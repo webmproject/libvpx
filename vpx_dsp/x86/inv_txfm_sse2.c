@@ -253,7 +253,7 @@ void vpx_idct8x8_1_add_sse2(const tran_low_t *input, uint8_t *dest,
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 5);
-  dc_value = _mm_set1_epi16(a1);
+  dc_value = _mm_set1_epi16((int16_t)a1);
 
   recon_and_store_8_dual(dest, dc_value, stride);
   dest += 2 * stride;
@@ -776,7 +776,7 @@ void vpx_idct16x16_1_add_sse2(const tran_low_t *input, uint8_t *dest,
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 6);
-  dc_value = _mm_set1_epi16(a1);
+  dc_value = _mm_set1_epi16((int16_t)a1);
 
   for (i = 0; i < 16; ++i) {
     recon_and_store_16(dest, dc_value);
@@ -2048,7 +2048,7 @@ void vpx_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest,
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 6);
-  dc_value = _mm_set1_epi16(a1);
+  dc_value = _mm_set1_epi16((int16_t)a1);
 
   for (j = 0; j < 32; ++j) {
     recon_and_store_16(dest + j * stride + 0, dc_value);

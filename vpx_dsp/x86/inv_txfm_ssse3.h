@@ -22,15 +22,15 @@ static INLINE void idct8x8_12_add_kernel_ssse3(__m128i *const io /* io[8] */) {
   const __m128i cp_28d_4d = dual_set_epi16(2 * cospi_28_64, 2 * cospi_4_64);
   const __m128i cp_n20d_12d = dual_set_epi16(-2 * cospi_20_64, 2 * cospi_12_64);
   const __m128i cp_8d_24d = dual_set_epi16(2 * cospi_8_64, 2 * cospi_24_64);
-  const __m128i cp_16_16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i cp_16_16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i cp_16_n16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  const __m128i cospi_16_64d = _mm_set1_epi16(2 * cospi_16_64);
-  const __m128i cospi_28_64d = _mm_set1_epi16(2 * cospi_28_64);
-  const __m128i cospi_4_64d = _mm_set1_epi16(2 * cospi_4_64);
-  const __m128i cospi_n20_64d = _mm_set1_epi16(-2 * cospi_20_64);
-  const __m128i cospi_12_64d = _mm_set1_epi16(2 * cospi_12_64);
-  const __m128i cospi_24_64d = _mm_set1_epi16(2 * cospi_24_64);
-  const __m128i cospi_8_64d = _mm_set1_epi16(2 * cospi_8_64);
+  const __m128i cospi_16_64d = _mm_set1_epi16((int16_t)(2 * cospi_16_64));
+  const __m128i cospi_28_64d = _mm_set1_epi16((int16_t)(2 * cospi_28_64));
+  const __m128i cospi_4_64d = _mm_set1_epi16((int16_t)(2 * cospi_4_64));
+  const __m128i cospi_n20_64d = _mm_set1_epi16((int16_t)(-2 * cospi_20_64));
+  const __m128i cospi_12_64d = _mm_set1_epi16((int16_t)(2 * cospi_12_64));
+  const __m128i cospi_24_64d = _mm_set1_epi16((int16_t)(2 * cospi_24_64));
+  const __m128i cospi_8_64d = _mm_set1_epi16((int16_t)(2 * cospi_8_64));
   __m128i step1[8], step2[8], tmp[4];
 
   // pass 1
