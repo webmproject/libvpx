@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17c81b22_28f2f3b1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-07-26T16:59:57Z",
+      "side": 1,
+      "message": "Add what (if any) the change is in speed and on RTC metrics.",
+      "range": {
+        "startLine": 7,
+        "startChar": 33,
+        "endLine": 8,
+        "endChar": 0
+      },
+      "revId": "a38c9d8cd8c172f9eeb6717e4f872c98910d37b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
