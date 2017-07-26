@@ -16,6 +16,24 @@
       "revId": "189e5b459eb11cc1f0170b28e71e221ef1abe2f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6dc8aeae_d52ea9e1",
+        "filename": "vpx_dsp/x86/highbd_idct4x4_add_sse4.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-07-26T22:36:09Z",
+      "side": 1,
+      "message": "Thanks. Will follow your fix.",
+      "parentUuid": "08889100_d0a603c1",
+      "revId": "189e5b459eb11cc1f0170b28e71e221ef1abe2f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
