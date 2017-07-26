@@ -19,19 +19,19 @@
 
 static void highbd_idct8x8_half1d(__m128i *const io) {
   const __m128i cp_4q_4q =
-      _mm_setr_epi32(cospi_4_64 << 2, 0, cospi_4_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_4_64 << 2, 0, (int)cospi_4_64 << 2, 0);
   const __m128i cp_8q_8q =
-      _mm_setr_epi32(cospi_8_64 << 2, 0, cospi_8_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_8_64 << 2, 0, (int)cospi_8_64 << 2, 0);
   const __m128i cp_12q_12q =
-      _mm_setr_epi32(cospi_12_64 << 2, 0, cospi_12_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_12_64 << 2, 0, (int)cospi_12_64 << 2, 0);
   const __m128i cp_16q_16q =
-      _mm_setr_epi32(cospi_16_64 << 2, 0, cospi_16_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_16_64 << 2, 0, (int)cospi_16_64 << 2, 0);
   const __m128i cp_20q_20q =
-      _mm_setr_epi32(cospi_20_64 << 2, 0, cospi_20_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_20_64 << 2, 0, (int)cospi_20_64 << 2, 0);
   const __m128i cp_24q_24q =
-      _mm_setr_epi32(cospi_24_64 << 2, 0, cospi_24_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_24_64 << 2, 0, (int)cospi_24_64 << 2, 0);
   const __m128i cp_28q_28q =
-      _mm_setr_epi32(cospi_28_64 << 2, 0, cospi_28_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_28_64 << 2, 0, (int)cospi_28_64 << 2, 0);
   __m128i temp1[4], temp2[4], step1[8], step2[8];
 
   transpose_32bit_4x4x2(io, io);
@@ -87,19 +87,19 @@ static void highbd_idct8x8_half1d(__m128i *const io) {
 
 static void highbd_idct8x8_12_half1d(__m128i *const io) {
   const __m128i cp_28q_28q =
-      _mm_setr_epi32(cospi_28_64 << 2, 0, cospi_28_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_28_64 << 2, 0, (int)cospi_28_64 << 2, 0);
   const __m128i cp_4q_4q =
-      _mm_setr_epi32(cospi_4_64 << 2, 0, cospi_4_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_4_64 << 2, 0, (int)cospi_4_64 << 2, 0);
   const __m128i cp_n20q_n20q =
-      _mm_setr_epi32(-cospi_20_64 * 4, 0, -cospi_20_64 * 4, 0);
+      _mm_setr_epi32(-(int)cospi_20_64 * 4, 0, -(int)cospi_20_64 * 4, 0);
   const __m128i cp_12q_12q =
-      _mm_setr_epi32(cospi_12_64 << 2, 0, cospi_12_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_12_64 << 2, 0, (int)cospi_12_64 << 2, 0);
   const __m128i cp_16q_16q =
-      _mm_setr_epi32(cospi_16_64 << 2, 0, cospi_16_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_16_64 << 2, 0, (int)cospi_16_64 << 2, 0);
   const __m128i cp_8q_8q =
-      _mm_setr_epi32(cospi_8_64 << 2, 0, cospi_8_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_8_64 << 2, 0, (int)cospi_8_64 << 2, 0);
   const __m128i cp_24q_24q =
-      _mm_setr_epi32(cospi_24_64 << 2, 0, cospi_24_64 << 2, 0);
+      _mm_setr_epi32((int)cospi_24_64 << 2, 0, (int)cospi_24_64 << 2, 0);
   __m128i temp1[4], temp2[4], step1[8], step2[8];
 
   transpose_32bit_4x4(io, io);
