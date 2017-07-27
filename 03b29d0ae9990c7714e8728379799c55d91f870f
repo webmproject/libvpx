@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd025c4e_4a77d2e4",
+        "filename": "vpx_dsp/x86/variance_impl_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-27T22:01:14Z",
+      "side": 1,
+      "message": "I know it\u0027s how it is from the macro, but it\u0027s weird to see \u0027dst\u0027 be const and \u0027src\u0027 non-const",
+      "range": {
+        "startLine": 300,
+        "startChar": 4,
+        "endLine": 300,
+        "endChar": 10
+      },
+      "revId": "03b29d0ae9990c7714e8728379799c55d91f870f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7732e8fc_5ef13a3a",
+        "filename": "vpx_dsp/x86/variance_impl_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-27T22:01:14Z",
+      "side": 1,
+      "message": "()s aren\u0027t needed here any more",
+      "range": {
+        "startLine": 301,
+        "startChar": 62,
+        "endLine": 301,
+        "endChar": 63
+      },
+      "revId": "03b29d0ae9990c7714e8728379799c55d91f870f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
