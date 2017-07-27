@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "445b254e_10ec6c1b",
+        "filename": "vpx_dsp/x86/variance_impl_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-27T01:02:53Z",
+      "side": 1,
+      "message": "INLINE, here and elsewhere",
+      "range": {
+        "startLine": 300,
+        "startChar": 7,
+        "endLine": 300,
+        "endChar": 13
+      },
+      "revId": "3b37ec19232500351651266a2df8a4ff9be40842",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df3e0650_de0473a0",
+        "filename": "vpx_dsp/x86/variance_impl_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-27T01:02:53Z",
+      "side": 1,
+      "message": "_mm256_setzero_si256, here and elsewhere",
+      "revId": "3b37ec19232500351651266a2df8a4ff9be40842",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79faa034_68eb782e",
+        "filename": "vpx_dsp/x86/variance_impl_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-27T01:02:53Z",
+      "side": 1,
+      "message": "expand",
+      "range": {
+        "startLine": 314,
+        "startChar": 7,
+        "endLine": 314,
+        "endChar": 13
+      },
+      "revId": "3b37ec19232500351651266a2df8a4ff9be40842",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
