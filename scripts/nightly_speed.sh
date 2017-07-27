@@ -100,6 +100,6 @@ dfps=`echo $dfps | sed 's/(//'`
 percent=`echo "($dfps - $pdfps) / $pdfps * 100" | bc -l`
 percent=${percent:0:5}
 
-echo -e '\t'"Enc fps   Dec fps    PSNR"'\t\t\t\t\t\t\t'"Enc status   Dec status   Change (%)"
+echo -e '\t'"Enc fps   Dec fps    PSNR"'\t\t\t\t\t\t\t'"Enc status   Dec status   Speedup(%)"
 echo -e '\t'$efps"        "$dfps"     "$psnr'\t'$eflag"            "$dflag"           "$percent
 printf "\n"
