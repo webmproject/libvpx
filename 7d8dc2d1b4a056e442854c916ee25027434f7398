@@ -22,6 +22,30 @@
       "revId": "7d8dc2d1b4a056e442854c916ee25027434f7398",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "be15b18c_f14e4bfa",
+        "filename": "vpx_dsp/arm/quantize_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-28T22:39:03Z",
+      "side": 1,
+      "message": "If we use vpmax we still end up needing to compare the bottom 2 elements:\n\n16x4: 0 1 2 3\n    : 4 5 6 7\n\nvpmax: 1 5 3 7\nagain: 5 5 7 7\n\nif 5 was actually the max value, we wouldn\u0027t have a way to check it. By going up to 32 bits we can compare all the values.\n\nI mean, we could shift or transpose the values and do another vmax, but this seems like the most efficient way.",
+      "parentUuid": "d2099ef9_959c2888",
+      "range": {
+        "startLine": 151,
+        "startChar": 33,
+        "endLine": 151,
+        "endChar": 42
+      },
+      "revId": "7d8dc2d1b4a056e442854c916ee25027434f7398",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
