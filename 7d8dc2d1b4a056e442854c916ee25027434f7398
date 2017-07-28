@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d2099ef9_959c2888",
+        "filename": "vpx_dsp/arm/quantize_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-07-28T22:22:08Z",
+      "side": 1,
+      "message": "Is vmovl_u16 necessary?\nWill a couple of vpmax_u16() work here?",
+      "range": {
+        "startLine": 151,
+        "startChar": 33,
+        "endLine": 151,
+        "endChar": 42
+      },
+      "revId": "7d8dc2d1b4a056e442854c916ee25027434f7398",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
