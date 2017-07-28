@@ -16,6 +16,24 @@
       "revId": "9e5e6418760a5068749bea939abf8eb58700b872",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d479d7bc_33d511a5",
+        "filename": "vpx_dsp/x86/variance_impl_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-07-28T17:58:40Z",
+      "side": 1,
+      "message": "\u003e Something like this?  I\u0027ll fix the rest after feedback.\n\nlooks good",
+      "parentUuid": "1e27185c_f425986b",
+      "revId": "9e5e6418760a5068749bea939abf8eb58700b872",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
