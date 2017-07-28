@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "29f2d946_5bb6343a",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-28T18:46:09Z",
+      "side": 0,
+      "message": "And it seems like it would fit best with this group.\n\nIn fact, mips32 and mip64 don\u0027t really belong in this list either. mips is an architecture, and already listed in arch_list",
+      "revId": "88a302e7430298de028c69408f151e3583b29021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4fed961d_5e0c8c15",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-28T18:46:09Z",
+      "side": 1,
+      "message": "I was able to build with the following:\n$ export LD_LIBRARY_PATH\u003d/tmp/loongson/gcc-4.8.3-d197-n64-loongson/usr/x86_64-unknown-linux-gnu/mips64el-redhat-linux/lib\n$ PATH\u003d/tmp/loongson/gcc-4.8.3-d197-n64-loongson/usr/bin:$PATH\n$ CROSS\u003dmips64el-redhat-linux- ~/reference/libvpx/configure --target\u003dmips64-linux-gcc --enable-mmi",
+      "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6a3c1e53_55d1b764",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 705,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-28T18:46:09Z",
+      "side": 1,
+      "message": "These are fine, but not really necessary. When using CROSS gcctarget does not get set correctly, so you end up needing to specify --target\u003d anyway.",
+      "range": {
+        "startLine": 705,
+        "startChar": 17,
+        "endLine": 705,
+        "endChar": 0
+      },
+      "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a33dac50_1dd76364",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1173,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-28T18:46:09Z",
+      "side": 1,
+      "message": "What\u0027s the relationship of loongson3 to mips32/64? How does mmi come into play?\n\nIt looks like loongson3 is a mips compatible isa, and mmi is an extension exclusively for loongson3.",
+      "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49d2bbed_5029ac53",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-28T18:46:09Z",
+      "side": 1,
+      "message": "These values are only used for the extension targets. Only mmi should go here.",
+      "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
