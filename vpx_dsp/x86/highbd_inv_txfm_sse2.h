@@ -12,6 +12,7 @@
 #define VPX_DSP_X86_HIGHBD_INV_TXFM_SSE2_H_
 
 #include <emmintrin.h>  // SSE2
+
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/inv_txfm.h"
@@ -44,9 +45,8 @@ static INLINE __m128i wraplow_16bit_shift5(const __m128i in0, const __m128i in1,
 }
 
 static INLINE __m128i dct_const_round_shift_64bit(const __m128i in) {
-  const __m128i t = _mm_add_epi64(
-      in,
-      _mm_setr_epi32(DCT_CONST_ROUNDING << 2, 0, DCT_CONST_ROUNDING << 2, 0));
+  const __m128i t =
+      _mm_add_epi64(in, pair_set_epi32(DCT_CONST_ROUNDING << 2, 0));
   return _mm_srli_si128(t, 2);
 }
 
@@ -56,6 +56,94 @@ static INLINE __m128i pack_4(const __m128i in0, const __m128i in1) {
   return _mm_unpacklo_epi32(t0, t1);                // 0, 1, 2, 3
 }
 
+static INLINE void abs_extend_64bit_sse2(const __m128i in,
+                                         __m128i *const out /*out[2]*/,
+                                         __m128i *const sign /*sign[2]*/) {
+  sign[0] = _mm_srai_epi32(in, 31);
+  out[0] = _mm_xor_si128(in, sign[0]);
+  out[0] = _mm_sub_epi32(out[0], sign[0]);
+  sign[1] = _mm_unpackhi_epi32(sign[0], sign[0]);  // 64-bit sign of 2, 3
+  sign[0] = _mm_unpacklo_epi32(sign[0], sign[0]);  // 64-bit sign of 0, 1
+  out[1] = _mm_unpackhi_epi32(out[0], out[0]);     // 2, 3
+  out[0] = _mm_unpacklo_epi32(out[0], out[0]);     // 0, 1
+}
+
+// Note: cospi must be non negative.
+static INLINE __m128i multiply_apply_sign_sse2(const __m128i in,
+                                               const __m128i sign,
+                                               const __m128i cospi) {
+  __m128i out = _mm_mul_epu32(in, cospi);
+  out = _mm_xor_si128(out, sign);
+  return _mm_sub_epi64(out, sign);
+}
+
+// Note: c must be non negative.
+static INLINE __m128i multiplication_round_shift_sse2(
+    const __m128i *const in /*in[2]*/, const __m128i *const sign /*sign[2]*/,
+    const int c) {
+  const __m128i pair_c = pair_set_epi32(c << 2, 0);
+  __m128i t0, t1;
+
+  t0 = multiply_apply_sign_sse2(in[0], sign[0], pair_c);
+  t1 = multiply_apply_sign_sse2(in[1], sign[1], pair_c);
+  t0 = dct_const_round_shift_64bit(t0);
+  t1 = dct_const_round_shift_64bit(t1);
+
+  return pack_4(t0, t1);
+}
+
+// Note: c0 and c1 must be non negative.
+static INLINE void highbd_multiplication_and_add_sse2(
+    const __m128i in0, const __m128i in1, const int c0, const int c1,
+    __m128i *const out0, __m128i *const out1) {
+  const __m128i pair_c0 = pair_set_epi32(c0 << 2, 0);
+  const __m128i pair_c1 = pair_set_epi32(c1 << 2, 0);
+  __m128i temp1[4], temp2[4], sign1[4], sign2[4];
+
+  abs_extend_64bit_sse2(in0, temp1, sign1);
+  abs_extend_64bit_sse2(in1, temp2, sign2);
+  temp1[2] = multiply_apply_sign_sse2(temp1[0], sign1[0], pair_c1);
+  temp1[3] = multiply_apply_sign_sse2(temp1[1], sign1[1], pair_c1);
+  temp1[0] = multiply_apply_sign_sse2(temp1[0], sign1[0], pair_c0);
+  temp1[1] = multiply_apply_sign_sse2(temp1[1], sign1[1], pair_c0);
+  temp2[2] = multiply_apply_sign_sse2(temp2[0], sign2[0], pair_c0);
+  temp2[3] = multiply_apply_sign_sse2(temp2[1], sign2[1], pair_c0);
+  temp2[0] = multiply_apply_sign_sse2(temp2[0], sign2[0], pair_c1);
+  temp2[1] = multiply_apply_sign_sse2(temp2[1], sign2[1], pair_c1);
+  temp1[0] = _mm_sub_epi64(temp1[0], temp2[0]);
+  temp1[1] = _mm_sub_epi64(temp1[1], temp2[1]);
+  temp2[0] = _mm_add_epi64(temp1[2], temp2[2]);
+  temp2[1] = _mm_add_epi64(temp1[3], temp2[3]);
+  temp1[0] = dct_const_round_shift_64bit(temp1[0]);
+  temp1[1] = dct_const_round_shift_64bit(temp1[1]);
+  temp2[0] = dct_const_round_shift_64bit(temp2[0]);
+  temp2[1] = dct_const_round_shift_64bit(temp2[1]);
+  *out0 = pack_4(temp1[0], temp1[1]);
+  *out1 = pack_4(temp2[0], temp2[1]);
+}
+
+static INLINE void highbd_idct8_stage4(const __m128i *const in,
+                                       __m128i *const out) {
+  out[0] = _mm_add_epi32(in[0], in[7]);
+  out[1] = _mm_add_epi32(in[1], in[6]);
+  out[2] = _mm_add_epi32(in[2], in[5]);
+  out[3] = _mm_add_epi32(in[3], in[4]);
+  out[4] = _mm_sub_epi32(in[3], in[4]);
+  out[5] = _mm_sub_epi32(in[2], in[5]);
+  out[6] = _mm_sub_epi32(in[1], in[6]);
+  out[7] = _mm_sub_epi32(in[0], in[7]);
+}
+
+static INLINE void highbd_idct8x8_final_round(__m128i *const io) {
+  io[0] = wraplow_16bit_shift5(io[0], io[8], _mm_set1_epi32(16));
+  io[1] = wraplow_16bit_shift5(io[1], io[9], _mm_set1_epi32(16));
+  io[2] = wraplow_16bit_shift5(io[2], io[10], _mm_set1_epi32(16));
+  io[3] = wraplow_16bit_shift5(io[3], io[11], _mm_set1_epi32(16));
+  io[4] = wraplow_16bit_shift5(io[4], io[12], _mm_set1_epi32(16));
+  io[5] = wraplow_16bit_shift5(io[5], io[13], _mm_set1_epi32(16));
+  io[6] = wraplow_16bit_shift5(io[6], io[14], _mm_set1_epi32(16));
+  io[7] = wraplow_16bit_shift5(io[7], io[15], _mm_set1_epi32(16));
+}
 static INLINE __m128i add_clamp(const __m128i in0, const __m128i in1,
                                 const int bd) {
   const __m128i zero = _mm_set1_epi16(0);
