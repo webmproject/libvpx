@@ -1011,7 +1011,8 @@ static void avg_source_sad(VP9_COMP *cpi, MACROBLOCK *x, int shift,
                                                           : kHighSadHighSumdiff;
 
   // Detect large lighting change.
-  if (tmp_variance < (tmp_sse >> 3) && (tmp_sse - tmp_variance) > 10000)
+  if (cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
+      tmp_variance < (tmp_sse >> 3) && (tmp_sse - tmp_variance) > 10000)
     x->content_state_sb = kLowVarHighSumdiff;
   else if (tmp_sad > (avg_source_sad_threshold << 1))
     x->content_state_sb = kVeryHighSad;
