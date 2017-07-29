@@ -364,7 +364,6 @@ static void set_rt_speed_feature_framesize_independent(
   sf->copy_partition_flag = 0;
   sf->use_source_sad = 0;
   sf->use_simple_block_yrd = 0;
-  sf->adapt_partition_source_sad = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -528,17 +527,6 @@ static void set_rt_speed_feature_framesize_independent(
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
     sf->skip_encode_sb = 0;
-    if (!cpi->external_resize) sf->use_source_sad = 1;
-    if (sf->use_source_sad) {
-      if (cm->width * cm->height <= 640 * 360)
-        sf->adapt_partition_source_sad = 1;
-      if (cpi->content_state_sb_fd == NULL &&
-          (!cpi->use_svc ||
-           cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
-        cpi->content_state_sb_fd = (uint8_t *)vpx_calloc(
-            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
-      }
-    }
     if (cpi->oxcf.rc_mode == VPX_CBR && content != VP9E_CONTENT_SCREEN) {
       // Enable short circuit for low temporal variance.
       sf->short_circuit_low_temp_var = 1;
@@ -551,7 +539,6 @@ static void set_rt_speed_feature_framesize_independent(
   }
 
   if (speed >= 7) {
-    sf->adapt_partition_source_sad = 0;
     sf->adaptive_rd_thresh = 3;
     sf->mv.search_method = FAST_DIAMOND;
     sf->mv.fullpel_search_step_param = 10;
@@ -564,6 +551,15 @@ static void set_rt_speed_feature_framesize_independent(
       sf->use_simple_block_yrd = 1;
       if (cpi->svc.non_reference_frame)
         sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_EVENMORE;
+    }
+    if (!cpi->external_resize) sf->use_source_sad = 1;
+    if (sf->use_source_sad) {
+      if (cpi->content_state_sb_fd == NULL &&
+          (!cpi->use_svc ||
+           cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
+        cpi->content_state_sb_fd = (uint8_t *)vpx_calloc(
+            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
+      }
     }
     // Enable partition copy. For SVC only enabled for top spatial resolution
     // layer.
