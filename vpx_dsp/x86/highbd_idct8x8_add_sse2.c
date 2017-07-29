@@ -8,219 +8,211 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <emmintrin.h>  // SSE2
-
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/x86/highbd_inv_txfm_sse2.h"
 #include "vpx_dsp/x86/inv_txfm_sse2.h"
 #include "vpx_dsp/x86/transpose_sse2.h"
-
-static void highbd_idct8x8_half1d(__m128i *const io) {
-  __m128i temp1[4], temp2[4], sign[2], step1[8], step2[8];
-
-  transpose_32bit_4x4x2(io, io);
-
-  // stage 1
-  step1[0] = io[0];
-  step1[2] = io[4];
-  step1[1] = io[2];
-  step1[3] = io[6];
-  highbd_multiplication_and_add_sse2(io[1], io[7], (int)cospi_28_64,
-                                     (int)cospi_4_64, &step1[4], &step1[7]);
-  highbd_multiplication_and_add_sse2(io[5], io[3], (int)cospi_12_64,
-                                     (int)cospi_20_64, &step1[5], &step1[6]);
-
-  // stage 2
-  temp2[0] = _mm_add_epi32(step1[0], step1[2]);
-  abs_extend_64bit_sse2(temp2[0], temp1, sign);
-  step2[0] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
-  temp2[0] = _mm_sub_epi32(step1[0], step1[2]);
-  abs_extend_64bit_sse2(temp2[0], temp1, sign);
-  step2[1] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
-  highbd_multiplication_and_add_sse2(step1[1], step1[3], (int)cospi_24_64,
-                                     (int)cospi_8_64, &step2[2], &step2[3]);
-  step2[4] = _mm_add_epi32(step1[4], step1[5]);
-  step2[5] = _mm_sub_epi32(step1[4], step1[5]);
-  step2[6] = _mm_sub_epi32(step1[7], step1[6]);
-  step2[7] = _mm_add_epi32(step1[7], step1[6]);
-
-  // stage 3
-  step1[0] = _mm_add_epi32(step2[0], step2[3]);
-  step1[1] = _mm_add_epi32(step2[1], step2[2]);
-  step1[2] = _mm_sub_epi32(step2[1], step2[2]);
-  step1[3] = _mm_sub_epi32(step2[0], step2[3]);
-  step1[4] = step2[4];
-  temp2[0] = _mm_sub_epi32(step2[6], step2[5]);
-  abs_extend_64bit_sse2(temp2[0], temp1, sign);
-  step1[5] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
-  temp2[0] = _mm_add_epi32(step2[6], step2[5]);
-  abs_extend_64bit_sse2(temp2[0], temp1, sign);
-  step1[6] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
-  step1[7] = step2[7];
-
-  // stage 4
-  highbd_idct8_stage4(step1, io);
-}
-
-static void highbd_idct8x8_12_half1d(__m128i *const io) {
-  __m128i temp1[4], temp2[4], sign[2], step1[8], step2[8];
-
-  transpose_32bit_4x4(io, io);
-
-  // stage 1
-  step1[0] = io[0];
-  step1[1] = io[2];
-  abs_extend_64bit_sse2(io[1], temp1, sign);
-  step1[4] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_28_64);
-  step1[7] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_4_64);
-  abs_extend_64bit_sse2(io[3], temp1, sign);
-  // step1[5] = -step1[5]
-  step1[5] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_20_64);
-  step1[6] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_12_64);
-
-  // stage 2
-  abs_extend_64bit_sse2(step1[0], temp1, sign);
-  step2[0] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
-  abs_extend_64bit_sse2(step1[1], temp1, sign);
-  step2[2] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_24_64);
-  step2[3] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_8_64);
-  step2[4] = _mm_sub_epi32(step1[4], step1[5]);
-  step2[5] = _mm_add_epi32(step1[4], step1[5]);
-  step2[6] = _mm_sub_epi32(step1[7], step1[6]);
-  step2[7] = _mm_add_epi32(step1[7], step1[6]);
-
-  // stage 3
-  step1[0] = _mm_add_epi32(step2[0], step2[3]);
-  step1[1] = _mm_add_epi32(step2[0], step2[2]);
-  step1[2] = _mm_sub_epi32(step2[0], step2[2]);
-  step1[3] = _mm_sub_epi32(step2[0], step2[3]);
-  step1[4] = step2[4];
-  temp2[0] = _mm_sub_epi32(step2[6], step2[5]);
-  abs_extend_64bit_sse2(temp2[0], temp1, sign);
-  step1[5] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
-  temp2[0] = _mm_add_epi32(step2[6], step2[5]);
-  abs_extend_64bit_sse2(temp2[0], temp1, sign);
-  step1[6] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
-  step1[7] = step2[7];
-
-  // stage 4
-  highbd_idct8_stage4(step1, io);
-}
+#include "vpx_dsp/x86/txfm_common_sse2.h"
 
 void vpx_highbd_idct8x8_64_add_sse2(const tran_low_t *input, uint16_t *dest,
                                     int stride, int bd) {
-  __m128i io[16];
+  tran_low_t out[8 * 8];
+  tran_low_t *outptr = out;
+  int i, j, test;
+  __m128i inptr[8];
+  __m128i min_input, max_input, temp1, temp2, sign_bits;
+  const __m128i zero = _mm_set1_epi16(0);
+  const __m128i sixteen = _mm_set1_epi16(16);
+  const __m128i max = _mm_set1_epi16(6201);
+  const __m128i min = _mm_set1_epi16(-6201);
+  int optimised_cols = 0;
 
-  io[0] = _mm_load_si128((const __m128i *)(input + 0 * 8 + 0));
-  io[4] = _mm_load_si128((const __m128i *)(input + 0 * 8 + 4));
-  io[1] = _mm_load_si128((const __m128i *)(input + 1 * 8 + 0));
-  io[5] = _mm_load_si128((const __m128i *)(input + 1 * 8 + 4));
-  io[2] = _mm_load_si128((const __m128i *)(input + 2 * 8 + 0));
-  io[6] = _mm_load_si128((const __m128i *)(input + 2 * 8 + 4));
-  io[3] = _mm_load_si128((const __m128i *)(input + 3 * 8 + 0));
-  io[7] = _mm_load_si128((const __m128i *)(input + 3 * 8 + 4));
-
-  if (bd == 8) {
-    __m128i io_short[8];
-
-    io_short[0] = _mm_packs_epi32(io[0], io[4]);
-    io_short[1] = _mm_packs_epi32(io[1], io[5]);
-    io_short[2] = _mm_packs_epi32(io[2], io[6]);
-    io_short[3] = _mm_packs_epi32(io[3], io[7]);
-    io[8] = _mm_load_si128((const __m128i *)(input + 4 * 8 + 0));
-    io[12] = _mm_load_si128((const __m128i *)(input + 4 * 8 + 4));
-    io[9] = _mm_load_si128((const __m128i *)(input + 5 * 8 + 0));
-    io[13] = _mm_load_si128((const __m128i *)(input + 5 * 8 + 4));
-    io[10] = _mm_load_si128((const __m128i *)(input + 6 * 8 + 0));
-    io[14] = _mm_load_si128((const __m128i *)(input + 6 * 8 + 4));
-    io[11] = _mm_load_si128((const __m128i *)(input + 7 * 8 + 0));
-    io[15] = _mm_load_si128((const __m128i *)(input + 7 * 8 + 4));
-    io_short[4] = _mm_packs_epi32(io[8], io[12]);
-    io_short[5] = _mm_packs_epi32(io[9], io[13]);
-    io_short[6] = _mm_packs_epi32(io[10], io[14]);
-    io_short[7] = _mm_packs_epi32(io[11], io[15]);
-
-    idct8_sse2(io_short);
-    idct8_sse2(io_short);
-    round_shift_8x8(io_short, io);
-  } else {
-    __m128i temp[4];
-
-    highbd_idct8x8_half1d(io);
-
-    io[8] = _mm_load_si128((const __m128i *)(input + 4 * 8 + 0));
-    io[12] = _mm_load_si128((const __m128i *)(input + 4 * 8 + 4));
-    io[9] = _mm_load_si128((const __m128i *)(input + 5 * 8 + 0));
-    io[13] = _mm_load_si128((const __m128i *)(input + 5 * 8 + 4));
-    io[10] = _mm_load_si128((const __m128i *)(input + 6 * 8 + 0));
-    io[14] = _mm_load_si128((const __m128i *)(input + 6 * 8 + 4));
-    io[11] = _mm_load_si128((const __m128i *)(input + 7 * 8 + 0));
-    io[15] = _mm_load_si128((const __m128i *)(input + 7 * 8 + 4));
-    highbd_idct8x8_half1d(&io[8]);
-
-    temp[0] = io[4];
-    temp[1] = io[5];
-    temp[2] = io[6];
-    temp[3] = io[7];
-    io[4] = io[8];
-    io[5] = io[9];
-    io[6] = io[10];
-    io[7] = io[11];
-    highbd_idct8x8_half1d(io);
-
-    io[8] = temp[0];
-    io[9] = temp[1];
-    io[10] = temp[2];
-    io[11] = temp[3];
-    highbd_idct8x8_half1d(&io[8]);
-
-    highbd_idct8x8_final_round(io);
+  // Load input into __m128i & pack to 16 bits
+  for (i = 0; i < 8; i++) {
+    temp1 = _mm_loadu_si128((const __m128i *)(input + 8 * i));
+    temp2 = _mm_loadu_si128((const __m128i *)(input + 8 * i + 4));
+    inptr[i] = _mm_packs_epi32(temp1, temp2);
   }
 
-  recon_and_store_8(io, dest, stride, bd);
+  // Find the min & max for the row transform
+  max_input = _mm_max_epi16(inptr[0], inptr[1]);
+  min_input = _mm_min_epi16(inptr[0], inptr[1]);
+  for (i = 2; i < 8; i++) {
+    max_input = _mm_max_epi16(max_input, inptr[i]);
+    min_input = _mm_min_epi16(min_input, inptr[i]);
+  }
+  max_input = _mm_cmpgt_epi16(max_input, max);
+  min_input = _mm_cmplt_epi16(min_input, min);
+  temp1 = _mm_or_si128(max_input, min_input);
+  test = _mm_movemask_epi8(temp1);
+
+  if (!test) {
+    // Do the row transform
+    idct8_sse2(inptr);
+
+    // Find the min & max for the column transform
+    max_input = _mm_max_epi16(inptr[0], inptr[1]);
+    min_input = _mm_min_epi16(inptr[0], inptr[1]);
+    for (i = 2; i < 8; i++) {
+      max_input = _mm_max_epi16(max_input, inptr[i]);
+      min_input = _mm_min_epi16(min_input, inptr[i]);
+    }
+    max_input = _mm_cmpgt_epi16(max_input, max);
+    min_input = _mm_cmplt_epi16(min_input, min);
+    temp1 = _mm_or_si128(max_input, min_input);
+    test = _mm_movemask_epi8(temp1);
+
+    if (test) {
+      transpose_16bit_8x8(inptr, inptr);
+      for (i = 0; i < 8; i++) {
+        sign_bits = _mm_cmplt_epi16(inptr[i], zero);
+        temp1 = _mm_unpackhi_epi16(inptr[i], sign_bits);
+        temp2 = _mm_unpacklo_epi16(inptr[i], sign_bits);
+        _mm_storeu_si128((__m128i *)(outptr + 4 * (2 * i + 1)), temp1);
+        _mm_storeu_si128((__m128i *)(outptr + 4 * (2 * i)), temp2);
+      }
+    } else {
+      // Set to use the optimised transform for the column
+      optimised_cols = 1;
+    }
+  } else {
+    // Run the un-optimised row transform
+    for (i = 0; i < 8; ++i) {
+      vpx_highbd_idct8_c(input, outptr, bd);
+      input += 8;
+      outptr += 8;
+    }
+  }
+
+  if (optimised_cols) {
+    idct8_sse2(inptr);
+
+    // Final round & shift and Reconstruction and Store
+    {
+      __m128i d[8];
+      for (i = 0; i < 8; i++) {
+        inptr[i] = _mm_add_epi16(inptr[i], sixteen);
+        d[i] = _mm_loadu_si128((const __m128i *)(dest + stride * i));
+        inptr[i] = _mm_srai_epi16(inptr[i], 5);
+        d[i] = add_clamp(d[i], inptr[i], bd);
+        // Store
+        _mm_storeu_si128((__m128i *)(dest + stride * i), d[i]);
+      }
+    }
+  } else {
+    // Run the un-optimised column transform
+    tran_low_t temp_in[8], temp_out[8];
+    for (i = 0; i < 8; ++i) {
+      for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
+      vpx_highbd_idct8_c(temp_in, temp_out, bd);
+      for (j = 0; j < 8; ++j) {
+        dest[j * stride + i] = highbd_clip_pixel_add(
+            dest[j * stride + i], ROUND_POWER_OF_TWO(temp_out[j], 5), bd);
+      }
+    }
+  }
 }
 
 void vpx_highbd_idct8x8_12_add_sse2(const tran_low_t *input, uint16_t *dest,
                                     int stride, int bd) {
-  const __m128i zero = _mm_setzero_si128();
-  __m128i io[16];
+  tran_low_t out[8 * 8] = { 0 };
+  tran_low_t *outptr = out;
+  int i, j, test;
+  __m128i inptr[8];
+  __m128i min_input, max_input, temp1, temp2, sign_bits;
+  const __m128i zero = _mm_set1_epi16(0);
+  const __m128i sixteen = _mm_set1_epi16(16);
+  const __m128i max = _mm_set1_epi16(6201);
+  const __m128i min = _mm_set1_epi16(-6201);
+  int optimised_cols = 0;
 
-  io[0] = _mm_load_si128((const __m128i *)(input + 0 * 8 + 0));
-  io[1] = _mm_load_si128((const __m128i *)(input + 1 * 8 + 0));
-  io[2] = _mm_load_si128((const __m128i *)(input + 2 * 8 + 0));
-  io[3] = _mm_load_si128((const __m128i *)(input + 3 * 8 + 0));
-
-  if (bd == 8) {
-    __m128i io_short[8];
-
-    io_short[0] = _mm_packs_epi32(io[0], zero);
-    io_short[1] = _mm_packs_epi32(io[1], zero);
-    io_short[2] = _mm_packs_epi32(io[2], zero);
-    io_short[3] = _mm_packs_epi32(io[3], zero);
-
-    idct8x8_12_add_kernel_sse2(io_short);
-    round_shift_8x8(io_short, io);
-  } else {
-    __m128i temp[4];
-
-    highbd_idct8x8_12_half1d(io);
-
-    temp[0] = io[4];
-    temp[1] = io[5];
-    temp[2] = io[6];
-    temp[3] = io[7];
-    highbd_idct8x8_12_half1d(io);
-
-    io[8] = temp[0];
-    io[9] = temp[1];
-    io[10] = temp[2];
-    io[11] = temp[3];
-    highbd_idct8x8_12_half1d(&io[8]);
-
-    highbd_idct8x8_final_round(io);
+  // Load input into __m128i & pack to 16 bits
+  for (i = 0; i < 8; i++) {
+    temp1 = _mm_loadu_si128((const __m128i *)(input + 8 * i));
+    temp2 = _mm_loadu_si128((const __m128i *)(input + 8 * i + 4));
+    inptr[i] = _mm_packs_epi32(temp1, temp2);
   }
 
-  recon_and_store_8(io, dest, stride, bd);
+  // Find the min & max for the row transform
+  // only first 4 row has non-zero coefs
+  max_input = _mm_max_epi16(inptr[0], inptr[1]);
+  min_input = _mm_min_epi16(inptr[0], inptr[1]);
+  for (i = 2; i < 4; i++) {
+    max_input = _mm_max_epi16(max_input, inptr[i]);
+    min_input = _mm_min_epi16(min_input, inptr[i]);
+  }
+  max_input = _mm_cmpgt_epi16(max_input, max);
+  min_input = _mm_cmplt_epi16(min_input, min);
+  temp1 = _mm_or_si128(max_input, min_input);
+  test = _mm_movemask_epi8(temp1);
+
+  if (!test) {
+    // Do the row transform
+    idct8_sse2(inptr);
+
+    // Find the min & max for the column transform
+    // N.B. Only first 4 cols contain non-zero coeffs
+    max_input = _mm_max_epi16(inptr[0], inptr[1]);
+    min_input = _mm_min_epi16(inptr[0], inptr[1]);
+    for (i = 2; i < 8; i++) {
+      max_input = _mm_max_epi16(max_input, inptr[i]);
+      min_input = _mm_min_epi16(min_input, inptr[i]);
+    }
+    max_input = _mm_cmpgt_epi16(max_input, max);
+    min_input = _mm_cmplt_epi16(min_input, min);
+    temp1 = _mm_or_si128(max_input, min_input);
+    test = _mm_movemask_epi8(temp1);
+
+    if (test) {
+      // Use fact only first 4 rows contain non-zero coeffs
+      transpose_16bit_4x8(inptr, inptr);
+      for (i = 0; i < 4; i++) {
+        sign_bits = _mm_cmplt_epi16(inptr[i], zero);
+        temp1 = _mm_unpackhi_epi16(inptr[i], sign_bits);
+        temp2 = _mm_unpacklo_epi16(inptr[i], sign_bits);
+        _mm_storeu_si128((__m128i *)(outptr + 4 * (2 * i + 1)), temp1);
+        _mm_storeu_si128((__m128i *)(outptr + 4 * (2 * i)), temp2);
+      }
+    } else {
+      // Set to use the optimised transform for the column
+      optimised_cols = 1;
+    }
+  } else {
+    // Run the un-optimised row transform
+    for (i = 0; i < 4; ++i) {
+      vpx_highbd_idct8_c(input, outptr, bd);
+      input += 8;
+      outptr += 8;
+    }
+  }
+
+  if (optimised_cols) {
+    idct8_sse2(inptr);
+
+    // Final round & shift and Reconstruction and Store
+    {
+      __m128i d[8];
+      for (i = 0; i < 8; i++) {
+        inptr[i] = _mm_add_epi16(inptr[i], sixteen);
+        d[i] = _mm_loadu_si128((const __m128i *)(dest + stride * i));
+        inptr[i] = _mm_srai_epi16(inptr[i], 5);
+        d[i] = add_clamp(d[i], inptr[i], bd);
+        // Store
+        _mm_storeu_si128((__m128i *)(dest + stride * i), d[i]);
+      }
+    }
+  } else {
+    // Run the un-optimised column transform
+    tran_low_t temp_in[8], temp_out[8];
+    for (i = 0; i < 8; ++i) {
+      for (j = 0; j < 8; ++j) temp_in[j] = out[j * 8 + i];
+      vpx_highbd_idct8_c(temp_in, temp_out, bd);
+      for (j = 0; j < 8; ++j) {
+        dest[j * stride + i] = highbd_clip_pixel_add(
+            dest[j * stride + i], ROUND_POWER_OF_TWO(temp_out[j], 5), bd);
+      }
+    }
+  }
 }
 
 void vpx_highbd_idct8x8_1_add_sse2(const tran_low_t *input, uint16_t *dest,
