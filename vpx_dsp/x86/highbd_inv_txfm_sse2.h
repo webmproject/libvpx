@@ -92,6 +92,23 @@ static INLINE __m128i multiplication_round_shift_sse2(
   return pack_4(t0, t1);
 }
 
+// Note: c must be non negative.
+static INLINE __m128i multiplication_neg_round_shift_sse2(
+    const __m128i *const in /*in[2]*/, const __m128i *const sign /*sign[2]*/,
+    const int c) {
+  const __m128i pair_c = pair_set_epi32(c << 2, 0);
+  __m128i t0, t1;
+
+  t0 = multiply_apply_sign_sse2(in[0], sign[0], pair_c);
+  t1 = multiply_apply_sign_sse2(in[1], sign[1], pair_c);
+  t0 = _mm_sub_epi64(_mm_setzero_si128(), t0);
+  t1 = _mm_sub_epi64(_mm_setzero_si128(), t1);
+  t0 = dct_const_round_shift_64bit(t0);
+  t1 = dct_const_round_shift_64bit(t1);
+
+  return pack_4(t0, t1);
+}
+
 // Note: c0 and c1 must be non negative.
 static INLINE void highbd_multiplication_and_add_sse2(
     const __m128i in0, const __m128i in1, const int c0, const int c1,
