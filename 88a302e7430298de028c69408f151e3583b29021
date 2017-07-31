@@ -16,6 +16,24 @@
       "revId": "88a302e7430298de028c69408f151e3583b29021",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc62dbc0_9fe9e099",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-07-31T08:22:14Z",
+      "side": 0,
+      "message": "I quite agree with you, mips32 and mips64 are not belong this list.\n\nFor mmi, there may be other versions vector instructions in the future, so i added a sub list here (ARCH_EXT_LIST_LOONGSON).",
+      "parentUuid": "29f2d946_5bb6343a",
+      "revId": "88a302e7430298de028c69408f151e3583b29021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }

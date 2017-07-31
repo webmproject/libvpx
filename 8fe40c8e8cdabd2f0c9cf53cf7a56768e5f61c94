@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "415b6a4b_71dab650",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 705,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-07-31T08:22:14Z",
+      "side": 1,
+      "message": "when using CROSS compile,--target option was needed,and gcctarget will determined by it. I add this two branch here so that we needn\u0027t have to specify the --target option when building on target which use \u0027gcc -dumpmachine\u0027 return \u0027mips64el*\u0027 or \u0027mips32el*\u0027.",
+      "parentUuid": "6a3c1e53_55d1b764",
+      "range": {
+        "startLine": 705,
+        "startChar": 17,
+        "endLine": 705,
+        "endChar": 0
+      },
+      "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a33dac50_1dd76364",
         "filename": "build/make/configure.sh",
         "patchSetId": 1
@@ -53,6 +77,24 @@
       "writtenOn": "2017-07-28T18:46:09Z",
       "side": 1,
       "message": "What\u0027s the relationship of loongson3 to mips32/64? How does mmi come into play?\n\nIt looks like loongson3 is a mips compatible isa, and mmi is an extension exclusively for loongson3.",
+      "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e80963b5_6d5a060a",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1173,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-07-31T08:22:14Z",
+      "side": 1,
+      "message": "loongson3 is a mips compatible isa, we use mmi represent loongson vector instructions.",
+      "parentUuid": "a33dac50_1dd76364",
       "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -73,6 +115,24 @@
       "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61c427c4_b95aabcf",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-07-31T08:22:14Z",
+      "side": 1,
+      "message": "yes, will remove loongson2 and loongson3 from here.",
+      "parentUuid": "49d2bbed_5029ac53",
+      "revId": "8fe40c8e8cdabd2f0c9cf53cf7a56768e5f61c94",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
