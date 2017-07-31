@@ -18,7 +18,7 @@
 
 static INLINE __m128i multiplication_round_shift_sse4_1(
     const __m128i *const in /*in[2]*/, const int c) {
-  const __m128i pair_c = pair_set_epi32(c << 2, 0);
+  const __m128i pair_c = pair_set_epi32(c * 4, 0);
   __m128i t0, t1;
 
   t0 = _mm_mul_epi32(in[0], pair_c);
