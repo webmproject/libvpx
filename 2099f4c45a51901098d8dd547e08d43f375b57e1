@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c01be4f6_852a7c4b",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-07-31T21:03:41Z",
+      "side": 1,
+      "message": "I could remove this or mark it \u0027DISABLED_\u0027",
+      "revId": "2099f4c45a51901098d8dd547e08d43f375b57e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
