@@ -490,6 +490,10 @@ typedef struct SPEED_FEATURES {
   int use_source_sad;
 
   int use_simple_block_yrd;
+
+  // If source sad of superblock is high, will switch from VARIANCE_PARTITION to
+  // REFERENCE_PARTITION (which selects partition based on the nonrd-pickmode).
+  int adapt_partition_source_sad;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
