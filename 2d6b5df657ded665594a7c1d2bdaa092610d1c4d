@@ -22,6 +22,30 @@
       "revId": "2d6b5df657ded665594a7c1d2bdaa092610d1c4d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8e11944_c4be98ef",
+        "filename": "vpx_dsp/arm/quantize_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-01T16:56:05Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "921deada_f2bd86d7",
+      "range": {
+        "startLine": 102,
+        "startChar": 40,
+        "endLine": 102,
+        "endChar": 45
+      },
+      "revId": "2d6b5df657ded665594a7c1d2bdaa092610d1c4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
