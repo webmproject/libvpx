@@ -3907,16 +3907,16 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
   if (two_pass_first_group_inter(cpi)) {
     cpi->twopass.active_worst_quality =
         VPXMIN(q + qrange_adj, cpi->oxcf.worst_allowed_q);
-  }
+  } else if (!frame_is_kf_gf_arf(cpi)) {
 #else
   if (!frame_is_kf_gf_arf(cpi)) {
+#endif
     // Have we been forced to adapt Q outside the expected range by an extreme
     // rate miss. If so adjust the active maxQ for the subsequent frames.
     if (q > cpi->twopass.active_worst_quality) {
       cpi->twopass.active_worst_quality = q;
     }
   }
-#endif
 
   if (enable_acl) {
     // Skip recoding, if model diff is below threshold
