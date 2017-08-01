@@ -2676,11 +2676,33 @@ static int scale_down(VP9_COMP *cpi, int q) {
   return scale;
 }
 
-static int big_rate_miss(VP9_COMP *cpi, int high_limit, int low_limit) {
+static int big_rate_miss_high_threshold(VP9_COMP *cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
+  int big_miss_high;
 
-  return (rc->projected_frame_size > ((high_limit * 3) / 2)) ||
-         (rc->projected_frame_size < (low_limit / 2));
+  if (frame_is_kf_gf_arf(cpi))
+    big_miss_high = rc->this_frame_target * 3 / 2;
+  else
+    big_miss_high = rc->this_frame_target * 2;
+
+  return big_miss_high;
+}
+
+static int big_rate_miss(VP9_COMP *cpi) {
+  const RATE_CONTROL *const rc = &cpi->rc;
+  int big_miss_high;
+  int big_miss_low;
+
+  // Ignore for overlay frames
+  if (rc->is_src_frame_alt_ref) {
+    return 0;
+  } else {
+    big_miss_low = (rc->this_frame_target / 2);
+    big_miss_high = big_rate_miss_high_threshold(cpi);
+
+    return (rc->projected_frame_size > big_miss_high) ||
+           (rc->projected_frame_size < big_miss_low);
+  }
 }
 
 // test in two pass for the first
@@ -2705,8 +2727,7 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
   int force_recode = 0;
 
   if ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
-      big_rate_miss(cpi, high_limit, low_limit) ||
-      (cpi->sf.recode_loop == ALLOW_RECODE) ||
+      big_rate_miss(cpi) || (cpi->sf.recode_loop == ALLOW_RECODE) ||
       (two_pass_first_group_inter(cpi) &&
        (cpi->sf.recode_loop == ALLOW_RECODE_FIRST)) ||
       (frame_is_kfgfarf && (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF))) {
@@ -2716,8 +2737,12 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
       cpi->resize_pending = 1;
       return 1;
     }
-    // Force recode if projected_frame_size > max_frame_bandwidth
-    if (rc->projected_frame_size >= rc->max_frame_bandwidth) return 1;
+
+    // Force recode for extreme overshoot.
+    if ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
+        (rc->projected_frame_size >= big_rate_miss_high_threshold(cpi))) {
+      return 1;
+    }
 
     // TODO(agrange) high_limit could be greater than the scale-down threshold.
     if ((rc->projected_frame_size > high_limit && q < maxq) ||
@@ -3780,11 +3805,16 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
         // Frame is too large
         if (rc->projected_frame_size > rc->this_frame_target) {
           // Special case if the projected size is > the max allowed.
-          if (rc->projected_frame_size >= rc->max_frame_bandwidth) {
+          if ((q == q_high) &&
+              ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
+               (rc->projected_frame_size >=
+                big_rate_miss_high_threshold(cpi)))) {
+            int max_rate = VPXMAX(1, VPXMIN(rc->max_frame_bandwidth,
+                                            big_rate_miss_high_threshold(cpi)));
             double q_val_high;
             q_val_high = vp9_convert_qindex_to_q(q_high, cm->bit_depth);
-            q_val_high = q_val_high * ((double)rc->projected_frame_size /
-                                       rc->max_frame_bandwidth);
+            q_val_high =
+                q_val_high * ((double)rc->projected_frame_size / max_rate);
             q_high = vp9_convert_q_to_qindex(q_val_high, cm->bit_depth);
             q_high = clamp(q_high, rc->best_quality, rc->worst_quality);
           }
@@ -3793,7 +3823,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
           qstep =
               get_qstep_adj(rc->projected_frame_size, rc->this_frame_target);
           q_low = VPXMIN(q + qstep, q_high);
-          // q_low = q < q_high ? q + 1 : q_high;
 
           if (undershoot_seen || loop_at_this_size > 1) {
             // Update rate_correction_factor unless
@@ -3821,15 +3850,14 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
           qstep =
               get_qstep_adj(rc->this_frame_target, rc->projected_frame_size);
           q_high = VPXMAX(q - qstep, q_low);
-          // q_high = q > q_low ? q - 1 : q_low;
 
           if (overshoot_seen || loop_at_this_size > 1) {
             vp9_rc_update_rate_correction_factors(cpi);
             q = (q_high + q_low) / 2;
           } else {
             vp9_rc_update_rate_correction_factors(cpi);
-            q = vp9_rc_regulate_q(cpi, rc->this_frame_target, bottom_index,
-                                  top_index);
+            q = vp9_rc_regulate_q(cpi, rc->this_frame_target,
+                                  VPXMIN(q_low, bottom_index), top_index);
             // Special case reset for qlow for constrained quality.
             // This should only trigger where there is very substantial
             // undershoot on a frame and the auto cq level is above
@@ -3840,12 +3868,11 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 
             while (q > q_high && retries < 10) {
               vp9_rc_update_rate_correction_factors(cpi);
-              q = vp9_rc_regulate_q(cpi, rc->this_frame_target, bottom_index,
-                                    top_index);
+              q = vp9_rc_regulate_q(cpi, rc->this_frame_target,
+                                    VPXMIN(q_low, bottom_index), top_index);
               retries++;
             }
           }
-
           undershoot_seen = 1;
         }
 
@@ -3880,6 +3907,14 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
   if (two_pass_first_group_inter(cpi)) {
     cpi->twopass.active_worst_quality =
         VPXMIN(q + qrange_adj, cpi->oxcf.worst_allowed_q);
+  }
+#else
+  if (!frame_is_kf_gf_arf(cpi)) {
+    // Have we been forced to adapt Q outside the expected range by an extreme
+    // rate miss. If so adjust the active maxQ for the subsequent frames.
+    if (q > cpi->twopass.active_worst_quality) {
+      cpi->twopass.active_worst_quality = q;
+    }
   }
 #endif
 
