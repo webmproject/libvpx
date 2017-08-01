@@ -77,27 +77,17 @@ static INLINE __m128i idct_calc_wraplow_sse2(const __m128i in0,
   return _mm_packs_epi32(t0, t1);
 }
 
-static INLINE void multiplication_and_add_2(const __m128i *const in0,
-                                            const __m128i *const in1,
-                                            const __m128i *const cst0,
-                                            const __m128i *const cst1,
-                                            __m128i *const res0,
-                                            __m128i *const res1) {
-  const __m128i lo = _mm_unpacklo_epi16(*in0, *in1);
-  const __m128i hi = _mm_unpackhi_epi16(*in0, *in1);
-  *res0 = idct_calc_wraplow_sse2(lo, hi, *cst0);
-  *res1 = idct_calc_wraplow_sse2(lo, hi, *cst1);
-}
-
 // Multiply elements by constants and add them together.
-static INLINE void multiplication_and_add(
-    const __m128i *const in0, const __m128i *const in1,
-    const __m128i *const in2, const __m128i *const in3,
-    const __m128i *const cst0, const __m128i *const cst1,
-    const __m128i *const cst2, const __m128i *const cst3, __m128i *const res0,
-    __m128i *const res1, __m128i *const res2, __m128i *const res3) {
-  multiplication_and_add_2(in0, in1, cst0, cst1, res0, res1);
-  multiplication_and_add_2(in2, in3, cst2, cst3, res2, res3);
+static INLINE void multiplication_and_add(const __m128i in0, const __m128i in1,
+                                          const int c0, const int c1,
+                                          __m128i *const res0,
+                                          __m128i *const res1) {
+  const __m128i cst0 = pair_set_epi16(c0, -c1);
+  const __m128i cst1 = pair_set_epi16(c1, c0);
+  const __m128i lo = _mm_unpacklo_epi16(in0, in1);
+  const __m128i hi = _mm_unpackhi_epi16(in0, in1);
+  *res0 = idct_calc_wraplow_sse2(lo, hi, cst0);
+  *res1 = idct_calc_wraplow_sse2(lo, hi, cst1);
 }
 
 // Functions to allow 8 bit optimisations to be used when profile 0 is used with
@@ -361,29 +351,19 @@ static INLINE void butterfly_self(__m128i *x0, __m128i *x1, const __m128i *c0,
 
 static INLINE void idct8(const __m128i *const in /*in[8]*/,
                          __m128i *const out /*out[8]*/) {
-  const __m128i cp_16_16 = pair_set_epi16(cospi_16_64, cospi_16_64);
-  const __m128i cp_16_n16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   __m128i step1[8], step2[8];
 
   // stage 1
-  {
-    const __m128i cp_28_n4 = pair_set_epi16(cospi_28_64, -cospi_4_64);
-    const __m128i cp_4_28 = pair_set_epi16(cospi_4_64, cospi_28_64);
-    const __m128i cp_n20_12 = pair_set_epi16(-cospi_20_64, cospi_12_64);
-    const __m128i cp_12_20 = pair_set_epi16(cospi_12_64, cospi_20_64);
-    multiplication_and_add(&in[1], &in[7], &in[3], &in[5], &cp_28_n4, &cp_4_28,
-                           &cp_n20_12, &cp_12_20, &step1[4], &step1[7],
-                           &step1[5], &step1[6]);
-  }
+  multiplication_and_add(in[1], in[7], (int)cospi_28_64, (int)cospi_4_64,
+                         &step1[4], &step1[7]);
+  multiplication_and_add(in[5], in[3], (int)cospi_12_64, (int)cospi_20_64,
+                         &step1[5], &step1[6]);
 
   // stage 2
-  {
-    const __m128i cp_24_n8 = pair_set_epi16(cospi_24_64, -cospi_8_64);
-    const __m128i cp_8_24 = pair_set_epi16(cospi_8_64, cospi_24_64);
-    multiplication_and_add(&in[0], &in[4], &in[2], &in[6], &cp_16_16,
-                           &cp_16_n16, &cp_24_n8, &cp_8_24, &step2[0],
-                           &step2[1], &step2[2], &step2[3]);
-  }
+  multiplication_and_add(in[0], in[4], (int)cospi_16_64, (int)cospi_16_64,
+                         &step2[1], &step2[0]);
+  multiplication_and_add(in[2], in[6], (int)cospi_24_64, (int)cospi_8_64,
+                         &step2[2], &step2[3]);
 
   step2[4] = _mm_add_epi16(step1[4], step1[5]);
   step2[5] = _mm_sub_epi16(step1[4], step1[5]);
@@ -395,8 +375,8 @@ static INLINE void idct8(const __m128i *const in /*in[8]*/,
   step1[1] = _mm_add_epi16(step2[1], step2[2]);
   step1[2] = _mm_sub_epi16(step2[1], step2[2]);
   step1[3] = _mm_sub_epi16(step2[0], step2[3]);
-  multiplication_and_add_2(&step2[6], &step2[5], &cp_16_n16, &cp_16_16,
-                           &step1[5], &step1[6]);
+  multiplication_and_add(step2[6], step2[5], (int)cospi_16_64, (int)cospi_16_64,
+                         &step1[5], &step1[6]);
 
   // stage 4
   out[0] = _mm_add_epi16(step1[0], step2[7]);

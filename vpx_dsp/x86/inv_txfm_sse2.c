@@ -423,43 +423,23 @@ void iadst8_sse2(__m128i *in) {
 }
 
 static INLINE void idct16_8col(__m128i *const io /*io[16]*/) {
-  const __m128i k__cospi_p16_p16 = pair_set_epi16(cospi_16_64, cospi_16_64);
-  const __m128i k__cospi_m16_p16 = pair_set_epi16(-cospi_16_64, cospi_16_64);
   __m128i step1[16], step2[16];
 
   // stage 2
-  {
-    const __m128i k__cospi_p30_m02 = pair_set_epi16(cospi_30_64, -cospi_2_64);
-    const __m128i k__cospi_p02_p30 = pair_set_epi16(cospi_2_64, cospi_30_64);
-    const __m128i k__cospi_p14_m18 = pair_set_epi16(cospi_14_64, -cospi_18_64);
-    const __m128i k__cospi_p18_p14 = pair_set_epi16(cospi_18_64, cospi_14_64);
-    multiplication_and_add(&io[1], &io[15], &io[9], &io[7], &k__cospi_p30_m02,
-                           &k__cospi_p02_p30, &k__cospi_p14_m18,
-                           &k__cospi_p18_p14, &step2[8], &step2[15], &step2[9],
-                           &step2[14]);
-  }
-  {
-    const __m128i k__cospi_p22_m10 = pair_set_epi16(cospi_22_64, -cospi_10_64);
-    const __m128i k__cospi_p10_p22 = pair_set_epi16(cospi_10_64, cospi_22_64);
-    const __m128i k__cospi_p06_m26 = pair_set_epi16(cospi_6_64, -cospi_26_64);
-    const __m128i k__cospi_p26_p06 = pair_set_epi16(cospi_26_64, cospi_6_64);
-    multiplication_and_add(&io[5], &io[11], &io[13], &io[3], &k__cospi_p22_m10,
-                           &k__cospi_p10_p22, &k__cospi_p06_m26,
-                           &k__cospi_p26_p06, &step2[10], &step2[13],
-                           &step2[11], &step2[12]);
-  }
+  multiplication_and_add(io[1], io[15], (int)cospi_30_64, (int)cospi_2_64,
+                         &step2[8], &step2[15]);
+  multiplication_and_add(io[9], io[7], (int)cospi_14_64, (int)cospi_18_64,
+                         &step2[9], &step2[14]);
+  multiplication_and_add(io[5], io[11], (int)cospi_22_64, (int)cospi_10_64,
+                         &step2[10], &step2[13]);
+  multiplication_and_add(io[13], io[3], (int)cospi_6_64, (int)cospi_26_64,
+                         &step2[11], &step2[12]);
 
   // stage 3
-  {
-    const __m128i k__cospi_p28_m04 = pair_set_epi16(cospi_28_64, -cospi_4_64);
-    const __m128i k__cospi_p04_p28 = pair_set_epi16(cospi_4_64, cospi_28_64);
-    const __m128i k__cospi_p12_m20 = pair_set_epi16(cospi_12_64, -cospi_20_64);
-    const __m128i k__cospi_p20_p12 = pair_set_epi16(cospi_20_64, cospi_12_64);
-    multiplication_and_add(&io[2], &io[14], &io[10], &io[6], &k__cospi_p28_m04,
-                           &k__cospi_p04_p28, &k__cospi_p12_m20,
-                           &k__cospi_p20_p12, &step1[4], &step1[7], &step1[5],
-                           &step1[6]);
-  }
+  multiplication_and_add(io[2], io[14], (int)cospi_28_64, (int)cospi_4_64,
+                         &step1[4], &step1[7]);
+  multiplication_and_add(io[10], io[6], (int)cospi_12_64, (int)cospi_20_64,
+                         &step1[5], &step1[6]);
   step1[8] = _mm_add_epi16(step2[8], step2[9]);
   step1[9] = _mm_sub_epi16(step2[8], step2[9]);
   step1[10] = _mm_sub_epi16(step2[11], step2[10]);
@@ -470,24 +450,19 @@ static INLINE void idct16_8col(__m128i *const io /*io[16]*/) {
   step1[15] = _mm_add_epi16(step2[14], step2[15]);
 
   // stage 4
-  {
-    const __m128i k__cospi_m08_p24 = pair_set_epi16(-cospi_8_64, cospi_24_64);
-    const __m128i k__cospi_p24_p08 = pair_set_epi16(cospi_24_64, cospi_8_64);
-    const __m128i k__cospi_m24_m08 = pair_set_epi16(-cospi_24_64, -cospi_8_64);
-    multiplication_and_add(&io[8], &io[0], &io[12], &io[4], &k__cospi_p16_p16,
-                           &k__cospi_m16_p16, &k__cospi_m08_p24,
-                           &k__cospi_p24_p08, &step2[0], &step2[1], &step2[2],
-                           &step2[3]);
-    step2[5] = _mm_sub_epi16(step1[4], step1[5]);
-    step1[4] = _mm_add_epi16(step1[4], step1[5]);
-    step2[6] = _mm_sub_epi16(step1[7], step1[6]);
-    step1[7] = _mm_add_epi16(step1[6], step1[7]);
-    step2[8] = step1[8];
-    multiplication_and_add(&step1[9], &step1[14], &step1[10], &step1[13],
-                           &k__cospi_m08_p24, &k__cospi_p24_p08,
-                           &k__cospi_m24_m08, &k__cospi_m08_p24, &step2[9],
-                           &step2[14], &step2[10], &step2[13]);
-  }
+  multiplication_and_add(io[0], io[8], (int)cospi_16_64, (int)cospi_16_64,
+                         &step2[1], &step2[0]);
+  multiplication_and_add(io[4], io[12], (int)cospi_24_64, (int)cospi_8_64,
+                         &step2[2], &step2[3]);
+  multiplication_and_add(step1[14], step1[9], (int)cospi_24_64, (int)cospi_8_64,
+                         &step2[9], &step2[14]);
+  multiplication_and_add(step1[10], step1[13], -(int)cospi_8_64,
+                         -(int)cospi_24_64, &step2[13], &step2[10]);
+  step2[5] = _mm_sub_epi16(step1[4], step1[5]);
+  step1[4] = _mm_add_epi16(step1[4], step1[5]);
+  step2[6] = _mm_sub_epi16(step1[7], step1[6]);
+  step1[7] = _mm_add_epi16(step1[6], step1[7]);
+  step2[8] = step1[8];
   step2[11] = step1[11];
   step2[12] = step1[12];
   step2[15] = step1[15];
@@ -497,8 +472,8 @@ static INLINE void idct16_8col(__m128i *const io /*io[16]*/) {
   step1[1] = _mm_add_epi16(step2[1], step2[2]);
   step1[2] = _mm_sub_epi16(step2[1], step2[2]);
   step1[3] = _mm_sub_epi16(step2[0], step2[3]);
-  multiplication_and_add_2(&step2[5], &step2[6], &k__cospi_m16_p16,
-                           &k__cospi_p16_p16, &step1[5], &step1[6]);
+  multiplication_and_add(step2[6], step2[5], (int)cospi_16_64, (int)cospi_16_64,
+                         &step1[5], &step1[6]);
   step1[8] = _mm_add_epi16(step2[8], step2[11]);
   step1[9] = _mm_add_epi16(step2[9], step2[10]);
   step1[10] = _mm_sub_epi16(step2[9], step2[10]);
@@ -517,10 +492,10 @@ static INLINE void idct16_8col(__m128i *const io /*io[16]*/) {
   step2[5] = _mm_sub_epi16(step1[2], step1[5]);
   step2[6] = _mm_sub_epi16(step1[1], step1[6]);
   step2[7] = _mm_sub_epi16(step1[0], step1[7]);
-  multiplication_and_add(&step1[10], &step1[13], &step1[11], &step1[12],
-                         &k__cospi_m16_p16, &k__cospi_p16_p16,
-                         &k__cospi_m16_p16, &k__cospi_p16_p16, &step2[10],
-                         &step2[13], &step2[11], &step2[12]);
+  multiplication_and_add(step1[13], step1[10], (int)cospi_16_64,
+                         (int)cospi_16_64, &step2[10], &step2[13]);
+  multiplication_and_add(step1[12], step1[11], (int)cospi_16_64,
+                         (int)cospi_16_64, &step2[11], &step2[12]);
 
   // stage 7
   io[0] = _mm_add_epi16(step2[0], step1[15]);
@@ -737,48 +712,31 @@ static INLINE void idct16x16_10_pass1(const __m128i *const input /*input[4]*/,
 static INLINE void idct16x16_10_pass2(__m128i *const l /*l[8]*/,
                                       __m128i *const io /*io[16]*/) {
   const __m128i zero = _mm_setzero_si128();
-  const __m128i k__cospi_p16_p16 = pair_set_epi16(cospi_16_64, cospi_16_64);
-  const __m128i k__cospi_m16_p16 = pair_set_epi16(-cospi_16_64, cospi_16_64);
   __m128i step1[16], step2[16];
 
   transpose_16bit_4x8(l, io);
 
   // stage 2
-  {
-    const __m128i k__cospi_p30_m02 = pair_set_epi16(cospi_30_64, -cospi_2_64);
-    const __m128i k__cospi_p02_p30 = pair_set_epi16(cospi_2_64, cospi_30_64);
-    const __m128i k__cospi_p06_m26 = pair_set_epi16(cospi_6_64, -cospi_26_64);
-    const __m128i k__cospi_p26_p06 = pair_set_epi16(cospi_26_64, cospi_6_64);
-    multiplication_and_add(&io[1], &zero, &zero, &io[3], &k__cospi_p30_m02,
-                           &k__cospi_p02_p30, &k__cospi_p06_m26,
-                           &k__cospi_p26_p06, &step2[8], &step2[15], &step2[11],
-                           &step2[12]);
-  }
+  multiplication_and_add(io[1], zero, (int)cospi_30_64, (int)cospi_2_64,
+                         &step2[8], &step2[15]);
+  multiplication_and_add(zero, io[3], (int)cospi_6_64, (int)cospi_26_64,
+                         &step2[11], &step2[12]);
 
   // stage 3
-  {
-    const __m128i k__cospi_p28_m04 = pair_set_epi16(cospi_28_64, -cospi_4_64);
-    const __m128i k__cospi_p04_p28 = pair_set_epi16(cospi_4_64, cospi_28_64);
-    multiplication_and_add_2(&io[2], &zero, &k__cospi_p28_m04,
-                             &k__cospi_p04_p28, &step1[4], &step1[7]);
-  }
+  multiplication_and_add(io[2], zero, (int)cospi_28_64, (int)cospi_4_64,
+                         &step1[4], &step1[7]);
 
   // stage 4
-  {
-    const __m128i k__cospi_m08_p24 = pair_set_epi16(-cospi_8_64, cospi_24_64);
-    const __m128i k__cospi_p24_p08 = pair_set_epi16(cospi_24_64, cospi_8_64);
-    const __m128i k__cospi_m24_m08 = pair_set_epi16(-cospi_24_64, -cospi_8_64);
-    multiplication_and_add_2(&zero, &io[0], &k__cospi_p16_p16,
-                             &k__cospi_m16_p16, &step1[0], &step1[1]);
-    multiplication_and_add(&step2[8], &step2[15], &step2[11], &step2[12],
-                           &k__cospi_m08_p24, &k__cospi_p24_p08,
-                           &k__cospi_m24_m08, &k__cospi_m08_p24, &step2[9],
-                           &step2[14], &step2[10], &step2[13]);
-  }
+  multiplication_and_add(io[0], zero, (int)cospi_16_64, (int)cospi_16_64,
+                         &step1[1], &step1[0]);
+  multiplication_and_add(step2[15], step2[8], (int)cospi_24_64, (int)cospi_8_64,
+                         &step2[9], &step2[14]);
+  multiplication_and_add(step2[11], step2[12], -(int)cospi_8_64,
+                         -(int)cospi_24_64, &step2[13], &step2[10]);
 
   // stage 5
-  multiplication_and_add_2(&step1[4], &step1[7], &k__cospi_m16_p16,
-                           &k__cospi_p16_p16, &step1[5], &step1[6]);
+  multiplication_and_add(step1[7], step1[4], (int)cospi_16_64, (int)cospi_16_64,
+                         &step1[5], &step1[6]);
   step1[8] = _mm_add_epi16(step2[8], step2[11]);
   step1[9] = _mm_add_epi16(step2[9], step2[10]);
   step1[10] = _mm_sub_epi16(step2[9], step2[10]);
@@ -797,10 +755,10 @@ static INLINE void idct16x16_10_pass2(__m128i *const l /*l[8]*/,
   step2[5] = _mm_sub_epi16(step1[1], step1[5]);
   step2[6] = _mm_sub_epi16(step1[1], step1[6]);
   step2[7] = _mm_sub_epi16(step1[0], step1[7]);
-  multiplication_and_add(&step1[10], &step1[13], &step1[11], &step1[12],
-                         &k__cospi_m16_p16, &k__cospi_p16_p16,
-                         &k__cospi_m16_p16, &k__cospi_p16_p16, &step2[10],
-                         &step2[13], &step2[11], &step2[12]);
+  multiplication_and_add(step1[13], step1[10], (int)cospi_16_64,
+                         (int)cospi_16_64, &step2[10], &step2[13]);
+  multiplication_and_add(step1[12], step1[11], (int)cospi_16_64,
+                         (int)cospi_16_64, &step2[11], &step2[12]);
 
   // stage 7
   io[0] = _mm_add_epi16(step2[0], step1[15]);
@@ -1312,20 +1270,20 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
 
 #define IDCT32_34                                                              \
   /* Stage1 */                                                                 \
-  multiplication_and_add_2(&in[1], &zero, &stg1_0, &stg1_1, &stp1_16,          \
-                           &stp1_31);                                          \
-  multiplication_and_add_2(&zero, &in[7], &stg1_6, &stg1_7, &stp1_19,          \
-                           &stp1_28);                                          \
-  multiplication_and_add_2(&in[5], &zero, &stg1_8, &stg1_9, &stp1_20,          \
-                           &stp1_27);                                          \
-  multiplication_and_add_2(&zero, &in[3], &stg1_14, &stg1_15, &stp1_23,        \
-                           &stp1_24);                                          \
+  multiplication_and_add(in[1], zero, (int)cospi_31_64, (int)cospi_1_64,       \
+                         &stp1_16, &stp1_31);                                  \
+  multiplication_and_add(zero, in[7], (int)cospi_7_64, (int)cospi_25_64,       \
+                         &stp1_19, &stp1_28);                                  \
+  multiplication_and_add(in[5], zero, (int)cospi_27_64, (int)cospi_5_64,       \
+                         &stp1_20, &stp1_27);                                  \
+  multiplication_and_add(zero, in[3], (int)cospi_3_64, (int)cospi_29_64,       \
+                         &stp1_23, &stp1_24);                                  \
                                                                                \
   /* Stage2 */                                                                 \
-  multiplication_and_add_2(&in[2], &zero, &stg2_0, &stg2_1, &stp2_8,           \
-                           &stp2_15);                                          \
-  multiplication_and_add_2(&zero, &in[6], &stg2_6, &stg2_7, &stp2_11,          \
-                           &stp2_12);                                          \
+  multiplication_and_add(in[2], zero, (int)cospi_30_64, (int)cospi_2_64,       \
+                         &stp2_8, &stp2_15);                                   \
+  multiplication_and_add(zero, in[6], (int)cospi_6_64, (int)cospi_26_64,       \
+                         &stp2_11, &stp2_12);                                  \
                                                                                \
   stp2_16 = stp1_16;                                                           \
   stp2_19 = stp1_19;                                                           \
@@ -1340,20 +1298,23 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp2_31 = stp1_31;                                                           \
                                                                                \
   /* Stage3 */                                                                 \
-  multiplication_and_add_2(&in[4], &zero, &stg3_0, &stg3_1, &stp1_4, &stp1_7); \
+  multiplication_and_add(in[4], zero, (int)cospi_28_64, (int)cospi_4_64,       \
+                         &stp1_4, &stp1_7);                                    \
                                                                                \
   stp1_8 = stp2_8;                                                             \
   stp1_11 = stp2_11;                                                           \
   stp1_12 = stp2_12;                                                           \
   stp1_15 = stp2_15;                                                           \
                                                                                \
-  multiplication_and_add(&stp1_16, &stp1_31, &stp1_19, &stp1_28, &stg3_4,      \
-                         &stg3_5, &stg3_6, &stg3_4, &stp1_17, &stp1_30,        \
-                         &stp1_18, &stp1_29);                                  \
+  multiplication_and_add(stp1_31, stp1_16, (int)cospi_28_64, (int)cospi_4_64,  \
+                         &stp1_17, &stp1_30);                                  \
+  multiplication_and_add(stp1_19, stp1_28, -(int)cospi_4_64,                   \
+                         -(int)cospi_28_64, &stp1_29, &stp1_18);               \
                                                                                \
-  multiplication_and_add(&stp1_20, &stp1_27, &stp1_23, &stp1_24, &stg3_8,      \
-                         &stg3_9, &stg3_10, &stg3_8, &stp1_21, &stp1_26,       \
-                         &stp1_22, &stp1_25);                                  \
+  multiplication_and_add(stp1_27, stp1_20, (int)cospi_12_64, (int)cospi_20_64, \
+                         &stp1_21, &stp1_26);                                  \
+  multiplication_and_add(stp1_23, stp1_24, -(int)cospi_20_64,                  \
+                         -(int)cospi_12_64, &stp1_25, &stp1_22);               \
                                                                                \
   stp1_16 = stp2_16;                                                           \
   stp1_31 = stp2_31;                                                           \
@@ -1365,16 +1326,18 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp1_28 = stp2_28;                                                           \
                                                                                \
   /* Stage4 */                                                                 \
-  multiplication_and_add_2(&in[0], &zero, &stg4_0, &stg4_1, &stp2_0, &stp2_1); \
+  multiplication_and_add(in[0], zero, (int)cospi_16_64, (int)cospi_16_64,      \
+                         &stp2_1, &stp2_0);                                    \
                                                                                \
   stp2_4 = stp1_4;                                                             \
   stp2_5 = stp1_4;                                                             \
   stp2_6 = stp1_7;                                                             \
   stp2_7 = stp1_7;                                                             \
                                                                                \
-  multiplication_and_add(&stp2_8, &stp2_15, &stp2_11, &stp2_12, &stg4_4,       \
-                         &stg4_5, &stg4_6, &stg4_4, &stp2_9, &stp2_14,         \
-                         &stp2_10, &stp2_13);                                  \
+  multiplication_and_add(stp2_15, stp2_8, (int)cospi_24_64, (int)cospi_8_64,   \
+                         &stp2_9, &stp2_14);                                   \
+  multiplication_and_add(stp2_11, stp2_12, -(int)cospi_8_64,                   \
+                         -(int)cospi_24_64, &stp2_13, &stp2_10);               \
                                                                                \
   stp2_8 = stp1_8;                                                             \
   stp2_15 = stp1_15;                                                           \
@@ -1404,8 +1367,8 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp1_1 = stp2_1;                                                             \
   stp1_2 = stp2_1;                                                             \
   stp1_3 = stp2_0;                                                             \
-  multiplication_and_add_2(&stp2_6, &stp2_5, &stg4_1, &stg4_0, &stp1_5,        \
-                           &stp1_6);                                           \
+  multiplication_and_add(stp2_6, stp2_5, (int)cospi_16_64, (int)cospi_16_64,   \
+                         &stp1_5, &stp1_6);                                    \
                                                                                \
   stp1_4 = stp2_4;                                                             \
   stp1_7 = stp2_7;                                                             \
@@ -1422,12 +1385,14 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp1_16 = stp2_16;                                                           \
   stp1_17 = stp2_17;                                                           \
                                                                                \
-  multiplication_and_add(&stp2_18, &stp2_29, &stp2_19, &stp2_28, &stg4_4,      \
-                         &stg4_5, &stg4_4, &stg4_5, &stp1_18, &stp1_29,        \
+  multiplication_and_add(stp2_29, stp2_18, (int)cospi_24_64, (int)cospi_8_64,  \
+                         &stp1_18, &stp1_29);                                  \
+  multiplication_and_add(stp2_28, stp2_19, (int)cospi_24_64, (int)cospi_8_64,  \
                          &stp1_19, &stp1_28);                                  \
-  multiplication_and_add(&stp2_20, &stp2_27, &stp2_21, &stp2_26, &stg4_6,      \
-                         &stg4_4, &stg4_6, &stg4_4, &stp1_20, &stp1_27,        \
-                         &stp1_21, &stp1_26);                                  \
+  multiplication_and_add(stp2_20, stp2_27, -(int)cospi_8_64,                   \
+                         -(int)cospi_24_64, &stp1_27, &stp1_20);               \
+  multiplication_and_add(stp2_21, stp2_26, -(int)cospi_8_64,                   \
+                         -(int)cospi_24_64, &stp1_26, &stp1_21);               \
                                                                                \
   stp1_22 = stp2_22;                                                           \
   stp1_23 = stp2_23;                                                           \
@@ -1451,8 +1416,9 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp2_14 = stp1_14;                                                           \
   stp2_15 = stp1_15;                                                           \
                                                                                \
-  multiplication_and_add(&stp1_10, &stp1_13, &stp1_11, &stp1_12, &stg6_0,      \
-                         &stg4_0, &stg6_0, &stg4_0, &stp2_10, &stp2_13,        \
+  multiplication_and_add(stp1_13, stp1_10, (int)cospi_16_64, (int)cospi_16_64, \
+                         &stp2_10, &stp2_13);                                  \
+  multiplication_and_add(stp1_12, stp1_11, (int)cospi_16_64, (int)cospi_16_64, \
                          &stp2_11, &stp2_12);                                  \
                                                                                \
   stp2_16 = _mm_add_epi16(stp1_16, stp1_23);                                   \
@@ -1496,11 +1462,13 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp1_18 = stp2_18;                                                           \
   stp1_19 = stp2_19;                                                           \
                                                                                \
-  multiplication_and_add(&stp2_20, &stp2_27, &stp2_21, &stp2_26, &stg6_0,      \
-                         &stg4_0, &stg6_0, &stg4_0, &stp1_20, &stp1_27,        \
+  multiplication_and_add(stp2_27, stp2_20, (int)cospi_16_64, (int)cospi_16_64, \
+                         &stp1_20, &stp1_27);                                  \
+  multiplication_and_add(stp2_26, stp2_21, (int)cospi_16_64, (int)cospi_16_64, \
                          &stp1_21, &stp1_26);                                  \
-  multiplication_and_add(&stp2_22, &stp2_25, &stp2_23, &stp2_24, &stg6_0,      \
-                         &stg4_0, &stg6_0, &stg4_0, &stp1_22, &stp1_25,        \
+  multiplication_and_add(stp2_25, stp2_22, (int)cospi_16_64, (int)cospi_16_64, \
+                         &stp1_22, &stp1_25);                                  \
+  multiplication_and_add(stp2_24, stp2_23, (int)cospi_16_64, (int)cospi_16_64, \
                          &stp1_23, &stp1_24);                                  \
                                                                                \
   stp1_28 = stp2_28;                                                           \
@@ -1512,39 +1480,6 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
 void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
                                int stride) {
   const __m128i zero = _mm_setzero_si128();
-
-  // idct constants for each stage
-  const __m128i stg1_0 = pair_set_epi16(cospi_31_64, -cospi_1_64);
-  const __m128i stg1_1 = pair_set_epi16(cospi_1_64, cospi_31_64);
-  const __m128i stg1_6 = pair_set_epi16(cospi_7_64, -cospi_25_64);
-  const __m128i stg1_7 = pair_set_epi16(cospi_25_64, cospi_7_64);
-  const __m128i stg1_8 = pair_set_epi16(cospi_27_64, -cospi_5_64);
-  const __m128i stg1_9 = pair_set_epi16(cospi_5_64, cospi_27_64);
-  const __m128i stg1_14 = pair_set_epi16(cospi_3_64, -cospi_29_64);
-  const __m128i stg1_15 = pair_set_epi16(cospi_29_64, cospi_3_64);
-
-  const __m128i stg2_0 = pair_set_epi16(cospi_30_64, -cospi_2_64);
-  const __m128i stg2_1 = pair_set_epi16(cospi_2_64, cospi_30_64);
-  const __m128i stg2_6 = pair_set_epi16(cospi_6_64, -cospi_26_64);
-  const __m128i stg2_7 = pair_set_epi16(cospi_26_64, cospi_6_64);
-
-  const __m128i stg3_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
-  const __m128i stg3_1 = pair_set_epi16(cospi_4_64, cospi_28_64);
-  const __m128i stg3_4 = pair_set_epi16(-cospi_4_64, cospi_28_64);
-  const __m128i stg3_5 = pair_set_epi16(cospi_28_64, cospi_4_64);
-  const __m128i stg3_6 = pair_set_epi16(-cospi_28_64, -cospi_4_64);
-  const __m128i stg3_8 = pair_set_epi16(-cospi_20_64, cospi_12_64);
-  const __m128i stg3_9 = pair_set_epi16(cospi_12_64, cospi_20_64);
-  const __m128i stg3_10 = pair_set_epi16(-cospi_12_64, -cospi_20_64);
-
-  const __m128i stg4_0 = pair_set_epi16(cospi_16_64, cospi_16_64);
-  const __m128i stg4_1 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  const __m128i stg4_4 = pair_set_epi16(-cospi_8_64, cospi_24_64);
-  const __m128i stg4_5 = pair_set_epi16(cospi_24_64, cospi_8_64);
-  const __m128i stg4_6 = pair_set_epi16(-cospi_24_64, -cospi_8_64);
-
-  const __m128i stg6_0 = pair_set_epi16(-cospi_16_64, cospi_16_64);
-
   __m128i in[32], col[32];
   __m128i stp1_0, stp1_1, stp1_2, stp1_3, stp1_4, stp1_5, stp1_6, stp1_7,
       stp1_8, stp1_9, stp1_10, stp1_11, stp1_12, stp1_13, stp1_14, stp1_15,
