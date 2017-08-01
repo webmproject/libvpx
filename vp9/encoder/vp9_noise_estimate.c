@@ -34,7 +34,7 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne, int width, int height) {
   } else if (width * height >= 1280 * 720) {
     ne->thresh = 140;
   } else if (width * height >= 640 * 360) {
-    ne->thresh = 100;
+    ne->thresh = 115;
   }
   ne->num_frames_estimate = 15;
 }
@@ -56,8 +56,8 @@ static int enable_noise_estimation(VP9_COMP *const cpi) {
   if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
       cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->oxcf.speed >= 5 &&
       cpi->resize_state == ORIG && cpi->resize_pending == 0 && !cpi->use_svc &&
-      cpi->oxcf.content != VP9E_CONTENT_SCREEN && cpi->common.width >= 640 &&
-      cpi->common.height >= 360)
+      cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
+      cpi->common.width * cpi->common.height >= 640 * 360)
     return 1;
   else
     return 0;
