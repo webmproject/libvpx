@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebd6ba1c_c1279fcb",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-02T02:54:21Z",
+      "side": 1,
+      "message": "you should be able to use the actual enum value here",
+      "revId": "84a521c5c62cf93f265c85a13ea56c7cd3abc402",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
