@@ -305,7 +305,7 @@ static INLINE void spv32_x0_y0(const uint8_t *src, int src_stride,
   }
 }
 
-// (x == 0, y == 8) or (x == 8, y == 0).  sstep determines the direction.
+// (x == 0, y == 4) or (x == 4, y == 0).  sstep determines the direction.
 static INLINE void spv32_half_zero(const uint8_t *src, int src_stride,
                                    const uint8_t *dst, int dst_stride,
                                    const uint8_t *sec, int sec_stride,
@@ -335,7 +335,7 @@ static INLINE void spv32_half_zero(const uint8_t *src, int src_stride,
   }
 }
 
-static INLINE void spv32_x0_y8(const uint8_t *src, int src_stride,
+static INLINE void spv32_x0_y4(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
                                const uint8_t *sec, int sec_stride, int do_sec,
                                int height, __m256i *sum_reg, __m256i *sse_reg) {
@@ -343,7 +343,7 @@ static INLINE void spv32_x0_y8(const uint8_t *src, int src_stride,
                   height, sum_reg, sse_reg, src_stride);
 }
 
-static INLINE void spv32_x8_y0(const uint8_t *src, int src_stride,
+static INLINE void spv32_x4_y0(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
                                const uint8_t *sec, int sec_stride, int do_sec,
                                int height, __m256i *sum_reg, __m256i *sse_reg) {
@@ -351,7 +351,7 @@ static INLINE void spv32_x8_y0(const uint8_t *src, int src_stride,
                   height, sum_reg, sse_reg, 1);
 }
 
-static INLINE void spv32_x8_y8(const uint8_t *src, int src_stride,
+static INLINE void spv32_x4_y4(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
                                const uint8_t *sec, int sec_stride, int do_sec,
                                int height, __m256i *sum_reg, __m256i *sse_reg) {
@@ -387,7 +387,7 @@ static INLINE void spv32_x8_y8(const uint8_t *src, int src_stride,
   }
 }
 
-// (x == 0, y == bil) or (x == 8, y == bil).  sstep determines the direction.
+// (x == 0, y == bil) or (x == 4, y == bil).  sstep determines the direction.
 static INLINE void spv32_bilin_zero(const uint8_t *src, int src_stride,
                                     const uint8_t *dst, int dst_stride,
                                     const uint8_t *sec, int sec_stride,
@@ -439,7 +439,7 @@ static INLINE void spv32_xb_y0(const uint8_t *src, int src_stride,
                    height, sum_reg, sse_reg, x_offset, 1);
 }
 
-static INLINE void spv32_x8_yb(const uint8_t *src, int src_stride,
+static INLINE void spv32_x4_yb(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
                                const uint8_t *sec, int sec_stride, int do_sec,
                                int height, __m256i *sum_reg, __m256i *sse_reg,
@@ -478,7 +478,7 @@ static INLINE void spv32_x8_yb(const uint8_t *src, int src_stride,
   }
 }
 
-static INLINE void spv32_xb_y8(const uint8_t *src, int src_stride,
+static INLINE void spv32_xb_y4(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
                                const uint8_t *sec, int sec_stride, int do_sec,
                                int height, __m256i *sum_reg, __m256i *sse_reg,
@@ -599,27 +599,27 @@ static INLINE int sub_pix_var32xh(const uint8_t *src, int src_stride,
     if (y_offset == 0) {
       spv32_x0_y0(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
                   height, &sum_reg, &sse_reg);
-      // x_offset = 0 and y_offset = 8
-    } else if (y_offset == 8) {
-      spv32_x0_y8(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
+      // x_offset = 0 and y_offset = 4
+    } else if (y_offset == 4) {
+      spv32_x0_y4(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
                   height, &sum_reg, &sse_reg);
       // x_offset = 0 and y_offset = bilin interpolation
     } else {
       spv32_x0_yb(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
                   height, &sum_reg, &sse_reg, y_offset);
     }
-    // x_offset = 8  and y_offset = 0
-  } else if (x_offset == 8) {
+    // x_offset = 4  and y_offset = 0
+  } else if (x_offset == 4) {
     if (y_offset == 0) {
-      spv32_x8_y0(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
+      spv32_x4_y0(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
                   height, &sum_reg, &sse_reg);
-      // x_offset = 8  and y_offset = 8
-    } else if (y_offset == 8) {
-      spv32_x8_y8(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
+      // x_offset = 4  and y_offset = 4
+    } else if (y_offset == 4) {
+      spv32_x4_y4(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
                   height, &sum_reg, &sse_reg);
-      // x_offset = 8  and y_offset = bilin interpolation
+      // x_offset = 4  and y_offset = bilin interpolation
     } else {
-      spv32_x8_yb(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
+      spv32_x4_yb(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
                   height, &sum_reg, &sse_reg, y_offset);
     }
     // x_offset = bilin interpolation and y_offset = 0
@@ -627,9 +627,9 @@ static INLINE int sub_pix_var32xh(const uint8_t *src, int src_stride,
     if (y_offset == 0) {
       spv32_xb_y0(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
                   height, &sum_reg, &sse_reg, x_offset);
-      // x_offset = bilin interpolation and y_offset = 8
-    } else if (y_offset == 8) {
-      spv32_xb_y8(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
+      // x_offset = bilin interpolation and y_offset = 4
+    } else if (y_offset == 4) {
+      spv32_xb_y4(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
                   height, &sum_reg, &sse_reg, x_offset);
       // x_offset = bilin interpolation and y_offset = bilin interpolation
     } else {
