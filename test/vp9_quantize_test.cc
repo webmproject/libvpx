@@ -25,6 +25,7 @@
 #include "vp9/common/vp9_scan.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/vpx_timer.h"
 
 using libvpx_test::ACMRandom;
 using libvpx_test::Buffer;
@@ -349,6 +350,79 @@ TEST_P(VP9Quantize32Test, EOBCheck) {
     }
   }
 }
+
+TEST_P(VP9QuantizeTest, DISABLED_Speed) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+  Buffer<tran_low_t> coeff = Buffer<tran_low_t>(16, 16, 0, 16);
+  ASSERT_TRUE(coeff.Init());
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[8]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[8]);
+  Buffer<tran_low_t> qcoeff = Buffer<tran_low_t>(16, 16, 0, 32);
+  ASSERT_TRUE(qcoeff.Init());
+  Buffer<tran_low_t> dqcoeff = Buffer<tran_low_t>(16, 16, 0, 32);
+  ASSERT_TRUE(dqcoeff.Init());
+  uint16_t eob;
+
+  // TX_4X4, TX_8X8 TX_16X16
+  for (TX_SIZE sz = 0; sz < 3; ++sz) {
+    // skip_block, zbin > coeff, zbin < coeff.
+    for (int i = 0; i < 3; ++i) {
+      const int skip_block = i == 0;
+      // TX_TYPE defines the scan order. That is not relevant to the speed test.
+      // Pick the first one.
+      const TX_TYPE tx_type = DCT_DCT;
+      const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
+      const int count = (4 << sz) * (4 << sz);  // 16, 64, 256
+      if (i == 0) {
+        // zbin values are unused when skip_block == 1.
+        zbin_ptr[0] = zbin_ptr[1] = 0;
+        coeff.Set(0);
+      } else if (i == 1) {
+        // When |coeff values| are less than zbin the results are 0.
+        zbin_ptr[0] = zbin_ptr[1] = 100;
+        coeff.Set(&rnd, -99, 99);
+      } else if (i == 2) {
+        zbin_ptr[0] = zbin_ptr[1] = 50;
+        coeff.Set(&rnd, -500, 500);
+      }
+      for (int j = 0; j < 2; j++) {
+        // Chosen by fair dice roll.
+        round_ptr[j] = 10;
+        quant_ptr[j] = -10;
+        quant_shift_ptr[j] = 10;
+        dequant_ptr[j] = 10;
+      }
+      for (int j = 2; j < 8; j++) {
+        zbin_ptr[j] = zbin_ptr[1];
+        round_ptr[j] = round_ptr[1];
+        quant_ptr[j] = quant_ptr[1];
+        quant_shift_ptr[j] = quant_shift_ptr[1];
+        dequant_ptr[j] = dequant_ptr[1];
+      }
+
+      vpx_usec_timer timer;
+      vpx_usec_timer_start(&timer);
+      for (int j = 0; j < 100000000 / count; ++j) {
+        quantize_op_(coeff.TopLeftPixel(), count, skip_block, zbin_ptr,
+                     round_ptr, quant_ptr, quant_shift_ptr,
+                     qcoeff.TopLeftPixel(), dqcoeff.TopLeftPixel(), dequant_ptr,
+                     &eob, scan_order->scan, scan_order->iscan);
+      }
+      vpx_usec_timer_mark(&timer);
+      const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
+      if (i == 0) printf("Skip block.\n");
+      if (i == 1) printf("Bypass calculations.\n");
+      if (i == 2) printf("Full calculations.\n");
+      printf("Quantize %dx%d time: %5d ms\n", 4 << sz, 4 << sz,
+             elapsed_time / 1000);
+    }
+    printf("\n");
+  }
+}
+
 using std::tr1::make_tuple;
 
 #if HAVE_SSE2
@@ -413,4 +487,10 @@ INSTANTIATE_TEST_CASE_P(NEON, VP9QuantizeTest,
                                                      &vpx_quantize_b_c,
                                                      VPX_BITS_8)));
 #endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH
+
+// Only useful to compare "Speed" test results.
+INSTANTIATE_TEST_CASE_P(DISABLED_C, VP9QuantizeTest,
+                        ::testing::Values(make_tuple(&vpx_quantize_b_c,
+                                                     &vpx_quantize_b_c,
+                                                     VPX_BITS_8)));
 }  // namespace
