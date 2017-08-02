@@ -702,6 +702,12 @@ process_common_toolchain() {
       power*)
         tgt_isa=ppc
         ;;
+      *mips64el*)
+        tgt_isa=mips64
+        ;;
+      *mips32el*)
+        tgt_isa=mips32
+        ;;
     esac
 
     # detect tgt_os
@@ -1163,6 +1169,11 @@ EOF
         fi
       fi
 
+      if enabled mmi; then
+        tgt_isa=loongson3a
+        check_add_ldflags -march=loongson3a
+      fi
+
       check_add_cflags -march=${tgt_isa}
       check_add_asflags -march=${tgt_isa}
       check_add_asflags -KPIC
@@ -1439,6 +1450,10 @@ EOF
         if enabled msa; then
           echo "msa optimizations are available only for little endian platforms"
           disable_feature msa
+        fi
+        if enabled mmi; then
+          echo "mmi optimizations are available only for little endian platforms"
+          disable_feature mmi
         fi
       fi
       ;;

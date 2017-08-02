@@ -411,6 +411,10 @@ if ($opts{arch} eq 'x86') {
       @ALL_ARCHS = filter("$opts{arch}", qw/msa/);
       last;
     }
+    if (/HAVE_MMI=yes/) {
+      @ALL_ARCHS = filter("$opts{arch}", qw/mmi/);
+      last;
+    }
   }
   close CONFIG_FILE;
   mips;
