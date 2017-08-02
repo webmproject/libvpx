@@ -664,7 +664,8 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
   // and multiple threads match.
   // It can be used in realtime when adaptive_rd_thresh_row_mt is enabled since
   // adaptive_rd_thresh is defined per-row for non-rd pickmode.
-  if (!sf->adaptive_rd_thresh_row_mt && cpi->row_mt_bit_exact)
+  if (!sf->adaptive_rd_thresh_row_mt && cpi->row_mt_bit_exact &&
+      oxcf->max_threads > 1)
     sf->adaptive_rd_thresh = 0;
 
   // This is only used in motion vector unit test.
@@ -820,7 +821,8 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   // and multiple threads match.
   // It can be used in realtime when adaptive_rd_thresh_row_mt is enabled since
   // adaptive_rd_thresh is defined per-row for non-rd pickmode.
-  if (!sf->adaptive_rd_thresh_row_mt && cpi->row_mt_bit_exact)
+  if (!sf->adaptive_rd_thresh_row_mt && cpi->row_mt_bit_exact &&
+      oxcf->max_threads > 1)
     sf->adaptive_rd_thresh = 0;
 
   // This is only used in motion vector unit test.
