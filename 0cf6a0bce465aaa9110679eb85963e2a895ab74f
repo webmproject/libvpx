@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a1348f8_cdc916b4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-02T03:27:06Z",
+      "side": 1,
+      "message": "could drop the WIP if you want to land this prior to merging the files; this change looks good and passes the tests (note this jenkins doesn\u0027t have AVX2 support)",
+      "revId": "0cf6a0bce465aaa9110679eb85963e2a895ab74f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
