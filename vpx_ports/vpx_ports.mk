@@ -28,3 +28,7 @@ PORTS_SRCS-$(ARCH_ARM) += arm.h
 
 PORTS_SRCS-$(ARCH_PPC) += ppc_cpudetect.c
 PORTS_SRCS-$(ARCH_PPC) += ppc.h
+
+ifeq ($(ARCH_MIPS), yes)
+PORTS_SRCS-yes += asmdefs_mmi.h
+endif
