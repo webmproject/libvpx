@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf07387_517c67f8",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-02T22:59:26Z",
+      "side": 1,
+      "message": "GenerateHelperStructs/Arrays",
+      "range": {
+        "startLine": 81,
+        "startChar": 5,
+        "endLine": 81,
+        "endChar": 28
+      },
+      "revId": "0927d61f9686bfcf73e91f60cf3d95a687bbe760",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a136d7a7_2a685a74",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-02T22:59:26Z",
+      "side": 1,
+      "message": "why not leave this DISABLED_?",
+      "revId": "0927d61f9686bfcf73e91f60cf3d95a687bbe760",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
