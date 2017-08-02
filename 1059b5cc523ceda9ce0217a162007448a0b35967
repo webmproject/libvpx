@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bba570f9_a3686af0",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-02T18:32:15Z",
+      "side": 1,
+      "message": "this could be a const given it\u0027s used in the printf",
+      "range": {
+        "startLine": 378,
+        "startChar": 25,
+        "endLine": 378,
+        "endChar": 32
+      },
+      "revId": "1059b5cc523ceda9ce0217a162007448a0b35967",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
