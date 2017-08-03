@@ -333,15 +333,20 @@ INSTANTIATE_TEST_CASE_P(SSE2, VP9QuantizeTest,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 
-// TODO(johannkoenig): SSSE3 optimizations do not yet pass these tests.
-#if HAVE_SSSE3 && ARCH_X86_64
+#if HAVE_SSSE3
+INSTANTIATE_TEST_CASE_P(SSSE3, VP9QuantizeTest,
+                        ::testing::Values(make_tuple(&vpx_quantize_b_ssse3,
+                                                     &vpx_quantize_b_c,
+                                                     VPX_BITS_8, 16)));
+
+#if ARCH_X86_64
+// TODO(johannkoenig): SSSE3 optimizations do not yet pass this test.
 INSTANTIATE_TEST_CASE_P(
     DISABLED_SSSE3, VP9QuantizeTest,
-    ::testing::Values(make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c,
-                                 VPX_BITS_8, 16),
-                      make_tuple(&vpx_quantize_b_32x32_ssse3,
+    ::testing::Values(make_tuple(&vpx_quantize_b_32x32_ssse3,
                                  &vpx_quantize_b_32x32_c, VPX_BITS_8, 32)));
-#endif  // HAVE_SSSE3 && ARCH_X86_64
+#endif  // ARCH_X86_64
+#endif  // HAVE_SSSE3
 
 // TODO(johannkoenig): AVX optimizations do not yet pass the 32x32 test or
 // highbitdepth configurations.
