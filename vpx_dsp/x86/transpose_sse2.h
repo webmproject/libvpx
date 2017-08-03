@@ -237,4 +237,52 @@ static INLINE void transpose_32bit_4x4x2(const __m128i *const in,
   out[7] = _mm_unpackhi_epi64(a6, a7);
 }
 
+static INLINE void transpose_32bit_8x4(const __m128i *const in,
+                                       __m128i *const out) {
+  // Unpack 32 bit elements. Goes from:
+  // in[0]: 00 01 02 03
+  // in[1]: 04 05 06 07
+  // in[2]: 10 11 12 13
+  // in[3]: 14 15 16 17
+  // in[4]: 20 21 22 23
+  // in[5]: 24 25 26 27
+  // in[6]: 30 31 32 33
+  // in[7]: 34 35 36 37
+  // to:
+  // a0: 00 10 01 11
+  // a1: 20 30 21 31
+  // a2: 02 12 03 13
+  // a3: 22 32 23 33
+  // a4: 04 14 05 15
+  // a5: 24 34 25 35
+  // a6: 06 16 07 17
+  // a7: 26 36 27 37
+  const __m128i a0 = _mm_unpacklo_epi32(in[0], in[2]);
+  const __m128i a1 = _mm_unpacklo_epi32(in[4], in[6]);
+  const __m128i a2 = _mm_unpackhi_epi32(in[0], in[2]);
+  const __m128i a3 = _mm_unpackhi_epi32(in[4], in[6]);
+  const __m128i a4 = _mm_unpacklo_epi32(in[1], in[3]);
+  const __m128i a5 = _mm_unpacklo_epi32(in[5], in[7]);
+  const __m128i a6 = _mm_unpackhi_epi32(in[1], in[3]);
+  const __m128i a7 = _mm_unpackhi_epi32(in[5], in[7]);
+
+  // Unpack 64 bit elements resulting in:
+  // out[0]: 00 10 20 30
+  // out[1]: 01 11 21 31
+  // out[2]: 02 12 22 32
+  // out[3]: 03 13 23 33
+  // out[4]: 04 14 24 34
+  // out[5]: 05 15 25 35
+  // out[6]: 06 16 26 36
+  // out[7]: 07 17 27 37
+  out[0] = _mm_unpacklo_epi64(a0, a1);
+  out[1] = _mm_unpackhi_epi64(a0, a1);
+  out[2] = _mm_unpacklo_epi64(a2, a3);
+  out[3] = _mm_unpackhi_epi64(a2, a3);
+  out[4] = _mm_unpacklo_epi64(a4, a5);
+  out[5] = _mm_unpackhi_epi64(a4, a5);
+  out[6] = _mm_unpacklo_epi64(a6, a7);
+  out[7] = _mm_unpackhi_epi64(a6, a7);
+}
+
 #endif  // VPX_DSP_X86_TRANSPOSE_SSE2_H_
