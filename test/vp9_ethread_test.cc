@@ -340,8 +340,6 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   ASSERT_EQ(single_thr_md5, multi_thr_md5);
 
   // Part 2: row_mt_mode_ = 0 vs row_mt_mode_ = 1 single thread bit exact test.
-  // The first-pass stats are not bit exact here, but that difference doesn't
-  // cause a mismatch between the final bitstreams.
   row_mt_mode_ = 1;
 
   // Encode using single thread

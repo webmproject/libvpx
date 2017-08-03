@@ -5589,7 +5589,7 @@ void vp9_set_row_mt(VP9_COMP *cpi) {
     cpi->row_mt = 1;
   }
 
-  if (cpi->row_mt && cpi->oxcf.max_threads > 1)
+  if (cpi->row_mt)
     cpi->row_mt_bit_exact = 1;
   else
     cpi->row_mt_bit_exact = 0;
