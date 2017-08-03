@@ -32,8 +32,8 @@ static INLINE __m128i multiplication_round_shift_sse4_1(
 static INLINE void highbd_multiplication_and_add_sse4_1(
     const __m128i in0, const __m128i in1, const int c0, const int c1,
     __m128i *const out0, __m128i *const out1) {
-  const __m128i pair_c0 = pair_set_epi32(c0 << 2, 0);
-  const __m128i pair_c1 = pair_set_epi32(c1 << 2, 0);
+  const __m128i pair_c0 = pair_set_epi32(4 * c0, 0);
+  const __m128i pair_c1 = pair_set_epi32(4 * c1, 0);
   __m128i temp1[4], temp2[4];
 
   extend_64bit(in0, temp1);
@@ -56,6 +56,17 @@ static INLINE void highbd_multiplication_and_add_sse4_1(
   temp2[1] = dct_const_round_shift_64bit(temp2[1]);
   *out0 = pack_4(temp1[0], temp1[1]);
   *out1 = pack_4(temp2[0], temp2[1]);
+}
+
+static INLINE void highbd_multiplication_sse4_1(const __m128i in, const int c0,
+                                                const int c1,
+                                                __m128i *const out0,
+                                                __m128i *const out1) {
+  __m128i temp[2];
+
+  extend_64bit(in, temp);
+  *out0 = multiplication_round_shift_sse4_1(temp, c0);
+  *out1 = multiplication_round_shift_sse4_1(temp, c1);
 }
 
 #endif  // VPX_DSP_X86_HIGHBD_INV_TXFM_SSE4_H_
