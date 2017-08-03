@@ -34,6 +34,24 @@
       "revId": "5611e6cb1cf8abbc97bd62dd2d5c4ac60c26e234",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ce38f96_6d44c60b",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-03T23:16:59Z",
+      "side": 1,
+      "message": "Builds OK in VS 2013",
+      "parentUuid": "a0d08ceb_8af66911",
+      "revId": "5611e6cb1cf8abbc97bd62dd2d5c4ac60c26e234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
