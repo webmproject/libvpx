@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bfcf47dc_fd1feeec",
+        "filename": "vpx_dsp/x86/highbd_idct16x16_add_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-08-04T21:39:33Z",
+      "side": 1,
+      "message": "Fixed in Patch Set 4. Will do for sse2 functions in next patch set. I forgot to remove the duplicate inline functions between sse2 and sse4.1. Will fix in next change or patch set.",
+      "parentUuid": "34b9eea6_dbc9bc16",
+      "revId": "67a7e6ebb698e1f3abcd22a80740e55041e691bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "65cdd00a_1234c43c",
         "filename": "vpx_dsp/x86/highbd_idct16x16_add_sse4.c",
         "patchSetId": 3
