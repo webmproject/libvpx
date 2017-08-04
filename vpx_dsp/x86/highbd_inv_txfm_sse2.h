@@ -115,7 +115,7 @@ static INLINE void highbd_multiplication_and_add_sse2(
     __m128i *const out0, __m128i *const out1) {
   const __m128i pair_c0 = pair_set_epi32(c0 << 2, 0);
   const __m128i pair_c1 = pair_set_epi32(c1 << 2, 0);
-  __m128i temp1[4], temp2[4], sign1[4], sign2[4];
+  __m128i temp1[4], temp2[4], sign1[2], sign2[2];
 
   abs_extend_64bit_sse2(in0, temp1, sign1);
   abs_extend_64bit_sse2(in1, temp2, sign2);
@@ -137,6 +137,29 @@ static INLINE void highbd_multiplication_and_add_sse2(
   temp2[1] = dct_const_round_shift_64bit(temp2[1]);
   *out0 = pack_4(temp1[0], temp1[1]);
   *out1 = pack_4(temp2[0], temp2[1]);
+}
+
+// Note: c0 and c1 must be non negative.
+static INLINE void highbd_multiplication_sse2(const __m128i in, const int c0,
+                                              const int c1, __m128i *const out0,
+                                              __m128i *const out1) {
+  __m128i temp[2], sign[2];
+
+  abs_extend_64bit_sse2(in, temp, sign);
+  *out0 = multiplication_round_shift_sse2(temp, sign, c0);
+  *out1 = multiplication_round_shift_sse2(temp, sign, c1);
+}
+
+// Note: c0 and c1 must be non negative.
+static INLINE void highbd_multiplication_neg_sse2(const __m128i in,
+                                                  const int c0, const int c1,
+                                                  __m128i *const out0,
+                                                  __m128i *const out1) {
+  __m128i temp[2], sign[2];
+
+  abs_extend_64bit_sse2(in, temp, sign);
+  *out0 = multiplication_neg_round_shift_sse2(temp, sign, c1);
+  *out1 = multiplication_round_shift_sse2(temp, sign, c0);
 }
 
 static INLINE void highbd_idct8_stage4(const __m128i *const in,
