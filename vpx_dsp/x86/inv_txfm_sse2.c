@@ -458,10 +458,10 @@ void vpx_idct16x16_256_add_sse2(const tran_low_t *input, uint8_t *dest,
     input += 128;
   }
 
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 16; i += 8) {
     int j;
-    transpose_16bit_8x8(l + i * 8, out);
-    transpose_16bit_8x8(r + i * 8, out + 8);
+    transpose_16bit_8x8(l + i, out);
+    transpose_16bit_8x8(r + i, out + 8);
     idct16_8col(out);
 
     for (j = 0; j < 16; ++j) {
@@ -489,9 +489,9 @@ void vpx_idct16x16_38_add_sse2(const tran_low_t *input, uint8_t *dest,
   in[15] = _mm_setzero_si128();
   idct16_8col(in);
 
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 16; i += 8) {
     int j;
-    transpose_16bit_8x8(in + i * 8, out);
+    transpose_16bit_8x8(in + i, out);
     out[8] = _mm_setzero_si128();
     out[9] = _mm_setzero_si128();
     out[10] = _mm_setzero_si128();
@@ -525,9 +525,9 @@ void vpx_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest,
   idct16x16_10_pass1(in, l);
 
   // Second 1-D inverse transform, performed per 8x16 block
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 16; i += 8) {
     int j;
-    idct16x16_10_pass2(l + 8 * i, in);
+    idct16x16_10_pass2(l + i, in);
 
     for (j = 0; j < 16; ++j) {
       write_buffer_8x1(dest + j * stride, in[j]);
@@ -1268,10 +1268,10 @@ void vpx_idct32x32_34_add_sse2(const tran_low_t *input, uint8_t *dest,
   col[29] = _mm_sub_epi16(stp1_2, stp1_29);
   col[30] = _mm_sub_epi16(stp1_1, stp1_30);
   col[31] = _mm_sub_epi16(stp1_0, stp1_31);
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 32; i += 8) {
     int j;
     // Transpose 32x8 block to 8x32 block
-    transpose_16bit_8x8(col + i * 8, in);
+    transpose_16bit_8x8(col + i, in);
     IDCT32_34
 
     // 2_D: Calculate the results and store them to destination.
@@ -1588,10 +1588,10 @@ static void load_buffer_8x32(const tran_low_t *input, __m128i *in) {
 void vpx_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
                                  int stride) {
   __m128i col[128], in[32];
-  int i, j;
+  int i;
 
   // rows
-  for (i = 0; i < 4; ++i) {
+  for (i = 0; i < 4 * 32; i += 32) {
     load_buffer_8x32(input, in);
     input += 32 << 3;
 
@@ -1601,17 +1601,16 @@ void vpx_idct32x32_1024_add_sse2(const tran_low_t *input, uint8_t *dest,
     transpose_16bit_8x8(in + 16, in + 16);
     transpose_16bit_8x8(in + 24, in + 24);
 
-    idct32_full_8x32(in, col + (i << 5));
+    idct32_full_8x32(in, col + i);
   }
 
   // columns
-  for (i = 0; i < 4; ++i) {
-    j = i << 3;
+  for (i = 0; i < 32; i += 8) {
     // Transpose 32x8 block to 8x32 block
-    transpose_16bit_8x8(col + j, in);
-    transpose_16bit_8x8(col + j + 32, in + 8);
-    transpose_16bit_8x8(col + j + 64, in + 16);
-    transpose_16bit_8x8(col + j + 96, in + 24);
+    transpose_16bit_8x8(col + i, in);
+    transpose_16bit_8x8(col + i + 32, in + 8);
+    transpose_16bit_8x8(col + i + 64, in + 16);
+    transpose_16bit_8x8(col + i + 96, in + 24);
 
     idct32_full_8x32(in, in);
     store_buffer_8x32(in, dest, stride);

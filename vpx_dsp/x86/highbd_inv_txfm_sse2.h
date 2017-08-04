@@ -233,10 +233,10 @@ static INLINE void highbd_idct_1_add_kernel(const tran_low_t *input,
   dc = _mm_set1_epi16(a1);
 
   for (i = 0; i < size; ++i) {
-    for (j = 0; j < (size >> 3); ++j) {
-      d = _mm_load_si128((const __m128i *)(&dest[j * 8]));
+    for (j = 0; j < size; j += 8) {
+      d = _mm_load_si128((const __m128i *)(&dest[j]));
       d = add_clamp(d, dc, bd);
-      _mm_store_si128((__m128i *)(&dest[j * 8]), d);
+      _mm_store_si128((__m128i *)(&dest[j]), d);
     }
     dest += stride;
   }

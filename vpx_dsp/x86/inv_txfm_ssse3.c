@@ -236,10 +236,10 @@ void vpx_idct32x32_34_add_ssse3(const tran_low_t *input, uint8_t *dest,
 
   // 1_D: Store 32 intermediate results for each 8x32 block.
   add_sub_butterfly(stp1, col, 32);
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 32; i += 8) {
     int j;
     // Transpose 32x8 block to 8x32 block
-    transpose_16bit_8x8(col + i * 8, in);
+    transpose_16bit_8x8(col + i, in);
     idct32_34_first_half(in, stp1);
     idct32_34_second_half(in, stp1);
 
