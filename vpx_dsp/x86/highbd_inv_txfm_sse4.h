@@ -29,9 +29,10 @@ static INLINE __m128i multiplication_round_shift_sse4_1(
   return pack_4(t0, t1);
 }
 
-static INLINE void highbd_multiplication_and_add_sse4_1(
-    const __m128i in0, const __m128i in1, const int c0, const int c1,
-    __m128i *const out0, __m128i *const out1) {
+static INLINE void highbd_butterfly_sse4_1(const __m128i in0, const __m128i in1,
+                                           const int c0, const int c1,
+                                           __m128i *const out0,
+                                           __m128i *const out1) {
   const __m128i pair_c0 = pair_set_epi32(4 * c0, 0);
   const __m128i pair_c1 = pair_set_epi32(4 * c1, 0);
   __m128i temp1[4], temp2[4];

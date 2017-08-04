@@ -28,8 +28,8 @@ static INLINE void highbd_idct4(__m128i *const io) {
   temp[0] = _mm_sub_epi32(io[0], io[2]);  // input[0] - input[2]
   extend_64bit(temp[0], temp);
   step[1] = multiplication_round_shift_sse4_1(temp, (int)cospi_16_64);
-  highbd_multiplication_and_add_sse4_1(io[1], io[3], (int)cospi_24_64,
-                                       (int)cospi_8_64, &step[2], &step[3]);
+  highbd_butterfly_sse4_1(io[1], io[3], (int)cospi_24_64, (int)cospi_8_64,
+                          &step[2], &step[3]);
 
   // stage 2
   io[0] = _mm_add_epi32(step[0], step[3]);  // step[0] + step[3]

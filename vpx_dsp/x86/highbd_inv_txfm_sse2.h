@@ -110,9 +110,10 @@ static INLINE __m128i multiplication_neg_round_shift_sse2(
 }
 
 // Note: c0 and c1 must be non negative.
-static INLINE void highbd_multiplication_and_add_sse2(
-    const __m128i in0, const __m128i in1, const int c0, const int c1,
-    __m128i *const out0, __m128i *const out1) {
+static INLINE void highbd_butterfly_sse2(const __m128i in0, const __m128i in1,
+                                         const int c0, const int c1,
+                                         __m128i *const out0,
+                                         __m128i *const out1) {
   const __m128i pair_c0 = pair_set_epi32(c0 << 2, 0);
   const __m128i pair_c1 = pair_set_epi32(c1 << 2, 0);
   __m128i temp1[4], temp2[4], sign1[2], sign2[2];
