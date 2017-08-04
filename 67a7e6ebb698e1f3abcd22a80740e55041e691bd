@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34b9eea6_dbc9bc16",
+        "filename": "vpx_dsp/x86/highbd_idct16x16_add_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-04T19:40:48Z",
+      "side": 1,
+      "message": "i is only used scaled by 8, no? this could just increment by 8 instead unless I\u0027m missing something",
+      "revId": "67a7e6ebb698e1f3abcd22a80740e55041e691bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65cdd00a_1234c43c",
+        "filename": "vpx_dsp/x86/highbd_idct16x16_add_sse4.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-04T19:40:48Z",
+      "side": 1,
+      "message": "here too for +\u003d 8, maybe elsewhere",
+      "revId": "67a7e6ebb698e1f3abcd22a80740e55041e691bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
