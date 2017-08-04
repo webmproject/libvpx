@@ -184,6 +184,27 @@ static INLINE void highbd_idct8x8_final_round(__m128i *const io) {
   io[6] = wraplow_16bit_shift5(io[6], io[14], _mm_set1_epi32(16));
   io[7] = wraplow_16bit_shift5(io[7], io[15], _mm_set1_epi32(16));
 }
+
+static INLINE void highbd_idct16_4col_stage7(const __m128i *const in,
+                                             __m128i *const out) {
+  out[0] = _mm_add_epi32(in[0], in[15]);
+  out[1] = _mm_add_epi32(in[1], in[14]);
+  out[2] = _mm_add_epi32(in[2], in[13]);
+  out[3] = _mm_add_epi32(in[3], in[12]);
+  out[4] = _mm_add_epi32(in[4], in[11]);
+  out[5] = _mm_add_epi32(in[5], in[10]);
+  out[6] = _mm_add_epi32(in[6], in[9]);
+  out[7] = _mm_add_epi32(in[7], in[8]);
+  out[8] = _mm_sub_epi32(in[7], in[8]);
+  out[9] = _mm_sub_epi32(in[6], in[9]);
+  out[10] = _mm_sub_epi32(in[5], in[10]);
+  out[11] = _mm_sub_epi32(in[4], in[11]);
+  out[12] = _mm_sub_epi32(in[3], in[12]);
+  out[13] = _mm_sub_epi32(in[2], in[13]);
+  out[14] = _mm_sub_epi32(in[1], in[14]);
+  out[15] = _mm_sub_epi32(in[0], in[15]);
+}
+
 static INLINE __m128i add_clamp(const __m128i in0, const __m128i in1,
                                 const int bd) {
   const __m128i zero = _mm_set1_epi16(0);
@@ -221,9 +242,17 @@ static INLINE void highbd_idct_1_add_kernel(const tran_low_t *input,
   }
 }
 
-static INLINE void recon_and_store_4_dual(const __m128i in,
-                                          uint16_t *const dest,
-                                          const int stride, const int bd) {
+static INLINE void recon_and_store_4(const __m128i in, uint16_t *const dest,
+                                     const int bd) {
+  __m128i d;
+
+  d = _mm_loadl_epi64((const __m128i *)dest);
+  d = add_clamp(d, in, bd);
+  _mm_storel_epi64((__m128i *)dest, d);
+}
+
+static INLINE void recon_and_store_4x2(const __m128i in, uint16_t *const dest,
+                                       const int stride, const int bd) {
   __m128i d;
 
   d = _mm_loadl_epi64((const __m128i *)(dest + 0 * stride));
@@ -234,16 +263,15 @@ static INLINE void recon_and_store_4_dual(const __m128i in,
   _mm_storeh_pi((__m64 *)(dest + 1 * stride), _mm_castsi128_ps(d));
 }
 
-static INLINE void recon_and_store_4(const __m128i *const in, uint16_t *dest,
-                                     const int stride, const int bd) {
-  recon_and_store_4_dual(in[0], dest, stride, bd);
+static INLINE void recon_and_store_4x4(const __m128i *const in, uint16_t *dest,
+                                       const int stride, const int bd) {
+  recon_and_store_4x2(in[0], dest, stride, bd);
   dest += 2 * stride;
-  recon_and_store_4_dual(in[1], dest, stride, bd);
+  recon_and_store_4x2(in[1], dest, stride, bd);
 }
 
-static INLINE void recon_and_store_8_kernel(const __m128i in,
-                                            uint16_t **const dest,
-                                            const int stride, const int bd) {
+static INLINE void recon_and_store_8(const __m128i in, uint16_t **const dest,
+                                     const int stride, const int bd) {
   __m128i d;
 
   d = _mm_load_si128((const __m128i *)(*dest));
@@ -252,16 +280,43 @@ static INLINE void recon_and_store_8_kernel(const __m128i in,
   *dest += stride;
 }
 
-static INLINE void recon_and_store_8(const __m128i *const in, uint16_t *dest,
-                                     const int stride, const int bd) {
-  recon_and_store_8_kernel(in[0], &dest, stride, bd);
-  recon_and_store_8_kernel(in[1], &dest, stride, bd);
-  recon_and_store_8_kernel(in[2], &dest, stride, bd);
-  recon_and_store_8_kernel(in[3], &dest, stride, bd);
-  recon_and_store_8_kernel(in[4], &dest, stride, bd);
-  recon_and_store_8_kernel(in[5], &dest, stride, bd);
-  recon_and_store_8_kernel(in[6], &dest, stride, bd);
-  recon_and_store_8_kernel(in[7], &dest, stride, bd);
+static INLINE void recon_and_store_8x8(const __m128i *const in, uint16_t *dest,
+                                       const int stride, const int bd) {
+  recon_and_store_8(in[0], &dest, stride, bd);
+  recon_and_store_8(in[1], &dest, stride, bd);
+  recon_and_store_8(in[2], &dest, stride, bd);
+  recon_and_store_8(in[3], &dest, stride, bd);
+  recon_and_store_8(in[4], &dest, stride, bd);
+  recon_and_store_8(in[5], &dest, stride, bd);
+  recon_and_store_8(in[6], &dest, stride, bd);
+  recon_and_store_8(in[7], &dest, stride, bd);
+}
+
+static INLINE __m128i load_pack_8_32bit(const tran_low_t *const input) {
+  const __m128i t0 = _mm_load_si128((const __m128i *)(input + 0));
+  const __m128i t1 = _mm_load_si128((const __m128i *)(input + 4));
+  return _mm_packs_epi32(t0, t1);
+}
+
+static INLINE void highbd_write_buffer_8(uint16_t *dest, const __m128i in,
+                                         const int bd) {
+  const __m128i final_rounding = _mm_set1_epi16(1 << 5);
+  __m128i out;
+
+  out = _mm_adds_epi16(in, final_rounding);
+  out = _mm_srai_epi16(out, 6);
+  recon_and_store_8(out, &dest, 0, bd);
+}
+
+static INLINE void highbd_write_buffer_4(uint16_t *const dest, const __m128i in,
+                                         const int bd) {
+  const __m128i final_rounding = _mm_set1_epi32(1 << 5);
+  __m128i out;
+
+  out = _mm_add_epi32(in, final_rounding);
+  out = _mm_srai_epi32(out, 6);
+  out = _mm_packs_epi32(out, out);
+  recon_and_store_4(out, dest, bd);
 }
 
 #endif  // VPX_DSP_X86_HIGHBD_INV_TXFM_SSE2_H_

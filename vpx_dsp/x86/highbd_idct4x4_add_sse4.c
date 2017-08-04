@@ -65,5 +65,5 @@ void vpx_highbd_idct4x4_16_add_sse4_1(const tran_low_t *input, uint16_t *dest,
     io[1] = wraplow_16bit_shift4(io[2], io[3], _mm_set1_epi32(8));
   }
 
-  recon_and_store_4(io, dest, stride, bd);
+  recon_and_store_4x4(io, dest, stride, bd);
 }

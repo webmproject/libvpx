@@ -178,7 +178,7 @@ void vpx_highbd_idct8x8_64_add_sse4_1(const tran_low_t *input, uint16_t *dest,
     highbd_idct8x8_final_round(io);
   }
 
-  recon_and_store_8(io, dest, stride, bd);
+  recon_and_store_8x8(io, dest, stride, bd);
 }
 
 void vpx_highbd_idct8x8_12_add_sse4_1(const tran_low_t *input, uint16_t *dest,
@@ -221,5 +221,5 @@ void vpx_highbd_idct8x8_12_add_sse4_1(const tran_low_t *input, uint16_t *dest,
     highbd_idct8x8_final_round(io);
   }
 
-  recon_and_store_8(io, dest, stride, bd);
+  recon_and_store_8x8(io, dest, stride, bd);
 }
