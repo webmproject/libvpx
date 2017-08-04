@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c06afd42_3cf1dcbf",
+        "filename": "vpx_dsp/x86/highbd_inv_txfm_sse2.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-04T01:07:05Z",
+      "side": 1,
+      "message": "that could be asserted throughout these functions instead. maybe in a future change",
+      "revId": "563d58ab84452c7060176ead75d3a5de710e3ae4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
