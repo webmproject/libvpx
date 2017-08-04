@@ -34,6 +34,24 @@
       "revId": "666c543f7bf81f2d4bbc3e1ba64569335c5b9d22",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e90a3f05_c32885a5",
+        "filename": "vpx_dsp/ppc/inv_txfm_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-04T18:07:35Z",
+      "side": 1,
+      "message": "\u003e Depending on the compiler, using arrays may end up with slower code generated, I\u0027d avoid it.\n\nOK. I hadn\u0027t seen an issue on x86 with recent compilers.",
+      "parentUuid": "15b77060_d8aebf59",
+      "revId": "666c543f7bf81f2d4bbc3e1ba64569335c5b9d22",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
