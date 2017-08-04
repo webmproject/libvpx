@@ -1001,20 +1001,20 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
 
 #define IDCT32_34                                                              \
   /* Stage1 */                                                                 \
-  multiplication_and_add(in[1], zero, (int)cospi_31_64, (int)cospi_1_64,       \
-                         &stp1_16, &stp1_31);                                  \
-  multiplication_and_add(zero, in[7], (int)cospi_7_64, (int)cospi_25_64,       \
-                         &stp1_19, &stp1_28);                                  \
-  multiplication_and_add(in[5], zero, (int)cospi_27_64, (int)cospi_5_64,       \
-                         &stp1_20, &stp1_27);                                  \
-  multiplication_and_add(zero, in[3], (int)cospi_3_64, (int)cospi_29_64,       \
-                         &stp1_23, &stp1_24);                                  \
+  butterfly(in[1], zero, (int)cospi_31_64, (int)cospi_1_64, &stp1_16,          \
+            &stp1_31);                                                         \
+  butterfly(zero, in[7], (int)cospi_7_64, (int)cospi_25_64, &stp1_19,          \
+            &stp1_28);                                                         \
+  butterfly(in[5], zero, (int)cospi_27_64, (int)cospi_5_64, &stp1_20,          \
+            &stp1_27);                                                         \
+  butterfly(zero, in[3], (int)cospi_3_64, (int)cospi_29_64, &stp1_23,          \
+            &stp1_24);                                                         \
                                                                                \
   /* Stage2 */                                                                 \
-  multiplication_and_add(in[2], zero, (int)cospi_30_64, (int)cospi_2_64,       \
-                         &stp2_8, &stp2_15);                                   \
-  multiplication_and_add(zero, in[6], (int)cospi_6_64, (int)cospi_26_64,       \
-                         &stp2_11, &stp2_12);                                  \
+  butterfly(in[2], zero, (int)cospi_30_64, (int)cospi_2_64, &stp2_8,           \
+            &stp2_15);                                                         \
+  butterfly(zero, in[6], (int)cospi_6_64, (int)cospi_26_64, &stp2_11,          \
+            &stp2_12);                                                         \
                                                                                \
   stp2_16 = stp1_16;                                                           \
   stp2_19 = stp1_19;                                                           \
@@ -1029,23 +1029,22 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp2_31 = stp1_31;                                                           \
                                                                                \
   /* Stage3 */                                                                 \
-  multiplication_and_add(in[4], zero, (int)cospi_28_64, (int)cospi_4_64,       \
-                         &stp1_4, &stp1_7);                                    \
+  butterfly(in[4], zero, (int)cospi_28_64, (int)cospi_4_64, &stp1_4, &stp1_7); \
                                                                                \
   stp1_8 = stp2_8;                                                             \
   stp1_11 = stp2_11;                                                           \
   stp1_12 = stp2_12;                                                           \
   stp1_15 = stp2_15;                                                           \
                                                                                \
-  multiplication_and_add(stp1_31, stp1_16, (int)cospi_28_64, (int)cospi_4_64,  \
-                         &stp1_17, &stp1_30);                                  \
-  multiplication_and_add(stp1_19, stp1_28, -(int)cospi_4_64,                   \
-                         -(int)cospi_28_64, &stp1_29, &stp1_18);               \
+  butterfly(stp1_31, stp1_16, (int)cospi_28_64, (int)cospi_4_64, &stp1_17,     \
+            &stp1_30);                                                         \
+  butterfly(stp1_19, stp1_28, -(int)cospi_4_64, -(int)cospi_28_64, &stp1_29,   \
+            &stp1_18);                                                         \
                                                                                \
-  multiplication_and_add(stp1_27, stp1_20, (int)cospi_12_64, (int)cospi_20_64, \
-                         &stp1_21, &stp1_26);                                  \
-  multiplication_and_add(stp1_23, stp1_24, -(int)cospi_20_64,                  \
-                         -(int)cospi_12_64, &stp1_25, &stp1_22);               \
+  butterfly(stp1_27, stp1_20, (int)cospi_12_64, (int)cospi_20_64, &stp1_21,    \
+            &stp1_26);                                                         \
+  butterfly(stp1_23, stp1_24, -(int)cospi_20_64, -(int)cospi_12_64, &stp1_25,  \
+            &stp1_22);                                                         \
                                                                                \
   stp1_16 = stp2_16;                                                           \
   stp1_31 = stp2_31;                                                           \
@@ -1057,18 +1056,18 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp1_28 = stp2_28;                                                           \
                                                                                \
   /* Stage4 */                                                                 \
-  multiplication_and_add(in[0], zero, (int)cospi_16_64, (int)cospi_16_64,      \
-                         &stp2_1, &stp2_0);                                    \
+  butterfly(in[0], zero, (int)cospi_16_64, (int)cospi_16_64, &stp2_1,          \
+            &stp2_0);                                                          \
                                                                                \
   stp2_4 = stp1_4;                                                             \
   stp2_5 = stp1_4;                                                             \
   stp2_6 = stp1_7;                                                             \
   stp2_7 = stp1_7;                                                             \
                                                                                \
-  multiplication_and_add(stp2_15, stp2_8, (int)cospi_24_64, (int)cospi_8_64,   \
-                         &stp2_9, &stp2_14);                                   \
-  multiplication_and_add(stp2_11, stp2_12, -(int)cospi_8_64,                   \
-                         -(int)cospi_24_64, &stp2_13, &stp2_10);               \
+  butterfly(stp2_15, stp2_8, (int)cospi_24_64, (int)cospi_8_64, &stp2_9,       \
+            &stp2_14);                                                         \
+  butterfly(stp2_11, stp2_12, -(int)cospi_8_64, -(int)cospi_24_64, &stp2_13,   \
+            &stp2_10);                                                         \
                                                                                \
   stp2_8 = stp1_8;                                                             \
   stp2_15 = stp1_15;                                                           \
@@ -1098,8 +1097,8 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp1_1 = stp2_1;                                                             \
   stp1_2 = stp2_1;                                                             \
   stp1_3 = stp2_0;                                                             \
-  multiplication_and_add(stp2_6, stp2_5, (int)cospi_16_64, (int)cospi_16_64,   \
-                         &stp1_5, &stp1_6);                                    \
+  butterfly(stp2_6, stp2_5, (int)cospi_16_64, (int)cospi_16_64, &stp1_5,       \
+            &stp1_6);                                                          \
                                                                                \
   stp1_4 = stp2_4;                                                             \
   stp1_7 = stp2_7;                                                             \
@@ -1116,14 +1115,14 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp1_16 = stp2_16;                                                           \
   stp1_17 = stp2_17;                                                           \
                                                                                \
-  multiplication_and_add(stp2_29, stp2_18, (int)cospi_24_64, (int)cospi_8_64,  \
-                         &stp1_18, &stp1_29);                                  \
-  multiplication_and_add(stp2_28, stp2_19, (int)cospi_24_64, (int)cospi_8_64,  \
-                         &stp1_19, &stp1_28);                                  \
-  multiplication_and_add(stp2_20, stp2_27, -(int)cospi_8_64,                   \
-                         -(int)cospi_24_64, &stp1_27, &stp1_20);               \
-  multiplication_and_add(stp2_21, stp2_26, -(int)cospi_8_64,                   \
-                         -(int)cospi_24_64, &stp1_26, &stp1_21);               \
+  butterfly(stp2_29, stp2_18, (int)cospi_24_64, (int)cospi_8_64, &stp1_18,     \
+            &stp1_29);                                                         \
+  butterfly(stp2_28, stp2_19, (int)cospi_24_64, (int)cospi_8_64, &stp1_19,     \
+            &stp1_28);                                                         \
+  butterfly(stp2_20, stp2_27, -(int)cospi_8_64, -(int)cospi_24_64, &stp1_27,   \
+            &stp1_20);                                                         \
+  butterfly(stp2_21, stp2_26, -(int)cospi_8_64, -(int)cospi_24_64, &stp1_26,   \
+            &stp1_21);                                                         \
                                                                                \
   stp1_22 = stp2_22;                                                           \
   stp1_23 = stp2_23;                                                           \
@@ -1147,10 +1146,10 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp2_14 = stp1_14;                                                           \
   stp2_15 = stp1_15;                                                           \
                                                                                \
-  multiplication_and_add(stp1_13, stp1_10, (int)cospi_16_64, (int)cospi_16_64, \
-                         &stp2_10, &stp2_13);                                  \
-  multiplication_and_add(stp1_12, stp1_11, (int)cospi_16_64, (int)cospi_16_64, \
-                         &stp2_11, &stp2_12);                                  \
+  butterfly(stp1_13, stp1_10, (int)cospi_16_64, (int)cospi_16_64, &stp2_10,    \
+            &stp2_13);                                                         \
+  butterfly(stp1_12, stp1_11, (int)cospi_16_64, (int)cospi_16_64, &stp2_11,    \
+            &stp2_12);                                                         \
                                                                                \
   stp2_16 = _mm_add_epi16(stp1_16, stp1_23);                                   \
   stp2_17 = _mm_add_epi16(stp1_17, stp1_22);                                   \
@@ -1193,14 +1192,14 @@ void iadst16_sse2(__m128i *in0, __m128i *in1) {
   stp1_18 = stp2_18;                                                           \
   stp1_19 = stp2_19;                                                           \
                                                                                \
-  multiplication_and_add(stp2_27, stp2_20, (int)cospi_16_64, (int)cospi_16_64, \
-                         &stp1_20, &stp1_27);                                  \
-  multiplication_and_add(stp2_26, stp2_21, (int)cospi_16_64, (int)cospi_16_64, \
-                         &stp1_21, &stp1_26);                                  \
-  multiplication_and_add(stp2_25, stp2_22, (int)cospi_16_64, (int)cospi_16_64, \
-                         &stp1_22, &stp1_25);                                  \
-  multiplication_and_add(stp2_24, stp2_23, (int)cospi_16_64, (int)cospi_16_64, \
-                         &stp1_23, &stp1_24);                                  \
+  butterfly(stp2_27, stp2_20, (int)cospi_16_64, (int)cospi_16_64, &stp1_20,    \
+            &stp1_27);                                                         \
+  butterfly(stp2_26, stp2_21, (int)cospi_16_64, (int)cospi_16_64, &stp1_21,    \
+            &stp1_26);                                                         \
+  butterfly(stp2_25, stp2_22, (int)cospi_16_64, (int)cospi_16_64, &stp1_22,    \
+            &stp1_25);                                                         \
+  butterfly(stp2_24, stp2_23, (int)cospi_16_64, (int)cospi_16_64, &stp1_23,    \
+            &stp1_24);                                                         \
                                                                                \
   stp1_28 = stp2_28;                                                           \
   stp1_29 = stp2_29;                                                           \
