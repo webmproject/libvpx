@@ -52,6 +52,24 @@
       "revId": "5611e6cb1cf8abbc97bd62dd2d5c4ac60c26e234",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77884c25_a76f31ce",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-04T00:50:27Z",
+      "side": 1,
+      "message": "\u003e Builds OK in VS 2013\n\nhttps://chromium-review.googlesource.com/c/31536",
+      "parentUuid": "2ce38f96_6d44c60b",
+      "revId": "5611e6cb1cf8abbc97bd62dd2d5c4ac60c26e234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
