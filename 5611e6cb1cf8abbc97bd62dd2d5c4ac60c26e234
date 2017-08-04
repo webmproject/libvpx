@@ -70,6 +70,24 @@
       "revId": "5611e6cb1cf8abbc97bd62dd2d5c4ac60c26e234",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "811868b7_7b52fb8e",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-04T19:41:23Z",
+      "side": 1,
+      "message": "Yeah the 32 bit builds spews a warning and then the binary segfaults on the aligned loads.",
+      "parentUuid": "77884c25_a76f31ce",
+      "revId": "5611e6cb1cf8abbc97bd62dd2d5c4ac60c26e234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
