@@ -90,6 +90,8 @@ static INLINE void multiplication_and_add(const __m128i in0, const __m128i in1,
   *res1 = idct_calc_wraplow_sse2(lo, hi, cst1);
 }
 
+#define butterfly multiplication_and_add
+
 // Functions to allow 8 bit optimisations to be used when profile 0 is used with
 // highbitdepth enabled
 static INLINE __m128i load_input_data4(const tran_low_t *data) {
@@ -306,47 +308,6 @@ static INLINE void add_sub_butterfly(const __m128i *in, __m128i *out,
     out[bound - i] = _mm_sub_epi16(in[i], in[bound - i]);
     i++;
   }
-}
-
-#define BUTTERFLY_PAIR(x0, x1, co0, co1)         \
-  do {                                           \
-    tmp0 = _mm_madd_epi16(x0, co0);              \
-    tmp1 = _mm_madd_epi16(x1, co0);              \
-    tmp2 = _mm_madd_epi16(x0, co1);              \
-    tmp3 = _mm_madd_epi16(x1, co1);              \
-    tmp0 = _mm_add_epi32(tmp0, rounding);        \
-    tmp1 = _mm_add_epi32(tmp1, rounding);        \
-    tmp2 = _mm_add_epi32(tmp2, rounding);        \
-    tmp3 = _mm_add_epi32(tmp3, rounding);        \
-    tmp0 = _mm_srai_epi32(tmp0, DCT_CONST_BITS); \
-    tmp1 = _mm_srai_epi32(tmp1, DCT_CONST_BITS); \
-    tmp2 = _mm_srai_epi32(tmp2, DCT_CONST_BITS); \
-    tmp3 = _mm_srai_epi32(tmp3, DCT_CONST_BITS); \
-  } while (0)
-
-static INLINE void butterfly(const __m128i *x0, const __m128i *x1,
-                             const __m128i *c0, const __m128i *c1, __m128i *y0,
-                             __m128i *y1) {
-  __m128i tmp0, tmp1, tmp2, tmp3, u0, u1;
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
-
-  u0 = _mm_unpacklo_epi16(*x0, *x1);
-  u1 = _mm_unpackhi_epi16(*x0, *x1);
-  BUTTERFLY_PAIR(u0, u1, *c0, *c1);
-  *y0 = _mm_packs_epi32(tmp0, tmp1);
-  *y1 = _mm_packs_epi32(tmp2, tmp3);
-}
-
-static INLINE void butterfly_self(__m128i *x0, __m128i *x1, const __m128i *c0,
-                                  const __m128i *c1) {
-  __m128i tmp0, tmp1, tmp2, tmp3, u0, u1;
-  const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
-
-  u0 = _mm_unpacklo_epi16(*x0, *x1);
-  u1 = _mm_unpackhi_epi16(*x0, *x1);
-  BUTTERFLY_PAIR(u0, u1, *c0, *c1);
-  *x0 = _mm_packs_epi32(tmp0, tmp1);
-  *x1 = _mm_packs_epi32(tmp2, tmp3);
 }
 
 static INLINE void idct8(const __m128i *const in /*in[8]*/,
