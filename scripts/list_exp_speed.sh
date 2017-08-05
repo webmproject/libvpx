@@ -12,36 +12,17 @@
 #set -x
 
 if [ "$#" -ne 1 ]; then
-  root_dir=~/Dev/av1k
+  root_dir=~/Dev/av1w
 else
   root_dir=$1
 fi
 
 code_dir=$root_dir/aom
 build_dir=$root_dir/release
-test_dir=~/Dev/field
+test_dir=~/Dev/weekly
 script_dir=~/Dev/sandbox/libvpx/scripts
 
-# video=~/Dev/samples/videos/yaowu/soccer_cif.y4m
-# wi=352
-# he=288
-# frames=5
-# bitrate=500
-# fps="30/1"
-
-# video=~/Dev/samples/videos/speed-set/touchdown_pass_480p.y4m
-# wi=854
-# he=480
-# frames=30
-# bitrate=2400
-# fps="30000/1001"
-
-video=~/Dev/samples/videos/speed-set/BasketballDrive_1920x1080_50.y4m
-wi=1920
-he=1080
-frames=75
-bitrate=4000
-fps="50/1"
+. $script_dir/video_sequence_weekly.sh
 
 # General options
 bs=bs
@@ -61,9 +42,8 @@ verbose=
 
 profile=0
 rm *.txt
-# ncobmc one_sided_compound chroma_sub8x8 rect_tx global_motion ext_tx cdef ext_intra ext_refs dual_filter motion_var warped_motion var_tx tx64x64 supertx ext_partition tpl_mv unpoison_partition_ctx wedge adapt_scan ans chroma_2x2 compound_segment ext_inter ext_tile filter_intra intrabc intra_interp loop_restoration lv_map q_adapt_probs compound_round convolve_round interintra mv_compound txk_sel ext_inter ec_adapt filter_7bit reference_buffer delta_q tile_groups ext_delta_q loopfiltering_across_tiles ec_smallmul smooth_hv alt_intra
 
-for exp_tool in experimental
+for exp_tool in experimental chroma_sub8x8 filter_7bit reference_buffer delta_q rect_tx global_motion ext_tx cdef ext_intra mv_compress ext_refs dual_filter motion_var warped_motion ext_delta_q loopfiltering_across_tiles ec_smallmul var_tx ext_inter wedge compound_segment interintra one_sided_compound smooth_hv parallel_deblocking rect_intra_pred convolve_round
 
 do
   cd $build_dir
