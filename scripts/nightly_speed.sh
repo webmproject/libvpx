@@ -20,15 +20,18 @@
 #   1) profile=2
 #   2) bitdepth="--bit-depth=10/12"
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
   root_dir=~/Dev/av1d
   profile=0
   pdfps=1
+  html_log_file=log.html  
 else
   root_dir=$1
   profile=$2
   pdfps=$3
+  html_log_file=$4
 fi
+log_path=~/Dev/log
 
 if [ "$profile" == "2" ]; then
   bitdepth="--bit-depth=10"
@@ -103,3 +106,24 @@ percent=${percent:0:5}
 echo -e '\t'"Enc fps   Dec fps    PSNR"'\t\t\t\t\t\t\t'"Enc status   Dec status   Speedup(%)"
 echo -e '\t'$efps"        "$dfps"     "$psnr'\t'$eflag"            "$dflag"           "$percent
 printf "\n"
+
+# Output a html log file for email
+echo "<p> AV1: $(basename $video), bitrate=$bitrate profile=$profile frames=$frames </p>" >> $log_path/$html_log_file
+echo "<table style=\"width:100%\">" >> $log_path/$html_log_file
+echo "  <tr>" >> $log_path/$html_log_file
+echo "    <th>Enc fps</th>" >> $log_path/$html_log_file
+echo "    <th>Dec fps</th>" >> $log_path/$html_log_file
+echo "    <th>Dec Speedup(%)</th>" >> $log_path/$html_log_file
+echo "    <th>Enc Status</th>" >> $log_path/$html_log_file
+echo "    <th>Dec Status</th>" >> $log_path/$html_log_file
+echo "    <th>PSNR</th>" >> $log_path/$html_log_file
+echo " </tr>" >> $log_path/$html_log_file
+echo " <tr>" >> $log_path/$html_log_file
+echo "    <td>$efps</td>" >> $log_path/$html_log_file
+echo "    <td>$dfps</td>" >> $log_path/$html_log_file
+echo "   <td>$percent</td>" >> $log_path/$html_log_file
+echo "    <td>$eflag</td>" >> $log_path/$html_log_file
+echo "    <td>$dflag</td>" >> $log_path/$html_log_file
+echo "    <td>$psnr</td>" >> $log_path/$html_log_file
+echo "  </tr>" >> $log_path/$html_log_file
+echo "</table>" >> $log_path/$html_log_file
