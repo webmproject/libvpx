@@ -595,7 +595,6 @@ if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
   specialize qw/vpx_idct16x16_1_add neon sse2/;
   specialize qw/vpx_idct32x32_1024_add neon sse2/;
   specialize qw/vpx_idct32x32_135_add neon sse2 ssse3/;
-  $vpx_idct32x32_135_add_sse2=vpx_idct32x32_1024_add_sse2;
   specialize qw/vpx_idct32x32_34_add neon sse2 ssse3/;
   specialize qw/vpx_idct32x32_1_add neon sse2/;
 

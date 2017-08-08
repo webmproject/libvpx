@@ -720,6 +720,8 @@ const PartialInvTxfmParam sse2_partial_idct_tests[] = {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1024_add_c>,
              &wrapper<vpx_idct32x32_1024_add_sse2>, TX_32X32, 1024, 8, 1),
+  make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_135_add_c>,
+             &wrapper<vpx_idct32x32_135_add_sse2>, TX_32X32, 135, 8, 1),
   make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_34_add_c>,
              &wrapper<vpx_idct32x32_34_add_sse2>, TX_32X32, 34, 8, 1),
   make_tuple(&vpx_fdct32x32_c, &wrapper<vpx_idct32x32_1_add_c>,
