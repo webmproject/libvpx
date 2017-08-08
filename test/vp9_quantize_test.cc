@@ -358,15 +358,18 @@ INSTANTIATE_TEST_CASE_P(DISABLED_AVX, VP9QuantizeTest,
 
 // TODO(webm:1448): dqcoeff is not handled correctly in HBD builds.
 #if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(NEON, VP9QuantizeTest,
-                        ::testing::Values(make_tuple(&vpx_quantize_b_neon,
-                                                     &vpx_quantize_b_c,
-                                                     VPX_BITS_8, 16)));
+INSTANTIATE_TEST_CASE_P(
+    NEON, VP9QuantizeTest,
+    ::testing::Values(make_tuple(&vpx_quantize_b_neon, &vpx_quantize_b_c,
+                                 VPX_BITS_8, 16),
+                      make_tuple(&vpx_quantize_b_32x32_neon,
+                                 &vpx_quantize_b_32x32_c, VPX_BITS_8, 32)));
 #endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH
 
 // Only useful to compare "Speed" test results.
-INSTANTIATE_TEST_CASE_P(DISABLED_C, VP9QuantizeTest,
-                        ::testing::Values(make_tuple(&vpx_quantize_b_c,
-                                                     &vpx_quantize_b_c,
-                                                     VPX_BITS_8, 16)));
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_C, VP9QuantizeTest,
+    ::testing::Values(
+        make_tuple(&vpx_quantize_b_c, &vpx_quantize_b_c, VPX_BITS_8, 16),
+        make_tuple(&vpx_quantize_b_c, &vpx_quantize_b_c, VPX_BITS_8, 32)));
 }  // namespace
