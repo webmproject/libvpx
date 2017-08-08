@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c193721a_c0da13fd",
+        "filename": "vpx_dsp/x86/quantize_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-08T00:15:57Z",
+      "side": 1,
+      "message": "this is:\n      store_tran_low(zero, dqcoeff_ptr + n_coeffs);\nin sse2",
+      "revId": "40c96abc6a84ff1a14e67cbdc47e4c56c3f8cce7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "113c4100_4b1c6cba",
+        "filename": "vpx_dsp/x86/quantize_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-08T00:15:57Z",
+      "side": 1,
+      "message": "\u0027one\u0027?",
+      "range": {
+        "startLine": 46,
+        "startChar": 18,
+        "endLine": 46,
+        "endChar": 22
+      },
+      "revId": "40c96abc6a84ff1a14e67cbdc47e4c56c3f8cce7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52ece66b_c7cc93f0",
+        "filename": "vpx_dsp/x86/quantize_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-08T00:15:57Z",
+      "side": 1,
+      "message": "why the double scope?",
+      "revId": "40c96abc6a84ff1a14e67cbdc47e4c56c3f8cce7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
