@@ -2126,7 +2126,7 @@ static int calculate_boost_bits(int frame_count, int boost,
   int allocation_chunks;
 
   // return 0 for invalid inputs (could arise e.g. through rounding errors)
-  if (!boost || (total_group_bits <= 0) || (frame_count <= 0)) return 0;
+  if (!boost || (total_group_bits <= 0) || (frame_count < 0)) return 0;
 
   allocation_chunks = (frame_count * 100) + boost;
 
