@@ -141,7 +141,9 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    const int skip_block = i == 0;
+    // Test skip block for the first three iterations to catch all the different
+    // sizes.
+    const int skip_block = i < 3;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = (TX_SIZE)(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -195,7 +197,7 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    int skip_block = i == 0;
+    int skip_block = i < 3;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = (TX_SIZE)(i % 3);  // TX_4X4, TX_8X8 TX_16X16
