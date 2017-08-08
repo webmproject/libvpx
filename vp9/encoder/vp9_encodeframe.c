@@ -3650,6 +3650,9 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       !force_horz_split && xss <= yss && bsize >= BLOCK_8X8;
   (void)*tp_orig;
 
+  // Avoid checking for rectangular partitions for speed >= 6.
+  if (cpi->oxcf.speed >= 6) do_rect = 0;
+
   assert(num_8x8_blocks_wide_lookup[bsize] ==
          num_8x8_blocks_high_lookup[bsize]);
 
@@ -3877,6 +3880,8 @@ static void nonrd_select_partition(VP9_COMP *cpi, ThreadData *td,
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
   RD_COST this_rdc;
+  BLOCK_SIZE subsize_ref =
+      (cpi->sf.adapt_partition_source_sad) ? BLOCK_8X8 : BLOCK_16X16;
 
   vp9_rd_cost_reset(&this_rdc);
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) return;
@@ -3890,7 +3895,7 @@ static void nonrd_select_partition(VP9_COMP *cpi, ThreadData *td,
     nonrd_pick_partition(cpi, td, tile_data, tp, mi_row, mi_col, bsize, rd_cost,
                          0, INT64_MAX, pc_tree);
   } else if (bsize == BLOCK_32X32 && partition != PARTITION_NONE &&
-             subsize >= BLOCK_16X16) {
+             subsize >= subsize_ref) {
     x->max_partition_size = BLOCK_32X32;
     x->min_partition_size = BLOCK_8X8;
     nonrd_pick_partition(cpi, td, tile_data, tp, mi_row, mi_col, bsize, rd_cost,
