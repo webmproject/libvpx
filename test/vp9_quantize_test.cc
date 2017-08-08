@@ -151,7 +151,7 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
     const TX_TYPE tx_type = (TX_TYPE)((i >> 2) % 3);
     const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
     const int count = (4 << sz) * (4 << sz);  // 16, 64, 256
-    coeff.Set(&rnd, 0, max_value_);
+    coeff.Set(&rnd, -max_value_, max_value_);
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_);
 
@@ -207,8 +207,10 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
     int count = (4 << sz) * (4 << sz);  // 16, 64, 256
     // Two random entries
     coeff.Set(0);
-    coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
-    coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
+    coeff.TopLeftPixel()[rnd(count)] =
+        rnd.RandRange(max_value_ * 2) - max_value_;
+    coeff.TopLeftPixel()[rnd(count)] =
+        rnd.RandRange(max_value_ * 2) - max_value_;
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_);
 
