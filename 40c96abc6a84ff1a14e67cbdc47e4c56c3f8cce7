@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "50c5a309_53fd8b02",
+        "filename": "vpx_dsp/x86/quantize_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-08T19:23:14Z",
+      "side": 1,
+      "message": "woops, huge miss on my part.\n\nsse2 is forced to load and adjust all of the ptrs before using them. it seemed a lot better this way around.",
+      "parentUuid": "c193721a_c0da13fd",
+      "revId": "40c96abc6a84ff1a14e67cbdc47e4c56c3f8cce7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "113c4100_4b1c6cba",
         "filename": "vpx_dsp/x86/quantize_ssse3.c",
         "patchSetId": 3
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "017e6427_c7520863",
+        "filename": "vpx_dsp/x86/quantize_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-08T19:23:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "113c4100_4b1c6cba",
+      "range": {
+        "startLine": 46,
+        "startChar": 18,
+        "endLine": 46,
+        "endChar": 22
+      },
+      "revId": "40c96abc6a84ff1a14e67cbdc47e4c56c3f8cce7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "52ece66b_c7cc93f0",
         "filename": "vpx_dsp/x86/quantize_ssse3.c",
         "patchSetId": 3
@@ -53,6 +95,24 @@
       "writtenOn": "2017-08-08T00:15:57Z",
       "side": 1,
       "message": "why the double scope?",
+      "revId": "40c96abc6a84ff1a14e67cbdc47e4c56c3f8cce7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb900e62_a4b724f0",
+        "filename": "vpx_dsp/x86/quantize_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-08T19:23:14Z",
+      "side": 1,
+      "message": "great question",
+      "parentUuid": "52ece66b_c7cc93f0",
       "revId": "40c96abc6a84ff1a14e67cbdc47e4c56c3f8cce7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
