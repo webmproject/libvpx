@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b30f247c_2555e805",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-09T15:14:57Z",
+      "side": 1,
+      "message": "This should describe the issue the patch fixes",
+      "revId": "8dac8d8acbfdc9f0eff754a4f59fdcc3784b4035",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3dbb0a7e_7ae6b3fb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-09T15:14:57Z",
+      "side": 1,
+      "message": "BUG\u003dwebm:1456",
+      "revId": "8dac8d8acbfdc9f0eff754a4f59fdcc3784b4035",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
