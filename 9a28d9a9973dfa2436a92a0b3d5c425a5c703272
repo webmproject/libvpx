@@ -70,6 +70,30 @@
       "revId": "9a28d9a9973dfa2436a92a0b3d5c425a5c703272",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ddfa1d7_a7b41cf8",
+        "filename": "test/acm_random.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-09T18:15:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8fcde5cb_78de8fa0",
+      "range": {
+        "startLine": 49,
+        "startChar": 7,
+        "endLine": 49,
+        "endChar": 42
+      },
+      "revId": "9a28d9a9973dfa2436a92a0b3d5c425a5c703272",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
