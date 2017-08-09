@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16c2b071_2ca197bf",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-09T16:56:54Z",
+      "side": 1,
+      "message": "rename buffer_idx to lst_fb_idx?",
+      "range": {
+        "startLine": 420,
+        "startChar": 45,
+        "endLine": 420,
+        "endChar": 55
+      },
+      "revId": "bbc3bfcd83b8f8bf2262c0e9e40f55096da98492",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3b6d8915_3ba19ef6",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-09T16:56:54Z",
+      "side": 1,
+      "message": "better to just pass the alt/glb/lst_fb_idx instead of cpi",
+      "revId": "bbc3bfcd83b8f8bf2262c0e9e40f55096da98492",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b2181c2_2f8d082a",
+        "filename": "vp9/encoder/vp9_denoiser.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-09T16:56:54Z",
+      "side": 1,
+      "message": "rename frame_idx_denoiser[] to something like: refresh_state_fb_idx?",
+      "revId": "bbc3bfcd83b8f8bf2262c0e9e40f55096da98492",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd17c725_13d57ae9",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2766,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-09T16:56:54Z",
+      "side": 1,
+      "message": "move this down to after line 2835",
+      "revId": "bbc3bfcd83b8f8bf2262c0e9e40f55096da98492",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
