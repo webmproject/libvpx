@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7eea9aef_e9c1cc2b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T16:29:48Z",
+      "side": 1,
+      "message": "Fix the denoiser frame buffer management?",
+      "revId": "36e05eb834492b876c1cdfc76cc62306e52862be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe71ed5c_763dc077",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T16:29:48Z",
+      "side": 1,
+      "message": "maybe better to say something like:\nChange the denoiser frame buffer management for SVC to more generally\nhandle the layer patterns in SVC (where last is not always refreshed).",
+      "revId": "36e05eb834492b876c1cdfc76cc62306e52862be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af037b6f_f738a00c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T16:29:48Z",
+      "side": 1,
+      "message": "say this is change is only for SVC with denoising.",
+      "revId": "36e05eb834492b876c1cdfc76cc62306e52862be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37101268_e56c62a8",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T16:29:48Z",
+      "side": 1,
+      "message": "remove this change",
+      "revId": "36e05eb834492b876c1cdfc76cc62306e52862be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c62d84a4_dd14e3f2",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T16:29:48Z",
+      "side": 1,
+      "message": "is it better to pass alt/gld/lst_fb_idx + 1 and then avoid fb_idx++ in the function?",
+      "revId": "36e05eb834492b876c1cdfc76cc62306e52862be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce672761_0f876d77",
+        "filename": "vp9/encoder/vp9_denoiser.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T16:29:48Z",
+      "side": 1,
+      "message": "add comment: 8 for number of REF_FRAMES and 1 for current denoised buffer",
+      "range": {
+        "startLine": 28,
+        "startChar": 15,
+        "endLine": 28,
+        "endChar": 16
+      },
+      "revId": "36e05eb834492b876c1cdfc76cc62306e52862be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
