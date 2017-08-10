@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "344d4315_0680be93",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T04:08:37Z",
+      "side": 1,
+      "message": "no need to pass full cpi, just pass cpi-\u003elst_fb_idx and cpi-\u003euse_svc.",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58810b02_72e27774",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T04:08:37Z",
+      "side": 1,
+      "message": "better to put: if (cpi-\u003euse_svc) frame \u003d cpi-\u003elst_fb_idx + 1\nmake sure non-svc behaviour is also bitexact.",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20377e42_9c5e268f",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T04:08:37Z",
+      "side": 1,
+      "message": "i think here we need to loop over all 8 slots (1 to 8)\nand updated all non-null slots with key frame?",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a228d525_47e63eb7",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T04:08:37Z",
+      "side": 1,
+      "message": "can\u0027t this just be used_num_ref_frames \u003d NONSVC_REF_FRAMES ?",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4f9a3e8_df79e370",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T04:08:37Z",
+      "side": 1,
+      "message": "why is this changed?",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd18810e_99ee0645",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-10T04:08:37Z",
+      "side": 1,
+      "message": "why is this changed?",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
