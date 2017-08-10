@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include "./vpx_config.h"
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_quant_common.h"
@@ -109,5 +110,128 @@ void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
         vmax_s16(v_eobmax_tmp, vreinterpret_s16_s64(v_eobmax_xxx3));
 
     *eob_ptr = (uint16_t)vget_lane_s16(v_eobmax_final, 0);
+  }
+}
+
+static INLINE int32x4_t extract_sign_bit(int32x4_t a) {
+  return vreinterpretq_s32_u32(vshrq_n_u32(vreinterpretq_u32_s32(a), 31));
+}
+
+void vp9_quantize_fp_32x32_neon(const tran_low_t *coeff_ptr, intptr_t count,
+                                int skip_block, const int16_t *round_ptr,
+                                const int16_t *quant_ptr,
+                                tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                                const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                                const int16_t *scan, const int16_t *iscan_ptr) {
+  const int16x8_t one = vdupq_n_s16(1);
+  const int16x8_t neg_one = vdupq_n_s16(-1);
+
+  // ROUND_POWER_OF_TWO(round_ptr[], 1)
+  const int16x8_t round = vrshrq_n_s16(vld1q_s16(round_ptr), 1);
+  const int16x8_t quant = vld1q_s16(quant_ptr);
+  const int16x4_t dequant = vld1_s16(dequant_ptr);
+  // dequant >> 2 is used similar to zbin as a threshold.
+  const int16x8_t dequant_thresh = vshrq_n_s16(vld1q_s16(dequant_ptr), 2);
+
+  // Process dc and the first seven ac coeffs.
+  const uint16x8_t iscan =
+      vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan_ptr), one));
+  const int16x8_t coeff = load_tran_low_to_s16q(coeff_ptr);
+  const int16x8_t coeff_sign = vshrq_n_s16(coeff, 15);
+  const int16x8_t coeff_abs = vabsq_s16(coeff);
+  const int16x8_t dequant_mask =
+      vreinterpretq_s16_u16(vcgeq_s16(coeff_abs, dequant_thresh));
+
+  int16x8_t qcoeff = vaddq_s16(coeff_abs, round);
+  int32x4_t dqcoeff_0, dqcoeff_1;
+  int16x8_t dqcoeff;
+  uint16x8_t eob_max;
+  (void)scan;
+  (void)count;
+  (void)skip_block;
+  assert(!skip_block);
+
+  // coeff * quant_ptr[]) >> 15
+  qcoeff = vqdmulhq_s16(qcoeff, quant);
+
+  // Restore sign.
+  qcoeff = veorq_s16(qcoeff, coeff_sign);
+  qcoeff = vsubq_s16(qcoeff, coeff_sign);
+  qcoeff = vandq_s16(qcoeff, dequant_mask);
+
+  // qcoeff * dequant[] / 2
+  dqcoeff_0 = vmull_s16(vget_low_s16(qcoeff), dequant);
+  dqcoeff_1 = vmull_n_s16(vget_high_s16(qcoeff), dequant_ptr[1]);
+
+  // Add 1 if negative to round towards zero because the C uses division.
+  dqcoeff_0 = vaddq_s32(dqcoeff_0, extract_sign_bit(dqcoeff_0));
+  dqcoeff_1 = vaddq_s32(dqcoeff_1, extract_sign_bit(dqcoeff_1));
+
+  dqcoeff = vcombine_s16(vshrn_n_s32(dqcoeff_0, 1), vshrn_n_s32(dqcoeff_1, 1));
+
+  eob_max = vandq_u16(vtstq_s16(qcoeff, neg_one), iscan);
+
+  store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
+  store_s16q_to_tran_low(dqcoeff_ptr, dqcoeff);
+
+  iscan_ptr += 8;
+  coeff_ptr += 8;
+  qcoeff_ptr += 8;
+  dqcoeff_ptr += 8;
+
+  {
+    int i;
+    const int16x8_t round = vrshrq_n_s16(vmovq_n_s16(round_ptr[1]), 1);
+    const int16x8_t quant = vmovq_n_s16(quant_ptr[1]);
+    const int16x8_t dequant_thresh =
+        vshrq_n_s16(vmovq_n_s16(dequant_ptr[1]), 2);
+
+    // Process the rest of the ac coeffs.
+    for (i = 8; i < 32 * 32; i += 8) {
+      const uint16x8_t iscan =
+          vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan_ptr), one));
+      const int16x8_t coeff = load_tran_low_to_s16q(coeff_ptr);
+      const int16x8_t coeff_sign = vshrq_n_s16(coeff, 15);
+      const int16x8_t coeff_abs = vabsq_s16(coeff);
+      const int16x8_t dequant_mask =
+          vreinterpretq_s16_u16(vcgeq_s16(coeff_abs, dequant_thresh));
+
+      int16x8_t qcoeff = vaddq_s16(coeff_abs, round);
+      int32x4_t dqcoeff_0, dqcoeff_1;
+      int16x8_t dqcoeff;
+
+      qcoeff = vqdmulhq_s16(qcoeff, quant);
+      qcoeff = veorq_s16(qcoeff, coeff_sign);
+      qcoeff = vsubq_s16(qcoeff, coeff_sign);
+      qcoeff = vandq_s16(qcoeff, dequant_mask);
+
+      dqcoeff_0 = vmull_n_s16(vget_low_s16(qcoeff), dequant_ptr[1]);
+      dqcoeff_1 = vmull_n_s16(vget_high_s16(qcoeff), dequant_ptr[1]);
+
+      dqcoeff_0 = vaddq_s32(dqcoeff_0, extract_sign_bit(dqcoeff_0));
+      dqcoeff_1 = vaddq_s32(dqcoeff_1, extract_sign_bit(dqcoeff_1));
+
+      dqcoeff =
+          vcombine_s16(vshrn_n_s32(dqcoeff_0, 1), vshrn_n_s32(dqcoeff_1, 1));
+
+      eob_max =
+          vmaxq_u16(eob_max, vandq_u16(vtstq_s16(qcoeff, neg_one), iscan));
+
+      store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
+      store_s16q_to_tran_low(dqcoeff_ptr, dqcoeff);
+
+      iscan_ptr += 8;
+      coeff_ptr += 8;
+      qcoeff_ptr += 8;
+      dqcoeff_ptr += 8;
+    }
+
+    {
+      const uint16x4_t eob_max_0 =
+          vmax_u16(vget_low_u16(eob_max), vget_high_u16(eob_max));
+      const uint16x4_t eob_max_1 = vpmax_u16(eob_max_0, eob_max_0);
+      const uint16x4_t eob_max_2 = vpmax_u16(eob_max_1, eob_max_1);
+      vst1_lane_u16(eob_ptr, eob_max_2, 0);
+    }
   }
 }
