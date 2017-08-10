@@ -130,7 +130,7 @@ TEST_P(LevelTest, TestTargetLevelApi) {
     if (level == 10 || level == 11 || level == 20 || level == 21 ||
         level == 30 || level == 31 || level == 40 || level == 41 ||
         level == 50 || level == 51 || level == 52 || level == 60 ||
-        level == 61 || level == 62 || level == 0 || level == 255)
+        level == 61 || level == 62 || level == 0 || level == 1 || level == 255)
       EXPECT_EQ(VPX_CODEC_OK,
                 vpx_codec_control(&enc, VP9E_SET_TARGET_LEVEL, level));
     else
