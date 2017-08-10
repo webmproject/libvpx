@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "978acb38_ecc5e852",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-08-10T05:27:05Z",
+      "side": 1,
+      "message": "before this change, we allocated MAX_REF_FRAMES buffers for SVC so I didn\u0027t change this here.",
+      "parentUuid": "a228d525_47e63eb7",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a4f9a3e8_df79e370",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 11
@@ -87,6 +105,24 @@
     },
     {
       "key": {
+        "uuid": "5f358a7e_182882ae",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-08-10T05:27:05Z",
+      "side": 1,
+      "message": "not sure. I apply clang-format automatically.",
+      "parentUuid": "a4f9a3e8_df79e370",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cd18810e_99ee0645",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 11
@@ -98,6 +134,24 @@
       "writtenOn": "2017-08-10T04:08:37Z",
       "side": 1,
       "message": "why is this changed?",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "199a8e4c_b598f66f",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-08-10T05:27:05Z",
+      "side": 1,
+      "message": "same as above.",
+      "parentUuid": "cd18810e_99ee0645",
       "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
