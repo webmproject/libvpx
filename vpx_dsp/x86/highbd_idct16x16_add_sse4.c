@@ -227,7 +227,7 @@ void vpx_highbd_idct16x16_256_add_sse4_1(const tran_low_t *input,
       in[14] = load_pack_8_32bit(input + 6 * 16 + 8);
       in[15] = load_pack_8_32bit(input + 7 * 16 + 8);
       transpose_16bit_8x8(in + 8, in + 8);
-      idct16_8col(in);
+      idct16_8col(in, in);
       in = r;
       input += 128;
     }
@@ -236,7 +236,7 @@ void vpx_highbd_idct16x16_256_add_sse4_1(const tran_low_t *input,
       int j;
       transpose_16bit_8x8(l + i, out);
       transpose_16bit_8x8(r + i, out + 8);
-      idct16_8col(out);
+      idct16_8col(out, out);
 
       for (j = 0; j < 16; ++j) {
         highbd_write_buffer_8(dest + j * stride, out[j], bd);
@@ -310,7 +310,7 @@ void vpx_highbd_idct16x16_38_add_sse4_1(const tran_low_t *input, uint16_t *dest,
   __m128i out[16];
 
   if (bd == 8) {
-    __m128i in[16];
+    __m128i in[16], temp[16];
 
     in[0] = load_pack_8_32bit(input + 0 * 16);
     in[1] = load_pack_8_32bit(input + 1 * 16);
@@ -322,28 +322,15 @@ void vpx_highbd_idct16x16_38_add_sse4_1(const tran_low_t *input, uint16_t *dest,
     in[7] = load_pack_8_32bit(input + 7 * 16);
     transpose_16bit_8x8(in, in);
 
-    in[8] = _mm_setzero_si128();
-    in[9] = _mm_setzero_si128();
-    in[10] = _mm_setzero_si128();
-    in[11] = _mm_setzero_si128();
-    in[12] = _mm_setzero_si128();
-    in[13] = _mm_setzero_si128();
-    in[14] = _mm_setzero_si128();
-    in[15] = _mm_setzero_si128();
-    idct16_8col(in);
+    for (i = 8; i < 16; i++) {
+      in[i] = _mm_setzero_si128();
+    }
+    idct16_8col(in, temp);
 
     for (i = 0; i < 16; i += 8) {
       int j;
-      transpose_16bit_8x8(in + i, out);
-      out[8] = _mm_setzero_si128();
-      out[9] = _mm_setzero_si128();
-      out[10] = _mm_setzero_si128();
-      out[11] = _mm_setzero_si128();
-      out[12] = _mm_setzero_si128();
-      out[13] = _mm_setzero_si128();
-      out[14] = _mm_setzero_si128();
-      out[15] = _mm_setzero_si128();
-      idct16_8col(out);
+      transpose_16bit_8x8(temp + i, in);
+      idct16_8col(in, out);
 
       for (j = 0; j < 16; ++j) {
         highbd_write_buffer_8(dest + j * stride, out[j], bd);
