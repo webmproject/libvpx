@@ -15,7 +15,6 @@ pw_1: times 8 dw 1
 
 SECTION .text
 
-; TODO(yunqingwang)fix quantize_b code for skip=1 case.
 %macro QUANTIZE_FN 2
 cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
                                 shift, qcoeff, dqcoeff, dequant, \
@@ -304,6 +303,9 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 
   ; skip-block, i.e. just write all zeroes
 .blank:
+DEFINE_ARGS coeff, ncoeff, skip, zbin, round, quant, shift, \
+            qcoeff, dqcoeff, dequant, eob, scan, iscan
+
   mov                             r0, dqcoeffmp
   movifnidn                  ncoeffq, ncoeffmp
   mov                             r2, qcoeffmp
@@ -341,5 +343,4 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %endmacro
 
 INIT_XMM ssse3
-QUANTIZE_FN b, 7
 QUANTIZE_FN b_32x32, 7
