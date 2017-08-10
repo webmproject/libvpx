@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ba5ebd5b_137c6d0d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-08-10T05:59:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "344d4315_0680be93",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "58810b02_72e27774",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 11
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "02bf9360_e30d6ad7",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-08-10T05:59:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "58810b02_72e27774",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "20377e42_9c5e268f",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 11
@@ -50,6 +86,24 @@
       "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b81d69aa_8ba4fa8d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-08-10T05:59:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "20377e42_9c5e268f",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -82,6 +136,24 @@
       "side": 1,
       "message": "before this change, we allocated MAX_REF_FRAMES buffers for SVC so I didn\u0027t change this here.",
       "parentUuid": "a228d525_47e63eb7",
+      "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d6d93dc_00ff605f",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-08-10T05:59:17Z",
+      "side": 1,
+      "message": "I deleted this member in the denoiser structure since it\u0027s the only place where it\u0027s used (after addressing the comment above about keyframe). it can be replaced with a local variable.",
+      "parentUuid": "978acb38_ecc5e852",
       "revId": "65303e2e50ffdf269c1e8d7f5fed9252950bba4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
