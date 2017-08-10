@@ -193,8 +193,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp9_diamond_search_sad avx/;
 
+if (vpx_config("CONFIG_REALTIME_ONLY") ne "yes") {
 add_proto qw/void vp9_temporal_filter_apply/, "const uint8_t *frame1, unsigned int stride, const uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, uint32_t *accumulator, uint16_t *count";
 specialize qw/vp9_temporal_filter_apply sse4_1/;
+}
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
