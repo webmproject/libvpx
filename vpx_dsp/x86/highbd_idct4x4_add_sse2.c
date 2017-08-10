@@ -75,17 +75,12 @@ static INLINE void highbd_idct4_small_sse2(__m128i *const io) {
 }
 
 static INLINE void highbd_idct4_large_sse2(__m128i *const io) {
-  __m128i temp[2], sign[2], step[4];
+  __m128i step[4];
 
   transpose_32bit_4x4(io, io);
 
   // stage 1
-  temp[0] = _mm_add_epi32(io[0], io[2]);  // input[0] + input[2]
-  abs_extend_64bit_sse2(temp[0], temp, sign);
-  step[0] = multiplication_round_shift_sse2(temp, sign, (int)cospi_16_64);
-  temp[0] = _mm_sub_epi32(io[0], io[2]);  // input[0] - input[2]
-  abs_extend_64bit_sse2(temp[0], temp, sign);
-  step[1] = multiplication_round_shift_sse2(temp, sign, (int)cospi_16_64);
+  highbd_butterfly_cospi16_sse2(io[0], io[2], &step[0], &step[1]);
   highbd_butterfly_sse2(io[1], io[3], (int)cospi_24_64, (int)cospi_8_64,
                         &step[2], &step[3]);
 

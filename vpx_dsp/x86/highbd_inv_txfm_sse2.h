@@ -140,6 +140,20 @@ static INLINE void highbd_butterfly_sse2(const __m128i in0, const __m128i in1,
   *out1 = pack_4(temp2[0], temp2[1]);
 }
 
+static INLINE void highbd_butterfly_cospi16_sse2(const __m128i in0,
+                                                 const __m128i in1,
+                                                 __m128i *const out0,
+                                                 __m128i *const out1) {
+  __m128i temp1[2], temp2, sign[2];
+
+  temp2 = _mm_add_epi32(in0, in1);
+  abs_extend_64bit_sse2(temp2, temp1, sign);
+  *out0 = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
+  temp2 = _mm_sub_epi32(in0, in1);
+  abs_extend_64bit_sse2(temp2, temp1, sign);
+  *out1 = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
+}
+
 // Note: c0 and c1 must be non negative.
 static INLINE void highbd_multiplication_sse2(const __m128i in, const int c0,
                                               const int c1, __m128i *const out0,
