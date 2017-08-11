@@ -914,6 +914,7 @@ static void restore_coding_context(VP9_COMP *cpi) {
   *cm->fc = cc->fc;
 }
 
+#if !CONFIG_REALTIME_ONLY
 static void configure_static_seg_features(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
@@ -1037,6 +1038,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
     }
   }
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 static void update_reference_segmentation_map(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
@@ -3214,7 +3216,6 @@ static void set_size_independent_vars(VP9_COMP *cpi) {
 static void set_size_dependent_vars(VP9_COMP *cpi, int *q, int *bottom_index,
                                     int *top_index) {
   VP9_COMMON *const cm = &cpi->common;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
 
   // Setup variables that depend on the dimensions of the frame.
   vp9_set_speed_features_framesize_dependent(cpi);
@@ -3226,17 +3227,19 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q, int *bottom_index,
     vp9_set_high_precision_mv(cpi, (*q) < HIGH_PRECISION_MV_QTHRESH);
   }
 
+#if !CONFIG_REALTIME_ONLY
   // Configure experimental use of segmentation for enhanced coding of
   // static regions if indicated.
   // Only allowed in the second pass of a two pass encode, as it requires
   // lagged coding, and if the relevant speed feature flag is set.
-  if (oxcf->pass == 2 && cpi->sf.static_segmentation)
+  if (cpi->oxcf.pass == 2 && cpi->sf.static_segmentation)
     configure_static_seg_features(cpi);
+#endif  // !CONFIG_REALTIME_ONLY
 
 #if CONFIG_VP9_POSTPROC && !(CONFIG_VP9_TEMPORAL_DENOISING)
-  if (oxcf->noise_sensitivity > 0) {
+  if (cpi->oxcf.noise_sensitivity > 0) {
     int l = 0;
-    switch (oxcf->noise_sensitivity) {
+    switch (cpi->oxcf.noise_sensitivity) {
       case 1: l = 20; break;
       case 2: l = 40; break;
       case 3: l = 60; break;

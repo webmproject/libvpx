@@ -140,5 +140,6 @@ VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct_msa.h
 
 # Strip unnecessary files with CONFIG_REALTIME_ONLY
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_firstpass.c
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_mbgraph.c
 
 VP9_CX_SRCS-yes := $(filter-out $(VP9_CX_SRCS_REMOVE-yes),$(VP9_CX_SRCS-yes))
