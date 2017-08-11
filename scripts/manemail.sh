@@ -1,9 +1,11 @@
 #!/bin/sh
 # Note:
-# - Be very careful to type the report HTML file name (without path)
+# - With any path, be very careful to type the report HTML file name.
 # - Use prodcertstatus --show_expiration_time to see when ticket expires.
 #
 
-report_file=$1
+report_html=$1
+report_path=/usr/local/google/home/luoyi/Dev/log
+report_send=$report_path/$report_html
 
-sendgmr --to=luoyi --cc=yunqingwang,vpx-eng --subject="Codec Daily Report" --from=luoyi --reply_to=luoyi --html_file=/usr/local/google/home/luoyi/Dev/log/$report_file --body_file=/usr/local/google/home/luoyi/Dev/log/$report_file
+sendgmr --to=luoyi --cc=yunqingwang,vpx-eng --from=luoyi --reply_to=luoyi --subject="Codec Daily Report" --html_file=$report_send --body_file=$report_send
