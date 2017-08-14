@@ -37,6 +37,7 @@
 #include "vp8/common/threading.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_timer.h"
+#include "vpx_util/vpx_write_yuv_frame.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
@@ -3902,7 +3903,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #endif
 
 #ifdef OUTPUT_YUV_SRC
-  vp8_write_yuv_frame(yuv_file, cpi->Source);
+  vpx_write_yuv_frame(yuv_file, cpi->Source);
 #endif
 
   do {
@@ -4483,7 +4484,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   update_reference_frames(cpi);
 
 #ifdef OUTPUT_YUV_DENOISED
-  vp8_write_yuv_frame(yuv_denoised_file,
+  vpx_write_yuv_frame(yuv_denoised_file,
                       &cpi->denoiser.yv12_running_avg[INTRA_FRAME]);
 #endif
 
@@ -4832,7 +4833,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #endif
 
   /* DEBUG */
-  /* vp8_write_yuv_frame("encoder_recon.yuv", cm->frame_to_show); */
+  /* vpx_write_yuv_frame("encoder_recon.yuv", cm->frame_to_show); */
 }
 #if !CONFIG_REALTIME_ONLY
 static void Pass2Encode(VP8_COMP *cpi, size_t *size, unsigned char *dest,
