@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d39ee788_a9f86570",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-14T20:58:31Z",
+      "side": 1,
+      "message": "this should be updated after your change to i \u003c 3 in a recent patch",
+      "revId": "e837cca49a1fc9d358d6413020a534ec65a58807",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "440edb46_0418b028",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-14T20:58:31Z",
+      "side": 1,
+      "message": "these could be !\u003d NULL to make it clear pointers are being tested; this codebase is inconsistent with this though",
+      "revId": "e837cca49a1fc9d358d6413020a534ec65a58807",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "043c5ace_7bc833ef",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-14T20:58:31Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "e837cca49a1fc9d358d6413020a534ec65a58807",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18bed2d0_61cc437b",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-14T20:58:31Z",
+      "side": 1,
+      "message": "and here for the pointer checks",
+      "revId": "e837cca49a1fc9d358d6413020a534ec65a58807",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
