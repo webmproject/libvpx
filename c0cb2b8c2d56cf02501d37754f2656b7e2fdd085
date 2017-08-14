@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "63900b82_c2559b78",
+        "filename": "test/test.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-14T17:42:20Z",
+      "side": 1,
+      "message": "config variables that aren\u0027t enabled are empty; you can use ifneq..., yes",
+      "range": {
+        "startLine": 161,
+        "startChar": 6,
+        "endLine": 161,
+        "endChar": 32
+      },
+      "revId": "c0cb2b8c2d56cf02501d37754f2656b7e2fdd085",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6cf45c3_f6b08052",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-14T17:42:20Z",
+      "side": 1,
+      "message": "just use \u0027ne yes\u0027 and drop the empty block",
+      "range": {
+        "startLine": 196,
+        "startChar": 39,
+        "endLine": 196,
+        "endChar": 41
+      },
+      "revId": "c0cb2b8c2d56cf02501d37754f2656b7e2fdd085",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
