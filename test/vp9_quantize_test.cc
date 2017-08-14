@@ -141,7 +141,9 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    const int skip_block = i == 0;
+    // Test skip block for the first three iterations to catch all the different
+    // sizes.
+    const int skip_block = i < 3;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = (TX_SIZE)(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -151,7 +153,7 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
     const TX_TYPE tx_type = (TX_TYPE)((i >> 2) % 3);
     const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
     const int count = (4 << sz) * (4 << sz);  // 16, 64, 256
-    coeff.Set(&rnd, 0, max_value_);
+    coeff.Set(&rnd, -max_value_, max_value_);
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_);
 
@@ -195,7 +197,7 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    int skip_block = i == 0;
+    int skip_block = i < 3;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = (TX_SIZE)(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -207,8 +209,10 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
     int count = (4 << sz) * (4 << sz);  // 16, 64, 256
     // Two random entries
     coeff.Set(0);
-    coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
-    coeff.TopLeftPixel()[rnd(count)] = rnd.RandRange(max_value_);
+    coeff.TopLeftPixel()[rnd(count)] =
+        rnd.RandRange(max_value_ * 2) - max_value_;
+    coeff.TopLeftPixel()[rnd(count)] =
+        rnd.RandRange(max_value_ * 2) - max_value_;
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_);
 
