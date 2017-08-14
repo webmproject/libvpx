@@ -73,10 +73,10 @@ static INLINE void highbd_butterfly_cospi16_sse4_1(const __m128i in0,
   *out1 = multiplication_round_shift_sse4_1(temp1, (int)cospi_16_64);
 }
 
-static INLINE void highbd_multiplication_sse4_1(const __m128i in, const int c0,
-                                                const int c1,
-                                                __m128i *const out0,
-                                                __m128i *const out1) {
+static INLINE void highbd_partial_butterfly_sse4_1(const __m128i in,
+                                                   const int c0, const int c1,
+                                                   __m128i *const out0,
+                                                   __m128i *const out1) {
   __m128i temp[2];
 
   extend_64bit(in, temp);

@@ -16,6 +16,7 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/inv_txfm.h"
+#include "vpx_dsp/x86/transpose_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 
 static INLINE void extend_64bit(const __m128i in,
@@ -84,6 +85,7 @@ static INLINE __m128i multiplication_round_shift_sse2(
   const __m128i pair_c = pair_set_epi32(c << 2, 0);
   __m128i t0, t1;
 
+  assert(c >= 0);
   t0 = multiply_apply_sign_sse2(in[0], sign[0], pair_c);
   t1 = multiply_apply_sign_sse2(in[1], sign[1], pair_c);
   t0 = dct_const_round_shift_64bit(t0);
@@ -99,6 +101,7 @@ static INLINE __m128i multiplication_neg_round_shift_sse2(
   const __m128i pair_c = pair_set_epi32(c << 2, 0);
   __m128i t0, t1;
 
+  assert(c >= 0);
   t0 = multiply_apply_sign_sse2(in[0], sign[0], pair_c);
   t1 = multiply_apply_sign_sse2(in[1], sign[1], pair_c);
   t0 = _mm_sub_epi64(_mm_setzero_si128(), t0);
@@ -118,6 +121,8 @@ static INLINE void highbd_butterfly_sse2(const __m128i in0, const __m128i in1,
   const __m128i pair_c1 = pair_set_epi32(c1 << 2, 0);
   __m128i temp1[4], temp2[4], sign1[2], sign2[2];
 
+  assert(c0 >= 0);
+  assert(c1 >= 0);
   abs_extend_64bit_sse2(in0, temp1, sign1);
   abs_extend_64bit_sse2(in1, temp2, sign2);
   temp1[2] = multiply_apply_sign_sse2(temp1[0], sign1[0], pair_c1);
@@ -140,6 +145,34 @@ static INLINE void highbd_butterfly_sse2(const __m128i in0, const __m128i in1,
   *out1 = pack_4(temp2[0], temp2[1]);
 }
 
+// Note: c0 and c1 must be non negative.
+static INLINE void highbd_partial_butterfly_sse2(const __m128i in, const int c0,
+                                                 const int c1,
+                                                 __m128i *const out0,
+                                                 __m128i *const out1) {
+  __m128i temp[2], sign[2];
+
+  assert(c0 >= 0);
+  assert(c1 >= 0);
+  abs_extend_64bit_sse2(in, temp, sign);
+  *out0 = multiplication_round_shift_sse2(temp, sign, c0);
+  *out1 = multiplication_round_shift_sse2(temp, sign, c1);
+}
+
+// Note: c0 and c1 must be non negative.
+static INLINE void highbd_partial_butterfly_neg_sse2(const __m128i in,
+                                                     const int c0, const int c1,
+                                                     __m128i *const out0,
+                                                     __m128i *const out1) {
+  __m128i temp[2], sign[2];
+
+  assert(c0 >= 0);
+  assert(c1 >= 0);
+  abs_extend_64bit_sse2(in, temp, sign);
+  *out0 = multiplication_neg_round_shift_sse2(temp, sign, c1);
+  *out1 = multiplication_round_shift_sse2(temp, sign, c0);
+}
+
 static INLINE void highbd_butterfly_cospi16_sse2(const __m128i in0,
                                                  const __m128i in1,
                                                  __m128i *const out0,
@@ -154,27 +187,17 @@ static INLINE void highbd_butterfly_cospi16_sse2(const __m128i in0,
   *out1 = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
 }
 
-// Note: c0 and c1 must be non negative.
-static INLINE void highbd_multiplication_sse2(const __m128i in, const int c0,
-                                              const int c1, __m128i *const out0,
-                                              __m128i *const out1) {
-  __m128i temp[2], sign[2];
-
-  abs_extend_64bit_sse2(in, temp, sign);
-  *out0 = multiplication_round_shift_sse2(temp, sign, c0);
-  *out1 = multiplication_round_shift_sse2(temp, sign, c1);
-}
-
-// Note: c0 and c1 must be non negative.
-static INLINE void highbd_multiplication_neg_sse2(const __m128i in,
-                                                  const int c0, const int c1,
-                                                  __m128i *const out0,
-                                                  __m128i *const out1) {
-  __m128i temp[2], sign[2];
-
-  abs_extend_64bit_sse2(in, temp, sign);
-  *out0 = multiplication_neg_round_shift_sse2(temp, sign, c1);
-  *out1 = multiplication_round_shift_sse2(temp, sign, c0);
+// Only do addition and subtraction butterfly, size = 16, 32
+static INLINE void highbd_add_sub_butterfly(const __m128i *in, __m128i *out,
+                                            int size) {
+  int i = 0;
+  const int num = size >> 1;
+  const int bound = size - 1;
+  while (i < num) {
+    out[i] = _mm_add_epi32(in[i], in[bound - i]);
+    out[bound - i] = _mm_sub_epi32(in[i], in[bound - i]);
+    i++;
+  }
 }
 
 static INLINE void highbd_idct8_stage4(const __m128i *const in,
@@ -311,6 +334,44 @@ static INLINE __m128i load_pack_8_32bit(const tran_low_t *const input) {
   const __m128i t0 = _mm_load_si128((const __m128i *)(input + 0));
   const __m128i t1 = _mm_load_si128((const __m128i *)(input + 4));
   return _mm_packs_epi32(t0, t1);
+}
+
+static INLINE void highbd_load_pack_transpose_32bit_8x8(const tran_low_t *input,
+                                                        const int stride,
+                                                        __m128i *const in) {
+  in[0] = load_pack_8_32bit(input + 0 * stride);
+  in[1] = load_pack_8_32bit(input + 1 * stride);
+  in[2] = load_pack_8_32bit(input + 2 * stride);
+  in[3] = load_pack_8_32bit(input + 3 * stride);
+  in[4] = load_pack_8_32bit(input + 4 * stride);
+  in[5] = load_pack_8_32bit(input + 5 * stride);
+  in[6] = load_pack_8_32bit(input + 6 * stride);
+  in[7] = load_pack_8_32bit(input + 7 * stride);
+  transpose_16bit_8x8(in, in);
+}
+
+static INLINE void highbd_load_transpose_32bit_8x4(const tran_low_t *input,
+                                                   const int stride,
+                                                   __m128i *in) {
+  in[0] = _mm_load_si128((const __m128i *)(input + 0 * stride + 0));
+  in[1] = _mm_load_si128((const __m128i *)(input + 0 * stride + 4));
+  in[2] = _mm_load_si128((const __m128i *)(input + 1 * stride + 0));
+  in[3] = _mm_load_si128((const __m128i *)(input + 1 * stride + 4));
+  in[4] = _mm_load_si128((const __m128i *)(input + 2 * stride + 0));
+  in[5] = _mm_load_si128((const __m128i *)(input + 2 * stride + 4));
+  in[6] = _mm_load_si128((const __m128i *)(input + 3 * stride + 0));
+  in[7] = _mm_load_si128((const __m128i *)(input + 3 * stride + 4));
+  transpose_32bit_8x4(in, in);
+}
+
+static INLINE void highbd_load_transpose_32bit_4x4(const tran_low_t *input,
+                                                   const int stride,
+                                                   __m128i *in) {
+  in[0] = _mm_load_si128((const __m128i *)(input + 0 * stride));
+  in[1] = _mm_load_si128((const __m128i *)(input + 1 * stride));
+  in[2] = _mm_load_si128((const __m128i *)(input + 2 * stride));
+  in[3] = _mm_load_si128((const __m128i *)(input + 3 * stride));
+  transpose_32bit_4x4(in, in);
 }
 
 static INLINE void highbd_write_buffer_8(uint16_t *dest, const __m128i in,

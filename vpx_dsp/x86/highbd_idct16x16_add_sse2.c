@@ -106,20 +106,20 @@ static INLINE void highbd_idct16x16_38_4col(__m128i *const io /*io[16]*/) {
   __m128i temp1[2], sign[2];
 
   // stage 2
-  highbd_multiplication_sse2(io[1], (int)cospi_30_64, (int)cospi_2_64,
-                             &step2[8], &step2[15]);
-  highbd_multiplication_neg_sse2(io[7], (int)cospi_14_64, (int)cospi_18_64,
-                                 &step2[9], &step2[14]);
-  highbd_multiplication_sse2(io[5], (int)cospi_22_64, (int)cospi_10_64,
-                             &step2[10], &step2[13]);
-  highbd_multiplication_neg_sse2(io[3], (int)cospi_6_64, (int)cospi_26_64,
-                                 &step2[11], &step2[12]);
+  highbd_partial_butterfly_sse2(io[1], (int)cospi_30_64, (int)cospi_2_64,
+                                &step2[8], &step2[15]);
+  highbd_partial_butterfly_neg_sse2(io[7], (int)cospi_14_64, (int)cospi_18_64,
+                                    &step2[9], &step2[14]);
+  highbd_partial_butterfly_sse2(io[5], (int)cospi_22_64, (int)cospi_10_64,
+                                &step2[10], &step2[13]);
+  highbd_partial_butterfly_neg_sse2(io[3], (int)cospi_6_64, (int)cospi_26_64,
+                                    &step2[11], &step2[12]);
 
   // stage 3
-  highbd_multiplication_sse2(io[2], (int)cospi_28_64, (int)cospi_4_64,
-                             &step1[4], &step1[7]);
-  highbd_multiplication_neg_sse2(io[6], (int)cospi_12_64, (int)cospi_20_64,
-                                 &step1[5], &step1[6]);
+  highbd_partial_butterfly_sse2(io[2], (int)cospi_28_64, (int)cospi_4_64,
+                                &step1[4], &step1[7]);
+  highbd_partial_butterfly_neg_sse2(io[6], (int)cospi_12_64, (int)cospi_20_64,
+                                    &step1[5], &step1[6]);
   step1[8] = _mm_add_epi32(step2[8], step2[9]);
   step1[9] = _mm_sub_epi32(step2[8], step2[9]);
   step1[10] = _mm_sub_epi32(step2[10], step2[11]);  // step1[10] = -step1[10]
@@ -133,8 +133,8 @@ static INLINE void highbd_idct16x16_38_4col(__m128i *const io /*io[16]*/) {
   abs_extend_64bit_sse2(io[0], temp1, sign);
   step2[0] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
   step2[1] = step2[0];
-  highbd_multiplication_sse2(io[4], (int)cospi_24_64, (int)cospi_8_64,
-                             &step2[2], &step2[3]);
+  highbd_partial_butterfly_sse2(io[4], (int)cospi_24_64, (int)cospi_8_64,
+                                &step2[2], &step2[3]);
   highbd_butterfly_sse2(step1[14], step1[9], (int)cospi_24_64, (int)cospi_8_64,
                         &step2[9], &step2[14]);
   highbd_butterfly_sse2(step1[10], step1[13], (int)cospi_8_64, (int)cospi_24_64,
@@ -158,14 +158,14 @@ static INLINE void highbd_idct16x16_10_4col(__m128i *const io /*io[16]*/) {
   __m128i temp[2], sign[2];
 
   // stage 2
-  highbd_multiplication_sse2(io[1], (int)cospi_30_64, (int)cospi_2_64,
-                             &step2[8], &step2[15]);
-  highbd_multiplication_neg_sse2(io[3], (int)cospi_6_64, (int)cospi_26_64,
-                                 &step2[11], &step2[12]);
+  highbd_partial_butterfly_sse2(io[1], (int)cospi_30_64, (int)cospi_2_64,
+                                &step2[8], &step2[15]);
+  highbd_partial_butterfly_neg_sse2(io[3], (int)cospi_6_64, (int)cospi_26_64,
+                                    &step2[11], &step2[12]);
 
   // stage 3
-  highbd_multiplication_sse2(io[2], (int)cospi_28_64, (int)cospi_4_64,
-                             &step1[4], &step1[7]);
+  highbd_partial_butterfly_sse2(io[2], (int)cospi_28_64, (int)cospi_4_64,
+                                &step1[4], &step1[7]);
   step1[8] = step2[8];
   step1[9] = step2[8];
   step1[10] =
@@ -209,25 +209,8 @@ void vpx_highbd_idct16x16_256_add_sse2(const tran_low_t *input, uint16_t *dest,
 
     in = l;
     for (i = 0; i < 2; i++) {
-      in[0] = load_pack_8_32bit(input + 0 * 16);
-      in[1] = load_pack_8_32bit(input + 1 * 16);
-      in[2] = load_pack_8_32bit(input + 2 * 16);
-      in[3] = load_pack_8_32bit(input + 3 * 16);
-      in[4] = load_pack_8_32bit(input + 4 * 16);
-      in[5] = load_pack_8_32bit(input + 5 * 16);
-      in[6] = load_pack_8_32bit(input + 6 * 16);
-      in[7] = load_pack_8_32bit(input + 7 * 16);
-      transpose_16bit_8x8(in, in);
-
-      in[8] = load_pack_8_32bit(input + 0 * 16 + 8);
-      in[9] = load_pack_8_32bit(input + 1 * 16 + 8);
-      in[10] = load_pack_8_32bit(input + 2 * 16 + 8);
-      in[11] = load_pack_8_32bit(input + 3 * 16 + 8);
-      in[12] = load_pack_8_32bit(input + 4 * 16 + 8);
-      in[13] = load_pack_8_32bit(input + 5 * 16 + 8);
-      in[14] = load_pack_8_32bit(input + 6 * 16 + 8);
-      in[15] = load_pack_8_32bit(input + 7 * 16 + 8);
-      transpose_16bit_8x8(in + 8, in + 8);
+      highbd_load_pack_transpose_32bit_8x8(&input[0], 16, &in[0]);
+      highbd_load_pack_transpose_32bit_8x8(&input[8], 16, &in[8]);
       idct16_8col(in, in);
       in = r;
       input += 128;
@@ -249,52 +232,18 @@ void vpx_highbd_idct16x16_256_add_sse2(const tran_low_t *input, uint16_t *dest,
 
     for (i = 0; i < 4; i++) {
       in = all[i];
-      in[0] = _mm_load_si128((const __m128i *)(input + 0 * 16 + 0));
-      in[1] = _mm_load_si128((const __m128i *)(input + 0 * 16 + 4));
-      in[2] = _mm_load_si128((const __m128i *)(input + 1 * 16 + 0));
-      in[3] = _mm_load_si128((const __m128i *)(input + 1 * 16 + 4));
-      in[4] = _mm_load_si128((const __m128i *)(input + 2 * 16 + 0));
-      in[5] = _mm_load_si128((const __m128i *)(input + 2 * 16 + 4));
-      in[6] = _mm_load_si128((const __m128i *)(input + 3 * 16 + 0));
-      in[7] = _mm_load_si128((const __m128i *)(input + 3 * 16 + 4));
-      transpose_32bit_8x4(in, in);
-
-      in[8] = _mm_load_si128((const __m128i *)(input + 0 * 16 + 8));
-      in[9] = _mm_load_si128((const __m128i *)(input + 0 * 16 + 12));
-      in[10] = _mm_load_si128((const __m128i *)(input + 1 * 16 + 8));
-      in[11] = _mm_load_si128((const __m128i *)(input + 1 * 16 + 12));
-      in[12] = _mm_load_si128((const __m128i *)(input + 2 * 16 + 8));
-      in[13] = _mm_load_si128((const __m128i *)(input + 2 * 16 + 12));
-      in[14] = _mm_load_si128((const __m128i *)(input + 3 * 16 + 8));
-      in[15] = _mm_load_si128((const __m128i *)(input + 3 * 16 + 12));
-      transpose_32bit_8x4(in + 8, in + 8);
-
+      highbd_load_transpose_32bit_8x4(&input[0], 16, &in[0]);
+      highbd_load_transpose_32bit_8x4(&input[8], 16, &in[8]);
       highbd_idct16_4col(in);
       input += 4 * 16;
     }
 
     for (i = 0; i < 16; i += 4) {
       int j;
-      out[0] = all[0][i + 0];
-      out[1] = all[1][i + 0];
-      out[2] = all[0][i + 1];
-      out[3] = all[1][i + 1];
-      out[4] = all[0][i + 2];
-      out[5] = all[1][i + 2];
-      out[6] = all[0][i + 3];
-      out[7] = all[1][i + 3];
-      transpose_32bit_8x4(out, out);
-
-      out[8] = all[2][i + 0];
-      out[9] = all[3][i + 0];
-      out[10] = all[2][i + 1];
-      out[11] = all[3][i + 1];
-      out[12] = all[2][i + 2];
-      out[13] = all[3][i + 2];
-      out[14] = all[2][i + 3];
-      out[15] = all[3][i + 3];
-      transpose_32bit_8x4(out + 8, out + 8);
-
+      transpose_32bit_4x4(all[0] + i, out + 0);
+      transpose_32bit_4x4(all[1] + i, out + 4);
+      transpose_32bit_4x4(all[2] + i, out + 8);
+      transpose_32bit_4x4(all[3] + i, out + 12);
       highbd_idct16_4col(out);
 
       for (j = 0; j < 16; ++j) {
@@ -313,16 +262,7 @@ void vpx_highbd_idct16x16_38_add_sse2(const tran_low_t *input, uint16_t *dest,
   if (bd == 8) {
     __m128i in[16], temp[16];
 
-    in[0] = load_pack_8_32bit(input + 0 * 16);
-    in[1] = load_pack_8_32bit(input + 1 * 16);
-    in[2] = load_pack_8_32bit(input + 2 * 16);
-    in[3] = load_pack_8_32bit(input + 3 * 16);
-    in[4] = load_pack_8_32bit(input + 4 * 16);
-    in[5] = load_pack_8_32bit(input + 5 * 16);
-    in[6] = load_pack_8_32bit(input + 6 * 16);
-    in[7] = load_pack_8_32bit(input + 7 * 16);
-    transpose_16bit_8x8(in, in);
-
+    highbd_load_pack_transpose_32bit_8x8(input, 16, in);
     for (i = 8; i < 16; i++) {
       in[i] = _mm_setzero_si128();
     }
@@ -343,30 +283,15 @@ void vpx_highbd_idct16x16_38_add_sse2(const tran_low_t *input, uint16_t *dest,
 
     for (i = 0; i < 2; i++) {
       in = all[i];
-      in[0] = _mm_load_si128((const __m128i *)(input + 0 * 16 + 0));
-      in[1] = _mm_load_si128((const __m128i *)(input + 0 * 16 + 4));
-      in[2] = _mm_load_si128((const __m128i *)(input + 1 * 16 + 0));
-      in[3] = _mm_load_si128((const __m128i *)(input + 1 * 16 + 4));
-      in[4] = _mm_load_si128((const __m128i *)(input + 2 * 16 + 0));
-      in[5] = _mm_load_si128((const __m128i *)(input + 2 * 16 + 4));
-      in[6] = _mm_load_si128((const __m128i *)(input + 3 * 16 + 0));
-      in[7] = _mm_load_si128((const __m128i *)(input + 3 * 16 + 4));
-      transpose_32bit_8x4(in, in);
+      highbd_load_transpose_32bit_8x4(input, 16, in);
       highbd_idct16x16_38_4col(in);
       input += 4 * 16;
     }
 
     for (i = 0; i < 16; i += 4) {
       int j;
-      out[0] = all[0][i + 0];
-      out[1] = all[1][i + 0];
-      out[2] = all[0][i + 1];
-      out[3] = all[1][i + 1];
-      out[4] = all[0][i + 2];
-      out[5] = all[1][i + 2];
-      out[6] = all[0][i + 3];
-      out[7] = all[1][i + 3];
-      transpose_32bit_8x4(out, out);
+      transpose_32bit_4x4(all[0] + i, out + 0);
+      transpose_32bit_4x4(all[1] + i, out + 4);
       highbd_idct16x16_38_4col(out);
 
       for (j = 0; j < 16; ++j) {
@@ -406,11 +331,7 @@ void vpx_highbd_idct16x16_10_add_sse2(const tran_low_t *input, uint16_t *dest,
 
     for (i = 0; i < 2; i++) {
       in = all[i];
-      in[0] = _mm_load_si128((const __m128i *)(input + 0 * 16));
-      in[1] = _mm_load_si128((const __m128i *)(input + 1 * 16));
-      in[2] = _mm_load_si128((const __m128i *)(input + 2 * 16));
-      in[3] = _mm_load_si128((const __m128i *)(input + 3 * 16));
-      transpose_32bit_4x4(in, in);
+      highbd_load_transpose_32bit_4x4(input, 16, in);
       highbd_idct16x16_10_4col(in);
       input += 4 * 16;
     }
