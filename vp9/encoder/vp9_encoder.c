@@ -2740,7 +2740,8 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
 
     // Force recode for extreme overshoot.
     if ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
-        (rc->projected_frame_size >= big_rate_miss_high_threshold(cpi))) {
+        (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF &&
+         rc->projected_frame_size >= big_rate_miss_high_threshold(cpi))) {
       return 1;
     }
 
