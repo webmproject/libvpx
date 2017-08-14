@@ -780,6 +780,8 @@ int main(int argc, const char **argv) {
               vpx_codec_control(&codec, VP9E_GET_SVC_LAYER_ID, &layer_id);
               parse_superframe_index(cx_pkt->data.frame.buf,
                                      cx_pkt->data.frame.sz, sizes, &count);
+              if (enc_cfg.ss_number_layers == 1)
+                sizes[0] = cx_pkt->data.frame.sz;
               // Note computing input_layer_frames here won't account for frame
               // drops in rate control stats.
               // TODO(marpan): Fix this for non-bypass mode so we can get stats
