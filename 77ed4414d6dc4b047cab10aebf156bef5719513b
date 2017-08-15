@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8bec3ac_743b307d",
+        "filename": "vpx_dsp/quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-15T18:03:42Z",
+      "side": 1,
+      "message": "https://chromium-review.googlesource.com/c/353028\n\nthere\u0027s quite a mix here and in vp9_quantize.c, now would be a good time to normalize things",
+      "revId": "77ed4414d6dc4b047cab10aebf156bef5719513b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
