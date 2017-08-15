@@ -658,9 +658,9 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vpx_highbd_idct16x16_256_add neon sse2 sse4_1/;
     specialize qw/vpx_highbd_idct16x16_38_add neon sse2 sse4_1/;
     specialize qw/vpx_highbd_idct16x16_10_add neon sse2 sse4_1/;
-    specialize qw/vpx_highbd_idct32x32_1024_add neon/;
-    specialize qw/vpx_highbd_idct32x32_135_add neon/;
-    specialize qw/vpx_highbd_idct32x32_34_add neon/;
+    specialize qw/vpx_highbd_idct32x32_1024_add neon sse2 sse4_1/;
+    specialize qw/vpx_highbd_idct32x32_135_add neon sse2 sse4_1/;
+    specialize qw/vpx_highbd_idct32x32_34_add neon sse2 sse4_1/;
   }  # !CONFIG_EMULATE_HARDWARE
 }  # CONFIG_VP9_HIGHBITDEPTH
 }  # CONFIG_VP9

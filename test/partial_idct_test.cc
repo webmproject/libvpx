@@ -633,6 +633,36 @@ INSTANTIATE_TEST_CASE_P(NEON, PartialIDctTest,
 // 32x32_135_ is implemented using the 1024 version.
 const PartialInvTxfmParam sse2_partial_idct_tests[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_sse2>, TX_32X32,
+             1024, 8, 2),
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_sse2>, TX_32X32,
+             1024, 10, 2),
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_sse2>, TX_32X32,
+             1024, 12, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_sse2>, TX_32X32, 135, 8, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_sse2>, TX_32X32, 135, 10, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_135_add_sse2>, TX_32X32, 135, 12, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_34_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_34_add_sse2>, TX_32X32, 34, 8, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_34_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_34_add_sse2>, TX_32X32, 34, 10, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_34_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_34_add_sse2>, TX_32X32, 34, 12, 2),
   make_tuple(
       &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_1_add_c>,
       &highbd_wrapper<vpx_highbd_idct32x32_1_add_sse2>, TX_32X32, 1, 8, 2),
@@ -767,6 +797,39 @@ INSTANTIATE_TEST_CASE_P(SSSE3, PartialIDctTest,
 
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 const PartialInvTxfmParam sse4_1_partial_idct_tests[] = {
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_sse4_1>, TX_32X32,
+             1024, 8, 2),
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_sse4_1>, TX_32X32,
+             1024, 10, 2),
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_1024_add_sse4_1>, TX_32X32,
+             1024, 12, 2),
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_135_add_sse4_1>, TX_32X32,
+             135, 8, 2),
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_135_add_sse4_1>, TX_32X32,
+             135, 10, 2),
+  make_tuple(&vpx_highbd_fdct32x32_c,
+             &highbd_wrapper<vpx_highbd_idct32x32_135_add_c>,
+             &highbd_wrapper<vpx_highbd_idct32x32_135_add_sse4_1>, TX_32X32,
+             135, 12, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_34_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_34_add_sse4_1>, TX_32X32, 34, 8, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_34_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_34_add_sse4_1>, TX_32X32, 34, 10, 2),
+  make_tuple(
+      &vpx_highbd_fdct32x32_c, &highbd_wrapper<vpx_highbd_idct32x32_34_add_c>,
+      &highbd_wrapper<vpx_highbd_idct32x32_34_add_sse4_1>, TX_32X32, 34, 12, 2),
   make_tuple(&vpx_highbd_fdct16x16_c,
              &highbd_wrapper<vpx_highbd_idct16x16_256_add_c>,
              &highbd_wrapper<vpx_highbd_idct16x16_256_add_sse4_1>, TX_16X16,
