@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "c87ef3a2_3d24dac6",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-15T21:17:15Z",
+      "side": 1,
+      "message": "\u003e I just wanted to avoid potential \"may be uninit\u0027d\" warnings. Should it be:\n\u003e if (quant !\u003d NULL \u0026\u0026 ref_quant !\u003dNULL) etc everywhere?\n\n!\u003d NULL would be my preference, but if it was only for static analysis then asserts would work or just an early abort",
+      "parentUuid": "07b84c24_2ffcd1db",
+      "revId": "e837cca49a1fc9d358d6413020a534ec65a58807",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "043c5ace_7bc833ef",
         "filename": "test/vp9_quantize_test.cc",
         "patchSetId": 5
