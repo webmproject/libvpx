@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd11e43a_b6f77c38",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-15T14:59:49Z",
+      "side": 1,
+      "message": "This line should describe what the patch fixes.\n\n\"Fix keyframe bit allocation\"\nor\n\"Work around short GOP length issue\"\n\nwill be much more useful to someone reading the commit log.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 29
+      },
+      "revId": "db8fa86a6c217002511d54f9af05824d486333db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
