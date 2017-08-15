@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7dea0435_81ee45c4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-15T21:26:01Z",
+      "side": 1,
+      "message": "I think it\u0027s just encoder slowdowns in general; the issue is linked below for reference, no need to mention it here",
+      "range": {
+        "startLine": 7,
+        "startChar": 50,
+        "endLine": 7,
+        "endChar": 65
+      },
+      "revId": "ded03c588d5b9c844575e33f3e6902cefdf7e703",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
