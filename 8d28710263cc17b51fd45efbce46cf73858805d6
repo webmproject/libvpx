@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3710a130_d91c6153",
+        "filename": "vpx_dsp/quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2017-08-15T17:48:55Z",
+      "side": 1,
+      "message": "If the decoder saturates this and the encoder allows it to overflow, this disparity might cause enc/dec mismatch.",
+      "range": {
+        "startLine": 160,
+        "startChar": 35,
+        "endLine": 160,
+        "endChar": 74
+      },
+      "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
