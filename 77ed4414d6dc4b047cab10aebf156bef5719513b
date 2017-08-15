@@ -34,6 +34,24 @@
       "revId": "77ed4414d6dc4b047cab10aebf156bef5719513b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4fe59292_0416c6d7",
+        "filename": "vpx_dsp/quantize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-15T21:29:52Z",
+      "side": 1,
+      "message": "\u003e I\u0027m a little confused now.\n\u003e       const int abs_coeff \u003d (coeff ^ coeff_sign) - coeff_sign;\n\u003e up above has no overflow warning, but is essentially the same situation.\n\u003e \n\u003e Should I adjust that in vp9, or just\n\u003e qcoeff_ptr[rc] \u003d (tmp ^ coeff_sign) - coeff_sign;\n\u003e which currently has no warnings (checking now to see if the test coverage is complete)\n\nthe signs of the types are different than here. changes like the one I linked resolved the issue in this way, but there might still be some holes or different methods in use",
+      "parentUuid": "52b76ac4_05726c47",
+      "revId": "77ed4414d6dc4b047cab10aebf156bef5719513b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
