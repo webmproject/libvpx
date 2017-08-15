@@ -350,8 +350,8 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
       VP9_COMMON *const cm = &cpi->common;
       int j, i;
       // Loop through the 8x8 sub-blocks.
-      const int bw = num_8x8_blocks_wide_lookup[BLOCK_64X64];
-      const int bh = num_8x8_blocks_high_lookup[BLOCK_64X64];
+      const int bw = num_8x8_blocks_wide_lookup[bs];
+      const int bh = num_8x8_blocks_high_lookup[bs];
       const int xmis = VPXMIN(cm->mi_cols - mi_col, bw);
       const int ymis = VPXMIN(cm->mi_rows - mi_row, bh);
       const int block_index = mi_row * cm->mi_cols + mi_col;
