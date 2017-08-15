@@ -22,6 +22,30 @@
       "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "039d57ab_9bb6455a",
+        "filename": "vpx_dsp/quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-15T19:50:32Z",
+      "side": 1,
+      "message": "This is the current behavior in lowbd builds.\n\nI thought quantize was encoder only and used to make a decision in the encode process. What\u0027s the equivalent decoder function?",
+      "parentUuid": "3710a130_d91c6153",
+      "range": {
+        "startLine": 160,
+        "startChar": 35,
+        "endLine": 160,
+        "endChar": 74
+      },
+      "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
