@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f95f4299_0248f193",
+        "filename": "vpx_dsp/mips/subtract_mmi.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-15T14:53:42Z",
+      "side": 1,
+      "message": "The macros are getting formatted poorly here. I suspect a problem with clang-format, but it might be possible to work around it.\n\nCould you use\n#define PTR_ADDU addu\n\n\"PTR_ADDU %[src], %[src],         %[src_stride]           \\n\\t\"\n\nI\u0027m not sure what the rules are about defines inside quoted blocks.",
+      "range": {
+        "startLine": 40,
+        "startChar": 67,
+        "endLine": 40,
+        "endChar": 75
+      },
+      "revId": "8215c2a4da0b52d5192eb3cc9bbb87f9df07b29d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
