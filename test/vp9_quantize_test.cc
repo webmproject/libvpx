@@ -210,9 +210,9 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
     // Two random entries
     coeff.Set(0);
     coeff.TopLeftPixel()[rnd(count)] =
-        rnd.RandRange(max_value_ * 2) - max_value_;
+        static_cast<int>(rnd.RandRange(max_value_ * 2)) - max_value_;
     coeff.TopLeftPixel()[rnd(count)] =
-        rnd.RandRange(max_value_ * 2) - max_value_;
+        static_cast<int>(rnd.RandRange(max_value_ * 2)) - max_value_;
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_);
 
