@@ -471,7 +471,6 @@ void vp9_encode_fp_row_mt(VP9_COMP *cpi) {
     accumulate_fp_tile_stat(first_tile_col, this_tile);
   }
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 static int temporal_filter_worker_hook(EncWorkerData *const thread_data,
                                        MultiThreadHandle *multi_thread_ctxt) {
@@ -549,6 +548,7 @@ void vp9_temporal_filter_row_mt(VP9_COMP *cpi) {
   launch_enc_workers(cpi, (VPxWorkerHook)temporal_filter_worker_hook,
                      multi_thread_ctxt, num_workers);
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 static int enc_row_mt_worker_hook(EncWorkerData *const thread_data,
                                   MultiThreadHandle *multi_thread_ctxt) {

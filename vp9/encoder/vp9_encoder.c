@@ -739,7 +739,9 @@ void vp9_initialize_enc(void) {
     vp9_init_me_luts();
     vp9_rc_init_minq_luts();
     vp9_entropy_mv_init();
+#if !CONFIG_REALTIME_ONLY
     vp9_temporal_filter_init();
+#endif
     init_done = 1;
   }
 }
@@ -5044,7 +5046,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       }
       cpi->svc.layer_context[cpi->svc.spatial_layer_id].has_alt_frame = 1;
 #endif
-
+#if !CONFIG_REALTIME_ONLY
       if ((oxcf->mode != REALTIME) && (oxcf->arnr_max_frames > 0) &&
           (oxcf->arnr_strength > 0)) {
         int bitrate = cpi->rc.avg_frame_bandwidth / 40;
@@ -5064,7 +5066,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
         force_src_buffer = &cpi->alt_ref_buffer;
       }
-
+#endif
       cm->show_frame = 0;
       cm->intra_only = 0;
       cpi->refresh_alt_ref_frame = 1;
