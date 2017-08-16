@@ -79,14 +79,21 @@ static INLINE __m128i idct_calc_wraplow_sse2(const __m128i in0,
 
 // Multiply elements by constants and add them together.
 static INLINE void butterfly(const __m128i in0, const __m128i in1, const int c0,
-                             const int c1, __m128i *const res0,
-                             __m128i *const res1) {
+                             const int c1, __m128i *const out0,
+                             __m128i *const out1) {
   const __m128i cst0 = pair_set_epi16(c0, -c1);
   const __m128i cst1 = pair_set_epi16(c1, c0);
   const __m128i lo = _mm_unpacklo_epi16(in0, in1);
   const __m128i hi = _mm_unpackhi_epi16(in0, in1);
-  *res0 = idct_calc_wraplow_sse2(lo, hi, cst0);
-  *res1 = idct_calc_wraplow_sse2(lo, hi, cst1);
+  *out0 = idct_calc_wraplow_sse2(lo, hi, cst0);
+  *out1 = idct_calc_wraplow_sse2(lo, hi, cst1);
+}
+
+static INLINE __m128i butterfly_cospi16(const __m128i in) {
+  const __m128i cst = pair_set_epi16((int)cospi_16_64, (int)cospi_16_64);
+  const __m128i lo = _mm_unpacklo_epi16(in, _mm_setzero_si128());
+  const __m128i hi = _mm_unpackhi_epi16(in, _mm_setzero_si128());
+  return idct_calc_wraplow_sse2(lo, hi, cst);
 }
 
 // Functions to allow 8 bit optimisations to be used when profile 0 is used with
@@ -111,37 +118,18 @@ static INLINE __m128i load_input_data8(const tran_low_t *data) {
 #endif
 }
 
-static INLINE void load_buffer_8x8(const tran_low_t *const input,
-                                   __m128i *const in) {
-  in[0] = load_input_data8(input + 0 * 8);
-  in[1] = load_input_data8(input + 1 * 8);
-  in[2] = load_input_data8(input + 2 * 8);
-  in[3] = load_input_data8(input + 3 * 8);
-  in[4] = load_input_data8(input + 4 * 8);
-  in[5] = load_input_data8(input + 5 * 8);
-  in[6] = load_input_data8(input + 6 * 8);
-  in[7] = load_input_data8(input + 7 * 8);
-}
-
-static INLINE void load_buffer_8x16(const tran_low_t *const input,
-                                    __m128i *const in) {
-  in[0] = load_input_data8(input + 0 * 16);
-  in[1] = load_input_data8(input + 1 * 16);
-  in[2] = load_input_data8(input + 2 * 16);
-  in[3] = load_input_data8(input + 3 * 16);
-  in[4] = load_input_data8(input + 4 * 16);
-  in[5] = load_input_data8(input + 5 * 16);
-  in[6] = load_input_data8(input + 6 * 16);
-  in[7] = load_input_data8(input + 7 * 16);
-
-  in[8] = load_input_data8(input + 8 * 16);
-  in[9] = load_input_data8(input + 9 * 16);
-  in[10] = load_input_data8(input + 10 * 16);
-  in[11] = load_input_data8(input + 11 * 16);
-  in[12] = load_input_data8(input + 12 * 16);
-  in[13] = load_input_data8(input + 13 * 16);
-  in[14] = load_input_data8(input + 14 * 16);
-  in[15] = load_input_data8(input + 15 * 16);
+static INLINE void load_transpose_16bit_8x8(const tran_low_t *input,
+                                            const int stride,
+                                            __m128i *const in) {
+  in[0] = load_input_data8(input + 0 * stride);
+  in[1] = load_input_data8(input + 1 * stride);
+  in[2] = load_input_data8(input + 2 * stride);
+  in[3] = load_input_data8(input + 3 * stride);
+  in[4] = load_input_data8(input + 4 * stride);
+  in[5] = load_input_data8(input + 5 * stride);
+  in[6] = load_input_data8(input + 6 * stride);
+  in[7] = load_input_data8(input + 7 * stride);
+  transpose_16bit_8x8(in, in);
 }
 
 static INLINE void recon_and_store(uint8_t *const dest, const __m128i in_x) {
@@ -192,62 +180,6 @@ static INLINE void write_buffer_8x8(const __m128i *const in,
   recon_and_store(dest + 7 * stride, t[7]);
 }
 
-static INLINE void write_buffer_8x16(uint8_t *const dest, __m128i *const in,
-                                     const int stride) {
-  const __m128i final_rounding = _mm_set1_epi16(1 << 5);
-  // Final rounding and shift
-  in[0] = _mm_adds_epi16(in[0], final_rounding);
-  in[1] = _mm_adds_epi16(in[1], final_rounding);
-  in[2] = _mm_adds_epi16(in[2], final_rounding);
-  in[3] = _mm_adds_epi16(in[3], final_rounding);
-  in[4] = _mm_adds_epi16(in[4], final_rounding);
-  in[5] = _mm_adds_epi16(in[5], final_rounding);
-  in[6] = _mm_adds_epi16(in[6], final_rounding);
-  in[7] = _mm_adds_epi16(in[7], final_rounding);
-  in[8] = _mm_adds_epi16(in[8], final_rounding);
-  in[9] = _mm_adds_epi16(in[9], final_rounding);
-  in[10] = _mm_adds_epi16(in[10], final_rounding);
-  in[11] = _mm_adds_epi16(in[11], final_rounding);
-  in[12] = _mm_adds_epi16(in[12], final_rounding);
-  in[13] = _mm_adds_epi16(in[13], final_rounding);
-  in[14] = _mm_adds_epi16(in[14], final_rounding);
-  in[15] = _mm_adds_epi16(in[15], final_rounding);
-
-  in[0] = _mm_srai_epi16(in[0], 6);
-  in[1] = _mm_srai_epi16(in[1], 6);
-  in[2] = _mm_srai_epi16(in[2], 6);
-  in[3] = _mm_srai_epi16(in[3], 6);
-  in[4] = _mm_srai_epi16(in[4], 6);
-  in[5] = _mm_srai_epi16(in[5], 6);
-  in[6] = _mm_srai_epi16(in[6], 6);
-  in[7] = _mm_srai_epi16(in[7], 6);
-  in[8] = _mm_srai_epi16(in[8], 6);
-  in[9] = _mm_srai_epi16(in[9], 6);
-  in[10] = _mm_srai_epi16(in[10], 6);
-  in[11] = _mm_srai_epi16(in[11], 6);
-  in[12] = _mm_srai_epi16(in[12], 6);
-  in[13] = _mm_srai_epi16(in[13], 6);
-  in[14] = _mm_srai_epi16(in[14], 6);
-  in[15] = _mm_srai_epi16(in[15], 6);
-
-  recon_and_store(dest + 0 * stride, in[0]);
-  recon_and_store(dest + 1 * stride, in[1]);
-  recon_and_store(dest + 2 * stride, in[2]);
-  recon_and_store(dest + 3 * stride, in[3]);
-  recon_and_store(dest + 4 * stride, in[4]);
-  recon_and_store(dest + 5 * stride, in[5]);
-  recon_and_store(dest + 6 * stride, in[6]);
-  recon_and_store(dest + 7 * stride, in[7]);
-  recon_and_store(dest + 8 * stride, in[8]);
-  recon_and_store(dest + 9 * stride, in[9]);
-  recon_and_store(dest + 10 * stride, in[10]);
-  recon_and_store(dest + 11 * stride, in[11]);
-  recon_and_store(dest + 12 * stride, in[12]);
-  recon_and_store(dest + 13 * stride, in[13]);
-  recon_and_store(dest + 14 * stride, in[14]);
-  recon_and_store(dest + 15 * stride, in[15]);
-}
-
 static INLINE void recon_and_store4x4_sse2(const __m128i *const in,
                                            uint8_t *const dest,
                                            const int stride) {
@@ -292,6 +224,14 @@ static INLINE void store_buffer_8x32(__m128i *in, uint8_t *dst, int stride) {
     dst += stride;
     j += 2;
   }
+}
+
+static INLINE void write_buffer_8x1(uint8_t *const dest, const __m128i in) {
+  const __m128i final_rounding = _mm_set1_epi16(1 << 5);
+  __m128i out;
+  out = _mm_adds_epi16(in, final_rounding);
+  out = _mm_srai_epi16(out, 6);
+  recon_and_store(dest, out);
 }
 
 // Only do addition and subtraction butterfly, size = 16, 32
@@ -405,23 +345,24 @@ static INLINE void idct8x8_12_add_kernel_sse2(__m128i *const io /*io[8]*/) {
   idct8(io, io);
 }
 
-static INLINE void idct16_8col(__m128i *const io /*io[16]*/) {
+static INLINE void idct16_8col(const __m128i *const in /*in[16]*/,
+                               __m128i *const out /*out[16]*/) {
   __m128i step1[16], step2[16];
 
   // stage 2
-  butterfly(io[1], io[15], (int)cospi_30_64, (int)cospi_2_64, &step2[8],
+  butterfly(in[1], in[15], (int)cospi_30_64, (int)cospi_2_64, &step2[8],
             &step2[15]);
-  butterfly(io[9], io[7], (int)cospi_14_64, (int)cospi_18_64, &step2[9],
+  butterfly(in[9], in[7], (int)cospi_14_64, (int)cospi_18_64, &step2[9],
             &step2[14]);
-  butterfly(io[5], io[11], (int)cospi_22_64, (int)cospi_10_64, &step2[10],
+  butterfly(in[5], in[11], (int)cospi_22_64, (int)cospi_10_64, &step2[10],
             &step2[13]);
-  butterfly(io[13], io[3], (int)cospi_6_64, (int)cospi_26_64, &step2[11],
+  butterfly(in[13], in[3], (int)cospi_6_64, (int)cospi_26_64, &step2[11],
             &step2[12]);
 
   // stage 3
-  butterfly(io[2], io[14], (int)cospi_28_64, (int)cospi_4_64, &step1[4],
+  butterfly(in[2], in[14], (int)cospi_28_64, (int)cospi_4_64, &step1[4],
             &step1[7]);
-  butterfly(io[10], io[6], (int)cospi_12_64, (int)cospi_20_64, &step1[5],
+  butterfly(in[10], in[6], (int)cospi_12_64, (int)cospi_20_64, &step1[5],
             &step1[6]);
   step1[8] = _mm_add_epi16(step2[8], step2[9]);
   step1[9] = _mm_sub_epi16(step2[8], step2[9]);
@@ -433,9 +374,9 @@ static INLINE void idct16_8col(__m128i *const io /*io[16]*/) {
   step1[15] = _mm_add_epi16(step2[14], step2[15]);
 
   // stage 4
-  butterfly(io[0], io[8], (int)cospi_16_64, (int)cospi_16_64, &step2[1],
+  butterfly(in[0], in[8], (int)cospi_16_64, (int)cospi_16_64, &step2[1],
             &step2[0]);
-  butterfly(io[4], io[12], (int)cospi_24_64, (int)cospi_8_64, &step2[2],
+  butterfly(in[4], in[12], (int)cospi_24_64, (int)cospi_8_64, &step2[2],
             &step2[3]);
   butterfly(step1[14], step1[9], (int)cospi_24_64, (int)cospi_8_64, &step2[9],
             &step2[14]);
@@ -481,22 +422,22 @@ static INLINE void idct16_8col(__m128i *const io /*io[16]*/) {
             &step2[11], &step2[12]);
 
   // stage 7
-  io[0] = _mm_add_epi16(step2[0], step1[15]);
-  io[1] = _mm_add_epi16(step2[1], step1[14]);
-  io[2] = _mm_add_epi16(step2[2], step2[13]);
-  io[3] = _mm_add_epi16(step2[3], step2[12]);
-  io[4] = _mm_add_epi16(step2[4], step2[11]);
-  io[5] = _mm_add_epi16(step2[5], step2[10]);
-  io[6] = _mm_add_epi16(step2[6], step1[9]);
-  io[7] = _mm_add_epi16(step2[7], step1[8]);
-  io[8] = _mm_sub_epi16(step2[7], step1[8]);
-  io[9] = _mm_sub_epi16(step2[6], step1[9]);
-  io[10] = _mm_sub_epi16(step2[5], step2[10]);
-  io[11] = _mm_sub_epi16(step2[4], step2[11]);
-  io[12] = _mm_sub_epi16(step2[3], step2[12]);
-  io[13] = _mm_sub_epi16(step2[2], step2[13]);
-  io[14] = _mm_sub_epi16(step2[1], step1[14]);
-  io[15] = _mm_sub_epi16(step2[0], step1[15]);
+  out[0] = _mm_add_epi16(step2[0], step1[15]);
+  out[1] = _mm_add_epi16(step2[1], step1[14]);
+  out[2] = _mm_add_epi16(step2[2], step2[13]);
+  out[3] = _mm_add_epi16(step2[3], step2[12]);
+  out[4] = _mm_add_epi16(step2[4], step2[11]);
+  out[5] = _mm_add_epi16(step2[5], step2[10]);
+  out[6] = _mm_add_epi16(step2[6], step1[9]);
+  out[7] = _mm_add_epi16(step2[7], step1[8]);
+  out[8] = _mm_sub_epi16(step2[7], step1[8]);
+  out[9] = _mm_sub_epi16(step2[6], step1[9]);
+  out[10] = _mm_sub_epi16(step2[5], step2[10]);
+  out[11] = _mm_sub_epi16(step2[4], step2[11]);
+  out[12] = _mm_sub_epi16(step2[3], step2[12]);
+  out[13] = _mm_sub_epi16(step2[2], step2[13]);
+  out[14] = _mm_sub_epi16(step2[1], step1[14]);
+  out[15] = _mm_sub_epi16(step2[0], step1[15]);
 }
 
 static INLINE void idct16x16_10_pass1(const __m128i *const input /*input[4]*/,
@@ -622,8 +563,7 @@ static INLINE void idct16x16_10_pass2(__m128i *const l /*l[8]*/,
             &step1[7]);
 
   // stage 4
-  butterfly(io[0], zero, (int)cospi_16_64, (int)cospi_16_64, &step1[1],
-            &step1[0]);
+  step1[0] = butterfly_cospi16(io[0]);
   butterfly(step2[15], step2[8], (int)cospi_24_64, (int)cospi_8_64, &step2[9],
             &step2[14]);
   butterfly(step2[11], step2[12], -(int)cospi_8_64, -(int)cospi_24_64,
@@ -643,12 +583,12 @@ static INLINE void idct16x16_10_pass2(__m128i *const l /*l[8]*/,
 
   // stage 6
   step2[0] = _mm_add_epi16(step1[0], step1[7]);
-  step2[1] = _mm_add_epi16(step1[1], step1[6]);
-  step2[2] = _mm_add_epi16(step1[1], step1[5]);
+  step2[1] = _mm_add_epi16(step1[0], step1[6]);
+  step2[2] = _mm_add_epi16(step1[0], step1[5]);
   step2[3] = _mm_add_epi16(step1[0], step1[4]);
   step2[4] = _mm_sub_epi16(step1[0], step1[4]);
-  step2[5] = _mm_sub_epi16(step1[1], step1[5]);
-  step2[6] = _mm_sub_epi16(step1[1], step1[6]);
+  step2[5] = _mm_sub_epi16(step1[0], step1[5]);
+  step2[6] = _mm_sub_epi16(step1[0], step1[6]);
   step2[7] = _mm_sub_epi16(step1[0], step1[7]);
   butterfly(step1[13], step1[10], (int)cospi_16_64, (int)cospi_16_64,
             &step2[10], &step2[13]);
@@ -674,11 +614,120 @@ static INLINE void idct16x16_10_pass2(__m128i *const l /*l[8]*/,
   io[15] = _mm_sub_epi16(step2[0], step1[15]);
 }
 
+static INLINE void idct32_8x32_quarter_2_stage_4_to_6(
+    __m128i *const step1 /*step1[16]*/, __m128i *const out /*out[16]*/) {
+  __m128i step2[32];
+
+  // stage 4
+  step2[8] = step1[8];
+  step2[15] = step1[15];
+  butterfly(step1[14], step1[9], (int)cospi_24_64, (int)cospi_8_64, &step2[9],
+            &step2[14]);
+  butterfly(step1[13], step1[10], -(int)cospi_8_64, (int)cospi_24_64,
+            &step2[10], &step2[13]);
+  step2[11] = step1[11];
+  step2[12] = step1[12];
+
+  // stage 5
+  step1[8] = _mm_add_epi16(step2[8], step2[11]);
+  step1[9] = _mm_add_epi16(step2[9], step2[10]);
+  step1[10] = _mm_sub_epi16(step2[9], step2[10]);
+  step1[11] = _mm_sub_epi16(step2[8], step2[11]);
+  step1[12] = _mm_sub_epi16(step2[15], step2[12]);
+  step1[13] = _mm_sub_epi16(step2[14], step2[13]);
+  step1[14] = _mm_add_epi16(step2[14], step2[13]);
+  step1[15] = _mm_add_epi16(step2[15], step2[12]);
+
+  // stage 6
+  out[8] = step1[8];
+  out[9] = step1[9];
+  butterfly(step1[13], step1[10], (int)cospi_16_64, (int)cospi_16_64, &out[10],
+            &out[13]);
+  butterfly(step1[12], step1[11], (int)cospi_16_64, (int)cospi_16_64, &out[11],
+            &out[12]);
+  out[14] = step1[14];
+  out[15] = step1[15];
+}
+
+static INLINE void idct32_8x32_quarter_3_4_stage_4_to_7(
+    __m128i *const step1 /*step1[32]*/, __m128i *const out /*out[32]*/) {
+  __m128i step2[32];
+
+  // stage 4
+  step2[16] = _mm_add_epi16(step1[16], step1[19]);
+  step2[17] = _mm_add_epi16(step1[17], step1[18]);
+  step2[18] = _mm_sub_epi16(step1[17], step1[18]);
+  step2[19] = _mm_sub_epi16(step1[16], step1[19]);
+  step2[20] = _mm_sub_epi16(step1[23], step1[20]);
+  step2[21] = _mm_sub_epi16(step1[22], step1[21]);
+  step2[22] = _mm_add_epi16(step1[22], step1[21]);
+  step2[23] = _mm_add_epi16(step1[23], step1[20]);
+
+  step2[24] = _mm_add_epi16(step1[24], step1[27]);
+  step2[25] = _mm_add_epi16(step1[25], step1[26]);
+  step2[26] = _mm_sub_epi16(step1[25], step1[26]);
+  step2[27] = _mm_sub_epi16(step1[24], step1[27]);
+  step2[28] = _mm_sub_epi16(step1[31], step1[28]);
+  step2[29] = _mm_sub_epi16(step1[30], step1[29]);
+  step2[30] = _mm_add_epi16(step1[29], step1[30]);
+  step2[31] = _mm_add_epi16(step1[28], step1[31]);
+
+  // stage 5
+  step1[16] = step2[16];
+  step1[17] = step2[17];
+  butterfly(step2[29], step2[18], (int)cospi_24_64, (int)cospi_8_64, &step1[18],
+            &step1[29]);
+  butterfly(step2[28], step2[19], (int)cospi_24_64, (int)cospi_8_64, &step1[19],
+            &step1[28]);
+  butterfly(step2[27], step2[20], -(int)cospi_8_64, (int)cospi_24_64,
+            &step1[20], &step1[27]);
+  butterfly(step2[26], step2[21], -(int)cospi_8_64, (int)cospi_24_64,
+            &step1[21], &step1[26]);
+  step1[22] = step2[22];
+  step1[23] = step2[23];
+  step1[24] = step2[24];
+  step1[25] = step2[25];
+  step1[30] = step2[30];
+  step1[31] = step2[31];
+
+  // stage 6
+  out[16] = _mm_add_epi16(step1[16], step1[23]);
+  out[17] = _mm_add_epi16(step1[17], step1[22]);
+  out[18] = _mm_add_epi16(step1[18], step1[21]);
+  out[19] = _mm_add_epi16(step1[19], step1[20]);
+  step2[20] = _mm_sub_epi16(step1[19], step1[20]);
+  step2[21] = _mm_sub_epi16(step1[18], step1[21]);
+  step2[22] = _mm_sub_epi16(step1[17], step1[22]);
+  step2[23] = _mm_sub_epi16(step1[16], step1[23]);
+
+  step2[24] = _mm_sub_epi16(step1[31], step1[24]);
+  step2[25] = _mm_sub_epi16(step1[30], step1[25]);
+  step2[26] = _mm_sub_epi16(step1[29], step1[26]);
+  step2[27] = _mm_sub_epi16(step1[28], step1[27]);
+  out[28] = _mm_add_epi16(step1[27], step1[28]);
+  out[29] = _mm_add_epi16(step1[26], step1[29]);
+  out[30] = _mm_add_epi16(step1[25], step1[30]);
+  out[31] = _mm_add_epi16(step1[24], step1[31]);
+
+  // stage 7
+  butterfly(step2[27], step2[20], (int)cospi_16_64, (int)cospi_16_64, &out[20],
+            &out[27]);
+  butterfly(step2[26], step2[21], (int)cospi_16_64, (int)cospi_16_64, &out[21],
+            &out[26]);
+  butterfly(step2[25], step2[22], (int)cospi_16_64, (int)cospi_16_64, &out[22],
+            &out[25]);
+  butterfly(step2[24], step2[23], (int)cospi_16_64, (int)cospi_16_64, &out[23],
+            &out[24]);
+}
+
 void idct4_sse2(__m128i *in);
 void idct8_sse2(__m128i *in);
 void idct16_sse2(__m128i *in0, __m128i *in1);
 void iadst4_sse2(__m128i *in);
 void iadst8_sse2(__m128i *in);
 void iadst16_sse2(__m128i *in0, __m128i *in1);
+void idct32_1024_8x32(const __m128i *const in, __m128i *const out);
+void idct32_34_8x32_sse2(const __m128i *const in, __m128i *const out);
+void idct32_34_8x32_ssse3(const __m128i *const in, __m128i *const out);
 
 #endif  // VPX_DSP_X86_INV_TXFM_SSE2_H_
