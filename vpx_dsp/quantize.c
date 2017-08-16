@@ -201,11 +201,8 @@ void vpx_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       if (abs_coeff >= zbins[rc != 0]) {
         const int64_t tmp1 = abs_coeff + round_ptr[rc != 0];
         const int64_t tmp2 = ((tmp1 * quant_ptr[rc != 0]) >> 16) + tmp1;
-        const uint32_t abs_qcoeff =
-            (uint32_t)((tmp2 * quant_shift_ptr[rc != 0]) >> 16);
-        // Restoring the sign triggers unsigned overflow warnings with negative
-        // values because the result of the xor operation is unsigned.
-        qcoeff_ptr[rc] = (tran_low_t)(abs_qcoeff ^ coeff_sign) - coeff_sign;
+        const int abs_qcoeff = (int)((tmp2 * quant_shift_ptr[rc != 0]) >> 16);
+        qcoeff_ptr[rc] = (tran_low_t)((abs_qcoeff ^ coeff_sign) - coeff_sign);
         dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
         if (abs_qcoeff) eob = i;
       }
@@ -310,9 +307,8 @@ void vpx_highbd_quantize_b_32x32_c(
       const int64_t tmp1 =
           abs_coeff + ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
       const int64_t tmp2 = ((tmp1 * quant_ptr[rc != 0]) >> 16) + tmp1;
-      const uint32_t abs_qcoeff =
-          (uint32_t)((tmp2 * quant_shift_ptr[rc != 0]) >> 15);
-      qcoeff_ptr[rc] = (tran_low_t)(abs_qcoeff ^ coeff_sign) - coeff_sign;
+      const int abs_qcoeff = (int)((tmp2 * quant_shift_ptr[rc != 0]) >> 15);
+      qcoeff_ptr[rc] = (tran_low_t)((abs_qcoeff ^ coeff_sign) - coeff_sign);
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2;
       if (abs_qcoeff) eob = idx_arr[i];
     }
