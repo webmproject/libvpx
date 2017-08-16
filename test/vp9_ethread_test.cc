@@ -50,7 +50,6 @@ class VPxFirstPassEncoderThreadTest
     InitializeConfig();
     SetMode(encoding_mode_);
 
-    cfg_.g_lag_in_frames = 3;
     cfg_.rc_end_usage = VPX_VBR;
     cfg_.rc_2pass_vbr_minsection_pct = 5;
     cfg_.rc_2pass_vbr_maxsection_pct = 2000;
@@ -238,7 +237,6 @@ class VPxEncoderThreadTest
     SetMode(encoding_mode_);
 
     if (encoding_mode_ != ::libvpx_test::kRealTime) {
-      cfg_.g_lag_in_frames = 3;
       cfg_.rc_end_usage = VPX_VBR;
       cfg_.rc_2pass_vbr_minsection_pct = 5;
       cfg_.rc_2pass_vbr_maxsection_pct = 2000;
