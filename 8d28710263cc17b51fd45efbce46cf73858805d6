@@ -118,6 +118,30 @@
       "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "371591f9_1c0f070b",
+        "filename": "vpx_dsp/quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-16T17:33:47Z",
+      "side": 1,
+      "message": "And there is still the current issue of a 8 bit file encoded in a hbd build and decoded in a lowbd build (or vice versa)",
+      "parentUuid": "53f3a86b_2f97d290",
+      "range": {
+        "startLine": 160,
+        "startChar": 35,
+        "endLine": 160,
+        "endChar": 74
+      },
+      "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
