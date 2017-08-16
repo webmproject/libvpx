@@ -730,7 +730,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       }
     } else {
       // SKIP_TXFM_AC_DC
-      // skip forward transform
+      // skip forward transform. Because this is handled here, the quantization
+      // does not need to do it.
       x->plane[plane].eobs[block] = 0;
       sse = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       dist = sse;

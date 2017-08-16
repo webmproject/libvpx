@@ -143,7 +143,7 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
   for (int i = 0; i < number_of_iterations; ++i) {
     // Test skip block for the first three iterations to catch all the different
     // sizes.
-    const int skip_block = i < 3;
+    const int skip_block = 0;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = (TX_SIZE)(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -197,7 +197,7 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
   uint16_t eob, ref_eob;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    int skip_block = i < 3;
+    int skip_block = 0;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = (TX_SIZE)(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -263,9 +263,9 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
   }
 
   for (TX_SIZE sz = starting_sz; sz <= ending_sz; ++sz) {
-    // skip_block, zbin > coeff, zbin < coeff.
-    for (int i = 0; i < 3; ++i) {
-      const int skip_block = i == 0;
+    // zbin > coeff, zbin < coeff.
+    for (int i = 0; i < 2; ++i) {
+      const int skip_block = 0;
       // TX_TYPE defines the scan order. That is not relevant to the speed test.
       // Pick the first one.
       const TX_TYPE tx_type = DCT_DCT;
@@ -276,14 +276,10 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
                            quant_shift_ptr_, dequant_ptr_);
 
       if (i == 0) {
-        // zbin values are unused when skip_block == 1.
-        zbin_ptr_[0] = zbin_ptr_[1] = 0;
-        coeff.Set(0);
-      } else if (i == 1) {
         // When |coeff values| are less than zbin the results are 0.
         zbin_ptr_[0] = zbin_ptr_[1] = 100;
         coeff.Set(&rnd, -99, 99);
-      } else if (i == 2) {
+      } else if (i == 1) {
         zbin_ptr_[0] = zbin_ptr_[1] = 50;
         coeff.Set(&rnd, -500, 500);
       }

@@ -333,6 +333,8 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int16_t *src_diff;
   src_diff = &p->src_diff[4 * (row * diff_stride + col)];
+  // skip block condition should be handled before this is called.
+  assert(!x->skip_block);
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -407,6 +409,9 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block, int row, int col,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int16_t *src_diff;
   src_diff = &p->src_diff[4 * (row * diff_stride + col)];
+  // skip block condition should be handled before this is called.
+  assert(!x->skip_block);
+
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
@@ -478,6 +483,8 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int16_t *src_diff;
   src_diff = &p->src_diff[4 * (row * diff_stride + col)];
+  // skip block condition should be handled before this is called.
+  assert(!x->skip_block);
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -773,6 +780,9 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
       xd, bwl, tx_size, mode, (x->skip_encode || x->fp_src_pred) ? src : dst,
       (x->skip_encode || x->fp_src_pred) ? src_stride : dst_stride, dst,
       dst_stride, col, row, plane);
+
+  // skip block condition should be handled before this is called.
+  assert(!x->skip_block);
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
