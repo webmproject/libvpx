@@ -142,6 +142,30 @@
       "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b08b2c49_f86d0e2c",
+        "filename": "vpx_dsp/quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2017-08-16T18:01:51Z",
+      "side": 1,
+      "message": "The qcoeffs are encoded / decoded in the bit-stream. dqv refers to the step size. So we have the index (i.e., qcoeff) then multiply by the step size to get the dqcoeff (reconstructed coeff).\n\nIf internal is 8-bit, val should stay at 16 bit.",
+      "parentUuid": "371591f9_1c0f070b",
+      "range": {
+        "startLine": 160,
+        "startChar": 35,
+        "endLine": 160,
+        "endChar": 74
+      },
+      "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
