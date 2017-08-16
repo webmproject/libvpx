@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f9ed4c6b_b00f6725",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-16T18:39:31Z",
+      "side": 1,
+      "message": "This and the other change could both have been attached directly to this bug, as they are driven by that same root cause.\n\nFormatting the line this way prevents the auto updater from making a comment on the bug when this is submitted.",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "b814e2d898a6d10019cf1419569ca221214641f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
