@@ -166,6 +166,30 @@
       "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b5ef96b_e8850aae",
+        "filename": "vpx_dsp/quantize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-16T18:11:16Z",
+      "side": 1,
+      "message": "So if this is only changed for quantize/quantize32x32 (non hbd / 8 bit only), it should not present any problems?",
+      "parentUuid": "b08b2c49_f86d0e2c",
+      "range": {
+        "startLine": 160,
+        "startChar": 35,
+        "endLine": 160,
+        "endChar": 74
+      },
+      "revId": "8d28710263cc17b51fd45efbce46cf73858805d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
