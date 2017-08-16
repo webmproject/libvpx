@@ -867,9 +867,10 @@ static INLINE int denoise_svc(const struct VP9_COMP *const cpi) {
 }
 #endif
 
+#define MIN_LOOKAHEAD_FOR_ARFS 4
 static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
   return !(cpi->oxcf.mode == REALTIME && cpi->oxcf.rc_mode == VPX_CBR) &&
-         cpi->oxcf.lag_in_frames > 0 &&
+         cpi->oxcf.lag_in_frames >= MIN_LOOKAHEAD_FOR_ARFS &&
          (cpi->oxcf.enable_auto_arf &&
           (!is_two_pass_svc(cpi) ||
            cpi->oxcf.ss_enable_auto_arf[cpi->svc.spatial_layer_id]));

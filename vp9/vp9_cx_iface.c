@@ -191,6 +191,13 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
                 (MAX_LAG_BUFFERS - 1));
   }
 
+  // For formation of valid ARF groups lag_in _frames should be 0 or greater
+  // than the max_gf_interval + 2
+  if (cfg->g_lag_in_frames > 0 && extra_cfg->max_gf_interval > 0 &&
+      cfg->g_lag_in_frames < extra_cfg->max_gf_interval + 2) {
+    ERROR("Set lag in frames to 0 (low delay) or >= (max-gf-interval + 2)");
+  }
+
   if (cfg->rc_resize_allowed == 1) {
     RANGE_CHECK(cfg, rc_scaled_width, 0, cfg->g_w);
     RANGE_CHECK(cfg, rc_scaled_height, 0, cfg->g_h);
