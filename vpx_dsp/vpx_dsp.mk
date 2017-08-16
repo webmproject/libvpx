@@ -283,7 +283,6 @@ ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_quantize_intrin_sse2.c
 endif
 ifeq ($(ARCH_X86_64),yes)
-DSP_SRCS-$(HAVE_SSSE3)  += x86/quantize_ssse3_x86_64.asm
 DSP_SRCS-$(HAVE_AVX)    += x86/quantize_avx_x86_64.asm
 endif
 
