@@ -648,8 +648,8 @@ static INLINE void highbd_idct32_34_4x32_quarter_2(const __m128i *in /*in[32]*/,
 static INLINE void highbd_idct32_34_4x32_quarter_1_2(
     const __m128i *const in /*in[32]*/, __m128i *const out /*out[32]*/) {
   __m128i temp[16];
-  highbd_idct32_135_4x32_quarter_1(in, temp);
-  highbd_idct32_135_4x32_quarter_2(in, temp);
+  highbd_idct32_34_4x32_quarter_1(in, temp);
+  highbd_idct32_34_4x32_quarter_2(in, temp);
   // stage 7
   highbd_add_sub_butterfly(temp, out, 16);
 }
