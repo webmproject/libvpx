@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4c52bb0_a34dd2f7",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-17T03:40:22Z",
+      "side": 1,
+      "message": "how about just a wrapper template like in vp9_error_block_test.cc (and earlier in the loopfilter test) to adapt the parameters? another option would be to factor the locals to a struct and move the implementation to the subclass. templating the whole function would require rtti, which we don\u0027t want",
+      "revId": "03783162b1a22a529fa6f27e5c7b04c73a609f9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
