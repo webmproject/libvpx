@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0c0abcaa_7dfb7b88",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-17T01:31:29Z",
+      "side": 1,
+      "message": "this fixes a test not the codec, it\u0027s best to name it here to avoid ambiguity",
+      "revId": "48110d0f7904bb04b4f70000721e96ed64bc6fb2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6ecb00d_16b9838a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-17T01:31:29Z",
+      "side": 1,
+      "message": "try to keep this alone in the first column so the change can be attached to the bug",
+      "range": {
+        "startLine": 18,
+        "startChar": 37,
+        "endLine": 18,
+        "endChar": 50
+      },
+      "revId": "48110d0f7904bb04b4f70000721e96ed64bc6fb2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
