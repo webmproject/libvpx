@@ -22,6 +22,30 @@
       "revId": "b814e2d898a6d10019cf1419569ca221214641f5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ed7e592_d4d3f08e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2017-08-17T12:25:05Z",
+      "side": 1,
+      "message": "I will bear this restriction in mind in the future.",
+      "parentUuid": "f9ed4c6b_b00f6725",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 22
+      },
+      "revId": "b814e2d898a6d10019cf1419569ca221214641f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
