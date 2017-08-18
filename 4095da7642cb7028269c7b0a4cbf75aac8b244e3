@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8e54655_d9246854",
+        "filename": "vpx_dsp/x86/variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-18T18:13:17Z",
+      "side": 1,
+      "message": "this one too",
+      "range": {
+        "startLine": 98,
+        "startChar": 13,
+        "endLine": 98,
+        "endChar": 16
+      },
+      "revId": "4095da7642cb7028269c7b0a4cbf75aac8b244e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
