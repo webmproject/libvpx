@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2b58649c_a90be5ad",
+        "filename": "vpx_dsp/x86/variance_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-08-18T17:56:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d81f6da1_9bfde2f8",
+      "range": {
+        "startLine": 83,
+        "startChar": 16,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "c20d1e7d1a42fcf1951ec6b8d7099823e3253fef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "33af2b4e_0aa909b0",
         "filename": "vpx_dsp/x86/variance_avx2.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-18T17:51:44Z",
       "side": 1,
       "message": "these could be made lower case in another patch",
+      "range": {
+        "startLine": 96,
+        "startChar": 13,
+        "endLine": 96,
+        "endChar": 16
+      },
+      "revId": "c20d1e7d1a42fcf1951ec6b8d7099823e3253fef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "087c32e9_99da2673",
+        "filename": "vpx_dsp/x86/variance_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-08-18T17:56:06Z",
+      "side": 1,
+      "message": "I\u0027ll fix now.",
+      "parentUuid": "33af2b4e_0aa909b0",
       "range": {
         "startLine": 96,
         "startChar": 13,
