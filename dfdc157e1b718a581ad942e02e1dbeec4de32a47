@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0bf80b9d_9270404f",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-18T19:52:38Z",
+      "side": 1,
+      "message": "the template based solution will remove the need for all this:\n\nhttps://chromium-review.googlesource.com/c/360946",
+      "revId": "dfdc157e1b718a581ad942e02e1dbeec4de32a47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
