@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa412499_2eaf784f",
+        "filename": "vp9/encoder/arm/neon/vp9_quantize_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-08-21T18:24:48Z",
+      "side": 1,
+      "message": "If dequant_ptr[] is always non-negative (ignore if not true), maybe qcoeff can apply mask before sign, and use the value after mask to calculate abs dqcoeff in int_16, and apply sign in the last. Not sure if this would be faster and bit-exact for arbitrary inputs and quant/dequant coefs.",
+      "revId": "6387431667235c80c13aedabf77be01cc91397fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
