@@ -9,6 +9,7 @@
  */
 
 #include <arm_neon.h>
+#include <assert.h>
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/arm/mem_neon.h"
@@ -20,24 +21,12 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                          tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
                          uint16_t *eob_ptr, const int16_t *scan_ptr,
                          const int16_t *iscan_ptr) {
-  const int16x8_t zero = vdupq_n_s16(0);
   const int16x8_t one = vdupq_n_s16(1);
   const int16x8_t neg_one = vdupq_n_s16(-1);
   uint16x8_t eob_max;
   (void)scan_ptr;
-
-  if (skip_block) {
-    do {
-      store_s16q_to_tran_low(qcoeff_ptr, zero);
-      store_s16q_to_tran_low(dqcoeff_ptr, zero);
-      qcoeff_ptr += 8;
-      dqcoeff_ptr += 8;
-      n_coeffs -= 8;
-    } while (n_coeffs > 0);
-
-    *eob_ptr = 0;
-    return;
-  }
+  (void)skip_block;
+  assert(!skip_block);
 
   // Process first 8 values which include a dc component.
   {
@@ -162,24 +151,14 @@ void vpx_quantize_b_32x32_neon(
     const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
     tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
     const int16_t *scan_ptr, const int16_t *iscan_ptr) {
-  const int16x8_t zero = vdupq_n_s16(0);
   const int16x8_t one = vdupq_n_s16(1);
   const int16x8_t neg_one = vdupq_n_s16(-1);
   uint16x8_t eob_max;
   int i;
   (void)scan_ptr;
   (void)n_coeffs;  // Because we will always calculate 32*32.
-
-  if (skip_block) {
-    for (i = 0; i < 32 * 32 / 8; ++i) {
-      store_s16q_to_tran_low(qcoeff_ptr, zero);
-      store_s16q_to_tran_low(dqcoeff_ptr, zero);
-      qcoeff_ptr += 8;
-      dqcoeff_ptr += 8;
-    }
-    *eob_ptr = 0;
-    return;
-  }
+  (void)skip_block;
+  assert(!skip_block);
 
   // Process first 8 values which include a dc component.
   {
