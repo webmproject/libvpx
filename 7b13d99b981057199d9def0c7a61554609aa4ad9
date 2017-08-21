@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e7b9c8e_f544946b",
+        "filename": "vp9/encoder/x86/vp9_quantize_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-21T22:24:51Z",
+      "side": 1,
+      "message": "you could move this to the declaration to avoid the scope here",
+      "revId": "7b13d99b981057199d9def0c7a61554609aa4ad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b160563_8c121ee8",
+        "filename": "vp9/encoder/x86/vp9_quantize_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-21T22:24:51Z",
+      "side": 1,
+      "message": "then this block could be dropped I think",
+      "revId": "7b13d99b981057199d9def0c7a61554609aa4ad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "945288b4_082e22f7",
+        "filename": "vp9/encoder/x86/vp9_quantize_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-21T22:24:51Z",
+      "side": 1,
+      "message": "drop this scope",
+      "revId": "7b13d99b981057199d9def0c7a61554609aa4ad9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
