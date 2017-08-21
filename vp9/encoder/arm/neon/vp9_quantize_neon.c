@@ -9,7 +9,7 @@
  */
 
 #include <arm_neon.h>
-
+#include <assert.h>
 #include <math.h>
 
 #include "vpx_mem/vpx_mem.h"
@@ -31,86 +31,83 @@ void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
                           tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
                           uint16_t *eob_ptr, const int16_t *scan,
                           const int16_t *iscan) {
+  // Quantization pass: All coefficients with index >= zero_flag are
+  // skippable. Note: zero_flag can be zero.
+  int i;
+  const int16x8_t v_zero = vdupq_n_s16(0);
+  const int16x8_t v_one = vdupq_n_s16(1);
+  int16x8_t v_eobmax_76543210 = vdupq_n_s16(-1);
+  int16x8_t v_round = vmovq_n_s16(round_ptr[1]);
+  int16x8_t v_quant = vmovq_n_s16(quant_ptr[1]);
+  int16x8_t v_dequant = vmovq_n_s16(dequant_ptr[1]);
+
   (void)scan;
+  (void)skip_block;
+  assert(!skip_block);
 
-  if (!skip_block) {
-    // Quantization pass: All coefficients with index >= zero_flag are
-    // skippable. Note: zero_flag can be zero.
-    int i;
-    const int16x8_t v_zero = vdupq_n_s16(0);
-    const int16x8_t v_one = vdupq_n_s16(1);
-    int16x8_t v_eobmax_76543210 = vdupq_n_s16(-1);
-    int16x8_t v_round = vmovq_n_s16(round_ptr[1]);
-    int16x8_t v_quant = vmovq_n_s16(quant_ptr[1]);
-    int16x8_t v_dequant = vmovq_n_s16(dequant_ptr[1]);
-    // adjust for dc
-    v_round = vsetq_lane_s16(round_ptr[0], v_round, 0);
-    v_quant = vsetq_lane_s16(quant_ptr[0], v_quant, 0);
-    v_dequant = vsetq_lane_s16(dequant_ptr[0], v_dequant, 0);
-    // process dc and the first seven ac coeffs
-    {
-      const int16x8_t v_iscan = vld1q_s16(&iscan[0]);
-      const int16x8_t v_coeff = load_tran_low_to_s16q(coeff_ptr);
-      const int16x8_t v_coeff_sign = vshrq_n_s16(v_coeff, 15);
-      const int16x8_t v_tmp = vabaq_s16(v_round, v_coeff, v_zero);
-      const int32x4_t v_tmp_lo =
-          vmull_s16(vget_low_s16(v_tmp), vget_low_s16(v_quant));
-      const int32x4_t v_tmp_hi =
-          vmull_s16(vget_high_s16(v_tmp), vget_high_s16(v_quant));
-      const int16x8_t v_tmp2 =
-          vcombine_s16(vshrn_n_s32(v_tmp_lo, 16), vshrn_n_s32(v_tmp_hi, 16));
-      const uint16x8_t v_nz_mask = vceqq_s16(v_tmp2, v_zero);
-      const int16x8_t v_iscan_plus1 = vaddq_s16(v_iscan, v_one);
-      const int16x8_t v_nz_iscan = vbslq_s16(v_nz_mask, v_zero, v_iscan_plus1);
-      const int16x8_t v_qcoeff_a = veorq_s16(v_tmp2, v_coeff_sign);
-      const int16x8_t v_qcoeff = vsubq_s16(v_qcoeff_a, v_coeff_sign);
-      const int16x8_t v_dqcoeff = vmulq_s16(v_qcoeff, v_dequant);
-      v_eobmax_76543210 = vmaxq_s16(v_eobmax_76543210, v_nz_iscan);
-      store_s16q_to_tran_low(qcoeff_ptr, v_qcoeff);
-      store_s16q_to_tran_low(dqcoeff_ptr, v_dqcoeff);
-      v_round = vmovq_n_s16(round_ptr[1]);
-      v_quant = vmovq_n_s16(quant_ptr[1]);
-      v_dequant = vmovq_n_s16(dequant_ptr[1]);
-    }
-    // now process the rest of the ac coeffs
-    for (i = 8; i < count; i += 8) {
-      const int16x8_t v_iscan = vld1q_s16(&iscan[i]);
-      const int16x8_t v_coeff = load_tran_low_to_s16q(coeff_ptr + i);
-      const int16x8_t v_coeff_sign = vshrq_n_s16(v_coeff, 15);
-      const int16x8_t v_tmp = vabaq_s16(v_round, v_coeff, v_zero);
-      const int32x4_t v_tmp_lo =
-          vmull_s16(vget_low_s16(v_tmp), vget_low_s16(v_quant));
-      const int32x4_t v_tmp_hi =
-          vmull_s16(vget_high_s16(v_tmp), vget_high_s16(v_quant));
-      const int16x8_t v_tmp2 =
-          vcombine_s16(vshrn_n_s32(v_tmp_lo, 16), vshrn_n_s32(v_tmp_hi, 16));
-      const uint16x8_t v_nz_mask = vceqq_s16(v_tmp2, v_zero);
-      const int16x8_t v_iscan_plus1 = vaddq_s16(v_iscan, v_one);
-      const int16x8_t v_nz_iscan = vbslq_s16(v_nz_mask, v_zero, v_iscan_plus1);
-      const int16x8_t v_qcoeff_a = veorq_s16(v_tmp2, v_coeff_sign);
-      const int16x8_t v_qcoeff = vsubq_s16(v_qcoeff_a, v_coeff_sign);
-      const int16x8_t v_dqcoeff = vmulq_s16(v_qcoeff, v_dequant);
-      v_eobmax_76543210 = vmaxq_s16(v_eobmax_76543210, v_nz_iscan);
-      store_s16q_to_tran_low(qcoeff_ptr + i, v_qcoeff);
-      store_s16q_to_tran_low(dqcoeff_ptr + i, v_dqcoeff);
-    }
-    {
-      const int16x4_t v_eobmax_3210 = vmax_s16(
-          vget_low_s16(v_eobmax_76543210), vget_high_s16(v_eobmax_76543210));
-      const int64x1_t v_eobmax_xx32 =
-          vshr_n_s64(vreinterpret_s64_s16(v_eobmax_3210), 32);
-      const int16x4_t v_eobmax_tmp =
-          vmax_s16(v_eobmax_3210, vreinterpret_s16_s64(v_eobmax_xx32));
-      const int64x1_t v_eobmax_xxx3 =
-          vshr_n_s64(vreinterpret_s64_s16(v_eobmax_tmp), 16);
-      const int16x4_t v_eobmax_final =
-          vmax_s16(v_eobmax_tmp, vreinterpret_s16_s64(v_eobmax_xxx3));
+  // adjust for dc
+  v_round = vsetq_lane_s16(round_ptr[0], v_round, 0);
+  v_quant = vsetq_lane_s16(quant_ptr[0], v_quant, 0);
+  v_dequant = vsetq_lane_s16(dequant_ptr[0], v_dequant, 0);
+  // process dc and the first seven ac coeffs
+  {
+    const int16x8_t v_iscan = vld1q_s16(&iscan[0]);
+    const int16x8_t v_coeff = load_tran_low_to_s16q(coeff_ptr);
+    const int16x8_t v_coeff_sign = vshrq_n_s16(v_coeff, 15);
+    const int16x8_t v_tmp = vabaq_s16(v_round, v_coeff, v_zero);
+    const int32x4_t v_tmp_lo =
+        vmull_s16(vget_low_s16(v_tmp), vget_low_s16(v_quant));
+    const int32x4_t v_tmp_hi =
+        vmull_s16(vget_high_s16(v_tmp), vget_high_s16(v_quant));
+    const int16x8_t v_tmp2 =
+        vcombine_s16(vshrn_n_s32(v_tmp_lo, 16), vshrn_n_s32(v_tmp_hi, 16));
+    const uint16x8_t v_nz_mask = vceqq_s16(v_tmp2, v_zero);
+    const int16x8_t v_iscan_plus1 = vaddq_s16(v_iscan, v_one);
+    const int16x8_t v_nz_iscan = vbslq_s16(v_nz_mask, v_zero, v_iscan_plus1);
+    const int16x8_t v_qcoeff_a = veorq_s16(v_tmp2, v_coeff_sign);
+    const int16x8_t v_qcoeff = vsubq_s16(v_qcoeff_a, v_coeff_sign);
+    const int16x8_t v_dqcoeff = vmulq_s16(v_qcoeff, v_dequant);
+    v_eobmax_76543210 = vmaxq_s16(v_eobmax_76543210, v_nz_iscan);
+    store_s16q_to_tran_low(qcoeff_ptr, v_qcoeff);
+    store_s16q_to_tran_low(dqcoeff_ptr, v_dqcoeff);
+    v_round = vmovq_n_s16(round_ptr[1]);
+    v_quant = vmovq_n_s16(quant_ptr[1]);
+    v_dequant = vmovq_n_s16(dequant_ptr[1]);
+  }
+  // now process the rest of the ac coeffs
+  for (i = 8; i < count; i += 8) {
+    const int16x8_t v_iscan = vld1q_s16(&iscan[i]);
+    const int16x8_t v_coeff = load_tran_low_to_s16q(coeff_ptr + i);
+    const int16x8_t v_coeff_sign = vshrq_n_s16(v_coeff, 15);
+    const int16x8_t v_tmp = vabaq_s16(v_round, v_coeff, v_zero);
+    const int32x4_t v_tmp_lo =
+        vmull_s16(vget_low_s16(v_tmp), vget_low_s16(v_quant));
+    const int32x4_t v_tmp_hi =
+        vmull_s16(vget_high_s16(v_tmp), vget_high_s16(v_quant));
+    const int16x8_t v_tmp2 =
+        vcombine_s16(vshrn_n_s32(v_tmp_lo, 16), vshrn_n_s32(v_tmp_hi, 16));
+    const uint16x8_t v_nz_mask = vceqq_s16(v_tmp2, v_zero);
+    const int16x8_t v_iscan_plus1 = vaddq_s16(v_iscan, v_one);
+    const int16x8_t v_nz_iscan = vbslq_s16(v_nz_mask, v_zero, v_iscan_plus1);
+    const int16x8_t v_qcoeff_a = veorq_s16(v_tmp2, v_coeff_sign);
+    const int16x8_t v_qcoeff = vsubq_s16(v_qcoeff_a, v_coeff_sign);
+    const int16x8_t v_dqcoeff = vmulq_s16(v_qcoeff, v_dequant);
+    v_eobmax_76543210 = vmaxq_s16(v_eobmax_76543210, v_nz_iscan);
+    store_s16q_to_tran_low(qcoeff_ptr + i, v_qcoeff);
+    store_s16q_to_tran_low(dqcoeff_ptr + i, v_dqcoeff);
+  }
+  {
+    const int16x4_t v_eobmax_3210 = vmax_s16(vget_low_s16(v_eobmax_76543210),
+                                             vget_high_s16(v_eobmax_76543210));
+    const int64x1_t v_eobmax_xx32 =
+        vshr_n_s64(vreinterpret_s64_s16(v_eobmax_3210), 32);
+    const int16x4_t v_eobmax_tmp =
+        vmax_s16(v_eobmax_3210, vreinterpret_s16_s64(v_eobmax_xx32));
+    const int64x1_t v_eobmax_xxx3 =
+        vshr_n_s64(vreinterpret_s64_s16(v_eobmax_tmp), 16);
+    const int16x4_t v_eobmax_final =
+        vmax_s16(v_eobmax_tmp, vreinterpret_s16_s64(v_eobmax_xxx3));
 
-      *eob_ptr = (uint16_t)vget_lane_s16(v_eobmax_final, 0);
-    }
-  } else {
-    memset(qcoeff_ptr, 0, count * sizeof(*qcoeff_ptr));
-    memset(dqcoeff_ptr, 0, count * sizeof(*dqcoeff_ptr));
-    *eob_ptr = 0;
+    *eob_ptr = (uint16_t)vget_lane_s16(v_eobmax_final, 0);
   }
 }
