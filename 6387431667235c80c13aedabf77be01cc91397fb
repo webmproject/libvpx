@@ -16,6 +16,24 @@
       "revId": "6387431667235c80c13aedabf77be01cc91397fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d844f705_e35317b6",
+        "filename": "vp9/encoder/arm/neon/vp9_quantize_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-21T19:53:48Z",
+      "side": 1,
+      "message": "dequant is 0 to 1828:\nhttps://chromium.googlesource.com/webm/libvpx/+/13eed991f9450cdd8b03fc03c38ea0f9b2667bf8/test/vp9_quantize_test.cc#117\n\nThe compiler was using vsra (shift and accumulate) to make the shift + add one instruction.\n\nIt does appear to be marginally faster with your suggestion though.\nhttps://chromium-review.googlesource.com/624396\n\nactually ... that same approach here causes off-by-one errors with negative values. tuns out quant is almost always negative, even though this starts out with an abs() call, qcoeff * quant is typically negative.",
+      "parentUuid": "aa412499_2eaf784f",
+      "revId": "6387431667235c80c13aedabf77be01cc91397fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
