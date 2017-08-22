@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "66e966d3_5b353b6a",
+        "filename": "vpx_dsp/mips/variance_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-22T19:29:45Z",
+      "side": 1,
+      "message": "#include \"./vpx_dsp_rtcd.h\"\n\nI might have missed this on the previous patch. It helps to ensure that the function prototypes stay in agreement.",
+      "revId": "6d0784d290d7d8495197883170577425ef621d9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "148b828e_4e8d5f1d",
+        "filename": "vpx_dsp/mips/variance_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-22T19:29:45Z",
+      "side": 1,
+      "message": "This is the loop counter?",
+      "revId": "6d0784d290d7d8495197883170577425ef621d9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce069d7b_2c7c8a78",
+        "filename": "vpx_dsp/mips/variance_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-22T19:29:45Z",
+      "side": 1,
+      "message": "You could also write an INLINE function to remove a lot of the duplication. See vpx_dsp/arm/sad_neon.c",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 19
+      },
+      "revId": "6d0784d290d7d8495197883170577425ef621d9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
