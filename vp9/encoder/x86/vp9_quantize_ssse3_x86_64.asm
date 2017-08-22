@@ -22,8 +22,6 @@ SECTION .text
 cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, round, quant, \
                                 qcoeff, dqcoeff, dequant, \
                                 eob, scan, iscan
-  cmp                    dword skipm, 0
-  jne .blank
 
   ; actual quantize loop - setup pointers, rounders, etc.
   movifnidn                   coeffq, coeffmp
@@ -172,27 +170,6 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, round, quant, \
   pmaxsw                          m8, m7
   pextrw                          r6, m8, 0
   mov                           [r2], r6
-  RET
-
-  ; skip-block, i.e. just write all zeroes
-.blank:
-  mov                             r0, dqcoeffmp
-  movifnidn                  ncoeffq, ncoeffmp
-  mov                             r2, qcoeffmp
-  mov                             r3, eobmp
-
-  lea                            r0q, [r0q+ncoeffq*2]
-  lea                            r2q, [r2q+ncoeffq*2]
-  neg                        ncoeffq
-  pxor                            m7, m7
-.blank_loop:
-  STORE_ZERO_TRAN_LOW 7, r0q, ncoeffq
-  STORE_ZERO_TRAN_LOW 7, r0q, ncoeffq + 8
-  STORE_ZERO_TRAN_LOW 7, r2q, ncoeffq
-  STORE_ZERO_TRAN_LOW 7, r2q, ncoeffq + 8
-  add                        ncoeffq, mmsize
-  jl .blank_loop
-  mov                     word [r3q], 0
   RET
 %endmacro
 

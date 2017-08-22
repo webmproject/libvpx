@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #include <tmmintrin.h>
 
 #include "./vpx_dsp_rtcd.h"
@@ -28,18 +29,8 @@ void vpx_quantize_b_ssse3(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   __m128i round, quant, dequant, shift;
   intptr_t index = 0;
   (void)scan_ptr;
-
-  if (skip_block) {
-    do {
-      store_tran_low(zero, dqcoeff_ptr + index);
-      store_tran_low(zero, dqcoeff_ptr + index + 8);
-      store_tran_low(zero, qcoeff_ptr + index);
-      store_tran_low(zero, qcoeff_ptr + index + 8);
-      index += 16;
-    } while (index < n_coeffs);
-    *eob_ptr = 0;
-    return;
-  }
+  (void)skip_block;
+  assert(!skip_block);
 
   // Setup global values
   {
