@@ -858,4 +858,11 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht16x16_msa, &vp9_iht16x16_256_add_msa, 3,
                    VPX_BITS_8)));
 #endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+
+#if HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+INSTANTIATE_TEST_CASE_P(VSX, Trans16x16DCT,
+                        ::testing::Values(make_tuple(&vpx_fdct16x16_c,
+                                                     &vpx_idct16x16_256_add_vsx,
+                                                     0, VPX_BITS_8)));
+#endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace
