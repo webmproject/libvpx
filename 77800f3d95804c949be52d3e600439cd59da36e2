@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e9e2368_be2d0e10",
+        "filename": "vpx_dsp/arm/quantize_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-23T03:59:50Z",
+      "side": 1,
+      "message": "could be extract_sign(_bit) or maybe I was thinking to embed the add, but this is all right",
+      "revId": "77800f3d95804c949be52d3e600439cd59da36e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
