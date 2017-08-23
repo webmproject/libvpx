@@ -11,6 +11,7 @@
 #include <arm_neon.h>
 #include <assert.h>
 
+#include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/arm/mem_neon.h"
 
@@ -143,6 +144,10 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   }
 }
 
+static INLINE int32x4_t extract_sign_bit(int32x4_t a) {
+  return vreinterpretq_s32_u32(vshrq_n_u32(vreinterpretq_u32_s32(a), 31));
+}
+
 // Main difference is that zbin values are halved before comparison and dqcoeff
 // values are divided by 2. zbin is rounded but dqcoeff is not.
 void vpx_quantize_b_32x32_neon(
@@ -184,7 +189,7 @@ void vpx_quantize_b_32x32_neon(
     // (round * quant * 2) >> 16 >> 1 == (round * quant) >> 16
     int16x8_t qcoeff = vshrq_n_s16(vqdmulhq_s16(rounded, quant), 1);
     int16x8_t dqcoeff;
-    int32x4_t dqcoeff_0, dqcoeff_1, dqcoeff_0_sign, dqcoeff_1_sign;
+    int32x4_t dqcoeff_0, dqcoeff_1;
 
     qcoeff = vaddq_s16(qcoeff, rounded);
 
@@ -209,21 +214,12 @@ void vpx_quantize_b_32x32_neon(
     dqcoeff_0 = vmull_s16(vget_low_s16(qcoeff), vget_low_s16(dequant));
     dqcoeff_1 = vmull_s16(vget_high_s16(qcoeff), vget_high_s16(dequant));
 
-    // The way the C shifts the values requires us to convert to positive before
-    // shifting or even narrowing, then put the sign back.
-    dqcoeff_0_sign = vshrq_n_s32(dqcoeff_0, 31);
-    dqcoeff_1_sign = vshrq_n_s32(dqcoeff_1, 31);
-    dqcoeff_0 = vabsq_s32(dqcoeff_0);
-    dqcoeff_1 = vabsq_s32(dqcoeff_1);
-    dqcoeff_0 = vshrq_n_s32(dqcoeff_0, 1);
-    dqcoeff_1 = vshrq_n_s32(dqcoeff_1, 1);
-    dqcoeff_0 = veorq_s32(dqcoeff_0, dqcoeff_0_sign);
-    dqcoeff_1 = veorq_s32(dqcoeff_1, dqcoeff_1_sign);
-    dqcoeff_0 = vsubq_s32(dqcoeff_0, dqcoeff_0_sign);
-    dqcoeff_1 = vsubq_s32(dqcoeff_1, dqcoeff_1_sign);
+    // Add 1 if negative to round towards zero because the C uses division.
+    dqcoeff_0 = vaddq_s32(dqcoeff_0, extract_sign_bit(dqcoeff_0));
+    dqcoeff_1 = vaddq_s32(dqcoeff_1, extract_sign_bit(dqcoeff_1));
 
-    // Narrow *without saturation* because that's what the C does.
-    dqcoeff = vcombine_s16(vmovn_s32(dqcoeff_0), vmovn_s32(dqcoeff_1));
+    dqcoeff =
+        vcombine_s16(vshrn_n_s32(dqcoeff_0, 1), vshrn_n_s32(dqcoeff_1, 1));
 
     store_s16q_to_tran_low(dqcoeff_ptr, dqcoeff);
     dqcoeff_ptr += 8;
@@ -253,7 +249,7 @@ void vpx_quantize_b_32x32_neon(
       // (round * quant * 2) >> 16 >> 1 == (round * quant) >> 16
       int16x8_t qcoeff = vshrq_n_s16(vqdmulhq_s16(rounded, quant), 1);
       int16x8_t dqcoeff;
-      int32x4_t dqcoeff_0, dqcoeff_1, dqcoeff_0_sign, dqcoeff_1_sign;
+      int32x4_t dqcoeff_0, dqcoeff_1;
 
       qcoeff = vaddq_s16(qcoeff, rounded);
 
@@ -279,18 +275,11 @@ void vpx_quantize_b_32x32_neon(
       dqcoeff_0 = vmull_s16(vget_low_s16(qcoeff), vget_low_s16(dequant));
       dqcoeff_1 = vmull_s16(vget_high_s16(qcoeff), vget_high_s16(dequant));
 
-      dqcoeff_0_sign = vshrq_n_s32(dqcoeff_0, 31);
-      dqcoeff_1_sign = vshrq_n_s32(dqcoeff_1, 31);
-      dqcoeff_0 = vabsq_s32(dqcoeff_0);
-      dqcoeff_1 = vabsq_s32(dqcoeff_1);
-      dqcoeff_0 = vshrq_n_s32(dqcoeff_0, 1);
-      dqcoeff_1 = vshrq_n_s32(dqcoeff_1, 1);
-      dqcoeff_0 = veorq_s32(dqcoeff_0, dqcoeff_0_sign);
-      dqcoeff_1 = veorq_s32(dqcoeff_1, dqcoeff_1_sign);
-      dqcoeff_0 = vsubq_s32(dqcoeff_0, dqcoeff_0_sign);
-      dqcoeff_1 = vsubq_s32(dqcoeff_1, dqcoeff_1_sign);
+      dqcoeff_0 = vaddq_s32(dqcoeff_0, extract_sign_bit(dqcoeff_0));
+      dqcoeff_1 = vaddq_s32(dqcoeff_1, extract_sign_bit(dqcoeff_1));
 
-      dqcoeff = vcombine_s16(vmovn_s32(dqcoeff_0), vmovn_s32(dqcoeff_1));
+      dqcoeff =
+          vcombine_s16(vshrn_n_s32(dqcoeff_0, 1), vshrn_n_s32(dqcoeff_1, 1));
 
       store_s16q_to_tran_low(dqcoeff_ptr, dqcoeff);
       dqcoeff_ptr += 8;
