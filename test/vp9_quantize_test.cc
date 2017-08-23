@@ -299,7 +299,13 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
 
       if (i == 0) {
         // When |coeff values| are less than zbin the results are 0.
-        for (int j = 0; j < 8; ++j) zbin_ptr_[j] = 100;
+        int threshold = 100;
+        if (max_size_ == 32) {
+          // For 32x32, the threshold is halved. Double it to keep the values
+          // from clearing it.
+          threshold = 200;
+        }
+        for (int j = 0; j < 8; ++j) zbin_ptr_[j] = threshold;
         coeff.Set(&rnd, -99, 99);
       } else if (i == 1) {
         for (int j = 0; j < 8; ++j) zbin_ptr_[j] = 50;
