@@ -1805,6 +1805,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
               (frame_mv[NEWMV][ref_frame].as_mv.col >> 3);
           cpi->fn_ptr[bsize].vf(x->plane[0].src.buf, x->plane[0].src.stride,
                                 pre_buf, pre_stride, &base_mv_sse);
+
+          // Exit NEWMV search if base_mv is (0,0) && bsize < BLOCK_16x16,
+          // for SVC encoding.
+          if (cpi->use_svc && cpi->svc.use_base_mv && bsize < BLOCK_16X16 &&
+              frame_mv[NEWMV][ref_frame].as_mv.row == 0 &&
+              frame_mv[NEWMV][ref_frame].as_mv.col == 0)
+            continue;
+
           // Exit NEWMV search if base_mv_sse is large.
           if (sf->base_mv_aggressive && base_mv_sse > (best_sse_sofar << scale))
             continue;
