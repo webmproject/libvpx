@@ -17,6 +17,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
+#include "vpx_dsp/x86/quantize_x86.h"
 
 void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                         int skip_block, const int16_t *zbin_ptr,
@@ -34,9 +35,7 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   __m128i qcoeff0, qcoeff1;
   __m128i cmp_mask0, cmp_mask1;
   __m128i all_zero;
-  __m128i qtmp0, qtmp1;
-  __m128i zero_coeff0, zero_coeff1, iscan0, iscan1;
-  __m128i eob = zero, eob0, eob1;
+  __m128i eob = zero, eob0;
 
   (void)scan_ptr;
   (void)skip_block;
@@ -44,15 +43,8 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
   *eob_ptr = 0;
 
-  // Setup global values.
-  zbin = _mm_load_si128((const __m128i *)zbin_ptr);
-  // x86 has no "greater *or equal*" comparison. Subtract 1 from zbin so
-  // it is a strict "greater" comparison.
-  zbin = _mm_sub_epi16(zbin, _mm_set1_epi16(1));
-  round = _mm_load_si128((const __m128i *)round_ptr);
-  quant = _mm_load_si128((const __m128i *)quant_ptr);
-  dequant = _mm_load_si128((const __m128i *)dequant_ptr);
-  shift = _mm_load_si128((const __m128i *)quant_shift_ptr);
+  load_b_values(zbin_ptr, &zbin, round_ptr, &round, quant_ptr, &quant,
+                dequant_ptr, &dequant, quant_shift_ptr, &shift);
 
   // Do DC and first 15 AC.
   coeff0 = load_tran_low(coeff_ptr);
@@ -81,20 +73,11 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     shift = _mm_unpackhi_epi64(shift, shift);
     dequant = _mm_unpackhi_epi64(dequant, dequant);
   } else {
-    qcoeff0 = _mm_adds_epi16(qcoeff0, round);
+    calculate_qcoeff(&qcoeff0, round, quant, shift);
     round = _mm_unpackhi_epi64(round, round);
-    qcoeff1 = _mm_adds_epi16(qcoeff1, round);
-
-    qtmp0 = _mm_mulhi_epi16(qcoeff0, quant);
     quant = _mm_unpackhi_epi64(quant, quant);
-    qtmp1 = _mm_mulhi_epi16(qcoeff1, quant);
-
-    qtmp0 = _mm_add_epi16(qtmp0, qcoeff0);
-    qtmp1 = _mm_add_epi16(qtmp1, qcoeff1);
-
-    qcoeff0 = _mm_mulhi_epi16(qtmp0, shift);
     shift = _mm_unpackhi_epi64(shift, shift);
-    qcoeff1 = _mm_mulhi_epi16(qtmp1, shift);
+    calculate_qcoeff(&qcoeff1, round, quant, shift);
 
     // Reinsert signs
     qcoeff0 = _mm_sign_epi16(qcoeff0, coeff0);
@@ -107,24 +90,15 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     store_tran_low(qcoeff0, qcoeff_ptr);
     store_tran_low(qcoeff1, qcoeff_ptr + 8);
 
-    coeff0 = _mm_mullo_epi16(qcoeff0, dequant);
+    coeff0 = calculate_dqcoeff(qcoeff0, dequant);
     dequant = _mm_unpackhi_epi64(dequant, dequant);
-    coeff1 = _mm_mullo_epi16(qcoeff1, dequant);
+    coeff1 = calculate_dqcoeff(qcoeff1, dequant);
 
     store_tran_low(coeff0, dqcoeff_ptr);
     store_tran_low(coeff1, dqcoeff_ptr + 8);
 
-    // Scan for eob.
-    zero_coeff0 = _mm_cmpeq_epi16(coeff0, zero);
-    zero_coeff1 = _mm_cmpeq_epi16(coeff1, zero);
-    iscan0 = _mm_load_si128((const __m128i *)(iscan_ptr));
-    iscan1 = _mm_load_si128((const __m128i *)(iscan_ptr + 8));
-    // Add one to convert from indices to counts
-    iscan0 = _mm_sub_epi16(iscan0, cmp_mask0);
-    iscan1 = _mm_sub_epi16(iscan1, cmp_mask1);
-    eob = _mm_andnot_si128(zero_coeff0, iscan0);
-    eob1 = _mm_andnot_si128(zero_coeff1, iscan1);
-    eob = _mm_max_epi16(eob, eob1);
+    eob = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan_ptr, 0,
+                       zero);
   }
 
   // AC only loop.
@@ -149,17 +123,8 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       continue;
     }
 
-    qcoeff0 = _mm_adds_epi16(qcoeff0, round);
-    qcoeff1 = _mm_adds_epi16(qcoeff1, round);
-
-    qtmp0 = _mm_mulhi_epi16(qcoeff0, quant);
-    qtmp1 = _mm_mulhi_epi16(qcoeff1, quant);
-
-    qtmp0 = _mm_add_epi16(qtmp0, qcoeff0);
-    qtmp1 = _mm_add_epi16(qtmp1, qcoeff1);
-
-    qcoeff0 = _mm_mulhi_epi16(qtmp0, shift);
-    qcoeff1 = _mm_mulhi_epi16(qtmp1, shift);
+    calculate_qcoeff(&qcoeff0, round, quant, shift);
+    calculate_qcoeff(&qcoeff1, round, quant, shift);
 
     qcoeff0 = _mm_sign_epi16(qcoeff0, coeff0);
     qcoeff1 = _mm_sign_epi16(qcoeff1, coeff1);
@@ -170,35 +135,18 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     store_tran_low(qcoeff0, qcoeff_ptr + index);
     store_tran_low(qcoeff1, qcoeff_ptr + index + 8);
 
-    coeff0 = _mm_mullo_epi16(qcoeff0, dequant);
-    coeff1 = _mm_mullo_epi16(qcoeff1, dequant);
+    coeff0 = calculate_dqcoeff(qcoeff0, dequant);
+    coeff1 = calculate_dqcoeff(qcoeff1, dequant);
 
     store_tran_low(coeff0, dqcoeff_ptr + index);
     store_tran_low(coeff1, dqcoeff_ptr + index + 8);
 
-    zero_coeff0 = _mm_cmpeq_epi16(coeff0, zero);
-    zero_coeff1 = _mm_cmpeq_epi16(coeff1, zero);
-    iscan0 = _mm_load_si128((const __m128i *)(iscan_ptr + index));
-    iscan1 = _mm_load_si128((const __m128i *)(iscan_ptr + index + 8));
-    iscan0 = _mm_sub_epi16(iscan0, cmp_mask0);
-    iscan1 = _mm_sub_epi16(iscan1, cmp_mask1);
-    eob0 = _mm_andnot_si128(zero_coeff0, iscan0);
-    eob1 = _mm_andnot_si128(zero_coeff1, iscan1);
-    eob0 = _mm_max_epi16(eob0, eob1);
+    eob0 = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan_ptr,
+                        index, zero);
     eob = _mm_max_epi16(eob, eob0);
   }
 
-  // Accumulate eob.
-  {
-    __m128i eob_shuffled;
-    eob_shuffled = _mm_shuffle_epi32(eob, 0xe);
-    eob = _mm_max_epi16(eob, eob_shuffled);
-    eob_shuffled = _mm_shufflelo_epi16(eob, 0xe);
-    eob = _mm_max_epi16(eob, eob_shuffled);
-    eob_shuffled = _mm_shufflelo_epi16(eob, 0x1);
-    eob = _mm_max_epi16(eob, eob_shuffled);
-    *eob_ptr = _mm_extract_epi16(eob, 1);
-  }
+  *eob_ptr = accumulate_eob(eob);
 }
 
 void vpx_quantize_b_32x32_avx(
@@ -217,16 +165,12 @@ void vpx_quantize_b_32x32_avx(
   __m128i qcoeff0, qcoeff1;
   __m128i cmp_mask0, cmp_mask1;
   __m128i all_zero;
-  __m128i qtmp0, qtmp1;
-  __m128i zero_coeff0, zero_coeff1, iscan0, iscan1;
-  __m128i eob = zero, eob0, eob1;
+  __m128i eob = zero, eob0;
 
   (void)scan_ptr;
   (void)n_coeffs;
   (void)skip_block;
   assert(!skip_block);
-
-  *eob_ptr = 0;
 
   // Setup global values.
   // The 32x32 halves zbin and round.
@@ -255,7 +199,7 @@ void vpx_quantize_b_32x32_avx(
   qcoeff1 = _mm_abs_epi16(coeff1);
 
   cmp_mask0 = _mm_cmpgt_epi16(qcoeff0, zbin);
-  zbin = _mm_unpackhi_epi64(zbin, zbin);  // Switch DC to AC
+  zbin = _mm_unpackhi_epi64(zbin, zbin);  // Switch DC to AC.
   cmp_mask1 = _mm_cmpgt_epi16(qcoeff1, zbin);
 
   all_zero = _mm_or_si128(cmp_mask0, cmp_mask1);
@@ -272,26 +216,17 @@ void vpx_quantize_b_32x32_avx(
     shift = _mm_unpackhi_epi64(shift, shift);
     dequant = _mm_unpackhi_epi64(dequant, dequant);
   } else {
-    qcoeff0 = _mm_adds_epi16(qcoeff0, round);
+    calculate_qcoeff(&qcoeff0, round, quant, shift);
     round = _mm_unpackhi_epi64(round, round);
-    qcoeff1 = _mm_adds_epi16(qcoeff1, round);
-
-    qtmp0 = _mm_mulhi_epi16(qcoeff0, quant);
     quant = _mm_unpackhi_epi64(quant, quant);
-    qtmp1 = _mm_mulhi_epi16(qcoeff1, quant);
-
-    qtmp0 = _mm_add_epi16(qtmp0, qcoeff0);
-    qtmp1 = _mm_add_epi16(qtmp1, qcoeff1);
-
-    qcoeff0 = _mm_mulhi_epi16(qtmp0, shift);
     shift = _mm_unpackhi_epi64(shift, shift);
-    qcoeff1 = _mm_mulhi_epi16(qtmp1, shift);
+    calculate_qcoeff(&qcoeff1, round, quant, shift);
 
-    // Reinsert signs
+    // Reinsert signs.
     qcoeff0 = _mm_sign_epi16(qcoeff0, coeff0);
     qcoeff1 = _mm_sign_epi16(qcoeff1, coeff1);
 
-    // Mask out zbin threshold coeffs
+    // Mask out zbin threshold coeffs.
     qcoeff0 = _mm_and_si128(qcoeff0, cmp_mask0);
     qcoeff1 = _mm_and_si128(qcoeff1, cmp_mask1);
 
@@ -304,9 +239,9 @@ void vpx_quantize_b_32x32_avx(
     coeff0 = _mm_abs_epi16(qcoeff0);
     coeff1 = _mm_abs_epi16(qcoeff1);
 
-    coeff0 = _mm_mullo_epi16(coeff0, dequant);
+    coeff0 = calculate_dqcoeff(coeff0, dequant);
     dequant = _mm_unpackhi_epi64(dequant, dequant);
-    coeff1 = _mm_mullo_epi16(coeff1, dequant);
+    coeff1 = calculate_dqcoeff(coeff1, dequant);
 
     // "Divide" by 2.
     coeff0 = _mm_srli_epi16(coeff0, 1);
@@ -318,17 +253,8 @@ void vpx_quantize_b_32x32_avx(
     store_tran_low(coeff0, dqcoeff_ptr);
     store_tran_low(coeff1, dqcoeff_ptr + 8);
 
-    // Scan for eob.
-    zero_coeff0 = _mm_cmpeq_epi16(coeff0, zero);
-    zero_coeff1 = _mm_cmpeq_epi16(coeff1, zero);
-    iscan0 = _mm_load_si128((const __m128i *)(iscan_ptr));
-    iscan1 = _mm_load_si128((const __m128i *)(iscan_ptr + 8));
-    // Add one to convert from indices to counts
-    iscan0 = _mm_sub_epi16(iscan0, cmp_mask0);
-    iscan1 = _mm_sub_epi16(iscan1, cmp_mask1);
-    eob = _mm_andnot_si128(zero_coeff0, iscan0);
-    eob1 = _mm_andnot_si128(zero_coeff1, iscan1);
-    eob = _mm_max_epi16(eob, eob1);
+    eob = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan_ptr, 0,
+                       zero);
   }
 
   // AC only loop.
@@ -353,17 +279,8 @@ void vpx_quantize_b_32x32_avx(
       continue;
     }
 
-    qcoeff0 = _mm_adds_epi16(qcoeff0, round);
-    qcoeff1 = _mm_adds_epi16(qcoeff1, round);
-
-    qtmp0 = _mm_mulhi_epi16(qcoeff0, quant);
-    qtmp1 = _mm_mulhi_epi16(qcoeff1, quant);
-
-    qtmp0 = _mm_add_epi16(qtmp0, qcoeff0);
-    qtmp1 = _mm_add_epi16(qtmp1, qcoeff1);
-
-    qcoeff0 = _mm_mulhi_epi16(qtmp0, shift);
-    qcoeff1 = _mm_mulhi_epi16(qtmp1, shift);
+    calculate_qcoeff(&qcoeff0, round, quant, shift);
+    calculate_qcoeff(&qcoeff1, round, quant, shift);
 
     qcoeff0 = _mm_sign_epi16(qcoeff0, coeff0);
     qcoeff1 = _mm_sign_epi16(qcoeff1, coeff1);
@@ -377,8 +294,8 @@ void vpx_quantize_b_32x32_avx(
     coeff0 = _mm_abs_epi16(qcoeff0);
     coeff1 = _mm_abs_epi16(qcoeff1);
 
-    coeff0 = _mm_mullo_epi16(coeff0, dequant);
-    coeff1 = _mm_mullo_epi16(coeff1, dequant);
+    coeff0 = calculate_dqcoeff(coeff0, dequant);
+    coeff1 = calculate_dqcoeff(coeff1, dequant);
 
     coeff0 = _mm_srli_epi16(coeff0, 1);
     coeff1 = _mm_srli_epi16(coeff1, 1);
@@ -389,27 +306,10 @@ void vpx_quantize_b_32x32_avx(
     store_tran_low(coeff0, dqcoeff_ptr + index);
     store_tran_low(coeff1, dqcoeff_ptr + index + 8);
 
-    zero_coeff0 = _mm_cmpeq_epi16(coeff0, zero);
-    zero_coeff1 = _mm_cmpeq_epi16(coeff1, zero);
-    iscan0 = _mm_load_si128((const __m128i *)(iscan_ptr + index));
-    iscan1 = _mm_load_si128((const __m128i *)(iscan_ptr + index + 8));
-    iscan0 = _mm_sub_epi16(iscan0, cmp_mask0);
-    iscan1 = _mm_sub_epi16(iscan1, cmp_mask1);
-    eob0 = _mm_andnot_si128(zero_coeff0, iscan0);
-    eob1 = _mm_andnot_si128(zero_coeff1, iscan1);
-    eob0 = _mm_max_epi16(eob0, eob1);
+    eob0 = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan_ptr,
+                        index, zero);
     eob = _mm_max_epi16(eob, eob0);
   }
 
-  // Accumulate eob.
-  {
-    __m128i eob_shuffled;
-    eob_shuffled = _mm_shuffle_epi32(eob, 0xe);
-    eob = _mm_max_epi16(eob, eob_shuffled);
-    eob_shuffled = _mm_shufflelo_epi16(eob, 0xe);
-    eob = _mm_max_epi16(eob, eob_shuffled);
-    eob_shuffled = _mm_shufflelo_epi16(eob, 0x1);
-    eob = _mm_max_epi16(eob, eob_shuffled);
-    *eob_ptr = _mm_extract_epi16(eob, 1);
-  }
+  *eob_ptr = accumulate_eob(eob);
 }
