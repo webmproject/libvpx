@@ -170,10 +170,13 @@ for t in ${all_targets}; do
     [ -f "${source_path}/${t}.mk" ] && enable_feature ${t}
 done
 
+if ! diff --version >/dev/null; then
+  die "diff missing: Try installing diffutils via your package manager."
+fi
+
 if ! perl --version >/dev/null; then
     die "Perl is required to build"
 fi
-
 
 if [ "`cd \"${source_path}\" && pwd`" != "`pwd`" ]; then
   # test to see if source_path already configured
