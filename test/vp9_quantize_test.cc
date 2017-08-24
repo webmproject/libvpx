@@ -322,9 +322,8 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
       }
       vpx_usec_timer_mark(&timer);
       const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
-      if (i == 0) printf("Skip block.\n");
-      if (i == 1) printf("Bypass calculations.\n");
-      if (i == 2) printf("Full calculations.\n");
+      if (i == 0) printf("Bypass calculations.\n");
+      if (i == 1) printf("Full calculations.\n");
       printf("Quantize %dx%d time: %5d ms\n", 4 << sz, 4 << sz,
              elapsed_time / 1000);
     }
