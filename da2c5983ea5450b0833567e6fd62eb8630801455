@@ -34,6 +34,24 @@
       "revId": "da2c5983ea5450b0833567e6fd62eb8630801455",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "513018a4_9fc0c612",
+        "filename": "vpx_dsp/x86/quantize_x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-08-24T19:20:03Z",
+      "side": 1,
+      "message": "Does it matter if the xmm registers come later? coeff is input and output, but I can move it to the end if that helps.",
+      "parentUuid": "7c4e9da4_43c176df",
+      "revId": "da2c5983ea5450b0833567e6fd62eb8630801455",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
