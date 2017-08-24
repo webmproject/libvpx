@@ -1540,4 +1540,12 @@ INSTANTIATE_TEST_CASE_P(VSX, VpxSseTest,
                         ::testing::Values(SseParams(2, 2,
                                                     &vpx_get4x4sse_cs_vsx)));
 #endif  // HAVE_VSX
+
+#if HAVE_MMI
+INSTANTIATE_TEST_CASE_P(MMI, VpxMseTest,
+                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_mmi),
+                                          MseParams(4, 3, &vpx_mse16x8_mmi),
+                                          MseParams(3, 4, &vpx_mse8x16_mmi),
+                                          MseParams(3, 3, &vpx_mse8x8_mmi)));
+#endif  // HAVE_MMI
 }  // namespace
