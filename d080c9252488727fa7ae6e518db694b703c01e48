@@ -22,6 +22,30 @@
       "revId": "d080c9252488727fa7ae6e518db694b703c01e48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e12b440_eca739d7",
+        "filename": "vpx_ports/asmdefs_mmi.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-08-25T08:28:21Z",
+      "side": 0,
+      "message": "yes, some of these are prepared for the future patchs. Sorry for this mistake.",
+      "parentUuid": "4e6697b5_8c210388",
+      "range": {
+        "startLine": 43,
+        "startChar": 27,
+        "endLine": 43,
+        "endChar": 28
+      },
+      "revId": "d080c9252488727fa7ae6e518db694b703c01e48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
