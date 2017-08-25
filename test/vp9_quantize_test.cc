@@ -392,14 +392,16 @@ INSTANTIATE_TEST_CASE_P(
 // TODO(johannkoenig): AVX optimizations do not yet pass the 32x32 test or
 // highbitdepth configurations.
 #if HAVE_AVX && !CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(
-    AVX, VP9QuantizeTest,
-    ::testing::Values(make_tuple(&vpx_quantize_b_avx, &vpx_quantize_b_c,
-                                 VPX_BITS_8, 16),
-                      // Even though SSSE3 and AVX do not match the reference
-                      // code, we can keep them in sync with each other.
-                      make_tuple(&vpx_quantize_b_32x32_avx,
-                                 &vpx_quantize_b_32x32_ssse3, VPX_BITS_8, 32)));
+INSTANTIATE_TEST_CASE_P(AVX, VP9QuantizeTest,
+                        ::testing::Values(make_tuple(&vpx_quantize_b_avx,
+                                                     &vpx_quantize_b_c,
+                                                     VPX_BITS_8, 16)));
+#if ARCH_X86_64
+INSTANTIATE_TEST_CASE_P(DISABLED_AVX, VP9QuantizeTest,
+                        ::testing::Values(make_tuple(&vpx_quantize_b_32x32_avx,
+                                                     &vpx_quantize_b_32x32_c,
+                                                     VPX_BITS_8, 32)));
+#endif  // ARCH_X86_64
 #endif  // HAVE_AVX && !CONFIG_VP9_HIGHBITDEPTH
 
 // TODO(webm:1448): dqcoeff is not handled correctly in HBD builds.
