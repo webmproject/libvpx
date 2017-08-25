@@ -40,10 +40,10 @@
   "dsll        " #reg1 ",       " #reg2 ",       " #shift "        \n\t"
 
 #define MMI_MTC1(reg, fp) \
-  "dmtc1       " #reg "         " #fp "                          \n\t"
+  "dmtc1       " #reg ",        " #fp "                            \n\t"
 
 #define MMI_LI(reg, immediate) \
-  "dli         " #reg "         " #immediate "                   \n\t"
+  "dli         " #reg ",        " #immediate "                     \n\t"
 
 #else
 #define mips_reg int32_t
@@ -69,10 +69,10 @@
   "sll         " #reg1 ",       " #reg2 ",       " #shift "        \n\t"
 
 #define MMI_MTC1(reg, fp) \
-  "mtc1        " #reg "         " #fp "                          \n\t"
+  "mtc1        " #reg ",        " #fp "                            \n\t"
 
 #define MMI_LI(reg, immediate) \
-  "li          " #reg "         " #immediate "                   \n\t"
+  "li          " #reg ",        " #immediate "                     \n\t"
 
 #endif /* HAVE_MIPS64 */
 

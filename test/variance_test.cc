@@ -1547,5 +1547,55 @@ INSTANTIATE_TEST_CASE_P(MMI, VpxMseTest,
                                           MseParams(4, 3, &vpx_mse16x8_mmi),
                                           MseParams(3, 4, &vpx_mse8x16_mmi),
                                           MseParams(3, 3, &vpx_mse8x8_mmi)));
+
+INSTANTIATE_TEST_CASE_P(
+    MMI, VpxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_mmi),
+                      VarianceParams(6, 5, &vpx_variance64x32_mmi),
+                      VarianceParams(5, 6, &vpx_variance32x64_mmi),
+                      VarianceParams(5, 5, &vpx_variance32x32_mmi),
+                      VarianceParams(5, 4, &vpx_variance32x16_mmi),
+                      VarianceParams(4, 5, &vpx_variance16x32_mmi),
+                      VarianceParams(4, 4, &vpx_variance16x16_mmi),
+                      VarianceParams(4, 3, &vpx_variance16x8_mmi),
+                      VarianceParams(3, 4, &vpx_variance8x16_mmi),
+                      VarianceParams(3, 3, &vpx_variance8x8_mmi),
+                      VarianceParams(3, 2, &vpx_variance8x4_mmi),
+                      VarianceParams(2, 3, &vpx_variance4x8_mmi),
+                      VarianceParams(2, 2, &vpx_variance4x4_mmi)));
+
+INSTANTIATE_TEST_CASE_P(
+    MMI, VpxSubpelVarianceTest,
+    ::testing::Values(
+        SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_mmi, 0),
+        SubpelVarianceParams(6, 5, &vpx_sub_pixel_variance64x32_mmi, 0),
+        SubpelVarianceParams(5, 6, &vpx_sub_pixel_variance32x64_mmi, 0),
+        SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_mmi, 0),
+        SubpelVarianceParams(5, 4, &vpx_sub_pixel_variance32x16_mmi, 0),
+        SubpelVarianceParams(4, 5, &vpx_sub_pixel_variance16x32_mmi, 0),
+        SubpelVarianceParams(4, 4, &vpx_sub_pixel_variance16x16_mmi, 0),
+        SubpelVarianceParams(4, 3, &vpx_sub_pixel_variance16x8_mmi, 0),
+        SubpelVarianceParams(3, 4, &vpx_sub_pixel_variance8x16_mmi, 0),
+        SubpelVarianceParams(3, 3, &vpx_sub_pixel_variance8x8_mmi, 0),
+        SubpelVarianceParams(3, 2, &vpx_sub_pixel_variance8x4_mmi, 0),
+        SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_mmi, 0),
+        SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_mmi, 0)));
+
+INSTANTIATE_TEST_CASE_P(
+    MMI, VpxSubpelAvgVarianceTest,
+    ::testing::Values(
+        SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_mmi, 0),
+        SubpelAvgVarianceParams(6, 5, &vpx_sub_pixel_avg_variance64x32_mmi, 0),
+        SubpelAvgVarianceParams(5, 6, &vpx_sub_pixel_avg_variance32x64_mmi, 0),
+        SubpelAvgVarianceParams(5, 5, &vpx_sub_pixel_avg_variance32x32_mmi, 0),
+        SubpelAvgVarianceParams(5, 4, &vpx_sub_pixel_avg_variance32x16_mmi, 0),
+        SubpelAvgVarianceParams(4, 5, &vpx_sub_pixel_avg_variance16x32_mmi, 0),
+        SubpelAvgVarianceParams(4, 4, &vpx_sub_pixel_avg_variance16x16_mmi, 0),
+        SubpelAvgVarianceParams(4, 3, &vpx_sub_pixel_avg_variance16x8_mmi, 0),
+        SubpelAvgVarianceParams(3, 4, &vpx_sub_pixel_avg_variance8x16_mmi, 0),
+        SubpelAvgVarianceParams(3, 3, &vpx_sub_pixel_avg_variance8x8_mmi, 0),
+        SubpelAvgVarianceParams(3, 2, &vpx_sub_pixel_avg_variance8x4_mmi, 0),
+        SubpelAvgVarianceParams(2, 3, &vpx_sub_pixel_avg_variance4x8_mmi, 0),
+        SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_mmi, 0)));
 #endif  // HAVE_MMI
 }  // namespace
