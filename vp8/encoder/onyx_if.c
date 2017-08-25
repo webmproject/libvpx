@@ -451,18 +451,6 @@ static void dealloc_compressor_data(VP8_COMP *cpi) {
   cpi->mb.pip = 0;
 
 #if CONFIG_MULTITHREAD
-  /* De-allocate mutex */
-  if (cpi->pmutex != NULL) {
-    VP8_COMMON *const pc = &cpi->common;
-    int i;
-
-    for (i = 0; i < pc->mb_rows; ++i) {
-      pthread_mutex_destroy(&cpi->pmutex[i]);
-    }
-    vpx_free(cpi->pmutex);
-    cpi->pmutex = NULL;
-  }
-
   vpx_free(cpi->mt_current_mb_col);
   cpi->mt_current_mb_col = NULL;
 #endif
@@ -1153,9 +1141,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
 
   int width = cm->Width;
   int height = cm->Height;
-#if CONFIG_MULTITHREAD
-  int prev_mb_rows = cm->mb_rows;
-#endif
 
   if (vp8_alloc_frame_buffers(cm, width, height)) {
     vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
@@ -1247,26 +1232,11 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
   if (cpi->oxcf.multi_threaded > 1) {
     int i;
 
-    /* De-allocate and re-allocate mutex */
-    if (cpi->pmutex != NULL) {
-      for (i = 0; i < prev_mb_rows; ++i) {
-        pthread_mutex_destroy(&cpi->pmutex[i]);
-      }
-      vpx_free(cpi->pmutex);
-      cpi->pmutex = NULL;
-    }
-
-    CHECK_MEM_ERROR(cpi->pmutex,
-                    vpx_malloc(sizeof(*cpi->pmutex) * cm->mb_rows));
-    if (cpi->pmutex) {
-      for (i = 0; i < cm->mb_rows; ++i) {
-        pthread_mutex_init(&cpi->pmutex[i], NULL);
-      }
-    }
-
     vpx_free(cpi->mt_current_mb_col);
     CHECK_MEM_ERROR(cpi->mt_current_mb_col,
                     vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cm->mb_rows));
+    for (i = 0; i < cm->mb_rows; ++i)
+      vpx_atomic_init(&cpi->mt_current_mb_col[i], 0);
   }
 
 #endif
@@ -3274,7 +3244,7 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm) {
   }
 
 #if CONFIG_MULTITHREAD
-  if (cpi->b_multi_threaded) {
+  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded)) {
     sem_post(&cpi->h_event_end_lpf); /* signal that we have set filter_level */
   }
 #endif
@@ -4471,7 +4441,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #endif
 
 #if CONFIG_MULTITHREAD
-  if (cpi->b_multi_threaded) {
+  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded)) {
     /* start loopfilter in separate thread */
     sem_post(&cpi->h_event_start_lpf);
     cpi->b_lpf_running = 1;
@@ -4497,7 +4467,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #if CONFIG_MULTITHREAD
   /* wait that filter_level is picked so that we can continue with stream
    * packing */
-  if (cpi->b_multi_threaded) sem_wait(&cpi->h_event_end_lpf);
+  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded))
+    sem_wait(&cpi->h_event_end_lpf);
 #endif
 
   /* build the bitstream */
@@ -5341,7 +5312,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_MULTITHREAD
   /* wait for the lpf thread done */
-  if (cpi->b_multi_threaded && cpi->b_lpf_running) {
+  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded) && cpi->b_lpf_running) {
     sem_wait(&cpi->h_event_end_lpf);
     cpi->b_lpf_running = 0;
   }

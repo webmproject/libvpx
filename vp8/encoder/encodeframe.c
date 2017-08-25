@@ -341,11 +341,11 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
 
 #if CONFIG_MULTITHREAD
   const int nsync = cpi->mt_sync_range;
-  const int rightmost_col = cm->mb_cols + nsync;
-  const int *last_row_current_mb_col;
-  int *current_mb_col = &cpi->mt_current_mb_col[mb_row];
+  vpx_atomic_int rightmost_col = VPX_ATOMIC_INIT(cm->mb_cols + nsync);
+  const vpx_atomic_int *last_row_current_mb_col;
+  vpx_atomic_int *current_mb_col = &cpi->mt_current_mb_col[mb_row];
 
-  if ((cpi->b_multi_threaded != 0) && (mb_row != 0)) {
+  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded) != 0 && mb_row != 0) {
     last_row_current_mb_col = &cpi->mt_current_mb_col[mb_row - 1];
   } else {
     last_row_current_mb_col = &rightmost_col;
@@ -415,15 +415,13 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
     vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
 #if CONFIG_MULTITHREAD
-    if (cpi->b_multi_threaded != 0) {
+    if (vpx_atomic_load_acquire(&cpi->b_multi_threaded) != 0) {
       if (((mb_col - 1) % nsync) == 0) {
-        pthread_mutex_t *mutex = &cpi->pmutex[mb_row];
-        protected_write(mutex, current_mb_col, mb_col - 1);
+        vpx_atomic_store_release(current_mb_col, mb_col - 1);
       }
 
       if (mb_row && !(mb_col & (nsync - 1))) {
-        pthread_mutex_t *mutex = &cpi->pmutex[mb_row - 1];
-        sync_read(mutex, mb_col, last_row_current_mb_col, nsync);
+        vp8_atomic_spin_wait(mb_col, last_row_current_mb_col, nsync);
       }
     }
 #endif
@@ -563,8 +561,9 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
                     xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
 
 #if CONFIG_MULTITHREAD
-  if (cpi->b_multi_threaded != 0) {
-    protected_write(&cpi->pmutex[mb_row], current_mb_col, rightmost_col);
+  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded) != 0) {
+    vpx_atomic_store_release(current_mb_col,
+                             vpx_atomic_load_acquire(&rightmost_col));
   }
 #endif
 
@@ -749,13 +748,14 @@ void vp8_encode_frame(VP8_COMP *cpi) {
     vpx_usec_timer_start(&emr_timer);
 
 #if CONFIG_MULTITHREAD
-    if (cpi->b_multi_threaded) {
+    if (vpx_atomic_load_acquire(&cpi->b_multi_threaded)) {
       int i;
 
       vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei,
                                 cpi->encoding_thread_count);
 
-      for (i = 0; i < cm->mb_rows; ++i) cpi->mt_current_mb_col[i] = -1;
+      for (i = 0; i < cm->mb_rows; ++i)
+        vpx_atomic_store_release(&cpi->mt_current_mb_col[i], -1);
 
       for (i = 0; i < cpi->encoding_thread_count; ++i) {
         sem_post(&cpi->h_event_start_encoding[i]);
