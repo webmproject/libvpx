@@ -560,8 +560,12 @@ static void set_rt_speed_feature_framesize_independent(
     sf->adaptive_rd_thresh = 3;
     sf->mv.search_method = FAST_DIAMOND;
     sf->mv.fullpel_search_step_param = 10;
+    // For SVC: use better mv search on base temporal layer, and only
+    // on base spatial layer if highest resolution is above 640x360.
     if (cpi->svc.number_temporal_layers > 2 &&
-        cpi->svc.temporal_layer_id == 0) {
+        cpi->svc.temporal_layer_id == 0 &&
+        (cpi->svc.spatial_layer_id == 0 ||
+         cpi->oxcf.width * cpi->oxcf.height <= 640 * 360)) {
       sf->mv.search_method = NSTEP;
       sf->mv.fullpel_search_step_param = 6;
     }
