@@ -528,11 +528,8 @@ static void set_rt_speed_feature_framesize_independent(
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
     sf->skip_encode_sb = 0;
-    // TODO(jianj/marpan): There is a test failure under highbitdepth build in
-    // MotionVectorTestLarge/41 for 4K when source_sad is used for speed 6.
-    // See issue webm:1452. Remove this resolution constraint when issue is
-    // solved.
-    if (!cpi->external_resize && cm->width <= 1920) sf->use_source_sad = 1;
+
+    if (!cpi->external_resize) sf->use_source_sad = 1;
 
     if (sf->use_source_sad) {
       sf->adapt_partition_source_sad = 1;
