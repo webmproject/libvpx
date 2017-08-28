@@ -56,6 +56,7 @@ DSP_SRCS-$(HAVE_VSX) += ppc/intrapred_vsx.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE)  += x86/highbd_intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_intrapred_sse2.asm
+DSP_SRCS-$(HAVE_SSE2) += x86/highbd_intrapred_intrin_sse2.c
 DSP_SRCS-$(HAVE_NEON) += arm/highbd_intrapred_neon.c
 endif  # CONFIG_VP9_HIGHBITDEPTH
 
