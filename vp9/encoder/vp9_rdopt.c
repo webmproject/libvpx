@@ -600,7 +600,7 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         vpx_highbd_convolve_copy(CONVERT_TO_SHORTPTR(dst), dst_stride, recon16,
-                                 32, NULL, 0, NULL, 0, bs, bs, xd->bd);
+                                 32, NULL, 0, 0, 0, 0, bs, bs, xd->bd);
         if (xd->lossless) {
           vp9_highbd_iwht4x4_add(dqcoeff, recon16, 32, *eob, xd->bd);
         } else {
@@ -623,7 +623,7 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
         recon = CONVERT_TO_BYTEPTR(recon16);
       } else {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vpx_convolve_copy(dst, dst_stride, recon, 32, NULL, 0, NULL, 0, bs, bs);
+        vpx_convolve_copy(dst, dst_stride, recon, 32, NULL, 0, 0, 0, 0, bs, bs);
         switch (tx_size) {
           case TX_32X32: vp9_idct32x32_add(dqcoeff, recon, 32, *eob); break;
           case TX_16X16: vp9_idct16x16_add(dqcoeff, recon, 32, *eob); break;

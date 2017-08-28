@@ -33,9 +33,9 @@ static const unsigned int kMaxDimension = 64;
 
 typedef void (*ConvolveFunc)(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
-                             const int16_t *filter_x, int filter_x_stride,
-                             const int16_t *filter_y, int filter_y_stride,
-                             int w, int h);
+                             const InterpKernel *filter, int x0_q4,
+                             int x_step_q4, int y0_q4, int y_step_q4, int w,
+                             int h);
 
 typedef void (*WrapperFilterBlock2d8Func)(
     const uint8_t *src_ptr, const unsigned int src_stride,
@@ -550,7 +550,7 @@ TEST_P(ConvolveTest, DISABLED_Copy_Speed) {
 
   vpx_usec_timer_start(&timer);
   for (int n = 0; n < kNumTests; ++n) {
-    UUT_->copy_[0](in, kInputStride, out, kOutputStride, NULL, 0, NULL, 0,
+    UUT_->copy_[0](in, kInputStride, out, kOutputStride, NULL, 0, 0, 0, 0,
                    width, height);
   }
   vpx_usec_timer_mark(&timer);
@@ -570,7 +570,7 @@ TEST_P(ConvolveTest, DISABLED_Avg_Speed) {
 
   vpx_usec_timer_start(&timer);
   for (int n = 0; n < kNumTests; ++n) {
-    UUT_->copy_[1](in, kInputStride, out, kOutputStride, NULL, 0, NULL, 0,
+    UUT_->copy_[1](in, kInputStride, out, kOutputStride, NULL, 0, 0, 0, 0,
                    width, height);
   }
   vpx_usec_timer_mark(&timer);
@@ -585,7 +585,7 @@ TEST_P(ConvolveTest, Copy) {
   uint8_t *const out = output();
 
   ASM_REGISTER_STATE_CHECK(UUT_->copy_[0](in, kInputStride, out, kOutputStride,
-                                          NULL, 0, NULL, 0, Width(), Height()));
+                                          NULL, 0, 0, 0, 0, Width(), Height()));
 
   CheckGuardBlocks();
 
@@ -604,7 +604,7 @@ TEST_P(ConvolveTest, Avg) {
   CopyOutputToRef();
 
   ASM_REGISTER_STATE_CHECK(UUT_->copy_[1](in, kInputStride, out, kOutputStride,
-                                          NULL, 0, NULL, 0, Width(), Height()));
+                                          NULL, 0, 0, 0, 0, Width(), Height()));
 
   CheckGuardBlocks();
 
@@ -621,12 +621,10 @@ TEST_P(ConvolveTest, Avg) {
 TEST_P(ConvolveTest, CopyHoriz) {
   uint8_t *const in = input();
   uint8_t *const out = output();
-  DECLARE_ALIGNED(256, const int16_t,
-                  filter8[8]) = { 0, 0, 0, 128, 0, 0, 0, 0 };
 
   ASM_REGISTER_STATE_CHECK(UUT_->sh8_[0](in, kInputStride, out, kOutputStride,
-                                         filter8, 16, filter8, 16, Width(),
-                                         Height()));
+                                         vp9_filter_kernels[0], 0, 16, 0, 16,
+                                         Width(), Height()));
 
   CheckGuardBlocks();
 
@@ -641,12 +639,10 @@ TEST_P(ConvolveTest, CopyHoriz) {
 TEST_P(ConvolveTest, CopyVert) {
   uint8_t *const in = input();
   uint8_t *const out = output();
-  DECLARE_ALIGNED(256, const int16_t,
-                  filter8[8]) = { 0, 0, 0, 128, 0, 0, 0, 0 };
 
   ASM_REGISTER_STATE_CHECK(UUT_->sv8_[0](in, kInputStride, out, kOutputStride,
-                                         filter8, 16, filter8, 16, Width(),
-                                         Height()));
+                                         vp9_filter_kernels[0], 0, 16, 0, 16,
+                                         Width(), Height()));
 
   CheckGuardBlocks();
 
@@ -661,12 +657,10 @@ TEST_P(ConvolveTest, CopyVert) {
 TEST_P(ConvolveTest, Copy2D) {
   uint8_t *const in = input();
   uint8_t *const out = output();
-  DECLARE_ALIGNED(256, const int16_t,
-                  filter8[8]) = { 0, 0, 0, 128, 0, 0, 0, 0 };
 
   ASM_REGISTER_STATE_CHECK(UUT_->shv8_[0](in, kInputStride, out, kOutputStride,
-                                          filter8, 16, filter8, 16, Width(),
-                                          Height()));
+                                          vp9_filter_kernels[0], 0, 16, 0, 16,
+                                          Width(), Height()));
 
   CheckGuardBlocks();
 
@@ -702,7 +696,6 @@ TEST(ConvolveTest, FiltersWontSaturateWhenAddedPairwise) {
   }
 }
 
-const int16_t kInvalidFilter[8] = { 0 };
 const WrapperFilterBlock2d8Func wrapper_filter_block2d_8[2] = {
   wrapper_filter_block2d_8_c, wrapper_filter_average_block2d_8_c
 };
@@ -755,21 +748,21 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
                                       Width(), Height(), UUT_->use_highbd_);
 
           if (filter_x && filter_y)
-            ASM_REGISTER_STATE_CHECK(UUT_->hv8_[i](
-                in, kInputStride, out, kOutputStride, filters[filter_x], 16,
-                filters[filter_y], 16, Width(), Height()));
+            ASM_REGISTER_STATE_CHECK(
+                UUT_->hv8_[i](in, kInputStride, out, kOutputStride, filters,
+                              filter_x, 16, filter_y, 16, Width(), Height()));
           else if (filter_y)
-            ASM_REGISTER_STATE_CHECK(UUT_->v8_[i](
-                in, kInputStride, out, kOutputStride, kInvalidFilter, 16,
-                filters[filter_y], 16, Width(), Height()));
+            ASM_REGISTER_STATE_CHECK(
+                UUT_->v8_[i](in, kInputStride, out, kOutputStride, filters, 0,
+                             16, filter_y, 16, Width(), Height()));
           else if (filter_x)
-            ASM_REGISTER_STATE_CHECK(UUT_->h8_[i](
-                in, kInputStride, out, kOutputStride, filters[filter_x], 16,
-                kInvalidFilter, 16, Width(), Height()));
+            ASM_REGISTER_STATE_CHECK(
+                UUT_->h8_[i](in, kInputStride, out, kOutputStride, filters,
+                             filter_x, 16, 0, 16, Width(), Height()));
           else
-            ASM_REGISTER_STATE_CHECK(UUT_->copy_[i](
-                in, kInputStride, out, kOutputStride, kInvalidFilter, 0,
-                kInvalidFilter, 0, Width(), Height()));
+            ASM_REGISTER_STATE_CHECK(UUT_->copy_[i](in, kInputStride, out,
+                                                    kOutputStride, NULL, 0, 0,
+                                                    0, 0, Width(), Height()));
 
           CheckGuardBlocks();
 
@@ -853,21 +846,21 @@ TEST_P(ConvolveTest, FilterExtremes) {
                                        filters[filter_y], ref, kOutputStride,
                                        Width(), Height(), UUT_->use_highbd_);
             if (filter_x && filter_y)
-              ASM_REGISTER_STATE_CHECK(UUT_->hv8_[0](
-                  in, kInputStride, out, kOutputStride, filters[filter_x], 16,
-                  filters[filter_y], 16, Width(), Height()));
+              ASM_REGISTER_STATE_CHECK(
+                  UUT_->hv8_[0](in, kInputStride, out, kOutputStride, filters,
+                                filter_x, 16, filter_y, 16, Width(), Height()));
             else if (filter_y)
-              ASM_REGISTER_STATE_CHECK(UUT_->v8_[0](
-                  in, kInputStride, out, kOutputStride, kInvalidFilter, 16,
-                  filters[filter_y], 16, Width(), Height()));
+              ASM_REGISTER_STATE_CHECK(
+                  UUT_->v8_[0](in, kInputStride, out, kOutputStride, filters, 0,
+                               16, filter_y, 16, Width(), Height()));
             else if (filter_x)
-              ASM_REGISTER_STATE_CHECK(UUT_->h8_[0](
-                  in, kInputStride, out, kOutputStride, filters[filter_x], 16,
-                  kInvalidFilter, 16, Width(), Height()));
+              ASM_REGISTER_STATE_CHECK(
+                  UUT_->h8_[0](in, kInputStride, out, kOutputStride, filters,
+                               filter_x, 16, 0, 16, Width(), Height()));
             else
-              ASM_REGISTER_STATE_CHECK(UUT_->copy_[0](
-                  in, kInputStride, out, kOutputStride, kInvalidFilter, 0,
-                  kInvalidFilter, 0, Width(), Height()));
+              ASM_REGISTER_STATE_CHECK(UUT_->copy_[0](in, kInputStride, out,
+                                                      kOutputStride, NULL, 0, 0,
+                                                      0, 0, Width(), Height()));
 
             for (int y = 0; y < Height(); ++y) {
               for (int x = 0; x < Width(); ++x)
@@ -897,8 +890,8 @@ TEST_P(ConvolveTest, CheckScalingFiltering) {
     for (int step = 1; step <= 32; ++step) {
       /* Test the horizontal and vertical filters in combination. */
       ASM_REGISTER_STATE_CHECK(
-          UUT_->shv8_[0](in, kInputStride, out, kOutputStride, eighttap[frac],
-                         step, eighttap[frac], step, Width(), Height()));
+          UUT_->shv8_[0](in, kInputStride, out, kOutputStride, eighttap, frac,
+                         step, frac, step, Width(), Height()));
 
       CheckGuardBlocks();
 
@@ -917,14 +910,14 @@ TEST_P(ConvolveTest, CheckScalingFiltering) {
 using std::tr1::make_tuple;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-#define WRAP(func, bd)                                                         \
-  void wrap_##func##_##bd(                                                     \
-      const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                  \
-      ptrdiff_t dst_stride, const int16_t *filter_x, int filter_x_stride,      \
-      const int16_t *filter_y, int filter_y_stride, int w, int h) {            \
-    vpx_highbd_##func(reinterpret_cast<const uint16_t *>(src), src_stride,     \
-                      reinterpret_cast<uint16_t *>(dst), dst_stride, filter_x, \
-                      filter_x_stride, filter_y, filter_y_stride, w, h, bd);   \
+#define WRAP(func, bd)                                                       \
+  void wrap_##func##_##bd(                                                   \
+      const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,                \
+      ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4,           \
+      int x_step_q4, int y0_q4, int y_step_q4, int w, int h) {               \
+    vpx_highbd_##func(reinterpret_cast<const uint16_t *>(src), src_stride,   \
+                      reinterpret_cast<uint16_t *>(dst), dst_stride, filter, \
+                      x0_q4, x_step_q4, y0_q4, y_step_q4, w, h, bd);         \
   }
 
 #if HAVE_SSE2 && ARCH_X86_64

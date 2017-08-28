@@ -554,21 +554,21 @@ filter8_1dfunction vpx_filter_block1d4_h2_ssse3;
 #define vpx_filter_block1d4_h2_avx2 vpx_filter_block1d4_h2_ssse3
 // void vpx_convolve8_horiz_avx2(const uint8_t *src, ptrdiff_t src_stride,
 //                                uint8_t *dst, ptrdiff_t dst_stride,
-//                                const int16_t *filter_x, int x_step_q4,
-//                                const int16_t *filter_y, int y_step_q4,
+//                                const InterpKernel *filter, int x0_q4,
+//                                int32_t x_step_q4, int y0_q4, int y_step_q4,
 //                                int w, int h);
 // void vpx_convolve8_vert_avx2(const uint8_t *src, ptrdiff_t src_stride,
 //                               uint8_t *dst, ptrdiff_t dst_stride,
-//                               const int16_t *filter_x, int x_step_q4,
-//                               const int16_t *filter_y, int y_step_q4,
+//                               const InterpKernel *filter, int x0_q4,
+//                               int32_t x_step_q4, int y0_q4, int y_step_q4,
 //                               int w, int h);
-FUN_CONV_1D(horiz, x_step_q4, filter_x, h, src, , avx2);
-FUN_CONV_1D(vert, y_step_q4, filter_y, v, src - src_stride * 3, , avx2);
+FUN_CONV_1D(horiz, x0_q4, x_step_q4, h, src, , avx2);
+FUN_CONV_1D(vert, y0_q4, y_step_q4, v, src - src_stride * 3, , avx2);
 
 // void vpx_convolve8_avx2(const uint8_t *src, ptrdiff_t src_stride,
 //                          uint8_t *dst, ptrdiff_t dst_stride,
-//                          const int16_t *filter_x, int x_step_q4,
-//                          const int16_t *filter_y, int y_step_q4,
+//                          const InterpKernel *filter, int x0_q4,
+//                          int32_t x_step_q4, int y0_q4, int y_step_q4,
 //                          int w, int h);
 FUN_CONV_2D(, avx2);
 #endif  // HAVE_AX2 && HAVE_SSSE3

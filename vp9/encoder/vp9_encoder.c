@@ -2645,15 +2645,14 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
 
         if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
           vpx_highbd_convolve8(CONVERT_TO_SHORTPTR(src_ptr), src_stride,
-                               CONVERT_TO_SHORTPTR(dst_ptr), dst_stride,
-                               kernel[x_q4 & 0xf], 16 * src_w / dst_w,
-                               kernel[y_q4 & 0xf], 16 * src_h / dst_h,
-                               16 / factor, 16 / factor, bd);
+                               CONVERT_TO_SHORTPTR(dst_ptr), dst_stride, kernel,
+                               x_q4 & 0xf, 16 * src_w / dst_w, y_q4 & 0xf,
+                               16 * src_h / dst_h, 16 / factor, 16 / factor,
+                               bd);
         } else {
-          vpx_scaled_2d(src_ptr, src_stride, dst_ptr, dst_stride,
-                        kernel[x_q4 & 0xf], 16 * src_w / dst_w,
-                        kernel[y_q4 & 0xf], 16 * src_h / dst_h, 16 / factor,
-                        16 / factor);
+          vpx_scaled_2d(src_ptr, src_stride, dst_ptr, dst_stride, kernel,
+                        x_q4 & 0xf, 16 * src_w / dst_w, y_q4 & 0xf,
+                        16 * src_h / dst_h, 16 / factor, 16 / factor);
         }
       }
     }
