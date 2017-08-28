@@ -1,0 +1,180 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bed2a767_cb1b8f81",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "This name was very confusing to me. It looks like it just does a single read and \"sync\" part implies some memory ordering (like __sync_* compiler builtins). But it does a very different thing -- it loops waiting for a condition. I think its name should include \"wait\" somehow.",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5457aef4_7c443918",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "This is unnecessary.",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b3ed32c_57f758a1",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "This is unnecessary.",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e36c758_57898063",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "s/: : :/:::/ as in other defines",
+      "range": {
+        "startLine": 60,
+        "startChar": 65,
+        "endLine": 60,
+        "endChar": 70
+      },
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08ee482e_8d3780ba",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "I would phrase this more strongly. They must not be used other than by means of the provided functions. Reading/writing the int value will work, but then it will break with atomic_int anyway.",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "307cd4e2_a96d651e",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "Drop volatile.\natomic_int does provide everything required for safe multithreaded accesses. It must not be always paired with volatile.",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e41c293_43c463f8",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "I would stick with the standard C/C++ naming as much as possible. The standard name for this operation is _store_, not write.\nAlso I would add the implied memory ordering of the operation. Reader of the code that uses this function may this it either provides relaxed memory ordering (as nothing is specified), or sequentially consistent ordering (as this is the default in C/C++). No chance of guessing that this is release operation:\nvoid vpx_atomic_store_release(vpx_atomic_int *atomic, int value);\nEliminates the need for the comment.",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "549747d6_ddaa78fc",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "I would do the cast here rather than remove const\u0027s throughout the code base and sprinkle TODO\u0027s and comments explaining why something that should be const is not declared const.\nThis looks more like a defect with C atomics, both atomic builtins and C++ accept consts. So it looks more reasonable to fix it locally rather than make it has systematic effect on the whole code base.",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77592deb_dd5f4201",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "Similarly here:\nint vpx_atomic_load_acquire(vpx_atomic_int *atomic);",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "553c4af0_fde6d922",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1121979
+      },
+      "writtenOn": "2017-08-28T09:34:14Z",
+      "side": 1,
+      "message": "You unconditionally undef VPX_USE_ATOMIC_BUILTINS which may not be defined, so you can drop\n#if defined(vpx_atomics_memory_barrier)\nhere as well.",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
