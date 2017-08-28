@@ -16,6 +16,24 @@
       "revId": "9d0ed5d0a669fec97f933e83febce2a9812c89f8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2eb75210_a52d4a83",
+        "filename": "vpx_dsp/ppc/vpx_convolve_vsx.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-08-28T22:30:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1225dce4_55f3c04d",
+      "revId": "9d0ed5d0a669fec97f933e83febce2a9812c89f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
