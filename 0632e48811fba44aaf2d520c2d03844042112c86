@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "7bd1bb2e_c3129d02",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "I added VPX_ATOMIC_INIT macros to be able to initialize this to const.",
+      "range": {
+        "startLine": 257,
+        "startChar": 17,
+        "endLine": 257,
+        "endChar": 40
+      },
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bed2a767_cb1b8f81",
         "filename": "vp8/decoder/threading.c",
         "patchSetId": 6
@@ -16,6 +39,24 @@
       "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "790cfbac_88db27f3",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done, replaced with vp8_atomic_spin_wait.",
+      "parentUuid": "bed2a767_cb1b8f81",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -36,6 +77,24 @@
     },
     {
       "key": {
+        "uuid": "314f9de0_48ae2412",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done, (replaced usage with #if defined instead).",
+      "parentUuid": "5457aef4_7c443918",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b3ed32c_57f758a1",
         "filename": "vpx_util/vpx_atomics.h",
         "patchSetId": 6
@@ -50,6 +109,24 @@
       "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "550eb7ea_7d6bf14e",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b3ed32c_57f758a1",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -76,6 +153,30 @@
     },
     {
       "key": {
+        "uuid": "d9f88681_8cfff618",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0e36c758_57898063",
+      "range": {
+        "startLine": 60,
+        "startChar": 65,
+        "endLine": 60,
+        "endChar": 70
+      },
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08ee482e_8d3780ba",
         "filename": "vpx_util/vpx_atomics.h",
         "patchSetId": 6
@@ -90,6 +191,24 @@
       "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "516fcf8d_3a1d8010",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08ee482e_8d3780ba",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -110,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "3ef1b99f_b2cc8636",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done, confused by volatile pointers in stdatomic headers.",
+      "parentUuid": "307cd4e2_a96d651e",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4e41c293_43c463f8",
         "filename": "vpx_util/vpx_atomics.h",
         "patchSetId": 6
@@ -124,6 +261,24 @@
       "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d3b8330_688b88fb",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e41c293_43c463f8",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -144,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "7755f210_56c8cb93",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done\n\nThis got ugly to beat -Wcast-qual though. :)",
+      "parentUuid": "549747d6_ddaa78fc",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77592deb_dd5f4201",
         "filename": "vpx_util/vpx_atomics.h",
         "patchSetId": 6
@@ -161,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "c99650d3_4d9697ba",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77592deb_dd5f4201",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "553c4af0_fde6d922",
         "filename": "vpx_util/vpx_atomics.h",
         "patchSetId": 6
@@ -175,6 +366,24 @@
       "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0cef1ba4_faf2a947",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-28T22:09:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "553c4af0_fde6d922",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
