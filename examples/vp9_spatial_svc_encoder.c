@@ -640,8 +640,9 @@ int main(int argc, const char **argv) {
 
 // Allocate image buffer
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (!vpx_img_alloc(&raw, enc_cfg.g_input_bit_depth == 8 ? VPX_IMG_FMT_I420
-                                                          : VPX_IMG_FMT_I42016,
+  if (!vpx_img_alloc(&raw,
+                     enc_cfg.g_input_bit_depth == 8 ? VPX_IMG_FMT_I420
+                                                    : VPX_IMG_FMT_I42016,
                      enc_cfg.g_w, enc_cfg.g_h, 32)) {
     die("Failed to allocate image %dx%d\n", enc_cfg.g_w, enc_cfg.g_h);
   }

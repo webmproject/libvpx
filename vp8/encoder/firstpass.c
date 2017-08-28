@@ -1273,8 +1273,9 @@ void vp8_init_second_pass(VP8_COMP *cpi) {
    * sum duration is not. Its calculated based on the actual durations of
    * all frames from the first pass.
    */
-  vp8_new_framerate(cpi, 10000000.0 * cpi->twopass.total_stats.count /
-                             cpi->twopass.total_stats.duration);
+  vp8_new_framerate(cpi,
+                    10000000.0 * cpi->twopass.total_stats.count /
+                        cpi->twopass.total_stats.duration);
 
   cpi->output_framerate = cpi->framerate;
   cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats.duration *

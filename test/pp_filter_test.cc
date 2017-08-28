@@ -90,8 +90,8 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckFilterOutput) {
   uint8_t *pixel_ptr = dst_image.TopLeftPixel();
   for (int i = 0; i < block_height; ++i) {
     for (int j = 0; j < block_width; ++j) {
-      ASSERT_EQ(kExpectedOutput[i], pixel_ptr[j]) << "at (" << i << ", " << j
-                                                  << ")";
+      ASSERT_EQ(kExpectedOutput[i], pixel_ptr[j])
+          << "at (" << i << ", " << j << ")";
     }
     pixel_ptr += dst_image.stride();
   }
@@ -182,8 +182,8 @@ class VpxMbPostProcAcrossIpTest
                      int rows, int cols, int src_pitch) {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        ASSERT_EQ(expected_output[c], src_c[c]) << "at (" << r << ", " << c
-                                                << ")";
+        ASSERT_EQ(expected_output[c], src_c[c])
+            << "at (" << r << ", " << c << ")";
       }
       src_c += src_pitch;
     }
@@ -296,8 +296,8 @@ class VpxMbPostProcDownTest
                      int rows, int cols, int src_pitch) {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        ASSERT_EQ(expected_output[r * rows + c], src_c[c]) << "at (" << r
-                                                           << ", " << c << ")";
+        ASSERT_EQ(expected_output[r * rows + c], src_c[c])
+            << "at (" << r << ", " << c << ")";
       }
       src_c += src_pitch;
     }

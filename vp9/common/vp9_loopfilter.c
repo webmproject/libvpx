@@ -1612,8 +1612,9 @@ void vp9_loop_filter_data_reset(
 
 void vp9_reset_lfm(VP9_COMMON *const cm) {
   if (cm->lf.filter_level) {
-    memset(cm->lf.lfm, 0, ((cm->mi_rows + (MI_BLOCK_SIZE - 1)) >> 3) *
-                              cm->lf.lfm_stride * sizeof(*cm->lf.lfm));
+    memset(cm->lf.lfm, 0,
+           ((cm->mi_rows + (MI_BLOCK_SIZE - 1)) >> 3) * cm->lf.lfm_stride *
+               sizeof(*cm->lf.lfm));
   }
 }
 

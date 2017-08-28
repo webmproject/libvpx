@@ -91,8 +91,8 @@ class DatarateTestLarge
     const bool key_frame =
         (pkt->data.frame.flags & VPX_FRAME_IS_KEY) ? true : false;
     if (!key_frame) {
-      ASSERT_GE(bits_in_buffer_model_, 0) << "Buffer Underrun at frame "
-                                          << pkt->data.frame.pts;
+      ASSERT_GE(bits_in_buffer_model_, 0)
+          << "Buffer Underrun at frame " << pkt->data.frame.pts;
     }
 
     const int64_t frame_size_in_bits = pkt->data.frame.sz * 8;
@@ -585,8 +585,8 @@ class DatarateTestVP9Large
         duration * timebase_ * cfg_.rc_target_bitrate * 1000);
 
     // Buffer should not go negative.
-    ASSERT_GE(bits_in_buffer_model_, 0) << "Buffer Underrun at frame "
-                                        << pkt->data.frame.pts;
+    ASSERT_GE(bits_in_buffer_model_, 0)
+        << "Buffer Underrun at frame " << pkt->data.frame.pts;
 
     const size_t frame_size_in_bits = pkt->data.frame.sz * 8;
 

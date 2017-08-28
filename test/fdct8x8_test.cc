@@ -511,8 +511,8 @@ class FwdTrans8x8TestBase {
         const int diff = dst[j] - ref[j];
 #endif
         const uint32_t error = diff * diff;
-        EXPECT_EQ(0u, error) << "Error: 8x8 IDCT has error " << error
-                             << " at index " << j;
+        EXPECT_EQ(0u, error)
+            << "Error: 8x8 IDCT has error " << error << " at index " << j;
       }
     }
   }

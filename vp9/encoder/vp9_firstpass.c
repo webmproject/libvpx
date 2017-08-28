@@ -726,8 +726,9 @@ static void first_pass_stat_calc(VP9_COMP *cpi, FIRSTPASS_STATS *fps,
   // Exclude any image dead zone
   if (fp_acc_data->image_data_start_row > 0) {
     fp_acc_data->intra_skip_count =
-        VPXMAX(0, fp_acc_data->intra_skip_count -
-                      (fp_acc_data->image_data_start_row * cm->mb_cols * 2));
+        VPXMAX(0,
+               fp_acc_data->intra_skip_count -
+                   (fp_acc_data->image_data_start_row * cm->mb_cols * 2));
   }
 
   fp_acc_data->intra_factor = fp_acc_data->intra_factor / (double)num_mbs;

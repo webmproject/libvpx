@@ -45,8 +45,8 @@ class InvalidFileTest : public ::libvpx_test::DecoderTest,
 
   void OpenResFile(const std::string &res_file_name_) {
     res_file_ = libvpx_test::OpenTestDataFile(res_file_name_);
-    ASSERT_TRUE(res_file_ != NULL) << "Result file open failed. Filename: "
-                                   << res_file_name_;
+    ASSERT_TRUE(res_file_ != NULL)
+        << "Result file open failed. Filename: " << res_file_name_;
   }
 
   virtual bool HandleDecodeResult(
