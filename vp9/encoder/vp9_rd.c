@@ -670,19 +670,21 @@ void vp9_update_rd_thresh_fact(int (*factor_buf)[MAX_MODES], int rd_thresh,
   }
 }
 
-int vp9_get_intra_cost_penalty(int qindex, int qdelta,
-                               vpx_bit_depth_t bit_depth) {
-  const int q = vp9_dc_quant(qindex, qdelta, bit_depth);
-#if CONFIG_VP9_HIGHBITDEPTH
-  switch (bit_depth) {
-    case VPX_BITS_8: return 20 * q;
-    case VPX_BITS_10: return 5 * q;
-    case VPX_BITS_12: return ROUND_POWER_OF_TWO(5 * q, 2);
-    default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
-      return -1;
-  }
-#else
-  return 20 * q;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+int vp9_get_intra_cost_penalty(const VP9_COMP *const cpi, BLOCK_SIZE bsize,
+                               int qindex, int qdelta) {
+  // Reduce the intra cost penalty for small blocks (<=16x16).
+  int reduction_fac =
+      (bsize <= BLOCK_16X16) ? ((bsize <= BLOCK_8X8) ? 4 : 2) : 0;
+
+  if (cpi->noise_estimate.enabled && cpi->noise_estimate.level == kHigh)
+    // Don't reduce intra cost penalty if estimated noise level is high.
+    reduction_fac = 0;
+
+  // Always use VPX_BITS_8 as input here because the penalty is applied
+  // to rate not distortion so we want a consistent penalty for all bit
+  // depths. If the actual bit depth were passed in here then the value
+  // retured by vp9_dc_quant() would scale with the bit depth and we would
+  // then need to apply inverse scaling to correct back to a bit depth
+  // independent rate penalty.
+  return (20 * vp9_dc_quant(qindex, qdelta, VPX_BITS_8)) >> reduction_fac;
 }
