@@ -16,6 +16,24 @@
       "revId": "d2a8a963c1ffc012760b0e98a9fe46c4e37af7f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02540982_37305d2f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-08-29T19:53:09Z",
+      "side": 1,
+      "message": "oopppss.... typo?? Looks like I did the same on the previous commit.",
+      "parentUuid": "ebd20f02_351dc6bd",
+      "revId": "d2a8a963c1ffc012760b0e98a9fe46c4e37af7f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
