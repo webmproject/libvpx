@@ -113,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "8322a585_f35a0070",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-29T15:41:51Z",
+      "side": 1,
+      "message": "libvpx builds with -Wundef which triggers a warning.",
+      "parentUuid": "f3ec07a7_33c2c48d",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b3ed32c_57f758a1",
         "filename": "vpx_util/vpx_atomics.h",
         "patchSetId": 6
@@ -277,6 +295,24 @@
       "side": 1,
       "message": "These volatiles in function signatures mean that the functions _support_ volatile variables as well.",
       "parentUuid": "3ef1b99f_b2cc8636",
+      "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "91caf6aa_124746a3",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-29T15:41:51Z",
+      "side": 1,
+      "message": "Thanks!",
+      "parentUuid": "77e5069e_73bb59a2",
       "revId": "0632e48811fba44aaf2d520c2d03844042112c86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
