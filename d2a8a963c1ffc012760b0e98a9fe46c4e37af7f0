@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebd20f02_351dc6bd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-29T19:29:53Z",
+      "side": 1,
+      "message": "actually 1411 I think, 1422 was for NEON",
+      "revId": "d2a8a963c1ffc012760b0e98a9fe46c4e37af7f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
