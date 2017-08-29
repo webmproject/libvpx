@@ -591,6 +591,7 @@ static void set_rt_speed_feature_framesize_independent(
 
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
+    sf->skip_encode_sb = 1;
     if (!cpi->use_svc) cpi->max_copied_frame = 4;
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
       sf->adaptive_rd_thresh_row_mt = 1;
