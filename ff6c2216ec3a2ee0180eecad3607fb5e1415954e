@@ -22,6 +22,30 @@
       "revId": "ff6c2216ec3a2ee0180eecad3607fb5e1415954e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f1f82d5_9889fb40",
+        "filename": "vpx_dsp/x86/highbd_intrapred_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-08-29T19:04:43Z",
+      "side": 1,
+      "message": "I think I can use a movd here.  Only the lower 16 bits is required.",
+      "parentUuid": "50c7b50e_28b8af89",
+      "range": {
+        "startLine": 183,
+        "startChar": 22,
+        "endLine": 183,
+        "endChar": 35
+      },
+      "revId": "ff6c2216ec3a2ee0180eecad3607fb5e1415954e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
