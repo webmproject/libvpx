@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df6ed51f_69a06e56",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1858,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-08-30T17:17:32Z",
+      "side": 1,
+      "message": "Lets do this only for (0, 0) motion vector for now, since regression should be\nsmall/neutral in that case. \nYou can add a comment/TODO for the case of non-zero motion vector.",
+      "revId": "266ef659b61ab37cb5b16153b66e0d216338da7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
