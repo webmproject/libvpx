@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f54bac21_bd45ee6a",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-30T07:13:36Z",
+      "side": 0,
+      "message": "I don\u0027t think the includes are done well enough in this library to remove this. You\u0027ll probably lose the pthread* wrappers in vpx_thread.h in windows builds",
+      "revId": "3e069846b996bb9821bff8ad5d30554ef64bf531",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
