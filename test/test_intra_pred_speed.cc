@@ -518,18 +518,19 @@ HIGHBD_INTRA_PRED_TEST(SSE2, TestHighbdIntraPred32,
 
 #if HAVE_SSSE3
 HIGHBD_INTRA_PRED_TEST(SSSE3, TestHighbdIntraPred4, NULL, NULL, NULL, NULL,
-                       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+                       NULL, NULL, vpx_highbd_d45_predictor_4x4_ssse3, NULL,
+                       NULL, NULL, NULL, NULL, NULL)
 HIGHBD_INTRA_PRED_TEST(SSSE3, TestHighbdIntraPred8, NULL, NULL, NULL, NULL,
-                       NULL, NULL, NULL, NULL, NULL, NULL,
-                       vpx_highbd_d207_predictor_8x8_ssse3,
+                       NULL, NULL, vpx_highbd_d45_predictor_8x8_ssse3, NULL,
+                       NULL, NULL, vpx_highbd_d207_predictor_8x8_ssse3,
                        vpx_highbd_d63_predictor_8x8_ssse3, NULL)
 HIGHBD_INTRA_PRED_TEST(SSSE3, TestHighbdIntraPred16, NULL, NULL, NULL, NULL,
-                       NULL, NULL, NULL, NULL, NULL, NULL,
-                       vpx_highbd_d207_predictor_16x16_ssse3,
+                       NULL, NULL, vpx_highbd_d45_predictor_16x16_ssse3, NULL,
+                       NULL, NULL, vpx_highbd_d207_predictor_16x16_ssse3,
                        vpx_highbd_d63_predictor_16x16_ssse3, NULL)
 HIGHBD_INTRA_PRED_TEST(SSSE3, TestHighbdIntraPred32, NULL, NULL, NULL, NULL,
-                       NULL, NULL, NULL, NULL, NULL, NULL,
-                       vpx_highbd_d207_predictor_32x32_ssse3,
+                       NULL, NULL, vpx_highbd_d45_predictor_32x32_ssse3, NULL,
+                       NULL, NULL, vpx_highbd_d207_predictor_32x32_ssse3,
                        vpx_highbd_d63_predictor_32x32_ssse3, NULL)
 #endif  // HAVE_SSSE3
 
