@@ -16,6 +16,24 @@
       "revId": "3e069846b996bb9821bff8ad5d30554ef64bf531",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "979e3777_00da36a2",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T19:49:52Z",
+      "side": 0,
+      "message": "Added back, I assumed that this would\u0027ve been covered by trybots?",
+      "parentUuid": "f54bac21_bd45ee6a",
+      "revId": "3e069846b996bb9821bff8ad5d30554ef64bf531",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }

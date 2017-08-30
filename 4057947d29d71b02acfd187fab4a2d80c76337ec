@@ -37,6 +37,42 @@
     },
     {
       "key": {
+        "uuid": "6490d00a_19cade8b",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T19:49:52Z",
+      "side": 1,
+      "message": "I\u0027d like to keep this potential perf improvement separate from fixing synchronization. If it turns out to be a regression to remove this macro I wouldn\u0027t want atomics reverted because of that.",
+      "parentUuid": "65871656_a2754d8a",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7febe4dd_b1a9d7a8",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T19:49:52Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1699d10b_cd6f79ec",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "822e7867_d23babf3",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 8
@@ -51,6 +87,24 @@
       "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6132941a_c76879fc",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 5318,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T19:49:52Z",
+      "side": 1,
+      "message": "Gotcha, I take \"in this file\" to mean that it\u0027s only read/written by the main thread, which makes sense to me given the functions they are in. Comment removed.",
+      "parentUuid": "822e7867_d23babf3",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "55db9334_13b3861a",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T19:49:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9f220226_95940b7d",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "478220c3_5989e9e6",
         "filename": "vpx_util/vpx_atomics.h",
         "patchSetId": 8
@@ -88,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "a143f482_fc21c389",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T19:49:52Z",
+      "side": 1,
+      "message": "Matching vpx_thread.h, done.",
+      "parentUuid": "478220c3_5989e9e6",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d06088dc_8698b3db",
         "filename": "vpx_util/vpx_atomics.h",
         "patchSetId": 8
@@ -102,6 +192,24 @@
       "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a6c4f7c_9f647958",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T19:49:52Z",
+      "side": 1,
+      "message": "Perfect, thanks!",
+      "parentUuid": "d06088dc_8698b3db",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -125,6 +233,30 @@
       "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2f816a2d_d4fdbf79",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T19:49:52Z",
+      "side": 1,
+      "message": "I put the TODO to consider adding \u003catomic\u003e support when building C++11 under _MSC_VER. There are no InterlockedRead or InterlockedStore for just loading and storing. This could be implemented on top of InterlockedExchange and CAS but I believe both operations are significantly more expensive than the load/stores in x86 asm.\n\nI\u0027ve heavily reworded this, PTAL.",
+      "parentUuid": "d380a708_6e3a3159",
+      "range": {
+        "startLine": 46,
+        "startChar": 26,
+        "endLine": 47,
+        "endChar": 15
+      },
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
