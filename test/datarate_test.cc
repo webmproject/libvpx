@@ -258,6 +258,14 @@ TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
   }
 }
 
+// Disabled for tsan, see:
+// https://bugs.chromium.org/p/webm/issues/detail?id=1049
+#if defined(__has_feature)
+#if __has_feature(thread_sanitizer)
+#define BUILDING_WITH_TSAN
+#endif
+#endif
+#ifndef BUILDING_WITH_TSAN
 TEST_P(DatarateTestLarge, DropFramesMultiThreads) {
   denoiser_on_ = 0;
   cfg_.rc_buf_initial_sz = 500;
@@ -277,6 +285,7 @@ TEST_P(DatarateTestLarge, DropFramesMultiThreads) {
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
       << " The datarate for the file missed the target!";
 }
+#endif  // !BUILDING_WITH_TSAN
 
 class DatarateTestRealTime : public DatarateTestLarge {
  public:
@@ -393,6 +402,10 @@ TEST_P(DatarateTestRealTime, ChangingDropFrameThresh) {
   }
 }
 
+// Disabled for tsan, see:
+// https://bugs.chromium.org/p/webm/issues/detail?id=1049
+
+#ifndef BUILDING_WITH_TSAN
 TEST_P(DatarateTestRealTime, DropFramesMultiThreads) {
   denoiser_on_ = 0;
   cfg_.rc_buf_initial_sz = 500;
@@ -413,6 +426,7 @@ TEST_P(DatarateTestRealTime, DropFramesMultiThreads) {
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
       << " The datarate for the file missed the target!";
 }
+#endif
 
 TEST_P(DatarateTestRealTime, GFBoost) {
   denoiser_on_ = 0;
