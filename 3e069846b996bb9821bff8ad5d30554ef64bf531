@@ -52,6 +52,24 @@
       "revId": "3e069846b996bb9821bff8ad5d30554ef64bf531",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c315beb5_68c9235f",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1126912
+      },
+      "writtenOn": "2017-08-30T20:35:57Z",
+      "side": 0,
+      "message": "FWIW we\u0027ve tested all three branches under building on Mac for ARM64 (atomics, builtins, asm) and they seem race free after this on the iPad that exhibited this issue. I don\u0027t have a Windows machine to test on, but I believe it should hit \"volatile int value;\", and do volatile read/writes under MSVC, which is a slight improvement over existing behavior (non-volatile -\u003e no guarantee of atomic read/writes) in terms of potential compiler reordering (which I have no idea whether it actually kicks in or not).",
+      "parentUuid": "74e422c1_f2d1aa98",
+      "revId": "3e069846b996bb9821bff8ad5d30554ef64bf531",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
