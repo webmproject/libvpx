@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47687362_2ac64fcf",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-30T20:24:36Z",
+      "side": 1,
+      "message": "this will likely never be made to build with c++11, but the comment is fine",
+      "range": {
+        "startLine": 43,
+        "startChar": 58,
+        "endLine": 43,
+        "endChar": 72
+      },
+      "revId": "2744756805e0835629d660aed48a093779b8f3b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
