@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "f3fe88e9_abfc31a8",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-30T20:19:52Z",
+      "side": 1,
+      "message": "\u003e I\u0027d like to keep this potential perf improvement separate from fixing synchronization. If it turns out to be a regression to remove this macro I wouldn\u0027t want atomics reverted because of that.\n\nIf it greatly affected performance and was intended as a fix then it would be better to limit to that platform. In this case I imagine it\u0027s close, but it\u0027s important to have an idea of what the effect will be before landing.",
+      "parentUuid": "7febe4dd_b1a9d7a8",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "822e7867_d23babf3",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 8
