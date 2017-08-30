@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "822e7867_d23babf3",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 5318,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-30T06:03:21Z",
+      "side": 1,
+      "message": "I think this is only used to indicate cleanup should be done. It\u0027s only read and written in this file.",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f220226_95940b7d",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-30T06:03:21Z",
+      "side": 1,
+      "message": "I\u0027d put this after the include as often defines before them are meant to have some affect",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "478220c3_5989e9e6",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-30T06:03:21Z",
+      "side": 1,
+      "message": "the style of check in endian_inl.h would be more consistent with existing checks, though there is a mix this only appears in gtest.\n\nhttps://chromium.googlesource.com/webm/libvpx/+/master/vpx_util/endian_inl.h#19",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d06088dc_8698b3db",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-30T06:03:21Z",
+      "side": 1,
+      "message": "you could check _MSC_VER if this is visual studio specific. mingw-w64 would probably hit the gcc / inline asm paths",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d380a708_6e3a3159",
+        "filename": "vpx_util/vpx_atomics.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-08-30T06:03:21Z",
+      "side": 1,
+      "message": "I think there\u0027s \u003catomic\u003e, but not stdatomic.h otherwise you\u0027d want a version check for that above.\nSome platform specific Interlocked* calls could be used in this branch. It might be better to phrase a TODO that way",
+      "range": {
+        "startLine": 46,
+        "startChar": 26,
+        "endLine": 47,
+        "endChar": 15
+      },
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
