@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "65871656_a2754d8a",
+        "filename": "vp8/common/threading.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000853
+      },
+      "writtenOn": "2017-08-30T18:15:26Z",
+      "side": 1,
+      "message": "Is there understanding of whether the combination of this macro (essentially an asm(\"pause\") on x86) and the following one (which is a sched_yield()) actually improves the performance?\nWhat I previously heard about this pattern was \"The original multi-threaded code in VP8 was implemented based on VP8\u0027s data access patterns with help from Intel Engineers.\", but the intention of it wasn\u0027t documented anywhere.\n\nI suspect what we actually want here is to spin for certain number of iterations using a pause instruction, and then back off to sched_yield().",
+      "revId": "4057947d29d71b02acfd187fab4a2d80c76337ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "822e7867_d23babf3",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 8
