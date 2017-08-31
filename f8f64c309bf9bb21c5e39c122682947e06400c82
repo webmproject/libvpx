@@ -22,6 +22,30 @@
       "revId": "f8f64c309bf9bb21c5e39c122682947e06400c82",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9932fbca_3cdfbcc5",
+        "filename": "vpx_dsp/ppc/inv_txfm_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2017-08-31T07:18:33Z",
+      "side": 1,
+      "message": "The compiler shouldn\u0027t make any difference nowadays, the manuals:\nnew draft http://openpowerfoundation.org/wp-content/uploads/resources/leabi-prd/leabi-20170321.pdf\nold manual http://www.nxp.com/files/32bit/doc/ref_manual/ALTIVECPIM.pdf",
+      "parentUuid": "e830660c_7bb07c7b",
+      "range": {
+        "startLine": 88,
+        "startChar": 31,
+        "endLine": 88,
+        "endChar": 49
+      },
+      "revId": "f8f64c309bf9bb21c5e39c122682947e06400c82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
