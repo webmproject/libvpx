@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vpx_dsp/ppc/bitdepth_conversion_vsx.h"
 #include "vpx_dsp/ppc/types_vsx.h"
 
 #include "./vpx_dsp_rtcd.h"
@@ -83,8 +84,8 @@ void vpx_idct4x4_16_add_vsx(const tran_low_t *input, uint8_t *dest,
                        0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
   uint8x16_t mask1 = { 0x0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,
                        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17 };
-  int16x8_t v0 = vec_vsx_ld(0, input);
-  int16x8_t v1 = vec_vsx_ld(16, input);
+  int16x8_t v0 = load_tran_low(0, input);
+  int16x8_t v1 = load_tran_low(8 * sizeof(*input), input);
   int16x8_t t0 = vec_mergeh(v0, v1);
   int16x8_t t1 = vec_mergel(v0, v1);
 
@@ -235,14 +236,14 @@ void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
   int16x8_t step0, step1, step2, step3, step4, step5, step6, step7;
   int16x8_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp16_0, tmp16_1,
       tmp16_2, tmp16_3;
-  int16x8_t src0 = vec_vsx_ld(0, input);
-  int16x8_t src1 = vec_vsx_ld(16, input);
-  int16x8_t src2 = vec_vsx_ld(2 * 16, input);
-  int16x8_t src3 = vec_vsx_ld(3 * 16, input);
-  int16x8_t src4 = vec_vsx_ld(4 * 16, input);
-  int16x8_t src5 = vec_vsx_ld(5 * 16, input);
-  int16x8_t src6 = vec_vsx_ld(6 * 16, input);
-  int16x8_t src7 = vec_vsx_ld(7 * 16, input);
+  int16x8_t src0 = load_tran_low(0, input);
+  int16x8_t src1 = load_tran_low(8 * sizeof(*input), input);
+  int16x8_t src2 = load_tran_low(16 * sizeof(*input), input);
+  int16x8_t src3 = load_tran_low(24 * sizeof(*input), input);
+  int16x8_t src4 = load_tran_low(32 * sizeof(*input), input);
+  int16x8_t src5 = load_tran_low(40 * sizeof(*input), input);
+  int16x8_t src6 = load_tran_low(48 * sizeof(*input), input);
+  int16x8_t src7 = load_tran_low(56 * sizeof(*input), input);
   uint8x16_t dest0 = vec_vsx_ld(0, dest);
   uint8x16_t dest1 = vec_vsx_ld(stride, dest);
   uint8x16_t dest2 = vec_vsx_ld(2 * stride, dest);
@@ -295,24 +296,24 @@ void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
   vec_vsx_st(xxpermdi(output3, dest7, 3), 7 * stride, dest);
 }
 
-#define LOAD_INPUT16(source, offset, step, in0, in1, in2, in3, in4, in5, in6, \
-                     in7, in8, in9, inA, inB, inC, inD, inE, inF)             \
-  in0 = vec_vsx_ld(offset, source);                                           \
-  in1 = vec_vsx_ld(step + offset, source);                                    \
-  in2 = vec_vsx_ld(2 * step + offset, source);                                \
-  in3 = vec_vsx_ld(3 * step + offset, source);                                \
-  in4 = vec_vsx_ld(4 * step + offset, source);                                \
-  in5 = vec_vsx_ld(5 * step + offset, source);                                \
-  in6 = vec_vsx_ld(6 * step + offset, source);                                \
-  in7 = vec_vsx_ld(7 * step + offset, source);                                \
-  in8 = vec_vsx_ld(8 * step + offset, source);                                \
-  in9 = vec_vsx_ld(9 * step + offset, source);                                \
-  inA = vec_vsx_ld(10 * step + offset, source);                               \
-  inB = vec_vsx_ld(11 * step + offset, source);                               \
-  inC = vec_vsx_ld(12 * step + offset, source);                               \
-  inD = vec_vsx_ld(13 * step + offset, source);                               \
-  inE = vec_vsx_ld(14 * step + offset, source);                               \
-  inF = vec_vsx_ld(15 * step + offset, source);
+#define LOAD_INPUT16(load, source, offset, step, in0, in1, in2, in3, in4, in5, \
+                     in6, in7, in8, in9, inA, inB, inC, inD, inE, inF)         \
+  in0 = load(offset, source);                                                  \
+  in1 = load((step) + (offset), source);                                       \
+  in2 = load(2 * (step) + (offset), source);                                   \
+  in3 = load(3 * (step) + (offset), source);                                   \
+  in4 = load(4 * (step) + (offset), source);                                   \
+  in5 = load(5 * (step) + (offset), source);                                   \
+  in6 = load(6 * (step) + (offset), source);                                   \
+  in7 = load(7 * (step) + (offset), source);                                   \
+  in8 = load(8 * (step) + (offset), source);                                   \
+  in9 = load(9 * (step) + (offset), source);                                   \
+  inA = load(10 * (step) + (offset), source);                                  \
+  inB = load(11 * (step) + (offset), source);                                  \
+  inC = load(12 * (step) + (offset), source);                                  \
+  inD = load(13 * (step) + (offset), source);                                  \
+  inE = load(14 * (step) + (offset), source);                                  \
+  inF = load(15 * (step) + (offset), source);
 
 #define STEP16_1(inpt0, inpt1, outpt0, outpt1, cospi) \
   tmp16_0 = vec_mergeh(inpt0, inpt1);                 \
@@ -507,8 +508,9 @@ void vpx_idct16x16_256_add_vsx(const tran_low_t *input, uint8_t *dest,
 
   // transform rows
   // load and transform the upper half of 16x16 matrix
-  LOAD_INPUT16(input, 0, 16, src00, src10, src01, src11, src02, src12, src03,
-               src13, src04, src14, src05, src15, src06, src16, src07, src17);
+  LOAD_INPUT16(load_tran_low, input, 0, 8 * sizeof(*input), src00, src10, src01,
+               src11, src02, src12, src03, src13, src04, src14, src05, src15,
+               src06, src16, src07, src17);
   TRANSPOSE8x8(src00, src01, src02, src03, src04, src05, src06, src07, tmp00,
                tmp01, tmp02, tmp03, tmp04, tmp05, tmp06, tmp07);
   TRANSPOSE8x8(src10, src11, src12, src13, src14, src15, src16, src17, tmp10,
@@ -523,7 +525,8 @@ void vpx_idct16x16_256_add_vsx(const tran_low_t *input, uint8_t *dest,
                tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17);
 
   // load and transform the lower half of 16x16 matrix
-  LOAD_INPUT16(input, 16 * 16, 16, src20, src30, src21, src31, src22, src32,
+  LOAD_INPUT16(load_tran_low, input, 8 * 8 * 2 * sizeof(*input),
+               8 * sizeof(*input), src20, src30, src21, src31, src22, src32,
                src23, src33, src24, src34, src25, src35, src26, src36, src27,
                src37);
   TRANSPOSE8x8(src20, src21, src22, src23, src24, src25, src26, src27, tmp20,
@@ -552,8 +555,9 @@ void vpx_idct16x16_256_add_vsx(const tran_low_t *input, uint8_t *dest,
          src36, src37);
 
   // load dest
-  LOAD_INPUT16(dest, 0, stride, dest0, dest1, dest2, dest3, dest4, dest5, dest6,
-               dest7, dest8, dest9, destA, destB, destC, destD, destE, destF);
+  LOAD_INPUT16(vec_vsx_ld, dest, 0, stride, dest0, dest1, dest2, dest3, dest4,
+               dest5, dest6, dest7, dest8, dest9, destA, destB, destC, destD,
+               destE, destF);
 
   PIXEL_ADD_STORE16(src00, src10, dest0, 0);
   PIXEL_ADD_STORE16(src01, src11, dest1, stride);
