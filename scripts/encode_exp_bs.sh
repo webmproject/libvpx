@@ -19,21 +19,22 @@
 #   1) profile=2
 #   2) Add $bitdepth in encoder command line, e.g. bitdepth="--bit-depth=10"
 #   3) Change runconfig.sh, bitdepth=--enable-highbitdepth
-#set -x
+set -x
 
 if [ "$#" -ne 1 ]; then
-  root_dir=~/Dev/av1w
+  video_sequence=soccer_cif.sh
 else
-  root_dir=$1
+  video_sequence=$1
 fi
 
+root_dir=~/Dev/av1w
 code_dir=$root_dir/aom
 build_dir=$root_dir/release
 test_dir=~/Dev/field
 script_dir=~/Dev/sandbox/libvpx/scripts
 bitstream_dir=~/Dev/samples/bitstreams/routine
 
-. $script_dir/video_sequence_weekly.sh
+. $script_dir/$video_sequence
 
 # General options
 Codec=av1
@@ -57,7 +58,8 @@ d7="interintra one_sided_compound smooth_hv"
 d8="parallel_deblocking rect_intra_pred convolve_round"
 d9="palette_throughput tempmv_signaling ext-comp-refs"
 
-exp_list="$d1 $d2 $d3 $d4 $d5 $d6 $d7 $d8 $d9"
+#exp_list="$d1 $d2 $d3 $d4 $d5 $d6 $d7 $d8 $d9"
+exp_list=experimental
 
 constant_cmdline_options="--skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --test-decode=warn --psnr"
 
