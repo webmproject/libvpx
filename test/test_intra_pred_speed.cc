@@ -481,28 +481,32 @@ HIGHBD_INTRA_PRED_TEST(
 
 #if HAVE_SSE2
 HIGHBD_INTRA_PRED_TEST(SSE2, TestHighbdIntraPred4,
-                       vpx_highbd_dc_predictor_4x4_sse2, NULL,
+                       vpx_highbd_dc_predictor_4x4_sse2,
+                       vpx_highbd_dc_left_predictor_4x4_sse2,
                        vpx_highbd_dc_top_predictor_4x4_sse2, NULL,
                        vpx_highbd_v_predictor_4x4_sse2,
                        vpx_highbd_h_predictor_4x4_sse2, NULL, NULL, NULL, NULL,
                        NULL, NULL, vpx_highbd_tm_predictor_4x4_c)
 
 HIGHBD_INTRA_PRED_TEST(SSE2, TestHighbdIntraPred8,
-                       vpx_highbd_dc_predictor_8x8_sse2, NULL,
+                       vpx_highbd_dc_predictor_8x8_sse2,
+                       vpx_highbd_dc_left_predictor_8x8_sse2,
                        vpx_highbd_dc_top_predictor_8x8_sse2, NULL,
                        vpx_highbd_v_predictor_8x8_sse2,
                        vpx_highbd_h_predictor_8x8_sse2, NULL, NULL, NULL, NULL,
                        NULL, NULL, vpx_highbd_tm_predictor_8x8_sse2)
 
 HIGHBD_INTRA_PRED_TEST(SSE2, TestHighbdIntraPred16,
-                       vpx_highbd_dc_predictor_16x16_sse2, NULL,
+                       vpx_highbd_dc_predictor_16x16_sse2,
+                       vpx_highbd_dc_left_predictor_16x16_sse2,
                        vpx_highbd_dc_top_predictor_16x16_sse2, NULL,
                        vpx_highbd_v_predictor_16x16_sse2,
                        vpx_highbd_h_predictor_16x16_sse2, NULL, NULL, NULL,
                        NULL, NULL, NULL, vpx_highbd_tm_predictor_16x16_sse2)
 
 HIGHBD_INTRA_PRED_TEST(SSE2, TestHighbdIntraPred32,
-                       vpx_highbd_dc_predictor_32x32_sse2, NULL,
+                       vpx_highbd_dc_predictor_32x32_sse2,
+                       vpx_highbd_dc_left_predictor_32x32_sse2,
                        vpx_highbd_dc_top_predictor_32x32_sse2, NULL,
                        vpx_highbd_v_predictor_32x32_sse2,
                        vpx_highbd_h_predictor_32x32_sse2, NULL, NULL, NULL,

@@ -177,6 +177,17 @@ static INLINE void dc_store_4x4(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
+void vpx_highbd_dc_left_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
+                                           const uint16_t *above,
+                                           const uint16_t *left, int bd) {
+  const __m128i two = _mm_cvtsi32_si128(2);
+  const __m128i sum = dc_sum_4(left);
+  const __m128i dc = _mm_srli_epi16(_mm_add_epi16(sum, two), 2);
+  (void)above;
+  (void)bd;
+  dc_store_4x4(dst, stride, &dc);
+}
+
 void vpx_highbd_dc_top_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
                                           const uint16_t *above,
                                           const uint16_t *left, int bd) {
@@ -210,6 +221,17 @@ static INLINE void dc_store_8x8(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
+void vpx_highbd_dc_left_predictor_8x8_sse2(uint16_t *dst, ptrdiff_t stride,
+                                           const uint16_t *above,
+                                           const uint16_t *left, int bd) {
+  const __m128i four = _mm_cvtsi32_si128(4);
+  const __m128i sum = dc_sum_8(left);
+  const __m128i dc = _mm_srli_epi16(_mm_add_epi16(sum, four), 3);
+  (void)above;
+  (void)bd;
+  dc_store_8x8(dst, stride, &dc);
+}
+
 void vpx_highbd_dc_top_predictor_8x8_sse2(uint16_t *dst, ptrdiff_t stride,
                                           const uint16_t *above,
                                           const uint16_t *left, int bd) {
@@ -239,6 +261,17 @@ static INLINE void dc_store_16x16(uint16_t *dst, ptrdiff_t stride,
     _mm_store_si128((__m128i *)dst, dc_dup);
     _mm_store_si128((__m128i *)(dst + 8), dc_dup);
   }
+}
+
+void vpx_highbd_dc_left_predictor_16x16_sse2(uint16_t *dst, ptrdiff_t stride,
+                                             const uint16_t *above,
+                                             const uint16_t *left, int bd) {
+  const __m128i eight = _mm_cvtsi32_si128(8);
+  const __m128i sum = dc_sum_16(left);
+  const __m128i dc = _mm_srli_epi16(_mm_add_epi16(sum, eight), 4);
+  (void)above;
+  (void)bd;
+  dc_store_16x16(dst, stride, &dc);
 }
 
 void vpx_highbd_dc_top_predictor_16x16_sse2(uint16_t *dst, ptrdiff_t stride,
@@ -275,6 +308,17 @@ static INLINE void dc_store_32x32(uint16_t *dst, ptrdiff_t stride,
     _mm_store_si128((__m128i *)(dst + 16), dc_dup);
     _mm_store_si128((__m128i *)(dst + 24), dc_dup);
   }
+}
+
+void vpx_highbd_dc_left_predictor_32x32_sse2(uint16_t *dst, ptrdiff_t stride,
+                                             const uint16_t *above,
+                                             const uint16_t *left, int bd) {
+  const __m128i sixteen = _mm_cvtsi32_si128(16);
+  const __m128i sum = dc_sum_32(left);
+  const __m128i dc = _mm_srli_epi32(_mm_add_epi32(sum, sixteen), 5);
+  (void)above;
+  (void)bd;
+  dc_store_32x32(dst, stride, &dc);
 }
 
 void vpx_highbd_dc_top_predictor_32x32_sse2(uint16_t *dst, ptrdiff_t stride,
