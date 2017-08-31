@@ -1441,6 +1441,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   TX_SIZE best_tx_size = TX_SIZES;
   INTERP_FILTER best_pred_filter = EIGHTTAP;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
+  uint8_t mode_checked[MB_MODE_COUNT][MAX_REF_FRAMES];
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
@@ -1505,6 +1506,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   INTERP_FILTER filter_gf_svc = EIGHTTAP;
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
+
+  memset(&mode_checked[0][0], 0, MB_MODE_COUNT * MAX_REF_FRAMES);
 
   if (reuse_inter_pred) {
     int i;
@@ -1645,6 +1648,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     int is_skippable;
     int this_early_term = 0;
     int rd_computed = 0;
+    int inter_mv_mode = 0;
+    int skip_this_mv = 0;
 
     PREDICTION_MODE this_mode = ref_mode_set[idx].pred_mode;
 
@@ -1849,6 +1854,22 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         continue;
       }
     }
+
+    // TODO(jianj): Skipping the testing of (duplicate) non-zero motion vector
+    // causes some regression, leave it for duplicate zero-mv for now, until
+    // regression issue is resolved.
+    for (inter_mv_mode = NEARESTMV; inter_mv_mode <= NEWMV; inter_mv_mode++) {
+      if (inter_mv_mode == this_mode) continue;
+      if (mode_checked[inter_mv_mode][ref_frame] &&
+          frame_mv[this_mode][ref_frame].as_int ==
+              frame_mv[inter_mv_mode][ref_frame].as_int &&
+          frame_mv[inter_mv_mode][ref_frame].as_int == 0) {
+        skip_this_mv = 1;
+        break;
+      }
+    }
+
+    if (skip_this_mv) continue;
 
     // If use_golden_nonzeromv is false, NEWMV mode is skipped for golden, no
     // need to compute best_pred_sad which is only used to skip golden NEWMV.
@@ -2064,6 +2085,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #else
     (void)ctx;
 #endif
+
+    mode_checked[this_mode][ref_frame] = 1;
 
     if (this_rdc.rdcost < best_rdc.rdcost || x->skip) {
       best_rdc = this_rdc;
