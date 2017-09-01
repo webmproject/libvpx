@@ -415,7 +415,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
 #endif
 
 #if CONFIG_MULTITHREAD
-        if (pbi->b_multithreaded_rd) {
+        if (vpx_atomic_load_acquire(&pbi->b_multithreaded_rd)) {
           vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
         }
 #else

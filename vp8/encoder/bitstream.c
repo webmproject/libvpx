@@ -1416,7 +1416,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest,
     vp8_start_encode(&cpi->bc[1], cx_data, cx_data_end);
 
 #if CONFIG_MULTITHREAD
-    if (cpi->b_multi_threaded) {
+    if (vpx_atomic_load_acquire(&cpi->b_multi_threaded)) {
       pack_mb_row_tokens(cpi, &cpi->bc[1]);
     } else {
       vp8_pack_tokens(&cpi->bc[1], cpi->tok, cpi->tok_count);
