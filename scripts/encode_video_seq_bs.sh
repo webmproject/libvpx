@@ -89,15 +89,15 @@ for video_sequence in $video_sequence_list
 do
 
   . $script_dir/$video_sequence
-
-  profile=0
   videoname=$(basename $video_sequence .sh)
+  
+  profile=0
   bs="$Codec.$exp_tool.$videoname.$commit_hash.$profile.webm"
   
   ./aomenc $verbose -o $bitstream_dir/$bs $video $codec --limit=$frames --profile=$profile --fps=$fps $tune_content --target-bitrate=$bitrate --tile-columns=$col_num $constant_cmdline_options
 
   # profile=2
-  # bs="$Codec.$exp_tool.$commit_hash.$profile.webm"
+  # bs="$Codec.$exp_tool.$videoname.$commit_hash.$profile.webm"
 
   # ./aomenc $verbose -o $bitstream_dir/$bs $video $codec --limit=$frames --profile=$profile --bit-depth=10 --fps=$fps $tune_content --target-bitrate=$bitrate --tile-columns=$col_num $constant_cmdline_options
  
