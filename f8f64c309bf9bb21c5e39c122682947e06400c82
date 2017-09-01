@@ -94,6 +94,30 @@
       "revId": "f8f64c309bf9bb21c5e39c122682947e06400c82",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf2be916_27ed8174",
+        "filename": "vpx_dsp/ppc/inv_txfm_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-01T03:09:44Z",
+      "side": 1,
+      "message": "\u003e I wrote it in a way more intuitive for me but I don\u0027t think this matters much, I may use offsets on the pointer for 32x32 idct if it\u0027s preferable.\n\nlet\u0027s go with this style for now since it\u0027s consistent with the rest of the code. any change could be done globally in a followup",
+      "parentUuid": "ab8f24df_eca39713",
+      "range": {
+        "startLine": 88,
+        "startChar": 31,
+        "endLine": 88,
+        "endChar": 49
+      },
+      "revId": "f8f64c309bf9bb21c5e39c122682947e06400c82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
