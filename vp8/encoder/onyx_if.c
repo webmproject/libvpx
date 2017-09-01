@@ -4445,6 +4445,9 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     /* start loopfilter in separate thread */
     sem_post(&cpi->h_event_start_lpf);
     cpi->b_lpf_running = 1;
+    /* wait for the filter_level to be picked so that we can continue with
+     * stream packing */
+    sem_wait(&cpi->h_event_end_lpf);
   } else
 #endif
   {
@@ -4462,13 +4465,6 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   if (cpi->oxcf.error_resilient_mode) {
     cm->refresh_entropy_probs = 0;
   }
-#endif
-
-#if CONFIG_MULTITHREAD
-  /* wait that filter_level is picked so that we can continue with stream
-   * packing */
-  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded))
-    sem_wait(&cpi->h_event_end_lpf);
 #endif
 
   /* build the bitstream */
