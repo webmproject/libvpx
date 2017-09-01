@@ -36,14 +36,16 @@ bitstream_dir=~/Dev/samples/bitstreams/routine
 
 . $script_dir/$video_sequence
 
+videoname=$(basename $video_sequence .sh)
+
 # General options
 Codec=av1
 codec="--codec=$Codec"
 verbose=
 
 cd $code_dir
-git checkout -q master
-git pull -q
+#git checkout -q master
+#git pull -q
 commit_hash=`git log -1 --oneline | awk '{print $1}'`
 
 cd $test_dir
@@ -58,8 +60,8 @@ d7="interintra one_sided_compound smooth_hv"
 d8="parallel_deblocking rect_intra_pred convolve_round"
 d9="palette_throughput tempmv_signaling ext-comp-refs"
 
-#exp_list="$d1 $d2 $d3 $d4 $d5 $d6 $d7 $d8 $d9"
-exp_list=experimental
+exp_list="$d1 $d2 $d3 $d4 $d5 $d6 $d7 $d8 $d9"
+#exp_list=experimental
 
 constant_cmdline_options="--skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --test-decode=warn --psnr"
 
@@ -91,12 +93,12 @@ do
   fi
 
   profile=0
-  bs="$Codec.$exp_tool.$commit_hash.$profile.webm"
+  bs="$Codec.$exp_tool.$videoname.$commit_hash.$profile.webm"
   
   ./aomenc $verbose -o $bitstream_dir/$bs $video $codec --limit=$frames --profile=$profile --fps=$fps $tune_content --target-bitrate=$bitrate --tile-columns=$col_num $constant_cmdline_options
 
   profile=2
-  bs="$Codec.$exp_tool.$commit_hash.$profile.webm"
+  bs="$Codec.$exp_tool.$videoname.$commit_hash.$profile.webm"
 
   ./aomenc $verbose -o $bitstream_dir/$bs $video $codec --limit=$frames --profile=$profile --bit-depth=10 --fps=$fps $tune_content --target-bitrate=$bitrate --tile-columns=$col_num $constant_cmdline_options
  
