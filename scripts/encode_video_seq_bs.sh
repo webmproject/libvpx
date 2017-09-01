@@ -42,8 +42,8 @@ codec="--codec=$Codec"
 verbose=
 
 cd $code_dir
-git checkout -q master
-git pull -q
+#git checkout -q master
+#git pull -q
 commit_hash=`git log -1 --oneline | awk '{print $1}'`
 
 cd $test_dir
@@ -64,7 +64,8 @@ d9="palette_throughput tempmv_signaling ext-comp-refs"
 exp_tool=experimental
 
 # Note: video sequence list
-video_sequence_list="BQTerrace_1080p60.sh BasketballDrive_1080p50.sh ParkScene_1080p24.sh"
+#video_sequence_list="BQTerrace_1080p60.sh BasketballDrive_1080p50.sh ParkScene_1080p24.sh"
+video_sequence_list="blue_sky_1080p25.sh rush_hour_1080p25.sh tennis_1080p24.sh"
 
 constant_cmdline_options="--skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --test-decode=warn --psnr"
 col_num=1
