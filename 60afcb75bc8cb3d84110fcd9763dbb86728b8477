@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "45a323dc_7fbd8370",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-09-01T15:56:55Z",
+      "side": 1,
+      "message": "supernit: this can be :\u003d given the CLEAR_VARS in line 29.",
+      "range": {
+        "startLine": 35,
+        "startChar": 24,
+        "endLine": 35,
+        "endChar": 26
+      },
+      "revId": "60afcb75bc8cb3d84110fcd9763dbb86728b8477",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
