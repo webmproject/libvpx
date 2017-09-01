@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c83ff86b_8d468476",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-01T06:30:56Z",
+      "side": 1,
+      "message": "try to keep the subject line short (50 characters or so)\nvpx_dsp,loongson: optimize sad functions with mmi\n\nwith the detail in the body of the commit.\n\nhttps://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project",
+      "revId": "967d2aeeb20f1a3a1eff920de2cf74eb2f16ff6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
