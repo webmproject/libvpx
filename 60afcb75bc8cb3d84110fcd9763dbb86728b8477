@@ -22,6 +22,30 @@
       "revId": "60afcb75bc8cb3d84110fcd9763dbb86728b8477",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0feb9d4_96541f3a",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-02T02:44:51Z",
+      "side": 1,
+      "message": "\u003e supernit: this can be :\u003d given the CLEAR_VARS in line 29.\n\ngood catch. done",
+      "parentUuid": "45a323dc_7fbd8370",
+      "range": {
+        "startLine": 35,
+        "startChar": 24,
+        "endLine": 35,
+        "endChar": 26
+      },
+      "revId": "60afcb75bc8cb3d84110fcd9763dbb86728b8477",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
