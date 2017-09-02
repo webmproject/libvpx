@@ -2,23 +2,8 @@
 # File:
 #  encode_exp_bs.sh
 # Decription:
-#  Configure, build, and run encoder/decoder for each experimental tool.
-#  Display the encoder/decode run time
-# Preassumption:
-#  1) Assume all script files are in ~/Dev/sandbox/libvpx/scripts
-# Note:
-#  See encoder config output if set,
-#  verbose=-v
-# LBD or HBD
-# Note:
-#  Standard bit depth:
-#   1) profile=0
-#   2) remove $bitdepth in encoder command line
-#   3) Change runconfig.sh, bitdepth=
-#  High bit depth:
-#   1) profile=2
-#   2) Add $bitdepth in encoder command line, e.g. bitdepth="--bit-depth=10"
-#   3) Change runconfig.sh, bitdepth=--enable-highbitdepth
+#  This script fixes an experiment and loops around on video sequences defined by
+#  video_sequence_list. See encode_exp_bs.sh
 set -x
 
 # if [ "$#" -ne 1 ]; then
@@ -68,7 +53,7 @@ exp_tool=experimental
 video_sequence_list="blue_sky_1080p25.sh rush_hour_1080p25.sh tennis_1080p24.sh"
 
 constant_cmdline_options="--skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --test-decode=warn --psnr"
-col_num=1
+col_num=0
 
 wi=1920
 he=1080
