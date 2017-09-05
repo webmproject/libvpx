@@ -186,4 +186,9 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ScaleTest,
                         ::testing::Values(vp9_scale_and_extend_frame_ssse3));
 #endif  // HAVE_SSSE3
 
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(NEON, ScaleTest,
+                        ::testing::Values(vp9_scale_and_extend_frame_neon));
+#endif  // HAVE_NEON
+
 }  // namespace libvpx_test

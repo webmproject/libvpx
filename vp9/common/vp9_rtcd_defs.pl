@@ -224,7 +224,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 # frame based scale
 #
 add_proto qw/void vp9_scale_and_extend_frame/, "const struct yv12_buffer_config *src, struct yv12_buffer_config *dst, INTERP_FILTER filter_type, int phase_scaler";
-specialize qw/vp9_scale_and_extend_frame ssse3/;
+specialize qw/vp9_scale_and_extend_frame neon ssse3/;
 
 }
 # end encoder functions
