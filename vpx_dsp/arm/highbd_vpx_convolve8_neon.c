@@ -17,8 +17,9 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_ports/mem.h"
 
-static INLINE void load_4x4(const int16_t *s, ptrdiff_t p, int16x4_t *s0,
-                            int16x4_t *s1, int16x4_t *s2, int16x4_t *s3) {
+static INLINE void load_4x4(const int16_t *s, const ptrdiff_t p,
+                            int16x4_t *const s0, int16x4_t *const s1,
+                            int16x4_t *const s2, int16x4_t *const s3) {
   *s0 = vld1_s16(s);
   s += p;
   *s1 = vld1_s16(s);
@@ -28,8 +29,9 @@ static INLINE void load_4x4(const int16_t *s, ptrdiff_t p, int16x4_t *s0,
   *s3 = vld1_s16(s);
 }
 
-static INLINE void load_8x4(const uint16_t *s, ptrdiff_t p, uint16x8_t *s0,
-                            uint16x8_t *s1, uint16x8_t *s2, uint16x8_t *s3) {
+static INLINE void load_8x4(const uint16_t *s, const ptrdiff_t p,
+                            uint16x8_t *const s0, uint16x8_t *const s1,
+                            uint16x8_t *const s2, uint16x8_t *const s3) {
   *s0 = vld1q_u16(s);
   s += p;
   *s1 = vld1q_u16(s);
@@ -39,10 +41,11 @@ static INLINE void load_8x4(const uint16_t *s, ptrdiff_t p, uint16x8_t *s0,
   *s3 = vld1q_u16(s);
 }
 
-static INLINE void load_8x8(const int16_t *s, ptrdiff_t p, int16x8_t *s0,
-                            int16x8_t *s1, int16x8_t *s2, int16x8_t *s3,
-                            int16x8_t *s4, int16x8_t *s5, int16x8_t *s6,
-                            int16x8_t *s7) {
+static INLINE void load_8x8(const int16_t *s, const ptrdiff_t p,
+                            int16x8_t *const s0, int16x8_t *const s1,
+                            int16x8_t *const s2, int16x8_t *const s3,
+                            int16x8_t *const s4, int16x8_t *const s5,
+                            int16x8_t *const s6, int16x8_t *const s7) {
   *s0 = vld1q_s16(s);
   s += p;
   *s1 = vld1q_s16(s);
@@ -60,11 +63,11 @@ static INLINE void load_8x8(const int16_t *s, ptrdiff_t p, int16x8_t *s0,
   *s7 = vld1q_s16(s);
 }
 
-static INLINE void store_8x8(uint16_t *s, ptrdiff_t p, const uint16x8_t s0,
-                             const uint16x8_t s1, const uint16x8_t s2,
-                             const uint16x8_t s3, const uint16x8_t s4,
-                             const uint16x8_t s5, const uint16x8_t s6,
-                             const uint16x8_t s7) {
+static INLINE void store_8x8(uint16_t *s, const ptrdiff_t p,
+                             const uint16x8_t s0, const uint16x8_t s1,
+                             const uint16x8_t s2, const uint16x8_t s3,
+                             const uint16x8_t s4, const uint16x8_t s5,
+                             const uint16x8_t s6, const uint16x8_t s7) {
   vst1q_u16(s, s0);
   s += p;
   vst1q_u16(s, s1);
@@ -89,9 +92,9 @@ static INLINE int32x4_t convolve8_4(const int16x4_t s0, const int16x4_t s1,
                                     const int16x8_t filters) {
   const int16x4_t filters_lo = vget_low_s16(filters);
   const int16x4_t filters_hi = vget_high_s16(filters);
-  int32x4_t sum = vdupq_n_s32(0);
+  int32x4_t sum;
 
-  sum = vmlal_lane_s16(sum, s0, filters_lo, 0);
+  sum = vmull_lane_s16(s0, filters_lo, 0);
   sum = vmlal_lane_s16(sum, s1, filters_lo, 1);
   sum = vmlal_lane_s16(sum, s2, filters_lo, 2);
   sum = vmlal_lane_s16(sum, s3, filters_lo, 3);
@@ -110,11 +113,10 @@ static INLINE uint16x8_t convolve8_8(const int16x8_t s0, const int16x8_t s1,
                                      const uint16x8_t max) {
   const int16x4_t filters_lo = vget_low_s16(filters);
   const int16x4_t filters_hi = vget_high_s16(filters);
-  int32x4_t sum0 = vdupq_n_s32(0);
-  int32x4_t sum1 = vdupq_n_s32(0);
+  int32x4_t sum0, sum1;
   uint16x8_t d;
 
-  sum0 = vmlal_lane_s16(sum0, vget_low_s16(s0), filters_lo, 0);
+  sum0 = vmull_lane_s16(vget_low_s16(s0), filters_lo, 0);
   sum0 = vmlal_lane_s16(sum0, vget_low_s16(s1), filters_lo, 1);
   sum0 = vmlal_lane_s16(sum0, vget_low_s16(s2), filters_lo, 2);
   sum0 = vmlal_lane_s16(sum0, vget_low_s16(s3), filters_lo, 3);
@@ -122,7 +124,7 @@ static INLINE uint16x8_t convolve8_8(const int16x8_t s0, const int16x8_t s1,
   sum0 = vmlal_lane_s16(sum0, vget_low_s16(s5), filters_hi, 1);
   sum0 = vmlal_lane_s16(sum0, vget_low_s16(s6), filters_hi, 2);
   sum0 = vmlal_lane_s16(sum0, vget_low_s16(s7), filters_hi, 3);
-  sum1 = vmlal_lane_s16(sum1, vget_high_s16(s0), filters_lo, 0);
+  sum1 = vmull_lane_s16(vget_high_s16(s0), filters_lo, 0);
   sum1 = vmlal_lane_s16(sum1, vget_high_s16(s1), filters_lo, 1);
   sum1 = vmlal_lane_s16(sum1, vget_high_s16(s2), filters_lo, 2);
   sum1 = vmlal_lane_s16(sum1, vget_high_s16(s3), filters_lo, 3);

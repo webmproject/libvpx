@@ -378,6 +378,7 @@ endif  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
 DSP_SRCS-$(HAVE_NEON) += arm/mem_neon.h
 DSP_SRCS-$(HAVE_NEON) += arm/sum_neon.h
 DSP_SRCS-$(HAVE_NEON) += arm/transpose_neon.h
+DSP_SRCS-$(HAVE_NEON) += arm/vpx_convolve8_neon.h
 
 # PPC VSX utilities
 DSP_SRCS-$(HAVE_VSX)  += ppc/types_vsx.h
