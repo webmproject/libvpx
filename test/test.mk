@@ -123,6 +123,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += vp8_fdct4x4_test.cc
 LIBVPX_TEST_SRCS-yes                   += idct_test.cc
 LIBVPX_TEST_SRCS-yes                   += predict_test.cc
 LIBVPX_TEST_SRCS-yes                   += vpx_scale_test.cc
+LIBVPX_TEST_SRCS-yes                   += vpx_scale_test.h
 
 ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_TEMPORAL_DENOISING),yesyes)
 LIBVPX_TEST_SRCS-$(HAVE_SSE2) += vp8_denoiser_sse2_test.cc
@@ -158,6 +159,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += hadamard_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += minmax_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_scale_test.cc
 ifneq ($(CONFIG_REALTIME_ONLY),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += temporal_filter_test.cc
 endif

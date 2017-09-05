@@ -15,10 +15,6 @@
 #include "./vpx_scale_rtcd.h"
 #include "vpx_scale/yv12config.h"
 
-extern void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
-                                         YV12_BUFFER_CONFIG *dst,
-                                         uint8_t filter_type, int phase_scaler);
-
 static void downsample_2_to_1_ssse3(const uint8_t *src, ptrdiff_t src_stride,
                                     uint8_t *dst, ptrdiff_t dst_stride, int w,
                                     int h) {
@@ -45,6 +41,9 @@ static INLINE __m128i filter(const __m128i *const a, const __m128i *const b,
                              const __m128i *const c, const __m128i *const d,
                              const __m128i *const e, const __m128i *const f,
                              const __m128i *const g, const __m128i *const h) {
+  // TODO(linfengz): hard coded coefficients should be replaced with general
+  // coefficients
+  // reading.
   const __m128i coeffs_ab =
       _mm_set_epi8(6, -1, 6, -1, 6, -1, 6, -1, 6, -1, 6, -1, 6, -1, 6, -1);
   const __m128i coeffs_cd = _mm_set_epi8(78, -19, 78, -19, 78, -19, 78, -19, 78,
@@ -186,7 +185,8 @@ void vp9_scale_and_extend_frame_ssse3(const YV12_BUFFER_CONFIG *src,
     downsample_2_to_1_ssse3(src->v_buffer, src->uv_stride, dst->v_buffer,
                             dst->uv_stride, dst_uv_w, dst_uv_h);
     vpx_extend_frame_borders(dst);
-  } else if (dst_w == src_w * 2 && dst_h == src_h * 2 && phase_scaler == 0) {
+  } else if (dst_w == src_w * 2 && dst_h == src_h * 2 && filter_type == 0 &&
+             phase_scaler == 0) {
     // The upsample() supports widths up to 1920 * 2.  If greater, fall back
     // to vp9_scale_and_extend_frame_c().
     if (dst_w / 2 <= 1920) {
