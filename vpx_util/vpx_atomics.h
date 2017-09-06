@@ -19,13 +19,13 @@ extern "C" {
 
 #if CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD
 
-#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) || \
-    (defined(__cplusplus) && __cplusplus >= 201112L)
-// Where available, use <stdatomic.h>
-#include <stdatomic.h>
-#define VPX_USE_STD_ATOMIC
-#else
-// Look for built-ins.
+// Look for built-in atomic support. We cannot use <stdatomic.h> or <atomic>
+// since neither is guaranteed to exist on both C and C++ platforms, and we need
+// to back the atomic type with the same type (g++ needs to be able to use
+// gcc-built code). g++ 6 doesn't support _Atomic as a keyword and can't use the
+// stdatomic.h header. Even if both <stdatomic.h> and <atomic> existed it's not
+// guaranteed that atomic_int is the same type as std::atomic_int.
+// See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60932#c13.
 #if !defined(__has_builtin)
 #define __has_builtin(x) 0  // Compatibility with non-clang compilers.
 #endif                      // !defined(__has_builtin)
@@ -33,7 +33,7 @@ extern "C" {
 #if (__has_builtin(__atomic_load_n)) || \
     (defined(__GNUC__) &&               \
      (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)))
-// For GCC >= 4.7 and Clang that support __atomic builtins, use those.
+// For GCC >= 4.7 and Clang versions that support __atomic builtins, use those.
 #define VPX_USE_ATOMIC_BUILTINS
 #else
 // Use platform-specific asm barriers.
@@ -63,64 +63,40 @@ extern "C" {
 #endif  // ARCH_X86 || ARCH_X86_64
 #endif  // defined(_MSC_VER)
 #endif  // atomic builtin availability check
-#endif  // stdatomic availability check
 
 // These are wrapped in a struct so that they are not easily accessed directly
 // on any platform (to discourage programmer errors by setting values directly).
 // This primitive MUST be initialized using vpx_atomic_init or VPX_ATOMIC_INIT
 // (NOT memset) and accessed through vpx_atomic_ functions.
-typedef struct vpx_atomic_int {
-#if defined(VPX_USE_STD_ATOMIC)
-  atomic_int value;
-#else
-  volatile int value;
-#endif  // defined(USE_STD_ATOMIC)
-} vpx_atomic_int;
+typedef struct vpx_atomic_int { volatile int value; } vpx_atomic_int;
 
-#if defined(VPX_USE_STD_ATOMIC)
-#define VPX_ATOMIC_INIT(num) \
-  { ATOMIC_VAR_INIT(num) }
-#else
 #define VPX_ATOMIC_INIT(num) \
   { num }
-#endif  // defined(VPX_USE_STD_ATOMIC)
 
 // Initialization of an atomic int, not thread safe.
 static INLINE void vpx_atomic_init(vpx_atomic_int *atomic, int value) {
-#if defined(VPX_USE_STD_ATOMIC)
-  atomic_init(&atomic->value, value);
-#else
   atomic->value = value;
-#endif  // defined(USE_STD_ATOMIC)
 }
 
 static INLINE void vpx_atomic_store_release(vpx_atomic_int *atomic, int value) {
-#if defined(VPX_USE_STD_ATOMIC)
-  atomic_store_explicit(&atomic->value, value, memory_order_release);
-#elif defined(VPX_USE_ATOMIC_BUILTINS)
+#if defined(VPX_USE_ATOMIC_BUILTINS)
   __atomic_store_n(&atomic->value, value, __ATOMIC_RELEASE);
 #else
   vpx_atomic_memory_barrier();
   atomic->value = value;
-#endif  // defined(VPX_USE_STD_ATOMIC)
+#endif  // defined(VPX_USE_ATOMIC_BUILTINS)
 }
 
 static INLINE int vpx_atomic_load_acquire(const vpx_atomic_int *atomic) {
-#if defined(VPX_USE_STD_ATOMIC)
-  // const_cast (in C) that doesn't trigger -Wcast-qual.
-  return atomic_load_explicit(
-      (atomic_int *)(uintptr_t)(const void *)&atomic->value,
-      memory_order_acquire);
-#elif defined(VPX_USE_ATOMIC_BUILTINS)
+#if defined(VPX_USE_ATOMIC_BUILTINS)
   return __atomic_load_n(&atomic->value, __ATOMIC_ACQUIRE);
 #else
   int v = atomic->value;
   vpx_atomic_memory_barrier();
   return v;
-#endif  // defined(VPX_USE_STD_ATOMIC)
+#endif  // defined(VPX_USE_ATOMIC_BUILTINS)
 }
 
-#undef VPX_USE_STD_ATOMIC
 #undef VPX_USE_ATOMIC_BUILTINS
 #undef vpx_atomic_memory_barrier
 
