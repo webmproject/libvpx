@@ -129,14 +129,17 @@ static void convolve(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
   // --Must round-up because block may be located at sub-pixel position.
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
+  // When calling in frame scaling function, the smallest scaling factor is x1/4
+  // ==> y_step_q4 = 64. Since w and h are at most 16, the temp buffer is still
+  // big enough.
   uint8_t temp[64 * 135];
   const int intermediate_height =
       (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
   assert(w <= 64);
   assert(h <= 64);
-  assert(y_step_q4 <= 32);
-  assert(x_step_q4 <= 32);
+  assert(y_step_q4 <= 32 || (y_step_q4 <= 64 && h <= 32));
+  assert(x_step_q4 <= 64);
 
   convolve_horiz(src - src_stride * (SUBPEL_TAPS / 2 - 1), src_stride, temp, 64,
                  filter, x0_q4, x_step_q4, w, intermediate_height);

@@ -828,14 +828,17 @@ static void scaledconvolve2d(const uint8_t *src, ptrdiff_t src_stride,
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
   // --Require an additional 8 rows for the horiz_w8 transpose tail.
+  // When calling in frame scaling function, the smallest scaling factor is x1/4
+  // ==> y_step_q4 = 64. Since w and h are at most 16, the temp buffer is still
+  // big enough.
   DECLARE_ALIGNED(16, uint8_t, temp[(135 + 8) * 64]);
   const int intermediate_height =
       (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
   assert(w <= 64);
   assert(h <= 64);
-  assert(y_step_q4 <= 32);
-  assert(x_step_q4 <= 32);
+  assert(y_step_q4 <= 32 || (y_step_q4 <= 64 && h <= 32));
+  assert(x_step_q4 <= 64);
 
   if (w >= 8) {
     scaledconvolve_horiz_w8(src - src_stride * (SUBPEL_TAPS / 2 - 1),

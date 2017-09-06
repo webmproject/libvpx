@@ -49,10 +49,10 @@ class ScaleTest : public VpxScaleBase,
 
   void RunTest() {
     static const int kNumSizesToTest = 4;
-    static const int kNumScaleFactorsToTest = 2;
+    static const int kNumScaleFactorsToTest = 4;
     static const int kWidthsToTest[] = { 16, 32, 48, 64 };
     static const int kHeightsToTest[] = { 16, 20, 24, 28 };
-    static const int kScaleFactors[] = { 1, 2 };
+    static const int kScaleFactors[] = { 1, 2, 3, 4 };
     for (INTERP_FILTER filter_type = 0; filter_type < 4; ++filter_type) {
       for (int phase_scaler = 0; phase_scaler < 16; ++phase_scaler) {
         for (int h = 0; h < kNumSizesToTest; ++h) {
@@ -132,8 +132,8 @@ TEST_P(ScaleTest, ScaleFrame) { ASSERT_NO_FATAL_FAILURE(RunTest()); }
 
 TEST_P(ScaleTest, DISABLED_Speed) {
   static const int kCountSpeedTestBlock = 100;
-  static const int kNumScaleFactorsToTest = 2;
-  static const int kScaleFactors[] = { 1, 2 };
+  static const int kNumScaleFactorsToTest = 4;
+  static const int kScaleFactors[] = { 1, 2, 3, 4 };
   const int src_height = 1280;
   const int src_width = 720;
   for (INTERP_FILTER filter_type = 2; filter_type < 4; ++filter_type) {
