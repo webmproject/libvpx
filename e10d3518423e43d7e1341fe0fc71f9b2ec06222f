@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89905d2f_e39263c0",
+        "filename": "vp9/encoder/arm/neon/vp9_frame_scale_neon.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T22:54:25Z",
+      "side": 1,
+      "message": "this could be named \u0027scaled\u0027 it reads well enough given its usage",
+      "range": {
+        "startLine": 272,
+        "startChar": 6,
+        "endLine": 272,
+        "endChar": 17
+      },
+      "revId": "e10d3518423e43d7e1341fe0fc71f9b2ec06222f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
