@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5fb7ff50_3b4769af",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-09-06T00:18:30Z",
+      "side": 1,
+      "message": "upsample_1_to_2_ssse3() has hard coded coefficients from filter type 0, which should be fixed later.",
+      "range": {
+        "startLine": 185,
+        "startChar": 57,
+        "endLine": 185,
+        "endChar": 73
+      },
+      "revId": "72c32436c0e820f4987ffc94bdb8fe663b62d841",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
