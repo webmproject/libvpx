@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6db698f2_2909a66f",
+        "filename": "test/vpx_scale_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T23:10:21Z",
+      "side": 1,
+      "message": "needed here?",
+      "revId": "d5d2cbcc758d8b735d2aba25663914185d11cada",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
