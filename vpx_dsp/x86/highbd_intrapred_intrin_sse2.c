@@ -371,3 +371,49 @@ void vpx_highbd_dc_128_predictor_32x32_sse2(uint16_t *dst, ptrdiff_t stride,
   (void)left;
   dc_store_32x32(dst, stride, &dc_dup);
 }
+
+// -----------------------------------------------------------------------------
+/*
+; ------------------------------------------
+; input: x, y, z, result
+;
+; trick from pascal
+; (x+2y+z+2)>>2 can be calculated as:
+; result = avg(x,z)
+; result -= xor(x,z) & 1
+; result = avg(result,y)
+; ------------------------------------------
+*/
+static INLINE __m128i avg3_epu16(const __m128i *x, const __m128i *y,
+                                 const __m128i *z) {
+  const __m128i one = _mm_set1_epi16(1);
+  const __m128i a = _mm_avg_epu16(*x, *z);
+  const __m128i b =
+      _mm_subs_epu16(a, _mm_and_si128(_mm_xor_si128(*x, *z), one));
+  return _mm_avg_epu16(b, *y);
+}
+
+void vpx_highbd_d207_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
+  const __m128i IJKL0000 = _mm_load_si128((const __m128i *)left);
+  const __m128i LLLL0000 = _mm_shufflelo_epi16(IJKL0000, 0xff);
+  const __m128i IJKLLLLL = _mm_unpacklo_epi64(IJKL0000, LLLL0000);
+  const __m128i JKLLLLL0 = _mm_srli_si128(IJKLLLLL, 2);
+  const __m128i KLLLLL00 = _mm_srli_si128(IJKLLLLL, 4);
+  const __m128i avg3 = avg3_epu16(&IJKLLLLL, &JKLLLLL0, &KLLLLL00);
+  const __m128i avg2 = _mm_avg_epu16(IJKLLLLL, JKLLLLL0);
+  const __m128i row0 = _mm_unpacklo_epi16(avg2, avg3);
+  const __m128i row1 = _mm_srli_si128(row0, 4);
+  const __m128i row2 = _mm_srli_si128(row0, 8);
+  const __m128i row3 = LLLL0000;
+  (void)above;
+  (void)bd;
+  _mm_storel_epi64((__m128i *)dst, row0);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row1);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row2);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row3);
+}
