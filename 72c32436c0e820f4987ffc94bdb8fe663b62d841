@@ -2,6 +2,97 @@
   "comments": [
     {
       "key": {
+        "uuid": "5ba632cc_6d0e5538",
+        "filename": "test/vp9_scale_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T01:28:14Z",
+      "side": 1,
+      "message": "this should be a const member function",
+      "revId": "72c32436c0e820f4987ffc94bdb8fe663b62d841",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d9a9d09c_2a54ddf1",
+        "filename": "test/vp9_scale_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T01:28:14Z",
+      "side": 1,
+      "message": "you should include string.h explicitly for this",
+      "range": {
+        "startLine": 87,
+        "startChar": 8,
+        "endLine": 87,
+        "endChar": 14
+      },
+      "revId": "72c32436c0e820f4987ffc94bdb8fe663b62d841",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ffadccf8_f70131bc",
+        "filename": "test/vpx_scale_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T01:28:14Z",
+      "side": 1,
+      "message": "I don\u0027t think this one is needed here",
+      "revId": "72c32436c0e820f4987ffc94bdb8fe663b62d841",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78642c34_28f659fe",
+        "filename": "test/vpx_scale_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T01:28:14Z",
+      "side": 1,
+      "message": "prefer sizeof(var)\n\nhttps://google.github.io/styleguide/cppguide.html#sizeof",
+      "revId": "72c32436c0e820f4987ffc94bdb8fe663b62d841",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a8d68d7_65b062ca",
+        "filename": "test/vpx_scale_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T01:28:14Z",
+      "side": 1,
+      "message": "same here for sizeof(var)",
+      "revId": "72c32436c0e820f4987ffc94bdb8fe663b62d841",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5fb7ff50_3b4769af",
         "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
         "patchSetId": 3
@@ -13,6 +104,30 @@
       "writtenOn": "2017-09-06T00:18:30Z",
       "side": 1,
       "message": "upsample_1_to_2_ssse3() has hard coded coefficients from filter type 0, which should be fixed later.",
+      "range": {
+        "startLine": 185,
+        "startChar": 57,
+        "endLine": 185,
+        "endChar": 73
+      },
+      "revId": "72c32436c0e820f4987ffc94bdb8fe663b62d841",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c48743c_6400ee5d",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T01:28:14Z",
+      "side": 1,
+      "message": "\u003e upsample_1_to_2_ssse3() has hard coded coefficients from filter type 0, which should be fixed later.\n\ncan you add a TODO for that?",
+      "parentUuid": "5fb7ff50_3b4769af",
       "range": {
         "startLine": 185,
         "startChar": 57,
