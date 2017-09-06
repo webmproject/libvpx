@@ -119,6 +119,7 @@ VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp8_macros_msa.h
 # common (c)
 VP8_COMMON_SRCS-$(HAVE_MMI) += common/mips/mmi/sixtap_filter_mmi.c
 VP8_COMMON_SRCS-$(HAVE_MMI) += common/mips/mmi/loopfilter_filters_mmi.c
+VP8_COMMON_SRCS-$(HAVE_MMI) += common/mips/mmi/idctllm_mmi.c
 
 ifeq ($(CONFIG_POSTPROC),yes)
 VP8_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/mfqe_msa.c

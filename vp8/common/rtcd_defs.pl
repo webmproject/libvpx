@@ -86,7 +86,7 @@ $vp8_loop_filter_simple_bh_mmi=vp8_loop_filter_bhs_mmi;
 #
 #idct16
 add_proto qw/void vp8_short_idct4x4llm/, "short *input, unsigned char *pred, int pitch, unsigned char *dst, int dst_stride";
-specialize qw/vp8_short_idct4x4llm mmx neon dspr2 msa/;
+specialize qw/vp8_short_idct4x4llm mmx neon dspr2 msa mmi/;
 
 #iwalsh1
 add_proto qw/void vp8_short_inv_walsh4x4_1/, "short *input, short *output";
@@ -94,11 +94,11 @@ specialize qw/vp8_short_inv_walsh4x4_1 dspr2/;
 
 #iwalsh16
 add_proto qw/void vp8_short_inv_walsh4x4/, "short *input, short *output";
-specialize qw/vp8_short_inv_walsh4x4 sse2 neon dspr2 msa/;
+specialize qw/vp8_short_inv_walsh4x4 sse2 neon dspr2 msa mmi/;
 
 #idct1_scalar_add
 add_proto qw/void vp8_dc_only_idct_add/, "short input, unsigned char *pred, int pred_stride, unsigned char *dst, int dst_stride";
-specialize qw/vp8_dc_only_idct_add mmx neon dspr2 msa/;
+specialize qw/vp8_dc_only_idct_add mmx neon dspr2 msa mmi/;
 
 #
 # RECON

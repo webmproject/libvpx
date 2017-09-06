@@ -169,4 +169,9 @@ INSTANTIATE_TEST_CASE_P(MMX, IDCTTest,
 INSTANTIATE_TEST_CASE_P(MSA, IDCTTest,
                         ::testing::Values(vp8_short_idct4x4llm_msa));
 #endif  // HAVE_MSA
+
+#if HAVE_MMI
+INSTANTIATE_TEST_CASE_P(MMI, IDCTTest,
+                        ::testing::Values(vp8_short_idct4x4llm_mmi));
+#endif  // HAVE_MMI
 }
