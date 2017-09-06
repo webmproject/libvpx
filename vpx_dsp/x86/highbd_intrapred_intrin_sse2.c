@@ -199,6 +199,16 @@ void vpx_highbd_dc_top_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
   dc_store_4x4(dst, stride, &dc);
 }
 
+void vpx_highbd_dc_128_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
+                                          const uint16_t *above,
+                                          const uint16_t *left, int bd) {
+  const __m128i dc = _mm_cvtsi32_si128(1 << (bd - 1));
+  const __m128i dc_dup = _mm_shufflelo_epi16(dc, 0x0);
+  (void)above;
+  (void)left;
+  dc_store_4x4(dst, stride, &dc_dup);
+}
+
 //------------------------------------------------------------------------------
 // DC 8x8
 
@@ -243,6 +253,16 @@ void vpx_highbd_dc_top_predictor_8x8_sse2(uint16_t *dst, ptrdiff_t stride,
   dc_store_8x8(dst, stride, &dc);
 }
 
+void vpx_highbd_dc_128_predictor_8x8_sse2(uint16_t *dst, ptrdiff_t stride,
+                                          const uint16_t *above,
+                                          const uint16_t *left, int bd) {
+  const __m128i dc = _mm_cvtsi32_si128(1 << (bd - 1));
+  const __m128i dc_dup = _mm_shufflelo_epi16(dc, 0x0);
+  (void)above;
+  (void)left;
+  dc_store_8x8(dst, stride, &dc_dup);
+}
+
 //------------------------------------------------------------------------------
 // DC 16x16
 
@@ -283,6 +303,16 @@ void vpx_highbd_dc_top_predictor_16x16_sse2(uint16_t *dst, ptrdiff_t stride,
   (void)left;
   (void)bd;
   dc_store_16x16(dst, stride, &dc);
+}
+
+void vpx_highbd_dc_128_predictor_16x16_sse2(uint16_t *dst, ptrdiff_t stride,
+                                            const uint16_t *above,
+                                            const uint16_t *left, int bd) {
+  const __m128i dc = _mm_cvtsi32_si128(1 << (bd - 1));
+  const __m128i dc_dup = _mm_shufflelo_epi16(dc, 0x0);
+  (void)above;
+  (void)left;
+  dc_store_16x16(dst, stride, &dc_dup);
 }
 
 //------------------------------------------------------------------------------
@@ -330,4 +360,14 @@ void vpx_highbd_dc_top_predictor_32x32_sse2(uint16_t *dst, ptrdiff_t stride,
   (void)left;
   (void)bd;
   dc_store_32x32(dst, stride, &dc);
+}
+
+void vpx_highbd_dc_128_predictor_32x32_sse2(uint16_t *dst, ptrdiff_t stride,
+                                            const uint16_t *above,
+                                            const uint16_t *left, int bd) {
+  const __m128i dc = _mm_cvtsi32_si128(1 << (bd - 1));
+  const __m128i dc_dup = _mm_shufflelo_epi16(dc, 0x0);
+  (void)above;
+  (void)left;
+  dc_store_32x32(dst, stride, &dc_dup);
 }
