@@ -22,10 +22,10 @@ forward_decls qw/vp8_common_forward_decls/;
 # Dequant
 #
 add_proto qw/void vp8_dequantize_b/, "struct blockd*, short *dqc";
-specialize qw/vp8_dequantize_b mmx neon msa/;
+specialize qw/vp8_dequantize_b mmx neon msa mmi/;
 
 add_proto qw/void vp8_dequant_idct_add/, "short *input, short *dq, unsigned char *output, int stride";
-specialize qw/vp8_dequant_idct_add mmx neon dspr2 msa/;
+specialize qw/vp8_dequant_idct_add mmx neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_dequant_idct_add_y_block/, "short *q, short *dq, unsigned char *dst, int stride, char *eobs";
 specialize qw/vp8_dequant_idct_add_y_block sse2 neon dspr2 msa/;
