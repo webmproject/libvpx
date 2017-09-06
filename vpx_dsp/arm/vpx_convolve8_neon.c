@@ -125,11 +125,10 @@ static INLINE int16x8_t convolve8_8(int16x8_t s0, int16x8_t s1, int16x8_t s2,
 
 void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
-                              const int16_t *filter_x, int x_step_q4,
-                              const int16_t *filter_y,  // unused
-                              int y_step_q4,            // unused
-                              int w, int h) {
-  const int16x8_t filters = vld1q_s16(filter_x);
+                              const InterpKernel *filter, int x0_q4,
+                              int x_step_q4, int y0_q4, int y_step_q4, int w,
+                              int h) {
+  const int16x8_t filters = vld1q_s16(filter[x0_q4]);
   uint8x8_t t0, t1, t2, t3;
 
   assert(!((intptr_t)dst & 3));
@@ -137,8 +136,8 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
   assert(x_step_q4 == 16);
 
   (void)x_step_q4;
+  (void)y0_q4;
   (void)y_step_q4;
-  (void)filter_y;
 
   src -= 3;
 
@@ -390,11 +389,10 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
 
 void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                                   uint8_t *dst, ptrdiff_t dst_stride,
-                                  const int16_t *filter_x, int x_step_q4,
-                                  const int16_t *filter_y,  // unused
-                                  int y_step_q4,            // unused
+                                  const InterpKernel *filter, int x0_q4,
+                                  int x_step_q4, int y0_q4, int y_step_q4,
                                   int w, int h) {
-  const int16x8_t filters = vld1q_s16(filter_x);
+  const int16x8_t filters = vld1q_s16(filter[x0_q4]);
   uint8x8_t t0, t1, t2, t3;
 
   assert(!((intptr_t)dst & 3));
@@ -402,8 +400,8 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
   assert(x_step_q4 == 16);
 
   (void)x_step_q4;
+  (void)y0_q4;
   (void)y_step_q4;
-  (void)filter_y;
 
   src -= 3;
 
@@ -692,19 +690,18 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
 
 void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
-                             const int16_t *filter_x,  // unused
-                             int x_step_q4,            // unused
-                             const int16_t *filter_y, int y_step_q4, int w,
+                             const InterpKernel *filter, int x0_q4,
+                             int x_step_q4, int y0_q4, int y_step_q4, int w,
                              int h) {
-  const int16x8_t filters = vld1q_s16(filter_y);
+  const int16x8_t filters = vld1q_s16(filter[y0_q4]);
 
   assert(!((intptr_t)dst & 3));
   assert(!(dst_stride & 3));
   assert(y_step_q4 == 16);
 
+  (void)x0_q4;
   (void)x_step_q4;
   (void)y_step_q4;
-  (void)filter_x;
 
   src -= 3 * src_stride;
 
@@ -864,19 +861,18 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
 
 void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
                                  uint8_t *dst, ptrdiff_t dst_stride,
-                                 const int16_t *filter_x,  // unused
-                                 int x_step_q4,            // unused
-                                 const int16_t *filter_y, int y_step_q4, int w,
+                                 const InterpKernel *filter, int x0_q4,
+                                 int x_step_q4, int y0_q4, int y_step_q4, int w,
                                  int h) {
-  const int16x8_t filters = vld1q_s16(filter_y);
+  const int16x8_t filters = vld1q_s16(filter[y0_q4]);
 
   assert(!((intptr_t)dst & 3));
   assert(!(dst_stride & 3));
   assert(y_step_q4 == 16);
 
+  (void)x0_q4;
   (void)x_step_q4;
   (void)y_step_q4;
-  (void)filter_x;
 
   src -= 3 * src_stride;
 

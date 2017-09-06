@@ -18,13 +18,14 @@
 
 void vpx_highbd_convolve_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
                                    uint16_t *dst, ptrdiff_t dst_stride,
-                                   const int16_t *filter_x, int filter_x_stride,
-                                   const int16_t *filter_y, int filter_y_stride,
+                                   const InterpKernel *filter, int x0_q4,
+                                   int x_step_q4, int y0_q4, int y_step_q4,
                                    int width, int h, int bd) {
-  (void)filter_x;
-  (void)filter_y;
-  (void)filter_x_stride;
-  (void)filter_y_stride;
+  (void)filter;
+  (void)x0_q4;
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
   (void)bd;
 
   assert(width % 4 == 0);
@@ -99,13 +100,14 @@ void vpx_highbd_convolve_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
 
 void vpx_highbd_convolve_avg_avx2(const uint16_t *src, ptrdiff_t src_stride,
                                   uint16_t *dst, ptrdiff_t dst_stride,
-                                  const int16_t *filter_x, int filter_x_stride,
-                                  const int16_t *filter_y, int filter_y_stride,
+                                  const InterpKernel *filter, int x0_q4,
+                                  int x_step_q4, int y0_q4, int y_step_q4,
                                   int width, int h, int bd) {
-  (void)filter_x;
-  (void)filter_y;
-  (void)filter_x_stride;
-  (void)filter_y_stride;
+  (void)filter;
+  (void)x0_q4;
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
   (void)bd;
 
   assert(width % 4 == 0);
@@ -1073,8 +1075,8 @@ void vpx_highbd_filter_block1d4_v2_sse2(const uint16_t *, ptrdiff_t, uint16_t *,
 #define vpx_highbd_filter_block1d4_v8_avx2 vpx_highbd_filter_block1d4_v8_sse2
 #define vpx_highbd_filter_block1d4_v2_avx2 vpx_highbd_filter_block1d4_v2_sse2
 
-HIGH_FUN_CONV_1D(horiz, x_step_q4, filter_x, h, src, , avx2);
-HIGH_FUN_CONV_1D(vert, y_step_q4, filter_y, v, src - src_stride * 3, , avx2);
+HIGH_FUN_CONV_1D(horiz, x0_q4, x_step_q4, h, src, , avx2);
+HIGH_FUN_CONV_1D(vert, y0_q4, y_step_q4, v, src - src_stride * 3, , avx2);
 HIGH_FUN_CONV_2D(, avx2);
 
 void vpx_highbd_filter_block1d4_h8_avg_sse2(const uint16_t *, ptrdiff_t,
@@ -1098,8 +1100,8 @@ void vpx_highbd_filter_block1d4_v2_avg_sse2(const uint16_t *, ptrdiff_t,
 #define vpx_highbd_filter_block1d4_v2_avg_avx2 \
   vpx_highbd_filter_block1d4_v2_avg_sse2
 
-HIGH_FUN_CONV_1D(avg_horiz, x_step_q4, filter_x, h, src, avg_, avx2);
-HIGH_FUN_CONV_1D(avg_vert, y_step_q4, filter_y, v, src - src_stride * 3, avg_,
+HIGH_FUN_CONV_1D(avg_horiz, x0_q4, x_step_q4, h, src, avg_, avx2);
+HIGH_FUN_CONV_1D(avg_vert, y0_q4, y_step_q4, v, src - src_stride * 3, avg_,
                  avx2);
 HIGH_FUN_CONV_2D(avg_, avx2);
 

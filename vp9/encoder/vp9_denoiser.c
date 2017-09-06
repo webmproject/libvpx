@@ -390,12 +390,12 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
   }
 
   if (decision == FILTER_BLOCK) {
-    vpx_convolve_copy(avg_start, avg.y_stride, src.buf, src.stride, NULL, 0,
-                      NULL, 0, num_4x4_blocks_wide_lookup[bs] << 2,
+    vpx_convolve_copy(avg_start, avg.y_stride, src.buf, src.stride, NULL, 0, 0,
+                      0, 0, num_4x4_blocks_wide_lookup[bs] << 2,
                       num_4x4_blocks_high_lookup[bs] << 2);
   } else {  // COPY_BLOCK
-    vpx_convolve_copy(src.buf, src.stride, avg_start, avg.y_stride, NULL, 0,
-                      NULL, 0, num_4x4_blocks_wide_lookup[bs] << 2,
+    vpx_convolve_copy(src.buf, src.stride, avg_start, avg.y_stride, NULL, 0, 0,
+                      0, 0, num_4x4_blocks_wide_lookup[bs] << 2,
                       num_4x4_blocks_high_lookup[bs] << 2);
   }
   *denoiser_decision = decision;

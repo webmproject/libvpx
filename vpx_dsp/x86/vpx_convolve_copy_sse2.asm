@@ -20,14 +20,14 @@ SECTION .text
 %endif
 %ifidn %2, highbd
 %define pavg pavgw
-cglobal %2_convolve_%1, 4, 7, 4+AUX_XMM_REGS, src, src_stride, \
+cglobal %2_convolve_%1, 4, 8, 4+AUX_XMM_REGS, src, src_stride, \
                                               dst, dst_stride, \
-                                              fx, fxs, fy, fys, w, h, bd
+                                              f, fxo, fxs, fyo, fys, w, h, bd
 %else
 %define pavg pavgb
-cglobal convolve_%1, 4, 7, 4+AUX_XMM_REGS, src, src_stride, \
+cglobal convolve_%1, 4, 8, 4+AUX_XMM_REGS, src, src_stride, \
                                            dst, dst_stride, \
-                                           fx, fxs, fy, fys, w, h
+                                           f, fxo, fxs, fyo, fys, w, h
 %endif
   mov r4d, dword wm
 %ifidn %2, highbd

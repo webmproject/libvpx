@@ -516,9 +516,10 @@ static void common_hv_2ht_2vt_and_aver_dst_64w_msa(
 
 void vpx_convolve8_avg_msa(const uint8_t *src, ptrdiff_t src_stride,
                            uint8_t *dst, ptrdiff_t dst_stride,
-                           const int16_t *filter_x, int x_step_q4,
-                           const int16_t *filter_y, int y_step_q4, int w,
-                           int h) {
+                           const InterpKernel *filter, int x0_q4, int x_step_q4,
+                           int y0_q4, int y_step_q4, int w, int h) {
+  const int16_t *const filter_x = filter[x0_q4];
+  const int16_t *const filter_y = filter[y0_q4];
   int8_t cnt, filt_hor[8], filt_ver[8];
 
   assert(x_step_q4 == 16);
@@ -560,14 +561,14 @@ void vpx_convolve8_avg_msa(const uint8_t *src, ptrdiff_t src_stride,
                                                &filt_hor[3], &filt_ver[3], h);
         break;
       default:
-        vpx_convolve8_avg_c(src, src_stride, dst, dst_stride, filter_x,
-                            x_step_q4, filter_y, y_step_q4, w, h);
+        vpx_convolve8_avg_c(src, src_stride, dst, dst_stride, filter, x0_q4,
+                            x_step_q4, y0_q4, y_step_q4, w, h);
         break;
     }
   } else if (((const int32_t *)filter_x)[0] == 0 ||
              ((const int32_t *)filter_y)[0] == 0) {
-    vpx_convolve8_avg_c(src, src_stride, dst, dst_stride, filter_x, x_step_q4,
-                        filter_y, y_step_q4, w, h);
+    vpx_convolve8_avg_c(src, src_stride, dst, dst_stride, filter, x0_q4,
+                        x_step_q4, y0_q4, y_step_q4, w, h);
   } else {
     switch (w) {
       case 4:
@@ -596,8 +597,8 @@ void vpx_convolve8_avg_msa(const uint8_t *src, ptrdiff_t src_stride,
                                                filt_ver, h);
         break;
       default:
-        vpx_convolve8_avg_c(src, src_stride, dst, dst_stride, filter_x,
-                            x_step_q4, filter_y, y_step_q4, w, h);
+        vpx_convolve8_avg_c(src, src_stride, dst, dst_stride, filter, x0_q4,
+                            x_step_q4, y0_q4, y_step_q4, w, h);
         break;
     }
   }

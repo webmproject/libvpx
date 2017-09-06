@@ -53,13 +53,13 @@ static inline void copy_w64(const uint8_t *src, ptrdiff_t src_stride,
 
 void vpx_convolve_copy_vsx(const uint8_t *src, ptrdiff_t src_stride,
                            uint8_t *dst, ptrdiff_t dst_stride,
-                           const int16_t *filter_x, int32_t filter_x_stride,
-                           const int16_t *filter_y, int32_t filter_y_stride,
-                           int32_t w, int32_t h) {
-  (void)filter_x;
-  (void)filter_y;
-  (void)filter_x_stride;
-  (void)filter_y_stride;
+                           const InterpKernel *filter, int x0_q4, int x_step_q4,
+                           int y0_q4, int32_t y_step_q4, int32_t w, int32_t h) {
+  (void)filter;
+  (void)x0_q4;
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
 
   switch (w) {
     case 16: {
@@ -132,14 +132,8 @@ static inline void avg_w64(const uint8_t *src, ptrdiff_t src_stride,
 
 void vpx_convolve_avg_vsx(const uint8_t *src, ptrdiff_t src_stride,
                           uint8_t *dst, ptrdiff_t dst_stride,
-                          const int16_t *filter_x, int32_t filter_x_stride,
-                          const int16_t *filter_y, int32_t filter_y_stride,
-                          int32_t w, int32_t h) {
-  (void)filter_x;
-  (void)filter_y;
-  (void)filter_x_stride;
-  (void)filter_y_stride;
-
+                          const InterpKernel *filter, int x0_q4, int x_step_q4,
+                          int y0_q4, int32_t y_step_q4, int32_t w, int32_t h) {
   switch (w) {
     case 16: {
       avg_w16(src, src_stride, dst, dst_stride, h);
@@ -154,8 +148,8 @@ void vpx_convolve_avg_vsx(const uint8_t *src, ptrdiff_t src_stride,
       break;
     }
     default: {
-      vpx_convolve_avg_c(src, src_stride, dst, dst_stride, filter_x,
-                         filter_x_stride, filter_y, filter_y_stride, w, h);
+      vpx_convolve_avg_c(src, src_stride, dst, dst_stride, filter, x0_q4,
+                         x_step_q4, y0_q4, y_step_q4, w, h);
       break;
     }
   }
@@ -299,9 +293,9 @@ static inline void convolve_avg_vert(const uint8_t *src, ptrdiff_t src_stride,
 
 static inline void convolve(const uint8_t *src, ptrdiff_t src_stride,
                             uint8_t *dst, ptrdiff_t dst_stride,
-                            const InterpKernel *const x_filters, int x0_q4,
-                            int x_step_q4, const InterpKernel *const y_filters,
-                            int y0_q4, int y_step_q4, int w, int h) {
+                            const InterpKernel *const filter, int x0_q4,
+                            int x_step_q4, int y0_q4, int y_step_q4, int w,
+                            int h) {
   // Note: Fixed size intermediate buffer, temp, places limits on parameters.
   // 2d filtering proceeds in 2 steps:
   //   (1) Interpolate horizontally into an intermediate buffer, temp.
@@ -324,95 +318,77 @@ static inline void convolve(const uint8_t *src, ptrdiff_t src_stride,
   assert(x_step_q4 <= 32);
 
   convolve_horiz(src - src_stride * (SUBPEL_TAPS / 2 - 1), src_stride, temp, 64,
-                 x_filters, x0_q4, x_step_q4, w, intermediate_height);
-  convolve_vert(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst, dst_stride,
-                y_filters, y0_q4, y_step_q4, w, h);
+                 filter, x0_q4, x_step_q4, w, intermediate_height);
+  convolve_vert(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst, dst_stride, filter,
+                y0_q4, y_step_q4, w, h);
 }
 
 void vpx_convolve8_horiz_vsx(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
-                             const int16_t *filter_x, int x_step_q4,
-                             const int16_t *filter_y, int y_step_q4, int w,
+                             const InterpKernel *filter, int x0_q4,
+                             int x_step_q4, int y0_q4, int y_step_q4, int w,
                              int h) {
-  const InterpKernel *const filters_x = get_filter_base(filter_x);
-  const int x0_q4 = get_filter_offset(filter_x, filters_x);
-
-  (void)filter_y;
+  (void)y0_q4;
   (void)y_step_q4;
 
-  convolve_horiz(src, src_stride, dst, dst_stride, filters_x, x0_q4, x_step_q4,
-                 w, h);
+  convolve_horiz(src, src_stride, dst, dst_stride, filter, x0_q4, x_step_q4, w,
+                 h);
 }
 
 void vpx_convolve8_avg_horiz_vsx(const uint8_t *src, ptrdiff_t src_stride,
                                  uint8_t *dst, ptrdiff_t dst_stride,
-                                 const int16_t *filter_x, int x_step_q4,
-                                 const int16_t *filter_y, int y_step_q4, int w,
+                                 const InterpKernel *filter, int x0_q4,
+                                 int x_step_q4, int y0_q4, int y_step_q4, int w,
                                  int h) {
-  const InterpKernel *const filters_x = get_filter_base(filter_x);
-  const int x0_q4 = get_filter_offset(filter_x, filters_x);
-
-  (void)filter_y;
+  (void)y0_q4;
   (void)y_step_q4;
 
-  convolve_avg_horiz(src, src_stride, dst, dst_stride, filters_x, x0_q4,
-                     x_step_q4, w, h);
+  convolve_avg_horiz(src, src_stride, dst, dst_stride, filter, x0_q4, x_step_q4,
+                     w, h);
 }
 
 void vpx_convolve8_vert_vsx(const uint8_t *src, ptrdiff_t src_stride,
                             uint8_t *dst, ptrdiff_t dst_stride,
-                            const int16_t *filter_x, int x_step_q4,
-                            const int16_t *filter_y, int y_step_q4, int w,
+                            const InterpKernel *filter, int x0_q4,
+                            int x_step_q4, int y0_q4, int y_step_q4, int w,
                             int h) {
-  const InterpKernel *const filters_y = get_filter_base(filter_y);
-  const int y0_q4 = get_filter_offset(filter_y, filters_y);
-
-  (void)filter_x;
+  (void)x0_q4;
   (void)x_step_q4;
 
-  convolve_vert(src, src_stride, dst, dst_stride, filters_y, y0_q4, y_step_q4,
-                w, h);
+  convolve_vert(src, src_stride, dst, dst_stride, filter, y0_q4, y_step_q4, w,
+                h);
 }
 
 void vpx_convolve8_avg_vert_vsx(const uint8_t *src, ptrdiff_t src_stride,
                                 uint8_t *dst, ptrdiff_t dst_stride,
-                                const int16_t *filter_x, int x_step_q4,
-                                const int16_t *filter_y, int y_step_q4, int w,
+                                const InterpKernel *filter, int x0_q4,
+                                int x_step_q4, int y0_q4, int y_step_q4, int w,
                                 int h) {
-  const InterpKernel *const filters_y = get_filter_base(filter_y);
-  const int y0_q4 = get_filter_offset(filter_y, filters_y);
-
-  (void)filter_x;
+  (void)x0_q4;
   (void)x_step_q4;
 
-  convolve_avg_vert(src, src_stride, dst, dst_stride, filters_y, y0_q4,
-                    y_step_q4, w, h);
+  convolve_avg_vert(src, src_stride, dst, dst_stride, filter, y0_q4, y_step_q4,
+                    w, h);
 }
 
 void vpx_convolve8_vsx(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
-                       ptrdiff_t dst_stride, const int16_t *filter_x,
-                       int x_step_q4, const int16_t *filter_y, int y_step_q4,
+                       ptrdiff_t dst_stride, const InterpKernel *filter,
+                       int x0_q4, int x_step_q4, int y0_q4, int y_step_q4,
                        int w, int h) {
-  const InterpKernel *const filters_x = get_filter_base(filter_x);
-  const int x0_q4 = get_filter_offset(filter_x, filters_x);
-  const InterpKernel *const filters_y = get_filter_base(filter_y);
-  const int y0_q4 = get_filter_offset(filter_y, filters_y);
-
-  convolve(src, src_stride, dst, dst_stride, filters_x, x0_q4, x_step_q4,
-           filters_y, y0_q4, y_step_q4, w, h);
+  convolve(src, src_stride, dst, dst_stride, filter, x0_q4, x_step_q4, y0_q4,
+           y_step_q4, w, h);
 }
 
 void vpx_convolve8_avg_vsx(const uint8_t *src, ptrdiff_t src_stride,
                            uint8_t *dst, ptrdiff_t dst_stride,
-                           const int16_t *filter_x, int x_step_q4,
-                           const int16_t *filter_y, int y_step_q4, int w,
-                           int h) {
+                           const InterpKernel *filter, int x0_q4, int x_step_q4,
+                           int y0_q4, int y_step_q4, int w, int h) {
   // Fixed size intermediate buffer places limits on parameters.
   DECLARE_ALIGNED(16, uint8_t, temp[64 * 64]);
   assert(w <= 64);
   assert(h <= 64);
 
-  vpx_convolve8_vsx(src, src_stride, temp, 64, filter_x, x_step_q4, filter_y,
+  vpx_convolve8_vsx(src, src_stride, temp, 64, filter, x0_q4, x_step_q4, y0_q4,
                     y_step_q4, w, h);
-  vpx_convolve_avg_vsx(temp, 64, dst, dst_stride, NULL, 0, NULL, 0, w, h);
+  vpx_convolve_avg_vsx(temp, 64, dst, dst_stride, NULL, 0, 0, 0, 0, w, h);
 }
