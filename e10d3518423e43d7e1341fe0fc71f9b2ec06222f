@@ -22,6 +22,30 @@
       "revId": "e10d3518423e43d7e1341fe0fc71f9b2ec06222f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd2e13d0_23b7b9c8",
+        "filename": "vp9/encoder/arm/neon/vp9_frame_scale_neon.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-09-06T23:12:57Z",
+      "side": 1,
+      "message": "Done\n\nNow \"scaled\" can be removed. But I\u0027d like to keep it here since there are more special scaling cases adding. It will be used finally.",
+      "parentUuid": "89905d2f_e39263c0",
+      "range": {
+        "startLine": 272,
+        "startChar": 6,
+        "endLine": 272,
+        "endChar": 17
+      },
+      "revId": "e10d3518423e43d7e1341fe0fc71f9b2ec06222f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
