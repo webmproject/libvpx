@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "add6b51b_61476249",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-06T23:07:07Z",
+      "side": 1,
+      "message": "is it really compatible now that the rate may exceed the level? was the only concern the alt-ref and tile count? maybe this should be named _AUTO?",
+      "revId": "7a4586f3f9b1ca6d1db797aaab98203772e5e5af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
