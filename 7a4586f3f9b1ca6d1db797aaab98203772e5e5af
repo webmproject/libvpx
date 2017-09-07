@@ -16,6 +16,24 @@
       "revId": "7a4586f3f9b1ca6d1db797aaab98203772e5e5af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "765d4ca5_58b44a59",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2017-09-07T22:23:41Z",
+      "side": 1,
+      "message": "AUTO is a better name. You are right, it\u0027s not guaranteed to be level compatible. Modified the commit message.",
+      "parentUuid": "add6b51b_61476249",
+      "revId": "7a4586f3f9b1ca6d1db797aaab98203772e5e5af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
