@@ -13,6 +13,18 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 
+static INLINE void load_u8_8x4(const uint8_t *s, const ptrdiff_t p,
+                               uint8x8_t *const s0, uint8x8_t *const s1,
+                               uint8x8_t *const s2, uint8x8_t *const s3) {
+  *s0 = vld1_u8(s);
+  s += p;
+  *s1 = vld1_u8(s);
+  s += p;
+  *s2 = vld1_u8(s);
+  s += p;
+  *s3 = vld1_u8(s);
+}
+
 static INLINE void load_u8_8x8(const uint8_t *s, const ptrdiff_t p,
                                uint8x8_t *const s0, uint8x8_t *const s1,
                                uint8x8_t *const s2, uint8x8_t *const s3,

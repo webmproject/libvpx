@@ -30,18 +30,6 @@
 // instructions. This optimization is much faster in speed unit test, but slowed
 // down the whole decoder by 5%.
 
-static INLINE void load_u8_8x4(const uint8_t *s, const ptrdiff_t p,
-                               uint8x8_t *const s0, uint8x8_t *const s1,
-                               uint8x8_t *const s2, uint8x8_t *const s3) {
-  *s0 = vld1_u8(s);
-  s += p;
-  *s1 = vld1_u8(s);
-  s += p;
-  *s2 = vld1_u8(s);
-  s += p;
-  *s3 = vld1_u8(s);
-}
-
 static INLINE void store_u8_8x8(uint8_t *s, const ptrdiff_t p,
                                 const uint8x8_t s0, const uint8x8_t s1,
                                 const uint8x8_t s2, const uint8x8_t s3,
