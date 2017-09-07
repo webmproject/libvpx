@@ -78,10 +78,11 @@ experiment_dependency() {
   
 }
 
+#debug="--enable-debug --disable-optimizations"
 common="--disable-unit-tests --disable-docs --enable-experimental"
 
 . $script_dir/disabled_list.sh
 
 experiment_dependency $1
 
-../$libsrc/configure $common $disabled $tool > /dev/null
+../$libsrc/configure $common $debug $disabled $tool > /dev/null
