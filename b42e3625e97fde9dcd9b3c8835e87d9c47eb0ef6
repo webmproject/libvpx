@@ -16,6 +16,24 @@
       "revId": "b42e3625e97fde9dcd9b3c8835e87d9c47eb0ef6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c06ebe5_6d898982",
+        "filename": "vp9/encoder/arm/neon/vp9_frame_scale_neon.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-09-07T19:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb9e554c_a972bbce",
+      "revId": "b42e3625e97fde9dcd9b3c8835e87d9c47eb0ef6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
