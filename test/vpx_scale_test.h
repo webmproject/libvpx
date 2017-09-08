@@ -50,11 +50,13 @@ class VpxScaleBase {
   void ResetScaleImage(YV12_BUFFER_CONFIG *const img, const int width,
                        const int height) {
     memset(img, 0, sizeof(*img));
-    ASSERT_EQ(0, vpx_alloc_frame_buffer(img, width, height, 1, 1,
 #if CONFIG_VP9_HIGHBITDEPTH
-                                        0,
-#endif
+    ASSERT_EQ(0, vpx_alloc_frame_buffer(img, width, height, 1, 1, 0,
                                         VP9_ENC_BORDER_IN_PIXELS, 0));
+#else
+    ASSERT_EQ(0, vpx_alloc_frame_buffer(img, width, height, 1, 1,
+                                        VP9_ENC_BORDER_IN_PIXELS, 0));
+#endif
     memset(img->buffer_alloc, kBufFiller, img->frame_size);
   }
 
