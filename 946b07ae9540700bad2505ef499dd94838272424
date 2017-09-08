@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a15fbba_3ac9e569",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-08T07:17:31Z",
+      "side": 1,
+      "message": "\u0027while not applying\u0027?",
+      "range": {
+        "startLine": 10,
+        "startChar": 40,
+        "endLine": 10,
+        "endChar": 58
+      },
+      "revId": "946b07ae9540700bad2505ef499dd94838272424",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "acd7746c_27b7c89c",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1220,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-08T07:17:31Z",
+      "side": 1,
+      "message": "in new code I\u0027d prefer {}s around conditionals continued to the next line for readability",
+      "revId": "946b07ae9540700bad2505ef499dd94838272424",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "abb93426_01d06fb8",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-08T07:17:31Z",
+      "side": 1,
+      "message": "might be worth factoring this into a function given its use across modules",
+      "revId": "946b07ae9540700bad2505ef499dd94838272424",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
