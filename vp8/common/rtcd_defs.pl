@@ -132,16 +132,16 @@ if (vpx_config("CONFIG_POSTPROC") eq "yes") {
 # Subpixel
 #
 add_proto qw/void vp8_sixtap_predict16x16/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_sixtap_predict16x16 sse2 ssse3 neon dspr2 msa/;
+specialize qw/vp8_sixtap_predict16x16 sse2 ssse3 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_sixtap_predict8x8/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_sixtap_predict8x8 sse2 ssse3 neon dspr2 msa/;
+specialize qw/vp8_sixtap_predict8x8 sse2 ssse3 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_sixtap_predict8x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_sixtap_predict8x4 sse2 ssse3 neon dspr2 msa/;
+specialize qw/vp8_sixtap_predict8x4 sse2 ssse3 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_sixtap_predict4x4/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_sixtap_predict4x4 mmx ssse3 neon dspr2 msa/;
+specialize qw/vp8_sixtap_predict4x4 mmx ssse3 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_bilinear_predict16x16/, "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch";
 specialize qw/vp8_bilinear_predict16x16 sse2 ssse3 neon msa/;
