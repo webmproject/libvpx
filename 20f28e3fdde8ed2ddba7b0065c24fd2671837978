@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0cc65d7d_8bf5229e",
+        "filename": "vp8/common/mips/mmi/loopfilter_filters_mmi.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-08T16:25:57Z",
+      "side": 1,
+      "message": "This is only used in one place and is identical to the MB version. You can leave out the #define and use punpck directly",
+      "range": {
+        "startLine": 204,
+        "startChar": 8,
+        "endLine": 204,
+        "endChar": 33
+      },
+      "revId": "20f28e3fdde8ed2ddba7b0065c24fd2671837978",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80e22791_35e8428d",
+        "filename": "vp8/common/mips/mmi/loopfilter_filters_mmi.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-08T16:25:57Z",
+      "side": 1,
+      "message": "Same here",
+      "range": {
+        "startLine": 472,
+        "startChar": 8,
+        "endLine": 472,
+        "endChar": 32
+      },
+      "revId": "20f28e3fdde8ed2ddba7b0065c24fd2671837978",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f15525ac_52f12785",
+        "filename": "vp8/common/mips/mmi/loopfilter_filters_mmi.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-08T16:25:57Z",
+      "side": 1,
+      "message": "This looks like the same set of instructions as the _LOOP_ version. Can you combine them?",
+      "range": {
+        "startLine": 686,
+        "startChar": 0,
+        "endLine": 686,
+        "endChar": 32
+      },
+      "revId": "20f28e3fdde8ed2ddba7b0065c24fd2671837978",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
