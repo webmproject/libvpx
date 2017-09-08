@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce4c19f8_2861fcfc",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1216,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-08T22:49:58Z",
+      "side": 1,
+      "message": "I\u0027d prefer {}s",
+      "revId": "4a4c577e140b377dcbf62f91249e97784e1297a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f5ccf0a_8e4c357c",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 925,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-08T22:49:58Z",
+      "side": 1,
+      "message": "you could just use get_msb() here",
+      "revId": "4a4c577e140b377dcbf62f91249e97784e1297a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4f30d1e6_7776d588",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-08T22:49:58Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "4a4c577e140b377dcbf62f91249e97784e1297a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45ceb0fc_783d289f",
+        "filename": "vpxenc.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-08T22:49:58Z",
+      "side": 1,
+      "message": "this is a long line in the output, maybe break after \u0027target level\u0027 and list them one per line",
+      "revId": "4a4c577e140b377dcbf62f91249e97784e1297a0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
