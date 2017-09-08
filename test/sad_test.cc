@@ -990,4 +990,59 @@ const SadMxNx4Param x4d_vsx_tests[] = {
 };
 INSTANTIATE_TEST_CASE_P(VSX, SADx4Test, ::testing::ValuesIn(x4d_vsx_tests));
 #endif  // HAVE_VSX
+
+//------------------------------------------------------------------------------
+// Loongson functions
+#if HAVE_MMI
+const SadMxNParam mmi_tests[] = {
+  SadMxNParam(64, 64, &vpx_sad64x64_mmi),
+  SadMxNParam(64, 32, &vpx_sad64x32_mmi),
+  SadMxNParam(32, 64, &vpx_sad32x64_mmi),
+  SadMxNParam(32, 32, &vpx_sad32x32_mmi),
+  SadMxNParam(32, 16, &vpx_sad32x16_mmi),
+  SadMxNParam(16, 32, &vpx_sad16x32_mmi),
+  SadMxNParam(16, 16, &vpx_sad16x16_mmi),
+  SadMxNParam(16, 8, &vpx_sad16x8_mmi),
+  SadMxNParam(8, 16, &vpx_sad8x16_mmi),
+  SadMxNParam(8, 8, &vpx_sad8x8_mmi),
+  SadMxNParam(8, 4, &vpx_sad8x4_mmi),
+  SadMxNParam(4, 8, &vpx_sad4x8_mmi),
+  SadMxNParam(4, 4, &vpx_sad4x4_mmi),
+};
+INSTANTIATE_TEST_CASE_P(MMI, SADTest, ::testing::ValuesIn(mmi_tests));
+
+const SadMxNAvgParam avg_mmi_tests[] = {
+  SadMxNAvgParam(64, 64, &vpx_sad64x64_avg_mmi),
+  SadMxNAvgParam(64, 32, &vpx_sad64x32_avg_mmi),
+  SadMxNAvgParam(32, 64, &vpx_sad32x64_avg_mmi),
+  SadMxNAvgParam(32, 32, &vpx_sad32x32_avg_mmi),
+  SadMxNAvgParam(32, 16, &vpx_sad32x16_avg_mmi),
+  SadMxNAvgParam(16, 32, &vpx_sad16x32_avg_mmi),
+  SadMxNAvgParam(16, 16, &vpx_sad16x16_avg_mmi),
+  SadMxNAvgParam(16, 8, &vpx_sad16x8_avg_mmi),
+  SadMxNAvgParam(8, 16, &vpx_sad8x16_avg_mmi),
+  SadMxNAvgParam(8, 8, &vpx_sad8x8_avg_mmi),
+  SadMxNAvgParam(8, 4, &vpx_sad8x4_avg_mmi),
+  SadMxNAvgParam(4, 8, &vpx_sad4x8_avg_mmi),
+  SadMxNAvgParam(4, 4, &vpx_sad4x4_avg_mmi),
+};
+INSTANTIATE_TEST_CASE_P(MMI, SADavgTest, ::testing::ValuesIn(avg_mmi_tests));
+
+const SadMxNx4Param x4d_mmi_tests[] = {
+  SadMxNx4Param(64, 64, &vpx_sad64x64x4d_mmi),
+  SadMxNx4Param(64, 32, &vpx_sad64x32x4d_mmi),
+  SadMxNx4Param(32, 64, &vpx_sad32x64x4d_mmi),
+  SadMxNx4Param(32, 32, &vpx_sad32x32x4d_mmi),
+  SadMxNx4Param(32, 16, &vpx_sad32x16x4d_mmi),
+  SadMxNx4Param(16, 32, &vpx_sad16x32x4d_mmi),
+  SadMxNx4Param(16, 16, &vpx_sad16x16x4d_mmi),
+  SadMxNx4Param(16, 8, &vpx_sad16x8x4d_mmi),
+  SadMxNx4Param(8, 16, &vpx_sad8x16x4d_mmi),
+  SadMxNx4Param(8, 8, &vpx_sad8x8x4d_mmi),
+  SadMxNx4Param(8, 4, &vpx_sad8x4x4d_mmi),
+  SadMxNx4Param(4, 8, &vpx_sad4x8x4d_mmi),
+  SadMxNx4Param(4, 4, &vpx_sad4x4x4d_mmi),
+};
+INSTANTIATE_TEST_CASE_P(MMI, SADx4Test, ::testing::ValuesIn(x4d_mmi_tests));
+#endif  // HAVE_MMI
 }  // namespace
