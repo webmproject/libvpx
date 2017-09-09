@@ -489,15 +489,19 @@ static INLINE void highbd_d63_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                         const uint16_t *above,
                                         const uint16_t *left, int bd) {
   int r, c;
+  int size;
   (void)left;
   (void)bd;
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c) {
-      dst[c] = r & 1 ? AVG3(above[(r >> 1) + c], above[(r >> 1) + c + 1],
-                            above[(r >> 1) + c + 2])
-                     : AVG2(above[(r >> 1) + c], above[(r >> 1) + c + 1]);
-    }
-    dst += stride;
+  for (c = 0; c < bs; ++c) {
+    dst[c] = AVG2(above[c], above[c + 1]);
+    dst[stride + c] = AVG3(above[c], above[c + 1], above[c + 2]);
+  }
+  for (r = 2, size = bs - 2; r < bs; r += 2, --size) {
+    memcpy(dst + (r + 0) * stride, dst + (r >> 1), size * sizeof(*dst));
+    vpx_memset16(dst + (r + 0) * stride + size, above[bs - 1], bs - size);
+    memcpy(dst + (r + 1) * stride, dst + stride + (r >> 1),
+           size * sizeof(*dst));
+    vpx_memset16(dst + (r + 1) * stride + size, above[bs - 1], bs - size);
   }
 }
 
