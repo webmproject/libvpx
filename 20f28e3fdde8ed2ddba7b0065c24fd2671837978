@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7d20b3f6_0d742226",
+        "filename": "vp8/common/mips/mmi/loopfilter_filters_mmi.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-11T06:11:52Z",
+      "side": 1,
+      "message": "This is used to avoid the format disordered by clang-format tool. If we use punpck directly, macro VP8_LOOP_VPSRAB will be formated into a confused style. considering macro VP8_LOOP_VPSRAB include only 7 lines and it is not used frequently, i removed this macro.",
+      "parentUuid": "0cc65d7d_8bf5229e",
+      "range": {
+        "startLine": 204,
+        "startChar": 8,
+        "endLine": 204,
+        "endChar": 33
+      },
+      "revId": "20f28e3fdde8ed2ddba7b0065c24fd2671837978",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "80e22791_35e8428d",
         "filename": "vp8/common/mips/mmi/loopfilter_filters_mmi.c",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "520dbc1e_8ca2d046",
+        "filename": "vp8/common/mips/mmi/loopfilter_filters_mmi.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-11T06:11:52Z",
+      "side": 1,
+      "message": "As mentioned above, this case was also used to avoid the format disordered by clang-format. but the macro VP8_MBLOOP_HPSRAB_ADD include 11 lines and it is used 3 times. may I still keep it until we find out a good way to work around in the future?",
+      "parentUuid": "80e22791_35e8428d",
+      "range": {
+        "startLine": 472,
+        "startChar": 8,
+        "endLine": 472,
+        "endChar": 32
+      },
+      "revId": "20f28e3fdde8ed2ddba7b0065c24fd2671837978",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f15525ac_52f12785",
         "filename": "vp8/common/mips/mmi/loopfilter_filters_mmi.c",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "20f28e3fdde8ed2ddba7b0065c24fd2671837978",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7d22e0dc_8af912c2",
+        "filename": "vp8/common/mips/mmi/loopfilter_filters_mmi.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-11T06:11:52Z",
+      "side": 1,
+      "message": "removed this macro.",
+      "parentUuid": "f15525ac_52f12785",
+      "range": {
+        "startLine": 686,
+        "startChar": 0,
+        "endLine": 686,
+        "endChar": 32
+      },
+      "revId": "20f28e3fdde8ed2ddba7b0065c24fd2671837978",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
