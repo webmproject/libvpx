@@ -467,6 +467,38 @@ TEST_P(VP9HighbdIntraPredTest, HighbdIntraPredTests) {
   RunTest(left_col, above_data, dst, ref_dst);
 }
 
+#if HAVE_SSSE3
+INSTANTIATE_TEST_CASE_P(
+    SSSE3_TO_C_8, VP9HighbdIntraPredTest,
+    ::testing::Values(
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_8x8_ssse3,
+                             &vpx_highbd_d207_predictor_8x8_c, 8, 8),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_16x16_ssse3,
+                             &vpx_highbd_d207_predictor_16x16_c, 16, 8),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_ssse3,
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 8)));
+
+INSTANTIATE_TEST_CASE_P(
+    SSSE3_TO_C_10, VP9HighbdIntraPredTest,
+    ::testing::Values(
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_8x8_ssse3,
+                             &vpx_highbd_d207_predictor_8x8_c, 8, 10),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_16x16_ssse3,
+                             &vpx_highbd_d207_predictor_16x16_c, 16, 10),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_ssse3,
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 10)));
+
+INSTANTIATE_TEST_CASE_P(
+    SSSE3_TO_C_12, VP9HighbdIntraPredTest,
+    ::testing::Values(
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_8x8_ssse3,
+                             &vpx_highbd_d207_predictor_8x8_c, 8, 12),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_16x16_ssse3,
+                             &vpx_highbd_d207_predictor_16x16_c, 16, 12),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_ssse3,
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 12)));
+#endif  // HAVE_SSSE3
+
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2_TO_C_8, VP9HighbdIntraPredTest,
@@ -479,6 +511,8 @@ INSTANTIATE_TEST_CASE_P(
                              &vpx_highbd_dc_128_predictor_16x16_c, 16, 8),
         HighbdIntraPredParam(&vpx_highbd_dc_128_predictor_32x32_sse2,
                              &vpx_highbd_dc_128_predictor_32x32_c, 32, 8),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_4x4_sse2,
+                             &vpx_highbd_d207_predictor_4x4_c, 4, 8),
         HighbdIntraPredParam(&vpx_highbd_dc_left_predictor_4x4_sse2,
                              &vpx_highbd_dc_left_predictor_4x4_c, 4, 8),
         HighbdIntraPredParam(&vpx_highbd_dc_left_predictor_8x8_sse2,
@@ -539,6 +573,8 @@ INSTANTIATE_TEST_CASE_P(
                              &vpx_highbd_dc_128_predictor_16x16_c, 16, 10),
         HighbdIntraPredParam(&vpx_highbd_dc_128_predictor_32x32_sse2,
                              &vpx_highbd_dc_128_predictor_32x32_c, 32, 10),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_4x4_sse2,
+                             &vpx_highbd_d207_predictor_4x4_c, 4, 10),
         HighbdIntraPredParam(&vpx_highbd_dc_left_predictor_4x4_sse2,
                              &vpx_highbd_dc_left_predictor_4x4_c, 4, 10),
         HighbdIntraPredParam(&vpx_highbd_dc_left_predictor_8x8_sse2,
@@ -599,6 +635,8 @@ INSTANTIATE_TEST_CASE_P(
                              &vpx_highbd_dc_128_predictor_16x16_c, 16, 12),
         HighbdIntraPredParam(&vpx_highbd_dc_128_predictor_32x32_sse2,
                              &vpx_highbd_dc_128_predictor_32x32_c, 32, 12),
+        HighbdIntraPredParam(&vpx_highbd_d207_predictor_4x4_sse2,
+                             &vpx_highbd_d207_predictor_4x4_c, 4, 12),
         HighbdIntraPredParam(&vpx_highbd_dc_left_predictor_4x4_sse2,
                              &vpx_highbd_dc_left_predictor_4x4_c, 4, 12),
         HighbdIntraPredParam(&vpx_highbd_dc_left_predictor_8x8_sse2,
