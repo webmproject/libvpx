@@ -43,6 +43,8 @@ typedef int32_t tran_high_t;
 typedef int16_t tran_low_t;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+typedef int16_t tran_coef_t;
+
 static INLINE uint8_t clip_pixel(int val) {
   return (val > 255) ? 255 : (val < 0) ? 0 : val;
 }

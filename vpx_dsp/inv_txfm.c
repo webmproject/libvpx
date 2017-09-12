@@ -105,6 +105,7 @@ void iadst4_c(const tran_low_t *input, tran_low_t *output) {
     return;
   }
 
+  // 32-bit result is enough for the following multiplications.
   s0 = sinpi_1_9 * x0;
   s1 = sinpi_2_9 * x0;
   s2 = sinpi_3_9 * x1;
@@ -1390,13 +1391,13 @@ void vpx_highbd_iadst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
     return;
   }
 
-  s0 = sinpi_1_9 * x0;
-  s1 = sinpi_2_9 * x0;
-  s2 = sinpi_3_9 * x1;
-  s3 = sinpi_4_9 * x2;
-  s4 = sinpi_1_9 * x2;
-  s5 = sinpi_2_9 * x3;
-  s6 = sinpi_4_9 * x3;
+  s0 = (tran_high_t)sinpi_1_9 * x0;
+  s1 = (tran_high_t)sinpi_2_9 * x0;
+  s2 = (tran_high_t)sinpi_3_9 * x1;
+  s3 = (tran_high_t)sinpi_4_9 * x2;
+  s4 = (tran_high_t)sinpi_1_9 * x2;
+  s5 = (tran_high_t)sinpi_2_9 * x3;
+  s6 = (tran_high_t)sinpi_4_9 * x3;
   s7 = (tran_high_t)HIGHBD_WRAPLOW(x0 - x2 + x3, bd);
 
   s0 = s0 + s3 + s5;
