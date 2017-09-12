@@ -588,7 +588,8 @@ add_proto qw/void vpx_iwht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, 
 add_proto qw/void vpx_iwht4x4_1_add/, "const tran_low_t *input, uint8_t *dest, int stride";
 
 if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
-  # Note that there are more specializations appended when CONFIG_VP9_HIGHBITDEPTH is off.
+  # Note that there are more specializations appended when
+  # CONFIG_VP9_HIGHBITDEPTH is off.
   specialize qw/vpx_idct4x4_16_add neon sse2 vsx/;
   specialize qw/vpx_idct4x4_1_add neon sse2/;
   specialize qw/vpx_idct8x8_64_add neon sse2 vsx/;
@@ -604,7 +605,7 @@ if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
   specialize qw/vpx_idct32x32_1_add neon sse2/;
 
   if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") ne "yes") {
-    # Note that these specializations appends to the above ones.
+    # Note that these specializations are appended to the above ones.
     specialize qw/vpx_idct4x4_16_add dspr2 msa/;
     specialize qw/vpx_idct4x4_1_add dspr2 msa/;
     specialize qw/vpx_idct8x8_64_add dspr2 msa/;
