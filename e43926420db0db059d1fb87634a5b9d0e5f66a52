@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb62a3e4_53b51d1b",
+        "filename": "vp8/common/mips/mmi/idctllm_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-13T17:08:52Z",
+      "side": 1,
+      "message": "Sorry, I meant to comment that these notes should be left out. They are copied from the C version and have some spelling errors and other issues.\n\nUnless a comment applies to this particular implementation, it\u0027s best to leave it out.",
+      "range": {
+        "startLine": 41,
+        "startChar": 3,
+        "endLine": 41,
+        "endChar": 8
+      },
+      "revId": "e43926420db0db059d1fb87634a5b9d0e5f66a52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
