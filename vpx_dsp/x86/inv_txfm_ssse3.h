@@ -92,8 +92,7 @@ static INLINE void idct8x8_12_add_kernel_ssse3(__m128i *const io /* io[8] */) {
   step1[1] = _mm_add_epi16(step2[0], step2[2]);
   step1[2] = _mm_sub_epi16(step2[0], step2[2]);
   step1[3] = _mm_sub_epi16(step2[0], step2[3]);
-  butterfly(step2[6], step2[5], (int)cospi_16_64, (int)cospi_16_64, &step1[5],
-            &step1[6]);
+  butterfly(step2[6], step2[5], cospi_16_64, cospi_16_64, &step1[5], &step1[6]);
 
   // stage 4
   io[0] = _mm_add_epi16(step1[0], step2[7]);

@@ -56,10 +56,10 @@ void vpx_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
     v_t2_hi = vmlal_n_s16(v_t2_hi, vget_high_s16(v_x3), (int16_t)cospi_8_64);
     v_t3_lo = vmlsl_n_s16(v_t3_lo, vget_low_s16(v_x2), (int16_t)cospi_8_64);
     v_t3_hi = vmlsl_n_s16(v_t3_hi, vget_high_s16(v_x2), (int16_t)cospi_8_64);
-    v_t0_lo = vmulq_n_s32(v_t0_lo, (int32_t)cospi_16_64);
-    v_t0_hi = vmulq_n_s32(v_t0_hi, (int32_t)cospi_16_64);
-    v_t1_lo = vmulq_n_s32(v_t1_lo, (int32_t)cospi_16_64);
-    v_t1_hi = vmulq_n_s32(v_t1_hi, (int32_t)cospi_16_64);
+    v_t0_lo = vmulq_n_s32(v_t0_lo, cospi_16_64);
+    v_t0_hi = vmulq_n_s32(v_t0_hi, cospi_16_64);
+    v_t1_lo = vmulq_n_s32(v_t1_lo, cospi_16_64);
+    v_t1_hi = vmulq_n_s32(v_t1_hi, cospi_16_64);
     {
       const int16x4_t a = vrshrn_n_s32(v_t0_lo, DCT_CONST_BITS);
       const int16x4_t b = vrshrn_n_s32(v_t0_hi, DCT_CONST_BITS);

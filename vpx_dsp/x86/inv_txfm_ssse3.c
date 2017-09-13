@@ -26,7 +26,7 @@ static INLINE void partial_butterfly_ssse3(const __m128i in, const int c0,
 }
 
 static INLINE __m128i partial_butterfly_cospi16_ssse3(const __m128i in) {
-  const __m128i coef_pair = _mm_set1_epi16(2 * (int)cospi_16_64);
+  const __m128i coef_pair = _mm_set1_epi16(2 * cospi_16_64);
   return _mm_mulhrs_epi16(in, coef_pair);
 }
 
@@ -57,8 +57,7 @@ static INLINE void idct32_34_8x32_quarter_1(const __m128i *const in /*in[32]*/,
   __m128i step1[8], step2[8];
 
   // stage 3
-  partial_butterfly_ssse3(in[4], (int)cospi_28_64, (int)cospi_4_64, &step1[4],
-                          &step1[7]);
+  partial_butterfly_ssse3(in[4], cospi_28_64, cospi_4_64, &step1[4], &step1[7]);
 
   // stage 4
   step2[0] = partial_butterfly_cospi16_ssse3(in[0]);
@@ -73,8 +72,7 @@ static INLINE void idct32_34_8x32_quarter_1(const __m128i *const in /*in[32]*/,
   step1[2] = step2[0];
   step1[3] = step2[0];
   step1[4] = step2[4];
-  butterfly(step2[6], step2[5], (int)cospi_16_64, (int)cospi_16_64, &step1[5],
-            &step1[6]);
+  butterfly(step2[6], step2[5], cospi_16_64, cospi_16_64, &step1[5], &step1[6]);
   step1[7] = step2[7];
 
   // stage 6
@@ -96,9 +94,9 @@ static INLINE void idct32_34_8x32_quarter_2(const __m128i *const in /*in[32]*/,
   __m128i step1[16], step2[16];
 
   // stage 2
-  partial_butterfly_ssse3(in[2], (int)cospi_30_64, (int)cospi_2_64, &step2[8],
+  partial_butterfly_ssse3(in[2], cospi_30_64, cospi_2_64, &step2[8],
                           &step2[15]);
-  partial_butterfly_ssse3(in[6], -(int)cospi_26_64, (int)cospi_6_64, &step2[11],
+  partial_butterfly_ssse3(in[6], -cospi_26_64, cospi_6_64, &step2[11],
                           &step2[12]);
 
   // stage 3
@@ -131,24 +129,24 @@ static INLINE void idct32_34_8x32_quarter_3_4(
   __m128i step1[32];
 
   // stage 1
-  partial_butterfly_ssse3(in[1], (int)cospi_31_64, (int)cospi_1_64, &step1[16],
+  partial_butterfly_ssse3(in[1], cospi_31_64, cospi_1_64, &step1[16],
                           &step1[31]);
-  partial_butterfly_ssse3(in[7], -(int)cospi_25_64, (int)cospi_7_64, &step1[19],
+  partial_butterfly_ssse3(in[7], -cospi_25_64, cospi_7_64, &step1[19],
                           &step1[28]);
-  partial_butterfly_ssse3(in[5], (int)cospi_27_64, (int)cospi_5_64, &step1[20],
+  partial_butterfly_ssse3(in[5], cospi_27_64, cospi_5_64, &step1[20],
                           &step1[27]);
-  partial_butterfly_ssse3(in[3], -(int)cospi_29_64, (int)cospi_3_64, &step1[23],
+  partial_butterfly_ssse3(in[3], -cospi_29_64, cospi_3_64, &step1[23],
                           &step1[24]);
 
   // stage 3
-  butterfly(step1[31], step1[16], (int)cospi_28_64, (int)cospi_4_64, &step1[17],
+  butterfly(step1[31], step1[16], cospi_28_64, cospi_4_64, &step1[17],
             &step1[30]);
-  butterfly(step1[28], step1[19], -(int)cospi_4_64, (int)cospi_28_64,
-            &step1[18], &step1[29]);
-  butterfly(step1[27], step1[20], (int)cospi_12_64, (int)cospi_20_64,
-            &step1[21], &step1[26]);
-  butterfly(step1[24], step1[23], -(int)cospi_20_64, (int)cospi_12_64,
-            &step1[22], &step1[25]);
+  butterfly(step1[28], step1[19], -cospi_4_64, cospi_28_64, &step1[18],
+            &step1[29]);
+  butterfly(step1[27], step1[20], cospi_12_64, cospi_20_64, &step1[21],
+            &step1[26]);
+  butterfly(step1[24], step1[23], -cospi_20_64, cospi_12_64, &step1[22],
+            &step1[25]);
 
   idct32_8x32_quarter_3_4_stage_4_to_7(step1, out);
 }
@@ -194,15 +192,13 @@ static INLINE void idct32_135_8x32_quarter_1(const __m128i *const in /*in[32]*/,
   __m128i step1[8], step2[8];
 
   // stage 3
-  partial_butterfly_ssse3(in[4], (int)cospi_28_64, (int)cospi_4_64, &step1[4],
-                          &step1[7]);
-  partial_butterfly_ssse3(in[12], -(int)cospi_20_64, (int)cospi_12_64,
-                          &step1[5], &step1[6]);
+  partial_butterfly_ssse3(in[4], cospi_28_64, cospi_4_64, &step1[4], &step1[7]);
+  partial_butterfly_ssse3(in[12], -cospi_20_64, cospi_12_64, &step1[5],
+                          &step1[6]);
 
   // stage 4
   step2[0] = partial_butterfly_cospi16_ssse3(in[0]);
-  partial_butterfly_ssse3(in[8], (int)cospi_24_64, (int)cospi_8_64, &step2[2],
-                          &step2[3]);
+  partial_butterfly_ssse3(in[8], cospi_24_64, cospi_8_64, &step2[2], &step2[3]);
   step2[4] = _mm_add_epi16(step1[4], step1[5]);
   step2[5] = _mm_sub_epi16(step1[4], step1[5]);
   step2[6] = _mm_sub_epi16(step1[7], step1[6]);
@@ -214,8 +210,7 @@ static INLINE void idct32_135_8x32_quarter_1(const __m128i *const in /*in[32]*/,
   step1[2] = _mm_sub_epi16(step2[0], step2[2]);
   step1[3] = _mm_sub_epi16(step2[0], step2[3]);
   step1[4] = step2[4];
-  butterfly(step2[6], step2[5], (int)cospi_16_64, (int)cospi_16_64, &step1[5],
-            &step1[6]);
+  butterfly(step2[6], step2[5], cospi_16_64, cospi_16_64, &step1[5], &step1[6]);
   step1[7] = step2[7];
 
   // stage 6
@@ -237,13 +232,13 @@ static INLINE void idct32_135_8x32_quarter_2(const __m128i *const in /*in[32]*/,
   __m128i step1[16], step2[16];
 
   // stage 2
-  partial_butterfly_ssse3(in[2], (int)cospi_30_64, (int)cospi_2_64, &step2[8],
+  partial_butterfly_ssse3(in[2], cospi_30_64, cospi_2_64, &step2[8],
                           &step2[15]);
-  partial_butterfly_ssse3(in[14], -(int)cospi_18_64, (int)cospi_14_64,
-                          &step2[9], &step2[14]);
-  partial_butterfly_ssse3(in[10], (int)cospi_22_64, (int)cospi_10_64,
-                          &step2[10], &step2[13]);
-  partial_butterfly_ssse3(in[6], -(int)cospi_26_64, (int)cospi_6_64, &step2[11],
+  partial_butterfly_ssse3(in[14], -cospi_18_64, cospi_14_64, &step2[9],
+                          &step2[14]);
+  partial_butterfly_ssse3(in[10], cospi_22_64, cospi_10_64, &step2[10],
+                          &step2[13]);
+  partial_butterfly_ssse3(in[6], -cospi_26_64, cospi_6_64, &step2[11],
                           &step2[12]);
 
   // stage 3
@@ -277,23 +272,23 @@ static INLINE void idct32_135_8x32_quarter_3_4(
   __m128i step1[32], step2[32];
 
   // stage 1
-  partial_butterfly_ssse3(in[1], (int)cospi_31_64, (int)cospi_1_64, &step1[16],
+  partial_butterfly_ssse3(in[1], cospi_31_64, cospi_1_64, &step1[16],
                           &step1[31]);
-  partial_butterfly_ssse3(in[15], -(int)cospi_17_64, (int)cospi_15_64,
-                          &step1[17], &step1[30]);
-  partial_butterfly_ssse3(in[9], (int)cospi_23_64, (int)cospi_9_64, &step1[18],
+  partial_butterfly_ssse3(in[15], -cospi_17_64, cospi_15_64, &step1[17],
+                          &step1[30]);
+  partial_butterfly_ssse3(in[9], cospi_23_64, cospi_9_64, &step1[18],
                           &step1[29]);
-  partial_butterfly_ssse3(in[7], -(int)cospi_25_64, (int)cospi_7_64, &step1[19],
+  partial_butterfly_ssse3(in[7], -cospi_25_64, cospi_7_64, &step1[19],
                           &step1[28]);
 
-  partial_butterfly_ssse3(in[5], (int)cospi_27_64, (int)cospi_5_64, &step1[20],
+  partial_butterfly_ssse3(in[5], cospi_27_64, cospi_5_64, &step1[20],
                           &step1[27]);
-  partial_butterfly_ssse3(in[11], -(int)cospi_21_64, (int)cospi_11_64,
-                          &step1[21], &step1[26]);
+  partial_butterfly_ssse3(in[11], -cospi_21_64, cospi_11_64, &step1[21],
+                          &step1[26]);
 
-  partial_butterfly_ssse3(in[13], (int)cospi_19_64, (int)cospi_13_64,
-                          &step1[22], &step1[25]);
-  partial_butterfly_ssse3(in[3], -(int)cospi_29_64, (int)cospi_3_64, &step1[23],
+  partial_butterfly_ssse3(in[13], cospi_19_64, cospi_13_64, &step1[22],
+                          &step1[25]);
+  partial_butterfly_ssse3(in[3], -cospi_29_64, cospi_3_64, &step1[23],
                           &step1[24]);
 
   // stage 2
@@ -318,16 +313,16 @@ static INLINE void idct32_135_8x32_quarter_3_4(
   // stage 3
   step1[16] = step2[16];
   step1[31] = step2[31];
-  butterfly(step2[30], step2[17], (int)cospi_28_64, (int)cospi_4_64, &step1[17],
+  butterfly(step2[30], step2[17], cospi_28_64, cospi_4_64, &step1[17],
             &step1[30]);
-  butterfly(step2[29], step2[18], -(int)cospi_4_64, (int)cospi_28_64,
-            &step1[18], &step1[29]);
+  butterfly(step2[29], step2[18], -cospi_4_64, cospi_28_64, &step1[18],
+            &step1[29]);
   step1[19] = step2[19];
   step1[20] = step2[20];
-  butterfly(step2[26], step2[21], (int)cospi_12_64, (int)cospi_20_64,
-            &step1[21], &step1[26]);
-  butterfly(step2[25], step2[22], -(int)cospi_20_64, (int)cospi_12_64,
-            &step1[22], &step1[25]);
+  butterfly(step2[26], step2[21], cospi_12_64, cospi_20_64, &step1[21],
+            &step1[26]);
+  butterfly(step2[25], step2[22], -cospi_20_64, cospi_12_64, &step1[22],
+            &step1[25]);
   step1[23] = step2[23];
   step1[24] = step2[24];
   step1[27] = step2[27];

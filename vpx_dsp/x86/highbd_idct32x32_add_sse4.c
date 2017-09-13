@@ -25,10 +25,10 @@ static INLINE void highbd_idct32_4x32_quarter_2_stage_4_to_6(
   // stage 4
   step2[8] = step1[8];
   step2[15] = step1[15];
-  highbd_butterfly_sse4_1(step1[14], step1[9], (int)cospi_24_64,
-                          (int)cospi_8_64, &step2[9], &step2[14]);
-  highbd_butterfly_sse4_1(step1[13], step1[10], -(int)cospi_8_64,
-                          (int)cospi_24_64, &step2[10], &step2[13]);
+  highbd_butterfly_sse4_1(step1[14], step1[9], cospi_24_64, cospi_8_64,
+                          &step2[9], &step2[14]);
+  highbd_butterfly_sse4_1(step1[13], step1[10], -cospi_8_64, cospi_24_64,
+                          &step2[10], &step2[13]);
   step2[11] = step1[11];
   step2[12] = step1[12];
 
@@ -45,10 +45,10 @@ static INLINE void highbd_idct32_4x32_quarter_2_stage_4_to_6(
   // stage 6
   out[8] = step1[8];
   out[9] = step1[9];
-  highbd_butterfly_sse4_1(step1[13], step1[10], (int)cospi_16_64,
-                          (int)cospi_16_64, &out[10], &out[13]);
-  highbd_butterfly_sse4_1(step1[12], step1[11], (int)cospi_16_64,
-                          (int)cospi_16_64, &out[11], &out[12]);
+  highbd_butterfly_sse4_1(step1[13], step1[10], cospi_16_64, cospi_16_64,
+                          &out[10], &out[13]);
+  highbd_butterfly_sse4_1(step1[12], step1[11], cospi_16_64, cospi_16_64,
+                          &out[11], &out[12]);
   out[14] = step1[14];
   out[15] = step1[15];
 }
@@ -79,14 +79,14 @@ static INLINE void highbd_idct32_4x32_quarter_3_4_stage_4_to_7(
   // stage 5
   step1[16] = step2[16];
   step1[17] = step2[17];
-  highbd_butterfly_sse4_1(step2[29], step2[18], (int)cospi_24_64,
-                          (int)cospi_8_64, &step1[18], &step1[29]);
-  highbd_butterfly_sse4_1(step2[28], step2[19], (int)cospi_24_64,
-                          (int)cospi_8_64, &step1[19], &step1[28]);
-  highbd_butterfly_sse4_1(step2[27], step2[20], -(int)cospi_8_64,
-                          (int)cospi_24_64, &step1[20], &step1[27]);
-  highbd_butterfly_sse4_1(step2[26], step2[21], -(int)cospi_8_64,
-                          (int)cospi_24_64, &step1[21], &step1[26]);
+  highbd_butterfly_sse4_1(step2[29], step2[18], cospi_24_64, cospi_8_64,
+                          &step1[18], &step1[29]);
+  highbd_butterfly_sse4_1(step2[28], step2[19], cospi_24_64, cospi_8_64,
+                          &step1[19], &step1[28]);
+  highbd_butterfly_sse4_1(step2[27], step2[20], -cospi_8_64, cospi_24_64,
+                          &step1[20], &step1[27]);
+  highbd_butterfly_sse4_1(step2[26], step2[21], -cospi_8_64, cospi_24_64,
+                          &step1[21], &step1[26]);
   step1[22] = step2[22];
   step1[23] = step2[23];
   step1[24] = step2[24];
@@ -118,14 +118,14 @@ static INLINE void highbd_idct32_4x32_quarter_3_4_stage_4_to_7(
   out[17] = step2[17];
   out[18] = step2[18];
   out[19] = step2[19];
-  highbd_butterfly_sse4_1(step2[27], step2[20], (int)cospi_16_64,
-                          (int)cospi_16_64, &out[20], &out[27]);
-  highbd_butterfly_sse4_1(step2[26], step2[21], (int)cospi_16_64,
-                          (int)cospi_16_64, &out[21], &out[26]);
-  highbd_butterfly_sse4_1(step2[25], step2[22], (int)cospi_16_64,
-                          (int)cospi_16_64, &out[22], &out[25]);
-  highbd_butterfly_sse4_1(step2[24], step2[23], (int)cospi_16_64,
-                          (int)cospi_16_64, &out[23], &out[24]);
+  highbd_butterfly_sse4_1(step2[27], step2[20], cospi_16_64, cospi_16_64,
+                          &out[20], &out[27]);
+  highbd_butterfly_sse4_1(step2[26], step2[21], cospi_16_64, cospi_16_64,
+                          &out[21], &out[26]);
+  highbd_butterfly_sse4_1(step2[25], step2[22], cospi_16_64, cospi_16_64,
+                          &out[22], &out[25]);
+  highbd_butterfly_sse4_1(step2[24], step2[23], cospi_16_64, cospi_16_64,
+                          &out[23], &out[24]);
   out[28] = step2[28];
   out[29] = step2[29];
   out[30] = step2[30];
@@ -146,16 +146,16 @@ static INLINE void highbd_idct32_1024_4x32_quarter_1(
   __m128i step1[8], step2[8];
 
   // stage 3
-  highbd_butterfly_sse4_1(in[4], in[28], (int)cospi_28_64, (int)cospi_4_64,
-                          &step1[4], &step1[7]);
-  highbd_butterfly_sse4_1(in[20], in[12], (int)cospi_12_64, (int)cospi_20_64,
-                          &step1[5], &step1[6]);
+  highbd_butterfly_sse4_1(in[4], in[28], cospi_28_64, cospi_4_64, &step1[4],
+                          &step1[7]);
+  highbd_butterfly_sse4_1(in[20], in[12], cospi_12_64, cospi_20_64, &step1[5],
+                          &step1[6]);
 
   // stage 4
-  highbd_butterfly_sse4_1(in[0], in[16], (int)cospi_16_64, (int)cospi_16_64,
-                          &step2[1], &step2[0]);
-  highbd_butterfly_sse4_1(in[8], in[24], (int)cospi_24_64, (int)cospi_8_64,
-                          &step2[2], &step2[3]);
+  highbd_butterfly_sse4_1(in[0], in[16], cospi_16_64, cospi_16_64, &step2[1],
+                          &step2[0]);
+  highbd_butterfly_sse4_1(in[8], in[24], cospi_24_64, cospi_8_64, &step2[2],
+                          &step2[3]);
   step2[4] = _mm_add_epi32(step1[4], step1[5]);
   step2[5] = _mm_sub_epi32(step1[4], step1[5]);
   step2[6] = _mm_sub_epi32(step1[7], step1[6]);
@@ -167,8 +167,8 @@ static INLINE void highbd_idct32_1024_4x32_quarter_1(
   step1[2] = _mm_sub_epi32(step2[1], step2[2]);
   step1[3] = _mm_sub_epi32(step2[0], step2[3]);
   step1[4] = step2[4];
-  highbd_butterfly_sse4_1(step2[6], step2[5], (int)cospi_16_64,
-                          (int)cospi_16_64, &step1[5], &step1[6]);
+  highbd_butterfly_sse4_1(step2[6], step2[5], cospi_16_64, cospi_16_64,
+                          &step1[5], &step1[6]);
   step1[7] = step2[7];
 
   // stage 6
@@ -190,14 +190,14 @@ static INLINE void highbd_idct32_1024_4x32_quarter_2(
   __m128i step1[32], step2[32];
 
   // stage 2
-  highbd_butterfly_sse4_1(in[2], in[30], (int)cospi_30_64, (int)cospi_2_64,
-                          &step2[8], &step2[15]);
-  highbd_butterfly_sse4_1(in[18], in[14], (int)cospi_14_64, (int)cospi_18_64,
-                          &step2[9], &step2[14]);
-  highbd_butterfly_sse4_1(in[10], in[22], (int)cospi_22_64, (int)cospi_10_64,
-                          &step2[10], &step2[13]);
-  highbd_butterfly_sse4_1(in[26], in[6], (int)cospi_6_64, (int)cospi_26_64,
-                          &step2[11], &step2[12]);
+  highbd_butterfly_sse4_1(in[2], in[30], cospi_30_64, cospi_2_64, &step2[8],
+                          &step2[15]);
+  highbd_butterfly_sse4_1(in[18], in[14], cospi_14_64, cospi_18_64, &step2[9],
+                          &step2[14]);
+  highbd_butterfly_sse4_1(in[10], in[22], cospi_22_64, cospi_10_64, &step2[10],
+                          &step2[13]);
+  highbd_butterfly_sse4_1(in[26], in[6], cospi_6_64, cospi_26_64, &step2[11],
+                          &step2[12]);
 
   // stage 3
   step1[8] = _mm_add_epi32(step2[8], step2[9]);
@@ -230,24 +230,24 @@ static INLINE void highbd_idct32_1024_4x32_quarter_3_4(
   __m128i step1[32], step2[32];
 
   // stage 1
-  highbd_butterfly_sse4_1(in[1], in[31], (int)cospi_31_64, (int)cospi_1_64,
-                          &step1[16], &step1[31]);
-  highbd_butterfly_sse4_1(in[17], in[15], (int)cospi_15_64, (int)cospi_17_64,
-                          &step1[17], &step1[30]);
-  highbd_butterfly_sse4_1(in[9], in[23], (int)cospi_23_64, (int)cospi_9_64,
-                          &step1[18], &step1[29]);
-  highbd_butterfly_sse4_1(in[25], in[7], (int)cospi_7_64, (int)cospi_25_64,
-                          &step1[19], &step1[28]);
+  highbd_butterfly_sse4_1(in[1], in[31], cospi_31_64, cospi_1_64, &step1[16],
+                          &step1[31]);
+  highbd_butterfly_sse4_1(in[17], in[15], cospi_15_64, cospi_17_64, &step1[17],
+                          &step1[30]);
+  highbd_butterfly_sse4_1(in[9], in[23], cospi_23_64, cospi_9_64, &step1[18],
+                          &step1[29]);
+  highbd_butterfly_sse4_1(in[25], in[7], cospi_7_64, cospi_25_64, &step1[19],
+                          &step1[28]);
 
-  highbd_butterfly_sse4_1(in[5], in[27], (int)cospi_27_64, (int)cospi_5_64,
-                          &step1[20], &step1[27]);
-  highbd_butterfly_sse4_1(in[21], in[11], (int)cospi_11_64, (int)cospi_21_64,
-                          &step1[21], &step1[26]);
+  highbd_butterfly_sse4_1(in[5], in[27], cospi_27_64, cospi_5_64, &step1[20],
+                          &step1[27]);
+  highbd_butterfly_sse4_1(in[21], in[11], cospi_11_64, cospi_21_64, &step1[21],
+                          &step1[26]);
 
-  highbd_butterfly_sse4_1(in[13], in[19], (int)cospi_19_64, (int)cospi_13_64,
-                          &step1[22], &step1[25]);
-  highbd_butterfly_sse4_1(in[29], in[3], (int)cospi_3_64, (int)cospi_29_64,
-                          &step1[23], &step1[24]);
+  highbd_butterfly_sse4_1(in[13], in[19], cospi_19_64, cospi_13_64, &step1[22],
+                          &step1[25]);
+  highbd_butterfly_sse4_1(in[29], in[3], cospi_3_64, cospi_29_64, &step1[23],
+                          &step1[24]);
 
   // stage 2
   step2[16] = _mm_add_epi32(step1[16], step1[17]);
@@ -271,16 +271,16 @@ static INLINE void highbd_idct32_1024_4x32_quarter_3_4(
   // stage 3
   step1[16] = step2[16];
   step1[31] = step2[31];
-  highbd_butterfly_sse4_1(step2[30], step2[17], (int)cospi_28_64,
-                          (int)cospi_4_64, &step1[17], &step1[30]);
-  highbd_butterfly_sse4_1(step2[29], step2[18], -(int)cospi_4_64,
-                          (int)cospi_28_64, &step1[18], &step1[29]);
+  highbd_butterfly_sse4_1(step2[30], step2[17], cospi_28_64, cospi_4_64,
+                          &step1[17], &step1[30]);
+  highbd_butterfly_sse4_1(step2[29], step2[18], -cospi_4_64, cospi_28_64,
+                          &step1[18], &step1[29]);
   step1[19] = step2[19];
   step1[20] = step2[20];
-  highbd_butterfly_sse4_1(step2[26], step2[21], (int)cospi_12_64,
-                          (int)cospi_20_64, &step1[21], &step1[26]);
-  highbd_butterfly_sse4_1(step2[25], step2[22], -(int)cospi_20_64,
-                          (int)cospi_12_64, &step1[22], &step1[25]);
+  highbd_butterfly_sse4_1(step2[26], step2[21], cospi_12_64, cospi_20_64,
+                          &step1[21], &step1[26]);
+  highbd_butterfly_sse4_1(step2[25], step2[22], -cospi_20_64, cospi_12_64,
+                          &step1[22], &step1[25]);
   step1[23] = step2[23];
   step1[24] = step2[24];
   step1[27] = step2[27];
@@ -370,16 +370,16 @@ static INLINE void highbd_idct32_135_4x32_quarter_1(
   __m128i step1[8], step2[8];
 
   // stage 3
-  highbd_partial_butterfly_sse4_1(in[4], (int)cospi_28_64, (int)cospi_4_64,
-                                  &step1[4], &step1[7]);
-  highbd_partial_butterfly_sse4_1(in[12], -(int)cospi_20_64, (int)cospi_12_64,
-                                  &step1[5], &step1[6]);
+  highbd_partial_butterfly_sse4_1(in[4], cospi_28_64, cospi_4_64, &step1[4],
+                                  &step1[7]);
+  highbd_partial_butterfly_sse4_1(in[12], -cospi_20_64, cospi_12_64, &step1[5],
+                                  &step1[6]);
 
   // stage 4
-  highbd_partial_butterfly_sse4_1(in[0], (int)cospi_16_64, (int)cospi_16_64,
-                                  &step2[1], &step2[0]);
-  highbd_partial_butterfly_sse4_1(in[8], (int)cospi_24_64, (int)cospi_8_64,
-                                  &step2[2], &step2[3]);
+  highbd_partial_butterfly_sse4_1(in[0], cospi_16_64, cospi_16_64, &step2[1],
+                                  &step2[0]);
+  highbd_partial_butterfly_sse4_1(in[8], cospi_24_64, cospi_8_64, &step2[2],
+                                  &step2[3]);
   step2[4] = _mm_add_epi32(step1[4], step1[5]);
   step2[5] = _mm_sub_epi32(step1[4], step1[5]);
   step2[6] = _mm_sub_epi32(step1[7], step1[6]);
@@ -391,8 +391,8 @@ static INLINE void highbd_idct32_135_4x32_quarter_1(
   step1[2] = _mm_sub_epi32(step2[1], step2[2]);
   step1[3] = _mm_sub_epi32(step2[0], step2[3]);
   step1[4] = step2[4];
-  highbd_butterfly_sse4_1(step2[6], step2[5], (int)cospi_16_64,
-                          (int)cospi_16_64, &step1[5], &step1[6]);
+  highbd_butterfly_sse4_1(step2[6], step2[5], cospi_16_64, cospi_16_64,
+                          &step1[5], &step1[6]);
   step1[7] = step2[7];
 
   // stage 6
@@ -414,14 +414,14 @@ static INLINE void highbd_idct32_135_4x32_quarter_2(
   __m128i step1[32], step2[32];
 
   // stage 2
-  highbd_partial_butterfly_sse4_1(in[2], (int)cospi_30_64, (int)cospi_2_64,
-                                  &step2[8], &step2[15]);
-  highbd_partial_butterfly_sse4_1(in[14], -(int)cospi_18_64, (int)cospi_14_64,
-                                  &step2[9], &step2[14]);
-  highbd_partial_butterfly_sse4_1(in[10], (int)cospi_22_64, (int)cospi_10_64,
-                                  &step2[10], &step2[13]);
-  highbd_partial_butterfly_sse4_1(in[6], -(int)cospi_26_64, (int)cospi_6_64,
-                                  &step2[11], &step2[12]);
+  highbd_partial_butterfly_sse4_1(in[2], cospi_30_64, cospi_2_64, &step2[8],
+                                  &step2[15]);
+  highbd_partial_butterfly_sse4_1(in[14], -cospi_18_64, cospi_14_64, &step2[9],
+                                  &step2[14]);
+  highbd_partial_butterfly_sse4_1(in[10], cospi_22_64, cospi_10_64, &step2[10],
+                                  &step2[13]);
+  highbd_partial_butterfly_sse4_1(in[6], -cospi_26_64, cospi_6_64, &step2[11],
+                                  &step2[12]);
 
   // stage 3
   step1[8] = _mm_add_epi32(step2[8], step2[9]);
@@ -454,24 +454,24 @@ static INLINE void highbd_idct32_135_4x32_quarter_3_4(
   __m128i step1[32], step2[32];
 
   // stage 1
-  highbd_partial_butterfly_sse4_1(in[1], (int)cospi_31_64, (int)cospi_1_64,
-                                  &step1[16], &step1[31]);
-  highbd_partial_butterfly_sse4_1(in[15], -(int)cospi_17_64, (int)cospi_15_64,
-                                  &step1[17], &step1[30]);
-  highbd_partial_butterfly_sse4_1(in[9], (int)cospi_23_64, (int)cospi_9_64,
-                                  &step1[18], &step1[29]);
-  highbd_partial_butterfly_sse4_1(in[7], -(int)cospi_25_64, (int)cospi_7_64,
-                                  &step1[19], &step1[28]);
+  highbd_partial_butterfly_sse4_1(in[1], cospi_31_64, cospi_1_64, &step1[16],
+                                  &step1[31]);
+  highbd_partial_butterfly_sse4_1(in[15], -cospi_17_64, cospi_15_64, &step1[17],
+                                  &step1[30]);
+  highbd_partial_butterfly_sse4_1(in[9], cospi_23_64, cospi_9_64, &step1[18],
+                                  &step1[29]);
+  highbd_partial_butterfly_sse4_1(in[7], -cospi_25_64, cospi_7_64, &step1[19],
+                                  &step1[28]);
 
-  highbd_partial_butterfly_sse4_1(in[5], (int)cospi_27_64, (int)cospi_5_64,
-                                  &step1[20], &step1[27]);
-  highbd_partial_butterfly_sse4_1(in[11], -(int)cospi_21_64, (int)cospi_11_64,
-                                  &step1[21], &step1[26]);
+  highbd_partial_butterfly_sse4_1(in[5], cospi_27_64, cospi_5_64, &step1[20],
+                                  &step1[27]);
+  highbd_partial_butterfly_sse4_1(in[11], -cospi_21_64, cospi_11_64, &step1[21],
+                                  &step1[26]);
 
-  highbd_partial_butterfly_sse4_1(in[13], (int)cospi_19_64, (int)cospi_13_64,
-                                  &step1[22], &step1[25]);
-  highbd_partial_butterfly_sse4_1(in[3], -(int)cospi_29_64, (int)cospi_3_64,
-                                  &step1[23], &step1[24]);
+  highbd_partial_butterfly_sse4_1(in[13], cospi_19_64, cospi_13_64, &step1[22],
+                                  &step1[25]);
+  highbd_partial_butterfly_sse4_1(in[3], -cospi_29_64, cospi_3_64, &step1[23],
+                                  &step1[24]);
 
   // stage 2
   step2[16] = _mm_add_epi32(step1[16], step1[17]);
@@ -495,16 +495,16 @@ static INLINE void highbd_idct32_135_4x32_quarter_3_4(
   // stage 3
   step1[16] = step2[16];
   step1[31] = step2[31];
-  highbd_butterfly_sse4_1(step2[30], step2[17], (int)cospi_28_64,
-                          (int)cospi_4_64, &step1[17], &step1[30]);
-  highbd_butterfly_sse4_1(step2[29], step2[18], -(int)cospi_4_64,
-                          (int)cospi_28_64, &step1[18], &step1[29]);
+  highbd_butterfly_sse4_1(step2[30], step2[17], cospi_28_64, cospi_4_64,
+                          &step1[17], &step1[30]);
+  highbd_butterfly_sse4_1(step2[29], step2[18], -cospi_4_64, cospi_28_64,
+                          &step1[18], &step1[29]);
   step1[19] = step2[19];
   step1[20] = step2[20];
-  highbd_butterfly_sse4_1(step2[26], step2[21], (int)cospi_12_64,
-                          (int)cospi_20_64, &step1[21], &step1[26]);
-  highbd_butterfly_sse4_1(step2[25], step2[22], -(int)cospi_20_64,
-                          (int)cospi_12_64, &step1[22], &step1[25]);
+  highbd_butterfly_sse4_1(step2[26], step2[21], cospi_12_64, cospi_20_64,
+                          &step1[21], &step1[26]);
+  highbd_butterfly_sse4_1(step2[25], step2[22], -cospi_20_64, cospi_12_64,
+                          &step1[22], &step1[25]);
   step1[23] = step2[23];
   step1[24] = step2[24];
   step1[27] = step2[27];
@@ -583,12 +583,12 @@ static INLINE void highbd_idct32_34_4x32_quarter_1(
   __m128i step1[8], step2[8];
 
   // stage 3
-  highbd_partial_butterfly_sse4_1(in[4], (int)cospi_28_64, (int)cospi_4_64,
-                                  &step1[4], &step1[7]);
+  highbd_partial_butterfly_sse4_1(in[4], cospi_28_64, cospi_4_64, &step1[4],
+                                  &step1[7]);
 
   // stage 4
-  highbd_partial_butterfly_sse4_1(in[0], (int)cospi_16_64, (int)cospi_16_64,
-                                  &step2[1], &step2[0]);
+  highbd_partial_butterfly_sse4_1(in[0], cospi_16_64, cospi_16_64, &step2[1],
+                                  &step2[0]);
   step2[4] = step1[4];
   step2[5] = step1[4];
   step2[6] = step1[7];
@@ -600,8 +600,8 @@ static INLINE void highbd_idct32_34_4x32_quarter_1(
   step1[2] = step2[1];
   step1[3] = step2[0];
   step1[4] = step2[4];
-  highbd_butterfly_sse4_1(step2[6], step2[5], (int)cospi_16_64,
-                          (int)cospi_16_64, &step1[5], &step1[6]);
+  highbd_butterfly_sse4_1(step2[6], step2[5], cospi_16_64, cospi_16_64,
+                          &step1[5], &step1[6]);
   step1[7] = step2[7];
 
   // stage 6
@@ -623,10 +623,10 @@ static INLINE void highbd_idct32_34_4x32_quarter_2(const __m128i *in /*in[32]*/,
   __m128i step1[32], step2[32];
 
   // stage 2
-  highbd_partial_butterfly_sse4_1(in[2], (int)cospi_30_64, (int)cospi_2_64,
-                                  &step2[8], &step2[15]);
-  highbd_partial_butterfly_sse4_1(in[6], -(int)cospi_26_64, (int)cospi_6_64,
-                                  &step2[11], &step2[12]);
+  highbd_partial_butterfly_sse4_1(in[2], cospi_30_64, cospi_2_64, &step2[8],
+                                  &step2[15]);
+  highbd_partial_butterfly_sse4_1(in[6], -cospi_26_64, cospi_6_64, &step2[11],
+                                  &step2[12]);
 
   // stage 3
   step1[8] = step2[8];
@@ -659,15 +659,15 @@ static INLINE void highbd_idct32_34_4x32_quarter_3_4(
   __m128i step1[32], step2[32];
 
   // stage 1
-  highbd_partial_butterfly_sse4_1(in[1], (int)cospi_31_64, (int)cospi_1_64,
-                                  &step1[16], &step1[31]);
-  highbd_partial_butterfly_sse4_1(in[7], -(int)cospi_25_64, (int)cospi_7_64,
-                                  &step1[19], &step1[28]);
+  highbd_partial_butterfly_sse4_1(in[1], cospi_31_64, cospi_1_64, &step1[16],
+                                  &step1[31]);
+  highbd_partial_butterfly_sse4_1(in[7], -cospi_25_64, cospi_7_64, &step1[19],
+                                  &step1[28]);
 
-  highbd_partial_butterfly_sse4_1(in[5], (int)cospi_27_64, (int)cospi_5_64,
-                                  &step1[20], &step1[27]);
-  highbd_partial_butterfly_sse4_1(in[3], -(int)cospi_29_64, (int)cospi_3_64,
-                                  &step1[23], &step1[24]);
+  highbd_partial_butterfly_sse4_1(in[5], cospi_27_64, cospi_5_64, &step1[20],
+                                  &step1[27]);
+  highbd_partial_butterfly_sse4_1(in[3], -cospi_29_64, cospi_3_64, &step1[23],
+                                  &step1[24]);
 
   // stage 2
   step2[16] = step1[16];
@@ -691,16 +691,16 @@ static INLINE void highbd_idct32_34_4x32_quarter_3_4(
   // stage 3
   step1[16] = step2[16];
   step1[31] = step2[31];
-  highbd_butterfly_sse4_1(step2[30], step2[17], (int)cospi_28_64,
-                          (int)cospi_4_64, &step1[17], &step1[30]);
-  highbd_butterfly_sse4_1(step2[29], step2[18], -(int)cospi_4_64,
-                          (int)cospi_28_64, &step1[18], &step1[29]);
+  highbd_butterfly_sse4_1(step2[30], step2[17], cospi_28_64, cospi_4_64,
+                          &step1[17], &step1[30]);
+  highbd_butterfly_sse4_1(step2[29], step2[18], -cospi_4_64, cospi_28_64,
+                          &step1[18], &step1[29]);
   step1[19] = step2[19];
   step1[20] = step2[20];
-  highbd_butterfly_sse4_1(step2[26], step2[21], (int)cospi_12_64,
-                          (int)cospi_20_64, &step1[21], &step1[26]);
-  highbd_butterfly_sse4_1(step2[25], step2[22], -(int)cospi_20_64,
-                          (int)cospi_12_64, &step1[22], &step1[25]);
+  highbd_butterfly_sse4_1(step2[26], step2[21], cospi_12_64, cospi_20_64,
+                          &step1[21], &step1[26]);
+  highbd_butterfly_sse4_1(step2[25], step2[22], -cospi_20_64, cospi_12_64,
+                          &step1[22], &step1[25]);
   step1[23] = step2[23];
   step1[24] = step2[24];
   step1[27] = step2[27];

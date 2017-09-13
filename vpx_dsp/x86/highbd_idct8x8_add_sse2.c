@@ -25,15 +25,15 @@ static void highbd_idct8x8_half1d(__m128i *const io) {
   step1[2] = io[4];
   step1[1] = io[2];
   step1[3] = io[6];
-  highbd_butterfly_sse2(io[1], io[7], (int)cospi_28_64, (int)cospi_4_64,
-                        &step1[4], &step1[7]);
-  highbd_butterfly_sse2(io[5], io[3], (int)cospi_12_64, (int)cospi_20_64,
-                        &step1[5], &step1[6]);
+  highbd_butterfly_sse2(io[1], io[7], cospi_28_64, cospi_4_64, &step1[4],
+                        &step1[7]);
+  highbd_butterfly_sse2(io[5], io[3], cospi_12_64, cospi_20_64, &step1[5],
+                        &step1[6]);
 
   // stage 2
   highbd_butterfly_cospi16_sse2(step1[0], step1[2], &step2[0], &step2[1]);
-  highbd_butterfly_sse2(step1[1], step1[3], (int)cospi_24_64, (int)cospi_8_64,
-                        &step2[2], &step2[3]);
+  highbd_butterfly_sse2(step1[1], step1[3], cospi_24_64, cospi_8_64, &step2[2],
+                        &step2[3]);
   step2[4] = _mm_add_epi32(step1[4], step1[5]);
   step2[5] = _mm_sub_epi32(step1[4], step1[5]);
   step2[6] = _mm_sub_epi32(step1[7], step1[6]);
@@ -61,18 +61,18 @@ static void highbd_idct8x8_12_half1d(__m128i *const io) {
   step1[0] = io[0];
   step1[1] = io[2];
   abs_extend_64bit_sse2(io[1], temp1, sign);
-  step1[4] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_28_64);
-  step1[7] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_4_64);
+  step1[4] = multiplication_round_shift_sse2(temp1, sign, cospi_28_64);
+  step1[7] = multiplication_round_shift_sse2(temp1, sign, cospi_4_64);
   abs_extend_64bit_sse2(io[3], temp1, sign);
-  step1[5] = multiplication_neg_round_shift_sse2(temp1, sign, (int)cospi_20_64);
-  step1[6] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_12_64);
+  step1[5] = multiplication_neg_round_shift_sse2(temp1, sign, cospi_20_64);
+  step1[6] = multiplication_round_shift_sse2(temp1, sign, cospi_12_64);
 
   // stage 2
   abs_extend_64bit_sse2(step1[0], temp1, sign);
-  step2[0] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
+  step2[0] = multiplication_round_shift_sse2(temp1, sign, cospi_16_64);
   abs_extend_64bit_sse2(step1[1], temp1, sign);
-  step2[2] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_24_64);
-  step2[3] = multiplication_round_shift_sse2(temp1, sign, (int)cospi_8_64);
+  step2[2] = multiplication_round_shift_sse2(temp1, sign, cospi_24_64);
+  step2[3] = multiplication_round_shift_sse2(temp1, sign, cospi_8_64);
   step2[4] = _mm_add_epi32(step1[4], step1[5]);
   step2[5] = _mm_sub_epi32(step1[4], step1[5]);
   step2[6] = _mm_sub_epi32(step1[7], step1[6]);

@@ -181,10 +181,10 @@ static INLINE void highbd_butterfly_cospi16_sse2(const __m128i in0,
 
   temp2 = _mm_add_epi32(in0, in1);
   abs_extend_64bit_sse2(temp2, temp1, sign);
-  *out0 = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
+  *out0 = multiplication_round_shift_sse2(temp1, sign, cospi_16_64);
   temp2 = _mm_sub_epi32(in0, in1);
   abs_extend_64bit_sse2(temp2, temp1, sign);
-  *out1 = multiplication_round_shift_sse2(temp1, sign, (int)cospi_16_64);
+  *out1 = multiplication_round_shift_sse2(temp1, sign, cospi_16_64);
 }
 
 // Only do addition and subtraction butterfly, size = 16, 32
