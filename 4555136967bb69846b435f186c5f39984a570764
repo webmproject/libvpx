@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "379b100f_03cdf740",
+        "filename": "vpx_dsp/x86/quantize_x86.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-13T15:53:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "95d7b9f0_1bab7035",
+      "revId": "4555136967bb69846b435f186c5f39984a570764",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0c85ec1c_a5482702",
         "filename": "vpx_dsp/x86/quantize_x86.h",
         "patchSetId": 4
@@ -33,6 +51,24 @@
       "revId": "4555136967bb69846b435f186c5f39984a570764",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32d12f39_c8912a26",
+        "filename": "vpx_dsp/x86/quantize_x86.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-13T15:53:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0c85ec1c_a5482702",
+      "revId": "4555136967bb69846b435f186c5f39984a570764",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
