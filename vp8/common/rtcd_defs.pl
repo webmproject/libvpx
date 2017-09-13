@@ -37,45 +37,49 @@ specialize qw/vp8_dequant_idct_add_uv_block sse2 neon dspr2 msa/;
 # Loopfilter
 #
 add_proto qw/void vp8_loop_filter_mbv/, "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi";
-specialize qw/vp8_loop_filter_mbv sse2 neon dspr2 msa/;
+specialize qw/vp8_loop_filter_mbv sse2 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_loop_filter_bv/, "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi";
-specialize qw/vp8_loop_filter_bv sse2 neon dspr2 msa/;
+specialize qw/vp8_loop_filter_bv sse2 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_loop_filter_mbh/, "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi";
-specialize qw/vp8_loop_filter_mbh sse2 neon dspr2 msa/;
+specialize qw/vp8_loop_filter_mbh sse2 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_loop_filter_bh/, "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi";
-specialize qw/vp8_loop_filter_bh sse2 neon dspr2 msa/;
+specialize qw/vp8_loop_filter_bh sse2 neon dspr2 msa mmi/;
 
 
 add_proto qw/void vp8_loop_filter_simple_mbv/, "unsigned char *y, int ystride, const unsigned char *blimit";
-specialize qw/vp8_loop_filter_simple_mbv sse2 neon msa/;
+specialize qw/vp8_loop_filter_simple_mbv sse2 neon msa mmi/;
 $vp8_loop_filter_simple_mbv_c=vp8_loop_filter_simple_vertical_edge_c;
 $vp8_loop_filter_simple_mbv_sse2=vp8_loop_filter_simple_vertical_edge_sse2;
 $vp8_loop_filter_simple_mbv_neon=vp8_loop_filter_mbvs_neon;
 $vp8_loop_filter_simple_mbv_msa=vp8_loop_filter_simple_vertical_edge_msa;
+$vp8_loop_filter_simple_mbv_mmi=vp8_loop_filter_simple_vertical_edge_mmi;
 
 add_proto qw/void vp8_loop_filter_simple_mbh/, "unsigned char *y, int ystride, const unsigned char *blimit";
-specialize qw/vp8_loop_filter_simple_mbh sse2 neon msa/;
+specialize qw/vp8_loop_filter_simple_mbh sse2 neon msa mmi/;
 $vp8_loop_filter_simple_mbh_c=vp8_loop_filter_simple_horizontal_edge_c;
 $vp8_loop_filter_simple_mbh_sse2=vp8_loop_filter_simple_horizontal_edge_sse2;
 $vp8_loop_filter_simple_mbh_neon=vp8_loop_filter_mbhs_neon;
 $vp8_loop_filter_simple_mbh_msa=vp8_loop_filter_simple_horizontal_edge_msa;
+$vp8_loop_filter_simple_mbh_mmi=vp8_loop_filter_simple_horizontal_edge_mmi;
 
 add_proto qw/void vp8_loop_filter_simple_bv/, "unsigned char *y, int ystride, const unsigned char *blimit";
-specialize qw/vp8_loop_filter_simple_bv sse2 neon msa/;
+specialize qw/vp8_loop_filter_simple_bv sse2 neon msa mmi/;
 $vp8_loop_filter_simple_bv_c=vp8_loop_filter_bvs_c;
 $vp8_loop_filter_simple_bv_sse2=vp8_loop_filter_bvs_sse2;
 $vp8_loop_filter_simple_bv_neon=vp8_loop_filter_bvs_neon;
 $vp8_loop_filter_simple_bv_msa=vp8_loop_filter_bvs_msa;
+$vp8_loop_filter_simple_bv_mmi=vp8_loop_filter_bvs_mmi;
 
 add_proto qw/void vp8_loop_filter_simple_bh/, "unsigned char *y, int ystride, const unsigned char *blimit";
-specialize qw/vp8_loop_filter_simple_bh sse2 neon msa/;
+specialize qw/vp8_loop_filter_simple_bh sse2 neon msa mmi/;
 $vp8_loop_filter_simple_bh_c=vp8_loop_filter_bhs_c;
 $vp8_loop_filter_simple_bh_sse2=vp8_loop_filter_bhs_sse2;
 $vp8_loop_filter_simple_bh_neon=vp8_loop_filter_bhs_neon;
 $vp8_loop_filter_simple_bh_msa=vp8_loop_filter_bhs_msa;
+$vp8_loop_filter_simple_bh_mmi=vp8_loop_filter_bhs_mmi;
 
 #
 # IDCT
