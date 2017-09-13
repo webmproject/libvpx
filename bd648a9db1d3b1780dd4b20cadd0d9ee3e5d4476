@@ -22,6 +22,30 @@
       "revId": "bd648a9db1d3b1780dd4b20cadd0d9ee3e5d4476",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab50a9df_a4a01269",
+        "filename": "vp9/encoder/arm/neon/vp9_frame_scale_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-09-13T17:38:31Z",
+      "side": 1,
+      "message": "Added static const int step_q4 \u003d 16 * 4 / 3;\nOops. I\u0027m adding comments on w/h now.",
+      "parentUuid": "009d02f3_5da5d5c0",
+      "range": {
+        "startLine": 451,
+        "startChar": 70,
+        "endLine": 451,
+        "endChar": 76
+      },
+      "revId": "bd648a9db1d3b1780dd4b20cadd0d9ee3e5d4476",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
