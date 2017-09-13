@@ -28,10 +28,10 @@ add_proto qw/void vp8_dequant_idct_add/, "short *input, short *dq, unsigned char
 specialize qw/vp8_dequant_idct_add mmx neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_dequant_idct_add_y_block/, "short *q, short *dq, unsigned char *dst, int stride, char *eobs";
-specialize qw/vp8_dequant_idct_add_y_block sse2 neon dspr2 msa/;
+specialize qw/vp8_dequant_idct_add_y_block sse2 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_dequant_idct_add_uv_block/, "short *q, short *dq, unsigned char *dst_u, unsigned char *dst_v, int stride, char *eobs";
-specialize qw/vp8_dequant_idct_add_uv_block sse2 neon dspr2 msa/;
+specialize qw/vp8_dequant_idct_add_uv_block sse2 neon dspr2 msa mmi/;
 
 #
 # Loopfilter
