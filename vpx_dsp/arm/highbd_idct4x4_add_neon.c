@@ -54,10 +54,10 @@ static INLINE void highbd_idct4x4_1_add_kernel2(uint16_t **dest,
 void vpx_highbd_idct4x4_1_add_neon(const tran_low_t *input, uint16_t *dest,
                                    int stride, int bd) {
   const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
-  const tran_low_t out0 =
-      HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
-  const tran_low_t out1 =
-      HIGHBD_WRAPLOW(dct_const_round_shift(out0 * cospi_16_64), bd);
+  const tran_low_t out0 = HIGHBD_WRAPLOW(
+      dct_const_round_shift(input[0] * (tran_high_t)cospi_16_64), bd);
+  const tran_low_t out1 = HIGHBD_WRAPLOW(
+      dct_const_round_shift(out0 * (tran_high_t)cospi_16_64), bd);
   const int16_t a1 = ROUND_POWER_OF_TWO(out1, 4);
   const int16x8_t dc = vdupq_n_s16(a1);
 

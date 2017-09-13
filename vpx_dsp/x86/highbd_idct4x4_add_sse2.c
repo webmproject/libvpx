@@ -147,8 +147,10 @@ void vpx_highbd_idct4x4_1_add_sse2(const tran_low_t *input, uint16_t *dest,
   tran_low_t out;
   __m128i dc, d;
 
-  out = HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
-  out = HIGHBD_WRAPLOW(dct_const_round_shift(out * cospi_16_64), bd);
+  out = HIGHBD_WRAPLOW(
+      dct_const_round_shift(input[0] * (tran_high_t)cospi_16_64), bd);
+  out =
+      HIGHBD_WRAPLOW(dct_const_round_shift(out * (tran_high_t)cospi_16_64), bd);
   a1 = ROUND_POWER_OF_TWO(out, 4);
   dc = _mm_set1_epi16(a1);
 

@@ -169,8 +169,8 @@ static INLINE void butterfly_one_coeff(const int16x8_t a, const int16x8_t b,
 
 // fdct_round_shift(a * c0 +/- b * c1)
 static INLINE void butterfly_two_coeff(const int16x8_t a, const int16x8_t b,
-                                       const tran_high_t c0,
-                                       const tran_high_t c1, int16x8_t *add,
+                                       const tran_coef_t c0,
+                                       const tran_coef_t c1, int16x8_t *add,
                                        int16x8_t *sub) {
   const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), c0);
   const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), c0);
