@@ -111,6 +111,7 @@ VP8_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/quantize_msa.c
 VP8_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/temporal_filter_msa.c
 
 VP8_CX_SRCS-$(HAVE_MMI) += encoder/mips/mmi/vp8_quantize_mmi.c
+VP8_CX_SRCS-$(HAVE_MMI) += encoder/mips/mmi/dct_mmi.c
 
 ifeq ($(CONFIG_TEMPORAL_DENOISING),yes)
 VP8_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/denoising_msa.c

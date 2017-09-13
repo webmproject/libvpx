@@ -176,13 +176,13 @@ if ($opts{arch} =~ /x86/) {
 # Forward DCT
 #
 add_proto qw/void vp8_short_fdct4x4/, "short *input, short *output, int pitch";
-specialize qw/vp8_short_fdct4x4 sse2 neon msa/;
+specialize qw/vp8_short_fdct4x4 sse2 neon msa mmi/;
 
 add_proto qw/void vp8_short_fdct8x4/, "short *input, short *output, int pitch";
-specialize qw/vp8_short_fdct8x4 sse2 neon msa/;
+specialize qw/vp8_short_fdct8x4 sse2 neon msa mmi/;
 
 add_proto qw/void vp8_short_walsh4x4/, "short *input, short *output, int pitch";
-specialize qw/vp8_short_walsh4x4 sse2 neon msa/;
+specialize qw/vp8_short_walsh4x4 sse2 neon msa mmi/;
 
 #
 # Quantizer
