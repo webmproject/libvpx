@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4f0b2b3_27c78351",
+        "filename": "vp8/common/mips/mmi/dequantize_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-14T16:38:33Z",
+      "side": 1,
+      "message": "What is this doing? Seems like it\u0027s doing \"memset(input, 0, 32);\" but there must be a simpler way to do it. What are the sdl/sdr instructions?",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 19
+      },
+      "revId": "b81de66171216a094e48f45f609fc56ac3f54277",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
