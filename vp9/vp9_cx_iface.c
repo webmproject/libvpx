@@ -213,7 +213,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         level != LEVEL_4 && level != LEVEL_4_1 && level != LEVEL_5 &&
         level != LEVEL_5_1 && level != LEVEL_5_2 && level != LEVEL_6 &&
         level != LEVEL_6_1 && level != LEVEL_6_2 && level != LEVEL_UNKNOWN &&
-        level != LEVEL_MAX)
+        level != LEVEL_AUTO && level != LEVEL_MAX)
       ERROR("target_level is invalid");
   }
 

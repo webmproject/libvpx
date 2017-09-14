@@ -360,6 +360,7 @@ typedef struct IMAGE_STAT {
 
 typedef enum {
   LEVEL_UNKNOWN = 0,
+  LEVEL_AUTO = 1,
   LEVEL_1 = 10,
   LEVEL_1_1 = 11,
   LEVEL_2 = 20,
@@ -911,6 +912,18 @@ static INLINE int get_level_index(VP9_LEVEL level) {
     if (level == vp9_level_defs[i].level) return i;
   }
   return -1;
+}
+
+// Return the log2 value of max column tiles corresponding to the level that
+// the picture size fits into.
+static INLINE int log_tile_cols_from_picsize_level(uint32_t pic_size) {
+  int i;
+  for (i = LEVEL_1; i < LEVEL_MAX; ++i) {
+    if (vp9_level_defs[i].max_luma_picture_size > pic_size) {
+      return get_msb(vp9_level_defs[i].max_col_tiles);
+    }
+  }
+  return INT_MAX;
 }
 
 VP9_LEVEL vp9_get_level(const Vp9LevelSpec *const level_spec);

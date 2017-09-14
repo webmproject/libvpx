@@ -1209,6 +1209,14 @@ static void set_tile_limits(VP9_COMP *cpi) {
         clamp(cpi->oxcf.tile_columns, min_log2_tile_cols, max_log2_tile_cols);
     cm->log2_tile_rows = cpi->oxcf.tile_rows;
   }
+
+  if (cpi->oxcf.target_level == LEVEL_AUTO) {
+    const uint32_t pic_size = cpi->common.width * cpi->common.height;
+    const int level_tile_cols = log_tile_cols_from_picsize_level(pic_size);
+    if (cm->log2_tile_cols > level_tile_cols) {
+      cm->log2_tile_cols = VPXMAX(level_tile_cols, min_log2_tile_cols);
+    }
+  }
 }
 
 static void update_frame_size(VP9_COMP *cpi) {
