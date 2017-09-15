@@ -468,6 +468,7 @@ class DatarateTestVP9Large
     }
     denoiser_offon_test_ = 0;
     denoiser_offon_period_ = -1;
+    frame_parallel_decoding_mode_ = 1;
   }
 
   //
@@ -547,6 +548,8 @@ class DatarateTestVP9Large
 
     encoder->Control(VP9E_SET_NOISE_SENSITIVITY, denoiser_on_);
     encoder->Control(VP9E_SET_TILE_COLUMNS, (cfg_.g_threads >> 1));
+    encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING,
+                     frame_parallel_decoding_mode_);
 
     if (cfg_.ts_number_layers > 1) {
       if (video->frame() == 0) {
@@ -627,6 +630,7 @@ class DatarateTestVP9Large
   int denoiser_on_;
   int denoiser_offon_test_;
   int denoiser_offon_period_;
+  int frame_parallel_decoding_mode_;
 };
 
 // Check basic rate targeting for VBR mode with 0 lag.
@@ -677,6 +681,36 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZero) {
   }
 }
 
+// Check basic rate targeting for VBR mode with non-zero lag, with
+// frame_parallel_decoding_mode off. This enables the adapt_coeff/mode/mv probs
+// since error_resilience is off.
+TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZeroFrameParDecOff) {
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.g_error_resilient = 0;
+  cfg_.rc_end_usage = VPX_VBR;
+  // For non-zero lag, rate control will work (be within bounds) for
+  // real-time mode.
+  if (deadline_ == VPX_DL_REALTIME) {
+    cfg_.g_lag_in_frames = 15;
+  } else {
+    cfg_.g_lag_in_frames = 0;
+  }
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 300);
+  for (int i = 400; i <= 800; i += 400) {
+    cfg_.rc_target_bitrate = i;
+    ResetModel();
+    frame_parallel_decoding_mode_ = 0;
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
+        << " The datarate for the file is lower than target by too much!";
+    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.25)
+        << " The datarate for the file is greater than target by too much!";
+  }
+}
+
 // Check basic rate targeting for CBR mode.
 TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
   cfg_.rc_buf_initial_sz = 500;
@@ -693,6 +727,33 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
   for (int i = 150; i < 800; i += 200) {
     cfg_.rc_target_bitrate = i;
     ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+        << " The datarate for the file is lower than target by too much!";
+    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+        << " The datarate for the file is greater than target by too much!";
+  }
+}
+
+// Check basic rate targeting for CBR mode, with frame_parallel_decoding_mode
+// off( and error_resilience off).
+TEST_P(DatarateTestVP9Large, BasicRateTargetingFrameParDecOff) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.g_error_resilient = 0;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+  for (int i = 150; i < 800; i += 200) {
+    cfg_.rc_target_bitrate = i;
+    ResetModel();
+    frame_parallel_decoding_mode_ = 0;
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
         << " The datarate for the file is lower than target by too much!";
