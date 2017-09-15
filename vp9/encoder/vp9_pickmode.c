@@ -1182,19 +1182,6 @@ static const REF_MODE ref_mode_set_svc[RT_INTER_MODES] = {
   { LAST_FRAME, NEWMV },       { GOLDEN_FRAME, NEWMV }
 };
 
-static int set_intra_cost_penalty(const VP9_COMP *const cpi, BLOCK_SIZE bsize) {
-  const VP9_COMMON *const cm = &cpi->common;
-  // Reduce the intra cost penalty for small blocks (<=16x16).
-  int reduction_fac =
-      (bsize <= BLOCK_16X16) ? ((bsize <= BLOCK_8X8) ? 4 : 2) : 0;
-  if (cpi->noise_estimate.enabled && cpi->noise_estimate.level == kHigh)
-    // Don't reduce intra cost penalty if estimated noise level is high.
-    reduction_fac = 0;
-  return vp9_get_intra_cost_penalty(cm->base_qindex, cm->y_dc_delta_q,
-                                    cm->bit_depth) >>
-         reduction_fac;
-}
-
 static INLINE void find_predictors(
     VP9_COMP *cpi, MACROBLOCK *x, MV_REFERENCE_FRAME ref_frame,
     int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
@@ -1450,7 +1437,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // var_y and sse_y are saved to be used in skipping checking
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
-  const int intra_cost_penalty = set_intra_cost_penalty(cpi, bsize);
+  const int intra_cost_penalty =
+      vp9_get_intra_cost_penalty(cpi, bsize, cm->base_qindex, cm->y_dc_delta_q);
   int64_t inter_mode_thresh =
       RDCOST(x->rdmult, x->rddiv, intra_cost_penalty, 0);
   const int *const rd_threshes = cpi->rd.threshes[mi->segment_id][bsize];
