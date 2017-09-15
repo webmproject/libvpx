@@ -22,6 +22,30 @@
       "revId": "b81de66171216a094e48f45f609fc56ac3f54277",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c79526ce_dfd20a39",
+        "filename": "vp8/common/mips/mmi/dequantize_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-15T06:33:42Z",
+      "side": 1,
+      "message": "yes, it is doing \"memset(input, 0, 32);\". effect of sdl and sdr are the same like gssdlc1 and gssdrc1, but they are excute by CPU, and gssdlc1 and gssdrc1 are excute by FPU. In theory they can be excuted in parallel.",
+      "parentUuid": "b4f0b2b3_27c78351",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 19
+      },
+      "revId": "b81de66171216a094e48f45f609fc56ac3f54277",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
