@@ -25,7 +25,7 @@ script_dir=~/Dev/sandbox/libvpx/scripts
 . $script_dir/video_sequence_weekly.sh
 
 # General options
-bs=bs
+bitstream_prefix=av1
 codec="--codec=av1"
 verbose=
 
@@ -62,7 +62,7 @@ do
 
   elog=e_$exp_tool.txt
   dlog=d_$exp_tool.txt
-  bs=$bs_$exp_tool.webm
+  bs=$bitstream_prefix.$exp_tool.webm
   
   if [ $exp_tool == intrabc ] || [ $exp_tool == palette ] || [ $exp_tool == palette_delta_encoding ] || [ $exp_tool == palette_throughput ]; then
     tune_content="--tune-content=screen"
