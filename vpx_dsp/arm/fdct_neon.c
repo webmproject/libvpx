@@ -50,8 +50,8 @@ void vpx_fdct4x4_neon(const int16_t *input, tran_low_t *final_output,
     // Must expand all elements to s32. See 'needs32' comment in fwd_txfm.c.
     const int32x4_t s_0_p_s_1 = vaddl_s16(s_0, s_1);
     const int32x4_t s_0_m_s_1 = vsubl_s16(s_0, s_1);
-    const int32x4_t temp1 = vmulq_n_s32(s_0_p_s_1, (int16_t)cospi_16_64);
-    const int32x4_t temp2 = vmulq_n_s32(s_0_m_s_1, (int16_t)cospi_16_64);
+    const int32x4_t temp1 = vmulq_n_s32(s_0_p_s_1, cospi_16_64);
+    const int32x4_t temp2 = vmulq_n_s32(s_0_m_s_1, cospi_16_64);
 
     // fdct_round_shift
     int16x4_t out_0 = vrshrn_n_s32(temp1, DCT_CONST_BITS);
@@ -59,13 +59,11 @@ void vpx_fdct4x4_neon(const int16_t *input, tran_low_t *final_output,
 
     // s_3 * cospi_8_64 + s_2 * cospi_24_64
     // s_3 * cospi_24_64 - s_2 * cospi_8_64
-    const int32x4_t s_3_cospi_8_64 = vmull_n_s16(s_3, (int16_t)cospi_8_64);
-    const int32x4_t s_3_cospi_24_64 = vmull_n_s16(s_3, (int16_t)cospi_24_64);
+    const int32x4_t s_3_cospi_8_64 = vmull_n_s16(s_3, cospi_8_64);
+    const int32x4_t s_3_cospi_24_64 = vmull_n_s16(s_3, cospi_24_64);
 
-    const int32x4_t temp3 =
-        vmlal_n_s16(s_3_cospi_8_64, s_2, (int16_t)cospi_24_64);
-    const int32x4_t temp4 =
-        vmlsl_n_s16(s_3_cospi_24_64, s_2, (int16_t)cospi_8_64);
+    const int32x4_t temp3 = vmlal_n_s16(s_3_cospi_8_64, s_2, cospi_24_64);
+    const int32x4_t temp4 = vmlsl_n_s16(s_3_cospi_24_64, s_2, cospi_8_64);
 
     // fdct_round_shift
     int16x4_t out_1 = vrshrn_n_s32(temp3, DCT_CONST_BITS);
