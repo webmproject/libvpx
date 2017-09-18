@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "763deaf5_706bbf5c",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-18T19:32:39Z",
+      "side": 1,
+      "message": "Name these more descriptively.",
+      "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0cd8658c_b73da7a0",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-18T19:32:39Z",
+      "side": 1,
+      "message": "Only two of these are tmp values. The other is the loop counter. Name it and set it outside the __asm__ block.",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 18
+      },
+      "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "041a3c20_a0d72b5e",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-18T19:32:39Z",
+      "side": 1,
+      "message": "Name this loop_count or something.",
+      "range": {
+        "startLine": 57,
+        "startChar": 13,
+        "endLine": 57,
+        "endChar": 17
+      },
+      "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a71c8865_598b7d72",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-18T19:32:39Z",
+      "side": 1,
+      "message": "Why not call COPY_MEM_8X2 twice instead of setting up the loop?",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 16
+      },
+      "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
