@@ -4179,7 +4179,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
       int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
       int64_t source_sad = avg_source_sad(cpi, x, shift, sb_offset2);
       if (sf->adapt_partition_source_sad &&
-          (cpi->oxcf.rc_mode == VPX_VBR &&
+          (cpi->oxcf.rc_mode == VPX_VBR && !cpi->rc.is_src_frame_alt_ref &&
            source_sad > sf->adapt_partition_thresh &&
            cpi->refresh_golden_frame))
         partition_search_type = REFERENCE_PARTITION;
