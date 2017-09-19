@@ -1199,7 +1199,7 @@ const ConvolveFunctions convolve8_neon(
     vpx_convolve8_avg_horiz_neon, vpx_convolve8_vert_neon,
     vpx_convolve8_avg_vert_neon, vpx_convolve8_neon, vpx_convolve8_avg_neon,
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
-    vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
+    vpx_scaled_avg_vert_c, vpx_scaled_2d_neon, vpx_scaled_avg_2d_c, 0);
 
 const ConvolveParam kArrayConvolve_neon[] = { ALL_SIZES(convolve8_neon) };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
