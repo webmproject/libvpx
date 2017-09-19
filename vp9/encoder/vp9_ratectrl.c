@@ -2220,9 +2220,10 @@ static void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi,
         rc->source_alt_ref_pending = 1;
         rc->alt_ref_gf_group = 1;
         // If alt-ref is used for this gf group, limit the interval.
-        if (rc->baseline_gf_interval > 10 &&
-            rc->baseline_gf_interval < rc->frames_to_key)
-          rc->baseline_gf_interval = 10;
+        if (rc->baseline_gf_interval > 12) {
+          rc->baseline_gf_interval = 12;
+          rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+        }
       }
     }
 #endif
