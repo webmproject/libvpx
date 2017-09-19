@@ -78,7 +78,16 @@ class ScaleTest : public VpxScaleBase,
                     src_width, src_height, dst_width, dst_height));
                 ReferenceScaleFrame(filter_type, phase_scaler);
                 ScaleFrame(filter_type, phase_scaler);
-                PrintDiff();
+                if (memcmp(dst_img_.buffer_alloc, ref_img_.buffer_alloc,
+                           ref_img_.frame_size)) {
+                  printf(
+                      "filter_type = %d, phase_scaler = %d, src_width = %4d, "
+                      "src_height = %4d, dst_width = %4d, dst_height = %4d, "
+                      "scale factor = %d:%d\n",
+                      filter_type, phase_scaler, src_width, src_height,
+                      dst_width, dst_height, sf_down, sf_up);
+                  PrintDiff();
+                }
                 CompareImages(dst_img_);
                 DeallocScaleImages();
               }
@@ -134,8 +143,8 @@ TEST_P(ScaleTest, DISABLED_Speed) {
   static const int kCountSpeedTestBlock = 100;
   static const int kNumScaleFactorsToTest = 4;
   static const int kScaleFactors[] = { 1, 2, 3, 4 };
-  const int src_height = 1280;
-  const int src_width = 720;
+  const int src_width = 1280;
+  const int src_height = 720;
   for (INTERP_FILTER filter_type = 2; filter_type < 4; ++filter_type) {
     for (int phase_scaler = 0; phase_scaler < 2; ++phase_scaler) {
       for (int sf_up_idx = 0; sf_up_idx < kNumScaleFactorsToTest; ++sf_up_idx) {

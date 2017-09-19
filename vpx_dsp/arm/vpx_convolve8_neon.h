@@ -90,3 +90,22 @@ static INLINE uint8x8_t convolve8_8(const int16x8_t s0, const int16x8_t s1,
   sum = vqaddq_s16(sum, vmulq_s16(s4, filter4));
   return vqrshrun_n_s16(sum, 7);
 }
+
+static INLINE uint8x8_t scale_filter_8(const uint8x8_t *const s,
+                                       const int16x8_t filters) {
+  const int16x8_t filter3 = vdupq_lane_s16(vget_low_s16(filters), 3);
+  const int16x8_t filter4 = vdupq_lane_s16(vget_high_s16(filters), 0);
+  int16x8_t ss[8];
+
+  ss[0] = vreinterpretq_s16_u16(vmovl_u8(s[0]));
+  ss[1] = vreinterpretq_s16_u16(vmovl_u8(s[1]));
+  ss[2] = vreinterpretq_s16_u16(vmovl_u8(s[2]));
+  ss[3] = vreinterpretq_s16_u16(vmovl_u8(s[3]));
+  ss[4] = vreinterpretq_s16_u16(vmovl_u8(s[4]));
+  ss[5] = vreinterpretq_s16_u16(vmovl_u8(s[5]));
+  ss[6] = vreinterpretq_s16_u16(vmovl_u8(s[6]));
+  ss[7] = vreinterpretq_s16_u16(vmovl_u8(s[7]));
+
+  return convolve8_8(ss[0], ss[1], ss[2], ss[3], ss[4], ss[5], ss[6], ss[7],
+                     filters, filter3, filter4);
+}
