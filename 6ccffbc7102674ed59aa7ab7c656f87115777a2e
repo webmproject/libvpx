@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9be3d10d_bcc5076b",
+        "filename": "test/vp9_intrapred_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-09-19T22:40:21Z",
+      "side": 1,
+      "message": "Good catch.  Will be in the sse2 section.",
+      "parentUuid": "1d669ed7_fcb9c29b",
+      "revId": "6ccffbc7102674ed59aa7ab7c656f87115777a2e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "777385ae_d6d5d352",
         "filename": "vpx_dsp/x86/highbd_intrapred_intrin_ssse3.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2017-09-19T21:35:02Z",
       "side": 1,
       "message": "given how much this is unrolled the final pass will do some extra work. any benefit in breaking the final stores out?",
+      "revId": "6ccffbc7102674ed59aa7ab7c656f87115777a2e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e8eae67f_90ffa36d",
+        "filename": "vpx_dsp/x86/highbd_intrapred_intrin_ssse3.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-09-19T22:40:21Z",
+      "side": 1,
+      "message": "Probably.  Breaking out now....",
+      "parentUuid": "777385ae_d6d5d352",
       "revId": "6ccffbc7102674ed59aa7ab7c656f87115777a2e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
