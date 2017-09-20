@@ -1678,6 +1678,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         continue;
 
       if (cpi->rc.alt_ref_gf_group && cm->show_frame &&
+          cpi->rc.frames_since_golden > 0 &&
           cpi->rc.frames_since_golden < (cpi->rc.baseline_gf_interval >> 1) &&
           ref_frame == ALTREF_FRAME &&
           frame_mv[this_mode][ref_frame].as_int != 0)
