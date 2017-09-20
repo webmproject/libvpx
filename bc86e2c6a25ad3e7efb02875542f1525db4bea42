@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2717ca99_8725b88b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-20T01:03:18Z",
+      "side": 1,
+      "message": "any change in these from patchset 4 to 5?",
+      "revId": "bc86e2c6a25ad3e7efb02875542f1525db4bea42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
