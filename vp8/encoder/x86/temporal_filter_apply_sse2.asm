@@ -203,5 +203,5 @@ align 16
 _const_top_bit:
     times 8 dw 1<<15
 align 16
-_const_16w
+_const_16w:
     times 8 dw 16
