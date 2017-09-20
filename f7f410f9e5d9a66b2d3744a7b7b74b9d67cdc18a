@@ -16,6 +16,24 @@
       "revId": "f7f410f9e5d9a66b2d3744a7b7b74b9d67cdc18a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae2c0b83_4b89d916",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-09-20T19:30:06Z",
+      "side": 1,
+      "message": "Reverted to the origin before the bug was introduced.",
+      "parentUuid": "d1d20f4a_ddce539f",
+      "revId": "f7f410f9e5d9a66b2d3744a7b7b74b9d67cdc18a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
