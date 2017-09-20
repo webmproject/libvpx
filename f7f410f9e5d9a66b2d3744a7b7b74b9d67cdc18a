@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d1d20f4a_ddce539f",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-20T19:20:10Z",
+      "side": 1,
+      "message": "this comment is misleading in the high-bitdepth case where tran_high is 64-bit",
+      "revId": "f7f410f9e5d9a66b2d3744a7b7b74b9d67cdc18a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
