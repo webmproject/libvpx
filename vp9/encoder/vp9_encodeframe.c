@@ -4163,6 +4163,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     x->sb_mvcol_part = 0;
     x->sb_mvrow_part = 0;
     x->sb_pickmode_part = 0;
+    x->arf_frame_usage = 0;
+    x->lastgolden_frame_usage = 0;
 
     if (seg->enabled) {
       const uint8_t *const map =
@@ -4239,6 +4241,17 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
 
         break;
       default: assert(0); break;
+    }
+
+    // Update ref_frame usage for inter frame if this group is ARF group.
+    if (!cpi->rc.is_src_frame_alt_ref && !cpi->refresh_golden_frame &&
+        !cpi->refresh_alt_ref_frame && cpi->rc.alt_ref_gf_group &&
+        cpi->sf.use_altref_onepass) {
+      int sboffset = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
+      if (cpi->count_arf_frame_usage != NULL)
+        cpi->count_arf_frame_usage[sboffset] = x->arf_frame_usage;
+      if (cpi->count_lastgolden_frame_usage != NULL)
+        cpi->count_lastgolden_frame_usage[sboffset] = x->lastgolden_frame_usage;
     }
 
     (*(cpi->row_mt_sync_write_ptr))(&tile_data->row_mt_sync, sb_row,

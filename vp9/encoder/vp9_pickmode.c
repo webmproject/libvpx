@@ -2288,6 +2288,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   }
 #endif
 
+  if (best_ref_frame == ALTREF_FRAME)
+    x->arf_frame_usage++;
+  else if (best_ref_frame != INTRA_FRAME)
+    x->lastgolden_frame_usage++;
+
   if (cpi->sf.adaptive_rd_thresh) {
     THR_MODES best_mode_idx = mode_idx[best_ref_frame][mode_offset(mi->mode)];
 
