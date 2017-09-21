@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "f19b1c52_16b7695f",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-21T05:56:22Z",
+      "side": 1,
+      "message": "Thank you very much for reviewing my code so many times and giving me so many usefull suggestions. About the naming conventions of\u0027ftmp\u0027 and \u0027tmp\u0027, may i make a explanation? I use ftmp to represent float register which used to keep temp value in inline asm, and tmp to represent general register. It\u0027s not very easy to name them descriptively, they may be used many times to stor valuse unrelated. If I misunderstand your meanning, please let me know.thank you very much.",
+      "parentUuid": "763deaf5_706bbf5c",
+      "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0cd8658c_b73da7a0",
         "filename": "vp8/common/mips/mmi/copymem_mmi.c",
         "patchSetId": 3
@@ -39,6 +57,30 @@
       "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "534f8845_dadb32a3",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-21T05:56:22Z",
+      "side": 1,
+      "message": "May I rename tmp2 to loop_count, and keep to set it inside of __asm__ block like following example: \n  double ftmp[2];\n  uint64_t tmp[3];\n\n  __asm__ volatile (\n    MMI_LI(%[loop_count], 0x04)\n    \"1:                                                     \\n\\t\"\n    COPY_MEM_16X2\n    COPY_MEM_16X2\n    MMI_ADDIU(%[loop_count], %[loop_count], -0x01)\n    \"bnez       %[loop_count],    1b                        \\n\\t\"\n    : [ftmp0]\"\u003d\u0026f\"(ftmp[0]),            [ftmp1]\"\u003d\u0026f\"(ftmp[1]),\n      [tmp0]\"\u003d\u0026r\"(tmp[0]),              [tmp1]\"\u003d\u0026r\"(tmp[1]),\n      [loop_count]\"\u003d\u0026r\"(tmp[2]),\n      [dst]\"+\u0026r\"(dst),                  [src]\"+\u0026r\"(src)\n    : [src_stride]\"r\"((mips_reg)src_stride),\n      [dst_stride]\"r\"((mips_reg)dst_stride)\n    : \"memory\"\n  );\n\n\nIf I redefine and set loop_count outside, the  first line inside of __asm__ block will be not macro call and then clang will formated them into a confused style as following:\n  double ftmp[2];\n  uint64_t tmp[2];\n  char loop_count \u003d 4;\n   __asm__ volatile(\n       \"1:                                                     \"\n       \"\\n\\t\" COPY_MEM_16X2 COPY_MEM_16X2 MMI_ADDIU(\n           % [loop_count], % [loop_count],\n           -0x01) \"bnez       %[loop_count],    1b                    \\n\\t\"\n       : [ftmp0] \"\u003d\u0026f\"(ftmp[0]), [ftmp1] \"\u003d\u0026f\"(ftmp[1]), [tmp0] \"\u003d\u0026r\"(tmp[0]),\n         [tmp1] \"\u003d\u0026r\"(tmp[1]), [loop_count] \"+\u0026r\"(loop_count), [dst] \"+\u0026r\"(dst),\n         [src] \"+\u0026r\"(src)\n       : [src_stride] \"r\"((mips_reg)src_stride),\n         [dst_stride] \"r\"((mips_reg)dst_stride)\n       : \"memory\");",
+      "parentUuid": "0cd8658c_b73da7a0",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 18
+      },
+      "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "0298e214_ea231fbc",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-21T05:56:22Z",
+      "side": 1,
+      "message": "Good suggestion. Thank you very much.",
+      "parentUuid": "041a3c20_a0d72b5e",
+      "range": {
+        "startLine": 57,
+        "startChar": 13,
+        "endLine": 57,
+        "endChar": 17
+      },
+      "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a71c8865_598b7d72",
         "filename": "vp8/common/mips/mmi/copymem_mmi.c",
         "patchSetId": 3
@@ -85,6 +151,30 @@
       "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec34d17a_7176b296",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-21T05:56:22Z",
+      "side": 1,
+      "message": "It\u0027s the same with comment 2. after clang-format, it appearance as following:\n  __asm__ volatile(COPY_MEM_8X2 COPY_MEM_8X2\n                   : [ftmp0] \"\u003d\u0026f\"(ftmp[0]), [ftmp1] \"\u003d\u0026f\"(ftmp[1]),\n                     [tmp0] \"\u003d\u0026r\"(tmp[0]), [tmp1] \"\u003d\u0026r\"(tmp[1]),\n                     [dst] \"+\u0026r\"(dst), [src] \"+\u0026r\"(src)\n                   : [src_stride] \"r\"((mips_reg)src_stride),\n                     [dst_stride] \"r\"((mips_reg)dst_stride)\n                   : \"memory\");\n\nso, may I keep this unchanged.",
+      "parentUuid": "a71c8865_598b7d72",
+      "range": {
+        "startLine": 101,
+        "startChar": 4,
+        "endLine": 101,
+        "endChar": 16
+      },
+      "revId": "009fc681f3de9cfae6cab8536ef4348b895c3753",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
