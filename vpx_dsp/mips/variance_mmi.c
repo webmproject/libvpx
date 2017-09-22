@@ -1068,14 +1068,14 @@ static inline void var_filter_block2d_bil_16x(const uint8_t *a, int a_stride,
 
     "1:                                                         \n\t"
     MMI_ADDU(%[a], %[a], %[a_stride])
-    VAR_FILTER_BLOCK2D_BIL_FIRST_PASS_16_A
-    MMI_ADDIU(%[temp2_ptr], %[temp2_ptr], 0x10)
-    VAR_FILTER_BLOCK2D_BIL_SECOND_PASS_16_B
-
-    MMI_ADDU(%[a], %[a], %[a_stride])
     VAR_FILTER_BLOCK2D_BIL_FIRST_PASS_16_B
     MMI_ADDIU(%[temp2_ptr], %[temp2_ptr], 0x10)
     VAR_FILTER_BLOCK2D_BIL_SECOND_PASS_16_A
+
+    MMI_ADDU(%[a], %[a], %[a_stride])
+    VAR_FILTER_BLOCK2D_BIL_FIRST_PASS_16_A
+    MMI_ADDIU(%[temp2_ptr], %[temp2_ptr], 0x10)
+    VAR_FILTER_BLOCK2D_BIL_SECOND_PASS_16_B
     "addiu      %[counter], %[counter],     -0x01               \n\t"
     "bnez       %[counter], 1b                                  \n\t"
     : [ftmp0] "=&f"(ftmp[0]), [ftmp1] "=&f"(ftmp[1]), [ftmp2] "=&f"(ftmp[2]),
