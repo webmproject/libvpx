@@ -214,8 +214,8 @@ static INLINE void butterfly_one_coeff(const int16x8_t a, const int16x8_t b,
 
 // fdct_round_shift(a * c0 +/- b * c1)
 static INLINE void butterfly_two_coeff(const int16x8_t a, const int16x8_t b,
-                                       const tran_high_t constant0,
-                                       const tran_high_t constant1,
+                                       const tran_coef_t constant0,
+                                       const tran_coef_t constant1,
                                        int16x8_t *add, int16x8_t *sub) {
   const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), constant0);
   const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), constant0);
@@ -590,19 +590,14 @@ static INLINE void butterfly_one_coeff_s16_s32(
 // Like butterfly_one_coeff, but with s32.
 static INLINE void butterfly_one_coeff_s32(
     const int32x4_t a_lo, const int32x4_t a_hi, const int32x4_t b_lo,
-    const int32x4_t b_hi, const tran_high_t constant, int32x4_t *add_lo,
+    const int32x4_t b_hi, const int32_t constant, int32x4_t *add_lo,
     int32x4_t *add_hi, int32x4_t *sub_lo, int32x4_t *sub_hi) {
-  // TODO(johannkoenig): Strangely there is only a conversion warning on int64_t
-  // to int32_t (const tran_high_t (aka const long long)) but not for int64_t to
-  // int16_t. The constants fit in int16_t. Investigate using int16_t for the
-  // constants to avoid bouncing between types.
-  const int32_t constant_s32 = (int32_t)constant;
-  const int32x4_t a_lo_0 = vmulq_n_s32(a_lo, constant_s32);
-  const int32x4_t a_hi_0 = vmulq_n_s32(a_hi, constant_s32);
-  const int32x4_t sum0 = vmlaq_n_s32(a_lo_0, b_lo, constant_s32);
-  const int32x4_t sum1 = vmlaq_n_s32(a_hi_0, b_hi, constant_s32);
-  const int32x4_t diff0 = vmlsq_n_s32(a_lo_0, b_lo, constant_s32);
-  const int32x4_t diff1 = vmlsq_n_s32(a_hi_0, b_hi, constant_s32);
+  const int32x4_t a_lo_0 = vmulq_n_s32(a_lo, constant);
+  const int32x4_t a_hi_0 = vmulq_n_s32(a_hi, constant);
+  const int32x4_t sum0 = vmlaq_n_s32(a_lo_0, b_lo, constant);
+  const int32x4_t sum1 = vmlaq_n_s32(a_hi_0, b_hi, constant);
+  const int32x4_t diff0 = vmlsq_n_s32(a_lo_0, b_lo, constant);
+  const int32x4_t diff1 = vmlsq_n_s32(a_hi_0, b_hi, constant);
   *add_lo = vrshrq_n_s32(sum0, DCT_CONST_BITS);
   *add_hi = vrshrq_n_s32(sum1, DCT_CONST_BITS);
   *sub_lo = vrshrq_n_s32(diff0, DCT_CONST_BITS);
@@ -621,19 +616,17 @@ static INLINE void butterfly_one_coeff_s32(
 // Like butterfly_two_coeff, but with s32.
 static INLINE void butterfly_two_coeff_s32(
     const int32x4_t a_lo, const int32x4_t a_hi, const int32x4_t b_lo,
-    const int32x4_t b_hi, const tran_high_t constant0,
-    const tran_high_t constant1, int32x4_t *add_lo, int32x4_t *add_hi,
-    int32x4_t *sub_lo, int32x4_t *sub_hi) {
-  const int32_t constant0_s32 = (int32_t)constant0;
-  const int32_t constant1_s32 = (int32_t)constant1;
-  const int32x4_t a0 = vmulq_n_s32(a_lo, constant0_s32);
-  const int32x4_t a1 = vmulq_n_s32(a_hi, constant0_s32);
-  const int32x4_t a2 = vmulq_n_s32(a_lo, constant1_s32);
-  const int32x4_t a3 = vmulq_n_s32(a_hi, constant1_s32);
-  const int32x4_t sum0 = vmlaq_n_s32(a2, b_lo, constant0_s32);
-  const int32x4_t sum1 = vmlaq_n_s32(a3, b_hi, constant0_s32);
-  const int32x4_t diff0 = vmlsq_n_s32(a0, b_lo, constant1_s32);
-  const int32x4_t diff1 = vmlsq_n_s32(a1, b_hi, constant1_s32);
+    const int32x4_t b_hi, const int32_t constant0, const int32_t constant1,
+    int32x4_t *add_lo, int32x4_t *add_hi, int32x4_t *sub_lo,
+    int32x4_t *sub_hi) {
+  const int32x4_t a0 = vmulq_n_s32(a_lo, constant0);
+  const int32x4_t a1 = vmulq_n_s32(a_hi, constant0);
+  const int32x4_t a2 = vmulq_n_s32(a_lo, constant1);
+  const int32x4_t a3 = vmulq_n_s32(a_hi, constant1);
+  const int32x4_t sum0 = vmlaq_n_s32(a2, b_lo, constant0);
+  const int32x4_t sum1 = vmlaq_n_s32(a3, b_hi, constant0);
+  const int32x4_t diff0 = vmlsq_n_s32(a0, b_lo, constant1);
+  const int32x4_t diff1 = vmlsq_n_s32(a1, b_hi, constant1);
   *add_lo = vrshrq_n_s32(sum0, DCT_CONST_BITS);
   *add_hi = vrshrq_n_s32(sum1, DCT_CONST_BITS);
   *sub_lo = vrshrq_n_s32(diff0, DCT_CONST_BITS);

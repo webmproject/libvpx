@@ -24,12 +24,9 @@ static INLINE __m128i dct_const_round_shift_4_sse2(const __m128i in0,
 }
 
 static INLINE void highbd_idct4_small_sse2(__m128i *const io) {
-  const __m128i cospi_p16_p16 =
-      _mm_setr_epi32((int)cospi_16_64, 0, (int)cospi_16_64, 0);
-  const __m128i cospi_p08_p08 =
-      _mm_setr_epi32((int)cospi_8_64, 0, (int)cospi_8_64, 0);
-  const __m128i cospi_p24_p24 =
-      _mm_setr_epi32((int)cospi_24_64, 0, (int)cospi_24_64, 0);
+  const __m128i cospi_p16_p16 = _mm_setr_epi32(cospi_16_64, 0, cospi_16_64, 0);
+  const __m128i cospi_p08_p08 = _mm_setr_epi32(cospi_8_64, 0, cospi_8_64, 0);
+  const __m128i cospi_p24_p24 = _mm_setr_epi32(cospi_24_64, 0, cospi_24_64, 0);
   __m128i temp1[4], temp2[4], step[4];
 
   transpose_32bit_4x4(io, io);
@@ -81,8 +78,8 @@ static INLINE void highbd_idct4_large_sse2(__m128i *const io) {
 
   // stage 1
   highbd_butterfly_cospi16_sse2(io[0], io[2], &step[0], &step[1]);
-  highbd_butterfly_sse2(io[1], io[3], (int)cospi_24_64, (int)cospi_8_64,
-                        &step[2], &step[3]);
+  highbd_butterfly_sse2(io[1], io[3], cospi_24_64, cospi_8_64, &step[2],
+                        &step[3]);
 
   // stage 2
   io[0] = _mm_add_epi32(step[0], step[3]);  // step[0] + step[3]
@@ -147,8 +144,10 @@ void vpx_highbd_idct4x4_1_add_sse2(const tran_low_t *input, uint16_t *dest,
   tran_low_t out;
   __m128i dc, d;
 
-  out = HIGHBD_WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64), bd);
-  out = HIGHBD_WRAPLOW(dct_const_round_shift(out * cospi_16_64), bd);
+  out = HIGHBD_WRAPLOW(
+      dct_const_round_shift(input[0] * (tran_high_t)cospi_16_64), bd);
+  out =
+      HIGHBD_WRAPLOW(dct_const_round_shift(out * (tran_high_t)cospi_16_64), bd);
   a1 = ROUND_POWER_OF_TWO(out, 4);
   dc = _mm_set1_epi16(a1);
 

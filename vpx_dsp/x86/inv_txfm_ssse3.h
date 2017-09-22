@@ -22,7 +22,7 @@ static INLINE void idct8x8_12_add_kernel_ssse3(__m128i *const io /* io[8] */) {
   const __m128i cp_28d_4d = dual_set_epi16(2 * cospi_28_64, 2 * cospi_4_64);
   const __m128i cp_n20d_12d = dual_set_epi16(-2 * cospi_20_64, 2 * cospi_12_64);
   const __m128i cp_8d_24d = dual_set_epi16(2 * cospi_8_64, 2 * cospi_24_64);
-  const __m128i cp_16_16 = _mm_set1_epi16((int16_t)cospi_16_64);
+  const __m128i cp_16_16 = _mm_set1_epi16(cospi_16_64);
   const __m128i cp_16_n16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i cospi_16_64d = _mm_set1_epi16((int16_t)(2 * cospi_16_64));
   const __m128i cospi_28_64d = _mm_set1_epi16((int16_t)(2 * cospi_28_64));
@@ -92,8 +92,7 @@ static INLINE void idct8x8_12_add_kernel_ssse3(__m128i *const io /* io[8] */) {
   step1[1] = _mm_add_epi16(step2[0], step2[2]);
   step1[2] = _mm_sub_epi16(step2[0], step2[2]);
   step1[3] = _mm_sub_epi16(step2[0], step2[3]);
-  butterfly(step2[6], step2[5], (int)cospi_16_64, (int)cospi_16_64, &step1[5],
-            &step1[6]);
+  butterfly(step2[6], step2[5], cospi_16_64, cospi_16_64, &step1[5], &step1[6]);
 
   // stage 4
   io[0] = _mm_add_epi16(step1[0], step2[7]);
