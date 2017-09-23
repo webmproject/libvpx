@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85c52878_ea4e43dc",
+        "filename": "vpx_dsp/x86/highbd_intrapred_intrin_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-23T01:46:02Z",
+      "side": 1,
+      "message": "you could align the decl, though I doubt there\u0027s much difference nowadays",
+      "revId": "3640bd77b5d2e56d5e27d98ee5e1e397569f408a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f641293f_8ade6628",
+        "filename": "vpx_dsp/x86/highbd_intrapred_intrin_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-23T01:46:02Z",
+      "side": 1,
+      "message": "maybe just store these in avg3_left[4]?",
+      "range": {
+        "startLine": 466,
+        "startChar": 27,
+        "endLine": 466,
+        "endChar": 38
+      },
+      "revId": "3640bd77b5d2e56d5e27d98ee5e1e397569f408a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
