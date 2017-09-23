@@ -16,6 +16,23 @@
       "revId": "e0b15e14b12d06111ec62ec9ad687cbe96e0eddf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "539ff8b7_7278faad",
+        "filename": "vpx_dsp/arm/vpx_scaled_convolve8_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-23T01:36:15Z",
+      "side": 1,
+      "message": "(h + 7) \u0026 ~7 ?",
+      "revId": "e0b15e14b12d06111ec62ec9ad687cbe96e0eddf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
