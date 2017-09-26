@@ -16,6 +16,24 @@
       "revId": "bcc9f79a356a6849a853f951804a2012b8a7a664",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e1b2d28_e2122d78",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-09-26T21:38:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "389359ae_159b93eb",
+      "revId": "bcc9f79a356a6849a853f951804a2012b8a7a664",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
