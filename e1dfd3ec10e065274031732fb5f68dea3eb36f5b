@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36cc3fcf_b232353e",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2017-09-26T18:12:40Z",
+      "side": 1,
+      "message": "naming this setting with a \"_vbr\" suffix and turning it on unconditionally for speed 4 does not seem right.\n\nthere also seem to be places where setting this feature will change behavior in the rate control code irrespective of whether or not we are in VBR mode. So i think it\u0027s best to get rid of the suffix and add comments as to when we enable this (i.e. 1-pass VBR).",
+      "revId": "e1dfd3ec10e065274031732fb5f68dea3eb36f5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
