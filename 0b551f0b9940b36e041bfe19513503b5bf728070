@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ec0d3a63_2b6b8b8a",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-09-26T22:17:33Z",
+      "side": 1,
+      "message": "I added \"invalid-\" prefix to unify. Should it be removed?",
+      "range": {
+        "startLine": 138,
+        "startChar": 5,
+        "endLine": 138,
+        "endChar": 13
+      },
+      "revId": "0b551f0b9940b36e041bfe19513503b5bf728070",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
