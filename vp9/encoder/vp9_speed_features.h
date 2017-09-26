@@ -496,6 +496,9 @@ typedef struct SPEED_FEATURES {
   // based on the nonrd-pickmode).
   int adapt_partition_source_sad;
   int adapt_partition_thresh;
+
+  // Enable use of alt-refs in 1 pass VBR.
+  int use_altref_onepass;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

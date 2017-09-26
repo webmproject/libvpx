@@ -46,9 +46,6 @@
 
 #define FRAME_OVERHEAD_BITS 200
 
-// Use this macro to turn on/off use of alt-refs in one-pass vbr mode.
-#define USE_ALTREF_FOR_ONE_PASS 0
-
 #if CONFIG_VP9_HIGHBITDEPTH
 #define ASSIGN_MINQ_TABLE(bit_depth, name)                   \
   do {                                                       \
@@ -594,13 +591,12 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
     q = clamp(q, VPXMIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
               VPXMAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
   }
-#if USE_ALTREF_FOR_ONE_PASS
-  if (cpi->oxcf.enable_auto_arf && cpi->oxcf.pass == 0 &&
-      cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0 &&
-      cpi->rc.is_src_frame_alt_ref && !cpi->rc.alt_ref_gf_group) {
+  if (cpi->sf.use_altref_onepass && cpi->oxcf.enable_auto_arf &&
+      cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_VBR &&
+      cpi->oxcf.lag_in_frames > 0 && cpi->rc.is_src_frame_alt_ref &&
+      !cpi->rc.alt_ref_gf_group) {
     q = VPXMIN(q, (q + cpi->rc.last_boosted_qindex) >> 1);
   }
-#endif
   return q;
 }
 
@@ -1569,12 +1565,10 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     cpi->refresh_golden_frame = 1;
     rc->source_alt_ref_pending = 0;
     rc->alt_ref_gf_group = 0;
-#if USE_ALTREF_FOR_ONE_PASS
-    if (cpi->oxcf.enable_auto_arf) {
+    if (cpi->sf.use_altref_onepass && cpi->oxcf.enable_auto_arf) {
       rc->source_alt_ref_pending = 1;
       rc->alt_ref_gf_group = 1;
     }
-#endif
   }
   if (cm->frame_type == KEY_FRAME)
     target = calc_iframe_target_size_one_pass_vbr(cpi);
@@ -2207,8 +2201,7 @@ static void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi,
       rc->af_ratio_onepass_vbr = 5;
       rc->gfu_boost = DEFAULT_GF_BOOST >> 2;
     }
-#if USE_ALTREF_FOR_ONE_PASS
-    if (cpi->oxcf.enable_auto_arf) {
+    if (cpi->sf.use_altref_onepass && cpi->oxcf.enable_auto_arf) {
       // Don't use alt-ref if there is a scene cut within the group,
       // or content is not low.
       if ((rc->high_source_sad_lagindex > 0 &&
@@ -2226,7 +2219,6 @@ static void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi,
         }
       }
     }
-#endif
     target = calc_pframe_target_size_one_pass_vbr(cpi);
     vp9_rc_set_frame_target(cpi, target);
   }
@@ -2378,9 +2370,8 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
       int target;
       cpi->refresh_golden_frame = 1;
       rc->source_alt_ref_pending = 0;
-#if USE_ALTREF_FOR_ONE_PASS
-      if (cpi->oxcf.enable_auto_arf) rc->source_alt_ref_pending = 1;
-#endif
+      if (cpi->sf.use_altref_onepass && cpi->oxcf.enable_auto_arf)
+        rc->source_alt_ref_pending = 1;
       rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
       rc->baseline_gf_interval =
           VPXMIN(20, VPXMAX(10, rc->baseline_gf_interval));

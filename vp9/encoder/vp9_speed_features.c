@@ -365,6 +365,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->use_source_sad = 0;
   sf->use_simple_block_yrd = 0;
   sf->adapt_partition_source_sad = 0;
+  sf->use_altref_onepass = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
