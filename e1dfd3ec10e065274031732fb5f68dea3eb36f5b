@@ -16,6 +16,24 @@
       "revId": "e1dfd3ec10e065274031732fb5f68dea3eb36f5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc184bdf_3c3ea68e",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-09-26T18:21:54Z",
+      "side": 1,
+      "message": "Done.\nYeah didn\u0027t intend to enable it for speed 4 in this patch.\nRemoved the _vbr suffix.",
+      "parentUuid": "36cc3fcf_b232353e",
+      "revId": "e1dfd3ec10e065274031732fb5f68dea3eb36f5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
