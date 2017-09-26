@@ -22,6 +22,30 @@
       "revId": "9878a3f1644df2ececbb928b32e6c71dc28facb8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf8c03d2_7f19ad5e",
+        "filename": "vp8/common/mips/mmi/copymem_mmi.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-09-26T00:46:13Z",
+      "side": 1,
+      "message": "Ok, I use uint8_t here and vp8_copy_mem8x8_mmi.",
+      "parentUuid": "cce8f22e_2a49de12",
+      "range": {
+        "startLine": 55,
+        "startChar": 2,
+        "endLine": 55,
+        "endChar": 6
+      },
+      "revId": "9878a3f1644df2ececbb928b32e6c71dc28facb8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
