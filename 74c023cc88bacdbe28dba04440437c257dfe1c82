@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a16bc3b6_895f3191",
+        "filename": "vpx_dsp/x86/highbd_intrapred_intrin_ssse3.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-26T23:59:58Z",
+      "side": 1,
+      "message": "not thinking too much about it this rotate+alignr looks pretty regular, could _mm_srli_si128 be used instead of the shuffle?",
+      "revId": "74c023cc88bacdbe28dba04440437c257dfe1c82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
