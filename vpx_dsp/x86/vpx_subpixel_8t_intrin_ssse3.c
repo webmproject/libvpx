@@ -10,6 +10,8 @@
 
 #include <tmmintrin.h>
 
+#include <string.h>
+
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_dsp/x86/convolve.h"
@@ -447,7 +449,7 @@ static void scaledconvolve_horiz_w8(const uint8_t *src, ptrdiff_t src_stride,
   int x, y, z;
   src -= SUBPEL_TAPS / 2 - 1;
 
-  // This function processes 8x8 areas.  The intermediate height is not always
+  // This function processes 8x8 areas. The intermediate height is not always
   // a multiple of 8, so force it to be a multiple of 8 here.
   y = h + (8 - (h & 0x7));
 
@@ -810,11 +812,10 @@ static void scaledconvolve_vert_w16(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-static void scaledconvolve2d(const uint8_t *src, ptrdiff_t src_stride,
-                             uint8_t *dst, ptrdiff_t dst_stride,
-                             const InterpKernel *const filter, int x0_q4,
-                             int x_step_q4, int y0_q4, int y_step_q4, int w,
-                             int h) {
+void vpx_scaled_2d_ssse3(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
+                         ptrdiff_t dst_stride, const InterpKernel *filter,
+                         int x0_q4, int x_step_q4, int y0_q4, int y_step_q4,
+                         int w, int h) {
   // Note: Fixed size intermediate buffer, temp, places limits on parameters.
   // 2d filtering proceeds in 2 steps:
   //   (1) Interpolate horizontally into an intermediate buffer, temp.
@@ -860,14 +861,6 @@ static void scaledconvolve2d(const uint8_t *src, ptrdiff_t src_stride,
     scaledconvolve_vert_w4(temp + 64 * (SUBPEL_TAPS / 2 - 1), 64, dst,
                            dst_stride, filter, y0_q4, y_step_q4, w, h);
   }
-}
-
-void vpx_scaled_2d_ssse3(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
-                         ptrdiff_t dst_stride, const InterpKernel *filter,
-                         int x0_q4, int x_step_q4, int y0_q4, int y_step_q4,
-                         int w, int h) {
-  scaledconvolve2d(src, src_stride, dst, dst_stride, filter, x0_q4, x_step_q4,
-                   y0_q4, y_step_q4, w, h);
 }
 
 // void vp9_convolve8_ssse3(const uint8_t *src, ptrdiff_t src_stride,

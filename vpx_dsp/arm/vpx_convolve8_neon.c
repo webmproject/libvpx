@@ -52,28 +52,6 @@ static INLINE void store_u8_8x8(uint8_t *s, const ptrdiff_t p,
   vst1_u8(s, s7);
 }
 
-static INLINE int16x4_t convolve8_4(const int16x4_t s0, const int16x4_t s1,
-                                    const int16x4_t s2, const int16x4_t s3,
-                                    const int16x4_t s4, const int16x4_t s5,
-                                    const int16x4_t s6, const int16x4_t s7,
-                                    const int16x8_t filters,
-                                    const int16x4_t filter3,
-                                    const int16x4_t filter4) {
-  const int16x4_t filters_lo = vget_low_s16(filters);
-  const int16x4_t filters_hi = vget_high_s16(filters);
-  int16x4_t sum;
-
-  sum = vmul_lane_s16(s0, filters_lo, 0);
-  sum = vmla_lane_s16(sum, s1, filters_lo, 1);
-  sum = vmla_lane_s16(sum, s2, filters_lo, 2);
-  sum = vmla_lane_s16(sum, s5, filters_hi, 1);
-  sum = vmla_lane_s16(sum, s6, filters_hi, 2);
-  sum = vmla_lane_s16(sum, s7, filters_hi, 3);
-  sum = vqadd_s16(sum, vmul_s16(s3, filter3));
-  sum = vqadd_s16(sum, vmul_s16(s4, filter4));
-  return sum;
-}
-
 void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const InterpKernel *filter, int x0_q4,
