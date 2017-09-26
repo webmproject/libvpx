@@ -69,6 +69,24 @@
       "revId": "f2bd47772cfe25b3f0a3450a611349d66093f946",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "38f99275_ea4fa486",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-26T23:04:50Z",
+      "side": 1,
+      "message": "in this case using it explicitly would be good. one use for one entry in the table is a bit confusing",
+      "parentUuid": "75133d96_ffcc99f9",
+      "revId": "f2bd47772cfe25b3f0a3450a611349d66093f946",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
