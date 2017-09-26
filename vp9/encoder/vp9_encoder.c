@@ -3434,7 +3434,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // scene detection and for superblock content state in CBR mode).
   // The flag may get reset below based on SVC or resizing state.
   cpi->compute_source_sad_onepass =
-      cpi->oxcf.mode == REALTIME && cpi->oxcf.speed >= 5 && cm->show_frame;
+      cpi->oxcf.mode == REALTIME && cm->show_frame;
 
   vpx_clear_system_state();
 
