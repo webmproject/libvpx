@@ -104,13 +104,13 @@ specialize qw/vp8_dc_only_idct_add mmx neon dspr2 msa mmi/;
 # RECON
 #
 add_proto qw/void vp8_copy_mem16x16/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_copy_mem16x16 sse2 neon dspr2 msa/;
+specialize qw/vp8_copy_mem16x16 sse2 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_copy_mem8x8/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_copy_mem8x8 mmx neon dspr2 msa/;
+specialize qw/vp8_copy_mem8x8 mmx neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_copy_mem8x4/, "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch";
-specialize qw/vp8_copy_mem8x4 mmx neon dspr2 msa/;
+specialize qw/vp8_copy_mem8x4 mmx neon dspr2 msa mmi/;
 
 #
 # Postproc
