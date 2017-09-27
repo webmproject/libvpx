@@ -393,6 +393,37 @@ static INLINE __m128i avg3_epu16(const __m128i *x, const __m128i *y,
   return _mm_avg_epu16(b, *y);
 }
 
+void vpx_highbd_d153_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
+  const int I = left[0];
+  const int J = left[1];
+  const int K = left[2];
+  const int L = left[3];
+  const __m128i XXXXXABC = _mm_loadu_si128((const __m128i *)(above - 5));
+  const __m128i LXXXXABC = _mm_insert_epi16(XXXXXABC, L, 0);
+  const __m128i LKXXXABC = _mm_insert_epi16(LXXXXABC, K, 1);
+  const __m128i LKJXXABC = _mm_insert_epi16(LKXXXABC, J, 2);
+  const __m128i LKJIXABC = _mm_insert_epi16(LKJXXABC, I, 3);
+  const __m128i KJIXABC0 = _mm_srli_si128(LKJIXABC, 2);
+  const __m128i JIXABC00 = _mm_srli_si128(LKJIXABC, 4);
+  const __m128i avg3 = avg3_epu16(&LKJIXABC, &KJIXABC0, &JIXABC00);
+  const __m128i avg2 = _mm_avg_epu16(LKJIXABC, KJIXABC0);
+  const __m128i row3 = _mm_unpacklo_epi16(avg2, avg3);
+  const __m128i row2 = _mm_srli_si128(row3, 4);
+  const __m128i row1 = _mm_srli_si128(row3, 8);
+  const __m128i row0 = _mm_srli_si128(avg3, 4);
+  (void)bd;
+  _mm_storel_epi64((__m128i *)dst, row0);
+  dst[0] = _mm_extract_epi16(avg2, 3);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row1);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row2);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row3);
+}
+
 void vpx_highbd_d207_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
                                         const uint16_t *above,
                                         const uint16_t *left, int bd) {
