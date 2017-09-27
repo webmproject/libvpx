@@ -209,6 +209,24 @@
       "revId": "0ee8dde9c7a97e3563669d470968a46a4db8f09b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53804c57_1735089e",
+        "filename": "test/test.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-27T00:21:55Z",
+      "side": 1,
+      "message": "there\u0027s a block in the .mk for that or just use new[] and memset here or regular calloc. there\u0027s no need for vpx specific allocators.",
+      "parentUuid": "c93a1024_01dc6da3",
+      "revId": "0ee8dde9c7a97e3563669d470968a46a4db8f09b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
