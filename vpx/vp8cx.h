@@ -444,6 +444,7 @@ enum vp8e_enc_control_id {
    * \note Valid parameter range:
    *              VP9E_CONTENT_DEFAULT = Regular video content (Default)
    *              VP9E_CONTENT_SCREEN  = Screen capture content
+   *              VP9E_CONTENT_FILM    = Film content: improves grain retention
    *
    * Supported in codecs: VP9
    */
@@ -696,6 +697,7 @@ typedef enum {
 typedef enum {
   VP9E_CONTENT_DEFAULT,
   VP9E_CONTENT_SCREEN,
+  VP9E_CONTENT_FILM,
   VP9E_CONTENT_INVALID
 } vp9e_tune_content;
 

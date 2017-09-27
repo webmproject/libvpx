@@ -2876,57 +2876,82 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
 
 // This function is designed to apply a bias or adjustment to an rd value based
 // on the relative variance of the source and reconstruction.
-#define LOW_VAR_THRESH 16
-#define VLOW_ADJ_MAX 25
-#define VHIGH_ADJ_MAX 8
+#define VERY_LOW_VAR_THRESH 2
+#define LOW_VAR_THRESH 5
+#define VAR_MULT 100
+static unsigned int max_var_adjust[VP9E_CONTENT_INVALID] = { 16, 16, 100 };
+
 static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
                                    BLOCK_SIZE bsize, int64_t *this_rd,
                                    MV_REFERENCE_FRAME ref_frame,
                                    unsigned int source_variance) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  unsigned int recon_variance;
+  unsigned int rec_variance;
+  unsigned int src_variance;
+  unsigned int src_rec_min;
   unsigned int absvar_diff = 0;
-  int64_t var_error = 0;
-  int64_t var_factor = 0;
+  unsigned int var_factor = 0;
+  unsigned int adj_max;
+  vp9e_tune_content content_type = cpi->oxcf.content;
 
   if (*this_rd == INT64_MAX) return;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    recon_variance = vp9_high_get_sby_perpixel_variance(cpi, &xd->plane[0].dst,
+    if (source_variance > 0) {
+      rec_variance = vp9_high_get_sby_perpixel_variance(cpi, &xd->plane[0].dst,
                                                         bsize, xd->bd);
+      src_variance = source_variance;
+    } else {
+      rec_variance =
+          vp9_high_get_sby_variance(cpi, &xd->plane[0].dst, bsize, xd->bd);
+      src_variance =
+          vp9_high_get_sby_variance(cpi, &x->plane[0].src, bsize, xd->bd);
+    }
   } else {
-    recon_variance =
-        vp9_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+    if (source_variance > 0) {
+      rec_variance =
+          vp9_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+      src_variance = source_variance;
+    } else {
+      rec_variance = vp9_get_sby_variance(cpi, &xd->plane[0].dst, bsize);
+      src_variance = vp9_get_sby_variance(cpi, &x->plane[0].src, bsize);
+    }
   }
 #else
-  recon_variance = vp9_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+  if (source_variance > 0) {
+    rec_variance = vp9_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+    src_variance = source_variance;
+  } else {
+    rec_variance = vp9_get_sby_variance(cpi, &xd->plane[0].dst, bsize);
+    src_variance = vp9_get_sby_variance(cpi, &x->plane[0].src, bsize);
+  }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-  if ((source_variance + recon_variance) > LOW_VAR_THRESH) {
-    absvar_diff = (source_variance > recon_variance)
-                      ? (source_variance - recon_variance)
-                      : (recon_variance - source_variance);
+  // Lower of source (raw per pixel value) and recon variance. Note that
+  // if the source per pixel is 0 then the recon value here will not be per
+  // pixel (see above) so will likely be much larger.
+  src_rec_min = VPXMIN(source_variance, rec_variance);
 
-    var_error = ((int64_t)200 * source_variance * recon_variance) /
-                (((int64_t)source_variance * source_variance) +
-                 ((int64_t)recon_variance * recon_variance));
-    var_error = 100 - var_error;
-  }
+  if (src_rec_min > LOW_VAR_THRESH) return;
 
-  // Source variance above a threshold and ref frame is intra.
-  // This case is targeted mainly at discouraging intra modes that give rise
-  // to a predictor with a low spatial complexity compared to the source.
-  if ((source_variance > LOW_VAR_THRESH) && (ref_frame == INTRA_FRAME) &&
-      (source_variance > recon_variance)) {
-    var_factor = VPXMIN(absvar_diff, VPXMIN(VLOW_ADJ_MAX, var_error));
-    // A second possible case of interest is where the source variance
-    // is very low and we wish to discourage false texture or motion trails.
-  } else if ((source_variance < (LOW_VAR_THRESH >> 1)) &&
-             (recon_variance > source_variance)) {
-    var_factor = VPXMIN(absvar_diff, VPXMIN(VHIGH_ADJ_MAX, var_error));
-  }
+  absvar_diff = (src_variance > rec_variance) ? (src_variance - rec_variance)
+                                              : (rec_variance - src_variance);
+
+  adj_max = max_var_adjust[content_type];
+
+  var_factor =
+      (unsigned int)((int64_t)VAR_MULT * absvar_diff) / VPXMAX(1, src_variance);
+  var_factor = VPXMIN(adj_max, var_factor);
+
   *this_rd += (*this_rd * var_factor) / 100;
+
+  if (content_type == VP9E_CONTENT_FILM) {
+    if (src_rec_min <= VERY_LOW_VAR_THRESH) {
+      if (ref_frame == INTRA_FRAME) *this_rd *= 2;
+      if (bsize > 6) *this_rd *= 2;
+    }
+  }
 }
 
 // Do we have an internal image edge (e.g. formatting bars).

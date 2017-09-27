@@ -350,6 +350,27 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
     td->mb.mv_limits.col_max =
         ((mb_cols - 1 - mb_col) * 16) + (17 - 2 * VP9_INTERP_EXTEND);
 
+    if (cpi->oxcf.content == VP9E_CONTENT_FILM) {
+      unsigned int src_variance;
+      struct buf_2d src;
+
+      src.buf = f->y_buffer + mb_y_offset;
+      src.stride = f->y_stride;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        src_variance =
+            vp9_high_get_sby_perpixel_variance(cpi, &src, BLOCK_16X16, mbd->bd);
+      } else {
+        src_variance = vp9_get_sby_perpixel_variance(cpi, &src, BLOCK_16X16);
+      }
+#else
+      src_variance = vp9_get_sby_perpixel_variance(cpi, &src, BLOCK_16X16);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+      if (src_variance <= 2) strength = VPXMAX(0, (int)strength - 2);
+    }
+
     for (frame = 0; frame < frame_count; frame++) {
       const uint32_t thresh_low = 10000;
       const uint32_t thresh_high = 20000;
