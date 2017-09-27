@@ -101,6 +101,24 @@
       "revId": "0ee8dde9c7a97e3563669d470968a46a4db8f09b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c93a1024_01dc6da3",
+        "filename": "test/test.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-09-27T00:06:22Z",
+      "side": 1,
+      "message": "it will fail without the source when compiling with --enable-shared",
+      "parentUuid": "b24a10bd_89656f64",
+      "revId": "0ee8dde9c7a97e3563669d470968a46a4db8f09b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
