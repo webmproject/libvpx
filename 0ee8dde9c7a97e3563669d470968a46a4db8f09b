@@ -227,6 +227,24 @@
       "revId": "0ee8dde9c7a97e3563669d470968a46a4db8f09b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9000f6c_b44ac731",
+        "filename": "test/test.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-09-27T00:32:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "53804c57_1735089e",
+      "revId": "0ee8dde9c7a97e3563669d470968a46a4db8f09b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
