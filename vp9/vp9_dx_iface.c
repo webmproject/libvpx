@@ -378,9 +378,11 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
                                       vpx_codec_iter_t *iter) {
   vpx_image_t *img = NULL;
 
-  // iter acts as a flip flop, so an image is only returned on the first
-  // call to get_frame.
-  if (*iter == NULL && ctx->pbi != NULL) {
+  // Legacy parameter carried over from VP8. Has no effect for VP9 since we
+  // always return only 1 frame per decode call.
+  (void)iter;
+
+  if (ctx->pbi != NULL) {
     YV12_BUFFER_CONFIG sd;
     vp9_ppflags_t flags = { 0, 0, 0 };
     if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC) set_ppflags(ctx, &flags);
