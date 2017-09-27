@@ -106,6 +106,7 @@ DSP_SRCS-$(HAVE_NEON)  += arm/highbd_vpx_convolve_neon.c
 endif
 
 DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_convolve_copy_sse2.asm
+DSP_SRCS-$(HAVE_NEON)  += arm/vpx_scaled_convolve8_neon.c
 
 ifeq ($(HAVE_NEON_ASM),yes)
 DSP_SRCS-yes += arm/vpx_convolve_copy_neon_asm$(ASM)
