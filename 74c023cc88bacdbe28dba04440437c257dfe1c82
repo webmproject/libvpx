@@ -16,6 +16,24 @@
       "revId": "74c023cc88bacdbe28dba04440437c257dfe1c82",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37e1ddb5_e2a093d6",
+        "filename": "vpx_dsp/x86/highbd_intrapred_intrin_ssse3.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-09-27T17:15:01Z",
+      "side": 1,
+      "message": "I was using _mm_slli_si128 and was having problems using immediates in the loop.  I\u0027ll go back an look at this again.",
+      "parentUuid": "a16bc3b6_895f3191",
+      "revId": "74c023cc88bacdbe28dba04440437c257dfe1c82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
