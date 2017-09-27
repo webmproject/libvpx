@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc1eab7b_b43068f9",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-27T01:36:06Z",
+      "side": 1,
+      "message": "(void)iter; would be more common",
+      "range": {
+        "startLine": 383,
+        "startChar": 1,
+        "endLine": 383,
+        "endChar": 14
+      },
+      "revId": "d4a1078a454f18829cc7e0a6849ad0aad07fcc8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
