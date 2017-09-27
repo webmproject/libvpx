@@ -134,6 +134,9 @@ const DecodeParam kVP9InvalidFileTests[] = {
   { 1, "invalid-vp90-02-v2.webm" },
 #if CONFIG_VP9_HIGHBITDEPTH
   { 1, "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.v2.ivf" },
+  { 1,
+    "invalid-vp90-2-21-resize_inter_320x180_5_3-4.webm.ivf.s45551_r01-05_b6-."
+    "ivf" },
 #endif
   { 1, "invalid-vp90-03-v3.webm" },
   { 1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf" },

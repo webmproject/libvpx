@@ -51,7 +51,7 @@ void vpx_idct4x4_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   int a;
   __m128i dc_value, d[2];
 
-  a = (int)dct_const_round_shift(input[0] * cospi_16_64);
+  a = (int)dct_const_round_shift((int16_t)input[0] * cospi_16_64);
   a = (int)dct_const_round_shift(a * cospi_16_64);
   a = ROUND_POWER_OF_TWO(a, 4);
 
@@ -210,7 +210,8 @@ void vpx_idct8x8_1_add_sse2(const tran_low_t *input, uint8_t *dest,
                             int stride) {
   __m128i dc_value;
   tran_high_t a1;
-  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
+  tran_low_t out =
+      WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 5);
@@ -547,7 +548,8 @@ void vpx_idct16x16_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   __m128i dc_value;
   int i;
   tran_high_t a1;
-  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
+  tran_low_t out =
+      WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 6);
@@ -1334,7 +1336,8 @@ void vpx_idct32x32_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   __m128i dc_value;
   int j;
   tran_high_t a1;
-  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
+  tran_low_t out =
+      WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 6);

@@ -131,16 +131,16 @@ void iadst4_c(const tran_low_t *input, tran_low_t *output) {
 }
 
 void idct4_c(const tran_low_t *input, tran_low_t *output) {
-  tran_low_t step[4];
+  int16_t step[4];
   tran_high_t temp1, temp2;
 
   // stage 1
-  temp1 = (input[0] + input[2]) * cospi_16_64;
-  temp2 = (input[0] - input[2]) * cospi_16_64;
+  temp1 = ((int16_t)input[0] + (int16_t)input[2]) * cospi_16_64;
+  temp2 = ((int16_t)input[0] - (int16_t)input[2]) * cospi_16_64;
   step[0] = WRAPLOW(dct_const_round_shift(temp1));
   step[1] = WRAPLOW(dct_const_round_shift(temp2));
-  temp1 = input[1] * cospi_24_64 - input[3] * cospi_8_64;
-  temp2 = input[1] * cospi_8_64 + input[3] * cospi_24_64;
+  temp1 = (int16_t)input[1] * cospi_24_64 - (int16_t)input[3] * cospi_8_64;
+  temp2 = (int16_t)input[1] * cospi_8_64 + (int16_t)input[3] * cospi_24_64;
   step[2] = WRAPLOW(dct_const_round_shift(temp1));
   step[3] = WRAPLOW(dct_const_round_shift(temp2));
 
@@ -178,7 +178,8 @@ void vpx_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 void vpx_idct4x4_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i;
   tran_high_t a1;
-  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
+  tran_low_t out =
+      WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 4);
@@ -268,20 +269,20 @@ void iadst8_c(const tran_low_t *input, tran_low_t *output) {
 }
 
 void idct8_c(const tran_low_t *input, tran_low_t *output) {
-  tran_low_t step1[8], step2[8];
+  int16_t step1[8], step2[8];
   tran_high_t temp1, temp2;
 
   // stage 1
-  step1[0] = input[0];
-  step1[2] = input[4];
-  step1[1] = input[2];
-  step1[3] = input[6];
-  temp1 = input[1] * cospi_28_64 - input[7] * cospi_4_64;
-  temp2 = input[1] * cospi_4_64 + input[7] * cospi_28_64;
+  step1[0] = (int16_t)input[0];
+  step1[2] = (int16_t)input[4];
+  step1[1] = (int16_t)input[2];
+  step1[3] = (int16_t)input[6];
+  temp1 = (int16_t)input[1] * cospi_28_64 - (int16_t)input[7] * cospi_4_64;
+  temp2 = (int16_t)input[1] * cospi_4_64 + (int16_t)input[7] * cospi_28_64;
   step1[4] = WRAPLOW(dct_const_round_shift(temp1));
   step1[7] = WRAPLOW(dct_const_round_shift(temp2));
-  temp1 = input[5] * cospi_12_64 - input[3] * cospi_20_64;
-  temp2 = input[5] * cospi_20_64 + input[3] * cospi_12_64;
+  temp1 = (int16_t)input[5] * cospi_12_64 - (int16_t)input[3] * cospi_20_64;
+  temp2 = (int16_t)input[5] * cospi_20_64 + (int16_t)input[3] * cospi_12_64;
   step1[5] = WRAPLOW(dct_const_round_shift(temp1));
   step1[6] = WRAPLOW(dct_const_round_shift(temp2));
 
@@ -374,7 +375,8 @@ void vpx_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 void vpx_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i, j;
   tran_high_t a1;
-  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
+  tran_low_t out =
+      WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 5);
@@ -553,26 +555,26 @@ void iadst16_c(const tran_low_t *input, tran_low_t *output) {
 }
 
 void idct16_c(const tran_low_t *input, tran_low_t *output) {
-  tran_low_t step1[16], step2[16];
+  int16_t step1[16], step2[16];
   tran_high_t temp1, temp2;
 
   // stage 1
-  step1[0] = input[0 / 2];
-  step1[1] = input[16 / 2];
-  step1[2] = input[8 / 2];
-  step1[3] = input[24 / 2];
-  step1[4] = input[4 / 2];
-  step1[5] = input[20 / 2];
-  step1[6] = input[12 / 2];
-  step1[7] = input[28 / 2];
-  step1[8] = input[2 / 2];
-  step1[9] = input[18 / 2];
-  step1[10] = input[10 / 2];
-  step1[11] = input[26 / 2];
-  step1[12] = input[6 / 2];
-  step1[13] = input[22 / 2];
-  step1[14] = input[14 / 2];
-  step1[15] = input[30 / 2];
+  step1[0] = (int16_t)input[0 / 2];
+  step1[1] = (int16_t)input[16 / 2];
+  step1[2] = (int16_t)input[8 / 2];
+  step1[3] = (int16_t)input[24 / 2];
+  step1[4] = (int16_t)input[4 / 2];
+  step1[5] = (int16_t)input[20 / 2];
+  step1[6] = (int16_t)input[12 / 2];
+  step1[7] = (int16_t)input[28 / 2];
+  step1[8] = (int16_t)input[2 / 2];
+  step1[9] = (int16_t)input[18 / 2];
+  step1[10] = (int16_t)input[10 / 2];
+  step1[11] = (int16_t)input[26 / 2];
+  step1[12] = (int16_t)input[6 / 2];
+  step1[13] = (int16_t)input[22 / 2];
+  step1[14] = (int16_t)input[14 / 2];
+  step1[15] = (int16_t)input[30 / 2];
 
   // stage 2
   step2[0] = step1[0];
@@ -797,7 +799,8 @@ void vpx_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest,
 void vpx_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i, j;
   tran_high_t a1;
-  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
+  tran_low_t out =
+      WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 6);
@@ -808,64 +811,64 @@ void vpx_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 }
 
 void idct32_c(const tran_low_t *input, tran_low_t *output) {
-  tran_low_t step1[32], step2[32];
+  int16_t step1[32], step2[32];
   tran_high_t temp1, temp2;
 
   // stage 1
-  step1[0] = input[0];
-  step1[1] = input[16];
-  step1[2] = input[8];
-  step1[3] = input[24];
-  step1[4] = input[4];
-  step1[5] = input[20];
-  step1[6] = input[12];
-  step1[7] = input[28];
-  step1[8] = input[2];
-  step1[9] = input[18];
-  step1[10] = input[10];
-  step1[11] = input[26];
-  step1[12] = input[6];
-  step1[13] = input[22];
-  step1[14] = input[14];
-  step1[15] = input[30];
+  step1[0] = (int16_t)input[0];
+  step1[1] = (int16_t)input[16];
+  step1[2] = (int16_t)input[8];
+  step1[3] = (int16_t)input[24];
+  step1[4] = (int16_t)input[4];
+  step1[5] = (int16_t)input[20];
+  step1[6] = (int16_t)input[12];
+  step1[7] = (int16_t)input[28];
+  step1[8] = (int16_t)input[2];
+  step1[9] = (int16_t)input[18];
+  step1[10] = (int16_t)input[10];
+  step1[11] = (int16_t)input[26];
+  step1[12] = (int16_t)input[6];
+  step1[13] = (int16_t)input[22];
+  step1[14] = (int16_t)input[14];
+  step1[15] = (int16_t)input[30];
 
-  temp1 = input[1] * cospi_31_64 - input[31] * cospi_1_64;
-  temp2 = input[1] * cospi_1_64 + input[31] * cospi_31_64;
+  temp1 = (int16_t)input[1] * cospi_31_64 - (int16_t)input[31] * cospi_1_64;
+  temp2 = (int16_t)input[1] * cospi_1_64 + (int16_t)input[31] * cospi_31_64;
   step1[16] = WRAPLOW(dct_const_round_shift(temp1));
   step1[31] = WRAPLOW(dct_const_round_shift(temp2));
 
-  temp1 = input[17] * cospi_15_64 - input[15] * cospi_17_64;
-  temp2 = input[17] * cospi_17_64 + input[15] * cospi_15_64;
+  temp1 = (int16_t)input[17] * cospi_15_64 - (int16_t)input[15] * cospi_17_64;
+  temp2 = (int16_t)input[17] * cospi_17_64 + (int16_t)input[15] * cospi_15_64;
   step1[17] = WRAPLOW(dct_const_round_shift(temp1));
   step1[30] = WRAPLOW(dct_const_round_shift(temp2));
 
-  temp1 = input[9] * cospi_23_64 - input[23] * cospi_9_64;
-  temp2 = input[9] * cospi_9_64 + input[23] * cospi_23_64;
+  temp1 = (int16_t)input[9] * cospi_23_64 - (int16_t)input[23] * cospi_9_64;
+  temp2 = (int16_t)input[9] * cospi_9_64 + (int16_t)input[23] * cospi_23_64;
   step1[18] = WRAPLOW(dct_const_round_shift(temp1));
   step1[29] = WRAPLOW(dct_const_round_shift(temp2));
 
-  temp1 = input[25] * cospi_7_64 - input[7] * cospi_25_64;
-  temp2 = input[25] * cospi_25_64 + input[7] * cospi_7_64;
+  temp1 = (int16_t)input[25] * cospi_7_64 - (int16_t)input[7] * cospi_25_64;
+  temp2 = (int16_t)input[25] * cospi_25_64 + (int16_t)input[7] * cospi_7_64;
   step1[19] = WRAPLOW(dct_const_round_shift(temp1));
   step1[28] = WRAPLOW(dct_const_round_shift(temp2));
 
-  temp1 = input[5] * cospi_27_64 - input[27] * cospi_5_64;
-  temp2 = input[5] * cospi_5_64 + input[27] * cospi_27_64;
+  temp1 = (int16_t)input[5] * cospi_27_64 - (int16_t)input[27] * cospi_5_64;
+  temp2 = (int16_t)input[5] * cospi_5_64 + (int16_t)input[27] * cospi_27_64;
   step1[20] = WRAPLOW(dct_const_round_shift(temp1));
   step1[27] = WRAPLOW(dct_const_round_shift(temp2));
 
-  temp1 = input[21] * cospi_11_64 - input[11] * cospi_21_64;
-  temp2 = input[21] * cospi_21_64 + input[11] * cospi_11_64;
+  temp1 = (int16_t)input[21] * cospi_11_64 - (int16_t)input[11] * cospi_21_64;
+  temp2 = (int16_t)input[21] * cospi_21_64 + (int16_t)input[11] * cospi_11_64;
   step1[21] = WRAPLOW(dct_const_round_shift(temp1));
   step1[26] = WRAPLOW(dct_const_round_shift(temp2));
 
-  temp1 = input[13] * cospi_19_64 - input[19] * cospi_13_64;
-  temp2 = input[13] * cospi_13_64 + input[19] * cospi_19_64;
+  temp1 = (int16_t)input[13] * cospi_19_64 - (int16_t)input[19] * cospi_13_64;
+  temp2 = (int16_t)input[13] * cospi_13_64 + (int16_t)input[19] * cospi_19_64;
   step1[22] = WRAPLOW(dct_const_round_shift(temp1));
   step1[25] = WRAPLOW(dct_const_round_shift(temp2));
 
-  temp1 = input[29] * cospi_3_64 - input[3] * cospi_29_64;
-  temp2 = input[29] * cospi_29_64 + input[3] * cospi_3_64;
+  temp1 = (int16_t)input[29] * cospi_3_64 - (int16_t)input[3] * cospi_29_64;
+  temp2 = (int16_t)input[29] * cospi_29_64 + (int16_t)input[3] * cospi_3_64;
   step1[23] = WRAPLOW(dct_const_round_shift(temp1));
   step1[24] = WRAPLOW(dct_const_round_shift(temp2));
 
@@ -1260,7 +1263,8 @@ void vpx_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
 void vpx_idct32x32_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
   int i, j;
   tran_high_t a1;
-  tran_low_t out = WRAPLOW(dct_const_round_shift(input[0] * cospi_16_64));
+  tran_low_t out =
+      WRAPLOW(dct_const_round_shift((int16_t)input[0] * cospi_16_64));
 
   out = WRAPLOW(dct_const_round_shift(out * cospi_16_64));
   a1 = ROUND_POWER_OF_TWO(out, 6);
