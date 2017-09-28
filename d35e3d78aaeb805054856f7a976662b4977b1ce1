@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a836fb2_4e7a80f5",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-09-28T18:30:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef7ee5da_caa274d4",
+      "revId": "d35e3d78aaeb805054856f7a976662b4977b1ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2e27c060_ef3bffc1",
         "filename": "vpx/src/vpx_image.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2017-09-28T05:42:17Z",
       "side": 1,
       "message": "this will be wrong without the rounding in the odd width case. maybe the test cases should include an encode/decode cycle with a psnr check to make sure this is working as intended",
+      "revId": "d35e3d78aaeb805054856f7a976662b4977b1ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "acfbef63_91e2fc62",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-09-28T18:30:14Z",
+      "side": 1,
+      "message": "I\u0027m not very clear how chroma subsampling is defined when the width is set as an odd number.\n\nSo we should round it up when it\u0027s odd here?\n\nThe test thing can be done in another change.",
+      "parentUuid": "2e27c060_ef3bffc1",
       "revId": "d35e3d78aaeb805054856f7a976662b4977b1ce1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
