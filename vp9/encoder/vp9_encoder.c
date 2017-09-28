@@ -3531,6 +3531,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // Scene detection is always used for VBR mode or screen-content case.
   // For other cases (e.g., CBR mode) use it for 5 <= speed < 8 for now
   // (need to check encoding time cost for doing this for speed 8).
+  cpi->rc.high_source_sad = 0;
   if (cpi->compute_source_sad_onepass &&
       (cpi->oxcf.rc_mode == VPX_VBR ||
        cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
