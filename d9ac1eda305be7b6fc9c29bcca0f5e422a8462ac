@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3f11fffa_7c0fb4db",
+        "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-28T16:36:08Z",
+      "side": 1,
+      "message": "Have you looked at the neon/x86 optimizations? They manage to mask out the EOB and speed up this calculation quite a bit. Alternatively, this could be a loop using the look up table.",
+      "range": {
+        "startLine": 167,
+        "startChar": 2,
+        "endLine": 167,
+        "endChar": 9
+      },
+      "revId": "d9ac1eda305be7b6fc9c29bcca0f5e422a8462ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "85242ee2_1ecb3e9e",
+        "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-09-28T16:36:08Z",
+      "side": 1,
+      "message": "Is this any faster than the C version? What MMI-specific code does it use?",
+      "range": {
+        "startLine": 187,
+        "startChar": 5,
+        "endLine": 187,
+        "endChar": 31
+      },
+      "revId": "d9ac1eda305be7b6fc9c29bcca0f5e422a8462ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
