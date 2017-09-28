@@ -69,6 +69,24 @@
       "revId": "d35e3d78aaeb805054856f7a976662b4977b1ce1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0584a69a_50f06b49",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-28T19:59:14Z",
+      "side": 1,
+      "message": "\u003e I\u0027m not very clear how chroma subsampling is defined when the width is set as an odd number.\n\u003e \n\u003e So we should round it up when it\u0027s odd here?\n\u003e \n\nyes, it should be (w/h + 1) / 2\n\n\u003e The test thing can be done in another change.\n\nyou can follow up with one, but I think this slight difference is a good example to try to use to see if the test will fail with it. there may be other cases that assume an even stride elsewhere in this code base.",
+      "parentUuid": "acfbef63_91e2fc62",
+      "revId": "d35e3d78aaeb805054856f7a976662b4977b1ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
