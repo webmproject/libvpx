@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ef7ee5da_caa274d4",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-28T05:42:17Z",
+      "side": 1,
+      "message": "this calculation actually has nothing to do with the buf_align, that will only affect the local allocation. really these shouldn\u0027t be adjusted if no allocation is going to be done. it could actually be moved after the !img check given where it\u0027s referenced",
+      "revId": "d35e3d78aaeb805054856f7a976662b4977b1ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2e27c060_ef3bffc1",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-09-28T05:42:17Z",
+      "side": 1,
+      "message": "this will be wrong without the rounding in the odd width case. maybe the test cases should include an encode/decode cycle with a psnr check to make sure this is working as intended",
+      "revId": "d35e3d78aaeb805054856f7a976662b4977b1ce1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
