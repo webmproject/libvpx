@@ -529,10 +529,7 @@ static void set_rt_speed_feature_framesize_independent(
     sf->partition_search_type = VAR_BASED_PARTITION;
     if (cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0 &&
         !is_keyframe) {
-      if (cpi->rc.is_src_frame_alt_ref) {
-        sf->partition_search_type = FIXED_PARTITION;
-        sf->always_this_block_size = BLOCK_64X64;
-      } else if (sf->use_altref_onepass && cpi->refresh_alt_ref_frame) {
+      if (sf->use_altref_onepass && cpi->refresh_alt_ref_frame) {
         sf->partition_search_type = REFERENCE_PARTITION;
       }
     }
@@ -640,6 +637,10 @@ static void set_rt_speed_feature_framesize_independent(
     sf->use_simple_block_yrd = 1;
   }
   if (sf->use_altref_onepass) {
+    if (cpi->rc.is_src_frame_alt_ref && cm->frame_type != KEY_FRAME) {
+      sf->partition_search_type = FIXED_PARTITION;
+      sf->always_this_block_size = BLOCK_64X64;
+    }
     if (cpi->count_arf_frame_usage == NULL)
       cpi->count_arf_frame_usage =
           (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
