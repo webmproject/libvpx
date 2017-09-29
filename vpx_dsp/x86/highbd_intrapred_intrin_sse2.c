@@ -425,6 +425,34 @@ void vpx_highbd_d117_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
   dst[stride] = _mm_extract_epi16(avg3, 0);
 }
 
+void vpx_highbd_d135_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
+  const int I = left[0];
+  const int J = left[1];
+  const int K = left[2];
+  const int L = left[3];
+  const __m128i XXXXABCD = _mm_loadu_si128((const __m128i *)(above - 4));
+  const __m128i KXXXABCD = _mm_insert_epi16(XXXXABCD, K, 0);
+  const __m128i KJXXABCD = _mm_insert_epi16(KXXXABCD, J, 1);
+  const __m128i KJIXABCD = _mm_insert_epi16(KJXXABCD, I, 2);
+  const __m128i JIXABCD0 = _mm_srli_si128(KJIXABCD, 2);
+  const __m128i LKJIXABC = _mm_insert_epi16(_mm_slli_si128(KJIXABCD, 2), L, 0);
+  const __m128i avg3 = avg3_epu16(&JIXABCD0, &KJIXABCD, &LKJIXABC);
+  const __m128i row0 = _mm_srli_si128(avg3, 6);
+  const __m128i row1 = _mm_srli_si128(avg3, 4);
+  const __m128i row2 = _mm_srli_si128(avg3, 2);
+  const __m128i row3 = avg3;
+  (void)bd;
+  _mm_storel_epi64((__m128i *)dst, row0);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row1);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row2);
+  dst += stride;
+  _mm_storel_epi64((__m128i *)dst, row3);
+}
+
 void vpx_highbd_d153_predictor_4x4_sse2(uint16_t *dst, ptrdiff_t stride,
                                         const uint16_t *above,
                                         const uint16_t *left, int bd) {
