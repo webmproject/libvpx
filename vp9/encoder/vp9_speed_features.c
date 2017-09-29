@@ -443,6 +443,8 @@ static void set_rt_speed_feature_framesize_independent(
 
   if (speed >= 4) {
     int i;
+    if (cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0)
+      sf->use_altref_onepass = 1;
     sf->last_partitioning_redo_frequency = 4;
     sf->adaptive_rd_thresh = 5;
     sf->use_fast_coef_costing = 0;
@@ -468,6 +470,7 @@ static void set_rt_speed_feature_framesize_independent(
   }
 
   if (speed >= 5) {
+    sf->use_altref_onepass = 0;
     sf->use_quant_fp = !is_keyframe;
     sf->auto_min_max_partition_size =
         is_keyframe ? RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
