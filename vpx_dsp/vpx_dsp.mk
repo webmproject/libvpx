@@ -386,6 +386,7 @@ DSP_SRCS-$(HAVE_VSX)  += ppc/transpose_vsx.h
 DSP_SRCS-$(HAVE_VSX)  += ppc/bitdepth_conversion_vsx.h
 
 # X86 utilities
+DSP_SRCS-$(HAVE_SSE2) += x86/mem_sse2.h
 DSP_SRCS-$(HAVE_SSE2) += x86/transpose_sse2.h
 
 DSP_SRCS-no += $(DSP_SRCS_REMOVE-yes)
