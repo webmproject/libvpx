@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b708e4b_5347774e",
+        "filename": "vp9/encoder/arm/neon/vp9_frame_scale_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-02T21:55:28Z",
+      "side": 1,
+      "message": "\u0027calculated\u0027 here and in the next 3 sentences",
+      "range": {
+        "startLine": 405,
+        "startChar": 17,
+        "endLine": 405,
+        "endChar": 26
+      },
+      "revId": "d255d9c76ddbc91ced88f6965aee5bbdf06833e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
