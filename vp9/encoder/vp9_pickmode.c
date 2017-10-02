@@ -1567,7 +1567,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   }
 #endif
 
-  if (cpi->rc.frames_since_golden == 0 && !cpi->use_svc) {
+  if (cpi->rc.frames_since_golden == 0 && !cpi->use_svc &&
+      !cpi->rc.alt_ref_gf_group && !cpi->rc.last_frame_is_src_altref) {
     usable_ref_frame = LAST_FRAME;
   } else {
     usable_ref_frame = GOLDEN_FRAME;
@@ -1580,6 +1581,15 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     if (cpi->rc.is_src_frame_alt_ref) {
       skip_ref_find_pred[LAST_FRAME] = 1;
       skip_ref_find_pred[GOLDEN_FRAME] = 1;
+    }
+    if (cm->show_frame == 0) {
+      usable_ref_frame = GOLDEN_FRAME;
+      skip_ref_find_pred[ALTREF_FRAME] = 1;
+      if (cpi->rc.frames_since_key == 1) {
+        usable_ref_frame = LAST_FRAME;
+        skip_ref_find_pred[GOLDEN_FRAME] = 1;
+        skip_ref_find_pred[ALTREF_FRAME] = 1;
+      }
     }
   }
 
