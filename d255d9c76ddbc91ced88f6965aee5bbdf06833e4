@@ -22,6 +22,30 @@
       "revId": "d255d9c76ddbc91ced88f6965aee5bbdf06833e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "748010db_b3bb8b80",
+        "filename": "vp9/encoder/arm/neon/vp9_frame_scale_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-10-02T22:51:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b708e4b_5347774e",
+      "range": {
+        "startLine": 405,
+        "startChar": 17,
+        "endLine": 405,
+        "endChar": 26
+      },
+      "revId": "d255d9c76ddbc91ced88f6965aee5bbdf06833e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
