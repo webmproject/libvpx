@@ -55,16 +55,22 @@ static INLINE void load_8bit_16x8(const uint8_t *const s,
   d[7] = _mm_load_si128((const __m128i *)(s + 7 * stride));
 }
 
-static INLINE void loadu_8bit_16x8(const uint8_t *const s,
+static INLINE void loadu_8bit_16x4(const uint8_t *const s,
                                    const ptrdiff_t stride, __m128i *const d) {
   d[0] = _mm_loadu_si128((const __m128i *)(s + 0 * stride));
   d[1] = _mm_loadu_si128((const __m128i *)(s + 1 * stride));
   d[2] = _mm_loadu_si128((const __m128i *)(s + 2 * stride));
   d[3] = _mm_loadu_si128((const __m128i *)(s + 3 * stride));
-  d[4] = _mm_loadu_si128((const __m128i *)(s + 4 * stride));
-  d[5] = _mm_loadu_si128((const __m128i *)(s + 5 * stride));
-  d[6] = _mm_loadu_si128((const __m128i *)(s + 6 * stride));
-  d[7] = _mm_loadu_si128((const __m128i *)(s + 7 * stride));
+}
+
+static INLINE void loadu_8bit_16x8(const uint8_t *const s,
+                                   const ptrdiff_t stride, __m128i *const d) {
+  loadu_8bit_16x4(s + 0 * stride, stride, &d[0]);
+  loadu_8bit_16x4(s + 4 * stride, stride, &d[4]);
+}
+
+static INLINE void _mm_storeh_epi64(__m128i *const d, const __m128i s) {
+  _mm_storeh_pi((__m64 *)d, _mm_castsi128_ps(s));
 }
 
 static INLINE void store_8bit_4x4(const __m128i *const s, uint8_t *const d,
@@ -73,6 +79,17 @@ static INLINE void store_8bit_4x4(const __m128i *const s, uint8_t *const d,
   *(int *)(d + 1 * stride) = _mm_cvtsi128_si32(s[1]);
   *(int *)(d + 2 * stride) = _mm_cvtsi128_si32(s[2]);
   *(int *)(d + 3 * stride) = _mm_cvtsi128_si32(s[3]);
+}
+
+static INLINE void store_8bit_4x4_sse2(const __m128i s, uint8_t *const d,
+                                       const ptrdiff_t stride) {
+  __m128i ss[4];
+
+  ss[0] = s;
+  ss[1] = _mm_srli_si128(s, 4);
+  ss[2] = _mm_srli_si128(s, 8);
+  ss[3] = _mm_srli_si128(s, 12);
+  store_8bit_4x4(ss, d, stride);
 }
 
 static INLINE void store_8bit_8x8(const __m128i *const s, uint8_t *const d,
