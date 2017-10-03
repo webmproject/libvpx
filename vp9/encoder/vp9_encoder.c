@@ -3438,8 +3438,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // Flag to check if its valid to compute the source sad (used for
   // scene detection and for superblock content state in CBR mode).
   // The flag may get reset below based on SVC or resizing state.
-  cpi->compute_source_sad_onepass =
-      cpi->oxcf.mode == REALTIME && cm->show_frame;
+  cpi->compute_source_sad_onepass = cpi->oxcf.mode == REALTIME;
 
   vpx_clear_system_state();
 
@@ -3532,7 +3531,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // For other cases (e.g., CBR mode) use it for 5 <= speed < 8 for now
   // (need to check encoding time cost for doing this for speed 8).
   cpi->rc.high_source_sad = 0;
-  if (cpi->compute_source_sad_onepass &&
+  if (cpi->compute_source_sad_onepass && cm->show_frame &&
       (cpi->oxcf.rc_mode == VPX_VBR ||
        cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
        (cpi->oxcf.speed >= 5 && cpi->oxcf.speed < 8 && !cpi->use_svc)))

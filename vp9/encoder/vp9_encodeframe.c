@@ -4183,7 +4183,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
       if (sf->adapt_partition_source_sad &&
           (cpi->oxcf.rc_mode == VPX_VBR && !cpi->rc.is_src_frame_alt_ref &&
            source_sad > sf->adapt_partition_thresh &&
-           cpi->refresh_golden_frame))
+           (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)))
         partition_search_type = REFERENCE_PARTITION;
     }
 
