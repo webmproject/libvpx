@@ -353,6 +353,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->reset_high_source_sad = 0;
   rc->high_source_sad_lagindex = -1;
   rc->alt_ref_gf_group = 0;
+  rc->last_frame_is_src_altref = 0;
   rc->fac_active_worst_inter = 150;
   rc->fac_active_worst_gf = 100;
   rc->force_qpmin = 0;
@@ -1480,6 +1481,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
       compute_frame_low_motion(cpi);
       if (cpi->sf.use_altref_onepass) update_altref_usage(cpi);
     }
+    cpi->rc.last_frame_is_src_altref = cpi->rc.is_src_frame_alt_ref;
   }
   if (cm->frame_type != KEY_FRAME) rc->reset_high_source_sad = 0;
 }
