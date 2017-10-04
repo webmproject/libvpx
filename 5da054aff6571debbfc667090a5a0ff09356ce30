@@ -52,6 +52,24 @@
       "revId": "5da054aff6571debbfc667090a5a0ff09356ce30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5abfcaea_50bd0449",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-10-04T17:42:20Z",
+      "side": 1,
+      "message": "Yes I guess clang-format has some taste different than us :).",
+      "parentUuid": "35a4c626_77a63565",
+      "revId": "5da054aff6571debbfc667090a5a0ff09356ce30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
