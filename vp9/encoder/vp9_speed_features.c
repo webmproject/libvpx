@@ -526,6 +526,8 @@ static void set_rt_speed_feature_framesize_independent(
   }
 
   if (speed >= 6) {
+    if (cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0)
+      sf->use_altref_onepass = 1;
     sf->partition_search_type = VAR_BASED_PARTITION;
     // Turn on this to use non-RD key frame coding mode.
     sf->use_nonrd_pick_mode = 1;
