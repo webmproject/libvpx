@@ -80,7 +80,7 @@ TEST(EncodeAPI, HighBitDepthCapability) {
 }
 
 #if CONFIG_VP8_ENCODER
-TEST(EncodeAPI, DISABLED_ImageSizeSetting) {
+TEST(EncodeAPI, ImageSizeSetting) {
   const int width = 711;
   const int height = 360;
   const int bps = 12;
