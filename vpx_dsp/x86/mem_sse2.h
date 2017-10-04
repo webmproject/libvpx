@@ -92,6 +92,15 @@ static INLINE void store_8bit_4x4_sse2(const __m128i s, uint8_t *const d,
   store_8bit_4x4(ss, d, stride);
 }
 
+static INLINE void store_8bit_8x4_from_16x2(const __m128i *const s,
+                                            uint8_t *const d,
+                                            const ptrdiff_t stride) {
+  _mm_storel_epi64((__m128i *)(d + 0 * stride), s[0]);
+  _mm_storeh_epi64((__m128i *)(d + 1 * stride), s[0]);
+  _mm_storel_epi64((__m128i *)(d + 2 * stride), s[1]);
+  _mm_storeh_epi64((__m128i *)(d + 3 * stride), s[1]);
+}
+
 static INLINE void store_8bit_8x8(const __m128i *const s, uint8_t *const d,
                                   const ptrdiff_t stride) {
   _mm_storel_epi64((__m128i *)(d + 0 * stride), s[0]);
