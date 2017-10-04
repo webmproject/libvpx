@@ -16,6 +16,24 @@
       "revId": "5da054aff6571debbfc667090a5a0ff09356ce30",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "431a3bf1_bb4eda0f",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-10-04T16:20:08Z",
+      "side": 1,
+      "message": "Yes. scale_plane_1_to_2_phase_0() uses src_w/src_h as loop numbers, and the others use dst_w/dst_h.",
+      "parentUuid": "75dff114_848cb249",
+      "revId": "5da054aff6571debbfc667090a5a0ff09356ce30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
