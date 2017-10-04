@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82e5476b_c0996848",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-04T01:06:21Z",
+      "side": 1,
+      "message": "some of this is leftover from intel. could do another pass after this one to normalize the names",
+      "range": {
+        "startLine": 119,
+        "startChar": 18,
+        "endLine": 119,
+        "endChar": 24
+      },
+      "revId": "6543213e8735aa624821942becf18efea5fa4ffa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30370b51_9bd7ec2a",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-04T01:06:21Z",
+      "side": 1,
+      "message": "nice!",
+      "range": {
+        "startLine": 330,
+        "startChar": 27,
+        "endLine": 330,
+        "endChar": 56
+      },
+      "revId": "6543213e8735aa624821942becf18efea5fa4ffa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
