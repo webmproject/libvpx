@@ -4216,7 +4216,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         // nonrd_pick_partition does not support 4x4 partition, so avoid it
         // on key frame for now.
         if ((cpi->oxcf.rc_mode == VPX_VBR && cpi->rc.high_source_sad &&
-             cm->frame_type != KEY_FRAME)) {
+             cpi->oxcf.speed < 6 && cm->frame_type != KEY_FRAME)) {
           // Use lower max_partition_size for low resoultions.
           if (cm->width <= 352 && cm->height <= 288)
             x->max_partition_size = BLOCK_32X32;
