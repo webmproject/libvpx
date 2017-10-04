@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <arm_neon.h>
+
 #include "./vp9_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
@@ -21,11 +23,11 @@
 // exceed the right and bottom boundaries of the destination frame. We rely on
 // the following frame extension function to fix these rows and columns.
 
-static INLINE void scale_plane_2_to_1_phase_0_neon(const uint8_t *src,
-                                                   const int src_stride,
-                                                   uint8_t *dst,
-                                                   const int dst_stride,
-                                                   const int w, const int h) {
+static INLINE void scale_plane_2_to_1_phase_0(const uint8_t *src,
+                                              const int src_stride,
+                                              uint8_t *dst,
+                                              const int dst_stride, const int w,
+                                              const int h) {
   const int max_width = (w + 15) & ~15;
   int y = h;
 
@@ -45,11 +47,11 @@ static INLINE void scale_plane_2_to_1_phase_0_neon(const uint8_t *src,
   } while (--y);
 }
 
-static INLINE void scale_plane_4_to_1_phase_0_neon(const uint8_t *src,
-                                                   const int src_stride,
-                                                   uint8_t *dst,
-                                                   const int dst_stride,
-                                                   const int w, const int h) {
+static INLINE void scale_plane_4_to_1_phase_0(const uint8_t *src,
+                                              const int src_stride,
+                                              uint8_t *dst,
+                                              const int dst_stride, const int w,
+                                              const int h) {
   const int max_width = (w + 15) & ~15;
   int y = h;
 
@@ -69,7 +71,7 @@ static INLINE void scale_plane_4_to_1_phase_0_neon(const uint8_t *src,
   } while (--y);
 }
 
-static INLINE void scale_plane_bilinear_phase_non_0_kernel(
+static INLINE void scale_plane_bilinear_kernel(
     const uint8x16_t in0, const uint8x16_t in1, const uint8x16_t in2,
     const uint8x16_t in3, const uint8x8_t coef0, const uint8x8_t coef1,
     uint8_t *const dst) {
@@ -95,7 +97,7 @@ static INLINE void scale_plane_bilinear_phase_non_0_kernel(
   vst1q_u8(dst, d);
 }
 
-static INLINE void scale_plane_2_to_1_bilinear_phase_non_0_neon(
+static INLINE void scale_plane_2_to_1_bilinear(
     const uint8_t *const src, const int src_stride, uint8_t *dst,
     const int dst_stride, const int w, const int h, const int16_t c0,
     const int16_t c1) {
@@ -117,8 +119,8 @@ static INLINE void scale_plane_2_to_1_bilinear_phase_non_0_neon(
       // 100 102 104 106 108 10A 10C 10E  110 112 114 116 118 11A 11C 11E
       // 101 103 105 107 109 10B 10D 10F  111 113 115 117 119 11B 11D 11F
       const uint8x16x2_t s1 = vld2q_u8(src1);
-      scale_plane_bilinear_phase_non_0_kernel(s0.val[0], s0.val[1], s1.val[0],
-                                              s1.val[1], coef0, coef1, dst);
+      scale_plane_bilinear_kernel(s0.val[0], s0.val[1], s1.val[0], s1.val[1],
+                                  coef0, coef1, dst);
       src0 += 32;
       src1 += 32;
       dst += 16;
@@ -130,7 +132,7 @@ static INLINE void scale_plane_2_to_1_bilinear_phase_non_0_neon(
   } while (--y);
 }
 
-static INLINE void scale_plane_4_to_1_bilinear_phase_non_0_neon(
+static INLINE void scale_plane_4_to_1_bilinear(
     const uint8_t *const src, const int src_stride, uint8_t *dst,
     const int dst_stride, const int w, const int h, const int16_t c0,
     const int16_t c1) {
@@ -157,8 +159,8 @@ static INLINE void scale_plane_4_to_1_bilinear_phase_non_0_neon(
       // 102 106 10A 10E 112 116 11A 11E  122 126 12A 12E 132 136 13A 13E (*)
       // 103 107 10B 10F 113 117 11B 11F  123 127 12B 12F 133 137 13B 13F (*)
       const uint8x16x4_t s1 = vld4q_u8(src1);
-      scale_plane_bilinear_phase_non_0_kernel(s0.val[0], s0.val[1], s1.val[0],
-                                              s1.val[1], coef0, coef1, dst);
+      scale_plane_bilinear_kernel(s0.val[0], s0.val[1], s1.val[0], s1.val[1],
+                                  coef0, coef1, dst);
       src0 += 64;
       src1 += 64;
       dst += 16;
@@ -178,12 +180,11 @@ static INLINE uint8x8_t scale_filter_bilinear(const uint8x8_t *const s,
   return vrshrn_n_u16(h1, 7);
 }
 
-static void scale_plane_2_to_1_general_neon(const uint8_t *src,
-                                            const int src_stride, uint8_t *dst,
-                                            const int dst_stride, const int w,
-                                            const int h,
-                                            const int16_t *const coef,
-                                            uint8_t *const temp_buffer) {
+static void scale_plane_2_to_1_general(const uint8_t *src, const int src_stride,
+                                       uint8_t *dst, const int dst_stride,
+                                       const int w, const int h,
+                                       const int16_t *const coef,
+                                       uint8_t *const temp_buffer) {
   const int width_hor = (w + 3) & ~3;
   const int width_ver = (w + 7) & ~7;
   const int height_hor = (2 * h + SUBPEL_TAPS - 2 + 7) & ~7;
@@ -268,10 +269,10 @@ static void scale_plane_2_to_1_general_neon(const uint8_t *src,
                   &s[12], &s[13]);
       t += 8 * width_hor;
 
-      d[0] = scale_filter_8(&s[0], filters);
-      d[1] = scale_filter_8(&s[2], filters);
-      d[2] = scale_filter_8(&s[4], filters);
-      d[3] = scale_filter_8(&s[6], filters);
+      d[0] = scale_filter_8(&s[0], filters);  // 00 01 02 03 04 05 06 07
+      d[1] = scale_filter_8(&s[2], filters);  // 10 11 12 13 14 15 16 17
+      d[2] = scale_filter_8(&s[4], filters);  // 20 21 22 23 24 25 26 27
+      d[3] = scale_filter_8(&s[6], filters);  // 30 31 32 33 34 35 36 37
       vst1_u8(dst + 0 * dst_stride, d[0]);
       vst1_u8(dst + 1 * dst_stride, d[1]);
       vst1_u8(dst + 2 * dst_stride, d[2]);
@@ -295,12 +296,11 @@ static void scale_plane_2_to_1_general_neon(const uint8_t *src,
   } while (x);
 }
 
-static void scale_plane_4_to_1_general_neon(const uint8_t *src,
-                                            const int src_stride, uint8_t *dst,
-                                            const int dst_stride, const int w,
-                                            const int h,
-                                            const int16_t *const coef,
-                                            uint8_t *const temp_buffer) {
+static void scale_plane_4_to_1_general(const uint8_t *src, const int src_stride,
+                                       uint8_t *dst, const int dst_stride,
+                                       const int w, const int h,
+                                       const int16_t *const coef,
+                                       uint8_t *const temp_buffer) {
   const int width_hor = (w + 1) & ~1;
   const int width_ver = (w + 7) & ~7;
   const int height_hor = (4 * h + SUBPEL_TAPS - 2 + 7) & ~7;
@@ -379,8 +379,8 @@ static void scale_plane_4_to_1_general_neon(const uint8_t *src,
                   &s[10], &s[11]);
       t += 8 * width_hor;
 
-      d[0] = scale_filter_8(&s[0], filters);
-      d[1] = scale_filter_8(&s[4], filters);
+      d[0] = scale_filter_8(&s[0], filters);  // 00 01 02 03 04 05 06 07
+      d[1] = scale_filter_8(&s[4], filters);  // 10 11 12 13 14 15 16 17
       vst1_u8(dst + 0 * dst_stride, d[0]);
       vst1_u8(dst + 1 * dst_stride, d[1]);
 
@@ -419,12 +419,11 @@ static void scale_plane_4_to_1_general_neon(const uint8_t *src,
 // decided by phase_scaler, and are always less than 1 pixel below the last row
 // of the original image.
 
-static void scale_plane_4_to_3_bilinear_neon(const uint8_t *src,
-                                             const int src_stride, uint8_t *dst,
-                                             const int dst_stride, const int w,
-                                             const int h,
-                                             const int phase_scaler,
-                                             uint8_t *const temp_buffer) {
+static void scale_plane_4_to_3_bilinear(const uint8_t *src,
+                                        const int src_stride, uint8_t *dst,
+                                        const int dst_stride, const int w,
+                                        const int h, const int phase_scaler,
+                                        uint8_t *const temp_buffer) {
   static const int step_q4 = 16 * 4 / 3;
   const int width_hor = (w + 5) - ((w + 5) % 6);
   const int stride_hor = width_hor + 2;  // store 2 extra pixels
@@ -561,13 +560,12 @@ static void scale_plane_4_to_3_bilinear_neon(const uint8_t *src,
   } while (x);
 }
 
-static void scale_plane_4_to_3_general_neon(const uint8_t *src,
-                                            const int src_stride, uint8_t *dst,
-                                            const int dst_stride, const int w,
-                                            const int h,
-                                            const InterpKernel *const coef,
-                                            const int phase_scaler,
-                                            uint8_t *const temp_buffer) {
+static void scale_plane_4_to_3_general(const uint8_t *src, const int src_stride,
+                                       uint8_t *dst, const int dst_stride,
+                                       const int w, const int h,
+                                       const InterpKernel *const coef,
+                                       const int phase_scaler,
+                                       uint8_t *const temp_buffer) {
   static const int step_q4 = 16 * 4 / 3;
   const int width_hor = (w + 5) - ((w + 5) % 6);
   const int stride_hor = width_hor + 2;  // store 2 extra pixels
@@ -723,41 +721,35 @@ void vp9_scale_and_extend_frame_neon(const YV12_BUFFER_CONFIG *src,
     // 2 to 1
     scaled = 1;
     if (phase_scaler == 0) {
-      scale_plane_2_to_1_phase_0_neon(src->y_buffer, src->y_stride,
-                                      dst->y_buffer, dst->y_stride, dst_w,
-                                      dst_h);
-      scale_plane_2_to_1_phase_0_neon(src->u_buffer, src->uv_stride,
-                                      dst->u_buffer, dst->uv_stride, dst_uv_w,
-                                      dst_uv_h);
-      scale_plane_2_to_1_phase_0_neon(src->v_buffer, src->uv_stride,
-                                      dst->v_buffer, dst->uv_stride, dst_uv_w,
-                                      dst_uv_h);
+      scale_plane_2_to_1_phase_0(src->y_buffer, src->y_stride, dst->y_buffer,
+                                 dst->y_stride, dst_w, dst_h);
+      scale_plane_2_to_1_phase_0(src->u_buffer, src->uv_stride, dst->u_buffer,
+                                 dst->uv_stride, dst_uv_w, dst_uv_h);
+      scale_plane_2_to_1_phase_0(src->v_buffer, src->uv_stride, dst->v_buffer,
+                                 dst->uv_stride, dst_uv_w, dst_uv_h);
     } else if (filter_type == BILINEAR) {
       const int16_t c0 = vp9_filter_kernels[BILINEAR][phase_scaler][3];
       const int16_t c1 = vp9_filter_kernels[BILINEAR][phase_scaler][4];
-      scale_plane_2_to_1_bilinear_phase_non_0_neon(src->y_buffer, src->y_stride,
-                                                   dst->y_buffer, dst->y_stride,
-                                                   dst_w, dst_h, c0, c1);
-      scale_plane_2_to_1_bilinear_phase_non_0_neon(
-          src->u_buffer, src->uv_stride, dst->u_buffer, dst->uv_stride,
-          dst_uv_w, dst_uv_h, c0, c1);
-      scale_plane_2_to_1_bilinear_phase_non_0_neon(
-          src->v_buffer, src->uv_stride, dst->v_buffer, dst->uv_stride,
-          dst_uv_w, dst_uv_h, c0, c1);
+      scale_plane_2_to_1_bilinear(src->y_buffer, src->y_stride, dst->y_buffer,
+                                  dst->y_stride, dst_w, dst_h, c0, c1);
+      scale_plane_2_to_1_bilinear(src->u_buffer, src->uv_stride, dst->u_buffer,
+                                  dst->uv_stride, dst_uv_w, dst_uv_h, c0, c1);
+      scale_plane_2_to_1_bilinear(src->v_buffer, src->uv_stride, dst->v_buffer,
+                                  dst->uv_stride, dst_uv_w, dst_uv_h, c0, c1);
     } else {
       const int buffer_stride = (dst_w + 3) & ~3;
       const int buffer_height = (2 * dst_h + SUBPEL_TAPS - 2 + 7) & ~7;
       uint8_t *const temp_buffer =
           (uint8_t *)malloc(buffer_stride * buffer_height);
       if (temp_buffer) {
-        scale_plane_2_to_1_general_neon(
+        scale_plane_2_to_1_general(
             src->y_buffer, src->y_stride, dst->y_buffer, dst->y_stride, dst_w,
             dst_h, vp9_filter_kernels[filter_type][phase_scaler], temp_buffer);
-        scale_plane_2_to_1_general_neon(
+        scale_plane_2_to_1_general(
             src->u_buffer, src->uv_stride, dst->u_buffer, dst->uv_stride,
             dst_uv_w, dst_uv_h, vp9_filter_kernels[filter_type][phase_scaler],
             temp_buffer);
-        scale_plane_2_to_1_general_neon(
+        scale_plane_2_to_1_general(
             src->v_buffer, src->uv_stride, dst->v_buffer, dst->uv_stride,
             dst_uv_w, dst_uv_h, vp9_filter_kernels[filter_type][phase_scaler],
             temp_buffer);
@@ -770,41 +762,35 @@ void vp9_scale_and_extend_frame_neon(const YV12_BUFFER_CONFIG *src,
     // 4 to 1
     scaled = 1;
     if (phase_scaler == 0) {
-      scale_plane_4_to_1_phase_0_neon(src->y_buffer, src->y_stride,
-                                      dst->y_buffer, dst->y_stride, dst_w,
-                                      dst_h);
-      scale_plane_4_to_1_phase_0_neon(src->u_buffer, src->uv_stride,
-                                      dst->u_buffer, dst->uv_stride, dst_uv_w,
-                                      dst_uv_h);
-      scale_plane_4_to_1_phase_0_neon(src->v_buffer, src->uv_stride,
-                                      dst->v_buffer, dst->uv_stride, dst_uv_w,
-                                      dst_uv_h);
+      scale_plane_4_to_1_phase_0(src->y_buffer, src->y_stride, dst->y_buffer,
+                                 dst->y_stride, dst_w, dst_h);
+      scale_plane_4_to_1_phase_0(src->u_buffer, src->uv_stride, dst->u_buffer,
+                                 dst->uv_stride, dst_uv_w, dst_uv_h);
+      scale_plane_4_to_1_phase_0(src->v_buffer, src->uv_stride, dst->v_buffer,
+                                 dst->uv_stride, dst_uv_w, dst_uv_h);
     } else if (filter_type == BILINEAR) {
       const int16_t c0 = vp9_filter_kernels[BILINEAR][phase_scaler][3];
       const int16_t c1 = vp9_filter_kernels[BILINEAR][phase_scaler][4];
-      scale_plane_4_to_1_bilinear_phase_non_0_neon(src->y_buffer, src->y_stride,
-                                                   dst->y_buffer, dst->y_stride,
-                                                   dst_w, dst_h, c0, c1);
-      scale_plane_4_to_1_bilinear_phase_non_0_neon(
-          src->u_buffer, src->uv_stride, dst->u_buffer, dst->uv_stride,
-          dst_uv_w, dst_uv_h, c0, c1);
-      scale_plane_4_to_1_bilinear_phase_non_0_neon(
-          src->v_buffer, src->uv_stride, dst->v_buffer, dst->uv_stride,
-          dst_uv_w, dst_uv_h, c0, c1);
+      scale_plane_4_to_1_bilinear(src->y_buffer, src->y_stride, dst->y_buffer,
+                                  dst->y_stride, dst_w, dst_h, c0, c1);
+      scale_plane_4_to_1_bilinear(src->u_buffer, src->uv_stride, dst->u_buffer,
+                                  dst->uv_stride, dst_uv_w, dst_uv_h, c0, c1);
+      scale_plane_4_to_1_bilinear(src->v_buffer, src->uv_stride, dst->v_buffer,
+                                  dst->uv_stride, dst_uv_w, dst_uv_h, c0, c1);
     } else {
       const int buffer_stride = (dst_w + 1) & ~1;
       const int buffer_height = (4 * dst_h + SUBPEL_TAPS - 2 + 7) & ~7;
       uint8_t *const temp_buffer =
           (uint8_t *)malloc(buffer_stride * buffer_height);
       if (temp_buffer) {
-        scale_plane_4_to_1_general_neon(
+        scale_plane_4_to_1_general(
             src->y_buffer, src->y_stride, dst->y_buffer, dst->y_stride, dst_w,
             dst_h, vp9_filter_kernels[filter_type][phase_scaler], temp_buffer);
-        scale_plane_4_to_1_general_neon(
+        scale_plane_4_to_1_general(
             src->u_buffer, src->uv_stride, dst->u_buffer, dst->uv_stride,
             dst_uv_w, dst_uv_h, vp9_filter_kernels[filter_type][phase_scaler],
             temp_buffer);
-        scale_plane_4_to_1_general_neon(
+        scale_plane_4_to_1_general(
             src->v_buffer, src->uv_stride, dst->v_buffer, dst->uv_stride,
             dst_uv_w, dst_uv_h, vp9_filter_kernels[filter_type][phase_scaler],
             temp_buffer);
@@ -822,27 +808,27 @@ void vp9_scale_and_extend_frame_neon(const YV12_BUFFER_CONFIG *src,
     if (temp_buffer) {
       scaled = 1;
       if (filter_type == BILINEAR) {
-        scale_plane_4_to_3_bilinear_neon(src->y_buffer, src->y_stride,
-                                         dst->y_buffer, dst->y_stride, dst_w,
-                                         dst_h, phase_scaler, temp_buffer);
-        scale_plane_4_to_3_bilinear_neon(
-            src->u_buffer, src->uv_stride, dst->u_buffer, dst->uv_stride,
-            dst_uv_w, dst_uv_h, phase_scaler, temp_buffer);
-        scale_plane_4_to_3_bilinear_neon(
-            src->v_buffer, src->uv_stride, dst->v_buffer, dst->uv_stride,
-            dst_uv_w, dst_uv_h, phase_scaler, temp_buffer);
+        scale_plane_4_to_3_bilinear(src->y_buffer, src->y_stride, dst->y_buffer,
+                                    dst->y_stride, dst_w, dst_h, phase_scaler,
+                                    temp_buffer);
+        scale_plane_4_to_3_bilinear(src->u_buffer, src->uv_stride,
+                                    dst->u_buffer, dst->uv_stride, dst_uv_w,
+                                    dst_uv_h, phase_scaler, temp_buffer);
+        scale_plane_4_to_3_bilinear(src->v_buffer, src->uv_stride,
+                                    dst->v_buffer, dst->uv_stride, dst_uv_w,
+                                    dst_uv_h, phase_scaler, temp_buffer);
       } else {
-        scale_plane_4_to_3_general_neon(
+        scale_plane_4_to_3_general(
             src->y_buffer, src->y_stride, dst->y_buffer, dst->y_stride, dst_w,
             dst_h, vp9_filter_kernels[filter_type], phase_scaler, temp_buffer);
-        scale_plane_4_to_3_general_neon(
-            src->u_buffer, src->uv_stride, dst->u_buffer, dst->uv_stride,
-            dst_uv_w, dst_uv_h, vp9_filter_kernels[filter_type], phase_scaler,
-            temp_buffer);
-        scale_plane_4_to_3_general_neon(
-            src->v_buffer, src->uv_stride, dst->v_buffer, dst->uv_stride,
-            dst_uv_w, dst_uv_h, vp9_filter_kernels[filter_type], phase_scaler,
-            temp_buffer);
+        scale_plane_4_to_3_general(src->u_buffer, src->uv_stride, dst->u_buffer,
+                                   dst->uv_stride, dst_uv_w, dst_uv_h,
+                                   vp9_filter_kernels[filter_type],
+                                   phase_scaler, temp_buffer);
+        scale_plane_4_to_3_general(src->v_buffer, src->uv_stride, dst->v_buffer,
+                                   dst->uv_stride, dst_uv_w, dst_uv_h,
+                                   vp9_filter_kernels[filter_type],
+                                   phase_scaler, temp_buffer);
       }
       free(temp_buffer);
     }
