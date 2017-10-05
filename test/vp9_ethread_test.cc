@@ -127,8 +127,10 @@ static void compare_fp_stats(vpx_fixed_buf_t *fp_stats, double factor) {
     const double *frame_stats2 = reinterpret_cast<double *>(stats2);
 
     for (j = 0; j < kDbl; ++j) {
-      EXPECT_LE(fabs(*frame_stats1 - *frame_stats2),
-                fabs(*frame_stats1) / factor);
+      ASSERT_LE(fabs(*frame_stats1 - *frame_stats2),
+                fabs(*frame_stats1) / factor)
+          << "First failure @ frame #" << i << " stat #" << j << " ("
+          << *frame_stats1 << " vs. " << *frame_stats2 << ")";
       frame_stats1++;
       frame_stats2++;
     }
@@ -182,7 +184,7 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   // Compare to check if using or not using row-mt generates close stats.
-  compare_fp_stats(&firstpass_stats_, 1000.0);
+  ASSERT_NO_FATAL_FAILURE(compare_fp_stats(&firstpass_stats_, 1000.0));
 
   // Test single thread vs multiple threads
   row_mt_mode_ = 1;
@@ -196,7 +198,7 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   // Compare to check if single-thread and multi-thread stats are close enough.
-  compare_fp_stats(&firstpass_stats_, 1000.0);
+  ASSERT_NO_FATAL_FAILURE(compare_fp_stats(&firstpass_stats_, 1000.0));
 
   // Bit exact test in row_mt mode.
   // When row_mt_mode_=1 and using >1 threads, the encoder generates bit exact
