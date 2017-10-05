@@ -540,9 +540,7 @@ static void set_rt_speed_feature_framesize_independent(
     if (sf->use_source_sad) {
       sf->adapt_partition_source_sad = 1;
       sf->adapt_partition_thresh =
-          (cm->width * cm->height <= 640 * 360) ? 40000 : 80000;
-      if (sf->use_altref_onepass && cpi->refresh_alt_ref_frame && !is_keyframe)
-        sf->adapt_partition_thresh = (3 * sf->adapt_partition_thresh) >> 2;
+          (cm->width * cm->height <= 640 * 360) ? 40000 : 60000;
       if (cpi->content_state_sb_fd == NULL &&
           (!cpi->use_svc ||
            cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
