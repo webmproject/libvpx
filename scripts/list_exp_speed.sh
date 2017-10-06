@@ -45,7 +45,9 @@ profile=0
 cd $test_dir
 rm *.txt
 
-for exp_tool in experimental chroma_sub8x8 filter_7bit reference_buffer rect_tx global_motion ext_tx cdef ext_intra mv_compress ext_refs dual_filter motion_var warped_motion ext_delta_q ec_smallmul var_tx ext_inter wedge compound_segment interintra one_sided_compound  ext-comp-refs smooth_hv parallel_deblocking rect_intra_pred convolve_round aom-qm dist_8x8 palette_throughput tempmv_signaling altref2
+for exp_tool in experimental chroma_sub8x8 reference_buffer rect_tx global_motion ext_tx cdef ext_intra mv_compress dual_filter motion_var warped_motion var_tx wedge compound_segment interintra one_sided_compound ext-comp-refs smooth_hv parallel_deblocking convolve_round altref2 adapt_scan intra_edge
+
+# dist_8x8 palette_throughput tempmv_signaling ext_delta_q ec_smallmul aom_qm
 
 do
   cd $build_dir

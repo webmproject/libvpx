@@ -13,7 +13,7 @@ else
   exp_tool=$1
 fi
 
-root_dir=~/Dev/av1w
+root_dir=~/Dev/aomedia
 code_dir=$root_dir/aom
 build_dir=$root_dir/release
 test_dir=~/Dev/field
@@ -49,6 +49,7 @@ cd $test_dir
 #video_sequence_list="BQTerrace_1080p60.sh BasketballDrive_1080p50.sh ParkScene_1080p24.sh"
 #video_sequence_list="blue_sky_1080p25.sh rush_hour_1080p25.sh tennis_1080p24.sh"
 video_sequence_list="aerial_4k.sh"
+#video_sequence_list="BasketballDrive_1080p50.sh"
 
 constant_cmdline_options="--skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=25 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --test-decode=warn --psnr"
 col_num=0
@@ -79,16 +80,16 @@ do
 
   # Note:
   #  Here we have an chance to override the encoding input options per video sequence
-  frames=25
+  frames=50
   bitrate=14000
   
   profile=0
-  bs="$Codec.$exp_tool.$videoname.$commit_hash.$profile.webm"
+  bs="$Codec.$exp_tool.$videoname.$commit_hash.f$frames.$profile.webm"
   
   ./aomenc $verbose -o $bitstream_dir/$bs $video $codec --limit=$frames --profile=$profile --fps=$fps $tune_content --target-bitrate=$bitrate --tile-columns=$col_num $constant_cmdline_options
 
   # profile=2
-  # bs="$Codec.$exp_tool.$videoname.$commit_hash.$profile.webm"
+  # bs="$Codec.$exp_tool.$videoname.$commit_hash.f$frames.$profile.webm"
 
   # ./aomenc $verbose -o $bitstream_dir/$bs $video $codec --limit=$frames --profile=$profile --bit-depth=10 --fps=$fps $tune_content --target-bitrate=$bitrate --tile-columns=$col_num $constant_cmdline_options
  
