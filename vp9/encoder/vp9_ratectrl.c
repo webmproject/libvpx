@@ -2280,7 +2280,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
     uint32_t min_thresh = 4000;
     float thresh = 8.0f;
     if (cpi->oxcf.rc_mode == VPX_VBR) {
-      min_thresh = 60000;
+      min_thresh = 70000;
       thresh = 2.1f;
     }
     if (cpi->oxcf.lag_in_frames > 0) {
