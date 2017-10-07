@@ -365,4 +365,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&vpx_fdct32x32_rd_msa,
                                  &vpx_idct32x32_1024_add_msa, 1, VPX_BITS_8)));
 #endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+
+#if HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+INSTANTIATE_TEST_CASE_P(
+    VSX, Trans32x32Test,
+    ::testing::Values(make_tuple(&vpx_fdct32x32_c, &vpx_idct32x32_1024_add_vsx,
+                                 0, VPX_BITS_8),
+                      make_tuple(&vpx_fdct32x32_rd_c,
+                                 &vpx_idct32x32_1024_add_vsx, 1, VPX_BITS_8)));
+#endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace
