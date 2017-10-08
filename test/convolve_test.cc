@@ -1200,7 +1200,7 @@ INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest,
 #else   // !CONFIG_VP9_HIGHBITDEPTH
 const ConvolveFunctions convolve8_avx2(
     vpx_convolve_copy_c, vpx_convolve_avg_c, vpx_convolve8_horiz_avx2,
-    vpx_convolve8_avg_horiz_ssse3, vpx_convolve8_vert_avx2,
+    vpx_convolve8_avg_horiz_avx2, vpx_convolve8_vert_avx2,
     vpx_convolve8_avg_vert_avx2, vpx_convolve8_avx2, vpx_convolve8_avg_avx2,
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
     vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
