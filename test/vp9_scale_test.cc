@@ -48,17 +48,19 @@ class ScaleTest : public VpxScaleBase,
   }
 
   void RunTest() {
-    static const int kNumSizesToTest = 4;
+    static const int kNumSizesToTest = 20;
     static const int kNumScaleFactorsToTest = 4;
-    static const int kWidthsToTest[] = { 16, 32, 48, 64 };
-    static const int kHeightsToTest[] = { 16, 20, 24, 28 };
+    static const int kSizesToTest[] = {
+      2,  4,  6,  8,  10, 12, 14, 16, 18,  20,
+      22, 24, 26, 28, 30, 32, 34, 68, 128, 134
+    };
     static const int kScaleFactors[] = { 1, 2, 3, 4 };
     for (INTERP_FILTER filter_type = 0; filter_type < 4; ++filter_type) {
       for (int phase_scaler = 0; phase_scaler < 16; ++phase_scaler) {
         for (int h = 0; h < kNumSizesToTest; ++h) {
-          const int src_height = kHeightsToTest[h];
+          const int src_height = kSizesToTest[h];
           for (int w = 0; w < kNumSizesToTest; ++w) {
-            const int src_width = kWidthsToTest[w];
+            const int src_width = kSizesToTest[w];
             for (int sf_up_idx = 0; sf_up_idx < kNumScaleFactorsToTest;
                  ++sf_up_idx) {
               const int sf_up = kScaleFactors[sf_up_idx];
@@ -71,7 +73,13 @@ class ScaleTest : public VpxScaleBase,
                   continue;
                 }
                 // I420 frame width and height must be even.
-                if (dst_width & 1 || dst_height & 1) {
+                if (!dst_width || !dst_height || dst_width & 1 ||
+                    dst_height & 1) {
+                  continue;
+                }
+                // vpx_convolve8_c() has restriction on the step which cannot
+                // exceed 64 (ratio 1 to 4).
+                if (src_width > 4 * dst_width || src_height > 4 * dst_height) {
                   continue;
                 }
                 ASSERT_NO_FATAL_FAILURE(ResetScaleImages(
