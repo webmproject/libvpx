@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "270c1b2d_d3b9412a",
+        "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-10-09T09:59:43Z",
+      "side": 1,
+      "message": "Thank you for your suggestion. I have mask out the EOB int the updated changes.",
+      "parentUuid": "3f11fffa_7c0fb4db",
+      "range": {
+        "startLine": 167,
+        "startChar": 2,
+        "endLine": 167,
+        "endChar": 9
+      },
+      "revId": "d9ac1eda305be7b6fc9c29bcca0f5e422a8462ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "85242ee2_1ecb3e9e",
         "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "d9ac1eda305be7b6fc9c29bcca0f5e422a8462ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37c27fb2_8c6ead77",
+        "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-10-09T09:59:43Z",
+      "side": 1,
+      "message": "Yes, it\u0027s faster than the original version, Because I unrolling the for loop here. There are no MMI code used temporary, I have tested my first version mmi optimization for this function, but the effect is not satisfactory. I am still try to find a better way to optimize it with mmi now. May I keep this optimization temporary although it was not optimized with mmi, because we really need to optimize the performance on loongson platform. Thank you very much.",
+      "parentUuid": "85242ee2_1ecb3e9e",
+      "range": {
+        "startLine": 187,
+        "startChar": 5,
+        "endLine": 187,
+        "endChar": 31
+      },
+      "revId": "d9ac1eda305be7b6fc9c29bcca0f5e422a8462ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
