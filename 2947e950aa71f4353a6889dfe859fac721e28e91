@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dcde2bcd_d9b98815",
+        "filename": "vpx_dsp/x86/vpx_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-10-09T21:19:05Z",
+      "side": 1,
+      "message": "Not sure if the compiler can automatically combine the two ifs. If not, this \u0027if (avg)\u0027 and the above one can combine together.",
+      "range": {
+        "startLine": 200,
+        "startChar": 4,
+        "endLine": 200,
+        "endChar": 14
+      },
+      "revId": "2947e950aa71f4353a6889dfe859fac721e28e91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
