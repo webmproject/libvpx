@@ -2276,6 +2276,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
     int start_frame = 0;
     int frames_to_buffer = 1;
     int frame = 0;
+    int scene_cut_force_key_frame = 0;
     uint64_t avg_sad_current = 0;
     uint32_t min_thresh = 4000;
     float thresh = 8.0f;
@@ -2306,6 +2307,8 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
         rc->high_source_sad = 1;
       else
         rc->high_source_sad = 0;
+      if (rc->high_source_sad && avg_sad_current > min_thresh << 1)
+        scene_cut_force_key_frame = 1;
       // Update recursive average for current frame.
       if (avg_sad_current > 0)
         rc->avg_source_sad[0] =
@@ -2366,6 +2369,8 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
             rc->high_source_sad = 1;
           else
             rc->high_source_sad = 0;
+          if (rc->high_source_sad && avg_sad > min_thresh << 1)
+            scene_cut_force_key_frame = 1;
           if (avg_sad > 0 || cpi->oxcf.rc_mode == VPX_CBR)
             rc->avg_source_sad[0] = (3 * rc->avg_source_sad[0] + avg_sad) >> 2;
         } else {
@@ -2397,6 +2402,8 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
         cpi->ext_refresh_frame_flags_pending == 0) {
       int target;
       cpi->refresh_golden_frame = 1;
+      if (cpi->oxcf.speed >= 6 && scene_cut_force_key_frame)
+        cm->frame_type = KEY_FRAME;
       rc->source_alt_ref_pending = 0;
       if (cpi->sf.use_altref_onepass && cpi->oxcf.enable_auto_arf)
         rc->source_alt_ref_pending = 1;
