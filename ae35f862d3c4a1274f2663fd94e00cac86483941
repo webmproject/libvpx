@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df1ecbd4_aeda4e3d",
+        "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-10-10T22:33:32Z",
+      "side": 1,
+      "message": "everything except [d]qcoeff can be const",
+      "range": {
+        "startLine": 34,
+        "startChar": 2,
+        "endLine": 34,
+        "endChar": 9
+      },
+      "revId": "ae35f862d3c4a1274f2663fd94e00cac86483941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d79d526_e98412a0",
+        "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-10-10T22:33:32Z",
+      "side": 1,
+      "message": "same here - almost everything can be const",
+      "range": {
+        "startLine": 203,
+        "startChar": 2,
+        "endLine": 203,
+        "endChar": 9
+      },
+      "revId": "ae35f862d3c4a1274f2663fd94e00cac86483941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
