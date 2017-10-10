@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe7d9575_be4eed32",
+        "filename": "vp9/encoder/x86/vp9_frame_scale_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-10-10T23:00:35Z",
+      "side": 1,
+      "message": "mask should be a pointer.",
+      "revId": "56d2a89214ce22079e25423df647d6c969d80ac5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
