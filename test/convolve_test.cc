@@ -902,33 +902,51 @@ TEST_P(ConvolveTest, FilterExtremes) {
 
 /* This test exercises that enough rows and columns are filtered with every
    possible initial fractional positions and scaling steps. */
+#if !CONFIG_VP9_HIGHBITDEPTH
+static const ConvolveFunc scaled_2d_c_funcs[2] = { vpx_scaled_2d_c,
+                                                   vpx_scaled_avg_2d_c };
+
 TEST_P(ConvolveTest, CheckScalingFiltering) {
   uint8_t *const in = input();
   uint8_t *const out = output();
-  const InterpKernel *const eighttap = vp9_filter_kernels[EIGHTTAP];
+  uint8_t ref[kOutputStride * kMaxDimension];
 
-  SetConstantInput(127);
+  ::libvpx_test::ACMRandom prng;
+  for (int y = 0; y < Height(); ++y) {
+    for (int x = 0; x < Width(); ++x) {
+      const uint16_t r = prng.Rand8Extremes();
+      assign_val(in, y * kInputStride + x, r);
+    }
+  }
 
-  for (int frac = 0; frac < 16; ++frac) {
-    for (int step = 1; step <= 32; ++step) {
-      /* Test the horizontal and vertical filters in combination. */
-      ASM_REGISTER_STATE_CHECK(
-          UUT_->shv8_[0](in, kInputStride, out, kOutputStride, eighttap, frac,
-                         step, frac, step, Width(), Height()));
+  for (int i = 0; i < 2; ++i) {
+    for (INTERP_FILTER filter_type = 0; filter_type < 4; ++filter_type) {
+      const InterpKernel *const eighttap = vp9_filter_kernels[filter_type];
+      for (int frac = 0; frac < 16; ++frac) {
+        for (int step = 1; step <= 32; ++step) {
+          /* Test the horizontal and vertical filters in combination. */
+          scaled_2d_c_funcs[i](in, kInputStride, ref, kOutputStride, eighttap,
+                               frac, step, frac, step, Width(), Height());
+          ASM_REGISTER_STATE_CHECK(
+              UUT_->shv8_[i](in, kInputStride, out, kOutputStride, eighttap,
+                             frac, step, frac, step, Width(), Height()));
 
-      CheckGuardBlocks();
+          CheckGuardBlocks();
 
-      for (int y = 0; y < Height(); ++y) {
-        for (int x = 0; x < Width(); ++x) {
-          ASSERT_EQ(lookup(in, y * kInputStride + x),
-                    lookup(out, y * kOutputStride + x))
-              << "x == " << x << ", y == " << y << ", frac == " << frac
-              << ", step == " << step;
+          for (int y = 0; y < Height(); ++y) {
+            for (int x = 0; x < Width(); ++x) {
+              ASSERT_EQ(lookup(ref, y * kOutputStride + x),
+                        lookup(out, y * kOutputStride + x))
+                  << "x == " << x << ", y == " << y << ", frac == " << frac
+                  << ", step == " << step;
+            }
+          }
         }
       }
     }
   }
 }
+#endif
 
 using std::tr1::make_tuple;
 
