@@ -112,10 +112,10 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
   if (!img_data) {
     uint64_t alloc_size;
     /* Calculate storage sizes given the chroma subsampling */
-    align = xcs ? (1 << xcs) - 1 : 1;
-    w = (d_w + align - 1) & ~(align - 1);
-    align = ycs ? (1 << ycs) - 1 : 1;
-    h = (d_h + align - 1) & ~(align - 1);
+    align = (1 << xcs) - 1;
+    w = (d_w + align) & ~align;
+    align = (1 << ycs) - 1;
+    h = (d_h + align) & ~align;
 
     s = (fmt & VPX_IMG_FMT_PLANAR) ? w : bps * w / 8;
     s = (s + stride_align - 1) & ~(stride_align - 1);
