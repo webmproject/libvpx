@@ -43,10 +43,6 @@
 #define ARF_STATS_OUTPUT 0
 #define COMPLEXITY_STATS_OUTPUT 0
 
-#ifdef CORPUS_VBR_EXPERIMENT
-#define CORPUS_VBR_MIDPOINT 82.0
-#endif
-
 #define FIRST_PASS_Q 10.0
 #define GF_MAX_BOOST 96.0
 #define INTRA_MODE_PENALTY 1024
@@ -241,20 +237,20 @@ static double calculate_active_area(const VP9_COMP *cpi,
 }
 
 // Get the average weighted error for the clip (or corpus)
-static double get_distribution_av_err(TWO_PASS *const twopass) {
+static double get_distribution_av_err(VP9_COMP *cpi, TWO_PASS *const twopass) {
   const double av_weight =
       twopass->total_stats.weight / twopass->total_stats.count;
-#ifdef CORPUS_VBR_EXPERIMENT
-  return av_weight * CORPUS_VBR_MIDPOINT;
-#else
-  return (twopass->total_stats.coded_error * av_weight) /
-         twopass->total_stats.count;
-#endif
+
+  if (cpi->oxcf.vbr_corpus_complexity)
+    return av_weight * twopass->mean_mod_score;
+  else
+    return (twopass->total_stats.coded_error * av_weight) /
+           twopass->total_stats.count;
 }
 
+#define ACT_AREA_CORRECTION 0.5
 // Calculate a modified Error used in distributing bits between easier and
 // harder frames.
-#define ACT_AREA_CORRECTION 0.5
 static double calculate_mod_frame_score(const VP9_COMP *cpi,
                                         const VP9EncoderConfig *oxcf,
                                         const FIRSTPASS_STATS *this_frame,
@@ -274,6 +270,7 @@ static double calculate_mod_frame_score(const VP9_COMP *cpi,
 
   return modified_score;
 }
+
 static double calculate_norm_frame_score(const VP9_COMP *cpi,
                                          const TWO_PASS *twopass,
                                          const VP9EncoderConfig *oxcf,
@@ -1722,22 +1719,24 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   {
     double modified_score_total = 0.0;
     const FIRSTPASS_STATS *s = twopass->stats_in;
-    const double av_err = get_distribution_av_err(twopass);
+    double av_err;
 
-#ifdef CORPUS_VBR_EXPERIMENT
-    twopass->mean_mod_score = CORPUS_VBR_MIDPOINT;
-#else
-    // The first scan is unclamped and gives a raw average.
-    while (s < twopass->stats_in_end) {
-      modified_score_total += calculate_mod_frame_score(cpi, oxcf, s, av_err);
-      ++s;
+    if (oxcf->vbr_corpus_complexity) {
+      twopass->mean_mod_score = (double)oxcf->vbr_corpus_complexity / 10.0;
+      av_err = get_distribution_av_err(cpi, twopass);
+    } else {
+      av_err = get_distribution_av_err(cpi, twopass);
+      // The first scan is unclamped and gives a raw average.
+      while (s < twopass->stats_in_end) {
+        modified_score_total += calculate_mod_frame_score(cpi, oxcf, s, av_err);
+        ++s;
+      }
+
+      // The average error from this first scan is used to define the midpoint
+      // error for the rate distribution function.
+      twopass->mean_mod_score =
+          modified_score_total / DOUBLE_DIVIDE_CHECK(stats->count);
     }
-
-    // The average error from this first scan is used to define the midpoint
-    // error for the rate distribution function.
-    twopass->mean_mod_score =
-        modified_score_total / DOUBLE_DIVIDE_CHECK(stats->count);
-#endif
 
     // Second scan using clamps based on the previous cycle average.
     // This may modify the total and average somewhat but we dont bother with
@@ -1751,12 +1750,13 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     }
     twopass->normalized_score_left = modified_score_total;
 
-#ifdef CORPUS_VBR_EXPERIMENT
-    // If using Corpus wide VBR mode then update the clip target bandwidth.
-    oxcf->target_bandwidth =
-        (int64_t)((double)oxcf->target_bandwidth *
-                  (twopass->normalized_score_left / stats->count));
-#endif
+    // If using Corpus wide VBR mode then update the clip target bandwidth to
+    // reflect how the clip compares to the rest of the corpus.
+    if (oxcf->vbr_corpus_complexity) {
+      oxcf->target_bandwidth =
+          (int64_t)((double)oxcf->target_bandwidth *
+                    (twopass->normalized_score_left / stats->count));
+    }
 
 #if COMPLEXITY_STATS_OUTPUT
     {
@@ -2185,9 +2185,9 @@ static void get_arf_buffer_indices(unsigned char *arf_buffer_indices) {
   arf_buffer_indices[1] = ARF_SLOT2;
 }
 
-#ifdef CORPUS_VBR_EXPERIMENT
-// Calculates the total normalized group complexity score for a given number
-// of frames starting at the current position in the stats file.
+// Used in corpus vbr: Calculates the total normalized group complexity score
+// for a given number of frames starting at the current position in the stats
+// file.
 static double calculate_group_score(VP9_COMP *cpi, double av_score,
                                     int frame_count) {
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -2195,6 +2195,9 @@ static double calculate_group_score(VP9_COMP *cpi, double av_score,
   const FIRSTPASS_STATS *s = twopass->stats_in;
   double score_total = 0.0;
   int i = 0;
+
+  // We dont ever want to return a 0 score here.
+  if (frame_count == 0) return 1.0;
 
   while ((i < frame_count) && (s < twopass->stats_in_end)) {
     score_total += calculate_norm_frame_score(cpi, twopass, oxcf, s, av_score);
@@ -2205,10 +2208,10 @@ static double calculate_group_score(VP9_COMP *cpi, double av_score,
 
   return score_total;
 }
-#endif
 
 static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
                                    int gf_arf_bits) {
+  VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
@@ -2217,7 +2220,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   int frame_index = 1;
   int target_frame_size;
   int key_frame;
-  const int max_bits = frame_max_bits(&cpi->rc, &cpi->oxcf);
+  const int max_bits = frame_max_bits(&cpi->rc, oxcf);
   int64_t total_group_bits = gf_group_bits;
   int mid_boost_bits = 0;
   int mid_frame_idx;
@@ -2228,12 +2231,9 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   int normal_frames;
   int normal_frame_bits;
   int last_frame_reduction = 0;
-
-#ifdef CORPUS_VBR_EXPERIMENT
-  double av_score = get_distribution_av_err(twopass);
-  double tot_norm_frame_score;
-  double this_frame_score;
-#endif
+  double av_score = 1.0;
+  double tot_norm_frame_score = 1.0;
+  double this_frame_score = 1.0;
 
   // Only encode alt reference frame in temporal base layer.
   if (has_temporal_layers) alt_frame_index = cpi->svc.number_temporal_layers;
@@ -2305,18 +2305,15 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
 
   normal_frames = (rc->baseline_gf_interval - rc->source_alt_ref_pending);
-
-#ifndef CORPUS_VBR_EXPERIMENT
-  // The last frame in the group is used less as a predictor so reduce
-  // its allocation a little.
-  if (normal_frames > 1) {
+  if (normal_frames > 1)
     normal_frame_bits = (int)(total_group_bits / normal_frames);
-  } else {
+  else
     normal_frame_bits = (int)total_group_bits;
+
+  if (oxcf->vbr_corpus_complexity) {
+    av_score = get_distribution_av_err(cpi, twopass);
+    tot_norm_frame_score = calculate_group_score(cpi, av_score, normal_frames);
   }
-#else
-  tot_norm_frame_score = calculate_group_score(cpi, av_score, normal_frames);
-#endif
 
   // Allocate bits to the other frames in the group.
   for (i = 0; i < normal_frames; ++i) {
@@ -2327,12 +2324,12 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       ++frame_index;
     }
 
-#ifdef CORPUS_VBR_EXPERIMENT
-    this_frame_score = calculate_norm_frame_score(cpi, twopass, &cpi->oxcf,
-                                                  &frame_stats, av_score);
-    normal_frame_bits = (int)((double)total_group_bits *
-                              (this_frame_score / tot_norm_frame_score));
-#endif
+    if (oxcf->vbr_corpus_complexity) {
+      this_frame_score = calculate_norm_frame_score(cpi, twopass, oxcf,
+                                                    &frame_stats, av_score);
+      normal_frame_bits = (int)((double)total_group_bits *
+                                (this_frame_score / tot_norm_frame_score));
+    }
 
     target_frame_size = normal_frame_bits;
     if ((i == (normal_frames - 1)) && (i >= 1)) {
@@ -2439,7 +2436,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mv_in_out_thresh;
   double abs_mv_in_out_thresh;
   double sr_accumulator = 0.0;
-  const double av_err = get_distribution_av_err(twopass);
+  const double av_err = get_distribution_av_err(cpi, twopass);
   unsigned int allow_alt_ref = is_altref_enabled(cpi);
 
   int f_boost = 0;
@@ -2868,7 +2865,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double kf_group_err = 0.0;
   double recent_loop_decay[FRAMES_TO_CHECK_DECAY];
   double sr_accumulator = 0.0;
-  const double av_err = get_distribution_av_err(twopass);
+  const double av_err = get_distribution_av_err(cpi, twopass);
   vp9_zero(next_frame);
 
   cpi->common.frame_type = KEY_FRAME;
