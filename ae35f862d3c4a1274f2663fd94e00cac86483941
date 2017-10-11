@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eb750a1d_139f7f0b",
+        "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-10-11T07:15:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df1ecbd4_aeda4e3d",
+      "range": {
+        "startLine": 34,
+        "startChar": 2,
+        "endLine": 34,
+        "endChar": 9
+      },
+      "revId": "ae35f862d3c4a1274f2663fd94e00cac86483941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5d79d526_e98412a0",
         "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "ae35f862d3c4a1274f2663fd94e00cac86483941",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3542f9d4_abf5ac4c",
+        "filename": "vp8/encoder/mips/mmi/vp8_quantize_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-10-11T07:15:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5d79d526_e98412a0",
+      "range": {
+        "startLine": 203,
+        "startChar": 2,
+        "endLine": 203,
+        "endChar": 9
+      },
+      "revId": "ae35f862d3c4a1274f2663fd94e00cac86483941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
