@@ -28,7 +28,7 @@ void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
   const InterpKernel *const kernel = vp9_filter_kernels[filter_type];
   int x, y, i;
 
-#if HAVE_NEON
+#if HAVE_SSSE3 || HAVE_NEON
   // TODO(linfengz): The 4:3 specialized C code is disabled by default since
   // it's much slower than the general version which calls vpx_scaled_2d() even
   // if vpx_scaled_2d() is not optimized. It will only be enabled as a reference
