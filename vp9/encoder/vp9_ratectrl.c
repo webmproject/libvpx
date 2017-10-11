@@ -44,8 +44,6 @@
 #define MIN_BPB_FACTOR 0.005
 #define MAX_BPB_FACTOR 50
 
-#define FRAME_OVERHEAD_BITS 200
-
 #if CONFIG_VP9_HIGHBITDEPTH
 #define ASSIGN_MINQ_TABLE(bit_depth, name)                   \
   do {                                                       \
@@ -212,18 +210,23 @@ int vp9_estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
 int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
   const RATE_CONTROL *rc = &cpi->rc;
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
-  const int min_frame_target =
-      VPXMAX(rc->min_frame_bandwidth, rc->avg_frame_bandwidth >> 5);
-  if (target < min_frame_target) target = min_frame_target;
-  if (cpi->refresh_golden_frame && rc->is_src_frame_alt_ref) {
-    // If there is an active ARF at this location use the minimum
-    // bits on this frame even if it is a constructed arf.
-    // The active maximum quantizer insures that an appropriate
-    // number of bits will be spent if needed for constructed ARFs.
-    target = min_frame_target;
+
+  if (cpi->oxcf.pass != 2) {
+    const int min_frame_target =
+        VPXMAX(rc->min_frame_bandwidth, rc->avg_frame_bandwidth >> 5);
+    if (target < min_frame_target) target = min_frame_target;
+    if (cpi->refresh_golden_frame && rc->is_src_frame_alt_ref) {
+      // If there is an active ARF at this location use the minimum
+      // bits on this frame even if it is a constructed arf.
+      // The active maximum quantizer insures that an appropriate
+      // number of bits will be spent if needed for constructed ARFs.
+      target = min_frame_target;
+    }
   }
+
   // Clip the frame target to the maximum allowed value.
   if (target > rc->max_frame_bandwidth) target = rc->max_frame_bandwidth;
+
   if (oxcf->rc_max_inter_bitrate_pct) {
     const int max_rate =
         rc->avg_frame_bandwidth * oxcf->rc_max_inter_bitrate_pct / 100;
