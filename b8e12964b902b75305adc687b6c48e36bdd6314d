@@ -16,6 +16,24 @@
       "revId": "b8e12964b902b75305adc687b6c48e36bdd6314d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f486e9f_821811e2",
+        "filename": "vp9/encoder/vp9_speed_features.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-12T04:45:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "161bfb3e_05e2db68",
+      "revId": "b8e12964b902b75305adc687b6c48e36bdd6314d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
