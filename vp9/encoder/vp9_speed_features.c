@@ -366,6 +366,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->use_simple_block_yrd = 0;
   sf->adapt_partition_source_sad = 0;
   sf->use_altref_onepass = 0;
+  sf->nonrd_keyframe = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -598,6 +599,7 @@ static void set_rt_speed_feature_framesize_independent(
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
     sf->skip_encode_sb = 1;
+    sf->nonrd_keyframe = 1;
     if (!cpi->use_svc) cpi->max_copied_frame = 4;
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
       sf->adaptive_rd_thresh_row_mt = 1;
