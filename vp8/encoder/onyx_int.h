@@ -692,6 +692,9 @@ typedef struct VP8_COMP {
     int token_costs[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
                    [MAX_ENTROPY_TOKENS];
   } rd_costs;
+
+  // Use the static threshold from ROI settings.
+  int use_roi_static_threshold;
 } VP8_COMP;
 
 void vp8_initialize_enc(void);

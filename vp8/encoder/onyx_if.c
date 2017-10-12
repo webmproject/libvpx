@@ -1553,9 +1553,8 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
 
   setup_features(cpi);
 
-  {
+  if (!cpi->use_roi_static_threshold) {
     int i;
-
     for (i = 0; i < MAX_MB_SEGMENTS; ++i) {
       cpi->segment_encode_breakout[i] = cpi->oxcf.encode_breakout;
     }
@@ -1814,6 +1813,8 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   cpi->gold_is_alt = 0;
 
   cpi->active_map_enabled = 0;
+
+  cpi->use_roi_static_threshold = 0;
 
 #if 0
     /* Experimental code for lagged and one pass */
@@ -5354,9 +5355,6 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows,
   const int range = 63;
   int i;
 
-  // This method is currently incompatible with the cyclic refresh method
-  if (cpi->cyclic_refresh_mode_enabled) return -1;
-
   // Check number of rows and columns match
   if (cpi->common.mb_rows != (int)rows || cpi->common.mb_cols != (int)cols) {
     return -1;
@@ -5375,7 +5373,11 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows,
     return -1;
   }
 
-  if (!map) {
+  // Also disable segmentation if no deltas are specified.
+  if (!map || (delta_q[0] == 0 && delta_q[1] == 0 && delta_q[2] == 0 &&
+               delta_q[3] == 0 && delta_lf[0] == 0 && delta_lf[1] == 0 &&
+               delta_lf[2] == 0 && delta_lf[3] == 0 && threshold[0] == 0 &&
+               threshold[1] == 0 && threshold[2] == 0 && threshold[3] == 0)) {
     disable_segmentation(cpi);
     return 0;
   }
@@ -5411,6 +5413,11 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows,
 
   /* Initialise the feature data structure */
   set_segment_data(cpi, &feature_data[0][0], SEGMENT_DELTADATA);
+
+  if (threshold[0] != 0 || threshold[1] != 0 || threshold[2] != 0 ||
+      threshold[3] != 0)
+    cpi->use_roi_static_threshold = 1;
+  cpi->cyclic_refresh_mode_enabled = 0;
 
   return 0;
 }
