@@ -188,10 +188,10 @@ specialize qw/vp8_short_walsh4x4 sse2 neon msa/;
 # Quantizer
 #
 add_proto qw/void vp8_regular_quantize_b/, "struct block *, struct blockd *";
-specialize qw/vp8_regular_quantize_b sse2 sse4_1 msa/;
+specialize qw/vp8_regular_quantize_b sse2 sse4_1 msa mmi/;
 
 add_proto qw/void vp8_fast_quantize_b/, "struct block *, struct blockd *";
-specialize qw/vp8_fast_quantize_b sse2 ssse3 neon msa/;
+specialize qw/vp8_fast_quantize_b sse2 ssse3 neon msa mmi/;
 
 #
 # Block subtraction
