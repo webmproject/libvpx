@@ -185,6 +185,30 @@
     },
     {
       "key": {
+        "uuid": "caeb4c0b_a02c202b",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1848,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:30:34Z",
+      "side": 1,
+      "message": "This called on codec init/creation, so a \"cpi-\u003euse_roi\" flag will still be zero at this point (since the cpi-\u003euse_roi flag would set in vp8_set_roi after codec init/creation.\n\nBut i agrees we should add a cpi-\u003euse_roi flag, as we need to avoid the static_threshold overwrite (see previous comment).",
+      "parentUuid": "813c643b_276eb3b6",
+      "range": {
+        "startLine": 1848,
+        "startChar": 7,
+        "endLine": 1848,
+        "endChar": 8
+      },
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9d184658_5154ebf6",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 2
