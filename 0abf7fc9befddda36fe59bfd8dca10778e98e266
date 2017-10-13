@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f7c3d59_e108898f",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1848,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T01:34:55Z",
+      "side": 1,
+      "message": "There is no external control for cyclic refresh for vp8. Should I add a flag for ROI map and use it here?",
+      "range": {
+        "startLine": 1848,
+        "startChar": 7,
+        "endLine": 1848,
+        "endChar": 8
+      },
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
