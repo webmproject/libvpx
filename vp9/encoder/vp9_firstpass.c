@@ -2185,6 +2185,28 @@ static void get_arf_buffer_indices(unsigned char *arf_buffer_indices) {
   arf_buffer_indices[1] = ARF_SLOT2;
 }
 
+#ifdef CORPUS_VBR_EXPERIMENT
+// Calculates the total normalized group complexity score for a given number
+// of frames starting at the current position in the stats file.
+static double calculate_group_score(VP9_COMP *cpi, double av_score,
+                                    int frame_count) {
+  VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  TWO_PASS *const twopass = &cpi->twopass;
+  const FIRSTPASS_STATS *s = twopass->stats_in;
+  double score_total = 0.0;
+  int i = 0;
+
+  while ((i < frame_count) && (s < twopass->stats_in_end)) {
+    score_total += calculate_norm_frame_score(cpi, twopass, oxcf, s, av_score);
+    ++s;
+    ++i;
+  }
+  assert(i == frame_count);
+
+  return score_total;
+}
+#endif
+
 static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
                                    int gf_arf_bits) {
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2205,8 +2227,13 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       is_two_pass_svc(cpi) && cpi->svc.number_temporal_layers > 1;
   int normal_frames;
   int normal_frame_bits;
-  int last_frame_bits;
-  int last_frame_reduction;
+  int last_frame_reduction = 0;
+
+#ifdef CORPUS_VBR_EXPERIMENT
+  double av_score = get_distribution_av_err(twopass);
+  double tot_norm_frame_score;
+  double this_frame_score;
+#endif
 
   // Only encode alt reference frame in temporal base layer.
   if (has_temporal_layers) alt_frame_index = cpi->svc.number_temporal_layers;
@@ -2279,17 +2306,17 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
   normal_frames = (rc->baseline_gf_interval - rc->source_alt_ref_pending);
 
+#ifndef CORPUS_VBR_EXPERIMENT
   // The last frame in the group is used less as a predictor so reduce
   // its allocation a little.
   if (normal_frames > 1) {
     normal_frame_bits = (int)(total_group_bits / normal_frames);
-    last_frame_reduction = normal_frame_bits / 16;
-    last_frame_bits = normal_frame_bits - last_frame_reduction;
   } else {
     normal_frame_bits = (int)total_group_bits;
-    last_frame_bits = normal_frame_bits;
-    last_frame_reduction = 0;
   }
+#else
+  tot_norm_frame_score = calculate_group_score(cpi, av_score, normal_frames);
+#endif
 
   // Allocate bits to the other frames in the group.
   for (i = 0; i < normal_frames; ++i) {
@@ -2300,11 +2327,18 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       ++frame_index;
     }
 
-    target_frame_size = (i == (normal_frames - 1))
-                            ? last_frame_bits
-                            : (frame_index == mid_frame_idx)
-                                  ? normal_frame_bits + last_frame_reduction
-                                  : normal_frame_bits;
+#ifdef CORPUS_VBR_EXPERIMENT
+    this_frame_score = calculate_norm_frame_score(cpi, twopass, &cpi->oxcf,
+                                                  &frame_stats, av_score);
+    normal_frame_bits = (int)((double)total_group_bits *
+                              (this_frame_score / tot_norm_frame_score));
+#endif
+
+    target_frame_size = normal_frame_bits;
+    if ((i == (normal_frames - 1)) && (i >= 1)) {
+      last_frame_reduction = normal_frame_bits / 16;
+      target_frame_size -= last_frame_reduction;
+    }
 
     if (rc->source_alt_ref_pending && cpi->multi_arf_enabled) {
       mid_boost_bits += (target_frame_size >> 4);
@@ -2324,6 +2358,9 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     gf_group->bit_allocation[frame_index] = target_frame_size;
     ++frame_index;
   }
+
+  // Add in some extra bits for the middle frame in the group.
+  gf_group->bit_allocation[mid_frame_idx] += last_frame_reduction;
 
   // Note:
   // We need to configure the frame at the end of the sequence + 1 that will be
