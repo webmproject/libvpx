@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0b3750dc_bbdefd09",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T21:52:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b66b596_8e58e32c",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2cf939f8_57ce80ab",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 2
@@ -33,6 +51,24 @@
       "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4720d26b_155005e2",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T21:52:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2cf939f8_57ce80ab",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "112d1621_e2784501",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T21:52:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f8cedbb9_cb55271e",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6205933e_c4368f41",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 2
@@ -67,6 +121,24 @@
       "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e965eca5_69e8e48c",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T21:52:43Z",
+      "side": 1,
+      "message": "Done\n\nCan you explain why -63 has more effect visually? Negative number means lower QP?",
+      "parentUuid": "6205933e_c4368f41",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9de75f77_f2c6c283",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T21:52:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8131db73_03e0615b",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ccca9d71_efc8e857",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "dac7a1ef_1df96ab3",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T21:52:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ccca9d71_efc8e857",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "effa0de3_8d25b71d",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 2
@@ -118,6 +226,24 @@
       "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c19c131_cb5629c4",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T21:52:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "effa0de3_8d25b71d",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -223,6 +349,24 @@
       "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32438aaa_52e0fb03",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5356,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-10-13T21:52:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d184658_5154ebf6",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
