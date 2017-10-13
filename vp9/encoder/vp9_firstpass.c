@@ -41,6 +41,11 @@
 
 #define OUTPUT_FPF 0
 #define ARF_STATS_OUTPUT 0
+#define COMPLEXITY_STATS_OUTPUT 0
+
+#ifdef CORPUS_VBR_EXPERIMENT
+#define CORPUS_VBR_MIDPOINT 82.0
+#endif
 
 #define FIRST_PASS_Q 10.0
 #define GF_MAX_BOOST 96.0
@@ -239,8 +244,12 @@ static double calculate_active_area(const VP9_COMP *cpi,
 static double get_distribution_av_err(TWO_PASS *const twopass) {
   const double av_weight =
       twopass->total_stats.weight / twopass->total_stats.count;
+#ifdef CORPUS_VBR_EXPERIMENT
+  return av_weight * CORPUS_VBR_MIDPOINT;
+#else
   return (twopass->total_stats.coded_error * av_weight) /
          twopass->total_stats.count;
+#endif
 }
 
 // Calculate a modified Error used in distributing bits between easier and
@@ -1686,7 +1695,7 @@ void calculate_coded_size(VP9_COMP *cpi, int *scaled_frame_width,
 
 void vp9_init_second_pass(VP9_COMP *cpi) {
   SVC *const svc = &cpi->svc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int is_two_pass_svc =
       (svc->number_spatial_layers > 1) || (svc->number_temporal_layers > 1);
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1705,6 +1714,60 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
   *stats = *twopass->stats_in_end;
   twopass->total_left_stats = *stats;
+
+  // Scan the first pass file and calculate a modified score for each
+  // frame that is used to distribute bits. The modified score is assumed
+  // to provide a linear basis for bit allocation. I.e a frame A with a score
+  // that is double that of frame B will be allocated 2x as many bits.
+  {
+    double modified_score_total = 0.0;
+    const FIRSTPASS_STATS *s = twopass->stats_in;
+    const double av_err = get_distribution_av_err(twopass);
+
+#ifdef CORPUS_VBR_EXPERIMENT
+    twopass->mean_mod_score = CORPUS_VBR_MIDPOINT;
+#else
+    // The first scan is unclamped and gives a raw average.
+    while (s < twopass->stats_in_end) {
+      modified_score_total += calculate_mod_frame_score(cpi, oxcf, s, av_err);
+      ++s;
+    }
+
+    // The average error from this first scan is used to define the midpoint
+    // error for the rate distribution function.
+    twopass->mean_mod_score =
+        modified_score_total / DOUBLE_DIVIDE_CHECK(stats->count);
+#endif
+
+    // Second scan using clamps based on the previous cycle average.
+    // This may modify the total and average somewhat but we dont bother with
+    // further itterations.
+    modified_score_total = 0.0;
+    s = twopass->stats_in;
+    while (s < twopass->stats_in_end) {
+      modified_score_total +=
+          calculate_norm_frame_score(cpi, twopass, oxcf, s, av_err);
+      ++s;
+    }
+    twopass->normalized_score_left = modified_score_total;
+
+#ifdef CORPUS_VBR_EXPERIMENT
+    // If using Corpus wide VBR mode then update the clip target bandwidth.
+    oxcf->target_bandwidth =
+        (int64_t)((double)oxcf->target_bandwidth *
+                  (twopass->normalized_score_left / stats->count));
+#endif
+
+#if COMPLEXITY_STATS_OUTPUT
+    {
+      FILE *compstats;
+      compstats = fopen("complexity_stats.stt", "a");
+      fprintf(compstats, "%10.3lf\n",
+              twopass->normalized_score_left / stats->count);
+      fclose(compstats);
+    }
+#endif
+  }
 
   frame_rate = 10000000.0 * stats->count / stats->duration;
   // Each frame can have a different duration, as the frame rate in the source
@@ -1727,39 +1790,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
   // This variable monitors how far behind the second ref update is lagging.
   twopass->sr_update_lag = 1;
-
-  // Scan the first pass file and calculate a modified score for each
-  // frame that is used to distribute bits. The modified score is assumed
-  // to provide a linear basis for bit allocation. I.e a frame A with a score
-  // that is double that of frame B will be allocated 2x as many bits.
-  {
-    double modified_score_total = 0.0;
-    const FIRSTPASS_STATS *s = twopass->stats_in;
-    const double av_err = get_distribution_av_err(twopass);
-
-    // The first scan is unclamped and gives a raw average.
-    while (s < twopass->stats_in_end) {
-      modified_score_total += calculate_mod_frame_score(cpi, oxcf, s, av_err);
-      ++s;
-    }
-
-    // The average error from this first scan is used to define the midpoint
-    // error for the rate distribution function.
-    twopass->mean_mod_score =
-        modified_score_total / DOUBLE_DIVIDE_CHECK(stats->count);
-
-    // Second scan using clamps based on the previous cycle average.
-    // This may modify the total and average somewhat but we dont bother with
-    // further itterations.
-    modified_score_total = 0.0;
-    s = twopass->stats_in;
-    while (s < twopass->stats_in_end) {
-      modified_score_total +=
-          calculate_norm_frame_score(cpi, twopass, oxcf, s, av_err);
-      ++s;
-    }
-    twopass->normalized_score_left = modified_score_total;
-  }
 
   // Reset the vbr bits off target counters
   rc->vbr_bits_off_target = 0;
