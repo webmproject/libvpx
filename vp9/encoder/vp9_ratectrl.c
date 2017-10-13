@@ -2121,7 +2121,7 @@ static void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi,
   uint64_t avg_source_sad_lag = avg_sad_current;
   int high_source_sad_lagindex = -1;
   int steady_sad_lagindex = -1;
-  uint32_t sad_thresh1 = 60000;
+  uint32_t sad_thresh1 = 70000;
   uint32_t sad_thresh2 = 120000;
   int low_content = 0;
   int high_content = 0;
