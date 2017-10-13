@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5de1e3ab_f779f444",
+        "filename": "vp8/common/mips/mmi/idct_blk_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-10-13T16:26:40Z",
+      "side": 1,
+      "message": "You don\u0027t need to declare these two functions. They are declared in vp8_rtcd.h\n\nIf you are using the C as an example, it is out of date with regard to this style.",
+      "range": {
+        "startLine": 14,
+        "startChar": 5,
+        "endLine": 14,
+        "endChar": 29
+      },
+      "revId": "976ff97d020b468bb6846d9ce97f93ab2050c84d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de0718b3_263623be",
+        "filename": "vp8/common/mips/mmi/idct_blk_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-10-13T16:26:40Z",
+      "side": 1,
+      "message": "I\u0027m not sure if you have the necessary functions, but it might be worth looking at the shortcuts that vp8/common/arm/neon/idct_blk_neon.c uses for these functions.",
+      "range": {
+        "startLine": 27,
+        "startChar": 11,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "976ff97d020b468bb6846d9ce97f93ab2050c84d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
