@@ -199,4 +199,8 @@ INSTANTIATE_TEST_CASE_P(SSE2, FdctTest,
 INSTANTIATE_TEST_CASE_P(MSA, FdctTest,
                         ::testing::Values(vp8_short_fdct4x4_msa));
 #endif  // HAVE_MSA
+#if HAVE_MMI
+INSTANTIATE_TEST_CASE_P(MMI, FdctTest,
+                        ::testing::Values(vp8_short_fdct4x4_mmi));
+#endif  // HAVE_MMI
 }  // namespace
