@@ -2,6 +2,142 @@
   "comments": [
     {
       "key": {
+        "uuid": "8b66b596_8e58e32c",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "set to 0 as default",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2cf939f8_57ce80ab",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "Add comment:\nROI is based on the segments (4 for vp8, 8 for vp9), smallest unit for segment is 16x16 for vp8, 8x8 for vp9.",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8cedbb9_cb55271e",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "Add comment:\nApplies delta QP on the segment blocks, varies from -63 to 63.\nSetting to negative means lower QP (better quality).",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6205933e_c4368f41",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "make this -63, so it has more effect visually.",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8131db73_03e0615b",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "Add comment:\nApplies delta loopfilter strength on the segment blocks, varies from -63 to 63.\nSetting to positive means stronger loopfilter.",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ccca9d71_efc8e857",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "Add comment:\nApplies skip encoding threshold on the segment blocks, varies from 0 to UINT_MAX.\nLarger value means more skipping of encoding is possible.",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "effa0de3_8d25b71d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "As example, prefer to set map \u003d 1 on square (say 1/4 x 1/4 of image) and centered in middle of image, map\u003d0 elsewhere",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "47eeae37_196a81ca",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1559,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "We need to disable this setting i think for ROI, since this will overwrite\nthe settings roi-\u003estatic_threshold[] (which is set in the function vp8_set_roimap()).\n\ncpi-\u003eoxcf.encode_breakout is 0 by default, but may be set with the control: VP8E_SET_STATIC_THRESHOLD.\n\nMaybe we should a new cpi flag (like cpi-\u003euse_roi) and set that to 1 if ROI is used,\nthen we can avoid this under that flag?",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2f7c3d59_e108898f",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 2
@@ -19,6 +155,64 @@
         "endLine": 1848,
         "endChar": 8
       },
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "813c643b_276eb3b6",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1848,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "remove this change here",
+      "parentUuid": "2f7c3d59_e108898f",
+      "range": {
+        "startLine": 1848,
+        "startChar": 7,
+        "endLine": 1848,
+        "endChar": 8
+      },
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9d184658_5154ebf6",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5356,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "remove this line",
+      "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48c9bffe_6078e20f",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 5359,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-13T17:01:47Z",
+      "side": 1,
+      "message": "I think we need to remove line 5359, and then force cyclic refresh off.\ncpi-\u003ecyclic_refresh_mode_enabled \u003d 0\n\nSo we\u0027re saying that is the application uses ROI (which means they call this function),\nthen we will turn off the cyclic refresh (codec-internal use of segment)",
       "revId": "0abf7fc9befddda36fe59bfd8dca10778e98e266",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
