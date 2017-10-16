@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d706336_ef1fb228",
+        "filename": "test/vpx_scale_test.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-16T21:57:18Z",
+      "side": 1,
+      "message": "given the test in this namespace the lookup should work. the test classes could additionally be embedded in an unnamed namespace, but that would be for a followup.",
+      "revId": "1fa3ec3023ef1b841d993bc21cba32b658a790ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
