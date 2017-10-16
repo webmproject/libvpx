@@ -16,6 +16,24 @@
       "revId": "7be2594fbc91274d9ba5e269575bd99b3df67569",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a39353a_2d761d71",
+        "filename": "vpx_dsp/x86/convolve_ssse3.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2017-10-16T22:55:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "93ea608f_f3149fdf",
+      "revId": "7be2594fbc91274d9ba5e269575bd99b3df67569",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
