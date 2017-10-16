@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f4428a2b_2fe74b24",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-16T20:21:40Z",
+      "side": 1,
+      "message": "you can remove this since we\u0027ll commit this at some point",
+      "revId": "976edebc77e6fffa00943445ab9b77155d05b142",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ecaba94b_524c9e24",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-16T20:21:40Z",
+      "side": 1,
+      "message": "Add comment: \"Setting qp_delta to -?? to show strong effect\"",
+      "revId": "976edebc77e6fffa00943445ab9b77155d05b142",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a9061a9_0ccc0bd4",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1556,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-16T20:21:40Z",
+      "side": 1,
+      "message": "can we enter this loop (i.e., using the config setting oxcf.encode_breakout) if:\n1) use_roi \u003d 0, or\n2) use_roi \u003d 1 and no delta_threshold is specified",
+      "revId": "976edebc77e6fffa00943445ab9b77155d05b142",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "527d2689_dd6ab788",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 5374,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-16T20:21:40Z",
+      "side": 1,
+      "message": "put commment here: \" ..we also disable if no deltas are specified....\"",
+      "revId": "976edebc77e6fffa00943445ab9b77155d05b142",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
