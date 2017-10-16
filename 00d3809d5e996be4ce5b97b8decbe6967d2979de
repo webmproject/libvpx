@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "278ca9ef_5cca0a5b",
+        "filename": "vp8/common/mips/mmi/idct_blk_mmi.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-10-16T14:18:14Z",
+      "side": 1,
+      "message": "uint8_t",
+      "range": {
+        "startLine": 15,
+        "startChar": 38,
+        "endLine": 15,
+        "endChar": 46
+      },
+      "revId": "00d3809d5e996be4ce5b97b8decbe6967d2979de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64a60cab_91bb4e2e",
+        "filename": "vp8/common/mips/mmi/idct_blk_mmi.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-10-16T14:18:14Z",
+      "side": 1,
+      "message": "int8_t",
+      "range": {
+        "startLine": 16,
+        "startChar": 38,
+        "endLine": 16,
+        "endChar": 42
+      },
+      "revId": "00d3809d5e996be4ce5b97b8decbe6967d2979de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7edb4ec7_23761a8c",
+        "filename": "vp8/common/mips/mmi/idct_blk_mmi.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-10-16T14:18:14Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 37,
+        "startChar": 39,
+        "endLine": 38,
+        "endChar": 61
+      },
+      "revId": "00d3809d5e996be4ce5b97b8decbe6967d2979de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
