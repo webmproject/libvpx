@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b483dda6_e1bff7f9",
+        "filename": "vp8/common/mips/mmi/idct_blk_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-10-16T10:10:51Z",
+      "side": 1,
+      "message": "The declaration here has been removed.",
+      "parentUuid": "5de1e3ab_f779f444",
+      "range": {
+        "startLine": 14,
+        "startChar": 5,
+        "endLine": 14,
+        "endChar": 29
+      },
+      "revId": "976ff97d020b468bb6846d9ce97f93ab2050c84d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "de0718b3_263623be",
         "filename": "vp8/common/mips/mmi/idct_blk_mmi.c",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "976ff97d020b468bb6846d9ce97f93ab2050c84d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27548f34_ed0070e0",
+        "filename": "vp8/common/mips/mmi/idct_blk_mmi.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2017-10-16T10:10:51Z",
+      "side": 1,
+      "message": "Thank you very much for your suggestion. It\u0027s a good idea, but the neon likely functions are not implemented yet. I will try to implemente them in My next optimization cycle.",
+      "parentUuid": "de0718b3_263623be",
+      "range": {
+        "startLine": 27,
+        "startChar": 11,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "976ff97d020b468bb6846d9ce97f93ab2050c84d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
