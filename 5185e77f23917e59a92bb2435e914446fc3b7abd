@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7fe4440_05cbe874",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-17T17:21:40Z",
+      "side": 1,
+      "message": "Add: \"This skip threshold only applies on delta frames\"",
+      "revId": "5185e77f23917e59a92bb2435e914446fc3b7abd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0dc87f84_9a76eaab",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 5374,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-17T17:21:40Z",
+      "side": 1,
+      "message": "if no deltas are specified",
+      "revId": "5185e77f23917e59a92bb2435e914446fc3b7abd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
