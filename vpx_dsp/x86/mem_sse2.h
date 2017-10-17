@@ -113,4 +113,12 @@ static INLINE void store_8bit_8x8(const __m128i *const s, uint8_t *const d,
   _mm_storel_epi64((__m128i *)(d + 7 * stride), s[7]);
 }
 
+static INLINE void storeu_8bit_16x4(const __m128i *const s, uint8_t *const d,
+                                    const ptrdiff_t stride) {
+  _mm_storeu_si128((__m128i *)(d + 0 * stride), s[0]);
+  _mm_storeu_si128((__m128i *)(d + 1 * stride), s[1]);
+  _mm_storeu_si128((__m128i *)(d + 2 * stride), s[2]);
+  _mm_storeu_si128((__m128i *)(d + 3 * stride), s[3]);
+}
+
 #endif  // VPX_DSP_X86_MEM_SSE2_H_
