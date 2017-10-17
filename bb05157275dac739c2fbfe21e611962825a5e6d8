@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8395ae5f_77999efc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-17T01:00:33Z",
+      "side": 1,
+      "message": "say something like:\nvp8: Enable use of ROI map\n\nDisable cyclic refresh is ROI is used.\n\nAdd example in vpx_temporal_svc_encoder.c",
+      "revId": "bb05157275dac739c2fbfe21e611962825a5e6d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32dc820c_7daa9ed1",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-17T01:00:33Z",
+      "side": 1,
+      "message": "keep these 0 as default",
+      "revId": "bb05157275dac739c2fbfe21e611962825a5e6d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1298876_a9ea55bc",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-17T01:00:33Z",
+      "side": 1,
+      "message": "add comment: Use 2 states: 1 is center square, 0 is the rest...",
+      "revId": "bb05157275dac739c2fbfe21e611962825a5e6d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
