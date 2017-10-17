@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0e9f87c_52e8bb57",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-17T02:42:51Z",
+      "side": 1,
+      "message": "and add flag to properly handle the static_thresh deltas",
+      "revId": "9dcf6cbf5546efbb8b680a45f49d077195e75644",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54b8bf96_783c47c3",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-17T02:42:51Z",
+      "side": 1,
+      "message": "Below we set delta_q to the extreme (-63) to show strong effect.",
+      "revId": "9dcf6cbf5546efbb8b680a45f49d077195e75644",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
