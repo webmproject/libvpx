@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3575025b_fcecc8c8",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1556,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-17T18:10:24Z",
+      "side": 1,
+      "message": "it good to set this new flag 0 explicitly in create_compression(), say after line 1815",
+      "revId": "693841ded1be7be5d42d8ce42a8dfdb114fe5bc8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
