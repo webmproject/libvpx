@@ -1,4 +1,5 @@
 #!/bin/sh
+#set -x
 
 platform=x86_64-linux-gcc
 codec=--enable-av1
