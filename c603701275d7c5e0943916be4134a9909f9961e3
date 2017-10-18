@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f58804f_1e889acf",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-18T17:05:43Z",
+      "side": 1,
+      "message": "i don\u0027t think we need these same comemnts here",
+      "revId": "c603701275d7c5e0943916be4134a9909f9961e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b797e38_58c06d9a",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-18T17:05:43Z",
+      "side": 1,
+      "message": "this comment is not correct (-63?)\nmaybe remove the comments here",
+      "revId": "c603701275d7c5e0943916be4134a9909f9961e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16a348db_6493aba7",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-18T17:05:43Z",
+      "side": 1,
+      "message": "remove these comments",
+      "revId": "c603701275d7c5e0943916be4134a9909f9961e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f21de79_7a5a8832",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-18T17:05:43Z",
+      "side": 1,
+      "message": "same, no need to add these comments here",
+      "range": {
+        "startLine": 467,
+        "startChar": 27,
+        "endLine": 467,
+        "endChar": 36
+      },
+      "revId": "c603701275d7c5e0943916be4134a9909f9961e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
