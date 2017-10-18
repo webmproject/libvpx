@@ -44,6 +44,7 @@ class DatarateTestLarge
     denoiser_offon_test_ = 0;
     denoiser_offon_period_ = -1;
     gf_boost_ = 0;
+    use_roi_ = 0;
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
@@ -53,6 +54,12 @@ class DatarateTestLarge
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
       encoder->Control(VP8E_SET_GF_CBR_BOOST_PCT, gf_boost_);
     }
+
+#if CONFIG_VP8_ENCODER
+    if (use_roi_ == 1) {
+      encoder->Control(VP8E_SET_ROI_MAP, &roi_);
+    }
+#endif
 
     if (denoiser_offon_test_) {
       ASSERT_GT(denoiser_offon_period_, 0)
@@ -145,6 +152,8 @@ class DatarateTestLarge
   int denoiser_offon_period_;
   int set_cpu_used_;
   int gf_boost_;
+  int use_roi_;
+  vpx_roi_map_t roi_;
 };
 
 #if CONFIG_TEMPORAL_DENOISING
@@ -412,6 +421,67 @@ TEST_P(DatarateTestRealTime, DropFramesMultiThreads) {
 
   ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
       << " The datarate for the file missed the target!";
+}
+
+TEST_P(DatarateTestRealTime, RegionOfInterest) {
+  denoiser_on_ = 0;
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  // Encode using multiple threads.
+  cfg_.g_threads = 2;
+
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 300);
+  cfg_.rc_target_bitrate = 450;
+  cfg_.g_w = 352;
+  cfg_.g_h = 288;
+
+  ResetModel();
+
+  // Set ROI parameters
+  use_roi_ = 1;
+  memset(&roi_, 0, sizeof(roi_));
+
+  roi_.rows = (cfg_.g_h + 15) / 16;
+  roi_.cols = (cfg_.g_w + 15) / 16;
+
+  roi_.delta_q[0] = 0;
+  roi_.delta_q[1] = -20;
+  roi_.delta_q[2] = 0;
+  roi_.delta_q[3] = 0;
+
+  roi_.delta_lf[0] = 0;
+  roi_.delta_lf[1] = -20;
+  roi_.delta_lf[2] = 0;
+  roi_.delta_lf[3] = 0;
+
+  roi_.static_threshold[0] = 0;
+  roi_.static_threshold[1] = 1000;
+  roi_.static_threshold[2] = 0;
+  roi_.static_threshold[3] = 0;
+
+  // Use 2 states: 1 is center square, 0 is the rest.
+  roi_.roi_map =
+      (uint8_t *)calloc(roi_.rows * roi_.cols, sizeof(*roi_.roi_map));
+  for (unsigned int i = 0; i < roi_.rows; ++i) {
+    for (unsigned int j = 0; j < roi_.cols; ++j) {
+      if (i > (roi_.rows >> 2) && i < ((roi_.rows * 3) >> 2) &&
+          j > (roi_.cols >> 2) && j < ((roi_.cols * 3) >> 2)) {
+        roi_.roi_map[i * roi_.cols + j] = 1;
+      }
+    }
+  }
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+      << " The datarate for the file exceeds the target!";
+
+  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.4)
+      << " The datarate for the file missed the target!";
+
+  free(roi_.roi_map);
 }
 
 TEST_P(DatarateTestRealTime, GFBoost) {
