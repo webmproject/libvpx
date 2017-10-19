@@ -3956,6 +3956,11 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     // rate miss. If so adjust the active maxQ for the subsequent frames.
     if (q > cpi->twopass.active_worst_quality) {
       cpi->twopass.active_worst_quality = q;
+#ifdef CORPUS_VBR_EXPERIMENT
+    } else if (q == q_low && rc->projected_frame_size < rc->this_frame_target) {
+      cpi->twopass.active_worst_quality =
+          VPXMAX(q, cpi->twopass.active_worst_quality - 1);
+#endif
     }
   }
 
