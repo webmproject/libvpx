@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a6e8efe5_327604eb",
+        "filename": "vpx_dsp/x86/avg_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-19T22:28:54Z",
+      "side": 1,
+      "message": "my mistake I merged the cast and the op together",
+      "parentUuid": "e60835e3_367a0c4f",
+      "revId": "55c126a5d72900816aded997e6ebc9098283a5c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b61c40ec_0e2fc8ca",
         "filename": "vpx_dsp/x86/avg_intrin_avx2.c",
         "patchSetId": 3
