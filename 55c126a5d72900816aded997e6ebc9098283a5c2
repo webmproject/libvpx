@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e60835e3_367a0c4f",
+        "filename": "vpx_dsp/x86/avg_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-19T22:16:30Z",
+      "side": 1,
+      "message": "I wonder if an and would have less latency here, but maybe not if there\u0027s an explicit instruction",
+      "revId": "55c126a5d72900816aded997e6ebc9098283a5c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b61c40ec_0e2fc8ca",
+        "filename": "vpx_dsp/x86/avg_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-19T22:16:30Z",
+      "side": 1,
+      "message": "these could be do {} while\u0027s but it may not make any difference, especially if they\u0027re unrolled",
+      "revId": "55c126a5d72900816aded997e6ebc9098283a5c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b7d16c5_60d74948",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_avx2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-19T22:16:30Z",
+      "side": 1,
+      "message": "could grab the one from sse2, but we might have some name conflicts. that might be nice to solve in a followup with _\u003carch\u003e suffixes",
+      "revId": "55c126a5d72900816aded997e6ebc9098283a5c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6e5a87ae_81322dbc",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_avx2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-19T22:16:30Z",
+      "side": 1,
+      "message": "()s aren\u0027t necessary here and 42, 53 and 56, though sse2 has them (was probably a macro to begin with",
+      "range": {
+        "startLine": 39,
+        "startChar": 29,
+        "endLine": 39,
+        "endChar": 30
+      },
+      "revId": "55c126a5d72900816aded997e6ebc9098283a5c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
