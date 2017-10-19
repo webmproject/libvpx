@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "70960041_c56d5a36",
+        "filename": "vpx_dsp/x86/avg_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-10-19T23:33:55Z",
+      "side": 1,
+      "message": "Just looked at the objdump.  The loop is not unrolled.  Also, it looks like the compiler did treat this as a do while.",
+      "parentUuid": "b61c40ec_0e2fc8ca",
+      "revId": "55c126a5d72900816aded997e6ebc9098283a5c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9b7d16c5_60d74948",
         "filename": "vpx_dsp/x86/bitdepth_conversion_avx2.h",
         "patchSetId": 3
@@ -71,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "27c293ae_29d1d4c6",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_avx2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-10-19T23:33:55Z",
+      "side": 1,
+      "message": "sgtm",
+      "parentUuid": "9b7d16c5_60d74948",
+      "revId": "55c126a5d72900816aded997e6ebc9098283a5c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6e5a87ae_81322dbc",
         "filename": "vpx_dsp/x86/bitdepth_conversion_avx2.h",
         "patchSetId": 3
@@ -82,6 +118,30 @@
       "writtenOn": "2017-10-19T22:16:30Z",
       "side": 1,
       "message": "()s aren\u0027t necessary here and 42, 53 and 56, though sse2 has them (was probably a macro to begin with",
+      "range": {
+        "startLine": 39,
+        "startChar": 29,
+        "endLine": 39,
+        "endChar": 30
+      },
+      "revId": "55c126a5d72900816aded997e6ebc9098283a5c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "641befa1_4c9a50c0",
+        "filename": "vpx_dsp/x86/bitdepth_conversion_avx2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-10-19T23:33:55Z",
+      "side": 1,
+      "message": "yep... cut/paste from the sse2.  Fixed.",
+      "parentUuid": "6e5a87ae_81322dbc",
       "range": {
         "startLine": 39,
         "startChar": 29,
