@@ -35,6 +35,8 @@ extern "C" {
 #define FIXED_GF_INTERVAL 8  // Used in some testing modes only
 #define ONEHALFONLY_RESIZE 0
 
+#define FRAME_OVERHEAD_BITS 200
+
 typedef enum {
   INTER_NORMAL = 0,
   INTER_HIGH = 1,
