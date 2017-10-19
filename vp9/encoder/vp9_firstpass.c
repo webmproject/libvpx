@@ -108,7 +108,7 @@ static void output_stats(FIRSTPASS_STATS *stats,
     fpfile = fopen("firstpass.stt", "a");
 
     fprintf(fpfile,
-            "%12.0lf %12.4lf %12.0lf %12.0lf %12.0lf %12.0lf %12.4lf %12.4lf"
+            "%12.0lf %12.4lf %12.2lf %12.2lf %12.2lf %12.0lf %12.4lf %12.4lf"
             "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf"
             "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.0lf %12.0lf %12.0lf"
             "%12.4lf"
