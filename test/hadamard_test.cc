@@ -268,6 +268,11 @@ INSTANTIATE_TEST_CASE_P(SSE2, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_sse2));
 #endif  // HAVE_SSE2
 
+#if HAVE_AVX2
+INSTANTIATE_TEST_CASE_P(AVX2, Hadamard16x16Test,
+                        ::testing::Values(&vpx_hadamard_16x16_avx2));
+#endif  // HAVE_AVX2
+
 #if HAVE_VSX
 INSTANTIATE_TEST_CASE_P(VSX, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_vsx));
