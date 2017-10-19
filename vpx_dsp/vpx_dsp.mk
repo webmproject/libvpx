@@ -290,6 +290,7 @@ endif
 # avg
 DSP_SRCS-yes           += avg.c
 DSP_SRCS-$(HAVE_SSE2)  += x86/avg_intrin_sse2.c
+DSP_SRCS-$(HAVE_AVX2)  += x86/avg_intrin_avx2.c
 DSP_SRCS-$(HAVE_NEON)  += arm/avg_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/hadamard_neon.c
 DSP_SRCS-$(HAVE_MSA)   += mips/avg_msa.c
