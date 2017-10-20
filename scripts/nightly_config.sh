@@ -13,6 +13,8 @@ debug=
 
 . $script_dir/disabled_list.sh
 
+echo ../$libsrc/configure $debug $common $disabled $tool
+
 ../$libsrc/configure $debug $common $disabled $tool > /dev/null
 if [ $? -ne 0 ]; then
   echo "Error: configure fails!" > $test_dir/error_config.txt

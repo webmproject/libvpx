@@ -17,13 +17,16 @@ script_dir=~/Dev/sandbox/libvpx/scripts
 
 common="--disable-docs --enable-experimental"
 
-bd_config="--enable-lowbitdepth"
+#bd_config="--enable-lowbitdepth"
 #--disable-highbitdepth"
 
 . $script_dir/disabled_list.sh
 
-../$libsrc/configure $debug $bd_config $common $disabled $tool > /dev/null
+echo ../$libsrc/configure $debug $common $disabled $tool
+
+../$libsrc/configure $debug $common $disabled $tool > /dev/null
 if [ $? -ne 0 ]; then
   echo "Error: configure fails!" > $test_dir/error_config.txt
   exit 1
 fi
+
