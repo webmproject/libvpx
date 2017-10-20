@@ -92,7 +92,7 @@ static void hadamard_col8x2_avx2(__m256i *in, int iter) {
 }
 
 static void hadamard_8x8x2_avx2(int16_t const *src_diff, int src_stride,
-                                tran_low_t *coeff) {
+                                int16_t *coeff) {
   __m256i src[8];
   src[0] = _mm256_loadu_si256((const __m256i *)src_diff);
   src[1] = _mm256_loadu_si256((const __m256i *)(src_diff += src_stride));
@@ -106,40 +106,52 @@ static void hadamard_8x8x2_avx2(int16_t const *src_diff, int src_stride,
   hadamard_col8x2_avx2(src, 0);
   hadamard_col8x2_avx2(src, 1);
 
-  // TODO(slavarnway): FIXME: For high bitdepths, it is unnecessary to
-  // mult/unpack/store here and load/pack the same memory in the next stage.
-  // Try using an intermediate buffer and store_tran_low() in the last stage.
-  store_tran_low(_mm256_permute2x128_si256(src[0], src[1], 0x20), coeff);
+  _mm256_storeu_si256((__m256i *)coeff,
+                      _mm256_permute2x128_si256(src[0], src[1], 0x20));
   coeff += 16;
-  store_tran_low(_mm256_permute2x128_si256(src[2], src[3], 0x20), coeff);
+  _mm256_storeu_si256((__m256i *)coeff,
+                      _mm256_permute2x128_si256(src[2], src[3], 0x20));
   coeff += 16;
-  store_tran_low(_mm256_permute2x128_si256(src[4], src[5], 0x20), coeff);
+  _mm256_storeu_si256((__m256i *)coeff,
+                      _mm256_permute2x128_si256(src[4], src[5], 0x20));
   coeff += 16;
-  store_tran_low(_mm256_permute2x128_si256(src[6], src[7], 0x20), coeff);
+  _mm256_storeu_si256((__m256i *)coeff,
+                      _mm256_permute2x128_si256(src[6], src[7], 0x20));
   coeff += 16;
-
-  store_tran_low(_mm256_permute2x128_si256(src[0], src[1], 0x31), coeff);
+  _mm256_storeu_si256((__m256i *)coeff,
+                      _mm256_permute2x128_si256(src[0], src[1], 0x31));
   coeff += 16;
-  store_tran_low(_mm256_permute2x128_si256(src[2], src[3], 0x31), coeff);
+  _mm256_storeu_si256((__m256i *)coeff,
+                      _mm256_permute2x128_si256(src[2], src[3], 0x31));
   coeff += 16;
-  store_tran_low(_mm256_permute2x128_si256(src[4], src[5], 0x31), coeff);
+  _mm256_storeu_si256((__m256i *)coeff,
+                      _mm256_permute2x128_si256(src[4], src[5], 0x31));
   coeff += 16;
-  store_tran_low(_mm256_permute2x128_si256(src[6], src[7], 0x31), coeff);
+  _mm256_storeu_si256((__m256i *)coeff,
+                      _mm256_permute2x128_si256(src[6], src[7], 0x31));
 }
 
 void vpx_hadamard_16x16_avx2(int16_t const *src_diff, int src_stride,
                              tran_low_t *coeff) {
   int idx;
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(32, int16_t, temp_coeff[16 * 16]);
+  int16_t *t_coeff = temp_coeff;
+#else
+  int16_t *t_coeff = coeff;
+#endif
+
   for (idx = 0; idx < 2; ++idx) {
     int16_t const *src_ptr = src_diff + idx * 8 * src_stride;
-    hadamard_8x8x2_avx2(src_ptr, src_stride, coeff + (idx * 64 * 2));
+    hadamard_8x8x2_avx2(src_ptr, src_stride, t_coeff + (idx * 64 * 2));
   }
 
   for (idx = 0; idx < 64; idx += 16) {
-    const __m256i coeff0 = load_tran_low(coeff);
-    const __m256i coeff1 = load_tran_low(coeff + 64);
-    const __m256i coeff2 = load_tran_low(coeff + 128);
-    const __m256i coeff3 = load_tran_low(coeff + 192);
+    const __m256i coeff0 = _mm256_loadu_si256((const __m256i *)t_coeff);
+    const __m256i coeff1 = _mm256_loadu_si256((const __m256i *)(t_coeff + 64));
+    const __m256i coeff2 = _mm256_loadu_si256((const __m256i *)(t_coeff + 128));
+    const __m256i coeff3 = _mm256_loadu_si256((const __m256i *)(t_coeff + 192));
+
     __m256i b0 = _mm256_add_epi16(coeff0, coeff1);
     __m256i b1 = _mm256_sub_epi16(coeff0, coeff1);
     __m256i b2 = _mm256_add_epi16(coeff2, coeff3);
@@ -156,5 +168,6 @@ void vpx_hadamard_16x16_avx2(int16_t const *src_diff, int src_stride,
     store_tran_low(_mm256_sub_epi16(b1, b3), coeff + 192);
 
     coeff += 16;
+    t_coeff += 16;
   }
 }
