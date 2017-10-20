@@ -12,7 +12,8 @@ d9="--disable-ext-partition --disable-ext-partition-types"
 #d10="--disable-txmg"
 d10="--disable-reference_buffer --disable-loopfiltering_across_tiles"
 d11="--disable-palette_throughput --disable-smooth_hv --disable-tempmv_signaling"
-d12="--disable-ext-comp-refs --disable-ext_delta_q --disable-parallel_deblocking --disable-simple_bwd_adapt"
+d12="--disable-ext-comp-refs --disable-ext_delta_q --disable-parallel_deblocking"
+d13="--disable-simple_bwd_adapt --disable-loopfilter-level"
 
 # --disable-cdef_singlepass
-disabled="$d1 $d2 $d3 $d4 $d5 $d6 $d7 $d8 $d9 $d10 $d11 $d12"
+disabled="$d1 $d2 $d3 $d4 $d5 $d6 $d7 $d8 $d9 $d10 $d11 $d12 $d13"
