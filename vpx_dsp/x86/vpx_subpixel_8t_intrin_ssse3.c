@@ -38,8 +38,8 @@ void vpx_filter_block1d4_h8_intrin_ssse3(
     const uint8_t *src_ptr, ptrdiff_t src_pitch, uint8_t *output_ptr,
     ptrdiff_t output_pitch, uint32_t output_height, const int16_t *filter) {
   __m128i firstFilters, secondFilters, shuffle1, shuffle2;
-  __m128i srcRegFilt1, srcRegFilt2, srcRegFilt3, srcRegFilt4;
-  __m128i addFilterReg64, filtersReg, srcReg, minReg;
+  __m128i srcRegFilt1, srcRegFilt2;
+  __m128i addFilterReg64, filtersReg, srcReg;
   unsigned int i;
 
   // create a register with 0,64,0,64,0,64,0,64,0,64,0,64,0,64,0,64
@@ -75,18 +75,16 @@ void vpx_filter_block1d4_h8_intrin_ssse3(
     srcRegFilt1 = _mm_maddubs_epi16(srcRegFilt1, firstFilters);
     srcRegFilt2 = _mm_maddubs_epi16(srcRegFilt2, secondFilters);
 
-    // extract the higher half of the lane
-    srcRegFilt3 = _mm_srli_si128(srcRegFilt1, 8);
-    srcRegFilt4 = _mm_srli_si128(srcRegFilt2, 8);
+    // sum the results together, saturating only on the final step
+    // the specific order of the additions prevents outranges
+    srcRegFilt1 = _mm_add_epi16(srcRegFilt1, srcRegFilt2);
 
-    minReg = _mm_min_epi16(srcRegFilt3, srcRegFilt2);
+    // extract the higher half of the register
+    srcRegFilt2 = _mm_srli_si128(srcRegFilt1, 8);
 
-    // add and saturate all the results together
-    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, srcRegFilt4);
-    srcRegFilt3 = _mm_max_epi16(srcRegFilt3, srcRegFilt2);
-    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, minReg);
-    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, srcRegFilt3);
-    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, addFilterReg64);
+    // add the rounding offset early to avoid another saturated add
+    srcRegFilt1 = _mm_add_epi16(srcRegFilt1, addFilterReg64);
+    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, srcRegFilt2);
 
     // shift by 7 bit each 16 bits
     srcRegFilt1 = _mm_srai_epi16(srcRegFilt1, 7);
