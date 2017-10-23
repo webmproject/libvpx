@@ -583,6 +583,8 @@ static void set_rt_speed_feature_framesize_independent(
       if (cpi->svc.non_reference_frame)
         sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_EVENMORE;
     }
+    if (cpi->use_svc && cpi->row_mt && cpi->oxcf.max_threads > 1)
+      sf->adaptive_rd_thresh_row_mt = 1;
     // Enable partition copy. For SVC only enabled for top spatial resolution
     // layer.
     cpi->max_copied_frame = 0;
