@@ -1,6 +1,6 @@
 #!/bin/sh
 
-d1="--disable-chroma_sub8x8"
+#d1="--disable-chroma_sub8x8"
 d2="--disable-rect_tx --disable-global_motion --disable-ext_tx"
 d3="--disable-cdef --disable-ext_intra --disable-intra-edge --disable-mv_compress"
 d4="--disable-dual_filter --disable-motion_var --disable-warped_motion"
@@ -16,4 +16,4 @@ d12="--disable-ext-comp-refs --disable-ext_delta_q --disable-parallel_deblocking
 d13="--disable-simple_bwd_adapt --disable-loopfilter-level"
 
 # --disable-cdef_singlepass
-disabled="$d1 $d2 $d3 $d4 $d5 $d6 $d7 $d8 $d9 $d10 $d11 $d12 $d13"
+disabled="$d2 $d3 $d4 $d5 $d6 $d7 $d8 $d9 $d10 $d11 $d12 $d13"
