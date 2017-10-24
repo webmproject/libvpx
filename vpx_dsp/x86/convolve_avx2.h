@@ -58,16 +58,19 @@ static INLINE __m256i convolve8_16_avx2(const __m256i *const s,
   const __m256i x1 = _mm256_maddubs_epi16(s[1], f[1]);
   const __m256i x2 = _mm256_maddubs_epi16(s[2], f[2]);
   const __m256i x3 = _mm256_maddubs_epi16(s[3], f[3]);
-  // add and saturate the results together
-  const __m256i min_x2x1 = _mm256_min_epi16(x2, x1);
-  const __m256i max_x2x1 = _mm256_max_epi16(x2, x1);
-  __m256i temp = _mm256_adds_epi16(x0, x3);
-  temp = _mm256_adds_epi16(temp, min_x2x1);
-  temp = _mm256_adds_epi16(temp, max_x2x1);
+  __m256i sum1, sum2;
+
+  // sum the results together, saturating only on the final step
+  // adding x0 with x2 and x1 with x3 is the only order that prevents
+  // outranges for all filters
+  sum1 = _mm256_add_epi16(x0, x2);
+  sum2 = _mm256_add_epi16(x1, x3);
+  // add the rounding offset early to avoid another saturated add
+  sum1 = _mm256_add_epi16(sum1, k_64);
+  sum1 = _mm256_adds_epi16(sum1, sum2);
   // round and shift by 7 bit each 16 bit
-  temp = _mm256_adds_epi16(temp, k_64);
-  temp = _mm256_srai_epi16(temp, 7);
-  return temp;
+  sum1 = _mm256_srai_epi16(sum1, 7);
+  return sum1;
 }
 
 static INLINE __m128i convolve8_8_avx2(const __m256i *const s,
@@ -82,16 +85,19 @@ static INLINE __m128i convolve8_8_avx2(const __m256i *const s,
                                        _mm256_castsi256_si128(f[2]));
   const __m128i x3 = _mm_maddubs_epi16(_mm256_castsi256_si128(s[3]),
                                        _mm256_castsi256_si128(f[3]));
-  // add and saturate the results together
-  const __m128i min_x2x1 = _mm_min_epi16(x2, x1);
-  const __m128i max_x2x1 = _mm_max_epi16(x2, x1);
-  __m128i temp = _mm_adds_epi16(x0, x3);
-  temp = _mm_adds_epi16(temp, min_x2x1);
-  temp = _mm_adds_epi16(temp, max_x2x1);
-  // round and shift by 7 bit each 16 bit
-  temp = _mm_adds_epi16(temp, k_64);
-  temp = _mm_srai_epi16(temp, 7);
-  return temp;
+  __m128i sum1, sum2;
+
+  // sum the results together, saturating only on the final step
+  // adding x0 with x2 and x1 with x3 is the only order that prevents
+  // outranges for all filters
+  sum1 = _mm_add_epi16(x0, x2);
+  sum2 = _mm_add_epi16(x1, x3);
+  // add the rounding offset early to avoid another saturated add
+  sum1 = _mm_add_epi16(sum1, k_64);
+  sum1 = _mm_adds_epi16(sum1, sum2);
+  // shift by 7 bit each 16 bit
+  sum1 = _mm_srai_epi16(sum1, 7);
+  return sum1;
 }
 
 #undef MM256_BROADCASTSI128_SI256
