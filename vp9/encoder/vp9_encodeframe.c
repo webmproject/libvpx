@@ -4797,8 +4797,31 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
     }
   } else {
+    FRAME_COUNTS *counts = cpi->td.counts;
     cm->reference_mode = SINGLE_REFERENCE;
+    if (cpi->allow_comp_inter_inter && cpi->sf.use_compound_nonrd_pickmode &&
+        cpi->rc.alt_ref_gf_group && !cpi->rc.is_src_frame_alt_ref &&
+        cm->frame_type != KEY_FRAME)
+      cm->reference_mode = REFERENCE_MODE_SELECT;
+
     encode_frame_internal(cpi);
+
+    if (cm->reference_mode == REFERENCE_MODE_SELECT) {
+      int single_count_zero = 0;
+      int comp_count_zero = 0;
+      int i;
+      for (i = 0; i < COMP_INTER_CONTEXTS; i++) {
+        single_count_zero += counts->comp_inter[i][0];
+        comp_count_zero += counts->comp_inter[i][1];
+      }
+      if (comp_count_zero == 0) {
+        cm->reference_mode = SINGLE_REFERENCE;
+        vp9_zero(counts->comp_inter);
+      } else if (single_count_zero == 0) {
+        cm->reference_mode = COMPOUND_REFERENCE;
+        vp9_zero(counts->comp_inter);
+      }
+    }
   }
 
   // If segmented AQ is enabled compute the average AQ weighting.
