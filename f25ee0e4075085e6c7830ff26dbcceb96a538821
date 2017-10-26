@@ -22,6 +22,30 @@
       "revId": "f25ee0e4075085e6c7830ff26dbcceb96a538821",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d71f0f0_31a44014",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1635,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-26T18:43:54Z",
+      "side": 1,
+      "message": "ALT frame is already added to the loop",
+      "parentUuid": "fe749c77_abc1202d",
+      "range": {
+        "startLine": 1635,
+        "startChar": 30,
+        "endLine": 1635,
+        "endChar": 37
+      },
+      "revId": "f25ee0e4075085e6c7830ff26dbcceb96a538821",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
