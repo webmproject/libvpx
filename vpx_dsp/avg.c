@@ -34,7 +34,7 @@ unsigned int vpx_avg_4x4_c(const uint8_t *s, int p) {
 
 // src_diff: first pass, 9 bit, dynamic range [-255, 255]
 //           second pass, 12 bit, dynamic range [-2040, 2040]
-static void hadamard_col8(const int16_t *src_diff, int src_stride,
+static void hadamard_col8(const int16_t *src_diff, ptrdiff_t src_stride,
                           int16_t *coeff) {
   int16_t b0 = src_diff[0 * src_stride] + src_diff[1 * src_stride];
   int16_t b1 = src_diff[0 * src_stride] - src_diff[1 * src_stride];
@@ -66,7 +66,7 @@ static void hadamard_col8(const int16_t *src_diff, int src_stride,
 
 // The order of the output coeff of the hadamard is not important. For
 // optimization purposes the final transpose may be skipped.
-void vpx_hadamard_8x8_c(const int16_t *src_diff, int src_stride,
+void vpx_hadamard_8x8_c(const int16_t *src_diff, ptrdiff_t src_stride,
                         tran_low_t *coeff) {
   int idx;
   int16_t buffer[64];
@@ -92,7 +92,7 @@ void vpx_hadamard_8x8_c(const int16_t *src_diff, int src_stride,
 }
 
 // In place 16x16 2D Hadamard transform
-void vpx_hadamard_16x16_c(const int16_t *src_diff, int src_stride,
+void vpx_hadamard_16x16_c(const int16_t *src_diff, ptrdiff_t src_stride,
                           tran_low_t *coeff) {
   int idx;
   for (idx = 0; idx < 4; ++idx) {

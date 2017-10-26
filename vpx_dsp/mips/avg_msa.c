@@ -56,7 +56,8 @@ uint32_t vpx_avg_4x4_msa(const uint8_t *src, int32_t src_stride) {
   return sum_out;
 }
 
-void vpx_hadamard_8x8_msa(const int16_t *src, int src_stride, int16_t *dst) {
+void vpx_hadamard_8x8_msa(const int16_t *src, ptrdiff_t src_stride,
+                          int16_t *dst) {
   v8i16 src0, src1, src2, src3, src4, src5, src6, src7;
   v8i16 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
 
@@ -80,7 +81,8 @@ void vpx_hadamard_8x8_msa(const int16_t *src, int src_stride, int16_t *dst) {
   ST_SH8(src0, src1, src2, src3, src4, src5, src6, src7, dst, 8);
 }
 
-void vpx_hadamard_16x16_msa(const int16_t *src, int src_stride, int16_t *dst) {
+void vpx_hadamard_16x16_msa(const int16_t *src, ptrdiff_t src_stride,
+                            int16_t *dst) {
   v8i16 src0, src1, src2, src3, src4, src5, src6, src7, src8, src9, src10;
   v8i16 src11, src12, src13, src14, src15, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5;
   v8i16 tmp6, tmp7, tmp8, tmp9, tmp10, tmp11, tmp12, tmp13, tmp14, tmp15;

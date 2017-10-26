@@ -214,7 +214,7 @@ static void hadamard_col8_sse2(__m128i *in, int iter) {
   }
 }
 
-void vpx_hadamard_8x8_sse2(int16_t const *src_diff, int src_stride,
+void vpx_hadamard_8x8_sse2(int16_t const *src_diff, ptrdiff_t src_stride,
                            tran_low_t *coeff) {
   __m128i src[8];
   src[0] = _mm_load_si128((const __m128i *)src_diff);
@@ -246,7 +246,7 @@ void vpx_hadamard_8x8_sse2(int16_t const *src_diff, int src_stride,
   store_tran_low(src[7], coeff);
 }
 
-void vpx_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
+void vpx_hadamard_16x16_sse2(int16_t const *src_diff, ptrdiff_t src_stride,
                              tran_low_t *coeff) {
   int idx;
   for (idx = 0; idx < 4; ++idx) {

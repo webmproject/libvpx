@@ -91,7 +91,7 @@ static void hadamard_col8x2_avx2(__m256i *in, int iter) {
   }
 }
 
-static void hadamard_8x8x2_avx2(int16_t const *src_diff, int src_stride,
+static void hadamard_8x8x2_avx2(int16_t const *src_diff, ptrdiff_t src_stride,
                                 int16_t *coeff) {
   __m256i src[8];
   src[0] = _mm256_loadu_si256((const __m256i *)src_diff);
@@ -131,7 +131,7 @@ static void hadamard_8x8x2_avx2(int16_t const *src_diff, int src_stride,
                       _mm256_permute2x128_si256(src[6], src[7], 0x31));
 }
 
-void vpx_hadamard_16x16_avx2(int16_t const *src_diff, int src_stride,
+void vpx_hadamard_16x16_avx2(int16_t const *src_diff, ptrdiff_t src_stride,
                              tran_low_t *coeff) {
   int idx;
 #if CONFIG_VP9_HIGHBITDEPTH

@@ -47,7 +47,7 @@ static void hadamard8x8_one_pass(int16x8_t *a0, int16x8_t *a1, int16x8_t *a2,
   *a7 = vaddq_s16(c1, c5);
 }
 
-void vpx_hadamard_8x8_neon(const int16_t *src_diff, int src_stride,
+void vpx_hadamard_8x8_neon(const int16_t *src_diff, ptrdiff_t src_stride,
                            tran_low_t *coeff) {
   int16x8_t a0 = vld1q_s16(src_diff);
   int16x8_t a1 = vld1q_s16(src_diff + src_stride);
@@ -76,7 +76,7 @@ void vpx_hadamard_8x8_neon(const int16_t *src_diff, int src_stride,
   store_s16q_to_tran_low(coeff + 56, a7);
 }
 
-void vpx_hadamard_16x16_neon(const int16_t *src_diff, int src_stride,
+void vpx_hadamard_16x16_neon(const int16_t *src_diff, ptrdiff_t src_stride,
                              tran_low_t *coeff) {
   int i;
 

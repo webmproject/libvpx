@@ -42,7 +42,7 @@ static void vpx_hadamard_s16_8x8_one_pass(int16x8_t v[8]) {
   v[7] = vec_add(c1, c5);
 }
 
-void vpx_hadamard_8x8_vsx(const int16_t *src_diff, int src_stride,
+void vpx_hadamard_8x8_vsx(const int16_t *src_diff, ptrdiff_t src_stride,
                           tran_low_t *coeff) {
   int16x8_t v[8];
 
@@ -71,7 +71,7 @@ void vpx_hadamard_8x8_vsx(const int16_t *src_diff, int src_stride,
   store_tran_low(v[7], 0, coeff + 56);
 }
 
-void vpx_hadamard_16x16_vsx(const int16_t *src_diff, int src_stride,
+void vpx_hadamard_16x16_vsx(const int16_t *src_diff, ptrdiff_t src_stride,
                             tran_low_t *coeff) {
   int i;
   const uint16x8_t ones = vec_splat_u16(1);
