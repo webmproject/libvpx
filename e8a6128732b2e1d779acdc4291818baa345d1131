@@ -22,6 +22,30 @@
       "revId": "e8a6128732b2e1d779acdc4291818baa345d1131",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54048805_3ca797e2",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2981,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-10-27T19:27:41Z",
+      "side": 1,
+      "message": "Done. This one and the one above.",
+      "parentUuid": "1b3c8650_3074142c",
+      "range": {
+        "startLine": 2981,
+        "startChar": 14,
+        "endLine": 2981,
+        "endChar": 15
+      },
+      "revId": "e8a6128732b2e1d779acdc4291818baa345d1131",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
