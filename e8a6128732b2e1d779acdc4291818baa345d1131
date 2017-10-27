@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1b3c8650_3074142c",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2981,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-10-27T19:21:22Z",
+      "side": 1,
+      "message": "this one is just misleading. Suggest you delete the comment.",
+      "range": {
+        "startLine": 2981,
+        "startChar": 14,
+        "endLine": 2981,
+        "endChar": 15
+      },
+      "revId": "e8a6128732b2e1d779acdc4291818baa345d1131",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
