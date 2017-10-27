@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9d82952_bce71d7b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-27T15:33:32Z",
+      "side": 1,
+      "message": "add this bug instead: https://buganizer.corp.google.com/issues/68362457",
+      "revId": "0411fa6575bd7540a2e5eb91f0524412a75d1e6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
