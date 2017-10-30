@@ -287,8 +287,12 @@ static void set_block_size(VP9_COMP *const cpi, MACROBLOCK *const x,
 }
 
 typedef struct {
-  int64_t sum_square_error;
-  int64_t sum_error;
+  // This struct is used for computing variance in choose_partitioning(), where
+  // the max number of samples within a superblock is 16x16 (with 4x4 avg). Even
+  // in high bitdepth, uint32_t is enough for sum_square_error (2^12 * 2^12 * 16
+  // * 16 = 2^32).
+  uint32_t sum_square_error;
+  int32_t sum_error;
   int log2_count;
   int variance;
 } var;
@@ -381,7 +385,7 @@ static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
 }
 
 // Set variance values given sum square error, sum error, count.
-static void fill_variance(int64_t s2, int64_t s, int c, var *v) {
+static void fill_variance(uint32_t s2, int32_t s, int c, var *v) {
   v->sum_square_error = s2;
   v->sum_error = s;
   v->log2_count = c;
