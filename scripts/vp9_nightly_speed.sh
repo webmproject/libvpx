@@ -1,8 +1,8 @@
 #!/bin/sh
 # File:
-#  list_exp_speed.sh
+#  vp9_nightly_speed.sh
 # Decription:
-#  Configure, build, and run encoder/decoder for each experimental tool.
+#  Configure, build, and run VP9 encoder/decoder for each experimental tool.
 #  Display the encoder/decode run time
 # Preassumption:
 #  1) Assume all script files are in ~/Dev/sandbox/libvpx/scripts
