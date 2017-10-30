@@ -1,6 +1,6 @@
 #!/bin/sh
 
-d2="--disable-global_motion --disable-ext_tx"
+d2="--disable-ext_tx"
 d3="--disable-cdef --disable-ext_intra --disable-intra-edge --disable-mv_compress"
 d4="--disable-dual_filter --disable-motion_var --disable-warped_motion"
 d5="--disable-wedge --disable-compound_segment"
