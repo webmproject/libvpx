@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "554aa2cb_86479526",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-30T19:47:48Z",
+      "side": 1,
+      "message": "Say something like:\n\nRemove vt2, that was only used for variance based on 4x4average.\nOnly change is for low-resolutions at speed 5, 6, 7.\nMetrics on RTC_derf is neutral with this change.\n\nStack size reduced by ??",
+      "revId": "18883094447c5c5e0262eec762eca8f50650c5c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fa0f7e04_7d4d10a0",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1407,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-10-30T19:47:48Z",
+      "side": 1,
+      "message": "remove this comment",
+      "revId": "18883094447c5c5e0262eec762eca8f50650c5c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
