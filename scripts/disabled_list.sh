@@ -1,6 +1,6 @@
 #!/bin/sh
 
-d2="--disable-rect_tx --disable-global_motion --disable-ext_tx"
+d2="--disable-global_motion --disable-ext_tx"
 d3="--disable-cdef --disable-ext_intra --disable-intra-edge --disable-mv_compress"
 d4="--disable-dual_filter --disable-motion_var --disable-warped_motion"
 d5="--disable-wedge --disable-compound_segment"
@@ -14,7 +14,6 @@ d11="--disable-palette_throughput --disable-smooth_hv --disable-tempmv_signaling
 d12="--disable-ext-comp-refs --disable-ext_delta_q --disable-parallel_deblocking"
 d13="--disable-simple_bwd_adapt --disable-loopfilter-level"
 
-#d1="--disable-chroma_sub8x8"
 #d10="--disable-txmg"
 # --disable-cdef_singlepass
 
