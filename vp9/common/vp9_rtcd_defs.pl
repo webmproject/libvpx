@@ -30,6 +30,7 @@ if ($opts{arch} eq "x86_64") {
   $ssse3_x86_64 = 'ssse3';
   $avx_x86_64 = 'avx';
   $avx2_x86_64 = 'avx2';
+  $avx512_x86_64 = 'avx512';
 }
 
 #

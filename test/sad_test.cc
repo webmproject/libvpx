@@ -896,6 +896,14 @@ const SadMxNx4Param x4d_avx2_tests[] = {
 INSTANTIATE_TEST_CASE_P(AVX2, SADx4Test, ::testing::ValuesIn(x4d_avx2_tests));
 #endif  // HAVE_AVX2
 
+#if HAVE_AVX512
+const SadMxNx4Param x4d_avx512_tests[] = {
+  SadMxNx4Param(64, 64, &vpx_sad64x64x4d_avx512),
+};
+INSTANTIATE_TEST_CASE_P(AVX512, SADx4Test,
+                        ::testing::ValuesIn(x4d_avx512_tests));
+#endif  // HAVE_AVX512
+
 //------------------------------------------------------------------------------
 // MIPS functions
 #if HAVE_MSA

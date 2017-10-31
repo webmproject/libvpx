@@ -20,6 +20,7 @@ if ($opts{arch} eq "x86_64") {
   $ssse3_x86_64 = 'ssse3';
   $avx_x86_64 = 'avx';
   $avx2_x86_64 = 'avx2';
+  $avx512_x86_64 = 'avx512';
 }
 
 #
@@ -872,7 +873,7 @@ specialize qw/vpx_sad4x4x8 sse4_1 msa mmi/;
 # Multi-block SAD, comparing a reference to N independent blocks
 #
 add_proto qw/void vpx_sad64x64x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array";
-specialize qw/vpx_sad64x64x4d avx2 neon msa sse2 vsx mmi/;
+specialize qw/vpx_sad64x64x4d avx512 avx2 neon msa sse2 vsx mmi/;
 
 add_proto qw/void vpx_sad64x32x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t * const ref_ptr[], int ref_stride, uint32_t *sad_array";
 specialize qw/vpx_sad64x32x4d neon msa sse2 vsx mmi/;

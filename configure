@@ -244,6 +244,7 @@ ARCH_EXT_LIST_X86="
     sse4_1
     avx
     avx2
+    avx512
 "
 
 ARCH_EXT_LIST_LOONGSON="
