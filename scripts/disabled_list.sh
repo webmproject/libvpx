@@ -2,7 +2,8 @@
 
 d2="--disable-ext_tx"
 d3="--disable-cdef --disable-ext_intra --disable-intra-edge --disable-mv_compress"
-d4="--disable-dual_filter --disable-motion_var --disable-warped_motion"
+d4="--disable-dual_filter"
+#--disable-motion_var --disable-warped_motion"
 #d5="--disable-wedge --disable-compound_segment"
 d6="--disable-interintra --disable-one_sided_compound"
 d7="--disable-convolve_round --disable-aom-qm --disable-dist_8x8"
