@@ -2604,9 +2604,13 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Should we use the alternate reference frame.
   if (allow_alt_ref && (i < cpi->oxcf.lag_in_frames) &&
       (i >= rc->min_gf_interval)) {
+    const int forward_frames = (rc->frames_to_key - i >= i - 1)
+                                   ? i - 1
+                                   : VPXMAX(0, rc->frames_to_key - i);
+
     // Calculate the boost for alt ref.
     rc->gfu_boost =
-        calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost, &b_boost);
+        calc_arf_boost(cpi, 0, forward_frames, i - 1, &f_boost, &b_boost);
     rc->source_alt_ref_pending = 1;
 
     // Test to see if multi arf is appropriate.
