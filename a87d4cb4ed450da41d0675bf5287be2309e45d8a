@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6f71f0ea_f810538f",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-11-02T22:07:41Z",
+      "side": 1,
+      "message": "What do you think is broken here?",
+      "parentUuid": "2295a444_7b82e2d2",
+      "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bf5b693f_6bfdbd6b",
         "filename": "build/make/configure.sh",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2017-11-02T18:46:24Z",
       "side": 1,
       "message": "Probably need to do something here.",
+      "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fcc1c22_5af2f829",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-11-02T22:07:41Z",
+      "side": 1,
+      "message": "This block disable things that Visual Studio versions 7/8/9/10 are known to not support. Yes, avx512 probably falls into that bucket. Do you know what VS version does support it?",
+      "parentUuid": "bf5b693f_6bfdbd6b",
       "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
