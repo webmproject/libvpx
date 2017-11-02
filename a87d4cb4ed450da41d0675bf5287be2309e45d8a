@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2295a444_7b82e2d2",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1153480
+      },
+      "writtenOn": "2017-11-02T18:46:24Z",
+      "side": 1,
+      "message": "Pretty sure a bunch of things are broken here.",
+      "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf5b693f_6bfdbd6b",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1153480
+      },
+      "writtenOn": "2017-11-02T18:46:24Z",
+      "side": 1,
+      "message": "Probably need to do something here.",
+      "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
