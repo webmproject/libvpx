@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "adc1bd97_014f83f7",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-11-03T14:50:44Z",
+      "side": 1,
+      "message": "I suspect we do not try to auto-detect for icc. The function basically checks if the compiler supports the option.",
+      "parentUuid": "2efeefba_4b32dc7c",
+      "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bf5b693f_6bfdbd6b",
         "filename": "build/make/configure.sh",
         "patchSetId": 4
@@ -102,6 +120,24 @@
       "side": 1,
       "message": "15.3. https://blogs.msdn.microsoft.com/vcblog/2017/07/11/microsoft-visual-studio-2017-supports-intel-avx-512/\n\nDoes that mean I have to go all the way up to 15 or just 14.",
       "parentUuid": "7fcc1c22_5af2f829",
+      "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30087fa5_ae0d45c4",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-11-03T14:50:44Z",
+      "side": 1,
+      "message": "It looks like 15.3 picked up support, which I\u0027m guessing is a service pack? We don\u0027t really offer a way to target that specifically, so 14 would be a good start. I don\u0027t think there is anything newer than 15 available?",
+      "parentUuid": "18da4878_111cbd96",
       "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
