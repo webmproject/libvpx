@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "aadfdfcb_80612f26",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1153480
+      },
+      "writtenOn": "2017-11-03T18:20:47Z",
+      "side": 1,
+      "message": "It seems that function will call soft enable if enabled gcc isn\u0027t true. I can\u0027t find any avx/avx2 checks for any of the instances icc turns up in grep. Yeah, I\u0027m pretty sure you are right.",
+      "parentUuid": "adc1bd97_014f83f7",
+      "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bf5b693f_6bfdbd6b",
         "filename": "build/make/configure.sh",
         "patchSetId": 4
@@ -138,6 +156,24 @@
       "side": 1,
       "message": "It looks like 15.3 picked up support, which I\u0027m guessing is a service pack? We don\u0027t really offer a way to target that specifically, so 14 would be a good start. I don\u0027t think there is anything newer than 15 available?",
       "parentUuid": "18da4878_111cbd96",
+      "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dbfe41b4_5f620eb7",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1153480
+      },
+      "writtenOn": "2017-11-03T18:20:47Z",
+      "side": 1,
+      "message": "Yeah, I don\u0027t think there is anything newer than 15. Added a check up to 14.",
+      "parentUuid": "30087fa5_ae0d45c4",
       "revId": "a87d4cb4ed450da41d0675bf5287be2309e45d8a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
