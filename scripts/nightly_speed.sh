@@ -77,9 +77,9 @@ laginframes=19
 taskset -c $core_id ./aomenc $verbose -o /dev/shm/"$bstream" $video $codec --limit=$frames --profile=$profile $bitdepth --fps=$fps $tune_content --target-bitrate=$bitrate --skip=0 -p 2 --good --cpu-used=0 --lag-in-frames=$laginframes --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=$col_num --test-decode=warn --psnr &>> $elog
 
 # Note: $2 is the time unit, ms or us
-#etime=`cat $elog | grep 'Pass 2/2' | grep 'fps)' | sed -e 's/^.*b\/s//' | awk '{print $1" "$2}'`
-efps=`cat $elog | grep 'Pass 2/2' | grep 'fps)' | sed -e 's/^.*b\/s//' | awk '{print $3}'`
-efps=`echo $efps | sed 's/(//'`
+etime=`cat $elog | awk 'NR==2 {NF-=3; print $NF}'`
+# efps=`cat $elog | grep 'Pass 2/2' | grep 'fps)' | sed -e 's/^.*b\/s//' | awk '{print $3}'`
+# efps=`echo $efps | sed 's/(//'`
 
 psnr=`cat $elog | grep 'PSNR' | awk '{print $5, $6, $7, $8, $9}'`
 tmp=`cat $elog | grep mismatch`
@@ -106,14 +106,14 @@ percent=`echo "($dfps - $pdfps) / $pdfps * 100" | bc -l`
 percent=${percent:0:5}
 
 echo -e '\t'"Enc fps   Dec fps    PSNR"'\t\t\t\t\t\t\t'"Enc status   Dec status   Speedup(%)"
-echo -e '\t'$efps"        "$dfps"     "$psnr'\t'$eflag"            "$dflag"           "$percent
+echo -e '\t'$etime"        "$dfps"     "$psnr'\t'$eflag"            "$dflag"           "$percent
 printf "\n"
 
 # Output a html log file for email
 echo "<p> AV1: $(basename $video), bitrate=$bitrate profile=$profile frames=$frames </p>" >> $log_path/$html_log_file
 echo "<table style=\"width:100%\">" >> $log_path/$html_log_file
 echo "  <tr>" >> $log_path/$html_log_file
-echo "    <th>Enc fps</th>" >> $log_path/$html_log_file
+echo "    <th>Enc Time</th>" >> $log_path/$html_log_file
 echo "    <th>Dec fps</th>" >> $log_path/$html_log_file
 echo "    <th>Dec Speedup(%)</th>" >> $log_path/$html_log_file
 echo "    <th>Enc Status</th>" >> $log_path/$html_log_file
@@ -121,7 +121,7 @@ echo "    <th>Dec Status</th>" >> $log_path/$html_log_file
 echo "    <th>PSNR</th>" >> $log_path/$html_log_file
 echo " </tr>" >> $log_path/$html_log_file
 echo " <tr>" >> $log_path/$html_log_file
-echo "    <td>$efps</td>" >> $log_path/$html_log_file
+echo "    <td>$etime</td>" >> $log_path/$html_log_file
 echo "    <td>$dfps</td>" >> $log_path/$html_log_file
 echo "   <td>$percent</td>" >> $log_path/$html_log_file
 echo "    <td>$eflag</td>" >> $log_path/$html_log_file
