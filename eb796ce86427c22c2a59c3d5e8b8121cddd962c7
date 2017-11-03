@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "7e00af3f_b09c18c6",
+        "filename": "vpx_dsp/x86/sad4d_avx512.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1153480
+      },
+      "writtenOn": "2017-11-03T00:31:25Z",
+      "side": 1,
+      "message": "All the features for avx, avx2, avx512, bmi1/2 and fma are in the same include. This can be seen here if you expand the intrinsics and look at the include here. https://software.intel.com/sites/landingpage/IntrinsicsGuide/#\n\nI will change it to AVX512.",
+      "parentUuid": "00865bfc_2d33058f",
+      "range": {
+        "startLine": 10,
+        "startChar": 27,
+        "endLine": 10,
+        "endChar": 31
+      },
+      "revId": "eb796ce86427c22c2a59c3d5e8b8121cddd962c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5503382f_4c7d84aa",
         "filename": "vpx_ports/x86.h",
         "patchSetId": 3
@@ -53,6 +77,30 @@
       "writtenOn": "2017-11-02T22:07:41Z",
       "side": 1,
       "message": "stray whitespace?",
+      "range": {
+        "startLine": 213,
+        "startChar": 1,
+        "endLine": 213,
+        "endChar": 0
+      },
+      "revId": "eb796ce86427c22c2a59c3d5e8b8121cddd962c7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dced11fd_93441a96",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1153480
+      },
+      "writtenOn": "2017-11-03T00:31:25Z",
+      "side": 1,
+      "message": "Fixed in patch set 4 thanks to Jenkins.",
+      "parentUuid": "5503382f_4c7d84aa",
       "range": {
         "startLine": 213,
         "startChar": 1,
