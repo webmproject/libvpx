@@ -45,6 +45,30 @@
       "revId": "5fe82459ec5c1566a2532e51550fb15b380f80de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d649fbdd_33de2166",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-04T01:34:32Z",
+      "side": 1,
+      "message": "I would normalize the type then the existing check for size_t should work. In either case it does mean the entire resolution range of the bitstream can\u0027t be exercised.",
+      "parentUuid": "4cbb9bfa_97cb4232",
+      "range": {
+        "startLine": 195,
+        "startChar": 36,
+        "endLine": 195,
+        "endChar": 39
+      },
+      "revId": "5fe82459ec5c1566a2532e51550fb15b380f80de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
