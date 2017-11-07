@@ -69,6 +69,30 @@
       "revId": "5fe82459ec5c1566a2532e51550fb15b380f80de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d0e2857_d035e0ad",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-11-07T16:09:52Z",
+      "side": 1,
+      "message": "normalize to which type? if the check doesn\u0027t move, this fails somewhere else because the previous check was in the \u0027else\u0027 condition.",
+      "parentUuid": "d649fbdd_33de2166",
+      "range": {
+        "startLine": 195,
+        "startChar": 36,
+        "endLine": 195,
+        "endChar": 39
+      },
+      "revId": "5fe82459ec5c1566a2532e51550fb15b380f80de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
