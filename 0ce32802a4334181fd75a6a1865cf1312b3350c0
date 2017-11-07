@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1766149d_551a5947",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-11-07T22:11:19Z",
+      "side": 1,
+      "message": "This doesn\u0027t hold when the test file is very short (I\u0027ve tried a bitstream with 10 frames. Same thing on the 2 frame test file provided in the bug).\nSo the test may need to be changed.",
+      "range": {
+        "startLine": 425,
+        "startChar": 2,
+        "endLine": 425,
+        "endChar": 58
+      },
+      "revId": "0ce32802a4334181fd75a6a1865cf1312b3350c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0195f0ab_cbd66869",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-11-07T22:11:19Z",
+      "side": 1,
+      "message": "This will also release the frame buffers for non-ref.",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 68,
+        "endChar": 6
+      },
+      "revId": "0ce32802a4334181fd75a6a1865cf1312b3350c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
