@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb7d9add_72aba75d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3596,
+      "author": {
+        "id": 1177966
+      },
+      "writtenOn": "2017-11-08T14:25:28Z",
+      "side": 1,
+      "message": "The change \u0027if (bsize \u003d\u003d BLOCK_8X8) ctx-\u003emic \u003d *xd-\u003emi[0];\u0027 seems to be generic as this can avoid non-initialization issues. Should this change be enabled always (i.e., even if CONSISTENT_RECODE_STATE macro is not enabled).",
+      "range": {
+        "startLine": 3596,
+        "startChar": 8,
+        "endLine": 3596,
+        "endChar": 13
+      },
+      "revId": "e52b90dec3848db10ba023570bf910fed5af707e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
