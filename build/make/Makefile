@@ -139,6 +139,8 @@ $(BUILD_PFX)%_avx.c.d: CFLAGS += -mavx
 $(BUILD_PFX)%_avx.c.o: CFLAGS += -mavx
 $(BUILD_PFX)%_avx2.c.d: CFLAGS += -mavx2
 $(BUILD_PFX)%_avx2.c.o: CFLAGS += -mavx2
+$(BUILD_PFX)%_avx512.c.d: CFLAGS += -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl
+$(BUILD_PFX)%_avx512.c.o: CFLAGS += -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl
 
 # POWER
 $(BUILD_PFX)%_vsx.c.d: CFLAGS += -maltivec -mvsx
