@@ -505,6 +505,9 @@ typedef struct SPEED_FEATURES {
 
   // Always use nonrd_pick_intra for all block sizes on keyframes.
   int nonrd_keyframe;
+
+  // For SVC: enables use of partition from lower spatial resolution.
+  int svc_use_lowres_part;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

@@ -847,7 +847,7 @@ static void copy_partitioning_helper(VP9_COMP *cpi, MACROBLOCK *x,
   int start_pos = mi_row * cm->mi_stride + mi_col;
 
   const int bsl = b_width_log2_lookup[bsize];
-  const int bs = (1 << bsl) / 4;
+  const int bs = (1 << bsl) >> 2;
   BLOCK_SIZE subsize;
   PARTITION_TYPE partition;
 
@@ -915,13 +915,155 @@ static int copy_partitioning(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   return 0;
 }
 
+static void copy_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
+                                  BLOCK_SIZE bsize, int mi_rowref,
+                                  int mi_colref, int mi_row, int mi_col,
+                                  int mi_row_high, int mi_col_high) {
+  VP9_COMMON *const cm = &cpi->common;
+  SVC *const svc = &cpi->svc;
+  BLOCK_SIZE *prev_part = svc->prev_partition_svc;
+  // Variables with _high are for higher resolution.
+  int bsize_high = 0;
+  int subsize_high = 0;
+  int bsl_high = 0;
+  int bs_high = 0;
+  int shift_row = 0;
+  int shift_col = 0;
+
+  // Find corresponding (mi_col/mi_row) block down-scaled by 2x2.
+  int start_pos = mi_row * (svc->mi_stride[svc->spatial_layer_id - 1]) + mi_col;
+
+  const int bsl = b_width_log2_lookup[bsize];
+  const int bs = (1 << bsl) >> 2;
+  BLOCK_SIZE subsize;
+  PARTITION_TYPE partition;
+
+  const int bw = b_width_log2_lookup[bsize];
+  const int bh = b_height_log2_lookup[bsize];
+  // For block size >= 32x32 shift_row/col can stay 0.
+  if (bw == 1)
+    shift_col = 3;
+  else if (bw == 2)
+    shift_col = 2;
+  if (bh == 1)
+    shift_row = 3;
+  else if (bh == 2)
+    shift_row = 2;
+
+  if (mi_row_high >= cm->mi_rows || mi_col_high >= cm->mi_cols) return;
+  if (mi_row >= (cm->mi_rows >> 1) || mi_col >= (cm->mi_cols >> 1)) return;
+
+  if ((mi_row - mi_rowref > shift_row) || (mi_col - mi_colref > shift_col))
+    return;
+
+  partition = partition_lookup[bsl][prev_part[start_pos]];
+  subsize = get_subsize(bsize, partition);
+
+  // Scale up block size by 2x2. Force 64x64 for size larger than 32x32.
+  if (bsize < BLOCK_32X32) {
+    bsize_high = bsize + 3;
+    subsize_high = subsize + 3;
+  } else if (bsize >= BLOCK_32X32) {
+    bsize_high = BLOCK_64X64;
+    subsize_high = BLOCK_64X64;
+  }
+  bsl_high = b_width_log2_lookup[bsize_high];
+  bs_high = (1 << bsl_high) / 4;
+
+  if (subsize < BLOCK_8X8) {
+    set_block_size(cpi, x, xd, mi_row_high, mi_col_high, bsize_high);
+  } else {
+    switch (partition) {
+      case PARTITION_NONE:
+        set_block_size(cpi, x, xd, mi_row_high, mi_col_high, bsize_high);
+        break;
+      case PARTITION_HORZ:
+        set_block_size(cpi, x, xd, mi_row_high, mi_col_high, subsize_high);
+        if (subsize_high < BLOCK_64X64)
+          set_block_size(cpi, x, xd, mi_row_high + bs_high, mi_col,
+                         subsize_high);
+        break;
+      case PARTITION_VERT:
+        set_block_size(cpi, x, xd, mi_row_high, mi_col_high, subsize_high);
+        if (subsize_high < BLOCK_64X64)
+          set_block_size(cpi, x, xd, mi_row_high, mi_col_high + bs_high,
+                         subsize_high);
+        break;
+      case PARTITION_SPLIT:
+        copy_partitioning_svc(cpi, x, xd, subsize, mi_rowref, mi_colref, mi_row,
+                              mi_col, mi_row_high, mi_col_high);
+        copy_partitioning_svc(cpi, x, xd, subsize, mi_rowref, mi_colref,
+                              mi_row + bs, mi_col, mi_row_high + bs_high,
+                              mi_col_high);
+        copy_partitioning_svc(cpi, x, xd, subsize, mi_rowref, mi_colref, mi_row,
+                              mi_col + bs, mi_row_high, mi_col_high + bs_high);
+        copy_partitioning_svc(cpi, x, xd, subsize, mi_rowref, mi_colref,
+                              mi_row + bs, mi_col + bs, mi_row_high + bs_high,
+                              mi_col_high + bs_high);
+        break;
+      default: assert(0);
+    }
+  }
+}
+
+static void update_partition_svc(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
+                                 int mi_col) {
+  VP9_COMMON *const cm = &cpi->common;
+  BLOCK_SIZE *prev_part = cpi->svc.prev_partition_svc;
+  int start_pos = mi_row * cm->mi_stride + mi_col;
+  const int bsl = b_width_log2_lookup[bsize];
+  const int bs = (1 << bsl) >> 2;
+  BLOCK_SIZE subsize;
+  PARTITION_TYPE partition;
+  const MODE_INFO *mi = NULL;
+  int xx, yy;
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols) return;
+
+  mi = cm->mi_grid_visible[start_pos];
+  partition = partition_lookup[bsl][mi->sb_type];
+  subsize = get_subsize(bsize, partition);
+  if (subsize < BLOCK_8X8) {
+    prev_part[start_pos] = bsize;
+  } else {
+    switch (partition) {
+      case PARTITION_NONE:
+        prev_part[start_pos] = bsize;
+        if (bsize == BLOCK_64X64) {
+          for (xx = 0; xx < 8; xx += 4)
+            for (yy = 0; yy < 8; yy += 4) {
+              if ((mi_row + xx < cm->mi_rows) && (mi_col + yy < cm->mi_cols))
+                prev_part[start_pos + xx * cm->mi_stride + yy] = bsize;
+            }
+        }
+        break;
+      case PARTITION_HORZ:
+        prev_part[start_pos] = subsize;
+        if (mi_row + bs < cm->mi_rows)
+          prev_part[start_pos + bs * cm->mi_stride] = subsize;
+        break;
+      case PARTITION_VERT:
+        prev_part[start_pos] = subsize;
+        if (mi_col + bs < cm->mi_cols) prev_part[start_pos + bs] = subsize;
+        break;
+      case PARTITION_SPLIT:
+        update_partition_svc(cpi, subsize, mi_row, mi_col);
+        update_partition_svc(cpi, subsize, mi_row + bs, mi_col);
+        update_partition_svc(cpi, subsize, mi_row, mi_col + bs);
+        update_partition_svc(cpi, subsize, mi_row + bs, mi_col + bs);
+        break;
+      default: assert(0);
+    }
+  }
+}
+
 static void update_prev_partition(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
                                   int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   BLOCK_SIZE *prev_part = cpi->prev_partition;
   int start_pos = mi_row * cm->mi_stride + mi_col;
   const int bsl = b_width_log2_lookup[bsize];
-  const int bs = (1 << bsl) / 4;
+  const int bs = (1 << bsl) >> 2;
   BLOCK_SIZE subsize;
   PARTITION_TYPE partition;
   const MODE_INFO *mi = NULL;
@@ -1094,10 +1236,24 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     x->lowvar_highsumdiff = (content_state == kLowVarHighSumdiff) ? 1 : 0;
     if (cpi->content_state_sb_fd != NULL)
       x->last_sb_high_content = cpi->content_state_sb_fd[sb_offset2];
+
+    // For SVC on top spatial layer and non_reference frame: copy partition
+    // from lower spatial resolution if svc_use_lowres_part is enabled.
+    // TODO(jianj): Fix to allow it to work on boundary.
+    if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 2 &&
+        cpi->svc.non_reference_frame && cpi->svc.prev_partition_svc != NULL &&
+        mi_row < cm->mi_rows - 8 && mi_col < cm->mi_cols - 8 &&
+        content_state != kVeryHighSad) {
+      copy_partitioning_svc(cpi, x, xd, BLOCK_64X64, mi_row >> 1, mi_col >> 1,
+                            mi_row >> 1, mi_col >> 1, mi_row, mi_col);
+      return 0;
+    }
     // If source_sad is low copy the partition without computing the y_sad.
     if (x->skip_low_source_sad && cpi->sf.copy_partition_flag &&
         copy_partitioning(cpi, x, xd, mi_row, mi_col, segment_id, sb_offset)) {
       x->sb_use_mv_part = 1;
+      if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 1)
+        update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
       return 0;
     }
   }
@@ -1222,6 +1378,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
         set_block_size(cpi, x, xd, mi_row, mi_col, BLOCK_64X64);
         x->variance_low[0] = 1;
         chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+        if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 1)
+          update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
         return 0;
       }
     }
@@ -1233,6 +1391,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     if (cpi->sf.copy_partition_flag && y_sad_last < cpi->vbp_threshold_copy &&
         copy_partitioning(cpi, x, xd, mi_row, mi_col, segment_id, sb_offset)) {
       chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+      if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 1)
+        update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
       return 0;
     }
   } else {
@@ -1454,6 +1614,10 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     if (cpi->copied_frame_cnt[sb_offset] == cpi->max_copied_frame)
       cpi->copied_frame_cnt[sb_offset] = 0;
   }
+
+  if (cm->frame_type != KEY_FRAME && cpi->sf.svc_use_lowres_part &&
+      cpi->svc.spatial_layer_id == 1)
+    update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
 
   if (cpi->sf.short_circuit_low_temp_var) {
     set_low_temp_var_flag(cpi, x, xd, &vt, thresholds, ref_frame_partition,

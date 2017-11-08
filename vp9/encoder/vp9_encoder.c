@@ -786,6 +786,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->prev_partition);
   cpi->prev_partition = NULL;
 
+  vpx_free(cpi->svc.prev_partition_svc);
+  cpi->svc.prev_partition_svc = NULL;
+
   vpx_free(cpi->prev_segment_id);
   cpi->prev_segment_id = NULL;
 
@@ -3549,6 +3552,15 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   set_size_dependent_vars(cpi, &q, &bottom_index, &top_index);
 
   if (cpi->sf.copy_partition_flag) alloc_copy_partition_data(cpi);
+
+  if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 1) {
+    if (cpi->svc.prev_partition_svc == NULL) {
+      CHECK_MEM_ERROR(
+          cm, cpi->svc.prev_partition_svc,
+          (BLOCK_SIZE *)vpx_calloc(cm->mi_stride * cm->mi_rows,
+                                   sizeof(*cpi->svc.prev_partition_svc)));
+    }
+  }
 
   if (cpi->oxcf.speed >= 5 && cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&

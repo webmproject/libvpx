@@ -372,6 +372,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->use_altref_onepass = 0;
   sf->use_compound_nonrd_pickmode = 0;
   sf->nonrd_keyframe = 0;
+  sf->svc_use_lowres_part = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -603,6 +604,11 @@ static void set_rt_speed_feature_framesize_independent(
           cpi->svc.temporal_layer_id == cpi->svc.number_temporal_layers - 1)
         cpi->max_copied_frame = 255;
     }
+    // For SVC: enable use of lower resolution partition for higher resolution,
+    // only for 3 spatial layers and when config/top resolution is above VGA.
+    if (cpi->use_svc && cpi->svc.number_spatial_layers == 3 &&
+        cpi->oxcf.width * cpi->oxcf.height > 640 * 480)
+      sf->svc_use_lowres_part = 1;
   }
 
   if (speed >= 8) {
