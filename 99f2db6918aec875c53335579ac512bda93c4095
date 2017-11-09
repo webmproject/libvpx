@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d312ea6_16bf3f51",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-09T02:03:12Z",
+      "side": 1,
+      "message": "this change between patchset 5 and 6 is what I was worried about for applications. this is a change in semantics I think, Frank what do you think?",
+      "revId": "99f2db6918aec875c53335579ac512bda93c4095",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
