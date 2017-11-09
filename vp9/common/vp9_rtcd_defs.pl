@@ -122,7 +122,7 @@ add_proto qw/void vp9_fdct8x8_quant/, "const int16_t *input, int stride, tran_lo
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_block_error avx2 sse2/;
 
-  specialize qw/vp9_block_error_fp sse2/;
+  specialize qw/vp9_block_error_fp avx2 sse2/;
 
   specialize qw/vp9_fdct8x8_quant neon ssse3/;
 
@@ -131,7 +131,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 } else {
   specialize qw/vp9_block_error avx2 msa sse2/;
 
-  specialize qw/vp9_block_error_fp neon sse2/;
+  specialize qw/vp9_block_error_fp neon avx2 sse2/;
 
   specialize qw/vp9_fdct8x8_quant sse2 ssse3 neon/;
 }
