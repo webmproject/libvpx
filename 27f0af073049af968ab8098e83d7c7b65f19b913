@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9fd7f01_803abd4a",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-09T02:34:45Z",
+      "side": 1,
+      "message": "block_size is only 16 or \u003e 16? could you just lead the loop with this block? I think the number of branches would be the same.",
+      "revId": "27f0af073049af968ab8098e83d7c7b65f19b913",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3baf52ea_fcdc9e3b",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-09T02:34:45Z",
+      "side": 1,
+      "message": "these ()s can go",
+      "range": {
+        "startLine": 160,
+        "startChar": 35,
+        "endLine": 160,
+        "endChar": 36
+      },
+      "revId": "27f0af073049af968ab8098e83d7c7b65f19b913",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
