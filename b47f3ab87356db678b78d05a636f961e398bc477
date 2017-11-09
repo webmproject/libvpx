@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d55af48_75d6deb3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T00:33:38Z",
+      "side": 1,
+      "message": "maybe better to say:\n\"vp9: SVC feature to use partition from lower resolution\"",
+      "revId": "b47f3ab87356db678b78d05a636f961e398bc477",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4dc9fc44_086e9f23",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T00:33:38Z",
+      "side": 1,
+      "message": "move this exit (lint 957) after line 952 (before call to partition_lookup/get_subsize)\n\nthat seems to fix asan error i think...",
+      "range": {
+        "startLine": 957,
+        "startChar": 16,
+        "endLine": 957,
+        "endChar": 25
+      },
+      "revId": "b47f3ab87356db678b78d05a636f961e398bc477",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a92ed9d0_3f7ac1e4",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1027,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T00:33:38Z",
+      "side": 1,
+      "message": "i think this only needs to be done (setting for +4 jump) if:\nif (bsize \u003d\u003d BLOCK_64X64) {\n}",
+      "revId": "b47f3ab87356db678b78d05a636f961e398bc477",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
