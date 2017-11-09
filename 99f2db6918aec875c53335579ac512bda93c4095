@@ -57,6 +57,30 @@
       "revId": "99f2db6918aec875c53335579ac512bda93c4095",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cffd4e19_36138df6",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-11-09T23:51:03Z",
+      "side": 1,
+      "message": "I\u0027ve tried on a SVC bitstream with one non-ref every other frame. ref_count is always 0 for non-ref frames.",
+      "parentUuid": "f1afc038_c5fc2bea",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 68,
+        "endChar": 58
+      },
+      "revId": "99f2db6918aec875c53335579ac512bda93c4095",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
