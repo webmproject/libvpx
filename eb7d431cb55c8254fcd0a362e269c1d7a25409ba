@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aaa9bd1b_b3782de5",
+        "filename": "test/external_frame_buffer_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-09T02:36:50Z",
+      "side": 0,
+      "message": "this line would be OK to keep",
+      "revId": "eb7d431cb55c8254fcd0a362e269c1d7a25409ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
