@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1ffb5e65_3e2ec1c4",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-11-09T12:43:01Z",
+      "side": 1,
+      "message": "I started with the loop (from above), stripping out the unnecessary code.  Tests showed the 16 only case was slower when using the loop, so the special case was added.  (like above)  This special case has fewer instructions.",
+      "parentUuid": "b9fd7f01_803abd4a",
+      "revId": "27f0af073049af968ab8098e83d7c7b65f19b913",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3baf52ea_fcdc9e3b",
         "filename": "vp9/encoder/x86/vp9_error_avx2.c",
         "patchSetId": 1
@@ -39,6 +57,30 @@
       "revId": "27f0af073049af968ab8098e83d7c7b65f19b913",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "564d65d6_48d711d6",
+        "filename": "vp9/encoder/x86/vp9_error_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-11-09T12:43:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3baf52ea_fcdc9e3b",
+      "range": {
+        "startLine": 160,
+        "startChar": 35,
+        "endLine": 160,
+        "endChar": 36
+      },
+      "revId": "27f0af073049af968ab8098e83d7c7b65f19b913",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
