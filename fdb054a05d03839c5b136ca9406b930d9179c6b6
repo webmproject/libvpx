@@ -16,6 +16,24 @@
       "revId": "fdb054a05d03839c5b136ca9406b930d9179c6b6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1abe4ebc_81ee33cd",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 934,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-11-09T22:36:48Z",
+      "side": 1,
+      "message": "this function is only called under cpi-\u003esvc.spatial_layer_id \u003d\u003d 2 so I think it\u0027s safe here.",
+      "parentUuid": "dc278a2f_36e6858e",
+      "revId": "fdb054a05d03839c5b136ca9406b930d9179c6b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
