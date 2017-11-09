@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "492a66cb_92cf7c75",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2607,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2017-11-09T10:39:18Z",
+      "side": 1,
+      "message": "Agreed re const. I tend to put in more brackets than strictly necessary because with my dyslexia it makes it easier for me to delineate the expression.  However, I am happy to remove for the final submit if the converse is true for other people.",
+      "parentUuid": "a131c473_8edf6d49",
+      "revId": "ac09c82331cc899a7915a6fcb7c91679aefcff14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c2385543_0e8cf013",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 3
