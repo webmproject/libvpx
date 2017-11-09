@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "e12fb277_a1c7fec9",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2607,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-09T21:14:07Z",
+      "side": 1,
+      "message": "\u003e Agreed re const. I tend to put in more brackets than strictly necessary because with my dyslexia it makes it easier for me to delineate the expression.  However, I am happy to remove for the final submit if the converse is true for other people.\n\nIt\u0027s usually left open and done case by case for extra parentheses, the bias I\u0027ve seen has been fewer for the most part.\n\nhttps://google.github.io/styleguide/cppguide.html#Return_Values\nhttps://google.github.io/styleguide/cppguide.html#Boolean_Expressions",
+      "parentUuid": "492a66cb_92cf7c75",
+      "revId": "ac09c82331cc899a7915a6fcb7c91679aefcff14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c2385543_0e8cf013",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 3
