@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc278a2f_36e6858e",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 934,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T22:30:17Z",
+      "side": 1,
+      "message": "should we add some assert here that svc.spatial_layer \u003e 1?",
+      "revId": "fdb054a05d03839c5b136ca9406b930d9179c6b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
