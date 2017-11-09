@@ -34,6 +34,29 @@
       "revId": "99f2db6918aec875c53335579ac512bda93c4095",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1afc038_c5fc2bea",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2017-11-09T18:44:15Z",
+      "side": 1,
+      "message": "I\u0027m not sure that this is the correct fix for the bug. This could potentially call ReleaseFrame multiple times, which could be an issue.\n\nFor non-ref frames does ref_count ever go above 0?",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 68,
+        "endChar": 58
+      },
+      "revId": "99f2db6918aec875c53335579ac512bda93c4095",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
