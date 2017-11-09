@@ -1202,6 +1202,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   const uint8_t *d;
   int sp;
   int dp;
+  int compute_minmax_variance = 1;
   unsigned int y_sad = UINT_MAX;
   BLOCK_SIZE bsize = BLOCK_64X64;
   // Ref frame used in partitioning.
@@ -1225,6 +1226,9 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
 
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
   segment_id = xd->mi[0]->segment_id;
+
+  if (cpi->oxcf.speed >= 8 || (cpi->use_svc && cpi->svc.non_reference_frame))
+    compute_minmax_variance = 0;
 
   if (cpi->sf.use_source_sad && !is_key_frame) {
     int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
@@ -1448,7 +1452,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
           force_split[split_index] = 1;
           force_split[i + 1] = 1;
           force_split[0] = 1;
-        } else if (cpi->oxcf.speed < 8 &&
+        } else if (compute_minmax_variance &&
                    vt.split[i].split[j].part_variances.none.variance >
                        thresholds[1] &&
                    !cyclic_refresh_segment_id_boosted(segment_id)) {
