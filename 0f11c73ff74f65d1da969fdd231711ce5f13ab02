@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3518c008_0f0460e0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "add in description:\n\nFor SVC with 3 spatial layers:\nAdd feature to copy/upscale partition from middle spatial layer\nto the upper/highest resolution, when superblock sad is not high.\n\nEnabled for speed \u003e\u003d 7 and only for non-reference frames.\n\nSpeedup ~3-4%, small loss in avgPNSR/SSIM of ~1%.",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8a45652_404eba5b",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "use \u003e\u003e 2 instead of / 4",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3bbb879_4e652d6e",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 936,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "use \u003e\u003e 2 instead of / 4",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "01853486_402d3cf5",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1014,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "use \u003e\u003e 2 instead of / 4",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4ea39d0f_5e399604",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1065,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "use \u003e\u003e 2 instead of / 4",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "271ae484_b4980798",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1240,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "Add comment: // TODO (jianj): Fix to allow it to work on boundary.",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8e9a101_066a4e6f",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1242,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "add the condition \"...\u0026\u0026 content_state !\u003d kVeryHighSad...\"\n\nThere is see some regression if we always using copy from low-res, so \nthis additional condition will reduce it (makes sense not to do so\non superblocks with high activity/sad).",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf9b72a8_003b87bf",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1252,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "don\u0027t need !\u003d KEY_FRAME here as this branch is under !is_key_frame",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c4fb293_27f758bb",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1379,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "can remove !\u003d KEY_FRAME as we never enter here for key_frame",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb98bc7a_fd09c3e5",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1393,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "can remove !\u003d KEY_FRAME as would not enter here on key_frame",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "74525350_41da56a6",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3557,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "keep track of stride for spatial layer, as in:\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/759701",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1a4a3fc_374072ae",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-11-09T17:51:49Z",
+      "side": 1,
+      "message": "add this to svc structure, as in:\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/759701",
+      "revId": "0f11c73ff74f65d1da969fdd231711ce5f13ab02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
