@@ -23,6 +23,7 @@
 #include "test/register_state_check.h"
 #include "test/util.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/vpx_timer.h"
 
 using libvpx_test::ACMRandom;
 
@@ -396,6 +397,22 @@ TEST_P(BlockErrorTestFP, Random) {
   Check(expected);
 }
 
+TEST_P(BlockErrorTestFP, DISABLED_Speed) {
+  const int kCountSpeedTestBlock = 20000;
+  vpx_usec_timer timer;
+  DECLARE_ALIGNED(16, tran_low_t, coeff[1024]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[1024]);
+  const int blocksize = GET_PARAM(0);
+
+  vpx_usec_timer_start(&timer);
+  for (int i = 0; i < kCountSpeedTestBlock; ++i) {
+    GET_PARAM(1)(coeff, dqcoeff, blocksize);
+  }
+  vpx_usec_timer_mark(&timer);
+  const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
+  printf("blocksize: %4d time: %4d us\n", blocksize, elapsed_time);
+}
+
 using std::tr1::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(
@@ -453,6 +470,15 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(256, &vp9_block_error_fp_sse2),
                       make_tuple(1024, &vp9_block_error_fp_sse2)));
 #endif  // HAVE_SSE2
+
+#if HAVE_AVX2
+INSTANTIATE_TEST_CASE_P(
+    AVX2, BlockErrorTestFP,
+    ::testing::Values(make_tuple(16, &vp9_block_error_fp_avx2),
+                      make_tuple(64, &vp9_block_error_fp_avx2),
+                      make_tuple(256, &vp9_block_error_fp_avx2),
+                      make_tuple(1024, &vp9_block_error_fp_avx2)));
+#endif  // HAVE_AVX2
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(
