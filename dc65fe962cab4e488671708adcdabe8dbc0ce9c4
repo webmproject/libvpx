@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6a86f91_0cfc6f40",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 18
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-10T22:16:15Z",
+      "side": 1,
+      "message": "I think this belongs with the CVBR change or you can bump it again there to be able to identify these separately. Technically this isn\u0027t an abi break, but we do need a compile time way to detect availability.",
+      "revId": "dc65fe962cab4e488671708adcdabe8dbc0ce9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
