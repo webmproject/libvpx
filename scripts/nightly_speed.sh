@@ -54,11 +54,14 @@ verbose=
 core_id=1
 exp_tool=experimental
 
+cd $root_dir/aom
+commit=`git log --pretty=%h -1`
+
 cd $test_dir
 
 elog=av1enc_log_p_$profile.txt
 dlog=av1dec_log_p_$profile.txt
-bstream=av1_profile_$profile.webm
+bstream=av1_p_$profile.$commit.webm
 
 if [ $exp_tool == intrabc ] || [ $exp_tool == palette ] || [ $exp_tool == palette_delta_encoding ] || [ $exp_tool == palette_throughput ]; then
   tune_content="--tune-content=screen"
