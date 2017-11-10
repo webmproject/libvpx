@@ -21,7 +21,8 @@
 static INLINE __m256i load_tran_low(const tran_low_t *a) {
 #if CONFIG_VP9_HIGHBITDEPTH
   const __m256i a_low = _mm256_loadu_si256((const __m256i *)a);
-  return _mm256_packs_epi32(a_low, *(const __m256i *)(a + 8));
+  const __m256i a_high = _mm256_loadu_si256((const __m256i *)(a + 8));
+  return _mm256_packs_epi32(a_low, a_high);
 #else
   return _mm256_loadu_si256((const __m256i *)a);
 #endif
