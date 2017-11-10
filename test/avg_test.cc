@@ -368,6 +368,21 @@ TEST_P(SatdTest, Random) {
   Check(expected);
 }
 
+TEST_P(SatdTest, DISABLED_Speed) {
+  const int kCountSpeedTestBlock = 20000;
+  vpx_usec_timer timer;
+  DECLARE_ALIGNED(16, tran_low_t, coeff[1024]);
+  const int blocksize = GET_PARAM(0);
+
+  vpx_usec_timer_start(&timer);
+  for (int i = 0; i < kCountSpeedTestBlock; ++i) {
+    GET_PARAM(1)(coeff, blocksize);
+  }
+  vpx_usec_timer_mark(&timer);
+  const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
+  printf("blocksize: %4d time: %4d us\n", blocksize, elapsed_time);
+}
+
 TEST_P(BlockErrorTestFP, MinValue) {
   const int64_t kMin = -32640;
   const int64_t expected = kMin * kMin * txfm_size_;
@@ -472,13 +487,19 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_AVX2
+INSTANTIATE_TEST_CASE_P(AVX2, SatdTest,
+                        ::testing::Values(make_tuple(16, &vpx_satd_avx2),
+                                          make_tuple(64, &vpx_satd_avx2),
+                                          make_tuple(256, &vpx_satd_avx2),
+                                          make_tuple(1024, &vpx_satd_avx2)));
+
 INSTANTIATE_TEST_CASE_P(
     AVX2, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_avx2),
                       make_tuple(64, &vp9_block_error_fp_avx2),
                       make_tuple(256, &vp9_block_error_fp_avx2),
                       make_tuple(1024, &vp9_block_error_fp_avx2)));
-#endif  // HAVE_AVX2
+#endif
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(

@@ -773,7 +773,7 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
     specialize qw/vpx_hadamard_16x16 avx2 sse2 neon vsx/;
 
     add_proto qw/int vpx_satd/, "const tran_low_t *coeff, int length";
-    specialize qw/vpx_satd sse2 neon/;
+    specialize qw/vpx_satd avx2 sse2 neon/;
   } else {
     add_proto qw/void vpx_hadamard_8x8/, "const int16_t *src_diff, ptrdiff_t src_stride, int16_t *coeff";
     specialize qw/vpx_hadamard_8x8 sse2 neon msa vsx/, "$ssse3_x86_64";
@@ -782,7 +782,7 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
     specialize qw/vpx_hadamard_16x16 avx2 sse2 neon msa vsx/;
 
     add_proto qw/int vpx_satd/, "const int16_t *coeff, int length";
-    specialize qw/vpx_satd sse2 neon msa/;
+    specialize qw/vpx_satd avx2 sse2 neon msa/;
   }
 
   add_proto qw/void vpx_int_pro_row/, "int16_t *hbuf, const uint8_t *ref, const int ref_stride, const int height";

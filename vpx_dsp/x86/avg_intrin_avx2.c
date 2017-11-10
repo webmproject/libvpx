@@ -171,3 +171,27 @@ void vpx_hadamard_16x16_avx2(int16_t const *src_diff, ptrdiff_t src_stride,
     t_coeff += 16;
   }
 }
+
+int vpx_satd_avx2(const tran_low_t *coeff, int length) {
+  const __m256i one = _mm256_set1_epi16(1);
+  __m256i accum = _mm256_setzero_si256();
+  int i;
+
+  for (i = 0; i < length; i += 16) {
+    const __m256i src_line = load_tran_low(coeff);
+    const __m256i abs = _mm256_abs_epi16(src_line);
+    const __m256i sum = _mm256_madd_epi16(abs, one);
+    accum = _mm256_add_epi32(accum, sum);
+    coeff += 16;
+  }
+
+  {  // 32 bit horizontal add
+    const __m256i a = _mm256_srli_si256(accum, 8);
+    const __m256i b = _mm256_add_epi32(accum, a);
+    const __m256i c = _mm256_srli_epi64(b, 32);
+    const __m256i d = _mm256_add_epi32(b, c);
+    const __m128i accum_128 = _mm_add_epi32(_mm256_castsi256_si128(d),
+                                            _mm256_extractf128_si256(d, 1));
+    return _mm_cvtsi128_si32(accum_128);
+  }
+}
