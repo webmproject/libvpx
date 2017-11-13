@@ -559,7 +559,7 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   iter = NULL;
   while ((cx_pkt = vpx_codec_get_cx_data(codec_ctx, &iter))) {
     switch (cx_pkt->kind) {
-#if VPX_ENCODER_ABI_VERSION > (5 + VPX_CODEC_ABI_VERSION)
+#if VPX_ENCODER_ABI_VERSION > (6 + VPX_CODEC_ABI_VERSION)
 #if CONFIG_SPATIAL_SVC
       case VPX_CODEC_SPATIAL_SVC_LAYER_PSNR: {
         int i;
@@ -597,7 +597,7 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
 #endif
 #endif
       case VPX_CODEC_PSNR_PKT: {
-#if VPX_ENCODER_ABI_VERSION > (5 + VPX_CODEC_ABI_VERSION)
+#if VPX_ENCODER_ABI_VERSION > (6 + VPX_CODEC_ABI_VERSION)
         int j;
         svc_log(svc_ctx, SVC_LOG_DEBUG,
                 "frame: %d, layer: %d, PSNR(Total/Y/U/V): "
