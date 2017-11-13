@@ -1973,11 +1973,11 @@ void vp9_set_target_rate(VP9_COMP *cpi) {
   else
     target_rate = vp9_rc_clamp_pframe_target_size(cpi, target_rate);
 
-#ifndef CORPUS_VBR_EXPERIMENT
-  // Correction to rate target based on prior over or under shoot.
-  if (cpi->oxcf.rc_mode == VPX_VBR || cpi->oxcf.rc_mode == VPX_CQ)
-    vbr_rate_correction(cpi, &target_rate);
-#endif
+  if (!cpi->oxcf.vbr_corpus_complexity) {
+    // Correction to rate target based on prior over or under shoot.
+    if (cpi->oxcf.rc_mode == VPX_VBR || cpi->oxcf.rc_mode == VPX_CQ)
+      vbr_rate_correction(cpi, &target_rate);
+  }
   vp9_rc_set_frame_target(cpi, target_rate);
 }
 

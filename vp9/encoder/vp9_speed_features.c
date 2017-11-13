@@ -157,6 +157,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
                                                          VP9_COMMON *cm,
                                                          SPEED_FEATURES *sf,
                                                          int speed) {
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int boosted = frame_is_boosted(cpi);
   int i;
 
@@ -182,7 +183,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   }
 
   if (speed >= 1) {
-    if (cpi->oxcf.pass == 2) {
+    if (oxcf->pass == 2) {
       TWO_PASS *const twopass = &cpi->twopass;
       if ((twopass->fr_content_type == FC_GRAPHICS_ANIMATION) ||
           vp9_internal_image_edge(cpi)) {
@@ -225,16 +226,16 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   }
 
   if (speed >= 2) {
-#ifdef CORPUS_VBR_EXPERIMENT
-    sf->recode_loop = ALLOW_RECODE_FIRST;
-#else
-    sf->recode_loop = ALLOW_RECODE_KFARFGF;
-#endif
+    if (oxcf->vbr_corpus_complexity)
+      sf->recode_loop = ALLOW_RECODE_FIRST;
+    else
+      sf->recode_loop = ALLOW_RECODE_KFARFGF;
+
     sf->tx_size_search_method =
         frame_is_boosted(cpi) ? USE_FULL_RD : USE_LARGESTALL;
 
     // Reference masking is not supported in dynamic scaling mode.
-    sf->reference_masking = cpi->oxcf.resize_mode != RESIZE_DYNAMIC ? 1 : 0;
+    sf->reference_masking = oxcf->resize_mode != RESIZE_DYNAMIC ? 1 : 0;
 
     sf->mode_search_skip_flags =
         (cm->frame_type == KEY_FRAME)

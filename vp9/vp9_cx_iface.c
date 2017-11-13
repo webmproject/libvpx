@@ -171,6 +171,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(cfg, rc_undershoot_pct, 100);
   RANGE_CHECK_HI(cfg, rc_overshoot_pct, 100);
   RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
+  RANGE_CHECK(cfg, rc_2pass_vbr_corpus_complexity, 0, 10000);
   RANGE_CHECK(cfg, kf_mode, VPX_KF_DISABLED, VPX_KF_AUTO);
   RANGE_CHECK_BOOL(cfg, rc_resize_allowed);
   RANGE_CHECK_HI(cfg, rc_dropframe_thresh, 100);
@@ -526,6 +527,7 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->two_pass_vbrbias = cfg->rc_2pass_vbr_bias_pct;
   oxcf->two_pass_vbrmin_section = cfg->rc_2pass_vbr_minsection_pct;
   oxcf->two_pass_vbrmax_section = cfg->rc_2pass_vbr_maxsection_pct;
+  oxcf->vbr_corpus_complexity = cfg->rc_2pass_vbr_corpus_complexity;
 
   oxcf->auto_key =
       cfg->kf_mode == VPX_KF_AUTO && cfg->kf_min_dist != cfg->kf_max_dist;
@@ -636,6 +638,7 @@ static vpx_codec_err_t set_encoder_config(
   printf("two_pass_vbrbias: %d\n",  oxcf->two_pass_vbrbias);
   printf("two_pass_vbrmin_section: %d\n", oxcf->two_pass_vbrmin_section);
   printf("two_pass_vbrmax_section: %d\n", oxcf->two_pass_vbrmax_section);
+  printf("vbr_corpus_complexity: %d\n",  oxcf->vbr_corpus_complexity);
   printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
   printf("enable_auto_arf: %d\n", oxcf->enable_auto_arf);
   printf("Version: %d\n", oxcf->Version);
@@ -1698,6 +1701,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
         50,    // rc_two_pass_vbrbias
         0,     // rc_two_pass_vbrmin_section
         2000,  // rc_two_pass_vbrmax_section
+        0,     // rc_2pass_vbr_corpus_complexity (non 0 for corpus vbr)
 
         // keyframing settings (kf)
         VPX_KF_AUTO,  // g_kfmode

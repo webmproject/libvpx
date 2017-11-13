@@ -209,6 +209,7 @@ typedef struct VP9EncoderConfig {
   int two_pass_vbrbias;  // two pass datarate control tweaks
   int two_pass_vbrmin_section;
   int two_pass_vbrmax_section;
+  int vbr_corpus_complexity;  // 0 indicates corpus vbr disabled
   // END DATARATE CONTROL OPTIONS
   // ----------------------------------------------------------------
 
