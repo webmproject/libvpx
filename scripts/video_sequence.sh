@@ -17,7 +17,7 @@
 video=~/Dev/samples/videos/speed-set/night_720p30.y4m
 wi=1280
 he=720
-frames=47
+frames=46
 bitrate=2500
 fps="30/1"
 
