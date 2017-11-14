@@ -929,9 +929,8 @@ static int copy_partitioning(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   return 0;
 }
 
-static void copy_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
-                                  BLOCK_SIZE bsize, int mi_rowref,
-                                  int mi_colref, int mi_row, int mi_col,
+static int scale_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
+                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
                                   int mi_row_high, int mi_col_high) {
   VP9_COMMON *const cm = &cpi->common;
   SVC *const svc = &cpi->svc;
@@ -939,62 +938,61 @@ static void copy_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   // Variables with _high are for higher resolution.
   int bsize_high = 0;
   int subsize_high = 0;
-  int bsl_high = 0;
-  int bs_high = 0;
-  int shift_row = 0;
-  int shift_col = 0;
+  const int bsl_high = b_width_log2_lookup[bsize];
+  const int bs_high = (1 << bsl_high) >> 2;
+  const int has_rows = (mi_row_high + bs_high) < cm->mi_rows;
+  const int has_cols = (mi_col_high + bs_high) < cm->mi_cols;
+
+  const int row_boundary_block_scale_factor[BLOCK_SIZES] = {
+    13, 13, 13, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0
+  };
+  const int col_boundary_block_scale_factor[BLOCK_SIZES] = {
+    13, 13, 13, 2, 2, 0, 2, 2, 0, 2, 2, 0, 0
+  };
+  int start_pos;
+  BLOCK_SIZE bsize_low;
+  PARTITION_TYPE partition_high;
+
+  if (mi_row_high >= cm->mi_rows || mi_col_high >= cm->mi_cols) return 0;
+  if (mi_row >= (cm->mi_rows >> 1) || mi_col >= (cm->mi_cols >> 1)) return 0;
 
   // Find corresponding (mi_col/mi_row) block down-scaled by 2x2.
-  int start_pos = mi_row * (svc->mi_stride[svc->spatial_layer_id - 1]) + mi_col;
-
-  const int bsl = b_width_log2_lookup[bsize];
-  const int bs = (1 << bsl) >> 2;
-  BLOCK_SIZE subsize;
-  PARTITION_TYPE partition;
-
-  const int bw = b_width_log2_lookup[bsize];
-  const int bh = b_height_log2_lookup[bsize];
-  // For block size >= 32x32 shift_row/col can stay 0.
-  if (bw == 1)
-    shift_col = 3;
-  else if (bw == 2)
-    shift_col = 2;
-  if (bh == 1)
-    shift_row = 3;
-  else if (bh == 2)
-    shift_row = 2;
-
-  if (mi_row_high >= cm->mi_rows || mi_col_high >= cm->mi_cols) return;
-  if (mi_row >= (cm->mi_rows >> 1) || mi_col >= (cm->mi_cols >> 1)) return;
-
-  if ((mi_row - mi_rowref > shift_row) || (mi_col - mi_colref > shift_col))
-    return;
-
-  partition = partition_lookup[bsl][prev_part[start_pos]];
-  subsize = get_subsize(bsize, partition);
+  start_pos = mi_row * (svc->mi_stride[svc->spatial_layer_id - 1]) + mi_col;
+  bsize_low = prev_part[start_pos];
+  // The block size is too big for boundaries. Do variance based partitioning.
+  if ((!has_rows || !has_cols) && bsize_low > BLOCK_16X16) return 1;
 
   // Scale up block size by 2x2. Force 64x64 for size larger than 32x32.
-  if (bsize < BLOCK_32X32) {
-    bsize_high = bsize + 3;
-    subsize_high = subsize + 3;
-  } else if (bsize >= BLOCK_32X32) {
+  if (bsize_low < BLOCK_32X32) {
+    bsize_high = bsize_low + 3;
+  } else if (bsize_low >= BLOCK_32X32) {
     bsize_high = BLOCK_64X64;
-    subsize_high = BLOCK_64X64;
   }
-  bsl_high = b_width_log2_lookup[bsize_high];
-  bs_high = (1 << bsl_high) / 4;
+  // Scale up blocks on boundary.
+  if (!has_cols && has_rows) {
+    bsize_high = bsize_low + row_boundary_block_scale_factor[bsize_low];
+  } else if (has_cols && !has_rows) {
+    bsize_high = bsize_low + col_boundary_block_scale_factor[bsize_low];
+  } else if (!has_cols && !has_rows) {
+    bsize_high = bsize_low;
+  }
 
-  if (subsize < BLOCK_8X8) {
+  partition_high = partition_lookup[bsl_high][bsize_high];
+  subsize_high = get_subsize(bsize, partition_high);
+
+  if (subsize_high < BLOCK_8X8) {
     set_block_size(cpi, x, xd, mi_row_high, mi_col_high, bsize_high);
   } else {
-    switch (partition) {
+    const int bsl = b_width_log2_lookup[bsize];
+    const int bs = (1 << bsl) >> 2;
+    switch (partition_high) {
       case PARTITION_NONE:
         set_block_size(cpi, x, xd, mi_row_high, mi_col_high, bsize_high);
         break;
       case PARTITION_HORZ:
         set_block_size(cpi, x, xd, mi_row_high, mi_col_high, subsize_high);
         if (subsize_high < BLOCK_64X64)
-          set_block_size(cpi, x, xd, mi_row_high + bs_high, mi_col,
+          set_block_size(cpi, x, xd, mi_row_high + bs_high, mi_col_high,
                          subsize_high);
         break;
       case PARTITION_VERT:
@@ -1004,20 +1002,26 @@ static void copy_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                          subsize_high);
         break;
       case PARTITION_SPLIT:
-        copy_partitioning_svc(cpi, x, xd, subsize, mi_rowref, mi_colref, mi_row,
-                              mi_col, mi_row_high, mi_col_high);
-        copy_partitioning_svc(cpi, x, xd, subsize, mi_rowref, mi_colref,
-                              mi_row + bs, mi_col, mi_row_high + bs_high,
-                              mi_col_high);
-        copy_partitioning_svc(cpi, x, xd, subsize, mi_rowref, mi_colref, mi_row,
-                              mi_col + bs, mi_row_high, mi_col_high + bs_high);
-        copy_partitioning_svc(cpi, x, xd, subsize, mi_rowref, mi_colref,
-                              mi_row + bs, mi_col + bs, mi_row_high + bs_high,
-                              mi_col_high + bs_high);
+        if (scale_partitioning_svc(cpi, x, xd, subsize_high, mi_row, mi_col,
+                                   mi_row_high, mi_col_high))
+          return 1;
+        if (scale_partitioning_svc(cpi, x, xd, subsize_high, mi_row + (bs >> 1),
+                                   mi_col, mi_row_high + bs_high, mi_col_high))
+          return 1;
+        if (scale_partitioning_svc(cpi, x, xd, subsize_high, mi_row,
+                                   mi_col + (bs >> 1), mi_row_high,
+                                   mi_col_high + bs_high))
+          return 1;
+        if (scale_partitioning_svc(cpi, x, xd, subsize_high, mi_row + (bs >> 1),
+                                   mi_col + (bs >> 1), mi_row_high + bs_high,
+                                   mi_col_high + bs_high))
+          return 1;
         break;
       default: assert(0);
     }
   }
+
+  return 0;
 }
 
 static void update_partition_svc(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
@@ -1257,14 +1261,12 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
 
     // For SVC on top spatial layer: use/scale the partition from
     // the lower spatial resolution if svc_use_lowres_part is enabled.
-    // TODO(jianj): Fix to allow it to work on boundary.
     if (cpi->sf.svc_use_lowres_part &&
         cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1 &&
-        cpi->svc.prev_partition_svc != NULL && mi_row < cm->mi_rows - 8 &&
-        mi_col < cm->mi_cols - 8 && content_state != kVeryHighSad) {
-      copy_partitioning_svc(cpi, x, xd, BLOCK_64X64, mi_row >> 1, mi_col >> 1,
-                            mi_row >> 1, mi_col >> 1, mi_row, mi_col);
-      return 0;
+        cpi->svc.prev_partition_svc != NULL && content_state != kVeryHighSad) {
+      if (!scale_partitioning_svc(cpi, x, xd, BLOCK_64X64, mi_row >> 1,
+                                  mi_col >> 1, mi_row, mi_col))
+        return 0;
     }
     // If source_sad is low copy the partition without computing the y_sad.
     if (x->skip_low_source_sad && cpi->sf.copy_partition_flag &&
