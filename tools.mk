@@ -13,6 +13,8 @@ TOOLS-yes            += tiny_ssim.c
 tiny_ssim.SRCS       += vpx/vpx_integer.h y4minput.c y4minput.h \
                         vpx/vpx_codec.h vpx/src/vpx_image.c
 tiny_ssim.SRCS       += vpx_mem/vpx_mem.c vpx_mem/vpx_mem.h
+tiny_ssim.SRCS       += vpx_dsp/ssim.h vpx_scale/yv12config.h
+tiny_ssim.SRCS       += vpx_ports/mem.h vpx_ports/mem.h
 tiny_ssim.SRCS       += vpx_mem/include/vpx_mem_intrnl.h
 tiny_ssim.GUID        = 3afa9b05-940b-4d68-b5aa-55157d8ed7b4
 tiny_ssim.DESCRIPTION = Generate SSIM/PSNR from raw .yuv files
