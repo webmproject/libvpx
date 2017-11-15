@@ -2407,8 +2407,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
   int i;
 
-  double boost_score = 0.0;
-  double old_boost_score = 0.0;
   double gf_group_err = 0.0;
   double gf_group_raw_error = 0.0;
   double gf_group_noise = 0.0;
@@ -2420,7 +2418,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mod_frame_err = 0.0;
 
   double mv_ratio_accumulator = 0.0;
-  double decay_accumulator = 1.0;
   double zero_motion_accumulator = 1.0;
   double loop_decay_rate = 1.00;
   double last_loop_decay_rate = 1.00;
@@ -2546,8 +2543,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       last_loop_decay_rate = loop_decay_rate;
       loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
 
-      decay_accumulator = decay_accumulator * loop_decay_rate;
-
       // Monitor for static sections.
       zero_motion_accumulator = VPXMIN(
           zero_motion_accumulator, get_zero_motion_factor(cpi, &next_frame));
@@ -2559,12 +2554,13 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         allow_alt_ref = 0;
         break;
       }
-    }
 
-    // Calculate a boost number for this frame.
-    boost_score += decay_accumulator *
-                   calc_frame_boost(cpi, &next_frame, &sr_accumulator,
-                                    this_frame_mv_in_out, GF_MAX_BOOST);
+      // Update the accumulator for second ref error difference.
+      // This is intended to give an indication of how much the coded error is
+      // increasing over time.
+      sr_accumulator += (next_frame.sr_coded_error - next_frame.coded_error);
+      sr_accumulator = VPXMAX(0.0, sr_accumulator);
+    }
 
     // Break out conditions.
     if (
@@ -2579,14 +2575,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
              (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
              (mv_in_out_accumulator < -mv_in_out_thresh) ||
-             (decay_accumulator < ARF_DECAY_BREAKOUT) ||
              (sr_accumulator > next_frame.intra_error)))) {
-      boost_score = old_boost_score;
       break;
     }
 
     *this_frame = next_frame;
-    old_boost_score = boost_score;
   }
 
   // Was the group length constrained by the requirement for a new KF?
@@ -2610,7 +2603,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             ? 1
             : 0;
   } else {
-    rc->gfu_boost = VPXMAX((int)boost_score, MIN_ARF_GF_BOOST);
+    rc->gfu_boost = calc_arf_boost(cpi, 0, (i - 1));
     rc->source_alt_ref_pending = 0;
   }
 
