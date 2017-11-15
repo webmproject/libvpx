@@ -3553,7 +3553,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   if (cpi->sf.copy_partition_flag) alloc_copy_partition_data(cpi);
 
-  if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 1) {
+  if (cpi->sf.svc_use_lowres_part &&
+      cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2) {
     if (cpi->svc.prev_partition_svc == NULL) {
       CHECK_MEM_ERROR(
           cm, cpi->svc.prev_partition_svc,

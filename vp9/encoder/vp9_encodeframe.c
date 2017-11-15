@@ -1255,13 +1255,13 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     if (cpi->content_state_sb_fd != NULL)
       x->last_sb_high_content = cpi->content_state_sb_fd[sb_offset2];
 
-    // For SVC on top spatial layer and non_reference frame: copy partition
-    // from lower spatial resolution if svc_use_lowres_part is enabled.
+    // For SVC on top spatial layer: use/scale the partition from
+    // the lower spatial resolution if svc_use_lowres_part is enabled.
     // TODO(jianj): Fix to allow it to work on boundary.
-    if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 2 &&
-        cpi->svc.non_reference_frame && cpi->svc.prev_partition_svc != NULL &&
-        mi_row < cm->mi_rows - 8 && mi_col < cm->mi_cols - 8 &&
-        content_state != kVeryHighSad) {
+    if (cpi->sf.svc_use_lowres_part &&
+        cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1 &&
+        cpi->svc.prev_partition_svc != NULL && mi_row < cm->mi_rows - 8 &&
+        mi_col < cm->mi_cols - 8 && content_state != kVeryHighSad) {
       copy_partitioning_svc(cpi, x, xd, BLOCK_64X64, mi_row >> 1, mi_col >> 1,
                             mi_row >> 1, mi_col >> 1, mi_row, mi_col);
       return 0;
@@ -1270,7 +1270,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     if (x->skip_low_source_sad && cpi->sf.copy_partition_flag &&
         copy_partitioning(cpi, x, xd, mi_row, mi_col, segment_id, sb_offset)) {
       x->sb_use_mv_part = 1;
-      if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 1)
+      if (cpi->sf.svc_use_lowres_part &&
+          cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2)
         update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
       return 0;
     }
@@ -1396,7 +1397,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
         set_block_size(cpi, x, xd, mi_row, mi_col, BLOCK_64X64);
         x->variance_low[0] = 1;
         chroma_check(cpi, x, bsize, y_sad, is_key_frame);
-        if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 1)
+        if (cpi->sf.svc_use_lowres_part &&
+            cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2)
           update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
         return 0;
       }
@@ -1409,7 +1411,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     if (cpi->sf.copy_partition_flag && y_sad_last < cpi->vbp_threshold_copy &&
         copy_partitioning(cpi, x, xd, mi_row, mi_col, segment_id, sb_offset)) {
       chroma_check(cpi, x, bsize, y_sad, is_key_frame);
-      if (cpi->sf.svc_use_lowres_part && cpi->svc.spatial_layer_id == 1)
+      if (cpi->sf.svc_use_lowres_part &&
+          cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2)
         update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
       return 0;
     }
@@ -1634,7 +1637,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   if (cm->frame_type != KEY_FRAME && cpi->sf.svc_use_lowres_part &&
-      cpi->svc.spatial_layer_id == 1)
+      cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2)
     update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
 
   if (cpi->sf.short_circuit_low_temp_var) {
