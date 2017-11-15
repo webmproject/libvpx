@@ -16,6 +16,24 @@
       "revId": "6246d8aa76f953cc2d49ab646944d625e5c8fe71",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff9ece30_f62e34c2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-11-15T23:25:55Z",
+      "side": 1,
+      "message": "This CL should fix that issue but I\u0027m not sure since it looks very complicated to reproduce that.\n\nI can try it after this CL gets in. If that\u0027s fixed, I\u0027ll close it.",
+      "parentUuid": "b401187c_0a30f5c0",
+      "revId": "6246d8aa76f953cc2d49ab646944d625e5c8fe71",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
