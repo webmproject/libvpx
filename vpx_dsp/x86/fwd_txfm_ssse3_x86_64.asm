@@ -31,8 +31,8 @@ SECTION .text
 INIT_XMM ssse3
 cglobal fdct8x8, 3, 5, 13, input, output, stride
 
-  mova               m8, [pd_8192]
-  mova              m12, [pw_11585x2]
+  mova               m8, [GLOBAL(pd_8192)]
+  mova              m12, [GLOBAL(pw_11585x2)]
 
   lea                r3, [2 * strideq]
   lea                r4, [4 * strideq]
@@ -92,10 +92,10 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
   ; sin(pi / 8), cos(pi / 8)
   punpcklwd m2, m10, m9
   punpckhwd m10, m9
-  pmaddwd m5, m2, [pw_15137_6270]
-  pmaddwd m2, [pw_6270_m15137]
-  pmaddwd m9, m10, [pw_15137_6270]
-  pmaddwd m10, [pw_6270_m15137]
+  pmaddwd m5, m2, [GLOBAL(pw_15137_6270)]
+  pmaddwd m2, [GLOBAL(pw_6270_m15137)]
+  pmaddwd m9, m10, [GLOBAL(pw_15137_6270)]
+  pmaddwd m10, [GLOBAL(pw_6270_m15137)]
   paddd m5, m8
   paddd m2, m8
   paddd m9, m8
@@ -120,10 +120,10 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
   ; sin(pi / 16), cos(pi / 16)
   punpcklwd m1, m10, m9
   punpckhwd m10, m9
-  pmaddwd m7, m1, [pw_16069_3196]
-  pmaddwd m1, [pw_3196_m16069]
-  pmaddwd m9, m10, [pw_16069_3196]
-  pmaddwd m10, [pw_3196_m16069]
+  pmaddwd m7, m1, [GLOBAL(pw_16069_3196)]
+  pmaddwd m1, [GLOBAL(pw_3196_m16069)]
+  pmaddwd m9, m10, [GLOBAL(pw_16069_3196)]
+  pmaddwd m10, [GLOBAL(pw_3196_m16069)]
   paddd m7, m8
   paddd m1, m8
   paddd m9, m8
@@ -138,10 +138,10 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
   ; sin(3 * pi / 16), cos(3 * pi / 16)
   punpcklwd m11, m0, m3
   punpckhwd m0, m3
-  pmaddwd m9, m11, [pw_9102_13623]
-  pmaddwd m11, [pw_13623_m9102]
-  pmaddwd m3, m0, [pw_9102_13623]
-  pmaddwd m0, [pw_13623_m9102]
+  pmaddwd m9, m11, [GLOBAL(pw_9102_13623)]
+  pmaddwd m11, [GLOBAL(pw_13623_m9102)]
+  pmaddwd m3, m0, [GLOBAL(pw_9102_13623)]
+  pmaddwd m0, [GLOBAL(pw_13623_m9102)]
   paddd m9, m8
   paddd m11, m8
   paddd m3, m8
@@ -211,10 +211,10 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
   ; stage 3
   punpcklwd m6, m1, m3
   punpckhwd m1, m3
-  pmaddwd m2, m6, [pw_11585_11585]
-  pmaddwd m6, [pw_11585_m11585]
-  pmaddwd m3, m1, [pw_11585_11585]
-  pmaddwd m1, [pw_11585_m11585]
+  pmaddwd m2, m6, [GLOBAL(pw_11585_11585)]
+  pmaddwd m6, [GLOBAL(pw_11585_m11585)]
+  pmaddwd m3, m1, [GLOBAL(pw_11585_11585)]
+  pmaddwd m1, [GLOBAL(pw_11585_m11585)]
   paddd m2, m8
   paddd m6, m8
   paddd m3, m8
@@ -231,10 +231,10 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
 
   punpcklwd m3, m5, m4
   punpckhwd m5, m4
-  pmaddwd m1, m3, [pw_15137_6270]
-  pmaddwd m3, [pw_6270_m15137]
-  pmaddwd m4, m5, [pw_15137_6270]
-  pmaddwd m5, [pw_6270_m15137]
+  pmaddwd m1, m3, [GLOBAL(pw_15137_6270)]
+  pmaddwd m3, [GLOBAL(pw_6270_m15137)]
+  pmaddwd m4, m5, [GLOBAL(pw_15137_6270)]
+  pmaddwd m5, [GLOBAL(pw_6270_m15137)]
   paddd m1, m8
   paddd m3, m8
   paddd m4, m8
@@ -255,10 +255,10 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
   ; stage 4
   punpcklwd m9, m5, m4
   punpckhwd m5, m4
-  pmaddwd m7, m9, [pw_16069_3196]
-  pmaddwd m9, [pw_3196_m16069]
-  pmaddwd m4, m5, [pw_16069_3196]
-  pmaddwd m5, [pw_3196_m16069]
+  pmaddwd m7, m9, [GLOBAL(pw_16069_3196)]
+  pmaddwd m9, [GLOBAL(pw_3196_m16069)]
+  pmaddwd m4, m5, [GLOBAL(pw_16069_3196)]
+  pmaddwd m5, [GLOBAL(pw_3196_m16069)]
   paddd m7, m8
   paddd m9, m8
   paddd m4, m8
@@ -272,10 +272,10 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
 
   punpcklwd m4, m10, m0
   punpckhwd m10, m0
-  pmaddwd m5, m4, [pw_9102_13623]
-  pmaddwd m4, [pw_13623_m9102]
-  pmaddwd m0, m10, [pw_9102_13623]
-  pmaddwd m10, [pw_13623_m9102]
+  pmaddwd m5, m4, [GLOBAL(pw_9102_13623)]
+  pmaddwd m4, [GLOBAL(pw_13623_m9102)]
+  pmaddwd m0, m10, [GLOBAL(pw_9102_13623)]
+  pmaddwd m10, [GLOBAL(pw_13623_m9102)]
   paddd m5, m8
   paddd m4, m8
   paddd m0, m8
