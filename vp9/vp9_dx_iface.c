@@ -316,6 +316,11 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
   ctx->pbi->decrypt_cb = ctx->decrypt_cb;
   ctx->pbi->decrypt_state = ctx->decrypt_state;
 
+#if CONFIG_INSPECTION
+  ctx->pbi->inspect_cb = ctx->inspect_cb;
+  ctx->pbi->inspect_ctx = ctx->inspect_ctx;
+#endif
+
   if (vp9_receive_compressed_data(ctx->pbi, data_sz, data)) {
     ctx->pbi->cur_buf->buf.corrupted = 1;
     ctx->pbi->need_resync = 1;
@@ -667,6 +672,19 @@ static vpx_codec_err_t ctrl_enable_lpf_opt(vpx_codec_alg_priv_t *ctx,
 
   return VPX_CODEC_OK;
 }
+static vpx_codec_err_t ctrl_set_inspection_callback(vpx_codec_alg_priv_t *ctx,
+                                                    va_list args) {
+#if !CONFIG_INSPECTION
+  (void)ctx;
+  (void)args;
+  return VPX_CODEC_INCAPABLE;
+#else
+  vpx_inspect_init *init = va_arg(args, vpx_inspect_init *);
+  ctx->inspect_cb = init->inspect_cb;
+  ctx->inspect_ctx = init->inspect_ctx;
+  return VPX_CODEC_OK;
+#endif
+}
 
 static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   { VP8_COPY_REFERENCE, ctrl_copy_reference },
@@ -679,6 +697,8 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   { VP9_SET_BYTE_ALIGNMENT, ctrl_set_byte_alignment },
   { VP9_SET_SKIP_LOOP_FILTER, ctrl_set_skip_loop_filter },
   { VP9_DECODE_SVC_SPATIAL_LAYER, ctrl_set_spatial_layer_svc },
+  { VP9_SET_INSPECTION_CALLBACK, ctrl_set_inspection_callback },
+
   { VP9D_SET_ROW_MT, ctrl_set_row_mt },
   { VP9D_SET_LOOP_FILTER_OPT, ctrl_enable_lpf_opt },
 

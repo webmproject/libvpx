@@ -499,7 +499,7 @@ NM=${NM}
 
 CFLAGS  = ${CFLAGS}
 CXXFLAGS  = ${CXXFLAGS}
-ARFLAGS = -crs\$(if \$(quiet),,v)
+ARFLAGS = crs\$(if \$(quiet),,v)
 LDFLAGS = ${LDFLAGS}
 ASFLAGS = ${ASFLAGS}
 extralibs = ${extralibs}

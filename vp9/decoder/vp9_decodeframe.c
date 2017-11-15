@@ -2202,4 +2202,8 @@ void vp9_decode_frame(VP9Decoder *pbi, const uint8_t *data,
   // Non frame parallel update frame context here.
   if (cm->refresh_frame_context && !context_updated)
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
+
+#if CONFIG_INSPECTION
+  if (pbi->inspect_cb != NULL) (*pbi->inspect_cb)(pbi, pbi->inspect_ctx);
+#endif
 }

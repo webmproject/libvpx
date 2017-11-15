@@ -47,6 +47,11 @@ struct vpx_codec_alg_priv {
   int svc_spatial_layer;
   int row_mt;
   int lpf_opt;
+
+#if CONFIG_INSPECTION
+  vpx_inspect_cb inspect_cb;
+  void *inspect_ctx;
+#endif
 };
 
 #endif  // VPX_VP9_VP9_DX_IFACE_H_

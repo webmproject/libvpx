@@ -63,6 +63,7 @@ Advanced options:
                                   enable vp9 temporal denoising
   ${toggle_webm_io}               enable input from and output to WebM container
   ${toggle_libyuv}                enable libyuv
+  ${toggle_inspection}            enable bitstream inspection
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -325,6 +326,7 @@ CONFIG_LIST="
     unit_tests
     webm_io
     libyuv
+    inspection
     decode_perf_tests
     encode_perf_tests
     multi_res_encoding
@@ -387,6 +389,7 @@ CMDLINE_SELECT="
     unit_tests
     webm_io
     libyuv
+    inspection
     decode_perf_tests
     encode_perf_tests
     multi_res_encoding

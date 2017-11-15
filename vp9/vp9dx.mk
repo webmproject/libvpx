@@ -29,4 +29,9 @@ VP9_DX_SRCS-yes += decoder/vp9_decoder.h
 VP9_DX_SRCS-yes += decoder/vp9_dsubexp.c
 VP9_DX_SRCS-yes += decoder/vp9_dsubexp.h
 
+ifeq ($(CONFIG_INSPECTION),yes)
+VP9_DX_SRCS-yes += decoder/inspection.c
+VP9_DX_SRCS-yes += decoder/inspection.h
+endif
+
 VP9_DX_SRCS-yes := $(filter-out $(VP9_DX_SRCS_REMOVE-yes),$(VP9_DX_SRCS-yes))

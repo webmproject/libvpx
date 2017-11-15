@@ -22,6 +22,10 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_ppflags.h"
 
+#if CONFIG_INSPECTION
+#include "vp9/decoder/inspection.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -90,6 +94,10 @@ typedef struct VP9Decoder {
   int row_mt;
   int lpf_mt_opt;
   RowMTWorkerData *row_mt_worker_data;
+#if CONFIG_INSPECTION
+  vpx_inspect_cb inspect_cb;
+  void *inspect_ctx;
+#endif
 } VP9Decoder;
 
 int vp9_receive_compressed_data(struct VP9Decoder *pbi, size_t size,

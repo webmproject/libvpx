@@ -145,6 +145,19 @@ simple_decoder.SRCS                += vpx_ports/mem_ops.h
 simple_decoder.SRCS                += vpx_ports/mem_ops_aligned.h
 simple_decoder.SRCS                += vpx_ports/msvc.h
 simple_decoder.DESCRIPTION          = Simplified decoder loop
+ifeq ($(CONFIG_INSPECTION),yes)
+EXAMPLES-$(CONFIG_DECODERS)    += inspect.c
+inspect.GUID                    = FA46A420-3356-441F-B0FD-60AA1345C181
+inspect.SRCS                   += ivfdec.h ivfdec.c
+inspect.SRCS                   += args.c args.h
+inspect.SRCS                   += tools_common.h tools_common.c
+inspect.SRCS                   += video_common.h
+inspect.SRCS                   += video_reader.h video_reader.c
+inspect.SRCS                   += vpx_ports/mem_ops.h
+inspect.SRCS                   += vpx_ports/mem_ops_aligned.h
+inspect.SRCS                   += vpx_ports/msvc.h
+inspect.DESCRIPTION             = Dump inspection data
+endif
 EXAMPLES-$(CONFIG_DECODERS)        += postproc.c
 postproc.SRCS                      += ivfdec.h ivfdec.c
 postproc.SRCS                      += tools_common.h tools_common.c
