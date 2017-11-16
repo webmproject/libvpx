@@ -34,6 +34,23 @@
       "revId": "6246d8aa76f953cc2d49ab646944d625e5c8fe71",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "212c653b_aeaf2046",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-16T04:58:32Z",
+      "side": 1,
+      "message": "wonder if this one could be an assert given the structure of the if statements",
+      "revId": "6246d8aa76f953cc2d49ab646944d625e5c8fe71",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
