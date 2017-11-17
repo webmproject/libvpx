@@ -962,6 +962,12 @@ static int scale_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   // The block size is too big for boundaries. Do variance based partitioning.
   if ((!has_rows || !has_cols) && bsize_low > BLOCK_16X16) return 1;
 
+  // For reference frames: return 1 (do variance-based partitioning) if the
+  // superblock is not low source sad and lower-resoln bsize is below 32x32.
+  if (!cpi->svc.non_reference_frame && !x->skip_low_source_sad &&
+      bsize_low < BLOCK_32X32)
+    return 1;
+
   // Scale up block size by 2x2. Force 64x64 for size larger than 32x32.
   if (bsize_low < BLOCK_32X32) {
     bsize_high = bsize_low + 3;
