@@ -287,9 +287,13 @@ int vp9_receive_compressed_data(VP9Decoder *pbi, size_t size,
   pbi->ready_for_new_data = 0;
 
   // Check if the previous frame was a frame without any references to it.
-  if (cm->new_fb_idx >= 0 && frame_bufs[cm->new_fb_idx].ref_count == 0)
+  if (cm->new_fb_idx >= 0 && frame_bufs[cm->new_fb_idx].ref_count == 0 &&
+      !frame_bufs[cm->new_fb_idx].released) {
     pool->release_fb_cb(pool->cb_priv,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
+    frame_bufs[cm->new_fb_idx].released = 1;
+  }
+
   // Find a free frame buffer. Return error if can not find any.
   cm->new_fb_idx = get_free_fb(cm);
   if (cm->new_fb_idx == INVALID_IDX) {

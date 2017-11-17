@@ -499,7 +499,7 @@ TEST_F(ExternalFrameBufferTest, SetAfterDecode) {
                                     release_vp9_frame_buffer));
 }
 
-TEST_F(ExternalFrameBufferNonRefTest, DISABLED_ReleaseNonRefFrameBuffer) {
+TEST_F(ExternalFrameBufferNonRefTest, ReleaseNonRefFrameBuffer) {
   const int num_buffers = VP9_MAXIMUM_REF_BUFFERS + VPX_MAXIMUM_WORK_BUFFERS;
   ASSERT_EQ(VPX_CODEC_OK,
             SetFrameBufferFunctions(num_buffers, get_vp9_frame_buffer,

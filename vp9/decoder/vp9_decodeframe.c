@@ -1184,6 +1184,7 @@ static void setup_frame_size(VP9_COMMON *cm, struct vpx_read_bit_buffer *rb) {
                        "Failed to allocate frame buffer");
   }
 
+  pool->frame_bufs[cm->new_fb_idx].released = 0;
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
   pool->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
@@ -1267,6 +1268,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
                        "Failed to allocate frame buffer");
   }
 
+  pool->frame_bufs[cm->new_fb_idx].released = 0;
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
   pool->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;

@@ -69,6 +69,7 @@ typedef struct {
   MV_REF *mvs;
   int mi_rows;
   int mi_cols;
+  uint8_t released;
   vpx_codec_frame_buffer_t raw_frame_buffer;
   YV12_BUFFER_CONFIG buf;
 } RefCntBuffer;
