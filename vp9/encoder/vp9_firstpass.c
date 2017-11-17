@@ -2091,8 +2091,8 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
   }
   arf_boost += (int)boost_score;
 
-  if (arf_boost < ((b_frames + f_frames) * 20))
-    arf_boost = ((b_frames + f_frames) * 20);
+  if (arf_boost < ((b_frames + f_frames) * 40))
+    arf_boost = ((b_frames + f_frames) * 40);
   arf_boost = VPXMAX(arf_boost, MIN_ARF_GF_BOOST);
 
   return arf_boost;
@@ -2562,7 +2562,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
 
     // Calculate a boost number for this frame.
-    sr_accumulator = 0.0;
     boost_score += decay_accumulator *
                    calc_frame_boost(cpi, &next_frame, &sr_accumulator,
                                     this_frame_mv_in_out, GF_MAX_BOOST);
@@ -2580,7 +2579,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
              (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
              (mv_in_out_accumulator < -mv_in_out_thresh) ||
-             (decay_accumulator < ARF_DECAY_BREAKOUT)))) {
+             (decay_accumulator < ARF_DECAY_BREAKOUT) ||
+             (sr_accumulator > next_frame.intra_error)))) {
       boost_score = old_boost_score;
       break;
     }
