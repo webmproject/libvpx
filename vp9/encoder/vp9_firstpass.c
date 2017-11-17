@@ -1950,8 +1950,7 @@ static void accumulate_frame_motion_stats(const FIRSTPASS_STATS *stats,
 
 #define BASELINE_ERR_PER_MB 12500.0
 static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
-                               double *sr_accumulator,
-                               double this_frame_mv_in_out, double max_boost) {
+                               double this_frame_mv_in_out) {
   double frame_boost;
   const double lq = vp9_convert_qindex_to_q(
       cpi->rc.avg_frame_qindex[INTER_FRAME], cpi->common.bit_depth);
@@ -1960,13 +1959,7 @@ static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * active_area) /
-                DOUBLE_DIVIDE_CHECK(this_frame->coded_error + *sr_accumulator);
-
-  // Update the accumulator for second ref error difference.
-  // This is intended to give an indication of how much the coded error is
-  // increasing over time.
-  *sr_accumulator += (this_frame->sr_coded_error - this_frame->coded_error);
-  *sr_accumulator = VPXMAX(0.0, *sr_accumulator);
+                DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
 
   // Small adjustment for cases where there is a zoom out
   if (this_frame_mv_in_out > 0.0)
@@ -1975,7 +1968,7 @@ static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
   // Q correction and scalling
   frame_boost = frame_boost * boost_q_correction;
 
-  return VPXMIN(frame_boost, max_boost * boost_q_correction);
+  return VPXMIN(frame_boost, GF_MAX_BOOST * boost_q_correction);
 }
 
 #define KF_BASELINE_ERR_PER_MB 12500.0
@@ -2019,7 +2012,6 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
   double this_frame_mv_in_out = 0.0;
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
-  double sr_accumulator = 0.0;
   int arf_boost;
   int flash_detected = 0;
 
@@ -2044,11 +2036,8 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
                               ? MIN_DECAY_FACTOR
                               : decay_accumulator;
     }
-
-    sr_accumulator = 0.0;
     boost_score += decay_accumulator *
-                   calc_frame_boost(cpi, this_frame, &sr_accumulator,
-                                    this_frame_mv_in_out, GF_MAX_BOOST);
+                   calc_frame_boost(cpi, this_frame, this_frame_mv_in_out);
   }
 
   arf_boost = (int)boost_score;
@@ -2060,7 +2049,6 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
   this_frame_mv_in_out = 0.0;
   mv_in_out_accumulator = 0.0;
   abs_mv_in_out_accumulator = 0.0;
-  sr_accumulator = 0.0;
 
   // Search backward towards last gf position.
   for (i = -1; i >= -b_frames; --i) {
@@ -2083,11 +2071,8 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
                               ? MIN_DECAY_FACTOR
                               : decay_accumulator;
     }
-
-    sr_accumulator = 0.0;
     boost_score += decay_accumulator *
-                   calc_frame_boost(cpi, this_frame, &sr_accumulator,
-                                    this_frame_mv_in_out, GF_MAX_BOOST);
+                   calc_frame_boost(cpi, this_frame, this_frame_mv_in_out);
   }
   arf_boost += (int)boost_score;
 
