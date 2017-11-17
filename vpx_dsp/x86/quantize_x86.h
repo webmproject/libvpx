@@ -12,7 +12,6 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
 
 static INLINE void load_b_values(const int16_t *zbin_ptr, __m128i *zbin,
                                  const int16_t *round_ptr, __m128i *round,
