@@ -919,7 +919,9 @@ int vp9_get_refresh_mask(VP9_COMP *cpi) {
   }
 }
 
-static int encode_tile_worker(VP9_COMP *cpi, VP9BitstreamWorkerData *data) {
+static int encode_tile_worker(void *arg1, void *arg2) {
+  VP9_COMP *cpi = (VP9_COMP *)arg1;
+  VP9BitstreamWorkerData *data = (VP9BitstreamWorkerData *)arg2;
   MACROBLOCKD *const xd = &data->xd;
   const int tile_row = 0;
   vpx_start_encode(&data->bit_writer, data->dest);
@@ -995,7 +997,7 @@ static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr) {
       }
       worker->data1 = cpi;
       worker->data2 = data;
-      worker->hook = (VPxWorkerHook)encode_tile_worker;
+      worker->hook = encode_tile_worker;
       worker->had_error = 0;
 
       if (i < num_workers - 1) {

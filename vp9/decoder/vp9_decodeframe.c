@@ -1364,7 +1364,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi, const uint8_t *data,
       pbi->lf_worker.data1 == NULL) {
     CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
                     vpx_memalign(32, sizeof(LFWorkerData)));
-    pbi->lf_worker.hook = (VPxWorkerHook)vp9_loop_filter_worker;
+    pbi->lf_worker.hook = vp9_loop_filter_worker;
     if (pbi->max_threads > 1 && !winterface->reset(&pbi->lf_worker)) {
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                          "Loop filter thread creation failed");
@@ -1474,8 +1474,10 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi, const uint8_t *data,
 // On entry 'tile_data->data_end' points to the end of the input frame, on exit
 // it is updated to reflect the bitreader position of the final tile column if
 // present in the tile buffer group or NULL otherwise.
-static int tile_worker_hook(TileWorkerData *const tile_data,
-                            VP9Decoder *const pbi) {
+static int tile_worker_hook(void *arg1, void *arg2) {
+  TileWorkerData *const tile_data = (TileWorkerData *)arg1;
+  VP9Decoder *const pbi = (VP9Decoder *)arg2;
+
   TileInfo *volatile tile = &tile_data->xd.tile;
   const int final_col = (1 << pbi->common.log2_tile_cols) - 1;
   const uint8_t *volatile bit_reader_end = NULL;
@@ -1569,7 +1571,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi, const uint8_t *data,
     tile_data->xd = pbi->mb;
     tile_data->xd.counts =
         cm->frame_parallel_decoding_mode ? NULL : &tile_data->counts;
-    worker->hook = (VPxWorkerHook)tile_worker_hook;
+    worker->hook = tile_worker_hook;
     worker->data1 = tile_data;
     worker->data2 = pbi;
   }

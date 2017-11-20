@@ -35,7 +35,8 @@ static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
                   td_t->rd_counts.coef_counts[i][j][k][l][m][n];
 }
 
-static int enc_worker_hook(EncWorkerData *const thread_data, void *unused) {
+static int enc_worker_hook(void *arg1, void *unused) {
+  EncWorkerData *const thread_data = (EncWorkerData *)arg1;
   VP9_COMP *const cpi = thread_data->cpi;
   const VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -142,7 +143,7 @@ static void launch_enc_workers(VP9_COMP *cpi, VPxWorkerHook hook, void *data2,
 
   for (i = 0; i < num_workers; i++) {
     VPxWorker *const worker = &cpi->workers[i];
-    worker->hook = (VPxWorkerHook)hook;
+    worker->hook = hook;
     worker->data1 = &cpi->tile_thr_data[i];
     worker->data2 = data2;
   }
@@ -210,7 +211,7 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
     }
   }
 
-  launch_enc_workers(cpi, (VPxWorkerHook)enc_worker_hook, NULL, num_workers);
+  launch_enc_workers(cpi, enc_worker_hook, NULL, num_workers);
 
   for (i = 0; i < num_workers; i++) {
     VPxWorker *const worker = &cpi->workers[i];
