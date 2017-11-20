@@ -131,9 +131,9 @@ static int svc_log(SvcContext *svc_ctx, SVC_LOG_LEVEL level, const char *fmt,
 static vpx_codec_err_t extract_option(LAYER_OPTION_TYPE type, char *input,
                                       int *value0, int *value1) {
   if (type == SCALE_FACTOR) {
-    *value0 = strtol(input, &input, 10);
+    *value0 = (int)strtol(input, &input, 10);
     if (*input++ != '/') return VPX_CODEC_INVALID_PARAM;
-    *value1 = strtol(input, &input, 10);
+    *value1 = (int)strtol(input, &input, 10);
 
     if (*value0 < option_min_values[SCALE_FACTOR] ||
         *value1 < option_min_values[SCALE_FACTOR] ||

@@ -168,7 +168,7 @@ void usage_exit(void) {
 static void parse_command_line(int argc, const char **argv_,
                                AppInput *app_input, SvcContext *svc_ctx,
                                vpx_codec_enc_cfg_t *enc_cfg) {
-  struct arg arg = { 0 };
+  struct arg arg;
   char **argv = NULL;
   char **argi = NULL;
   char **argj = NULL;
@@ -509,7 +509,7 @@ static void printout_rate_control_summary(struct RateControlStats *rc,
 }
 
 vpx_codec_err_t parse_superframe_index(const uint8_t *data, size_t data_sz,
-                                       uint32_t sizes[8], int *count) {
+                                       uint64_t sizes[8], int *count) {
   // A chunk ending with a byte matching 0xc0 is an invalid chunk unless
   // it is a super frame index. If the last byte of real video compression
   // data is 0xc0 the encoder must add a 0 byte. If we have the marker but
@@ -606,9 +606,9 @@ void set_frame_flags_bypass_mode(int sl, int tl, int num_spatial_layers,
 }
 
 int main(int argc, const char **argv) {
-  AppInput app_input = { 0 };
+  AppInput app_input;
   VpxVideoWriter *writer = NULL;
-  VpxVideoInfo info = { 0 };
+  VpxVideoInfo info;
   vpx_codec_ctx_t codec;
   vpx_codec_enc_cfg_t enc_cfg;
   SvcContext svc_ctx;
@@ -770,7 +770,7 @@ int main(int argc, const char **argv) {
           SvcInternal_t *const si = (SvcInternal_t *)svc_ctx.internal;
           if (cx_pkt->data.frame.sz > 0) {
 #if OUTPUT_RC_STATS
-            uint32_t sizes[8];
+            uint64_t sizes[8];
             int count = 0;
 #endif
             vpx_video_writer_write_frame(writer, cx_pkt->data.frame.buf,
