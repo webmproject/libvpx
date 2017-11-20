@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "154cc00e_8593a897",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1622,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-20T23:30:58Z",
+      "side": 1,
+      "message": "most of the code in this lib will explicitly cast from void* (LFWorkerData* here)",
+      "revId": "069c38ce8a1106dafa34cdf5ca47e5b21b8bb302",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e5c8aec_c2429cfd",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-20T23:30:58Z",
+      "side": 1,
+      "message": "same here, an explicit cast would be preferred",
+      "revId": "069c38ce8a1106dafa34cdf5ca47e5b21b8bb302",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d34caa9_de1cf65a",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1478,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-20T23:30:58Z",
+      "side": 1,
+      "message": "an explicit cast would be preferred",
+      "revId": "069c38ce8a1106dafa34cdf5ca47e5b21b8bb302",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf230657_63b6471c",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 923,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-20T23:30:58Z",
+      "side": 1,
+      "message": "an explicit cast would be preferred",
+      "revId": "069c38ce8a1106dafa34cdf5ca47e5b21b8bb302",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "202334f0_a69c231a",
+        "filename": "vp9/encoder/vp9_ethread.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-20T23:30:58Z",
+      "side": 1,
+      "message": "an explicit cast would be preferred",
+      "revId": "069c38ce8a1106dafa34cdf5ca47e5b21b8bb302",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
