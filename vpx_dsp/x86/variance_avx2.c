@@ -31,137 +31,134 @@ DECLARE_ALIGNED(32, static const uint8_t, bilinear_filters_avx2[512]) = {
   2,  14, 2,  14, 2,  14, 2,  14, 2,  14, 2,  14, 2,  14, 2,  14,
   2,  14, 2,  14, 2,  14, 2,  14, 2,  14, 2,  14, 2,  14, 2,  14,
 };
+
+DECLARE_ALIGNED(32, static const int8_t, adjacent_sub_avx2[32]) = {
+  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,
+  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1
+};
 /* clang-format on */
 
 void vpx_get16x16var_avx2(const unsigned char *src_ptr, int source_stride,
                           const unsigned char *ref_ptr, int recon_stride,
                           unsigned int *sse, int *sum) {
   unsigned int i, src_2strides, ref_2strides;
-  __m256i sum_ref_src = _mm256_setzero_si256();
-  __m256i madd_ref_src = _mm256_setzero_si256();
+  __m256i sum_reg = _mm256_setzero_si256();
+  __m256i sse_reg = _mm256_setzero_si256();
   // process two 16 byte locations in a 256 bit register
   src_2strides = source_stride << 1;
   ref_2strides = recon_stride << 1;
   for (i = 0; i < 8; ++i) {
-    const __m256i zero_reg = _mm256_setzero_si256();
+    // convert up values in 128 bit registers across lanes
     const __m256i src0 =
-        _mm256_castsi128_si256(_mm_loadu_si128((__m128i const *)(src_ptr)));
-    const __m256i src = _mm256_inserti128_si256(
-        src0, _mm_loadu_si128((__m128i const *)(src_ptr + source_stride)), 1);
+        _mm256_cvtepu8_epi16(_mm_loadu_si128((__m128i const *)(src_ptr)));
+    const __m256i src1 = _mm256_cvtepu8_epi16(
+        _mm_loadu_si128((__m128i const *)(src_ptr + source_stride)));
     const __m256i ref0 =
-        _mm256_castsi128_si256(_mm_loadu_si128((__m128i const *)(ref_ptr)));
-    const __m256i ref = _mm256_inserti128_si256(
-        ref0, _mm_loadu_si128((__m128i const *)(ref_ptr + recon_stride)), 1);
-    const __m256i src_lo = _mm256_unpacklo_epi8(src, zero_reg);
-    const __m256i src_hi = _mm256_unpackhi_epi8(src, zero_reg);
-    const __m256i ref_lo = _mm256_unpacklo_epi8(ref, zero_reg);
-    const __m256i ref_hi = _mm256_unpackhi_epi8(ref, zero_reg);
-    const __m256i diff_lo = _mm256_sub_epi16(src_lo, ref_lo);
-    const __m256i diff_hi = _mm256_sub_epi16(src_hi, ref_hi);
-    const __m256i madd_lo = _mm256_madd_epi16(diff_lo, diff_lo);
-    const __m256i madd_hi = _mm256_madd_epi16(diff_hi, diff_hi);
-    const __m256i src_ref_diff_sum = _mm256_add_epi16(diff_lo, diff_hi);
+        _mm256_cvtepu8_epi16(_mm_loadu_si128((__m128i const *)(ref_ptr)));
+    const __m256i ref1 = _mm256_cvtepu8_epi16(
+        _mm_loadu_si128((__m128i const *)(ref_ptr + recon_stride)));
+    const __m256i diff0 = _mm256_sub_epi16(src0, ref0);
+    const __m256i diff1 = _mm256_sub_epi16(src1, ref1);
+    const __m256i madd0 = _mm256_madd_epi16(diff0, diff0);
+    const __m256i madd1 = _mm256_madd_epi16(diff1, diff1);
 
-    sum_ref_src = _mm256_add_epi16(sum_ref_src, src_ref_diff_sum);
-    // add high to low
-    madd_ref_src =
-        _mm256_add_epi32(madd_ref_src, _mm256_add_epi32(madd_lo, madd_hi));
+    // add to the running totals
+    sum_reg = _mm256_add_epi16(sum_reg, _mm256_add_epi16(diff0, diff1));
+    sse_reg = _mm256_add_epi32(sse_reg, _mm256_add_epi32(madd0, madd1));
 
     src_ptr += src_2strides;
     ref_ptr += ref_2strides;
   }
-
   {
-    const __m128i zero_reg = _mm_setzero_si128();
     // extract the low lane and add it to the high lane
-    const __m128i sum_ref_src_128 =
-        _mm_add_epi16(_mm256_castsi256_si128(sum_ref_src),
-                      _mm256_extractf128_si256(sum_ref_src, 1));
-    const __m128i madd_ref_src_128 =
-        _mm_add_epi32(_mm256_castsi256_si128(madd_ref_src),
-                      _mm256_extractf128_si256(madd_ref_src, 1));
-    // 16 -> 32 sign extended
-    const __m128i sum_lo =
-        _mm_srai_epi32(_mm_unpacklo_epi16(zero_reg, sum_ref_src_128), 16);
-    // 16 -> 32 sign extended
-    const __m128i sum_hi =
-        _mm_srai_epi32(_mm_unpackhi_epi16(zero_reg, sum_ref_src_128), 16);
-    const __m128i sum_hl = _mm_add_epi32(sum_lo, sum_hi);
-    const __m128i madd_lo = _mm_unpacklo_epi32(madd_ref_src_128, zero_reg);
-    const __m128i madd_hi = _mm_unpackhi_epi32(madd_ref_src_128, zero_reg);
-    const __m128i madd = _mm_add_epi32(madd_lo, madd_hi);
-    const __m128i ex_sum_lo = _mm_unpacklo_epi32(sum_hl, zero_reg);
-    const __m128i ex_sum_hi = _mm_unpackhi_epi32(sum_hl, zero_reg);
-    const __m128i ex_sum = _mm_add_epi32(ex_sum_lo, ex_sum_hi);
-    *((int *)sse) =
-        _mm_cvtsi128_si32(_mm_add_epi32(madd, _mm_srli_si128(madd, 8)));
-    *((int *)sum) =
-        _mm_cvtsi128_si32(_mm_add_epi32(ex_sum, _mm_srli_si128(ex_sum, 8)));
+    const __m128i sum_reg_128 = _mm_add_epi16(
+        _mm256_castsi256_si128(sum_reg), _mm256_extractf128_si256(sum_reg, 1));
+    const __m128i sse_reg_128 = _mm_add_epi32(
+        _mm256_castsi256_si128(sse_reg), _mm256_extractf128_si256(sse_reg, 1));
+
+    // sum upper and lower 64 bits together and convert up to 32 bit values
+    const __m128i sum_reg_64 =
+        _mm_add_epi16(sum_reg_128, _mm_srli_si128(sum_reg_128, 8));
+    const __m128i sum_int32 = _mm_cvtepi16_epi32(sum_reg_64);
+
+    // unpack sse and sum registers and add
+    const __m128i sse_sum_lo = _mm_unpacklo_epi32(sse_reg_128, sum_int32);
+    const __m128i sse_sum_hi = _mm_unpackhi_epi32(sse_reg_128, sum_int32);
+    const __m128i sse_sum = _mm_add_epi32(sse_sum_lo, sse_sum_hi);
+
+    // perform the final summation and extract the results
+    const __m128i res = _mm_add_epi32(sse_sum, _mm_srli_si128(sse_sum, 8));
+    *((int *)sse) = _mm_cvtsi128_si32(res);
+    *((int *)sum) = _mm_extract_epi32(res, 1);
   }
 }
 
 static void get32x16var_avx2(const unsigned char *src_ptr, int source_stride,
                              const unsigned char *ref_ptr, int recon_stride,
                              unsigned int *sse, int *sum) {
-  unsigned int i;
-  const __m256i zero_reg = _mm256_setzero_si256();
-  __m256i sum_ref_src = _mm256_setzero_si256();
-  __m256i madd_ref_src = _mm256_setzero_si256();
+  unsigned int i, src_2strides, ref_2strides;
+  const __m256i adj_sub = _mm256_load_si256((__m256i const *)adjacent_sub_avx2);
+  __m256i sum_reg = _mm256_setzero_si256();
+  __m256i sse_reg = _mm256_setzero_si256();
 
-  // processing 32 elements in parallel
-  for (i = 0; i < 16; i++) {
-    const __m256i src = _mm256_loadu_si256((__m256i const *)(src_ptr));
-    const __m256i ref = _mm256_loadu_si256((__m256i const *)(ref_ptr));
-    const __m256i src_lo = _mm256_unpacklo_epi8(src, zero_reg);
-    const __m256i src_hi = _mm256_unpackhi_epi8(src, zero_reg);
-    const __m256i ref_lo = _mm256_unpacklo_epi8(ref, zero_reg);
-    const __m256i ref_hi = _mm256_unpackhi_epi8(ref, zero_reg);
-    const __m256i diff_lo = _mm256_sub_epi16(src_lo, ref_lo);
-    const __m256i diff_hi = _mm256_sub_epi16(src_hi, ref_hi);
-    const __m256i madd_lo = _mm256_madd_epi16(diff_lo, diff_lo);
-    const __m256i madd_hi = _mm256_madd_epi16(diff_hi, diff_hi);
-    // add high to low
-    const __m256i diff_sum = _mm256_add_epi16(diff_lo, diff_hi);
+  // process 64 elements in an iteration
+  src_2strides = source_stride << 1;
+  ref_2strides = recon_stride << 1;
+  for (i = 0; i < 8; i++) {
+    const __m256i src0 = _mm256_loadu_si256((__m256i const *)(src_ptr));
+    const __m256i src1 =
+        _mm256_loadu_si256((__m256i const *)(src_ptr + source_stride));
+    const __m256i ref0 = _mm256_loadu_si256((__m256i const *)(ref_ptr));
+    const __m256i ref1 =
+        _mm256_loadu_si256((__m256i const *)(ref_ptr + recon_stride));
 
-    sum_ref_src = _mm256_add_epi16(sum_ref_src, diff_sum);
+    // unpack into pairs of source and reference values
+    const __m256i src_ref0 = _mm256_unpacklo_epi8(src0, ref0);
+    const __m256i src_ref1 = _mm256_unpackhi_epi8(src0, ref0);
+    const __m256i src_ref2 = _mm256_unpacklo_epi8(src1, ref1);
+    const __m256i src_ref3 = _mm256_unpackhi_epi8(src1, ref1);
 
-    // add high to low
-    madd_ref_src =
-        _mm256_add_epi32(madd_ref_src, _mm256_add_epi32(madd_lo, madd_hi));
+    // subtract adjacent elements using src*1 + ref*-1
+    const __m256i diff0 = _mm256_maddubs_epi16(src_ref0, adj_sub);
+    const __m256i diff1 = _mm256_maddubs_epi16(src_ref1, adj_sub);
+    const __m256i diff2 = _mm256_maddubs_epi16(src_ref2, adj_sub);
+    const __m256i diff3 = _mm256_maddubs_epi16(src_ref3, adj_sub);
+    const __m256i madd0 = _mm256_madd_epi16(diff0, diff0);
+    const __m256i madd1 = _mm256_madd_epi16(diff1, diff1);
+    const __m256i madd2 = _mm256_madd_epi16(diff2, diff2);
+    const __m256i madd3 = _mm256_madd_epi16(diff3, diff3);
 
-    src_ptr += source_stride;
-    ref_ptr += recon_stride;
+    // add to the running totals
+    sum_reg = _mm256_add_epi16(sum_reg, _mm256_add_epi16(diff0, diff1));
+    sum_reg = _mm256_add_epi16(sum_reg, _mm256_add_epi16(diff2, diff3));
+    sse_reg = _mm256_add_epi32(sse_reg, _mm256_add_epi32(madd0, madd1));
+    sse_reg = _mm256_add_epi32(sse_reg, _mm256_add_epi32(madd2, madd3));
+
+    src_ptr += src_2strides;
+    ref_ptr += ref_2strides;
   }
 
   {
-    // 16 -> 32 sign extended
-    const __m256i sum_lo =
-        _mm256_srai_epi32(_mm256_unpacklo_epi16(zero_reg, sum_ref_src), 16);
-    // 16 -> 32 sign extended
-    const __m256i sum_hi =
-        _mm256_srai_epi32(_mm256_unpackhi_epi16(zero_reg, sum_ref_src), 16);
-    const __m256i sum_hl = _mm256_add_epi32(sum_lo, sum_hi);
-    const __m256i madd_lo = _mm256_unpacklo_epi32(madd_ref_src, zero_reg);
-    const __m256i madd_hi = _mm256_unpackhi_epi32(madd_ref_src, zero_reg);
-    const __m256i madd = _mm256_add_epi32(madd_lo, madd_hi);
-    const __m256i ex_sum_lo = _mm256_unpacklo_epi32(sum_hl, zero_reg);
-    const __m256i ex_sum_hi = _mm256_unpackhi_epi32(sum_hl, zero_reg);
-    const __m256i ex_sum = _mm256_add_epi32(ex_sum_lo, ex_sum_hi);
+    // extract the low lane and add it to the high lane
+    const __m128i sum_reg_128 = _mm_add_epi16(
+        _mm256_castsi256_si128(sum_reg), _mm256_extractf128_si256(sum_reg, 1));
+    const __m128i sse_reg_128 = _mm_add_epi32(
+        _mm256_castsi256_si128(sse_reg), _mm256_extractf128_si256(sse_reg, 1));
 
-    // shift 8 bytes eight
-    madd_ref_src = _mm256_srli_si256(madd, 8);
-    sum_ref_src = _mm256_srli_si256(ex_sum, 8);
+    // sum upper and lower 64 bits together and convert up to 32 bit values
+    const __m128i sum_reg_64 =
+        _mm_add_epi16(sum_reg_128, _mm_srli_si128(sum_reg_128, 8));
+    const __m128i sum_int32 = _mm_cvtepi16_epi32(sum_reg_64);
 
-    madd_ref_src = _mm256_add_epi32(madd_ref_src, madd);
-    sum_ref_src = _mm256_add_epi32(sum_ref_src, ex_sum);
+    // unpack sse and sum registers and add
+    const __m128i sse_sum_lo = _mm_unpacklo_epi32(sse_reg_128, sum_int32);
+    const __m128i sse_sum_hi = _mm_unpackhi_epi32(sse_reg_128, sum_int32);
+    const __m128i sse_sum = _mm_add_epi32(sse_sum_lo, sse_sum_hi);
 
-    // extract the low lane and the high lane and add the results
-    *((int *)sse) =
-        _mm_cvtsi128_si32(_mm256_castsi256_si128(madd_ref_src)) +
-        _mm_cvtsi128_si32(_mm256_extractf128_si256(madd_ref_src, 1));
-
-    *((int *)sum) = _mm_cvtsi128_si32(_mm256_castsi256_si128(sum_ref_src)) +
-                    _mm_cvtsi128_si32(_mm256_extractf128_si256(sum_ref_src, 1));
+    // perform the final summation and extract the results
+    const __m128i res = _mm_add_epi32(sse_sum, _mm_srli_si128(sse_sum, 8));
+    *((int *)sse) = _mm_cvtsi128_si32(res);
+    *((int *)sum) = _mm_extract_epi32(res, 1);
   }
 }
 

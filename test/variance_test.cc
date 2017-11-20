@@ -492,7 +492,7 @@ void MainTestClass<VarianceFunctionType>::SpeedTest() {
 
   vpx_usec_timer timer;
   vpx_usec_timer_start(&timer);
-  for (int i = 0; i < 100000000 / block_size(); ++i) {
+  for (int i = 0; i < (1 << 30) / block_size(); ++i) {
     const uint32_t variance = params_.func(src_, width(), ref_, width(), &sse);
     // Ignore return value.
     (void)variance;
