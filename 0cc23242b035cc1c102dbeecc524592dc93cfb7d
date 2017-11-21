@@ -34,6 +34,24 @@
       "revId": "0cc23242b035cc1c102dbeecc524592dc93cfb7d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ac3817a_3d11dd37",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-21T00:43:42Z",
+      "side": 0,
+      "message": "\u003e It outputs a \u0027K\u0027 for key frame and nothing for others. I don\u0027t see why it\u0027s useful.\n\nothers might have used \u0027.\u0027, but I agree it\u0027s not all that helpful",
+      "parentUuid": "60bea333_9f28503f",
+      "revId": "0cc23242b035cc1c102dbeecc524592dc93cfb7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
