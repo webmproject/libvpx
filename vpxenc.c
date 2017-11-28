@@ -123,6 +123,8 @@ static int fourcc_is_ivf(const char detect[4]) {
   return 0;
 }
 
+static const arg_def_t help =
+    ARG_DEF(NULL, "help", 0, "Show usage options and exit");
 static const arg_def_t debugmode =
     ARG_DEF("D", "debug", 0, "Debug mode (makes output deterministic)");
 static const arg_def_t outputfile =
@@ -199,7 +201,8 @@ static const arg_def_t test16bitinternalarg = ARG_DEF(
     NULL, "test-16bit-internal", 0, "Force use of 16 bit internal buffer");
 #endif
 
-static const arg_def_t *main_args[] = { &debugmode,
+static const arg_def_t *main_args[] = { &help,
+                                        &debugmode,
                                         &outputfile,
                                         &codecarg,
                                         &passes,
@@ -549,46 +552,54 @@ static const int vp9_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
 
 static const arg_def_t *no_args[] = { NULL };
 
-void usage_exit(void) {
+void show_help(FILE *fout, int shorthelp) {
   int i;
   const int num_encoder = get_vpx_encoder_count();
 
-  fprintf(stderr, "Usage: %s <options> -o dst_filename src_filename \n",
+  fprintf(fout, "Usage: %s <options> -o dst_filename src_filename \n",
           exec_name);
 
-  fprintf(stderr, "\nOptions:\n");
-  arg_show_usage(stderr, main_args);
-  fprintf(stderr, "\nEncoder Global Options:\n");
-  arg_show_usage(stderr, global_args);
-  fprintf(stderr, "\nRate Control Options:\n");
-  arg_show_usage(stderr, rc_args);
-  fprintf(stderr, "\nTwopass Rate Control Options:\n");
-  arg_show_usage(stderr, rc_twopass_args);
-  fprintf(stderr, "\nKeyframe Placement Options:\n");
-  arg_show_usage(stderr, kf_args);
+  if (shorthelp) {
+    fprintf(fout, "Use --help to see the full list of options.\n");
+    return;
+  }
+
+  fprintf(fout, "\nOptions:\n");
+  arg_show_usage(fout, main_args);
+  fprintf(fout, "\nEncoder Global Options:\n");
+  arg_show_usage(fout, global_args);
+  fprintf(fout, "\nRate Control Options:\n");
+  arg_show_usage(fout, rc_args);
+  fprintf(fout, "\nTwopass Rate Control Options:\n");
+  arg_show_usage(fout, rc_twopass_args);
+  fprintf(fout, "\nKeyframe Placement Options:\n");
+  arg_show_usage(fout, kf_args);
 #if CONFIG_VP8_ENCODER
-  fprintf(stderr, "\nVP8 Specific Options:\n");
-  arg_show_usage(stderr, vp8_args);
+  fprintf(fout, "\nVP8 Specific Options:\n");
+  arg_show_usage(fout, vp8_args);
 #endif
 #if CONFIG_VP9_ENCODER
-  fprintf(stderr, "\nVP9 Specific Options:\n");
-  arg_show_usage(stderr, vp9_args);
+  fprintf(fout, "\nVP9 Specific Options:\n");
+  arg_show_usage(fout, vp9_args);
 #endif
-  fprintf(stderr,
+  fprintf(fout,
           "\nStream timebase (--timebase):\n"
           "  The desired precision of timestamps in the output, expressed\n"
           "  in fractional seconds. Default is 1/1000.\n");
-  fprintf(stderr, "\nIncluded encoders:\n\n");
+  fprintf(fout, "\nIncluded encoders:\n\n");
 
   for (i = 0; i < num_encoder; ++i) {
     const VpxInterface *const encoder = get_vpx_encoder_by_index(i);
     const char *defstr = (i == (num_encoder - 1)) ? "(default)" : "";
-    fprintf(stderr, "    %-6s - %s %s\n", encoder->name,
+    fprintf(fout, "    %-6s - %s %s\n", encoder->name,
             vpx_codec_iface_name(encoder->codec_interface()), defstr);
   }
-  fprintf(stderr, "\n        ");
-  fprintf(stderr, "Use --codec to switch to a non-default encoder.\n\n");
+  fprintf(fout, "\n        ");
+  fprintf(fout, "Use --codec to switch to a non-default encoder.\n\n");
+}
 
+void usage_exit(void) {
+  show_help(stderr, 1);
   exit(EXIT_FAILURE);
 }
 
@@ -903,7 +914,10 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
   for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
     arg.argv_step = 1;
 
-    if (arg_match(&arg, &codecarg, argi)) {
+    if (arg_match(&arg, &help, argi)) {
+      show_help(stdout, 0);
+      exit(EXIT_SUCCESS);
+    } else if (arg_match(&arg, &codecarg, argi)) {
       global->codec = get_vpx_encoder_by_name(arg.val);
       if (!global->codec)
         die("Error: Unrecognized argument (%s) to --codec\n", arg.val);
@@ -1905,8 +1919,6 @@ int main(int argc, const char **argv_) {
   memset(&input, 0, sizeof(input));
   exec_name = argv_[0];
 
-  if (argc < 3) usage_exit();
-
   /* Setup default input stream settings */
   input.framerate.numerator = 30;
   input.framerate.denominator = 1;
@@ -1919,6 +1931,8 @@ int main(int argc, const char **argv_) {
    */
   argv = argv_dup(argc - 1, argv_ + 1);
   parse_global_config(&global, argv);
+
+  if (argc < 3) usage_exit();
 
   switch (global.color_type) {
     case I420: input.fmt = VPX_IMG_FMT_I420; break;
@@ -1953,7 +1967,10 @@ int main(int argc, const char **argv_) {
   /* Handle non-option arguments */
   input.filename = argv[0];
 
-  if (!input.filename) usage_exit();
+  if (!input.filename) {
+    fprintf(stderr, "No input file specified!\n");
+    usage_exit();
+  }
 
   /* Decide if other chroma subsamplings than 4:2:0 are supported */
   if (global.codec->fourcc == VP9_FOURCC) input.only_i420 = 0;
