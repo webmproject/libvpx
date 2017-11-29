@@ -13,9 +13,13 @@
 #include "vpx_ports/asmdefs_mmi.h"
 
 /* clang-format off */
+/* TRANSPOSE_4H: transpose 4x4 matrix.
+   Input: ftmp1,ftmp2,ftmp3,ftmp4
+   Output: ftmp1,ftmp2,ftmp3,ftmp4
+   Note: ftmp0 always be 0, ftmp5~9 used for temporary value.
+ */
 #define TRANSPOSE_4H                                         \
   MMI_LI(%[tmp0], 0x93)                                      \
-  "xor        %[ftmp0],   %[ftmp0],   %[ftmp0]         \n\t" \
   "mtc1       %[tmp0],    %[ftmp10]                    \n\t" \
   "punpcklhw  %[ftmp5],   %[ftmp1],   %[ftmp0]         \n\t" \
   "punpcklhw  %[ftmp9],   %[ftmp2],   %[ftmp0]         \n\t" \
@@ -40,8 +44,8 @@
 /* clang-format on */
 
 void vp8_short_fdct4x4_mmi(int16_t *input, int16_t *output, int pitch) {
-  int pitch_half = pitch / 2;
   uint64_t tmp[1];
+  int16_t *ip = input;
 
 #if _MIPS_SIM == _ABIO32
   register double ftmp0 asm("$f0");
@@ -81,52 +85,51 @@ void vp8_short_fdct4x4_mmi(int16_t *input, int16_t *output, int pitch) {
   DECLARE_ALIGNED(8, const uint64_t, ff_pw_7500) = { 0x00001d4c00001d4cULL };
   DECLARE_ALIGNED(8, const uint64_t, ff_ph_op1) = { 0x14e808a914e808a9ULL };
   DECLARE_ALIGNED(8, const uint64_t, ff_ph_op3) = { 0xeb1808a9eb1808a9ULL };
-
-  DECLARE_ALIGNED(16, int, a[4]);
-  DECLARE_ALIGNED(16, int, b[4]);
-  DECLARE_ALIGNED(16, int, c[4]);
-  DECLARE_ALIGNED(16, int, d[4]);
-
-  // stage1
-  a[0] = (input[0] + input[3]) * 8;
-  a[1] = (input[0 + pitch_half] + input[3 + pitch_half]) * 8;
-  a[2] = (input[0 + 2 * pitch_half] + input[3 + 2 * pitch_half]) * 8;
-  a[3] = (input[0 + 3 * pitch_half] + input[3 + 3 * pitch_half]) * 8;
-
-  b[0] = (input[1] + input[2]) * 8;
-  b[1] = (input[1 + pitch_half] + input[2 + pitch_half]) * 8;
-  b[2] = (input[1 + 2 * pitch_half] + input[2 + 2 * pitch_half]) * 8;
-  b[3] = (input[1 + 3 * pitch_half] + input[2 + 3 * pitch_half]) * 8;
-
-  c[0] = (input[1] - input[2]) * 8;
-  c[1] = (input[1 + pitch_half] - input[2 + pitch_half]) * 8;
-  c[2] = (input[1 + 2 * pitch_half] - input[2 + 2 * pitch_half]) * 8;
-  c[3] = (input[1 + 3 * pitch_half] - input[2 + 3 * pitch_half]) * 8;
-
-  d[0] = (input[0] - input[3]) * 8;
-  d[1] = (input[0 + pitch_half] - input[3 + pitch_half]) * 8;
-  d[2] = (input[0 + 2 * pitch_half] - input[3 + 2 * pitch_half]) * 8;
-  d[3] = (input[0 + 3 * pitch_half] - input[3 + 3 * pitch_half]) * 8;
+  DECLARE_ALIGNED(8, const uint64_t, ff_pw_5352) = { 0x000014e8000014e8ULL };
+  DECLARE_ALIGNED(8, const uint64_t, ff_pw_2217) = { 0x000008a9000008a9ULL };
+  DECLARE_ALIGNED(8, const uint64_t, ff_ph_8) = { 0x0008000800080008ULL };
 
   __asm__ volatile (
-    "gslqc1     %[ftmp2],   %[ftmp1],       0x00(%[a])      \n\t"
-    "gslqc1     %[ftmp4],   %[ftmp3],       0x00(%[b])      \n\t"
-    "gslqc1     %[ftmp6],   %[ftmp5],       0x00(%[c])      \n\t"
-    "gslqc1     %[ftmp8],   %[ftmp7],       0x00(%[d])      \n\t"
+    "xor        %[ftmp0],   %[ftmp0],      %[ftmp0]         \n\t"
+    "gsldlc1    %[ftmp1],   0x07(%[ip])                     \n\t"
+    "gsldrc1    %[ftmp1],   0x00(%[ip])                     \n\t"
+    MMI_ADDU(%[ip], %[ip], %[pitch])
+    "gsldlc1    %[ftmp2],   0x07(%[ip])                     \n\t"
+    "gsldrc1    %[ftmp2],   0x00(%[ip])                     \n\t"
+    MMI_ADDU(%[ip], %[ip], %[pitch])
+    "gsldlc1    %[ftmp3],   0x07(%[ip])                     \n\t"
+    "gsldrc1    %[ftmp3],   0x00(%[ip])                     \n\t"
+    MMI_ADDU(%[ip], %[ip], %[pitch])
+    "gsldlc1    %[ftmp4],   0x07(%[ip])                     \n\t"
+    "gsldrc1    %[ftmp4],   0x00(%[ip])                     \n\t"
+    MMI_ADDU(%[ip], %[ip], %[pitch])
+    TRANSPOSE_4H
 
-    "paddw      %[ftmp9],   %[ftmp1],       %[ftmp3]        \n\t"
-    "paddw      %[ftmp10],  %[ftmp2],       %[ftmp4]        \n\t"
-    "psubw      %[ftmp11],  %[ftmp1],       %[ftmp3]        \n\t"
-    "psubw      %[ftmp12],  %[ftmp2],       %[ftmp4]        \n\t"
-    "packsswh   %[ftmp1],   %[ftmp9],       %[ftmp10]       \n\t"
-    "packsswh   %[ftmp3],   %[ftmp11],      %[ftmp12]       \n\t"
-    "packsswh   %[ftmp2],   %[ftmp5],       %[ftmp6]        \n\t"
-    "packsswh   %[ftmp4],   %[ftmp7],       %[ftmp8]        \n\t"
+    "ldc1       %[ftmp11],  %[ff_ph_8]                      \n\t"
+    // f1 + f4
+    "paddh      %[ftmp5],   %[ftmp1],       %[ftmp4]        \n\t"
+    // a1
+    "pmullh     %[ftmp5],   %[ftmp5],       %[ftmp11]       \n\t"
+    // f2 + f3
+    "paddh      %[ftmp6],   %[ftmp2],       %[ftmp3]        \n\t"
+    // b1
+    "pmullh     %[ftmp6],   %[ftmp6],       %[ftmp11]       \n\t"
+    // f2 - f3
+    "psubh      %[ftmp7],   %[ftmp2],       %[ftmp3]        \n\t"
+    // c1
+    "pmullh     %[ftmp7],   %[ftmp7],       %[ftmp11]       \n\t"
+    // f1 - f4
+    "psubh      %[ftmp8],   %[ftmp1],       %[ftmp4]        \n\t"
+    // d1
+    "pmullh     %[ftmp8],   %[ftmp8],       %[ftmp11]       \n\t"
+    // op[0] = a1 + b1
+    "paddh      %[ftmp1],   %[ftmp5],       %[ftmp6]        \n\t"
+    // op[2] = a1 - b1
+    "psubh      %[ftmp3],   %[ftmp5],       %[ftmp6]        \n\t"
+
+    // op[1] = (c1 * 2217 + d1 * 5352 + 14500) >> 12
     MMI_LI(%[tmp0], 0x0c)
-    "mov.d      %[ftmp7],   %[ftmp2]                        \n\t"
-    "mov.d      %[ftmp8],   %[ftmp4]                        \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                       \n\t"
-
     "ldc1       %[ftmp12],  %[ff_pw_14500]                  \n\t"
     "punpcklhw  %[ftmp9],   %[ftmp7],       %[ftmp8]        \n\t"
     "pmaddhw    %[ftmp5],   %[ftmp9],       %[ff_ph_op1]    \n\t"
@@ -138,6 +141,7 @@ void vp8_short_fdct4x4_mmi(int16_t *input, int16_t *output, int pitch) {
     "psraw      %[ftmp6],   %[ftmp6],       %[ftmp11]       \n\t"
     "packsswh   %[ftmp2],   %[ftmp5],       %[ftmp6]        \n\t"
 
+    // op[3] = (d1 * 2217 - c1 * 5352 + 7500) >> 12
     "ldc1       %[ftmp12],  %[ff_pw_7500]                   \n\t"
     "punpcklhw  %[ftmp9],   %[ftmp8],       %[ftmp7]        \n\t"
     "pmaddhw    %[ftmp5],   %[ftmp9],       %[ff_ph_op3]    \n\t"
@@ -150,7 +154,6 @@ void vp8_short_fdct4x4_mmi(int16_t *input, int16_t *output, int pitch) {
     "packsswh   %[ftmp4],   %[ftmp5],       %[ftmp6]        \n\t"
     TRANSPOSE_4H
 
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]        \n\t"
     "paddh      %[ftmp5],   %[ftmp1],       %[ftmp4]        \n\t"
     "paddh      %[ftmp6],   %[ftmp2],       %[ftmp3]        \n\t"
     "psubh      %[ftmp7],   %[ftmp2],       %[ftmp3]        \n\t"
@@ -163,17 +166,16 @@ void vp8_short_fdct4x4_mmi(int16_t *input, int16_t *output, int pitch) {
     "paddh      %[ftmp1],   %[ftmp5],       %[ftmp6]        \n\t"
     "psubh      %[ftmp2],   %[ftmp5],       %[ftmp6]        \n\t"
     "ldc1       %[ftmp9],   %[ff_ph_07]                     \n\t"
-    MMI_LI(%[tmp0], 0x04)
     "paddh      %[ftmp1],   %[ftmp1],       %[ftmp9]        \n\t"
     "paddh      %[ftmp2],   %[ftmp2],       %[ftmp9]        \n\t"
+    MMI_LI(%[tmp0], 0x04)
     "mtc1       %[tmp0],    %[ftmp9]                        \n\t"
     "psrah      %[ftmp1],   %[ftmp1],       %[ftmp9]        \n\t"
     "psrah      %[ftmp2],   %[ftmp2],       %[ftmp9]        \n\t"
 
     MMI_LI(%[tmp0], 0x10)
-    "ldc1       %[ftmp12],  %[ff_pw_12000]                  \n\t"
     "mtc1       %[tmp0],    %[ftmp9]                        \n\t"
-
+    "ldc1       %[ftmp12],  %[ff_pw_12000]                  \n\t"
     "punpcklhw  %[ftmp5],   %[ftmp7],       %[ftmp8]        \n\t"
     "pmaddhw    %[ftmp10],  %[ftmp5],       %[ff_ph_op1]    \n\t"
     "punpckhhw  %[ftmp5],   %[ftmp7],       %[ftmp8]        \n\t"
@@ -196,31 +198,28 @@ void vp8_short_fdct4x4_mmi(int16_t *input, int16_t *output, int pitch) {
     "psraw      %[ftmp11],  %[ftmp11],      %[ftmp9]        \n\t"
     "packsswh   %[ftmp4],   %[ftmp10],      %[ftmp11]       \n\t"
 
+    "gssdlc1    %[ftmp1],   0x07(%[output])                 \n\t"
+    "gssdrc1    %[ftmp1],   0x00(%[output])                 \n\t"
+    "gssdlc1    %[ftmp3],   0x0f(%[output])                 \n\t"
+    "gssdrc1    %[ftmp3],   0x08(%[output])                 \n\t"
+    "gssdlc1    %[ftmp2],   0x17(%[output])                 \n\t"
+    "gssdrc1    %[ftmp2],   0x10(%[output])                 \n\t"
+    "gssdlc1    %[ftmp4],   0x1f(%[output])                 \n\t"
+    "gssdrc1    %[ftmp4],   0x18(%[output])                 \n\t"
+
     : [ftmp0] "=&f"(ftmp0), [ftmp1] "=&f"(ftmp1), [ftmp2] "=&f"(ftmp2),
       [ftmp3] "=&f"(ftmp3), [ftmp4] "=&f"(ftmp4), [ftmp5] "=&f"(ftmp5),
       [ftmp6] "=&f"(ftmp6), [ftmp7] "=&f"(ftmp7), [ftmp8] "=&f"(ftmp8),
       [ftmp9] "=&f"(ftmp9), [ftmp10] "=&f"(ftmp10), [ftmp11] "=&f"(ftmp11),
-      [ftmp12] "=&f"(ftmp12), [tmp0] "=&r"(tmp[0])
-    : [ff_ph_01] "m"(ff_ph_01), [ff_ph_07] "m"(ff_ph_07), [a] "r"(a),
-      [b] "r"(b), [c] "r"(c), [d] "r"(d), [ff_ph_op1] "f"(ff_ph_op1),
-      [ff_ph_op3] "f"(ff_ph_op3), [ff_pw_14500] "m"(ff_pw_14500),
-      [ff_pw_7500] "m"(ff_pw_7500), [ff_pw_12000] "m"(ff_pw_12000),
-      [ff_pw_51000] "m"(ff_pw_51000)
+      [ftmp12] "=&f"(ftmp12), [tmp0] "=&r"(tmp[0]), [ip]"+&r"(ip)
+    : [ff_ph_01] "m"(ff_ph_01), [ff_ph_07] "m"(ff_ph_07),
+      [ff_ph_op1] "f"(ff_ph_op1), [ff_ph_op3] "f"(ff_ph_op3),
+      [ff_pw_14500] "m"(ff_pw_14500), [ff_pw_7500] "m"(ff_pw_7500),
+      [ff_pw_12000] "m"(ff_pw_12000), [ff_pw_51000] "m"(ff_pw_51000),
+      [ff_pw_5352]"m"(ff_pw_5352), [ff_pw_2217]"m"(ff_pw_2217),
+      [ff_ph_8]"m"(ff_ph_8), [pitch]"r"(pitch), [output] "r"(output)
+    : "memory"
   );
-
-  __asm__ volatile(
-      "gssdlc1    %[ftmp1],   0x07(%[output])                 \n\t"
-      "gssdrc1    %[ftmp1],   0x00(%[output])                 \n\t"
-      "gssdlc1    %[ftmp3],   0x0f(%[output])                 \n\t"
-      "gssdrc1    %[ftmp3],   0x08(%[output])                 \n\t"
-      "gssdlc1    %[ftmp2],   0x17(%[output])                 \n\t"
-      "gssdrc1    %[ftmp2],   0x10(%[output])                 \n\t"
-      "gssdlc1    %[ftmp4],   0x1f(%[output])                 \n\t"
-      "gssdrc1    %[ftmp4],   0x18(%[output])                 \n\t"
-      :
-      : [ftmp1] "f"(ftmp1), [ftmp2] "f"(ftmp2), [ftmp3] "f"(ftmp3),
-        [ftmp4] "f"(ftmp4), [output] "r"(output)
-      : "memory");
 }
 
 void vp8_short_fdct8x4_mmi(int16_t *input, int16_t *output, int pitch) {
@@ -277,7 +276,7 @@ void vp8_short_walsh4x4_mmi(int16_t *input, int16_t *output, int pitch) {
     "psubh      %[ftmp4],   %[ftmp5],       %[ftmp6]            \n\t"
 
     "pcmpeqh    %[ftmp6],   %[ftmp5],       %[ftmp0]            \n\t"
-    "paddh      %[ftmp6],   %[ftmp6],       %[ff_ph_01]           \n\t"
+    "paddh      %[ftmp6],   %[ftmp6],       %[ff_ph_01]         \n\t"
     "paddh      %[ftmp1],   %[ftmp1],       %[ftmp6]            \n\t"
     TRANSPOSE_4H
 
