@@ -907,10 +907,7 @@ static int copy_partitioning(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
     int layer = LAYER_IDS_TO_IDX(0, cpi->svc.temporal_layer_id,
                                  cpi->svc.number_temporal_layers);
     const LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
-    if (lc->is_key_frame ||
-        (cpi->svc.temporal_layer_id != cpi->svc.number_temporal_layers - 1 &&
-         cpi->svc.number_temporal_layers > 1))
-      svc_copy_allowed = 0;
+    if (lc->is_key_frame || !cpi->svc.non_reference_frame) svc_copy_allowed = 0;
     frames_since_key_thresh = cpi->svc.number_spatial_layers << 1;
   }
   if (cpi->rc.frames_since_key > frames_since_key_thresh && svc_copy_allowed &&
