@@ -63,7 +63,7 @@ extern "C" {
  * fields to structures
  */
 #define VPX_ENCODER_ABI_VERSION \
-  (6 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
+  (7 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
 
 /*! \brief Encoder capabilities bitfield
  *
@@ -182,6 +182,8 @@ typedef struct vpx_codec_cx_pkt {
        * Only applicable when "output partition" mode is enabled. First
        * partition has id 0.*/
       int partition_id;
+      unsigned int width;               /**< frame width */
+      unsigned int height;              /**< frame height */
     } frame;                            /**< data for compressed frame packet */
     vpx_fixed_buf_t twopass_stats;      /**< data for two-pass packet */
     vpx_fixed_buf_t firstpass_mb_stats; /**< first pass mb packet */
