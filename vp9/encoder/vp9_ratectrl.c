@@ -1873,9 +1873,12 @@ void vp9_rc_set_gf_interval_range(const VP9_COMP *const cpi,
 
     if (oxcf->target_level == LEVEL_AUTO) {
       const uint32_t pic_size = cpi->common.width * cpi->common.height;
+      const uint32_t pic_breadth =
+          VPXMAX(cpi->common.width, cpi->common.height);
       int i;
       for (i = LEVEL_1; i < LEVEL_MAX; ++i) {
-        if (vp9_level_defs[i].max_luma_picture_size > pic_size) {
+        if (vp9_level_defs[i].max_luma_picture_size >= pic_size &&
+            vp9_level_defs[i].max_luma_picture_breadth >= pic_breadth) {
           if (rc->min_gf_interval <=
               (int)vp9_level_defs[i].min_altref_distance) {
             rc->min_gf_interval =
