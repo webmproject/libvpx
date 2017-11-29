@@ -20,7 +20,6 @@
 #include "vpx_dsp/x86/transpose_sse2.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
-#include "vpx_ports/emmintrin_compat.h"
 
 // These are reused by the avx2 intrinsics.
 // vpx_filter_block1d8_v8_intrin_ssse3()
