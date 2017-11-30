@@ -154,9 +154,8 @@ enum vpx_codec_cx_pkt_kind {
   VPX_CODEC_STATS_PKT,      /**< Two-pass statistics for this frame */
   VPX_CODEC_FPMB_STATS_PKT, /**< first pass mb statistics for this frame */
   VPX_CODEC_PSNR_PKT,       /**< PSNR statistics for this frame */
-// Spatial SVC is still experimental and may be removed before the next ABI
-// bump.
-#if VPX_ENCODER_ABI_VERSION > (6 + VPX_CODEC_ABI_VERSION)
+// Spatial SVC is still experimental and may be removed.
+#if defined(VPX_TEST_SPATIAL_SVC)
   VPX_CODEC_SPATIAL_SVC_LAYER_SIZES, /**< Sizes for each layer in this frame*/
   VPX_CODEC_SPATIAL_SVC_LAYER_PSNR,  /**< PSNR for each layer in this frame*/
 #endif
@@ -192,9 +191,8 @@ typedef struct vpx_codec_cx_pkt {
       double psnr[4];          /**< PSNR, total/y/u/v */
     } psnr;                    /**< data for PSNR packet */
     vpx_fixed_buf_t raw;       /**< data for arbitrary packets */
-// Spatial SVC is still experimental and may be removed before the next
-// ABI bump.
-#if VPX_ENCODER_ABI_VERSION > (6 + VPX_CODEC_ABI_VERSION)
+// Spatial SVC is still experimental and may be removed.
+#if defined(VPX_TEST_SPATIAL_SVC)
     size_t layer_sizes[VPX_SS_MAX_LAYERS];
     struct vpx_psnr_pkt layer_psnr[VPX_SS_MAX_LAYERS];
 #endif
