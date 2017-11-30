@@ -1078,8 +1078,8 @@ static void update_partition_svc(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
   }
 }
 
-static void update_prev_partition(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
-                                  int mi_col) {
+static void update_prev_partition_helper(VP9_COMP *cpi, BLOCK_SIZE bsize,
+                                         int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   BLOCK_SIZE *prev_part = cpi->prev_partition;
   int start_pos = mi_row * cm->mi_stride + mi_col;
@@ -1109,14 +1109,24 @@ static void update_prev_partition(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
         if (mi_col + bs < cm->mi_cols) prev_part[start_pos + bs] = subsize;
         break;
       case PARTITION_SPLIT:
-        update_prev_partition(cpi, subsize, mi_row, mi_col);
-        update_prev_partition(cpi, subsize, mi_row + bs, mi_col);
-        update_prev_partition(cpi, subsize, mi_row, mi_col + bs);
-        update_prev_partition(cpi, subsize, mi_row + bs, mi_col + bs);
+        update_prev_partition_helper(cpi, subsize, mi_row, mi_col);
+        update_prev_partition_helper(cpi, subsize, mi_row + bs, mi_col);
+        update_prev_partition_helper(cpi, subsize, mi_row, mi_col + bs);
+        update_prev_partition_helper(cpi, subsize, mi_row + bs, mi_col + bs);
         break;
       default: assert(0);
     }
   }
+}
+
+static void update_prev_partition(VP9_COMP *cpi, MACROBLOCK *x, int segment_id,
+                                  int mi_row, int mi_col, int sb_offset) {
+  update_prev_partition_helper(cpi, BLOCK_64X64, mi_row, mi_col);
+  cpi->prev_segment_id[sb_offset] = segment_id;
+  memcpy(&(cpi->prev_variance_low[sb_offset * 25]), x->variance_low,
+         sizeof(x->variance_low));
+  // Reset the counter for copy partitioning
+  cpi->copied_frame_cnt[sb_offset] = 0;
 }
 
 static void chroma_check(VP9_COMP *cpi, MACROBLOCK *x, int bsize,
@@ -1251,6 +1261,8 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->oxcf.speed >= 8 || (cpi->use_svc && cpi->svc.non_reference_frame))
     compute_minmax_variance = 0;
 
+  memset(x->variance_low, 0, sizeof(x->variance_low));
+
   if (cpi->sf.use_source_sad && !is_key_frame) {
     int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
     content_state = x->content_state_sb;
@@ -1268,8 +1280,12 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
         cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1 &&
         cpi->svc.prev_partition_svc != NULL && content_state != kVeryHighSad) {
       if (!scale_partitioning_svc(cpi, x, xd, BLOCK_64X64, mi_row >> 1,
-                                  mi_col >> 1, mi_row, mi_col))
+                                  mi_col >> 1, mi_row, mi_col)) {
+        if (cpi->sf.copy_partition_flag) {
+          update_prev_partition(cpi, x, segment_id, mi_row, mi_col, sb_offset);
+        }
         return 0;
+      }
     }
     // If source_sad is low copy the partition without computing the y_sad.
     if (x->skip_low_source_sad && cpi->sf.copy_partition_flag &&
@@ -1292,8 +1308,6 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
 
   // For non keyframes, disable 4x4 average for low resolution when speed = 8
   threshold_4x4avg = (cpi->oxcf.speed < 8) ? thresholds[1] << 1 : INT64_MAX;
-
-  memset(x->variance_low, 0, sizeof(x->variance_low));
 
   if (xd->mb_to_right_edge < 0) pixels_wide += (xd->mb_to_right_edge >> 3);
   if (xd->mb_to_bottom_edge < 0) pixels_high += (xd->mb_to_bottom_edge >> 3);
@@ -1405,6 +1419,9 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
         if (cpi->sf.svc_use_lowres_part &&
             cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2)
           update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
+        if (cpi->sf.copy_partition_flag) {
+          update_prev_partition(cpi, x, segment_id, mi_row, mi_col, sb_offset);
+        }
         return 0;
       }
     }
@@ -1632,13 +1649,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   if (cm->frame_type != KEY_FRAME && cpi->sf.copy_partition_flag) {
-    update_prev_partition(cpi, BLOCK_64X64, mi_row, mi_col);
-    cpi->prev_segment_id[sb_offset] = segment_id;
-    memcpy(&(cpi->prev_variance_low[sb_offset * 25]), x->variance_low,
-           sizeof(x->variance_low));
-    // Reset the counter for copy partitioning
-    if (cpi->copied_frame_cnt[sb_offset] == cpi->max_copied_frame)
-      cpi->copied_frame_cnt[sb_offset] = 0;
+    update_prev_partition(cpi, x, segment_id, mi_row, mi_col, sb_offset);
   }
 
   if (cm->frame_type != KEY_FRAME && cpi->sf.svc_use_lowres_part &&
