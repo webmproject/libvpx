@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "003a73b1_0c71a1f1",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-30T01:27:37Z",
+      "side": 1,
+      "message": "wouldn\u0027t this be useful for vp8 too?",
+      "revId": "bef4c61022397ad9649f7aa51b32c5be915a1ac5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
