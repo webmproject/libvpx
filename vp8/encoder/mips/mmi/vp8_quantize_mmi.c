@@ -18,13 +18,14 @@
   z = coeff_ptr[rc];                                                     \
   sz = (z >> 31);                                                        \
   x = (z ^ sz) - sz;                                                     \
-  if (x >= (zbin_ptr[rc] + *(zbin_boost_ptr++) + zbin_oq_value)) {       \
+  zbin = zbin_ptr[rc] + *(zbin_boost_ptr++) + zbin_oq_value;             \
+  if (x >= zbin) {                                                       \
     x += round_ptr[rc];                                                  \
     y = ((((x * quant_ptr[rc]) >> 16) + x) * quant_shift_ptr[rc]) >> 16; \
-    x = (y ^ sz) - sz;                                                   \
-    qcoeff_ptr[rc] = x;                                                  \
-    dqcoeff_ptr[rc] = x * dequant_ptr[rc];                               \
     if (y) {                                                             \
+      x = (y ^ sz) - sz;                                                 \
+      qcoeff_ptr[rc] = x;                                                \
+      dqcoeff_ptr[rc] = x * dequant_ptr[rc];                             \
       eob = i;                                                           \
       zbin_boost_ptr = b->zrun_zbin_boost;                               \
     }                                                                    \
@@ -198,8 +199,8 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
 }
 
 void vp8_regular_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
-  int eob;
-  int x, y, z, sz;
+  int eob = 0;
+  int x, y, z, sz, zbin;
   const int16_t *zbin_boost_ptr = b->zrun_zbin_boost;
   const int16_t *coeff_ptr = b->coeff;
   const int16_t *zbin_ptr = b->zbin;
@@ -210,28 +211,52 @@ void vp8_regular_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
   int16_t *dqcoeff_ptr = d->dqcoeff;
   const int16_t *dequant_ptr = d->dequant;
   const int16_t zbin_oq_value = b->zbin_extra;
+  register double ftmp0 asm("$f0");
 
-  memset(qcoeff_ptr, 0, 32);
-  memset(dqcoeff_ptr, 0, 32);
+  //  memset(qcoeff_ptr, 0, 32);
+  //  memset(dqcoeff_ptr, 0, 32);
+  /* clang-format off */
+  __asm__ volatile (
+    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]        \n\t"
+    "gssdlc1    %[ftmp0],   0x07(%[qcoeff_ptr])             \n\t"
+    "gssdrc1    %[ftmp0],   0x00(%[qcoeff_ptr])             \n\t"
+    "gssdlc1    %[ftmp0],   0x0f(%[qcoeff_ptr])             \n\t"
+    "gssdrc1    %[ftmp0],   0x08(%[qcoeff_ptr])             \n\t"
+    "gssdlc1    %[ftmp0],   0x17(%[qcoeff_ptr])             \n\t"
+    "gssdrc1    %[ftmp0],   0x10(%[qcoeff_ptr])             \n\t"
+    "gssdlc1    %[ftmp0],   0x1f(%[qcoeff_ptr])             \n\t"
+    "gssdrc1    %[ftmp0],   0x18(%[qcoeff_ptr])             \n\t"
 
-  eob = -1;
+    "gssdlc1    %[ftmp0],   0x07(%[dqcoeff_ptr])            \n\t"
+    "gssdrc1    %[ftmp0],   0x00(%[dqcoeff_ptr])            \n\t"
+    "gssdlc1    %[ftmp0],   0x0f(%[dqcoeff_ptr])            \n\t"
+    "gssdrc1    %[ftmp0],   0x08(%[dqcoeff_ptr])            \n\t"
+    "gssdlc1    %[ftmp0],   0x17(%[dqcoeff_ptr])            \n\t"
+    "gssdrc1    %[ftmp0],   0x10(%[dqcoeff_ptr])            \n\t"
+    "gssdlc1    %[ftmp0],   0x1f(%[dqcoeff_ptr])            \n\t"
+    "gssdrc1    %[ftmp0],   0x18(%[dqcoeff_ptr])            \n\t"
+    : [ftmp0]"=&f"(ftmp0)
+    : [qcoeff_ptr]"r"(qcoeff_ptr), [dqcoeff_ptr]"r"(dqcoeff_ptr)
+    : "memory"
+  );
+  /* clang-format on */
 
-  REGULAR_SELECT_EOB(0, 0);
-  REGULAR_SELECT_EOB(1, 1);
-  REGULAR_SELECT_EOB(2, 4);
-  REGULAR_SELECT_EOB(3, 8);
-  REGULAR_SELECT_EOB(4, 5);
-  REGULAR_SELECT_EOB(5, 2);
-  REGULAR_SELECT_EOB(6, 3);
-  REGULAR_SELECT_EOB(7, 6);
-  REGULAR_SELECT_EOB(8, 9);
-  REGULAR_SELECT_EOB(9, 12);
-  REGULAR_SELECT_EOB(10, 13);
-  REGULAR_SELECT_EOB(11, 10);
-  REGULAR_SELECT_EOB(12, 7);
-  REGULAR_SELECT_EOB(13, 11);
-  REGULAR_SELECT_EOB(14, 14);
-  REGULAR_SELECT_EOB(15, 15);
+  REGULAR_SELECT_EOB(1, 0);
+  REGULAR_SELECT_EOB(2, 1);
+  REGULAR_SELECT_EOB(3, 4);
+  REGULAR_SELECT_EOB(4, 8);
+  REGULAR_SELECT_EOB(5, 5);
+  REGULAR_SELECT_EOB(6, 2);
+  REGULAR_SELECT_EOB(7, 3);
+  REGULAR_SELECT_EOB(8, 6);
+  REGULAR_SELECT_EOB(9, 9);
+  REGULAR_SELECT_EOB(10, 12);
+  REGULAR_SELECT_EOB(11, 13);
+  REGULAR_SELECT_EOB(12, 10);
+  REGULAR_SELECT_EOB(13, 7);
+  REGULAR_SELECT_EOB(14, 11);
+  REGULAR_SELECT_EOB(15, 14);
+  REGULAR_SELECT_EOB(16, 15);
 
-  *d->eob = (char)(eob + 1);
+  *d->eob = (char)eob;
 }
