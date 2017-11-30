@@ -22,6 +22,30 @@
       "revId": "5044779e77517851d91b65d1eec4199919901ecf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2295a0d_ff57888a",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1293,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-11-30T19:54:04Z",
+      "side": 1,
+      "message": "\u003e If no one is working on or using this, can we just delete these codes wrapped in ABI flags?\n\nI plan to in stages, first though downstream code/tests might need updating. This just deals with the immediate problem that you\u0027ve run into a couple time when making api additions.",
+      "parentUuid": "ff622c37_75d7fe3d",
+      "range": {
+        "startLine": 1292,
+        "startChar": 8,
+        "endLine": 1293,
+        "endChar": 28
+      },
+      "revId": "5044779e77517851d91b65d1eec4199919901ecf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
