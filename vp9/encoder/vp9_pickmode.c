@@ -1176,7 +1176,9 @@ static const REF_MODE ref_mode_set[RT_INTER_MODES] = {
   { ALTREF_FRAME, ZEROMV }, { ALTREF_FRAME, NEARESTMV },
   { ALTREF_FRAME, NEARMV }, { ALTREF_FRAME, NEWMV }
 };
-static const REF_MODE ref_mode_set_svc[RT_INTER_MODES] = {
+
+#define RT_INTER_MODES_SVC 8
+static const REF_MODE ref_mode_set_svc[RT_INTER_MODES_SVC] = {
   { LAST_FRAME, ZEROMV },      { LAST_FRAME, NEARESTMV },
   { LAST_FRAME, NEARMV },      { GOLDEN_FRAME, ZEROMV },
   { GOLDEN_FRAME, NEARESTMV }, { GOLDEN_FRAME, NEARMV },
@@ -1495,6 +1497,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   INTERP_FILTER filter_gf_svc = EIGHTTAP;
   MV_REFERENCE_FRAME best_second_ref_frame = NONE;
   int comp_modes = 0;
+  int num_inter_modes = (cpi->use_svc) ? RT_INTER_MODES_SVC : RT_INTER_MODES;
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
 
@@ -1644,7 +1647,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   if (cpi->use_svc || cpi->oxcf.speed <= 7 || bsize < BLOCK_32X32)
     x->sb_use_mv_part = 0;
 
-  for (idx = 0; idx < RT_INTER_MODES + comp_modes; ++idx) {
+  for (idx = 0; idx < num_inter_modes + comp_modes; ++idx) {
     int rate_mv = 0;
     int mode_rd_thresh;
     int mode_index;
@@ -1660,7 +1663,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     PREDICTION_MODE this_mode;
     second_ref_frame = NONE;
 
-    if (idx < RT_INTER_MODES) {
+    if (idx < num_inter_modes) {
       this_mode = ref_mode_set[idx].pred_mode;
       ref_frame = ref_mode_set[idx].ref_frame;
 
@@ -1672,7 +1675,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       // Add (0,0) compound modes.
       this_mode = ZEROMV;
       ref_frame = LAST_FRAME;
-      if (idx == RT_INTER_MODES + comp_modes - 1) ref_frame = GOLDEN_FRAME;
+      if (idx == num_inter_modes + comp_modes - 1) ref_frame = GOLDEN_FRAME;
       second_ref_frame = ALTREF_FRAME;
       comp_pred = 1;
     }
