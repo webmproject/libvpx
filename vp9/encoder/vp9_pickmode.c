@@ -330,7 +330,8 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
                                     MACROBLOCK *x, MACROBLOCKD *xd,
                                     int *out_rate_sum, int64_t *out_dist_sum,
                                     unsigned int *var_y, unsigned int *sse_y,
-                                    int mi_row, int mi_col, int *early_term) {
+                                    int mi_row, int mi_col, int *early_term,
+                                    int *flag_preduv_computed) {
   // Note our transform coeffs are 8 times an orthogonal transform.
   // Hence quantizer step is also 8 times. To get effective quantizer
   // we need to divide by 8 before sending to modeling function.
@@ -487,6 +488,7 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
         int j = i - 1;
 
         vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, i);
+        flag_preduv_computed[i - 1] = 1;
         var_uv[j] = cpi->fn_ptr[uv_bsize].vf(
             p->src.buf, p->src.stride, pd->dst.buf, pd->dst.stride, &sse_uv[j]);
 
@@ -860,13 +862,11 @@ static void free_pred_buffer(PRED_BUFFER *p) {
   if (p != NULL) p->in_use = 0;
 }
 
-static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
-                                 int mi_row, int mi_col,
-                                 MV_REFERENCE_FRAME ref_frame,
-                                 PREDICTION_MODE this_mode, unsigned int var_y,
-                                 unsigned int sse_y,
-                                 struct buf_2d yv12_mb[][MAX_MB_PLANE],
-                                 int *rate, int64_t *dist) {
+static void encode_breakout_test(
+    VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize, int mi_row, int mi_col,
+    MV_REFERENCE_FRAME ref_frame, PREDICTION_MODE this_mode, unsigned int var_y,
+    unsigned int sse_y, struct buf_2d yv12_mb[][MAX_MB_PLANE], int *rate,
+    int64_t *dist, int *flag_preduv_computed) {
   MACROBLOCKD *xd = &x->e_mbd;
   MODE_INFO *const mi = xd->mi[0];
   const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
@@ -927,9 +927,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       thresh_dc_uv = 0;
     }
 
-    // Skip UV prediction unless breakout is zero (lossless) to save
-    // computation with low impact on the result
-    if (x->encode_breakout == 0) {
+    if (!flag_preduv_computed[0] || !flag_preduv_computed[1]) {
       xd->plane[1].pre[0] = yv12_mb[ref_frame][1];
       xd->plane[2].pre[0] = yv12_mb[ref_frame][2];
       vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
@@ -1655,6 +1653,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     int is_skippable;
     int this_early_term = 0;
     int rd_computed = 0;
+    int flag_preduv_computed[2] = { 0 };
     int inter_mv_mode = 0;
     int skip_this_mv = 0;
     int comp_pred = 0;
@@ -2025,7 +2024,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           cm->base_qindex) {
         model_rd_for_sb_y_large(cpi, bsize, x, xd, &this_rdc.rate,
                                 &this_rdc.dist, &var_y, &sse_y, mi_row, mi_col,
-                                &this_early_term);
+                                &this_early_term, flag_preduv_computed);
       } else {
         rd_computed = 1;
         model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc.rate, &this_rdc.dist,
@@ -2074,10 +2073,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         (x->color_sensitivity[0] || x->color_sensitivity[1])) {
       RD_COST rdc_uv;
       const BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
-      if (x->color_sensitivity[0])
+      if (x->color_sensitivity[0] && !flag_preduv_computed[0]) {
         vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 1);
-      if (x->color_sensitivity[1])
+        flag_preduv_computed[0] = 1;
+      }
+      if (x->color_sensitivity[1] && !flag_preduv_computed[1]) {
         vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 2);
+        flag_preduv_computed[1] = 1;
+      }
       model_rd_for_sb_uv(cpi, uv_bsize, x, xd, &rdc_uv, &var_y, &sse_y, 1, 2);
       this_rdc.rate += rdc_uv.rate;
       this_rdc.dist += rdc_uv.dist;
@@ -2106,7 +2109,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     if (cpi->allow_encode_breakout) {
       encode_breakout_test(cpi, x, bsize, mi_row, mi_col, ref_frame, this_mode,
                            var_y, sse_y, yv12_mb, &this_rdc.rate,
-                           &this_rdc.dist);
+                           &this_rdc.dist, flag_preduv_computed);
       if (x->skip) {
         this_rdc.rate += rate_mv;
         this_rdc.rdcost =
