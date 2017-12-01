@@ -1498,6 +1498,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   MV_REFERENCE_FRAME best_second_ref_frame = NONE;
   int comp_modes = 0;
   int num_inter_modes = (cpi->use_svc) ? RT_INTER_MODES_SVC : RT_INTER_MODES;
+  int flag_svc_subpel = 0;
+  int svc_mv_col = 0;
+  int svc_mv_row = 0;
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
 
@@ -1647,6 +1650,18 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   if (cpi->use_svc || cpi->oxcf.speed <= 7 || bsize < BLOCK_32X32)
     x->sb_use_mv_part = 0;
 
+  // Set the flag_svc_subpel to 1 for SVC if the lower spatial layer used
+  // an averaging filter for downsampling (phase = 8). If so, we will test
+  // a nonzero motion mode on the spatial (goldeen) reference.
+  // The nonzero motion is half pixel shifted to left and top (-4, -4).
+  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
+      svc_force_zero_mode[GOLDEN_FRAME - 1] &&
+      cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id - 1] == 8) {
+    svc_mv_col = -4;
+    svc_mv_row = -4;
+    flag_svc_subpel = 1;
+  }
+
   for (idx = 0; idx < num_inter_modes + comp_modes; ++idx) {
     int rate_mv = 0;
     int mode_rd_thresh;
@@ -1660,6 +1675,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     int inter_mv_mode = 0;
     int skip_this_mv = 0;
     int comp_pred = 0;
+    int force_gf_mv = 0;
     PREDICTION_MODE this_mode;
     second_ref_frame = NONE;
 
@@ -1678,6 +1694,19 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       if (idx == num_inter_modes + comp_modes - 1) ref_frame = GOLDEN_FRAME;
       second_ref_frame = ALTREF_FRAME;
       comp_pred = 1;
+    }
+
+    if (flag_svc_subpel && ref_frame == GOLDEN_FRAME) {
+      force_gf_mv = 1;
+      // Only test mode if NEARESTMV/NEARMV is (svc_mv_col, svc_mv_row),
+      // otherwise set NEWMV to (svc_mv_col, svc_mv_row).
+      if (this_mode == NEWMV) {
+        frame_mv[this_mode][ref_frame].as_mv.col = svc_mv_col;
+        frame_mv[this_mode][ref_frame].as_mv.row = svc_mv_row;
+      } else if (frame_mv[this_mode][ref_frame].as_mv.col != svc_mv_col ||
+                 frame_mv[this_mode][ref_frame].as_mv.row != svc_mv_row) {
+        continue;
+      }
     }
 
     if (comp_pred) {
@@ -1737,7 +1766,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     // Skip non-zeromv mode search for golden frame if force_skip_low_temp_var
     // is set. If nearestmv for golden frame is 0, zeromv mode will be skipped
     // later.
-    if (force_skip_low_temp_var && ref_frame == GOLDEN_FRAME &&
+    if (!force_gf_mv && force_skip_low_temp_var && ref_frame == GOLDEN_FRAME &&
         frame_mv[this_mode][ref_frame].as_int != 0) {
       continue;
     }
@@ -1751,7 +1780,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     }
 
     if (cpi->use_svc) {
-      if (svc_force_zero_mode[ref_frame - 1] &&
+      if (!force_gf_mv && svc_force_zero_mode[ref_frame - 1] &&
           frame_mv[this_mode][ref_frame].as_int != 0)
         continue;
     }
@@ -1808,7 +1837,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                              &rd_thresh_freq_fact[mode_index])))
       continue;
 
-    if (this_mode == NEWMV) {
+    if (this_mode == NEWMV && !force_gf_mv) {
       if (ref_frame > LAST_FRAME && !cpi->use_svc &&
           cpi->oxcf.rc_mode == VPX_CBR) {
         int tmp_sad;
@@ -1949,7 +1978,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     if ((this_mode == NEWMV || filter_ref == SWITCHABLE) &&
         pred_filter_search &&
         (ref_frame == LAST_FRAME ||
-         (ref_frame == GOLDEN_FRAME &&
+         (ref_frame == GOLDEN_FRAME && !force_gf_mv &&
           (cpi->use_svc || cpi->oxcf.rc_mode == VPX_VBR))) &&
         (((mi->mv[0].as_mv.row | mi->mv[0].as_mv.col) & 0x07) != 0)) {
       int pf_rate[3];
