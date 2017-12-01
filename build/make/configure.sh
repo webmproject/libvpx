@@ -1345,7 +1345,7 @@ EOF
           EXE_SFX=.exe
           ;;
         win64)
-          add_asflags -f x64
+          add_asflags -f win64
           enabled debug && add_asflags -g cv8
           EXE_SFX=.exe
           ;;
