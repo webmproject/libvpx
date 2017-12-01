@@ -1359,7 +1359,7 @@ const ConvolveFunctions convolve8_msa(
     vpx_convolve8_avg_horiz_msa, vpx_convolve8_vert_msa,
     vpx_convolve8_avg_vert_msa, vpx_convolve8_msa, vpx_convolve8_avg_msa,
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
-    vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
+    vpx_scaled_avg_vert_c, vpx_scaled_2d_msa, vpx_scaled_avg_2d_c, 0);
 
 const ConvolveParam kArrayConvolve8_msa[] = { ALL_SIZES(convolve8_msa) };
 INSTANTIATE_TEST_CASE_P(MSA, ConvolveTest,
