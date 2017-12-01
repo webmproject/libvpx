@@ -1336,7 +1336,6 @@ EOF
         esac
         log_echo "  using $AS"
       fi
-      [ "${AS##*/}" = nasm ] && add_asflags -Ox
       AS_SFX=.asm
       case  ${tgt_os} in
         win32)
