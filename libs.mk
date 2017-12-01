@@ -188,6 +188,13 @@ libvpx_srcs.txt:
 	@echo $(CODEC_SRCS) | xargs -n1 echo | LC_ALL=C sort -u > $@
 CLEAN-OBJS += libvpx_srcs.txt
 
+# Assembly files that are included, but don't define symbols themselves.
+# Filtered out to avoid Windows build warnings.
+ASM_INCLUDES := \
+    third_party/x86inc/x86inc.asm \
+    vpx_config.asm \
+    vpx_ports/x86_abi_support.asm \
+    vpx_dsp/x86/bitdepth_conversion_sse2.asm \
 
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
@@ -198,14 +205,6 @@ vpx.def: $(call enabled,CODEC_EXPORTS)
             --name=vpx\
             --out=$@ $^
 CLEAN-OBJS += vpx.def
-
-# Assembly files that are included, but don't define symbols themselves.
-# Filtered out to avoid Visual Studio build warnings.
-ASM_INCLUDES := \
-    third_party/x86inc/x86inc.asm \
-    vpx_config.asm \
-    vpx_ports/x86_abi_support.asm \
-    vpx_dsp/x86/bitdepth_conversion_sse2.asm \
 
 vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def
 	@echo "    [CREATE] $@"
@@ -229,7 +228,7 @@ vpx.$(VCPROJ_SFX): $(RTCD)
 
 endif
 else
-LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
+LIBVPX_OBJS=$(call objs, $(filter-out $(ASM_INCLUDES), $(CODEC_SRCS)))
 OBJS-yes += $(LIBVPX_OBJS)
 LIBS-$(if yes,$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
