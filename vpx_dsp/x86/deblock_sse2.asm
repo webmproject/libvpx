@@ -83,6 +83,8 @@
         add         rbx,        16
 %endmacro
 
+SECTION .text
+
 ;void vpx_post_proc_down_and_across_mb_row_sse2
 ;(
 ;    unsigned char *src_ptr,
