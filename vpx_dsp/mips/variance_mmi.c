@@ -22,12 +22,20 @@ static const uint8_t bilinear_filters[8][2] = {
 /* Use VARIANCE_SSE_SUM_8_FOR_W64 in vpx_variance64x64,vpx_variance64x32,
    vpx_variance32x64. VARIANCE_SSE_SUM_8 will lead to sum overflow. */
 #define VARIANCE_SSE_SUM_8_FOR_W64                                  \
+  /* sse */                                                         \
+  "pasubub    %[ftmp3],   %[ftmp1],       %[ftmp2]            \n\t" \
+  "punpcklbh  %[ftmp4],   %[ftmp3],       %[ftmp0]            \n\t" \
+  "punpckhbh  %[ftmp5],   %[ftmp3],       %[ftmp0]            \n\t" \
+  "pmaddhw    %[ftmp6],   %[ftmp4],       %[ftmp4]            \n\t" \
+  "pmaddhw    %[ftmp7],   %[ftmp5],       %[ftmp5]            \n\t" \
+  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp6]            \n\t" \
+  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp7]            \n\t" \
+                                                                    \
+  /* sum */                                                         \
   "punpcklbh  %[ftmp3],   %[ftmp1],       %[ftmp0]            \n\t" \
   "punpckhbh  %[ftmp4],   %[ftmp1],       %[ftmp0]            \n\t" \
   "punpcklbh  %[ftmp5],   %[ftmp2],       %[ftmp0]            \n\t" \
   "punpckhbh  %[ftmp6],   %[ftmp2],       %[ftmp0]            \n\t" \
-                                                                    \
-  /* sum */                                                         \
   "punpcklhw  %[ftmp1],   %[ftmp3],       %[ftmp0]            \n\t" \
   "punpckhhw  %[ftmp2],   %[ftmp3],       %[ftmp0]            \n\t" \
   "punpcklhw  %[ftmp7],   %[ftmp5],       %[ftmp0]            \n\t" \
@@ -43,29 +51,7 @@ static const uint8_t bilinear_filters[8][2] = {
   "paddw      %[ftmp9],   %[ftmp9],       %[ftmp3]            \n\t" \
   "paddw      %[ftmp9],   %[ftmp9],       %[ftmp4]            \n\t" \
   "paddw      %[ftmp9],   %[ftmp9],       %[ftmp5]            \n\t" \
-  "paddw      %[ftmp9],   %[ftmp9],       %[ftmp6]            \n\t" \
-                                                                    \
-  /* *sse */                                                        \
-  "pmuluw     %[ftmp1],   %[ftmp3],       %[ftmp3]            \n\t" \
-  "pmuluw     %[ftmp2],   %[ftmp5],       %[ftmp5]            \n\t" \
-  "pmuluw     %[ftmp7],   %[ftmp4],       %[ftmp4]            \n\t" \
-  "pmuluw     %[ftmp8],   %[ftmp6],       %[ftmp6]            \n\t" \
-  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp1]            \n\t" \
-  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp2]            \n\t" \
-  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp7]            \n\t" \
-  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp8]            \n\t" \
-  "dsrl       %[ftmp3],   %[ftmp3],       %[ftmp11]           \n\t" \
-  "dsrl       %[ftmp5],   %[ftmp5],       %[ftmp11]           \n\t" \
-  "dsrl       %[ftmp4],   %[ftmp4],       %[ftmp11]           \n\t" \
-  "dsrl       %[ftmp6],   %[ftmp6],       %[ftmp11]           \n\t" \
-  "pmuluw     %[ftmp1],   %[ftmp3],       %[ftmp3]            \n\t" \
-  "pmuluw     %[ftmp2],   %[ftmp5],       %[ftmp5]            \n\t" \
-  "pmuluw     %[ftmp7],   %[ftmp4],       %[ftmp4]            \n\t" \
-  "pmuluw     %[ftmp8],   %[ftmp6],       %[ftmp6]            \n\t" \
-  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp1]            \n\t" \
-  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp2]            \n\t" \
-  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp7]            \n\t" \
-  "paddw      %[ftmp10],  %[ftmp10],      %[ftmp8]            \n\t"
+  "paddw      %[ftmp9],   %[ftmp9],       %[ftmp6]            \n\t"
 
 #define VARIANCE_SSE_SUM_4                                          \
   /* sse */                                                         \
@@ -490,10 +476,13 @@ static inline uint32_t vpx_variance64x(const uint8_t *a, int a_stride,
     MMI_ADDU(%[a], %[a], %[a_stride])
     MMI_ADDU(%[b], %[b], %[b_stride])
     "bnez       %[tmp0],    1b                                  \n\t"
+
     "mfc1       %[tmp1],    %[ftmp9]                            \n\t"
     "mfhc1      %[tmp2],    %[ftmp9]                            \n\t"
     "addu       %[sum],     %[tmp1],        %[tmp2]             \n\t"
-    "swc1       %[ftmp10],  0x00(%[sse])                        \n\t"
+    "dsrl       %[ftmp1],   %[ftmp10],      %[ftmp11]           \n\t"
+    "paddw      %[ftmp1],   %[ftmp1],       %[ftmp10]           \n\t"
+    "swc1       %[ftmp1],   0x00(%[sse])                        \n\t"
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
       [ftmp2]"=&f"(ftmp[2]),            [ftmp3]"=&f"(ftmp[3]),
       [ftmp4]"=&f"(ftmp[4]),            [ftmp5]"=&f"(ftmp[5]),
@@ -566,10 +555,13 @@ uint32_t vpx_variance32x64_mmi(const uint8_t *a, int a_stride, const uint8_t *b,
     MMI_ADDU(%[a], %[a], %[a_stride])
     MMI_ADDU(%[b], %[b], %[b_stride])
     "bnez       %[tmp0],    1b                                  \n\t"
+
     "mfc1       %[tmp1],    %[ftmp9]                            \n\t"
     "mfhc1      %[tmp2],    %[ftmp9]                            \n\t"
     "addu       %[sum],     %[tmp1],        %[tmp2]             \n\t"
-    "swc1       %[ftmp10],  0x00(%[sse])                        \n\t"
+    "dsrl       %[ftmp1],   %[ftmp10],      %[ftmp11]           \n\t"
+    "paddw      %[ftmp1],   %[ftmp1],       %[ftmp10]           \n\t"
+    "swc1       %[ftmp1],   0x00(%[sse])                        \n\t"
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
       [ftmp2]"=&f"(ftmp[2]),            [ftmp3]"=&f"(ftmp[3]),
       [ftmp4]"=&f"(ftmp[4]),            [ftmp5]"=&f"(ftmp[5]),
@@ -603,7 +595,6 @@ static inline uint32_t vpx_variance32x(const uint8_t *a, int a_stride,
     MMI_L(%[tmp0], %[high], 0x00)
     "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
     "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
     "xor        %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
     "1:                                                         \n\t"
@@ -641,13 +632,11 @@ static inline uint32_t vpx_variance32x(const uint8_t *a, int a_stride,
     "punpckhhw  %[ftmp4],   %[ftmp10],      %[ftmp0]            \n\t"
     "punpcklhw  %[ftmp5],   %[ftmp12],      %[ftmp0]            \n\t"
     "punpckhhw  %[ftmp6],   %[ftmp12],      %[ftmp0]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
-    "paddw      %[ftmp10],  %[ftmp10],      %[ftmp3]            \n\t"
-    "paddw      %[ftmp10],  %[ftmp10],      %[ftmp4]            \n\t"
-    "psubw      %[ftmp10],  %[ftmp10],      %[ftmp5]            \n\t"
-    "psubw      %[ftmp10],  %[ftmp10],      %[ftmp6]            \n\t"
-    "dsrl       %[ftmp0],   %[ftmp10],      %[ftmp11]           \n\t"
-    "paddw      %[ftmp0],   %[ftmp0],       %[ftmp10]           \n\t"
+    "paddw      %[ftmp3],   %[ftmp3],       %[ftmp4]            \n\t"
+    "psubw      %[ftmp3],   %[ftmp3],       %[ftmp5]            \n\t"
+    "psubw      %[ftmp3],   %[ftmp3],       %[ftmp6]            \n\t"
+    "dsrl       %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
+    "paddw      %[ftmp0],   %[ftmp0],       %[ftmp3]            \n\t"
     "swc1       %[ftmp0],   0x00(%[sum])                        \n\t"
 
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
@@ -691,7 +680,6 @@ static inline uint32_t vpx_variance16x(const uint8_t *a, int a_stride,
     MMI_L(%[tmp0], %[high], 0x00)
     "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
     "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
     "xor        %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
     "1:                                                         \n\t"
@@ -719,13 +707,11 @@ static inline uint32_t vpx_variance16x(const uint8_t *a, int a_stride,
     "punpckhhw  %[ftmp4],   %[ftmp10],      %[ftmp0]            \n\t"
     "punpcklhw  %[ftmp5],   %[ftmp12],      %[ftmp0]            \n\t"
     "punpckhhw  %[ftmp6],   %[ftmp12],      %[ftmp0]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
-    "paddw      %[ftmp10],  %[ftmp10],      %[ftmp3]            \n\t"
-    "paddw      %[ftmp10],  %[ftmp10],      %[ftmp4]            \n\t"
-    "psubw      %[ftmp10],  %[ftmp10],      %[ftmp5]            \n\t"
-    "psubw      %[ftmp10],  %[ftmp10],      %[ftmp6]            \n\t"
-    "dsrl       %[ftmp0],   %[ftmp10],      %[ftmp11]           \n\t"
-    "paddw      %[ftmp0],   %[ftmp0],       %[ftmp10]           \n\t"
+    "paddw      %[ftmp3],   %[ftmp3],       %[ftmp4]            \n\t"
+    "psubw      %[ftmp3],   %[ftmp3],       %[ftmp5]            \n\t"
+    "psubw      %[ftmp3],   %[ftmp3],       %[ftmp6]            \n\t"
+    "dsrl       %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
+    "paddw      %[ftmp0],   %[ftmp0],       %[ftmp3]            \n\t"
     "swc1       %[ftmp0],   0x00(%[sum])                        \n\t"
 
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
@@ -770,7 +756,6 @@ static inline uint32_t vpx_variance8x(const uint8_t *a, int a_stride,
     MMI_L(%[tmp0], %[high], 0x00)
     "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
     "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
     "xor        %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
     "1:                                                         \n\t"
@@ -793,13 +778,11 @@ static inline uint32_t vpx_variance8x(const uint8_t *a, int a_stride,
     "punpckhhw  %[ftmp4],   %[ftmp10],      %[ftmp0]            \n\t"
     "punpcklhw  %[ftmp5],   %[ftmp12],      %[ftmp0]            \n\t"
     "punpckhhw  %[ftmp6],   %[ftmp12],      %[ftmp0]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
-    "paddw      %[ftmp10],  %[ftmp10],      %[ftmp3]            \n\t"
-    "paddw      %[ftmp10],  %[ftmp10],      %[ftmp4]            \n\t"
-    "psubw      %[ftmp10],  %[ftmp10],      %[ftmp5]            \n\t"
-    "psubw      %[ftmp10],  %[ftmp10],      %[ftmp6]            \n\t"
-    "dsrl       %[ftmp0],   %[ftmp10],      %[ftmp11]           \n\t"
-    "paddw      %[ftmp0],   %[ftmp0],       %[ftmp10]           \n\t"
+    "paddw      %[ftmp3],   %[ftmp3],       %[ftmp4]            \n\t"
+    "psubw      %[ftmp3],   %[ftmp3],       %[ftmp5]            \n\t"
+    "psubw      %[ftmp3],   %[ftmp3],       %[ftmp6]            \n\t"
+    "dsrl       %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
+    "paddw      %[ftmp0],   %[ftmp0],       %[ftmp3]            \n\t"
     "swc1       %[ftmp0],   0x00(%[sum])                        \n\t"
 
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
@@ -846,7 +829,6 @@ static inline uint32_t vpx_variance4x(const uint8_t *a, int a_stride,
     "xor        %[ftmp6],   %[ftmp6],       %[ftmp6]            \n\t"
     "xor        %[ftmp7],   %[ftmp7],       %[ftmp7]            \n\t"
     "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
     "1:                                                         \n\t"
     "gsldlc1    %[ftmp1],   0x07(%[a])                          \n\t"
     "gsldrc1    %[ftmp1],   0x00(%[a])                          \n\t"
@@ -867,13 +849,11 @@ static inline uint32_t vpx_variance4x(const uint8_t *a, int a_stride,
     "punpckhhw  %[ftmp4],   %[ftmp7],       %[ftmp0]            \n\t"
     "punpcklhw  %[ftmp5],   %[ftmp8],       %[ftmp0]            \n\t"
     "punpckhhw  %[ftmp6],   %[ftmp8],       %[ftmp0]            \n\t"
-    "xor        %[ftmp7],   %[ftmp7],       %[ftmp7]            \n\t"
-    "paddw      %[ftmp7],   %[ftmp7],       %[ftmp3]            \n\t"
-    "paddw      %[ftmp7],   %[ftmp7],       %[ftmp4]            \n\t"
-    "psubw      %[ftmp7],   %[ftmp7],       %[ftmp5]            \n\t"
-    "psubw      %[ftmp7],   %[ftmp7],       %[ftmp6]            \n\t"
-    "dsrl       %[ftmp0],   %[ftmp7],       %[ftmp10]           \n\t"
-    "paddw      %[ftmp0],   %[ftmp0],       %[ftmp7]            \n\t"
+    "paddw      %[ftmp3],   %[ftmp3],       %[ftmp4]            \n\t"
+    "psubw      %[ftmp3],   %[ftmp3],       %[ftmp5]            \n\t"
+    "psubw      %[ftmp3],   %[ftmp3],       %[ftmp6]            \n\t"
+    "dsrl       %[ftmp0],   %[ftmp3],       %[ftmp10]           \n\t"
+    "paddw      %[ftmp0],   %[ftmp0],       %[ftmp3]            \n\t"
     "swc1       %[ftmp0],   0x00(%[sum])                        \n\t"
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
       [ftmp2]"=&f"(ftmp[2]),            [ftmp3]"=&f"(ftmp[3]),
@@ -915,7 +895,6 @@ static inline uint32_t vpx_mse16x(const uint8_t *a, int a_stride,
     MMI_L(%[tmp0], %[high], 0x00)
     "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
 
     "1:                                                         \n\t"
     VARIANCE_SSE_16
@@ -968,7 +947,6 @@ static inline uint32_t vpx_mse8x(const uint8_t *a, int a_stride,
     MMI_L(%[tmp0], %[high], 0x00)
     "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
 
     "1:                                                         \n\t"
     VARIANCE_SSE_8
