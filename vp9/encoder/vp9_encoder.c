@@ -5286,6 +5286,21 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 #endif  // CONFIG_REALTIME_ONLY
 
+#if 1
+  {
+    VP9_COMMON *const cm = &cpi->common;
+    TWO_PASS *const twopass = &cpi->twopass;
+    GF_GROUP *const gf_group = &twopass->gf_group;
+
+    printf("Frame=%d, gf_group_update_type[gf_group_index=%d]=%d, "
+           "show_frame=%d\n",
+           cm->current_video_frame, gf_group->index,
+           gf_group->update_type[gf_group->index],
+           cm->show_frame);
+  }
+#endif  // 0
+
+
   if (cm->refresh_frame_context)
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
 
@@ -5319,6 +5334,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (oxcf->pass != 1) {
     double samples = 0.0;
     cpi->bytes += (int)(*size);
+    
+ #if 1
+	{
+		printf("Frame %d: rate: %d\n",
+			   cm->current_video_frame, (int)(*size));
+	}
+#endif  // 0
 
     if (cm->show_frame) {
       uint32_t bit_depth = 8;
@@ -5348,6 +5370,19 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         cpi->total_sq_error += psnr.sse[0];
         cpi->total_samples += psnr.samples[0];
         samples = psnr.samples[0];
+        
+#if 1
+        {
+			const int rddiv = cpi->rd.RDDIV;
+			const int rdmult = cpi->rd.RDMULT;
+			const int64_t rdcost = RDCOST(
+				rdmult, rddiv, (int)(*size) * 8, psnr.sse[0]);
+			printf("Frame %d: distortion: %" PRIu64 " rdcost: %" PRId64 "\n",
+				   cm->current_video_frame, psnr.sse[0], rdcost);
+			printf("%d %d\n", rddiv, rdmult);
+				
+		}
+#endif  // 0
 
         {
           PSNR_STATS psnr2;

@@ -2600,6 +2600,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
 
   // Set the interval until the next gf.
+  // rc->baseline_gf_interval = 8;
   rc->baseline_gf_interval = i - (is_key_frame || rc->source_alt_ref_pending);
 
   // Only encode alt reference frame in temporal base layer. So
