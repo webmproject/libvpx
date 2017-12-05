@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c517de3f_ac80bf8b",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-05T23:48:21Z",
+      "side": 1,
+      "message": "this is short, you could do away with the temporaries or at least merge the assignment and declaration",
+      "revId": "755c7ed487bd585009b64d9bf60589c3d6eedfd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8732c0e9_f9b1db6e",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-05T23:48:21Z",
+      "side": 1,
+      "message": "these two can be const member functions I believe",
+      "revId": "755c7ed487bd585009b64d9bf60589c3d6eedfd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7527c085_38b78db0",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-05T23:48:21Z",
+      "side": 1,
+      "message": "const",
+      "revId": "755c7ed487bd585009b64d9bf60589c3d6eedfd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7ea5d7ae_e31f3226",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 486,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-05T23:48:21Z",
+      "side": 1,
+      "message": "same comments as the functions above",
+      "revId": "755c7ed487bd585009b64d9bf60589c3d6eedfd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52c94301_c594d2c7",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-05T23:48:21Z",
+      "side": 1,
+      "message": "const",
+      "revId": "755c7ed487bd585009b64d9bf60589c3d6eedfd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
