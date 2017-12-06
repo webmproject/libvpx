@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82ec0556_c5ce0e39",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 14
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-06T20:38:39Z",
+      "side": 1,
+      "message": "use static_cast in c++",
+      "range": {
+        "startLine": 281,
+        "startChar": 14,
+        "endLine": 281,
+        "endChar": 19
+      },
+      "revId": "55a36f409ddee692f05b62d79cce7e8c200316c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
