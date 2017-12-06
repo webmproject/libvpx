@@ -95,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "06aa713d_c3e8ee2f",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1152070
+      },
+      "writtenOn": "2017-12-06T22:01:25Z",
+      "side": 1,
+      "message": "I forget exactly why I didn\u0027t use itoa, I think it was because of some combination of: not being standard-compliant, and that there was no way to figure out how many digits were written, (so I could keep appending quickly after writing the digits). I figured it was easier to write my own.",
+      "parentUuid": "ba447eb5_19ba9d9b",
+      "range": {
+        "startLine": 230,
+        "startChar": 2,
+        "endLine": 244,
+        "endChar": 5
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "99d8eeb4_afe7b9c0",
         "filename": "examples/inspect.c",
         "patchSetId": 1
@@ -164,6 +188,30 @@
     },
     {
       "key": {
+        "uuid": "946798d1_6aec8a73",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1152070
+      },
+      "writtenOn": "2017-12-06T22:01:25Z",
+      "side": 1,
+      "message": "This is not on the fast path. I generally used snprintf when perf was not critical.",
+      "parentUuid": "e41ff9c7_35293b9a",
+      "range": {
+        "startLine": 425,
+        "startChar": 19,
+        "endLine": 425,
+        "endChar": 20
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1b01e9ff_0c25fc9f",
         "filename": "examples/inspect.c",
         "patchSetId": 1
@@ -187,6 +235,30 @@
     },
     {
       "key": {
+        "uuid": "dbbea92e_eb6a5283",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1152070
+      },
+      "writtenOn": "2017-12-06T22:01:25Z",
+      "side": 1,
+      "message": "These are used once per frame, so not as bad as once per block.",
+      "parentUuid": "1b01e9ff_0c25fc9f",
+      "range": {
+        "startLine": 510,
+        "startChar": 0,
+        "endLine": 510,
+        "endChar": 78
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "cb1de5b9_04653641",
         "filename": "tools/build_inspector.sh",
         "patchSetId": 1
@@ -198,6 +270,30 @@
       "writtenOn": "2017-12-06T01:35:09Z",
       "side": 1,
       "message": "I\u0027d feel better if we just made this a make target out at the main make level and not a special script.  This puts everything in tree.    \n\nI might",
+      "range": {
+        "startLine": 25,
+        "startChar": 6,
+        "endLine": 25,
+        "endChar": 14
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27a8c707_1bc010da",
+        "filename": "tools/build_inspector.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1152070
+      },
+      "writtenOn": "2017-12-06T22:01:25Z",
+      "side": 1,
+      "message": "I\u0027m not familiar enough to the build system to do that.",
+      "parentUuid": "cb1de5b9_04653641",
       "range": {
         "startLine": 25,
         "startChar": 6,
