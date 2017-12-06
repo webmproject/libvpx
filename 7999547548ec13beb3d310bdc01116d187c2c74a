@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f2657a31_41b67e8d",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-12-06T01:35:09Z",
+      "side": 1,
+      "message": "why keep it around?",
+      "range": {
+        "startLine": 37,
+        "startChar": 16,
+        "endLine": 37,
+        "endChar": 19
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "944ea8c1_b2294ac2",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-12-06T01:35:09Z",
+      "side": 1,
+      "message": "why keep these around?",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 11
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "addc2ab1_713a806c",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-12-06T01:35:09Z",
+      "side": 1,
+      "message": "Seems a bit over complicated to me how about ..   Don\u0027t need to reverse anything with this. \nd \u003d 1;\nif ( v \u003c 0) {\n  buf[i++]\u003d\u0027-\u0027\n  v \u003d -v;\n}\nwhile(d * 10 \u003c v) d *\u003d 10;\nwhile(d \u003e 0){\n  buf[i++] \u003d (v / d) + \u00270\u0027;\n  v \u003d v % d;\n  d /\u003d 10 ;\n}",
+      "range": {
+        "startLine": 230,
+        "startChar": 2,
+        "endLine": 244,
+        "endChar": 5
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c76d5ac_5772bea3",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-12-06T01:35:09Z",
+      "side": 1,
+      "message": "for (i \u003d 0; i \u003c len \u0026\u0026 v[i] \u003d\u003d nv[i]; ++i);\nif (i \u003c len) break;",
+      "range": {
+        "startLine": 383,
+        "startChar": 8,
+        "endLine": 392,
+        "endChar": 11
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e41ff9c7_35293b9a",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-12-06T01:35:09Z",
+      "side": 1,
+      "message": "why is snprintf okay here but no where else?",
+      "range": {
+        "startLine": 425,
+        "startChar": 19,
+        "endLine": 425,
+        "endChar": 20
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b01e9ff_0c25fc9f",
+        "filename": "examples/inspect.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-12-06T01:35:09Z",
+      "side": 1,
+      "message": "lots of snprintfs ( I thought they were bad?)",
+      "range": {
+        "startLine": 510,
+        "startChar": 0,
+        "endLine": 510,
+        "endChar": 78
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb1de5b9_04653641",
+        "filename": "tools/build_inspector.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2017-12-06T01:35:09Z",
+      "side": 1,
+      "message": "I\u0027d feel better if we just made this a make target out at the main make level and not a special script.  This puts everything in tree.    \n\nI might",
+      "range": {
+        "startLine": 25,
+        "startChar": 6,
+        "endLine": 25,
+        "endChar": 14
+      },
+      "revId": "7999547548ec13beb3d310bdc01116d187c2c74a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
