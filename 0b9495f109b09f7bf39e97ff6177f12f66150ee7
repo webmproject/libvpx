@@ -22,6 +22,75 @@
       "revId": "0b9495f109b09f7bf39e97ff6177f12f66150ee7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4093b8af_ae922175",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 974,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-12-06T20:16:11Z",
+      "side": 1,
+      "message": "This seems weird. Why are these treated as ENTROPY_CONTEXT instead of _PLANES?",
+      "range": {
+        "startLine": 974,
+        "startChar": 2,
+        "endLine": 974,
+        "endChar": 4
+      },
+      "revId": "0b9495f109b09f7bf39e97ff6177f12f66150ee7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ec1a3ea_aa2cb06c",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1157,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-12-06T20:16:11Z",
+      "side": 1,
+      "message": "It copies them as planes here",
+      "range": {
+        "startLine": 1157,
+        "startChar": 8,
+        "endLine": 1157,
+        "endChar": 14
+      },
+      "revId": "0b9495f109b09f7bf39e97ff6177f12f66150ee7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29cda431_860d6852",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1162,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2017-12-06T20:16:11Z",
+      "side": 1,
+      "message": "And then ta is not used at all?",
+      "range": {
+        "startLine": 1162,
+        "startChar": 11,
+        "endLine": 1162,
+        "endChar": 13
+      },
+      "revId": "0b9495f109b09f7bf39e97ff6177f12f66150ee7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
