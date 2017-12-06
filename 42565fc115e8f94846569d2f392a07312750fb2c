@@ -16,6 +16,24 @@
       "revId": "42565fc115e8f94846569d2f392a07312750fb2c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c183fdec_df5586dc",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2017-12-06T05:57:03Z",
+      "side": 1,
+      "message": "\u003e you might want to ASSERT that these aren\u0027t 0 and/or \u003c\u003d the requested width and height if we\u0027re not upscaling\n\nThe test will first downscale and then upscale so I\u0027ll just add an assert here.\nAnd there is a check below comparing the frame sizes from encoder frame packets with those from the decoder. That should be enough to verify the correctness.",
+      "parentUuid": "19a13c9d_0dcf8816",
+      "revId": "42565fc115e8f94846569d2f392a07312750fb2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
