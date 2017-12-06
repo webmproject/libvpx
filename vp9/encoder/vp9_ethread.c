@@ -66,8 +66,8 @@ static int get_max_tile_cols(VP9_COMP *cpi) {
   log2_tile_cols =
       clamp(cpi->oxcf.tile_columns, min_log2_tile_cols, max_log2_tile_cols);
   if (cpi->oxcf.target_level == LEVEL_AUTO) {
-    const uint32_t pic_size = cpi->common.width * cpi->common.height;
-    const int level_tile_cols = log_tile_cols_from_picsize_level(pic_size);
+    const int level_tile_cols =
+        log_tile_cols_from_picsize_level(cpi->common.width, cpi->common.height);
     if (log2_tile_cols > level_tile_cols) {
       log2_tile_cols = VPXMAX(level_tile_cols, min_log2_tile_cols);
     }

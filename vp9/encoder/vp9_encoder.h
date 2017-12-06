@@ -383,6 +383,7 @@ typedef struct {
   VP9_LEVEL level;
   uint64_t max_luma_sample_rate;
   uint32_t max_luma_picture_size;
+  uint32_t max_luma_picture_breadth;
   double average_bitrate;  // in kilobits per second
   double max_cpb_size;     // in kilobits
   double compression_ratio;
@@ -422,14 +423,15 @@ typedef struct {
 
 typedef enum {
   BITRATE_TOO_LARGE = 0,
-  LUMA_PIC_SIZE_TOO_LARGE = 1,
-  LUMA_SAMPLE_RATE_TOO_LARGE = 2,
-  CPB_TOO_LARGE = 3,
-  COMPRESSION_RATIO_TOO_SMALL = 4,
-  TOO_MANY_COLUMN_TILE = 5,
-  ALTREF_DIST_TOO_SMALL = 6,
-  TOO_MANY_REF_BUFFER = 7,
-  TARGET_LEVEL_FAIL_IDS = 8
+  LUMA_PIC_SIZE_TOO_LARGE,
+  LUMA_PIC_BREADTH_TOO_LARGE,
+  LUMA_SAMPLE_RATE_TOO_LARGE,
+  CPB_TOO_LARGE,
+  COMPRESSION_RATIO_TOO_SMALL,
+  TOO_MANY_COLUMN_TILE,
+  ALTREF_DIST_TOO_SMALL,
+  TOO_MANY_REF_BUFFER,
+  TARGET_LEVEL_FAIL_IDS
 } TARGET_LEVEL_FAIL_ID;
 
 typedef struct {
@@ -920,10 +922,14 @@ static INLINE int get_level_index(VP9_LEVEL level) {
 
 // Return the log2 value of max column tiles corresponding to the level that
 // the picture size fits into.
-static INLINE int log_tile_cols_from_picsize_level(uint32_t pic_size) {
+static INLINE int log_tile_cols_from_picsize_level(uint32_t width,
+                                                   uint32_t height) {
   int i;
+  const uint32_t pic_size = width * height;
+  const uint32_t pic_breadth = VPXMAX(width, height);
   for (i = LEVEL_1; i < LEVEL_MAX; ++i) {
-    if (vp9_level_defs[i].max_luma_picture_size > pic_size) {
+    if (vp9_level_defs[i].max_luma_picture_size >= pic_size &&
+        vp9_level_defs[i].max_luma_picture_breadth >= pic_breadth) {
       return get_msb(vp9_level_defs[i].max_col_tiles);
     }
   }
