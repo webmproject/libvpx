@@ -1696,6 +1696,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       comp_pred = 1;
     }
 
+    if (ref_frame > usable_ref_frame) continue;
+    if (skip_ref_find_pred[ref_frame]) continue;
+
     if (flag_svc_subpel && ref_frame == GOLDEN_FRAME) {
       force_gf_mv = 1;
       // Only test mode if NEARESTMV/NEARMV is (svc_mv_col, svc_mv_row),
@@ -1718,9 +1721,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       // feature is in use as in this case there can only be one reference.
       if (segfeature_active(seg, mi->segment_id, SEG_LVL_REF_FRAME)) continue;
     }
-
-    if (ref_frame > usable_ref_frame) continue;
-    if (skip_ref_find_pred[ref_frame]) continue;
 
     // For SVC, skip the golden (spatial) reference search if sse of zeromv_last
     // is below threshold.
