@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "628385eb_4e9643a0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-08T23:10:29Z",
+      "side": 1,
+      "message": "Allow for denoising next to highest reoln",
+      "revId": "df557d0fcf578b2a9adba38667a8e4ec2f06876f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8307332c_9645edfe",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-08T23:10:29Z",
+      "side": 1,
+      "message": "remove this",
+      "revId": "df557d0fcf578b2a9adba38667a8e4ec2f06876f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8355e60_84706ef8",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-08T23:10:29Z",
+      "side": 1,
+      "message": "put this around \"CONFIG_DENOISE\"?\n\nalso lets use denoiser_level to pass in this feature",
+      "revId": "df557d0fcf578b2a9adba38667a8e4ec2f06876f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
