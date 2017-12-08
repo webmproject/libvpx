@@ -881,6 +881,8 @@ void vp9_svc_check_reset_layer_rc_flag(VP9_COMP *const cpi) {
         RATE_CONTROL *lrc = &lc->rc;
         lrc->rc_1_frame = 0;
         lrc->rc_2_frame = 0;
+        lrc->bits_off_target = lrc->optimal_buffer_level;
+        lrc->buffer_level = lrc->optimal_buffer_level;
       }
     }
   }
