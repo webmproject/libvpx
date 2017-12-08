@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1841209e_cef24fa6",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2546,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-08T20:05:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a6fe9ff1_53d5ab85",
+      "revId": "0944ab3e23973d7ff3c94f30bf6f68615ea62af9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bc7826c4_f41ebbc8",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2017-12-07T20:25:49Z",
       "side": 1,
       "message": "do you still want the max(0.0,...)?",
+      "revId": "0944ab3e23973d7ff3c94f30bf6f68615ea62af9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c19a9a9c_3fece8ac",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2549,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-08T20:05:08Z",
+      "side": 1,
+      "message": "\u003e do you still want the max(0.0,...)?\n\nso no?",
+      "parentUuid": "bc7826c4_f41ebbc8",
       "revId": "0944ab3e23973d7ff3c94f30bf6f68615ea62af9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
