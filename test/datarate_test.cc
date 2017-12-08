@@ -1449,24 +1449,29 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
   // TODO(marpan): Check that effective_datarate for each layer hits the
   // layer target_bitrate.
-  for (int i = 600; i <= 1000; i += 200) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    denoiser_on_ = 1;
-    assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                          cfg_.ts_number_layers, cfg_.temporal_layering_mode);
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.78)
-        << " The datarate for the file exceeds the target by too much!";
-    ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
-        << " The datarate for the file is lower than the target by too much!";
+  // For SVC, noise_sen = 1 means denoising only the top spatial layer
+  // noise_sen = 2 means denoising the two top spatial layers.
+  for (int noise_sen = 1; noise_sen <= 2; noise_sen++) {
+    for (int i = 600; i <= 1000; i += 200) {
+      cfg_.rc_target_bitrate = i;
+      ResetModel();
+      denoiser_on_ = noise_sen;
+      assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                            cfg_.ts_number_layers, cfg_.temporal_layering_mode);
+      ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+      ASSERT_GE(cfg_.rc_target_bitrate, file_datarate_ * 0.78)
+          << " The datarate for the file exceeds the target by too much!";
+      ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.15)
+          << " The datarate for the file is lower than the target by too much!";
 #if CONFIG_VP9_DECODER
-    // Number of temporal layers > 1, so half of the frames in this SVC pattern
-    // will be non-reference frame and hence encoder will avoid loopfilter.
-    // Since frame dropper is off, we can expcet 150 (half of the sequence)
-    // mismatched frames.
-    EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+      // Number of temporal layers > 1, so half of the frames in this SVC
+      // pattern
+      // will be non-reference frame and hence encoder will avoid loopfilter.
+      // Since frame dropper is off, we can expcet 150 (half of the sequence)
+      // mismatched frames.
+      EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
 #endif
+    }
   }
 }
 

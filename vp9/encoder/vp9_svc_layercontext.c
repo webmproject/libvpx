@@ -37,6 +37,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->scaled_one_half = 0;
   svc->current_superframe = 0;
   svc->non_reference_frame = 0;
+
   for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
     svc->ext_frame_flags[sl] = 0;
@@ -389,9 +390,9 @@ int vp9_is_upper_layer_key_frame(const VP9_COMP *const cpi) {
              .is_key_frame;
 }
 
-static void get_layer_resolution(const int width_org, const int height_org,
-                                 const int num, const int den, int *width_out,
-                                 int *height_out) {
+void get_layer_resolution(const int width_org, const int height_org,
+                          const int num, const int den, int *width_out,
+                          int *height_out) {
   int w, h;
 
   if (width_out == NULL || height_out == NULL || den == 0) return;

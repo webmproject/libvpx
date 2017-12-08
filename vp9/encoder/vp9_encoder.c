@@ -2861,18 +2861,26 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
       cpi->denoiser.denoising_level > kDenLowLow) {
     int svc_base_is_key = 0;
+    int denoise_svc_second_layer = 0;
     if (cpi->use_svc) {
       int realloc_fail = 0;
+      const int svc_buf_shift =
+          cpi->svc.number_spatial_layers - cpi->svc.spatial_layer_id == 2
+              ? cpi->denoiser.num_ref_frames
+              : 0;
       int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
                                    cpi->svc.temporal_layer_id,
                                    cpi->svc.number_temporal_layers);
       LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
       svc_base_is_key = lc->is_key_frame;
-
-      // Check if we need to allocate extra buffers in the denoiser for
+      denoise_svc_second_layer =
+          cpi->svc.number_spatial_layers - cpi->svc.spatial_layer_id == 2 ? 1
+                                                                          : 0;
+      // Check if we need to allocate extra buffers in the denoiser
+      // for
       // refreshed frames.
       realloc_fail = vp9_denoiser_realloc_svc(
-          cm, &cpi->denoiser, cpi->refresh_alt_ref_frame,
+          cm, &cpi->denoiser, svc_buf_shift, cpi->refresh_alt_ref_frame,
           cpi->refresh_golden_frame, cpi->refresh_last_frame, cpi->alt_fb_idx,
           cpi->gld_fb_idx, cpi->lst_fb_idx);
       if (realloc_fail)
@@ -2883,7 +2891,8 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
         &cpi->denoiser, *cpi->Source, cpi->common.frame_type,
         cpi->refresh_alt_ref_frame, cpi->refresh_golden_frame,
         cpi->refresh_last_frame, cpi->alt_fb_idx, cpi->gld_fb_idx,
-        cpi->lst_fb_idx, cpi->resize_pending, svc_base_is_key);
+        cpi->lst_fb_idx, cpi->resize_pending, svc_base_is_key,
+        denoise_svc_second_layer);
   }
 #endif
   if (is_one_pass_cbr_svc(cpi)) {
@@ -3318,8 +3327,9 @@ static void setup_denoiser_buffer(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   if (cpi->oxcf.noise_sensitivity > 0 &&
       !cpi->denoiser.frame_buffer_initialized) {
-    if (vp9_denoiser_alloc(cm, cpi->use_svc, &cpi->denoiser, cm->width,
-                           cm->height, cm->subsampling_x, cm->subsampling_y,
+    if (vp9_denoiser_alloc(cm, &cpi->svc, &cpi->denoiser, cpi->use_svc,
+                           cpi->oxcf.noise_sensitivity, cm->width, cm->height,
+                           cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                            cm->use_highbitdepth,
 #endif
