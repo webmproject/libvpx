@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6905e5ae_8aa2934e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "whether to denoise the second highest spatial layer.",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f38f4c12_ed85eeb9",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "// For SVC: denoise the two top spatial layers.",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ebf16e35_4ffa6bde",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 1451,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "add comment:\n// For SVC noise_sen \u003d 1 means denoise only top spatial layers,\n// noise_sen \u003d 2 means denoise two top spatial layers.",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8dc38d6c_00333bad",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "can we just pass the two quantites instead of the whole SVC struct?\n -number_spatial_layers\n -spatial_layer_id\n\nor maybe its better to pass the \"shift\" parameter from outside?",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "377f8c48_42d25f2f",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "should we put the lines 580 and 584 around:\nif (cpi-\u003euse_svc) {\n}\n\nand also set scaled_width/height to width/height as default?",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0992cb46_99613918",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "duplicate line?",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb1c22dc_ba7c48f3",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "prefer parenthesis ...(layer \u003d\u003d 0) ? .....",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45e257d0_cb34f9b3",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2887,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "prefer to make this a variable before the call, and put comment as to what it means,\nmaybe something like?\ndenoise_svc_second_layer \u003d (cpi-\u003esvc.number_spatial_layers - cpi-\u003esvc.spatial_layer_id \u003d\u003d 2) ? 1 : 0;",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce029dae_d1425b0a",
+        "filename": "vp9/encoder/vp9_noise_estimate.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "add comment:\n// For SVC: we only do noise estimation on top spatial layer.",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f957e942_9ae7df46",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "if (noise_sen \u003e\u003d 2)....\n\ncan add comment as well, we only denoise at most 2 spatial (highest) layers",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fae7857d_0a72a3d2",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-11T17:56:47Z",
+      "side": 1,
+      "message": "2: For SVC only, on top two spatial layers.",
+      "revId": "ce4d17074f945d52b2e6ce72abfecb3edd65c19e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
