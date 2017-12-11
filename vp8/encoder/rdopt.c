@@ -23,6 +23,7 @@
 #include "modecosts.h"
 #include "encodeintra.h"
 #include "pickinter.h"
+#include "vp8/common/common.h"
 #include "vp8/common/entropymode.h"
 #include "vp8/common/reconinter.h"
 #include "vp8/common/reconintra.h"
@@ -959,19 +960,13 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
   vp8_variance_fn_ptr_t *v_fn_ptr;
 
   ENTROPY_CONTEXT_PLANES t_above, t_left;
-  ENTROPY_CONTEXT *ta;
-  ENTROPY_CONTEXT *tl;
   ENTROPY_CONTEXT_PLANES t_above_b, t_left_b;
-  ENTROPY_CONTEXT *ta_b;
-  ENTROPY_CONTEXT *tl_b;
 
   memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
   memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
 
-  ta = (ENTROPY_CONTEXT *)&t_above;
-  tl = (ENTROPY_CONTEXT *)&t_left;
-  ta_b = (ENTROPY_CONTEXT *)&t_above_b;
-  tl_b = (ENTROPY_CONTEXT *)&t_left_b;
+  vp8_zero(t_above_b);
+  vp8_zero(t_left_b);
 
   br = 0;
   bd = 0;
@@ -1151,13 +1146,13 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
         mode_selected = this_mode;
         best_label_rd = this_rd;
 
-        memcpy(ta_b, ta_s, sizeof(ENTROPY_CONTEXT_PLANES));
-        memcpy(tl_b, tl_s, sizeof(ENTROPY_CONTEXT_PLANES));
+        memcpy(&t_above_b, &t_above_s, sizeof(ENTROPY_CONTEXT_PLANES));
+        memcpy(&t_left_b, &t_left_s, sizeof(ENTROPY_CONTEXT_PLANES));
       }
     } /*for each 4x4 mode*/
 
-    memcpy(ta, ta_b, sizeof(ENTROPY_CONTEXT_PLANES));
-    memcpy(tl, tl_b, sizeof(ENTROPY_CONTEXT_PLANES));
+    memcpy(&t_above, &t_above_b, sizeof(ENTROPY_CONTEXT_PLANES));
+    memcpy(&t_left, &t_left_b, sizeof(ENTROPY_CONTEXT_PLANES));
 
     labels2mode(x, labels, i, mode_selected, &mode_mv[mode_selected],
                 bsi->ref_mv, x->mvcost);
