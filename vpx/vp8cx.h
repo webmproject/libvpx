@@ -408,7 +408,7 @@ enum vp8e_enc_control_id {
 
   /*!\brief Codec control function to set noise sensitivity.
    *
-   *  0: off, 1: On(YOnly)
+   *  0: off, 1: On(YOnly), 2: For SVC only, on top two spatial layers(YOnly)
    *
    * Supported in codecs: VP9
    */

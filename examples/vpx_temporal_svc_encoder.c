@@ -32,13 +32,21 @@ static const char *exec_name;
 
 void usage_exit(void) { exit(EXIT_FAILURE); }
 
-// Denoiser states, for temporal denoising.
-enum denoiserState {
-  kDenoiserOff,
-  kDenoiserOnYOnly,
-  kDenoiserOnYUV,
-  kDenoiserOnYUVAggressive,
-  kDenoiserOnAdaptive
+// Denoiser states for vp8, for temporal denoising.
+enum denoiserStateVp8 {
+  kVp8DenoiserOff,
+  kVp8DenoiserOnYOnly,
+  kVp8DenoiserOnYUV,
+  kVp8DenoiserOnYUVAggressive,
+  kVp8DenoiserOnAdaptive
+};
+
+// Denoiser states for vp9, for temporal denoising.
+enum denoiserStateVp9 {
+  kVp9DenoiserOff,
+  kVp9DenoiserOnYOnly,
+  // For SVC: denoise the top two spatial layers.
+  kVp9DenoiserOnYTwoSpatialLayers
 };
 
 static int mode_to_num_layers[13] = { 1, 2, 2, 3, 3, 3, 3, 5, 2, 3, 3, 3, 3 };
@@ -755,7 +763,7 @@ int main(int argc, char **argv) {
 
   if (strncmp(encoder->name, "vp8", 3) == 0) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, -speed);
-    vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, kDenoiserOff);
+    vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, kVp8DenoiserOff);
     vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
     vpx_codec_control(&codec, VP8E_SET_GF_CBR_BOOST_PCT, 0);
 #if VP8_ROI_MAP
@@ -772,7 +780,7 @@ int main(int argc, char **argv) {
     vpx_codec_control(&codec, VP9E_SET_GF_CBR_BOOST_PCT, 0);
     vpx_codec_control(&codec, VP9E_SET_FRAME_PARALLEL_DECODING, 0);
     vpx_codec_control(&codec, VP9E_SET_FRAME_PERIODIC_BOOST, 0);
-    vpx_codec_control(&codec, VP9E_SET_NOISE_SENSITIVITY, kDenoiserOff);
+    vpx_codec_control(&codec, VP9E_SET_NOISE_SENSITIVITY, kVp9DenoiserOff);
     vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
     vpx_codec_control(&codec, VP9E_SET_TUNE_CONTENT, 0);
     vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (cfg.g_threads >> 1));
