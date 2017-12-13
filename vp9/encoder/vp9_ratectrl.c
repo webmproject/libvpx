@@ -1488,6 +1488,8 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     cpi->rc.last_frame_is_src_altref = cpi->rc.is_src_frame_alt_ref;
   }
   if (cm->frame_type != KEY_FRAME) rc->reset_high_source_sad = 0;
+
+  rc->last_avg_frame_bandwidth = rc->avg_frame_bandwidth;
 }
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {

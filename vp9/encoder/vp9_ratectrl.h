@@ -152,6 +152,8 @@ typedef struct {
   int rc_2_frame;
   int q_1_frame;
   int q_2_frame;
+  // Keep track of the last target average frame bandwidth.
+  int last_avg_frame_bandwidth;
 
   // Auto frame-scaling variables.
   FRAME_SCALE_LEVEL frame_size_selector;

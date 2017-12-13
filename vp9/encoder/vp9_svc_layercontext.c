@@ -862,3 +862,26 @@ void vp9_svc_reset_key_frame(VP9_COMP *const cpi) {
   vp9_update_temporal_layer_framerate(cpi);
   vp9_restore_layer_context(cpi);
 }
+
+void vp9_svc_check_reset_layer_rc_flag(VP9_COMP *const cpi) {
+  SVC *svc = &cpi->svc;
+  int sl, tl;
+  for (sl = 0; sl < svc->number_spatial_layers; ++sl) {
+    // Check for reset based on avg_frame_bandwidth for spatial layer sl.
+    int layer = LAYER_IDS_TO_IDX(sl, svc->number_temporal_layers - 1,
+                                 svc->number_temporal_layers);
+    LAYER_CONTEXT *lc = &svc->layer_context[layer];
+    RATE_CONTROL *lrc = &lc->rc;
+    if (lrc->avg_frame_bandwidth > (3 * lrc->last_avg_frame_bandwidth >> 1) ||
+        lrc->avg_frame_bandwidth < (lrc->last_avg_frame_bandwidth >> 1)) {
+      // Reset for all temporal layers with spatial layer sl.
+      for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
+        int layer = LAYER_IDS_TO_IDX(sl, tl, svc->number_temporal_layers);
+        LAYER_CONTEXT *lc = &svc->layer_context[layer];
+        RATE_CONTROL *lrc = &lc->rc;
+        lrc->rc_1_frame = 0;
+        lrc->rc_2_frame = 0;
+      }
+    }
+  }
+}
