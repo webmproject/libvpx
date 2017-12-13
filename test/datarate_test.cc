@@ -1264,10 +1264,8 @@ class DatarateOnePassCbrSvc
     const bool key_frame =
         (pkt->data.frame.flags & VPX_FRAME_IS_KEY) ? true : false;
     if (!key_frame) {
-      // TODO(marpan): This check currently fails for some of the SVC tests,
-      // re-enable when issue (webm:1350) is resolved.
-      //  ASSERT_GE(bits_in_buffer_model_, 0) << "Buffer Underrun at frame "
-      //                                      << pkt->data.frame.pts;
+      ASSERT_GE(bits_in_buffer_model_, 0)
+          << "Buffer Underrun at frame " << pkt->data.frame.pts;
     }
     const size_t frame_size_in_bits = pkt->data.frame.sz * 8;
     bits_in_buffer_model_ -= static_cast<int64_t>(frame_size_in_bits);
@@ -1363,7 +1361,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL1TLScreenContent1) {
   svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 10;
   cfg_.kf_max_dist = 9999;
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   cfg_.rc_target_bitrate = 500;
   ResetModel();
   tune_content_ = 1;
@@ -1398,8 +1396,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
   svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.kf_max_dist = 9999;
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 200);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   // TODO(marpan): Check that effective_datarate for each layer hits the
   // layer target_bitrate.
   for (int i = 200; i <= 800; i += 200) {
@@ -1415,9 +1413,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
 #if CONFIG_VP9_DECODER
     // Number of temporal layers > 1, so half of the frames in this SVC pattern
     // will be non-reference frame and hence encoder will avoid loopfilter.
-    // Since frame dropper is off, we can expcet 100 (half of the sequence)
+    // Since frame dropper is off, we can expect 200 (half of the sequence)
     // mismatched frames.
-    EXPECT_EQ(static_cast<unsigned int>(100), GetMismatchFrames());
+    EXPECT_EQ(static_cast<unsigned int>(200), GetMismatchFrames());
 #endif
   }
 }
@@ -1446,7 +1444,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
   svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.kf_max_dist = 9999;
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   // TODO(marpan): Check that effective_datarate for each layer hits the
   // layer target_bitrate.
   // For SVC, noise_sen = 1 means denoising only the top spatial layer
@@ -1467,9 +1466,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
       // Number of temporal layers > 1, so half of the frames in this SVC
       // pattern
       // will be non-reference frame and hence encoder will avoid loopfilter.
-      // Since frame dropper is off, we can expcet 150 (half of the sequence)
+      // Since frame dropper is off, we can expect 200 (half of the sequence)
       // mismatched frames.
-      EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+      EXPECT_EQ(static_cast<unsigned int>(200), GetMismatchFrames());
 #endif
     }
   }
@@ -1498,9 +1497,9 @@ TEST_P(DatarateOnePassCbrSvc, DISABLED_OnePassCbrSvc2SL3TLSmallKf) {
   svc_params_.scaling_factor_num[1] = 288;
   svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 10;
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 200);
   cfg_.rc_target_bitrate = 400;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   // For this 3 temporal layer case, pattern repeats every 4 frames, so choose
   // 4 key neighboring key frame periods (so key frame will land on 0-2-1-2).
   for (int j = 64; j <= 67; j++) {
@@ -1540,7 +1539,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4Threads) {
   svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.kf_max_dist = 9999;
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
@@ -1553,9 +1552,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4Threads) {
 #if CONFIG_VP9_DECODER
   // Number of temporal layers > 1, so half of the frames in this SVC pattern
   // will be non-reference frame and hence encoder will avoid loopfilter.
-  // Since frame dropper is off, we can expcet 150 (half of the sequence)
+  // Since frame dropper is off, we can expect 30 (half of the sequence)
   // mismatched frames.
-  EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+  EXPECT_EQ(static_cast<unsigned int>(30), GetMismatchFrames());
 #endif
 }
 
@@ -1585,7 +1584,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
   svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.kf_max_dist = 9999;
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
@@ -1598,9 +1598,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
 #if CONFIG_VP9_DECODER
   // Number of temporal layers > 1, so half of the frames in this SVC pattern
   // will be non-reference frame and hence encoder will avoid loopfilter.
-  // Since frame dropper is off, we can expcet 150 (half of the sequence)
+  // Since frame dropper is off, we can expect 200 (half of the sequence)
   // mismatched frames.
-  EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+  EXPECT_EQ(static_cast<unsigned int>(200), GetMismatchFrames());
 #endif
 }
 
@@ -1629,8 +1629,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLSmallKf) {
   svc_params_.scaling_factor_num[2] = 288;
   svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 10;
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
   cfg_.rc_target_bitrate = 800;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   // For this 3 temporal layer case, pattern repeats every 4 frames, so choose
   // 4 key neighboring key frame periods (so key frame will land on 0-2-1-2).
   for (int j = 32; j <= 35; j++) {
@@ -1672,7 +1673,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4threads) {
   svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.kf_max_dist = 9999;
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
@@ -1685,9 +1686,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4threads) {
 #if CONFIG_VP9_DECODER
   // Number of temporal layers > 1, so half of the frames in this SVC pattern
   // will be non-reference frame and hence encoder will avoid loopfilter.
-  // Since frame dropper is off, we can expcet 150 (half of the sequence)
+  // Since frame dropper is off, we can expect 30 (half of the sequence)
   // mismatched frames.
-  EXPECT_EQ(static_cast<unsigned int>(150), GetMismatchFrames());
+  EXPECT_EQ(static_cast<unsigned int>(30), GetMismatchFrames());
 #endif
 }
 
@@ -1719,7 +1720,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL1TL5x5MultipleRuns) {
   cfg_.layer_target_bitrate[0] = 300;
   cfg_.layer_target_bitrate[1] = 1400;
   cfg_.rc_target_bitrate = 1700;
-  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 300);
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   ResetModel();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
