@@ -200,6 +200,7 @@ sub filter {
 sub common_top() {
   my $include_guard = uc($opts{sym})."_H_";
   print <<EOF;
+// This file is generated. Do not edit.
 #ifndef ${include_guard}
 #define ${include_guard}
 
