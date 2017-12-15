@@ -86,6 +86,7 @@ static INLINE void vp8_filter_block1d_h6_mmi(unsigned char *src_ptr,
   register double ftmp8 asm("$f18");
   register double ftmp9 asm("$f20");
   register double ftmp10 asm("$f22");
+  register double ftmp11 asm("$f24");
 #else
   register double fzero asm("$f0");
   register double ftmp0 asm("$f1");
@@ -99,6 +100,7 @@ static INLINE void vp8_filter_block1d_h6_mmi(unsigned char *src_ptr,
   register double ftmp8 asm("$f9");
   register double ftmp9 asm("$f10");
   register double ftmp10 asm("$f11");
+  register double ftmp11 asm("$f12");
 #endif  // _MIPS_SIM == _ABIO32
 
   __asm__ volatile (
@@ -112,11 +114,13 @@ static INLINE void vp8_filter_block1d_h6_mmi(unsigned char *src_ptr,
     "li         %[tmp0],        0x07                                  \n\t"
     "mtc1       %[tmp0],        %[ftmp7]                              \n\t"
     "li         %[tmp0],        0x08                                  \n\t"
-    "mtc1       %[tmp0],        %[ftmp10]                             \n\t"
+    "mtc1       %[tmp0],        %[ftmp11]                             \n\t"
 
     "1:                                                               \n\t"
     "gsldlc1    %[ftmp9],       0x05(%[src_ptr])                      \n\t"
-    "gsldrc1    %[ftmp9],      -0x02(%[src_ptr])                      \n\t"
+    "gsldrc1    %[ftmp9],       -0x02(%[src_ptr])                     \n\t"
+    "gsldlc1    %[ftmp10],      0x06(%[src_ptr])                      \n\t"
+    "gsldrc1    %[ftmp10],      -0x01(%[src_ptr])                     \n\t"
 
     "punpcklbh  %[ftmp6],       %[ftmp9],          %[fzero]           \n\t"
     "pmullh     %[ftmp8],       %[ftmp6],          %[ftmp0]           \n\t"
@@ -125,24 +129,21 @@ static INLINE void vp8_filter_block1d_h6_mmi(unsigned char *src_ptr,
     "pmullh     %[ftmp6],       %[ftmp6],          %[ftmp4]           \n\t"
     "paddsh     %[ftmp8],       %[ftmp8],          %[ftmp6]           \n\t"
 
-    "gsldlc1    %[ftmp9],       0x06(%[src_ptr])                      \n\t"
-    "gsldrc1    %[ftmp9],      -0x01(%[src_ptr])                      \n\t"
-
-    "punpcklbh  %[ftmp6],       %[ftmp9],          %[fzero]           \n\t"
+    "punpcklbh  %[ftmp6],       %[ftmp10],         %[fzero]           \n\t"
     "pmullh     %[ftmp6],       %[ftmp6],          %[ftmp1]           \n\t"
     "paddsh     %[ftmp8],       %[ftmp8],          %[ftmp6]           \n\t"
 
-    "punpckhbh  %[ftmp6],       %[ftmp9],          %[fzero]           \n\t"
+    "punpckhbh  %[ftmp6],       %[ftmp10],         %[fzero]           \n\t"
     "pmullh     %[ftmp6],       %[ftmp6],          %[ftmp5]           \n\t"
     "paddsh     %[ftmp8],       %[ftmp8],          %[ftmp6]           \n\t"
 
-    "dsrl       %[ftmp9],       %[ftmp9],          %[ftmp10]          \n\t"
-    "punpcklbh  %[ftmp6],       %[ftmp9],          %[fzero]           \n\t"
+    "dsrl       %[ftmp10],      %[ftmp10],         %[ftmp11]          \n\t"
+    "punpcklbh  %[ftmp6],       %[ftmp10],         %[fzero]           \n\t"
     "pmullh     %[ftmp6],       %[ftmp6],          %[ftmp2]           \n\t"
     "paddsh     %[ftmp8],       %[ftmp8],          %[ftmp6]           \n\t"
 
-    "dsrl       %[ftmp9],       %[ftmp9],          %[ftmp10]          \n\t"
-    "punpcklbh  %[ftmp6],       %[ftmp9],          %[fzero]           \n\t"
+    "dsrl       %[ftmp10],      %[ftmp10],         %[ftmp11]          \n\t"
+    "punpcklbh  %[ftmp6],       %[ftmp10],         %[fzero]           \n\t"
     "pmullh     %[ftmp6],       %[ftmp6],          %[ftmp3]           \n\t"
     "paddsh     %[ftmp8],       %[ftmp8],          %[ftmp6]           \n\t"
 
@@ -163,8 +164,9 @@ static INLINE void vp8_filter_block1d_h6_mmi(unsigned char *src_ptr,
       [ftmp5]"=&f"(ftmp5),              [ftmp6]"=&f"(ftmp6),
       [ftmp7]"=&f"(ftmp7),              [ftmp8]"=&f"(ftmp8),
       [ftmp9]"=&f"(ftmp9),              [ftmp10]"=&f"(ftmp10),
-      [tmp0]"=&r"(tmp[0]),              [src_ptr]"+&r"(src_ptr),
-      [output_ptr]"+&r"(output_ptr),    [output_height]"+&r"(output_height)
+      [ftmp11]"=&f"(ftmp11),            [tmp0]"=&r"(tmp[0]),
+      [output_ptr]"+&r"(output_ptr),    [output_height]"+&r"(output_height),
+      [src_ptr]"+&r"(src_ptr)
     : [src_pixels_per_line]"r"((mips_reg)src_pixels_per_line),
       [vp8_filter]"r"(vp8_filter),      [output_width]"r"(output_width),
       [ff_ph_40]"f"(ff_ph_40)
@@ -190,6 +192,11 @@ static INLINE void vp8_filter_block1dc_v6_mmi(
   register double ftmp6 asm("$f14");
   register double ftmp7 asm("$f16");
   register double ftmp8 asm("$f18");
+  register double ftmp9 asm("$f20");
+  register double ftmp10 asm("$f22");
+  register double ftmp11 asm("$f24");
+  register double ftmp12 asm("$f26");
+  register double ftmp13 asm("$f28");
 #else
   register double fzero asm("$f0");
   register double ftmp0 asm("$f1");
@@ -201,6 +208,11 @@ static INLINE void vp8_filter_block1dc_v6_mmi(
   register double ftmp6 asm("$f7");
   register double ftmp7 asm("$f8");
   register double ftmp8 asm("$f9");
+  register double ftmp9 asm("$f10");
+  register double ftmp10 asm("$f11");
+  register double ftmp11 asm("$f12");
+  register double ftmp12 asm("$f13");
+  register double ftmp13 asm("$f14");
 #endif  // _MIPS_SIM == _ABIO32
 
   __asm__ volatile (
@@ -210,52 +222,56 @@ static INLINE void vp8_filter_block1dc_v6_mmi(
     "ldc1       %[ftmp3],     0x30(%[vp8_filter])                     \n\t"
     "ldc1       %[ftmp4],     0x40(%[vp8_filter])                     \n\t"
     "ldc1       %[ftmp5],     0x50(%[vp8_filter])                     \n\t"
-    MMI_SUBU(%[src_ptr],   %[src_ptr],      %[pixels_per_line_x2])
     "xor        %[fzero],     %[fzero],        %[fzero]               \n\t"
     "li         %[tmp0],      0x07                                    \n\t"
-    "mtc1       %[tmp0],      %[ftmp7]                                \n\t"
+    "mtc1       %[tmp0],      %[ftmp13]                               \n\t"
 
+    /* In order to make full use of memory load delay slot,
+     * Operation of memory loading and calculating has been rearranged.
+     */
     "1:                                                               \n\t"
     "gsldlc1    %[ftmp6],     0x07(%[src_ptr])                        \n\t"
     "gsldrc1    %[ftmp6],     0x00(%[src_ptr])                        \n\t"
-    "pmullh     %[ftmp8],     %[ftmp6],        %[ftmp0]               \n\t"
-
     MMI_ADDU(%[addr0],     %[src_ptr],      %[pixels_per_line])
-    "gsldlc1    %[ftmp6],     0x07(%[addr0])                          \n\t"
-    "gsldrc1    %[ftmp6],     0x00(%[addr0])                          \n\t"
-    "pmullh     %[ftmp6],     %[ftmp6],        %[ftmp1]               \n\t"
-    "paddsh     %[ftmp8],     %[ftmp8],        %[ftmp6]               \n\t"
-
+    "gsldlc1    %[ftmp7],     0x07(%[addr0])                          \n\t"
+    "gsldrc1    %[ftmp7],     0x00(%[addr0])                          \n\t"
     MMI_ADDU(%[addr0],     %[src_ptr],      %[pixels_per_line_x2])
-    "gsldlc1    %[ftmp6],     0x07(%[addr0])                          \n\t"
-    "gsldrc1    %[ftmp6],     0x00(%[addr0])                          \n\t"
-    "pmullh     %[ftmp6],     %[ftmp6],        %[ftmp2]               \n\t"
-    "paddsh     %[ftmp8],     %[ftmp8],        %[ftmp6]               \n\t"
+    "gsldlc1    %[ftmp8],     0x07(%[addr0])                          \n\t"
+    "gsldrc1    %[ftmp8],     0x00(%[addr0])                          \n\t"
 
     MMI_ADDU(%[addr0],     %[src_ptr],      %[pixels_per_line_x4])
-    "gsldlc1    %[ftmp6],     0x07(%[addr0])                          \n\t"
-    "gsldrc1    %[ftmp6],     0x00(%[addr0])                          \n\t"
-    "pmullh     %[ftmp6],     %[ftmp6],        %[ftmp4]               \n\t"
-    "paddsh     %[ftmp8],     %[ftmp8],        %[ftmp6]               \n\t"
-
+    "gsldlc1    %[ftmp9],     0x07(%[addr0])                          \n\t"
+    "gsldrc1    %[ftmp9],     0x00(%[addr0])                          \n\t"
     MMI_ADDU(%[src_ptr],   %[src_ptr],      %[pixels_per_line])
     MMI_ADDU(%[addr0],     %[src_ptr],      %[pixels_per_line_x2])
-    "gsldlc1    %[ftmp6],     0x07(%[addr0])                          \n\t"
-    "gsldrc1    %[ftmp6],     0x00(%[addr0])                          \n\t"
-    "pmullh     %[ftmp6],     %[ftmp6],        %[ftmp3]               \n\t"
-    "paddsh     %[ftmp8],     %[ftmp8],        %[ftmp6]               \n\t"
-
+    "gsldlc1    %[ftmp10],    0x07(%[addr0])                          \n\t"
+    "gsldrc1    %[ftmp10],    0x00(%[addr0])                          \n\t"
     MMI_ADDU(%[addr0],     %[src_ptr],      %[pixels_per_line_x4])
-    "gsldlc1    %[ftmp6],     0x07(%[addr0])                          \n\t"
-    "gsldrc1    %[ftmp6],     0x00(%[addr0])                          \n\t"
-    "pmullh     %[ftmp6],     %[ftmp6],        %[ftmp5]               \n\t"
-    "paddsh     %[ftmp8],     %[ftmp8],        %[ftmp6]               \n\t"
+    "gsldlc1    %[ftmp11],    0x07(%[addr0])                          \n\t"
+    "gsldrc1    %[ftmp11],    0x00(%[addr0])                          \n\t"
 
-    "paddsh     %[ftmp8],     %[ftmp8],        %[ff_ph_40]            \n\t"
-    "psrah      %[ftmp8],     %[ftmp8],        %[ftmp7]               \n\t"
-    "packushb   %[ftmp8],     %[ftmp8],        %[fzero]               \n\t"
-    "gsswlc1    %[ftmp8],     0x03(%[output_ptr])                     \n\t"
-    "gsswrc1    %[ftmp8],     0x00(%[output_ptr])                     \n\t"
+    "pmullh     %[ftmp12],    %[ftmp6],        %[ftmp0]               \n\t"
+
+    "pmullh     %[ftmp7],     %[ftmp7],        %[ftmp1]               \n\t"
+    "paddsh     %[ftmp12],    %[ftmp12],       %[ftmp7]               \n\t"
+
+    "pmullh     %[ftmp8],     %[ftmp8],        %[ftmp2]               \n\t"
+    "paddsh     %[ftmp12],    %[ftmp12],       %[ftmp8]               \n\t"
+
+    "pmullh     %[ftmp9],     %[ftmp9],        %[ftmp4]               \n\t"
+    "paddsh     %[ftmp12],    %[ftmp12],       %[ftmp9]               \n\t"
+
+    "pmullh     %[ftmp10],    %[ftmp10],       %[ftmp3]               \n\t"
+    "paddsh     %[ftmp12],    %[ftmp12],       %[ftmp10]              \n\t"
+
+    "pmullh     %[ftmp11],    %[ftmp11],       %[ftmp5]               \n\t"
+    "paddsh     %[ftmp12],    %[ftmp12],       %[ftmp11]              \n\t"
+
+    "paddsh     %[ftmp12],    %[ftmp12],       %[ff_ph_40]            \n\t"
+    "psrah      %[ftmp12],    %[ftmp12],       %[ftmp13]              \n\t"
+    "packushb   %[ftmp12],    %[ftmp12],       %[fzero]               \n\t"
+    "gsswlc1    %[ftmp12],    0x03(%[output_ptr])                     \n\t"
+    "gsswrc1    %[ftmp12],    0x00(%[output_ptr])                     \n\t"
 
     MMI_ADDIU(%[output_height], %[output_height], -0x01)
     MMI_ADDU(%[output_ptr], %[output_ptr], %[output_pitch])
@@ -265,9 +281,11 @@ static INLINE void vp8_filter_block1dc_v6_mmi(
       [ftmp3]"=&f"(ftmp3),              [ftmp4]"=&f"(ftmp4),
       [ftmp5]"=&f"(ftmp5),              [ftmp6]"=&f"(ftmp6),
       [ftmp7]"=&f"(ftmp7),              [ftmp8]"=&f"(ftmp8),
-      [tmp0]"=&r"(tmp[0]),              [addr0]"=&r"(addr[0]),
-      [src_ptr]"+&r"(src_ptr),          [output_ptr]"+&r"(output_ptr),
-      [output_height]"+&r"(output_height)
+      [ftmp9]"=&f"(ftmp9),              [ftmp10]"=&f"(ftmp10),
+      [ftmp11]"=&f"(ftmp11),            [ftmp12]"=&f"(ftmp12),
+      [ftmp13]"=&f"(ftmp13),            [tmp0]"=&r"(tmp[0]),
+      [addr0]"=&r"(addr[0]),            [src_ptr]"+&r"(src_ptr),
+      [output_ptr]"+&r"(output_ptr),    [output_height]"+&r"(output_height)
     : [pixels_per_line]"r"((mips_reg)pixels_per_line),
       [pixels_per_line_x2]"r"((mips_reg)(pixels_per_line<<1)),
       [pixels_per_line_x4]"r"((mips_reg)(pixels_per_line<<2)),
@@ -301,6 +319,7 @@ static INLINE void vp8_filter_block1d_h6_filter0_mmi(
     "1:                                                               \n\t"
     "gsldlc1    %[ftmp0],       0x07(%[src_ptr])                      \n\t"
     "gsldrc1    %[ftmp0],       0x00(%[src_ptr])                      \n\t"
+    MMI_ADDU(%[src_ptr],  %[src_ptr], %[src_pixels_per_line])
 
     "punpcklbh  %[ftmp1],       %[ftmp0],          %[fzero]           \n\t"
     "gssdlc1    %[ftmp1],       0x07(%[output_ptr])                   \n\t"
@@ -308,7 +327,6 @@ static INLINE void vp8_filter_block1d_h6_filter0_mmi(
 
     "addiu      %[output_height], %[output_height], -0x01             \n\t"
     MMI_ADDU(%[output_ptr],  %[output_ptr],    %[output_width])
-    MMI_ADDU(%[src_ptr],  %[src_ptr], %[src_pixels_per_line])
     "bnez       %[output_height],               1b                    \n\t"
     : [fzero]"=&f"(fzero),              [ftmp0]"=&f"(ftmp0),
       [ftmp1]"=&f"(ftmp1),              [src_ptr]"+&r"(src_ptr),
@@ -338,12 +356,12 @@ static INLINE void vp8_filter_block1dc_v6_filter0_mmi(
     "1:                                                               \n\t"
     "gsldlc1    %[ftmp0],     0x07(%[src_ptr])                        \n\t"
     "gsldrc1    %[ftmp0],     0x00(%[src_ptr])                        \n\t"
+    MMI_ADDU(%[src_ptr],   %[src_ptr],      %[pixels_per_line])
+    MMI_ADDIU(%[output_height], %[output_height], -0x01)
     "packushb   %[ftmp1],     %[ftmp0],        %[fzero]               \n\t"
     "gsswlc1    %[ftmp1],     0x03(%[output_ptr])                     \n\t"
     "gsswrc1    %[ftmp1],     0x00(%[output_ptr])                     \n\t"
 
-    MMI_ADDU(%[src_ptr],   %[src_ptr],      %[pixels_per_line])
-    MMI_ADDIU(%[output_height], %[output_height], -0x01)
     MMI_ADDU(%[output_ptr], %[output_ptr], %[output_pitch])
     "bnez       %[output_height], 1b                                  \n\t"
     : [fzero]"=&f"(fzero),              [ftmp0]"=&f"(ftmp0),
@@ -386,7 +404,7 @@ static INLINE void vp8_filter_block1dc_v6_filter0_mmi(
       }                                                                        \
     } else {                                                                   \
       for (i = 0; i < loop; ++i) {                                             \
-        vp8_filter_block1dc_v6_mmi(FData2 + n * 2 + i * 4, dst_ptr + i * 4, m, \
+        vp8_filter_block1dc_v6_mmi(FData2 + i * 4, dst_ptr + i * 4, m,         \
                                    dst_pitch, n * 2, VFilter);                 \
       }                                                                        \
     }                                                                          \
