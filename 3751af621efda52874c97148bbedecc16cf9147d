@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "576a9da9_940e8fbf",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 25
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-18T21:25:39Z",
+      "side": 1,
+      "message": "would a PostEncodeFrameHook work to match the existing calls? can this not be done in the FramePkt hook due to the potential for drops?",
+      "revId": "3751af621efda52874c97148bbedecc16cf9147d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
