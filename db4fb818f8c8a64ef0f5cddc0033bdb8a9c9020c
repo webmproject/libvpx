@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e811c794_56c74723",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-12-18T21:26:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a5e8462_a135ce06",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 5
+      },
+      "revId": "db4fb818f8c8a64ef0f5cddc0033bdb8a9c9020c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "101331ad_fc9bfa8e",
         "filename": "test/vp9_quantize_test.cc",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "7ddd7def_5482e3d1",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-12-18T21:26:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "101331ad_fc9bfa8e",
+      "range": {
+        "startLine": 45,
+        "startChar": 41,
+        "endLine": 45,
+        "endChar": 54
+      },
+      "revId": "db4fb818f8c8a64ef0f5cddc0033bdb8a9c9020c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6dfdf933_b5c3e0be",
         "filename": "test/vp9_quantize_test.cc",
         "patchSetId": 2
@@ -59,6 +107,24 @@
       "writtenOn": "2017-12-18T21:14:30Z",
       "side": 1,
       "message": "these existing ranges could be corrected in a followup like line 143/144",
+      "revId": "db4fb818f8c8a64ef0f5cddc0033bdb8a9c9020c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fb7a5522_46be9e54",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2017-12-18T21:26:53Z",
+      "side": 1,
+      "message": "Yes.",
+      "parentUuid": "6dfdf933_b5c3e0be",
       "revId": "db4fb818f8c8a64ef0f5cddc0033bdb8a9c9020c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
