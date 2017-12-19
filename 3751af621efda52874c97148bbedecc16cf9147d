@@ -34,6 +34,24 @@
       "revId": "3751af621efda52874c97148bbedecc16cf9147d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4bacb2d3_4379bd14",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 25
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T06:51:25Z",
+      "side": 1,
+      "message": "\u003e Yes we need it here to handle frame drops. The FramePkt can detect frame drops, but it does not know what the temporal layer_id was for those dropped frames (and that is needed to update the buffer level correctly).\n\nOK, then maybe PostEncodeFrameHook; you could hide the pass and end_usage check in the implementation",
+      "parentUuid": "fce3db97_ff13713b",
+      "revId": "3751af621efda52874c97148bbedecc16cf9147d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
