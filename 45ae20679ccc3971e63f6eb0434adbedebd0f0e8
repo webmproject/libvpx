@@ -1,0 +1,152 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e647cbbc_df77b871",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 26
+      },
+      "lineNbr": 1227,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T20:14:18Z",
+      "side": 1,
+      "message": "could just be a memset",
+      "revId": "45ae20679ccc3971e63f6eb0434adbedebd0f0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3213e46_5a6e3c6d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 26
+      },
+      "lineNbr": 1273,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T20:14:18Z",
+      "side": 1,
+      "message": "const",
+      "revId": "45ae20679ccc3971e63f6eb0434adbedebd0f0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b77b5646_00f1bb4e",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 26
+      },
+      "lineNbr": 1280,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T20:14:18Z",
+      "side": 1,
+      "message": "this might be available in static library builds from the decoder, but currently this is mostly a test that relies only on the encoder",
+      "revId": "45ae20679ccc3971e63f6eb0434adbedebd0f0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a739499e_24e06e0d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 26
+      },
+      "lineNbr": 1328,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T20:14:18Z",
+      "side": 1,
+      "message": "const",
+      "revId": "45ae20679ccc3971e63f6eb0434adbedebd0f0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5a114f3b_f871e0f4",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 26
+      },
+      "lineNbr": 1343,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T20:14:18Z",
+      "side": 1,
+      "message": "this looks inconsistent when paired with the next line; could update that throughout.",
+      "range": {
+        "startLine": 1343,
+        "startChar": 50,
+        "endLine": 1343,
+        "endChar": 54
+      },
+      "revId": "45ae20679ccc3971e63f6eb0434adbedebd0f0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f02d147b_de10980b",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 26
+      },
+      "lineNbr": 1416,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T20:14:18Z",
+      "side": 1,
+      "message": "const",
+      "revId": "45ae20679ccc3971e63f6eb0434adbedebd0f0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "336f7c13_1dc1dc5e",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 26
+      },
+      "lineNbr": 1437,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T20:14:18Z",
+      "side": 1,
+      "message": "const",
+      "revId": "45ae20679ccc3971e63f6eb0434adbedebd0f0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1af1a5d5_1c9be39c",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 26
+      },
+      "lineNbr": 1481,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2017-12-19T20:14:18Z",
+      "side": 1,
+      "message": "CheckLayerRateTargeting would be better in c++",
+      "range": {
+        "startLine": 1481,
+        "startChar": 2,
+        "endLine": 1481,
+        "endChar": 28
+      },
+      "revId": "45ae20679ccc3971e63f6eb0434adbedebd0f0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
