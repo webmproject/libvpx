@@ -16,6 +16,24 @@
       "revId": "3751af621efda52874c97148bbedecc16cf9147d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fce3db97_ff13713b",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 25
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-19T03:31:25Z",
+      "side": 1,
+      "message": "Yes we need it here to handle frame drops. The FramePkt can detect frame drops, but it does not know what the temporal layer_id was for those dropped frames (and that is needed to update the buffer level correctly).",
+      "parentUuid": "576a9da9_940e8fbf",
+      "revId": "3751af621efda52874c97148bbedecc16cf9147d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
