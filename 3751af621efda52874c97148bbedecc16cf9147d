@@ -52,6 +52,24 @@
       "revId": "3751af621efda52874c97148bbedecc16cf9147d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b95318af_12049962",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 25
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2017-12-19T18:14:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4bacb2d3_4379bd14",
+      "revId": "3751af621efda52874c97148bbedecc16cf9147d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
