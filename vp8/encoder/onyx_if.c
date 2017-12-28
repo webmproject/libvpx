@@ -3799,7 +3799,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 
   /* Setup background Q adjustment for error resilient mode.
    * For multi-layer encodes only enable this for the base layer.
-  */
+   */
   if (cpi->cyclic_refresh_mode_enabled) {
     // Special case for screen_content_mode with golden frame updates.
     int disable_cr_gf =

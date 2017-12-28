@@ -529,7 +529,7 @@ enum vp8e_enc_control_id {
    * struct #vpx_svc_ref_frame_config defined below.
    *
    * Supported in codecs: VP9
-  */
+   */
   VP9E_SET_SVC_REF_FRAME_CONFIG,
 
   /*!\brief Codec control function to set intended rendering image size.
@@ -550,11 +550,11 @@ enum vp8e_enc_control_id {
   VP9E_SET_TARGET_LEVEL,
 
   /*!\brief Codec control function to set row level multi-threading.
-  *
-  * 0 : off, 1 : on
-  *
-  * Supported in codecs: VP9
-  */
+   *
+   * 0 : off, 1 : on
+   *
+   * Supported in codecs: VP9
+   */
   VP9E_SET_ROW_MT,
 
   /*!\brief Codec control function to get bitstream level.
@@ -574,18 +574,18 @@ enum vp8e_enc_control_id {
   VP9E_SET_ALT_REF_AQ,
 
   /*!\brief Boost percentage for Golden Frame in CBR mode.
-    *
-    * This value controls the amount of boost given to Golden Frame in
-    * CBR mode. It is expressed as a percentage of the average
-    * per-frame bitrate, with the special (and default) value 0 meaning
-    * the feature is off, i.e., no golden frame boost in CBR mode and
-    * average bitrate target is used.
-    *
-    * For example, to allow 100% more bits, i.e, 2X, in a golden frame
-    * than average frame, set this to 100.
-    *
-    * Supported in codecs: VP8
-    */
+   *
+   * This value controls the amount of boost given to Golden Frame in
+   * CBR mode. It is expressed as a percentage of the average
+   * per-frame bitrate, with the special (and default) value 0 meaning
+   * the feature is off, i.e., no golden frame boost in CBR mode and
+   * average bitrate target is used.
+   *
+   * For example, to allow 100% more bits, i.e, 2X, in a golden frame
+   * than average frame, set this to 100.
+   *
+   * Supported in codecs: VP8
+   */
   VP8E_SET_GF_CBR_BOOST_PCT,
 
   /*!\brief Codec control function to enable the extreme motion vector unit test

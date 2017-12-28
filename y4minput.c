@@ -130,8 +130,8 @@ static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
   The number of taps is intentionally kept small to reduce computational
    overhead and limit ringing.
 
-  The taps from these filters are scaled so that their sum is 1, and the result
-   is scaled by 128 and rounded to integers to create a filter whose
+  The taps from these filters are scaled so that their sum is 1, and the
+  result is scaled by 128 and rounded to integers to create a filter whose
    intermediate values fit inside 16 bits.
   Coefficients are rounded in such a way as to ensure their sum is still 128,
    which is usually equivalent to normal rounding.

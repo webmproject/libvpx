@@ -174,4 +174,4 @@ INSTANTIATE_TEST_CASE_P(MSA, IDCTTest,
 INSTANTIATE_TEST_CASE_P(MMI, IDCTTest,
                         ::testing::Values(vp8_short_idct4x4llm_mmi));
 #endif  // HAVE_MMI
-}
+}  // namespace

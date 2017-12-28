@@ -27,8 +27,8 @@
 
 namespace {
 
-using std::string;
 using libvpx_test::ACMRandom;
+using std::string;
 
 #if CONFIG_WEBM_IO
 

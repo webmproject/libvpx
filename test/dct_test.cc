@@ -28,8 +28,8 @@
 
 using libvpx_test::ACMRandom;
 using libvpx_test::Buffer;
-using std::tr1::tuple;
 using std::tr1::make_tuple;
+using std::tr1::tuple;
 
 namespace {
 typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);

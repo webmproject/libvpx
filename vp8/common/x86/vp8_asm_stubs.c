@@ -351,8 +351,8 @@ void vp8_sixtap_predict4x4_ssse3(unsigned char *src_ptr,
                                    yoffset);
     } else {
       /* ssse3 second-pass only function couldn't handle (xoffset==0 &&
-        * yoffset==0) case correctly. Add copy function here to guarantee
-        * six-tap function handles all possible offsets. */
+       * yoffset==0) case correctly. Add copy function here to guarantee
+       * six-tap function handles all possible offsets. */
       int r;
 
       for (r = 0; r < 4; ++r) {

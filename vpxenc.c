@@ -1278,8 +1278,8 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
           match = 1;
 
           /* Point either to the next free element or the first
-          * instance of this control.
-          */
+           * instance of this control.
+           */
           for (j = 0; j < config->arg_ctrl_cnt; j++)
             if (ctrl_args_map != NULL &&
                 config->arg_ctrls[j][0] == ctrl_args_map[i])

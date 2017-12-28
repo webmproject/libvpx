@@ -996,7 +996,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi) {
            * bits on this frame even if it is a contructed arf.
            * The active maximum quantizer insures that an appropriate
            * number of bits will be spent if needed for contstructed ARFs.
-          */
+           */
           cpi->this_frame_target = 0;
         }
 

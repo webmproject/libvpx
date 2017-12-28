@@ -6,7 +6,7 @@
  *  tree. An additional intellectual property rights grant can be found
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
-*/
+ */
 
 #ifndef VP8_COMMON_VP8_ENTROPYMODEDATA_H_
 #define VP8_COMMON_VP8_ENTROPYMODEDATA_H_

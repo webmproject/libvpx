@@ -15,9 +15,9 @@
 static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG *yv12,
                             void *user_priv) {
   /** vpx_img_wrap() doesn't allow specifying independent strides for
-    * the Y, U, and V planes, nor other alignment adjustments that
-    * might be representable by a YV12_BUFFER_CONFIG, so we just
-    * initialize all the fields.*/
+   * the Y, U, and V planes, nor other alignment adjustments that
+   * might be representable by a YV12_BUFFER_CONFIG, so we just
+   * initialize all the fields.*/
   int bps;
   if (!yv12->subsampling_y) {
     if (!yv12->subsampling_x) {

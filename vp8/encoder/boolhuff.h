@@ -9,12 +9,12 @@
  */
 
 /****************************************************************************
-*
-*   Module Title :     boolhuff.h
-*
-*   Description  :     Bool Coder header file.
-*
-****************************************************************************/
+ *
+ *   Module Title :     boolhuff.h
+ *
+ *   Description  :     Bool Coder header file.
+ *
+ ****************************************************************************/
 #ifndef VP8_ENCODER_BOOLHUFF_H_
 #define VP8_ENCODER_BOOLHUFF_H_
 
