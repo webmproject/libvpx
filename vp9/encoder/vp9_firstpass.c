@@ -44,7 +44,6 @@
 #define COMPLEXITY_STATS_OUTPUT 0
 
 #define FIRST_PASS_Q 10.0
-#define GF_MAX_BOOST 96.0
 #define INTRA_MODE_PENALTY 1024
 #define MIN_ARF_GF_BOOST 240
 #define MIN_DECAY_FACTOR 0.01
@@ -1949,6 +1948,7 @@ static void accumulate_frame_motion_stats(const FIRSTPASS_STATS *stats,
 }
 
 #define BASELINE_ERR_PER_MB 12500.0
+#define GF_MAX_BOOST 96.0
 static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
                                double this_frame_mv_in_out) {
   double frame_boost;
@@ -2383,6 +2383,8 @@ static void adjust_group_arnr_filter(VP9_COMP *cpi, double section_noise,
 
 // Analyse and define a gf/arf group.
 #define ARF_DECAY_BREAKOUT 0.10
+#define ARF_ABS_ZOOM_THRESH 4.0
+
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2411,7 +2413,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   double mv_ratio_accumulator_thresh;
-  double mv_in_out_thresh;
   double abs_mv_in_out_thresh;
   double sr_accumulator = 0.0;
   const double av_err = get_distribution_av_err(cpi, twopass);
@@ -2457,8 +2458,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Motion breakout threshold for loop below depends on image size.
   mv_ratio_accumulator_thresh =
       (cpi->initial_height + cpi->initial_width) / 4.0;
-  mv_in_out_thresh = (cpi->initial_height + cpi->initial_width) / 300.0;
-  abs_mv_in_out_thresh = (cpi->initial_height + cpi->initial_width) / 200.0;
+  abs_mv_in_out_thresh = ARF_ABS_ZOOM_THRESH;
 
   // Set a maximum and minimum interval for the GF group.
   // If the image appears almost completely static we can extend beyond this.
@@ -2562,7 +2562,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             (!flash_detected) &&
             ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
              (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
-             (mv_in_out_accumulator < -mv_in_out_thresh) ||
              (sr_accumulator > next_frame.intra_error)))) {
       break;
     }
