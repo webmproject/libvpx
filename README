@@ -1,4 +1,4 @@
-README - 26 January 2017
+README - 24 January 2018
 
 Welcome to the WebM VP8/VP9 Codec SDK!
 
@@ -63,6 +63,8 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     armv8-linux-gcc
     mips32-linux-gcc
     mips64-linux-gcc
+    ppc64-linux-gcc
+    ppc64le-linux-gcc
     sparc-solaris-gcc
     x86-android-gcc
     x86-darwin8-gcc
