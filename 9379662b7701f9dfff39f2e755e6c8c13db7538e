@@ -22,6 +22,30 @@
       "revId": "9379662b7701f9dfff39f2e755e6c8c13db7538e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "099e54e2_4ffce746",
+        "filename": "CHANGELOG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-05T22:45:59Z",
+      "side": 1,
+      "message": "\u003e need to look up when --tune-content\u003dfilm was added\n\nvery recently. in the same time frame as corpus-complexity",
+      "parentUuid": "84618643_fea2a5ca",
+      "range": {
+        "startLine": 9,
+        "startChar": 4,
+        "endLine": 9,
+        "endChar": 16
+      },
+      "revId": "9379662b7701f9dfff39f2e755e6c8c13db7538e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
