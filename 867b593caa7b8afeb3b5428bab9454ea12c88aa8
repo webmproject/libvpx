@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d665cbee_f157f35e",
+        "filename": "vpx_dsp/x86/inv_txfm_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-05T23:44:43Z",
+      "side": 1,
+      "message": "in a followup we could rename these to kSinPiXXXX to allow the locals to be named a bit more naturally",
+      "range": {
+        "startLine": 103,
+        "startChar": 46,
+        "endLine": 103,
+        "endChar": 55
+      },
+      "revId": "867b593caa7b8afeb3b5428bab9454ea12c88aa8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
