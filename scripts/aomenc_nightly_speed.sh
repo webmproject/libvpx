@@ -39,4 +39,4 @@ cc_list="--cc=yunqingwang,vpx-eng"
 
 $script_path/gen_html_footer.sh >> $log_path/$html_log_file
 
-sendgmr --to=$users $cc_list --subject="AV1 Encoder Nightly Report" --from=$sender --reply_to=$sender --html_file=/usr/local/google/home/luoyi/Dev/log/$html_log_file --body_file=/usr/local/google/home/luoyi/Dev/log/$html_log_file
+sendgmr --to=$users $cc_list --subject="AV1 Nightly Speed Report" --from=$sender --reply_to=$sender --html_file=/usr/local/google/home/luoyi/Dev/log/$html_log_file --body_file=/usr/local/google/home/luoyi/Dev/log/$html_log_file
