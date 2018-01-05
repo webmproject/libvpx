@@ -661,6 +661,10 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   // averaging filter), use bilinear for now.
   if (width * height <= 640 * 480) {
     cpi->svc.downsample_filter_type[cpi->svc.spatial_layer_id] = BILINEAR;
+    // Use Eightap_smooth for low resolutions.
+    if (width * height <= 320 * 240)
+      cpi->svc.downsample_filter_type[cpi->svc.spatial_layer_id] =
+          EIGHTTAP_SMOOTH;
     cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id] = 8;
   }
 
