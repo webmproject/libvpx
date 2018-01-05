@@ -19,6 +19,10 @@
 #include "vpx_dsp/x86/transpose_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
 
+// Note: There is no 64-bit bit-level shifting SIMD instruction. All
+// coefficients are left shifted by 2, so that dct_const_round_shift() can be
+// done by right shifting 2 bytes.
+
 static INLINE void extend_64bit(const __m128i in,
                                 __m128i *const out /*out[2]*/) {
   out[0] = _mm_unpacklo_epi32(in, in);  // 0, 0, 1, 1

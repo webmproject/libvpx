@@ -746,7 +746,9 @@ const DctParam c_ht_tests[] = {
 
 INSTANTIATE_TEST_CASE_P(C, TransHT, ::testing::ValuesIn(c_ht_tests));
 
-#if HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
+#if !CONFIG_EMULATE_HARDWARE
+
+#if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, TransHT,
     ::testing::Values(
@@ -776,7 +778,51 @@ INSTANTIATE_TEST_CASE_P(
                    VPX_BITS_8, 1),
         make_tuple(&vp9_fht4x4_sse2, &iht_wrapper<vp9_iht4x4_16_add_sse2>, 4, 3,
                    VPX_BITS_8, 1)));
-#endif  // HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
+#endif  // HAVE_SSE2
+
+#if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(
+    SSE4_1, TransHT,
+    ::testing::Values(
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 0,
+                   VPX_BITS_8, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 1,
+                   VPX_BITS_8, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 2,
+                   VPX_BITS_8, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 3,
+                   VPX_BITS_8, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 0,
+                   VPX_BITS_10, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 1,
+                   VPX_BITS_10, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 2,
+                   VPX_BITS_10, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 3,
+                   VPX_BITS_10, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 0,
+                   VPX_BITS_12, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 1,
+                   VPX_BITS_12, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 2,
+                   VPX_BITS_12, 2),
+        make_tuple(&vp9_highbd_fht4x4_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 3,
+                   VPX_BITS_12, 2)));
+#endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+
+#endif  // !CONFIG_EMULATE_HARDWARE
 
 /* -------------------------------------------------------------------------- */
 
