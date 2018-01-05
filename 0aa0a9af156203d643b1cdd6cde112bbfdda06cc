@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5e20357f_f003a6db",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-05T22:58:02Z",
+      "side": 1,
+      "message": "check these with ASSERT_TRUE(...)",
+      "revId": "0aa0a9af156203d643b1cdd6cde112bbfdda06cc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2123628a_60ea8852",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-05T22:58:02Z",
+      "side": 1,
+      "message": "google test has been updated, you can use the more natural ASSERT_EQ(pixel_size_, 2) now",
+      "revId": "0aa0a9af156203d643b1cdd6cde112bbfdda06cc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4648781c_c06f7a96",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-05T22:58:02Z",
+      "side": 1,
+      "message": "this will break under visual studio builds; you need to either move these to an array or move the #if around the whole INSTANTIATE.",
+      "revId": "0aa0a9af156203d643b1cdd6cde112bbfdda06cc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
