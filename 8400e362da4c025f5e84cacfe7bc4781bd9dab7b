@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4031dc0f_ef3dfafc",
+        "filename": "vp9/common/x86/vp9_highbd_iht4x4_add_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-06T00:24:09Z",
+      "side": 1,
+      "message": "these inner ()s could go",
+      "range": {
+        "startLine": 101,
+        "startChar": 52,
+        "endLine": 101,
+        "endChar": 53
+      },
+      "revId": "8400e362da4c025f5e84cacfe7bc4781bd9dab7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
