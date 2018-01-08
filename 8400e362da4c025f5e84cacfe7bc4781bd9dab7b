@@ -22,6 +22,30 @@
       "revId": "8400e362da4c025f5e84cacfe7bc4781bd9dab7b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c817e221_be0e1ac2",
+        "filename": "vp9/common/x86/vp9_highbd_iht4x4_add_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2018-01-08T18:16:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4031dc0f_ef3dfafc",
+      "range": {
+        "startLine": 101,
+        "startChar": 52,
+        "endLine": 101,
+        "endChar": 53
+      },
+      "revId": "8400e362da4c025f5e84cacfe7bc4781bd9dab7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
