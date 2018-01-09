@@ -1312,6 +1312,11 @@ EOF
             check_gcc_machine_option ${ext%_*} $ext
           fi
         fi
+
+        # https://bugs.chromium.org/p/webm/issues/detail?id=1464
+        # The assembly optimizations for vpx_sub_pixel_variance do not link with
+        # gcc 6.
+        enabled sse2 && soft_enable pic
       done
 
       if enabled external_build; then
