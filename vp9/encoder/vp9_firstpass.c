@@ -2815,6 +2815,7 @@ static int test_candidate_kf(TWO_PASS *twopass,
 #define FRAMES_TO_CHECK_DECAY 8
 #define MIN_KF_TOT_BOOST 300
 #define KF_BOOST_SCAN_MAX_FRAMES 32
+#define KF_ABS_ZOOM_THRESH 6.0
 
 #ifdef AGGRESSIVE_VBR
 #define KF_MAX_FRAME_BOOST 80.0
@@ -2842,6 +2843,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double kf_group_err = 0.0;
   double recent_loop_decay[FRAMES_TO_CHECK_DECAY];
   double sr_accumulator = 0.0;
+  double abs_mv_in_out_accumulator = 0.0;
   const double av_err = get_distribution_av_err(cpi, twopass);
   vp9_zero(next_frame);
 
@@ -3021,7 +3023,14 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
                                         KF_MAX_FRAME_BOOST * zm_factor);
 
       boost_score += frame_boost;
-      if (frame_boost < 25.00) break;
+
+      // Measure of zoom. Large zoom tends to indicate reduced boost.
+      abs_mv_in_out_accumulator +=
+          fabs(next_frame.mv_in_out_count * next_frame.pcnt_motion);
+
+      if ((frame_boost < 25.00) ||
+          (abs_mv_in_out_accumulator > KF_ABS_ZOOM_THRESH))
+        break;
     } else {
       break;
     }
