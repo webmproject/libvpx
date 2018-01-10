@@ -107,12 +107,14 @@ echo "    <th>Enc Time (ms)</th>" >> $log_path/$html_log_file
 echo "    <th>Enc Speedup(%)</th>" >> $log_path/$html_log_file
 echo "    <th>Dec FPS</th>" >> $log_path/$html_log_file
 echo "    <th>Dec Speedup(%)</th>" >> $log_path/$html_log_file
+echo "    <th>PSNR</th>" >> $log_path/$html_log_file
 echo " </tr>" >> $log_path/$html_log_file
 echo " <tr>" >> $log_path/$html_log_file
 echo "    <td>$etime</td>" >> $log_path/$html_log_file
 echo "    <td>$epercent</td>" >> $log_path/$html_log_file
 echo "    <td>$dfps</td>" >> $log_path/$html_log_file
 echo "    <td>$dpercent</td>" >> $log_path/$html_log_file
+echo "    <td>$psnr</td>" >> $log_path/$html_log_file
 echo "  </tr>" >> $log_path/$html_log_file
 echo "</table>" >> $log_path/$html_log_file
 
