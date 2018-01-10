@@ -4360,6 +4360,15 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   struct segmentation *const seg = &cm->seg;
   TX_SIZE t;
 
+  // SVC: skip encoding of enhancement layer if the layer target bandwidth = 0.
+  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
+      !cpi->svc.rc_drop_superframe && cpi->oxcf.target_bandwidth == 0) {
+    cpi->svc.skip_enhancement_layer = 1;
+    vp9_rc_postencode_update_drop_frame(cpi);
+    cpi->ext_refresh_frame_flags_pending = 0;
+    return;
+  }
+
   set_ext_overrides(cpi);
   vpx_clear_system_state();
 
@@ -4451,7 +4460,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     if (vp9_rc_drop_frame(cpi) ||
         (is_one_pass_cbr_svc(cpi) && cpi->svc.rc_drop_superframe == 1)) {
       vp9_rc_postencode_update_drop_frame(cpi);
-      ++cm->current_video_frame;
       cpi->ext_refresh_frame_flags_pending = 0;
       cpi->svc.rc_drop_superframe = 1;
       cpi->last_frame_dropped = 1;

@@ -37,6 +37,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->scaled_one_half = 0;
   svc->current_superframe = 0;
   svc->non_reference_frame = 0;
+  svc->skip_enhancement_layer = 0;
 
   for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
@@ -605,6 +606,7 @@ static void set_flags_and_fb_idx_for_temporal_mode_noLayering(
 int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc = NULL;
+  cpi->svc.skip_enhancement_layer = 0;
   if (cpi->svc.number_spatial_layers > 1) cpi->svc.use_base_mv = 1;
   cpi->svc.force_zero_mode_spatial_ref = 1;
   cpi->svc.mi_stride[cpi->svc.spatial_layer_id] = cpi->common.mi_stride;

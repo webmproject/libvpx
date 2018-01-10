@@ -101,6 +101,8 @@ typedef struct SVC {
   int mi_stride[VPX_MAX_LAYERS];
 
   int first_layer_denoise;
+
+  int skip_enhancement_layer;
 } SVC;
 
 struct VP9_COMP;
