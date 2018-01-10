@@ -390,8 +390,9 @@ void vp9_row_mt_sync_write_dummy(VP9RowMTSync *const row_mt_sync, int r, int c,
 }
 
 #if !CONFIG_REALTIME_ONLY
-static int first_pass_worker_hook(EncWorkerData *const thread_data,
-                                  MultiThreadHandle *multi_thread_ctxt) {
+static int first_pass_worker_hook(void *arg1, void *arg2) {
+  EncWorkerData *const thread_data = (EncWorkerData *)arg1;
+  MultiThreadHandle *multi_thread_ctxt = (MultiThreadHandle *)arg2;
   VP9_COMP *const cpi = thread_data->cpi;
   const VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -470,8 +471,8 @@ void vp9_encode_fp_row_mt(VP9_COMP *cpi) {
     }
   }
 
-  launch_enc_workers(cpi, (VPxWorkerHook)first_pass_worker_hook,
-                     multi_thread_ctxt, num_workers);
+  launch_enc_workers(cpi, first_pass_worker_hook, multi_thread_ctxt,
+                     num_workers);
 
   first_tile_col = &cpi->tile_data[0];
   for (i = 1; i < tile_cols; i++) {
@@ -480,8 +481,9 @@ void vp9_encode_fp_row_mt(VP9_COMP *cpi) {
   }
 }
 
-static int temporal_filter_worker_hook(EncWorkerData *const thread_data,
-                                       MultiThreadHandle *multi_thread_ctxt) {
+static int temporal_filter_worker_hook(void *arg1, void *arg2) {
+  EncWorkerData *const thread_data = (EncWorkerData *)arg1;
+  MultiThreadHandle *multi_thread_ctxt = (MultiThreadHandle *)arg2;
   VP9_COMP *const cpi = thread_data->cpi;
   const VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -553,13 +555,14 @@ void vp9_temporal_filter_row_mt(VP9_COMP *cpi) {
     }
   }
 
-  launch_enc_workers(cpi, (VPxWorkerHook)temporal_filter_worker_hook,
-                     multi_thread_ctxt, num_workers);
+  launch_enc_workers(cpi, temporal_filter_worker_hook, multi_thread_ctxt,
+                     num_workers);
 }
 #endif  // !CONFIG_REALTIME_ONLY
 
-static int enc_row_mt_worker_hook(EncWorkerData *const thread_data,
-                                  MultiThreadHandle *multi_thread_ctxt) {
+static int enc_row_mt_worker_hook(void *arg1, void *arg2) {
+  EncWorkerData *const thread_data = (EncWorkerData *)arg1;
+  MultiThreadHandle *multi_thread_ctxt = (MultiThreadHandle *)arg2;
   VP9_COMP *const cpi = thread_data->cpi;
   const VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -648,8 +651,8 @@ void vp9_encode_tiles_row_mt(VP9_COMP *cpi) {
     }
   }
 
-  launch_enc_workers(cpi, (VPxWorkerHook)enc_row_mt_worker_hook,
-                     multi_thread_ctxt, num_workers);
+  launch_enc_workers(cpi, enc_row_mt_worker_hook, multi_thread_ctxt,
+                     num_workers);
 
   for (i = 0; i < num_workers; i++) {
     VPxWorker *const worker = &cpi->workers[i];
