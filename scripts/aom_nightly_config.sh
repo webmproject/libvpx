@@ -1,23 +1,13 @@
 #!/bin/sh
 #set -x
 
-platform=x86_64-linux-gcc
-codec=--enable-av1
 libsrc=aom
 test_dir=~/Dev/nightly
-script_dir=~/Dev/sandbox/libvpx/scripts
-tool=
 
-common="--disable-unit-tests --disable-docs"
-debug=
+echo "cmake ../$libsrc -DCONFIG_UNIT_TESTS=0 -DENABLE_DOCS=0"
 
-#. $script_dir/disabled_list.sh
-disabled=
-
-echo ../$libsrc/configure $common $debug $disabled $tool
-
-../$libsrc/configure $common $debug $disabled $tool > /dev/null
+cmake ../$libsrc -DCONFIG_UNIT_TESTS=0 -DENABLE_DOCS=0 > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo "Error: configure fails!" > $test_dir/aom_error_config.txt
+  echo "Error: cmake configure fails!" > $test_dir/aom_error_config.txt
   exit 1
 fi

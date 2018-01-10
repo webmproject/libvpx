@@ -44,7 +44,7 @@ $script_path/aom_nightly_speed.sh $av1_code $pdfps $petime $speed $html_log_file
 users=luoyi
 host_name=`hostname`
 sender=luoyi
-#cc_list="--cc=yunqingwang,vpx-eng"
+cc_list="--cc=yunqingwang,vpx-eng"
 
 $script_path/gen_html_footer.sh >> $log_path/$html_log_file
 
