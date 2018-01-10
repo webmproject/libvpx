@@ -11,16 +11,18 @@
 #  verbose=-v
 #set -x
 
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
   root_dir=~/Dev/av1d
   pdfps=1
   petime=1
+  speed=0
   html_log_file=log.html  
 else
   root_dir=$1
   pdfps=$2
   petime=$3
-  html_log_file=$4
+  speed=$4
+  html_log_file=$5
 fi
 log_path=~/Dev/log
 
@@ -54,10 +56,9 @@ profile=0
 tune_content=
 col_num=0
 laginframes=19
-speed=0
 
-elog=av1enc_log_p_$profile.txt
-dlog=av1dec_log_p_$profile.txt
+elog=av1enc_log_p_$profile.$speed.txt
+dlog=av1dec_log_p_$profile.$speed.txt
 bstream=av1_p_$profile.$speed.$commit.webm
 
 taskset -c $core_id ./aomenc $verbose -o /dev/shm/"$bstream" $video $codec --limit=$frames --profile=$profile $bitdepth --fps=$fps $tune_content --target-bitrate=$bitrate --skip=0 -p 2 --good --cpu-used=$speed --lag-in-frames=$laginframes --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 --tile-columns=$col_num --psnr &>> $elog
