@@ -22,7 +22,7 @@ namespace {
 // Encoding modes
 const libvpx_test::TestMode kEncodingModeVectors[] = {
   ::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
-  ::libvpx_test::kRealTime,
+  ::libvpx_test::kRealTime
 };
 
 // Encoding speeds

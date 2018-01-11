@@ -112,8 +112,9 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(MSA, SumSquaresTest, ::testing::Values(make_tuple(
-                                                 &vpx_sum_squares_2d_i16_c,
-                                                 &vpx_sum_squares_2d_i16_msa)));
+INSTANTIATE_TEST_CASE_P(
+    MSA, SumSquaresTest,
+    ::testing::Values(make_tuple(&vpx_sum_squares_2d_i16_c,
+                                 &vpx_sum_squares_2d_i16_msa)));
 #endif  // HAVE_MSA
 }  // namespace

@@ -205,7 +205,7 @@ using std::tr1::make_tuple;
 
 #if CONFIG_VP9_ENCODER
 const ConsistencyParam c_vp9_tests[] = {
-  make_tuple(320, 240), make_tuple(318, 242), make_tuple(318, 238),
+  make_tuple(320, 240), make_tuple(318, 242), make_tuple(318, 238)
 };
 INSTANTIATE_TEST_CASE_P(C, ConsistencyVP9Test,
                         ::testing::ValuesIn(c_vp9_tests));
