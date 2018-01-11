@@ -2215,9 +2215,9 @@ int main(int argc, const char **argv_) {
 
     if (!global.quiet) {
       FOREACH_STREAM(fprintf(
-          stderr, "\rPass %d/%d frame %4d/%-4d %7" PRId64 "B %7" PRId64
-                  "b/f %7" PRId64 "b/s"
-                  " %7" PRId64 " %s (%.2f fps)\033[K\n",
+          stderr,
+          "\rPass %d/%d frame %4d/%-4d %7" PRId64 "B %7" PRId64 "b/f %7" PRId64
+          "b/s %7" PRId64 " %s (%.2f fps)\033[K\n",
           pass + 1, global.passes, frames_in, stream->frames_out,
           (int64_t)stream->nbytes,
           seen_frames ? (int64_t)(stream->nbytes * 8 / seen_frames) : 0,
