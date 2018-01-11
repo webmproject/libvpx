@@ -68,7 +68,9 @@ extern "C" {
 // on any platform (to discourage programmer errors by setting values directly).
 // This primitive MUST be initialized using vpx_atomic_init or VPX_ATOMIC_INIT
 // (NOT memset) and accessed through vpx_atomic_ functions.
-typedef struct vpx_atomic_int { volatile int value; } vpx_atomic_int;
+typedef struct vpx_atomic_int {
+  volatile int value;
+} vpx_atomic_int;
 
 #define VPX_ATOMIC_INIT(num) \
   { num }
