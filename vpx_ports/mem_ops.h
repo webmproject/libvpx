@@ -224,5 +224,4 @@ static VPX_INLINE void mem_put_le32(void *vmem, MEM_VALUE_T val) {
   mem[3] = (MAU_T)((val >> 24) & 0xff);
 }
 /* clang-format on */
-
 #endif  // VPX_PORTS_MEM_OPS_H_
