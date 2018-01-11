@@ -99,9 +99,10 @@ static void set_rate_control_metrics(struct RateControlMetrics *rc,
   for (i = 0; i < cfg->ts_number_layers; ++i) {
     if (i > 0) {
       rc->layer_framerate[i] = framerate / cfg->ts_rate_decimator[i];
-      rc->layer_pfb[i] = 1000.0 * (rc->layer_target_bitrate[i] -
-                                   rc->layer_target_bitrate[i - 1]) /
-                         (rc->layer_framerate[i] - rc->layer_framerate[i - 1]);
+      rc->layer_pfb[i] =
+          1000.0 *
+          (rc->layer_target_bitrate[i] - rc->layer_target_bitrate[i - 1]) /
+          (rc->layer_framerate[i] - rc->layer_framerate[i - 1]);
     }
     rc->layer_input_frames[i] = 0;
     rc->layer_enc_frames[i] = 0;
