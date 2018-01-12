@@ -1785,7 +1785,10 @@ static int vector_match(int16_t *ref, int16_t *src, int bwl) {
 }
 
 static const MV search_pos[4] = {
-  { -1, 0 }, { 0, -1 }, { 0, 1 }, { 1, 0 },
+  { -1, 0 },
+  { 0, -1 },
+  { 0, 1 },
+  { 1, 0 },
 };
 
 unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
@@ -1876,7 +1879,10 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 
   {
     const uint8_t *const pos[4] = {
-      ref_buf - ref_stride, ref_buf - 1, ref_buf + 1, ref_buf + ref_stride,
+      ref_buf - ref_stride,
+      ref_buf - 1,
+      ref_buf + 1,
+      ref_buf + ref_stride,
     };
 
     cpi->fn_ptr[bsize].sdx4df(src_buf, src_stride, pos, ref_stride, this_sad);

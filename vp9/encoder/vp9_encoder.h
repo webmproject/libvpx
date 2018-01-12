@@ -868,9 +868,8 @@ static INLINE int is_one_pass_cbr_svc(const struct VP9_COMP *const cpi) {
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 static INLINE int denoise_svc(const struct VP9_COMP *const cpi) {
-  return (!cpi->use_svc ||
-          (cpi->use_svc &&
-           cpi->svc.spatial_layer_id >= cpi->svc.first_layer_denoise));
+  return (!cpi->use_svc || (cpi->use_svc && cpi->svc.spatial_layer_id >=
+                                                cpi->svc.first_layer_denoise));
 }
 #endif
 

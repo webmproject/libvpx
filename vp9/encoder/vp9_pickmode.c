@@ -1785,9 +1785,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         continue;
     }
 
-    if (sf->reference_masking &&
-        !(frame_mv[this_mode][ref_frame].as_int == 0 &&
-          ref_frame == LAST_FRAME)) {
+    if (sf->reference_masking && !(frame_mv[this_mode][ref_frame].as_int == 0 &&
+                                   ref_frame == LAST_FRAME)) {
       if (usable_ref_frame < ALTREF_FRAME) {
         if (!force_skip_low_temp_var && usable_ref_frame > LAST_FRAME) {
           i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;

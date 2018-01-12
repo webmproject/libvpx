@@ -50,7 +50,8 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 }
 
 static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
-  { 10, 6 }, { 8, 5 },
+  { 10, 6 },
+  { 8, 5 },
 };
 
 // 'num' can be negative, but 'shift' must be non-negative.
@@ -200,9 +201,9 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
           const int band_next = band_translate[i + 1];
           const int token_next =
               (i + 1 != eob) ? vp9_get_token(qcoeff[scan[i + 1]]) : EOB_TOKEN;
-          unsigned int(
-              *const token_costs_next)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
-              token_costs + band_next;
+          unsigned int(*const token_costs_next)[2][COEFF_CONTEXTS]
+                                               [ENTROPY_TOKENS] =
+                                                   token_costs + band_next;
           token_cache[rc] = vp9_pt_energy_class[t0];
           ctx_next = get_coef_context(nb, token_cache, i + 1);
           token_tree_sel_next = (x == 0);

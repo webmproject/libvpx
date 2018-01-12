@@ -229,9 +229,8 @@ int vp9_get_pred_context_single_ref_p2(const MACROBLOCKD *xd) {
         else
           pred_context = 4 * (edge_mi->ref_frame[0] == GOLDEN_FRAME);
       } else {
-        pred_context = 1 +
-                       2 * (edge_mi->ref_frame[0] == GOLDEN_FRAME ||
-                            edge_mi->ref_frame[1] == GOLDEN_FRAME);
+        pred_context = 1 + 2 * (edge_mi->ref_frame[0] == GOLDEN_FRAME ||
+                                edge_mi->ref_frame[1] == GOLDEN_FRAME);
       }
     } else {  // inter/inter
       const int above_has_second = has_second_ref(above_mi);
