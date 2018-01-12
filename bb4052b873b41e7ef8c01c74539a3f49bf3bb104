@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6615cf50_9db6c938",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2757,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2018-01-12T22:57:58Z",
+      "side": 1,
+      "message": "What if its an detailed static scene with no noise ( eg cgi) with a one frame change? that becomes static again.    \n\nEg we are doing a screen capture at near lossless, and someone types in a new letter on the screen?   \n\nLast Error \u003d 0,   New Error \u003d 0 ,  this error \u003d 40?\n\nor anything else in which there\u0027s a somewhat detailed but really static background with a single frame change of something small on the screen.",
+      "range": {
+        "startLine": 2757,
+        "startChar": 25,
+        "endLine": 2757,
+        "endChar": 35
+      },
+      "revId": "bb4052b873b41e7ef8c01c74539a3f49bf3bb104",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
