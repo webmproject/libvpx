@@ -76,7 +76,6 @@ static INLINE tran_high_t highbd_check_range(tran_high_t input, int bd) {
 // bd of 10 uses trans_low with 18bits, need to remove 14bits
 // bd of 12 uses trans_low with 20bits, need to remove 12bits
 // bd of x uses trans_low with 8+x bits, need to remove 24-x bits
-
 #define WRAPLOW(x) ((((int32_t)check_range(x)) << 16) >> 16)
 #if CONFIG_VP9_HIGHBITDEPTH
 #define HIGHBD_WRAPLOW(x, bd) \

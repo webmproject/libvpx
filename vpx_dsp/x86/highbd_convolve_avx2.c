@@ -192,8 +192,6 @@ void vpx_highbd_convolve_avg_avx2(const uint16_t *src, ptrdiff_t src_stride,
 // -----------------------------------------------------------------------------
 // Horizontal and vertical filtering
 
-#define CONV8_ROUNDING_BITS (7)
-
 static const uint8_t signal_pattern_0[32] = { 0, 1, 2, 3, 2, 3, 4, 5, 4, 5, 6,
                                               7, 6, 7, 8, 9, 0, 1, 2, 3, 2, 3,
                                               4, 5, 4, 5, 6, 7, 6, 7, 8, 9 };
@@ -209,6 +207,8 @@ static const uint8_t signal_pattern_2[32] = { 6,  7,  8,  9,  8,  9,  10, 11,
                                               10, 11, 12, 13, 12, 13, 14, 15 };
 
 static const uint32_t signal_index[8] = { 2, 3, 4, 5, 2, 3, 4, 5 };
+
+#define CONV8_ROUNDING_BITS (7)
 
 // -----------------------------------------------------------------------------
 // Horizontal Filtering
