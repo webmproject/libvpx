@@ -34,7 +34,9 @@ typedef struct {
 /* Structure used to hold all the overlaps of a macroblock. The overlaps of a
  * macroblock is further divided into block overlaps.
  */
-typedef struct { B_OVERLAP overlaps[16]; } MB_OVERLAP;
+typedef struct {
+  B_OVERLAP overlaps[16];
+} MB_OVERLAP;
 
 /* Structure for keeping track of motion vectors and which reference frame they
  * refer to. Used for motion vector interpolation.

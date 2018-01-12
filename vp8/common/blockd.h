@@ -37,7 +37,9 @@ extern "C" {
 #define SEGMENT_DELTADATA 0
 #define SEGMENT_ABSDATA 1
 
-typedef struct { int r, c; } POS;
+typedef struct {
+  int r, c;
+} POS;
 
 #define PLANE_TYPE_Y_NO_DC 0
 #define PLANE_TYPE_Y2 1

@@ -31,7 +31,9 @@ typedef struct {
   void *ptr2;
 } DECODETHREAD_DATA;
 
-typedef struct { MACROBLOCKD mbd; } MB_ROW_DEC;
+typedef struct {
+  MACROBLOCKD mbd;
+} MB_ROW_DEC;
 
 typedef struct {
   int enabled;

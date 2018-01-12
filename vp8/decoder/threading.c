@@ -739,24 +739,21 @@ void vp8mt_alloc_temp_buffers(VP8D_COMP *pbi, int width, int prev_mb_rows) {
     /* Allocate memory for above_row buffers. */
     CALLOC_ARRAY(pbi->mt_yabove_row, pc->mb_rows);
     for (i = 0; i < pc->mb_rows; ++i)
-      CHECK_MEM_ERROR(
-          pbi->mt_yabove_row[i],
-          vpx_memalign(
-              16, sizeof(unsigned char) * (width + (VP8BORDERINPIXELS << 1))));
+      CHECK_MEM_ERROR(pbi->mt_yabove_row[i],
+                      vpx_memalign(16, sizeof(unsigned char) *
+                                           (width + (VP8BORDERINPIXELS << 1))));
 
     CALLOC_ARRAY(pbi->mt_uabove_row, pc->mb_rows);
     for (i = 0; i < pc->mb_rows; ++i)
-      CHECK_MEM_ERROR(
-          pbi->mt_uabove_row[i],
-          vpx_memalign(16,
-                       sizeof(unsigned char) * (uv_width + VP8BORDERINPIXELS)));
+      CHECK_MEM_ERROR(pbi->mt_uabove_row[i],
+                      vpx_memalign(16, sizeof(unsigned char) *
+                                           (uv_width + VP8BORDERINPIXELS)));
 
     CALLOC_ARRAY(pbi->mt_vabove_row, pc->mb_rows);
     for (i = 0; i < pc->mb_rows; ++i)
-      CHECK_MEM_ERROR(
-          pbi->mt_vabove_row[i],
-          vpx_memalign(16,
-                       sizeof(unsigned char) * (uv_width + VP8BORDERINPIXELS)));
+      CHECK_MEM_ERROR(pbi->mt_vabove_row[i],
+                      vpx_memalign(16, sizeof(unsigned char) *
+                                           (uv_width + VP8BORDERINPIXELS)));
 
     /* Allocate memory for left_col buffers. */
     CALLOC_ARRAY(pbi->mt_yleft_col, pc->mb_rows);

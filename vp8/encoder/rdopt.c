@@ -770,9 +770,9 @@ static void rd_pick_intra_mbuv_mode(MACROBLOCK *x, int *rate,
     vp8_quantize_mbuv(x);
 
     rate_to = rd_cost_mbuv(x);
-    this_rate = rate_to +
-                x->intra_uv_mode_cost[xd->frame_type]
-                                     [xd->mode_info_context->mbmi.uv_mode];
+    this_rate =
+        rate_to + x->intra_uv_mode_cost[xd->frame_type]
+                                       [xd->mode_info_context->mbmi.uv_mode];
 
     this_distortion = vp8_mbuverror(x) / 4;
 
