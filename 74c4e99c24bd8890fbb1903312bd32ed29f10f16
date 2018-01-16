@@ -16,6 +16,24 @@
       "revId": "74c4e99c24bd8890fbb1903312bd32ed29f10f16",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5791ca8c_97423440",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-16T19:49:24Z",
+      "side": 1,
+      "message": "it\u0027s untriaged, I wonder what the status is in 5.0.1.",
+      "parentUuid": "b81609de_be74b850",
+      "revId": "74c4e99c24bd8890fbb1903312bd32ed29f10f16",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }

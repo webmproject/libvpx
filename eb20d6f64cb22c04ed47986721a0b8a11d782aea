@@ -34,6 +34,24 @@
       "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f2f1e37_8a262948",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-16T19:49:24Z",
+      "side": 0,
+      "message": "\u003e comment in front of #\n\u003e \n\u003e Removed the rest of them because they don\u0027t appear to serve any purpose. Left the ones that have information in the comments.\n\nthey\u0027re mostly to provide a visual (and logical) break between different types. if the others weren\u0027t affected I wouldn\u0027t add that to this change.",
+      "parentUuid": "26b1f431_d67c5384",
+      "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
