@@ -52,6 +52,24 @@
       "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "069b2f87_5c51af0d",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-01-16T20:09:10Z",
+      "side": 0,
+      "message": "The functions themselves provide that distinction. Not sure what adding the lines helps. Most other files don\u0027t use this style. Removing just one line would make it weird.",
+      "parentUuid": "6f2f1e37_8a262948",
+      "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
