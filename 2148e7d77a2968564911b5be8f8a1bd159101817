@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90d1d6fc_54288404",
+        "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-01-16T19:39:02Z",
+      "side": 1,
+      "message": "|| PIC?",
+      "range": {
+        "startLine": 366,
+        "startChar": 4,
+        "endLine": 366,
+        "endChar": 15
+      },
+      "revId": "2148e7d77a2968564911b5be8f8a1bd159101817",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
