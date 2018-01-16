@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "ad2fff38_56fd7480",
+        "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-01-16T20:13:14Z",
+      "side": 1,
+      "message": "isn\u0027t this 32bit + PIC?",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 18
+      },
+      "revId": "2148e7d77a2968564911b5be8f8a1bd159101817",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "90d1d6fc_54288404",
         "filename": "vpx_dsp/x86/subpel_variance_sse2.asm",
         "patchSetId": 2
