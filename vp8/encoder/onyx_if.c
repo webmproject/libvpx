@@ -3364,11 +3364,6 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
         (LOWER_RES_FRAME_INFO *)cpi->oxcf.mr_low_res_mode_info;
 
     if (cpi->oxcf.mr_encoder_id) {
-      // TODO(marpan): This constraint shouldn't be needed, as we would like
-      // to allow for key frame setting (forced or periodic) defined per
-      // spatial layer. For now, keep this in.
-      cm->frame_type = low_res_frame_info->frame_type;
-
       // Check if lower resolution is available for motion vector reuse.
       if (cm->frame_type != KEY_FRAME) {
         cpi->mr_low_res_mv_avail = 1;
@@ -3393,7 +3388,16 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
                      == low_res_frame_info->low_res_ref_frames[ALTREF_FRAME]);
         */
       }
+      // Disable motion vector reuse (i.e., disable any usage of the low_res)
+      // if the previous lower stream is skipped/disabled.
+      if (low_res_frame_info->skip_encoding_prev_stream) {
+        cpi->mr_low_res_mv_avail = 0;
+      }
     }
+    // This stream is not skipped (i.e., it's being encoded), so set this skip
+    // flag to 0. This is needed for the next stream (i.e., which is the next
+    // frame to be encoded).
+    low_res_frame_info->skip_encoding_prev_stream = 0;
 
     // On a key frame: For the lowest resolution, keep track of the key frame
     // counter value. For the higher resolutions, reset the current video
@@ -4999,10 +5003,13 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
         // be received for that high layer, which will yield an incorrect
         // frame rate (from time-stamp adjustment in above calculation).
         if (cpi->oxcf.mr_encoder_id) {
-          cpi->ref_framerate = low_res_frame_info->low_res_framerate;
+          if (!low_res_frame_info->skip_encoding_base_stream)
+            cpi->ref_framerate = low_res_frame_info->low_res_framerate;
         } else {
           // Keep track of frame rate for lowest resolution.
           low_res_frame_info->low_res_framerate = cpi->ref_framerate;
+          // The base stream is being encoded so set skip flag to 0.
+          low_res_frame_info->skip_encoding_base_stream = 0;
         }
       }
 #endif
