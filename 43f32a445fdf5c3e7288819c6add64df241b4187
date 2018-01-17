@@ -1,0 +1,197 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25952435_e7567ac2",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "better to pass the codec_type, and then base block_size on that.\n\nAlso we need the codec_type, since the segment features are different\nfor vp8 and vp9: \n-static_threshold does not exist for vp9\n-vp9 allows up to 8 segments\n-vp9 has 2 other optional features (ref_frame and skip).",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10af5cd4_2026f6b3",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "this feature only exists only for vp8",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54eeb3b1_18640875",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 780,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "keep this set to 3 as default",
+      "range": {
+        "startLine": 780,
+        "startChar": 30,
+        "endLine": 780,
+        "endChar": 46
+      },
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "28403661_a5c5dfda",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 791,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "if its vp9 codec, we should disable AQ_MODE here by calling control again:\nvpx_codec_control(\u0026codec, VP9E_SET_AQ_MODE, 0);",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "60b98849_ed207b5e",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "do we need this here?",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f30f407d_40b5b908",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 658,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "this threshold don\u0027t exist for vp9?",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1937d54_91e0ca41",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3731,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "i think we should be applied also to key frame?",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7c68676_dc3435f5",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4491,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "not sure we need this here, as apply_roi_map is called after this?",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b2175a0f_7e4532e8",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "don\u0027t think we use this in VP9 roi",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd85bd7d_8774ff24",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "vp9 has two other features: see SEG_LVL_REF_FRAME and SEG_LVL_SKIP,\nin common/vp9_seg_common.h.\n\nIt says there are \"optional\" in comment, and i\u0027m not sure they work\nin real-time mode (non-rd flow), so we can ignore them for now. But you should add comment about it.",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea5ba29c_17112d2f",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 656,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-17T17:35:02Z",
+      "side": 1,
+      "message": "this one is only for vp8?",
+      "revId": "43f32a445fdf5c3e7288819c6add64df241b4187",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
