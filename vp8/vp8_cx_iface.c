@@ -902,8 +902,6 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
             (unsigned long)((delta * ctx->cfg.g_timebase.den + round) /
                             ctx->cfg.g_timebase.num / 10000000);
         pkt.data.frame.flags = lib_flags << 16;
-        pkt.data.frame.width = cpi->common.Width;
-        pkt.data.frame.height = cpi->common.Height;
 
         if (lib_flags & FRAMEFLAGS_KEY) {
           pkt.data.frame.flags |= VPX_FRAME_IS_KEY;
