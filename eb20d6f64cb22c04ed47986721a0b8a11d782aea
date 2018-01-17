@@ -106,6 +106,24 @@
       "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "610527cb_d98db6cb",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-17T18:49:02Z",
+      "side": 0,
+      "message": "\u003e I can abandon the update if you don\u0027t want the clang 5.0.0 formatter. I don\u0027t think this removal is egregious though.\n\nWe should move forward with 5.0.0 or 5.0.1, I just want to limit incidental changes and avoid surprises in reviews if we hit something like this. Maybe move this one to within the #if if that satisfies it to keep the diff down.",
+      "parentUuid": "089d8e51_1997f0e6",
+      "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
