@@ -70,6 +70,24 @@
       "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23561b30_28235c81",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-17T00:41:45Z",
+      "side": 0,
+      "message": "\u003e The functions themselves provide that distinction. Not sure what adding the lines helps. Most other files don\u0027t use this style. Removing just one line would make it weird.\n\nwe picked up some of it from webp. I\u0027m just worried about taking a format tool that forces us to change code in this way. the !HAVE_NEON_ASM might be enough to distinguish this section",
+      "parentUuid": "069b2f87_5c51af0d",
+      "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
