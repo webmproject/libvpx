@@ -124,6 +124,24 @@
       "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77689346_e3216398",
+        "filename": "vpx_dsp/arm/intrapred_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-01-17T18:55:05Z",
+      "side": 0,
+      "message": "I really don\u0027t think these separators are worth preserving. They are not in most of the other libvpx code and don\u0027t add any meaningful information.",
+      "parentUuid": "610527cb_d98db6cb",
+      "revId": "eb20d6f64cb22c04ed47986721a0b8a11d782aea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
