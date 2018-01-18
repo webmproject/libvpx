@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "80f73bf4_4b544261",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2018-01-18T21:33:12Z",
+      "side": 1,
+      "message": "Nevermind.. I lied.  This code works with the highbitdepth enabled, so I\u0027ll remove the above.",
+      "parentUuid": "1df17862_ff6cc9ac",
+      "range": {
+        "startLine": 535,
+        "startChar": 32,
+        "endLine": 535,
+        "endChar": 56
+      },
+      "revId": "f554effe77133fcf8be23dc9bc0eb37c0148da6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "7df6082a_1d62ffb6",
         "filename": "vp9/encoder/x86/vp9_quantize_avx2.c",
         "patchSetId": 9
