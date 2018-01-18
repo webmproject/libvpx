@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7cebec5b_62009fe6",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-18T19:47:13Z",
+      "side": 1,
+      "message": "there are some CONFIG_VP9_HIGHBITDEPTH checks in the code, is that still a wip?",
+      "range": {
+        "startLine": 535,
+        "startChar": 32,
+        "endLine": 535,
+        "endChar": 56
+      },
+      "revId": "f554effe77133fcf8be23dc9bc0eb37c0148da6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7df6082a_1d62ffb6",
+        "filename": "vp9/encoder/x86/vp9_quantize_avx2.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-18T19:47:13Z",
+      "side": 1,
+      "message": "you could join these 2 to the declarations",
+      "revId": "f554effe77133fcf8be23dc9bc0eb37c0148da6e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
