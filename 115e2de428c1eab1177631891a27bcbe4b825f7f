@@ -16,6 +16,97 @@
       "revId": "115e2de428c1eab1177631891a27bcbe4b825f7f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e487555_8d0ebbd4",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-18T08:00:54Z",
+      "side": 1,
+      "message": "I\u0027d prefer {}s on loops and conditional that continue to a new line, like you have at 184",
+      "range": {
+        "startLine": 128,
+        "startChar": 29,
+        "endLine": 128,
+        "endChar": 0
+      },
+      "revId": "115e2de428c1eab1177631891a27bcbe4b825f7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9df0354f_0bc64512",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-18T08:00:54Z",
+      "side": 1,
+      "message": "prefer sizeof(var)",
+      "revId": "115e2de428c1eab1177631891a27bcbe4b825f7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6b08d988_37e59043",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-18T08:00:54Z",
+      "side": 1,
+      "message": "these 2 don\u0027t appear to be used meaningfully",
+      "revId": "115e2de428c1eab1177631891a27bcbe4b825f7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "561aed72_030277bc",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-18T08:00:54Z",
+      "side": 1,
+      "message": "put this above string.h",
+      "revId": "115e2de428c1eab1177631891a27bcbe4b825f7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a5a72d7_3897e861",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-18T08:00:54Z",
+      "side": 1,
+      "message": "mem_loc is guaranteed to be non-NULL at this point correct? maybe add an assert to document that",
+      "revId": "115e2de428c1eab1177631891a27bcbe4b825f7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
