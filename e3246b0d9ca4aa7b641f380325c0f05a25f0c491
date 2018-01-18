@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47d51c90_59de7f99",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-18T21:33:32Z",
+      "side": 1,
+      "message": "Add comment on what test does, something like:\nSets up 2 spatial streams with 2 temporal layers per stream, and generates invalid configuration by setting the temporal layer rate allocation (ts_target_bitrate[]) to 0\nfor both layers.",
+      "revId": "e3246b0d9ca4aa7b641f380325c0f05a25f0c491",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
