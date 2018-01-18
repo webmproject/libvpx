@@ -16,6 +16,24 @@
       "revId": "f95bf1db50cdffde0d37eeb768a9955fc423684c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ea77596_43cb6369",
+        "filename": "vp8/common/modecont.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-01-18T20:58:29Z",
+      "side": 1,
+      "message": "Yep:\n$ clang-format -i vp8/common/modecont.c\n$ git diff\ndiff --git a/vp8/common/modecont.c b/vp8/common/modecont.c\nindex d6ad9bb99..196221fa6 100644\n--- a/vp8/common/modecont.c\n+++ b/vp8/common/modecont.c\n@@ -13,26 +13,44 @@\n const int vp8_mode_contexts[6][4] \u003d {\n   {\n       /* 0 */\n-      7, 1, 1, 143,\n+      7,\n+      1,\n+      1,\n+      143,\n   },\n\u003c...\u003e",
+      "parentUuid": "4916379e_ef2edeeb",
+      "revId": "f95bf1db50cdffde0d37eeb768a9955fc423684c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
