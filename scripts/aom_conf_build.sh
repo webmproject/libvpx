@@ -7,6 +7,7 @@ exp_tool=
 
 cd $build_dir
 make clean > /dev/null
+rm -fr *
 $script_dir/aom_nightly_config.sh
 make -j > /dev/null
 if [ $? -ne 0 ]; then
