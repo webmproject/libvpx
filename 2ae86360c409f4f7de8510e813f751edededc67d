@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43af48f9_d78ab6bb",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 663,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-22T21:37:38Z",
+      "side": 1,
+      "message": "Add the other 2 vp9 features (SEG_LVL_REF_FRAME and SEG_LVL_SKIP) here.\nThe SEG_LVL_SKIP is setup to work in real-time mode, so we should allow for that one too to work for ROI in this patch.",
+      "revId": "2ae86360c409f4f7de8510e813f751edededc67d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
