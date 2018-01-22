@@ -1351,6 +1351,14 @@ class DatarateOnePassCbrSvc
               << "Buffer Underrun at frame " << pkt->data.frame.pts;
         }
       }
+
+      ASSERT_EQ(pkt->data.frame.width[sl],
+                top_sl_width_ * svc_params_.scaling_factor_num[sl] /
+                    svc_params_.scaling_factor_den[sl]);
+
+      ASSERT_EQ(pkt->data.frame.height[sl],
+                top_sl_height_ * svc_params_.scaling_factor_num[sl] /
+                    svc_params_.scaling_factor_den[sl]);
     }
   }
 
@@ -1393,6 +1401,8 @@ class DatarateOnePassCbrSvc
   int number_temporal_layers_;
   int layer_target_avg_bandwidth_[VPX_MAX_LAYERS];
   bool dynamic_drop_layer_;
+  unsigned int top_sl_width_;
+  unsigned int top_sl_height_;
 };
 static void assign_layer_bitrates(vpx_codec_enc_cfg_t *const enc_cfg,
                                   const vpx_svc_extra_cfg_t *svc_params,
@@ -1486,6 +1496,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL1TLScreenContent1) {
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
+  top_sl_width_ = 1280;
+  top_sl_height_ = 720;
   cfg_.rc_target_bitrate = 500;
   ResetModel();
   tune_content_ = 1;
@@ -1527,6 +1539,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
   // TODO(marpan): Check that effective_datarate for each layer hits the
   // layer target_bitrate.
   for (int i = 200; i <= 800; i += 200) {
@@ -1577,6 +1591,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
   // TODO(marpan): Check that effective_datarate for each layer hits the
   // layer target_bitrate.
   // For SVC, noise_sen = 1 means denoising only the top spatial layer
@@ -1633,6 +1649,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLSmallKf) {
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
   // For this 3 temporal layer case, pattern repeats every 4 frames, so choose
   // 4 key neighboring key frame periods (so key frame will land on 0-2-1-2).
   for (int j = 64; j <= 67; j++) {
@@ -1675,6 +1693,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4Threads) {
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
+  top_sl_width_ = 1280;
+  top_sl_height_ = 720;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
@@ -1722,6 +1742,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
@@ -1769,6 +1791,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL_to_2SL_dynamic) {
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   dynamic_drop_layer_ = true;
@@ -1812,6 +1836,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLSmallKf) {
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
   // For this 3 temporal layer case, pattern repeats every 4 frames, so choose
   // 4 key neighboring key frame periods (so key frame will land on 0-2-1-2).
   for (int j = 32; j <= 35; j++) {
@@ -1856,6 +1882,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4threads) {
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
+  top_sl_width_ = 1280;
+  top_sl_height_ = 720;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
@@ -1911,6 +1939,8 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL1TL5x5MultipleRuns) {
   bits_in_buffer_model_[1] =
       cfg_.layer_target_bitrate[1] * cfg_.rc_buf_initial_sz;
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
+  top_sl_width_ = 1280;
+  top_sl_height_ = 720;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                           number_temporal_layers_, file_datarate_, 0.78, 1.15);

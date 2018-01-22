@@ -278,10 +278,10 @@ class ResizeTest
   }
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
-    ASSERT_NE(static_cast<int>(pkt->data.frame.width), 0);
-    ASSERT_NE(static_cast<int>(pkt->data.frame.height), 0);
-    encode_frame_width_.push_back(pkt->data.frame.width);
-    encode_frame_height_.push_back(pkt->data.frame.height);
+    ASSERT_NE(static_cast<int>(pkt->data.frame.width[0]), 0);
+    ASSERT_NE(static_cast<int>(pkt->data.frame.height[0]), 0);
+    encode_frame_width_.push_back(pkt->data.frame.width[0]);
+    encode_frame_height_.push_back(pkt->data.frame.height[0]);
   }
 
   unsigned int GetFrameWidth(size_t idx) const {
@@ -485,10 +485,10 @@ class ResizeRealtimeTest
   }
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
-    ASSERT_NE(static_cast<int>(pkt->data.frame.width), 0);
-    ASSERT_NE(static_cast<int>(pkt->data.frame.height), 0);
-    encode_frame_width_.push_back(pkt->data.frame.width);
-    encode_frame_height_.push_back(pkt->data.frame.height);
+    ASSERT_NE(static_cast<int>(pkt->data.frame.width[0]), 0);
+    ASSERT_NE(static_cast<int>(pkt->data.frame.height[0]), 0);
+    encode_frame_width_.push_back(pkt->data.frame.width[0]);
+    encode_frame_height_.push_back(pkt->data.frame.height[0]);
   }
 
   unsigned int GetMismatchFrames() { return mismatch_nframes_; }

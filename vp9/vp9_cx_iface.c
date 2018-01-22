@@ -1234,6 +1234,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
           ctx->pending_frame_magnitude |= size;
           cx_data += size;
           cx_data_sz -= size;
+          pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
+          pkt.data.frame.height[cpi->svc.spatial_layer_id] = cpi->common.height;
 
           if (ctx->output_cx_pkt_cb.output_cx_pkt) {
             pkt.kind = VPX_CODEC_CX_FRAME_PKT;
@@ -1260,8 +1262,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
         pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
             timebase, dst_end_time_stamp - dst_time_stamp);
         pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
-        pkt.data.frame.width = cpi->common.width;
-        pkt.data.frame.height = cpi->common.height;
+        pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
+        pkt.data.frame.height[cpi->svc.spatial_layer_id] = cpi->common.height;
 
         if (ctx->pending_cx_data) {
           if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;

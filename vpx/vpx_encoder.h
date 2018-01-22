@@ -182,8 +182,10 @@ typedef struct vpx_codec_cx_pkt {
        * Only applicable when "output partition" mode is enabled. First
        * partition has id 0.*/
       int partition_id;
-      unsigned int width;               /**< frame width */
-      unsigned int height;              /**< frame height */
+      /*!\brief Width and height of frames in this packet. VP8 will only use the
+       * first one.*/
+      unsigned int width[VPX_SS_MAX_LAYERS];  /**< frame width */
+      unsigned int height[VPX_SS_MAX_LAYERS]; /**< frame height */
     } frame;                            /**< data for compressed frame packet */
     vpx_fixed_buf_t twopass_stats;      /**< data for two-pass packet */
     vpx_fixed_buf_t firstpass_mb_stats; /**< first pass mb packet */
