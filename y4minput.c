@@ -139,7 +139,6 @@ static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
   Conversions which require both horizontal and vertical filtering could
    have these steps pipelined, for less memory consumption and better cache
    performance, but we do them separately for simplicity.*/
-
 #define OC_MINI(_a, _b) ((_a) > (_b) ? (_b) : (_a))
 #define OC_MAXI(_a, _b) ((_a) < (_b) ? (_b) : (_a))
 #define OC_CLAMPI(_a, _b, _c) (OC_MAXI(_a, OC_MINI(_b, _c)))

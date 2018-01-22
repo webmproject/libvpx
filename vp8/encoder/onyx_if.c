@@ -2862,7 +2862,6 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
     fclose(yframe);
 }
 #endif
-/* return of 0 means drop frame */
 
 #if !CONFIG_REALTIME_ONLY
 /* Function to test for conditions that indeicate we should loop
@@ -4785,8 +4784,6 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     cpi->frames_since_key++;
     cpi->temporal_pattern_counter++;
   }
-
-/* reset to normal state now that we are done. */
 
 #if 0
     {

@@ -1270,6 +1270,9 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) = {
       vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    cfg_maps; */
       vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
       vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   get_cx_data; */
-      vp8e_set_config, NULL, vp8e_get_preview, vp8e_mr_alloc_mem,
+      vp8e_set_config,
+      NULL,
+      vp8e_get_preview,
+      vp8e_mr_alloc_mem,
   } /* encoder functions */
 };

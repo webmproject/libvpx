@@ -14,38 +14,37 @@
 
 extern const int16_t vpx_rv[];
 
-#define VPX_TRANSPOSE8x16_UB_UB(in0, in1, in2, in3, in4, in5, in6, in7, out0,  \
-                                out1, out2, out3, out4, out5, out6, out7,      \
-                                out8, out9, out10, out11, out12, out13, out14, \
-                                out15)                                         \
-  {                                                                            \
-    v8i16 temp0, temp1, temp2, temp3, temp4;                                   \
-    v8i16 temp5, temp6, temp7, temp8, temp9;                                   \
-                                                                               \
-    ILVR_B4_SH(in1, in0, in3, in2, in5, in4, in7, in6, temp0, temp1, temp2,    \
-               temp3);                                                         \
-    ILVR_H2_SH(temp1, temp0, temp3, temp2, temp4, temp5);                      \
-    ILVRL_W2_SH(temp5, temp4, temp6, temp7);                                   \
-    ILVL_H2_SH(temp1, temp0, temp3, temp2, temp4, temp5);                      \
-    ILVRL_W2_SH(temp5, temp4, temp8, temp9);                                   \
-    ILVL_B4_SH(in1, in0, in3, in2, in5, in4, in7, in6, temp0, temp1, temp2,    \
-               temp3);                                                         \
-    ILVR_H2_SH(temp1, temp0, temp3, temp2, temp4, temp5);                      \
-    ILVRL_W2_UB(temp5, temp4, out8, out10);                                    \
-    ILVL_H2_SH(temp1, temp0, temp3, temp2, temp4, temp5);                      \
-    ILVRL_W2_UB(temp5, temp4, out12, out14);                                   \
-    out0 = (v16u8)temp6;                                                       \
-    out2 = (v16u8)temp7;                                                       \
-    out4 = (v16u8)temp8;                                                       \
-    out6 = (v16u8)temp9;                                                       \
-    out9 = (v16u8)__msa_ilvl_d((v2i64)out8, (v2i64)out8);                      \
-    out11 = (v16u8)__msa_ilvl_d((v2i64)out10, (v2i64)out10);                   \
-    out13 = (v16u8)__msa_ilvl_d((v2i64)out12, (v2i64)out12);                   \
-    out15 = (v16u8)__msa_ilvl_d((v2i64)out14, (v2i64)out14);                   \
-    out1 = (v16u8)__msa_ilvl_d((v2i64)out0, (v2i64)out0);                      \
-    out3 = (v16u8)__msa_ilvl_d((v2i64)out2, (v2i64)out2);                      \
-    out5 = (v16u8)__msa_ilvl_d((v2i64)out4, (v2i64)out4);                      \
-    out7 = (v16u8)__msa_ilvl_d((v2i64)out6, (v2i64)out6);                      \
+#define VPX_TRANSPOSE8x16_UB_UB(                                            \
+    in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2, out3, out4,   \
+    out5, out6, out7, out8, out9, out10, out11, out12, out13, out14, out15) \
+  {                                                                         \
+    v8i16 temp0, temp1, temp2, temp3, temp4;                                \
+    v8i16 temp5, temp6, temp7, temp8, temp9;                                \
+                                                                            \
+    ILVR_B4_SH(in1, in0, in3, in2, in5, in4, in7, in6, temp0, temp1, temp2, \
+               temp3);                                                      \
+    ILVR_H2_SH(temp1, temp0, temp3, temp2, temp4, temp5);                   \
+    ILVRL_W2_SH(temp5, temp4, temp6, temp7);                                \
+    ILVL_H2_SH(temp1, temp0, temp3, temp2, temp4, temp5);                   \
+    ILVRL_W2_SH(temp5, temp4, temp8, temp9);                                \
+    ILVL_B4_SH(in1, in0, in3, in2, in5, in4, in7, in6, temp0, temp1, temp2, \
+               temp3);                                                      \
+    ILVR_H2_SH(temp1, temp0, temp3, temp2, temp4, temp5);                   \
+    ILVRL_W2_UB(temp5, temp4, out8, out10);                                 \
+    ILVL_H2_SH(temp1, temp0, temp3, temp2, temp4, temp5);                   \
+    ILVRL_W2_UB(temp5, temp4, out12, out14);                                \
+    out0 = (v16u8)temp6;                                                    \
+    out2 = (v16u8)temp7;                                                    \
+    out4 = (v16u8)temp8;                                                    \
+    out6 = (v16u8)temp9;                                                    \
+    out9 = (v16u8)__msa_ilvl_d((v2i64)out8, (v2i64)out8);                   \
+    out11 = (v16u8)__msa_ilvl_d((v2i64)out10, (v2i64)out10);                \
+    out13 = (v16u8)__msa_ilvl_d((v2i64)out12, (v2i64)out12);                \
+    out15 = (v16u8)__msa_ilvl_d((v2i64)out14, (v2i64)out14);                \
+    out1 = (v16u8)__msa_ilvl_d((v2i64)out0, (v2i64)out0);                   \
+    out3 = (v16u8)__msa_ilvl_d((v2i64)out2, (v2i64)out2);                   \
+    out5 = (v16u8)__msa_ilvl_d((v2i64)out4, (v2i64)out4);                   \
+    out7 = (v16u8)__msa_ilvl_d((v2i64)out6, (v2i64)out6);                   \
   }
 
 #define VPX_AVER_IF_RETAIN(above2_in, above1_in, src_in, below1_in, below2_in, \

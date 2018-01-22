@@ -1584,9 +1584,8 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
       // Adjust boost and af_ratio based on avg_frame_low_motion, which varies
       // between 0 and 100 (stationary, 100% zero/small motion).
       rc->gfu_boost =
-          VPXMAX(500,
-                 DEFAULT_GF_BOOST * (rc->avg_frame_low_motion << 1) /
-                     (rc->avg_frame_low_motion + 100));
+          VPXMAX(500, DEFAULT_GF_BOOST * (rc->avg_frame_low_motion << 1) /
+                          (rc->avg_frame_low_motion + 100));
       rc->af_ratio_onepass_vbr = VPXMIN(15, VPXMAX(5, 3 * rc->gfu_boost / 400));
     }
     adjust_gfint_frame_constraint(cpi, rc->frames_to_key);

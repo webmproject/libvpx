@@ -1052,9 +1052,8 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
    * overflow when values are large
    */
   projected_size_based_on_q =
-      (int)(((.5 +
-              rate_correction_factor *
-                  vp8_bits_per_mb[cpi->common.frame_type][Q]) *
+      (int)(((.5 + rate_correction_factor *
+                       vp8_bits_per_mb[cpi->common.frame_type][Q]) *
              cpi->common.MBs) /
             (1 << BPER_MB_NORMBITS));
 

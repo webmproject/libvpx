@@ -1513,9 +1513,9 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
           }
         }
       }
-      if (is_key_frame || (low_res &&
-                           vt.split[i].split[j].part_variances.none.variance >
-                               threshold_4x4avg)) {
+      if (is_key_frame ||
+          (low_res && vt.split[i].split[j].part_variances.none.variance >
+                          threshold_4x4avg)) {
         force_split[split_index] = 0;
         // Go down to 4x4 down-sampling for variance.
         variance4x4downsample[i2 + j] = 1;
@@ -3403,9 +3403,10 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
         // Rate and distortion based partition search termination clause.
         if (!cpi->sf.ml_partition_search_early_termination &&
-            !x->e_mbd.lossless && ((best_rdc.dist < (dist_breakout_thr >> 2)) ||
-                                   (best_rdc.dist < dist_breakout_thr &&
-                                    best_rdc.rate < rate_breakout_thr))) {
+            !x->e_mbd.lossless &&
+            ((best_rdc.dist < (dist_breakout_thr >> 2)) ||
+             (best_rdc.dist < dist_breakout_thr &&
+              best_rdc.rate < rate_breakout_thr))) {
           do_rect = 0;
         }
       }
@@ -4620,8 +4621,9 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
 
   if (cpi->tile_data == NULL || cpi->allocated_tiles < tile_cols * tile_rows) {
     if (cpi->tile_data != NULL) vpx_free(cpi->tile_data);
-    CHECK_MEM_ERROR(cm, cpi->tile_data, vpx_malloc(tile_cols * tile_rows *
-                                                   sizeof(*cpi->tile_data)));
+    CHECK_MEM_ERROR(
+        cm, cpi->tile_data,
+        vpx_malloc(tile_cols * tile_rows * sizeof(*cpi->tile_data)));
     cpi->allocated_tiles = tile_cols * tile_rows;
 
     for (tile_row = 0; tile_row < tile_rows; ++tile_row)

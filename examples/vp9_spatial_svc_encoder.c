@@ -429,8 +429,9 @@ static void set_rate_control_stats(struct RateControlStats *rc,
         rc->layer_framerate[layer] = framerate / cfg->ts_rate_decimator[tl];
       if (tl > 0) {
         rc->layer_pfb[layer] =
-            1000.0 * (cfg->layer_target_bitrate[layer] -
-                      cfg->layer_target_bitrate[layer - 1]) /
+            1000.0 *
+            (cfg->layer_target_bitrate[layer] -
+             cfg->layer_target_bitrate[layer - 1]) /
             (rc->layer_framerate[layer] - rc->layer_framerate[layer - 1]);
       } else {
         rc->layer_pfb[layer] = 1000.0 * cfg->layer_target_bitrate[layer] /
