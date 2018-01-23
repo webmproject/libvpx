@@ -597,24 +597,15 @@ class TransHT : public TransTestBase {
   TransHT() { fwd_txfm_ref = fht_ref; }
 };
 
-TEST_P(TransHT, AccuracyCheck) { RunAccuracyCheck(1); }
+TEST_P(TransHT, AccuracyCheck) {
+  RunAccuracyCheck(size_ == 16 && bit_depth_ > 10 ? 2 : 1);
+}
 
 TEST_P(TransHT, CoeffCheck) { RunCoeffCheck(); }
 
 TEST_P(TransHT, MemCheck) { RunMemCheck(); }
 
 TEST_P(TransHT, InvAccuracyCheck) { RunInvAccuracyCheck(1); }
-
-/* TODO:(johannkoenig) Determine why these fail AccuracyCheck
-   make_tuple(&vp9_highbd_fht16x16_c,
-   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 0, VPX_BITS_12, 2),
-   make_tuple(&vp9_highbd_fht16x16_c,
-   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 1, VPX_BITS_12, 2),
-   make_tuple(&vp9_highbd_fht16x16_c,
-   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 2, VPX_BITS_12, 2),
-   make_tuple(&vp9_highbd_fht16x16_c,
-   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 3, VPX_BITS_12, 2),
-  */
 
 const DctParam c_ht_tests[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -642,6 +633,19 @@ const DctParam c_ht_tests[] = {
   make_tuple(&vp9_highbd_fht16x16_c,
              &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 3,
              VPX_BITS_10, 2),
+  make_tuple(&vp9_highbd_fht16x16_c,
+             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 0,
+             VPX_BITS_12, 2),
+  make_tuple(&vp9_highbd_fht16x16_c,
+             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 1,
+             VPX_BITS_12, 2),
+  make_tuple(&vp9_highbd_fht16x16_c,
+             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 2,
+             VPX_BITS_12, 2),
+  make_tuple(&vp9_highbd_fht16x16_c,
+             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 3,
+             VPX_BITS_12, 2),
+
   make_tuple(&vp9_highbd_fht8x8_c,
              &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 0, VPX_BITS_8,
              2),
@@ -784,6 +788,43 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, TransHT,
     ::testing::Values(
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   0, VPX_BITS_8, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   1, VPX_BITS_8, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   2, VPX_BITS_8, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   3, VPX_BITS_8, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   0, VPX_BITS_10, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   1, VPX_BITS_10, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   2, VPX_BITS_10, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   3, VPX_BITS_10, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   0, VPX_BITS_12, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   1, VPX_BITS_12, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   2, VPX_BITS_12, 2),
+        make_tuple(&vp9_highbd_fht16x16_c,
+                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
+                   3, VPX_BITS_12, 2),
+
         make_tuple(&vp9_highbd_fht8x8_c,
                    &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 0,
                    VPX_BITS_8, 2),

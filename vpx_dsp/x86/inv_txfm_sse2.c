@@ -514,7 +514,7 @@ void vpx_idct16x16_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   }
 }
 
-static void iadst16_8col(__m128i *const in) {
+void vpx_iadst16_8col_sse2(__m128i *const in) {
   // perform 16x16 1-D ADST for 8 columns
   __m128i s[16], x[16], u[32], v[32];
   const __m128i k__cospi_p01_p31 = pair_set_epi16(cospi_1_64, cospi_31_64);
@@ -874,8 +874,8 @@ void idct16_sse2(__m128i *const in0, __m128i *const in1) {
 
 void iadst16_sse2(__m128i *const in0, __m128i *const in1) {
   transpose_16bit_16x16(in0, in1);
-  iadst16_8col(in0);
-  iadst16_8col(in1);
+  vpx_iadst16_8col_sse2(in0);
+  vpx_iadst16_8col_sse2(in1);
 }
 
 // Group the coefficient calculation into smaller functions to prevent stack

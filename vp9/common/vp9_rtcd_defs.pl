@@ -105,6 +105,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
     specialize qw/vp9_highbd_iht4x4_16_add sse4_1/;
     specialize qw/vp9_highbd_iht8x8_64_add sse4_1/;
+    specialize qw/vp9_highbd_iht16x16_256_add sse4_1/;
   }
 }
 

@@ -107,5 +107,6 @@ static INLINE void highbd_idct4_sse4_1(__m128i *const io) {
 }
 
 void vpx_highbd_idct8x8_half1d_sse4_1(__m128i *const io);
+void vpx_highbd_idct16_4col_sse4_1(__m128i *const io /*io[16]*/);
 
 #endif  // VPX_DSP_X86_HIGHBD_INV_TXFM_SSE4_H_

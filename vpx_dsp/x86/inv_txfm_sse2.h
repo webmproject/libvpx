@@ -701,6 +701,7 @@ void vpx_idct8_sse2(__m128i *const in);
 void idct16_sse2(__m128i *const in0, __m128i *const in1);
 void iadst4_sse2(__m128i *const in);
 void iadst8_sse2(__m128i *const in);
+void vpx_iadst16_8col_sse2(__m128i *const in);
 void iadst16_sse2(__m128i *const in0, __m128i *const in1);
 void idct32_1024_8x32(const __m128i *const in, __m128i *const out);
 void idct32_34_8x32_sse2(const __m128i *const in, __m128i *const out);
