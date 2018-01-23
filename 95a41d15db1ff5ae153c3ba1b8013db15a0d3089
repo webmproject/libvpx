@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb4c2a56_c02ba583",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-23T23:04:16Z",
+      "side": 1,
+      "message": "should add the skip segment feature here for vp9\n\ndon\u0027t need to add the ref_frame since its not doing anything in real-time.",
+      "revId": "95a41d15db1ff5ae153c3ba1b8013db15a0d3089",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7e0867b_ab133ba4",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-23T23:04:16Z",
+      "side": 1,
+      "message": "skip and ref_frame segment is only used in VP9",
+      "revId": "95a41d15db1ff5ae153c3ba1b8013db15a0d3089",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a635a39b_98689c0a",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-23T23:04:16Z",
+      "side": 1,
+      "message": "add:\n// TODO(jianj): SEG_LVL_REF_FRAME does not currently do anything\n// in real-time (nonrd-pickmode). Allow this to work for real-time.\nint ref_frame[8]; //**\u003c Reference frame for this block.  */",
+      "revId": "95a41d15db1ff5ae153c3ba1b8013db15a0d3089",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
