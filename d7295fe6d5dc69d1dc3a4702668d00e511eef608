@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c5ae2a0a_c5a8b2de",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-01-23T04:47:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "600c5311_0ee668f7",
+      "range": {
+        "startLine": 124,
+        "startChar": 9,
+        "endLine": 124,
+        "endChar": 13
+      },
+      "revId": "d7295fe6d5dc69d1dc3a4702668d00e511eef608",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "946d0141_71d10692",
         "filename": "vpx/src/vpx_encoder.c",
         "patchSetId": 6
@@ -39,6 +63,24 @@
       "revId": "d7295fe6d5dc69d1dc3a4702668d00e511eef608",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8cf66b0e_39e5ee4b",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-01-23T04:47:41Z",
+      "side": 1,
+      "message": "I wrapped the memory release in these flags since LOWER_RES_FRAME_INFO requires that. Or I can write a new interface to free the memory (similar to memory allocation in mr_get_mem_loc).\n\nIn the case of not being configured with these flags, the memory allocation in mr_get_mem_loc won\u0027t do anything (returns a null pointer) and there\u0027s no need to free.",
+      "parentUuid": "946d0141_71d10692",
+      "revId": "d7295fe6d5dc69d1dc3a4702668d00e511eef608",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
