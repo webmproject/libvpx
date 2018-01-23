@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90ee9ded_3015f8cc",
+        "filename": ".clang-format",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-23T23:01:34Z",
+      "side": 1,
+      "message": "you can remove the trailing whitespace here",
+      "revId": "7afba02521bf7f6d98a5b6a875b55c7976b7fca6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
