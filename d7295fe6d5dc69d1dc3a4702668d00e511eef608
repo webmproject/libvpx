@@ -22,6 +22,23 @@
       "revId": "d7295fe6d5dc69d1dc3a4702668d00e511eef608",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "946d0141_71d10692",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-23T04:19:41Z",
+      "side": 1,
+      "message": "actually this is always expected to be exposed as part of the api since we don\u0027t do CONFIG_ checks there. it should fail if called in a library that doesn\u0027t have it enabled though.",
+      "revId": "d7295fe6d5dc69d1dc3a4702668d00e511eef608",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
