@@ -17,7 +17,7 @@
 #include "vpx_dsp/x86/inv_txfm_ssse3.h"
 #include "vpx_dsp/x86/transpose_sse2.h"
 
-static void highbd_idct8x8_half1d(__m128i *const io) {
+void highbd_idct8x8_half1d(__m128i *const io) {
   __m128i step1[8], step2[8];
 
   transpose_32bit_4x4x2(io, io);
