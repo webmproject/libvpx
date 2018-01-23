@@ -106,6 +106,6 @@ static INLINE void highbd_idct4_sse4_1(__m128i *const io) {
   io[3] = _mm_sub_epi32(step[0], step[3]);  // step[0] - step[3]
 }
 
-void highbd_idct8x8_half1d(__m128i *const io);
+void vpx_highbd_idct8x8_half1d_sse4_1(__m128i *const io);
 
 #endif  // VPX_DSP_X86_HIGHBD_INV_TXFM_SSE4_H_

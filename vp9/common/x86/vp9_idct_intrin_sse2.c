@@ -68,16 +68,16 @@ void vp9_iht8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest, int stride,
 
   switch (tx_type) {
     case 0:  // DCT_DCT
-      idct8_sse2(in);
-      idct8_sse2(in);
+      vpx_idct8_sse2(in);
+      vpx_idct8_sse2(in);
       break;
     case 1:  // ADST_DCT
-      idct8_sse2(in);
+      vpx_idct8_sse2(in);
       iadst8_sse2(in);
       break;
     case 2:  // DCT_ADST
       iadst8_sse2(in);
-      idct8_sse2(in);
+      vpx_idct8_sse2(in);
       break;
     case 3:  // ADST_ADST
       iadst8_sse2(in);
