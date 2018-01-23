@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e3d677aa_4cc7e0f0",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 715,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-23T22:46:19Z",
+      "side": 1,
+      "message": "set this to 0 as default",
+      "revId": "b9192f5a56ba682fdd0c315089dbee0e80fe30fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f73b442a_15c149eb",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1071,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-23T22:46:19Z",
+      "side": 1,
+      "message": "is there any change here?",
+      "revId": "b9192f5a56ba682fdd0c315089dbee0e80fe30fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
