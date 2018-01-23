@@ -204,12 +204,12 @@ void vp9_highbd_iht8x8_64_add_sse4_1(const tran_low_t *input, uint16_t *dest,
     io_short[7] = _mm_packs_epi32(io[11], io[15]);
 
     if (tx_type == DCT_DCT || tx_type == ADST_DCT) {
-      idct8_sse2(io_short);
+      vpx_idct8_sse2(io_short);
     } else {
       iadst8_sse2(io_short);
     }
     if (tx_type == DCT_DCT || tx_type == DCT_ADST) {
-      idct8_sse2(io_short);
+      vpx_idct8_sse2(io_short);
     } else {
       iadst8_sse2(io_short);
     }
@@ -218,8 +218,8 @@ void vp9_highbd_iht8x8_64_add_sse4_1(const tran_low_t *input, uint16_t *dest,
     __m128i temp[4];
 
     if (tx_type == DCT_DCT || tx_type == ADST_DCT) {
-      highbd_idct8x8_half1d(io);
-      highbd_idct8x8_half1d(&io[8]);
+      vpx_highbd_idct8x8_half1d_sse4_1(io);
+      vpx_highbd_idct8x8_half1d_sse4_1(&io[8]);
     } else {
       highbd_iadst8_sse4_1(io);
       highbd_iadst8_sse4_1(&io[8]);
@@ -235,12 +235,12 @@ void vp9_highbd_iht8x8_64_add_sse4_1(const tran_low_t *input, uint16_t *dest,
     io[7] = io[11];
 
     if (tx_type == DCT_DCT || tx_type == DCT_ADST) {
-      highbd_idct8x8_half1d(io);
+      vpx_highbd_idct8x8_half1d_sse4_1(io);
       io[8] = temp[0];
       io[9] = temp[1];
       io[10] = temp[2];
       io[11] = temp[3];
-      highbd_idct8x8_half1d(&io[8]);
+      vpx_highbd_idct8x8_half1d_sse4_1(&io[8]);
     } else {
       highbd_iadst8_sse4_1(io);
       io[8] = temp[0];

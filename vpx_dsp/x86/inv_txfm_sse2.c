@@ -165,7 +165,7 @@ void vpx_idct8x8_64_add_sse2(const tran_low_t *input, uint8_t *dest,
 
   // 2-D
   for (i = 0; i < 2; i++) {
-    idct8_sse2(in);
+    vpx_idct8_sse2(in);
   }
 
   write_buffer_8x8(in, dest, stride);
@@ -221,7 +221,7 @@ void vpx_idct8x8_1_add_sse2(const tran_low_t *input, uint8_t *dest,
   recon_and_store_8_dual(dest, dc_value, stride);
 }
 
-void idct8_sse2(__m128i *const in) {
+void vpx_idct8_sse2(__m128i *const in) {
   // 8x8 Transpose is copied from vpx_fdct8x8_sse2()
   transpose_16bit_8x8(in, in);
 
