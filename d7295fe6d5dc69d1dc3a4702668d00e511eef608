@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "600c5311_0ee668f7",
+        "filename": "test/encode_api_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-23T04:07:07Z",
+      "side": 1,
+      "message": "this will resolve to the same, but elsewhere I think it\u0027s more common to omit the \u0027\u0026\u0027 when dealing with an array.",
+      "range": {
+        "startLine": 124,
+        "startChar": 9,
+        "endLine": 124,
+        "endChar": 13
+      },
+      "revId": "d7295fe6d5dc69d1dc3a4702668d00e511eef608",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
