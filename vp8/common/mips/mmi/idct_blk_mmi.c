@@ -12,7 +12,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 void vp8_dequant_idct_add_y_block_mmi(int16_t *q, int16_t *dq, uint8_t *dst,
-                                      int stride, int8_t *eobs) {
+                                      int stride, char *eobs) {
   int i, j;
 
   for (i = 0; i < 4; i++) {
@@ -33,8 +33,7 @@ void vp8_dequant_idct_add_y_block_mmi(int16_t *q, int16_t *dq, uint8_t *dst,
 }
 
 void vp8_dequant_idct_add_uv_block_mmi(int16_t *q, int16_t *dq, uint8_t *dstu,
-                                       uint8_t *dstv, int stride,
-                                       int8_t *eobs) {
+                                       uint8_t *dstv, int stride, char *eobs) {
   int i, j;
 
   for (i = 0; i < 2; i++) {
