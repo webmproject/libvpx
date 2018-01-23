@@ -106,76 +106,90 @@ TEST(EncodeAPI, ImageSizeSetting) {
 }
 #endif
 
-#if CONFIG_MULTI_RES_ENCODING
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
 // invalid configuration by setting the temporal layer rate allocation
-// (ts_target_bitrate[]) to 0 for both layers.
-TEST(EncodeAPI, VP8MultiResEncode) {
+// (ts_target_bitrate[]) to 0 for both layers. This should fail independent of
+// CONFIG_MULTI_RES_ENCODING.
+TEST(EncodeAPI, MultiResEncode) {
+  static const vpx_codec_iface_t *kCodecs[] = {
+#if CONFIG_VP8_ENCODER
+    &vpx_codec_vp8_cx_algo,
+#endif
+#if CONFIG_VP9_ENCODER
+    &vpx_codec_vp9_cx_algo,
+#endif
+  };
   const int width = 1280;
   const int height = 720;
   const int width_down = width / 2;
   const int height_down = height / 2;
   const int target_bitrate = 1000;
   const int framerate = 30;
-  vpx_codec_ctx_t enc[2];
-  vpx_codec_enc_cfg_t cfg[2];
-  vpx_rational_t dsf[2] = { { 2, 1 }, { 2, 1 } };
 
-  memset(enc, 0, sizeof(enc));
+  for (int c = 0; c < NELEMENTS(kCodecs); ++c) {
+    const vpx_codec_iface_t *const iface = kCodecs[c];
+    vpx_codec_ctx_t enc[2];
+    vpx_codec_enc_cfg_t cfg[2];
+    vpx_rational_t dsf[2] = { { 2, 1 }, { 2, 1 } };
 
-  for (int i = 0; i < 2; i++) {
-    vpx_codec_enc_config_default(vpx_codec_vp8_cx(), &cfg[i], 0);
-  }
+    memset(enc, 0, sizeof(enc));
 
-  /* Highest-resolution encoder settings */
-  cfg[0].g_w = width;
-  cfg[0].g_h = height;
-  cfg[0].rc_dropframe_thresh = 0;
-  cfg[0].rc_end_usage = VPX_CBR;
-  cfg[0].rc_resize_allowed = 0;
-  cfg[0].rc_min_quantizer = 2;
-  cfg[0].rc_max_quantizer = 56;
-  cfg[0].rc_undershoot_pct = 100;
-  cfg[0].rc_overshoot_pct = 15;
-  cfg[0].rc_buf_initial_sz = 500;
-  cfg[0].rc_buf_optimal_sz = 600;
-  cfg[0].rc_buf_sz = 1000;
-  cfg[0].g_error_resilient = 1; /* Enable error resilient mode */
-  cfg[0].g_lag_in_frames = 0;
+    for (int i = 0; i < 2; i++) {
+      vpx_codec_enc_config_default(iface, &cfg[i], 0);
+    }
 
-  cfg[0].kf_mode = VPX_KF_AUTO;
-  cfg[0].kf_min_dist = 3000;
-  cfg[0].kf_max_dist = 3000;
+    /* Highest-resolution encoder settings */
+    cfg[0].g_w = width;
+    cfg[0].g_h = height;
+    cfg[0].rc_dropframe_thresh = 0;
+    cfg[0].rc_end_usage = VPX_CBR;
+    cfg[0].rc_resize_allowed = 0;
+    cfg[0].rc_min_quantizer = 2;
+    cfg[0].rc_max_quantizer = 56;
+    cfg[0].rc_undershoot_pct = 100;
+    cfg[0].rc_overshoot_pct = 15;
+    cfg[0].rc_buf_initial_sz = 500;
+    cfg[0].rc_buf_optimal_sz = 600;
+    cfg[0].rc_buf_sz = 1000;
+    cfg[0].g_error_resilient = 1; /* Enable error resilient mode */
+    cfg[0].g_lag_in_frames = 0;
 
-  cfg[0].rc_target_bitrate = target_bitrate; /* Set target bitrate */
-  cfg[0].g_timebase.num = 1;                 /* Set fps */
-  cfg[0].g_timebase.den = framerate;
+    cfg[0].kf_mode = VPX_KF_AUTO;
+    cfg[0].kf_min_dist = 3000;
+    cfg[0].kf_max_dist = 3000;
 
-  memcpy(&cfg[1], &cfg[0], sizeof(cfg[0]));
-  cfg[1].rc_target_bitrate = 500;
-  cfg[1].g_w = width_down;
-  cfg[1].g_h = height_down;
+    cfg[0].rc_target_bitrate = target_bitrate; /* Set target bitrate */
+    cfg[0].g_timebase.num = 1;                 /* Set fps */
+    cfg[0].g_timebase.den = framerate;
 
-  for (int i = 0; i < 2; i++) {
-    cfg[i].ts_number_layers = 2;
-    cfg[i].ts_periodicity = 2;
-    cfg[i].ts_rate_decimator[0] = 2;
-    cfg[i].ts_rate_decimator[1] = 1;
-    cfg[i].ts_layer_id[0] = 0;
-    cfg[i].ts_layer_id[1] = 1;
-    // Invalid parameters.
-    cfg[i].ts_target_bitrate[0] = 0;
-    cfg[i].ts_target_bitrate[1] = 0;
-  }
+    memcpy(&cfg[1], &cfg[0], sizeof(cfg[0]));
+    cfg[1].rc_target_bitrate = 500;
+    cfg[1].g_w = width_down;
+    cfg[1].g_h = height_down;
 
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
-            vpx_codec_enc_init_multi(&enc[0], vpx_codec_vp8_cx(), &cfg[0], 2, 0,
-                                     &dsf[0]));
+    for (int i = 0; i < 2; i++) {
+      cfg[i].ts_number_layers = 2;
+      cfg[i].ts_periodicity = 2;
+      cfg[i].ts_rate_decimator[0] = 2;
+      cfg[i].ts_rate_decimator[1] = 1;
+      cfg[i].ts_layer_id[0] = 0;
+      cfg[i].ts_layer_id[1] = 1;
+      // Invalid parameters.
+      cfg[i].ts_target_bitrate[0] = 0;
+      cfg[i].ts_target_bitrate[1] = 0;
+    }
 
-  for (int i = 0; i < 2; i++) {
-    vpx_codec_destroy(&enc[i]);
+    // VP9 should report incapable, VP8 invalid for all configurations.
+    const char kVP9Name[] = "WebM Project VP9";
+    const bool is_vp9 = strncmp(kVP9Name, vpx_codec_iface_name(iface),
+                                sizeof(kVP9Name) - 1) == 0;
+    EXPECT_EQ(is_vp9 ? VPX_CODEC_INCAPABLE : VPX_CODEC_INVALID_PARAM,
+              vpx_codec_enc_init_multi(&enc[0], iface, &cfg[0], 2, 0, &dsf[0]));
+
+    for (int i = 0; i < 2; i++) {
+      vpx_codec_destroy(&enc[i]);
+    }
   }
 }
-#endif
 
 }  // namespace
