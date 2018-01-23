@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ce0e983_3efc2733",
+        "filename": "vpx_util/vpx_thread.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2018-01-23T18:12:58Z",
+      "side": 0,
+      "message": "On which MSVC release and with which target is this producing a compile error? _beginthreadex() is not available to (for example) Windows Store apps. The pthread_create() wrapper can\u0027t start being a no-op on those targets unless we\u0027re going to require that multithread is disabled for non-desktop Windows builds.\n\nNote, regardless of the answer to the above, this needs a bug in the tracker.",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 5
+      },
+      "revId": "9debbc2ec7e6ff004dba4d66d2780e216ca50b1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
