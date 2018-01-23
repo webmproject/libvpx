@@ -81,6 +81,24 @@
       "revId": "d7295fe6d5dc69d1dc3a4702668d00e511eef608",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52e4c177_1e8fe107",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-01-23T06:50:10Z",
+      "side": 1,
+      "message": "\u003e I wrapped the memory release in these flags since LOWER_RES_FRAME_INFO requires that. Or I can write a new interface to free the memory (similar to memory allocation in mr_get_mem_loc).\n\u003e \n\u003e In the case of not being configured with these flags, the memory allocation in mr_get_mem_loc won\u0027t do anything (returns a null pointer) and there\u0027s no need to free.\n\nOK, it would be good to check that we have build and test coverage before cherry-picking.",
+      "parentUuid": "8cf66b0e_39e5ee4b",
+      "revId": "d7295fe6d5dc69d1dc3a4702668d00e511eef608",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
