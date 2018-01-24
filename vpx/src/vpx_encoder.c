@@ -84,6 +84,8 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(
     int i;
     void *mem_loc = NULL;
 
+    if (iface->enc.mr_get_mem_loc == NULL) return VPX_CODEC_INCAPABLE;
+
     if (!(res = iface->enc.mr_get_mem_loc(cfg, &mem_loc))) {
       for (i = 0; i < num_enc; i++) {
         vpx_codec_priv_enc_mr_cfg_t mr_cfg;
