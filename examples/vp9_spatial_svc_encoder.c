@@ -574,8 +574,8 @@ void set_frame_flags_bypass_mode(int sl, int tl, int num_spatial_layers,
       } else {
         if (is_key_frame) {
           ref_frame_config->frame_flags[sl] =
-              VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_ARF |
-              VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
+              VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+              VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_ARF;
         } else {
           ref_frame_config->frame_flags[sl] =
               VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
@@ -593,10 +593,16 @@ void set_frame_flags_bypass_mode(int sl, int tl, int num_spatial_layers,
     }
     if (tl == 0) {
       ref_frame_config->lst_fb_idx[sl] = sl;
-      if (sl)
-        ref_frame_config->gld_fb_idx[sl] = sl - 1;
-      else
+      if (sl) {
+        if (is_key_frame) {
+          ref_frame_config->lst_fb_idx[sl] = sl - 1;
+          ref_frame_config->gld_fb_idx[sl] = sl;
+        } else {
+          ref_frame_config->gld_fb_idx[sl] = sl - 1;
+        }
+      } else {
         ref_frame_config->gld_fb_idx[sl] = 0;
+      }
       ref_frame_config->alt_fb_idx[sl] = 0;
     } else if (tl == 1) {
       ref_frame_config->lst_fb_idx[sl] = sl;
@@ -739,6 +745,8 @@ int main(int argc, const char **argv) {
       // the encode for the whole superframe. The encoder will internally loop
       // over all the spatial layers for the current superframe.
       vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id);
+      // TODO(jianj): Fix the parameter passing for "is_key_frame" in
+      // set_frame_flags_bypass_model() for case of periodic key frames.
       set_frame_flags_bypass_mode(sl, layer_id.temporal_layer_id,
                                   svc_ctx.spatial_layers, frame_cnt == 0,
                                   &ref_frame_config);
