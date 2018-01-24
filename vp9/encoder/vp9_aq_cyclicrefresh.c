@@ -464,10 +464,6 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
       cr->rate_ratio_qdelta = VPXMAX(cr->rate_ratio_qdelta, 2.5);
     }
   }
-  if (cpi->svc.spatial_layer_id > 0) {
-    cr->motion_thresh = 4;
-    cr->rate_boost_fac = 12;
-  }
   if (cpi->oxcf.rc_mode == VPX_VBR) {
     // To be adjusted for VBR mode, e.g., based on gf period and boost.
     // For now use smaller qp-delta (than CBR), no second boosted seg, and
