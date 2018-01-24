@@ -19,7 +19,6 @@
 void vpx_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,
                              int stride) {
   const uint8_t *dst = dest;
-  const int16x4_t cospis = vld1_s16(kCospi);
   uint32x2_t s32 = vdup_n_u32(0);
   int16x8_t a[2];
   uint8x8_t s, d[2];
@@ -31,11 +30,11 @@ void vpx_idct4x4_16_add_neon(const tran_low_t *input, uint8_t *dest,
   // Rows
   a[0] = load_tran_low_to_s16q(input);
   a[1] = load_tran_low_to_s16q(input + 8);
-  idct4x4_16_kernel_bd8(cospis, a);
+  transpose_idct4x4_16_bd8(a);
 
   // Columns
   a[1] = vcombine_s16(vget_high_s16(a[1]), vget_low_s16(a[1]));
-  idct4x4_16_kernel_bd8(cospis, a);
+  transpose_idct4x4_16_bd8(a);
   a[0] = vrshrq_n_s16(a[0], 4);
   a[1] = vrshrq_n_s16(a[1], 4);
 

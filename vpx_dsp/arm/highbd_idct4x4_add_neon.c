@@ -138,16 +138,14 @@ void vpx_highbd_idct4x4_16_add_neon(const tran_low_t *input, uint16_t *dest,
   c[3] = vld1q_s32(input + 12);
 
   if (bd == 8) {
-    const int16x4_t cospis = vld1_s16(kCospi);
-
     // Rows
     a[0] = vcombine_s16(vmovn_s32(c[0]), vmovn_s32(c[1]));
     a[1] = vcombine_s16(vmovn_s32(c[2]), vmovn_s32(c[3]));
-    idct4x4_16_kernel_bd8(cospis, a);
+    transpose_idct4x4_16_bd8(a);
 
     // Columns
     a[1] = vcombine_s16(vget_high_s16(a[1]), vget_low_s16(a[1]));
-    idct4x4_16_kernel_bd8(cospis, a);
+    transpose_idct4x4_16_bd8(a);
     a[0] = vrshrq_n_s16(a[0], 4);
     a[1] = vrshrq_n_s16(a[1], 4);
   } else {

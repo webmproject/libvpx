@@ -78,6 +78,28 @@ static INLINE int32x4x2_t highbd_idct_sub_dual(const int32x4x2_t s0,
 
 //------------------------------------------------------------------------------
 
+static INLINE int16x8_t dct_const_round_shift_low_8(const int32x4_t *const in) {
+  return vcombine_s16(vrshrn_n_s32(in[0], DCT_CONST_BITS),
+                      vrshrn_n_s32(in[1], DCT_CONST_BITS));
+}
+
+static INLINE void dct_const_round_shift_low_8_dual(const int32x4_t *const t32,
+                                                    int16x8_t *const d0,
+                                                    int16x8_t *const d1) {
+  *d0 = dct_const_round_shift_low_8(t32 + 0);
+  *d1 = dct_const_round_shift_low_8(t32 + 2);
+}
+
+static INLINE int32x4x2_t
+dct_const_round_shift_high_4x2(const int64x2_t *const in) {
+  int32x4x2_t out;
+  out.val[0] = vcombine_s32(vrshrn_n_s64(in[0], DCT_CONST_BITS),
+                            vrshrn_n_s64(in[1], DCT_CONST_BITS));
+  out.val[1] = vcombine_s32(vrshrn_n_s64(in[2], DCT_CONST_BITS),
+                            vrshrn_n_s64(in[3], DCT_CONST_BITS));
+  return out;
+}
+
 // Multiply a by a_const. Saturate, shift and narrow by DCT_CONST_BITS.
 static INLINE int16x8_t multiply_shift_and_narrow_s16(const int16x8_t a,
                                                       const int16_t a_const) {
@@ -102,24 +124,24 @@ static INLINE int16x8_t add_multiply_shift_and_narrow_s16(
   // input) this function can not use vaddq_s16.
   // In order to match existing behavior and intentionally out of range tests,
   // expand the addition up to 32 bits to prevent truncation.
-  int32x4_t temp_low = vaddl_s16(vget_low_s16(a), vget_low_s16(b));
-  int32x4_t temp_high = vaddl_s16(vget_high_s16(a), vget_high_s16(b));
-  temp_low = vmulq_n_s32(temp_low, ab_const);
-  temp_high = vmulq_n_s32(temp_high, ab_const);
-  return vcombine_s16(vrshrn_n_s32(temp_low, DCT_CONST_BITS),
-                      vrshrn_n_s32(temp_high, DCT_CONST_BITS));
+  int32x4_t t[2];
+  t[0] = vaddl_s16(vget_low_s16(a), vget_low_s16(b));
+  t[1] = vaddl_s16(vget_high_s16(a), vget_high_s16(b));
+  t[0] = vmulq_n_s32(t[0], ab_const);
+  t[1] = vmulq_n_s32(t[1], ab_const);
+  return dct_const_round_shift_low_8(t);
 }
 
 // Subtract b from a, then multiply by ab_const. Shift and narrow by
 // DCT_CONST_BITS.
 static INLINE int16x8_t sub_multiply_shift_and_narrow_s16(
     const int16x8_t a, const int16x8_t b, const int16_t ab_const) {
-  int32x4_t temp_low = vsubl_s16(vget_low_s16(a), vget_low_s16(b));
-  int32x4_t temp_high = vsubl_s16(vget_high_s16(a), vget_high_s16(b));
-  temp_low = vmulq_n_s32(temp_low, ab_const);
-  temp_high = vmulq_n_s32(temp_high, ab_const);
-  return vcombine_s16(vrshrn_n_s32(temp_low, DCT_CONST_BITS),
-                      vrshrn_n_s32(temp_high, DCT_CONST_BITS));
+  int32x4_t t[2];
+  t[0] = vsubl_s16(vget_low_s16(a), vget_low_s16(b));
+  t[1] = vsubl_s16(vget_high_s16(a), vget_high_s16(b));
+  t[0] = vmulq_n_s32(t[0], ab_const);
+  t[1] = vmulq_n_s32(t[1], ab_const);
+  return dct_const_round_shift_low_8(t);
 }
 
 // Multiply a by a_const and b by b_const, then accumulate. Shift and narrow by
@@ -127,12 +149,12 @@ static INLINE int16x8_t sub_multiply_shift_and_narrow_s16(
 static INLINE int16x8_t multiply_accumulate_shift_and_narrow_s16(
     const int16x8_t a, const int16_t a_const, const int16x8_t b,
     const int16_t b_const) {
-  int32x4_t temp_low = vmull_n_s16(vget_low_s16(a), a_const);
-  int32x4_t temp_high = vmull_n_s16(vget_high_s16(a), a_const);
-  temp_low = vmlal_n_s16(temp_low, vget_low_s16(b), b_const);
-  temp_high = vmlal_n_s16(temp_high, vget_high_s16(b), b_const);
-  return vcombine_s16(vrshrn_n_s32(temp_low, DCT_CONST_BITS),
-                      vrshrn_n_s32(temp_high, DCT_CONST_BITS));
+  int32x4_t t[2];
+  t[0] = vmull_n_s16(vget_low_s16(a), a_const);
+  t[1] = vmull_n_s16(vget_high_s16(a), a_const);
+  t[0] = vmlal_n_s16(t[0], vget_low_s16(b), b_const);
+  t[1] = vmlal_n_s16(t[1], vget_high_s16(b), b_const);
+  return dct_const_round_shift_low_8(t);
 }
 
 //------------------------------------------------------------------------------
@@ -145,53 +167,43 @@ static INLINE int16x8_t multiply_accumulate_shift_and_narrow_s16(
 static INLINE int32x4x2_t
 multiply_shift_and_narrow_s32_dual(const int32x4x2_t a, const int32_t a_const) {
   int64x2_t b[4];
-  int32x4x2_t c;
+
   b[0] = vmull_n_s32(vget_low_s32(a.val[0]), a_const);
   b[1] = vmull_n_s32(vget_high_s32(a.val[0]), a_const);
   b[2] = vmull_n_s32(vget_low_s32(a.val[1]), a_const);
   b[3] = vmull_n_s32(vget_high_s32(a.val[1]), a_const);
-  c.val[0] = vcombine_s32(vrshrn_n_s64(b[0], DCT_CONST_BITS),
-                          vrshrn_n_s64(b[1], DCT_CONST_BITS));
-  c.val[1] = vcombine_s32(vrshrn_n_s64(b[2], DCT_CONST_BITS),
-                          vrshrn_n_s64(b[3], DCT_CONST_BITS));
-  return c;
+  return dct_const_round_shift_high_4x2(b);
 }
 
 // Add a and b, then multiply by ab_const. Shift and narrow by DCT_CONST_BITS.
 static INLINE int32x4x2_t add_multiply_shift_and_narrow_s32_dual(
     const int32x4x2_t a, const int32x4x2_t b, const int32_t ab_const) {
-  const int32x4_t temp_low = vaddq_s32(a.val[0], b.val[0]);
-  const int32x4_t temp_high = vaddq_s32(a.val[1], b.val[1]);
+  int32x4_t t[2];
   int64x2_t c[4];
-  int32x4x2_t d;
-  c[0] = vmull_n_s32(vget_low_s32(temp_low), ab_const);
-  c[1] = vmull_n_s32(vget_high_s32(temp_low), ab_const);
-  c[2] = vmull_n_s32(vget_low_s32(temp_high), ab_const);
-  c[3] = vmull_n_s32(vget_high_s32(temp_high), ab_const);
-  d.val[0] = vcombine_s32(vrshrn_n_s64(c[0], DCT_CONST_BITS),
-                          vrshrn_n_s64(c[1], DCT_CONST_BITS));
-  d.val[1] = vcombine_s32(vrshrn_n_s64(c[2], DCT_CONST_BITS),
-                          vrshrn_n_s64(c[3], DCT_CONST_BITS));
-  return d;
+
+  t[0] = vaddq_s32(a.val[0], b.val[0]);
+  t[1] = vaddq_s32(a.val[1], b.val[1]);
+  c[0] = vmull_n_s32(vget_low_s32(t[0]), ab_const);
+  c[1] = vmull_n_s32(vget_high_s32(t[0]), ab_const);
+  c[2] = vmull_n_s32(vget_low_s32(t[1]), ab_const);
+  c[3] = vmull_n_s32(vget_high_s32(t[1]), ab_const);
+  return dct_const_round_shift_high_4x2(c);
 }
 
 // Subtract b from a, then multiply by ab_const. Shift and narrow by
 // DCT_CONST_BITS.
 static INLINE int32x4x2_t sub_multiply_shift_and_narrow_s32_dual(
     const int32x4x2_t a, const int32x4x2_t b, const int32_t ab_const) {
-  const int32x4_t temp_low = vsubq_s32(a.val[0], b.val[0]);
-  const int32x4_t temp_high = vsubq_s32(a.val[1], b.val[1]);
+  int32x4_t t[2];
   int64x2_t c[4];
-  int32x4x2_t d;
-  c[0] = vmull_n_s32(vget_low_s32(temp_low), ab_const);
-  c[1] = vmull_n_s32(vget_high_s32(temp_low), ab_const);
-  c[2] = vmull_n_s32(vget_low_s32(temp_high), ab_const);
-  c[3] = vmull_n_s32(vget_high_s32(temp_high), ab_const);
-  d.val[0] = vcombine_s32(vrshrn_n_s64(c[0], DCT_CONST_BITS),
-                          vrshrn_n_s64(c[1], DCT_CONST_BITS));
-  d.val[1] = vcombine_s32(vrshrn_n_s64(c[2], DCT_CONST_BITS),
-                          vrshrn_n_s64(c[3], DCT_CONST_BITS));
-  return d;
+
+  t[0] = vsubq_s32(a.val[0], b.val[0]);
+  t[1] = vsubq_s32(a.val[1], b.val[1]);
+  c[0] = vmull_n_s32(vget_low_s32(t[0]), ab_const);
+  c[1] = vmull_n_s32(vget_high_s32(t[0]), ab_const);
+  c[2] = vmull_n_s32(vget_low_s32(t[1]), ab_const);
+  c[3] = vmull_n_s32(vget_high_s32(t[1]), ab_const);
+  return dct_const_round_shift_high_4x2(c);
 }
 
 // Multiply a by a_const and b by b_const, then accumulate. Shift and narrow by
@@ -200,7 +212,6 @@ static INLINE int32x4x2_t multiply_accumulate_shift_and_narrow_s32_dual(
     const int32x4x2_t a, const int32_t a_const, const int32x4x2_t b,
     const int32_t b_const) {
   int64x2_t c[4];
-  int32x4x2_t d;
   c[0] = vmull_n_s32(vget_low_s32(a.val[0]), a_const);
   c[1] = vmull_n_s32(vget_high_s32(a.val[0]), a_const);
   c[2] = vmull_n_s32(vget_low_s32(a.val[1]), a_const);
@@ -209,11 +220,7 @@ static INLINE int32x4x2_t multiply_accumulate_shift_and_narrow_s32_dual(
   c[1] = vmlal_n_s32(c[1], vget_high_s32(b.val[0]), b_const);
   c[2] = vmlal_n_s32(c[2], vget_low_s32(b.val[1]), b_const);
   c[3] = vmlal_n_s32(c[3], vget_high_s32(b.val[1]), b_const);
-  d.val[0] = vcombine_s32(vrshrn_n_s64(c[0], DCT_CONST_BITS),
-                          vrshrn_n_s64(c[1], DCT_CONST_BITS));
-  d.val[1] = vcombine_s32(vrshrn_n_s64(c[2], DCT_CONST_BITS),
-                          vrshrn_n_s64(c[3], DCT_CONST_BITS));
-  return d;
+  return dct_const_round_shift_high_4x2(c);
 }
 
 // Shift the output down by 6 and add it to the destination buffer.
@@ -281,13 +288,12 @@ static INLINE uint8x16_t create_dcq(const int16_t dc) {
   return vdupq_n_u8((uint8_t)t);
 }
 
-static INLINE void idct4x4_16_kernel_bd8(const int16x4_t cospis,
-                                         int16x8_t *const a) {
+static INLINE void idct4x4_16_kernel_bd8(int16x8_t *const a) {
+  const int16x4_t cospis = vld1_s16(kCospi);
   int16x4_t b[4];
   int32x4_t c[4];
   int16x8_t d[2];
 
-  transpose_s16_4x4q(&a[0], &a[1]);
   b[0] = vget_low_s16(a[0]);
   b[1] = vget_high_s16(a[0]);
   b[2] = vget_low_s16(a[1]);
@@ -296,18 +302,18 @@ static INLINE void idct4x4_16_kernel_bd8(const int16x4_t cospis,
   c[2] = vmull_lane_s16(b[1], cospis, 2);
   c[1] = vsubq_s32(c[0], c[2]);
   c[0] = vaddq_s32(c[0], c[2]);
-  c[2] = vmull_lane_s16(b[2], cospis, 3);
-  c[3] = vmull_lane_s16(b[2], cospis, 1);
-  c[2] = vmlsl_lane_s16(c[2], b[3], cospis, 1);
-  c[3] = vmlal_lane_s16(c[3], b[3], cospis, 3);
-  b[0] = vrshrn_n_s32(c[0], DCT_CONST_BITS);
-  b[1] = vrshrn_n_s32(c[1], DCT_CONST_BITS);
-  b[2] = vrshrn_n_s32(c[2], DCT_CONST_BITS);
-  b[3] = vrshrn_n_s32(c[3], DCT_CONST_BITS);
-  d[0] = vcombine_s16(b[0], b[1]);
-  d[1] = vcombine_s16(b[3], b[2]);
+  c[3] = vmull_lane_s16(b[2], cospis, 3);
+  c[2] = vmull_lane_s16(b[2], cospis, 1);
+  c[3] = vmlsl_lane_s16(c[3], b[3], cospis, 1);
+  c[2] = vmlal_lane_s16(c[2], b[3], cospis, 3);
+  dct_const_round_shift_low_8_dual(c, &d[0], &d[1]);
   a[0] = vaddq_s16(d[0], d[1]);
   a[1] = vsubq_s16(d[0], d[1]);
+}
+
+static INLINE void transpose_idct4x4_16_bd8(int16x8_t *const a) {
+  transpose_s16_4x4q(&a[0], &a[1]);
+  idct4x4_16_kernel_bd8(a);
 }
 
 static INLINE void idct8x8_12_pass1_bd8(const int16x4_t cospis0,
@@ -366,7 +372,6 @@ static INLINE void idct8x8_12_pass2_bd8(const int16x4_t cospis0,
   int16x8_t in[4];
   int16x8_t step1[8], step2[8];
   int32x4_t t32[8];
-  int16x4_t t16[8];
 
   transpose_s16_4x8(input[0], input[1], input[2], input[3], input[4], input[5],
                     input[6], input[7], &in[0], &in[1], &in[2], &in[3]);
@@ -399,12 +404,7 @@ static INLINE void idct8x8_12_pass2_bd8(const int16x4_t cospis0,
   t32[1] = vmlsl_lane_s16(t32[3], vget_high_s16(step2[5]), cospis0, 2);
   t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(step2[5]), cospis0, 2);
   t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(step2[5]), cospis0, 2);
-  t16[0] = vrshrn_n_s32(t32[0], DCT_CONST_BITS);
-  t16[1] = vrshrn_n_s32(t32[1], DCT_CONST_BITS);
-  t16[2] = vrshrn_n_s32(t32[2], DCT_CONST_BITS);
-  t16[3] = vrshrn_n_s32(t32[3], DCT_CONST_BITS);
-  step1[5] = vcombine_s16(t16[0], t16[1]);
-  step1[6] = vcombine_s16(t16[2], t16[3]);
+  dct_const_round_shift_low_8_dual(t32, &step1[5], &step1[6]);
 
   // stage 4
   output[0] = vaddq_s16(step1[0], step2[7]);
@@ -425,7 +425,6 @@ static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
   int16x4_t step1l[4], step1h[4];
   int16x8_t step1[8], step2[8];
   int32x4_t t32[8];
-  int16x4_t t16[8];
 
   transpose_s16_8x8(&io[0], &io[1], &io[2], &io[3], &io[4], &io[5], &io[6],
                     &io[7]);
@@ -464,18 +463,8 @@ static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
   t32[5] = vmlsl_lane_s16(t32[5], input5h, cospis1, 2);
   t32[6] = vmlal_lane_s16(t32[6], input7l, cospis1, 3);
   t32[7] = vmlal_lane_s16(t32[7], input7h, cospis1, 3);
-  t16[0] = vrshrn_n_s32(t32[0], DCT_CONST_BITS);
-  t16[1] = vrshrn_n_s32(t32[1], DCT_CONST_BITS);
-  t16[2] = vrshrn_n_s32(t32[2], DCT_CONST_BITS);
-  t16[3] = vrshrn_n_s32(t32[3], DCT_CONST_BITS);
-  t16[4] = vrshrn_n_s32(t32[4], DCT_CONST_BITS);
-  t16[5] = vrshrn_n_s32(t32[5], DCT_CONST_BITS);
-  t16[6] = vrshrn_n_s32(t32[6], DCT_CONST_BITS);
-  t16[7] = vrshrn_n_s32(t32[7], DCT_CONST_BITS);
-  step1[4] = vcombine_s16(t16[0], t16[1]);
-  step1[5] = vcombine_s16(t16[2], t16[3]);
-  step1[6] = vcombine_s16(t16[4], t16[5]);
-  step1[7] = vcombine_s16(t16[6], t16[7]);
+  dct_const_round_shift_low_8_dual(&t32[0], &step1[4], &step1[5]);
+  dct_const_round_shift_low_8_dual(&t32[4], &step1[6], &step1[7]);
 
   // stage 2
   t32[2] = vmull_lane_s16(step1l[0], cospis0, 2);
@@ -492,18 +481,8 @@ static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
   t32[5] = vmlsl_lane_s16(t32[5], step1h[3], cospis0, 1);
   t32[6] = vmlal_lane_s16(t32[6], step1l[3], cospis0, 3);
   t32[7] = vmlal_lane_s16(t32[7], step1h[3], cospis0, 3);
-  t16[0] = vrshrn_n_s32(t32[0], DCT_CONST_BITS);
-  t16[1] = vrshrn_n_s32(t32[1], DCT_CONST_BITS);
-  t16[2] = vrshrn_n_s32(t32[2], DCT_CONST_BITS);
-  t16[3] = vrshrn_n_s32(t32[3], DCT_CONST_BITS);
-  t16[4] = vrshrn_n_s32(t32[4], DCT_CONST_BITS);
-  t16[5] = vrshrn_n_s32(t32[5], DCT_CONST_BITS);
-  t16[6] = vrshrn_n_s32(t32[6], DCT_CONST_BITS);
-  t16[7] = vrshrn_n_s32(t32[7], DCT_CONST_BITS);
-  step2[0] = vcombine_s16(t16[0], t16[1]);
-  step2[1] = vcombine_s16(t16[2], t16[3]);
-  step2[2] = vcombine_s16(t16[4], t16[5]);
-  step2[3] = vcombine_s16(t16[6], t16[7]);
+  dct_const_round_shift_low_8_dual(&t32[0], &step2[0], &step2[1]);
+  dct_const_round_shift_low_8_dual(&t32[4], &step2[2], &step2[3]);
 
   step2[4] = vaddq_s16(step1[4], step1[5]);
   step2[5] = vsubq_s16(step1[4], step1[5]);
@@ -522,12 +501,7 @@ static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
   t32[1] = vmlsl_lane_s16(t32[3], vget_high_s16(step2[5]), cospis0, 2);
   t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(step2[5]), cospis0, 2);
   t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(step2[5]), cospis0, 2);
-  t16[0] = vrshrn_n_s32(t32[0], DCT_CONST_BITS);
-  t16[1] = vrshrn_n_s32(t32[1], DCT_CONST_BITS);
-  t16[2] = vrshrn_n_s32(t32[2], DCT_CONST_BITS);
-  t16[3] = vrshrn_n_s32(t32[3], DCT_CONST_BITS);
-  step1[5] = vcombine_s16(t16[0], t16[1]);
-  step1[6] = vcombine_s16(t16[2], t16[3]);
+  dct_const_round_shift_low_8_dual(t32, &step1[5], &step1[6]);
 
   // stage 4
   io[0] = vaddq_s16(step1[0], step2[7]);
@@ -538,19 +512,6 @@ static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
   io[5] = vsubq_s16(step1[2], step1[5]);
   io[6] = vsubq_s16(step1[1], step1[6]);
   io[7] = vsubq_s16(step1[0], step2[7]);
-}
-
-static INLINE void idct16x16_add_wrap_low_8x2(const int32x4_t *const t32,
-                                              int16x8_t *const d0,
-                                              int16x8_t *const d1) {
-  int16x4_t t16[4];
-
-  t16[0] = vrshrn_n_s32(t32[0], DCT_CONST_BITS);
-  t16[1] = vrshrn_n_s32(t32[1], DCT_CONST_BITS);
-  t16[2] = vrshrn_n_s32(t32[2], DCT_CONST_BITS);
-  t16[3] = vrshrn_n_s32(t32[3], DCT_CONST_BITS);
-  *d0 = vcombine_s16(t16[0], t16[1]);
-  *d1 = vcombine_s16(t16[2], t16[3]);
 }
 
 static INLINE void idct_cospi_8_24_q_kernel(const int16x8_t s0,
@@ -573,7 +534,7 @@ static INLINE void idct_cospi_8_24_q(const int16x8_t s0, const int16x8_t s1,
   int32x4_t t32[4];
 
   idct_cospi_8_24_q_kernel(s0, s1, cospi_0_8_16_24, t32);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct_cospi_8_24_neg_q(const int16x8_t s0, const int16x8_t s1,
@@ -585,7 +546,7 @@ static INLINE void idct_cospi_8_24_neg_q(const int16x8_t s0, const int16x8_t s1,
   idct_cospi_8_24_q_kernel(s0, s1, cospi_0_8_16_24, t32);
   t32[2] = vnegq_s32(t32[2]);
   t32[3] = vnegq_s32(t32[3]);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct_cospi_16_16_q(const int16x8_t s0, const int16x8_t s1,
@@ -600,7 +561,7 @@ static INLINE void idct_cospi_16_16_q(const int16x8_t s0, const int16x8_t s1,
   t32[1] = vmlsl_lane_s16(t32[5], vget_high_s16(s0), cospi_0_8_16_24, 2);
   t32[2] = vmlal_lane_s16(t32[4], vget_low_s16(s0), cospi_0_8_16_24, 2);
   t32[3] = vmlal_lane_s16(t32[5], vget_high_s16(s0), cospi_0_8_16_24, 2);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct_cospi_2_30(const int16x8_t s0, const int16x8_t s1,
@@ -616,7 +577,7 @@ static INLINE void idct_cospi_2_30(const int16x8_t s0, const int16x8_t s1,
   t32[1] = vmlsl_lane_s16(t32[1], vget_high_s16(s1), cospi_2_30_10_22, 0);
   t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(s0), cospi_2_30_10_22, 0);
   t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(s0), cospi_2_30_10_22, 0);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct_cospi_4_28(const int16x8_t s0, const int16x8_t s1,
@@ -632,7 +593,7 @@ static INLINE void idct_cospi_4_28(const int16x8_t s0, const int16x8_t s1,
   t32[1] = vmlsl_lane_s16(t32[1], vget_high_s16(s1), cospi_4_12_20N_28, 0);
   t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(s0), cospi_4_12_20N_28, 0);
   t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(s0), cospi_4_12_20N_28, 0);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct_cospi_6_26(const int16x8_t s0, const int16x8_t s1,
@@ -648,7 +609,7 @@ static INLINE void idct_cospi_6_26(const int16x8_t s0, const int16x8_t s1,
   t32[1] = vmlal_lane_s16(t32[1], vget_high_s16(s1), cospi_6_26N_14_18N, 1);
   t32[2] = vmlsl_lane_s16(t32[2], vget_low_s16(s0), cospi_6_26N_14_18N, 1);
   t32[3] = vmlsl_lane_s16(t32[3], vget_high_s16(s0), cospi_6_26N_14_18N, 1);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct_cospi_10_22(const int16x8_t s0, const int16x8_t s1,
@@ -664,7 +625,7 @@ static INLINE void idct_cospi_10_22(const int16x8_t s0, const int16x8_t s1,
   t32[1] = vmlsl_lane_s16(t32[1], vget_high_s16(s1), cospi_2_30_10_22, 2);
   t32[2] = vmlal_lane_s16(t32[2], vget_low_s16(s0), cospi_2_30_10_22, 2);
   t32[3] = vmlal_lane_s16(t32[3], vget_high_s16(s0), cospi_2_30_10_22, 2);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct_cospi_12_20(const int16x8_t s0, const int16x8_t s1,
@@ -680,7 +641,7 @@ static INLINE void idct_cospi_12_20(const int16x8_t s0, const int16x8_t s1,
   t32[1] = vmlal_lane_s16(t32[1], vget_high_s16(s1), cospi_4_12_20N_28, 2);
   t32[2] = vmlsl_lane_s16(t32[2], vget_low_s16(s0), cospi_4_12_20N_28, 2);
   t32[3] = vmlsl_lane_s16(t32[3], vget_high_s16(s0), cospi_4_12_20N_28, 2);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct_cospi_14_18(const int16x8_t s0, const int16x8_t s1,
@@ -696,7 +657,7 @@ static INLINE void idct_cospi_14_18(const int16x8_t s0, const int16x8_t s1,
   t32[1] = vmlal_lane_s16(t32[1], vget_high_s16(s1), cospi_6_26N_14_18N, 3);
   t32[2] = vmlsl_lane_s16(t32[2], vget_low_s16(s0), cospi_6_26N_14_18N, 3);
   t32[3] = vmlsl_lane_s16(t32[3], vget_high_s16(s0), cospi_6_26N_14_18N, 3);
-  idct16x16_add_wrap_low_8x2(t32, d0, d1);
+  dct_const_round_shift_low_8_dual(t32, d0, d1);
 }
 
 static INLINE void idct16x16_add_stage7(const int16x8_t *const step2,
