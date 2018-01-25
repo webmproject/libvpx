@@ -103,6 +103,8 @@ typedef struct SVC {
   int first_layer_denoise;
 
   int skip_enhancement_layer;
+
+  int lower_layer_qindex;
 } SVC;
 
 struct VP9_COMP;
