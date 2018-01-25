@@ -1224,12 +1224,70 @@ class DatarateOnePassCbrSvc
     base_speed_setting_ = 5;
     spatial_layer_id_ = 0;
     temporal_layer_id_ = 0;
+    update_pattern_ = 0;
     memset(bits_in_buffer_model_, 0, sizeof(bits_in_buffer_model_));
     memset(bits_total_, 0, sizeof(bits_total_));
     memset(layer_target_avg_bandwidth_, 0, sizeof(layer_target_avg_bandwidth_));
     dynamic_drop_layer_ = false;
   }
   virtual void BeginPassHook(unsigned int /*pass*/) {}
+
+  // Example pattern for spatial layers and 2 temporal layers used in the
+  // bypass/flexible mode. The pattern corresponds to the pattern
+  // VP9E_TEMPORAL_LAYERING_MODE_0101 (temporal_layering_mode == 2) used in
+  // non-flexible mode, except that we disable inter-layer prediction.
+  void set_frame_flags_bypass_mode(
+      int tl, int num_spatial_layers, int is_key_frame,
+      vpx_svc_ref_frame_config_t *ref_frame_config) {
+    for (int sl = 0; sl < num_spatial_layers; ++sl) {
+      if (!tl) {
+        if (!sl) {
+          ref_frame_config->frame_flags[sl] =
+              VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_GF |
+              VP8_EFLAG_NO_UPD_ARF;
+        } else {
+          if (is_key_frame) {
+            ref_frame_config->frame_flags[sl] =
+                VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+                VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_ARF;
+          } else {
+            ref_frame_config->frame_flags[sl] =
+                VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_GF |
+                VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_REF_GF;
+          }
+        }
+      } else if (tl == 1) {
+        if (!sl) {
+          ref_frame_config->frame_flags[sl] =
+              VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+              VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
+        } else {
+          ref_frame_config->frame_flags[sl] =
+              VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_LAST |
+              VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_REF_GF;
+        }
+      }
+      if (tl == 0) {
+        ref_frame_config->lst_fb_idx[sl] = sl;
+        if (sl) {
+          if (is_key_frame) {
+            ref_frame_config->lst_fb_idx[sl] = sl - 1;
+            ref_frame_config->gld_fb_idx[sl] = sl;
+          } else {
+            ref_frame_config->gld_fb_idx[sl] = sl - 1;
+          }
+        } else {
+          ref_frame_config->gld_fb_idx[sl] = 0;
+        }
+        ref_frame_config->alt_fb_idx[sl] = 0;
+      } else if (tl == 1) {
+        ref_frame_config->lst_fb_idx[sl] = sl;
+        ref_frame_config->gld_fb_idx[sl] = num_spatial_layers + sl - 1;
+        ref_frame_config->alt_fb_idx[sl] = num_spatial_layers + sl;
+      }
+    }
+  }
+
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 0) {
@@ -1253,6 +1311,21 @@ class DatarateOnePassCbrSvc
       encoder->Control(VP9E_SET_ROW_MT, 1);
       encoder->Control(VP8E_SET_STATIC_THRESHOLD, 1);
       encoder->Control(VP9E_SET_TUNE_CONTENT, tune_content_);
+    }
+
+    if (update_pattern_ && video->frame() >= 100) {
+      vpx_svc_layer_id_t layer_id;
+      if (video->frame() == 100) {
+        cfg_.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
+        encoder->Config(&cfg_);
+      }
+      // Set layer id since the pattern changed.
+      layer_id.spatial_layer_id = 0;
+      layer_id.temporal_layer_id = (video->frame() % 2 != 0);
+      encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
+      set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
+                                  number_spatial_layers_, 0, &ref_frame_config);
+      encoder->Control(VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_frame_config);
     }
 
     if (dynamic_drop_layer_) {
@@ -1403,6 +1476,8 @@ class DatarateOnePassCbrSvc
   bool dynamic_drop_layer_;
   unsigned int top_sl_width_;
   unsigned int top_sl_height_;
+  vpx_svc_ref_frame_config_t ref_frame_config;
+  int update_pattern_;
 };
 static void assign_layer_bitrates(vpx_codec_enc_cfg_t *const enc_cfg,
                                   const vpx_svc_extra_cfg_t *svc_params,
@@ -1759,6 +1834,51 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
   // mismatched frames.
   EXPECT_EQ(static_cast<unsigned int>(200), GetMismatchFrames());
 #endif
+}
+
+// Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and
+// 2 temporal layers, with a change on the fly from the fixed SVC pattern to one
+// generate via SVC_SET_REF_FRAME_CONFIG. The new pattern also disables
+// inter-layer prediction.
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL2TLDynamicPatternChange) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.ss_number_layers = 3;
+  cfg_.ts_number_layers = 2;
+  cfg_.ts_rate_decimator[0] = 2;
+  cfg_.ts_rate_decimator[1] = 1;
+  cfg_.g_error_resilient = 1;
+  cfg_.g_threads = 1;
+  cfg_.temporal_layering_mode = 2;
+  svc_params_.scaling_factor_num[0] = 72;
+  svc_params_.scaling_factor_den[0] = 288;
+  svc_params_.scaling_factor_num[1] = 144;
+  svc_params_.scaling_factor_den[1] = 288;
+  svc_params_.scaling_factor_num[2] = 288;
+  svc_params_.scaling_factor_den[2] = 288;
+  cfg_.rc_dropframe_thresh = 0;
+  cfg_.kf_max_dist = 9999;
+  number_spatial_layers_ = cfg_.ss_number_layers;
+  number_temporal_layers_ = cfg_.ts_number_layers;
+  // Change SVC pattern on the fly.
+  update_pattern_ = 1;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
+  cfg_.rc_target_bitrate = 800;
+  ResetModel();
+  assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
+                          number_temporal_layers_, file_datarate_, 0.78, 1.15);
 }
 
 // Check basic rate targeting for 1 pass CBR SVC with 3 spatial layers and on

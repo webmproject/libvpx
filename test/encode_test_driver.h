@@ -128,6 +128,11 @@ class Encoder {
     ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
   }
 
+  void Control(int ctrl_id, struct vpx_svc_ref_frame_config *arg) {
+    const vpx_codec_err_t res = vpx_codec_control_(&encoder_, ctrl_id, arg);
+    ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
+  }
+
   void Control(int ctrl_id, struct vpx_svc_parameters *arg) {
     const vpx_codec_err_t res = vpx_codec_control_(&encoder_, ctrl_id, arg);
     ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
