@@ -22,6 +22,30 @@
       "revId": "067457339bc6dce72cc07cb0ebf9f549f452250a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68770d7c_613387da",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1495,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-25T17:31:53Z",
+      "side": 1,
+      "message": "Yes. It will only be used (in pick_inter_mode) for spatial_layer_id \u003e 0,\nso it should be always be set for the lower spatial layer.\n\nalso i don\u0027t set it here for top spatial layer, since it won\u0027t be used for the next frame (which is base/spatial layer_id \u003d 0).",
+      "parentUuid": "6c0aca31_530d5722",
+      "range": {
+        "startLine": 1495,
+        "startChar": 4,
+        "endLine": 1495,
+        "endChar": 50
+      },
+      "revId": "067457339bc6dce72cc07cb0ebf9f549f452250a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
