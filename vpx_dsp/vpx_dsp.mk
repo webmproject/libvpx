@@ -134,6 +134,7 @@ DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve8_vert_msa.c
 DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_avg_msa.c
 DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_copy_msa.c
 DSP_SRCS-$(HAVE_MSA) += mips/vpx_convolve_msa.h
+DSP_SRCS-$(HAVE_MMI) += mips/vpx_convolve8_mmi.c
 
 # common (dspr2)
 DSP_SRCS-$(HAVE_DSPR2)  += mips/convolve_common_dspr2.h
