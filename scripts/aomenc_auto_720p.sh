@@ -1,7 +1,7 @@
 #!/bin/sh
 # Unique calling argument: frame number
 #
-set -x
+#set -x
 
 if [ "$#" -ne 1 ]; then
   frames=25
@@ -38,4 +38,4 @@ fps=30
 bitrate=2500
 laginframes=19
 
-taskset -c 0 ./aomenc -o /run/shm/$bitstream ~/Dev/samples/videos/speed-set/night_720p30.y4m --codec=av1 --fps=$fps/1 --skip=0 -p 2 --good --cpu-used=0 --target-bitrate=$bitrate --lag-in-frames=$laginframes --profile=$prof $bitdepth --limit=$frames --enable-cdef=0 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 -t 1 --psnr --test-decode=warn -D
+taskset -c 0 ./aomenc -o /run/shm/$bitstream ~/Dev/samples/videos/speed-set/night_720p30.y4m --codec=av1 --fps=$fps/1 --skip=0 -p 2 --cpu-used=0 --target-bitrate=$bitrate --lag-in-frames=$laginframes --profile=$prof $bitdepth --limit=$frames --enable-cdef=0 --min-q=0 --max-q=63 --auto-alt-ref=1 --kf-max-dist=150 --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 --minsection-pct=0 --maxsection-pct=2000 --arnr-maxframes=7 --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 --frame-parallel=0 -t 1 --psnr --test-decode=warn -D
