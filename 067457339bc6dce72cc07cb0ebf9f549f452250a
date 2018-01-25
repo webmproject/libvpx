@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c0aca31_530d5722",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1495,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-01-25T17:27:32Z",
+      "side": 1,
+      "message": "Is this initialization of lower_layer_qindex for next frame?",
+      "range": {
+        "startLine": 1495,
+        "startChar": 4,
+        "endLine": 1495,
+        "endChar": 50
+      },
+      "revId": "067457339bc6dce72cc07cb0ebf9f549f452250a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
