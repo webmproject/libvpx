@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fe47a02_ab6e08b6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "something like?\nDatarate unittest for usage of SVC_SET_REF_FRAME_CONFIG",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2a93cbc_bea2af98",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1237,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "non-flexible mode, except that we disable inter-layer prediction.",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99232e39_eb330f73",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1253,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "need to add VP8_EFLAG_NO_REF_GF to disable inter-layer prediction\n\nand add comment to highlight this change.",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d562aca6_a17dff32",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1264,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "need to add VP8_EFLAG_NO_REF_GF to disable inter-layer prediction\n\nand add comment to highlight this change",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "46b86f58_3710b081",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1319,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "the change config should only be needed on the transition frame (100), right?",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0cd0915_a64718f6",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1834,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "update comments, something like:\nCheck basic rate targeting for 1 pass CBR SVC for 3 spatial and 2 temporal layers,\nwith a change on the fly from the fixed SVC pattern to one generated via SET_REF_FRAME_CONFIG. The new pattern also disables inter-layer prediction.",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f2028ca_75dbee0a",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1835,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "call is something like: OnePassCbrSvc3SL2TLDynamicPatternChange",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dee17fbd_963177aa",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1850,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "also add new variable to trigger the change in pattern:\nupdate_svc_pattern_ \u003d 1;",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "998025a2_a268a630",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1873,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "why does this not work?",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42b048bc_3d65a2f3",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1866,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-26T02:47:54Z",
+      "side": 1,
+      "message": "can you make a separate CL for this change only, since we need this.\n\ncan you make the update in vp9_update_layer_content_change_confg()?",
+      "revId": "0c2df57405f4b5e1bd037d261c6a5d2c1c006ea4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
