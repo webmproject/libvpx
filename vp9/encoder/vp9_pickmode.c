@@ -2211,9 +2211,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
   // For spatial enhancemanent layer: perform intra prediction only if base
   // layer is chosen as the reference. Always perform intra prediction if
-  // LAST is the only reference or is_key_frame is set.
+  // LAST is the only reference, or is_key_frame is set, or on base
+  // temporal layer.
   if (cpi->svc.spatial_layer_id) {
     perform_intra_pred =
+        cpi->svc.temporal_layer_id == 0 ||
         cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame ||
         !(cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) ||
         (!cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame &&
