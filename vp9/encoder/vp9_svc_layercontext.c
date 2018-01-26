@@ -155,6 +155,8 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
   int sl, tl, layer = 0, spatial_layer_target;
   float bitrate_alloc = 1.0;
 
+  cpi->svc.temporal_layering_mode = oxcf->temporal_layering_mode;
+
   if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING) {
     for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
       for (tl = 0; tl < oxcf->ts_number_layers; ++tl) {
