@@ -674,7 +674,7 @@ static unsigned int read_partition_size(VP8D_COMP *pbi,
 
 static int read_is_valid(const unsigned char *start, size_t len,
                          const unsigned char *end) {
-  return (start + len > start && start + len <= end);
+  return len != 0 && len <= (size_t)(end - start);
 }
 
 static unsigned int read_available_partition_size(
