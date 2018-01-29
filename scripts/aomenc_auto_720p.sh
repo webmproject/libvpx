@@ -27,7 +27,7 @@ cd ../release
 #../aom/configure --disable-docs --disable-unit-tests
 #make clean;make
 
-rm -fr *
+rm -fr ./*
 cmake ../aom -DCONFIG_UNIT_TESTS=0 -DENABLE_DOCS=0
 make
 
