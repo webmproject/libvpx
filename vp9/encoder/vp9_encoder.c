@@ -547,6 +547,74 @@ static void apply_active_map(VP9_COMP *cpi) {
   }
 }
 
+static void apply_roi_map(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  struct segmentation *const seg = &cm->seg;
+  vpx_roi_map_t *roi = &cpi->roi;
+  const int *delta_q = roi->delta_q;
+  const int *delta_lf = roi->delta_lf;
+  const int *skip = roi->skip;
+  int ref_frame[8];
+  int internal_delta_q[MAX_SEGMENTS];
+  int i;
+  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
+                                    VP9_ALT_FLAG };
+
+  // TODO(jianj): Investigate why ROI not working in speed < 5 or in non
+  // realtime mode.
+  if (cpi->oxcf.mode != REALTIME || cpi->oxcf.speed < 5) return;
+  if (!roi->enabled) return;
+
+  memcpy(&ref_frame, roi->ref_frame, sizeof(ref_frame));
+
+  vp9_enable_segmentation(seg);
+  vp9_clearall_segfeatures(seg);
+  // Select delta coding method;
+  seg->abs_delta = SEGMENT_DELTADATA;
+
+  memcpy(cpi->segmentation_map, roi->roi_map, (cm->mi_rows * cm->mi_cols));
+
+  for (i = 0; i < MAX_SEGMENTS; ++i) {
+    // Translate the external delta q values to internal values.
+    internal_delta_q[i] = vp9_quantizer_to_qindex(abs(delta_q[i]));
+    if (delta_q[i] < 0) internal_delta_q[i] = -internal_delta_q[i];
+    vp9_disable_segfeature(seg, i, SEG_LVL_ALT_Q);
+    vp9_disable_segfeature(seg, i, SEG_LVL_ALT_LF);
+    if (internal_delta_q[i] != 0) {
+      vp9_enable_segfeature(seg, i, SEG_LVL_ALT_Q);
+      vp9_set_segdata(seg, i, SEG_LVL_ALT_Q, internal_delta_q[i]);
+    }
+    if (delta_lf[i] != 0) {
+      vp9_enable_segfeature(seg, i, SEG_LVL_ALT_LF);
+      vp9_set_segdata(seg, i, SEG_LVL_ALT_LF, delta_lf[i]);
+    }
+    if (skip[i] != 0) {
+      vp9_enable_segfeature(seg, i, SEG_LVL_SKIP);
+      vp9_set_segdata(seg, i, SEG_LVL_SKIP, skip[i]);
+    }
+    if (ref_frame[i] >= 0) {
+      int valid_ref = 1;
+      // ALTREF is not used as reference for nonrd_pickmode with 0 lag.
+      if (ref_frame[i] == ALTREF_FRAME && cpi->sf.use_nonrd_pick_mode)
+        valid_ref = 0;
+      // If GOLDEN is selected, make sure it's set as reference.
+      if (ref_frame[i] == GOLDEN_FRAME &&
+          !(cpi->ref_frame_flags & flag_list[ref_frame[i]])) {
+        valid_ref = 0;
+      }
+      // GOLDEN was updated in previous encoded frame, so GOLDEN and LAST are
+      // same reference.
+      if (ref_frame[i] == GOLDEN_FRAME && cpi->rc.frames_since_golden == 0)
+        ref_frame[i] = LAST_FRAME;
+      if (valid_ref) {
+        vp9_enable_segfeature(seg, i, SEG_LVL_REF_FRAME);
+        vp9_set_segdata(seg, i, SEG_LVL_REF_FRAME, ref_frame[i]);
+      }
+    }
+  }
+  roi->enabled = 1;
+}
+
 static void init_level_info(Vp9LevelInfo *level_info) {
   Vp9LevelStats *const level_stats = &level_info->level_stats;
   Vp9LevelSpec *const level_spec = &level_info->level_spec;
@@ -555,6 +623,13 @@ static void init_level_info(Vp9LevelInfo *level_info) {
   memset(level_spec, 0, sizeof(*level_spec));
   level_spec->level = LEVEL_UNKNOWN;
   level_spec->min_altref_distance = INT_MAX;
+}
+
+static int check_seg_range(int seg_data[8], int range) {
+  return !(abs(seg_data[0]) > range || abs(seg_data[1]) > range ||
+           abs(seg_data[2]) > range || abs(seg_data[3]) > range ||
+           abs(seg_data[4]) > range || abs(seg_data[5]) > range ||
+           abs(seg_data[6]) > range || abs(seg_data[7]) > range);
 }
 
 VP9_LEVEL vp9_get_level(const Vp9LevelSpec *const level_spec) {
@@ -581,6 +656,61 @@ VP9_LEVEL vp9_get_level(const Vp9LevelSpec *const level_spec) {
     break;
   }
   return (i == VP9_LEVELS) ? LEVEL_UNKNOWN : vp9_level_defs[i].level;
+}
+
+int vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
+                    unsigned int cols, int delta_q[8], int delta_lf[8],
+                    int skip[8], int ref_frame[8]) {
+  VP9_COMMON *cm = &cpi->common;
+  vpx_roi_map_t *roi = &cpi->roi;
+  const int range = 63;
+  const int ref_frame_range = 3;  // Alt-ref
+  const int skip_range = 1;
+  const int frame_rows = cpi->common.mi_rows;
+  const int frame_cols = cpi->common.mi_cols;
+
+  // Check number of rows and columns match
+  if (frame_rows != (int)rows || frame_cols != (int)cols) {
+    return -1;
+  }
+
+  if (!check_seg_range(delta_q, range) || !check_seg_range(delta_lf, range) ||
+      !check_seg_range(ref_frame, ref_frame_range) ||
+      !check_seg_range(skip, skip_range))
+    return -1;
+
+  // Also disable segmentation if no deltas are specified.
+  if (!map ||
+      (!(delta_q[0] | delta_q[1] | delta_q[2] | delta_q[3] | delta_q[4] |
+         delta_q[5] | delta_q[6] | delta_q[7] | delta_lf[0] | delta_lf[1] |
+         delta_lf[2] | delta_lf[3] | delta_lf[4] | delta_lf[5] | delta_lf[6] |
+         delta_lf[7] | skip[0] | skip[1] | skip[2] | skip[3] | skip[4] |
+         skip[5] | skip[6] | skip[7]) &&
+       (ref_frame[0] == -1 && ref_frame[1] == -1 && ref_frame[2] == -1 &&
+        ref_frame[3] == -1 && ref_frame[4] == -1 && ref_frame[5] == -1 &&
+        ref_frame[6] == -1 && ref_frame[7] == -1))) {
+    vp9_disable_segmentation(&cm->seg);
+    cpi->roi.enabled = 0;
+    return 0;
+  }
+
+  if (roi->roi_map) {
+    vpx_free(roi->roi_map);
+    roi->roi_map = NULL;
+  }
+  CHECK_MEM_ERROR(cm, roi->roi_map, vpx_malloc(rows * cols));
+
+  // Copy to ROI sturcture in the compressor.
+  memcpy(roi->roi_map, map, rows * cols);
+  memcpy(&roi->delta_q, delta_q, MAX_SEGMENTS * sizeof(delta_q[0]));
+  memcpy(&roi->delta_lf, delta_lf, MAX_SEGMENTS * sizeof(delta_lf[0]));
+  memcpy(&roi->skip, skip, MAX_SEGMENTS * sizeof(skip[0]));
+  memcpy(&roi->ref_frame, ref_frame, MAX_SEGMENTS * sizeof(ref_frame[0]));
+  roi->enabled = 1;
+  roi->rows = rows;
+  roi->cols = cols;
+
+  return 0;
 }
 
 int vp9_set_active_map(VP9_COMP *cpi, unsigned char *new_map_16x16, int rows,
@@ -816,6 +946,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vpx_free(cpi->active_map.map);
   cpi->active_map.map = NULL;
+
+  vpx_free(cpi->roi.roi_map);
+  cpi->roi.roi_map = NULL;
 
   vpx_free(cpi->consec_zero_mv);
   cpi->consec_zero_mv = NULL;
@@ -3632,6 +3765,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     // it may be pretty bad for rate-control,
     // and I should handle it somehow
     vp9_alt_ref_aq_setup_map(cpi->alt_ref_aq, cpi);
+  } else if (cpi->roi.enabled && cm->frame_type != KEY_FRAME) {
+    apply_roi_map(cpi);
   }
 
   apply_active_map(cpi);
