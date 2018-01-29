@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f4b585f_7c25d68e",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1230,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T05:46:13Z",
+      "side": 1,
+      "message": "update_pattern_ \u003d 0;",
+      "revId": "a12ae86cca5c09d8bd1ffebfdb09aee814d14bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7f4b6a7_3ec88941",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1315,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T05:46:13Z",
+      "side": 1,
+      "message": "better to base this on \"update_pattern_ \u003d 1\" (instead of number_temporal_layers \u003d 2)",
+      "revId": "a12ae86cca5c09d8bd1ffebfdb09aee814d14bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0daeb8f9_e64a8c3a",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1321,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T05:46:13Z",
+      "side": 1,
+      "message": "-should be VP9_SET_SVC_LAYER_ID\n\n-and layer_id.temporal_layer_id needs to be set to 0/1, \n (if video-\u003eframe() % 2 \u003d\u003d 0) layer_id.temporal_layer_id \u003d 0, otherwise 1)",
+      "revId": "a12ae86cca5c09d8bd1ffebfdb09aee814d14bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f5a779e_c47c45d2",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2371,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T05:46:13Z",
+      "side": 1,
+      "message": "remove this",
+      "revId": "a12ae86cca5c09d8bd1ffebfdb09aee814d14bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe75d2b8_6dc758b3",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1389,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T05:46:13Z",
+      "side": 1,
+      "message": "remove this",
+      "revId": "a12ae86cca5c09d8bd1ffebfdb09aee814d14bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45006fe5_6514a923",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T05:46:13Z",
+      "side": 1,
+      "message": "remove this",
+      "revId": "a12ae86cca5c09d8bd1ffebfdb09aee814d14bdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
