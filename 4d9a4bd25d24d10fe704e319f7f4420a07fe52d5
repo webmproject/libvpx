@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a937b6d2_eb66e317",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T18:30:44Z",
+      "side": 1,
+      "message": "should add 0s for the ref_frame feature as well\n\nit should work this patch: https://chromium-review.googlesource.com/c/webm/libvpx/+/891303",
+      "revId": "4d9a4bd25d24d10fe704e319f7f4420a07fe52d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f520a21e_8beceb79",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 586,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T18:30:44Z",
+      "side": 1,
+      "message": "add ref_frame",
+      "revId": "4d9a4bd25d24d10fe704e319f7f4420a07fe52d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95b7a4b9_78c8386c",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T18:30:44Z",
+      "side": 1,
+      "message": "add checks on ref_frame",
+      "revId": "4d9a4bd25d24d10fe704e319f7f4420a07fe52d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "946a1700_686b3261",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 945,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T18:30:44Z",
+      "side": 1,
+      "message": "add ref_frame[8]",
+      "revId": "4d9a4bd25d24d10fe704e319f7f4420a07fe52d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f1a763b_e09a696d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1423,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T18:30:44Z",
+      "side": 1,
+      "message": "add roi-\u003eref_frame",
+      "revId": "4d9a4bd25d24d10fe704e319f7f4420a07fe52d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ddec1c6_fee503f8",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-29T18:30:44Z",
+      "side": 1,
+      "message": "remove this comment, support exists but it does not do anything in non-rd pickmode\n(you have comment on this already in line 665)",
+      "revId": "4d9a4bd25d24d10fe704e319f7f4420a07fe52d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
