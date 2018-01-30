@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7699f8b_c3bdfa77",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-30T02:31:02Z",
+      "side": 1,
+      "message": "remove this bug, since this has nothing to do with the API/control issue",
+      "revId": "ca5d67e63e4db73bbf351f0daa7f6c72e903e437",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
