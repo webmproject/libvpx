@@ -549,6 +549,8 @@ static void set_flags_and_fb_idx_for_temporal_mode2(VP9_COMP *const cpi) {
     if (!spatial_id) {
       cpi->ref_frame_flags = VP9_LAST_FLAG;
     } else {
+      if (spatial_id == cpi->svc.number_spatial_layers - 1)
+        cpi->ext_refresh_alt_ref_frame = 0;
       cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
     }
   }
