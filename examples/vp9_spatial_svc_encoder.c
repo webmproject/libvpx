@@ -589,6 +589,10 @@ void set_frame_flags_bypass_mode(int sl, int tl, int num_spatial_layers,
       } else {
         ref_frame_config->frame_flags[sl] =
             VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
+        if (sl == num_spatial_layers - 1)
+          ref_frame_config->frame_flags[sl] =
+              VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_REF_ARF |
+              VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
       }
     }
     if (tl == 0) {
