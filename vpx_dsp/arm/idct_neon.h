@@ -417,17 +417,14 @@ static INLINE void idct8x8_12_pass2_bd8(const int16x4_t cospis0,
   output[7] = vsubq_s16(step1[0], step2[7]);
 }
 
-static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
-                                     const int16x4_t cospis1,
-                                     int16x8_t *const io) {
+static INLINE void idct8x8_64_1d_bd8_kernel(const int16x4_t cospis0,
+                                            const int16x4_t cospis1,
+                                            int16x8_t *const io) {
   int16x4_t input1l, input1h, input3l, input3h, input5l, input5h, input7l,
       input7h;
   int16x4_t step1l[4], step1h[4];
   int16x8_t step1[8], step2[8];
   int32x4_t t32[8];
-
-  transpose_s16_8x8(&io[0], &io[1], &io[2], &io[3], &io[4], &io[5], &io[6],
-                    &io[7]);
 
   // stage 1
   input1l = vget_low_s16(io[1]);
@@ -512,6 +509,14 @@ static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
   io[5] = vsubq_s16(step1[2], step1[5]);
   io[6] = vsubq_s16(step1[1], step1[6]);
   io[7] = vsubq_s16(step1[0], step2[7]);
+}
+
+static INLINE void idct8x8_64_1d_bd8(const int16x4_t cospis0,
+                                     const int16x4_t cospis1,
+                                     int16x8_t *const io) {
+  transpose_s16_8x8(&io[0], &io[1], &io[2], &io[3], &io[4], &io[5], &io[6],
+                    &io[7]);
+  idct8x8_64_1d_bd8_kernel(cospis0, cospis1, io);
 }
 
 static INLINE void idct_cospi_8_24_q_kernel(const int16x8_t s0,
@@ -734,6 +739,28 @@ static INLINE void idct16x16_store_pass1(const int16x8_t *const out,
   vst1q_s16(output, out[14]);
   output += 16;
   vst1q_s16(output, out[15]);
+}
+
+static INLINE void idct8x8_add8x1(const int16x8_t a, uint8_t **const dest,
+                                  const int stride) {
+  const uint8x8_t s = vld1_u8(*dest);
+  const int16x8_t res = vrshrq_n_s16(a, 5);
+  const uint16x8_t q = vaddw_u8(vreinterpretq_u16_s16(res), s);
+  const uint8x8_t d = vqmovun_s16(vreinterpretq_s16_u16(q));
+  vst1_u8(*dest, d);
+  *dest += stride;
+}
+
+static INLINE void idct8x8_add8x8_neon(int16x8_t *const out, uint8_t *dest,
+                                       const int stride) {
+  idct8x8_add8x1(out[0], &dest, stride);
+  idct8x8_add8x1(out[1], &dest, stride);
+  idct8x8_add8x1(out[2], &dest, stride);
+  idct8x8_add8x1(out[3], &dest, stride);
+  idct8x8_add8x1(out[4], &dest, stride);
+  idct8x8_add8x1(out[5], &dest, stride);
+  idct8x8_add8x1(out[6], &dest, stride);
+  idct8x8_add8x1(out[7], &dest, stride);
 }
 
 static INLINE void idct16x16_add8x1(const int16x8_t a, uint8_t **const dest,
