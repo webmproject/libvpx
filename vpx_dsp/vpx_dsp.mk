@@ -242,6 +242,7 @@ DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_34_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_135_add_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct32x32_1024_add_neon.c
+DSP_SRCS-$(HAVE_NEON)  += arm/highbd_idct_neon.h
 DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_inv_txfm_sse2.h
 DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct4x4_add_sse2.c
 DSP_SRCS-$(HAVE_SSE2)  += x86/highbd_idct8x8_add_sse2.c

@@ -753,26 +753,66 @@ INSTANTIATE_TEST_CASE_P(C, TransHT, ::testing::ValuesIn(c_ht_tests));
 #if !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(
-    NEON, TransHT,
-    ::testing::Values(
-        make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 0,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 2,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 3,
-                   VPX_BITS_8, 1),
 
-        make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 0,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 2,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 3,
-                   VPX_BITS_8, 1)));
+const DctParam neon_ht_tests[] = {
+#if CONFIG_VP9_HIGHBITDEPTH
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 0,
+             VPX_BITS_8, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 1,
+             VPX_BITS_8, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 2,
+             VPX_BITS_8, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 3,
+             VPX_BITS_8, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 0,
+             VPX_BITS_10, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 1,
+             VPX_BITS_10, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 2,
+             VPX_BITS_10, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 3,
+             VPX_BITS_10, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 0,
+             VPX_BITS_12, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 1,
+             VPX_BITS_12, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 2,
+             VPX_BITS_12, 2),
+  make_tuple(&vp9_highbd_fht4x4_c,
+             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 3,
+             VPX_BITS_12, 2),
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 0,
+             VPX_BITS_8, 1),
+  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1,
+             VPX_BITS_8, 1),
+  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 2,
+             VPX_BITS_8, 1),
+  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 3,
+             VPX_BITS_8, 1),
+
+  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 0,
+             VPX_BITS_8, 1),
+  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1,
+             VPX_BITS_8, 1),
+  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 2,
+             VPX_BITS_8, 1),
+  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 3,
+             VPX_BITS_8, 1)
+};
+
+INSTANTIATE_TEST_CASE_P(NEON, TransHT, ::testing::ValuesIn(neon_ht_tests));
 #endif  // HAVE_NEON
 
 #if HAVE_SSE2
