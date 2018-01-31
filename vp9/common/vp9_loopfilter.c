@@ -1174,7 +1174,7 @@ void vp9_filter_block_plane_non420(VP9_COMMON *cm,
     }
 
     // Disable filtering on the leftmost column
-    border_mask = ~(mi_col == 0);
+    border_mask = ~(mi_col == 0 ? 1 : 0);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       highbd_filter_selectively_vert(
