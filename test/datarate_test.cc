@@ -1879,13 +1879,6 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL2TLDynamicPatternChange) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                           number_temporal_layers_, file_datarate_, 0.78, 1.15);
-#if CONFIG_VP9_DECODER
-  // Number of temporal layers > 1, so half of the frames in this SVC pattern
-  // will be non-reference frame and hence encoder will avoid loopfilter.
-  // Since frame dropper is off, we can expect 200 (half of the sequence)
-  // mismatched frames.
-  EXPECT_EQ(static_cast<unsigned int>(200), GetMismatchFrames());
-#endif
 }
 
 // Check basic rate targeting for 1 pass CBR SVC with 3 spatial layers and on
