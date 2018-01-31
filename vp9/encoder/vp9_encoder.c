@@ -1121,8 +1121,9 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
 
   // For 1 pass cbr: allocate scaled_frame that may be used as an intermediate
   // buffer for a 2 stage down-sampling: two stages of 1:2 down-sampling for a
-  // target of 1/4x1/4.
-  if (is_one_pass_cbr_svc(cpi) && !cpi->svc.scaled_temp_is_alloc) {
+  // target of 1/4x1/4. number_spatial_layers must be greater than 2.
+  if (is_one_pass_cbr_svc(cpi) && !cpi->svc.scaled_temp_is_alloc &&
+      cpi->svc.number_spatial_layers > 2) {
     cpi->svc.scaled_temp_is_alloc = 1;
     if (vpx_realloc_frame_buffer(
             &cpi->svc.scaled_temp, cm->width >> 1, cm->height >> 1,
