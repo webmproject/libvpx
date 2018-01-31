@@ -120,12 +120,12 @@ typedef enum {
 typedef struct {
   unsigned char index;
   unsigned char first_inter_index;
-  RATE_FACTOR_LEVEL rf_level[(MAX_LAG_BUFFERS * 2) + 1];
-  FRAME_UPDATE_TYPE update_type[(MAX_LAG_BUFFERS * 2) + 1];
-  unsigned char arf_src_offset[(MAX_LAG_BUFFERS * 2) + 1];
-  unsigned char arf_update_idx[(MAX_LAG_BUFFERS * 2) + 1];
-  unsigned char arf_ref_idx[(MAX_LAG_BUFFERS * 2) + 1];
-  int bit_allocation[(MAX_LAG_BUFFERS * 2) + 1];
+  RATE_FACTOR_LEVEL rf_level[MAX_STATIC_GF_GROUP_LENGTH + 1];
+  FRAME_UPDATE_TYPE update_type[MAX_STATIC_GF_GROUP_LENGTH + 1];
+  unsigned char arf_src_offset[MAX_STATIC_GF_GROUP_LENGTH + 1];
+  unsigned char arf_update_idx[MAX_STATIC_GF_GROUP_LENGTH + 1];
+  unsigned char arf_ref_idx[MAX_STATIC_GF_GROUP_LENGTH + 1];
+  int bit_allocation[MAX_STATIC_GF_GROUP_LENGTH + 1];
 } GF_GROUP;
 
 typedef struct {

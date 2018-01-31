@@ -2281,7 +2281,8 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   // Define middle frame
   mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
 
-  normal_frames = (rc->baseline_gf_interval - rc->source_alt_ref_pending);
+  normal_frames =
+      rc->baseline_gf_interval - (key_frame || rc->source_alt_ref_pending);
   if (normal_frames > 1)
     normal_frame_bits = (int)(total_group_bits / normal_frames);
   else
@@ -2547,9 +2548,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
 
     // Break out conditions.
-    if (
-        // Break at active_max_gf_interval unless almost totally static.
-        ((i >= active_max_gf_interval) && (zero_motion_accumulator < 0.995)) ||
+    // Break at maximum of active_max_gf_interval unless almost totally static.
+    if (((twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH) &&
+         (i >= active_max_gf_interval) && (zero_motion_accumulator < 0.995)) ||
         (
             // Don't break out with a very short interval.
             (i >= active_min_gf_interval) &&
@@ -2569,8 +2570,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   rc->constrained_gf_group = (i >= rc->frames_to_key) ? 1 : 0;
 
   // Should we use the alternate reference frame.
-  if (allow_alt_ref && (i < cpi->oxcf.lag_in_frames) &&
-      (i >= rc->min_gf_interval)) {
+  if ((twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH) && allow_alt_ref &&
+      (i < cpi->oxcf.lag_in_frames) && (i >= rc->min_gf_interval)) {
     const int forward_frames = (rc->frames_to_key - i >= i - 1)
                                    ? i - 1
                                    : VPXMAX(0, rc->frames_to_key - i);
@@ -2598,7 +2599,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
 
   // Set the interval until the next gf.
-  rc->baseline_gf_interval = i - (is_key_frame || rc->source_alt_ref_pending);
+  rc->baseline_gf_interval =
+      (twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH)
+          ? (i - (is_key_frame || rc->source_alt_ref_pending))
+          : i;
 
   // Only encode alt reference frame in temporal base layer. So
   // baseline_gf_interval should be multiple of a temporal layer group
@@ -3025,8 +3029,14 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       double zm_factor;
 
       // Monitor for static sections.
-      zero_motion_accumulator = VPXMIN(
-          zero_motion_accumulator, get_zero_motion_factor(cpi, &next_frame));
+      // First frame in kf group the second ref indicator is invalid.
+      if (i > 0) {
+        zero_motion_accumulator = VPXMIN(
+            zero_motion_accumulator, get_zero_motion_factor(cpi, &next_frame));
+      } else {
+        zero_motion_accumulator =
+            next_frame.pcnt_inter - next_frame.pcnt_motion;
+      }
 
       // Factor 0.75-1.25 based on how much of frame is static.
       zm_factor = (0.75 + (zero_motion_accumulator / 2.0));
@@ -3062,10 +3072,16 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->section_intra_rating = calculate_section_intra_ratio(
       start_position, twopass->stats_in_end, rc->frames_to_key);
 
-  // Apply various clamps for min and max boost
-  rc->kf_boost = VPXMAX((int)boost_score, (rc->frames_to_key * 3));
-  rc->kf_boost = VPXMAX(rc->kf_boost, MIN_KF_TOT_BOOST);
-  rc->kf_boost = VPXMIN(rc->kf_boost, MAX_KF_TOT_BOOST);
+  // Special case for static / slide show content but dont apply
+  // if the kf group is very short.
+  if ((zero_motion_accumulator > 0.99) && (rc->frames_to_key > 8)) {
+    rc->kf_boost = VPXMAX((rc->frames_to_key * 100), MAX_KF_TOT_BOOST);
+  } else {
+    // Apply various clamps for min and max boost
+    rc->kf_boost = VPXMAX((int)boost_score, (rc->frames_to_key * 3));
+    rc->kf_boost = VPXMAX(rc->kf_boost, MIN_KF_TOT_BOOST);
+    rc->kf_boost = VPXMIN(rc->kf_boost, MAX_KF_TOT_BOOST);
+  }
 
   // Work out how many bits to allocate for the key frame itself.
   kf_bits = calculate_boost_bits((rc->frames_to_key - 1), rc->kf_boost,
