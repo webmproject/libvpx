@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62f1df27_7af1d76e",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-31T00:46:13Z",
+      "side": 1,
+      "message": "Add comment:\n// ALTREF is not used as reference for nonrd_pickmode with 0 lag.",
+      "revId": "dffc72325015390ed8033cb66e9cc1cb3c19db15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9fa08543_e55a5b4f",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-31T00:46:13Z",
+      "side": 1,
+      "message": "add comment:\n// If GOLDEN is selected make sure is set as a reference.",
+      "revId": "dffc72325015390ed8033cb66e9cc1cb3c19db15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "385da664_ea1a1eae",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-31T00:46:13Z",
+      "side": 1,
+      "message": "add comment:\n// GOLDEN was updated in previous encoded frame, so GOLDEN and LAST are same reference.",
+      "revId": "dffc72325015390ed8033cb66e9cc1cb3c19db15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "941e1ce6_8faecbd3",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-31T00:46:13Z",
+      "side": 1,
+      "message": "extra line?",
+      "revId": "dffc72325015390ed8033cb66e9cc1cb3c19db15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9d90886_ec67bd33",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-31T00:46:13Z",
+      "side": 1,
+      "message": "(abs(seg_data[6]) \u003e range) || (abs(seg_data[7]) \u003e range))",
+      "revId": "dffc72325015390ed8033cb66e9cc1cb3c19db15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ff0ad1f_2b1b5095",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 671,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-01-31T00:46:13Z",
+      "side": 1,
+      "message": "should we have a check_seg_range() for the skip feature (range is 1?)",
+      "revId": "dffc72325015390ed8033cb66e9cc1cb3c19db15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
