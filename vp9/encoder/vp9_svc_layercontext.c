@@ -45,8 +45,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     svc->ext_lst_fb_idx[sl] = 0;
     svc->ext_gld_fb_idx[sl] = 1;
     svc->ext_alt_fb_idx[sl] = 2;
-    svc->downsample_filter_type[sl] = EIGHTTAP;
-    svc->downsample_filter_phase[sl] = 0;  // Set to 8 for averaging filter.
+    svc->downsample_filter_type[sl] = BILINEAR;
+    svc->downsample_filter_phase[sl] = 8;  // Set to 8 for averaging filter.
   }
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
