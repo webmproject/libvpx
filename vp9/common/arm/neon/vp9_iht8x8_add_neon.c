@@ -147,31 +147,30 @@ void vp9_iht8x8_64_add_neon(const tran_low_t *input, uint8_t *dest, int stride,
   transpose_s16_8x8(&a[0], &a[1], &a[2], &a[3], &a[4], &a[5], &a[6], &a[7]);
 
   switch (tx_type) {
-    case 0:  // DCT_DCT
+    case DCT_DCT:
       idct8x8_64_1d_bd8_kernel(cospis0, cospis1, a);
       transpose_s16_8x8(&a[0], &a[1], &a[2], &a[3], &a[4], &a[5], &a[6], &a[7]);
       idct8x8_64_1d_bd8_kernel(cospis0, cospis1, a);
       break;
 
-    case 1:  // ADST_DCT
+    case ADST_DCT:
       idct8x8_64_1d_bd8_kernel(cospis0, cospis1, a);
       transpose_s16_8x8(&a[0], &a[1], &a[2], &a[3], &a[4], &a[5], &a[6], &a[7]);
       iadst8(a);
       break;
 
-    case 2:  // DCT_ADST
+    case DCT_ADST:
       iadst8(a);
       transpose_s16_8x8(&a[0], &a[1], &a[2], &a[3], &a[4], &a[5], &a[6], &a[7]);
       idct8x8_64_1d_bd8_kernel(cospis0, cospis1, a);
       break;
 
-    case 3:  // ADST_ADST
+    default:
+      assert(tx_type == ADST_ADST);
       iadst8(a);
       transpose_s16_8x8(&a[0], &a[1], &a[2], &a[3], &a[4], &a[5], &a[6], &a[7]);
       iadst8(a);
       break;
-
-    default: assert(0); break;
   }
 
   idct8x8_add8x8_neon(a, dest, stride);

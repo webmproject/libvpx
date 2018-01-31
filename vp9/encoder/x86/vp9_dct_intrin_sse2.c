@@ -170,13 +170,13 @@ void vp9_fht4x4_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst4_sse2(in);
       write_buffer_4x4(output, in);
       break;
-    case ADST_ADST:
+    default:
+      assert(tx_type == ADST_ADST);
       load_buffer_4x4(input, in, stride);
       fadst4_sse2(in);
       fadst4_sse2(in);
       write_buffer_4x4(output, in);
       break;
-    default: assert(0); break;
   }
 }
 
@@ -1097,14 +1097,14 @@ void vp9_fht8x8_sse2(const int16_t *input, tran_low_t *output, int stride,
       right_shift_8x8(in, 1);
       write_buffer_8x8(output, in, 8);
       break;
-    case ADST_ADST:
+    default:
+      assert(tx_type == ADST_ADST);
       load_buffer_8x8(input, in, stride);
       fadst8_sse2(in);
       fadst8_sse2(in);
       right_shift_8x8(in, 1);
       write_buffer_8x8(output, in, 8);
       break;
-    default: assert(0); break;
   }
 }
 
@@ -1963,13 +1963,13 @@ void vp9_fht16x16_sse2(const int16_t *input, tran_low_t *output, int stride,
       fadst16_sse2(in0, in1);
       write_buffer_16x16(output, in0, in1, 16);
       break;
-    case ADST_ADST:
+    default:
+      assert(tx_type == ADST_ADST);
       load_buffer_16x16(input, in0, in1, stride);
       fadst16_sse2(in0, in1);
       right_shift_16x16(in0, in1);
       fadst16_sse2(in0, in1);
       write_buffer_16x16(output, in0, in1, 16);
       break;
-    default: assert(0); break;
   }
 }
