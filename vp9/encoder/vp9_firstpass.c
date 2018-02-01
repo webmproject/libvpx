@@ -2699,13 +2699,24 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
 }
 
+// Intra / Inter threshold very low
+#define VERY_LOW_II 1.5
+// Clean slide transitions we expect a sharp single frame spike in error.
+#define ERROR_SPIKE 5.0
+
 // Slide show transition detection.
 // Tests for case where there is very low error either side of the current frame
 // but much higher just for this frame. This can help detect key frames in
 // slide shows even where the slides are pictures of different sizes.
+// Also requires that intra and inter errors are very similar to help eliminate
+// harmful false positives.
 // It will not help if the transition is a fade or other multi-frame effect.
-static int slide_transition(double this_err, double last_err, double next_err) {
-  return (this_err > (last_err * 5.0)) && (this_err > (next_err * 5.0));
+static int slide_transition(const FIRSTPASS_STATS *this_frame,
+                            const FIRSTPASS_STATS *last_frame,
+                            const FIRSTPASS_STATS *next_frame) {
+  return (this_frame->intra_error < (this_frame->coded_error * VERY_LOW_II)) &&
+         (this_frame->coded_error > (last_frame->coded_error * ERROR_SPIKE)) &&
+         (this_frame->coded_error > (next_frame->coded_error * ERROR_SPIKE));
 }
 
 // Threshold for use of the lagging second reference frame. High second ref
@@ -2752,8 +2763,7 @@ static int test_candidate_kf(TWO_PASS *twopass,
   if ((this_frame->pcnt_second_ref < SECOND_REF_USEAGE_THRESH) &&
       (next_frame->pcnt_second_ref < SECOND_REF_USEAGE_THRESH) &&
       ((this_frame->pcnt_inter < VERY_LOW_INTER_THRESH) ||
-       (slide_transition(this_frame->coded_error, last_frame->coded_error,
-                         next_frame->coded_error)) ||
+       (slide_transition(this_frame, last_frame, next_frame)) ||
        ((pcnt_intra > MIN_INTRA_LEVEL) &&
         (pcnt_intra > (INTRA_VS_INTER_THRESH * modified_pcnt_inter)) &&
         ((this_frame->intra_error /
