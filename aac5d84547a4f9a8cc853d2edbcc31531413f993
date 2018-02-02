@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "165bb45e_ee80a080",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-02T04:14:07Z",
+      "side": 1,
+      "message": "you could break this one out and return error rather than ok, right now it\u0027s similar to existing behavior",
+      "range": {
+        "startLine": 807,
+        "startChar": 8,
+        "endLine": 807,
+        "endChar": 24
+      },
+      "revId": "aac5d84547a4f9a8cc853d2edbcc31531413f993",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
