@@ -109,6 +109,7 @@ static int16x8_t cospi31_v = { 804, 804, 804, 804, 804, 804, 804, 804 };
 
 void vpx_idct4x4_16_add_vsx(const tran_low_t *input, uint8_t *dest,
                             int stride) {
+  int i, j;
   int32x4_t temp1, temp2, temp3, temp4;
   int16x8_t step0, step1, tmp16_0, tmp16_1, t_out0, t_out1;
   uint8x16_t mask0 = { 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
@@ -152,8 +153,8 @@ void vpx_idct4x4_16_add_vsx(const tran_low_t *input, uint8_t *dest,
   output_v = vec_packsu(tmp16_0, tmp16_1);
 
   vec_vsx_st(output_v, 0, tmp_dest);
-  for (int i = 0; i < 4; i++)
-    for (int j = 0; j < 4; j++) dest[j * stride + i] = tmp_dest[j * 4 + i];
+  for (i = 0; i < 4; i++)
+    for (j = 0; j < 4; j++) dest[j * stride + i] = tmp_dest[j * 4 + i];
 }
 
 #define TRANSPOSE8x8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2, \
