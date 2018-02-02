@@ -16,6 +16,24 @@
       "revId": "f1d7650d45a0acf3c7e343cb63982d1c0efbbc2d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1641edf_54ea9db4",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 809,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-02-02T00:52:25Z",
+      "side": 1,
+      "message": "The chromium clusterfuzz test doesn\u0027t call the correct init for multi-res encoder. So the null pointer check here should be sufficient for us. I\u0027ll file a bug to chromium regarding this.",
+      "parentUuid": "5dce2091_49e51afd",
+      "revId": "f1d7650d45a0acf3c7e343cb63982d1c0efbbc2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
