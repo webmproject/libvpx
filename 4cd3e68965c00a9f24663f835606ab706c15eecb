@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42a63a02_12c4f9eb",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 809,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-02T03:11:22Z",
+      "side": 1,
+      "message": "this should be an error in the multi-res case, no? In general if rc_target_bitrate is 0 and multi-res is unavailable or fails we probably should fail the encode call.",
+      "revId": "4cd3e68965c00a9f24663f835606ab706c15eecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
