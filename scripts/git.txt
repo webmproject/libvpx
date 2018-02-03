@@ -1,0 +1,132 @@
+#########################################################
+# My personal GIT tips
+#########################################################
+
+(1) Squash several commit into one (consolitation)
+# Note:
+#  Between HEAD and 3 is tilde sign
+$ git rebase -i HEAD~3
+# step 1: In pop-up editor (emacs), "pick" the earliest one and squash all the rest.
+# step 2: In second pop-up editor, edit the commit message and save, exit.
+
+
+(2) Pull the latest changes (sometime it is a fix/required) and put it under
+# your working commit
+$ git pull --rebase
+# if there are any conflicts, you need edit the conflicted files manually. then 
+$ git add <conflict and edited files>
+$ git rebase --continue
+
+# Note: Don't do git commit between "git add" and "git rebase --continue", 
+  if you did, then you need git rebase --abort and come over.
+
+# Another way (?) from Su Hui
+$ git fetch
+$ git rebase -i origin/nextgenv2
+# -i ?, the following works:
+$ git rebase origin/nextgenv2
+# if there are any conflicts, you need edit the conflicted files manually. Sometimes
+# need to diff against change in another repos or blame the conflict file to see the
+# change.
+$ git add <conflict and edited file>
+$ git rebase --continue
+
+
+(3) Create a branch from a older commit
+# Create a branch from the top and specify the targeted remote branch
+# Typically I need to create a branch for new code construction
+$ git checkout -b <branch_name> <origin/nextgenv2>
+
+# Typically I need to create a branch for performance test base (seat)
+$ git checkout -b <branch_name> <commit>
+
+
+(4) Restore the local top to <commit>
+# Delete the current top commit 
+$ git reset --hard <commit>
+
+# Delete the current failed merge/modification
+$ git reset --hard
+
+
+(5) Diff a commit against its parent
+$ git diff <commit>^!
+
+# Diff HEAD agaist its parent
+$ git diff HEAD^!
+
+ 
+(6) Restore one file from previous commit and fix latest commit
+$ git checkout <commit> <filename>
+$ git commit --amend
+
+
+(7) Merge a commit from master branch to another branch
+$ git checkout <branch>
+# use cherry pick. Please make sure the <branch> is clean and latest 
+$ git fetch https://chromium.googlesource.com/webm/libvpx refs/changes/18/336818/3 && git cherry-pick FETCH_HEAD
+# if there is no conflict, it automatically merge (if successfull) with local. And 
+# the commit appears if do "git log"
+# if there is conflict, need to merge manually and $ git commit -a --amend (i guess)
+
+
+(8) Cherry pick
+# This way we add an extra line (reference to the picked commit)
+$ git cherry-pick -x <commit hash>
+
+
+(9) Sandbox push
+First ask Admin to create a sandbox (remote branch) for you.
+# Work in local from git init, git commit ....
+# Initial push:
+# Here we use "head" instead of "for", "for" is for review board. Please note:
+# we use -f
+$ git push -f https://chromium-review.googlesource.com/webm/libvpx HEAD:refs/heads/sandbox/luoyi@google.com/convolve
+$ git checkout -b sandbox/luoyi@google.com/convolve
+
+# check it out:
+$ git checkout -b codestore origin/sandbox/luoyi@google.com/convolve
+
+# Push
+# Run git push, then the error message would show you two ways. The first way works. See following:
+$ git push origin HEAD:sandbox/luoyi@google.com/convolve
+
+(10) Revert a change
+$ git checkout <commit hash> <filename>
+Revert a file at <commit hash> to index
+
+(11) Diff current staged file (ready to commit) against a previous commit version
+$ git diff --cached <commit hash> <path/file>
+
+(12) Setup a branch for continuing work
+# On a branch named: branch_name1,
+$ git checkout -b <branch_name2>
+$ git branch -u origin/nextgenv2
+# latest commit may not be merged yet. So after local check-in, can we do
+  cherry-pick later from branch_name2 to branch_name1?
+
+(13) Generate and Apply a patch
+$ git diff --no-ext-diff > my.diff
+$ git apply my.diff
+
+(14) git log --pretty=format:"%h %an %cd %s" --date=short
+     git log --pretty=fuller
+
+(15) git rebase -i origin/master
+     Remove current unwanted base patch
+     Pull in latest patches
+     
+########################################################
+# Trivial tips now
+########################################################
+(1) Push for a review
+$ git push https://chromium-review.googlesource.com/webm/libvpx HEAD:refs/for/nextgenv2
+or
+$ review_push.sh
+
+(2) Show git remote repo
+$ git remote show origin
+
+(3) Check codebase's tag information
+$ git tag
+$ git rev-list -n1 v0.1.0

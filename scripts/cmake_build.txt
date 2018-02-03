@@ -1,0 +1,28 @@
+
+Regular build
+rm -rf ./* && cmake ../.. -DENABLE_WERROR=1  && make -j
+
+Debug build without optimizations (can be used for Eclipse debugging):
+(Implies --disable-optimizations)
+
+rm -rf ./* && cmake ../.. -DENABLE_WERROR=1 -DCMAKE_BUILD_TYPE=Debug  && make -j
+
+Debug build with optimizations on (should be used for performance analysis):
+rm -rf ./* && cmake ../.. -DENABLE_WERROR=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS_RELEASE='-O3 -g' -DCMAKE_CXX_FLAGS_RELEASE='-O3 -g' -DCMAKE_LD_FLAGS_RELEASE='-O3 -g' && make -j
+
+Build with ASAN:
+rm -rf ./* && cmake ../.. -DSANITIZE=address -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DENABLE_CCACHE=1 && make -j
+
+
+Build with TSAN
+
+rm -rf ./* && cmake ../.. -DSANITIZE=thread -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug && make -j
+
+
+Build with UBSAN
+
+rm -rf ./* && cmake ../.. -DSANITIZE=integer -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_FLAGS=-O1 -DCMAKE_CXX_FLAGS=-O1 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXE_LINKER_FLAGS=-Wl,--start-group -DENABLE_CCACHE=1 && make -j
+
+
+rm -rf ./* && cmake ../.. -DSANITIZE=undefined -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_FLAGS=-O1 -DCMAKE_CXX_FLAGS=-O1 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXE_LINKER_FLAGS=-Wl,--start-group  -DENABLE_CCACHE=1 && make -j
+
