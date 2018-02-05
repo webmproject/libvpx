@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9210e7fa_69f38b24",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 759,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-05T20:58:29Z",
+      "side": 1,
+      "message": "for consistency (and to avoid breakage under visual studio) you should break this out to a table",
+      "revId": "09c0a8aab043d032dd8892664cd9ed79eb40c2e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
