@@ -132,13 +132,11 @@ void vp9_highbd_iht4x4_16_add_neon(const tran_low_t *input, uint16_t *dest,
       case DCT_ADST: {
         const int32x4_t cospis = vld1q_s32(kCospi32);
 
+        transpose_s32_4x4(&c[0], &c[1], &c[2], &c[3]);
+        highbd_iadst4(c);
         if (bd == 10) {
-          transpose_s32_4x4(&c[0], &c[1], &c[2], &c[3]);
-          highbd_iadst4(c);
           idct4x4_16_kernel_bd10(cospis, c);
         } else {
-          transpose_s32_4x4(&c[0], &c[1], &c[2], &c[3]);
-          highbd_iadst4(c);
           idct4x4_16_kernel_bd12(cospis, c);
         }
         break;
