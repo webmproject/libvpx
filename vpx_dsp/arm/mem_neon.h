@@ -19,6 +19,13 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
+static INLINE int16x4_t create_s16x4_neon(const int16_t c0, const int16_t c1,
+                                          const int16_t c2, const int16_t c3) {
+  return vcreate_s16((uint16_t)c0 | ((uint16_t)c1 << 16) |
+                     ((int64_t)(uint16_t)c2 << 32) |
+                     ((int64_t)(uint16_t)c3 << 48));
+}
+
 // Helper functions used to load tran_low_t into int16, narrowing if necessary.
 static INLINE int16x8x2_t load_tran_low_to_s16x2q(const tran_low_t *buf) {
 #if CONFIG_VP9_HIGHBITDEPTH

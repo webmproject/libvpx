@@ -18,37 +18,66 @@
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/transpose_neon.h"
 
-static INLINE void iadst_half_butterfly_neon(int16x8_t *const x) {
-  const int16x4_t c = vdup_n_s16(cospi_16_64);
+static INLINE void iadst_half_butterfly_neon(int16x8_t *const x,
+                                             const int16x4_t c) {
   const int16x8_t sum = vaddq_s16(x[0], x[1]);
   const int16x8_t sub = vsubq_s16(x[0], x[1]);
   int32x4_t t0[2], t1[2];
 
-  t0[0] = vmull_s16(c, vget_low_s16(sum));
-  t0[1] = vmull_s16(c, vget_high_s16(sum));
-  t1[0] = vmull_s16(c, vget_low_s16(sub));
-  t1[1] = vmull_s16(c, vget_high_s16(sub));
+  t0[0] = vmull_lane_s16(vget_low_s16(sum), c, 0);
+  t0[1] = vmull_lane_s16(vget_high_s16(sum), c, 0);
+  t1[0] = vmull_lane_s16(vget_low_s16(sub), c, 0);
+  t1[1] = vmull_lane_s16(vget_high_s16(sub), c, 0);
   x[0] = dct_const_round_shift_low_8(t0);
   x[1] = dct_const_round_shift_low_8(t1);
 }
 
-static INLINE void iadst_butterfly_neon(const int16x8_t in0,
-                                        const int16x8_t in1, const int c0,
-                                        const int c1, int32x4_t *const s0,
-                                        int32x4_t *const s1) {
-  const int16x4_t cst0 = vdup_n_s16(c0);
-  const int16x4_t cst1 = vdup_n_s16(c1);
-  int32x4_t t0[2], t1[2];
+static INLINE void iadst_butterfly_lane_0_1_neon(const int16x8_t in0,
+                                                 const int16x8_t in1,
+                                                 const int16x4_t c,
+                                                 int32x4_t *const s0,
+                                                 int32x4_t *const s1) {
+  s0[0] = vmull_lane_s16(vget_low_s16(in0), c, 0);
+  s0[1] = vmull_lane_s16(vget_high_s16(in0), c, 0);
+  s1[0] = vmull_lane_s16(vget_low_s16(in0), c, 1);
+  s1[1] = vmull_lane_s16(vget_high_s16(in0), c, 1);
 
-  t0[0] = vmull_s16(cst0, vget_low_s16(in0));
-  t0[1] = vmull_s16(cst0, vget_high_s16(in0));
-  t1[0] = vmull_s16(cst1, vget_low_s16(in0));
-  t1[1] = vmull_s16(cst1, vget_high_s16(in0));
+  s0[0] = vmlal_lane_s16(s0[0], vget_low_s16(in1), c, 1);
+  s0[1] = vmlal_lane_s16(s0[1], vget_high_s16(in1), c, 1);
+  s1[0] = vmlsl_lane_s16(s1[0], vget_low_s16(in1), c, 0);
+  s1[1] = vmlsl_lane_s16(s1[1], vget_high_s16(in1), c, 0);
+}
 
-  s0[0] = vmlal_s16(t0[0], cst1, vget_low_s16(in1));
-  s0[1] = vmlal_s16(t0[1], cst1, vget_high_s16(in1));
-  s1[0] = vmlsl_s16(t1[0], cst0, vget_low_s16(in1));
-  s1[1] = vmlsl_s16(t1[1], cst0, vget_high_s16(in1));
+static INLINE void iadst_butterfly_lane_2_3_neon(const int16x8_t in0,
+                                                 const int16x8_t in1,
+                                                 const int16x4_t c,
+                                                 int32x4_t *const s0,
+                                                 int32x4_t *const s1) {
+  s0[0] = vmull_lane_s16(vget_low_s16(in0), c, 2);
+  s0[1] = vmull_lane_s16(vget_high_s16(in0), c, 2);
+  s1[0] = vmull_lane_s16(vget_low_s16(in0), c, 3);
+  s1[1] = vmull_lane_s16(vget_high_s16(in0), c, 3);
+
+  s0[0] = vmlal_lane_s16(s0[0], vget_low_s16(in1), c, 3);
+  s0[1] = vmlal_lane_s16(s0[1], vget_high_s16(in1), c, 3);
+  s1[0] = vmlsl_lane_s16(s1[0], vget_low_s16(in1), c, 2);
+  s1[1] = vmlsl_lane_s16(s1[1], vget_high_s16(in1), c, 2);
+}
+
+static INLINE void iadst_butterfly_lane_3_2_neon(const int16x8_t in0,
+                                                 const int16x8_t in1,
+                                                 const int16x4_t c,
+                                                 int32x4_t *const s0,
+                                                 int32x4_t *const s1) {
+  s0[0] = vmull_lane_s16(vget_low_s16(in0), c, 3);
+  s0[1] = vmull_lane_s16(vget_high_s16(in0), c, 3);
+  s1[0] = vmull_lane_s16(vget_low_s16(in0), c, 2);
+  s1[1] = vmull_lane_s16(vget_high_s16(in0), c, 2);
+
+  s0[0] = vmlal_lane_s16(s0[0], vget_low_s16(in1), c, 2);
+  s0[1] = vmlal_lane_s16(s0[1], vget_high_s16(in1), c, 2);
+  s1[0] = vmlsl_lane_s16(s1[0], vget_low_s16(in1), c, 3);
+  s1[1] = vmlsl_lane_s16(s1[1], vget_high_s16(in1), c, 3);
 }
 
 static INLINE int16x8_t add_dct_const_round_shift_low_8(
@@ -70,6 +99,12 @@ static INLINE int16x8_t sub_dct_const_round_shift_low_8(
 }
 
 static INLINE void iadst8(int16x8_t *const io) {
+  const int16x4_t c0 =
+      create_s16x4_neon(cospi_2_64, cospi_30_64, cospi_10_64, cospi_22_64);
+  const int16x4_t c1 =
+      create_s16x4_neon(cospi_18_64, cospi_14_64, cospi_26_64, cospi_6_64);
+  const int16x4_t c2 =
+      create_s16x4_neon(cospi_16_64, 0, cospi_8_64, cospi_24_64);
   int16x8_t x[8], t[4];
   int32x4_t s0[2], s1[2], s2[2], s3[2], s4[2], s5[2], s6[2], s7[2];
 
@@ -83,10 +118,10 @@ static INLINE void iadst8(int16x8_t *const io) {
   x[7] = io[6];
 
   // stage 1
-  iadst_butterfly_neon(x[0], x[1], cospi_2_64, cospi_30_64, s0, s1);
-  iadst_butterfly_neon(x[2], x[3], cospi_10_64, cospi_22_64, s2, s3);
-  iadst_butterfly_neon(x[4], x[5], cospi_18_64, cospi_14_64, s4, s5);
-  iadst_butterfly_neon(x[6], x[7], cospi_26_64, cospi_6_64, s6, s7);
+  iadst_butterfly_lane_0_1_neon(x[0], x[1], c0, s0, s1);
+  iadst_butterfly_lane_2_3_neon(x[2], x[3], c0, s2, s3);
+  iadst_butterfly_lane_0_1_neon(x[4], x[5], c1, s4, s5);
+  iadst_butterfly_lane_2_3_neon(x[6], x[7], c1, s6, s7);
 
   x[0] = add_dct_const_round_shift_low_8(s0, s4);
   x[1] = add_dct_const_round_shift_low_8(s1, s5);
@@ -102,8 +137,8 @@ static INLINE void iadst8(int16x8_t *const io) {
   t[1] = x[1];
   t[2] = x[2];
   t[3] = x[3];
-  iadst_butterfly_neon(x[4], x[5], cospi_8_64, cospi_24_64, s4, s5);
-  iadst_butterfly_neon(x[7], x[6], cospi_24_64, cospi_8_64, s7, s6);
+  iadst_butterfly_lane_2_3_neon(x[4], x[5], c2, s4, s5);
+  iadst_butterfly_lane_3_2_neon(x[7], x[6], c2, s7, s6);
 
   x[0] = vaddq_s16(t[0], t[2]);
   x[1] = vaddq_s16(t[1], t[3]);
@@ -115,8 +150,8 @@ static INLINE void iadst8(int16x8_t *const io) {
   x[7] = sub_dct_const_round_shift_low_8(s5, s7);
 
   // stage 3
-  iadst_half_butterfly_neon(x + 2);
-  iadst_half_butterfly_neon(x + 6);
+  iadst_half_butterfly_neon(x + 2, c2);
+  iadst_half_butterfly_neon(x + 6, c2);
 
   io[0] = x[0];
   io[1] = vnegq_s16(x[4]);

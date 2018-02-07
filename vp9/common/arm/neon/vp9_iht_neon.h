@@ -22,26 +22,23 @@
 
 static INLINE void iadst4(int16x8_t *const io) {
   const int32x4_t c3 = vdupq_n_s32(sinpi_3_9);
-  int16x4_t c[5], x[4];
+  int16x4_t x[4];
   int32x4_t s[8], output[4];
-
-  c[1] = vdup_n_s16(sinpi_1_9);
-  c[2] = vdup_n_s16(sinpi_2_9);
-  c[3] = vdup_n_s16(sinpi_3_9);
-  c[4] = vdup_n_s16(sinpi_4_9);
+  const int16x4_t c =
+      create_s16x4_neon(sinpi_1_9, sinpi_2_9, sinpi_3_9, sinpi_4_9);
 
   x[0] = vget_low_s16(io[0]);
   x[1] = vget_low_s16(io[1]);
   x[2] = vget_high_s16(io[0]);
   x[3] = vget_high_s16(io[1]);
 
-  s[0] = vmull_s16(c[1], x[0]);
-  s[1] = vmull_s16(c[2], x[0]);
-  s[2] = vmull_s16(c[3], x[1]);
-  s[3] = vmull_s16(c[4], x[2]);
-  s[4] = vmull_s16(c[1], x[2]);
-  s[5] = vmull_s16(c[2], x[3]);
-  s[6] = vmull_s16(c[4], x[3]);
+  s[0] = vmull_lane_s16(x[0], c, 0);
+  s[1] = vmull_lane_s16(x[0], c, 1);
+  s[2] = vmull_lane_s16(x[1], c, 2);
+  s[3] = vmull_lane_s16(x[2], c, 3);
+  s[4] = vmull_lane_s16(x[2], c, 0);
+  s[5] = vmull_lane_s16(x[3], c, 1);
+  s[6] = vmull_lane_s16(x[3], c, 3);
   s[7] = vaddl_s16(x[0], x[3]);
   s[7] = vsubw_s16(s[7], x[2]);
 
