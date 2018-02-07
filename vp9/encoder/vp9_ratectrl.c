@@ -31,10 +31,13 @@
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 
-// Max rate target for 1080P and below encodes under normal circumstances
-// (1920 * 1080 / (16 * 16)) * MAX_MB_RATE bits per MB
+// Max rate per frame for 1080P and below encodes if no level requirement given.
+// For larger formats limit to MAX_MB_RATE bits per MB
+// 4Mbits is derived from the level requirement for level 4 (1080P 30) which
+// requires that HW can sustain a rate of 16Mbits over a 4 frame group.
+// If a lower level requirement is specified then this may over ride this value.
 #define MAX_MB_RATE 250
-#define MAXRATE_1080P 2025000
+#define MAXRATE_1080P 4000000
 
 #define DEFAULT_KF_BOOST 2000
 #define DEFAULT_GF_BOOST 2000
@@ -1913,12 +1916,12 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
       VPXMAX(rc->min_frame_bandwidth, FRAME_OVERHEAD_BITS);
 
   // A maximum bitrate for a frame is defined.
-  // The baseline for this aligns with HW implementations that
-  // can support decode of 1080P content up to a bitrate of MAX_MB_RATE bits
-  // per 16x16 MB (averaged over a frame). However this limit is extended if
-  // a very high rate is given on the command line or the the rate cannnot
-  // be acheived because of a user specificed max q (e.g. when the user
-  // specifies lossless encode.
+  // However this limit is extended if a very high rate is given on the command
+  // line or the the rate cannnot be acheived because of a user specificed max q
+  // (e.g. when the user specifies lossless encode).
+  //
+  // If a level is specified that requires a lower maximum rate then the level
+  // value take precedence.
   vbr_max_bits =
       (int)(((int64_t)rc->avg_frame_bandwidth * oxcf->two_pass_vbrmax_section) /
             100);
