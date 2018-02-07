@@ -16,6 +16,24 @@
       "revId": "36363304903286369a63b0498d506a13fe335606",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71dba42a_6a993eb6",
+        "filename": "vp9/common/arm/neon/vp9_highbd_iht4x4_add_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2018-02-07T18:41:10Z",
+      "side": 1,
+      "message": "Thanks! Done in https://chromium-review.googlesource.com/#/c/webm/libvpx/+/907328",
+      "parentUuid": "644ce0cb_f023094f",
+      "revId": "36363304903286369a63b0498d506a13fe335606",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
