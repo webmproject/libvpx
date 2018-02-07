@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "953bc9c0_24367bf4",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-07T17:54:52Z",
+      "side": 1,
+      "message": "zero(roi-\u003edelta_qp)",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c64cd32f_9f60fd2a",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 20
@@ -42,6 +59,23 @@
     },
     {
       "key": {
+        "uuid": "996471cc_5f8cfc91",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-07T17:54:52Z",
+      "side": 1,
+      "message": "put this inside the above vp9 loop (lines 213-220)\n\nand should this be ref_frame[1] \u003d ..., as example here has only 2 segments/states.",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ee4958c0_35f958ae",
         "filename": "test/datarate_test.cc",
         "patchSetId": 20
@@ -53,6 +87,23 @@
       "writtenOn": "2018-02-07T07:20:44Z",
       "side": 1,
       "message": "this could be a bool",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7a38353_064df04b",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-07T17:54:52Z",
+      "side": 1,
+      "message": "change comment to describe what the test does",
       "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
