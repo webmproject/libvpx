@@ -1,0 +1,192 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72df44b2_95d616a8",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "you could assert block_size !\u003d 0 after this or otherwise fail as vp8/9 are the only two options currently",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c64cd32f_9f60fd2a",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "you could cache these as is_vp8/9 to avoid the redundant calls and maybe just send in the codec name as the first parameter rather than the encoder. preferred parameter order is (input, output) in either case.",
+      "range": {
+        "startLine": 200,
+        "startChar": 6,
+        "endLine": 200,
+        "endChar": 43
+      },
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee4958c0_35f958ae",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "this could be a bool",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fd44447_926bdde8",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "old test code?",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "729aef03_7113ec3c",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "old test code?",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bd1b789_ed0df606",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 20
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "check this allocation with ASSERT_TRUE(...!\u003d NULL) and use c++ style reinterpret_cast",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "773dc2c8_c00a7461",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "prefer {}s on conditionals that continue to the next line",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43df3de8_f0ee1374",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "you can just return this directly",
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5daf89cc_2f3ffbcf",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 1652,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "it\u0027s",
+      "range": {
+        "startLine": 1652,
+        "startChar": 59,
+        "endLine": 1652,
+        "endChar": 62
+      },
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ff53826_ff40258f",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 20
+      },
+      "lineNbr": 1653,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "we?",
+      "range": {
+        "startLine": 1653,
+        "startChar": 31,
+        "endLine": 1653,
+        "endChar": 36
+      },
+      "revId": "56156e67a7404d1bebdf2a81c1e4aacf0a3d2324",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

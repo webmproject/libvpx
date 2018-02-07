@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "4b5f9e71_c0e3d705",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-07T07:20:44Z",
+      "side": 1,
+      "message": "you can store these comparisons in a const int to and reuse them as needed",
+      "range": {
+        "startLine": 174,
+        "startChar": 6,
+        "endLine": 174,
+        "endChar": 43
+      },
+      "revId": "2ae86360c409f4f7de8510e813f751edededc67d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "43af48f9_d78ab6bb",
         "filename": "vpx/vp8cx.h",
         "patchSetId": 7
