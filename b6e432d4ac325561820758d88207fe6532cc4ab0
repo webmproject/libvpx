@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c1c41332_c02df68e",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-02-08T19:28:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c5b510cf_992ea9c3",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f00f60d3_8fd38f11",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 24
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "4aff326c_0441d254",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-02-08T19:28:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f00f60d3_8fd38f11",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "17e0f1ca_08042ea7",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 24
@@ -50,6 +86,24 @@
       "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f584d970_d1a4d215",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-02-08T19:28:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17e0f1ca_08042ea7",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -76,6 +130,30 @@
     },
     {
       "key": {
+        "uuid": "1303e948_a76f52f1",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-02-08T19:28:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f5761872_2b67203f",
+      "range": {
+        "startLine": 708,
+        "startChar": 2,
+        "endLine": 708,
+        "endChar": 6
+      },
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ebd841f_0321a117",
         "filename": "test/datarate_test.cc",
         "patchSetId": 24
@@ -93,6 +171,24 @@
     },
     {
       "key": {
+        "uuid": "36361f76_9ae79304",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 1089,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-02-08T19:28:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ebd841f_0321a117",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2469f5ae_9d8468c8",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 24
@@ -104,6 +200,24 @@
       "writtenOn": "2018-02-08T07:32:19Z",
       "side": 1,
       "message": "this is consistent with the code as is. a code cleanup later would be to remove the else in cases where we return from the other branch",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d881575e_63d644a9",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1430,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-02-08T19:28:34Z",
+      "side": 1,
+      "message": "I\u0027ll clean up in a followup.",
+      "parentUuid": "2469f5ae_9d8468c8",
       "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
