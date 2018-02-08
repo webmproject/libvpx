@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c5b510cf_992ea9c3",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:32:19Z",
+      "side": 1,
+      "message": "you could do these in the declaration",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f00f60d3_8fd38f11",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:32:19Z",
+      "side": 1,
+      "message": "due to the die above you can just set the variable with a ?:",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17e0f1ca_08042ea7",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:32:19Z",
+      "side": 1,
+      "message": "I think the die covers this now",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5761872_2b67203f",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:32:19Z",
+      "side": 1,
+      "message": "bool",
+      "range": {
+        "startLine": 708,
+        "startChar": 2,
+        "endLine": 708,
+        "endChar": 6
+      },
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3ebd841f_0321a117",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 1089,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:32:19Z",
+      "side": 1,
+      "message": "debug code?",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2469f5ae_9d8468c8",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1430,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:32:19Z",
+      "side": 1,
+      "message": "this is consistent with the code as is. a code cleanup later would be to remove the else in cases where we return from the other branch",
+      "revId": "b6e432d4ac325561820758d88207fe6532cc4ab0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
