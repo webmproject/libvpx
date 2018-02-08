@@ -2237,9 +2237,6 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     }
     gf_group->arf_update_idx[0] = arf_buffer_indices[0];
     gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
-
-    // Step over the golden frame / overlay frame
-    if (EOF == input_stats(twopass, &frame_stats)) return;
   }
 
   // Deduct the boost bits for arf (or gf if it is not a key frame)
