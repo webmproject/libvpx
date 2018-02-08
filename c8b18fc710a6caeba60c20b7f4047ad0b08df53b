@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3eda73a5_eb726e2b",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2552,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:03:38Z",
+      "side": 1,
+      "message": "maybe put this in a constant since it\u0027s reused throughout",
+      "range": {
+        "startLine": 2552,
+        "startChar": 39,
+        "endLine": 2552,
+        "endChar": 41
+      },
+      "revId": "c8b18fc710a6caeba60c20b7f4047ad0b08df53b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0829fe50_368fa88e",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:03:38Z",
+      "side": 1,
+      "message": "this is a little over 3.5K now; I believe there\u0027s only one instance, correct?",
+      "revId": "c8b18fc710a6caeba60c20b7f4047ad0b08df53b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b820e6e2_bfe66475",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1868,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-08T07:03:38Z",
+      "side": 1,
+      "message": "you could make this based on the size of the buffers to avoid having the values in 2 places.",
+      "revId": "c8b18fc710a6caeba60c20b7f4047ad0b08df53b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
