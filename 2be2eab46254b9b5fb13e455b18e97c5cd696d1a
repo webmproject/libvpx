@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1237c17e_f5b63b18",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 25
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-08T20:45:34Z",
+      "side": 1,
+      "message": "also add:\nAQ_MODE needs to be turned off for ROI to take effect.",
+      "revId": "2be2eab46254b9b5fb13e455b18e97c5cd696d1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99c1af87_04171064",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 25
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-08T20:45:34Z",
+      "side": 1,
+      "message": "not used in non-rd pickmode for 0 lag.",
+      "revId": "2be2eab46254b9b5fb13e455b18e97c5cd696d1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08345f68_a5329575",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 25
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-08T20:45:34Z",
+      "side": 1,
+      "message": "not working for speeds \u003c 5...",
+      "revId": "2be2eab46254b9b5fb13e455b18e97c5cd696d1a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
