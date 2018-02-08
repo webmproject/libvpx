@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ab6a2f51_40b34b52",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2552,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-02-08T11:06:37Z",
+      "side": 1,
+      "message": "Yes. Will do.",
+      "parentUuid": "3eda73a5_eb726e2b",
+      "range": {
+        "startLine": 2552,
+        "startChar": 39,
+        "endLine": 2552,
+        "endChar": 41
+      },
+      "revId": "c8b18fc710a6caeba60c20b7f4047ad0b08df53b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0829fe50_368fa88e",
         "filename": "vp9/encoder/vp9_firstpass.h",
         "patchSetId": 3
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "751edeee_a3c4f421",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-02-08T11:06:37Z",
+      "side": 1,
+      "message": "Yes there is only one instance. Even so I was mindful that I did not want to make this too large. The choice is a balance of cost here vs benefit. This should be large enough for most YT chunks as things stand and even for longer chunks / sections there are diminishing returns. For example if there was a single static 500 frame chunk the number of extra GFs is reduced from ~20 to ~1.\n\nI think however I will replace the 10 * MAX_LAG_BUFFERS with a single named #define as this is used in another file.",
+      "parentUuid": "0829fe50_368fa88e",
+      "revId": "c8b18fc710a6caeba60c20b7f4047ad0b08df53b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b820e6e2_bfe66475",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 3
@@ -53,6 +95,24 @@
       "writtenOn": "2018-02-08T07:03:38Z",
       "side": 1,
       "message": "you could make this based on the size of the buffers to avoid having the values in 2 places.",
+      "revId": "c8b18fc710a6caeba60c20b7f4047ad0b08df53b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a20fa61_d2dc4f5e",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1868,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-02-08T11:06:37Z",
+      "side": 1,
+      "message": "Yes. I think I will put in a single #define used both for defining the fixed two pass buffers and here.",
+      "parentUuid": "b820e6e2_bfe66475",
       "revId": "c8b18fc710a6caeba60c20b7f4047ad0b08df53b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
