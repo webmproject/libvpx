@@ -179,7 +179,7 @@ static void set_roi_map(const char *enc_name, vpx_codec_enc_cfg_t *cfg,
   }
   zero(*roi);
 
-  block_size = is_vp9 && !is_vp8 ? 16 : 8;
+  block_size = is_vp9 && !is_vp8 ? 8 : 16;
 
   // ROI is based on the segments (4 for vp8, 8 for vp9), smallest unit for
   // segment is 16x16 for vp8, 8x8 for vp9.
@@ -190,7 +190,7 @@ static void set_roi_map(const char *enc_name, vpx_codec_enc_cfg_t *cfg,
   // Setting to negative means lower QP (better quality).
   // Below we set delta_q to the extreme (-63) to show strong effect.
   // VP8 uses the first 4 segments. VP9 uses all 8 segments.
-  zero(roi->delta_qp);
+  zero(roi->delta_q);
   roi->delta_q[1] = -63;
 
   // Applies delta loopfilter strength on the segment blocks, varies from -63 to
@@ -792,7 +792,7 @@ int main(int argc, char **argv) {
     vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
     vpx_codec_control(&codec, VP8E_SET_GF_CBR_BOOST_PCT, 0);
 #if ROI_MAP
-    set_roi_map(&cfg, &roi, encoder);
+    set_roi_map(encoder->name, &cfg, &roi);
     if (vpx_codec_control(&codec, VP8E_SET_ROI_MAP, &roi))
       die_codec(&codec, "Failed to set ROI map");
 #endif
@@ -810,7 +810,7 @@ int main(int argc, char **argv) {
     vpx_codec_control(&codec, VP9E_SET_TUNE_CONTENT, 0);
     vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (cfg.g_threads >> 1));
 #if ROI_MAP
-    set_roi_map(&cfg, &roi, encoder);
+    set_roi_map(encoder->name, &cfg, &roi);
     if (vpx_codec_control(&codec, VP9E_SET_ROI_MAP, &roi))
       die_codec(&codec, "Failed to set ROI map");
     vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 0);
