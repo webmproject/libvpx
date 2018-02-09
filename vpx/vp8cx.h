@@ -125,7 +125,7 @@ extern vpx_codec_iface_t *vpx_codec_vp9_cx(void);
 enum vp8e_enc_control_id {
   /*!\brief Codec control function to pass an ROI map to encoder.
    *
-   * Supported in codecs: VP8
+   * Supported in codecs: VP8, VP9
    */
   VP8E_SET_ROI_MAP = 8,
 
@@ -423,12 +423,6 @@ enum vp8e_enc_control_id {
    */
   VP9E_SET_SVC,
 
-  /*!\brief Codec control function to pass an ROI map to encoder.
-   *
-   * Supported in codecs: VP9
-   */
-  VP9E_SET_ROI_MAP,
-
   /*!\brief Codec control function to set parameters for SVC.
    * \note Parameters contain min_q, max_q, scaling factor for each of the
    *       SVC layers.
@@ -649,20 +643,16 @@ typedef enum vp9e_temporal_layering_mode {
  */
 
 typedef struct vpx_roi_map {
-  /*! If ROI is enabled. */
-  uint8_t enabled;
-  /*! An id between 0-3 (0-7 for vp9) for each 16x16 (8x8 for VP9)
-   * region within a frame. */
+  /*! An id between 0 and 3 for each 16x16 region within a frame. */
   unsigned char *roi_map;
   unsigned int rows; /**< Number of rows. */
   unsigned int cols; /**< Number of columns. */
-  /*! VP8 only uses the first 4 segments. VP9 uses 8 segments. */
-  int delta_q[8];  /**< Quantizer deltas. */
-  int delta_lf[8]; /**< Loop filter deltas. */
-  /*! skip and ref frame segment is only used in VP9. */
-  int skip[8];      /**< Skip this block. */
-  int ref_frame[8]; /**< Reference frame for this block. */
-  /*! Static breakout threshold for each segment. Only used in VP8. */
+  // TODO(paulwilkins): broken for VP9 which has 8 segments
+  // q and loop filter deltas for each segment
+  // (see MAX_MB_SEGMENTS)
+  int delta_q[4];  /**< Quantizer deltas. */
+  int delta_lf[4]; /**< Loop filter deltas. */
+  /*! Static breakout threshold for each segment. */
   unsigned int static_threshold[4];
 } vpx_roi_map_t;
 
@@ -759,8 +749,6 @@ VPX_CTRL_USE_TYPE(VP8E_SET_TEMPORAL_LAYER_ID, int)
 #define VPX_CTRL_VP8E_SET_TEMPORAL_LAYER_ID
 VPX_CTRL_USE_TYPE(VP8E_SET_ROI_MAP, vpx_roi_map_t *)
 #define VPX_CTRL_VP8E_SET_ROI_MAP
-VPX_CTRL_USE_TYPE(VP9E_SET_ROI_MAP, vpx_roi_map_t *)
-#define VPX_CTRL_VP9E_SET_ROI_MAP
 VPX_CTRL_USE_TYPE(VP8E_SET_ACTIVEMAP, vpx_active_map_t *)
 #define VPX_CTRL_VP8E_SET_ACTIVEMAP
 VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE, vpx_scaling_mode_t *)
