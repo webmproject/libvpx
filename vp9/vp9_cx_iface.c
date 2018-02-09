@@ -1415,11 +1415,21 @@ static vpx_image_t *encoder_get_preview(vpx_codec_alg_priv_t *ctx) {
 
 static vpx_codec_err_t ctrl_set_roi_map(vpx_codec_alg_priv_t *ctx,
                                         va_list args) {
-  (void)ctx;
-  (void)args;
+  vpx_roi_map_t *data = va_arg(args, vpx_roi_map_t *);
 
-  // TODO(yaowu): Need to re-implement and test for VP9.
-  return VPX_CODEC_INVALID_PARAM;
+  if (data) {
+    vpx_roi_map_t *roi = (vpx_roi_map_t *)data;
+
+    if (!vp9_set_roi_map(ctx->cpi, roi->roi_map, roi->rows, roi->cols,
+                         roi->delta_q, roi->delta_lf, roi->skip,
+                         roi->ref_frame)) {
+      return VPX_CODEC_OK;
+    } else {
+      return VPX_CODEC_INVALID_PARAM;
+    }
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
 }
 
 static vpx_codec_err_t ctrl_set_active_map(vpx_codec_alg_priv_t *ctx,
@@ -1609,7 +1619,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   // Setters
   { VP8_SET_REFERENCE, ctrl_set_reference },
   { VP8_SET_POSTPROC, ctrl_set_previewpp },
-  { VP8E_SET_ROI_MAP, ctrl_set_roi_map },
+  { VP9E_SET_ROI_MAP, ctrl_set_roi_map },
   { VP8E_SET_ACTIVEMAP, ctrl_set_active_map },
   { VP8E_SET_SCALEMODE, ctrl_set_scale_mode },
   { VP8E_SET_CPUUSED, ctrl_set_cpuused },
