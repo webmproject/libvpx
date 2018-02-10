@@ -539,6 +539,7 @@ class DatarateTestVP9Large
     denoiser_offon_test_ = 0;
     denoiser_offon_period_ = -1;
     frame_parallel_decoding_mode_ = 1;
+    use_roi_ = 0;
   }
 
   //
