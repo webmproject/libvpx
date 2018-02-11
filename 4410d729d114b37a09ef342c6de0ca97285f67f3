@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed1ec19c_856ef4b4",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-11T02:34:58Z",
+      "side": 1,
+      "message": "\u0027is_vp9\u0027 should suffice",
+      "range": {
+        "startLine": 182,
+        "startChar": 15,
+        "endLine": 182,
+        "endChar": 32
+      },
+      "revId": "4410d729d114b37a09ef342c6de0ca97285f67f3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
