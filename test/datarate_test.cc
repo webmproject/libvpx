@@ -44,7 +44,7 @@ class DatarateTestLarge
     denoiser_offon_test_ = 0;
     denoiser_offon_period_ = -1;
     gf_boost_ = 0;
-    use_roi_ = 0;
+    use_roi_ = false;
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
@@ -55,11 +55,9 @@ class DatarateTestLarge
       encoder->Control(VP8E_SET_GF_CBR_BOOST_PCT, gf_boost_);
     }
 
-#if CONFIG_VP8_ENCODER
-    if (use_roi_ == 1) {
+    if (use_roi_) {
       encoder->Control(VP8E_SET_ROI_MAP, &roi_);
     }
-#endif
 
     if (denoiser_offon_test_) {
       ASSERT_GT(denoiser_offon_period_, 0)
@@ -152,7 +150,7 @@ class DatarateTestLarge
   int denoiser_offon_period_;
   int set_cpu_used_;
   int gf_boost_;
-  int use_roi_;
+  bool use_roi_;
   vpx_roi_map_t roi_;
 };
 
@@ -441,7 +439,7 @@ TEST_P(DatarateTestRealTime, RegionOfInterest) {
   ResetModel();
 
   // Set ROI parameters
-  use_roi_ = 1;
+  use_roi_ = true;
   memset(&roi_, 0, sizeof(roi_));
 
   roi_.rows = (cfg_.g_h + 15) / 16;
@@ -539,7 +537,7 @@ class DatarateTestVP9Large
     denoiser_offon_test_ = 0;
     denoiser_offon_period_ = -1;
     frame_parallel_decoding_mode_ = 1;
-    use_roi_ = 0;
+    use_roi_ = false;
   }
 
   //
