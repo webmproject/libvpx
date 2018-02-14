@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e5b31c04_4765f297",
+        "filename": "vpx_dsp/ppc/inv_txfm_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-14T07:24:23Z",
+      "side": 1,
+      "message": "this project expects c90, these need to be scoped outside of the loop.\n\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/898607",
+      "range": {
+        "startLine": 118,
+        "startChar": 7,
+        "endLine": 118,
+        "endChar": 10
+      },
+      "revId": "abd5e20320bf31c7d31c7797663a2066d94e5d2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
