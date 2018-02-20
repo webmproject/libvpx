@@ -35,7 +35,7 @@ static INLINE void vpx_write(vpx_writer *br, int bit, int probability) {
   int count = br->count;
   unsigned int range = br->range;
   unsigned int lowvalue = br->lowvalue;
-  register int shift;
+  int shift;
 
   split = 1 + (((range - 1) * probability) >> 8);
 

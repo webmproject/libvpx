@@ -94,7 +94,7 @@ static INLINE int vpx_read(vpx_reader *r, int prob) {
   }
 
   {
-    register int shift = vpx_norm[range];
+    const int shift = vpx_norm[range];
     range <<= shift;
     value <<= shift;
     count -= shift;
