@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "042805db_057e0a9c",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 831,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-21T06:42:45Z",
+      "side": 1,
+      "message": "just an observation, no change necessary now: I think the duplication for third to last parameter (0..3) could be resolved with a Combine and Range in the instantiation.\n\nhttps://github.com/google/googletest/blob/master/googletest/docs/AdvancedGuide.md#how-to-write-value-parameterized-tests",
+      "revId": "29b6a30cd971f0ad1d99dbeb081cda9f011d4b2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
