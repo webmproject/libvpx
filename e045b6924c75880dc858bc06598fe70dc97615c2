@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ff11c50_706876b3",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1449,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-22T04:29:17Z",
+      "side": 1,
+      "message": "Can we do CheckLayerRateTargeting() here, and then reset the bits_total_[layer] \u003d 0.?",
+      "revId": "e045b6924c75880dc858bc06598fe70dc97615c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "67efd43d_96946ec5",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1917,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-22T04:29:17Z",
+      "side": 1,
+      "message": "update comment to say what test does",
+      "revId": "e045b6924c75880dc858bc06598fe70dc97615c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ebe17222_596c5fc3",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1956,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-02-22T04:29:17Z",
+      "side": 1,
+      "message": "These parameters (0.35, 0.85) mean it doesn\u0027t hit the bitrate.\n\nCheckLayerRateTargeting() compares encoded bitrate wrt to layer target, which \nare changed midday in the stream.\n\nSo i think we need to call this twice, once for 800k and then for 400k,\nand the encoded bitrate should be reset on the first call.",
+      "revId": "e045b6924c75880dc858bc06598fe70dc97615c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
