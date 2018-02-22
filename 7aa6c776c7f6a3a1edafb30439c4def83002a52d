@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "53d1ebcc_982da7a6",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2018-02-22T22:30:02Z",
+      "side": 1,
+      "message": "It\u0027s WIP. But I\u0027d like to get your early review comments. Thanks!",
+      "range": {
+        "startLine": 449,
+        "startChar": 10,
+        "endLine": 449,
+        "endChar": 19
+      },
+      "revId": "7aa6c776c7f6a3a1edafb30439c4def83002a52d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
