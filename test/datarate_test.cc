@@ -1265,6 +1265,72 @@ TEST_P(DatarateTestVP9LargeDenoiser, DenoiserOffOn) {
 }
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
+static void assign_layer_bitrates(vpx_codec_enc_cfg_t *const enc_cfg,
+                                  const vpx_svc_extra_cfg_t *svc_params,
+                                  int spatial_layers, int temporal_layers,
+                                  int temporal_layering_mode,
+                                  int *layer_target_avg_bandwidth,
+                                  int64_t *bits_in_buffer_model) {
+  int sl, spatial_layer_target;
+  float total = 0;
+  float alloc_ratio[VPX_MAX_LAYERS] = { 0 };
+  float framerate = 30.0;
+  for (sl = 0; sl < spatial_layers; ++sl) {
+    if (svc_params->scaling_factor_den[sl] > 0) {
+      alloc_ratio[sl] = (float)(svc_params->scaling_factor_num[sl] * 1.0 /
+                                svc_params->scaling_factor_den[sl]);
+      total += alloc_ratio[sl];
+    }
+  }
+  for (sl = 0; sl < spatial_layers; ++sl) {
+    enc_cfg->ss_target_bitrate[sl] = spatial_layer_target =
+        (unsigned int)(enc_cfg->rc_target_bitrate * alloc_ratio[sl] / total);
+    const int index = sl * temporal_layers;
+    if (temporal_layering_mode == 3) {
+      enc_cfg->layer_target_bitrate[index] = spatial_layer_target >> 1;
+      enc_cfg->layer_target_bitrate[index + 1] =
+          (spatial_layer_target >> 1) + (spatial_layer_target >> 2);
+      enc_cfg->layer_target_bitrate[index + 2] = spatial_layer_target;
+    } else if (temporal_layering_mode == 2) {
+      enc_cfg->layer_target_bitrate[index] = spatial_layer_target * 2 / 3;
+      enc_cfg->layer_target_bitrate[index + 1] = spatial_layer_target;
+    } else if (temporal_layering_mode <= 1) {
+      enc_cfg->layer_target_bitrate[index] = spatial_layer_target;
+    }
+  }
+  for (sl = 0; sl < spatial_layers; ++sl) {
+    for (int tl = 0; tl < temporal_layers; ++tl) {
+      const int layer = sl * temporal_layers + tl;
+      float layer_framerate = framerate;
+      if (temporal_layers == 2 && tl == 0) layer_framerate = framerate / 2;
+      if (temporal_layers == 3 && tl == 0) layer_framerate = framerate / 4;
+      if (temporal_layers == 3 && tl == 1) layer_framerate = framerate / 2;
+      layer_target_avg_bandwidth[layer] = static_cast<int>(
+          enc_cfg->layer_target_bitrate[layer] * 1000.0 / layer_framerate);
+      bits_in_buffer_model[layer] =
+          enc_cfg->layer_target_bitrate[layer] * enc_cfg->rc_buf_initial_sz;
+    }
+  }
+}
+
+static void CheckLayerRateTargeting(vpx_codec_enc_cfg_t *const cfg,
+                                    int number_spatial_layers,
+                                    int number_temporal_layers,
+                                    double *file_datarate,
+                                    double thresh_overshoot,
+                                    double thresh_undershoot) {
+  for (int sl = 0; sl < number_spatial_layers; ++sl)
+    for (int tl = 0; tl < number_temporal_layers; ++tl) {
+      const int layer = sl * number_temporal_layers + tl;
+      ASSERT_GE(cfg->layer_target_bitrate[layer],
+                file_datarate[layer] * thresh_overshoot)
+          << " The datarate for the file exceeds the target by too much!";
+      ASSERT_LE(cfg->layer_target_bitrate[layer],
+                file_datarate[layer] * thresh_undershoot)
+          << " The datarate for the file is lower than the target by too much!";
+    }
+}
+
 class DatarateOnePassCbrSvc
     : public ::libvpx_test::EncoderTest,
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
@@ -1296,6 +1362,8 @@ class DatarateOnePassCbrSvc
     memset(bits_total_, 0, sizeof(bits_total_));
     memset(layer_target_avg_bandwidth_, 0, sizeof(layer_target_avg_bandwidth_));
     dynamic_drop_layer_ = false;
+    change_bitrate_ = false;
+    last_pts_ref_ = 0;
   }
   virtual void BeginPassHook(unsigned int /*pass*/) {}
 
@@ -1393,6 +1461,39 @@ class DatarateOnePassCbrSvc
       set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
                                   number_spatial_layers_, 0, &ref_frame_config);
       encoder->Control(VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_frame_config);
+    }
+
+    if (change_bitrate_ && video->frame() == 200) {
+      duration_ = (last_pts_ + 1) * timebase_;
+      for (int sl = 0; sl < number_spatial_layers_; ++sl) {
+        for (int tl = 0; tl < number_temporal_layers_; ++tl) {
+          const int layer = sl * number_temporal_layers_ + tl;
+          const double file_size_in_kb = bits_total_[layer] / 1000.;
+          file_datarate_[layer] = file_size_in_kb / duration_;
+        }
+      }
+
+      CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
+                              number_temporal_layers_, file_datarate_, 0.78,
+                              1.15);
+
+      memset(file_datarate_, 0, sizeof(file_datarate_));
+      memset(bits_total_, 0, sizeof(bits_total_));
+      int64_t bits_in_buffer_model_tmp[VPX_MAX_LAYERS];
+      last_pts_ref_ = last_pts_;
+      // Set new target bitarate.
+      cfg_.rc_target_bitrate = cfg_.rc_target_bitrate >> 1;
+      // Buffer level should not reset on dynamic bitrate change.
+      memcpy(bits_in_buffer_model_tmp, bits_in_buffer_model_,
+             sizeof(bits_in_buffer_model_));
+      assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                            cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                            layer_target_avg_bandwidth_, bits_in_buffer_model_);
+      memcpy(bits_in_buffer_model_, bits_in_buffer_model_tmp,
+             sizeof(bits_in_buffer_model_));
+
+      // Change config to update encoder with new bitrate configuration.
+      encoder->Config(&cfg_);
     }
 
     if (dynamic_drop_layer_) {
@@ -1503,11 +1604,12 @@ class DatarateOnePassCbrSvc
   }
 
   virtual void EndPassHook(void) {
+    if (change_bitrate_) last_pts_ = last_pts_ - last_pts_ref_;
+    duration_ = (last_pts_ + 1) * timebase_;
     for (int sl = 0; sl < number_spatial_layers_; ++sl) {
       for (int tl = 0; tl < number_temporal_layers_; ++tl) {
         const int layer = sl * number_temporal_layers_ + tl;
         const double file_size_in_kb = bits_total_[layer] / 1000.;
-        duration_ = (last_pts_ + 1) * timebase_;
         file_datarate_[layer] = file_size_in_kb / duration_;
       }
     }
@@ -1545,72 +1647,9 @@ class DatarateOnePassCbrSvc
   unsigned int top_sl_height_;
   vpx_svc_ref_frame_config_t ref_frame_config;
   int update_pattern_;
+  bool change_bitrate_;
+  int last_pts_ref_;
 };
-static void assign_layer_bitrates(vpx_codec_enc_cfg_t *const enc_cfg,
-                                  const vpx_svc_extra_cfg_t *svc_params,
-                                  int spatial_layers, int temporal_layers,
-                                  int temporal_layering_mode,
-                                  int *layer_target_avg_bandwidth,
-                                  int64_t *bits_in_buffer_model) {
-  int sl, spatial_layer_target;
-  float total = 0;
-  float alloc_ratio[VPX_MAX_LAYERS] = { 0 };
-  float framerate = 30.0;
-  for (sl = 0; sl < spatial_layers; ++sl) {
-    if (svc_params->scaling_factor_den[sl] > 0) {
-      alloc_ratio[sl] = (float)(svc_params->scaling_factor_num[sl] * 1.0 /
-                                svc_params->scaling_factor_den[sl]);
-      total += alloc_ratio[sl];
-    }
-  }
-  for (sl = 0; sl < spatial_layers; ++sl) {
-    enc_cfg->ss_target_bitrate[sl] = spatial_layer_target =
-        (unsigned int)(enc_cfg->rc_target_bitrate * alloc_ratio[sl] / total);
-    const int index = sl * temporal_layers;
-    if (temporal_layering_mode == 3) {
-      enc_cfg->layer_target_bitrate[index] = spatial_layer_target >> 1;
-      enc_cfg->layer_target_bitrate[index + 1] =
-          (spatial_layer_target >> 1) + (spatial_layer_target >> 2);
-      enc_cfg->layer_target_bitrate[index + 2] = spatial_layer_target;
-    } else if (temporal_layering_mode == 2) {
-      enc_cfg->layer_target_bitrate[index] = spatial_layer_target * 2 / 3;
-      enc_cfg->layer_target_bitrate[index + 1] = spatial_layer_target;
-    } else if (temporal_layering_mode <= 1) {
-      enc_cfg->layer_target_bitrate[index] = spatial_layer_target;
-    }
-  }
-  for (sl = 0; sl < spatial_layers; ++sl) {
-    for (int tl = 0; tl < temporal_layers; ++tl) {
-      const int layer = sl * temporal_layers + tl;
-      float layer_framerate = framerate;
-      if (temporal_layers == 2 && tl == 0) layer_framerate = framerate / 2;
-      if (temporal_layers == 3 && tl == 0) layer_framerate = framerate / 4;
-      if (temporal_layers == 3 && tl == 1) layer_framerate = framerate / 2;
-      layer_target_avg_bandwidth[layer] = static_cast<int>(
-          enc_cfg->layer_target_bitrate[layer] * 1000.0 / layer_framerate);
-      bits_in_buffer_model[layer] =
-          enc_cfg->layer_target_bitrate[layer] * enc_cfg->rc_buf_initial_sz;
-    }
-  }
-}
-
-static void CheckLayerRateTargeting(vpx_codec_enc_cfg_t *const cfg,
-                                    int number_spatial_layers,
-                                    int number_temporal_layers,
-                                    double *file_datarate,
-                                    double thresh_overshoot,
-                                    double thresh_undershoot) {
-  for (int sl = 0; sl < number_spatial_layers; ++sl)
-    for (int tl = 0; tl < number_temporal_layers; ++tl) {
-      const int layer = sl * number_temporal_layers + tl;
-      ASSERT_GE(cfg->layer_target_bitrate[layer],
-                file_datarate[layer] * thresh_overshoot)
-          << " The datarate for the file exceeds the target by too much!";
-      ASSERT_LE(cfg->layer_target_bitrate[layer],
-                file_datarate[layer] * thresh_undershoot)
-          << " The datarate for the file is lower than the target by too much!";
-    }
-}
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and 1
 // temporal layer, with screen content mode on and same speed setting for all
@@ -1888,6 +1927,56 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
   top_sl_height_ = 480;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
+  assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
+                          number_temporal_layers_, file_datarate_, 0.78, 1.15);
+#if CONFIG_VP9_DECODER
+  // Number of temporal layers > 1, so half of the frames in this SVC pattern
+  // will be non-reference frame and hence encoder will avoid loopfilter.
+  // Since frame dropper is off, we can expect 200 (half of the sequence)
+  // mismatched frames.
+  EXPECT_EQ(static_cast<unsigned int>(200), GetMismatchFrames());
+#endif
+}
+
+// Check rate targeting for 1 pass CBR SVC: 3 spatial layers and
+// 3 temporal layers, changing the target bitrate at the middle of encoding.
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLDynamicBitrateChange) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.ss_number_layers = 3;
+  cfg_.ts_number_layers = 3;
+  cfg_.ts_rate_decimator[0] = 4;
+  cfg_.ts_rate_decimator[1] = 2;
+  cfg_.ts_rate_decimator[2] = 1;
+  cfg_.g_error_resilient = 1;
+  cfg_.g_threads = 1;
+  cfg_.temporal_layering_mode = 3;
+  svc_params_.scaling_factor_num[0] = 72;
+  svc_params_.scaling_factor_den[0] = 288;
+  svc_params_.scaling_factor_num[1] = 144;
+  svc_params_.scaling_factor_den[1] = 288;
+  svc_params_.scaling_factor_num[2] = 288;
+  svc_params_.scaling_factor_den[2] = 288;
+  cfg_.rc_dropframe_thresh = 0;
+  cfg_.kf_max_dist = 9999;
+  number_spatial_layers_ = cfg_.ss_number_layers;
+  number_temporal_layers_ = cfg_.ts_number_layers;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
+  cfg_.rc_target_bitrate = 800;
+  ResetModel();
+  change_bitrate_ = true;
   assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                         cfg_.ts_number_layers, cfg_.temporal_layering_mode,
                         layer_target_avg_bandwidth_, bits_in_buffer_model_);
