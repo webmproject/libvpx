@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "61b1b264_4206104d",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-23T23:44:00Z",
+      "side": 1,
+      "message": "could be a static_cast",
+      "range": {
+        "startLine": 465,
+        "startChar": 43,
+        "endLine": 465,
+        "endChar": 48
+      },
+      "revId": "0a6d464490b1baededf62a4f8bac822c63412a2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
