@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4606c9a8_bdd9a0e0",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1056,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-23T04:29:43Z",
+      "side": 1,
+      "message": "is this the right thing to do (rather than clamp)? will find_fractional_mv_step be using the correct data in the case tmp_* are within range?",
+      "revId": "b66a3e35e00ed28cdaca682940fef3e0cdccec8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
