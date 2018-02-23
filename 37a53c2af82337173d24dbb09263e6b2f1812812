@@ -22,6 +22,30 @@
       "revId": "37a53c2af82337173d24dbb09263e6b2f1812812",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "75fcd2fb_c5f18163",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1153359
+      },
+      "writtenOn": "2018-02-23T23:28:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6461a989_1dca42d1",
+      "range": {
+        "startLine": 470,
+        "startChar": 62,
+        "endLine": 470,
+        "endChar": 72
+      },
+      "revId": "37a53c2af82337173d24dbb09263e6b2f1812812",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
