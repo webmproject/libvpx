@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6461a989_1dca42d1",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-23T01:45:12Z",
+      "side": 1,
+      "message": "this could be reduced to a sizeof(arr)/sizeof(arr[0]) no? or at least make the const equal to that",
+      "range": {
+        "startLine": 470,
+        "startChar": 62,
+        "endLine": 470,
+        "endChar": 72
+      },
+      "revId": "37a53c2af82337173d24dbb09263e6b2f1812812",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
