@@ -26,6 +26,15 @@ static INLINE int16x4_t create_s16x4_neon(const int16_t c0, const int16_t c1,
                      ((int64_t)(uint16_t)c3 << 48));
 }
 
+static INLINE int32x2_t create_s32x2_neon(const int32_t c0, const int32_t c1) {
+  return vcreate_s32((uint32_t)c0 | ((int64_t)(uint32_t)c1 << 32));
+}
+
+static INLINE int32x4_t create_s32x4_neon(const int32_t c0, const int32_t c1,
+                                          const int32_t c2, const int32_t c3) {
+  return vcombine_s32(create_s32x2_neon(c0, c1), create_s32x2_neon(c2, c3));
+}
+
 // Helper functions used to load tran_low_t into int16, narrowing if necessary.
 static INLINE int16x8x2_t load_tran_low_to_s16x2q(const tran_low_t *buf) {
 #if CONFIG_VP9_HIGHBITDEPTH

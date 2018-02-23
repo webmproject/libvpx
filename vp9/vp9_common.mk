@@ -83,6 +83,7 @@ VP9_COMMON_SRCS-$(HAVE_DSPR2) += common/mips/dspr2/vp9_itrans8_dspr2.c
 VP9_COMMON_SRCS-$(HAVE_DSPR2) += common/mips/dspr2/vp9_itrans16_dspr2.c
 else
 VP9_COMMON_SRCS-$(HAVE_NEON)   += common/arm/neon/vp9_highbd_iht4x4_add_neon.c
+VP9_COMMON_SRCS-$(HAVE_NEON)   += common/arm/neon/vp9_highbd_iht8x8_add_neon.c
 VP9_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp9_highbd_iht4x4_add_sse4.c
 VP9_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp9_highbd_iht8x8_add_sse4.c
 VP9_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/vp9_highbd_iht16x16_add_sse4.c
