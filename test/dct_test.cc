@@ -85,8 +85,15 @@ void highbd_iht_wrapper(const tran_low_t *in, uint8_t *out, int stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+struct FuncInfo {
+  FhtFunc ft_func;
+  IhtWithBdFunc it_func;
+  int size;
+  int pixel_size;
+};
+
 /* forward transform, inverse transform, size, transform type, bit depth */
-typedef tuple<FhtFunc, IhtWithBdFunc, int, int, vpx_bit_depth_t, int> DctParam;
+typedef tuple<int, const FuncInfo *, int, vpx_bit_depth_t> DctParam;
 
 void fdct_ref(const Buffer<int16_t> &in, Buffer<tran_low_t> *out, int size,
               int /*tx_type*/) {
@@ -128,12 +135,14 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
  public:
   virtual void SetUp() {
     rnd_.Reset(ACMRandom::DeterministicSeed());
-    fwd_txfm_ = GET_PARAM(0);
-    inv_txfm_ = GET_PARAM(1);
-    size_ = GET_PARAM(2);
-    tx_type_ = GET_PARAM(3);
-    bit_depth_ = GET_PARAM(4);
-    pixel_size_ = GET_PARAM(5);
+    const int idx = GET_PARAM(0);
+    const FuncInfo *func_info = &(GET_PARAM(1)[idx]);
+    tx_type_ = GET_PARAM(2);
+    bit_depth_ = GET_PARAM(3);
+    fwd_txfm_ = func_info->ft_func;
+    inv_txfm_ = func_info->it_func;
+    size_ = func_info->size;
+    pixel_size_ = func_info->pixel_size;
     max_pixel_value_ = (1 << bit_depth_) - 1;
 
     // Randomize stride_ to a value less than or equal to 1024
@@ -165,6 +174,7 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
   }
 
   void InitMem() {
+    if (pixel_size_ == 1 && bit_depth_ > VPX_BITS_8) return;
     if (pixel_size_ == 1) {
       for (int j = 0; j < block_size_; ++j) {
         src_[j] = rnd_.Rand16() & max_pixel_value_;
@@ -195,6 +205,7 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
 
  protected:
   void RunAccuracyCheck(int limit) {
+    if (pixel_size_ == 1 && bit_depth_ > VPX_BITS_8) return;
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     Buffer<int16_t> test_input_block =
         Buffer<int16_t>(size_, size_, 8, size_ == 4 ? 0 : 16);
@@ -252,6 +263,7 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
   }
 
   void RunCoeffCheck() {
+    if (pixel_size_ == 1 && bit_depth_ > VPX_BITS_8) return;
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
     Buffer<int16_t> input_block =
@@ -281,6 +293,7 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
   }
 
   void RunMemCheck() {
+    if (pixel_size_ == 1 && bit_depth_ > VPX_BITS_8) return;
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
     Buffer<int16_t> input_extreme_block =
@@ -331,6 +344,7 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
   }
 
   void RunInvAccuracyCheck(int limit) {
+    if (pixel_size_ == 1 && bit_depth_ > VPX_BITS_8) return;
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 1000;
     Buffer<int16_t> in = Buffer<int16_t>(size_, size_, 4);
@@ -411,7 +425,15 @@ class TransDCT : public TransTestBase {
   TransDCT() { fwd_txfm_ref = fdct_ref; }
 };
 
-TEST_P(TransDCT, AccuracyCheck) { RunAccuracyCheck(1); }
+TEST_P(TransDCT, AccuracyCheck) {
+  int t = 1;
+  if (size_ == 16 && bit_depth_ > 10 && pixel_size_ == 2) {
+    t = 2;
+  } else if (size_ == 32 && bit_depth_ > 10 && pixel_size_ == 2) {
+    t = 7;
+  }
+  RunAccuracyCheck(t);
+}
 
 TEST_P(TransDCT, CoeffCheck) { RunCoeffCheck(); }
 
@@ -419,173 +441,136 @@ TEST_P(TransDCT, MemCheck) { RunMemCheck(); }
 
 TEST_P(TransDCT, InvAccuracyCheck) { RunInvAccuracyCheck(1); }
 
-/* TODO:(johannkoenig) Determine why these fail AccuracyCheck
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct32x32_c>,
-  &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_c>, 32, 0, VPX_BITS_12, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct16x16_c>,
-  &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_c>, 16, 0, VPX_BITS_12, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct32x32_sse2>,
-  &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_sse2>, 32, 0, VPX_BITS_12,
-  2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct16x16_sse2>,
-  &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_sse2>, 16, 0, VPX_BITS_12,
-  2),
-*/
-
-const DctParam c_dct_tests[] = {
+static const FuncInfo dct_c_func_info[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct32x32_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_c>, 32, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct32x32_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_c>, 32, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct16x16_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_c>, 16, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct16x16_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_c>, 16, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct8x8_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_c>, 8, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct8x8_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_c>, 8, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct8x8_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_c>, 8, 0,
-             VPX_BITS_12, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct4x4_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_c>, 4, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct4x4_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_c>, 4, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct4x4_c>,
-             &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_c>, 4, 0,
-             VPX_BITS_12, 2),
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&fdct_wrapper<vpx_fdct32x32_c>,
-             &idct_wrapper<vpx_idct32x32_1024_add_c>, 32, 0, VPX_BITS_8, 1),
-  make_tuple(&fdct_wrapper<vpx_fdct16x16_c>,
-             &idct_wrapper<vpx_idct16x16_256_add_c>, 16, 0, VPX_BITS_8, 1),
-  make_tuple(&fdct_wrapper<vpx_fdct8x8_c>, &idct_wrapper<vpx_idct8x8_64_add_c>,
-             8, 0, VPX_BITS_8, 1),
-  make_tuple(&fdct_wrapper<vpx_fdct4x4_c>, &idct_wrapper<vpx_idct4x4_16_add_c>,
-             4, 0, VPX_BITS_8, 1)
+  { &fdct_wrapper<vpx_highbd_fdct4x4_c>,
+    &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_c>, 4, 2 },
+  { &fdct_wrapper<vpx_highbd_fdct8x8_c>,
+    &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_c>, 8, 2 },
+  { &fdct_wrapper<vpx_highbd_fdct16x16_c>,
+    &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_c>, 16, 2 },
+  { &fdct_wrapper<vpx_highbd_fdct32x32_c>,
+    &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_c>, 32, 2 },
+#endif
+  { &fdct_wrapper<vpx_fdct4x4_c>, &idct_wrapper<vpx_idct4x4_16_add_c>, 4, 1 },
+  { &fdct_wrapper<vpx_fdct8x8_c>, &idct_wrapper<vpx_idct8x8_64_add_c>, 8, 1 },
+  { &fdct_wrapper<vpx_fdct16x16_c>, &idct_wrapper<vpx_idct16x16_256_add_c>, 16,
+    1 },
+  { &fdct_wrapper<vpx_fdct32x32_c>, &idct_wrapper<vpx_idct32x32_1024_add_c>, 32,
+    1 }
 };
 
-INSTANTIATE_TEST_CASE_P(C, TransDCT, ::testing::ValuesIn(c_dct_tests));
+INSTANTIATE_TEST_CASE_P(
+    C, TransDCT,
+    ::testing::Combine(
+        ::testing::Range(0, static_cast<int>(sizeof(dct_c_func_info) /
+                                             sizeof(dct_c_func_info[0]))),
+        ::testing::Values(dct_c_func_info), ::testing::Values(0),
+        ::testing::Values(VPX_BITS_8, VPX_BITS_10, VPX_BITS_12)));
 
 #if !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_SSE2
-const DctParam sse2_dct_tests[] = {
+static const FuncInfo dct_sse2_func_info[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct32x32_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_sse2>, 32, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct32x32_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_sse2>, 32, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct16x16_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_sse2>, 16, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct16x16_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_sse2>, 16, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct8x8_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_sse2>, 8, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct8x8_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_sse2>, 8, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct8x8_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_sse2>, 8, 0,
-             VPX_BITS_12, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct4x4_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_sse2>, 4, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct4x4_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_sse2>, 4, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vpx_highbd_fdct4x4_sse2>,
-             &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_sse2>, 4, 0,
-             VPX_BITS_12, 2),
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&fdct_wrapper<vpx_fdct32x32_sse2>,
-             &idct_wrapper<vpx_idct32x32_1024_add_sse2>, 32, 0, VPX_BITS_8, 1),
-  make_tuple(&fdct_wrapper<vpx_fdct16x16_sse2>,
-             &idct_wrapper<vpx_idct16x16_256_add_sse2>, 16, 0, VPX_BITS_8, 1),
-  make_tuple(&fdct_wrapper<vpx_fdct8x8_sse2>,
-             &idct_wrapper<vpx_idct8x8_64_add_sse2>, 8, 0, VPX_BITS_8, 1),
-  make_tuple(&fdct_wrapper<vpx_fdct4x4_sse2>,
-             &idct_wrapper<vpx_idct4x4_16_add_sse2>, 4, 0, VPX_BITS_8, 1)
+  { &fdct_wrapper<vpx_highbd_fdct4x4_sse2>,
+    &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_sse2>, 4, 2 },
+  { &fdct_wrapper<vpx_highbd_fdct8x8_sse2>,
+    &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_sse2>, 8, 2 },
+  { &fdct_wrapper<vpx_highbd_fdct16x16_sse2>,
+    &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_sse2>, 16, 2 },
+  { &fdct_wrapper<vpx_highbd_fdct32x32_sse2>,
+    &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_sse2>, 32, 2 },
+#endif
+  { &fdct_wrapper<vpx_fdct4x4_sse2>, &idct_wrapper<vpx_idct4x4_16_add_sse2>, 4,
+    1 },
+  { &fdct_wrapper<vpx_fdct8x8_sse2>, &idct_wrapper<vpx_idct8x8_64_add_sse2>, 8,
+    1 },
+  { &fdct_wrapper<vpx_fdct16x16_sse2>,
+    &idct_wrapper<vpx_idct16x16_256_add_sse2>, 16, 1 },
+  { &fdct_wrapper<vpx_fdct32x32_sse2>,
+    &idct_wrapper<vpx_idct32x32_1024_add_sse2>, 32, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(SSE2, TransDCT, ::testing::ValuesIn(sse2_dct_tests));
+INSTANTIATE_TEST_CASE_P(
+    SSE2, TransDCT,
+    ::testing::Combine(
+        ::testing::Range(0, static_cast<int>(sizeof(dct_sse2_func_info) /
+                                             sizeof(dct_sse2_func_info[0]))),
+        ::testing::Values(dct_sse2_func_info), ::testing::Values(0),
+        ::testing::Values(VPX_BITS_8, VPX_BITS_10, VPX_BITS_12)));
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3 && !CONFIG_VP9_HIGHBITDEPTH && ARCH_X86_64
+// vpx_fdct8x8_ssse3 is only available in 64 bit builds.
+static const FuncInfo dct_ssse3_func_info = {
+  &fdct_wrapper<vpx_fdct8x8_ssse3>, &idct_wrapper<vpx_idct8x8_64_add_sse2>, 8, 1
+};
+
 // TODO(johannkoenig): high bit depth fdct8x8.
-INSTANTIATE_TEST_CASE_P(
-    SSSE3, TransDCT,
-    ::testing::Values(
-        // vpx_fdct8x8_ssse3 is only available in 64 bit builds.
-        make_tuple(&fdct_wrapper<vpx_fdct8x8_ssse3>,
-                   &idct_wrapper<vpx_idct8x8_64_add_sse2>, 8, 0, VPX_BITS_8,
-                   1)));
+INSTANTIATE_TEST_CASE_P(SSSE3, TransDCT,
+                        ::testing::Values(make_tuple(0, &dct_ssse3_func_info, 0,
+                                                     VPX_BITS_8)));
 #endif  // HAVE_SSSE3 && !CONFIG_VP9_HIGHBITDEPTH && ARCH_X86_64
 
 #if HAVE_AVX2 && !CONFIG_VP9_HIGHBITDEPTH
+static const FuncInfo dct_avx2_func_info = {
+  &fdct_wrapper<vpx_fdct32x32_avx2>, &idct_wrapper<vpx_idct32x32_1024_add_sse2>,
+  32, 1
+};
+
 // TODO(johannkoenig): high bit depth fdct32x32.
-INSTANTIATE_TEST_CASE_P(
-    AVX2, TransDCT,
-    ::testing::Values(make_tuple(&fdct_wrapper<vpx_fdct32x32_avx2>,
-                                 &idct_wrapper<vpx_idct32x32_1024_add_sse2>, 32,
-                                 0, VPX_BITS_8, 1)));
+INSTANTIATE_TEST_CASE_P(AVX2, TransDCT,
+                        ::testing::Values(make_tuple(0, &dct_avx2_func_info, 0,
+                                                     VPX_BITS_8)));
 #endif  // HAVE_AVX2 && !CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_NEON
+static const FuncInfo dct_neon_func_info[4] = {
+  { &fdct_wrapper<vpx_fdct4x4_neon>, &idct_wrapper<vpx_idct4x4_16_add_neon>, 4,
+    1 },
+  { &fdct_wrapper<vpx_fdct8x8_neon>, &idct_wrapper<vpx_idct8x8_64_add_neon>, 8,
+    1 },
+  { &fdct_wrapper<vpx_fdct16x16_neon>,
+    &idct_wrapper<vpx_idct16x16_256_add_neon>, 16, 1 },
+  { &fdct_wrapper<vpx_fdct32x32_neon>,
+    &idct_wrapper<vpx_idct32x32_1024_add_neon>, 32, 1 }
+};
+
 INSTANTIATE_TEST_CASE_P(
     NEON, TransDCT,
-    ::testing::Values(make_tuple(&fdct_wrapper<vpx_fdct32x32_neon>,
-                                 &idct_wrapper<vpx_idct32x32_1024_add_neon>, 32,
-                                 0, VPX_BITS_8, 1),
-                      make_tuple(&fdct_wrapper<vpx_fdct16x16_neon>,
-                                 &idct_wrapper<vpx_idct16x16_256_add_neon>, 16,
-                                 0, VPX_BITS_8, 1),
-                      make_tuple(&fdct_wrapper<vpx_fdct8x8_neon>,
-                                 &idct_wrapper<vpx_idct8x8_64_add_neon>, 8, 0,
-                                 VPX_BITS_8, 1),
-                      make_tuple(&fdct_wrapper<vpx_fdct4x4_neon>,
-                                 &idct_wrapper<vpx_idct4x4_16_add_neon>, 4, 0,
-                                 VPX_BITS_8, 1)));
+    ::testing::Combine(::testing::Range(0, 4),
+                       ::testing::Values(dct_neon_func_info),
+                       ::testing::Values(0), ::testing::Values(VPX_BITS_8)));
 #endif  // HAVE_NEON
 
 #if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(
-    MSA, TransDCT,
-    ::testing::Values(make_tuple(&fdct_wrapper<vpx_fdct32x32_msa>,
-                                 &idct_wrapper<vpx_idct32x32_1024_add_msa>, 32,
-                                 0, VPX_BITS_8, 1),
-                      make_tuple(&fdct_wrapper<vpx_fdct16x16_msa>,
-                                 &idct_wrapper<vpx_idct16x16_256_add_msa>, 16,
-                                 0, VPX_BITS_8, 1),
-                      make_tuple(&fdct_wrapper<vpx_fdct8x8_msa>,
-                                 &idct_wrapper<vpx_idct8x8_64_add_msa>, 8, 0,
-                                 VPX_BITS_8, 1),
-                      make_tuple(&fdct_wrapper<vpx_fdct4x4_msa>,
-                                 &idct_wrapper<vpx_idct4x4_16_add_msa>, 4, 0,
-                                 VPX_BITS_8, 1)));
+static const FuncInfo dct_msa_func_info[4] = {
+  { &fdct_wrapper<vpx_fdct4x4_msa>, &idct_wrapper<vpx_idct4x4_16_add_msa>, 4,
+    1 },
+  { &fdct_wrapper<vpx_fdct8x8_msa>, &idct_wrapper<vpx_idct8x8_64_add_msa>, 8,
+    1 },
+  { &fdct_wrapper<vpx_fdct16x16_msa>, &idct_wrapper<vpx_idct16x16_256_add_msa>,
+    16, 1 },
+  { &fdct_wrapper<vpx_fdct32x32_msa>, &idct_wrapper<vpx_idct32x32_1024_add_msa>,
+    32, 1 }
+};
+
+INSTANTIATE_TEST_CASE_P(MSA, TransDCT,
+                        ::testing::Combine(::testing::Range(0, 4),
+                                           ::testing::Values(dct_msa_func_info),
+                                           ::testing::Values(0),
+                                           ::testing::Values(VPX_BITS_8)));
 #endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(
-    VSX, TransDCT,
-    ::testing::Values(make_tuple(&fdct_wrapper<vpx_fdct4x4_c>,
-                                 &idct_wrapper<vpx_idct4x4_16_add_vsx>, 4, 0,
-                                 VPX_BITS_8, 1)));
+static const FuncInfo dct_vsx_func_info = {
+  &fdct_wrapper<vpx_fdct4x4_c>, &idct_wrapper<vpx_idct4x4_16_add_vsx>, 4, 1
+};
+
+INSTANTIATE_TEST_CASE_P(VSX, TransDCT,
+                        ::testing::Values(make_tuple(0, &dct_vsx_func_info, 0,
+                                                     VPX_BITS_8)));
 #endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH &&
 
 #endif  // !CONFIG_EMULATE_HARDWARE
@@ -598,7 +583,7 @@ class TransHT : public TransTestBase {
 };
 
 TEST_P(TransHT, AccuracyCheck) {
-  RunAccuracyCheck(size_ == 16 && bit_depth_ > 10 ? 2 : 1);
+  RunAccuracyCheck(size_ == 16 && bit_depth_ > 10 && pixel_size_ == 2 ? 2 : 1);
 }
 
 TEST_P(TransHT, CoeffCheck) { RunCoeffCheck(); }
@@ -607,397 +592,84 @@ TEST_P(TransHT, MemCheck) { RunMemCheck(); }
 
 TEST_P(TransHT, InvAccuracyCheck) { RunInvAccuracyCheck(1); }
 
-const DctParam c_ht_tests[] = {
+static const FuncInfo ht_c_func_info[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 1,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 2,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 3,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 1,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 2,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 3,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 0,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 1,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 2,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht16x16_c,
-             &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>, 16, 3,
-             VPX_BITS_12, 2),
-
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 0, VPX_BITS_8,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 1, VPX_BITS_8,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 2, VPX_BITS_8,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 3, VPX_BITS_8,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 0, VPX_BITS_10,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 1, VPX_BITS_10,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 2, VPX_BITS_10,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 3, VPX_BITS_10,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 0, VPX_BITS_12,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 1, VPX_BITS_12,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 2, VPX_BITS_12,
-             2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8, 3, VPX_BITS_12,
-             2),
-
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 0, VPX_BITS_8,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 1, VPX_BITS_8,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 2, VPX_BITS_8,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 3, VPX_BITS_8,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 0, VPX_BITS_10,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 1, VPX_BITS_10,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 2, VPX_BITS_10,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 3, VPX_BITS_10,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 0, VPX_BITS_12,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 1, VPX_BITS_12,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 2, VPX_BITS_12,
-             2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4, 3, VPX_BITS_12,
-             2),
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_c>, 16, 0,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_c>, 16, 1,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_c>, 16, 2,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_c>, 16, 3,
-             VPX_BITS_8, 1),
-
-  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_c>, 8, 0, VPX_BITS_8,
-             1),
-  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_c>, 8, 1, VPX_BITS_8,
-             1),
-  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_c>, 8, 2, VPX_BITS_8,
-             1),
-  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_c>, 8, 3, VPX_BITS_8,
-             1),
-
-  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_c>, 4, 0, VPX_BITS_8,
-             1),
-  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_c>, 4, 1, VPX_BITS_8,
-             1),
-  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_c>, 4, 2, VPX_BITS_8,
-             1),
-  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_c>, 4, 3, VPX_BITS_8,
-             1)
+  { &vp9_highbd_fht4x4_c, &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_c>, 4,
+    2 },
+  { &vp9_highbd_fht8x8_c, &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_c>, 8,
+    2 },
+  { &vp9_highbd_fht16x16_c, &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_c>,
+    16, 2 },
+#endif
+  { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_c>, 4, 1 },
+  { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_c>, 8, 1 },
+  { &vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_c>, 16, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(C, TransHT, ::testing::ValuesIn(c_ht_tests));
+INSTANTIATE_TEST_CASE_P(
+    C, TransHT,
+    ::testing::Combine(
+        ::testing::Range(0, static_cast<int>(sizeof(ht_c_func_info) /
+                                             sizeof(ht_c_func_info[0]))),
+        ::testing::Values(ht_c_func_info), ::testing::Range(0, 4),
+        ::testing::Values(VPX_BITS_8, VPX_BITS_10, VPX_BITS_12)));
 
 #if !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_NEON
 
-const DctParam neon_ht_tests[] = {
+static const FuncInfo ht_neon_func_info[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 1,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 2,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 3,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 1,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 2,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 3,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 0,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 1,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 2,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht4x4_c,
-             &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4, 3,
-             VPX_BITS_12, 2),
-
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 1,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 2,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 3,
-             VPX_BITS_8, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 1,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 2,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 3,
-             VPX_BITS_10, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 0,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 1,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 2,
-             VPX_BITS_12, 2),
-  make_tuple(&vp9_highbd_fht8x8_c,
-             &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8, 3,
-             VPX_BITS_12, 2),
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 0,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 2,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 3,
-             VPX_BITS_8, 1),
-
-  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 0,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 2,
-             VPX_BITS_8, 1),
-  make_tuple(&vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 3,
-             VPX_BITS_8, 1)
+  { &vp9_highbd_fht4x4_c, &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4,
+    2 },
+  { &vp9_highbd_fht8x8_c, &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8,
+    2 },
+#endif
+  { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1 },
+  { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(NEON, TransHT, ::testing::ValuesIn(neon_ht_tests));
+INSTANTIATE_TEST_CASE_P(
+    NEON, TransHT,
+    ::testing::Combine(
+        ::testing::Range(0, static_cast<int>(sizeof(ht_neon_func_info) /
+                                             sizeof(ht_neon_func_info[0]))),
+        ::testing::Values(ht_neon_func_info), ::testing::Range(0, 4),
+        ::testing::Values(VPX_BITS_8, VPX_BITS_10, VPX_BITS_12)));
 #endif  // HAVE_NEON
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
-    SSE2, TransHT,
-    ::testing::Values(
-        make_tuple(&vp9_fht16x16_sse2, &iht_wrapper<vp9_iht16x16_256_add_sse2>,
-                   16, 0, VPX_BITS_8, 1),
-        make_tuple(&vp9_fht16x16_sse2, &iht_wrapper<vp9_iht16x16_256_add_sse2>,
-                   16, 1, VPX_BITS_8, 1),
-        make_tuple(&vp9_fht16x16_sse2, &iht_wrapper<vp9_iht16x16_256_add_sse2>,
-                   16, 2, VPX_BITS_8, 1),
-        make_tuple(&vp9_fht16x16_sse2, &iht_wrapper<vp9_iht16x16_256_add_sse2>,
-                   16, 3, VPX_BITS_8, 1),
 
-        make_tuple(&vp9_fht8x8_sse2, &iht_wrapper<vp9_iht8x8_64_add_sse2>, 8, 0,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht8x8_sse2, &iht_wrapper<vp9_iht8x8_64_add_sse2>, 8, 1,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht8x8_sse2, &iht_wrapper<vp9_iht8x8_64_add_sse2>, 8, 2,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht8x8_sse2, &iht_wrapper<vp9_iht8x8_64_add_sse2>, 8, 3,
-                   VPX_BITS_8, 1),
+static const FuncInfo ht_sse2_func_info[3] = {
+  { &vp9_fht4x4_sse2, &iht_wrapper<vp9_iht4x4_16_add_sse2>, 4, 1 },
+  { &vp9_fht8x8_sse2, &iht_wrapper<vp9_iht8x8_64_add_sse2>, 8, 1 },
+  { &vp9_fht16x16_sse2, &iht_wrapper<vp9_iht16x16_256_add_sse2>, 16, 1 }
+};
 
-        make_tuple(&vp9_fht4x4_sse2, &iht_wrapper<vp9_iht4x4_16_add_sse2>, 4, 0,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht4x4_sse2, &iht_wrapper<vp9_iht4x4_16_add_sse2>, 4, 1,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht4x4_sse2, &iht_wrapper<vp9_iht4x4_16_add_sse2>, 4, 2,
-                   VPX_BITS_8, 1),
-        make_tuple(&vp9_fht4x4_sse2, &iht_wrapper<vp9_iht4x4_16_add_sse2>, 4, 3,
-                   VPX_BITS_8, 1)));
+INSTANTIATE_TEST_CASE_P(SSE2, TransHT,
+                        ::testing::Combine(::testing::Range(0, 3),
+                                           ::testing::Values(ht_sse2_func_info),
+                                           ::testing::Range(0, 4),
+                                           ::testing::Values(VPX_BITS_8)));
 #endif  // HAVE_SSE2
 
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
+static const FuncInfo ht_sse4_1_func_info[3] = {
+  { &vp9_highbd_fht4x4_c, &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>,
+    4, 2 },
+  { vp9_highbd_fht8x8_c, &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>,
+    8, 2 },
+  { &vp9_highbd_fht16x16_c,
+    &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16, 2 }
+};
+
 INSTANTIATE_TEST_CASE_P(
     SSE4_1, TransHT,
-    ::testing::Values(
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   0, VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   1, VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   2, VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   3, VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   0, VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   1, VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   2, VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   3, VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   0, VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   1, VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   2, VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht16x16_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16,
-                   3, VPX_BITS_12, 2),
-
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 0,
-                   VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 1,
-                   VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 2,
-                   VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 3,
-                   VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 0,
-                   VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 1,
-                   VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 2,
-                   VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 3,
-                   VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 0,
-                   VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 1,
-                   VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 2,
-                   VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht8x8_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_sse4_1>, 8, 3,
-                   VPX_BITS_12, 2),
-
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 0,
-                   VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 1,
-                   VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 2,
-                   VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 3,
-                   VPX_BITS_8, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 0,
-                   VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 1,
-                   VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 2,
-                   VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 3,
-                   VPX_BITS_10, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 0,
-                   VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 1,
-                   VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 2,
-                   VPX_BITS_12, 2),
-        make_tuple(&vp9_highbd_fht4x4_c,
-                   &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_sse4_1>, 4, 3,
-                   VPX_BITS_12, 2)));
+    ::testing::Combine(::testing::Range(0, 3),
+                       ::testing::Values(ht_sse4_1_func_info),
+                       ::testing::Range(0, 4),
+                       ::testing::Values(VPX_BITS_8, VPX_BITS_10,
+                                         VPX_BITS_12)));
 #endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 
 #endif  // !CONFIG_EMULATE_HARDWARE
@@ -1017,29 +689,29 @@ TEST_P(TransWHT, MemCheck) { RunMemCheck(); }
 
 TEST_P(TransWHT, InvAccuracyCheck) { RunInvAccuracyCheck(0); }
 
-const DctParam c_wht_tests[] = {
+static const FuncInfo wht_c_func_info[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&fdct_wrapper<vp9_highbd_fwht4x4_c>,
-             &highbd_idct_wrapper<vpx_highbd_iwht4x4_16_add_c>, 4, 0,
-             VPX_BITS_8, 2),
-  make_tuple(&fdct_wrapper<vp9_highbd_fwht4x4_c>,
-             &highbd_idct_wrapper<vpx_highbd_iwht4x4_16_add_c>, 4, 0,
-             VPX_BITS_10, 2),
-  make_tuple(&fdct_wrapper<vp9_highbd_fwht4x4_c>,
-             &highbd_idct_wrapper<vpx_highbd_iwht4x4_16_add_c>, 4, 0,
-             VPX_BITS_12, 2),
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  make_tuple(&fdct_wrapper<vp9_fwht4x4_c>, &idct_wrapper<vpx_iwht4x4_16_add_c>,
-             4, 0, VPX_BITS_8, 1)
+  { &fdct_wrapper<vp9_highbd_fwht4x4_c>,
+    &highbd_idct_wrapper<vpx_highbd_iwht4x4_16_add_c>, 4, 2 },
+#endif
+  { &fdct_wrapper<vp9_fwht4x4_c>, &idct_wrapper<vpx_iwht4x4_16_add_c>, 4, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(C, TransWHT, ::testing::ValuesIn(c_wht_tests));
+INSTANTIATE_TEST_CASE_P(
+    C, TransWHT,
+    ::testing::Combine(
+        ::testing::Range(0, static_cast<int>(sizeof(wht_c_func_info) /
+                                             sizeof(wht_c_func_info[0]))),
+        ::testing::Values(wht_c_func_info), ::testing::Values(0),
+        ::testing::Values(VPX_BITS_8, VPX_BITS_10, VPX_BITS_12)));
 
 #if HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
-INSTANTIATE_TEST_CASE_P(
-    SSE2, TransWHT,
-    ::testing::Values(make_tuple(&fdct_wrapper<vp9_fwht4x4_sse2>,
-                                 &idct_wrapper<vpx_iwht4x4_16_add_sse2>, 4, 0,
-                                 VPX_BITS_8, 1)));
+static const FuncInfo wht_sse2_func_info = {
+  &fdct_wrapper<vp9_fwht4x4_sse2>, &idct_wrapper<vpx_iwht4x4_16_add_sse2>, 4, 1
+};
+
+INSTANTIATE_TEST_CASE_P(SSE2, TransWHT,
+                        ::testing::Values(make_tuple(0, &wht_sse2_func_info, 0,
+                                                     VPX_BITS_8)));
 #endif  // HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
 }  // namespace
