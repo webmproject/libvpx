@@ -255,11 +255,14 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
     }
 
     EXPECT_GE(static_cast<uint32_t>(limit), max_error)
-        << "Error: 4x4 FHT/IHT has an individual round trip error > " << limit;
+        << "Error: " << size_ << "x" << size_
+        << " transform/inverse transform has an individual round trip error > "
+        << limit;
 
     EXPECT_GE(count_test_block * limit, total_error)
-        << "Error: 4x4 FHT/IHT has average round trip error > " << limit
-        << " per block";
+        << "Error: " << size_ << "x" << size_
+        << " transform/inverse transform has average round trip error > "
+        << limit << " per block";
   }
 
   void RunCoeffCheck() {
@@ -330,8 +333,8 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
           EXPECT_GE(
               4 * DCT_MAX_VALUE << (bit_depth_ - 8),
               abs(output_block.TopLeftPixel()[h * output_block.stride() + w]))
-              << "Error: 4x4 FDCT has coefficient larger than "
-                 "4*DCT_MAX_VALUE"
+              << "Error: " << size_ << "x" << size_
+              << " transform has coefficient larger than 4*DCT_MAX_VALUE"
               << " at " << w << "," << h;
           if (::testing::Test::HasFailure()) {
             printf("Size: %d Transform type: %d\n", size_, tx_type_);
@@ -396,8 +399,14 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
           }
           const uint32_t error = diff * diff;
           EXPECT_GE(static_cast<uint32_t>(limit), error)
-              << "Error: " << size_ << "x" << size_ << " IDCT has error "
-              << error << " at " << w << "," << h;
+              << "Error: " << size_ << "x" << size_
+              << " inverse transform has error " << error << " at " << w << ","
+              << h << " org:" << (int)src_[h * stride_ + w]
+              << " opt:" << (int)dst_[h * stride_ + w];
+          if (::testing::Test::HasFailure()) {
+            printf("Size: %d Transform type: %d\n", size_, tx_type_);
+            return;
+          }
         }
       }
     }
@@ -626,7 +635,8 @@ static const FuncInfo ht_neon_func_info[] = {
     2 },
 #endif
   { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1 },
-  { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1 }
+  { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1 },
+  { &vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_neon>, 16, 1 }
 };
 
 INSTANTIATE_TEST_CASE_P(

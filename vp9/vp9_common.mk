@@ -70,6 +70,7 @@ VP9_COMMON_SRCS-$(HAVE_MSA)   += common/mips/msa/vp9_idct16x16_msa.c
 VP9_COMMON_SRCS-$(HAVE_SSE2)  += common/x86/vp9_idct_intrin_sse2.c
 VP9_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/vp9_iht4x4_add_neon.c
 VP9_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/vp9_iht8x8_add_neon.c
+VP9_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/vp9_iht16x16_add_neon.c
 VP9_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/vp9_iht_neon.h
 
 ifeq ($(CONFIG_VP9_POSTPROC),yes)

@@ -71,6 +71,24 @@ static INLINE void iadst_half_butterfly_neon(int16x8_t *const x,
   x[1] = dct_const_round_shift_low_8(t1);
 }
 
+static INLINE int16x8_t iadst_half_butterfly_neg_neon(const int16x8_t in,
+                                                      const int16x4_t c) {
+  int32x4_t t[2];
+
+  t[0] = vmull_lane_s16(vget_low_s16(in), c, 1);
+  t[1] = vmull_lane_s16(vget_high_s16(in), c, 1);
+  return dct_const_round_shift_low_8(t);
+}
+
+static INLINE int16x8_t iadst_half_butterfly_pos_neon(const int16x8_t in,
+                                                      const int16x4_t c) {
+  int32x4_t t[2];
+
+  t[0] = vmull_lane_s16(vget_low_s16(in), c, 0);
+  t[1] = vmull_lane_s16(vget_high_s16(in), c, 0);
+  return dct_const_round_shift_low_8(t);
+}
+
 static INLINE void iadst_butterfly_lane_0_1_neon(const int16x8_t in0,
                                                  const int16x8_t in1,
                                                  const int16x4_t c,
@@ -101,6 +119,22 @@ static INLINE void iadst_butterfly_lane_2_3_neon(const int16x8_t in0,
   s0[1] = vmlal_lane_s16(s0[1], vget_high_s16(in1), c, 3);
   s1[0] = vmlsl_lane_s16(s1[0], vget_low_s16(in1), c, 2);
   s1[1] = vmlsl_lane_s16(s1[1], vget_high_s16(in1), c, 2);
+}
+
+static INLINE void iadst_butterfly_lane_1_0_neon(const int16x8_t in0,
+                                                 const int16x8_t in1,
+                                                 const int16x4_t c,
+                                                 int32x4_t *const s0,
+                                                 int32x4_t *const s1) {
+  s0[0] = vmull_lane_s16(vget_low_s16(in0), c, 1);
+  s0[1] = vmull_lane_s16(vget_high_s16(in0), c, 1);
+  s1[0] = vmull_lane_s16(vget_low_s16(in0), c, 0);
+  s1[1] = vmull_lane_s16(vget_high_s16(in0), c, 0);
+
+  s0[0] = vmlal_lane_s16(s0[0], vget_low_s16(in1), c, 0);
+  s0[1] = vmlal_lane_s16(s0[1], vget_high_s16(in1), c, 0);
+  s1[0] = vmlsl_lane_s16(s1[0], vget_low_s16(in1), c, 1);
+  s1[1] = vmlsl_lane_s16(s1[1], vget_high_s16(in1), c, 1);
 }
 
 static INLINE void iadst_butterfly_lane_3_2_neon(const int16x8_t in0,
