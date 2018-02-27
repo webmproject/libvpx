@@ -1648,7 +1648,7 @@ class DatarateOnePassCbrSvc
   vpx_svc_ref_frame_config_t ref_frame_config;
   int update_pattern_;
   bool change_bitrate_;
-  int last_pts_ref_;
+  vpx_codec_pts_t last_pts_ref_;
 };
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and 1
