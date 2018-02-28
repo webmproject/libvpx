@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5bb0db6e_a62acc72",
+        "filename": "test/dct_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-02-28T06:51:00Z",
+      "side": 1,
+      "message": "use static_cast in c++",
+      "range": {
+        "startLine": 404,
+        "startChar": 33,
+        "endLine": 404,
+        "endChar": 37
+      },
+      "revId": "88c23864474a9d357a77317a8c4c2dce709ceee2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
