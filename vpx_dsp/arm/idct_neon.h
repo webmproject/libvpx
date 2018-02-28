@@ -890,62 +890,6 @@ static INLINE void highbd_add_and_store_bd8(const int16x8_t *const a,
   highbd_idct16x16_add8x1_bd8(a[31], &out, stride);
 }
 
-static INLINE void highbd_idct16x16_add_store(const int32x4x2_t *const out,
-                                              uint16_t *dest, const int stride,
-                                              const int bd) {
-  // Add the result to dest
-  const int16x8_t max = vdupq_n_s16((1 << bd) - 1);
-  int16x8_t o[16];
-  o[0] = vcombine_s16(vrshrn_n_s32(out[0].val[0], 6),
-                      vrshrn_n_s32(out[0].val[1], 6));
-  o[1] = vcombine_s16(vrshrn_n_s32(out[1].val[0], 6),
-                      vrshrn_n_s32(out[1].val[1], 6));
-  o[2] = vcombine_s16(vrshrn_n_s32(out[2].val[0], 6),
-                      vrshrn_n_s32(out[2].val[1], 6));
-  o[3] = vcombine_s16(vrshrn_n_s32(out[3].val[0], 6),
-                      vrshrn_n_s32(out[3].val[1], 6));
-  o[4] = vcombine_s16(vrshrn_n_s32(out[4].val[0], 6),
-                      vrshrn_n_s32(out[4].val[1], 6));
-  o[5] = vcombine_s16(vrshrn_n_s32(out[5].val[0], 6),
-                      vrshrn_n_s32(out[5].val[1], 6));
-  o[6] = vcombine_s16(vrshrn_n_s32(out[6].val[0], 6),
-                      vrshrn_n_s32(out[6].val[1], 6));
-  o[7] = vcombine_s16(vrshrn_n_s32(out[7].val[0], 6),
-                      vrshrn_n_s32(out[7].val[1], 6));
-  o[8] = vcombine_s16(vrshrn_n_s32(out[8].val[0], 6),
-                      vrshrn_n_s32(out[8].val[1], 6));
-  o[9] = vcombine_s16(vrshrn_n_s32(out[9].val[0], 6),
-                      vrshrn_n_s32(out[9].val[1], 6));
-  o[10] = vcombine_s16(vrshrn_n_s32(out[10].val[0], 6),
-                       vrshrn_n_s32(out[10].val[1], 6));
-  o[11] = vcombine_s16(vrshrn_n_s32(out[11].val[0], 6),
-                       vrshrn_n_s32(out[11].val[1], 6));
-  o[12] = vcombine_s16(vrshrn_n_s32(out[12].val[0], 6),
-                       vrshrn_n_s32(out[12].val[1], 6));
-  o[13] = vcombine_s16(vrshrn_n_s32(out[13].val[0], 6),
-                       vrshrn_n_s32(out[13].val[1], 6));
-  o[14] = vcombine_s16(vrshrn_n_s32(out[14].val[0], 6),
-                       vrshrn_n_s32(out[14].val[1], 6));
-  o[15] = vcombine_s16(vrshrn_n_s32(out[15].val[0], 6),
-                       vrshrn_n_s32(out[15].val[1], 6));
-  highbd_idct16x16_add8x1(o[0], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[1], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[2], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[3], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[4], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[5], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[6], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[7], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[8], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[9], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[10], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[11], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[12], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[13], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[14], max, &dest, stride);
-  highbd_idct16x16_add8x1(o[15], max, &dest, stride);
-}
-
 void vpx_idct16x16_256_add_half1d(const void *const input, int16_t *output,
                                   void *const dest, const int stride,
                                   const int highbd_flag);
