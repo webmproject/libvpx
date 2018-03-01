@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "07924b14_e3e59af9",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2018-03-01T00:57:04Z",
+      "side": 1,
+      "message": "Is clamping needed? If it is needed, why only add clamping for 2 positions instead of all positions checked?",
+      "range": {
+        "startLine": 417,
+        "startChar": 2,
+        "endLine": 417,
+        "endChar": 14
+      },
+      "revId": "bee056bd04ace0f1102ebea45622e15a3052436c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
