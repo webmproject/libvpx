@@ -35,7 +35,7 @@ static void iadst16x16_256_add_half1d(const void *const input, int16_t *output,
       create_s16x4_neon(cospi_4_64, cospi_28_64, cospi_20_64, cospi_12_64);
   const int16x4_t c_16_n16_8_24 =
       create_s16x4_neon(cospi_16_64, -cospi_16_64, cospi_8_64, cospi_24_64);
-  int16x8_t x[16], t[8];
+  int16x8_t x[16], t[12];
   int32x4_t s0[2], s1[2], s2[2], s3[2], s4[2], s5[2], s6[2], s7[2];
   int32x4_t s8[2], s9[2], s10[2], s11[2], s12[2], s13[2], s14[2], s15[2];
 
