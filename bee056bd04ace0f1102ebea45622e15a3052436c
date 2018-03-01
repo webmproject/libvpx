@@ -22,6 +22,30 @@
       "revId": "bee056bd04ace0f1102ebea45622e15a3052436c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3bd09ad_68b00bad",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-01T01:03:49Z",
+      "side": 1,
+      "message": "I printed out the motion vectors here and found some were out of the range (x-\u003emv_col_min/max and x-\u003emv_row_min/max). In some extreme cases, it caused OOB in the bug.\n\nActually I also found that the first clamping was enough to fix the bug... and I agree the clamping may be needed in all positions for safety.\n\nAny thoughts on why motion vectors would be out of that range?",
+      "parentUuid": "07924b14_e3e59af9",
+      "range": {
+        "startLine": 417,
+        "startChar": 2,
+        "endLine": 417,
+        "endChar": 14
+      },
+      "revId": "bee056bd04ace0f1102ebea45622e15a3052436c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
