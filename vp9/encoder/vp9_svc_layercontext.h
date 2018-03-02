@@ -89,6 +89,7 @@ typedef struct SVC {
   int current_superframe;
   int non_reference_frame;
   int use_base_mv;
+  int use_partition_reuse;
   // Used to control the downscaling filter for source scaling, for 1 pass CBR.
   // downsample_filter_phase: = 0 will do sub-sampling (no weighted average),
   // = 8 will center the target pixel and get a symmetric averaging filter.

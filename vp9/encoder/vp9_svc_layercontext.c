@@ -33,6 +33,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->rc_drop_superframe = 0;
   svc->force_zero_mode_spatial_ref = 0;
   svc->use_base_mv = 0;
+  svc->use_partition_reuse = 0;
   svc->scaled_temp_is_alloc = 0;
   svc->scaled_one_half = 0;
   svc->current_superframe = 0;
@@ -611,7 +612,10 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc = NULL;
   cpi->svc.skip_enhancement_layer = 0;
-  if (cpi->svc.number_spatial_layers > 1) cpi->svc.use_base_mv = 1;
+  if (cpi->svc.number_spatial_layers > 1) {
+    cpi->svc.use_base_mv = 1;
+    cpi->svc.use_partition_reuse = 1;
+  }
   cpi->svc.force_zero_mode_spatial_ref = 1;
   cpi->svc.mi_stride[cpi->svc.spatial_layer_id] = cpi->common.mi_stride;
 
@@ -675,8 +679,9 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   if (lc->scaling_factor_num > (3 * lc->scaling_factor_den) >> 2)
     cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id] = 0;
 
-  // The usage of use_base_mv assumes down-scale of 2x2. For now, turn off use
-  // of base motion vectors if spatial scale factors for any layers are not 2,
+  // The usage of use_base_mv or partition_reuse assumes down-scale of 2x2.
+  // For now, turn off use of base motion vectors and partition reuse if the
+  // spatial scale factors for any layers are not 2,
   // keep the case of 3 spatial layers with scale factor of 4x4 for base layer.
   // TODO(marpan): Fix this to allow for use_base_mv for scale factors != 2.
   if (cpi->svc.number_spatial_layers > 1) {
@@ -688,6 +693,7 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
           !(lc->scaling_factor_num == lc->scaling_factor_den >> 2 && sl == 0 &&
             cpi->svc.number_spatial_layers == 3)) {
         cpi->svc.use_base_mv = 0;
+        cpi->svc.use_partition_reuse = 0;
         break;
       }
     }
