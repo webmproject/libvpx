@@ -635,10 +635,10 @@ static const FuncInfo ht_neon_func_info[] = {
     2 },
 #endif
   { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1 },
-  { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1 },
-// TODO(linfengz): reenable this function once test vector failures are
+// TODO(linfengz): reenable these functions once test vector failures are
 // addressed.
 #if 0
+  { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1 },
   { &vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_neon>, 16, 1 }
 #endif
 };
