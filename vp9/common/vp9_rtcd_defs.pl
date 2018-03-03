@@ -103,8 +103,8 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_highbd_iht16x16_256_add/, "const tran_low_t *input, uint16_t *output, int pitch, int tx_type, int bd";
 
   if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
-    specialize qw/vp9_highbd_iht4x4_16_add neon sse4_1/;
-    specialize qw/vp9_highbd_iht8x8_64_add neon sse4_1/;
+    specialize qw/vp9_highbd_iht4x4_16_add sse4_1/;
+    specialize qw/vp9_highbd_iht8x8_64_add sse4_1/;
     specialize qw/vp9_highbd_iht16x16_256_add sse4_1/;
   }
 }
