@@ -11,19 +11,13 @@
 #define TEST_CLEAR_SYSTEM_STATE_H_
 
 #include "./vpx_config.h"
-#if ARCH_X86 || ARCH_X86_64
-#include "vpx_ports/x86.h"
-#endif
+#include "vpx_ports/system_state.h"
 
 namespace libvpx_test {
 
 // Reset system to a known state. This function should be used for all non-API
 // test cases.
-inline void ClearSystemState() {
-#if ARCH_X86 || ARCH_X86_64
-  vpx_reset_mmx_state();
-#endif
-}
+inline void ClearSystemState() { vpx_clear_system_state(); }
 
 }  // namespace libvpx_test
 #endif  // TEST_CLEAR_SYSTEM_STATE_H_
