@@ -675,9 +675,8 @@ INSTANTIATE_TEST_CASE_P(NEON, FwdTrans8x8DCT,
                         ::testing::Values(make_tuple(&vpx_fdct8x8_neon,
                                                      &vpx_idct8x8_64_add_neon,
                                                      0, VPX_BITS_8)));
-// TODO(linfengz): reenable these functions once test vector failures are
-// addressed.
-#if 0   // !CONFIG_VP9_HIGHBITDEPTH
+
+#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     NEON, FwdTrans8x8HT,
     ::testing::Values(
