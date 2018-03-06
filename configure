@@ -606,8 +606,10 @@ process_toolchain() {
         # https://bugs.chromium.org/p/webm/issues/detail?id=1069
         check_add_cflags -Wextra
         # check_add_cflags also adds to cxxflags. gtest does not do well with
-        # -Wundef so add it explicitly to CFLAGS only.
+        # these flags so add them explicitly to CFLAGS only.
         check_cflags -Wundef && add_cflags_only -Wundef
+        check_cflags -Wframe-larger-than=52000 && \
+          add_cflags_only -Wframe-larger-than=52000
         if enabled mips || [ -z "${INLINE}" ]; then
           enabled extra_warnings || check_add_cflags -Wno-unused-function
         fi
