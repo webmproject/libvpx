@@ -16,6 +16,24 @@
       "revId": "38b8d063f2856a814961c13f96f88c267385ca07",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fb5b869_82d81f11",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-07T05:23:44Z",
+      "side": 1,
+      "message": "Since these functions target win64, the goal was to reduce the accuracy on 64bit to match 32bit? given the overwhelming drive towards 64bit, is it worth preserving the 32bit behavior?",
+      "parentUuid": "966b04d1_05ec3b22",
+      "revId": "38b8d063f2856a814961c13f96f88c267385ca07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
