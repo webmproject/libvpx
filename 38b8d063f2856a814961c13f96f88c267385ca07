@@ -34,6 +34,24 @@
       "revId": "38b8d063f2856a814961c13f96f88c267385ca07",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7707d3ee_0795a07f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-07T07:12:43Z",
+      "side": 1,
+      "message": "\u003e Since these functions target win64, the goal was to reduce the accuracy on 64bit to match 32bit? given the overwhelming drive towards 64bit, is it worth preserving the 32bit behavior?\n\n32-bit had the extended range (80 vs 64). this ensured 32-bit binaries would work the same as 64-bit. I think keeping it as is would be less invasive if all that\u0027s needed is to remove the asm ref.",
+      "parentUuid": "2fb5b869_82d81f11",
+      "revId": "38b8d063f2856a814961c13f96f88c267385ca07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
