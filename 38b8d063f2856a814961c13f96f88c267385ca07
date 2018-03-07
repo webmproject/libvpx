@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "966b04d1_05ec3b22",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-07T02:58:47Z",
+      "side": 1,
+      "message": "the point was to make 32-bit and 64-bit match; there\u0027s plenty of double math in vp8 on the encode side",
+      "revId": "38b8d063f2856a814961c13f96f88c267385ca07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
