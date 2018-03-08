@@ -33,7 +33,8 @@ class VpxScaleBase {
                   const int height) {
     memset(img, 0, sizeof(*img));
     ASSERT_EQ(
-        0, vp8_yv12_alloc_frame_buffer(img, width, height, VP8BORDERINPIXELS));
+        0, vp8_yv12_alloc_frame_buffer(img, width, height, VP8BORDERINPIXELS))
+        << "for width: " << width << " height: " << height;
     memset(img->buffer_alloc, kBufFiller, img->frame_size);
   }
 
