@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "664749e7_69dc8ace",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1585,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-03-09T12:33:58Z",
+      "side": 1,
+      "message": "That was my attempt to spell it out but as you know spelling anything out is not my strong point. I think my intent was \"divisor\" but I appear to have quantized out a few letters.\n\nWill fix ;)",
+      "parentUuid": "1521c5af_9478cea2",
+      "range": {
+        "startLine": 1585,
+        "startChar": 21,
+        "endLine": 1585,
+        "endChar": 26
+      },
+      "revId": "a707fb05a70e81cabd1bee17101249e207a5c2b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2611d712_a962d74b",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 2
@@ -36,6 +60,24 @@
       "writtenOn": "2018-03-08T23:35:55Z",
       "side": 1,
       "message": "no need to have an else when all the other branches return",
+      "revId": "a707fb05a70e81cabd1bee17101249e207a5c2b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e1ede8a_20950fa5",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1597,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-03-09T12:33:58Z",
+      "side": 1,
+      "message": "True.. I did have a case for \u003e 4K but for now I dont have the test material to validate it.\n\nWill fix",
+      "parentUuid": "2611d712_a962d74b",
       "revId": "a707fb05a70e81cabd1bee17101249e207a5c2b2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
