@@ -1244,7 +1244,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
 
   // For the variance computation under SVC mode, we treat the frame as key if
   // the reference (base layer frame) is key frame (i.e., is_key_frame == 1).
-  const int is_key_frame =
+  int is_key_frame =
       (cm->frame_type == KEY_FRAME ||
        (is_one_pass_cbr_svc(cpi) &&
         cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame));
@@ -1254,6 +1254,15 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   int variance4x4downsample[16];
   int segment_id;
   int sb_offset = (cm->mi_stride >> 3) * (mi_row >> 3) + (mi_col >> 3);
+
+  // For SVC: check if LAST frame is NULL and if so treat this frame as a key
+  // frame, for the purpose of the superblock partitioning. This can happen
+  // (LAST is NULL) in some cases where enhancement spatial layers are enabled
+  // dyanmically in the stream and the only reference is the spatial
+  // reference (GOLDEN).
+  if (cpi->use_svc) {
+    if (get_ref_frame_buffer(cpi, LAST_FRAME) == NULL) is_key_frame = 1;
+  }
 
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
   segment_id = xd->mi[0]->segment_id;
