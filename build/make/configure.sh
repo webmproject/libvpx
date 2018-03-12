@@ -1202,6 +1202,9 @@ EOF
       ;;
     x86*)
       case  ${tgt_os} in
+        android)
+          soft_enable realtime_only
+          ;;
         win*)
           enabled gcc && add_cflags -fno-common
           ;;
