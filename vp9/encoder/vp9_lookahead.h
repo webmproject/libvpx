@@ -15,10 +15,6 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx/vpx_integer.h"
 
-#if CONFIG_SPATIAL_SVC
-#include "vpx/vp8cx.h"
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

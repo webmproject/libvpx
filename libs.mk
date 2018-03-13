@@ -88,7 +88,7 @@ ifeq ($(CONFIG_VP9_ENCODER),yes)
   CODEC_EXPORTS-yes += $(addprefix $(VP9_PREFIX),$(VP9_CX_EXPORTS))
   CODEC_SRCS-yes += $(VP9_PREFIX)vp9cx.mk vpx/vp8.h vpx/vp8cx.h
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
-  INSTALL-LIBS-$(CONFIG_SPATIAL_SVC) += include/vpx/svc_context.h
+  INSTALL-LIBS-yes += include/vpx/svc_context.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP9_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
   CODEC_DOC_SECTIONS += vp9 vp9_encoder
@@ -153,9 +153,7 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += vpx_dsp/x86/bitdepth_conversion_sse2.asm
 endif
 CODEC_EXPORTS-yes += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
-ifeq ($(CONFIG_SPATIAL_SVC),yes)
-CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_spatial_svc
-endif
+CODEC_EXPORTS-$(CONFIG_VP9_ENCODER) += vpx/exports_spatial_svc
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
 
 INSTALL-LIBS-yes += include/vpx/vpx_codec.h

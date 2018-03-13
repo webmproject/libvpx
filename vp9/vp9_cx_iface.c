@@ -237,22 +237,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         ERROR("ts_rate_decimator factors are not powers of 2");
   }
 
-#if CONFIG_SPATIAL_SVC
-
-  if ((cfg->ss_number_layers > 1 || cfg->ts_number_layers > 1) &&
-      cfg->g_pass == VPX_RC_LAST_PASS) {
-    unsigned int i, alt_ref_sum = 0;
-    for (i = 0; i < cfg->ss_number_layers; ++i) {
-      if (cfg->ss_enable_auto_alt_ref[i]) ++alt_ref_sum;
-    }
-    if (alt_ref_sum > REF_FRAMES - cfg->ss_number_layers)
-      ERROR("Not enough ref buffers for svc alt ref frames");
-    if (cfg->ss_number_layers * cfg->ts_number_layers > 3 &&
-        cfg->g_error_resilient == 0)
-      ERROR("Multiple frame context are not supported for more than 3 layers");
-  }
-#endif
-
   // VP9 does not support a lower bound on the keyframe interval in
   // automatic keyframe placement mode.
   if (cfg->kf_mode != VPX_KF_DISABLED && cfg->kf_min_dist != cfg->kf_max_dist &&
@@ -589,9 +573,6 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->motion_vector_unit_test = extra_cfg->motion_vector_unit_test;
 
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
-#if CONFIG_SPATIAL_SVC
-    oxcf->ss_enable_auto_arf[sl] = cfg->ss_enable_auto_alt_ref[sl];
-#endif
     for (tl = 0; tl < oxcf->ts_number_layers; ++tl) {
       oxcf->layer_target_bitrate[sl * oxcf->ts_number_layers + tl] =
           1000 * cfg->layer_target_bitrate[sl * oxcf->ts_number_layers + tl];
@@ -599,9 +580,6 @@ static vpx_codec_err_t set_encoder_config(
   }
   if (oxcf->ss_number_layers == 1 && oxcf->pass != 0) {
     oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
-#if CONFIG_SPATIAL_SVC
-    oxcf->ss_enable_auto_arf[0] = extra_cfg->enable_auto_alt_ref;
-#endif
   }
   if (oxcf->ts_number_layers > 1) {
     for (tl = 0; tl < VPX_TS_MAX_LAYERS; ++tl) {
@@ -1215,14 +1193,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       if (size || (cpi->use_svc && cpi->svc.skip_enhancement_layer)) {
         vpx_codec_cx_pkt_t pkt;
 
-#if CONFIG_SPATIAL_SVC
-        if (cpi->use_svc)
-          cpi->svc
-              .layer_context[cpi->svc.spatial_layer_id *
-                             cpi->svc.number_temporal_layers]
-              .layer_size += size;
-#endif
-
         // Pack invisible frames with the next visible frame
         if (!cpi->common.show_frame ||
             (cpi->use_svc &&
@@ -1291,27 +1261,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
         cx_data += size;
         cx_data_sz -= size;
-#if CONFIG_SPATIAL_SVC && defined(VPX_TEST_SPATIAL_SVC)
-        if (cpi->use_svc && !ctx->output_cx_pkt_cb.output_cx_pkt) {
-          vpx_codec_cx_pkt_t pkt_sizes, pkt_psnr;
-          int sl;
-          vp9_zero(pkt_sizes);
-          vp9_zero(pkt_psnr);
-          pkt_sizes.kind = VPX_CODEC_SPATIAL_SVC_LAYER_SIZES;
-          pkt_psnr.kind = VPX_CODEC_SPATIAL_SVC_LAYER_PSNR;
-          for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
-            LAYER_CONTEXT *lc =
-                &cpi->svc.layer_context[sl * cpi->svc.number_temporal_layers];
-            pkt_sizes.data.layer_sizes[sl] = lc->layer_size;
-            pkt_psnr.data.layer_psnr[sl] = lc->psnr_pkt;
-            lc->layer_size = 0;
-          }
-
-          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt_sizes);
-
-          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt_psnr);
-        }
-#endif
         if (is_one_pass_cbr_svc(cpi) &&
             (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
           // Encoded all spatial layers; exit loop.
