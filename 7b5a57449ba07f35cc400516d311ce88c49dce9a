@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "57752fa4_11bef4e4",
+        "filename": "examples.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-13T20:32:04Z",
+      "side": 0,
+      "message": "This file is only included with CONFIG_SPATIAL_SVC. How is it being used currently?",
+      "range": {
+        "startLine": 113,
+        "startChar": 41,
+        "endLine": 113,
+        "endChar": 64
+      },
+      "revId": "7b5a57449ba07f35cc400516d311ce88c49dce9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2c97ab61_ce39f62e",
         "filename": "examples/vp9_spatial_svc_encoder.c",
         "patchSetId": 2
@@ -19,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "92581ce7_f8883c17",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-13T20:32:04Z",
+      "side": 0,
+      "message": "Ack",
+      "parentUuid": "2c97ab61_ce39f62e",
+      "revId": "7b5a57449ba07f35cc400516d311ce88c49dce9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e7b4980d_3f8dbdec",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 2
@@ -30,6 +71,47 @@
       "writtenOn": "2018-03-13T20:27:44Z",
       "side": 0,
       "message": "we need this file, don\u0027t remove.",
+      "revId": "7b5a57449ba07f35cc400516d311ce88c49dce9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "127022c0_24b55697",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-13T20:32:04Z",
+      "side": 0,
+      "message": "Ack",
+      "parentUuid": "e7b4980d_3f8dbdec",
+      "revId": "7b5a57449ba07f35cc400516d311ce88c49dce9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "66b0ad06_7f14a3cb",
+        "filename": "vpx/vpx_codec.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-13T20:32:04Z",
+      "side": 0,
+      "message": "Same, this is guarded by CONFIG_SPATIAL_SVC",
+      "range": {
+        "startLine": 19,
+        "startChar": 40,
+        "endLine": 19,
+        "endChar": 55
+      },
       "revId": "7b5a57449ba07f35cc400516d311ce88c49dce9a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
