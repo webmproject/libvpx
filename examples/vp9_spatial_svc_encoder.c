@@ -562,9 +562,10 @@ vpx_codec_err_t parse_superframe_index(const uint8_t *data, size_t data_sz,
 // bypass/flexible mode. The pattern corresponds to the pattern
 // VP9E_TEMPORAL_LAYERING_MODE_0101 (temporal_layering_mode == 2) used in
 // non-flexible mode.
-void set_frame_flags_bypass_mode(int sl, int tl, int num_spatial_layers,
+void set_frame_flags_bypass_mode(int tl, int num_spatial_layers,
                                  int is_key_frame,
                                  vpx_svc_ref_frame_config_t *ref_frame_config) {
+  int sl;
   for (sl = 0; sl < num_spatial_layers; ++sl) {
     if (!tl) {
       if (!sl) {
@@ -751,7 +752,7 @@ int main(int argc, const char **argv) {
       vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id);
       // TODO(jianj): Fix the parameter passing for "is_key_frame" in
       // set_frame_flags_bypass_model() for case of periodic key frames.
-      set_frame_flags_bypass_mode(sl, layer_id.temporal_layer_id,
+      set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
                                   svc_ctx.spatial_layers, frame_cnt == 0,
                                   &ref_frame_config);
       vpx_codec_control(&codec, VP9E_SET_SVC_REF_FRAME_CONFIG,
