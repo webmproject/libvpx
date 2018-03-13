@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e27f66de_e0f318e0",
+        "filename": "vpx_ports/system_state.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-13T19:58:33Z",
+      "side": 1,
+      "message": "// extern \"C\"",
+      "revId": "e13fdf28e58f2ffdfbaabce5944f85d5941a1cc8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
