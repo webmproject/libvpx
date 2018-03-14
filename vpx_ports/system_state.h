@@ -13,18 +13,10 @@
 
 #include "./vpx_config.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#if HAVE_MMX
-extern void vpx_clear_system_state();
+#if ARCH_X86 || ARCH_X86_64
+void vpx_reset_mmx_state(void);
+#define vpx_clear_system_state() vpx_reset_mmx_state()
 #else
 #define vpx_clear_system_state()
-#endif  // HAVE_MMX
-
-#ifdef __cplusplus
-}  // extern "C"
-#endif
-
+#endif  // ARCH_X86 || ARCH_X86_64
 #endif  // VPX_PORTS_SYSTEM_STATE_H_
