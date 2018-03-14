@@ -784,6 +784,7 @@ int main(int argc, const char **argv) {
 #if OUTPUT_RC_STATS
             uint64_t sizes[8];
             int count = 0;
+            vp9_zero(sizes);
 #endif
             vpx_video_writer_write_frame(writer, cx_pkt->data.frame.buf,
                                          cx_pkt->data.frame.sz,
