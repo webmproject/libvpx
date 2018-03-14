@@ -608,6 +608,8 @@ int main(int argc, char **argv) {
   double sum_bitrate2 = 0.0;
   double framerate = 30.0;
 
+  zero(rc.layer_target_bitrate);
+
   exec_name = argv[0];
   // Check usage and arguments.
   if (argc < min_args) {
