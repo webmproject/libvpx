@@ -4499,7 +4499,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
   // SVC: skip encoding of enhancement layer if the layer target bandwidth = 0.
   if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
-      !cpi->svc.rc_drop_superframe && cpi->oxcf.target_bandwidth == 0) {
+      cpi->oxcf.target_bandwidth == 0) {
     cpi->svc.skip_enhancement_layer = 1;
     vp9_rc_postencode_update_drop_frame(cpi);
     vp9_inc_frame_in_layer(cpi);
@@ -4591,23 +4591,29 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   }
 
   // For 1 pass CBR, check if we are dropping this frame.
-  // For spatial layers, for now only check for frame-dropping on first spatial
-  // layer, and if decision is to drop, we drop whole super-frame.
+  // For spatial layers, for now if we decide to drop current spatial
+  // layer then we will also drop all upper spatial layers.
+  // TODO(marpan): Allow for the case of dropping single layer only without
+  // dropping all upper layers.
   if (oxcf->pass == 0 && oxcf->rc_mode == VPX_CBR &&
       cm->frame_type != KEY_FRAME) {
     if (vp9_rc_drop_frame(cpi) ||
-        (is_one_pass_cbr_svc(cpi) && cpi->svc.rc_drop_superframe == 1)) {
+        (is_one_pass_cbr_svc(cpi) &&
+         cpi->svc.rc_drop_spatial_layer[cpi->svc.spatial_layer_id] == 1)) {
       vp9_rc_postencode_update_drop_frame(cpi);
       cpi->ext_refresh_frame_flags_pending = 0;
-      cpi->svc.rc_drop_superframe = 1;
       cpi->last_frame_dropped = 1;
-      // TODO(marpan): Advancing the svc counters on dropped frames can break
-      // the referencing scheme for the fixed svc patterns defined in
-      // vp9_one_pass_cbr_svc_start_layer(). Look into fixing this issue, but
-      // for now, don't advance the svc frame counters on dropped frame.
-      // if (cpi->use_svc)
-      //   vp9_inc_frame_in_layer(cpi);
-
+      if (cpi->use_svc) {
+        int i;
+        // If we are dropping this spatial layer, then we will drop all
+        // upper spatial layers.
+        for (i = cpi->svc.spatial_layer_id; i < cpi->svc.number_spatial_layers;
+             i++)
+          cpi->svc.rc_drop_spatial_layer[i] = 1;
+        vp9_inc_frame_in_layer(cpi);
+        if (cpi->svc.rc_drop_spatial_layer[0] == 0)
+          cpi->svc.skip_enhancement_layer = 1;
+      }
       return;
     }
   }
@@ -4626,6 +4632,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   }
 
   cpi->last_frame_dropped = 0;
+  cpi->svc.last_layer_encoded = cpi->svc.spatial_layer_id;
 
   // Disable segmentation if it decrease rate/distortion ratio
   if (cpi->oxcf.aq_mode == LOOKAHEAD_AQ)

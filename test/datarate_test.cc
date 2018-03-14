@@ -1366,6 +1366,8 @@ class DatarateOnePassCbrSvc
     last_pts_ref_ = 0;
     middle_bitrate_ = 0;
     top_bitrate_ = 0;
+    superframe_count_ = -1;
+    key_frame_spacing_ = 9999;
   }
   virtual void BeginPassHook(unsigned int /*pass*/) {}
 
@@ -1450,6 +1452,17 @@ class DatarateOnePassCbrSvc
       encoder->Control(VP9E_SET_TUNE_CONTENT, tune_content_);
     }
 
+    superframe_count_++;
+    temporal_layer_id_ = 0;
+    if (number_temporal_layers_ == 2)
+      temporal_layer_id_ = (superframe_count_ % 2 != 0);
+    else if (number_temporal_layers_ == 3) {
+      if (superframe_count_ % 2 != 0) temporal_layer_id_ = 2;
+      if (superframe_count_ > 1) {
+        if ((superframe_count_ - 2) % 4 == 0) temporal_layer_id_ = 1;
+      }
+    }
+
     if (update_pattern_ && video->frame() >= 100) {
       vpx_svc_layer_id_t layer_id;
       if (video->frame() == 100) {
@@ -1459,6 +1472,7 @@ class DatarateOnePassCbrSvc
       // Set layer id since the pattern changed.
       layer_id.spatial_layer_id = 0;
       layer_id.temporal_layer_id = (video->frame() % 2 != 0);
+      temporal_layer_id_ = layer_id.temporal_layer_id;
       encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
       set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
                                   number_spatial_layers_, 0, &ref_frame_config);
@@ -1528,14 +1542,7 @@ class DatarateOnePassCbrSvc
     duration_ = 0;
   }
 
-  virtual void PostEncodeFrameHook(::libvpx_test::Encoder *encoder) {
-    vpx_svc_layer_id_t layer_id;
-    encoder->Control(VP9E_GET_SVC_LAYER_ID, &layer_id);
-    spatial_layer_id_ = layer_id.spatial_layer_id;
-    temporal_layer_id_ = layer_id.temporal_layer_id;
-    // Update buffer with per-layer target frame bandwidth, this is done
-    // for every frame passed to the encoder (encoded or dropped).
-    // For temporal layers, update the cumulative buffer level.
+  virtual void PostEncodeFrameHook() {
     for (int sl = 0; sl < number_spatial_layers_; ++sl) {
       for (int tl = temporal_layer_id_; tl < number_temporal_layers_; ++tl) {
         const int layer = sl * number_temporal_layers_ + tl;
@@ -1585,9 +1592,14 @@ class DatarateOnePassCbrSvc
     last_pts_ = pkt->data.frame.pts;
     const bool key_frame =
         (pkt->data.frame.flags & VPX_FRAME_IS_KEY) ? true : false;
+    if (key_frame) {
+      temporal_layer_id_ = 0;
+      superframe_count_ = 0;
+    }
     parse_superframe_index(static_cast<const uint8_t *>(pkt->data.frame.buf),
                            pkt->data.frame.sz, sizes, &count);
-    if (!dynamic_drop_layer_) ASSERT_EQ(count, number_spatial_layers_);
+    // Count may be less than number of spatial layers because of frame drops.
+    ASSERT_LE(count, number_spatial_layers_);
     for (int sl = 0; sl < number_spatial_layers_; ++sl) {
       sizes[sl] = sizes[sl] << 3;
       // Update the total encoded bits per layer.
@@ -1599,7 +1611,8 @@ class DatarateOnePassCbrSvc
         bits_in_buffer_model_[layer] -= static_cast<int64_t>(sizes[sl]);
         // There should be no buffer underrun, except on the base
         // temporal layer, since there may be key frames there.
-        if (!key_frame && tl > 0) {
+        // Fo short key frame spacing, buffer can underrun on individual frames.
+        if (!key_frame && tl > 0 && key_frame_spacing_ < 100) {
           ASSERT_GE(bits_in_buffer_model_[layer], 0)
               << "Buffer Underrun at frame " << pkt->data.frame.pts;
         }
@@ -1663,6 +1676,8 @@ class DatarateOnePassCbrSvc
   vpx_codec_pts_t last_pts_ref_;
   int middle_bitrate_;
   int top_bitrate_;
+  int superframe_count_;
+  int key_frame_spacing_;
 };
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and 1
@@ -1728,7 +1743,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
   svc_params_.scaling_factor_den[0] = 288;
   svc_params_.scaling_factor_num[1] = 288;
   svc_params_.scaling_factor_den[1] = 288;
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
@@ -1780,7 +1795,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
   svc_params_.scaling_factor_den[0] = 288;
   svc_params_.scaling_factor_num[1] = 288;
   svc_params_.scaling_factor_den[1] = 288;
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
@@ -1850,6 +1865,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLSmallKf) {
   // 4 key neighboring key frame periods (so key frame will land on 0-2-1-2).
   for (int j = 64; j <= 67; j++) {
     cfg_.kf_max_dist = j;
+    key_frame_spacing_ = j;
     ResetModel();
     assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                           cfg_.ts_number_layers, cfg_.temporal_layering_mode,
@@ -1883,7 +1899,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4Threads) {
   svc_params_.scaling_factor_den[0] = 288;
   svc_params_.scaling_factor_num[1] = 288;
   svc_params_.scaling_factor_den[1] = 288;
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
@@ -1931,7 +1947,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
   svc_params_.scaling_factor_den[1] = 288;
   svc_params_.scaling_factor_num[2] = 288;
   svc_params_.scaling_factor_den[2] = 288;
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
@@ -1980,7 +1996,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLDynamicBitrateChange) {
   svc_params_.scaling_factor_den[1] = 288;
   svc_params_.scaling_factor_num[2] = 288;
   svc_params_.scaling_factor_den[2] = 288;
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
@@ -2031,7 +2047,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL2TLDynamicPatternChange) {
   svc_params_.scaling_factor_den[1] = 288;
   svc_params_.scaling_factor_num[2] = 288;
   svc_params_.scaling_factor_den[2] = 288;
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
@@ -2062,7 +2078,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL2TLDynamicPatternChange) {
 // the fly switching to 1 and then 2 and back to 3 spatial layers. This switch
 // is done by setting spatial layer bitrates to 0, and then back to non-zero,
 // during the sequence.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL_dynamic) {
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL_DisableEnableLayers) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -2082,7 +2098,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL_dynamic) {
   svc_params_.scaling_factor_den[1] = 288;
   svc_params_.scaling_factor_num[2] = 288;
   svc_params_.scaling_factor_den[2] = 288;
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;
@@ -2139,6 +2155,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLSmallKf) {
   // 4 key neighboring key frame periods (so key frame will land on 0-2-1-2).
   for (int j = 32; j <= 35; j++) {
     cfg_.kf_max_dist = j;
+    key_frame_spacing_ = j;
     ResetModel();
     assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                           cfg_.ts_number_layers, cfg_.temporal_layering_mode,
@@ -2174,7 +2191,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4threads) {
   svc_params_.scaling_factor_den[1] = 288;
   svc_params_.scaling_factor_num[2] = 288;
   svc_params_.scaling_factor_den[2] = 288;
-  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
   number_temporal_layers_ = cfg_.ts_number_layers;

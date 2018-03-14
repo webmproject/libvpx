@@ -30,7 +30,6 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->spatial_layer_id = 0;
   svc->temporal_layer_id = 0;
   svc->first_spatial_layer_to_encode = 0;
-  svc->rc_drop_superframe = 0;
   svc->force_zero_mode_spatial_ref = 0;
   svc->use_base_mv = 0;
   svc->use_partition_reuse = 0;
@@ -39,9 +38,11 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->current_superframe = 0;
   svc->non_reference_frame = 0;
   svc->skip_enhancement_layer = 0;
+  svc->last_layer_encoded = 0;
 
   for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
+    svc->rc_drop_spatial_layer[sl] = 0;
     svc->ext_frame_flags[sl] = 0;
     svc->ext_lst_fb_idx[sl] = 0;
     svc->ext_gld_fb_idx[sl] = 1;
@@ -648,8 +649,12 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
     }
   }
 
-  if (cpi->svc.spatial_layer_id == cpi->svc.first_spatial_layer_to_encode)
-    cpi->svc.rc_drop_superframe = 0;
+  // Reset the drop flags for all spatial lauyers, on the base layer.
+  if (cpi->svc.spatial_layer_id == 0) {
+    int i;
+    for (i = 0; i < cpi->svc.number_spatial_layers; i++)
+      cpi->svc.rc_drop_spatial_layer[i] = 0;
+  }
 
   lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id *
                                    cpi->svc.number_temporal_layers +

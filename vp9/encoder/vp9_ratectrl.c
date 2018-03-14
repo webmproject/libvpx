@@ -398,7 +398,7 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   if (!oxcf->drop_frames_water_mark ||
       (is_one_pass_cbr_svc(cpi) &&
-       cpi->svc.spatial_layer_id > cpi->svc.first_spatial_layer_to_encode)) {
+       cpi->svc.rc_drop_spatial_layer[cpi->svc.spatial_layer_id] == 1)) {
     return 0;
   } else {
     if (rc->buffer_level < 0) {

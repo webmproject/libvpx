@@ -201,7 +201,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
       PreEncodeFrameHook(video, encoder.get());
       encoder->EncodeFrame(video, frame_flags_);
 
-      PostEncodeFrameHook(encoder.get());
+      PostEncodeFrameHook();
 
       CxDataIterator iter = encoder->GetCxData();
 

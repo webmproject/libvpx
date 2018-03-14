@@ -57,7 +57,7 @@ typedef struct SVC {
 
   int spatial_layer_to_encode;
   int first_spatial_layer_to_encode;
-  int rc_drop_superframe;
+  int rc_drop_spatial_layer[VPX_MAX_LAYERS];
 
   // Workaround for multiple frame contexts
   enum { ENCODED = 0, ENCODING, NEED_TO_ENCODE } encode_empty_frame_state;
@@ -106,6 +106,8 @@ typedef struct SVC {
   int skip_enhancement_layer;
 
   int lower_layer_qindex;
+
+  int last_layer_encoded;
 } SVC;
 
 struct VP9_COMP;
