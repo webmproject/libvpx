@@ -839,7 +839,6 @@ int main(int argc, const char **argv) {
               // window of size rc->window, shifted by rc->window / 2.
               // Ignore first window segment, due to key frame.
               if (frame_cnt > (unsigned int)rc.window_size) {
-                tl = layer_id.temporal_layer_id;
                 for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
                   sum_bitrate += 0.001 * 8.0 * sizes[sl] * framerate;
                 }
@@ -856,7 +855,6 @@ int main(int argc, const char **argv) {
               // Second shifted window.
               if (frame_cnt >
                   (unsigned int)(rc.window_size + rc.window_size / 2)) {
-                tl = layer_id.temporal_layer_id;
                 for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
                   sum_bitrate2 += 0.001 * 8.0 * sizes[sl] * framerate;
                 }
