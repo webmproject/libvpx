@@ -95,17 +95,11 @@ static const SvcInternal_t *get_const_svc_internal(const SvcContext *svc_ctx) {
   return (const SvcInternal_t *)svc_ctx->internal;
 }
 
-static void svc_log_reset(SvcContext *svc_ctx) {
-  SvcInternal_t *const si = (SvcInternal_t *)svc_ctx->internal;
-  si->message_buffer[0] = '\0';
-}
-
 static int svc_log(SvcContext *svc_ctx, SVC_LOG_LEVEL level, const char *fmt,
                    ...) {
   char buf[512];
   int retval = 0;
   va_list ap;
-  SvcInternal_t *const si = get_svc_internal(svc_ctx);
 
   if (level > svc_ctx->log_level) {
     return retval;
@@ -115,16 +109,8 @@ static int svc_log(SvcContext *svc_ctx, SVC_LOG_LEVEL level, const char *fmt,
   retval = vsnprintf(buf, sizeof(buf), fmt, ap);
   va_end(ap);
 
-  if (svc_ctx->log_print) {
-    printf("%s", buf);
-  } else {
-    strncat(si->message_buffer, buf,
-            sizeof(si->message_buffer) - strlen(si->message_buffer) - 1);
-  }
+  printf("%s", buf);
 
-  if (level == SVC_LOG_ERROR) {
-    si->codec_ctx->err_detail = si->message_buffer;
-  }
   return retval;
 }
 
@@ -548,8 +534,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     return VPX_CODEC_INVALID_PARAM;
   }
 
-  svc_log_reset(svc_ctx);
-
   res =
       vpx_codec_encode(codec_ctx, rawimg, pts, (uint32_t)duration, 0, deadline);
   if (res != VPX_CODEC_OK) {
@@ -619,19 +603,13 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   return VPX_CODEC_OK;
 }
 
-const char *vpx_svc_get_message(const SvcContext *svc_ctx) {
-  const SvcInternal_t *const si = get_const_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL) return NULL;
-  return si->message_buffer;
-}
-
 static double calc_psnr(double d) {
   if (d == 0) return 100;
   return -10.0 * log(d) / log(10.0);
 }
 
 // dump accumulated statistics and reset accumulated values
-const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
+void vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   int number_of_frames;
   int i, j;
   uint32_t bytes_total = 0;
@@ -641,12 +619,10 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   double y_scale;
 
   SvcInternal_t *const si = get_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL) return NULL;
-
-  svc_log_reset(svc_ctx);
+  if (svc_ctx == NULL || si == NULL) return;
 
   number_of_frames = si->psnr_pkt_received;
-  if (number_of_frames <= 0) return vpx_svc_get_message(svc_ctx);
+  if (number_of_frames <= 0) return;
 
   svc_log(svc_ctx, SVC_LOG_INFO, "\n");
   for (i = 0; i < svc_ctx->spatial_layers; ++i) {
@@ -686,7 +662,6 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   si->psnr_pkt_received = 0;
 
   svc_log(svc_ctx, SVC_LOG_INFO, "Total Bytes=[%u]\n", bytes_total);
-  return vpx_svc_get_message(svc_ctx);
 }
 
 void vpx_svc_release(SvcContext *svc_ctx) {

@@ -35,10 +35,8 @@ typedef struct {
   int temporal_layers;  // number of temporal layers
   int temporal_layering_mode;
   SVC_LOG_LEVEL log_level;  // amount of information to display
-  int log_print;       // when set, printf log messages instead of returning the
-                       // message with svc_get_message
-  int output_rc_stat;  // for outputting rc stats
-  int speed;           // speed setting for codec
+  int output_rc_stat;       // for outputting rc stats
+  int speed;                // speed setting for codec
   int threads;
   int aqmode;  // turns on aq-mode=3 (cyclic_refresh): 0=off, 1=on.
   // private storage for vpx_svc_encode
@@ -71,7 +69,6 @@ typedef struct SvcInternal {
   int layer;
   int use_multiple_frame_contexts;
 
-  char message_buffer[2048];
   vpx_codec_ctx_t *codec_ctx;
 } SvcInternal_t;
 
@@ -106,12 +103,7 @@ void vpx_svc_release(SvcContext *svc_ctx);
 /**
  * dump accumulated statistics and reset accumulated values
  */
-const char *vpx_svc_dump_statistics(SvcContext *svc_ctx);
-
-/**
- *  get status message from previous encode
- */
-const char *vpx_svc_get_message(const SvcContext *svc_ctx);
+void vpx_svc_dump_statistics(SvcContext *svc_ctx);
 
 #ifdef __cplusplus
 }  // extern "C"

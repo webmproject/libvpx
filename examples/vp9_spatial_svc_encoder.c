@@ -646,7 +646,6 @@ int main(int argc, const char **argv) {
   struct vpx_usec_timer timer;
   int64_t cx_time = 0;
   memset(&svc_ctx, 0, sizeof(svc_ctx));
-  svc_ctx.log_print = 1;
   exec_name = argv[0];
   parse_command_line(argc, argv, &app_input, &svc_ctx, &enc_cfg);
 
@@ -772,7 +771,6 @@ int main(int argc, const char **argv) {
     vpx_usec_timer_mark(&timer);
     cx_time += vpx_usec_timer_elapsed(&timer);
 
-    printf("%s", vpx_svc_get_message(&svc_ctx));
     fflush(stdout);
     if (res != VPX_CODEC_OK) {
       die_codec(&codec, "Failed to encode frame");
@@ -931,7 +929,7 @@ int main(int argc, const char **argv) {
          1000000 * (double)frame_cnt / (double)cx_time);
   vpx_img_free(&raw);
   // display average size, psnr
-  printf("%s", vpx_svc_dump_statistics(&svc_ctx));
+  vpx_svc_dump_statistics(&svc_ctx);
   vpx_svc_release(&svc_ctx);
   return EXIT_SUCCESS;
 }
