@@ -1330,6 +1330,7 @@ void vp9_filter_block_plane_ss11(VP9_COMMON *const cm,
   uint16_t mask_4x4 = lfm->left_uv[TX_4X4];
   uint16_t mask_4x4_int = lfm->int_4x4_uv;
 
+  vp9_zero(lfl_uv);
   assert(plane->subsampling_x == 1 && plane->subsampling_y == 1);
 
   // Vertical pass: do 2 rows at one time
