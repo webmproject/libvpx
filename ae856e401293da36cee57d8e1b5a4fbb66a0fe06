@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5482f16e_f8bdd88c",
+        "filename": "vpx_ports/system_state.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-14T23:19:35Z",
+      "side": 0,
+      "message": "would\n#if ARCH_X86 \u0026\u0026 HAVE_MMX\nbut sufficient?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 12
+      },
+      "revId": "ae856e401293da36cee57d8e1b5a4fbb66a0fe06",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
