@@ -672,6 +672,7 @@ int main(int argc, const char **argv) {
     die("Failed to initialize encoder\n");
 
 #if OUTPUT_RC_STATS
+  rc.window_size = 15;  // Silence a static analysis warning.
   if (svc_ctx.output_rc_stat) {
     set_rate_control_stats(&rc, &enc_cfg);
     framerate = enc_cfg.g_timebase.den / enc_cfg.g_timebase.num;
