@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ce2ff64_7874ad07",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 721,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-14T23:37:58Z",
+      "side": 1,
+      "message": "for consistency you can match the location of these after the allocation checks in vp9_resize_plane",
+      "revId": "8ed7a310fd1746e6738072375652f63bc2434f9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
