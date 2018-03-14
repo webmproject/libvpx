@@ -4502,8 +4502,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
       !cpi->svc.rc_drop_superframe && cpi->oxcf.target_bandwidth == 0) {
     cpi->svc.skip_enhancement_layer = 1;
     vp9_rc_postencode_update_drop_frame(cpi);
-    if (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)
-      vp9_inc_frame_in_layer(cpi);
+    vp9_inc_frame_in_layer(cpi);
     cpi->ext_refresh_frame_flags_pending = 0;
     return;
   }
