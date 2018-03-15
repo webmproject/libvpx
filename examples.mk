@@ -109,18 +109,17 @@ ifeq ($(CONFIG_WEBM_IO),yes)
 endif
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
-ifeq ($(CONFIG_SPATIAL_SVC),yes)
-  EXAMPLES-$(CONFIG_VP9_ENCODER)      += vp9_spatial_svc_encoder.c
-  vp9_spatial_svc_encoder.SRCS        += args.c args.h
-  vp9_spatial_svc_encoder.SRCS        += ivfenc.c ivfenc.h
-  vp9_spatial_svc_encoder.SRCS        += tools_common.c tools_common.h
-  vp9_spatial_svc_encoder.SRCS        += video_common.h
-  vp9_spatial_svc_encoder.SRCS        += video_writer.h video_writer.c
-  vp9_spatial_svc_encoder.SRCS        += vpx_ports/msvc.h
-  vp9_spatial_svc_encoder.SRCS        += vpxstats.c vpxstats.h
-  vp9_spatial_svc_encoder.GUID        = 4A38598D-627D-4505-9C7B-D4020C84100D
-  vp9_spatial_svc_encoder.DESCRIPTION = VP9 Spatial SVC Encoder
-endif
+
+EXAMPLES-$(CONFIG_VP9_ENCODER)      += vp9_spatial_svc_encoder.c
+vp9_spatial_svc_encoder.SRCS        += args.c args.h
+vp9_spatial_svc_encoder.SRCS        += ivfenc.c ivfenc.h
+vp9_spatial_svc_encoder.SRCS        += tools_common.c tools_common.h
+vp9_spatial_svc_encoder.SRCS        += video_common.h
+vp9_spatial_svc_encoder.SRCS        += video_writer.h video_writer.c
+vp9_spatial_svc_encoder.SRCS        += vpx_ports/msvc.h
+vp9_spatial_svc_encoder.SRCS        += vpxstats.c vpxstats.h
+vp9_spatial_svc_encoder.GUID        = 4A38598D-627D-4505-9C7B-D4020C84100D
+vp9_spatial_svc_encoder.DESCRIPTION = VP9 Spatial SVC Encoder
 
 ifneq ($(CONFIG_SHARED),yes)
 EXAMPLES-$(CONFIG_VP9_ENCODER)    += resize_util.c

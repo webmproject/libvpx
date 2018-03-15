@@ -471,11 +471,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     return VPX_CODEC_INVALID_PARAM;
   }
 
-#if CONFIG_SPATIAL_SVC
-  for (i = 0; i < svc_ctx->spatial_layers; ++i)
-    enc_cfg->ss_enable_auto_alt_ref[i] = si->enable_auto_alt_ref[i];
-#endif
-
   if (svc_ctx->temporal_layers > 1) {
     int i;
     for (i = 0; i < svc_ctx->temporal_layers; ++i) {
@@ -543,56 +538,7 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   iter = NULL;
   while ((cx_pkt = vpx_codec_get_cx_data(codec_ctx, &iter))) {
     switch (cx_pkt->kind) {
-#if CONFIG_SPATIAL_SVC && defined(VPX_TEST_SPATIAL_SVC)
-      case VPX_CODEC_SPATIAL_SVC_LAYER_PSNR: {
-        int i;
-        for (i = 0; i < svc_ctx->spatial_layers; ++i) {
-          int j;
-          svc_log(svc_ctx, SVC_LOG_DEBUG,
-                  "SVC frame: %d, layer: %d, PSNR(Total/Y/U/V): "
-                  "%2.3f  %2.3f  %2.3f  %2.3f \n",
-                  si->psnr_pkt_received, i, cx_pkt->data.layer_psnr[i].psnr[0],
-                  cx_pkt->data.layer_psnr[i].psnr[1],
-                  cx_pkt->data.layer_psnr[i].psnr[2],
-                  cx_pkt->data.layer_psnr[i].psnr[3]);
-          svc_log(svc_ctx, SVC_LOG_DEBUG,
-                  "SVC frame: %d, layer: %d, SSE(Total/Y/U/V): "
-                  "%2.3f  %2.3f  %2.3f  %2.3f \n",
-                  si->psnr_pkt_received, i, cx_pkt->data.layer_psnr[i].sse[0],
-                  cx_pkt->data.layer_psnr[i].sse[1],
-                  cx_pkt->data.layer_psnr[i].sse[2],
-                  cx_pkt->data.layer_psnr[i].sse[3]);
-
-          for (j = 0; j < COMPONENTS; ++j) {
-            si->psnr_sum[i][j] += cx_pkt->data.layer_psnr[i].psnr[j];
-            si->sse_sum[i][j] += cx_pkt->data.layer_psnr[i].sse[j];
-          }
-        }
-        ++si->psnr_pkt_received;
-        break;
-      }
-      case VPX_CODEC_SPATIAL_SVC_LAYER_SIZES: {
-        int i;
-        for (i = 0; i < svc_ctx->spatial_layers; ++i)
-          si->bytes_sum[i] += cx_pkt->data.layer_sizes[i];
-        break;
-      }
-#endif
       case VPX_CODEC_PSNR_PKT: {
-#if CONFIG_SPATIAL_SVC && defined(VPX_TEST_SPATIAL_SVC)
-        int j;
-        svc_log(svc_ctx, SVC_LOG_DEBUG,
-                "frame: %d, layer: %d, PSNR(Total/Y/U/V): "
-                "%2.3f  %2.3f  %2.3f  %2.3f \n",
-                si->psnr_pkt_received, 0, cx_pkt->data.layer_psnr[0].psnr[0],
-                cx_pkt->data.layer_psnr[0].psnr[1],
-                cx_pkt->data.layer_psnr[0].psnr[2],
-                cx_pkt->data.layer_psnr[0].psnr[3]);
-        for (j = 0; j < COMPONENTS; ++j) {
-          si->psnr_sum[0][j] += cx_pkt->data.layer_psnr[0].psnr[j];
-          si->sse_sum[0][j] += cx_pkt->data.layer_psnr[0].sse[j];
-        }
-#endif
       }
         ++si->psnr_pkt_received;
         break;
