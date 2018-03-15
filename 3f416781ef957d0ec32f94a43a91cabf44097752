@@ -34,6 +34,24 @@
       "revId": "3f416781ef957d0ec32f94a43a91cabf44097752",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eebdfe55_315bdb92",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-15T21:48:30Z",
+      "side": 1,
+      "message": "Sure, but it doesn\u0027t say anything about it not being required. Intel makes no distinction between 32 and 64:\nhttps://software.intel.com/en-us/node/524274\n\nand http://www.felixcloutier.com/x86/EMMS.html says:\nEMMS operation is the same in non-64-bit modes and 64-bit mode.\n\nIt might be possible to use __asm() on win64.",
+      "parentUuid": "9a795fd3_0f74cf96",
+      "revId": "3f416781ef957d0ec32f94a43a91cabf44097752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
