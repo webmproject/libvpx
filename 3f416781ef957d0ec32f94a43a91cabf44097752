@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e4d90216_bab46b0c",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-15T20:50:37Z",
+      "side": 1,
+      "message": "maybe \u0026\u0026 HAVE_MMX?\n\nThe documentation I\u0027m finding doesn\u0027t separate out using \u0027emms\u0027 on x86 vs x86_64 so maybe I just need to find a way to make it work on x86_64 VS",
+      "revId": "3f416781ef957d0ec32f94a43a91cabf44097752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
