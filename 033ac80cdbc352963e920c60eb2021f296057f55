@@ -22,6 +22,30 @@
       "revId": "033ac80cdbc352963e920c60eb2021f296057f55",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90e78c95_69eab485",
+        "filename": "vpx_ports/vpx_ports.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-15T06:11:34Z",
+      "side": 1,
+      "message": "\u003e this could be guarded with smth MSVC specific, but i don\u0027t think the other build systems are as concerned about empty files.\n\nmac will usually emit warnings as well.",
+      "parentUuid": "6907fb11_3a47225a",
+      "range": {
+        "startLine": 22,
+        "startChar": 13,
+        "endLine": 22,
+        "endChar": 24
+      },
+      "revId": "033ac80cdbc352963e920c60eb2021f296057f55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
