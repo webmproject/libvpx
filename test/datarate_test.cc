@@ -1364,6 +1364,8 @@ class DatarateOnePassCbrSvc
     dynamic_drop_layer_ = false;
     change_bitrate_ = false;
     last_pts_ref_ = 0;
+    middle_bitrate_ = 0;
+    top_bitrate_ = 0;
   }
   virtual void BeginPassHook(unsigned int /*pass*/) {}
 
@@ -1497,16 +1499,26 @@ class DatarateOnePassCbrSvc
     }
 
     if (dynamic_drop_layer_) {
-      if (video->frame() == 100) {
-        // Change layer bitrates to set top layer to 0. This will trigger skip
-        // encoding/dropping of top spatial layer.
-        cfg_.rc_target_bitrate -= cfg_.layer_target_bitrate[2];
+      if (video->frame() == 50) {
+        // Change layer bitrates to set top layers to 0. This will trigger skip
+        // encoding/dropping of top two spatial layers.
+        cfg_.rc_target_bitrate -=
+            (cfg_.layer_target_bitrate[1] + cfg_.layer_target_bitrate[2]);
+        middle_bitrate_ = cfg_.layer_target_bitrate[1];
+        top_bitrate_ = cfg_.layer_target_bitrate[2];
+        cfg_.layer_target_bitrate[1] = 0;
         cfg_.layer_target_bitrate[2] = 0;
         encoder->Config(&cfg_);
-      } else if (video->frame() == 300) {
-        // Change layer bitrate on top layer to non-zero to start encoding it
-        // again.
-        cfg_.layer_target_bitrate[2] = 500;
+      } else if (video->frame() == 100) {
+        // Change layer bitrate on second layer to non-zero to start
+        // encoding it again.
+        cfg_.layer_target_bitrate[1] = middle_bitrate_;
+        cfg_.rc_target_bitrate += cfg_.layer_target_bitrate[1];
+        encoder->Config(&cfg_);
+      } else if (video->frame() == 200) {
+        // Change layer bitrate on top layer to non-zero to start
+        // encoding it again.
+        cfg_.layer_target_bitrate[2] = top_bitrate_;
         cfg_.rc_target_bitrate += cfg_.layer_target_bitrate[2];
         encoder->Config(&cfg_);
       }
@@ -1649,6 +1661,8 @@ class DatarateOnePassCbrSvc
   int update_pattern_;
   bool change_bitrate_;
   vpx_codec_pts_t last_pts_ref_;
+  int middle_bitrate_;
+  int top_bitrate_;
 };
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and 1
@@ -2045,10 +2059,10 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL2TLDynamicPatternChange) {
 }
 
 // Check basic rate targeting for 1 pass CBR SVC with 3 spatial layers and on
-// the fly switching to 2 spatial layers and then back to 3. This switch is done
-// by setting top spatial layer bitrate to 0, and then back to non-zero, during
-// the sequence.
-TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL_to_2SL_dynamic) {
+// the fly switching to 1 and then 2 and back to 3 spatial layers. This switch
+// is done by setting spatial layer bitrates to 0, and then back to non-zero,
+// during the sequence.
+TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL_dynamic) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;

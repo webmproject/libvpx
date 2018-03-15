@@ -1229,7 +1229,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
              cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)) {
           if (ctx->pending_cx_data == 0) ctx->pending_cx_data = cx_data;
           ctx->pending_cx_data_sz += size;
-          ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+          if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
           ctx->pending_frame_magnitude |= size;
           cx_data += size;
           cx_data_sz -= size;
