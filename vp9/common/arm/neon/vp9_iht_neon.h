@@ -257,4 +257,16 @@ static INLINE void iadst8(int16x8_t *const io) {
   io[7] = vnegq_s16(x[1]);
 }
 
+void vpx_iadst16x16_256_add_half1d(const void *const input, int16_t *output,
+                                   void *const dest, const int stride,
+                                   const int highbd_flag);
+
+typedef void (*iht_1d)(const void *const input, int16_t *output,
+                       void *const dest, const int stride,
+                       const int highbd_flag);
+
+typedef struct {
+  iht_1d cols, rows;  // vertical and horizontal
+} iht_2d;
+
 #endif  // VP9_COMMON_ARM_NEON_VP9_IHT_NEON_H_

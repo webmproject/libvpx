@@ -401,8 +401,7 @@ class TransTestBase : public ::testing::TestWithParam<DctParam> {
           EXPECT_GE(static_cast<uint32_t>(limit), error)
               << "Error: " << size_ << "x" << size_
               << " inverse transform has error " << error << " at " << w << ","
-              << h << " org:" << (int)src_[h * stride_ + w]
-              << " opt:" << (int)dst_[h * stride_ + w];
+              << h;
           if (::testing::Test::HasFailure()) {
             printf("Size: %d Transform type: %d\n", size_, tx_type_);
             return;
@@ -633,6 +632,8 @@ static const FuncInfo ht_neon_func_info[] = {
     2 },
   { &vp9_highbd_fht8x8_c, &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8,
     2 },
+  { &vp9_highbd_fht16x16_c,
+    &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_neon>, 16, 2 },
 #endif
   { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1 },
   { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1 },
