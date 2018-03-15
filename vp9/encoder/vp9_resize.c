@@ -720,6 +720,10 @@ void vp9_highbd_resize_plane(const uint8_t *const input, int height, int width,
   uint16_t *arrbuf2 = (uint16_t *)malloc(sizeof(uint16_t) * height2);
   if (intbuf == NULL || tmpbuf == NULL || arrbuf == NULL || arrbuf2 == NULL)
     goto Error;
+  assert(width > 0);
+  assert(height > 0);
+  assert(width2 > 0);
+  assert(height2 > 0);
   for (i = 0; i < height; ++i) {
     highbd_resize_multistep(CONVERT_TO_SHORTPTR(input + in_stride * i), width,
                             intbuf + width2 * i, width2, tmpbuf, bd);
