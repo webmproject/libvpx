@@ -46,6 +46,30 @@
       "revId": "033ac80cdbc352963e920c60eb2021f296057f55",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5090a34_141a40d5",
+        "filename": "vpx_ports/vpx_ports.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-15T19:40:44Z",
+      "side": 1,
+      "message": "mac builds clean here. nm show float_control_word.asm.o has all of vpx_config.h (and an undefined reference to _rand? maybe from x86_abi_support) but nothing else. Maybe the detritus causes it to think it\u0027s not \"empty\"? It does get ar\u0027d into libvpx_g.a",
+      "parentUuid": "90e78c95_69eab485",
+      "range": {
+        "startLine": 22,
+        "startChar": 13,
+        "endLine": 22,
+        "endChar": 24
+      },
+      "revId": "033ac80cdbc352963e920c60eb2021f296057f55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
