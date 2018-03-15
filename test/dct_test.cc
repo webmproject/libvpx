@@ -629,14 +629,10 @@ INSTANTIATE_TEST_CASE_P(
 
 static const FuncInfo ht_neon_func_info[] = {
 #if CONFIG_VP9_HIGHBITDEPTH
-// TODO(linfengz): reenable these functions once test vector failures are
-// addressed.
-#if 0
   { &vp9_highbd_fht4x4_c, &highbd_iht_wrapper<vp9_highbd_iht4x4_16_add_neon>, 4,
     2 },
   { &vp9_highbd_fht8x8_c, &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8,
     2 },
-#endif
 #endif
   { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1 },
   { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_neon>, 8, 1 },
