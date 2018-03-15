@@ -16,6 +16,24 @@
       "revId": "3f416781ef957d0ec32f94a43a91cabf44097752",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a795fd3_0f74cf96",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-15T21:42:07Z",
+      "side": 1,
+      "message": "\u003e maybe \u0026\u0026 HAVE_MMX?\n\u003e \n\u003e The documentation I\u0027m finding doesn\u0027t separate out using \u0027emms\u0027 on x86 vs x86_64 so maybe I just need to find a way to make it work on x86_64 VS\n\nit\u0027s listed under x86:\nhttps://msdn.microsoft.com/en-us/library/hh977023.aspx\n\nnot x64:\nhttps://msdn.microsoft.com/en-us/library/hh977022.aspx",
+      "parentUuid": "e4d90216_bab46b0c",
+      "revId": "3f416781ef957d0ec32f94a43a91cabf44097752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
