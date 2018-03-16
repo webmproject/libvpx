@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eec47452_37029d7a",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-16T20:57:40Z",
+      "side": 1,
+      "message": "extra space",
+      "range": {
+        "startLine": 399,
+        "startChar": 15,
+        "endLine": 399,
+        "endChar": 16
+      },
+      "revId": "b948049981848d180ea765d79ee09a4cbda1c15a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4938b565_aa57c238",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-16T20:57:40Z",
+      "side": 1,
+      "message": "this can be defined with something like ( \u003d ? : ) and be const.",
+      "range": {
+        "startLine": 414,
+        "startChar": 10,
+        "endLine": 414,
+        "endChar": 25
+      },
+      "revId": "b948049981848d180ea765d79ee09a4cbda1c15a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f128d616_1a63c481",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-16T20:57:40Z",
+      "side": 1,
+      "message": "longer than 80 characters.\n\nclang-format can be used in sublime-text to correct formats for the whole file.",
+      "range": {
+        "startLine": 418,
+        "startChar": 80,
+        "endLine": 418,
+        "endChar": 82
+      },
+      "revId": "b948049981848d180ea765d79ee09a4cbda1c15a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a042994_dd9182b0",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-16T20:57:40Z",
+      "side": 1,
+      "message": "maybe this variable can be eliminated. just use the condition in the following if statement.",
+      "range": {
+        "startLine": 419,
+        "startChar": 6,
+        "endLine": 419,
+        "endChar": 16
+      },
+      "revId": "b948049981848d180ea765d79ee09a4cbda1c15a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "76f5768d_631d1a6f",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-16T20:57:40Z",
+      "side": 1,
+      "message": "you can return 0 directly here",
+      "range": {
+        "startLine": 422,
+        "startChar": 8,
+        "endLine": 422,
+        "endChar": 14
+      },
+      "revId": "b948049981848d180ea765d79ee09a4cbda1c15a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
