@@ -81,6 +81,24 @@
       "revId": "a707fb05a70e81cabd1bee17101249e207a5c2b2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6563723c_1814c650",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1597,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-03-16T12:17:11Z",
+      "side": 1,
+      "message": "Correction. The return case is for 4K and above so does matter.",
+      "parentUuid": "7e1ede8a_20950fa5",
+      "revId": "a707fb05a70e81cabd1bee17101249e207a5c2b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
