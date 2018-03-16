@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ad8c0e4d_77269a8f",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-03-16T18:50:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6700d284_29fef46e",
+      "range": {
+        "startLine": 396,
+        "startChar": 0,
+        "endLine": 396,
+        "endChar": 3
+      },
+      "revId": "2fd6bcaa543c6af75478582ed9dc439d9b52ea60",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4096c090_c27dc202",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2018-03-16T17:56:00Z",
       "side": 1,
       "message": "maybe keep this as it was. and only call check_buffer on line 454 and 456? then you don\u0027t need to pass use_dropmark.",
+      "range": {
+        "startLine": 448,
+        "startChar": 8,
+        "endLine": 448,
+        "endChar": 31
+      },
+      "revId": "2fd6bcaa543c6af75478582ed9dc439d9b52ea60",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ce1519f_3212dc9e",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-03-16T18:50:09Z",
+      "side": 1,
+      "message": "prefer not too, as this would force dropping of all upper layers only based on buffer underrun of current layer",
+      "parentUuid": "4096c090_c27dc202",
       "range": {
         "startLine": 448,
         "startChar": 8,
