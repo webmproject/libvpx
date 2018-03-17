@@ -37,13 +37,15 @@ class ExtendBorderTest
   void ExtendBorder() { ASM_REGISTER_STATE_CHECK(extend_fn_(&img_)); }
 
   void RunTest() {
-#if ARCH_ARM
-    // Some arm devices OOM when trying to allocate the largest buffers.
-    static const int kNumSizesToTest = 6;
-#else
+#if ARCH_ARM || (ARCH_MIPS && !HAVE_MIPS64) || ARCH_X86
+    // Avoid OOM failures on 32-bit platforms.
     static const int kNumSizesToTest = 7;
+#else
+    static const int kNumSizesToTest = 8;
 #endif
-    static const int kSizesToTest[] = { 1, 15, 33, 145, 512, 1025, 16383 };
+    static const int kSizesToTest[] = {
+      1, 15, 33, 145, 512, 1025, 3840, 16383
+    };
     for (int h = 0; h < kNumSizesToTest; ++h) {
       for (int w = 0; w < kNumSizesToTest; ++w) {
         ASSERT_NO_FATAL_FAILURE(ResetImages(kSizesToTest[w], kSizesToTest[h]));
