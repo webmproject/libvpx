@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "21f55f1d_9592a759",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 1697,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T22:49:42Z",
+      "side": 1,
+      "message": "this could be unsigned int since it\u0027ll be \u003e\u003d 0. and then clean up the static_cast in the test.",
+      "range": {
+        "startLine": 1697,
+        "startChar": 6,
+        "endLine": 1697,
+        "endChar": 24
+      },
+      "revId": "a621687b6c3d7a1a24b6e03c77eb9a1f127e2046",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1b6e2c88_4ef9a8ee",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 1741,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T22:49:42Z",
+      "side": 1,
+      "message": "If num_nonref_frames_ is defined as unsigned int, then we don\u0027t need static_cast here.\n\nThis could be applied to all following test cases.",
+      "range": {
+        "startLine": 1741,
+        "startChar": 38,
+        "endLine": 1741,
+        "endChar": 56
+      },
+      "revId": "a621687b6c3d7a1a24b6e03c77eb9a1f127e2046",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a32176ee_abd10399",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 4630,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T22:49:42Z",
+      "side": 1,
+      "message": "you can break from the loop under this condition.",
+      "range": {
+        "startLine": 4630,
+        "startChar": 75,
+        "endLine": 4630,
+        "endChar": 76
+      },
+      "revId": "a621687b6c3d7a1a24b6e03c77eb9a1f127e2046",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "5bfa2c90_ffb2072a",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 11
