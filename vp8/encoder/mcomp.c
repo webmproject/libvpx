@@ -34,19 +34,22 @@ int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight) {
    * NEAREST for subsequent blocks. The "Weight" parameter allows, to a
    * limited extent, for some account to be taken of these factors.
    */
-  return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] +
-           mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1]) *
-          Weight) >>
-         7;
+  const int mv_idx_row =
+      clamp((mv->as_mv.row - ref->as_mv.row) >> 1, 0, MVvals);
+  const int mv_idx_col =
+      clamp((mv->as_mv.col - ref->as_mv.col) >> 1, 0, MVvals);
+  return ((mvcost[0][mv_idx_row] + mvcost[1][mv_idx_col]) * Weight) >> 7;
 }
 
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2],
                        int error_per_bit) {
   /* Ignore mv costing if mvcost is NULL */
   if (mvcost) {
-    return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] +
-             mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1]) *
-                error_per_bit +
+    const int mv_idx_row =
+        clamp((mv->as_mv.row - ref->as_mv.row) >> 1, 0, MVvals);
+    const int mv_idx_col =
+        clamp((mv->as_mv.col - ref->as_mv.col) >> 1, 0, MVvals);
+    return ((mvcost[0][mv_idx_row] + mvcost[1][mv_idx_col]) * error_per_bit +
             128) >>
            8;
   }
