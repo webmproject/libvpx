@@ -63,7 +63,7 @@ extern "C" {
  * fields to structures
  */
 #define VPX_ENCODER_ABI_VERSION \
-  (8 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
+  (9 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
 
 /*! \brief Encoder capabilities bitfield
  *
@@ -181,9 +181,9 @@ typedef struct vpx_codec_cx_pkt {
        * first one.*/
       unsigned int width[VPX_SS_MAX_LAYERS];  /**< frame width */
       unsigned int height[VPX_SS_MAX_LAYERS]; /**< frame height */
-      /*!\brief Last spatial layer frame in this packet. VP8 will always be set
-       * to 0.*/
-      unsigned int last_spatial_layer_encoded;
+      /*!\brief Flag to indicate if spatial layer frame in this packet is
+       * encoded or dropped. VP8 will always be set to 1.*/
+      uint8_t spatial_layer_encoded[VPX_SS_MAX_LAYERS];
     } frame;                            /**< data for compressed frame packet */
     vpx_fixed_buf_t twopass_stats;      /**< data for two-pass packet */
     vpx_fixed_buf_t firstpass_mb_stats; /**< first pass mb packet */

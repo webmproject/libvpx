@@ -3751,6 +3751,24 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   suppress_active_map(cpi);
 
+  // For SVC on non-zero spatial layer: if the previous spatial layer
+  // was dropped then disable the prediciton from this (scaled) reference.
+  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
+      cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id - 1]) {
+    MV_REFERENCE_FRAME ref_frame;
+    static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
+                                      VP9_ALT_FLAG };
+    for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+      const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
+      if (yv12 != NULL && (cpi->ref_frame_flags & flag_list[ref_frame])) {
+        const struct scale_factors *const scale_fac =
+            &cm->frame_refs[ref_frame - 1].sf;
+        if (vp9_is_scaled(scale_fac))
+          cpi->ref_frame_flags &= (~flag_list[ref_frame]);
+      }
+    }
+  }
+
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
@@ -4504,6 +4522,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     vp9_rc_postencode_update_drop_frame(cpi);
     vp9_inc_frame_in_layer(cpi);
     cpi->ext_refresh_frame_flags_pending = 0;
+    cpi->last_frame_dropped = 1;
+    cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
+    cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
     return;
   }
 
@@ -4591,28 +4612,31 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   }
 
   // For 1 pass CBR, check if we are dropping this frame.
-  // For spatial layers, for now if we decide to drop current spatial
-  // layer then we will also drop all upper spatial layers.
-  // TODO(marpan): Allow for the case of dropping single layer only without
-  // dropping all upper layers.
+  // Never drop on key frame, of if base layer is key for svc.
   if (oxcf->pass == 0 && oxcf->rc_mode == VPX_CBR &&
-      cm->frame_type != KEY_FRAME) {
-    if (vp9_rc_drop_frame(cpi) ||
-        (is_one_pass_cbr_svc(cpi) &&
-         cpi->svc.rc_drop_spatial_layer[cpi->svc.spatial_layer_id] == 1)) {
+      cm->frame_type != KEY_FRAME &&
+      (!cpi->use_svc ||
+       !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
+    if (vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
       cpi->ext_refresh_frame_flags_pending = 0;
       cpi->last_frame_dropped = 1;
+      cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
       if (cpi->use_svc) {
-        int i;
-        // If we are dropping this spatial layer, then we will drop all
-        // upper spatial layers.
-        for (i = cpi->svc.spatial_layer_id; i < cpi->svc.number_spatial_layers;
-             i++)
-          cpi->svc.rc_drop_spatial_layer[i] = 1;
+        cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
         vp9_inc_frame_in_layer(cpi);
-        if (cpi->svc.rc_drop_spatial_layer[0] == 0)
-          cpi->svc.skip_enhancement_layer = 1;
+        cpi->svc.skip_enhancement_layer = 1;
+        if (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1) {
+          int i;
+          int all_layers_drop = 1;
+          for (i = 0; i < cpi->svc.spatial_layer_id; i++) {
+            if (cpi->svc.drop_spatial_layer[i] == 0) {
+              all_layers_drop = 0;
+              break;
+            }
+          }
+          if (all_layers_drop == 1) cpi->svc.skip_enhancement_layer = 0;
+        }
       }
       return;
     }
@@ -4632,7 +4656,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   }
 
   cpi->last_frame_dropped = 0;
-  cpi->svc.last_layer_encoded = cpi->svc.spatial_layer_id;
+  cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 0;
 
   // Disable segmentation if it decrease rate/distortion ratio
   if (cpi->oxcf.aq_mode == LOOKAHEAD_AQ)
