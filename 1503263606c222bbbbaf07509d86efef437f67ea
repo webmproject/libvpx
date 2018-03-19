@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9759692f_294d9bc2",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3755,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "layer",
+      "range": {
+        "startLine": 3755,
+        "startChar": 33,
+        "endLine": 3755,
+        "endChar": 39
+      },
+      "revId": "1503263606c222bbbbaf07509d86efef437f67ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3630e16e_e25c1b07",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3758,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "drop this",
+      "range": {
+        "startLine": 3758,
+        "startChar": 68,
+        "endLine": 3758,
+        "endChar": 72
+      },
+      "revId": "1503263606c222bbbbaf07509d86efef437f67ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd5905bf_345d00f5",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 705,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "drop space",
+      "range": {
+        "startLine": 705,
+        "startChar": 4,
+        "endLine": 705,
+        "endChar": 5
+      },
+      "revId": "1503263606c222bbbbaf07509d86efef437f67ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f1716e98_46b84662",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "drop this",
+      "range": {
+        "startLine": 708,
+        "startChar": 69,
+        "endLine": 708,
+        "endChar": 74
+      },
+      "revId": "1503263606c222bbbbaf07509d86efef437f67ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8e3d819_78bcd205",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "this can be uint8_t to save some memory usage.",
+      "range": {
+        "startLine": 186,
+        "startChar": 6,
+        "endLine": 186,
+        "endChar": 18
+      },
+      "revId": "1503263606c222bbbbaf07509d86efef437f67ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

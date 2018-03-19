@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "835e53bc_e243d142",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "also vp9_zero(sizes_parsed)",
+      "range": {
+        "startLine": 789,
+        "startChar": 12,
+        "endLine": 789,
+        "endChar": 21
+      },
+      "revId": "de0c3b1e30b477e1efc0581a82d3fb8dfe9db604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2770c25_7a296b66",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "drop \"\u003d\u003d1\"",
+      "range": {
+        "startLine": 813,
+        "startChar": 66,
+        "endLine": 813,
+        "endChar": 71
+      },
+      "revId": "de0c3b1e30b477e1efc0581a82d3fb8dfe9db604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32fa7bb2_279df9de",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 825,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "drop \"\u003d\u003d1\"",
+      "range": {
+        "startLine": 825,
+        "startChar": 65,
+        "endLine": 825,
+        "endChar": 69
+      },
+      "revId": "de0c3b1e30b477e1efc0581a82d3fb8dfe9db604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7f83ceb_7102b2f4",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "drop \"\u003d\u003d1\"",
+      "range": {
+        "startLine": 850,
+        "startChar": 67,
+        "endLine": 850,
+        "endChar": 71
+      },
+      "revId": "de0c3b1e30b477e1efc0581a82d3fb8dfe9db604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2917e75d_1478f9f7",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 1592,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "these two actually only set the first element to 0.\n\nbetter to use vp9_zero to memset them.",
+      "range": {
+        "startLine": 1591,
+        "startChar": 13,
+        "endLine": 1592,
+        "endChar": 37
+      },
+      "revId": "de0c3b1e30b477e1efc0581a82d3fb8dfe9db604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5298a76b_617c489d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 1606,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-19T18:52:49Z",
+      "side": 1,
+      "message": "drop this",
+      "range": {
+        "startLine": 1606,
+        "startChar": 52,
+        "endLine": 1606,
+        "endChar": 56
+      },
+      "revId": "de0c3b1e30b477e1efc0581a82d3fb8dfe9db604",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
