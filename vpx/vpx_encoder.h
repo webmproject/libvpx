@@ -63,7 +63,7 @@ extern "C" {
  * fields to structures
  */
 #define VPX_ENCODER_ABI_VERSION \
-  (9 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
+  (10 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
 
 /*! \brief Encoder capabilities bitfield
  *

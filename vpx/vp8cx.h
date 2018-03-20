@@ -602,6 +602,15 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST,
+
+  /*!\brief Codec control function to constrain the inter-layer prediction
+   * (prediction of lower spatial resolution) in VP9 SVC.
+   *
+   * 0 : inter-layer prediction on, 1 : off, 2 : off only on non-key frames
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_SVC_INTER_LAYER_PRED,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -878,6 +887,9 @@ VPX_CTRL_USE_TYPE(VP9E_GET_LEVEL, int *)
 
 VPX_CTRL_USE_TYPE(VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST, unsigned int)
 #define VPX_CTRL_VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST
+
+VPX_CTRL_USE_TYPE(VP9E_SET_SVC_INTER_LAYER_PRED, unsigned int)
+#define VPX_CTRL_VP9E_SET_SVC_INTER_LAYER_PRED
 
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */

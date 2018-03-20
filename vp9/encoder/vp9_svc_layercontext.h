@@ -19,6 +19,12 @@
 extern "C" {
 #endif
 
+typedef enum {
+  INTER_LAYER_PRED_ON,
+  INTER_LAYER_PRED_OFF,
+  INTER_LAYER_PRED_OFF_NONKEY
+} INTER_LAYER_PRED;
+
 typedef struct {
   RATE_CONTROL rc;
   int target_bandwidth;
@@ -108,6 +114,8 @@ typedef struct SVC {
 
   int last_layer_dropped[VPX_MAX_LAYERS];
   int drop_spatial_layer[VPX_MAX_LAYERS];
+
+  INTER_LAYER_PRED disable_inter_layer_pred;
 } SVC;
 
 struct VP9_COMP;

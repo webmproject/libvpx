@@ -1516,6 +1516,14 @@ static vpx_codec_err_t ctrl_set_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_svc_inter_layer_pred(vpx_codec_alg_priv_t *ctx,
+                                                     va_list args) {
+  const int data = va_arg(args, int);
+  VP9_COMP *const cpi = ctx->cpi;
+  cpi->svc.disable_inter_layer_pred = data;
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t ctrl_register_cx_callback(vpx_codec_alg_priv_t *ctx,
                                                  va_list args) {
   vpx_codec_priv_output_cx_pkt_cb_pair_t *cbp =
@@ -1599,6 +1607,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_TARGET_LEVEL, ctrl_set_target_level },
   { VP9E_SET_ROW_MT, ctrl_set_row_mt },
   { VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST, ctrl_enable_motion_vector_unit_test },
+  { VP9E_SET_SVC_INTER_LAYER_PRED, ctrl_set_svc_inter_layer_pred },
 
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },
