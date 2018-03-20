@@ -2230,7 +2230,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4Threads) {
                           layer_target_avg_bandwidth_, bits_in_buffer_model_);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
-                            number_temporal_layers_, file_datarate_, 0.75, 1.2);
+                            number_temporal_layers_, file_datarate_, 0.73, 1.2);
 #if CONFIG_VP9_DECODER
     // The non-reference frames are expected to be mismatched frames as the
     // encoder will avoid loopfilter on these frames.

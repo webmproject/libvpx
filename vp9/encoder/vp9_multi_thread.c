@@ -146,11 +146,9 @@ void vp9_row_mt_mem_dealloc(VP9_COMP *cpi) {
       TileDataEnc *this_tile =
           &cpi->tile_data[tile_row * multi_thread_ctxt->allocated_tile_cols +
                           tile_col];
-      if (cpi->sf.adaptive_rd_thresh_row_mt) {
-        if (this_tile->row_base_thresh_freq_fact != NULL) {
-          vpx_free(this_tile->row_base_thresh_freq_fact);
-          this_tile->row_base_thresh_freq_fact = NULL;
-        }
+      if (this_tile->row_base_thresh_freq_fact != NULL) {
+        vpx_free(this_tile->row_base_thresh_freq_fact);
+        this_tile->row_base_thresh_freq_fact = NULL;
       }
     }
   }
