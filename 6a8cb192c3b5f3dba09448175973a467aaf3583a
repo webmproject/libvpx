@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "faa0d772_5de83fb8",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-20T01:43:00Z",
+      "side": 1,
+      "message": "this is pretty ugly, i\u0027ll admit",
+      "range": {
+        "startLine": 36,
+        "startChar": 15,
+        "endLine": 36,
+        "endChar": 22
+      },
+      "revId": "6a8cb192c3b5f3dba09448175973a467aaf3583a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
