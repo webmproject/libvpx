@@ -16,6 +16,24 @@
       "revId": "2dedebdee46cb904af3a8b7d244bfe6df7beb4c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d6d1b314_7fc28939",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-20T00:35:51Z",
+      "side": 1,
+      "message": "I get identical output with bash 4.4 without the -n option. The resultant solution files also work with the earlier versions of bash, it just prints the warning message.",
+      "parentUuid": "2417a31f_bffcebcf",
+      "revId": "2dedebdee46cb904af3a8b7d244bfe6df7beb4c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
