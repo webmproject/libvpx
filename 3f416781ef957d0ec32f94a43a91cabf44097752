@@ -70,6 +70,47 @@
       "revId": "3f416781ef957d0ec32f94a43a91cabf44097752",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56b0b7b3_4471df19",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-20T00:12:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "24b81e62_17b7e46d",
+      "revId": "3f416781ef957d0ec32f94a43a91cabf44097752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e760d79c_40796467",
+        "filename": "vpx_ports/system_state.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-20T00:12:48Z",
+      "side": 1,
+      "message": "ARCH_X86 \u0026\u0026 HAVE_MMX",
+      "range": {
+        "startLine": 24,
+        "startChar": 11,
+        "endLine": 24,
+        "endChar": 19
+      },
+      "revId": "3f416781ef957d0ec32f94a43a91cabf44097752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
