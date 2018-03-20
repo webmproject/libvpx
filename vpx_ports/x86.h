@@ -317,8 +317,6 @@ static INLINE unsigned int x87_set_double_precision(void) {
   return mode;
 }
 
-extern void vpx_reset_mmx_state(void);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif
