@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2417a31f_bffcebcf",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-20T00:24:04Z",
+      "side": 1,
+      "message": "-n is required for this function to work correctly without further modification:\n      -n        make NAME a reference to the variable named by its value",
+      "revId": "2dedebdee46cb904af3a8b7d244bfe6df7beb4c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
