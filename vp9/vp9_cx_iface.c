@@ -1205,8 +1205,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
           cx_data_sz -= size;
           pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
           pkt.data.frame.height[cpi->svc.spatial_layer_id] = cpi->common.height;
-          pkt.data.frame.last_spatial_layer_encoded =
-              cpi->svc.last_layer_encoded;
+          pkt.data.frame.spatial_layer_encoded[cpi->svc.spatial_layer_id] =
+              1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
 
           if (ctx->output_cx_pkt_cb.output_cx_pkt) {
             pkt.kind = VPX_CODEC_CX_FRAME_PKT;
@@ -1235,7 +1235,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
         pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
         pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
         pkt.data.frame.height[cpi->svc.spatial_layer_id] = cpi->common.height;
-        pkt.data.frame.last_spatial_layer_encoded = cpi->svc.last_layer_encoded;
+        pkt.data.frame.spatial_layer_encoded[cpi->svc.spatial_layer_id] =
+            1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
 
         if (ctx->pending_cx_data) {
           if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;

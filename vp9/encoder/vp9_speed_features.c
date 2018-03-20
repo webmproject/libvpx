@@ -596,7 +596,8 @@ static void set_rt_speed_feature_framesize_independent(
     if (!cpi->last_frame_dropped && cpi->resize_state == ORIG &&
         !cpi->external_resize &&
         (!cpi->use_svc ||
-         cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
+         (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1 &&
+          !cpi->svc.last_layer_dropped[cpi->svc.number_spatial_layers - 1]))) {
       sf->copy_partition_flag = 1;
       cpi->max_copied_frame = 2;
       // The top temporal enhancement layer (for number of temporal layers > 1)
@@ -666,6 +667,11 @@ static void set_rt_speed_feature_framesize_independent(
           (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
                                 sizeof(*cpi->count_lastgolden_frame_usage));
   }
+  // Disable adaptive_rd_thresh for row_mt for SVC with frame dropping.
+  // This is causing some tests to fail.
+  // TODO(marpan/jianj): Look into this failure and re-enable later.
+  if (cpi->use_svc && cpi->oxcf.drop_frames_water_mark)
+    sf->adaptive_rd_thresh_row_mt = 0;
 }
 
 void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {

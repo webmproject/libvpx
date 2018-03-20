@@ -917,7 +917,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
         pkt.data.frame.flags = lib_flags << 16;
         pkt.data.frame.width[0] = cpi->common.Width;
         pkt.data.frame.height[0] = cpi->common.Height;
-        pkt.data.frame.last_spatial_layer_encoded = 0;
+        pkt.data.frame.spatial_layer_encoded[0] = 1;
 
         if (lib_flags & FRAMEFLAGS_KEY) {
           pkt.data.frame.flags |= VPX_FRAME_IS_KEY;
