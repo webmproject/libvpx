@@ -686,6 +686,12 @@ static unsigned int read_available_partition_size(
   const unsigned char *partition_size_ptr = token_part_sizes + i * 3;
   unsigned int partition_size = 0;
   ptrdiff_t bytes_left = fragment_end - fragment_start;
+  if (bytes_left < 0) {
+    vpx_internal_error(
+        &pc->error, VPX_CODEC_CORRUPT_FRAME,
+        "Truncated packet or corrupt partition. No bytes left %d.",
+        (int)bytes_left);
+  }
   /* Calculate the length of this partition. The last partition
    * size is implicit. If the partition size can't be read, then
    * either use the remaining data in the buffer (for EC mode)
