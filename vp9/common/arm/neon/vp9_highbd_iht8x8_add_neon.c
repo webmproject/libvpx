@@ -18,17 +18,6 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/inv_txfm.h"
 
-static INLINE void iadst_half_butterfly_bd10_neon(int32x4_t *const x,
-                                                  const int32x2_t c) {
-  const int32x4_t sum = vaddq_s32(x[0], x[1]);
-  const int32x4_t sub = vsubq_s32(x[0], x[1]);
-
-  x[0] = vmulq_lane_s32(sum, c, 0);
-  x[1] = vmulq_lane_s32(sub, c, 0);
-  x[0] = vrshrq_n_s32(x[0], DCT_CONST_BITS);
-  x[1] = vrshrq_n_s32(x[1], DCT_CONST_BITS);
-}
-
 static INLINE void iadst_half_butterfly_bd12_neon(int32x4_t *const x,
                                                   const int32x2_t c) {
   const int32x4_t sum = vaddq_s32(x[0], x[1]);
@@ -44,30 +33,6 @@ static INLINE void iadst_half_butterfly_bd12_neon(int32x4_t *const x,
 
   x[0] = vcombine_s32(out0_lo, out0_hi);
   x[1] = vcombine_s32(out1_lo, out1_hi);
-}
-
-static INLINE void iadst_butterfly_lane_0_1_bd10_neon(const int32x4_t in0,
-                                                      const int32x4_t in1,
-                                                      const int32x2_t c,
-                                                      int32x4_t *const s0,
-                                                      int32x4_t *const s1) {
-  const int32x4_t t0 = vmulq_lane_s32(in0, c, 0);
-  const int32x4_t t1 = vmulq_lane_s32(in0, c, 1);
-
-  *s0 = vmlaq_lane_s32(t0, in1, c, 1);
-  *s1 = vmlsq_lane_s32(t1, in1, c, 0);
-}
-
-static INLINE void iadst_butterfly_lane_1_0_bd10_neon(const int32x4_t in0,
-                                                      const int32x4_t in1,
-                                                      const int32x2_t c,
-                                                      int32x4_t *const s0,
-                                                      int32x4_t *const s1) {
-  const int32x4_t t0 = vmulq_lane_s32(in0, c, 1);
-  const int32x4_t t1 = vmulq_lane_s32(in0, c, 0);
-
-  *s0 = vmlaq_lane_s32(t0, in1, c, 0);
-  *s1 = vmlsq_lane_s32(t1, in1, c, 1);
 }
 
 static INLINE void iadst_butterfly_lane_0_1_bd12_neon(const int32x4_t in0,
@@ -100,18 +65,6 @@ static INLINE void iadst_butterfly_lane_1_0_bd12_neon(const int32x4_t in0,
   s1[0] = vmlsl_lane_s32(t1_lo, vget_low_s32(in1), c, 1);
   s0[1] = vmlal_lane_s32(t0_hi, vget_high_s32(in1), c, 0);
   s1[1] = vmlsl_lane_s32(t1_hi, vget_high_s32(in1), c, 1);
-}
-
-static INLINE int32x4_t
-add_dct_const_round_shift_low_8_bd10(const int32x4_t in0, const int32x4_t in1) {
-  const int32x4_t sum = vaddq_s32(in0, in1);
-  return vrshrq_n_s32(sum, DCT_CONST_BITS);
-}
-
-static INLINE int32x4_t
-sub_dct_const_round_shift_low_8_bd10(const int32x4_t in0, const int32x4_t in1) {
-  const int32x4_t sub = vsubq_s32(in0, in1);
-  return vrshrq_n_s32(sub, DCT_CONST_BITS);
 }
 
 static INLINE int32x4_t add_dct_const_round_shift_low_8_bd12(
