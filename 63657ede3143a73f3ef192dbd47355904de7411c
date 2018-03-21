@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "25d2663d_acf8dd20",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 774,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-21T18:29:46Z",
+      "side": 1,
+      "message": "you can combine these two into one",
+      "range": {
+        "startLine": 773,
+        "startChar": 8,
+        "endLine": 774,
+        "endChar": 39
+      },
+      "revId": "63657ede3143a73f3ef192dbd47355904de7411c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
