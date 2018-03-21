@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a327c5e9_17ef35a6",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1128439
+      },
+      "writtenOn": "2018-03-21T22:59:45Z",
+      "side": 1,
+      "message": "I\u0027d say:\n\"The x87 FPU is not used on Win64 or ARM so setting the x87 control word is not necessary.\"\n\nIt\u0027s not clear from this patch what was being modified in the control word:\n- If it was precision then SSE/SSE2 don\u0027t have a precision flag and don\u0027t need it\n- If it was something else (rounding, exceptions) then there are SSE/SSE2 variants of these which should be used instead\n\nAlternate comment:\n\n\"The x87 FPU is not used on Win64 or ARM so setting the x87 control word is not necessary. The SSE/SSE2 and ARM FPUs don\u0027t have a precision control - the precision is embedded in each instruction - so the need to set the control word is also gone.\"",
+      "revId": "ab19696b365eeb4afcab7fb7b5842bcc797f2eb0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
