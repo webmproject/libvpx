@@ -52,6 +52,24 @@
       "revId": "38b8d063f2856a814961c13f96f88c267385ca07",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a79b7390_7fc2072b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-21T17:17:01Z",
+      "side": 1,
+      "message": "If this was to ensure 32 bit builds used 64 bit arithmetic instead of 80 bit, then 64 bit build shouldn\u0027t require anything, yeah? The guard in emms.asm is for win64, but it sounds like it shouldn\u0027t be doing anything in that situation?",
+      "parentUuid": "7707d3ee_0795a07f",
+      "revId": "38b8d063f2856a814961c13f96f88c267385ca07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
