@@ -1068,10 +1068,12 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         rate2 +=
             vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv, cpi->mb.mvcost, 128);
       }
+        // fall through
 
       case NEARESTMV:
       case NEARMV:
         if (mode_mv[this_mode].as_int == 0) continue;
+        // fall through
 
       case ZEROMV:
 
