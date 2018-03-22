@@ -16,6 +16,24 @@
       "revId": "ab19696b365eeb4afcab7fb7b5842bcc797f2eb0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bdfbc59_9492a5cb",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-22T15:17:17Z",
+      "side": 1,
+      "message": "Finally managed to find the Intel manual with the table for Precision Control. Added a more complete description of what is going on lower in the file. I think paired with the explanation that we are setting the Precision Control, just saying the PC is not supported here seems reasonable.",
+      "parentUuid": "a327c5e9_17ef35a6",
+      "revId": "ab19696b365eeb4afcab7fb7b5842bcc797f2eb0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
