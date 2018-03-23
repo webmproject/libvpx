@@ -140,7 +140,7 @@ class RegisterStateCheck {};
 
 #endif  // _WIN64
 
-#if ARCH_X86
+#if ARCH_X86 || ARCH_X86_64
 #if defined(__GNUC__)
 
 namespace libvpx_test {
@@ -178,7 +178,7 @@ class RegisterStateCheckMMX {
 }  // namespace libvpx_test
 
 #endif  // __GNUC__
-#endif  // ARCH_X86
+#endif  // ARCH_X86 || ARCH_X86_64
 
 #ifndef API_REGISTER_STATE_CHECK
 #define API_REGISTER_STATE_CHECK ASM_REGISTER_STATE_CHECK

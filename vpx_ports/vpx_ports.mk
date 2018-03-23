@@ -20,6 +20,10 @@ PORTS_SRCS-yes += vpx_timer.h
 ifeq ($(ARCH_X86),yes)
 PORTS_SRCS-$(HAVE_MMX) += emms_mmx.c
 endif
+ifeq ($(ARCH_X86_64),yes)
+# Visual Studio x64 does not support the _mm_empty() intrinsic.
+PORTS_SRCS-$(HAVE_MMX) += emms_mmx.asm
+endif
 
 ifeq ($(ARCH_X86_64),yes)
 PORTS_SRCS-$(CONFIG_MSVS) += float_control_word.asm
