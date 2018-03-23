@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0e5c9bf9_af8bfd1e",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-23T16:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "faa0d772_5de83fb8",
+      "range": {
+        "startLine": 36,
+        "startChar": 15,
+        "endLine": 36,
+        "endChar": 22
+      },
+      "revId": "6a8cb192c3b5f3dba09448175973a467aaf3583a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "015e919b_449eebeb",
         "filename": "build/make/msvs_common.sh",
         "patchSetId": 2
@@ -39,6 +63,24 @@
       "revId": "6a8cb192c3b5f3dba09448175973a467aaf3583a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5cf1f2fd_6eee2dbe",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-23T16:45:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "015e919b_449eebeb",
+      "revId": "6a8cb192c3b5f3dba09448175973a467aaf3583a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
