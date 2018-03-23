@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3c7d600b_ffe48d35",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-23T16:46:29Z",
+      "side": 1,
+      "message": "doesn\u0027t actually cause the build to fail but it\u0027s the thought that counts.",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 14
+      },
+      "revId": "b60afb06bcd74d15e591c6692688cebe0f899fad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
