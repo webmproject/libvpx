@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f73fb9d_24543476",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-23T18:09:48Z",
+      "side": 0,
+      "message": "keep this",
+      "revId": "60a3cb9ad840377d46286bfd703c30a4a4ee56e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
