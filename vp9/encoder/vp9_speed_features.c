@@ -667,11 +667,6 @@ static void set_rt_speed_feature_framesize_independent(
           (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
                                 sizeof(*cpi->count_lastgolden_frame_usage));
   }
-  // Disable adaptive_rd_thresh for row_mt for SVC with frame dropping.
-  // This is causing some tests to fail.
-  // TODO(marpan/jianj): Look into this failure and re-enable later.
-  if (cpi->use_svc && cpi->oxcf.drop_frames_water_mark)
-    sf->adaptive_rd_thresh_row_mt = 0;
 }
 
 void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
