@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88d9eb85_2a4f1479",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-23T03:50:08Z",
+      "side": 1,
+      "message": "may want to drop this character so the file renders correctly in ascii",
+      "range": {
+        "startLine": 316,
+        "startChar": 10,
+        "endLine": 316,
+        "endChar": 11
+      },
+      "revId": "9a88ee1a0ce20484dcf3c2c904555e3fc25b1676",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
