@@ -941,7 +941,6 @@ process_common_toolchain() {
           setup_gnu_toolchain
           arch_int=${tgt_isa##armv}
           arch_int=${arch_int%%te}
-          check_add_asflags --defsym ARCHITECTURE=${arch_int}
           tune_cflags="-mtune="
           if [ ${tgt_isa} = "armv7" ] || [ ${tgt_isa} = "armv7s" ]; then
             if [ -z "${float_abi}" ]; then
@@ -968,6 +967,19 @@ EOF
 
           enabled debug && add_asflags -g
           asm_conversion_cmd="${source_path}/build/make/ads2gas.pl"
+
+          case ${tgt_os} in
+            win*)
+              asm_conversion_cmd="$asm_conversion_cmd -noelf"
+              AS="$CC -c"
+              EXE_SFX=.exe
+              enable_feature thumb
+              ;;
+            *)
+              check_add_asflags --defsym ARCHITECTURE=${arch_int}
+              ;;
+          esac
+
           if enabled thumb; then
             asm_conversion_cmd="$asm_conversion_cmd -thumb"
             check_add_cflags -mthumb
