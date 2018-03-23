@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a067058a_9999a520",
+        "filename": "vpx_ports/vpx_ports.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-23T19:24:42Z",
+      "side": 1,
+      "message": "This could be modified to use the intrinsic for everything except MSVS, but the conditionals get pretty confusing. This keeps it fairly simple. 32 bit gets the intrinsic, all 64 bit platforms get the assembly (everything used to get the assembly).",
+      "range": {
+        "startLine": 25,
+        "startChar": 26,
+        "endLine": 25,
+        "endChar": 38
+      },
+      "revId": "883d858c145432567068f0061ec67c41dcd8003a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
