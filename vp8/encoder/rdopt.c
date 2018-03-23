@@ -2135,6 +2135,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         rd.rate2 +=
             vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv, x->mvcost, 96);
       }
+        // fall through
 
       case NEARESTMV:
       case NEARMV:
@@ -2151,6 +2152,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             (mode_mv[this_mode].as_int == 0)) {
           continue;
         }
+        // fall through
 
       case ZEROMV:
 

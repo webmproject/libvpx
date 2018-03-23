@@ -68,7 +68,9 @@ TEST_P(KeyframeTest, TestRandomVideoSource) {
 
   // In realtime mode - auto placed keyframes are exceedingly rare,  don't
   // bother with this check   if(GetParam() > 0)
-  if (GET_PARAM(1) > 0) EXPECT_GT(kf_count_, 1);
+  if (GET_PARAM(1) > 0) {
+    EXPECT_GT(kf_count_, 1);
+  }
 }
 
 TEST_P(KeyframeTest, TestDisableKeyframes) {
@@ -128,8 +130,9 @@ TEST_P(KeyframeTest, TestAutoKeyframe) {
 
   // In realtime mode - auto placed keyframes are exceedingly rare,  don't
   // bother with this check
-  if (GET_PARAM(1) > 0)
+  if (GET_PARAM(1) > 0) {
     EXPECT_EQ(2u, kf_pts_list_.size()) << " Not the right number of keyframes ";
+  }
 
   // Verify that keyframes match the file keyframes in the file.
   for (std::vector<vpx_codec_pts_t>::const_iterator iter = kf_pts_list_.begin();

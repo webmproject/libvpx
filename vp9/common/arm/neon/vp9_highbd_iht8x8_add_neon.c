@@ -18,8 +18,8 @@
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/inv_txfm.h"
 
-static INLINE void iadst_half_butterfly_bd12_neon(int32x4_t *const x,
-                                                  const int32x2_t c) {
+static INLINE void highbd_iadst_half_butterfly_neon(int32x4_t *const x,
+                                                    const int32x2_t c) {
   const int32x4_t sum = vaddq_s32(x[0], x[1]);
   const int32x4_t sub = vsubq_s32(x[0], x[1]);
   const int64x2_t t0_lo = vmull_lane_s32(vget_low_s32(sum), c, 0);
@@ -35,11 +35,11 @@ static INLINE void iadst_half_butterfly_bd12_neon(int32x4_t *const x,
   x[1] = vcombine_s32(out1_lo, out1_hi);
 }
 
-static INLINE void iadst_butterfly_lane_0_1_bd12_neon(const int32x4_t in0,
-                                                      const int32x4_t in1,
-                                                      const int32x2_t c,
-                                                      int64x2_t *const s0,
-                                                      int64x2_t *const s1) {
+static INLINE void highbd_iadst_butterfly_lane_0_1_neon(const int32x4_t in0,
+                                                        const int32x4_t in1,
+                                                        const int32x2_t c,
+                                                        int64x2_t *const s0,
+                                                        int64x2_t *const s1) {
   const int64x2_t t0_lo = vmull_lane_s32(vget_low_s32(in0), c, 0);
   const int64x2_t t1_lo = vmull_lane_s32(vget_low_s32(in0), c, 1);
   const int64x2_t t0_hi = vmull_lane_s32(vget_high_s32(in0), c, 0);
@@ -51,11 +51,11 @@ static INLINE void iadst_butterfly_lane_0_1_bd12_neon(const int32x4_t in0,
   s1[1] = vmlsl_lane_s32(t1_hi, vget_high_s32(in1), c, 0);
 }
 
-static INLINE void iadst_butterfly_lane_1_0_bd12_neon(const int32x4_t in0,
-                                                      const int32x4_t in1,
-                                                      const int32x2_t c,
-                                                      int64x2_t *const s0,
-                                                      int64x2_t *const s1) {
+static INLINE void highbd_iadst_butterfly_lane_1_0_neon(const int32x4_t in0,
+                                                        const int32x4_t in1,
+                                                        const int32x2_t c,
+                                                        int64x2_t *const s0,
+                                                        int64x2_t *const s1) {
   const int64x2_t t0_lo = vmull_lane_s32(vget_low_s32(in0), c, 1);
   const int64x2_t t1_lo = vmull_lane_s32(vget_low_s32(in0), c, 0);
   const int64x2_t t0_hi = vmull_lane_s32(vget_high_s32(in0), c, 1);
@@ -67,7 +67,7 @@ static INLINE void iadst_butterfly_lane_1_0_bd12_neon(const int32x4_t in0,
   s1[1] = vmlsl_lane_s32(t1_hi, vget_high_s32(in1), c, 1);
 }
 
-static INLINE int32x4_t add_dct_const_round_shift_low_8_bd12(
+static INLINE int32x4_t highbd_add_dct_const_round_shift_low_8(
     const int64x2_t *const in0, const int64x2_t *const in1) {
   const int64x2_t sum_lo = vaddq_s64(in0[0], in1[0]);
   const int64x2_t sum_hi = vaddq_s64(in0[1], in1[1]);
@@ -76,7 +76,7 @@ static INLINE int32x4_t add_dct_const_round_shift_low_8_bd12(
   return vcombine_s32(out_lo, out_hi);
 }
 
-static INLINE int32x4_t sub_dct_const_round_shift_low_8_bd12(
+static INLINE int32x4_t highbd_sub_dct_const_round_shift_low_8(
     const int64x2_t *const in0, const int64x2_t *const in1) {
   const int64x2_t sub_lo = vsubq_s64(in0[0], in1[0]);
   const int64x2_t sub_hi = vsubq_s64(in0[1], in1[1]);
@@ -108,40 +108,46 @@ static INLINE void highbd_iadst8(int32x4_t *const io0, int32x4_t *const io1,
   x[7] = *io6;
 
   // stage 1
-  iadst_butterfly_lane_0_1_bd12_neon(x[0], x[1], vget_low_s32(c0), s[0], s[1]);
-  iadst_butterfly_lane_0_1_bd12_neon(x[2], x[3], vget_high_s32(c0), s[2], s[3]);
-  iadst_butterfly_lane_0_1_bd12_neon(x[4], x[5], vget_low_s32(c1), s[4], s[5]);
-  iadst_butterfly_lane_0_1_bd12_neon(x[6], x[7], vget_high_s32(c1), s[6], s[7]);
+  highbd_iadst_butterfly_lane_0_1_neon(x[0], x[1], vget_low_s32(c0), s[0],
+                                       s[1]);
+  highbd_iadst_butterfly_lane_0_1_neon(x[2], x[3], vget_high_s32(c0), s[2],
+                                       s[3]);
+  highbd_iadst_butterfly_lane_0_1_neon(x[4], x[5], vget_low_s32(c1), s[4],
+                                       s[5]);
+  highbd_iadst_butterfly_lane_0_1_neon(x[6], x[7], vget_high_s32(c1), s[6],
+                                       s[7]);
 
-  x[0] = add_dct_const_round_shift_low_8_bd12(s[0], s[4]);
-  x[1] = add_dct_const_round_shift_low_8_bd12(s[1], s[5]);
-  x[2] = add_dct_const_round_shift_low_8_bd12(s[2], s[6]);
-  x[3] = add_dct_const_round_shift_low_8_bd12(s[3], s[7]);
-  x[4] = sub_dct_const_round_shift_low_8_bd12(s[0], s[4]);
-  x[5] = sub_dct_const_round_shift_low_8_bd12(s[1], s[5]);
-  x[6] = sub_dct_const_round_shift_low_8_bd12(s[2], s[6]);
-  x[7] = sub_dct_const_round_shift_low_8_bd12(s[3], s[7]);
+  x[0] = highbd_add_dct_const_round_shift_low_8(s[0], s[4]);
+  x[1] = highbd_add_dct_const_round_shift_low_8(s[1], s[5]);
+  x[2] = highbd_add_dct_const_round_shift_low_8(s[2], s[6]);
+  x[3] = highbd_add_dct_const_round_shift_low_8(s[3], s[7]);
+  x[4] = highbd_sub_dct_const_round_shift_low_8(s[0], s[4]);
+  x[5] = highbd_sub_dct_const_round_shift_low_8(s[1], s[5]);
+  x[6] = highbd_sub_dct_const_round_shift_low_8(s[2], s[6]);
+  x[7] = highbd_sub_dct_const_round_shift_low_8(s[3], s[7]);
 
   // stage 2
   t[0] = x[0];
   t[1] = x[1];
   t[2] = x[2];
   t[3] = x[3];
-  iadst_butterfly_lane_0_1_bd12_neon(x[4], x[5], vget_high_s32(c2), s[4], s[5]);
-  iadst_butterfly_lane_1_0_bd12_neon(x[7], x[6], vget_high_s32(c2), s[7], s[6]);
+  highbd_iadst_butterfly_lane_0_1_neon(x[4], x[5], vget_high_s32(c2), s[4],
+                                       s[5]);
+  highbd_iadst_butterfly_lane_1_0_neon(x[7], x[6], vget_high_s32(c2), s[7],
+                                       s[6]);
 
   x[0] = vaddq_s32(t[0], t[2]);
   x[1] = vaddq_s32(t[1], t[3]);
   x[2] = vsubq_s32(t[0], t[2]);
   x[3] = vsubq_s32(t[1], t[3]);
-  x[4] = add_dct_const_round_shift_low_8_bd12(s[4], s[6]);
-  x[5] = add_dct_const_round_shift_low_8_bd12(s[5], s[7]);
-  x[6] = sub_dct_const_round_shift_low_8_bd12(s[4], s[6]);
-  x[7] = sub_dct_const_round_shift_low_8_bd12(s[5], s[7]);
+  x[4] = highbd_add_dct_const_round_shift_low_8(s[4], s[6]);
+  x[5] = highbd_add_dct_const_round_shift_low_8(s[5], s[7]);
+  x[6] = highbd_sub_dct_const_round_shift_low_8(s[4], s[6]);
+  x[7] = highbd_sub_dct_const_round_shift_low_8(s[5], s[7]);
 
   // stage 3
-  iadst_half_butterfly_bd12_neon(x + 2, vget_low_s32(c2));
-  iadst_half_butterfly_bd12_neon(x + 6, vget_low_s32(c2));
+  highbd_iadst_half_butterfly_neon(x + 2, vget_low_s32(c2));
+  highbd_iadst_half_butterfly_neon(x + 6, vget_low_s32(c2));
 
   *io0 = x[0];
   *io1 = vnegq_s32(x[4]);

@@ -379,7 +379,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
           // zero/small motion in skin detection is high, i.e, > 4).
           if (consec_zeromv < 4) {
             i = ymis;
-            j = xmis;
+            break;
           }
         }
       }
