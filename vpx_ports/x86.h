@@ -295,11 +295,11 @@ static unsigned short x87_get_control_word(void) {
   return mode;
 }
 #elif ARCH_X86_64
-// Unsupported on Win64:
-// https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/control87-controlfp-control87-2
-// _MCW_PC (Precision control) (Not supported on ARM or x64 platforms.)
-static void x87_set_control_word(unsigned int mode) { (void)mode; }
-static unsigned int x87_get_control_word(void) { return 0; }
+/* No fldcw intrinsics on Windows x64, punt to external asm */
+extern void vpx_winx64_fldcw(unsigned short mode);
+extern unsigned short vpx_winx64_fstcw(void);
+#define x87_set_control_word vpx_winx64_fldcw
+#define x87_get_control_word vpx_winx64_fstcw
 #else
 static void x87_set_control_word(unsigned short mode) {
   __asm { fldcw mode }
