@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "580e4bc1_366663b2",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-24T03:43:40Z",
+      "side": 1,
+      "message": "you could say: source paths may be incorrect because...",
+      "revId": "b60afb06bcd74d15e591c6692688cebe0f899fad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3c7d600b_ffe48d35",
         "filename": "build/make/msvs_common.sh",
         "patchSetId": 3
@@ -22,6 +39,30 @@
       "revId": "b60afb06bcd74d15e591c6692688cebe0f899fad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "262c2d5d_6e81fa4d",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-24T03:43:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "3c7d600b_ffe48d35",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 14
+      },
+      "revId": "b60afb06bcd74d15e591c6692688cebe0f899fad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
