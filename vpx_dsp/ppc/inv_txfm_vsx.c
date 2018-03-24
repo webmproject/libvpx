@@ -14,6 +14,7 @@
 
 #include "vpx_dsp/ppc/bitdepth_conversion_vsx.h"
 #include "vpx_dsp/ppc/types_vsx.h"
+#include "vpx_dsp/ppc/inv_txfm_vsx.h"
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/inv_txfm.h"
@@ -76,8 +77,20 @@ static int16x8_t cospi29_v = { 2404, 2404, 2404, 2404, 2404, 2404, 2404, 2404 };
 static int16x8_t cospi30_v = { 1606, 1606, 1606, 1606, 1606, 1606, 1606, 1606 };
 static int16x8_t cospi31_v = { 804, 804, 804, 804, 804, 804, 804, 804 };
 
-static uint8x16_t mask1 = { 0x0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,
-                            0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17 };
+static const int16x8_t sinpi_1_9_v = { 5283, 5283, 5283, 5283,
+                                       5283, 5283, 5283, 5283 };
+static const int16x8_t sinpi_2_9_v = { 9929, 9929, 9929, 9929,
+                                       9929, 9929, 9929, 9929 };
+static const int16x8_t sinpi_3_9_v = { 13377, 13377, 13377, 13377,
+                                       13377, 13377, 13377, 13377 };
+static const int16x8_t sinpi_4_9_v = { 15212, 15212, 15212, 15212,
+                                       15212, 15212, 15212, 15212 };
+
+static const uint8x16_t mask1 = {
+  0x0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,
+  0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17
+};
+
 #define ROUND_SHIFT_INIT                                               \
   const int32x4_t shift = vec_sl(vec_splat_s32(1), vec_splat_u32(13)); \
   const uint32x4_t shift14 = vec_splat_u32(14);
@@ -118,17 +131,9 @@ static uint8x16_t mask1 = { 0x0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,
   for (i = 0; i < 4; i++)                             \
     for (j = 0; j < 4; j++) dest[j * stride + i] = tmp_dest[j * 4 + i];
 
-void vpx_idct4x4_16_add_vsx(const tran_low_t *input, uint8_t *dest,
+void vpx_round_store4x4_vsx(int16x8_t *in, int16x8_t *out, uint8_t *dest,
                             int stride) {
   int i, j;
-  int32x4_t temp1, temp2, temp3, temp4;
-  int16x8_t step0, step1, tmp16_0, tmp16_1, t_out0, t_out1;
-  uint8x16_t mask0 = { 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
-                       0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
-  int16x8_t v0 = load_tran_low(0, input);
-  int16x8_t v1 = load_tran_low(8 * sizeof(*input), input);
-  int16x8_t t0 = vec_mergeh(v0, v1);
-  int16x8_t t1 = vec_mergel(v0, v1);
   uint8x16_t dest0 = vec_vsx_ld(0, dest);
   uint8x16_t dest1 = vec_vsx_ld(stride, dest);
   uint8x16_t dest2 = vec_vsx_ld(2 * stride, dest);
@@ -138,27 +143,45 @@ void vpx_idct4x4_16_add_vsx(const tran_low_t *input, uint8_t *dest,
   int16x8_t d_u1 = (int16x8_t)vec_mergeh(dest1, zerov);
   int16x8_t d_u2 = (int16x8_t)vec_mergeh(dest2, zerov);
   int16x8_t d_u3 = (int16x8_t)vec_mergeh(dest3, zerov);
-
+  int16x8_t tmp16_0, tmp16_1;
   uint8x16_t output_v;
   uint8_t tmp_dest[16];
-  ROUND_SHIFT_INIT
   PIXEL_ADD_INIT;
 
-  v0 = vec_mergeh(t0, t1);
-  v1 = vec_mergel(t0, t1);
+  PIXEL_ADD4(out[0], in[0]);
+  PIXEL_ADD4(out[1], in[1]);
 
-  IDCT4(v0, v1, t_out0, t_out1);
-  // transpose
-  t0 = vec_mergeh(t_out0, t_out1);
-  t1 = vec_mergel(t_out0, t_out1);
-  v0 = vec_mergeh(t0, t1);
-  v1 = vec_mergel(t0, t1);
-  IDCT4(v0, v1, t_out0, t_out1);
+  PACK_STORE(out[0], out[1]);
+}
 
-  PIXEL_ADD4(v0, t_out0);
-  PIXEL_ADD4(v1, t_out1);
+void vpx_idct4_vsx(int16x8_t *in, int16x8_t *out) {
+  int32x4_t temp1, temp2, temp3, temp4;
+  int16x8_t step0, step1, tmp16_0;
+  uint8x16_t mask0 = { 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
+                       0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 };
+  int16x8_t t0 = vec_mergeh(in[0], in[1]);
+  int16x8_t t1 = vec_mergel(in[0], in[1]);
+  ROUND_SHIFT_INIT
 
-  PACK_STORE(v0, v1);
+  in[0] = vec_mergeh(t0, t1);
+  in[1] = vec_mergel(t0, t1);
+
+  IDCT4(in[0], in[1], out[0], out[1]);
+}
+
+void vpx_idct4x4_16_add_vsx(const tran_low_t *input, uint8_t *dest,
+                            int stride) {
+  int16x8_t in[2], out[2];
+
+  in[0] = load_tran_low(0, input);
+  in[1] = load_tran_low(8 * sizeof(*input), input);
+  // Rows
+  vpx_idct4_vsx(in, out);
+
+  // Columns
+  vpx_idct4_vsx(out, in);
+
+  vpx_round_store4x4_vsx(in, out, dest, stride);
 }
 
 #define TRANSPOSE8x8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2, \
@@ -1129,4 +1152,51 @@ void vpx_iwht4x4_16_add_vsx(const tran_low_t *input, uint8_t *dest,
   TRANSFORM_COLS;
 
   PACK_STORE(v_a, v_c);
+}
+
+void vp9_iadst4_vsx(int16x8_t *in, int16x8_t *out) {
+  int16x8_t sinpi_1_3_v, sinpi_4_2_v, sinpi_2_3_v, sinpi_1_4_v, sinpi_12_n3_v;
+  int32x4_t v_v[5], u_v[4];
+  int32x4_t zerov = vec_splat_s32(0);
+  int16x8_t tmp0, tmp1;
+  int16x8_t zero16v = vec_splat_s16(0);
+  uint32x4_t shift16 = vec_sl(vec_splat_u32(8), vec_splat_u32(1));
+  ROUND_SHIFT_INIT;
+
+  sinpi_1_3_v = vec_mergel(sinpi_1_9_v, sinpi_3_9_v);
+  sinpi_4_2_v = vec_mergel(sinpi_4_9_v, sinpi_2_9_v);
+  sinpi_2_3_v = vec_mergel(sinpi_2_9_v, sinpi_3_9_v);
+  sinpi_1_4_v = vec_mergel(sinpi_1_9_v, sinpi_4_9_v);
+  sinpi_12_n3_v = vec_mergel(vec_add(sinpi_1_9_v, sinpi_2_9_v),
+                             vec_sub(zero16v, sinpi_3_9_v));
+
+  tmp0 = (int16x8_t)vec_mergeh((int32x4_t)in[0], (int32x4_t)in[1]);
+  tmp1 = (int16x8_t)vec_mergel((int32x4_t)in[0], (int32x4_t)in[1]);
+  in[0] = (int16x8_t)vec_mergeh((int32x4_t)tmp0, (int32x4_t)tmp1);
+  in[1] = (int16x8_t)vec_mergel((int32x4_t)tmp0, (int32x4_t)tmp1);
+
+  v_v[0] = vec_msum(in[0], sinpi_1_3_v, zerov);
+  v_v[1] = vec_msum(in[1], sinpi_4_2_v, zerov);
+  v_v[2] = vec_msum(in[0], sinpi_2_3_v, zerov);
+  v_v[3] = vec_msum(in[1], sinpi_1_4_v, zerov);
+  v_v[4] = vec_msum(in[0], sinpi_12_n3_v, zerov);
+
+  in[0] = vec_sub(in[0], in[1]);
+  in[1] = (int16x8_t)vec_sra((int32x4_t)in[1], shift16);
+  in[0] = vec_add(in[0], in[1]);
+  in[0] = (int16x8_t)vec_sl((int32x4_t)in[0], shift16);
+
+  u_v[0] = vec_add(v_v[0], v_v[1]);
+  u_v[1] = vec_sub(v_v[2], v_v[3]);
+  u_v[2] = vec_msum(in[0], sinpi_1_3_v, zerov);
+  u_v[3] = vec_sub(v_v[1], v_v[3]);
+  u_v[3] = vec_add(u_v[3], v_v[4]);
+
+  DCT_CONST_ROUND_SHIFT(u_v[0]);
+  DCT_CONST_ROUND_SHIFT(u_v[1]);
+  DCT_CONST_ROUND_SHIFT(u_v[2]);
+  DCT_CONST_ROUND_SHIFT(u_v[3]);
+
+  out[0] = vec_packs(u_v[0], u_v[1]);
+  out[1] = vec_packs(u_v[2], u_v[3]);
 }
