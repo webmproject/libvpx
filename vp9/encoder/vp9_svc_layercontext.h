@@ -114,6 +114,8 @@ typedef struct SVC {
 
   int last_layer_dropped[VPX_MAX_LAYERS];
   int drop_spatial_layer[VPX_MAX_LAYERS];
+  int framedrop_thresh[VPX_MAX_LAYERS];
+  int framedrop_mode;
 
   INTER_LAYER_PRED disable_inter_layer_pred;
 } SVC;

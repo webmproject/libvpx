@@ -396,7 +396,11 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
 int vp9_rc_drop_frame(VP9_COMP *cpi) {
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
-  if (!oxcf->drop_frames_water_mark) {
+  int drop_frames_water_mark = oxcf->drop_frames_water_mark;
+  if (cpi->use_svc)
+    drop_frames_water_mark =
+        cpi->svc.framedrop_thresh[cpi->svc.spatial_layer_id];
+  if (!drop_frames_water_mark) {
     return 0;
   } else {
     if (rc->buffer_level < 0) {
@@ -406,7 +410,7 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
       // If buffer is below drop_mark, for now just drop every other frame
       // (starting with the next frame) until it increases back over drop_mark.
       int drop_mark =
-          (int)(oxcf->drop_frames_water_mark * rc->optimal_buffer_level / 100);
+          (int)(drop_frames_water_mark * rc->optimal_buffer_level / 100);
       if ((rc->buffer_level > drop_mark) && (rc->decimation_factor > 0)) {
         --rc->decimation_factor;
       } else if (rc->buffer_level <= drop_mark && rc->decimation_factor == 0) {

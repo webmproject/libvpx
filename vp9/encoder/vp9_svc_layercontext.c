@@ -39,6 +39,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->non_reference_frame = 0;
   svc->skip_enhancement_layer = 0;
   svc->disable_inter_layer_pred = INTER_LAYER_PRED_ON;
+  svc->framedrop_mode = 0;
 
   for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
@@ -50,6 +51,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     svc->ext_alt_fb_idx[sl] = 2;
     svc->downsample_filter_type[sl] = BILINEAR;
     svc->downsample_filter_phase[sl] = 8;  // Set to 8 for averaging filter.
+    svc->framedrop_thresh[sl] = oxcf->drop_frames_water_mark;
   }
 
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
