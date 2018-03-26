@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "46f07de1_b7e91b1e",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-26T16:40:34Z",
+      "side": 1,
+      "message": "The function returns without running fix_path, so it\u0027s not really \"may be incorrect\". Updated to be a bit more specific about what failed and how to fix it.",
+      "parentUuid": "580e4bc1_366663b2",
+      "revId": "b60afb06bcd74d15e591c6692688cebe0f899fad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3c7d600b_ffe48d35",
         "filename": "build/make/msvs_common.sh",
         "patchSetId": 3
