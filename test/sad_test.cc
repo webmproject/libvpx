@@ -85,7 +85,7 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
     mask_ = (1 << bit_depth_) - 1;
-    source_stride_ = (params_.width + 31) & ~31;
+    source_stride_ = (params_.width + 63) & ~63;
     reference_stride_ = params_.width * 2;
     rnd_.Reset(ACMRandom::DeterministicSeed());
   }
@@ -109,7 +109,7 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
 
  protected:
   // Handle blocks up to 4 blocks 64x64 with stride up to 128
-  static const int kDataAlignment = 16;
+  static const int kDataAlignment = 32;
   static const int kDataBlockSize = 64 * 128;
   static const int kDataBufferSize = 4 * kDataBlockSize;
 
