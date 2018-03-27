@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ac5ed93_6c315a65",
+        "filename": "tools/set_analyzer_env.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-27T21:30:13Z",
+      "side": 1,
+      "message": "seems sourced scripts should just not have shebang lines.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
