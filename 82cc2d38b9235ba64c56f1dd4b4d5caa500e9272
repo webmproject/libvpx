@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9817df42_52a47865",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 2245,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-27T20:43:19Z",
+      "side": 1,
+      "message": "constrained_framedrop_ \u003d k;",
+      "range": {
+        "startLine": 2245,
+        "startChar": 18,
+        "endLine": 2245,
+        "endChar": 40
+      },
+      "revId": "82cc2d38b9235ba64c56f1dd4b4d5caa500e9272",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7ba8d1be_a79db11f",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4621,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-27T20:43:19Z",
+      "side": 1,
+      "message": "or",
+      "range": {
+        "startLine": 4621,
+        "startChar": 30,
+        "endLine": 4621,
+        "endChar": 32
+      },
+      "revId": "82cc2d38b9235ba64c56f1dd4b4d5caa500e9272",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49d26359_b4c7df9b",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4637,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-27T20:43:19Z",
+      "side": 1,
+      "message": "is this possible to be called if svc is not used? if cpi-\u003euse_svc \u003d\u003d 0, and vp9_rc_drop_frame(cpi) returns 1.",
+      "range": {
+        "startLine": 4637,
+        "startChar": 15,
+        "endLine": 4637,
+        "endChar": 33
+      },
+      "revId": "82cc2d38b9235ba64c56f1dd4b4d5caa500e9272",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
