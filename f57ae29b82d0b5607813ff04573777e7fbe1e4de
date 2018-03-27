@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb3586a5_5245f1cb",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1397,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-27T17:47:30Z",
+      "side": 1,
+      "message": "I couldn\u0027t get this working on one line like:\n[ $(which) -a $(version) -gt 8 ]\n\nso just resorted to nesting it.",
+      "range": {
+        "startLine": 1397,
+        "startChar": 17,
+        "endLine": 1397,
+        "endChar": 22
+      },
+      "revId": "f57ae29b82d0b5607813ff04573777e7fbe1e4de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
