@@ -93,6 +93,30 @@
       "revId": "2019403e8815fbc8924e8ac420dc2ef8084d02e1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c6c8392_a0800f51",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4637,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-03-27T22:00:33Z",
+      "side": 1,
+      "message": "I just realized that last_layer_dropped is used for partition copy on the top spatial layer so it can be a variable instead of an array?",
+      "parentUuid": "0c8e8237_7684ad69",
+      "range": {
+        "startLine": 4637,
+        "startChar": 15,
+        "endLine": 4637,
+        "endChar": 33
+      },
+      "revId": "2019403e8815fbc8924e8ac420dc2ef8084d02e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
