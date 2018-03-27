@@ -137,6 +137,11 @@ class Encoder {
     const vpx_codec_err_t res = vpx_codec_control_(&encoder_, ctrl_id, arg);
     ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
   }
+
+  void Control(int ctrl_id, struct vpx_svc_frame_drop *arg) {
+    const vpx_codec_err_t res = vpx_codec_control_(&encoder_, ctrl_id, arg);
+    ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
+  }
 #if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
   void Control(int ctrl_id, vpx_active_map_t *arg) {
     const vpx_codec_err_t res = vpx_codec_control_(&encoder_, ctrl_id, arg);

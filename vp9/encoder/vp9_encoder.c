@@ -4618,17 +4618,24 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   }
 
   // For 1 pass CBR, check if we are dropping this frame.
-  // Never drop on key frame, of if base layer is key for svc.
+  // Never drop on key frame, or if base layer is key for svc.
   if (oxcf->pass == 0 && oxcf->rc_mode == VPX_CBR &&
       cm->frame_type != KEY_FRAME &&
       (!cpi->use_svc ||
        !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
-    if (vp9_rc_drop_frame(cpi)) {
+    int svc_prev_layer_dropped = 0;
+    // In the contrained framedrop mode for svc (framedrop_mode = 1), if the
+    // previous spatial layer was dropped, drop the current spatial layer.
+    if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
+        cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id - 1])
+      svc_prev_layer_dropped = 1;
+    if ((svc_prev_layer_dropped && cpi->svc.framedrop_mode) ||
+        vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
       cpi->ext_refresh_frame_flags_pending = 0;
       cpi->last_frame_dropped = 1;
-      cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
       if (cpi->use_svc) {
+        cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
         cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
         vp9_inc_frame_in_layer(cpi);
         cpi->svc.skip_enhancement_layer = 1;

@@ -771,7 +771,7 @@ typedef struct vpx_svc_ref_frame_config {
  * spatial layers to drop.
  */
 typedef struct vpx_svc_frame_drop {
-  int framedrop_thresh[VPX_SS_MAX_LAYERS]; /**< Frame flags. */
+  int framedrop_thresh[VPX_SS_MAX_LAYERS]; /**< Frame drop thresholds */
   int framedrop_mode; /**< Layer-based or constrained dropping. */
 } vpx_svc_frame_drop_t;
 
