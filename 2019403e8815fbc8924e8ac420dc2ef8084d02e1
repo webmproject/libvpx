@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a7bb0101_5dcfe1df",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4633,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-03-27T18:11:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fcb333e3_a3a157fa",
+      "range": {
+        "startLine": 4633,
+        "startChar": 8,
+        "endLine": 4633,
+        "endChar": 30
+      },
+      "revId": "2019403e8815fbc8924e8ac420dc2ef8084d02e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e891eb9f_65380dc6",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2018-03-27T17:37:33Z",
       "side": 1,
       "message": "There is an array svc.last_layer_dropped[] which is only used for scaling partitions. is that really needed? It\u0027s always set together with svc.drop_spatial_layer[].",
+      "range": {
+        "startLine": 4637,
+        "startChar": 15,
+        "endLine": 4637,
+        "endChar": 33
+      },
+      "revId": "2019403e8815fbc8924e8ac420dc2ef8084d02e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c8e8237_7684ad69",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 4637,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-03-27T18:11:50Z",
+      "side": 1,
+      "message": "last_layer_dropped needs to be updated as well after the encoding, needed for next frame, so i think its needed as separate flag. It might be possible to combine them, but that would be in another change. I don\u0027t want to change that behavior in this change.",
+      "parentUuid": "e891eb9f_65380dc6",
       "range": {
         "startLine": 4637,
         "startChar": 15,
