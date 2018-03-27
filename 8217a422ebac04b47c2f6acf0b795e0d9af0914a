@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb7465f9_af9cc49c",
+        "filename": "vpx_dsp/mips/vpx_convolve8_mmi.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-27T15:39:43Z",
+      "side": 1,
+      "message": "Since this is a static function, it does not need to be prefixed with vpx_ and it does not need to use the same function prototype as the global vpx_ version. filter, x0_q4, x_step_q4, y0_q4, and y_step_q4 can all be dropped.",
+      "range": {
+        "startLine": 361,
+        "startChar": 0,
+        "endLine": 361,
+        "endChar": 6
+      },
+      "revId": "8217a422ebac04b47c2f6acf0b795e0d9af0914a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
