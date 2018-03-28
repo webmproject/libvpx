@@ -1618,6 +1618,17 @@ class DatarateOnePassCbrSvc
       }
     }
     ASSERT_EQ(count, num_layers_encoded);
+    // In the constrained frame drop mode, if a given spatial is dropped all
+    // upper layers must be dropped too.
+    if (constrained_framedrop_) {
+      for (int sl = 0; sl < number_spatial_layers_; ++sl) {
+        if (!pkt->data.frame.spatial_layer_encoded[sl]) {
+          // Check that all upper layers are dropped.
+          for (int sl2 = sl + 1; sl2 < number_spatial_layers_; ++sl2)
+            ASSERT_EQ(pkt->data.frame.spatial_layer_encoded[sl2], 0);
+        }
+      }
+    }
     // Keep track of number of non-reference frames, needed for mismatch check.
     // Non-reference frames are top spatial and temporal layer frames,
     // for TL > 0.
