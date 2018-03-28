@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bf51fc21_6390ccf8",
+        "filename": "vpx_dsp/x86/sad4d_avx2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-28T19:31:19Z",
+      "side": 1,
+      "message": "visual studio won\u0027t recognize this as a const __m256i* you\u0027ll need to make this \u0027const __m256i *sums /*[4]*/\u0027",
+      "range": {
+        "startLine": 14,
+        "startChar": 30,
+        "endLine": 14,
+        "endChar": 51
+      },
+      "revId": "5cc9ea36bee4005aaf539a5caa54bd491c83aff2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08c34240_cac21aa5",
+        "filename": "vpx_dsp/x86/sad4d_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-28T19:31:19Z",
+      "side": 1,
+      "message": "I don\u0027t think you\u0027ll have the right alignment on x86, try --target\u003dx86-linux-gcc after installing gcc/g++-multilib and the x86 toolchains",
+      "revId": "5cc9ea36bee4005aaf539a5caa54bd491c83aff2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
