@@ -23,6 +23,7 @@
 #include "vpx/vpx_codec.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/vpx_timer.h"
 
 template <typename Function>
 struct TestParams {
@@ -461,6 +462,38 @@ TEST_P(SADx4Test, SrcAlignedByWidth) {
   FillRandom(GetReference(3), reference_stride_);
   CheckSADs();
   source_data_ = tmp_source_data;
+}
+
+TEST_P(SADx4Test, DISABLED_Speed) {
+  int tmp_stride = reference_stride_;
+  reference_stride_ -= 1;
+  FillRandom(source_data_, source_stride_);
+  FillRandom(GetReference(0), reference_stride_);
+  FillRandom(GetReference(1), reference_stride_);
+  FillRandom(GetReference(2), reference_stride_);
+  FillRandom(GetReference(3), reference_stride_);
+  const int kCountSpeedTestBlock = 500000000 / (params_.width * params_.height);
+  uint32_t reference_sad[4], exp_sad[4];
+  vpx_usec_timer timer;
+
+  memset(reference_sad, 0, sizeof(reference_sad));
+  SADs(exp_sad);
+  vpx_usec_timer_start(&timer);
+  for (int i = 0; i < kCountSpeedTestBlock; ++i) {
+    for (int block = 0; block < 4; ++block) {
+      reference_sad[block] = ReferenceSAD(block);
+    }
+  }
+  vpx_usec_timer_mark(&timer);
+  for (int block = 0; block < 4; ++block) {
+    EXPECT_EQ(reference_sad[block], exp_sad[block]) << "block " << block;
+  }
+  const int elapsed_time =
+      static_cast<int>(vpx_usec_timer_elapsed(&timer) / 1000);
+  printf("sad%dx%dx4 (%2dbit) time: %5d ms\n", params_.width, params_.height,
+         bit_depth_, elapsed_time);
+
+  reference_stride_ = tmp_stride;
 }
 
 //------------------------------------------------------------------------------
