@@ -1495,6 +1495,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #endif
   INTERP_FILTER filter_gf_svc = EIGHTTAP;
   MV_REFERENCE_FRAME best_second_ref_frame = NONE;
+  MV_REFERENCE_FRAME spatial_ref = GOLDEN_FRAME;
   const struct segmentation *const seg = &cm->seg;
   int comp_modes = 0;
   int num_inter_modes = (cpi->use_svc) ? RT_INTER_MODES_SVC : RT_INTER_MODES;
@@ -1615,11 +1616,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       cpi->svc.spatial_layer_id > 0) {
     if (cpi->ref_frame_flags & flag_list[LAST_FRAME]) {
       struct scale_factors *const sf = &cm->frame_refs[LAST_FRAME - 1].sf;
-      if (vp9_is_scaled(sf)) svc_force_zero_mode[LAST_FRAME - 1] = 1;
+      if (vp9_is_scaled(sf)) {
+        svc_force_zero_mode[LAST_FRAME - 1] = 1;
+        spatial_ref = LAST_FRAME;
+      }
     }
     if (cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) {
       struct scale_factors *const sf = &cm->frame_refs[GOLDEN_FRAME - 1].sf;
-      if (vp9_is_scaled(sf)) svc_force_zero_mode[GOLDEN_FRAME - 1] = 1;
+      if (vp9_is_scaled(sf)) {
+        svc_force_zero_mode[GOLDEN_FRAME - 1] = 1;
+        spatial_ref = GOLDEN_FRAME;
+      }
     }
   }
 
@@ -1673,10 +1680,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
   // Set the flag_svc_subpel to 1 for SVC if the lower spatial layer used
   // an averaging filter for downsampling (phase = 8). If so, we will test
-  // a nonzero motion mode on the spatial (goldeen) reference.
+  // a nonzero motion mode on the spatial reference.
   // The nonzero motion is half pixel shifted to left and top (-4, -4).
   if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
-      svc_force_zero_mode[GOLDEN_FRAME - 1] &&
+      svc_force_zero_mode[spatial_ref - 1] &&
       cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id - 1] == 8) {
     svc_mv_col = -4;
     svc_mv_row = -4;
@@ -1726,7 +1733,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         get_segdata(seg, mi->segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame)
       continue;
 
-    if (flag_svc_subpel && ref_frame == GOLDEN_FRAME) {
+    if (flag_svc_subpel && ref_frame == spatial_ref) {
       force_gf_mv = 1;
       // Only test mode if NEARESTMV/NEARMV is (svc_mv_col, svc_mv_row),
       // otherwise set NEWMV to (svc_mv_col, svc_mv_row).
