@@ -69,6 +69,23 @@
       "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2b10cde_8b718325",
+        "filename": "tools/set_analyzer_env.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-28T01:48:57Z",
+      "side": 1,
+      "message": "gcc supports some of these sanitizers too",
+      "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
