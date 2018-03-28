@@ -22,6 +22,30 @@
       "revId": "8217a422ebac04b47c2f6acf0b795e0d9af0914a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f990f924_040337b2",
+        "filename": "vpx_dsp/mips/vpx_convolve8_mmi.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1221903
+      },
+      "writtenOn": "2018-03-28T01:48:12Z",
+      "side": 1,
+      "message": "Thank you very much Johann, your advice remind us. Consider vpx_convolve_avg_c is not a static function, my suggestion is to remove the \u0027static\u0027 here, and keep the interface consitant.",
+      "parentUuid": "fb7465f9_af9cc49c",
+      "range": {
+        "startLine": 361,
+        "startChar": 0,
+        "endLine": 361,
+        "endChar": 6
+      },
+      "revId": "8217a422ebac04b47c2f6acf0b795e0d9af0914a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
