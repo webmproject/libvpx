@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d625f1af_813afb73",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1397,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-28T18:21:53Z",
+      "side": 1,
+      "message": "lol yeah that doesn\u0027t work at all. boy i\u0027m lazy, i just assumed it was an executable.",
+      "parentUuid": "b0abbeb2_81725f64",
+      "range": {
+        "startLine": 1397,
+        "startChar": 10,
+        "endLine": 1397,
+        "endChar": 61
+      },
+      "revId": "c794c1de042fff83d1701ee1e50a880bd0223f46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e589108b_2e31115d",
         "filename": "build/make/configure.sh",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "c794c1de042fff83d1701ee1e50a880bd0223f46",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5310b990_1bc1282b",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1403,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-28T18:21:53Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e589108b_2e31115d",
+      "range": {
+        "startLine": 1398,
+        "startChar": 0,
+        "endLine": 1403,
+        "endChar": 14
+      },
+      "revId": "c794c1de042fff83d1701ee1e50a880bd0223f46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
