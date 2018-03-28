@@ -31,7 +31,7 @@ namespace {
 const int kThreads = 0;
 const int kFileName = 1;
 
-typedef std::tr1::tuple<int, const char *> DecodeParam;
+typedef ::testing::tuple<int, const char *> DecodeParam;
 
 class TestVectorTest : public ::libvpx_test::DecoderTest,
                        public ::libvpx_test::CodecTestWithParam<DecodeParam> {
@@ -88,12 +88,12 @@ class TestVectorTest : public ::libvpx_test::DecoderTest,
 // the test failed.
 TEST_P(TestVectorTest, MD5Match) {
   const DecodeParam input = GET_PARAM(1);
-  const std::string filename = std::tr1::get<kFileName>(input);
+  const std::string filename = ::testing::get<kFileName>(input);
   vpx_codec_flags_t flags = 0;
   vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
   char str[256];
 
-  cfg.threads = std::tr1::get<kThreads>(input);
+  cfg.threads = ::testing::get<kThreads>(input);
 
   snprintf(str, sizeof(str) / sizeof(str[0]) - 1, "file: %s threads: %d",
            filename.c_str(), cfg.threads);

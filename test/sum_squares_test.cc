@@ -28,7 +28,7 @@ namespace {
 const int kNumIterations = 10000;
 
 typedef uint64_t (*SSI16Func)(const int16_t *src, int stride, int size);
-typedef std::tr1::tuple<SSI16Func, SSI16Func> SumSquaresParam;
+typedef ::testing::tuple<SSI16Func, SSI16Func> SumSquaresParam;
 
 class SumSquaresTest : public ::testing::TestWithParam<SumSquaresParam> {
  public:
@@ -102,7 +102,7 @@ TEST_P(SumSquaresTest, ExtremeValues) {
   }
 }
 
-using std::tr1::make_tuple;
+using ::testing::make_tuple;
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(

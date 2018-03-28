@@ -21,7 +21,7 @@
 #include "./ivfenc.h"
 #include "./vpx_version.h"
 
-using std::tr1::make_tuple;
+using ::testing::make_tuple;
 
 namespace {
 
@@ -34,7 +34,7 @@ const char kNewEncodeOutputFile[] = "new_encode.ivf";
 /*
  DecodePerfTest takes a tuple of filename + number of threads to decode with
  */
-typedef std::tr1::tuple<const char *, unsigned> DecodePerfParam;
+typedef ::testing::tuple<const char *, unsigned> DecodePerfParam;
 
 const DecodePerfParam kVP9DecodePerfVectors[] = {
   make_tuple("vp90-2-bbb_426x240_tile_1x1_180kbps.webm", 1),

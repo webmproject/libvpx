@@ -33,10 +33,10 @@ const int kNumBlockEntries = 16;
 
 typedef void (*VP8Quantize)(BLOCK *b, BLOCKD *d);
 
-typedef std::tr1::tuple<VP8Quantize, VP8Quantize> VP8QuantizeParam;
+typedef ::testing::tuple<VP8Quantize, VP8Quantize> VP8QuantizeParam;
 
+using ::testing::make_tuple;
 using libvpx_test::ACMRandom;
-using std::tr1::make_tuple;
 
 // Create and populate a VP8_COMP instance which has a complete set of
 // quantization inputs as well as a second MACROBLOCKD for output.

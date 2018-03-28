@@ -141,7 +141,7 @@ class BlockinessTestBase : public ::testing::Test {
 };
 
 #if CONFIG_VP9_ENCODER
-typedef std::tr1::tuple<int, int> BlockinessParam;
+typedef ::testing::tuple<int, int> BlockinessParam;
 class BlockinessVP9Test
     : public BlockinessTestBase,
       public ::testing::WithParamInterface<BlockinessParam> {
@@ -208,7 +208,7 @@ TEST_P(BlockinessVP9Test, WorstCaseBlockiness) {
 }
 #endif  // CONFIG_VP9_ENCODER
 
-using std::tr1::make_tuple;
+using ::testing::make_tuple;
 
 //------------------------------------------------------------------------------
 // C functions
