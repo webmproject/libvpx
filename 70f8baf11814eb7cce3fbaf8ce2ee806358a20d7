@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c8031500_3d2bc2b8",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-28T02:44:39Z",
+      "side": 1,
+      "message": "the analyzer is reporting a new error from gtest.h, but fails to capture it in the output:\n\nwarning: Path diagnostic report is not generated. Current output format does not support diagnostics that cross file boundaries. Refer to --analyzer-output for valid output formats\nIn file included from /usr/local/google/home/jzern/external/libvpx/git/test/sad_test.cc:15:\n/usr/local/google/home/jzern/external/libvpx/git/third_party/googletest/src/include/gtest/gtest.h:1421:11: warning: The left operand of \u0027\u003d\u003d\u0027 is a garbage value\n  if (lhs \u003d\u003d rhs) {\n      ~~~ ^\n1 warning generated.\n\nI think it\u0027s concerned about reference_sad[] not being initialized. An assert(kCountSpeedTestBlock \u003e 0) or a memset should work",
+      "revId": "70f8baf11814eb7cce3fbaf8ce2ee806358a20d7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
