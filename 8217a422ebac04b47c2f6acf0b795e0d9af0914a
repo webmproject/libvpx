@@ -46,6 +46,30 @@
       "revId": "8217a422ebac04b47c2f6acf0b795e0d9af0914a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bd2b054_a2b4a15a",
+        "filename": "vpx_dsp/mips/vpx_convolve8_mmi.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1272032
+      },
+      "writtenOn": "2018-03-28T02:09:34Z",
+      "side": 1,
+      "message": "I\u0027ve removed the \u0027static\u0027 of vpx_convolve_avg_mmi, and keep the interface consitant.",
+      "parentUuid": "f990f924_040337b2",
+      "range": {
+        "startLine": 361,
+        "startChar": 0,
+        "endLine": 361,
+        "endChar": 6
+      },
+      "revId": "8217a422ebac04b47c2f6acf0b795e0d9af0914a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
