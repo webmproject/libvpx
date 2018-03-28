@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0abbeb2_81725f64",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1397,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2018-03-28T18:06:17Z",
+      "side": 1,
+      "message": "I don\u0027t think this works-- it\u0027s xcrun you want to run which on; not the shell function wrapping it.",
+      "range": {
+        "startLine": 1397,
+        "startChar": 10,
+        "endLine": 1397,
+        "endChar": 61
+      },
+      "revId": "c794c1de042fff83d1701ee1e50a880bd0223f46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
