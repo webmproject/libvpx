@@ -22,6 +22,53 @@
       "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e30e6335_dc308254",
+        "filename": "tools/set_analyzer_env.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-28T01:37:00Z",
+      "side": 1,
+      "message": "\u003e seems sourced scripts should just not have shebang lines.\n\nthat\u0027s the general guidance",
+      "parentUuid": "7ac5ed93_6c315a65",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7614acb_1c46c4e1",
+        "filename": "tools/set_analyzer_env.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-03-28T01:37:00Z",
+      "side": 1,
+      "message": "it\u0027s more common to quote strings passed to echo",
+      "range": {
+        "startLine": 26,
+        "startChar": 9,
+        "endLine": 26,
+        "endChar": 30
+      },
+      "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
