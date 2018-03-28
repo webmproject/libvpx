@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "e88733a4_bc52274c",
+        "filename": "tools/set_analyzer_env.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-28T19:23:17Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e30e6335_dc308254",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a7614acb_1c46c4e1",
         "filename": "tools/set_analyzer_env.sh",
         "patchSetId": 2
@@ -72,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "c7ad5111_d6d6a3cf",
+        "filename": "tools/set_analyzer_env.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-28T19:23:17Z",
+      "side": 1,
+      "message": "oh yeah i fixed the rest of them",
+      "parentUuid": "a7614acb_1c46c4e1",
+      "range": {
+        "startLine": 26,
+        "startChar": 9,
+        "endLine": 26,
+        "endChar": 30
+      },
+      "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e2b10cde_8b718325",
         "filename": "tools/set_analyzer_env.sh",
         "patchSetId": 2
@@ -83,6 +131,24 @@
       "writtenOn": "2018-03-28T01:48:57Z",
       "side": 1,
       "message": "gcc supports some of these sanitizers too",
+      "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a292f91_539682f3",
+        "filename": "tools/set_analyzer_env.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-03-28T19:23:17Z",
+      "side": 1,
+      "message": "my goal was to simplify the jenkins builds and improve reproducability. since we are only using clang there, it seemed best to require it here.",
+      "parentUuid": "e2b10cde_8b718325",
       "revId": "31d038a49f6af37dbc140952c198d83d6c4bade6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
