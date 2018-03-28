@@ -1455,7 +1455,7 @@ class DatarateOnePassCbrSvc
 
       if (constrained_framedrop_) {
         vpx_svc_frame_drop_t svc_drop_frame;
-        svc_drop_frame.framedrop_mode = 1;
+        svc_drop_frame.framedrop_mode = CONSTRAINED_LAYER_DROP;
         for (i = 0; i < number_spatial_layers_; i++)
           svc_drop_frame.framedrop_thresh[i] = 30;
         encoder->Control(VP9E_SET_SVC_FRAME_DROP_LAYER, &svc_drop_frame);
