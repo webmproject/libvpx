@@ -18,7 +18,7 @@ namespace {
 
 const int kTestMode = 0;
 
-typedef std::tr1::tuple<libvpx_test::TestMode, int> SuperframeTestParam;
+typedef ::testing::tuple<libvpx_test::TestMode, int> SuperframeTestParam;
 
 class SuperframeTest
     : public ::libvpx_test::EncoderTest,
@@ -31,7 +31,7 @@ class SuperframeTest
   virtual void SetUp() {
     InitializeConfig();
     const SuperframeTestParam input = GET_PARAM(1);
-    const libvpx_test::TestMode mode = std::tr1::get<kTestMode>(input);
+    const libvpx_test::TestMode mode = ::testing::get<kTestMode>(input);
     SetMode(mode);
     sf_count_ = 0;
     sf_count_max_ = INT_MAX;

@@ -91,7 +91,7 @@ class AverageTestBase : public ::testing::Test {
 };
 typedef unsigned int (*AverageFunction)(const uint8_t *s, int pitch);
 
-typedef std::tr1::tuple<int, int, int, int, AverageFunction> AvgFunc;
+typedef ::testing::tuple<int, int, int, int, AverageFunction> AvgFunc;
 
 class AverageTest : public AverageTestBase,
                     public ::testing::WithParamInterface<AvgFunc> {
@@ -122,7 +122,7 @@ class AverageTest : public AverageTestBase,
 typedef void (*IntProRowFunc)(int16_t hbuf[16], uint8_t const *ref,
                               const int ref_stride, const int height);
 
-typedef std::tr1::tuple<int, IntProRowFunc, IntProRowFunc> IntProRowParam;
+typedef ::testing::tuple<int, IntProRowFunc, IntProRowFunc> IntProRowParam;
 
 class IntProRowTest : public AverageTestBase,
                       public ::testing::WithParamInterface<IntProRowParam> {
@@ -164,7 +164,7 @@ class IntProRowTest : public AverageTestBase,
 
 typedef int16_t (*IntProColFunc)(uint8_t const *ref, const int width);
 
-typedef std::tr1::tuple<int, IntProColFunc, IntProColFunc> IntProColParam;
+typedef ::testing::tuple<int, IntProColFunc, IntProColFunc> IntProColParam;
 
 class IntProColTest : public AverageTestBase,
                       public ::testing::WithParamInterface<IntProColParam> {
@@ -189,7 +189,7 @@ class IntProColTest : public AverageTestBase,
 };
 
 typedef int (*SatdFunc)(const tran_low_t *coeffs, int length);
-typedef std::tr1::tuple<int, SatdFunc> SatdTestParam;
+typedef ::testing::tuple<int, SatdFunc> SatdTestParam;
 
 class SatdTest : public ::testing::Test,
                  public ::testing::WithParamInterface<SatdTestParam> {
@@ -235,7 +235,7 @@ class SatdTest : public ::testing::Test,
 
 typedef int64_t (*BlockErrorFunc)(const tran_low_t *coeff,
                                   const tran_low_t *dqcoeff, int block_size);
-typedef std::tr1::tuple<int, BlockErrorFunc> BlockErrorTestFPParam;
+typedef ::testing::tuple<int, BlockErrorFunc> BlockErrorTestFPParam;
 
 class BlockErrorTestFP
     : public ::testing::Test,
@@ -428,7 +428,7 @@ TEST_P(BlockErrorTestFP, DISABLED_Speed) {
   printf("blocksize: %4d time: %4d us\n", blocksize, elapsed_time);
 }
 
-using std::tr1::make_tuple;
+using ::testing::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(
     C, AverageTest,

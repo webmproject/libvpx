@@ -127,7 +127,7 @@ class ConsistencyTestBase : public ::testing::Test {
 };
 
 #if CONFIG_VP9_ENCODER
-typedef std::tr1::tuple<int, int> ConsistencyParam;
+typedef ::testing::tuple<int, int> ConsistencyParam;
 class ConsistencyVP9Test
     : public ConsistencyTestBase,
       public ::testing::WithParamInterface<ConsistencyParam> {
@@ -198,7 +198,7 @@ TEST_P(ConsistencyVP9Test, ConsistencyIsZero) {
 }
 #endif  // CONFIG_VP9_ENCODER
 
-using std::tr1::make_tuple;
+using ::testing::make_tuple;
 
 //------------------------------------------------------------------------------
 // C functions

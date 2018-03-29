@@ -24,14 +24,14 @@
 
 namespace {
 
+using ::testing::make_tuple;
 using libvpx_test::ACMRandom;
-using std::tr1::make_tuple;
 
 typedef void (*PredictFunc)(uint8_t *src_ptr, int src_pixels_per_line,
                             int xoffset, int yoffset, uint8_t *dst_ptr,
                             int dst_pitch);
 
-typedef std::tr1::tuple<int, int, PredictFunc> PredictParam;
+typedef ::testing::tuple<int, int, PredictFunc> PredictParam;
 
 class PredictTestBase : public ::testing::TestWithParam<PredictParam> {
  public:

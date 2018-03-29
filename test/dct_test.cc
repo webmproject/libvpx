@@ -26,10 +26,10 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
 
+using ::testing::make_tuple;
+using ::testing::tuple;
 using libvpx_test::ACMRandom;
 using libvpx_test::Buffer;
-using std::tr1::make_tuple;
-using std::tr1::tuple;
 
 namespace {
 typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);

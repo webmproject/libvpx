@@ -35,7 +35,7 @@ typedef int64_t (*HBDBlockErrorFunc)(const tran_low_t *coeff,
                                      intptr_t block_size, int64_t *ssz,
                                      int bps);
 
-typedef std::tr1::tuple<HBDBlockErrorFunc, HBDBlockErrorFunc, vpx_bit_depth_t>
+typedef ::testing::tuple<HBDBlockErrorFunc, HBDBlockErrorFunc, vpx_bit_depth_t>
     BlockErrorParam;
 
 typedef int64_t (*BlockErrorFunc)(const tran_low_t *coeff,
@@ -168,7 +168,7 @@ TEST_P(BlockErrorTest, ExtremeValues) {
       << "First failed at test case " << first_failure;
 }
 
-using std::tr1::make_tuple;
+using ::testing::make_tuple;
 
 #if HAVE_SSE2
 const BlockErrorParam sse2_block_error_tests[] = {

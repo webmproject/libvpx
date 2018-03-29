@@ -53,23 +53,22 @@ class CodecFactory {
 template <class T1>
 class CodecTestWithParam
     : public ::testing::TestWithParam<
-          std::tr1::tuple<const libvpx_test::CodecFactory *, T1> > {};
+          ::testing::tuple<const libvpx_test::CodecFactory *, T1> > {};
 
 template <class T1, class T2>
 class CodecTestWith2Params
     : public ::testing::TestWithParam<
-          std::tr1::tuple<const libvpx_test::CodecFactory *, T1, T2> > {};
+          ::testing::tuple<const libvpx_test::CodecFactory *, T1, T2> > {};
 
 template <class T1, class T2, class T3>
 class CodecTestWith3Params
     : public ::testing::TestWithParam<
-          std::tr1::tuple<const libvpx_test::CodecFactory *, T1, T2, T3> > {};
+          ::testing::tuple<const libvpx_test::CodecFactory *, T1, T2, T3> > {};
 
 template <class T1, class T2, class T3, class T4>
 class CodecTestWith4Params
-    : public ::testing::TestWithParam<
-          std::tr1::tuple<const libvpx_test::CodecFactory *, T1, T2, T3, T4> > {
-};
+    : public ::testing::TestWithParam< ::testing::tuple<
+          const libvpx_test::CodecFactory *, T1, T2, T3, T4> > {};
 
 /*
  * VP8 Codec Definitions

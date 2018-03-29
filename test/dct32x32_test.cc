@@ -66,7 +66,7 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
 typedef void (*FwdTxfmFunc)(const int16_t *in, tran_low_t *out, int stride);
 typedef void (*InvTxfmFunc)(const tran_low_t *in, uint8_t *out, int stride);
 
-typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int, vpx_bit_depth_t>
+typedef ::testing::tuple<FwdTxfmFunc, InvTxfmFunc, int, vpx_bit_depth_t>
     Trans32x32Param;
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -292,7 +292,7 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
   }
 }
 
-using std::tr1::make_tuple;
+using ::testing::make_tuple;
 
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
