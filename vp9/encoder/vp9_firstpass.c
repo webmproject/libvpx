@@ -1588,7 +1588,9 @@ static double wq_err_divisor(VP9_COMP *cpi) {
 
   // Use a different error per mb factor for calculating boost for
   //  different formats.
-  if (screen_area < 1280 * 720) {
+  if (screen_area <= 640 * 360) {
+    return 115.0;
+  } else if (screen_area < 1280 * 720) {
     return 125.0;
   } else if (screen_area <= 1920 * 1080) {
     return 130.0;
