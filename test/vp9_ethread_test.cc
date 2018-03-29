@@ -409,7 +409,7 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(::libvpx_test::kTwoPassGood,
                           ::libvpx_test::kOnePassGood,
                           ::libvpx_test::kRealTime),
-        ::testing::Range(3, 9),    // cpu_used
+        ::testing::Range(3, 10),   // cpu_used
         ::testing::Range(0, 3),    // tile_columns
         ::testing::Range(2, 5)));  // threads
 

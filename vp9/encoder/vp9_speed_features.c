@@ -661,6 +661,14 @@ static void set_rt_speed_feature_framesize_independent(
     sf->limit_newmv_early_exit = 0;
     sf->use_simple_block_yrd = 1;
   }
+
+  if (speed >= 9) {
+    sf->mv.enable_adaptive_subpel_force_stop = 1;
+    sf->mv.adapt_subpel_force_stop.mv_thresh = 2;
+    sf->mv.adapt_subpel_force_stop.force_stop_below = 1;
+    sf->mv.adapt_subpel_force_stop.force_stop_above = 2;
+  }
+
   if (sf->use_altref_onepass) {
     if (cpi->rc.is_src_frame_alt_ref && cm->frame_type != KEY_FRAME) {
       sf->partition_search_type = FIXED_PARTITION;

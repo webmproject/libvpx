@@ -161,6 +161,17 @@ typedef enum {
   ONE_LOOP_REDUCED = 1
 } FAST_COEFF_UPDATE;
 
+typedef struct ADAPT_SUBPEL_FORCE_STOP {
+  // Threshold for full pixel motion vector;
+  int mv_thresh;
+
+  // subpel_force_stop if full pixel MV is below the threshold.
+  int force_stop_below;
+
+  // subpel_force_stop if full pixel MV is equal to or above the threshold.
+  int force_stop_above;
+} ADAPT_SUBPEL_FORCE_STOP;
+
 typedef struct MV_SPEED_FEATURES {
   // Motion search method (Diamond, NSTEP, Hex, Big Diamond, Square, etc).
   SEARCH_METHODS search_method;
@@ -188,6 +199,11 @@ typedef struct MV_SPEED_FEATURES {
   // 2: Stop at half pixel.
   // 3: Stop at full pixel.
   int subpel_force_stop;
+
+  // If it's enabled, different subpel_force_stop will be used for different MV.
+  int enable_adaptive_subpel_force_stop;
+
+  ADAPT_SUBPEL_FORCE_STOP adapt_subpel_force_stop;
 
   // This variable sets the step_param used in full pel motion search.
   int fullpel_search_step_param;
