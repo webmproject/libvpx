@@ -748,7 +748,7 @@ typedef struct vpx_svc_layer_id {
   int temporal_layer_id; /**< Temporal layer id number. */
 } vpx_svc_layer_id_t;
 
-/*!\brief  vp9 svc frame flag parameters.
+/*!\brief vp9 svc frame flag parameters.
  *
  * This defines the frame flags and buffer indices for each spatial layer for
  * svc encoding.
@@ -763,7 +763,18 @@ typedef struct vpx_svc_ref_frame_config {
   int alt_fb_idx[VPX_TS_MAX_LAYERS];  /**< Altref buffer index. */
 } vpx_svc_ref_frame_config_t;
 
-/*!\brief  vp9 svc frame dropping parameters.
+/*!\brief VP9 svc frame dropping mode.
+ *
+ * This defines the frame drop mode for SVC.
+ *
+ */
+typedef enum {
+  LAYER_DROP, /**< Any spatial layer can drop. */
+  CONSTRAINED_LAYER_DROP
+  /**< Upper layers are constrained to drop if current layer drops. */
+} SVC_LAYER_DROP_MODE;
+
+/*!\brief vp9 svc frame dropping parameters.
  *
  * This defines the frame drop thresholds for each spatial layer, and the
  * the frame dropping mode: 0 = layer based frame dropping (default),
@@ -772,7 +783,8 @@ typedef struct vpx_svc_ref_frame_config {
  */
 typedef struct vpx_svc_frame_drop {
   int framedrop_thresh[VPX_SS_MAX_LAYERS]; /**< Frame drop thresholds */
-  int framedrop_mode; /**< Layer-based or constrained dropping. */
+  SVC_LAYER_DROP_MODE
+  framedrop_mode; /**< Layer-based or constrained dropping. */
 } vpx_svc_frame_drop_t;
 
 /*!\cond */

@@ -395,14 +395,14 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
 
 static int check_buffer(VP9_COMP *cpi, int drop_mark) {
   SVC *svc = &cpi->svc;
-  if (!cpi->use_svc || !cpi->svc.framedrop_mode) {
+  if (!cpi->use_svc || cpi->svc.framedrop_mode == LAYER_DROP) {
     RATE_CONTROL *const rc = &cpi->rc;
     return (rc->buffer_level <= drop_mark);
   } else {
     int i;
-    // For SVC in the constrained framedrop mode (svc->framedrop_mode = 1):
-    // the condition on buffer (to drop frame) is checked on current and
-    // upper spatial layers.
+    // For SVC in the constrained framedrop mode (svc->framedrop_mode =
+    // CONSTRAINED_LAYER_DROP): the condition on buffer (to drop frame) is
+    // checked on current and upper spatial layers.
     for (i = svc->spatial_layer_id; i < svc->number_spatial_layers; ++i) {
       const int layer = LAYER_IDS_TO_IDX(i, svc->temporal_layer_id,
                                          svc->number_temporal_layers);
