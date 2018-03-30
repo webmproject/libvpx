@@ -237,7 +237,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagZero) {
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
         << " The datarate for the file is lower than target by too much!";
-    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.30)
+    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.35)
         << " The datarate for the file is greater than target by too much!";
   }
 }
@@ -294,7 +294,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZeroFrameParDecOff) {
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
         << " The datarate for the file is lower than target by too much!";
-    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.30)
+    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.35)
         << " The datarate for the file is greater than target by too much!";
   }
 }
