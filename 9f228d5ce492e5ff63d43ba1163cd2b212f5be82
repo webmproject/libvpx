@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3bf51b5_fbca1be4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-03-30T21:49:04Z",
+      "side": 1,
+      "message": "also say: added control for enabling denoiser.",
+      "revId": "9f228d5ce492e5ff63d43ba1163cd2b212f5be82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a9d6dd07_5920dab1",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-03-30T21:49:04Z",
+      "side": 1,
+      "message": "make this 0 as default",
+      "revId": "9f228d5ce492e5ff63d43ba1163cd2b212f5be82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
