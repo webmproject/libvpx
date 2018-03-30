@@ -632,7 +632,7 @@ int main(int argc, const char **argv) {
   int end_of_stream = 0;
   int frames_received = 0;
 #if OUTPUT_RC_STATS
-  VpxVideoWriter *outfile[VPX_TS_MAX_LAYERS] = { NULL };
+  VpxVideoWriter *outfile[VPX_SS_MAX_LAYERS] = { NULL };
   struct RateControlStats rc;
   vpx_svc_layer_id_t layer_id;
   vpx_svc_ref_frame_config_t ref_frame_config;
@@ -644,6 +644,8 @@ int main(int argc, const char **argv) {
   struct vpx_usec_timer timer;
   int64_t cx_time = 0;
   memset(&svc_ctx, 0, sizeof(svc_ctx));
+  memset(&app_input, 0, sizeof(AppInput));
+  memset(&info, 0, sizeof(VpxVideoInfo));
   exec_name = argv[0];
   parse_command_line(argc, argv, &app_input, &svc_ctx, &enc_cfg);
 
@@ -692,16 +694,16 @@ int main(int argc, const char **argv) {
       die("Failed to open %s for writing\n", app_input.output_filename);
   }
 #if OUTPUT_RC_STATS
-  // For now, just write temporal layer streams.
-  // TODO(marpan): do spatial by re-writing superframe.
+  // Write out spatial layer stream.
+  // TODO(marpan/jianj): allow for writing each spatial and temporal stream.
   if (svc_ctx.output_rc_stat) {
-    for (tl = 0; tl < enc_cfg.ts_number_layers; ++tl) {
+    for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
       char file_name[PATH_MAX];
 
-      snprintf(file_name, sizeof(file_name), "%s_t%d.ivf",
-               app_input.output_filename, tl);
-      outfile[tl] = vpx_video_writer_open(file_name, kContainerIVF, &info);
-      if (!outfile[tl]) die("Failed to open %s for writing", file_name);
+      snprintf(file_name, sizeof(file_name), "%s_s%d.ivf",
+               app_input.output_filename, sl);
+      outfile[sl] = vpx_video_writer_open(file_name, kContainerIVF, &info);
+      if (!outfile[sl]) die("Failed to open %s for writing", file_name);
     }
   }
 #endif
@@ -725,6 +727,8 @@ int main(int argc, const char **argv) {
   vpx_codec_control(&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT, 900);
 
   vpx_codec_control(&codec, VP9E_SET_SVC_INTER_LAYER_PRED, 0);
+
+  vpx_codec_control(&codec, VP9E_SET_NOISE_SENSITIVITY, 0);
 
   // Encode frames
   while (!end_of_stream) {
@@ -800,6 +804,7 @@ int main(int argc, const char **argv) {
             uint64_t sizes[8];
             uint64_t sizes_parsed[8];
             int count = 0;
+            int tot_size = 0;
             vp9_zero(sizes);
             vp9_zero(sizes_parsed);
 #endif
@@ -825,14 +830,16 @@ int main(int argc, const char **argv) {
                     num_layers_encoded++;
                   }
                 }
+                tot_size = 0;
+                for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+                  if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
+                    tot_size += sizes[sl];
+                    vpx_video_writer_write_frame(
+                        outfile[sl], cx_pkt->data.frame.buf, tot_size,
+                        cx_pkt->data.frame.pts);
+                  }
+                }
               }
-              for (tl = layer_id.temporal_layer_id;
-                   tl < enc_cfg.ts_number_layers; ++tl) {
-                vpx_video_writer_write_frame(
-                    outfile[tl], cx_pkt->data.frame.buf, cx_pkt->data.frame.sz,
-                    cx_pkt->data.frame.pts);
-              }
-
               for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
                 if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
                   for (tl = layer_id.temporal_layer_id;
@@ -941,8 +948,8 @@ int main(int argc, const char **argv) {
   }
 #if OUTPUT_RC_STATS
   if (svc_ctx.output_rc_stat) {
-    for (tl = 0; tl < enc_cfg.ts_number_layers; ++tl) {
-      vpx_video_writer_close(outfile[tl]);
+    for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+      vpx_video_writer_close(outfile[sl]);
     }
   }
 #endif
