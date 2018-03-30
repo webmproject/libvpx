@@ -18,12 +18,12 @@
 
 namespace {
 
-static void assign_layer_bitrates(vpx_codec_enc_cfg_t *const enc_cfg,
-                                  const vpx_svc_extra_cfg_t *svc_params,
-                                  int spatial_layers, int temporal_layers,
-                                  int temporal_layering_mode,
-                                  int *layer_target_avg_bandwidth,
-                                  int64_t *bits_in_buffer_model) {
+void AssignLayerBitrates(vpx_codec_enc_cfg_t *const enc_cfg,
+                         const vpx_svc_extra_cfg_t *svc_params,
+                         int spatial_layers, int temporal_layers,
+                         int temporal_layering_mode,
+                         int *layer_target_avg_bandwidth,
+                         int64_t *bits_in_buffer_model) {
   int sl, spatial_layer_target;
   float total = 0;
   float alloc_ratio[VPX_MAX_LAYERS] = { 0 };
@@ -66,12 +66,11 @@ static void assign_layer_bitrates(vpx_codec_enc_cfg_t *const enc_cfg,
   }
 }
 
-static void CheckLayerRateTargeting(vpx_codec_enc_cfg_t *const cfg,
-                                    int number_spatial_layers,
-                                    int number_temporal_layers,
-                                    double *file_datarate,
-                                    double thresh_overshoot,
-                                    double thresh_undershoot) {
+void CheckLayerRateTargeting(vpx_codec_enc_cfg_t *const cfg,
+                             int number_spatial_layers,
+                             int number_temporal_layers, double *file_datarate,
+                             double thresh_overshoot,
+                             double thresh_undershoot) {
   for (int sl = 0; sl < number_spatial_layers; ++sl)
     for (int tl = 0; tl < number_temporal_layers; ++tl) {
       const int layer = sl * number_temporal_layers + tl;
@@ -265,9 +264,9 @@ class DatarateOnePassCbrSvc
       // Buffer level should not reset on dynamic bitrate change.
       memcpy(bits_in_buffer_model_tmp, bits_in_buffer_model_,
              sizeof(bits_in_buffer_model_));
-      assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                            cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                            layer_target_avg_bandwidth_, bits_in_buffer_model_);
+      AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                          cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                          layer_target_avg_bandwidth_, bits_in_buffer_model_);
       memcpy(bits_in_buffer_model_, bits_in_buffer_model_tmp,
              sizeof(bits_in_buffer_model_));
 
@@ -503,9 +502,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL1TLScreenContent1) {
   ResetModel();
   tune_content_ = 1;
   base_speed_setting_ = speed_setting_;
-  assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
+  AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                      cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                      layer_target_avg_bandwidth_, bits_in_buffer_model_);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                           number_temporal_layers_, file_datarate_, 0.78, 1.15);
@@ -551,9 +550,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL) {
   for (int i = 200; i <= 800; i += 200) {
     cfg_.rc_target_bitrate = i;
     ResetModel();
-    assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                          cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                          layer_target_avg_bandwidth_, bits_in_buffer_model_);
+    AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                             number_temporal_layers_, file_datarate_, 0.75, 1.2);
@@ -604,9 +603,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLDenoiserOn) {
       cfg_.rc_target_bitrate = i;
       ResetModel();
       denoiser_on_ = noise_sen;
-      assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                            cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                            layer_target_avg_bandwidth_, bits_in_buffer_model_);
+      AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                          cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                          layer_target_avg_bandwidth_, bits_in_buffer_model_);
       ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
       CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                               number_temporal_layers_, file_datarate_, 0.78,
@@ -656,9 +655,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TLSmallKf) {
     cfg_.kf_max_dist = j;
     key_frame_spacing_ = j;
     ResetModel();
-    assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                          cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                          layer_target_avg_bandwidth_, bits_in_buffer_model_);
+    AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                             number_temporal_layers_, file_datarate_, 0.78,
@@ -706,9 +705,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4Threads) {
       cfg_.rc_target_bitrate = i;
       ResetModel();
       constrained_framedrop_ = k;
-      assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                            cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                            layer_target_avg_bandwidth_, bits_in_buffer_model_);
+      AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                          cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                          layer_target_avg_bandwidth_, bits_in_buffer_model_);
       ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
       CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                               number_temporal_layers_, file_datarate_, 0.75,
@@ -756,9 +755,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL) {
   top_sl_height_ = 480;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
-  assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
+  AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                      cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                      layer_target_avg_bandwidth_, bits_in_buffer_model_);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                           number_temporal_layers_, file_datarate_, 0.78, 1.15);
@@ -804,9 +803,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLDynamicBitrateChange) {
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   change_bitrate_ = true;
-  assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
+  AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                      cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                      layer_target_avg_bandwidth_, bits_in_buffer_model_);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                           number_temporal_layers_, file_datarate_, 0.78, 1.15);
@@ -854,9 +853,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL2TLDynamicPatternChange) {
   top_sl_height_ = 480;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
-  assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
+  AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                      cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                      layer_target_avg_bandwidth_, bits_in_buffer_model_);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                           number_temporal_layers_, file_datarate_, 0.78, 1.15);
@@ -902,9 +901,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL_DisableEnableLayers) {
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   dynamic_drop_layer_ = true;
-  assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
+  AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                      cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                      layer_target_avg_bandwidth_, bits_in_buffer_model_);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   // Don't check rate targeting on top spatial layer since it will be skipped
   // for part of the sequence.
@@ -955,9 +954,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TLSmallKf) {
     cfg_.kf_max_dist = j;
     key_frame_spacing_ = j;
     ResetModel();
-    assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                          cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                          layer_target_avg_bandwidth_, bits_in_buffer_model_);
+    AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                        cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                        layer_target_avg_bandwidth_, bits_in_buffer_model_);
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
     CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                             number_temporal_layers_, file_datarate_, 0.78,
@@ -1007,9 +1006,9 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4Threads) {
       cfg_.rc_target_bitrate = i;
       ResetModel();
       constrained_framedrop_ = k;
-      assign_layer_bitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
-                            cfg_.ts_number_layers, cfg_.temporal_layering_mode,
-                            layer_target_avg_bandwidth_, bits_in_buffer_model_);
+      AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                          cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                          layer_target_avg_bandwidth_, bits_in_buffer_model_);
       ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
       CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
                               number_temporal_layers_, file_datarate_, 0.73,

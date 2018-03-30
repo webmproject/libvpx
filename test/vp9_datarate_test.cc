@@ -67,7 +67,7 @@ class DatarateTestVP9Large
   // LAST is always update on base/layer 0, GOLDEN is updated on layer 1.
   // For this 3 layer example, the 2nd enhancement layer (layer 2) updates
   // the altref frame.
-  int SetFrameFlags(int frame_num, int num_temp_layers) {
+  static int GetFrameFlags(int frame_num, int num_temp_layers) {
     int frame_flags = 0;
     if (num_temp_layers == 2) {
       if (frame_num % 2 == 0) {
@@ -95,7 +95,7 @@ class DatarateTestVP9Large
     return frame_flags;
   }
 
-  int SetLayerId(int frame_num, int num_temp_layers) {
+  static int SetLayerId(int frame_num, int num_temp_layers) {
     int layer_id = 0;
     if (num_temp_layers == 2) {
       if (frame_num % 2 == 0) {
@@ -143,7 +143,7 @@ class DatarateTestVP9Large
       }
       vpx_svc_layer_id_t layer_id;
       layer_id.spatial_layer_id = 0;
-      frame_flags_ = SetFrameFlags(video->frame(), cfg_.ts_number_layers);
+      frame_flags_ = GetFrameFlags(video->frame(), cfg_.ts_number_layers);
       layer_id.temporal_layer_id =
           SetLayerId(video->frame(), cfg_.ts_number_layers);
       encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
