@@ -975,6 +975,8 @@ int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
     _y4m->aux_buf_sz =
         _y4m->aux_buf_read_sz + ((_y4m->pic_w + 1) / 2) * _y4m->pic_h;
     _y4m->convert = y4m_convert_411_420jpeg;
+    fprintf(stderr, "Unsupported conversion from yuv 411\n");
+    return -1;
   } else if (strcmp(_y4m->chroma_type, "444") == 0) {
     _y4m->src_c_dec_h = 1;
     _y4m->src_c_dec_v = 1;
