@@ -830,14 +830,17 @@ int main(int argc, const char **argv) {
                     num_layers_encoded++;
                   }
                 }
-                tot_size = 0;
                 for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                  if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
-                    tot_size += sizes[sl];
+                  unsigned int sl2;
+                  tot_size = 0;
+                  for (sl2 = 0; sl2 <= sl; ++sl2) {
+                    if (cx_pkt->data.frame.spatial_layer_encoded[sl2])
+                      tot_size += sizes[sl2];
+                  }
+                  if (tot_size > 0)
                     vpx_video_writer_write_frame(
                         outfile[sl], cx_pkt->data.frame.buf, tot_size,
                         cx_pkt->data.frame.pts);
-                  }
                 }
               }
               for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
