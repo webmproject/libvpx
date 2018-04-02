@@ -45,7 +45,16 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   used to get a list of supported options:
     $ ../libvpx/configure --help
 
-  4. Cross development
+  4. Compiler analyzers
+  Compilers have added sanitizers which instrument binaries with information
+  about address calculation, memory usage, threading, undefined behavior, and
+  other common errors. To simplify building libvpx with some of these features
+  use tools/set_analyzer_env.sh before running configure. It will set the
+  compiler and necessary flags for building as well as environment variables
+  read by the analyzer when testing the binaries.
+    $ source ../libvpx/tools/set_analyzer_env.sh address
+
+  5. Cross development
   For cross development, the most notable option is the --target option. The
   most up-to-date list of supported targets can be found at the bottom of the
   --help output of the configure script. As of this writing, the list of
@@ -127,7 +136,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   environment variables: CC, AR, LD, AS, STRIP, NM. Additional flags can be
   passed to these executables with CFLAGS, LDFLAGS, and ASFLAGS.
 
-  5. Configuration errors
+  6. Configuration errors
   If the configuration step fails, the first step is to look in the error log.
   This defaults to config.log. This should give a good indication of what went
   wrong. If not, contact us for support.
