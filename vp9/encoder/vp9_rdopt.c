@@ -3074,10 +3074,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
   const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = tile_data->thresh_freq_fact[bsize];
   int64_t mode_threshold[MAX_MODES];
-  int *tile_mode_map = tile_data->mode_map[bsize];
-  int mode_map[MAX_MODES];  // Maintain mode_map information locally to avoid
-                            // lock mechanism involved with reads from
-                            // tile_mode_map
+  int8_t *tile_mode_map = tile_data->mode_map[bsize];
+  int8_t mode_map[MAX_MODES];  // Maintain mode_map information locally to avoid
+                               // lock mechanism involved with reads from
+                               // tile_mode_map
   const int mode_search_skip_flags = sf->mode_search_skip_flags;
   int64_t mask_filter = 0;
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
