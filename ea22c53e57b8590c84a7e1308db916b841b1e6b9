@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c60d898f_81f70e78",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1268,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-03T23:13:43Z",
+      "side": 1,
+      "message": "this could be one if statement:\n\nif (ref \u003d\u003d NULL || (...))\n\nIf ref\u003d\u003dNULL is satisfied, the second half condition won\u0027t be checked since the whole condition is already satisfied.",
+      "range": {
+        "startLine": 1266,
+        "startChar": 4,
+        "endLine": 1268,
+        "endChar": 7
+      },
+      "revId": "ea22c53e57b8590c84a7e1308db916b841b1e6b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
