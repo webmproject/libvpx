@@ -1255,13 +1255,17 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   int segment_id;
   int sb_offset = (cm->mi_stride >> 3) * (mi_row >> 3) + (mi_col >> 3);
 
-  // For SVC: check if LAST frame is NULL and if so treat this frame as a key
-  // frame, for the purpose of the superblock partitioning. This can happen
-  // (LAST is NULL) in some cases where enhancement spatial layers are enabled
-  // dyanmically in the stream and the only reference is the spatial
+  // For SVC: check if LAST frame is NULL or if the resolution of LAST is
+  // different than the current frame resolution, and if so, treat this frame
+  // as a key frame, for the purpose of the superblock partitioning.
+  // LAST == NULL can happen in some cases where enhancement spatial layers are
+  // enabled dyanmically in the stream and the only reference is the spatial
   // reference (GOLDEN).
   if (cpi->use_svc) {
-    if (get_ref_frame_buffer(cpi, LAST_FRAME) == NULL) is_key_frame = 1;
+    const YV12_BUFFER_CONFIG *const ref = get_ref_frame_buffer(cpi, LAST_FRAME);
+    if (ref == NULL || ref->y_crop_height != cm->height ||
+        ref->y_crop_width != cm->width)
+      is_key_frame = 1;
   }
 
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
