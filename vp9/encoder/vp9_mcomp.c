@@ -329,8 +329,8 @@ static unsigned int setup_center_error(
   if (second_pred != NULL) {
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       DECLARE_ALIGNED(16, uint16_t, comp_pred16[64 * 64]);
-      vpx_highbd_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,
-                               y_stride);
+      vpx_highbd_comp_avg_pred(comp_pred16, CONVERT_TO_SHORTPTR(second_pred), w,
+                               h, CONVERT_TO_SHORTPTR(y + offset), y_stride);
       besterr =
           vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, src, src_stride, sse1);
     } else {

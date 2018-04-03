@@ -1367,7 +1367,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/unsigned int vpx_highbd_12_mse8x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
   specialize qw/vpx_highbd_12_mse8x8 sse2/;
 
-  add_proto qw/void vpx_highbd_comp_avg_pred/, "uint16_t *comp_pred, const uint8_t *pred8, int width, int height, const uint8_t *ref8, int ref_stride";
+  add_proto qw/void vpx_highbd_comp_avg_pred/, "uint16_t *comp_pred, const uint16_t *pred, int width, int height, const uint16_t *ref, int ref_stride";
 
   #
   # Subpixel Variance

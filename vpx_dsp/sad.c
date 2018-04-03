@@ -173,7 +173,8 @@ static INLINE unsigned int highbd_sadb(const uint8_t *a8, int a_stride,
       const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride,  \
       const uint8_t *second_pred) {                                            \
     DECLARE_ALIGNED(16, uint16_t, comp_pred[m * n]);                           \
-    vpx_highbd_comp_avg_pred_c(comp_pred, second_pred, m, n, ref, ref_stride); \
+    vpx_highbd_comp_avg_pred_c(comp_pred, CONVERT_TO_SHORTPTR(second_pred), m, \
+                               n, CONVERT_TO_SHORTPTR(ref), ref_stride);       \
     return highbd_sadb(src, src_stride, comp_pred, m, m, n);                   \
   }
 
