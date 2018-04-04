@@ -1223,6 +1223,11 @@ EOF
         esac
 
         if enabled msa; then
+          # TODO(libyuv:793)
+          # The new mips functions in libyuv do not build
+          # with the toolchains we currently use for testing.
+          soft_disable libyuv
+
           add_cflags -mmsa
           add_asflags -mmsa
           add_ldflags -mmsa
