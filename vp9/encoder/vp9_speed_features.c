@@ -531,6 +531,9 @@ static void set_rt_speed_feature_framesize_independent(
       sf->limit_newmv_early_exit = 1;
       if (!cpi->use_svc) sf->bias_golden = 1;
     }
+    // Keep nonrd_keyframe = 1 for non-base spatial layers to prevent large
+    // encoding time.
+    if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) sf->nonrd_keyframe = 1;
   }
 
   if (speed >= 6) {
