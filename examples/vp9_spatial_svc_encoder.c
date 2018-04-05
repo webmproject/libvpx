@@ -714,7 +714,7 @@ int main(int argc, const char **argv) {
   if (svc_ctx.speed != -1)
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, svc_ctx.speed);
   if (svc_ctx.threads) {
-    vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (svc_ctx.threads >> 1));
+    vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, get_msb(svc_ctx.threads));
     if (svc_ctx.threads > 1)
       vpx_codec_control(&codec, VP9E_SET_ROW_MT, 1);
     else
