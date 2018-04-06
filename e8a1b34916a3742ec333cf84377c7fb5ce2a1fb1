@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9e91766_0797f476",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 718,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-06T07:00:55Z",
+      "side": 1,
+      "message": "log2 is part of c99; since vpx_ports is already being used you can grab get_msb()",
+      "revId": "e8a1b34916a3742ec333cf84377c7fb5ce2a1fb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
