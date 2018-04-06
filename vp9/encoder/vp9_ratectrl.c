@@ -702,14 +702,6 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   int active_worst_quality;
   int ambient_qp;
   unsigned int num_frames_weight_key = 5 * cpi->svc.number_temporal_layers;
-  // For SVC: when inter layer prediction is off, on the second superframe
-  // (superframe = 1) use the QP from the previous superframe. This needed to
-  // maintain quality since we can't temporally predict from the very first
-  // superframe.
-  if (cpi->use_svc && cpi->svc.current_superframe == 1 &&
-      cpi->svc.number_spatial_layers > 1 &&
-      cpi->svc.disable_inter_layer_pred == INTER_LAYER_PRED_OFF)
-    return rc->last_q[KEY_FRAME];
   if (cm->frame_type == KEY_FRAME || rc->reset_high_source_sad)
     return rc->worst_quality;
   // For ambient_qp we use minimum of avg_frame_qindex[KEY_FRAME/INTER_FRAME]
@@ -1735,13 +1727,8 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id, cpi->svc.temporal_layer_id,
                        cpi->svc.number_temporal_layers);
   // Periodic key frames is based on the super-frame counter
-  // (svc.current_superframe), also only base spatial layer is key frame unless
-  // svc.disable_inter_layer_pred = INTER_LAYER_PRED_OFF.
-  int first_frame_iskey =
-      (cpi->svc.disable_inter_layer_pred == INTER_LAYER_PRED_OFF)
-          ? (cpi->svc.current_superframe == 0)
-          : (cm->current_video_frame == 0);
-  if (first_frame_iskey || (cpi->frame_flags & FRAMEFLAGS_KEY) ||
+  // (svc.current_superframe), also only base spatial layer is key frame.
+  if ((cm->current_video_frame == 0) || (cpi->frame_flags & FRAMEFLAGS_KEY) ||
       (cpi->oxcf.auto_key &&
        (cpi->svc.current_superframe % cpi->oxcf.key_freq == 0) &&
        cpi->svc.spatial_layer_id == 0)) {
@@ -1751,7 +1738,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       cpi->svc.layer_context[layer].is_key_frame = 1;
       cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
     } else if (is_one_pass_cbr_svc(cpi)) {
-      if (!first_frame_iskey) vp9_svc_reset_key_frame(cpi);
+      if (cm->current_video_frame > 0) vp9_svc_reset_key_frame(cpi);
       layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
                                cpi->svc.temporal_layer_id,
                                cpi->svc.number_temporal_layers);
@@ -1763,18 +1750,6 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     }
   } else {
     cm->frame_type = INTER_FRAME;
-    // Special case for first superframe when inter_layer prediction is off.
-    // Force key frame on base spatial layer for second superframe.
-    // TODO(marpan): This condition may be removed, depending on #spatial_layer
-    // and scaling factor, but keep it for now for simplicity.
-    if (cpi->svc.disable_inter_layer_pred == INTER_LAYER_PRED_OFF &&
-        cpi->svc.current_superframe == 1 && cpi->svc.spatial_layer_id == 0 &&
-        cpi->svc.number_spatial_layers > 1) {
-      vp9_svc_reset_key_frame(cpi);
-      cm->frame_type = KEY_FRAME;
-      cpi->svc.layer_context[layer].is_key_frame = 1;
-      target = calc_iframe_target_size_one_pass_cbr(cpi);
-    }
     if (is_two_pass_svc(cpi)) {
       LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
       if (cpi->svc.spatial_layer_id == 0) {
