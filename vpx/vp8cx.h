@@ -769,9 +769,9 @@ typedef struct vpx_svc_ref_frame_config {
  *
  */
 typedef enum {
-  LAYER_DROP, /**< Any spatial layer can drop. */
-  CONSTRAINED_LAYER_DROP
+  CONSTRAINED_LAYER_DROP,
   /**< Upper layers are constrained to drop if current layer drops. */
+  LAYER_DROP, /**< Any spatial layer can drop. */
 } SVC_LAYER_DROP_MODE;
 
 /*!\brief vp9 svc frame dropping parameters.
