@@ -15,6 +15,7 @@
 #include "test/util.h"
 #include "test/y4m_video_source.h"
 #include "vpx/vpx_codec.h"
+#include "vpx_ports/bitops.h"
 
 namespace {
 
@@ -200,7 +201,7 @@ class DatarateOnePassCbrSvc
       encoder->Control(VP8E_SET_CPUUSED, speed_setting_);
       encoder->Control(VP9E_SET_TILE_COLUMNS, 0);
       encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 300);
-      encoder->Control(VP9E_SET_TILE_COLUMNS, (cfg_.g_threads >> 1));
+      encoder->Control(VP9E_SET_TILE_COLUMNS, get_msb(cfg_.g_threads));
       encoder->Control(VP9E_SET_ROW_MT, 1);
       encoder->Control(VP8E_SET_STATIC_THRESHOLD, 1);
       encoder->Control(VP9E_SET_TUNE_CONTENT, tune_content_);

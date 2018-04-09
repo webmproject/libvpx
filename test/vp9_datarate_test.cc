@@ -15,6 +15,7 @@
 #include "test/util.h"
 #include "test/y4m_video_source.h"
 #include "vpx/vpx_codec.h"
+#include "vpx_ports/bitops.h"
 
 namespace {
 
@@ -129,7 +130,7 @@ class DatarateTestVP9Large
     }
 
     encoder->Control(VP9E_SET_NOISE_SENSITIVITY, denoiser_on_);
-    encoder->Control(VP9E_SET_TILE_COLUMNS, (cfg_.g_threads >> 1));
+    encoder->Control(VP9E_SET_TILE_COLUMNS, get_msb(cfg_.g_threads));
     encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING,
                      frame_parallel_decoding_mode_);
 
