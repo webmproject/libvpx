@@ -122,7 +122,7 @@ class DatarateOnePassCbrSvc
     superframe_count_ = -1;
     key_frame_spacing_ = 9999;
     num_nonref_frames_ = 0;
-    constrained_framedrop_ = 0;
+    layer_framedrop_ = 0;
   }
   virtual void BeginPassHook(unsigned int /*pass*/) {}
 
@@ -206,9 +206,9 @@ class DatarateOnePassCbrSvc
       encoder->Control(VP8E_SET_STATIC_THRESHOLD, 1);
       encoder->Control(VP9E_SET_TUNE_CONTENT, tune_content_);
 
-      if (constrained_framedrop_) {
+      if (layer_framedrop_) {
         vpx_svc_frame_drop_t svc_drop_frame;
-        svc_drop_frame.framedrop_mode = CONSTRAINED_LAYER_DROP;
+        svc_drop_frame.framedrop_mode = LAYER_DROP;
         for (i = 0; i < number_spatial_layers_; i++)
           svc_drop_frame.framedrop_thresh[i] = 30;
         encoder->Control(VP9E_SET_SVC_FRAME_DROP_LAYER, &svc_drop_frame);
@@ -373,7 +373,7 @@ class DatarateOnePassCbrSvc
     ASSERT_EQ(count, num_layers_encoded);
     // In the constrained frame drop mode, if a given spatial is dropped all
     // upper layers must be dropped too.
-    if (constrained_framedrop_) {
+    if (!layer_framedrop_) {
       for (int sl = 0; sl < number_spatial_layers_; ++sl) {
         if (!pkt->data.frame.spatial_layer_encoded[sl]) {
           // Check that all upper layers are dropped.
@@ -468,7 +468,7 @@ class DatarateOnePassCbrSvc
   int superframe_count_;
   int key_frame_spacing_;
   unsigned int num_nonref_frames_;
-  int constrained_framedrop_;
+  int layer_framedrop_;
 };
 
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and 1
@@ -700,12 +700,12 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc2SL3TL4Threads) {
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   top_sl_width_ = 1280;
   top_sl_height_ = 720;
-  constrained_framedrop_ = 0;
+  layer_framedrop_ = 0;
   for (int k = 0; k < 2; k++) {
     for (int i = 200; i <= 600; i += 200) {
       cfg_.rc_target_bitrate = i;
       ResetModel();
-      constrained_framedrop_ = k;
+      layer_framedrop_ = k;
       AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                           cfg_.ts_number_layers, cfg_.temporal_layering_mode,
                           layer_target_avg_bandwidth_, bits_in_buffer_model_);
@@ -1001,12 +1001,12 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc3SL3TL4Threads) {
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   top_sl_width_ = 1280;
   top_sl_height_ = 720;
-  constrained_framedrop_ = 0;
+  layer_framedrop_ = 0;
   for (int k = 0; k < 2; k++) {
     for (int i = 200; i <= 600; i += 200) {
       cfg_.rc_target_bitrate = i;
       ResetModel();
-      constrained_framedrop_ = k;
+      layer_framedrop_ = k;
       AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                           cfg_.ts_number_layers, cfg_.temporal_layering_mode,
                           layer_target_avg_bandwidth_, bits_in_buffer_model_);

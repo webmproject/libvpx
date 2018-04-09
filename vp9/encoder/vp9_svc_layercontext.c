@@ -39,7 +39,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->non_reference_frame = 0;
   svc->skip_enhancement_layer = 0;
   svc->disable_inter_layer_pred = INTER_LAYER_PRED_ON;
-  svc->framedrop_mode = LAYER_DROP;
+  svc->framedrop_mode = CONSTRAINED_LAYER_DROP;
 
   for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
