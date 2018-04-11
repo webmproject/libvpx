@@ -421,7 +421,7 @@ static int set_vt_partitioning(VP9_COMP *cpi, MACROBLOCK *const x,
   // No check for vert/horiz split as too few samples for variance.
   if (bsize == bsize_min) {
     // Variance already computed to set the force_split.
-    if (cm->frame_type == KEY_FRAME) get_variance(&vt.part_variances->none);
+    if (frame_is_intra_only(cm)) get_variance(&vt.part_variances->none);
     if (mi_col + block_width / 2 < cm->mi_cols &&
         mi_row + block_height / 2 < cm->mi_rows &&
         vt.part_variances->none.variance < threshold) {
@@ -431,9 +431,9 @@ static int set_vt_partitioning(VP9_COMP *cpi, MACROBLOCK *const x,
     return 0;
   } else if (bsize > bsize_min) {
     // Variance already computed to set the force_split.
-    if (cm->frame_type == KEY_FRAME) get_variance(&vt.part_variances->none);
+    if (frame_is_intra_only(cm)) get_variance(&vt.part_variances->none);
     // For key frame: take split for bsize above 32X32 or very high variance.
-    if (cm->frame_type == KEY_FRAME &&
+    if (frame_is_intra_only(cm) &&
         (bsize > BLOCK_32X32 ||
          vt.part_variances->none.variance > (threshold << 4))) {
       return 0;
@@ -505,7 +505,7 @@ static int64_t scale_part_thresh_sumdiff(int64_t threshold_base, int speed,
 static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q,
                                int content_state) {
   VP9_COMMON *const cm = &cpi->common;
-  const int is_key_frame = (cm->frame_type == KEY_FRAME);
+  const int is_key_frame = frame_is_intra_only(cm);
   const int threshold_multiplier = is_key_frame ? 20 : 1;
   int64_t threshold_base =
       (int64_t)(threshold_multiplier * cpi->y_dequant[q][1]);
@@ -565,7 +565,7 @@ void vp9_set_variance_partition_thresholds(VP9_COMP *cpi, int q,
                                            int content_state) {
   VP9_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
-  const int is_key_frame = (cm->frame_type == KEY_FRAME);
+  const int is_key_frame = frame_is_intra_only(cm);
   if (sf->partition_search_type != VAR_BASED_PARTITION &&
       sf->partition_search_type != REFERENCE_PARTITION) {
     return;
@@ -1226,11 +1226,11 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   // For the variance computation under SVC mode, we treat the frame as key if
   // the reference (base layer frame) is key frame (i.e., is_key_frame == 1).
   int is_key_frame =
-      (cm->frame_type == KEY_FRAME ||
+      (frame_is_intra_only(cm) ||
        (is_one_pass_cbr_svc(cpi) &&
         cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame));
   // Always use 4x4 partition for key frame.
-  const int use_4x4_partition = cm->frame_type == KEY_FRAME;
+  const int use_4x4_partition = frame_is_intra_only(cm);
   const int low_res = (cm->width <= 352 && cm->height <= 288);
   int variance4x4downsample[16];
   int segment_id;
@@ -1646,11 +1646,11 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     }
   }
 
-  if (cm->frame_type != KEY_FRAME && cpi->sf.copy_partition_flag) {
+  if (!frame_is_intra_only(cm) && cpi->sf.copy_partition_flag) {
     update_prev_partition(cpi, x, segment_id, mi_row, mi_col, sb_offset);
   }
 
-  if (cm->frame_type != KEY_FRAME && cpi->sf.svc_use_lowres_part &&
+  if (!frame_is_intra_only(cm) && cpi->sf.svc_use_lowres_part &&
       cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2)
     update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
 
@@ -4366,7 +4366,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
     if (cyclic_refresh_segment_id_boosted(mi->segment_id))
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
 
-  if (cm->frame_type == KEY_FRAME)
+  if (frame_is_intra_only(cm))
     hybrid_intra_mode_search(cpi, x, rd_cost, bsize, ctx);
   else if (cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)
     hybrid_search_svc_baseiskey(cpi, x, rd_cost, bsize, ctx, tile_data, mi_row,
@@ -5062,7 +5062,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         // nonrd_pick_partition does not support 4x4 partition, so avoid it
         // on key frame for now.
         if ((cpi->oxcf.rc_mode == VPX_VBR && cpi->rc.high_source_sad &&
-             cpi->oxcf.speed < 6 && cm->frame_type != KEY_FRAME &&
+             cpi->oxcf.speed < 6 && !frame_is_intra_only(cm) &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
           // Use lower max_partition_size for low resoultions.
           if (cm->width <= 352 && cm->height <= 288)
@@ -5078,7 +5078,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
           // TODO(marpan): Seems like nonrd_select_partition does not support
           // 4x4 partition. Since 4x4 is used on key frame, use this switch
           // for now.
-          if (cm->frame_type == KEY_FRAME)
+          if (frame_is_intra_only(cm))
             nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
                                 BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
           else

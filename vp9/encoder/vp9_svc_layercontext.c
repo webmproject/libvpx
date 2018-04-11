@@ -41,12 +41,14 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->skip_enhancement_layer = 0;
   svc->disable_inter_layer_pred = INTER_LAYER_PRED_ON;
   svc->framedrop_mode = CONSTRAINED_LAYER_DROP;
-  svc->base_layer_intra_only = 0;
+  svc->set_intra_only_frame = 0;
+  svc->previous_frame_is_intra_only = 0;
   svc->superframe_has_layer_sync = 0;
 
   for (i = 0; i < REF_FRAMES; ++i) {
     svc->fb_idx_spatial_layer_id[i] = -1;
     svc->fb_idx_temporal_layer_id[i] = -1;
+    svc->fb_idx_base[i] = 0;
   }
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
     svc->last_layer_dropped[sl] = 0;
@@ -1081,5 +1083,18 @@ void vp9_svc_check_spatial_layer_sync(VP9_COMP *const cpi) {
         cpi->ext_refresh_alt_ref_frame = 1;
       }
     }
+  }
+}
+
+void vp9_svc_update_ref_frame_buffer_idx(VP9_COMP *const cpi) {
+  SVC *const svc = &cpi->svc;
+  // Update the usage of frame buffer index for base spatial layers.
+  if (svc->spatial_layer_id == 0) {
+    if ((cpi->ref_frame_flags & VP9_LAST_FLAG) || cpi->refresh_last_frame)
+      svc->fb_idx_base[cpi->lst_fb_idx] = 1;
+    if ((cpi->ref_frame_flags & VP9_GOLD_FLAG) || cpi->refresh_golden_frame)
+      svc->fb_idx_base[cpi->gld_fb_idx] = 1;
+    if ((cpi->ref_frame_flags & VP9_ALT_FLAG) || cpi->refresh_alt_ref_frame)
+      svc->fb_idx_base[cpi->alt_fb_idx] = 1;
   }
 }

@@ -429,7 +429,7 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   int thresh_low_motion = (cm->width < 720) ? 55 : 20;
   int qp_thresh = VPXMIN(20, rc->best_quality << 1);
   cr->apply_cyclic_refresh = 1;
-  if (cm->frame_type == KEY_FRAME || cpi->svc.temporal_layer_id > 0 ||
+  if (frame_is_intra_only(cm) || cpi->svc.temporal_layer_id > 0 ||
       is_lossless_requested(&cpi->oxcf) ||
       rc->avg_frame_qindex[INTER_FRAME] < qp_thresh ||
       (cpi->use_svc &&

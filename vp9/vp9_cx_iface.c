@@ -1553,9 +1553,7 @@ static vpx_codec_err_t ctrl_set_svc_spatial_layer_sync(
   int sl;
   for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl)
     cpi->svc.spatial_layer_sync[sl] = data->spatial_layer_sync[sl];
-  // TODO(marpan): Implement intra_only feature. Currently this setting
-  // does nothing.
-  cpi->svc.base_layer_intra_only = data->base_layer_intra_only;
+  cpi->svc.set_intra_only_frame = data->base_layer_intra_only;
   return VPX_CODEC_OK;
 }
 
