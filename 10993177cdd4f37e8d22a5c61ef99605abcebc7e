@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "544add48_91b54531",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-12T18:53:04Z",
+      "side": 1,
+      "message": "GET_PARAM(2) returns 0 and 1 since the range is ::testing::Range(0, 2) in line 1069.",
+      "parentUuid": "f81c3356_a0521e58",
+      "revId": "10993177cdd4f37e8d22a5c61ef99605abcebc7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca1345cb_effc86e9",
         "filename": "test/svc_datarate_test.cc",
         "patchSetId": 2
@@ -33,6 +51,24 @@
       "revId": "10993177cdd4f37e8d22a5c61ef99605abcebc7e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95f743db_f1ad9163",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 948,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-12T18:53:04Z",
+      "side": 1,
+      "message": "Done.\n\nSame.",
+      "parentUuid": "ca1345cb_effc86e9",
+      "revId": "10993177cdd4f37e8d22a5c61ef99605abcebc7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
