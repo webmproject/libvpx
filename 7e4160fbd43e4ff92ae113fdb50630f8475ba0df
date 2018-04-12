@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "85fbb885_b0520f19",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-12T00:10:08Z",
+      "side": 1,
+      "message": "can you invert this check and just return immediately rather than increasing the scope for the entire block?",
+      "revId": "7e4160fbd43e4ff92ae113fdb50630f8475ba0df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
