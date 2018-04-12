@@ -16,6 +16,24 @@
       "revId": "7e4160fbd43e4ff92ae113fdb50630f8475ba0df",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31756e01_5a6335a7",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-12T00:18:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "85fbb885_b0520f19",
+      "revId": "7e4160fbd43e4ff92ae113fdb50630f8475ba0df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
