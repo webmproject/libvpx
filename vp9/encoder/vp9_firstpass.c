@@ -2441,8 +2441,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
 
       // Monitor for static sections.
-      zero_motion_accumulator = VPXMIN(
-          zero_motion_accumulator, get_zero_motion_factor(cpi, &next_frame));
+      if ((rc->frames_since_key + i - 1) > 1) {
+        zero_motion_accumulator *= get_zero_motion_factor(cpi, &next_frame);
+      }
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -2464,8 +2465,17 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Break out conditions.
     // Break at maximum of active_max_gf_interval unless almost totally static.
-    if (((twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH) &&
-         (i >= active_max_gf_interval) && (zero_motion_accumulator < 0.995)) ||
+    //
+    // Note that the addition of a test of rc->source_alt_ref_active is
+    // deliberate. The effect of this is that after a normal altref group even
+    // if the material is static there will be one normal length GF group
+    // before allowing longer GF groups. The reason for this is that in cases
+    // such as slide shows where slides are separated by a complex transition
+    // such as a fade, the arf group spanning the transition may not be coded
+    // at a very high quality and hence this frame (with its overlay) is a
+    // poor golden frame to use for an extended group.
+    if (((i >= active_max_gf_interval) &&
+         ((zero_motion_accumulator < 0.995) || (rc->source_alt_ref_active))) ||
         (
             // Don't break out with a very short interval.
             (i >= active_min_gf_interval) &&
@@ -2485,7 +2495,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   rc->constrained_gf_group = (i >= rc->frames_to_key) ? 1 : 0;
 
   // Should we use the alternate reference frame.
-  if ((twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH) && allow_alt_ref &&
+  if ((zero_motion_accumulator < 0.995) && allow_alt_ref &&
       (i < cpi->oxcf.lag_in_frames) && (i >= rc->min_gf_interval)) {
     const int forward_frames = (rc->frames_to_key - i >= i - 1)
                                    ? i - 1
@@ -2513,11 +2523,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 200);
 #endif
 
-  // Set the interval until the next gf.
   rc->baseline_gf_interval =
-      (twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH)
-          ? (i - (is_key_frame || rc->source_alt_ref_pending))
-          : i;
+      ((twopass->kf_zeromotion_pct >= STATIC_KF_GROUP_THRESH) &&
+       (i >= rc->frames_to_key))
+          ? i
+          : (i - (is_key_frame || rc->source_alt_ref_pending));
 
   rc->frames_till_gf_update_due = rc->baseline_gf_interval;
 
@@ -2764,6 +2774,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vp9_zero(next_frame);
 
   cpi->common.frame_type = KEY_FRAME;
+  rc->frames_since_key = 0;
 
   // Reset the GF group data structures.
   vp9_zero(*gf_group);
@@ -2908,7 +2919,10 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   for (i = 0; i < (rc->frames_to_key - 1); ++i) {
     if (EOF == input_stats(twopass, &next_frame)) break;
 
-    if (i <= KF_BOOST_SCAN_MAX_FRAMES) {
+    // The zero motion test here insures that if we mark a kf group as static
+    // it is static throughout not just the first KF_BOOST_SCAN_MAX_FRAMES.
+    // It also allows for a larger boost on long static groups.
+    if ((i <= KF_BOOST_SCAN_MAX_FRAMES) || (zero_motion_accumulator >= 0.99)) {
       double frame_boost;
       double zm_factor;
 
