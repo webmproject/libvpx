@@ -1201,14 +1201,6 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     write_bitdepth_colorspace_sampling(cm, wb);
     write_frame_size(cm, wb);
   } else {
-    // In spatial svc if it's not error_resilient_mode then we need to code all
-    // visible frames as invisible. But we need to keep the show_frame flag so
-    // that the publisher could know whether it is supposed to be visible.
-    // So we will code the show_frame flag as it is. Then code the intra_only
-    // bit here. This will make the bitstream incompatible. In the player we
-    // will change to show_frame flag to 0, then add an one byte frame with
-    // show_existing_frame flag which tells the decoder which frame we want to
-    // show.
     if (!cm->show_frame) vpx_wb_write_bit(wb, cm->intra_only);
 
     if (!cm->error_resilient_mode)
