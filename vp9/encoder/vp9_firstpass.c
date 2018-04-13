@@ -316,16 +316,7 @@ void vp9_init_first_pass(VP9_COMP *cpi) {
 }
 
 void vp9_end_first_pass(VP9_COMP *cpi) {
-  if (is_two_pass_svc(cpi)) {
-    int i;
-    for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
-      output_stats(&cpi->svc.layer_context[i].twopass.total_stats,
-                   cpi->output_pkt_list);
-    }
-  } else {
-    output_stats(&cpi->twopass.total_stats, cpi->output_pkt_list);
-  }
-
+  output_stats(&cpi->twopass.total_stats, cpi->output_pkt_list);
   vpx_free(cpi->twopass.fp_mb_float_stats);
   cpi->twopass.fp_mb_float_stats = NULL;
 }
@@ -849,9 +840,6 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
   YV12_BUFFER_CONFIG *const new_yv12 = get_frame_new_buffer(cm);
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
 
-  LAYER_CONTEXT *const lc =
-      is_two_pass_svc(cpi) ? &cpi->svc.layer_context[cpi->svc.spatial_layer_id]
-                           : NULL;
   MODE_INFO mi_above, mi_left;
 
   double mb_intra_factor;
@@ -860,25 +848,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
 
   // First pass code requires valid last and new frame buffers.
   assert(new_yv12 != NULL);
-  assert((lc != NULL) || frame_is_intra_only(cm) || (lst_yv12 != NULL));
-
-  if (lc != NULL) {
-    // Use either last frame or alt frame for motion search.
-    if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
-      first_ref_buf = vp9_get_scaled_ref_frame(cpi, LAST_FRAME);
-      if (first_ref_buf == NULL)
-        first_ref_buf = get_ref_frame_buffer(cpi, LAST_FRAME);
-    }
-
-    if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
-      gld_yv12 = vp9_get_scaled_ref_frame(cpi, GOLDEN_FRAME);
-      if (gld_yv12 == NULL) {
-        gld_yv12 = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
-      }
-    } else {
-      gld_yv12 = NULL;
-    }
-  }
+  assert(frame_is_intra_only(cm) || (lst_yv12 != NULL));
 
   xd->mi = cm->mi_grid_visible + xd->mi_stride * (mb_row << 1) +
            (tile.mi_col_start >> 1);
@@ -1072,8 +1042,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
         ((cm->mb_cols - 1 - mb_col) * 16) + BORDER_MV_PIXELS_B16;
 
     // Other than for the first frame do a motion search.
-    if ((lc == NULL && cm->current_video_frame > 0) ||
-        (lc != NULL && lc->current_video_frame_in_layer > 0)) {
+    if (cm->current_video_frame > 0) {
       int tmp_err, motion_error, raw_motion_error;
       // Assume 0,0 motion with no mv overhead.
       MV mv = { 0, 0 }, tmp_mv = { 0, 0 };
@@ -1113,7 +1082,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
       // TODO(pengchong): Replace the hard-coded threshold
-      if (raw_motion_error > 25 || lc != NULL) {
+      if (raw_motion_error > 25) {
         // Test last reference frame using the previous best mv as the
         // starting point (best reference) for the search.
         first_pass_motion_search(cpi, x, best_ref_mv, &mv, &motion_error);
@@ -1131,9 +1100,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
         }
 
         // Search in an older reference frame.
-        if (((lc == NULL && cm->current_video_frame > 1) ||
-             (lc != NULL && lc->current_video_frame_in_layer > 1)) &&
-            gld_yv12 != NULL) {
+        if ((cm->current_video_frame > 1) && gld_yv12 != NULL) {
           // Assume 0,0 motion with no mv overhead.
           int gf_motion_error;
 
@@ -1371,9 +1338,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   YV12_BUFFER_CONFIG *const new_yv12 = get_frame_new_buffer(cm);
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
 
-  LAYER_CONTEXT *const lc =
-      is_two_pass_svc(cpi) ? &cpi->svc.layer_context[cpi->svc.spatial_layer_id]
-                           : NULL;
   BufferPool *const pool = cm->buffer_pool;
 
   FIRSTPASS_DATA fp_temp_data;
@@ -1385,7 +1349,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
   // First pass code requires valid last and new frame buffers.
   assert(new_yv12 != NULL);
-  assert((lc != NULL) || frame_is_intra_only(cm) || (lst_yv12 != NULL));
+  assert(frame_is_intra_only(cm) || (lst_yv12 != NULL));
 
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
@@ -1395,50 +1359,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
   set_first_pass_params(cpi);
   vp9_set_quantizer(cm, find_fp_qindex(cm->bit_depth));
-
-  if (lc != NULL) {
-    twopass = &lc->twopass;
-
-    cpi->lst_fb_idx = cpi->svc.spatial_layer_id;
-    cpi->ref_frame_flags = VP9_LAST_FLAG;
-
-    if (cpi->svc.number_spatial_layers + cpi->svc.spatial_layer_id <
-        REF_FRAMES) {
-      cpi->gld_fb_idx =
-          cpi->svc.number_spatial_layers + cpi->svc.spatial_layer_id;
-      cpi->ref_frame_flags |= VP9_GOLD_FLAG;
-      cpi->refresh_golden_frame = (lc->current_video_frame_in_layer == 0);
-    } else {
-      cpi->refresh_golden_frame = 0;
-    }
-
-    if (lc->current_video_frame_in_layer == 0) cpi->ref_frame_flags = 0;
-
-    vp9_scale_references(cpi);
-
-    // Use either last frame or alt frame for motion search.
-    if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
-      first_ref_buf = vp9_get_scaled_ref_frame(cpi, LAST_FRAME);
-      if (first_ref_buf == NULL)
-        first_ref_buf = get_ref_frame_buffer(cpi, LAST_FRAME);
-    }
-
-    if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
-      gld_yv12 = vp9_get_scaled_ref_frame(cpi, GOLDEN_FRAME);
-      if (gld_yv12 == NULL) {
-        gld_yv12 = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
-      }
-    } else {
-      gld_yv12 = NULL;
-    }
-
-    set_ref_ptrs(cm, xd,
-                 (cpi->ref_frame_flags & VP9_LAST_FLAG) ? LAST_FRAME : NONE,
-                 (cpi->ref_frame_flags & VP9_GOLD_FLAG) ? GOLDEN_FRAME : NONE);
-
-    cpi->Source = vp9_scale_if_required(cm, cpi->un_scaled_source,
-                                        &cpi->scaled_source, 0, EIGHTTAP, 0);
-  }
 
   vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
@@ -1523,18 +1443,13 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
   vpx_extend_frame_borders(new_yv12);
 
-  if (lc != NULL) {
-    vp9_update_reference_frames(cpi);
-  } else {
-    // The frame we just compressed now becomes the last frame.
-    ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[cpi->lst_fb_idx],
-               cm->new_fb_idx);
-  }
+  // The frame we just compressed now becomes the last frame.
+  ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[cpi->lst_fb_idx],
+             cm->new_fb_idx);
 
   // Special case for the first frame. Copy into the GF buffer as a second
   // reference.
-  if (cm->current_video_frame == 0 && cpi->gld_fb_idx != INVALID_IDX &&
-      lc == NULL) {
+  if (cm->current_video_frame == 0 && cpi->gld_fb_idx != INVALID_IDX) {
     ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[cpi->gld_fb_idx],
                cm->ref_frame_map[cpi->lst_fb_idx]);
   }
@@ -1708,14 +1623,9 @@ void calculate_coded_size(VP9_COMP *cpi, int *scaled_frame_width,
 }
 
 void vp9_init_second_pass(VP9_COMP *cpi) {
-  SVC *const svc = &cpi->svc;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  const int is_two_pass_svc =
-      (svc->number_spatial_layers > 1) || (svc->number_temporal_layers > 1);
   RATE_CONTROL *const rc = &cpi->rc;
-  TWO_PASS *const twopass =
-      is_two_pass_svc ? &svc->layer_context[svc->spatial_layer_id].twopass
-                      : &cpi->twopass;
+  TWO_PASS *const twopass = &cpi->twopass;
   double frame_rate;
   FIRSTPASS_STATS *stats;
 
@@ -1792,18 +1702,9 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // encoded in the second pass is a guess. However, the sum duration is not.
   // It is calculated based on the actual durations of all frames from the
   // first pass.
-
-  if (is_two_pass_svc) {
-    vp9_update_spatial_layer_framerate(cpi, frame_rate);
-    twopass->bits_left =
-        (int64_t)(stats->duration *
-                  svc->layer_context[svc->spatial_layer_id].target_bandwidth /
-                  10000000.0);
-  } else {
-    vp9_new_framerate(cpi, frame_rate);
-    twopass->bits_left =
-        (int64_t)(stats->duration * oxcf->target_bandwidth / 10000000.0);
-  }
+  vp9_new_framerate(cpi, frame_rate);
+  twopass->bits_left =
+      (int64_t)(stats->duration * oxcf->target_bandwidth / 10000000.0);
 
   // This variable monitors how far behind the second ref update is lagging.
   twopass->sr_update_lag = 1;
@@ -2241,8 +2142,6 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   int mid_frame_idx;
   unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
   int alt_frame_index = frame_index;
-  int has_temporal_layers =
-      is_two_pass_svc(cpi) && cpi->svc.number_temporal_layers > 1;
   int normal_frames;
   int normal_frame_bits;
   int last_frame_reduction = 0;
@@ -2250,11 +2149,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   double tot_norm_frame_score = 1.0;
   double this_frame_score = 1.0;
 
-  // Only encode alt reference frame in temporal base layer.
-  if (has_temporal_layers) alt_frame_index = cpi->svc.number_temporal_layers;
-
-  key_frame =
-      cpi->common.frame_type == KEY_FRAME || vp9_is_upper_layer_key_frame(cpi);
+  key_frame = cpi->common.frame_type == KEY_FRAME;
 
   get_arf_buffer_indices(arf_buffer_indices);
 
@@ -2284,19 +2179,14 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     gf_group->rf_level[alt_frame_index] = GF_ARF_STD;
     gf_group->bit_allocation[alt_frame_index] = gf_arf_bits;
 
-    if (has_temporal_layers)
-      gf_group->arf_src_offset[alt_frame_index] =
-          (unsigned char)(rc->baseline_gf_interval -
-                          cpi->svc.number_temporal_layers);
-    else
-      gf_group->arf_src_offset[alt_frame_index] =
-          (unsigned char)(rc->baseline_gf_interval - 1);
+    gf_group->arf_src_offset[alt_frame_index] =
+        (unsigned char)(rc->baseline_gf_interval - 1);
 
     gf_group->arf_update_idx[alt_frame_index] = arf_buffer_indices[0];
     gf_group->arf_ref_idx[alt_frame_index] =
         arf_buffer_indices[cpi->multi_arf_last_grp_enabled &&
                            rc->source_alt_ref_active];
-    if (!has_temporal_layers) ++frame_index;
+    ++frame_index;
 
     if (cpi->multi_arf_enabled) {
       // Set aside a slot for a level 1 arf.
@@ -2332,11 +2222,6 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   for (i = 0; i < normal_frames; ++i) {
     int arf_idx = 0;
     if (EOF == input_stats(twopass, &frame_stats)) break;
-
-    if (has_temporal_layers && frame_index == alt_frame_index) {
-      ++frame_index;
-    }
-
     if (oxcf->vbr_corpus_complexity) {
       this_frame_score = calculate_norm_frame_score(cpi, twopass, oxcf,
                                                     &frame_stats, av_score);
@@ -2638,27 +2523,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       (twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH)
           ? (i - (is_key_frame || rc->source_alt_ref_pending))
           : i;
-
-  // Only encode alt reference frame in temporal base layer. So
-  // baseline_gf_interval should be multiple of a temporal layer group
-  // (typically the frame distance between two base layer frames)
-  if (is_two_pass_svc(cpi) && cpi->svc.number_temporal_layers > 1) {
-    int count = (1 << (cpi->svc.number_temporal_layers - 1)) - 1;
-    int new_gf_interval = (rc->baseline_gf_interval + count) & (~count);
-    int j;
-    for (j = 0; j < new_gf_interval - rc->baseline_gf_interval; ++j) {
-      if (EOF == input_stats(twopass, this_frame)) break;
-      gf_group_err +=
-          calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
-      gf_group_raw_error += this_frame->coded_error;
-      gf_group_noise += this_frame->frame_noise_energy;
-      gf_group_skip_pct += this_frame->intra_skip_pct;
-      gf_group_inactive_zone_rows += this_frame->inactive_zone_rows;
-      gf_group_inter += this_frame->pcnt_inter;
-      gf_group_motion += this_frame->pcnt_motion;
-    }
-    rc->baseline_gf_interval = new_gf_interval;
-  }
 
   rc->frames_till_gf_update_due = rc->baseline_gf_interval;
 
@@ -3010,18 +2874,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->next_key_frame_forced = 0;
   }
 
-  if (is_two_pass_svc(cpi) && cpi->svc.number_temporal_layers > 1) {
-    int count = (1 << (cpi->svc.number_temporal_layers - 1)) - 1;
-    int new_frame_to_key = (rc->frames_to_key + count) & (~count);
-    int j;
-    for (j = 0; j < new_frame_to_key - rc->frames_to_key; ++j) {
-      if (EOF == input_stats(twopass, this_frame)) break;
-      kf_group_err +=
-          calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
-    }
-    rc->frames_to_key = new_frame_to_key;
-  }
-
   // Special case for the last key frame of the file.
   if (twopass->stats_in >= twopass->stats_in_end) {
     // Accumulate kf group error.
@@ -3180,15 +3032,6 @@ static void configure_buffer_updates(VP9_COMP *cpi) {
       break;
     default: assert(0); break;
   }
-  if (is_two_pass_svc(cpi)) {
-    if (cpi->svc.temporal_layer_id > 0) {
-      cpi->refresh_last_frame = 0;
-      cpi->refresh_golden_frame = 0;
-    }
-    if (cpi->svc.layer_context[cpi->svc.spatial_layer_id].gold_ref_idx < 0)
-      cpi->refresh_golden_frame = 0;
-    if (cpi->alt_ref_source == NULL) cpi->refresh_alt_ref_frame = 0;
-  }
 }
 
 static int is_skippable_frame(const VP9_COMP *cpi) {
@@ -3196,10 +3039,7 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
   // first  pass, and so do its previous and forward frames, then this frame
   // can be skipped for partition check, and the partition size is assigned
   // according to the variance
-  const SVC *const svc = &cpi->svc;
-  const TWO_PASS *const twopass =
-      is_two_pass_svc(cpi) ? &svc->layer_context[svc->spatial_layer_id].twopass
-                           : &cpi->twopass;
+  const TWO_PASS *const twopass = &cpi->twopass;
 
   return (!frame_is_intra_only(&cpi->common) &&
           twopass->stats_in - 2 > twopass->stats_in_start &&
@@ -3221,9 +3061,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
 
   int target_rate;
-  LAYER_CONTEXT *const lc =
-      is_two_pass_svc(cpi) ? &cpi->svc.layer_context[cpi->svc.spatial_layer_id]
-                           : 0;
 
   if (!twopass->stats_in) return;
 
@@ -3238,20 +3075,10 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
     cm->frame_type = INTER_FRAME;
 
-    if (lc != NULL) {
-      if (cpi->svc.spatial_layer_id == 0) {
-        lc->is_key_frame = 0;
-      } else {
-        lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
-
-        if (lc->is_key_frame) cpi->ref_frame_flags &= (~VP9_LAST_FLAG);
-      }
-    }
-
     // Do the firstpass stats indicate that this frame is skippable for the
     // partition search?
     if (cpi->sf.allow_partition_search_skip && cpi->oxcf.pass == 2 &&
-        (!cpi->use_svc || is_two_pass_svc(cpi))) {
+        !cpi->use_svc) {
       cpi->partition_search_skippable_frame = is_skippable_frame(cpi);
     }
 
@@ -3262,12 +3089,9 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   if (cpi->oxcf.rc_mode == VPX_Q) {
     twopass->active_worst_quality = cpi->oxcf.cq_level;
-  } else if (cm->current_video_frame == 0 ||
-             (lc != NULL && lc->current_video_frame_in_layer == 0)) {
+  } else if (cm->current_video_frame == 0) {
     const int frames_left =
-        (int)(twopass->total_stats.count -
-              ((lc != NULL) ? lc->current_video_frame_in_layer
-                            : cm->current_video_frame));
+        (int)(twopass->total_stats.count - cm->current_video_frame);
     // Special case code for first frame.
     const int section_target_bandwidth =
         (int)(twopass->bits_left / frames_left);
@@ -3316,33 +3140,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
   }
 
-  if (lc != NULL) {
-    if (cpi->svc.spatial_layer_id == 0) {
-      lc->is_key_frame = (cm->frame_type == KEY_FRAME);
-      if (lc->is_key_frame) {
-        cpi->ref_frame_flags &=
-            (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
-        lc->frames_from_key_frame = 0;
-        // Encode an intra only empty frame since we have a key frame.
-        cpi->svc.encode_intra_empty_frame = 1;
-      }
-    } else {
-      cm->frame_type = INTER_FRAME;
-      lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
-
-      if (lc->is_key_frame) {
-        cpi->ref_frame_flags &= (~VP9_LAST_FLAG);
-        lc->frames_from_key_frame = 0;
-      }
-    }
-  }
-
   // Define a new GF/ARF group. (Should always enter here for key frames).
   if (rc->frames_till_gf_update_due == 0) {
     define_gf_group(cpi, &this_frame);
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-    if (lc != NULL) cpi->refresh_golden_frame = 1;
 
 #if ARF_STATS_OUTPUT
     {
@@ -3363,7 +3165,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   // Do the firstpass stats indicate that this frame is skippable for the
   // partition search?
   if (cpi->sf.allow_partition_search_skip && cpi->oxcf.pass == 2 &&
-      (!cpi->use_svc || is_two_pass_svc(cpi))) {
+      !cpi->use_svc) {
     cpi->partition_search_skippable_frame = is_skippable_frame(cpi);
   }
 
@@ -3409,8 +3211,7 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
     rc->rate_error_estimate = 0;
   }
 
-  if (cpi->common.frame_type != KEY_FRAME &&
-      !vp9_is_upper_layer_key_frame(cpi)) {
+  if (cpi->common.frame_type != KEY_FRAME) {
     twopass->kf_group_bits -= bits_used;
     twopass->last_kfgroup_zeromotion_pct = twopass->kf_zeromotion_pct;
   }

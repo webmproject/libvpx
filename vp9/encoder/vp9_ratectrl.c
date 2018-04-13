@@ -1097,7 +1097,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
   int *inter_minq;
   ASSIGN_MINQ_TABLE(cm->bit_depth, inter_minq);
 
-  if (frame_is_intra_only(cm) || vp9_is_upper_layer_key_frame(cpi)) {
+  if (frame_is_intra_only(cm)) {
     // Handle the special case for key frames forced when we have reached
     // the maximum key frame interval. Here force the Q to a range
     // based on the ambient Q to reduce the risk of popping.
@@ -1213,9 +1213,8 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
 #if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
   vpx_clear_system_state();
   // Static forced key frames Q restrictions dealt with elsewhere.
-  if (!((frame_is_intra_only(cm) || vp9_is_upper_layer_key_frame(cpi))) ||
-      !rc->this_key_frame_forced ||
-      (cpi->twopass.last_kfgroup_zeromotion_pct < STATIC_MOTION_THRESH)) {
+  if (!frame_is_intra_only(cm) || !rc->this_key_frame_forced ||
+      cpi->twopass.last_kfgroup_zeromotion_pct < STATIC_MOTION_THRESH) {
     int qdelta = vp9_frame_type_qdelta(cpi, gf_group->rf_level[gf_group->index],
                                        active_worst_quality);
     active_worst_quality =
@@ -1239,8 +1238,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
   if (oxcf->rc_mode == VPX_Q) {
     q = active_best_quality;
     // Special case code to try and match quality with forced key frames.
-  } else if ((frame_is_intra_only(cm) || vp9_is_upper_layer_key_frame(cpi)) &&
-             rc->this_key_frame_forced) {
+  } else if (frame_is_intra_only(cm) && rc->this_key_frame_forced) {
     // If static since last kf use better of last boosted and last kf q.
     if (cpi->twopass.last_kfgroup_zeromotion_pct >= STATIC_MOTION_THRESH) {
       q = VPXMIN(rc->last_kf_qindex, rc->last_boosted_qindex);
@@ -1488,7 +1486,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   rc->total_target_vs_actual = rc->total_actual_bits - rc->total_target_bits;
 
-  if (!cpi->use_svc || is_two_pass_svc(cpi)) {
+  if (!cpi->use_svc) {
     if (is_altref_enabled(cpi) && cpi->refresh_alt_ref_frame &&
         (cm->frame_type != KEY_FRAME))
       // Update the alternate reference frame stats as appropriate.
@@ -1734,10 +1732,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
        cpi->svc.spatial_layer_id == 0)) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
-    if (is_two_pass_svc(cpi)) {
-      cpi->svc.layer_context[layer].is_key_frame = 1;
-      cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
-    } else if (is_one_pass_cbr_svc(cpi)) {
+    if (is_one_pass_cbr_svc(cpi)) {
       if (cm->current_video_frame > 0) vp9_svc_reset_key_frame(cpi);
       layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
                                cpi->svc.temporal_layer_id,
@@ -1750,17 +1745,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     }
   } else {
     cm->frame_type = INTER_FRAME;
-    if (is_two_pass_svc(cpi)) {
-      LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
-      if (cpi->svc.spatial_layer_id == 0) {
-        lc->is_key_frame = 0;
-      } else {
-        lc->is_key_frame =
-            cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame;
-        if (lc->is_key_frame) cpi->ref_frame_flags &= (~VP9_LAST_FLAG);
-      }
-      cpi->ref_frame_flags &= (~VP9_ALT_FLAG);
-    } else if (is_one_pass_cbr_svc(cpi)) {
+    if (is_one_pass_cbr_svc(cpi)) {
       LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
       if (cpi->svc.spatial_layer_id == cpi->svc.first_spatial_layer_to_encode) {
         lc->is_key_frame = 0;

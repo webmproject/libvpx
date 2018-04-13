@@ -32,7 +32,7 @@ static MESH_PATTERN
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality
 static int frame_is_boosted(const VP9_COMP *cpi) {
-  return frame_is_kf_gf_arf(cpi) || vp9_is_upper_layer_key_frame(cpi);
+  return frame_is_kf_gf_arf(cpi);
 }
 
 // Sets a partition size down to which the auto partition code will always

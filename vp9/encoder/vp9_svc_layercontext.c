@@ -311,7 +311,7 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   // Reset the frames_since_key and frames_to_key counters to their values
   // before the layer restore. Keep these defined for the stream (not layer).
   if (cpi->svc.number_temporal_layers > 1 ||
-      (cpi->svc.number_spatial_layers > 1 && !is_two_pass_svc(cpi))) {
+      cpi->svc.number_spatial_layers > 1) {
     cpi->rc.frames_since_key = old_frame_since_key;
     cpi->rc.frames_to_key = old_frame_to_key;
   }
@@ -387,15 +387,6 @@ void vp9_inc_frame_in_layer(VP9_COMP *const cpi) {
   ++lc->frames_from_key_frame;
   if (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)
     ++cpi->svc.current_superframe;
-}
-
-int vp9_is_upper_layer_key_frame(const VP9_COMP *const cpi) {
-  return is_two_pass_svc(cpi) && cpi->svc.spatial_layer_id > 0 &&
-         cpi->svc
-             .layer_context[cpi->svc.spatial_layer_id *
-                                cpi->svc.number_temporal_layers +
-                            cpi->svc.temporal_layer_id]
-             .is_key_frame;
 }
 
 void get_layer_resolution(const int width_org, const int height_org,

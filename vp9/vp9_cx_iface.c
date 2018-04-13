@@ -1074,23 +1074,11 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
   if (cpi->oxcf.pass == 2 && cpi->level_constraint.level_index >= 0 &&
       !cpi->level_constraint.rc_config_updated) {
-    SVC *const svc = &cpi->svc;
-    const int is_two_pass_svc =
-        (svc->number_spatial_layers > 1) || (svc->number_temporal_layers > 1);
     const VP9EncoderConfig *const oxcf = &cpi->oxcf;
     TWO_PASS *const twopass = &cpi->twopass;
     FIRSTPASS_STATS *stats = &twopass->total_stats;
-    if (is_two_pass_svc) {
-      const double frame_rate = 10000000.0 * stats->count / stats->duration;
-      vp9_update_spatial_layer_framerate(cpi, frame_rate);
-      twopass->bits_left =
-          (int64_t)(stats->duration *
-                    svc->layer_context[svc->spatial_layer_id].target_bandwidth /
-                    10000000.0);
-    } else {
-      twopass->bits_left =
-          (int64_t)(stats->duration * oxcf->target_bandwidth / 10000000.0);
-    }
+    twopass->bits_left =
+        (int64_t)(stats->duration * oxcf->target_bandwidth / 10000000.0);
     cpi->level_constraint.rc_config_updated = 1;
   }
 
@@ -1460,9 +1448,6 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
       svc->first_spatial_layer_to_encode >= (int)ctx->cfg.ss_number_layers) {
     return VPX_CODEC_INVALID_PARAM;
   }
-  // First spatial layer to encode not implemented for two-pass.
-  if (is_two_pass_svc(cpi) && svc->first_spatial_layer_to_encode > 0)
-    return VPX_CODEC_INVALID_PARAM;
   return VPX_CODEC_OK;
 }
 

@@ -1117,11 +1117,7 @@ static void write_frame_size_with_refs(VP9_COMP *cpi,
         ((cpi->svc.number_temporal_layers > 1 &&
           cpi->oxcf.rc_mode == VPX_CBR) ||
          (cpi->svc.number_spatial_layers > 1 &&
-          cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame) ||
-         (is_two_pass_svc(cpi) &&
-          cpi->svc.encode_empty_frame_state == ENCODING &&
-          cpi->svc.layer_context[0].frames_from_key_frame <
-              cpi->svc.number_temporal_layers + 1))) {
+          cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame))) {
       found = 0;
     } else if (cfg != NULL) {
       found =

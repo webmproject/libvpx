@@ -860,10 +860,6 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(
 
 void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
 
-static INLINE int is_two_pass_svc(const struct VP9_COMP *const cpi) {
-  return cpi->use_svc && cpi->oxcf.pass != 0;
-}
-
 static INLINE int is_one_pass_cbr_svc(const struct VP9_COMP *const cpi) {
   return (cpi->use_svc && cpi->oxcf.pass == 0);
 }
@@ -879,9 +875,7 @@ static INLINE int denoise_svc(const struct VP9_COMP *const cpi) {
 static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
   return !(cpi->oxcf.mode == REALTIME && cpi->oxcf.rc_mode == VPX_CBR) &&
          cpi->oxcf.lag_in_frames >= MIN_LOOKAHEAD_FOR_ARFS &&
-         (cpi->oxcf.enable_auto_arf &&
-          (!is_two_pass_svc(cpi) ||
-           cpi->oxcf.ss_enable_auto_arf[cpi->svc.spatial_layer_id]));
+         cpi->oxcf.enable_auto_arf;
 }
 
 static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
