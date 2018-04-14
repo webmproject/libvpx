@@ -573,13 +573,20 @@ process_detect() {
         check_ld() {
             true
         }
+        check_lib() {
+            true
+        }
     fi
     check_header stdio.h || die "Unable to invoke compiler: ${CC} ${CFLAGS}"
     check_ld <<EOF || die "Toolchain is unable to link executables"
 int main(void) {return 0;}
 EOF
     # check system headers
-    check_header pthread.h
+    check_lib -lpthread <<EOF && enable_feature pthread_h
+#include <pthread.h>
+#include <stddef.h>
+int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }
+EOF
     check_header unistd.h # for sysconf(3) and friends.
 
     check_header vpx/vpx_integer.h -I${source_path} && enable_feature vpx_ports

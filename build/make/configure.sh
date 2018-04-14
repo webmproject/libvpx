@@ -319,6 +319,12 @@ check_ld() {
     && check_cmd ${LD} ${LDFLAGS} "$@" -o ${TMP_X} ${TMP_O} ${extralibs}
 }
 
+check_lib() {
+  log check_lib "$@"
+  check_cc $@ \
+    && check_cmd ${LD} ${LDFLAGS} -o ${TMP_X} ${TMP_O} "$@" ${extralibs}
+}
+
 check_header(){
   log check_header "$@"
   header=$1
@@ -1484,7 +1490,11 @@ EOF
         # bionic includes basic pthread functionality, obviating -lpthread.
         ;;
       *)
-        check_header pthread.h && add_extralibs -lpthread
+        check_lib -lpthread <<EOF && enable_feature pthread_h && add_extralibs -lpthread
+#include <pthread.h>
+#include <stddef.h>
+int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }
+EOF
         ;;
     esac
   fi
