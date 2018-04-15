@@ -19,21 +19,13 @@
 
 namespace {
 
-class DatarateTestVP9Large
-    : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
  public:
-  DatarateTestVP9Large() : EncoderTest(GET_PARAM(0)) {}
+  explicit DatarateTestVP9(const ::libvpx_test::CodecFactory *codec)
+      : EncoderTest(codec) {}
 
  protected:
-  virtual ~DatarateTestVP9Large() {}
-
-  virtual void SetUp() {
-    InitializeConfig();
-    SetMode(GET_PARAM(1));
-    set_cpu_used_ = GET_PARAM(2);
-    ResetModel();
-  }
+  virtual ~DatarateTestVP9() {}
 
   virtual void ResetModel() {
     last_pts_ = 0;
@@ -222,6 +214,23 @@ class DatarateTestVP9Large
   vpx_roi_map_t roi_;
 };
 
+// Params: test mode, speed setting and index for bitrate array.
+class DatarateTestVP9Large
+    : public DatarateTestVP9,
+      public ::libvpx_test::CodecTestWith3Params<libvpx_test::TestMode, int,
+                                                 int> {
+ public:
+  DatarateTestVP9Large() : DatarateTestVP9(GET_PARAM(0)) {}
+
+ protected:
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(GET_PARAM(1));
+    set_cpu_used_ = GET_PARAM(2);
+    ResetModel();
+  }
+};
+
 // Check basic rate targeting for VBR mode with 0 lag.
 TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagZero) {
   cfg_.rc_min_quantizer = 0;
@@ -232,15 +241,17 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagZero) {
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 300);
-  for (int i = 400; i <= 800; i += 400) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
-        << " The datarate for the file is lower than target by too much!";
-    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.35)
-        << " The datarate for the file is greater than target by too much!";
-  }
+
+  const int bitrates[2] = { 400, 800 };
+  const int bitrate_index = GET_PARAM(3);
+  if (bitrate_index > 1) return;
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.35)
+      << " The datarate for the file is greater than target by too much!";
 }
 
 // Check basic rate targeting for VBR mode with non-zero lag.
@@ -259,15 +270,16 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZero) {
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 300);
-  for (int i = 400; i <= 800; i += 400) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
-        << " The datarate for the file is lower than target by too much!";
-    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.30)
-        << " The datarate for the file is greater than target by too much!";
-  }
+  const int bitrates[2] = { 400, 800 };
+  const int bitrate_index = GET_PARAM(3);
+  if (bitrate_index > 1) return;
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.30)
+      << " The datarate for the file is greater than target by too much!";
 }
 
 // Check basic rate targeting for VBR mode with non-zero lag, with
@@ -288,16 +300,17 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZeroFrameParDecOff) {
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 300);
-  for (int i = 400; i <= 800; i += 400) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    frame_parallel_decoding_mode_ = 0;
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
-        << " The datarate for the file is lower than target by too much!";
-    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.35)
-        << " The datarate for the file is greater than target by too much!";
-  }
+  const int bitrates[2] = { 400, 800 };
+  const int bitrate_index = GET_PARAM(3);
+  if (bitrate_index > 1) return;
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  ResetModel();
+  frame_parallel_decoding_mode_ = 0;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.75)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.35)
+      << " The datarate for the file is greater than target by too much!";
 }
 
 // Check basic rate targeting for CBR mode.
@@ -313,15 +326,15 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 140);
-  for (int i = 150; i < 800; i += 200) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
-        << " The datarate for the file is lower than target by too much!";
-    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
-        << " The datarate for the file is greater than target by too much!";
-  }
+  const int bitrates[4] = { 150, 350, 550, 750 };
+  const int bitrate_index = GET_PARAM(3);
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+      << " The datarate for the file is greater than target by too much!";
 }
 
 // Check basic rate targeting for CBR mode, with frame_parallel_decoding_mode
@@ -339,16 +352,16 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingFrameParDecOff) {
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 140);
-  for (int i = 150; i < 800; i += 200) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    frame_parallel_decoding_mode_ = 0;
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
-        << " The datarate for the file is lower than target by too much!";
-    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
-        << " The datarate for the file is greater than target by too much!";
-  }
+  const int bitrates[4] = { 150, 350, 550, 750 };
+  const int bitrate_index = GET_PARAM(3);
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  ResetModel();
+  frame_parallel_decoding_mode_ = 0;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+      << " The datarate for the file is greater than target by too much!";
 }
 
 // Check basic rate targeting for CBR mode, with 2 threads and dropped frames.
@@ -389,19 +402,18 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting444) {
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
   cfg_.rc_end_usage = VPX_CBR;
-
-  for (int i = 250; i < 900; i += 200) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(static_cast<double>(cfg_.rc_target_bitrate),
-              effective_datarate_[0] * 0.80)
-        << " The datarate for the file exceeds the target by too much!";
-    ASSERT_LE(static_cast<double>(cfg_.rc_target_bitrate),
-              effective_datarate_[0] * 1.15)
-        << " The datarate for the file missed the target!"
-        << cfg_.rc_target_bitrate << " " << effective_datarate_;
-  }
+  const int bitrates[4] = { 250, 450, 650, 850 };
+  const int bitrate_index = GET_PARAM(3);
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(static_cast<double>(cfg_.rc_target_bitrate),
+            effective_datarate_[0] * 0.80)
+      << " The datarate for the file exceeds the target by too much!";
+  ASSERT_LE(static_cast<double>(cfg_.rc_target_bitrate),
+            effective_datarate_[0] * 1.15)
+      << " The datarate for the file missed the target!"
+      << cfg_.rc_target_bitrate << " " << effective_datarate_;
 }
 
 // Check that (1) the first dropped frame gets earlier and earlier
@@ -428,31 +440,32 @@ TEST_P(DatarateTestVP9Large, ChangingDropFrameThresh) {
                                        30, 1, 0, 140);
 
   const int kDropFrameThreshTestStep = 30;
-  for (int j = 50; j <= 150; j += 100) {
-    cfg_.rc_target_bitrate = j;
-    vpx_codec_pts_t last_drop = 140;
-    int last_num_drops = 0;
-    for (int i = 10; i < 100; i += kDropFrameThreshTestStep) {
-      cfg_.rc_dropframe_thresh = i;
-      ResetModel();
-      ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-      ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
-          << " The datarate for the file is lower than target by too much!";
-      ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.25)
-          << " The datarate for the file is greater than target by too much!";
-      ASSERT_LE(first_drop_, last_drop)
-          << " The first dropped frame for drop_thresh " << i
-          << " > first dropped frame for drop_thresh "
-          << i - kDropFrameThreshTestStep;
-      ASSERT_GE(num_drops_, last_num_drops * 0.85)
-          << " The number of dropped frames for drop_thresh " << i
-          << " < number of dropped frames for drop_thresh "
-          << i - kDropFrameThreshTestStep;
-      last_drop = first_drop_;
-      last_num_drops = num_drops_;
-    }
+  const int bitrates[2] = { 50, 150 };
+  const int bitrate_index = GET_PARAM(3);
+  if (bitrate_index > 1) return;
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  vpx_codec_pts_t last_drop = 140;
+  int last_num_drops = 0;
+  for (int i = 10; i < 100; i += kDropFrameThreshTestStep) {
+    cfg_.rc_dropframe_thresh = i;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+        << " The datarate for the file is lower than target by too much!";
+    ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.25)
+        << " The datarate for the file is greater than target by too much!";
+    ASSERT_LE(first_drop_, last_drop)
+        << " The first dropped frame for drop_thresh " << i
+        << " > first dropped frame for drop_thresh "
+        << i - kDropFrameThreshTestStep;
+    ASSERT_GE(num_drops_, last_num_drops * 0.85)
+        << " The number of dropped frames for drop_thresh " << i
+        << " < number of dropped frames for drop_thresh "
+        << i - kDropFrameThreshTestStep;
+    last_drop = first_drop_;
+    last_num_drops = num_drops_;
   }
-}
+}  // namespace
 
 // Check basic rate targeting for 2 temporal layers.
 TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
@@ -477,23 +490,23 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 200);
-  for (int i = 200; i <= 800; i += 200) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    // 60-40 bitrate allocation for 2 temporal layers.
-    cfg_.layer_target_bitrate[0] = 60 * cfg_.rc_target_bitrate / 100;
-    cfg_.layer_target_bitrate[1] = cfg_.rc_target_bitrate;
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
-      ASSERT_GE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 0.85)
-          << " The datarate for the file is lower than target by too much, "
-             "for layer: "
-          << j;
-      ASSERT_LE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 1.15)
-          << " The datarate for the file is greater than target by too much, "
-             "for layer: "
-          << j;
-    }
+  const int bitrates[4] = { 200, 400, 600, 800 };
+  const int bitrate_index = GET_PARAM(3);
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  ResetModel();
+  // 60-40 bitrate allocation for 2 temporal layers.
+  cfg_.layer_target_bitrate[0] = 60 * cfg_.rc_target_bitrate / 100;
+  cfg_.layer_target_bitrate[1] = cfg_.rc_target_bitrate;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
+    ASSERT_GE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 0.85)
+        << " The datarate for the file is lower than target by too much, "
+           "for layer: "
+        << j;
+    ASSERT_LE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 1.15)
+        << " The datarate for the file is greater than target by too much, "
+           "for layer: "
+        << j;
   }
 }
 
@@ -519,28 +532,28 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayers) {
 
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 200);
-  for (int i = 200; i <= 800; i += 200) {
-    cfg_.rc_target_bitrate = i;
-    ResetModel();
-    // 40-20-40 bitrate allocation for 3 temporal layers.
-    cfg_.layer_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
-    cfg_.layer_target_bitrate[1] = 60 * cfg_.rc_target_bitrate / 100;
-    cfg_.layer_target_bitrate[2] = cfg_.rc_target_bitrate;
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
-      // TODO(yaowu): Work out more stable rc control strategy and
-      //              Adjust the thresholds to be tighter than .75.
-      ASSERT_GE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 0.75)
-          << " The datarate for the file is lower than target by too much, "
-             "for layer: "
-          << j;
-      // TODO(yaowu): Work out more stable rc control strategy and
-      //              Adjust the thresholds to be tighter than 1.25.
-      ASSERT_LE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 1.25)
-          << " The datarate for the file is greater than target by too much, "
-             "for layer: "
-          << j;
-    }
+  const int bitrates[4] = { 200, 400, 600, 800 };
+  const int bitrate_index = GET_PARAM(3);
+  cfg_.rc_target_bitrate = bitrates[bitrate_index];
+  ResetModel();
+  // 40-20-40 bitrate allocation for 3 temporal layers.
+  cfg_.layer_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
+  cfg_.layer_target_bitrate[1] = 60 * cfg_.rc_target_bitrate / 100;
+  cfg_.layer_target_bitrate[2] = cfg_.rc_target_bitrate;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
+    // TODO(yaowu): Work out more stable rc control strategy and
+    //              Adjust the thresholds to be tighter than .75.
+    ASSERT_GE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 0.75)
+        << " The datarate for the file is lower than target by too much, "
+           "for layer: "
+        << j;
+    // TODO(yaowu): Work out more stable rc control strategy and
+    //              Adjust the thresholds to be tighter than 1.25.
+    ASSERT_LE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 1.25)
+        << " The datarate for the file is greater than target by too much, "
+           "for layer: "
+        << j;
   }
 }
 
@@ -592,9 +605,20 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayersFrameDropping) {
   }
 }
 
-class DatarateTestVP9RealTime : public DatarateTestVP9Large {
+// Params: speed setting.
+class DatarateTestVP9RealTime : public DatarateTestVP9,
+                                public ::libvpx_test::CodecTestWithParam<int> {
  public:
+  DatarateTestVP9RealTime() : DatarateTestVP9(GET_PARAM(0)) {}
   virtual ~DatarateTestVP9RealTime() {}
+
+ protected:
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(::libvpx_test::kRealTime);
+    set_cpu_used_ = GET_PARAM(1);
+    ResetModel();
+  }
 };
 
 // Check VP9 region of interest feature.
@@ -655,7 +679,8 @@ TEST_P(DatarateTestVP9RealTime, RegionOfInterest) {
 }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-class DatarateTestVP9LargeDenoiser : public DatarateTestVP9Large {
+// Params: speed setting.
+class DatarateTestVP9LargeDenoiser : public DatarateTestVP9RealTime {
  public:
   virtual ~DatarateTestVP9LargeDenoiser() {}
 };
@@ -782,13 +807,11 @@ TEST_P(DatarateTestVP9LargeDenoiser, DenoiserOffOn) {
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
                           ::testing::Values(::libvpx_test::kOnePassGood,
                                             ::libvpx_test::kRealTime),
-                          ::testing::Range(2, 9));
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTime,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Range(5, 9));
+                          ::testing::Range(2, 9), ::testing::Range(0, 4));
+
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTime, ::testing::Range(5, 9));
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeDenoiser,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Range(5, 9));
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeDenoiser, ::testing::Range(5, 9));
 #endif
 }  // namespace
