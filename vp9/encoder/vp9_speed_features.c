@@ -374,6 +374,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->use_compound_nonrd_pickmode = 0;
   sf->nonrd_keyframe = 0;
   sf->svc_use_lowres_part = 0;
+  sf->re_encode_overshoot_rt = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -534,6 +535,10 @@ static void set_rt_speed_feature_framesize_independent(
     // Keep nonrd_keyframe = 1 for non-base spatial layers to prevent
     // increase in encoding time.
     if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) sf->nonrd_keyframe = 1;
+    if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
+        cm->frame_type != KEY_FRAME && cpi->resize_state == ORIG &&
+        cpi->oxcf.content == VP9E_CONTENT_SCREEN)
+      sf->re_encode_overshoot_rt = 1;
   }
 
   if (speed >= 6) {

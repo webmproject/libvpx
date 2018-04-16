@@ -3683,11 +3683,14 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // For other cases (e.g., CBR mode) use it for 5 <= speed < 8 for now
   // (need to check encoding time cost for doing this for speed 8).
   cpi->rc.high_source_sad = 0;
-  if (cpi->compute_source_sad_onepass && cm->show_frame &&
+  if (cm->show_frame &&
       (cpi->oxcf.rc_mode == VPX_VBR ||
        cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
        (cpi->oxcf.speed >= 5 && cpi->oxcf.speed < 8 && !cpi->use_svc)))
     vp9_scene_detection_onepass(cpi);
+
+  if (cpi->svc.spatial_layer_id == 0)
+    cpi->svc.high_source_sad_superframe = cpi->rc.high_source_sad;
 
   // For 1 pass CBR SVC, only ZEROMV is allowed for spatial reference frame
   // when svc->force_zero_mode_spatial_ref = 1. Under those conditions we can
@@ -3774,10 +3777,10 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   // Check if we should drop this frame because of high overshoot.
   // Only for frames where high temporal-source SAD is detected.
-  if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
-      cpi->resize_state == ORIG && cm->frame_type != KEY_FRAME &&
-      cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
-      cpi->rc.high_source_sad == 1) {
+  // For SVC: all spatial layers are checked for re-encoding.
+  if (cpi->sf.re_encode_overshoot_rt &&
+      (cpi->rc.high_source_sad ||
+       (cpi->use_svc && cpi->svc.high_source_sad_superframe))) {
     int frame_size = 0;
     // Get an estimate of the encoded frame size.
     save_coding_context(cpi);

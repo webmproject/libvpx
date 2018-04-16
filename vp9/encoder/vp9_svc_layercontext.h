@@ -118,6 +118,11 @@ typedef struct SVC {
   SVC_LAYER_DROP_MODE framedrop_mode;
 
   INTER_LAYER_PRED disable_inter_layer_pred;
+
+  // Flag to indicate scene change at current superframe, scene detection is
+  // currently checked for each superframe prior to encoding, on the full
+  // resolution source.
+  int high_source_sad_superframe;
 } SVC;
 
 struct VP9_COMP;

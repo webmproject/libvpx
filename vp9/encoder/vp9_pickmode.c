@@ -1503,10 +1503,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int svc_mv_col = 0;
   int svc_mv_row = 0;
   unsigned int thresh_svc_skip_golden = 500;
+  if (cpi->svc.spatial_layer_id > 0 && cpi->svc.high_source_sad_superframe)
+    thresh_svc_skip_golden = 0;
   // Lower the skip threshold if lower spatial layer is better quality relative
   // to current layer.
-  if (cpi->svc.spatial_layer_id > 0 && cm->base_qindex > 150 &&
-      cm->base_qindex > cpi->svc.lower_layer_qindex + 15)
+  else if (cpi->svc.spatial_layer_id > 0 && cm->base_qindex > 150 &&
+           cm->base_qindex > cpi->svc.lower_layer_qindex + 15)
     thresh_svc_skip_golden = 100;
   // Increase skip threshold if lower spatial layer is lower quality relative
   // to current layer.

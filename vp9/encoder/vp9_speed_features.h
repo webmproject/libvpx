@@ -508,6 +508,10 @@ typedef struct SPEED_FEATURES {
 
   // For SVC: enables use of partition from lower spatial resolution.
   int svc_use_lowres_part;
+
+  // Enable re-encoding on scene change with potential high overshoot,
+  // for real-time encoding flow.
+  int re_encode_overshoot_rt;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

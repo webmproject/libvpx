@@ -730,6 +730,8 @@ int main(int argc, const char **argv) {
 
   vpx_codec_control(&codec, VP9E_SET_NOISE_SENSITIVITY, 0);
 
+  vpx_codec_control(&codec, VP9E_SET_TUNE_CONTENT, 0);
+
   // Encode frames
   while (!end_of_stream) {
     vpx_codec_iter_t iter = NULL;
