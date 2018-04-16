@@ -231,6 +231,22 @@ class DatarateTestVP9Large
   }
 };
 
+// Params: test mode, speed setting.
+class DatarateTestVP9LargeOneBR
+    : public DatarateTestVP9,
+      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
+ public:
+  DatarateTestVP9LargeOneBR() : DatarateTestVP9(GET_PARAM(0)) {}
+
+ protected:
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(GET_PARAM(1));
+    set_cpu_used_ = GET_PARAM(2);
+    ResetModel();
+  }
+};
+
 // Check basic rate targeting for VBR mode with 0 lag.
 TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagZero) {
   cfg_.rc_min_quantizer = 0;
@@ -365,7 +381,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingFrameParDecOff) {
 }
 
 // Check basic rate targeting for CBR mode, with 2 threads and dropped frames.
-TEST_P(DatarateTestVP9Large, BasicRateTargetingDropFramesMultiThreads) {
+TEST_P(DatarateTestVP9LargeOneBR, BasicRateTargetingDropFramesMultiThreads) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -560,7 +576,8 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayers) {
 // Check basic rate targeting for 3 temporal layers, with frame dropping.
 // Only for one (low) bitrate with lower max_quantizer, and somewhat higher
 // frame drop threshold, to force frame dropping.
-TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayersFrameDropping) {
+TEST_P(DatarateTestVP9LargeOneBR,
+       BasicRateTargeting3TemporalLayersFrameDropping) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -808,6 +825,11 @@ VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
                           ::testing::Values(::libvpx_test::kOnePassGood,
                                             ::libvpx_test::kRealTime),
                           ::testing::Range(2, 9), ::testing::Range(0, 4));
+
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeOneBR,
+                          ::testing::Values(::libvpx_test::kOnePassGood,
+                                            ::libvpx_test::kRealTime),
+                          ::testing::Range(2, 9));
 
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTime, ::testing::Range(5, 9));
 
