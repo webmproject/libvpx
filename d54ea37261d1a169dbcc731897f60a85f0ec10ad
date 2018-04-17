@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9915b39e_808b130f",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 3782,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-04-17T23:40:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86328e6b_4edf8e05",
+      "range": {
+        "startLine": 3782,
+        "startChar": 31,
+        "endLine": 3782,
+        "endChar": 35
+      },
+      "revId": "d54ea37261d1a169dbcc731897f60a85f0ec10ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30d4e940_7733802b",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-17T23:29:59Z",
       "side": 1,
       "message": "no need to change src_height and last_src_height?",
+      "range": {
+        "startLine": 2314,
+        "startChar": 4,
+        "endLine": 2314,
+        "endChar": 13
+      },
+      "revId": "d54ea37261d1a169dbcc731897f60a85f0ec10ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2a5bcc2_cca77b7f",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2314,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-04-17T23:40:16Z",
+      "side": 1,
+      "message": "fixed in last patch upload",
+      "parentUuid": "30d4e940_7733802b",
       "range": {
         "startLine": 2314,
         "startChar": 4,
@@ -62,6 +110,24 @@
       "revId": "d54ea37261d1a169dbcc731897f60a85f0ec10ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7712d6f9_6e7a2c02",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-04-17T23:40:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cfb42b07_855196fb",
+      "revId": "d54ea37261d1a169dbcc731897f60a85f0ec10ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
