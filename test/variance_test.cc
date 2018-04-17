@@ -1384,15 +1384,19 @@ INSTANTIATE_TEST_CASE_P(
 
 #if HAVE_AVX2
 INSTANTIATE_TEST_CASE_P(AVX2, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_avx2)));
+                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_avx2),
+                                          MseParams(4, 3, &vpx_mse16x8_avx2)));
 
 INSTANTIATE_TEST_CASE_P(
     AVX2, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_avx2),
                       VarianceParams(6, 5, &vpx_variance64x32_avx2),
+                      VarianceParams(5, 6, &vpx_variance32x64_avx2),
                       VarianceParams(5, 5, &vpx_variance32x32_avx2),
                       VarianceParams(5, 4, &vpx_variance32x16_avx2),
-                      VarianceParams(4, 4, &vpx_variance16x16_avx2)));
+                      VarianceParams(4, 5, &vpx_variance16x32_avx2),
+                      VarianceParams(4, 4, &vpx_variance16x16_avx2),
+                      VarianceParams(4, 3, &vpx_variance16x8_avx2)));
 
 INSTANTIATE_TEST_CASE_P(
     AVX2, VpxSubpelVarianceTest,
