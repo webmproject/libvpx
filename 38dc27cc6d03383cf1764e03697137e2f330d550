@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f656555b_4134ccee",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-18T03:14:47Z",
+      "side": 1,
+      "message": "the naming might be a bit better but this matches check_ld(), no?",
+      "revId": "38dc27cc6d03383cf1764e03697137e2f330d550",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45c05fe7_c50b2916",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1496,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-18T03:14:47Z",
+      "side": 1,
+      "message": "might want to cast this to int to avoid any flag interference",
+      "range": {
+        "startLine": 1496,
+        "startChar": 24,
+        "endLine": 1496,
+        "endChar": 38
+      },
+      "revId": "38dc27cc6d03383cf1764e03697137e2f330d550",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ff49f55_e7ef4fb2",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 588,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-18T03:14:47Z",
+      "side": 1,
+      "message": "here too for the cast",
+      "revId": "38dc27cc6d03383cf1764e03697137e2f330d550",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
