@@ -16,6 +16,24 @@
       "revId": "db249e694aa11e325db92cd9df3ad388b67dd134",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a500efb_0ab8feac",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-18T21:38:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59d604f3_285fce70",
+      "revId": "db249e694aa11e325db92cd9df3ad388b67dd134",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
