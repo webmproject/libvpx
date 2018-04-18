@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9adbbd89_3123fe3a",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2018-04-18T04:40:37Z",
+      "side": 1,
+      "message": "Almost, but one vital difference. check_ld places all arguments early in the command line, before any linked object, to make sure any flags actually take effect. check_lib places arguments after, to make linking of libraries actually work.\n\nIn ffmpeg/libav\u0027s configure script, which this one is derived from, check_ld filters the arguments, and place any -l* at the end and the rest at the start.\n\nI chose not to try to replicate all that here, it requires adding a few filter functions.",
+      "parentUuid": "f656555b_4134ccee",
+      "revId": "38dc27cc6d03383cf1764e03697137e2f330d550",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "45c05fe7_c50b2916",
         "filename": "build/make/configure.sh",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2018-04-18T03:14:47Z",
       "side": 1,
       "message": "might want to cast this to int to avoid any flag interference",
+      "range": {
+        "startLine": 1496,
+        "startChar": 24,
+        "endLine": 1496,
+        "endChar": 38
+      },
+      "revId": "38dc27cc6d03383cf1764e03697137e2f330d550",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a659382_fc8fbd27",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1496,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2018-04-18T04:40:37Z",
+      "side": 1,
+      "message": "You mean the return value? According to specs, pthread_create returns an int, not a pointer. (I\u0027m calling the function, not just returning its address.) OTOH, a cast won\u0027t really hurt either.",
+      "parentUuid": "45c05fe7_c50b2916",
       "range": {
         "startLine": 1496,
         "startChar": 24,
