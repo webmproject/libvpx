@@ -832,19 +832,6 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
   *top_index = active_worst_quality;
   *bottom_index = active_best_quality;
 
-#if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
-  // Limit Q range for the adaptive loop.
-  if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced &&
-      !(cm->current_video_frame == 0)) {
-    int qdelta = 0;
-    vpx_clear_system_state();
-    qdelta = vp9_compute_qdelta_by_rate(
-        &cpi->rc, cm->frame_type, active_worst_quality, 2.0, cm->bit_depth);
-    *top_index = active_worst_quality + qdelta;
-    *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
-  }
-#endif
-
   // Special case code to try and match quality with forced key frames
   if (cm->frame_type == KEY_FRAME && rc->this_key_frame_forced) {
     q = rc->last_boosted_qindex;
