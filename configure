@@ -582,7 +582,10 @@ process_detect() {
 int main(void) {return 0;}
 EOF
     # check system headers
-    check_lib -lpthread <<EOF && enable_feature pthread_h
+
+    # Use both check_header and check_lib here, since check_lib
+    # could be a stub that always returns true.
+    check_header pthread.h && check_lib -lpthread <<EOF && enable_feature pthread_h
 #include <pthread.h>
 #include <stddef.h>
 int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }
