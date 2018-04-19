@@ -413,7 +413,8 @@ static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
   } while (cr->target_num_seg_blocks < block_count && i != cr->sb_index);
   cr->sb_index = i;
   cr->reduce_refresh = 0;
-  if (count_sel<(3 * count_tot)>> 2) cr->reduce_refresh = 1;
+  if (cpi->oxcf.content != VP9E_CONTENT_SCREEN)
+    if (count_sel<(3 * count_tot)>> 2) cr->reduce_refresh = 1;
 }
 
 // Set cyclic refresh parameters.
