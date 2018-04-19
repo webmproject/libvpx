@@ -3683,7 +3683,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // For other cases (e.g., CBR mode) use it for 5 <= speed < 8 for now
   // (need to check encoding time cost for doing this for speed 8).
   cpi->rc.high_source_sad = 0;
-  if (cm->show_frame &&
+  if (cm->show_frame && cpi->oxcf.mode == REALTIME &&
       (cpi->oxcf.rc_mode == VPX_VBR ||
        cpi->oxcf.content == VP9E_CONTENT_SCREEN ||
        (cpi->oxcf.speed >= 5 && cpi->oxcf.speed < 8 && !cpi->use_svc)))
