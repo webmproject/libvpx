@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "634162df_f388ee34",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-19T06:24:22Z",
+      "side": 1,
+      "message": "always",
+      "range": {
+        "startLine": 587,
+        "startChar": 27,
+        "endLine": 587,
+        "endChar": 34
+      },
+      "revId": "36267e9ecb34da6d1e49dfaf5e76818363b9ee6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
