@@ -620,8 +620,14 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
        !(cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)) &&
       (cpi->rc.rc_1_frame * cpi->rc.rc_2_frame == -1) &&
       cpi->rc.q_1_frame != cpi->rc.q_2_frame) {
-    q = clamp(q, VPXMIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
-              VPXMAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
+    int qclamp = clamp(q, VPXMIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
+                       VPXMAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
+    // If the previous had overshoot and the current q needs to increase above
+    // the clamped value, reduce the clamp for faster reaction to overshoot.
+    if (cpi->rc.rc_1_frame == -1 && q > qclamp)
+      q = (q + qclamp) >> 1;
+    else
+      q = qclamp;
   }
   return q;
 }
