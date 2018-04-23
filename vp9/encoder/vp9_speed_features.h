@@ -272,6 +272,9 @@ typedef struct SPEED_FEATURES {
   // for intra and model coefs for the rest.
   TX_SIZE_SEARCH_METHOD tx_size_search_method;
 
+  // How many levels of tx size to search, starting from the largest.
+  int tx_size_search_depth;
+
   // Low precision 32x32 fdct keeps everything in 16 bits and thus is less
   // precise but significantly faster than the non lp version.
   int use_lp32x32fdct;

@@ -858,7 +858,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
 
   if (cm->tx_mode == TX_MODE_SELECT) {
     start_tx = max_tx_size;
-    end_tx = 0;
+    end_tx = VPXMAX(start_tx - cpi->sf.tx_size_search_depth, 0);
   } else {
     TX_SIZE chosen_tx_size =
         VPXMIN(max_tx_size, tx_mode_to_biggest_tx_size[cm->tx_mode]);
