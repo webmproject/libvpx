@@ -8,6 +8,8 @@
 
 #include "mkvmuxer/mkvmuxer.h"
 
+#include <stdint.h>
+
 #include <cfloat>
 #include <climits>
 #include <cstdio>
@@ -23,11 +25,6 @@
 #include "mkvmuxer/mkvmuxerutil.h"
 #include "mkvmuxer/mkvwriter.h"
 #include "mkvparser/mkvparser.h"
-
-// disable deprecation warnings for auto_ptr
-#if defined(__GNUC__) && __GNUC__ >= 5
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
 
 namespace mkvmuxer {
 
@@ -72,7 +69,7 @@ bool StrCpy(const char* src, char** dst_ptr) {
   return true;
 }
 
-typedef std::auto_ptr<PrimaryChromaticity> PrimaryChromaticityPtr;
+typedef std::unique_ptr<PrimaryChromaticity> PrimaryChromaticityPtr;
 bool CopyChromaticity(const PrimaryChromaticity* src,
                       PrimaryChromaticityPtr* dst) {
   if (!dst)
@@ -1057,22 +1054,22 @@ bool MasteringMetadata::Write(IMkvWriter* writer) const {
 bool MasteringMetadata::SetChromaticity(
     const PrimaryChromaticity* r, const PrimaryChromaticity* g,
     const PrimaryChromaticity* b, const PrimaryChromaticity* white_point) {
-  PrimaryChromaticityPtr r_ptr(NULL);
+  PrimaryChromaticityPtr r_ptr(nullptr);
   if (r) {
     if (!CopyChromaticity(r, &r_ptr))
       return false;
   }
-  PrimaryChromaticityPtr g_ptr(NULL);
+  PrimaryChromaticityPtr g_ptr(nullptr);
   if (g) {
     if (!CopyChromaticity(g, &g_ptr))
       return false;
   }
-  PrimaryChromaticityPtr b_ptr(NULL);
+  PrimaryChromaticityPtr b_ptr(nullptr);
   if (b) {
     if (!CopyChromaticity(b, &b_ptr))
       return false;
   }
-  PrimaryChromaticityPtr wp_ptr(NULL);
+  PrimaryChromaticityPtr wp_ptr(nullptr);
   if (white_point) {
     if (!CopyChromaticity(white_point, &wp_ptr))
       return false;
@@ -1238,7 +1235,7 @@ bool Colour::Write(IMkvWriter* writer) const {
 }
 
 bool Colour::SetMasteringMetadata(const MasteringMetadata& mastering_metadata) {
-  std::auto_ptr<MasteringMetadata> mm_ptr(new MasteringMetadata());
+  std::unique_ptr<MasteringMetadata> mm_ptr(new MasteringMetadata());
   if (!mm_ptr.get())
     return false;
 
@@ -1546,7 +1543,7 @@ bool VideoTrack::Write(IMkvWriter* writer) const {
 }
 
 bool VideoTrack::SetColour(const Colour& colour) {
-  std::auto_ptr<Colour> colour_ptr(new Colour());
+  std::unique_ptr<Colour> colour_ptr(new Colour());
   if (!colour_ptr.get())
     return false;
 
@@ -1574,7 +1571,7 @@ bool VideoTrack::SetColour(const Colour& colour) {
 }
 
 bool VideoTrack::SetProjection(const Projection& projection) {
-  std::auto_ptr<Projection> projection_ptr(new Projection());
+  std::unique_ptr<Projection> projection_ptr(new Projection());
   if (!projection_ptr.get())
     return false;
 
@@ -2666,7 +2663,7 @@ bool Cluster::QueueOrWriteFrame(const Frame* const frame) {
   // and write it if it is okay to do so (i.e.) no other track has an held back
   // frame with timestamp <= the timestamp of the frame in question.
   std::vector<std::list<Frame*>::iterator> frames_to_erase;
-  for (std::list<Frame *>::iterator
+  for (std::list<Frame*>::iterator
            current_track_iterator = stored_frames_[track_number].begin(),
            end = --stored_frames_[track_number].end();
        current_track_iterator != end; ++current_track_iterator) {
