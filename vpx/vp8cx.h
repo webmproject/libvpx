@@ -620,6 +620,13 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_SVC_FRAME_DROP_LAYER,
+
+  /*!\brief Codec control function to get the refresh and reference flags and
+   * the buffer indices, up to the last encoded spatial layer.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_GET_SVC_REF_FRAME_CONFIG,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -757,10 +764,18 @@ typedef struct vpx_svc_layer_id {
  *
  */
 typedef struct vpx_svc_ref_frame_config {
-  int frame_flags[VPX_TS_MAX_LAYERS]; /**< Frame flags. */
-  int lst_fb_idx[VPX_TS_MAX_LAYERS];  /**< Last buffer index. */
-  int gld_fb_idx[VPX_TS_MAX_LAYERS];  /**< Golden buffer index. */
-  int alt_fb_idx[VPX_TS_MAX_LAYERS];  /**< Altref buffer index. */
+  // TODO(jianj/marpan): Remove the usage of frame_flags, instead use the
+  // update and reference flags.
+  int frame_flags[VPX_SS_MAX_LAYERS];       /**< Frame flags. */
+  int lst_fb_idx[VPX_SS_MAX_LAYERS];        /**< Last buffer index. */
+  int gld_fb_idx[VPX_SS_MAX_LAYERS];        /**< Golden buffer index. */
+  int alt_fb_idx[VPX_SS_MAX_LAYERS];        /**< Altref buffer index. */
+  int update_last[VPX_SS_MAX_LAYERS];       /**< Update last. */
+  int update_golden[VPX_SS_MAX_LAYERS];     /**< Update golden. */
+  int update_alt_ref[VPX_SS_MAX_LAYERS];    /**< Update altref. */
+  int reference_last[VPX_SS_MAX_LAYERS];    /**< Last as eference. */
+  int reference_golden[VPX_SS_MAX_LAYERS];  /**< Golden as reference. */
+  int reference_alt_ref[VPX_SS_MAX_LAYERS]; /**< Altref as reference. */
 } vpx_svc_ref_frame_config_t;
 
 /*!\brief VP9 svc frame dropping mode.
@@ -926,6 +941,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_SVC_INTER_LAYER_PRED, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_FRAME_DROP_LAYER, vpx_svc_frame_drop_t *)
 #define VPX_CTRL_VP9E_SET_SVC_FRAME_DROP_LAYER
+
+VPX_CTRL_USE_TYPE(VP9E_GET_SVC_REF_FRAME_CONFIG, vpx_svc_ref_frame_config_t *)
+#define VPX_CTRL_VP9E_GET_SVC_REF_FRAME_CONFIG
 
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */
