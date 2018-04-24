@@ -46,19 +46,31 @@ vp8_multi_resolution_encoder_three_formats() {
   local readonly output_files="${VPX_TEST_OUTPUT_DIR}/vp8_mre_0.ivf
                                ${VPX_TEST_OUTPUT_DIR}/vp8_mre_1.ivf
                                ${VPX_TEST_OUTPUT_DIR}/vp8_mre_2.ivf"
+  local readonly layer_bitrates="150 80 50"
+  local readonly keyframe_insert="200"
+  local readonly temporal_layers="3 3 3"
+  local readonly framerate="30"
 
   if [ "$(vpx_config_option_enabled CONFIG_MULTI_RES_ENCODING)" = "yes" ]; then
     if [ "$(vp8_encode_available)" = "yes" ]; then
       # Param order:
       #  Input width
       #  Input height
+      #  Framerate
       #  Input file path
       #  Output file names
+      #  Layer bitrates
+      #  Temporal layers
+      #  Keyframe insert
       #  Output PSNR
       vp8_mre "${YUV_RAW_INPUT_WIDTH}" \
         "${YUV_RAW_INPUT_HEIGHT}" \
+        "${framerate}" \
         "${YUV_RAW_INPUT}" \
         ${output_files} \
+        ${layer_bitrates} \
+        ${temporal_layers} \
+        "${keyframe_insert}" \
         0
 
       for output_file in ${output_files}; do
