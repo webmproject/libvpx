@@ -86,7 +86,7 @@ static void write_selected_tx_size(const VP9_COMMON *cm,
   BLOCK_SIZE bsize = xd->mi[0]->sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   const vpx_prob *const tx_probs =
-      get_tx_probs2(max_tx_size, xd, &cm->fc->tx_probs);
+      get_tx_probs(max_tx_size, get_tx_size_context(xd), &cm->fc->tx_probs);
   vpx_write(w, tx_size != TX_4X4, tx_probs[0]);
   if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {
     vpx_write(w, tx_size != TX_8X8, tx_probs[1]);

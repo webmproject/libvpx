@@ -176,12 +176,6 @@ static INLINE const vpx_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
   }
 }
 
-static INLINE const vpx_prob *get_tx_probs2(TX_SIZE max_tx_size,
-                                            const MACROBLOCKD *xd,
-                                            const struct tx_probs *tx_probs) {
-  return get_tx_probs(max_tx_size, get_tx_size_context(xd), tx_probs);
-}
-
 static INLINE unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
                                           struct tx_counts *tx_counts) {
   switch (max_tx_size) {
