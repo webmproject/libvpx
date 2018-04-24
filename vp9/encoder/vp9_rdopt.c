@@ -845,14 +845,12 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                               { INT64_MAX, INT64_MAX },
                               { INT64_MAX, INT64_MAX },
                               { INT64_MAX, INT64_MAX } };
-  int n, m;
+  int n;
   int s0, s1;
   int64_t best_rd = INT64_MAX;
   TX_SIZE best_tx = max_tx_size;
   int start_tx, end_tx;
-
-  const vpx_prob *tx_probs =
-      get_tx_probs(max_tx_size, get_tx_size_context(xd), &cm->fc->tx_probs);
+  const int tx_size_ctx = get_tx_size_context(xd);
   assert(skip_prob > 0);
   s0 = vp9_cost_bit(skip_prob, 0);
   s1 = vp9_cost_bit(skip_prob, 1);
@@ -868,13 +866,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   }
 
   for (n = start_tx; n >= end_tx; n--) {
-    int r_tx_size = 0;
-    for (m = 0; m <= n - (n == (int)max_tx_size); m++) {
-      if (m == n)
-        r_tx_size += vp9_cost_zero(tx_probs[m]);
-      else
-        r_tx_size += vp9_cost_one(tx_probs[m]);
-    }
+    const int r_tx_size = cpi->tx_size_cost[max_tx_size - 1][tx_size_ctx][n];
     txfm_rd_in_plane(cpi, x, &r[n][0], &d[n], &s[n], &sse[n], ref_best_rd, 0,
                      bs, n, cpi->sf.use_fast_coef_costing);
     r[n][1] = r[n][0];
