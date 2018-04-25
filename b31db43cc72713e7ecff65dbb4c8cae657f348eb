@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c30f23b3_a6767b5f",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-04-25T20:57:28Z",
+      "side": 1,
+      "message": "this requires disabling webm-io explicitly. could make it only disable webm-io (with a warning?) but i think this is best.",
+      "range": {
+        "startLine": 745,
+        "startChar": 13,
+        "endLine": 745,
+        "endChar": 20
+      },
+      "revId": "b31db43cc72713e7ecff65dbb4c8cae657f348eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
