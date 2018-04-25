@@ -817,6 +817,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   // Some speed-up features even for best quality as minimal impact on quality.
   sf->adaptive_rd_thresh = 1;
   sf->tx_size_search_breakout = 1;
+  sf->tx_size_search_depth = 2;
 
   sf->exhaustive_searches_thresh =
       (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ? (1 << 20)
