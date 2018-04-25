@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "287a1fea_082bd69d",
+        "filename": "vp8/decoder/decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 692,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-25T19:08:48Z",
+      "side": 1,
+      "message": "you may want to avoid the \u0027t\u0027; we\u0027ve run into compatibility issues with \u0027z\u0027 in the past. casting to int should be fine for this purpose.",
+      "range": {
+        "startLine": 692,
+        "startChar": 62,
+        "endLine": 692,
+        "endChar": 66
+      },
+      "revId": "480042982fa6d7da66ef375ea46e7a97b01e03c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
