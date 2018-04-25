@@ -46,9 +46,9 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     svc->last_layer_dropped[sl] = 0;
     svc->drop_spatial_layer[sl] = 0;
     svc->ext_frame_flags[sl] = 0;
-    svc->ext_lst_fb_idx[sl] = 0;
-    svc->ext_gld_fb_idx[sl] = 1;
-    svc->ext_alt_fb_idx[sl] = 2;
+    svc->lst_fb_idx[sl] = 0;
+    svc->gld_fb_idx[sl] = 1;
+    svc->alt_fb_idx[sl] = 2;
     svc->downsample_filter_type[sl] = BILINEAR;
     svc->downsample_filter_phase[sl] = 8;  // Set to 8 for averaging filter.
     svc->framedrop_thresh[sl] = oxcf->drop_frames_water_mark;
@@ -603,6 +603,26 @@ static void set_flags_and_fb_idx_for_temporal_mode_noLayering(
   }
 }
 
+void vp9_copy_flags_ref_update_idx(VP9_COMP *const cpi) {
+  SVC *const svc = &cpi->svc;
+  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
+                                    VP9_ALT_FLAG };
+  int sl = svc->spatial_layer_id;
+  svc->lst_fb_idx[sl] = cpi->lst_fb_idx;
+  svc->gld_fb_idx[sl] = cpi->gld_fb_idx;
+  svc->alt_fb_idx[sl] = cpi->alt_fb_idx;
+
+  svc->update_last[sl] = (uint8_t)cpi->refresh_last_frame;
+  svc->update_golden[sl] = (uint8_t)cpi->refresh_golden_frame;
+  svc->update_altref[sl] = (uint8_t)cpi->refresh_alt_ref_frame;
+  svc->reference_last[sl] =
+      (uint8_t)(cpi->ref_frame_flags & flag_list[LAST_FRAME]);
+  svc->reference_golden[sl] =
+      (uint8_t)(cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]);
+  svc->reference_altref[sl] =
+      (uint8_t)(cpi->ref_frame_flags & flag_list[ALTREF_FRAME]);
+}
+
 int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc = NULL;
@@ -637,9 +657,9 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
       cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
       sl = cpi->svc.spatial_layer_id;
       vp9_apply_encoding_flags(cpi, cpi->svc.ext_frame_flags[sl]);
-      cpi->lst_fb_idx = cpi->svc.ext_lst_fb_idx[sl];
-      cpi->gld_fb_idx = cpi->svc.ext_gld_fb_idx[sl];
-      cpi->alt_fb_idx = cpi->svc.ext_alt_fb_idx[sl];
+      cpi->lst_fb_idx = cpi->svc.lst_fb_idx[sl];
+      cpi->gld_fb_idx = cpi->svc.gld_fb_idx[sl];
+      cpi->alt_fb_idx = cpi->svc.alt_fb_idx[sl];
     }
   }
 
@@ -713,6 +733,8 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   }
 
   if (cpi->svc.spatial_layer_id == 0) cpi->svc.high_source_sad_superframe = 0;
+
+  vp9_copy_flags_ref_update_idx(cpi);
 
   if (vp9_set_size_literal(cpi, width, height) != 0)
     return VPX_CODEC_INVALID_PARAM;

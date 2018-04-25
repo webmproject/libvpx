@@ -3042,6 +3042,8 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
       if (cpi->refresh_alt_ref_frame)
         svc->ref_frame_index[cpi->alt_fb_idx] = svc->current_superframe;
     }
+    // Copy flags from encoder to SVC struct.
+    vp9_copy_flags_ref_update_idx(cpi);
   }
 }
 

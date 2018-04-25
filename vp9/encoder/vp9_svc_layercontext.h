@@ -86,9 +86,9 @@ typedef struct SVC {
   // Frame flags and buffer indexes for each spatial layer, set by the
   // application (external settings).
   int ext_frame_flags[VPX_MAX_LAYERS];
-  int ext_lst_fb_idx[VPX_MAX_LAYERS];
-  int ext_gld_fb_idx[VPX_MAX_LAYERS];
-  int ext_alt_fb_idx[VPX_MAX_LAYERS];
+  int lst_fb_idx[VPX_MAX_LAYERS];
+  int gld_fb_idx[VPX_MAX_LAYERS];
+  int alt_fb_idx[VPX_MAX_LAYERS];
   int ref_frame_index[REF_FRAMES];
   int force_zero_mode_spatial_ref;
   int current_superframe;
@@ -123,6 +123,14 @@ typedef struct SVC {
   // currently checked for each superframe prior to encoding, on the full
   // resolution source.
   int high_source_sad_superframe;
+
+  // Flags used to get SVC pattern info.
+  uint8_t update_last[VPX_SS_MAX_LAYERS];
+  uint8_t update_golden[VPX_SS_MAX_LAYERS];
+  uint8_t update_altref[VPX_SS_MAX_LAYERS];
+  uint8_t reference_last[VPX_SS_MAX_LAYERS];
+  uint8_t reference_golden[VPX_SS_MAX_LAYERS];
+  uint8_t reference_altref[VPX_SS_MAX_LAYERS];
 } SVC;
 
 struct VP9_COMP;
@@ -169,6 +177,8 @@ struct lookahead_entry *vp9_svc_lookahead_pop(struct VP9_COMP *const cpi,
 
 // Start a frame and initialize svc parameters
 int vp9_svc_start_frame(struct VP9_COMP *const cpi);
+
+void vp9_copy_flags_ref_update_idx(struct VP9_COMP *const cpi);
 
 int vp9_one_pass_cbr_svc_start_layer(struct VP9_COMP *const cpi);
 
