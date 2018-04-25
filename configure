@@ -522,7 +522,7 @@ process_detect() {
         # here rather than at option parse time because the target auto-detect
         # magic happens after the command line has been parsed.
         case "${tgt_os}" in
-        linux|os2|darwin*|iphonesimulator*)
+        linux|os2|solaris|darwin*|iphonesimulator*)
             # Supported platforms
             ;;
         *)
