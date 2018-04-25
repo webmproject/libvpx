@@ -3732,28 +3732,9 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   suppress_active_map(cpi);
 
   // For SVC on non-zero spatial layer: check for disabling inter-layer
-  // (spatial) prediction, if svc.disable_inter_layer_pred is set.
-  // if the previous spatial layer was dropped then disable the prediction from
-  // this (scaled) reference.
-  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) {
-    if ((cpi->svc.disable_inter_layer_pred == INTER_LAYER_PRED_OFF_NONKEY &&
-         !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame) ||
-        cpi->svc.disable_inter_layer_pred == INTER_LAYER_PRED_OFF ||
-        cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id - 1]) {
-      MV_REFERENCE_FRAME ref_frame;
-      static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
-                                        VP9_ALT_FLAG };
-      for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
-        const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
-        if (yv12 != NULL && (cpi->ref_frame_flags & flag_list[ref_frame])) {
-          const struct scale_factors *const scale_fac =
-              &cm->frame_refs[ref_frame - 1].sf;
-          if (vp9_is_scaled(scale_fac))
-            cpi->ref_frame_flags &= (~flag_list[ref_frame]);
-        }
-      }
-    }
-  }
+  // prediction.
+  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0)
+    vp9_svc_constrain_inter_layer_pred(cpi);
 
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
