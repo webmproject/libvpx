@@ -363,7 +363,7 @@ add_proto qw/void vpx_convolve_copy/, "const uint8_t *src, ptrdiff_t src_stride,
 specialize qw/vpx_convolve_copy neon dspr2 msa sse2 vsx/;
 
 add_proto qw/void vpx_convolve_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve_avg neon dspr2 msa sse2 vsx/;
+specialize qw/vpx_convolve_avg neon dspr2 msa sse2 vsx mmi/;
 
 add_proto qw/void vpx_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
 specialize qw/vpx_convolve8 sse2 ssse3 avx2 neon dspr2 msa vsx mmi/;
@@ -378,7 +378,7 @@ add_proto qw/void vpx_convolve8_avg/, "const uint8_t *src, ptrdiff_t src_stride,
 specialize qw/vpx_convolve8_avg sse2 ssse3 avx2 neon dspr2 msa vsx mmi/;
 
 add_proto qw/void vpx_convolve8_avg_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve8_avg_horiz sse2 ssse3 avx2 neon dspr2 msa vsx/;
+specialize qw/vpx_convolve8_avg_horiz sse2 ssse3 avx2 neon dspr2 msa vsx mmi/;
 
 add_proto qw/void vpx_convolve8_avg_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
 specialize qw/vpx_convolve8_avg_vert sse2 ssse3 avx2 neon dspr2 msa vsx mmi/;

@@ -1382,8 +1382,8 @@ INSTANTIATE_TEST_CASE_P(VSX, ConvolveTest,
 
 #if HAVE_MMI
 const ConvolveFunctions convolve8_mmi(
-    vpx_convolve_copy_c, vpx_convolve_avg_c, vpx_convolve8_horiz_mmi,
-    vpx_convolve8_avg_horiz_c, vpx_convolve8_vert_mmi,
+    vpx_convolve_copy_c, vpx_convolve_avg_mmi, vpx_convolve8_horiz_mmi,
+    vpx_convolve8_avg_horiz_mmi, vpx_convolve8_vert_mmi,
     vpx_convolve8_avg_vert_mmi, vpx_convolve8_mmi, vpx_convolve8_avg_mmi,
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
     vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);

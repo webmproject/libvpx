@@ -254,6 +254,89 @@ static void convolve_vert_mmi(const uint8_t *src, ptrdiff_t src_stride,
   );
 }
 
+static void convolve_avg_horiz_mmi(const uint8_t *src, ptrdiff_t src_stride,
+                                   uint8_t *dst, ptrdiff_t dst_stride,
+                                   const InterpKernel *filter, int x0_q4,
+                                   int x_step_q4, int32_t w, int32_t h) {
+  const int16_t *filter_x = filter[x0_q4];
+  double ftmp[14];
+  uint32_t tmp[2];
+  uint32_t para[2];
+  para[0] = (1 << ((FILTER_BITS)-1));
+  para[1] = FILTER_BITS;
+  src -= SUBPEL_TAPS / 2 - 1;
+  src_stride -= w;
+  dst_stride -= w;
+  (void)x_step_q4;
+
+  __asm__ volatile(
+    "move       %[tmp1],    %[width]                   \n\t"
+    "xor        %[ftmp0],   %[ftmp0],    %[ftmp0]      \n\t"
+    "gsldlc1    %[filter1], 0x03(%[filter])            \n\t"
+    "gsldrc1    %[filter1], 0x00(%[filter])            \n\t"
+    "gsldlc1    %[filter2], 0x0b(%[filter])            \n\t"
+    "gsldrc1    %[filter2], 0x08(%[filter])            \n\t"
+    "1:                                                \n\t"
+    /* Get 8 data per row */
+    "gsldlc1    %[ftmp5],   0x07(%[src])               \n\t"
+    "gsldrc1    %[ftmp5],   0x00(%[src])               \n\t"
+    "gsldlc1    %[ftmp7],   0x08(%[src])               \n\t"
+    "gsldrc1    %[ftmp7],   0x01(%[src])               \n\t"
+    "gsldlc1    %[ftmp9],   0x09(%[src])               \n\t"
+    "gsldrc1    %[ftmp9],   0x02(%[src])               \n\t"
+    "gsldlc1    %[ftmp11],  0x0A(%[src])               \n\t"
+    "gsldrc1    %[ftmp11],  0x03(%[src])               \n\t"
+    "punpcklbh  %[ftmp4],   %[ftmp5],    %[ftmp0]      \n\t"
+    "punpckhbh  %[ftmp5],   %[ftmp5],    %[ftmp0]      \n\t"
+    "punpcklbh  %[ftmp6],   %[ftmp7],    %[ftmp0]      \n\t"
+    "punpckhbh  %[ftmp7],   %[ftmp7],    %[ftmp0]      \n\t"
+    "punpcklbh  %[ftmp8],   %[ftmp9],    %[ftmp0]      \n\t"
+    "punpckhbh  %[ftmp9],   %[ftmp9],    %[ftmp0]      \n\t"
+    "punpcklbh  %[ftmp10],  %[ftmp11],   %[ftmp0]      \n\t"
+    "punpckhbh  %[ftmp11],  %[ftmp11],   %[ftmp0]      \n\t"
+    MMI_ADDIU(%[width],   %[width],    -0x04)
+    /* Get raw data */
+    GET_DATA_H_MMI
+    ROUND_POWER_OF_TWO_MMI
+    CLIP_PIXEL_MMI
+    "punpcklbh  %[ftmp12],  %[ftmp12],   %[ftmp0]      \n\t"
+    "gsldlc1    %[ftmp4],   0x07(%[dst])               \n\t"
+    "gsldrc1    %[ftmp4],   0x00(%[dst])               \n\t"
+    "punpcklbh  %[ftmp4],   %[ftmp4],    %[ftmp0]      \n\t"
+    "paddh      %[ftmp12],  %[ftmp12],   %[ftmp4]      \n\t"
+    "li         %[tmp0],    0x10001                    \n\t"
+    MMI_MTC1(%[tmp0],     %[ftmp5])
+    "punpcklhw  %[ftmp5],   %[ftmp5],    %[ftmp5]      \n\t"
+    "paddh      %[ftmp12],  %[ftmp12],   %[ftmp5]      \n\t"
+    "psrah      %[ftmp12],  %[ftmp12],   %[ftmp5]      \n\t"
+    "packushb   %[ftmp12],  %[ftmp12],   %[ftmp0]      \n\t"
+    "swc1       %[ftmp12],  0x00(%[dst])               \n\t"
+    MMI_ADDIU(%[dst],     %[dst],      0x04)
+    MMI_ADDIU(%[src],     %[src],      0x04)
+    /* Loop count */
+    "bnez       %[width],   1b                         \n\t"
+    "move       %[width],   %[tmp1]                    \n\t"
+    MMI_ADDU(%[src],      %[src],      %[src_stride])
+    MMI_ADDU(%[dst],      %[dst],      %[dst_stride])
+    MMI_ADDIU(%[height],  %[height],   -0x01)
+    "bnez       %[height],  1b                         \n\t"
+    : [srcl]"=&f"(ftmp[0]),     [srch]"=&f"(ftmp[1]),
+      [filter1]"=&f"(ftmp[2]),  [filter2]"=&f"(ftmp[3]),
+      [ftmp0]"=&f"(ftmp[4]),    [ftmp4]"=&f"(ftmp[5]),
+      [ftmp5]"=&f"(ftmp[6]),    [ftmp6]"=&f"(ftmp[7]),
+      [ftmp7]"=&f"(ftmp[8]),    [ftmp8]"=&f"(ftmp[9]),
+      [ftmp9]"=&f"(ftmp[10]),   [ftmp10]"=&f"(ftmp[11]),
+      [ftmp11]"=&f"(ftmp[12]),  [ftmp12]"=&f"(ftmp[13]),
+      [tmp0]"=&r"(tmp[0]),      [tmp1]"=&r"(tmp[1]),
+      [src]"+&r"(src),          [width]"+&r"(w),
+      [dst]"+&r"(dst),          [height]"+&r"(h)
+    : [filter]"r"(filter_x),    [para]"r"(para),
+      [src_stride]"r"((mips_reg)src_stride),
+      [dst_stride]"r"((mips_reg)dst_stride)
+    : "memory"
+  );
+}
+
 static void convolve_avg_vert_mmi(const uint8_t *src, ptrdiff_t src_stride,
                                   uint8_t *dst, ptrdiff_t dst_stride,
                                   const InterpKernel *filter, int y0_q4,
@@ -362,52 +445,63 @@ void vpx_convolve_avg_mmi(const uint8_t *src, ptrdiff_t src_stride,
                           uint8_t *dst, ptrdiff_t dst_stride,
                           const InterpKernel *filter, int x0_q4, int x_step_q4,
                           int y0_q4, int y_step_q4, int w, int h) {
-  double ftmp[4];
-  uint32_t tmp[2];
-  src_stride -= w;
-  dst_stride -= w;
+  int x, y;
+
   (void)filter;
   (void)x0_q4;
   (void)x_step_q4;
   (void)y0_q4;
   (void)y_step_q4;
 
-  __asm__ volatile(
-    "move       %[tmp1],    %[width]                  \n\t"
-    "xor        %[ftmp0],   %[ftmp0],   %[ftmp0]      \n\t"
-    "li         %[tmp0],    0x10001                   \n\t"
-    MMI_MTC1(%[tmp0],    %[ftmp3])
-    "punpcklhw  %[ftmp3],   %[ftmp3],   %[ftmp3]      \n\t"
-    "1:                                               \n\t"
-    "gsldlc1    %[ftmp1],   0x07(%[src])              \n\t"
-    "gsldrc1    %[ftmp1],   0x00(%[src])              \n\t"
-    "gsldlc1    %[ftmp2],   0x07(%[dst])              \n\t"
-    "gsldrc1    %[ftmp2],   0x00(%[dst])              \n\t"
-    "punpcklbh  %[ftmp1],   %[ftmp1],   %[ftmp0]      \n\t"
-    "punpcklbh  %[ftmp2],   %[ftmp2],   %[ftmp0]      \n\t"
-    "paddh      %[ftmp1],   %[ftmp1],   %[ftmp2]      \n\t"
-    "paddh      %[ftmp1],   %[ftmp1],   %[ftmp3]      \n\t"
-    "psrah      %[ftmp1],   %[ftmp1],   %[ftmp3]      \n\t"
-    "packushb   %[ftmp1],   %[ftmp1],   %[ftmp0]      \n\t"
-    "swc1       %[ftmp1],   0x00(%[dst])              \n\t"
-    MMI_ADDIU(%[width],  %[width],   -0x04)
-    MMI_ADDIU(%[dst],    %[dst],     0x04)
-    MMI_ADDIU(%[src],    %[src],     0x04)
-    "bnez       %[width],   1b                        \n\t"
-    "move       %[width],   %[tmp1]                   \n\t"
-    MMI_ADDU(%[dst],     %[dst],     %[dst_stride])
-    MMI_ADDU(%[src],     %[src],     %[src_stride])
-    MMI_ADDIU(%[height], %[height],  -0x01)
-    "bnez       %[height],  1b                        \n\t"
-    : [ftmp0]"=&f"(ftmp[0]),  [ftmp1]"=&f"(ftmp[1]),
-      [ftmp2]"=&f"(ftmp[2]),  [ftmp3]"=&f"(ftmp[3]),
-      [tmp0]"=&r"(tmp[0]),    [tmp1]"=&r"(tmp[1]),
-      [src]"+&r"(src),        [dst]"+&r"(dst),
-      [width]"+&r"(w),        [height]"+&r"(h)
-    : [src_stride]"r"((mips_reg)src_stride),
-      [dst_stride]"r"((mips_reg)dst_stride)
-    : "memory"
-  );
+  if (w & 0x03) {
+    for (y = 0; y < h; ++y) {
+      for (x = 0; x < w; ++x) dst[x] = ROUND_POWER_OF_TWO(dst[x] + src[x], 1);
+      src += src_stride;
+      dst += dst_stride;
+    }
+  } else {
+    double ftmp[4];
+    uint32_t tmp[2];
+    src_stride -= w;
+    dst_stride -= w;
+
+    __asm__ volatile(
+      "move       %[tmp1],    %[width]                  \n\t"
+      "xor        %[ftmp0],   %[ftmp0],   %[ftmp0]      \n\t"
+      "li         %[tmp0],    0x10001                   \n\t"
+      MMI_MTC1(%[tmp0],    %[ftmp3])
+      "punpcklhw  %[ftmp3],   %[ftmp3],   %[ftmp3]      \n\t"
+      "1:                                               \n\t"
+      "gsldlc1    %[ftmp1],   0x07(%[src])              \n\t"
+      "gsldrc1    %[ftmp1],   0x00(%[src])              \n\t"
+      "gsldlc1    %[ftmp2],   0x07(%[dst])              \n\t"
+      "gsldrc1    %[ftmp2],   0x00(%[dst])              \n\t"
+      "punpcklbh  %[ftmp1],   %[ftmp1],   %[ftmp0]      \n\t"
+      "punpcklbh  %[ftmp2],   %[ftmp2],   %[ftmp0]      \n\t"
+      "paddh      %[ftmp1],   %[ftmp1],   %[ftmp2]      \n\t"
+      "paddh      %[ftmp1],   %[ftmp1],   %[ftmp3]      \n\t"
+      "psrah      %[ftmp1],   %[ftmp1],   %[ftmp3]      \n\t"
+      "packushb   %[ftmp1],   %[ftmp1],   %[ftmp0]      \n\t"
+      "swc1       %[ftmp1],   0x00(%[dst])              \n\t"
+      MMI_ADDIU(%[width],  %[width],   -0x04)
+      MMI_ADDIU(%[dst],    %[dst],     0x04)
+      MMI_ADDIU(%[src],    %[src],     0x04)
+      "bnez       %[width],   1b                        \n\t"
+      "move       %[width],   %[tmp1]                   \n\t"
+      MMI_ADDU(%[dst],     %[dst],     %[dst_stride])
+      MMI_ADDU(%[src],     %[src],     %[src_stride])
+      MMI_ADDIU(%[height], %[height],  -0x01)
+      "bnez       %[height],  1b                        \n\t"
+      : [ftmp0]"=&f"(ftmp[0]),  [ftmp1]"=&f"(ftmp[1]),
+        [ftmp2]"=&f"(ftmp[2]),  [ftmp3]"=&f"(ftmp[3]),
+        [tmp0]"=&r"(tmp[0]),    [tmp1]"=&r"(tmp[1]),
+        [src]"+&r"(src),        [dst]"+&r"(dst),
+        [width]"+&r"(w),        [height]"+&r"(h)
+      : [src_stride]"r"((mips_reg)src_stride),
+        [dst_stride]"r"((mips_reg)dst_stride)
+      : "memory"
+    );
+  }
 }
 
 static void convolve_horiz(const uint8_t *src, ptrdiff_t src_stride,
@@ -478,6 +572,29 @@ static void convolve_avg_vert(const uint8_t *src, ptrdiff_t src_stride,
     }
     ++src;
     ++dst;
+  }
+}
+
+static void convolve_avg_horiz(const uint8_t *src, ptrdiff_t src_stride,
+                               uint8_t *dst, ptrdiff_t dst_stride,
+                               const InterpKernel *x_filters, int x0_q4,
+                               int x_step_q4, int w, int h) {
+  int x, y;
+  src -= SUBPEL_TAPS / 2 - 1;
+
+  for (y = 0; y < h; ++y) {
+    int x_q4 = x0_q4;
+    for (x = 0; x < w; ++x) {
+      const uint8_t *const src_x = &src[x_q4 >> SUBPEL_BITS];
+      const int16_t *const x_filter = x_filters[x_q4 & SUBPEL_MASK];
+      int k, sum = 0;
+      for (k = 0; k < SUBPEL_TAPS; ++k) sum += src_x[k] * x_filter[k];
+      dst[x] = ROUND_POWER_OF_TWO(
+          dst[x] + clip_pixel(ROUND_POWER_OF_TWO(sum, FILTER_BITS)), 1);
+      x_q4 += x_step_q4;
+    }
+    src += src_stride;
+    dst += dst_stride;
   }
 }
 
@@ -553,6 +670,21 @@ void vpx_convolve8_vert_mmi(const uint8_t *src, ptrdiff_t src_stride,
                       y_step_q4, w, h);
 }
 
+void vpx_convolve8_avg_horiz_mmi(const uint8_t *src, ptrdiff_t src_stride,
+                                 uint8_t *dst, ptrdiff_t dst_stride,
+                                 const InterpKernel *filter, int x0_q4,
+                                 int32_t x_step_q4, int y0_q4, int y_step_q4,
+                                 int w, int h) {
+  (void)y0_q4;
+  (void)y_step_q4;
+  if (w & 0x03)
+    convolve_avg_horiz(src, src_stride, dst, dst_stride, filter, x0_q4,
+                       x_step_q4, w, h);
+  else
+    convolve_avg_horiz_mmi(src, src_stride, dst, dst_stride, filter, x0_q4,
+                           x_step_q4, w, h);
+}
+
 void vpx_convolve8_avg_vert_mmi(const uint8_t *src, ptrdiff_t src_stride,
                                 uint8_t *dst, ptrdiff_t dst_stride,
                                 const InterpKernel *filter, int x0_q4,
@@ -580,8 +712,5 @@ void vpx_convolve8_avg_mmi(const uint8_t *src, ptrdiff_t src_stride,
 
   vpx_convolve8_mmi(src, src_stride, temp, 64, filter, x0_q4, x_step_q4, y0_q4,
                     y_step_q4, w, h);
-  if (w & 0x03)
-    vpx_convolve_avg_c(temp, 64, dst, dst_stride, NULL, 0, 0, 0, 0, w, h);
-  else
-    vpx_convolve_avg_mmi(temp, 64, dst, dst_stride, NULL, 0, 0, 0, 0, w, h);
+  vpx_convolve_avg_mmi(temp, 64, dst, dst_stride, NULL, 0, 0, 0, 0, w, h);
 }
