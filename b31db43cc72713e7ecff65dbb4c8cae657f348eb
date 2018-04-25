@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "dc56a1c5_6790bd22",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-25T21:20:17Z",
+      "side": 1,
+      "message": "the space before \u0027;\u0027 could go",
+      "range": {
+        "startLine": 743,
+        "startChar": 22,
+        "endLine": 743,
+        "endChar": 23
+      },
+      "revId": "b31db43cc72713e7ecff65dbb4c8cae657f348eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c30f23b3_a6767b5f",
         "filename": "configure",
         "patchSetId": 3
@@ -13,6 +36,30 @@
       "writtenOn": "2018-04-25T20:57:28Z",
       "side": 1,
       "message": "this requires disabling webm-io explicitly. could make it only disable webm-io (with a warning?) but i think this is best.",
+      "range": {
+        "startLine": 745,
+        "startChar": 13,
+        "endLine": 745,
+        "endChar": 20
+      },
+      "revId": "b31db43cc72713e7ecff65dbb4c8cae657f348eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30d4cd72_9e2be665",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-04-25T21:20:17Z",
+      "side": 1,
+      "message": "\u003e this requires disabling webm-io explicitly. could make it only disable webm-io (with a warning?) but i think this is best.\n\nwe more quietly disable c++ targets without a c++ compiler (~line 720), I think this might be of the same sort",
+      "parentUuid": "c30f23b3_a6767b5f",
       "range": {
         "startLine": 745,
         "startChar": 13,
