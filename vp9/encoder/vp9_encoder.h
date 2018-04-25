@@ -645,6 +645,8 @@ typedef struct VP9_COMP {
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
+  // Indices are:  max_tx_size-1,  tx_size_ctx,    tx_size
+  int tx_size_cost[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 
   int multi_arf_allowed;
   int multi_arf_enabled;

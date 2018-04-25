@@ -69,10 +69,12 @@ static void fill_mode_costs(VP9_COMP *cpi) {
   const FRAME_CONTEXT *const fc = cpi->common.fc;
   int i, j;
 
-  for (i = 0; i < INTRA_MODES; ++i)
-    for (j = 0; j < INTRA_MODES; ++j)
+  for (i = 0; i < INTRA_MODES; ++i) {
+    for (j = 0; j < INTRA_MODES; ++j) {
       vp9_cost_tokens(cpi->y_mode_costs[i][j], vp9_kf_y_mode_prob[i][j],
                       vp9_intra_mode_tree);
+    }
+  }
 
   vp9_cost_tokens(cpi->mbmode_cost, fc->y_mode_prob[1], vp9_intra_mode_tree);
   for (i = 0; i < INTRA_MODES; ++i) {
@@ -82,9 +84,28 @@ static void fill_mode_costs(VP9_COMP *cpi) {
                     fc->uv_mode_prob[i], vp9_intra_mode_tree);
   }
 
-  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i) {
     vp9_cost_tokens(cpi->switchable_interp_costs[i],
                     fc->switchable_interp_prob[i], vp9_switchable_interp_tree);
+  }
+
+  for (i = TX_8X8; i < TX_SIZES; ++i) {
+    for (j = 0; j < TX_SIZE_CONTEXTS; ++j) {
+      const vpx_prob *tx_probs = get_tx_probs(i, j, &fc->tx_probs);
+      int k;
+      for (k = 0; k <= i; ++k) {
+        int cost = 0;
+        int m;
+        for (m = 0; m <= k - (k == i); ++m) {
+          if (m == k)
+            cost += vp9_cost_zero(tx_probs[m]);
+          else
+            cost += vp9_cost_one(tx_probs[m]);
+        }
+        cpi->tx_size_cost[i - 1][j][k] = cost;
+      }
+    }
+  }
 }
 
 static void fill_token_costs(vp9_coeff_cost *c,
