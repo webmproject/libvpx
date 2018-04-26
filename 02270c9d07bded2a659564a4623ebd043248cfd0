@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "29cd6dd7_dfca62ed",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 856,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-26T21:33:48Z",
+      "side": 1,
+      "message": "should we check alt ref too to be more general?",
+      "range": {
+        "startLine": 856,
+        "startChar": 46,
+        "endLine": 856,
+        "endChar": 58
+      },
+      "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "98da8e77_5939df7d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-26T21:33:48Z",
+      "side": 1,
+      "message": "move this after INTER_LAYER_PRED_ON",
+      "range": {
+        "startLine": 26,
+        "startChar": 2,
+        "endLine": 26,
+        "endChar": 33
+      },
+      "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "773d94ee_27e1ca63",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-26T21:33:48Z",
+      "side": 1,
+      "message": "better to have some comments on each level about what they do.",
+      "range": {
+        "startLine": 27,
+        "startChar": 2,
+        "endLine": 27,
+        "endChar": 18
+      },
+      "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
