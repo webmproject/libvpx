@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "97ef4f91_836e491c",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 856,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-04-26T22:24:44Z",
+      "side": 1,
+      "message": "we can do that in another patch, as we should get this rolled in first.\nWe currently don\u0027t use ALT_REF for RTC case.",
+      "parentUuid": "29cd6dd7_dfca62ed",
+      "range": {
+        "startLine": 856,
+        "startChar": 46,
+        "endLine": 856,
+        "endChar": 58
+      },
+      "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "98da8e77_5939df7d",
         "filename": "vp9/encoder/vp9_svc_layercontext.h",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2018-04-26T21:33:48Z",
       "side": 1,
       "message": "move this after INTER_LAYER_PRED_ON",
+      "range": {
+        "startLine": 26,
+        "startChar": 2,
+        "endLine": 26,
+        "endChar": 33
+      },
+      "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "724045ec_71266bd5",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-04-26T22:24:44Z",
+      "side": 1,
+      "message": "prefer to leave as last one, so an application that is already used any of the first 3 won\u0027t be impacted.",
+      "parentUuid": "98da8e77_5939df7d",
       "range": {
         "startLine": 26,
         "startChar": 2,
@@ -68,6 +116,30 @@
       "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b3183ea_5461e52a",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-04-26T22:24:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "773d94ee_27e1ca63",
+      "range": {
+        "startLine": 27,
+        "startChar": 2,
+        "endLine": 27,
+        "endChar": 18
+      },
+      "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
