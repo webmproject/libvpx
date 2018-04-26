@@ -1886,7 +1886,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
         if (bsize < BLOCK_16X16) continue;
 
-        tmp_sad = vp9_int_pro_motion_estimation(cpi, x, bsize, mi_row, mi_col);
+        tmp_sad = vp9_int_pro_motion_estimation(
+            cpi, x, bsize, mi_row, mi_col,
+            &x->mbmi_ext->ref_mvs[ref_frame][0].as_mv);
 
         if (tmp_sad > x->pred_mv_sad[LAST_FRAME]) continue;
         if (tmp_sad + (num_pels_log2_lookup[bsize] << 4) > best_pred_sad)
