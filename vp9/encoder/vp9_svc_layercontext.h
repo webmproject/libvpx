@@ -20,9 +20,16 @@ extern "C" {
 #endif
 
 typedef enum {
+  // Inter-layer prediction is on on all frames.
   INTER_LAYER_PRED_ON,
+  // Inter-layer prediction is off on all frames.
   INTER_LAYER_PRED_OFF,
-  INTER_LAYER_PRED_OFF_NONKEY
+  // Inter-layer prediction is off on non-key frames.
+  INTER_LAYER_PRED_OFF_NONKEY,
+  // Inter-layer prediction is on on all frames, but constrained such
+  // that any layer S (> 0) can only predict from previous spatial
+  // layer S-1, from the same superframe.
+  INTER_LAYER_PRED_ON_CONSTRAINED
 } INTER_LAYER_PRED;
 
 typedef struct {
@@ -187,6 +194,8 @@ void vp9_free_svc_cyclic_refresh(struct VP9_COMP *const cpi);
 void vp9_svc_reset_key_frame(struct VP9_COMP *const cpi);
 
 void vp9_svc_check_reset_layer_rc_flag(struct VP9_COMP *const cpi);
+
+void vp9_svc_constrain_inter_layer_pred(struct VP9_COMP *const cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
