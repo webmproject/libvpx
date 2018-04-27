@@ -666,9 +666,10 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   // Reset the drop flags for all spatial layers, on the base layer.
   if (cpi->svc.spatial_layer_id == 0) {
     vp9_zero(cpi->svc.drop_spatial_layer);
-    memset(&cpi->svc.lst_fb_idx, -1, sizeof(cpi->svc.lst_fb_idx));
-    memset(&cpi->svc.gld_fb_idx, -1, sizeof(cpi->svc.lst_fb_idx));
-    memset(&cpi->svc.alt_fb_idx, -1, sizeof(cpi->svc.lst_fb_idx));
+    // TODO(jianj/marpan): Investigate why setting cpi->svc.lst/gld/alt_fb_idx
+    // causes an issue with frame dropping and temporal layers, when the frame
+    // flags are passed via the encode call. Issue is that we're resetting
+    // ext_refresh_frame_flags_pending to 0 on frame drops.
     vp9_zero(cpi->svc.update_last);
     vp9_zero(cpi->svc.update_golden);
     vp9_zero(cpi->svc.update_altref);
