@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "49f6bfe6_a2c037ca",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 856,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-27T00:04:47Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "97ef4f91_836e491c",
+      "range": {
+        "startLine": 856,
+        "startChar": 46,
+        "endLine": 856,
+        "endChar": 58
+      },
+      "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "98da8e77_5939df7d",
         "filename": "vp9/encoder/vp9_svc_layercontext.h",
         "patchSetId": 6
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "prefer to leave as last one, so an application that is already used any of the first 3 won\u0027t be impacted.",
       "parentUuid": "98da8e77_5939df7d",
+      "range": {
+        "startLine": 26,
+        "startChar": 2,
+        "endLine": 26,
+        "endChar": 33
+      },
+      "revId": "02270c9d07bded2a659564a4623ebd043248cfd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c8d3bdb_60e3bcf0",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-27T00:04:47Z",
+      "side": 1,
+      "message": "in current code base, we always use enum for this. we don\u0027t use 0,1,2... so I think it\u0027s safe to make this change. and chromium is not using it.\n\nmaybe bump up ABI if move this up to show change to applications.",
+      "parentUuid": "724045ec_71266bd5",
       "range": {
         "startLine": 26,
         "startChar": 2,

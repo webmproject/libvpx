@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a3505a1_c69ad4ac",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 669,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-04-27T00:04:47Z",
+      "side": 1,
+      "message": "can you do this using memset or vp9_zero()?",
+      "range": {
+        "startLine": 669,
+        "startChar": 4,
+        "endLine": 669,
+        "endChar": 7
+      },
+      "revId": "a7547d52265f9bf38e192b8ebc05f0b69900257a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
