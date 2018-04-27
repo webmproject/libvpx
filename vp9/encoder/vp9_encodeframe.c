@@ -1387,7 +1387,9 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
           x->plane[0].src.buf, x->plane[0].src.stride, xd->plane[0].pre[0].buf,
           xd->plane[0].pre[0].stride);
     } else {
-      y_sad = vp9_int_pro_motion_estimation(cpi, x, bsize, mi_row, mi_col);
+      const MV dummy_mv = { 0, 0 };
+      y_sad = vp9_int_pro_motion_estimation(cpi, x, bsize, mi_row, mi_col,
+                                            &dummy_mv);
       x->sb_use_mv_part = 1;
       x->sb_mvcol_part = mi->mv[0].as_mv.col;
       x->sb_mvrow_part = mi->mv[0].as_mv.row;

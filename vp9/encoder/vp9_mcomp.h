@@ -66,7 +66,8 @@ int vp9_refining_search_sad(const struct macroblock *x, struct mv *ref_mv,
 // Perform integral projection based motion estimation.
 unsigned int vp9_int_pro_motion_estimation(const struct VP9_COMP *cpi,
                                            MACROBLOCK *x, BLOCK_SIZE bsize,
-                                           int mi_row, int mi_col);
+                                           int mi_row, int mi_col,
+                                           const MV *ref_mv);
 
 typedef uint32_t(fractional_mv_step_fp)(
     const MACROBLOCK *x, MV *bestmv, const MV *ref_mv, int allow_hp,
