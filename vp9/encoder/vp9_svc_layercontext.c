@@ -665,10 +665,16 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
 
   // Reset the drop flags for all spatial layers, on the base layer.
   if (cpi->svc.spatial_layer_id == 0) {
-    int i;
-    for (i = 0; i < cpi->svc.number_spatial_layers; i++) {
-      cpi->svc.drop_spatial_layer[i] = 0;
-    }
+    vp9_zero(cpi->svc.drop_spatial_layer);
+    memset(&cpi->svc.lst_fb_idx, -1, sizeof(cpi->svc.lst_fb_idx));
+    memset(&cpi->svc.gld_fb_idx, -1, sizeof(cpi->svc.lst_fb_idx));
+    memset(&cpi->svc.alt_fb_idx, -1, sizeof(cpi->svc.lst_fb_idx));
+    vp9_zero(cpi->svc.update_last);
+    vp9_zero(cpi->svc.update_golden);
+    vp9_zero(cpi->svc.update_altref);
+    vp9_zero(cpi->svc.reference_last);
+    vp9_zero(cpi->svc.reference_golden);
+    vp9_zero(cpi->svc.reference_altref);
   }
 
   lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id *
@@ -733,8 +739,6 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   }
 
   if (cpi->svc.spatial_layer_id == 0) cpi->svc.high_source_sad_superframe = 0;
-
-  vp9_copy_flags_ref_update_idx(cpi);
 
   if (vp9_set_size_literal(cpi, width, height) != 0)
     return VPX_CODEC_INVALID_PARAM;
