@@ -20,24 +20,13 @@
 #include "test/register_state_check.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/variance.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_timer.h"
 
 namespace {
 
-typedef unsigned int (*VarianceMxNFunc)(const uint8_t *a, int a_stride,
-                                        const uint8_t *b, int b_stride,
-                                        unsigned int *sse);
-typedef unsigned int (*SubpixVarMxNFunc)(const uint8_t *a, int a_stride,
-                                         int xoffset, int yoffset,
-                                         const uint8_t *b, int b_stride,
-                                         unsigned int *sse);
-typedef unsigned int (*SubpixAvgVarMxNFunc)(const uint8_t *a, int a_stride,
-                                            int xoffset, int yoffset,
-                                            const uint8_t *b, int b_stride,
-                                            uint32_t *sse,
-                                            const uint8_t *second_pred);
 typedef unsigned int (*Get4x4SseFunc)(const uint8_t *a, int a_stride,
                                       const uint8_t *b, int b_stride);
 typedef unsigned int (*SumOfSquaresFunction)(const int16_t *src);
@@ -692,7 +681,7 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::ExtremeRefTest() {
 }
 
 template <>
-void SubpelVarianceTest<SubpixAvgVarMxNFunc>::RefTest() {
+void SubpelVarianceTest<vpx_subp_avg_variance_fn_t>::RefTest() {
   for (int x = 0; x < 8; ++x) {
     for (int y = 0; y < 8; ++y) {
       if (!use_high_bit_depth()) {
@@ -728,10 +717,10 @@ void SubpelVarianceTest<SubpixAvgVarMxNFunc>::RefTest() {
 }
 
 typedef MainTestClass<Get4x4SseFunc> VpxSseTest;
-typedef MainTestClass<VarianceMxNFunc> VpxMseTest;
-typedef MainTestClass<VarianceMxNFunc> VpxVarianceTest;
-typedef SubpelVarianceTest<SubpixVarMxNFunc> VpxSubpelVarianceTest;
-typedef SubpelVarianceTest<SubpixAvgVarMxNFunc> VpxSubpelAvgVarianceTest;
+typedef MainTestClass<vpx_variance_fn_t> VpxMseTest;
+typedef MainTestClass<vpx_variance_fn_t> VpxVarianceTest;
+typedef SubpelVarianceTest<vpx_subpixvariance_fn_t> VpxSubpelVarianceTest;
+typedef SubpelVarianceTest<vpx_subp_avg_variance_fn_t> VpxSubpelAvgVarianceTest;
 
 TEST_P(VpxSseTest, RefSse) { RefTestSse(); }
 TEST_P(VpxSseTest, MaxSse) { MaxTestSse(); }
@@ -756,14 +745,14 @@ INSTANTIATE_TEST_CASE_P(C, VpxSseTest,
                         ::testing::Values(SseParams(2, 2,
                                                     &vpx_get4x4sse_cs_c)));
 
-typedef TestParams<VarianceMxNFunc> MseParams;
+typedef TestParams<vpx_variance_fn_t> MseParams;
 INSTANTIATE_TEST_CASE_P(C, VpxMseTest,
                         ::testing::Values(MseParams(4, 4, &vpx_mse16x16_c),
                                           MseParams(4, 3, &vpx_mse16x8_c),
                                           MseParams(3, 4, &vpx_mse8x16_c),
                                           MseParams(3, 3, &vpx_mse8x8_c)));
 
-typedef TestParams<VarianceMxNFunc> VarianceParams;
+typedef TestParams<vpx_variance_fn_t> VarianceParams;
 INSTANTIATE_TEST_CASE_P(
     C, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_c),
@@ -780,7 +769,7 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(2, 3, &vpx_variance4x8_c),
                       VarianceParams(2, 2, &vpx_variance4x4_c)));
 
-typedef TestParams<SubpixVarMxNFunc> SubpelVarianceParams;
+typedef TestParams<vpx_subpixvariance_fn_t> SubpelVarianceParams;
 INSTANTIATE_TEST_CASE_P(
     C, VpxSubpelVarianceTest,
     ::testing::Values(
@@ -798,7 +787,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_c, 0),
         SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_c, 0)));
 
-typedef TestParams<SubpixAvgVarMxNFunc> SubpelAvgVarianceParams;
+typedef TestParams<vpx_subp_avg_variance_fn_t> SubpelAvgVarianceParams;
 INSTANTIATE_TEST_CASE_P(
     C, VpxSubpelAvgVarianceTest,
     ::testing::Values(
@@ -817,10 +806,11 @@ INSTANTIATE_TEST_CASE_P(
         SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_c, 0)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
-typedef MainTestClass<VarianceMxNFunc> VpxHBDMseTest;
-typedef MainTestClass<VarianceMxNFunc> VpxHBDVarianceTest;
-typedef SubpelVarianceTest<SubpixVarMxNFunc> VpxHBDSubpelVarianceTest;
-typedef SubpelVarianceTest<SubpixAvgVarMxNFunc> VpxHBDSubpelAvgVarianceTest;
+typedef MainTestClass<vpx_variance_fn_t> VpxHBDMseTest;
+typedef MainTestClass<vpx_variance_fn_t> VpxHBDVarianceTest;
+typedef SubpelVarianceTest<vpx_subpixvariance_fn_t> VpxHBDSubpelVarianceTest;
+typedef SubpelVarianceTest<vpx_subp_avg_variance_fn_t>
+    VpxHBDSubpelAvgVarianceTest;
 
 TEST_P(VpxHBDMseTest, RefMse) { RefTestMse(); }
 TEST_P(VpxHBDMseTest, MaxMse) { MaxTestMse(); }
