@@ -494,11 +494,10 @@ static int scale_sse_threshold(VP9_COMMON *cm, int thresh) {
     switch (cm->bit_depth) {
       case VPX_BITS_8: ret_val = thresh; break;
       case VPX_BITS_10: ret_val = thresh << 4; break;
-      case VPX_BITS_12: ret_val = thresh << 8; break;
       default:
-        assert(0 &&
-               "cm->bit_depth should be VPX_BITS_8, "
-               "VPX_BITS_10 or VPX_BITS_12");
+        assert(cm->bit_depth == VPX_BITS_12);
+        ret_val = thresh << 8;
+        break;
     }
   }
 #else
@@ -520,11 +519,10 @@ static int get_ul_intra_threshold(VP9_COMMON *cm) {
     switch (cm->bit_depth) {
       case VPX_BITS_8: ret_val = UL_INTRA_THRESH; break;
       case VPX_BITS_10: ret_val = UL_INTRA_THRESH << 2; break;
-      case VPX_BITS_12: ret_val = UL_INTRA_THRESH << 4; break;
       default:
-        assert(0 &&
-               "cm->bit_depth should be VPX_BITS_8, "
-               "VPX_BITS_10 or VPX_BITS_12");
+        assert(cm->bit_depth == VPX_BITS_12);
+        ret_val = UL_INTRA_THRESH << 4;
+        break;
     }
   }
 #else
@@ -541,11 +539,10 @@ static int get_smooth_intra_threshold(VP9_COMMON *cm) {
     switch (cm->bit_depth) {
       case VPX_BITS_8: ret_val = SMOOTH_INTRA_THRESH; break;
       case VPX_BITS_10: ret_val = SMOOTH_INTRA_THRESH << 4; break;
-      case VPX_BITS_12: ret_val = SMOOTH_INTRA_THRESH << 8; break;
       default:
-        assert(0 &&
-               "cm->bit_depth should be VPX_BITS_8, "
-               "VPX_BITS_10 or VPX_BITS_12");
+        assert(cm->bit_depth == VPX_BITS_12);
+        ret_val = SMOOTH_INTRA_THRESH << 8;
+        break;
     }
   }
 #else
@@ -971,12 +968,10 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
       switch (cm->bit_depth) {
         case VPX_BITS_8: break;
         case VPX_BITS_10: this_error >>= 4; break;
-        case VPX_BITS_12: this_error >>= 8; break;
         default:
-          assert(0 &&
-                 "cm->bit_depth should be VPX_BITS_8, "
-                 "VPX_BITS_10 or VPX_BITS_12");
-          return;
+          assert(cm->bit_depth == VPX_BITS_12);
+          this_error >>= 8;
+          break;
       }
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -3025,12 +3020,13 @@ static void configure_buffer_updates(VP9_COMP *cpi) {
       cpi->refresh_alt_ref_frame = 0;
       cpi->rc.is_src_frame_alt_ref = 1;
       break;
-    case ARF_UPDATE:
+    default:
+      assert(twopass->gf_group.update_type[twopass->gf_group.index] ==
+             ARF_UPDATE);
       cpi->refresh_last_frame = 0;
       cpi->refresh_golden_frame = 0;
       cpi->refresh_alt_ref_frame = 1;
       break;
-    default: assert(0); break;
   }
 }
 

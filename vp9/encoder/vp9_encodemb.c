@@ -358,13 +358,13 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
                                p->quant_fp, qcoeff, dqcoeff, pd->dequant, eob,
                                scan_order->scan, scan_order->iscan);
         break;
-      case TX_4X4:
+      default:
+        assert(tx_size == TX_4X4);
         x->fwd_txfm4x4(src_diff, coeff, diff_stride);
         vp9_highbd_quantize_fp(coeff, 16, x->skip_block, p->round_fp,
                                p->quant_fp, qcoeff, dqcoeff, pd->dequant, eob,
                                scan_order->scan, scan_order->iscan);
         break;
-      default: assert(0);
     }
     return;
   }
@@ -388,13 +388,13 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
                         p->round_fp, p->quant_fp, qcoeff, dqcoeff, pd->dequant,
                         eob, scan_order->scan, scan_order->iscan);
       break;
-    case TX_4X4:
+    default:
+      assert(tx_size == TX_4X4);
       x->fwd_txfm4x4(src_diff, coeff, diff_stride);
       vp9_quantize_fp(coeff, 16, x->skip_block, p->round_fp, p->quant_fp,
                       qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                       scan_order->iscan);
       break;
-    default: assert(0); break;
   }
 }
 
@@ -434,13 +434,13 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block, int row, int col,
                                p->quant_fp[0], qcoeff, dqcoeff, pd->dequant[0],
                                eob);
         break;
-      case TX_4X4:
+      default:
+        assert(tx_size == TX_4X4);
         x->fwd_txfm4x4(src_diff, coeff, diff_stride);
         vpx_highbd_quantize_dc(coeff, 16, x->skip_block, p->round,
                                p->quant_fp[0], qcoeff, dqcoeff, pd->dequant[0],
                                eob);
         break;
-      default: assert(0);
     }
     return;
   }
@@ -462,12 +462,12 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block, int row, int col,
       vpx_quantize_dc(coeff, 64, x->skip_block, p->round, p->quant_fp[0],
                       qcoeff, dqcoeff, pd->dequant[0], eob);
       break;
-    case TX_4X4:
+    default:
+      assert(tx_size == TX_4X4);
       x->fwd_txfm4x4(src_diff, coeff, diff_stride);
       vpx_quantize_dc(coeff, 16, x->skip_block, p->round, p->quant_fp[0],
                       qcoeff, dqcoeff, pd->dequant[0], eob);
       break;
-    default: assert(0); break;
   }
 }
 
@@ -511,14 +511,14 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
                               pd->dequant, eob, scan_order->scan,
                               scan_order->iscan);
         break;
-      case TX_4X4:
+      default:
+        assert(tx_size == TX_4X4);
         x->fwd_txfm4x4(src_diff, coeff, diff_stride);
         vpx_highbd_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round,
                               p->quant, p->quant_shift, qcoeff, dqcoeff,
                               pd->dequant, eob, scan_order->scan,
                               scan_order->iscan);
         break;
-      default: assert(0);
     }
     return;
   }
@@ -544,13 +544,13 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
                      p->quant_shift, qcoeff, dqcoeff, pd->dequant, eob,
                      scan_order->scan, scan_order->iscan);
       break;
-    case TX_4X4:
+    default:
+      assert(tx_size == TX_4X4);
       x->fwd_txfm4x4(src_diff, coeff, diff_stride);
       vpx_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round, p->quant,
                      p->quant_shift, qcoeff, dqcoeff, pd->dequant, eob,
                      scan_order->scan, scan_order->iscan);
       break;
-    default: assert(0); break;
   }
 }
 
@@ -634,14 +634,14 @@ static void encode_block(int plane, int block, int row, int col,
         vp9_highbd_idct8x8_add(dqcoeff, dst16, pd->dst.stride, p->eobs[block],
                                xd->bd);
         break;
-      case TX_4X4:
+      default:
+        assert(tx_size == TX_4X4);
         // this is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
         x->highbd_inv_txfm_add(dqcoeff, dst16, pd->dst.stride, p->eobs[block],
                                xd->bd);
         break;
-      default: assert(0 && "Invalid transform size");
     }
     return;
   }
@@ -657,13 +657,13 @@ static void encode_block(int plane, int block, int row, int col,
     case TX_8X8:
       vp9_idct8x8_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
-    case TX_4X4:
+    default:
+      assert(tx_size == TX_4X4);
       // this is like vp9_short_idct4x4 but has a special case around eob<=1
       // which is significant (not just an optimization) for the lossless
       // case.
       x->inv_txfm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
-    default: assert(0 && "Invalid transform size"); break;
   }
 }
 
@@ -848,7 +848,8 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 xd->bd);
         }
         break;
-      case TX_4X4:
+      default:
+        assert(tx_size == TX_4X4);
         if (!x->skip_recode) {
           vpx_highbd_subtract_block(4, 4, src_diff, diff_stride, src,
                                     src_stride, dst, dst_stride, xd->bd);
@@ -876,7 +877,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
           }
         }
         break;
-      default: assert(0); return;
     }
     if (*eob) *(args->skip) = 0;
     return;
@@ -930,7 +930,8 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
       if (!x->skip_encode && *eob)
         vp9_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob);
       break;
-    case TX_4X4:
+    default:
+      assert(tx_size == TX_4X4);
       if (!x->skip_recode) {
         vpx_subtract_block(4, 4, src_diff, diff_stride, src, src_stride, dst,
                            dst_stride);
@@ -955,7 +956,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
           vp9_iht4x4_16_add(dqcoeff, dst, dst_stride, tx_type);
       }
       break;
-    default: assert(0); break;
   }
   if (*eob) *(args->skip) = 0;
 }

@@ -483,14 +483,10 @@ static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
       *hr = 3;
       *hs = 5;
       break;
-    case ONETWO:
+    default:
+      assert(mode == ONETWO);
       *hr = 1;
       *hs = 2;
-      break;
-    default:
-      *hr = 1;
-      *hs = 1;
-      assert(0);
       break;
   }
 }
@@ -1726,7 +1722,8 @@ static void highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad4x4x4d_bits10)
         break;
 
-      case VPX_BITS_12:
+      default:
+        assert(cm->bit_depth == VPX_BITS_12);
         HIGHBD_BFP(BLOCK_32X16, vpx_highbd_sad32x16_bits12,
                    vpx_highbd_sad32x16_avg_bits12, vpx_highbd_12_variance32x16,
                    vpx_highbd_12_sub_pixel_variance32x16,
@@ -1805,11 +1802,6 @@ static void highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_12_sub_pixel_avg_variance4x4,
                    vpx_highbd_sad4x4x4d_bits12)
         break;
-
-      default:
-        assert(0 &&
-               "cm->bit_depth should be VPX_BITS_8, "
-               "VPX_BITS_10 or VPX_BITS_12");
     }
   }
 }
@@ -3286,11 +3278,9 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
       case VPX_BITS_10:
         dc_quant_devisor = 16.0;
         break;
-      case VPX_BITS_12:
-        dc_quant_devisor = 64.0;
-        break;
       default:
-        assert(0 && "bit_depth must be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+        assert(cm->bit_depth == VPX_BITS_12);
+        dc_quant_devisor = 64.0;
         break;
     }
 #else

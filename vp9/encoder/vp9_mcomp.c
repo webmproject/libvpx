@@ -2215,7 +2215,8 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       var = bigdia_search(x, mvp_full, step_param, error_per_bit, 1, cost_list,
                           fn_ptr, 1, ref_mv, tmp_mv);
       break;
-    case NSTEP:
+    default:
+      assert(method == NSTEP);
       var = full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
                                MAX_MVSEARCH_STEPS - 1 - step_param, 1,
                                cost_list, fn_ptr, ref_mv, tmp_mv);
@@ -2241,7 +2242,6 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
         }
       }
       break;
-    default: assert(0 && "Invalid search method.");
   }
 
   if (method != NSTEP && rd && var < var_max)

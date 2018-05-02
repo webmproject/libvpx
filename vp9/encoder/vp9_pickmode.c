@@ -726,13 +726,13 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
                             qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                             scan_order->iscan);
             break;
-          case TX_4X4:
+          default:
+            assert(tx_size == TX_4X4);
             x->fwd_txfm4x4(src_diff, coeff, diff_stride);
             vp9_quantize_fp(coeff, 16, x->skip_block, p->round_fp, p->quant_fp,
                             qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                             scan_order->iscan);
             break;
-          default: assert(0); break;
         }
         *skippable &= (*eob == 0);
         eob_cost += 1;
