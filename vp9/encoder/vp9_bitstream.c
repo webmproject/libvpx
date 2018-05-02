@@ -459,7 +459,8 @@ static void write_modes_sb(
           write_modes_b(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col + bs,
                         max_mv_magnitude, interp_filter_selected);
         break;
-      case PARTITION_SPLIT:
+      default:
+        assert(partition == PARTITION_SPLIT);
         write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col, subsize,
                        max_mv_magnitude, interp_filter_selected);
         write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row, mi_col + bs,
@@ -469,7 +470,6 @@ static void write_modes_sb(
         write_modes_sb(cpi, xd, tile, w, tok, tok_end, mi_row + bs, mi_col + bs,
                        subsize, max_mv_magnitude, interp_filter_selected);
         break;
-      default: assert(0);
     }
   }
 
@@ -618,9 +618,10 @@ static void update_coef_probs_common(vpx_writer *const bc, VP9_COMP *cpi,
       return;
     }
 
-    case ONE_LOOP_REDUCED: {
+    default: {
       int updates = 0;
       int noupdates_before_first = 0;
+      assert(cpi->sf.use_fast_coef_updates == ONE_LOOP_REDUCED);
       for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
@@ -670,7 +671,6 @@ static void update_coef_probs_common(vpx_writer *const bc, VP9_COMP *cpi,
       }
       return;
     }
-    default: assert(0);
   }
 }
 
@@ -1149,8 +1149,10 @@ static void write_profile(BITSTREAM_PROFILE profile,
     case PROFILE_0: vpx_wb_write_literal(wb, 0, 2); break;
     case PROFILE_1: vpx_wb_write_literal(wb, 2, 2); break;
     case PROFILE_2: vpx_wb_write_literal(wb, 1, 2); break;
-    case PROFILE_3: vpx_wb_write_literal(wb, 6, 3); break;
-    default: assert(0);
+    default:
+      assert(profile == PROFILE_3);
+      vpx_wb_write_literal(wb, 6, 3);
+      break;
   }
 }
 

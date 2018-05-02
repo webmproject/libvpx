@@ -616,10 +616,10 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
             case TX_16X16:
               vp9_highbd_idct16x16_add(dqcoeff, recon16, 32, *eob, xd->bd);
               break;
-            case TX_32X32:
+            default:
+              assert(tx_size == TX_32X32);
               vp9_highbd_idct32x32_add(dqcoeff, recon16, 32, *eob, xd->bd);
               break;
-            default: assert(0 && "Invalid transform size");
           }
         }
         recon = CONVERT_TO_BYTEPTR(recon16);
@@ -630,13 +630,13 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
           case TX_32X32: vp9_idct32x32_add(dqcoeff, recon, 32, *eob); break;
           case TX_16X16: vp9_idct16x16_add(dqcoeff, recon, 32, *eob); break;
           case TX_8X8: vp9_idct8x8_add(dqcoeff, recon, 32, *eob); break;
-          case TX_4X4:
+          default:
+            assert(tx_size == TX_4X4);
             // this is like vp9_short_idct4x4 but has a special case around
             // eob<=1, which is significant (not just an optimization) for
             // the lossless case.
             x->inv_txfm_add(dqcoeff, recon, 32, *eob);
             break;
-          default: assert(0 && "Invalid transform size"); break;
         }
 #if CONFIG_VP9_HIGHBITDEPTH
       }
@@ -1462,11 +1462,11 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       if (is_compound)
         this_mv[1].as_int = frame_mv[mode][mi->ref_frame[1]].as_int;
       break;
-    case ZEROMV:
+    default:
+      assert(mode == ZEROMV);
       this_mv[0].as_int = 0;
       if (is_compound) this_mv[1].as_int = 0;
       break;
-    default: break;
   }
 
   mi->bmi[i].as_mv[0].as_int = this_mv[0].as_int;

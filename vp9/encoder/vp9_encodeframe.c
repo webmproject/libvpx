@@ -385,14 +385,11 @@ static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
         node->split[i] = &vt->split[i].part_variances.none;
       break;
     }
-    case BLOCK_4X4: {
+    default: {
       v4x4 *vt = (v4x4 *)data;
+      assert(bsize == BLOCK_4X4);
       node->part_variances = &vt->part_variances;
       for (i = 0; i < 4; i++) node->split[i] = &vt->split[i];
-      break;
-    }
-    default: {
-      assert(0);
       break;
     }
   }
@@ -885,13 +882,13 @@ static void copy_partitioning_helper(VP9_COMP *cpi, MACROBLOCK *x,
         set_block_size(cpi, x, xd, mi_row, mi_col, subsize);
         set_block_size(cpi, x, xd, mi_row, mi_col + bs, subsize);
         break;
-      case PARTITION_SPLIT:
+      default:
+        assert(partition == PARTITION_SPLIT);
         copy_partitioning_helper(cpi, x, xd, subsize, mi_row, mi_col);
         copy_partitioning_helper(cpi, x, xd, subsize, mi_row + bs, mi_col);
         copy_partitioning_helper(cpi, x, xd, subsize, mi_row, mi_col + bs);
         copy_partitioning_helper(cpi, x, xd, subsize, mi_row + bs, mi_col + bs);
         break;
-      default: assert(0);
     }
   }
 }
@@ -1004,7 +1001,8 @@ static int scale_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
           set_block_size(cpi, x, xd, mi_row_high, mi_col_high + bs_high,
                          subsize_high);
         break;
-      case PARTITION_SPLIT:
+      default:
+        assert(partition_high == PARTITION_SPLIT);
         if (scale_partitioning_svc(cpi, x, xd, subsize_high, mi_row, mi_col,
                                    mi_row_high, mi_col_high))
           return 1;
@@ -1020,7 +1018,6 @@ static int scale_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                                    mi_col_high + bs_high))
           return 1;
         break;
-      default: assert(0);
     }
   }
 
@@ -1067,13 +1064,13 @@ static void update_partition_svc(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
         prev_part[start_pos] = subsize;
         if (mi_col + bs < cm->mi_cols) prev_part[start_pos + bs] = subsize;
         break;
-      case PARTITION_SPLIT:
+      default:
+        assert(partition == PARTITION_SPLIT);
         update_partition_svc(cpi, subsize, mi_row, mi_col);
         update_partition_svc(cpi, subsize, mi_row + bs, mi_col);
         update_partition_svc(cpi, subsize, mi_row, mi_col + bs);
         update_partition_svc(cpi, subsize, mi_row + bs, mi_col + bs);
         break;
-      default: assert(0);
     }
   }
 }
@@ -1108,13 +1105,13 @@ static void update_prev_partition_helper(VP9_COMP *cpi, BLOCK_SIZE bsize,
         prev_part[start_pos] = subsize;
         if (mi_col + bs < cm->mi_cols) prev_part[start_pos + bs] = subsize;
         break;
-      case PARTITION_SPLIT:
+      default:
+        assert(partition == PARTITION_SPLIT);
         update_prev_partition_helper(cpi, subsize, mi_row, mi_col);
         update_prev_partition_helper(cpi, subsize, mi_row + bs, mi_col);
         update_prev_partition_helper(cpi, subsize, mi_row, mi_col + bs);
         update_prev_partition_helper(cpi, subsize, mi_row + bs, mi_col + bs);
         break;
-      default: assert(0);
     }
   }
 }
@@ -2183,7 +2180,8 @@ static void encode_sb(VP9_COMP *cpi, ThreadData *td, const TileInfo *const tile,
                  subsize, &pc_tree->horizontal[1]);
       }
       break;
-    case PARTITION_SPLIT:
+    default:
+      assert(partition == PARTITION_SPLIT);
       if (bsize == BLOCK_8X8) {
         encode_b(cpi, tile, td, tp, mi_row, mi_col, output_enabled, subsize,
                  pc_tree->leaf_split[0]);
@@ -2198,7 +2196,6 @@ static void encode_sb(VP9_COMP *cpi, ThreadData *td, const TileInfo *const tile,
                   subsize, pc_tree->split[3]);
       }
       break;
-    default: assert(0 && "Invalid partition type."); break;
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
@@ -2524,7 +2521,8 @@ static void encode_sb_rt(VP9_COMP *cpi, ThreadData *td,
                     subsize, &pc_tree->horizontal[1]);
       }
       break;
-    case PARTITION_SPLIT:
+    default:
+      assert(partition == PARTITION_SPLIT);
       subsize = get_subsize(bsize, PARTITION_SPLIT);
       encode_sb_rt(cpi, td, tile, tp, mi_row, mi_col, output_enabled, subsize,
                    pc_tree->split[0]);
@@ -2535,7 +2533,6 @@ static void encode_sb_rt(VP9_COMP *cpi, ThreadData *td,
       encode_sb_rt(cpi, td, tile, tp, mi_row + hbs, mi_col + hbs,
                    output_enabled, subsize, pc_tree->split[3]);
       break;
-    default: assert(0 && "Invalid partition type."); break;
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
@@ -2674,7 +2671,8 @@ static void rd_use_partition(VP9_COMP *cpi, ThreadData *td,
         last_part_rdc.rdcost += tmp_rdc.rdcost;
       }
       break;
-    case PARTITION_SPLIT:
+    default:
+      assert(partition == PARTITION_SPLIT);
       if (bsize == BLOCK_8X8) {
         rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &last_part_rdc,
                          subsize, pc_tree->leaf_split[0], INT64_MAX);
@@ -2704,7 +2702,6 @@ static void rd_use_partition(VP9_COMP *cpi, ThreadData *td,
         last_part_rdc.dist += tmp_rdc.dist;
       }
       break;
-    default: assert(0); break;
   }
 
   pl = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -4210,7 +4207,8 @@ static void nonrd_select_partition(VP9_COMP *cpi, ThreadData *td,
           }
         }
         break;
-      case PARTITION_SPLIT:
+      default:
+        assert(partition == PARTITION_SPLIT);
         subsize = get_subsize(bsize, PARTITION_SPLIT);
         nonrd_select_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
                                subsize, output_enabled, rd_cost,
@@ -4240,7 +4238,6 @@ static void nonrd_select_partition(VP9_COMP *cpi, ThreadData *td,
           rd_cost->dist += this_rdc.dist;
         }
         break;
-      default: assert(0 && "Invalid partition type."); break;
     }
   }
 
@@ -4329,7 +4326,8 @@ static void nonrd_use_partition(VP9_COMP *cpi, ThreadData *td,
                     output_enabled, subsize, &pc_tree->horizontal[1]);
       }
       break;
-    case PARTITION_SPLIT:
+    default:
+      assert(partition == PARTITION_SPLIT);
       subsize = get_subsize(bsize, PARTITION_SPLIT);
       if (bsize == BLOCK_8X8) {
         nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, dummy_cost,
@@ -4350,7 +4348,6 @@ static void nonrd_use_partition(VP9_COMP *cpi, ThreadData *td,
                             dummy_cost, pc_tree->split[3]);
       }
       break;
-    default: assert(0 && "Invalid partition type."); break;
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
@@ -4454,7 +4451,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
                             BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
         break;
-      case REFERENCE_PARTITION:
+      default:
+        assert(partition_search_type == REFERENCE_PARTITION);
         x->sb_pickmode_part = 1;
         set_offsets(cpi, tile_info, x, mi_row, mi_col, BLOCK_64X64);
         // Use nonrd_pick_partition on scene-cut for VBR mode.
@@ -4486,7 +4484,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         }
 
         break;
-      default: assert(0); break;
     }
 
     // Update ref_frame usage for inter frame if this group is ARF group.
@@ -4553,16 +4550,12 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
                                       &var16->sse, &var16->sum);
             var16->var = variance_highbd(var16);
             break;
-          case VPX_BITS_12:
+          default:
+            assert(cm->bit_depth == VPX_BITS_12);
             vpx_highbd_12_get16x16var(src, src_stride, last_src, last_stride,
                                       &var16->sse, &var16->sum);
             var16->var = variance_highbd(var16);
             break;
-          default:
-            assert(0 &&
-                   "cm->bit_depth should be VPX_BITS_8, VPX_BITS_10"
-                   " or VPX_BITS_12");
-            return -1;
         }
       } else {
         vpx_get16x16var(src, src_stride, last_src, last_stride, &var16->sse,
