@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd95afb9_0a5183e5",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3033,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2018-05-03T21:26:53Z",
+      "side": 1,
+      "message": "Do we need the conditionals here? Seems it would be faster to remove them even though you\u0027re potentially updating 3 slots that have already been updated.",
+      "range": {
+        "startLine": 3033,
+        "startChar": 57,
+        "endLine": 3033,
+        "endChar": 58
+      },
+      "revId": "b946286b893c529434107ff8f953b5d57a390044",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
