@@ -3023,9 +3023,17 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     // Keep track of frame index for each reference frame.
     SVC *const svc = &cpi->svc;
     if (cm->frame_type == KEY_FRAME) {
+      int i;
       svc->ref_frame_index[cpi->lst_fb_idx] = svc->current_superframe;
       svc->ref_frame_index[cpi->gld_fb_idx] = svc->current_superframe;
       svc->ref_frame_index[cpi->alt_fb_idx] = svc->current_superframe;
+      // On key frame update all reference frame slots.
+      for (i = 0; i < REF_FRAMES; i++) {
+        // LAST/GOLDEN/ALTREF is already updated above.
+        if (i != cpi->lst_fb_idx && i != cpi->gld_fb_idx &&
+            i != cpi->alt_fb_idx)
+          ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[i], cm->new_fb_idx);
+      }
     } else {
       if (cpi->refresh_last_frame)
         svc->ref_frame_index[cpi->lst_fb_idx] = svc->current_superframe;
