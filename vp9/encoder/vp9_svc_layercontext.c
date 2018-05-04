@@ -407,6 +407,40 @@ void get_layer_resolution(const int width_org, const int height_org,
   *height_out = h;
 }
 
+void reset_fb_idx_unused(VP9_COMP *const cpi) {
+  // If a reference frame is not referenced or refreshed, then set the
+  // fb_idx for that reference to the first one used/referenced.
+  // This is to avoid setting fb_idx for a reference to a slot that is not
+  // used/needed (i.e., since that reference is not referenced or refreshed).
+  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
+                                    VP9_ALT_FLAG };
+  MV_REFERENCE_FRAME ref_frame;
+  MV_REFERENCE_FRAME first_ref = 0;
+  int first_fb_idx = 0;
+  int fb_idx[3] = { cpi->lst_fb_idx, cpi->gld_fb_idx, cpi->alt_fb_idx };
+  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
+    if (cpi->ref_frame_flags & flag_list[ref_frame]) {
+      first_ref = ref_frame;
+      first_fb_idx = fb_idx[ref_frame - 1];
+      break;
+    }
+  }
+  if (first_ref > 0) {
+    if (first_ref != LAST_FRAME &&
+        !(cpi->ref_frame_flags & flag_list[LAST_FRAME]) &&
+        !cpi->ext_refresh_last_frame)
+      cpi->lst_fb_idx = first_fb_idx;
+    else if (first_ref != GOLDEN_FRAME &&
+             !(cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
+             !cpi->ext_refresh_golden_frame)
+      cpi->gld_fb_idx = first_fb_idx;
+    else if (first_ref != ALTREF_FRAME &&
+             !(cpi->ref_frame_flags & flag_list[ALTREF_FRAME]) &&
+             !cpi->ext_refresh_alt_ref_frame)
+      cpi->alt_fb_idx = first_fb_idx;
+  }
+}
+
 // The function sets proper ref_frame_flags, buffer indices, and buffer update
 // variables for temporal layering mode 3 - that does 0-2-1-2 temporal layering
 // scheme.
@@ -510,6 +544,8 @@ static void set_flags_and_fb_idx_for_temporal_mode3(VP9_COMP *const cpi) {
     cpi->gld_fb_idx = cpi->svc.number_spatial_layers + spatial_id - 1;
     cpi->alt_fb_idx = cpi->svc.number_spatial_layers + spatial_id;
   }
+
+  reset_fb_idx_unused(cpi);
 }
 
 // The function sets proper ref_frame_flags, buffer indices, and buffer update
@@ -569,6 +605,8 @@ static void set_flags_and_fb_idx_for_temporal_mode2(VP9_COMP *const cpi) {
     cpi->gld_fb_idx = cpi->svc.number_spatial_layers + spatial_id - 1;
     cpi->alt_fb_idx = cpi->svc.number_spatial_layers + spatial_id;
   }
+
+  reset_fb_idx_unused(cpi);
 }
 
 // The function sets proper ref_frame_flags, buffer indices, and buffer update
@@ -601,6 +639,8 @@ static void set_flags_and_fb_idx_for_temporal_mode_noLayering(
   } else {
     cpi->gld_fb_idx = 0;
   }
+
+  reset_fb_idx_unused(cpi);
 }
 
 void vp9_copy_flags_ref_update_idx(VP9_COMP *const cpi) {
