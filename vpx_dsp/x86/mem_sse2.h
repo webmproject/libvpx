@@ -15,6 +15,11 @@
 
 #include "./vpx_config.h"
 
+static INLINE __m128i loadh_epi64(const __m128i s, const void *const src) {
+  return _mm_castps_si128(
+      _mm_loadh_pi(_mm_castsi128_ps(s), (const __m64 *)src));
+}
+
 static INLINE void load_8bit_4x4(const uint8_t *const s, const ptrdiff_t stride,
                                  __m128i *const d) {
   d[0] = _mm_cvtsi32_si128(*(const int *)(s + 0 * stride));
