@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ac06ea1a_8561a27a",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 4547,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-05-07T18:22:49Z",
+      "side": 1,
+      "message": "better add a SVC variable here so we don\u0027t need to reference cpi-\u003esvc multiple times.\n\nSVC *const svc \u003d \u0026cpi-\u003esvc;\n\nand use svc in the following if statemnet.",
+      "range": {
+        "startLine": 4547,
+        "startChar": 74,
+        "endLine": 4547,
+        "endChar": 75
+      },
+      "revId": "018ab3286432cb4c0a5598bf7324306fa5faa460",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
