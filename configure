@@ -585,7 +585,7 @@ EOF
 
     # Use both check_header and check_lib here, since check_lib
     # could be a stub that always returns true.
-    check_header pthread.h && check_lib -lpthread <<EOF && enable_feature pthread_h
+    check_header pthread.h && check_lib -lpthread <<EOF || disable_feature pthread_h
 #include <pthread.h>
 #include <stddef.h>
 int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }
