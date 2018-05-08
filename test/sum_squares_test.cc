@@ -104,6 +104,13 @@ TEST_P(SumSquaresTest, ExtremeValues) {
 
 using ::testing::make_tuple;
 
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(
+    NEON, SumSquaresTest,
+    ::testing::Values(make_tuple(&vpx_sum_squares_2d_i16_c,
+                                 &vpx_sum_squares_2d_i16_neon)));
+#endif  // HAVE_NEON
+
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, SumSquaresTest,
