@@ -297,7 +297,10 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest {
     duration_ = 0;
   }
 
-  virtual void PostEncodeFrameHook() {
+  virtual void PostEncodeFrameHook(::libvpx_test::Encoder *encoder) {
+    vpx_svc_layer_id_t layer_id;
+    encoder->Control(VP9E_GET_SVC_LAYER_ID, &layer_id);
+    temporal_layer_id_ = layer_id.temporal_layer_id;
     for (int sl = 0; sl < number_spatial_layers_; ++sl) {
       for (int tl = temporal_layer_id_; tl < number_temporal_layers_; ++tl) {
         const int layer = sl * number_temporal_layers_ + tl;
@@ -848,7 +851,7 @@ TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc2SL3TL4Threads) {
                       layer_target_avg_bandwidth_, bits_in_buffer_model_);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
-                          number_temporal_layers_, file_datarate_, 0.75, 1.2);
+                          number_temporal_layers_, file_datarate_, 0.75, 1.45);
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
