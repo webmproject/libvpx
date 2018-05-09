@@ -719,11 +719,8 @@ process_common_toolchain() {
       *sparc*)
         tgt_isa=sparc
         ;;
-      power*64*-*)
-        tgt_isa=ppc64
-        ;;
-      power*)
-        tgt_isa=ppc
+      power*64le*-*)
+        tgt_isa=ppc64le
         ;;
       *mips64el*)
         tgt_isa=mips64
@@ -1221,7 +1218,7 @@ EOF
       check_add_asflags -march=${tgt_isa}
       check_add_asflags -KPIC
       ;;
-    ppc*)
+    ppc64le*)
       link_with_cc=gcc
       setup_gnu_toolchain
       check_gcc_machine_option "vsx"

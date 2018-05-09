@@ -76,7 +76,6 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     armv8-linux-gcc
     mips32-linux-gcc
     mips64-linux-gcc
-    ppc64-linux-gcc
     ppc64le-linux-gcc
     sparc-solaris-gcc
     x86-android-gcc
