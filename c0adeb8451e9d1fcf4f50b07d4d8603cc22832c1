@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "49f3633d_0dca1d20",
+        "filename": "vpx_dsp/ppc/quantize_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-09T16:24:26Z",
+      "side": 1,
+      "message": "2018",
+      "range": {
+        "startLine": 2,
+        "startChar": 18,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "c0adeb8451e9d1fcf4f50b07d4d8603cc22832c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "279c672c_66111160",
+        "filename": "vpx_dsp/ppc/quantize_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-09T16:24:26Z",
+      "side": 1,
+      "message": "I don\u0027t see a mem* func, which is usually why string.h gets pulled in. Whats it for?",
+      "range": {
+        "startLine": 13,
+        "startChar": 10,
+        "endLine": 13,
+        "endChar": 16
+      },
+      "revId": "c0adeb8451e9d1fcf4f50b07d4d8603cc22832c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e54c4e1_d306f4e5",
+        "filename": "vpx_dsp/ppc/quantize_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-09T16:24:26Z",
+      "side": 1,
+      "message": "Is there maybe a cmpz function? (just guessing, don\u0027t know vsx)",
+      "range": {
+        "startLine": 65,
+        "startChar": 15,
+        "endLine": 65,
+        "endChar": 24
+      },
+      "revId": "c0adeb8451e9d1fcf4f50b07d4d8603cc22832c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
