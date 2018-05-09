@@ -543,8 +543,9 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int eob = p->eobs[block];
 
-  if (x->block_tx_domain) {
+  if (x->block_tx_domain && eob) {
     const int ss_txfrm_size = tx_size << 1;
     int64_t this_sse;
     const int shift = tx_size == TX_32X32 ? 0 : 2;
@@ -584,14 +585,13 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
     const uint8_t *src = &p->src.buf[src_idx];
     const uint8_t *dst = &pd->dst.buf[dst_idx];
     const tran_low_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-    const uint16_t *eob = &p->eobs[block];
     unsigned int tmp;
 
     tmp = pixel_sse(cpi, xd, pd, src, src_stride, dst, dst_stride, blk_row,
                     blk_col, plane_bsize, tx_bsize);
     *out_sse = (int64_t)tmp * 16;
 
-    if (*eob) {
+    if (eob) {
 #if CONFIG_VP9_HIGHBITDEPTH
       DECLARE_ALIGNED(16, uint16_t, recon16[1024]);
       uint8_t *recon = (uint8_t *)recon16;
@@ -604,21 +604,21 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
         vpx_highbd_convolve_copy(CONVERT_TO_SHORTPTR(dst), dst_stride, recon16,
                                  32, NULL, 0, 0, 0, 0, bs, bs, xd->bd);
         if (xd->lossless) {
-          vp9_highbd_iwht4x4_add(dqcoeff, recon16, 32, *eob, xd->bd);
+          vp9_highbd_iwht4x4_add(dqcoeff, recon16, 32, eob, xd->bd);
         } else {
           switch (tx_size) {
             case TX_4X4:
-              vp9_highbd_idct4x4_add(dqcoeff, recon16, 32, *eob, xd->bd);
+              vp9_highbd_idct4x4_add(dqcoeff, recon16, 32, eob, xd->bd);
               break;
             case TX_8X8:
-              vp9_highbd_idct8x8_add(dqcoeff, recon16, 32, *eob, xd->bd);
+              vp9_highbd_idct8x8_add(dqcoeff, recon16, 32, eob, xd->bd);
               break;
             case TX_16X16:
-              vp9_highbd_idct16x16_add(dqcoeff, recon16, 32, *eob, xd->bd);
+              vp9_highbd_idct16x16_add(dqcoeff, recon16, 32, eob, xd->bd);
               break;
             default:
               assert(tx_size == TX_32X32);
-              vp9_highbd_idct32x32_add(dqcoeff, recon16, 32, *eob, xd->bd);
+              vp9_highbd_idct32x32_add(dqcoeff, recon16, 32, eob, xd->bd);
               break;
           }
         }
@@ -627,15 +627,15 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         vpx_convolve_copy(dst, dst_stride, recon, 32, NULL, 0, 0, 0, 0, bs, bs);
         switch (tx_size) {
-          case TX_32X32: vp9_idct32x32_add(dqcoeff, recon, 32, *eob); break;
-          case TX_16X16: vp9_idct16x16_add(dqcoeff, recon, 32, *eob); break;
-          case TX_8X8: vp9_idct8x8_add(dqcoeff, recon, 32, *eob); break;
+          case TX_32X32: vp9_idct32x32_add(dqcoeff, recon, 32, eob); break;
+          case TX_16X16: vp9_idct16x16_add(dqcoeff, recon, 32, eob); break;
+          case TX_8X8: vp9_idct8x8_add(dqcoeff, recon, 32, eob); break;
           default:
             assert(tx_size == TX_4X4);
             // this is like vp9_short_idct4x4 but has a special case around
             // eob<=1, which is significant (not just an optimization) for
             // the lossless case.
-            x->inv_txfm_add(dqcoeff, recon, 32, *eob);
+            x->inv_txfm_add(dqcoeff, recon, 32, eob);
             break;
         }
 #if CONFIG_VP9_HIGHBITDEPTH
