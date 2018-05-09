@@ -4593,6 +4593,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
   cpi->last_frame_dropped = 0;
   cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 0;
+  // Keep track of the frame buffer index updated/refreshed for the
+  // current encoded TL0 superframe.
+  if (cpi->svc.temporal_layer_id == 0) {
+    if (cpi->refresh_last_frame)
+      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->lst_fb_idx;
+    else if (cpi->refresh_golden_frame)
+      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->gld_fb_idx;
+    else if (cpi->refresh_alt_ref_frame)
+      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->alt_fb_idx;
+  }
 
   // Disable segmentation if it decrease rate/distortion ratio
   if (cpi->oxcf.aq_mode == LOOKAHEAD_AQ)
