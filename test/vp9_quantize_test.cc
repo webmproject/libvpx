@@ -575,3 +575,10 @@ INSTANTIATE_TEST_CASE_P(
                    &QuantFPWrapper<vp9_quantize_fp_32x32_c>, VPX_BITS_8, 32,
                    true)));
 }  // namespace
+
+#if HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(VSX, VP9QuantizeTest,
+                        ::testing::Values(make_tuple(&vpx_quantize_b_vsx,
+                                                     &vpx_quantize_b_c,
+                                                     VPX_BITS_8, 16, false)));
+#endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
