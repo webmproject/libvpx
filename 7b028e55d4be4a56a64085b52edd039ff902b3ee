@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f0fa9de_25339541",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-10T22:43:36Z",
+      "side": 1,
+      "message": "This looks like it redefines check_header for external_build",
+      "range": {
+        "startLine": 516,
+        "startChar": 8,
+        "endLine": 516,
+        "endChar": 20
+      },
+      "revId": "7b028e55d4be4a56a64085b52edd039ff902b3ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0886fbb5_569a5cdb",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 564,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-10T22:43:36Z",
+      "side": 1,
+      "message": "Should be able to do without this?",
+      "range": {
+        "startLine": 564,
+        "startChar": 33,
+        "endLine": 564,
+        "endChar": 47
+      },
+      "revId": "7b028e55d4be4a56a64085b52edd039ff902b3ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
