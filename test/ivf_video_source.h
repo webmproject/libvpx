@@ -16,7 +16,7 @@
 #include "test/video_source.h"
 
 namespace libvpx_test {
-const unsigned int kCodeBufferSize = 256 * 1024;
+const unsigned int kCodeBufferSize = 256 * 1024 * 1024;
 const unsigned int kIvfFileHdrSize = 32;
 const unsigned int kIvfFrameHdrSize = 12;
 
