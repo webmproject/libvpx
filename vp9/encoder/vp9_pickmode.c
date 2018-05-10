@@ -1772,7 +1772,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       continue;
 
     if (sf->short_circuit_flat_blocks && x->source_variance == 0 &&
-        this_mode != NEARESTMV) {
+        frame_mv[this_mode][ref_frame].as_int != 0) {
       continue;
     }
 
@@ -1883,7 +1883,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         (!cpi->sf.adaptive_rd_thresh_row_mt &&
          rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
                              &rd_thresh_freq_fact[mode_index])))
-      continue;
+      if (frame_mv[this_mode][ref_frame].as_int != 0) continue;
 
     if (this_mode == NEWMV && !force_gf_mv) {
       if (ref_frame > LAST_FRAME && !cpi->use_svc &&
