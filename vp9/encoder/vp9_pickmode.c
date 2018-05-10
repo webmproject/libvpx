@@ -1502,8 +1502,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int flag_svc_subpel = 0;
   int svc_mv_col = 0;
   int svc_mv_row = 0;
+  int no_scaling = 0;
   unsigned int thresh_svc_skip_golden = 500;
-  if (cpi->svc.spatial_layer_id > 0 && cpi->svc.high_source_sad_superframe)
+  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) {
+    int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id - 1,
+                                 cpi->svc.temporal_layer_id,
+                                 cpi->svc.number_temporal_layers);
+    LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
+    if (lc->scaling_factor_num == lc->scaling_factor_den) no_scaling = 1;
+  }
+  if (cpi->svc.spatial_layer_id > 0 &&
+      (cpi->svc.high_source_sad_superframe || no_scaling))
     thresh_svc_skip_golden = 0;
   // Lower the skip threshold if lower spatial layer is better quality relative
   // to current layer.
@@ -1517,7 +1526,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     thresh_svc_skip_golden = 1000;
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
-
   memset(&mode_checked[0][0], 0, MB_MODE_COUNT * MAX_REF_FRAMES);
 
   if (reuse_inter_pred) {
