@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c9776bde_ffc35af3",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-05-10T23:04:27Z",
+      "side": 1,
+      "message": "\u003e This looks like it redefines check_header for external_build\n\nI missed that, but it returns false in most cases. We\u0027d need another if enabled neon check here.",
+      "parentUuid": "7f0fa9de_25339541",
+      "range": {
+        "startLine": 516,
+        "startChar": 8,
+        "endLine": 516,
+        "endChar": 20
+      },
+      "revId": "7b028e55d4be4a56a64085b52edd039ff902b3ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0886fbb5_569a5cdb",
         "filename": "configure",
         "patchSetId": 3
