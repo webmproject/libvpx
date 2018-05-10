@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "a8bd155e_b8037772",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-05-10T23:21:43Z",
+      "side": 1,
+      "message": "\u003e What do you mean by \"returns\" false? It should allow you to simplify the check below to just checking for neon, no?\n\ncheck_header() returns false probably at 545. I want the \u0027|| die\u0027 to make it a non-optional header.",
+      "parentUuid": "f6d1ea30_ff2ec294",
+      "range": {
+        "startLine": 516,
+        "startChar": 8,
+        "endLine": 516,
+        "endChar": 20
+      },
+      "revId": "7b028e55d4be4a56a64085b52edd039ff902b3ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0886fbb5_569a5cdb",
         "filename": "configure",
         "patchSetId": 3
