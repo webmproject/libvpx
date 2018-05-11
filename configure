@@ -593,6 +593,10 @@ EOF
     check_header unistd.h # for sysconf(3) and friends.
 
     check_header vpx/vpx_integer.h -I${source_path} && enable_feature vpx_ports
+
+    if enabled neon && ! enabled external_build; then
+      check_header arm_neon.h || die "Unable to find arm_neon.h"
+    fi
 }
 
 process_toolchain() {
