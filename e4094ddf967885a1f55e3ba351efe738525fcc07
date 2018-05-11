@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "67b276e0_29cd4d20",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-05-11T02:06:44Z",
+      "side": 1,
+      "message": "these ()s aren\u0027t necessary. generally {}s are preferable when continuing conditionals to a new line",
+      "range": {
+        "startLine": 228,
+        "startChar": 8,
+        "endLine": 228,
+        "endChar": 9
+      },
+      "revId": "e4094ddf967885a1f55e3ba351efe738525fcc07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
