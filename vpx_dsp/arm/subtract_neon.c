@@ -66,8 +66,8 @@ void vpx_subtract_block_neon(int rows, int cols, int16_t *diff,
   } else {
     assert(cols == 4);
     do {
-      const uint8x8_t s = load_unaligned_u8(src, src_stride);
-      const uint8x8_t p = load_unaligned_u8(pred, pred_stride);
+      const uint8x8_t s = load_unaligned_u8(src, (int)src_stride);
+      const uint8x8_t p = load_unaligned_u8(pred, (int)pred_stride);
       const uint16x8_t d = vsubl_u8(s, p);
       vst1_s16(diff + 0 * diff_stride, vreinterpret_s16_u16(vget_low_u16(d)));
       vst1_s16(diff + 1 * diff_stride, vreinterpret_s16_u16(vget_high_u16(d)));
