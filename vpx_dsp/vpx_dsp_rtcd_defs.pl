@@ -626,7 +626,7 @@ if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
   specialize qw/vpx_idct32x32_135_add neon sse2 ssse3/;
   specialize qw/vpx_idct32x32_34_add neon sse2 ssse3/;
   specialize qw/vpx_idct32x32_1_add neon sse2/;
-  specialize qw/vpx_iwht4x4_16_add sse2/;
+  specialize qw/vpx_iwht4x4_16_add sse2 vsx/;
 
   if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") ne "yes") {
     # Note that these specializations are appended to the above ones.

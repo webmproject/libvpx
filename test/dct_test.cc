@@ -725,4 +725,14 @@ INSTANTIATE_TEST_CASE_P(SSE2, TransWHT,
                         ::testing::Values(make_tuple(0, &wht_sse2_func_info, 0,
                                                      VPX_BITS_8)));
 #endif  // HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
+
+#if HAVE_VSX && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
+static const FuncInfo wht_vsx_func_info = {
+  &fdct_wrapper<vp9_fwht4x4_c>, &idct_wrapper<vpx_iwht4x4_16_add_vsx>, 4, 1
+};
+
+INSTANTIATE_TEST_CASE_P(VSX, TransWHT,
+                        ::testing::Values(make_tuple(0, &wht_vsx_func_info, 0,
+                                                     VPX_BITS_8)));
+#endif  // HAVE_VSX && !CONFIG_EMULATE_HARDWARE
 }  // namespace
