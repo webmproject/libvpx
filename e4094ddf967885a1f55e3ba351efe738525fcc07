@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "a14571f6_3eba9b75",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 18
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-11T05:31:06Z",
+      "side": 1,
+      "message": "add loss in metrics of speed 9 vs 8, on rtc and rtc_derf",
+      "revId": "e4094ddf967885a1f55e3ba351efe738525fcc07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "67b276e0_29cd4d20",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 18
@@ -19,6 +36,40 @@
         "endLine": 228,
         "endChar": 9
       },
+      "revId": "e4094ddf967885a1f55e3ba351efe738525fcc07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c499afee_584f44c7",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-11T05:31:06Z",
+      "side": 1,
+      "message": "we should have this motion thresh as speed feature, we may want to vary based on resolution, etc..",
+      "revId": "e4094ddf967885a1f55e3ba351efe738525fcc07",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55f6d5c9_8d9d42ae",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-11T05:31:06Z",
+      "side": 1,
+      "message": "you\u0027re assuming speed 8 is at subpel_force_stop \u003d 1 here?",
       "revId": "e4094ddf967885a1f55e3ba351efe738525fcc07",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
