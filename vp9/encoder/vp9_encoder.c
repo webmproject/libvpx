@@ -4560,8 +4560,18 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
       if (cpi->use_svc) {
         cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
         cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
-        vp9_inc_frame_in_layer(cpi);
         cpi->svc.skip_enhancement_layer = 1;
+        if (cpi->svc.framedrop_mode != CONSTRAINED_LAYER_DROP ||
+            cpi->svc.drop_spatial_layer[0] == 0) {
+          // For the case of CONSTRAINED_LAYER_DROP where the base is dropped
+          // (drop_spatial_layer[0] == 1), which means full superframe dropped,
+          // we don't increment the svc frame counters. In particular temporal
+          // layer counter (which is incremented in vp9_inc_frame_in_layer())
+          // won't be incremented, so on a dropped frame we try the same
+          // temporal_layer_id on next incoming frame. This is to avoid an
+          // issue with temporal alignement with full superframe dropping.
+          vp9_inc_frame_in_layer(cpi);
+        }
         if (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1) {
           int i;
           int all_layers_drop = 1;
