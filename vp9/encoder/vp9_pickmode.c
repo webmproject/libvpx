@@ -1771,6 +1771,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         sse_zeromv_normalized < thresh_svc_skip_golden)
       continue;
 
+    if (!(cpi->ref_frame_flags & flag_list[ref_frame])) continue;
+
     if (sf->short_circuit_flat_blocks && x->source_variance == 0 &&
         frame_mv[this_mode][ref_frame].as_int != 0) {
       continue;
@@ -1801,8 +1803,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           frame_mv[this_mode][ref_frame].as_int != 0)
         continue;
     }
-
-    if (!(cpi->ref_frame_flags & flag_list[ref_frame])) continue;
 
     if (const_motion[ref_frame] && this_mode == NEARMV) continue;
 
