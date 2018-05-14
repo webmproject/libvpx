@@ -96,7 +96,6 @@ typedef struct SVC {
   int lst_fb_idx[VPX_MAX_LAYERS];
   int gld_fb_idx[VPX_MAX_LAYERS];
   int alt_fb_idx[VPX_MAX_LAYERS];
-  int ref_frame_index[REF_FRAMES];
   int force_zero_mode_spatial_ref;
   int current_superframe;
   int non_reference_frame;
@@ -142,6 +141,11 @@ typedef struct SVC {
   // Keep track of the frame buffer index updated/refreshed on the base
   // temporal superframe.
   uint8_t fb_idx_upd_tl0[VPX_SS_MAX_LAYERS];
+
+  // Keep track of the spatial and temporal layer id of the frame that last
+  // updated the frame buffer index.
+  uint8_t fb_idx_spatial_layer_id[REF_FRAMES];
+  uint8_t fb_idx_temporal_layer_id[REF_FRAMES];
 } SVC;
 
 struct VP9_COMP;
@@ -200,6 +204,8 @@ void vp9_svc_reset_key_frame(struct VP9_COMP *const cpi);
 void vp9_svc_check_reset_layer_rc_flag(struct VP9_COMP *const cpi);
 
 void vp9_svc_constrain_inter_layer_pred(struct VP9_COMP *const cpi);
+
+void vp9_svc_assert_constraints_pattern(struct VP9_COMP *const cpi);
 
 #ifdef __cplusplus
 }  // extern "C"

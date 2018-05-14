@@ -41,7 +41,10 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->disable_inter_layer_pred = INTER_LAYER_PRED_ON;
   svc->framedrop_mode = CONSTRAINED_LAYER_DROP;
 
-  for (i = 0; i < REF_FRAMES; ++i) svc->ref_frame_index[i] = -1;
+  for (i = 0; i < REF_FRAMES; ++i) {
+    svc->fb_idx_spatial_layer_id[i] = -1;
+    svc->fb_idx_temporal_layer_id[i] = -1;
+  }
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
     svc->last_layer_dropped[sl] = 0;
     svc->drop_spatial_layer[sl] = 0;
@@ -936,6 +939,48 @@ void vp9_svc_constrain_inter_layer_pred(VP9_COMP *const cpi) {
              cpi->svc.update_altref[sl - 1]))
           disable = 0;
         if (disable) cpi->ref_frame_flags &= (~ref_flag);
+      }
+    }
+  }
+}
+
+void vp9_svc_assert_constraints_pattern(VP9_COMP *const cpi) {
+  SVC *const svc = &cpi->svc;
+  // For fixed/non-flexible mode, and with CONSTRAINED frame drop
+  // mode (default), the folllowing constraint are expected.
+  if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
+      svc->framedrop_mode == CONSTRAINED_LAYER_DROP) {
+    if (!cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame) {
+      // On non-key frames: LAST is always temporal reference, GOLDEN is
+      // spatial reference.
+      if (svc->temporal_layer_id == 0)
+        // Base temporal only predicts from base temporal.
+        assert(svc->fb_idx_temporal_layer_id[cpi->lst_fb_idx] == 0);
+      else
+        // Non-base temporal only predicts from lower temporal layer.
+        assert(svc->fb_idx_temporal_layer_id[cpi->lst_fb_idx] <
+               svc->temporal_layer_id);
+      if (svc->spatial_layer_id > 0) {
+        // Non-base spatial only predicts from lower spatial layer with same
+        // temporal_id.
+        assert(svc->fb_idx_spatial_layer_id[cpi->gld_fb_idx] ==
+               svc->spatial_layer_id - 1);
+        assert(svc->fb_idx_temporal_layer_id[cpi->gld_fb_idx] ==
+               svc->temporal_layer_id);
+      }
+    } else if (svc->spatial_layer_id > 0) {
+      // Only 1 reference for frame whose base is key; reference may be LAST
+      // or GOLDEN, so we check both.
+      if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
+        assert(svc->fb_idx_spatial_layer_id[cpi->lst_fb_idx] ==
+               svc->spatial_layer_id - 1);
+        assert(svc->fb_idx_temporal_layer_id[cpi->lst_fb_idx] ==
+               svc->temporal_layer_id);
+      } else if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
+        assert(svc->fb_idx_spatial_layer_id[cpi->gld_fb_idx] ==
+               svc->spatial_layer_id - 1);
+        assert(svc->fb_idx_temporal_layer_id[cpi->gld_fb_idx] ==
+               svc->temporal_layer_id);
       }
     }
   }

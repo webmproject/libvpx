@@ -3024,23 +3024,28 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     SVC *const svc = &cpi->svc;
     if (cm->frame_type == KEY_FRAME) {
       int i;
-      svc->ref_frame_index[cpi->lst_fb_idx] = svc->current_superframe;
-      svc->ref_frame_index[cpi->gld_fb_idx] = svc->current_superframe;
-      svc->ref_frame_index[cpi->alt_fb_idx] = svc->current_superframe;
       // On key frame update all reference frame slots.
       for (i = 0; i < REF_FRAMES; i++) {
+        svc->fb_idx_spatial_layer_id[i] = svc->spatial_layer_id;
+        svc->fb_idx_temporal_layer_id[i] = svc->temporal_layer_id;
         // LAST/GOLDEN/ALTREF is already updated above.
         if (i != cpi->lst_fb_idx && i != cpi->gld_fb_idx &&
             i != cpi->alt_fb_idx)
           ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[i], cm->new_fb_idx);
       }
     } else {
-      if (cpi->refresh_last_frame)
-        svc->ref_frame_index[cpi->lst_fb_idx] = svc->current_superframe;
-      if (cpi->refresh_golden_frame)
-        svc->ref_frame_index[cpi->gld_fb_idx] = svc->current_superframe;
-      if (cpi->refresh_alt_ref_frame)
-        svc->ref_frame_index[cpi->alt_fb_idx] = svc->current_superframe;
+      if (cpi->refresh_last_frame) {
+        svc->fb_idx_spatial_layer_id[cpi->lst_fb_idx] = svc->spatial_layer_id;
+        svc->fb_idx_temporal_layer_id[cpi->lst_fb_idx] = svc->temporal_layer_id;
+      }
+      if (cpi->refresh_golden_frame) {
+        svc->fb_idx_spatial_layer_id[cpi->gld_fb_idx] = svc->spatial_layer_id;
+        svc->fb_idx_temporal_layer_id[cpi->gld_fb_idx] = svc->temporal_layer_id;
+      }
+      if (cpi->refresh_alt_ref_frame) {
+        svc->fb_idx_spatial_layer_id[cpi->alt_fb_idx] = svc->spatial_layer_id;
+        svc->fb_idx_temporal_layer_id[cpi->alt_fb_idx] = svc->temporal_layer_id;
+      }
     }
     // Copy flags from encoder to SVC struct.
     vp9_copy_flags_ref_update_idx(cpi);
@@ -3729,10 +3734,12 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   suppress_active_map(cpi);
 
-  // For SVC on non-zero spatial layer: check for disabling inter-layer
-  // prediction.
-  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0)
-    vp9_svc_constrain_inter_layer_pred(cpi);
+  if (cpi->use_svc) {
+    // On non-zero spatial layer, check for disabling inter-layer
+    // prediction.
+    if (cpi->svc.spatial_layer_id > 0) vp9_svc_constrain_inter_layer_pred(cpi);
+    vp9_svc_assert_constraints_pattern(cpi);
+  }
 
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
