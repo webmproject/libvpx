@@ -3579,7 +3579,7 @@ static void set_frame_size(VP9_COMP *cpi) {
   set_ref_ptrs(cm, xd, LAST_FRAME, LAST_FRAME);
 }
 
-#if CONSISTENT_RECODE_STATE
+#if CONFIG_CONSISTENT_RECODE
 static void save_encode_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -4644,7 +4644,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   memset(cpi->mode_chosen_counts, 0,
          MAX_MODES * sizeof(*cpi->mode_chosen_counts));
 #endif
-#if CONSISTENT_RECODE_STATE
+#if CONFIG_CONSISTENT_RECODE
   // Backup to ensure consistency between recodes
   save_encode_params(cpi);
 #endif
