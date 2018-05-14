@@ -537,8 +537,14 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) sf->nonrd_keyframe = 1;
     if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
         cm->frame_type != KEY_FRAME && cpi->resize_state == ORIG &&
-        cpi->oxcf.content == VP9E_CONTENT_SCREEN)
+        cpi->oxcf.content == VP9E_CONTENT_SCREEN) {
       sf->re_encode_overshoot_rt = 1;
+    }
+    if (cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0 &&
+        cm->width <= 1280 && cm->height <= 720) {
+      sf->use_altref_onepass = 1;
+      sf->use_compound_nonrd_pickmode = 1;
+    }
   }
 
   if (speed >= 6) {
