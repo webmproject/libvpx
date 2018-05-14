@@ -23,6 +23,9 @@
 extern "C" {
 #endif
 
+// This macro defines the control for consistent recode behaviour
+#define CONSISTENT_RECODE_STATE 0
+
 #define RDDIV_BITS 7
 #define RD_EPB_SHIFT 6
 
@@ -108,7 +111,11 @@ typedef struct RD_OPT {
   int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
 
   int64_t filter_threshes[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
+#if CONSISTENT_RECODE_STATE
+  int64_t prediction_type_threshes_prev[MAX_REF_FRAMES][REFERENCE_MODES];
 
+  int64_t filter_threshes_prev[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
+#endif
   int RDMULT;
   int RDDIV;
 } RD_OPT;

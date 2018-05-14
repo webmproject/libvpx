@@ -3612,9 +3612,13 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
   }
 
   if (best_mode_index < 0 || best_rd >= best_rd_so_far) {
-    // If adaptive interp filter is enabled, then the current leaf node of 8x8
-    // data is needed for sub8x8. Hence preserve the context.
+// If adaptive interp filter is enabled, then the current leaf node of 8x8
+// data is needed for sub8x8. Hence preserve the context.
+#if CONSISTENT_RECODE_STATE
+    if (bsize == BLOCK_8X8) ctx->mic = *xd->mi[0];
+#else
     if (cpi->row_mt && bsize == BLOCK_8X8) ctx->mic = *xd->mi[0];
+#endif
     rd_cost->rate = INT_MAX;
     rd_cost->rdcost = INT64_MAX;
     return;

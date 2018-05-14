@@ -4663,6 +4663,9 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
         for (i = 0; i < BLOCK_SIZES; ++i) {
           for (j = 0; j < MAX_MODES; ++j) {
             tile_data->thresh_freq_fact[i][j] = RD_THRESH_INIT_FACT;
+#if CONSISTENT_RECODE_STATE
+            tile_data->thresh_freq_fact_prev[i][j] = RD_THRESH_INIT_FACT;
+#endif
             tile_data->mode_map[i][j] = j;
           }
         }
@@ -4787,7 +4790,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   x->fwd_txfm4x4 = xd->lossless ? vp9_fwht4x4 : vpx_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   x->inv_txfm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
-
+#if CONSISTENT_RECODE_STATE
+  x->optimize = sf->optimize_coefficients == 1 && cpi->oxcf.pass != 1;
+#endif
   if (xd->lossless) x->optimize = 0;
 
   cm->tx_mode = select_tx_mode(cpi, xd);
@@ -4912,8 +4917,47 @@ static int compute_frame_aq_offset(struct VP9_COMP *cpi) {
   return sum_delta / (cm->mi_rows * cm->mi_cols);
 }
 
+#if CONSISTENT_RECODE_STATE
+static void restore_encode_params(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_rows = 1 << cm->log2_tile_rows;
+  int tile_col, tile_row;
+  int i, j;
+  RD_OPT *rd_opt = &cpi->rd;
+  for (i = 0; i < MAX_REF_FRAMES; i++) {
+    for (j = 0; j < REFERENCE_MODES; j++)
+      rd_opt->prediction_type_threshes[i][j] =
+          rd_opt->prediction_type_threshes_prev[i][j];
+
+    for (j = 0; j < SWITCHABLE_FILTER_CONTEXTS; j++)
+      rd_opt->filter_threshes[i][j] = rd_opt->filter_threshes_prev[i][j];
+  }
+
+  if (cpi->tile_data != NULL) {
+    for (tile_row = 0; tile_row < tile_rows; ++tile_row)
+      for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+        TileDataEnc *tile_data =
+            &cpi->tile_data[tile_row * tile_cols + tile_col];
+        for (i = 0; i < BLOCK_SIZES; ++i) {
+          for (j = 0; j < MAX_MODES; ++j) {
+            tile_data->thresh_freq_fact[i][j] =
+                tile_data->thresh_freq_fact_prev[i][j];
+          }
+        }
+      }
+  }
+
+  cm->interp_filter = cpi->sf.default_interp_filter;
+}
+#endif
+
 void vp9_encode_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
+
+#if CONSISTENT_RECODE_STATE
+  restore_encode_params(cpi);
+#endif
 
   // In the longer term the encoder should be generalized to match the
   // decoder such that we allow compound where one of the 3 buffers has a
