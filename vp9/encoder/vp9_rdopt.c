@@ -847,7 +847,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                               { INT64_MAX, INT64_MAX } };
   int n;
   int s0, s1;
-  int64_t best_rd = INT64_MAX;
+  int64_t best_rd = ref_best_rd;
   TX_SIZE best_tx = max_tx_size;
   int start_tx, end_tx;
   const int tx_size_ctx = get_tx_size_context(xd);
@@ -868,8 +868,8 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
 
   for (n = start_tx; n >= end_tx; n--) {
     const int r_tx_size = cpi->tx_size_cost[max_tx_size - 1][tx_size_ctx][n];
-    txfm_rd_in_plane(cpi, x, &r[n][0], &d[n], &s[n], &sse[n], ref_best_rd, 0,
-                     bs, n, cpi->sf.use_fast_coef_costing);
+    txfm_rd_in_plane(cpi, x, &r[n][0], &d[n], &s[n], &sse[n], best_rd, 0, bs, n,
+                     cpi->sf.use_fast_coef_costing);
     r[n][1] = r[n][0];
     if (r[n][0] < INT_MAX) {
       r[n][1] += r_tx_size;
