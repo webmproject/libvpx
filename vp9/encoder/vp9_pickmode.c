@@ -1660,6 +1660,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     }
   }
 
+  if (sf->disable_golden_ref && (x->content_state_sb != kVeryHighSad ||
+                                 cpi->rc.avg_frame_low_motion < 60))
+    usable_ref_frame = LAST_FRAME;
+
   if (!((cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
         !svc_force_zero_mode[GOLDEN_FRAME - 1] && !force_skip_low_temp_var))
     use_golden_nonzeromv = 0;

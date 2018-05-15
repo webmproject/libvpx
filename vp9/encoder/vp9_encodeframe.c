@@ -583,6 +583,7 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q,
     } else {
       thresholds[1] = (5 * threshold_base) >> 1;
     }
+    if (cpi->sf.disable_16x16part_nonkey) thresholds[2] = INT64_MAX;
   }
 }
 
