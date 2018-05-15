@@ -201,6 +201,24 @@
     },
     {
       "key": {
+        "uuid": "b4b7d503_527dbc2f",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-15T15:31:42Z",
+      "side": 1,
+      "message": "The idea would be to use vec_add(d, s) inside the loop and an extra vec_sum4s after the loop (like you said).\n\nWe can\u0027t change msums, because the sse requires 20-bits",
+      "parentUuid": "f72c99a8_3053bb10",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "04755805_3e3b2783",
         "filename": "vpx_dsp/ppc/variance_vsx.c",
         "patchSetId": 2
@@ -265,6 +283,24 @@
       "side": 1,
       "message": "It would be interesting to unroll a bit and use the accumulators, not 100% sold on replacing msums though.",
       "parentUuid": "6079fa48_3d6b4839",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2225c36f_9e0e5175",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-15T15:31:42Z",
+      "side": 1,
+      "message": "You can\u0027t replace msums. What I\u0027m proposing here is s0 \u003d vec_add(d0, s0) and s1 \u003d vec_add(d1, s1), and something like s \u003d vec_sum4s(s0, s) after the loop.",
+      "parentUuid": "d1dfd9ac_38c8f283",
       "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
