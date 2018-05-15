@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "cd87850c_100f4cf8",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "I can use it, I\u0027m doubtful Visual Studio will support PowerPC anytime soon, but better safe than sorry :)",
+      "parentUuid": "5947a24f_f1846bde",
+      "range": {
+        "startLine": 105,
+        "startChar": 7,
+        "endLine": 105,
+        "endChar": 13
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1c759c43_5d4bdfb0",
         "filename": "vpx_dsp/ppc/variance_vsx.c",
         "patchSetId": 2
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "d6d1dd67_14f1e29c",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "1c759c43_5d4bdfb0",
+      "range": {
+        "startLine": 106,
+        "startChar": 48,
+        "endLine": 106,
+        "endChar": 50
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f0b2598f_1a34abfd",
         "filename": "vpx_dsp/ppc/variance_vsx.c",
         "patchSetId": 2
@@ -82,6 +130,30 @@
       "writtenOn": "2018-05-15T14:16:46Z",
       "side": 1,
       "message": "I think this might bottleneck your pipeline. Everything converges here on every loop iteration. We might get away with converging only after the height loop.",
+      "range": {
+        "startLine": 128,
+        "startChar": 1,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d3629ea_9e5c85ef",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "Ideally we could use 2/4 more registers and issue 2 operations in parallel and see if it gets faster.",
+      "parentUuid": "f0b2598f_1a34abfd",
       "range": {
         "startLine": 128,
         "startChar": 1,
@@ -111,6 +183,24 @@
     },
     {
       "key": {
+        "uuid": "f72c99a8_3053bb10",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "sums4s does not have a 16bit variant, ideally it could be changed to use the normal add and a single sum4s at the end.\n\nmsums has the same constraint and an alternative would require few more instructions.\n\nNot sure if it worth it given 4xN is already on the diminished returns side.",
+      "parentUuid": "08405ae6_e7505ab7",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "04755805_3e3b2783",
         "filename": "vpx_dsp/ppc/variance_vsx.c",
         "patchSetId": 2
@@ -122,6 +212,24 @@
       "writtenOn": "2018-05-15T14:16:46Z",
       "side": 1,
       "message": "For blocks of width 8, you don\u0027t need to use a 32-bit accumulators for the sum.\nThe input is 8-bit and the biggest block height is 16 (2^4).\nWorst case, each pipeline will require 2^12 bits.",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c524aec6_7b2b657c",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "Same considerations as 4xN case, it might worth investigating this and unrolling as well.",
+      "parentUuid": "04755805_3e3b2783",
       "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -145,6 +253,24 @@
     },
     {
       "key": {
+        "uuid": "d1dfd9ac_38c8f283",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "It would be interesting to unroll a bit and use the accumulators, not 100% sold on replacing msums though.",
+      "parentUuid": "6079fa48_3d6b4839",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "987ce822_b15d2bbf",
         "filename": "vpx_dsp/ppc/variance_vsx.c",
         "patchSetId": 2
@@ -156,6 +282,24 @@
       "writtenOn": "2018-05-15T14:16:46Z",
       "side": 1,
       "message": "It might be faster to use two 32-bit accumulators (ss0, ss1) and add them outside of the height loop.",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fe101724_992530b5",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "Probably it will.",
+      "parentUuid": "987ce822_b15d2bbf",
       "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -179,6 +323,24 @@
     },
     {
       "key": {
+        "uuid": "8feaadaf_65890cf2",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "In general anything that uses more registers should give some good results.",
+      "parentUuid": "894e90a3_8c7c7f8a",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "78d8d74e_5f1ebea7",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 2
@@ -190,6 +352,30 @@
       "writtenOn": "2018-05-15T03:11:12Z",
       "side": 1,
       "message": "Did you mean to add vsx here?",
+      "range": {
+        "startLine": 1193,
+        "startChar": 66,
+        "endLine": 1193,
+        "endChar": 67
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4264855b_a9943e8e",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-05-15T15:19:40Z",
+      "side": 1,
+      "message": "Yes, but it will probably happen in the far future.",
+      "parentUuid": "78d8d74e_5f1ebea7",
       "range": {
         "startLine": 1193,
         "startChar": 66,
