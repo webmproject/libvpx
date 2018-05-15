@@ -71,6 +71,114 @@
     },
     {
       "key": {
+        "uuid": "f0b2598f_1a34abfd",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-15T14:16:46Z",
+      "side": 1,
+      "message": "I think this might bottleneck your pipeline. Everything converges here on every loop iteration. We might get away with converging only after the height loop.",
+      "range": {
+        "startLine": 128,
+        "startChar": 1,
+        "endLine": 135,
+        "endChar": 28
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08405ae6_e7505ab7",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-15T14:16:46Z",
+      "side": 1,
+      "message": "For blocks of width 4, you don\u0027t need to use a 32-bit accumulators for the sum.\nThe input is 8-bit and the biggest height is 8 (2^3).\nWorst case, each pipeline will require 2^11 bits.",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04755805_3e3b2783",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-15T14:16:46Z",
+      "side": 1,
+      "message": "For blocks of width 8, you don\u0027t need to use a 32-bit accumulators for the sum.\nThe input is 8-bit and the biggest block height is 16 (2^4).\nWorst case, each pipeline will require 2^12 bits.",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6079fa48_3d6b4839",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-15T14:16:46Z",
+      "side": 1,
+      "message": "For blocks of width 16, it might be faster to use two 16-bit accumulators and combine them only outside of the height loop. The CPU *should* be able to process both accumulator in parallel.",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "987ce822_b15d2bbf",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-15T14:16:46Z",
+      "side": 1,
+      "message": "It might be faster to use two 32-bit accumulators (ss0, ss1) and add them outside of the height loop.",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "894e90a3_8c7c7f8a",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-15T14:16:46Z",
+      "side": 1,
+      "message": "For blocks of width 32, I would be curious of using four 16-bit accumulators.",
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "78d8d74e_5f1ebea7",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 2
