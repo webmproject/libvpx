@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d695660_52557b72",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-15T03:11:12Z",
+      "side": 1,
+      "message": "vsx",
+      "range": {
+        "startLine": 7,
+        "startChar": 20,
+        "endLine": 7,
+        "endChar": 23
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5947a24f_f1846bde",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-15T03:11:12Z",
+      "side": 1,
+      "message": "Looks like this wasn\u0027t noticed before, but we do have an INLINE define in vpx_config.h in the off chance someone wants to build this with Visual Studio.",
+      "range": {
+        "startLine": 105,
+        "startChar": 7,
+        "endLine": 105,
+        "endChar": 13
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c759c43_5d4bdfb0",
+        "filename": "vpx_dsp/ppc/variance_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-15T03:11:12Z",
+      "side": 1,
+      "message": "prefer sum and sum_squared to make reading the prototype a little easier. inside the function s/ss are fine.\n\nalso put sum_squared first to match the other prototypes",
+      "range": {
+        "startLine": 106,
+        "startChar": 48,
+        "endLine": 106,
+        "endChar": 50
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78d8d74e_5f1ebea7",
+        "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-15T03:11:12Z",
+      "side": 1,
+      "message": "Did you mean to add vsx here?",
+      "range": {
+        "startLine": 1193,
+        "startChar": 66,
+        "endLine": 1193,
+        "endChar": 67
+      },
+      "revId": "d11098987d4416c5773d110d9c6922b58f0fd779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
