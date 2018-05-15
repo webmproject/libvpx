@@ -2426,6 +2426,19 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
       if (cm->frame_type != KEY_FRAME && rc->reset_high_source_sad)
         rc->this_frame_target = rc->avg_frame_bandwidth;
     }
+    // For SVC the new (updated) avg_source_sad[0] for the current superframe
+    // updates the setting for all layers.
+    if (cpi->use_svc) {
+      int sl, tl;
+      SVC *const svc = &cpi->svc;
+      for (sl = 0; sl < svc->number_spatial_layers; ++sl)
+        for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
+          int layer = LAYER_IDS_TO_IDX(sl, tl, svc->number_temporal_layers);
+          LAYER_CONTEXT *const lc = &svc->layer_context[layer];
+          RATE_CONTROL *const lrc = &lc->rc;
+          lrc->avg_source_sad[0] = rc->avg_source_sad[0];
+        }
+    }
     // For VBR, under scene change/high content change, force golden refresh.
     if (cpi->oxcf.rc_mode == VPX_VBR && cm->frame_type != KEY_FRAME &&
         rc->high_source_sad && rc->frames_to_key > 3 &&
@@ -2460,7 +2473,10 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int thresh_qp = 3 * (rc->worst_quality >> 2);
-  int thresh_rate = rc->avg_frame_bandwidth * 10;
+  int thresh_rate = rc->avg_frame_bandwidth << 3;
+  // Lower rate threshold for video.
+  if (cpi->oxcf.content != VP9E_CONTENT_SCREEN)
+    thresh_rate = rc->avg_frame_bandwidth << 2;
   if (cm->base_qindex < thresh_qp && frame_size > thresh_rate) {
     double rate_correction_factor =
         cpi->rc.rate_correction_factors[INTER_NORMAL];
