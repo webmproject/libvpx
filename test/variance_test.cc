@@ -1533,6 +1533,27 @@ INSTANTIATE_TEST_CASE_P(VSX, SumOfSquaresTest,
 INSTANTIATE_TEST_CASE_P(VSX, VpxSseTest,
                         ::testing::Values(SseParams(2, 2,
                                                     &vpx_get4x4sse_cs_vsx)));
+INSTANTIATE_TEST_CASE_P(VSX, VpxMseTest,
+                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_vsx),
+                                          MseParams(4, 3, &vpx_mse16x8_vsx),
+                                          MseParams(3, 4, &vpx_mse8x16_vsx),
+                                          MseParams(3, 3, &vpx_mse8x8_vsx)));
+
+INSTANTIATE_TEST_CASE_P(
+    VSX, VpxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_vsx),
+                      VarianceParams(6, 5, &vpx_variance64x32_vsx),
+                      VarianceParams(5, 6, &vpx_variance32x64_vsx),
+                      VarianceParams(5, 5, &vpx_variance32x32_vsx),
+                      VarianceParams(5, 4, &vpx_variance32x16_vsx),
+                      VarianceParams(4, 5, &vpx_variance16x32_vsx),
+                      VarianceParams(4, 4, &vpx_variance16x16_vsx),
+                      VarianceParams(4, 3, &vpx_variance16x8_vsx),
+                      VarianceParams(3, 4, &vpx_variance8x16_vsx),
+                      VarianceParams(3, 3, &vpx_variance8x8_vsx),
+                      VarianceParams(3, 2, &vpx_variance8x4_vsx),
+                      VarianceParams(2, 3, &vpx_variance4x8_vsx),
+                      VarianceParams(2, 2, &vpx_variance4x4_vsx)));
 #endif  // HAVE_VSX
 
 #if HAVE_MMI
