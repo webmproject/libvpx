@@ -723,9 +723,7 @@ process_toolchain() {
             check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
 EOF
-            check_cxx "$@" <<EOF && soft_enable webm_io
-int z;
-EOF
+            check_add_cxxflags -std=c++11 && soft_enable webm_io
             check_cxx "$@" <<EOF && soft_enable libyuv
 int z;
 EOF
@@ -734,9 +732,7 @@ EOF
             enabled pthread_h && check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
 EOF
-            check_cxx "$@" <<EOF && soft_enable webm_io
-int z;
-EOF
+            check_add_cxxflags -std=c++11 && soft_enable webm_io
             check_cxx "$@" <<EOF && soft_enable libyuv
 int z;
 EOF
