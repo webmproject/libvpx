@@ -1689,6 +1689,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   }
 
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
+    // Skip find_predictor if the reference frame is not in the
+    // ref_frame_flags (i.e., not used as a reference for this frame).
+    skip_ref_find_pred[ref_frame] =
+        !(cpi->ref_frame_flags & flag_list[ref_frame]);
     if (!skip_ref_find_pred[ref_frame]) {
       find_predictors(cpi, x, ref_frame, frame_mv, const_motion,
                       &ref_frame_skip_mask, flag_list, tile_data, mi_row,
