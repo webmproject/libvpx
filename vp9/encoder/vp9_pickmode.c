@@ -1429,7 +1429,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
   VP9_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
-  const SVC *const svc = &cpi->svc;
+  SVC *const svc = &cpi->svc;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mi = xd->mi[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
@@ -1503,7 +1503,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #endif
   INTERP_FILTER filter_gf_svc = EIGHTTAP;
   MV_REFERENCE_FRAME best_second_ref_frame = NONE;
-  MV_REFERENCE_FRAME spatial_ref = GOLDEN_FRAME;
+  MV_REFERENCE_FRAME inter_layer_ref = GOLDEN_FRAME;
   const struct segmentation *const seg = &cm->seg;
   int comp_modes = 0;
   int num_inter_modes = (cpi->use_svc) ? RT_INTER_MODES_SVC : RT_INTER_MODES;
@@ -1512,25 +1512,25 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int svc_mv_row = 0;
   int no_scaling = 0;
   unsigned int thresh_svc_skip_golden = 500;
-  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) {
-    int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id - 1,
-                                 cpi->svc.temporal_layer_id,
-                                 cpi->svc.number_temporal_layers);
-    LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
+  if (cpi->use_svc && svc->spatial_layer_id > 0) {
+    int layer =
+        LAYER_IDS_TO_IDX(svc->spatial_layer_id - 1, svc->temporal_layer_id,
+                         svc->number_temporal_layers);
+    LAYER_CONTEXT *const lc = &svc->layer_context[layer];
     if (lc->scaling_factor_num == lc->scaling_factor_den) no_scaling = 1;
   }
-  if (cpi->svc.spatial_layer_id > 0 &&
-      (cpi->svc.high_source_sad_superframe || no_scaling))
+  if (svc->spatial_layer_id > 0 &&
+      (svc->high_source_sad_superframe || no_scaling))
     thresh_svc_skip_golden = 0;
   // Lower the skip threshold if lower spatial layer is better quality relative
   // to current layer.
-  else if (cpi->svc.spatial_layer_id > 0 && cm->base_qindex > 150 &&
-           cm->base_qindex > cpi->svc.lower_layer_qindex + 15)
+  else if (svc->spatial_layer_id > 0 && cm->base_qindex > 150 &&
+           cm->base_qindex > svc->lower_layer_qindex + 15)
     thresh_svc_skip_golden = 100;
   // Increase skip threshold if lower spatial layer is lower quality relative
   // to current layer.
-  else if (cpi->svc.spatial_layer_id > 0 && cm->base_qindex < 140 &&
-           cm->base_qindex < cpi->svc.lower_layer_qindex - 20)
+  else if (svc->spatial_layer_id > 0 && cm->base_qindex < 140 &&
+           cm->base_qindex < svc->lower_layer_qindex - 20)
     thresh_svc_skip_golden = 1000;
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
@@ -1593,10 +1593,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     if (cpi->use_svc) {
-      int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
-                                   cpi->svc.temporal_layer_id,
-                                   cpi->svc.number_temporal_layers);
-      LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
+      int layer =
+          LAYER_IDS_TO_IDX(svc->spatial_layer_id, svc->temporal_layer_id,
+                           svc->number_temporal_layers);
+      LAYER_CONTEXT *lc = &svc->layer_context[layer];
       denoise_svc_pickmode = denoise_svc(cpi) && !lc->is_key_frame;
     }
     if (cpi->denoiser.denoising_level > kDenLowLow && denoise_svc_pickmode)
@@ -1631,19 +1631,19 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // For svc mode, on spatial_layer_id > 0: if the reference has different scale
   // constrain the inter mode to only test zero motion.
   if (cpi->use_svc && svc->force_zero_mode_spatial_ref &&
-      cpi->svc.spatial_layer_id > 0) {
+      svc->spatial_layer_id > 0) {
     if (cpi->ref_frame_flags & flag_list[LAST_FRAME]) {
       struct scale_factors *const sf = &cm->frame_refs[LAST_FRAME - 1].sf;
       if (vp9_is_scaled(sf)) {
         svc_force_zero_mode[LAST_FRAME - 1] = 1;
-        spatial_ref = LAST_FRAME;
+        inter_layer_ref = LAST_FRAME;
       }
     }
     if (cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) {
       struct scale_factors *const sf = &cm->frame_refs[GOLDEN_FRAME - 1].sf;
       if (vp9_is_scaled(sf)) {
         svc_force_zero_mode[GOLDEN_FRAME - 1] = 1;
-        spatial_ref = GOLDEN_FRAME;
+        inter_layer_ref = GOLDEN_FRAME;
       }
     }
   }
@@ -1704,9 +1704,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // an averaging filter for downsampling (phase = 8). If so, we will test
   // a nonzero motion mode on the spatial reference.
   // The nonzero motion is half pixel shifted to left and top (-4, -4).
-  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
-      svc_force_zero_mode[spatial_ref - 1] &&
-      cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id - 1] == 8) {
+  if (cpi->use_svc && svc->spatial_layer_id > 0 &&
+      svc_force_zero_mode[inter_layer_ref - 1] &&
+      svc->downsample_filter_phase[svc->spatial_layer_id - 1] == 8) {
     svc_mv_col = -4;
     svc_mv_row = -4;
     flag_svc_subpel = 1;
@@ -1755,7 +1755,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         get_segdata(seg, mi->segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame)
       continue;
 
-    if (flag_svc_subpel && ref_frame == spatial_ref) {
+    if (flag_svc_subpel && ref_frame == inter_layer_ref) {
       force_gf_mv = 1;
       // Only test mode if NEARESTMV/NEARMV is (svc_mv_col, svc_mv_row),
       // otherwise set NEWMV to (svc_mv_col, svc_mv_row).
@@ -1943,7 +1943,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
           // Exit NEWMV search if base_mv is (0,0) && bsize < BLOCK_16x16,
           // for SVC encoding.
-          if (cpi->use_svc && cpi->svc.use_base_mv && bsize < BLOCK_16X16 &&
+          if (cpi->use_svc && svc->use_base_mv && bsize < BLOCK_16X16 &&
               frame_mv[NEWMV][ref_frame].as_mv.row == 0 &&
               frame_mv[NEWMV][ref_frame].as_mv.col == 0)
             continue;
@@ -2266,12 +2266,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // layer is chosen as the reference. Always perform intra prediction if
   // LAST is the only reference, or is_key_frame is set, or on base
   // temporal layer.
-  if (cpi->svc.spatial_layer_id) {
+  if (svc->spatial_layer_id) {
     perform_intra_pred =
-        cpi->svc.temporal_layer_id == 0 ||
-        cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame ||
+        svc->temporal_layer_id == 0 ||
+        svc->layer_context[svc->temporal_layer_id].is_key_frame ||
         !(cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) ||
-        (!cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame &&
+        (!svc->layer_context[svc->temporal_layer_id].is_key_frame &&
          svc_force_zero_mode[best_ref_frame - 1]);
     inter_mode_thresh = (inter_mode_thresh << 1) + inter_mode_thresh;
   }
