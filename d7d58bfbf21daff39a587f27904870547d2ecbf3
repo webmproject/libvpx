@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e051d6ad_1b780836",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-05-17T00:04:34Z",
+      "side": 1,
+      "message": "if you have comparison numbers on a particular device (possibly from a DISABLED_...Speed test) that can be useful to include in the body of the commit message",
+      "revId": "d7d58bfbf21daff39a587f27904870547d2ecbf3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
