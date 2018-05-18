@@ -40,7 +40,7 @@ extern "C" {
 #define STATIC_KF_GROUP_THRESH 99
 
 // The maximum duration of a GF group that is static (for example a slide show).
-#define MAX_STATIC_GF_GROUP_LENGTH 250
+#define MAX_STATIC_GF_GROUP_LENGTH 25
 
 typedef enum {
   INTER_NORMAL = 0,
