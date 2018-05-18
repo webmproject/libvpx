@@ -1598,7 +1598,7 @@ if (vpx_config("CONFIG_POSTPROC") eq "yes" || vpx_config("CONFIG_VP9_POSTPROC") 
     specialize qw/vpx_plane_add_noise sse2 msa/;
 
     add_proto qw/void vpx_mbpost_proc_down/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
-    specialize qw/vpx_mbpost_proc_down sse2 neon msa/;
+    specialize qw/vpx_mbpost_proc_down sse2 neon msa vsx/;
 
     add_proto qw/void vpx_mbpost_proc_across_ip/, "unsigned char *dst, int pitch, int rows, int cols,int flimit";
     specialize qw/vpx_mbpost_proc_across_ip sse2 neon msa/;

@@ -20,6 +20,7 @@ typedef vector unsigned short uint16x8_t;
 typedef vector signed int int32x4_t;
 typedef vector unsigned int uint32x4_t;
 typedef vector bool short bool16x8_t;
+typedef vector bool int bool32x4_t;
 
 #ifdef __clang__
 static const uint8x16_t xxpermdi0_perm = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
