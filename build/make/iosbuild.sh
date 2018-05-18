@@ -132,7 +132,8 @@ create_vpx_framework_config_shim() {
   done
 
   # Consume the last line of output from the loop: We don't want it.
-  sed -i '' -e '$d' "${config_file}"
+  sed -i.bak -e '$d' "${config_file}"
+  rm "${config_file}.bak"
 
   printf "#endif\n\n" >> "${config_file}"
   printf "#endif  // ${include_guard}" >> "${config_file}"
