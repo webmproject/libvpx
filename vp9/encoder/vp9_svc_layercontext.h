@@ -140,7 +140,7 @@ typedef struct SVC {
 
   // Keep track of the frame buffer index updated/refreshed on the base
   // temporal superframe.
-  uint8_t fb_idx_upd_tl0[VPX_SS_MAX_LAYERS];
+  int fb_idx_upd_tl0[VPX_SS_MAX_LAYERS];
 
   // Keep track of the spatial and temporal layer id of the frame that last
   // updated the frame buffer index.
