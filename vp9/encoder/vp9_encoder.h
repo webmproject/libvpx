@@ -278,6 +278,21 @@ static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
   return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
 }
 
+typedef struct TplDepStats {
+  uint64_t intra_cost;
+  uint64_t inter_cost;
+  uint64_t mc_flow;
+  uint64_t mc_dep_cost;
+} TplDepStats;
+
+typedef struct TplDepFrame {
+  uint8_t is_valid;
+  TplDepStats *tpl_stats_ptr;
+  int stride;
+  int width;
+  int height;
+} TplDepFrame;
+
 // TODO(jingning) All spatially adaptive variables should go to TileDataEnc.
 typedef struct TileDataEnc {
   TileInfo tile_info;
@@ -475,6 +490,8 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG raw_scaled_source;
 #endif
   YV12_BUFFER_CONFIG *raw_source_frame;
+
+  TplDepFrame tpl_stats[MAX_LAG_BUFFERS];
 
   TileDataEnc *tile_data;
   int allocated_tiles;  // Keep track of memory allocated for tiles.
