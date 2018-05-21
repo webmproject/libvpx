@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "569ae524_2d7340bb",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 1246,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-21T23:00:24Z",
+      "side": 1,
+      "message": "no it should stay, as in original code.",
+      "parentUuid": "259ce927_36b54aa7",
+      "range": {
+        "startLine": 1246,
+        "startChar": 6,
+        "endLine": 1246,
+        "endChar": 7
+      },
+      "revId": "21b0ef91b08b173fc168256621f38196d746d8ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "678581c3_de69cd3c",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 29
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "8f622cef_d1e32385",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 4808,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-21T23:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "678581c3_de69cd3c",
+      "range": {
+        "startLine": 4808,
+        "startChar": 9,
+        "endLine": 4808,
+        "endChar": 37
+      },
+      "revId": "21b0ef91b08b173fc168256621f38196d746d8ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab5855a_f00d2270",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 29
@@ -59,6 +107,30 @@
       "writtenOn": "2018-05-17T04:06:37Z",
       "side": 1,
       "message": "I think it can also be used in non-svc case?",
+      "range": {
+        "startLine": 5365,
+        "startChar": 29,
+        "endLine": 5365,
+        "endChar": 49
+      },
+      "revId": "21b0ef91b08b173fc168256621f38196d746d8ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca525303_ca0c8875",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 5365,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-21T23:00:24Z",
+      "side": 1,
+      "message": "intra-only is no-show frame, so part of a superframe, like svc",
+      "parentUuid": "9ab5855a_f00d2270",
       "range": {
         "startLine": 5365,
         "startChar": 29,
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "ab89fd7d_40203073",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 734,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-21T23:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d9ca7228_0d368ee4",
+      "range": {
+        "startLine": 734,
+        "startChar": 2,
+        "endLine": 734,
+        "endChar": 14
+      },
+      "revId": "21b0ef91b08b173fc168256621f38196d746d8ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "558cba24_292c2281",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 29
@@ -105,6 +201,30 @@
       "writtenOn": "2018-05-17T04:06:37Z",
       "side": 1,
       "message": "why is this needed here?\n\nand set_intra_only_frame is also called in non-svc one pass cbr path, so maybe remove svc from name?",
+      "range": {
+        "startLine": 1716,
+        "startChar": 6,
+        "endLine": 1716,
+        "endChar": 38
+      },
+      "revId": "21b0ef91b08b173fc168256621f38196d746d8ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f37f1ccd_2eacf1a3",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 1716,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-21T23:00:24Z",
+      "side": 1,
+      "message": "i\u0027ll add comments in another patch. It is to check overlap of usage of frame buffers slots between base and non-base layers. If there is overlap in the update of these buffers they doesn\u0027t make sense to do intra-only.",
+      "parentUuid": "558cba24_292c2281",
       "range": {
         "startLine": 1716,
         "startChar": 6,
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "7e3bf7b1_b8a23731",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 1730,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-21T23:00:24Z",
+      "side": 1,
+      "message": "will add comments later. I prefer to keep the fb_idx ordered from lowest to higher index (when going from last to golden to altref).",
+      "parentUuid": "58ea2bd0_fd8ea5ad",
+      "range": {
+        "startLine": 1730,
+        "startChar": 10,
+        "endLine": 1730,
+        "endChar": 15
+      },
+      "revId": "21b0ef91b08b173fc168256621f38196d746d8ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e36c18da_0ec8f508",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 29
@@ -160,6 +304,30 @@
       "revId": "21b0ef91b08b173fc168256621f38196d746d8ba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c4da528_5d71d5c6",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 1545,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-21T23:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e36c18da_0ec8f508",
+      "range": {
+        "startLine": 1545,
+        "startChar": 6,
+        "endLine": 1545,
+        "endChar": 10
+      },
+      "revId": "21b0ef91b08b173fc168256621f38196d746d8ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
