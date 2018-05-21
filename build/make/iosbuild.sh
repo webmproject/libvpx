@@ -351,7 +351,7 @@ if [ "$ENABLE_SHARED" = "yes" ]; then
   IOS_VERSION_MIN="8.0"
 else
   IOS_VERSION_OPTIONS=""
-  IOS_VERSION_MIN="6.0"
+  IOS_VERSION_MIN="7.0"
 fi
 
 if [ "${VERBOSE}" = "yes" ]; then
