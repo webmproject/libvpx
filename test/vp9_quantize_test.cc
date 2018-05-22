@@ -18,6 +18,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
+#include "test/bench.h"
 #include "test/buffer.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
@@ -67,10 +68,13 @@ void QuantFPWrapper(const tran_low_t *coeff, intptr_t count, int skip_block,
      scan, iscan);
 }
 
-class VP9QuantizeBase {
+class VP9QuantizeBase : public AbstractBench {
  public:
   VP9QuantizeBase(vpx_bit_depth_t bit_depth, int max_size, bool is_fp)
-      : bit_depth_(bit_depth), max_size_(max_size), is_fp_(is_fp) {
+      : bit_depth_(bit_depth), max_size_(max_size), is_fp_(is_fp),
+        coeff(Buffer<tran_low_t>(max_size_, max_size_, 0, 16)),
+        qcoeff(Buffer<tran_low_t>(max_size_, max_size_, 0, 32)),
+        dqcoeff(Buffer<tran_low_t>(max_size_, max_size_, 0, 32)) {
     max_value_ = (1 << bit_depth_) - 1;
     zbin_ptr_ =
         reinterpret_cast<int16_t *>(vpx_memalign(16, 8 * sizeof(*zbin_ptr_)));
@@ -86,6 +90,9 @@ class VP9QuantizeBase {
         vpx_memalign(16, 8 * sizeof(*quant_shift_ptr_)));
     dequant_ptr_ = reinterpret_cast<int16_t *>(
         vpx_memalign(16, 8 * sizeof(*dequant_ptr_)));
+
+    r_ptr = (is_fp_) ? round_fp_ptr_ : round_ptr_;
+    q_ptr = (is_fp_) ? quant_fp_ptr_ : quant_ptr_;
   }
 
   ~VP9QuantizeBase() {
@@ -118,6 +125,15 @@ class VP9QuantizeBase {
   int max_value_;
   const int max_size_;
   const bool is_fp_;
+  Buffer<tran_low_t> coeff;
+  Buffer<tran_low_t> qcoeff;
+  Buffer<tran_low_t> dqcoeff;
+  int16_t *r_ptr;
+  int16_t *q_ptr;
+  int count;
+  int skip_block;
+  const scan_order *scan;
+  uint16_t eob;
 };
 
 class VP9QuantizeTest : public VP9QuantizeBase,
@@ -128,9 +144,16 @@ class VP9QuantizeTest : public VP9QuantizeBase,
         quantize_op_(GET_PARAM(0)), ref_quantize_op_(GET_PARAM(1)) {}
 
  protected:
+  void run();
   const QuantizeFunc quantize_op_;
   const QuantizeFunc ref_quantize_op_;
 };
+
+void VP9QuantizeTest::run() {
+  quantize_op_(coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr, q_ptr,
+               quant_shift_ptr_, qcoeff.TopLeftPixel(), dqcoeff.TopLeftPixel(),
+               dequant_ptr_, &eob, scan->scan, scan->iscan);
+}
 
 // This quantizer compares the AC coefficients to the quantization step size to
 // determine if further multiplication operations are needed.
@@ -269,11 +292,8 @@ void GenerateHelperArrays(ACMRandom *rnd, int16_t *zbin, int16_t *round,
 
 TEST_P(VP9QuantizeTest, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  Buffer<tran_low_t> coeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 16);
   ASSERT_TRUE(coeff.Init());
-  Buffer<tran_low_t> qcoeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(qcoeff.Init());
-  Buffer<tran_low_t> dqcoeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(dqcoeff.Init());
   Buffer<tran_low_t> ref_qcoeff =
       Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
@@ -281,7 +301,8 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
   Buffer<tran_low_t> ref_dqcoeff =
       Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(ref_dqcoeff.Init());
-  uint16_t eob, ref_eob;
+  uint16_t ref_eob = 0;
+  eob = 0;
 
   for (int i = 0; i < number_of_iterations; ++i) {
     // Test skip block for the first three iterations to catch all the different
@@ -294,23 +315,21 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
       sz = TX_32X32;
     }
     const TX_TYPE tx_type = static_cast<TX_TYPE>((i >> 2) % 3);
-    const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
-    const int count = (4 << sz) * (4 << sz);
+    scan = &vp9_scan_orders[sz][tx_type];
+    count = (4 << sz) * (4 << sz);
     coeff.Set(&rnd, -max_value_, max_value_);
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_, round_fp_ptr_,
                          quant_fp_ptr_);
-    int16_t *r_ptr = (is_fp_) ? round_fp_ptr_ : round_ptr_;
-    int16_t *q_ptr = (is_fp_) ? quant_fp_ptr_ : quant_ptr_;
     ref_quantize_op_(coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr,
                      q_ptr, quant_shift_ptr_, ref_qcoeff.TopLeftPixel(),
                      ref_dqcoeff.TopLeftPixel(), dequant_ptr_, &ref_eob,
-                     scan_order->scan, scan_order->iscan);
+                     scan->scan, scan->iscan);
 
     ASM_REGISTER_STATE_CHECK(quantize_op_(
         coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr, q_ptr,
         quant_shift_ptr_, qcoeff.TopLeftPixel(), dqcoeff.TopLeftPixel(),
-        dequant_ptr_, &eob, scan_order->scan, scan_order->iscan));
+        dequant_ptr_, &eob, scan->scan, scan->iscan));
 
     EXPECT_TRUE(qcoeff.CheckValues(ref_qcoeff));
     EXPECT_TRUE(dqcoeff.CheckValues(ref_dqcoeff));
@@ -328,11 +347,8 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
 
 TEST_P(VP9QuantizeTest, EOBCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  Buffer<tran_low_t> coeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 16);
   ASSERT_TRUE(coeff.Init());
-  Buffer<tran_low_t> qcoeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(qcoeff.Init());
-  Buffer<tran_low_t> dqcoeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(dqcoeff.Init());
   Buffer<tran_low_t> ref_qcoeff =
       Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
@@ -340,10 +356,12 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
   Buffer<tran_low_t> ref_dqcoeff =
       Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(ref_dqcoeff.Init());
-  uint16_t eob, ref_eob;
+  uint16_t ref_eob = 0;
+  eob = 0;
+  const uint32_t max_index = max_size_ * max_size_ - 1;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    const int skip_block = 0;
+    skip_block = 0;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = static_cast<TX_SIZE>(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -351,28 +369,26 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
       sz = TX_32X32;
     }
     const TX_TYPE tx_type = static_cast<TX_TYPE>((i >> 2) % 3);
-    const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
-    int count = (4 << sz) * (4 << sz);
+    scan = &vp9_scan_orders[sz][tx_type];
+    count = (4 << sz) * (4 << sz);
     // Two random entries
     coeff.Set(0);
-    coeff.TopLeftPixel()[rnd(count)] =
+    coeff.TopLeftPixel()[rnd.RandRange(count) & max_index] =
         static_cast<int>(rnd.RandRange(max_value_ * 2)) - max_value_;
-    coeff.TopLeftPixel()[rnd(count)] =
+    coeff.TopLeftPixel()[rnd.RandRange(count) & max_index] =
         static_cast<int>(rnd.RandRange(max_value_ * 2)) - max_value_;
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_, round_fp_ptr_,
                          quant_fp_ptr_);
-    int16_t *r_ptr = (is_fp_) ? round_fp_ptr_ : round_ptr_;
-    int16_t *q_ptr = (is_fp_) ? quant_fp_ptr_ : quant_ptr_;
     ref_quantize_op_(coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr,
                      q_ptr, quant_shift_ptr_, ref_qcoeff.TopLeftPixel(),
                      ref_dqcoeff.TopLeftPixel(), dequant_ptr_, &ref_eob,
-                     scan_order->scan, scan_order->iscan);
+                     scan->scan, scan->iscan);
 
     ASM_REGISTER_STATE_CHECK(quantize_op_(
         coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr, q_ptr,
         quant_shift_ptr_, qcoeff.TopLeftPixel(), dqcoeff.TopLeftPixel(),
-        dequant_ptr_, &eob, scan_order->scan, scan_order->iscan));
+        dequant_ptr_, &eob, scan->scan, scan->iscan));
 
     EXPECT_TRUE(qcoeff.CheckValues(ref_qcoeff));
     EXPECT_TRUE(dqcoeff.CheckValues(ref_dqcoeff));
@@ -390,13 +406,9 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
 
 TEST_P(VP9QuantizeTest, DISABLED_Speed) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  Buffer<tran_low_t> coeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 16);
   ASSERT_TRUE(coeff.Init());
-  Buffer<tran_low_t> qcoeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(qcoeff.Init());
-  Buffer<tran_low_t> dqcoeff = Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(dqcoeff.Init());
-  uint16_t eob;
   TX_SIZE starting_sz, ending_sz;
 
   if (max_size_ == 16) {
@@ -410,18 +422,16 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
   for (TX_SIZE sz = starting_sz; sz <= ending_sz; ++sz) {
     // zbin > coeff, zbin < coeff.
     for (int i = 0; i < 2; ++i) {
-      const int skip_block = 0;
+      skip_block = 0;
       // TX_TYPE defines the scan order. That is not relevant to the speed test.
       // Pick the first one.
       const TX_TYPE tx_type = DCT_DCT;
-      const scan_order *scan_order = &vp9_scan_orders[sz][tx_type];
-      const int count = (4 << sz) * (4 << sz);
+      count = (4 << sz) * (4 << sz);
+      scan = &vp9_scan_orders[sz][tx_type];
 
       GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                            quant_shift_ptr_, dequant_ptr_, round_fp_ptr_,
                            quant_fp_ptr_);
-      int16_t *r_ptr = (is_fp_) ? round_fp_ptr_ : round_ptr_;
-      int16_t *q_ptr = (is_fp_) ? quant_fp_ptr_ : quant_ptr_;
 
       if (i == 0) {
         // When |coeff values| are less than zbin the results are 0.
@@ -438,22 +448,15 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
         coeff.Set(&rnd, -500, 500);
       }
 
-      vpx_usec_timer timer;
-      vpx_usec_timer_start(&timer);
-      for (int j = 0; j < 100000000 / count; ++j) {
-        quantize_op_(coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr,
-                     q_ptr, quant_shift_ptr_, qcoeff.TopLeftPixel(),
-                     dqcoeff.TopLeftPixel(), dequant_ptr_, &eob,
-                     scan_order->scan, scan_order->iscan);
-      }
-      vpx_usec_timer_mark(&timer);
-      const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
-      if (i == 0) printf("Bypass calculations.\n");
-      if (i == 1) printf("Full calculations.\n");
-      printf("Quantize %dx%d time: %5d ms\n", 4 << sz, 4 << sz,
-             elapsed_time / 1000);
+      runNTimes(10000000 / count);
+      const char *type =
+          (i == 0) ? "Bypass calculations " : "Full calculations ";
+      char block_size[16];
+      snprintf(block_size, sizeof(block_size), "%dx%d", 4 << sz, 4 << sz);
+      char title[100];
+      snprintf(title, sizeof(title), "%25s %8s ", type, block_size);
+      printMedian(title);
     }
-    printf("\n");
   }
 }
 
