@@ -948,12 +948,11 @@ void vp9_svc_constrain_inter_layer_pred(VP9_COMP *const cpi) {
 
 void vp9_svc_assert_constraints_pattern(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
-  // For fixed/non-flexible mode, and with CONSTRAINED frame drop
-  // mode (default), the folllowing constraint are expected, when
-  // inter-layer prediciton is on (default).
+  // For fixed/non-flexible mode, the folllowing constraint are expected,
+  // when inter-layer prediciton is on (default).
   if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
       svc->disable_inter_layer_pred == INTER_LAYER_PRED_ON &&
-      svc->framedrop_mode == CONSTRAINED_LAYER_DROP) {
+      svc->framedrop_mode != LAYER_DROP) {
     if (!cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame) {
       // On non-key frames: LAST is always temporal reference, GOLDEN is
       // spatial reference.

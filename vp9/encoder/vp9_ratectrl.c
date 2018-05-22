@@ -390,16 +390,17 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->baseline_gf_interval = (rc->min_gf_interval + rc->max_gf_interval) / 2;
 }
 
-static int check_buffer(VP9_COMP *cpi, int drop_mark) {
+static int check_buffer_above_thresh(VP9_COMP *cpi, int drop_mark) {
   SVC *svc = &cpi->svc;
-  if (!cpi->use_svc || cpi->svc.framedrop_mode == LAYER_DROP) {
+  if (!cpi->use_svc || cpi->svc.framedrop_mode != FULL_SUPERFRAME_DROP) {
     RATE_CONTROL *const rc = &cpi->rc;
-    return (rc->buffer_level <= drop_mark);
+    return (rc->buffer_level > drop_mark);
   } else {
     int i;
-    // For SVC in the constrained framedrop mode (svc->framedrop_mode =
-    // CONSTRAINED_LAYER_DROP): the condition on buffer (to drop frame) is
-    // checked on current and upper spatial layers.
+    // For SVC in the FULL_SUPERFRAME_DROP): the condition on
+    // buffer (if its above threshold, so no drop) is checked on current and
+    // upper spatial layers. If any spatial layer is not above threshold then
+    // we return 0.
     for (i = svc->spatial_layer_id; i < svc->number_spatial_layers; ++i) {
       const int layer = LAYER_IDS_TO_IDX(i, svc->temporal_layer_id,
                                          svc->number_temporal_layers);
@@ -407,9 +408,41 @@ static int check_buffer(VP9_COMP *cpi, int drop_mark) {
       RATE_CONTROL *lrc = &lc->rc;
       const int drop_mark_layer =
           (int)(cpi->svc.framedrop_thresh[i] * lrc->optimal_buffer_level / 100);
-      if (!(lrc->buffer_level <= drop_mark_layer)) return 0;
+      if (!(lrc->buffer_level > drop_mark_layer)) return 0;
     }
     return 1;
+  }
+}
+
+static int check_buffer_below_thresh(VP9_COMP *cpi, int drop_mark) {
+  SVC *svc = &cpi->svc;
+  if (!cpi->use_svc || cpi->svc.framedrop_mode == LAYER_DROP) {
+    RATE_CONTROL *const rc = &cpi->rc;
+    return (rc->buffer_level <= drop_mark);
+  } else {
+    int i;
+    // For SVC in the constrained framedrop mode (svc->framedrop_mode =
+    // CONSTRAINED_LAYER_DROP or FULL_SUPERFRAME_DROP): the condition on
+    // buffer (if its below threshold, so drop frame) is checked on current
+    // and upper spatial layers. For FULL_SUPERFRAME_DROP mode if any
+    // spatial layer is <= threshold, then we return 1 (drop).
+    for (i = svc->spatial_layer_id; i < svc->number_spatial_layers; ++i) {
+      const int layer = LAYER_IDS_TO_IDX(i, svc->temporal_layer_id,
+                                         svc->number_temporal_layers);
+      LAYER_CONTEXT *lc = &svc->layer_context[layer];
+      RATE_CONTROL *lrc = &lc->rc;
+      const int drop_mark_layer =
+          (int)(cpi->svc.framedrop_thresh[i] * lrc->optimal_buffer_level / 100);
+      if (cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP) {
+        if (lrc->buffer_level <= drop_mark_layer) return 1;
+      } else {
+        if (!(lrc->buffer_level <= drop_mark_layer)) return 0;
+      }
+    }
+    if (cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP)
+      return 0;
+    else
+      return 1;
   }
 }
 
@@ -420,10 +453,15 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
   if (cpi->use_svc)
     drop_frames_water_mark =
         cpi->svc.framedrop_thresh[cpi->svc.spatial_layer_id];
-  if (!drop_frames_water_mark) {
+  if (!drop_frames_water_mark ||
+      (cpi->svc.spatial_layer_id > 0 &&
+       cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP)) {
     return 0;
   } else {
-    if (rc->buffer_level < 0) {
+    if ((rc->buffer_level < 0 &&
+         cpi->svc.framedrop_mode != FULL_SUPERFRAME_DROP) ||
+        (check_buffer_below_thresh(cpi, -1) &&
+         cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP)) {
       // Always drop if buffer is below 0.
       return 1;
     } else {
@@ -431,9 +469,11 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
       // (starting with the next frame) until it increases back over drop_mark.
       int drop_mark =
           (int)(drop_frames_water_mark * rc->optimal_buffer_level / 100);
-      if ((rc->buffer_level > drop_mark) && (rc->decimation_factor > 0)) {
+      if (check_buffer_above_thresh(cpi, drop_mark) &&
+          (rc->decimation_factor > 0)) {
         --rc->decimation_factor;
-      } else if (check_buffer(cpi, drop_mark) && rc->decimation_factor == 0) {
+      } else if (check_buffer_below_thresh(cpi, drop_mark) &&
+                 rc->decimation_factor == 0) {
         rc->decimation_factor = 1;
       }
       if (rc->decimation_factor > 0) {

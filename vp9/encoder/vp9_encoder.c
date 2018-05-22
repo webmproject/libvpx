@@ -4529,9 +4529,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     cpi->last_frame_dropped = 1;
     cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
     cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
-    if (cpi->svc.framedrop_mode != CONSTRAINED_LAYER_DROP ||
+    if (cpi->svc.framedrop_mode == LAYER_DROP ||
         cpi->svc.drop_spatial_layer[0] == 0) {
-      // For the case of CONSTRAINED_LAYER_DROP where the base is dropped
+      // For the case of constrained drop mode where the base is dropped
       // (drop_spatial_layer[0] == 1), which means full superframe dropped,
       // we don't increment the svc frame counters. In particular temporal
       // layer counter (which is incremented in vp9_inc_frame_in_layer())
@@ -4595,14 +4595,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
       (!cpi->use_svc ||
        !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
     int svc_prev_layer_dropped = 0;
-    // In the contrained framedrop mode for svc (framedrop_mode =
-    // CONSTRAINED_LAYER_DROP), if the previous spatial layer was dropped, drop
-    // the current spatial layer.
+    // In the constrained or full_superframe framedrop mode for svc
+    // (framedrop_mode !=  LAYER_DROP), if the previous spatial layer was
+    // dropped, drop the current spatial layer.
     if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
         cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id - 1])
       svc_prev_layer_dropped = 1;
-    if ((svc_prev_layer_dropped &&
-         cpi->svc.framedrop_mode == CONSTRAINED_LAYER_DROP) ||
+    if ((svc_prev_layer_dropped && cpi->svc.framedrop_mode != LAYER_DROP) ||
         vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
       cpi->ext_refresh_frame_flags_pending = 0;
@@ -4611,9 +4610,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
         cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
         cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
         cpi->svc.skip_enhancement_layer = 1;
-        if (cpi->svc.framedrop_mode != CONSTRAINED_LAYER_DROP ||
+        if (cpi->svc.framedrop_mode == LAYER_DROP ||
             cpi->svc.drop_spatial_layer[0] == 0) {
-          // For the case of CONSTRAINED_LAYER_DROP where the base is dropped
+          // For the case of constrained drop mode where the base is dropped
           // (drop_spatial_layer[0] == 1), which means full superframe dropped,
           // we don't increment the svc frame counters. In particular temporal
           // layer counter (which is incremented in vp9_inc_frame_in_layer())
