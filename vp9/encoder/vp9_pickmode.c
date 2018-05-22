@@ -1729,7 +1729,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     int inter_mv_mode = 0;
     int skip_this_mv = 0;
     int comp_pred = 0;
-    int force_gf_mv = 0;
+    int force_mv_inter_layer = 0;
     PREDICTION_MODE this_mode;
     second_ref_frame = NONE;
 
@@ -1760,7 +1760,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       continue;
 
     if (flag_svc_subpel && ref_frame == inter_layer_ref) {
-      force_gf_mv = 1;
+      force_mv_inter_layer = 1;
       // Only test mode if NEARESTMV/NEARMV is (svc_mv_col, svc_mv_row),
       // otherwise set NEWMV to (svc_mv_col, svc_mv_row).
       if (this_mode == NEWMV) {
@@ -1825,7 +1825,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     // Skip non-zeromv mode search for golden frame if force_skip_low_temp_var
     // is set. If nearestmv for golden frame is 0, zeromv mode will be skipped
     // later.
-    if (!force_gf_mv && force_skip_low_temp_var && ref_frame == GOLDEN_FRAME &&
+    if (!force_mv_inter_layer && force_skip_low_temp_var &&
+        ref_frame == GOLDEN_FRAME &&
         frame_mv[this_mode][ref_frame].as_int != 0) {
       continue;
     }
@@ -1839,7 +1840,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     }
 
     if (cpi->use_svc) {
-      if (!force_gf_mv && svc_force_zero_mode[ref_frame - 1] &&
+      if (!force_mv_inter_layer && svc_force_zero_mode[ref_frame - 1] &&
           frame_mv[this_mode][ref_frame].as_int != 0)
         continue;
     }
@@ -1901,7 +1902,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                              &rd_thresh_freq_fact[mode_index])))
       if (frame_mv[this_mode][ref_frame].as_int != 0) continue;
 
-    if (this_mode == NEWMV && !force_gf_mv) {
+    if (this_mode == NEWMV && !force_mv_inter_layer) {
       if (ref_frame > LAST_FRAME && !cpi->use_svc &&
           cpi->oxcf.rc_mode == VPX_CBR) {
         int tmp_sad;
@@ -2044,7 +2045,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     if ((this_mode == NEWMV || filter_ref == SWITCHABLE) &&
         pred_filter_search &&
         (ref_frame == LAST_FRAME ||
-         (ref_frame == GOLDEN_FRAME && !force_gf_mv &&
+         (ref_frame == GOLDEN_FRAME && !force_mv_inter_layer &&
           (cpi->use_svc || cpi->oxcf.rc_mode == VPX_VBR))) &&
         (((mi->mv[0].as_mv.row | mi->mv[0].as_mv.col) & 0x07) != 0)) {
       int pf_rate[3];
