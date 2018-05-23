@@ -5334,8 +5334,25 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
   YV12_BUFFER_CONFIG *ref_frame[3] = { NULL, NULL, NULL };
 
+  VP9_COMMON *cm = &cpi->common;
   struct scale_factors sf;
   int rdmult, idx;
+  ThreadData *td = &cpi->td;
+  MACROBLOCK *x = &td->mb;
+  MACROBLOCKD *xd = &x->e_mbd;
+  int mi_row, mi_col;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(16, uint16_t, predictor16[16 * 16 * 3]);
+  DECLARE_ALIGNED(16, uint8_t, predictor8[16 * 16 * 3]);
+  uint8_t *predictor;
+  (void)predictor;
+  (void)predictor16;
+  (void)predictor8;
+#else
+  DECLARE_ALIGNED(16, uint8_t, predictor[16 * 16 * 3]);
+  (void)predictor;
+#endif
 
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -5362,6 +5379,25 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   set_error_per_bit(&cpi->td.mb, rdmult);
   vp9_initialize_me_consts(cpi, &cpi->td.mb, ARNR_FILT_QINDEX);
 
+  for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
+    // Motion estimation row boundary
+    x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+    x->mv_limits.row_max =
+        (cm->mi_rows - 1 - mi_row) * MI_SIZE + (17 - 2 * VP9_INTERP_EXTEND);
+    for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
+      int mb_y_offset =
+          mi_row * MI_SIZE * this_frame->y_stride + mi_col * MI_SIZE;
+
+      (void)mb_y_offset;
+      // Motion estimation column boundary
+      x->mv_limits.col_min =
+          -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+      x->mv_limits.col_max =
+          ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
+    }
+  }
+
+  (void)xd;
   (void)tpl_frame;
   (void)this_frame;
   (void)ref_frame;
