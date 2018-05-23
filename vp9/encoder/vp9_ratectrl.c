@@ -273,6 +273,14 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   const VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
+  // On dropped frame, don't update buffer if its currently stable
+  // (above optimal level). This can cause issues when full superframe
+  // can drop (!= LAYER_DROP), since QP is adjusted downwards with buffer
+  // overflow, which can cause more frame drops.
+  if (cpi->svc.framedrop_mode != LAYER_DROP && encoded_frame_size == 0 &&
+      rc->buffer_level > rc->optimal_buffer_level)
+    return;
+
   // Non-viewable frames are a special case and are treated as pure overhead.
   if (!cm->show_frame) {
     rc->bits_off_target -= encoded_frame_size;
@@ -770,8 +778,10 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   active_worst_quality = VPXMIN(rc->worst_quality, ambient_qp * 5 >> 2);
   if (rc->buffer_level > rc->optimal_buffer_level) {
     // Adjust down.
-    // Maximum limit for down adjustment, ~30%.
+    // Maximum limit for down adjustment ~30%; make it lower for screen content.
     int max_adjustment_down = active_worst_quality / 3;
+    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN)
+      max_adjustment_down = active_worst_quality >> 3;
     if (max_adjustment_down) {
       buff_lvl_step = ((rc->maximum_buffer_size - rc->optimal_buffer_level) /
                        max_adjustment_down);
@@ -2512,7 +2522,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
 int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
-  int thresh_qp = 3 * (rc->worst_quality >> 2);
+  int thresh_qp = 7 * (rc->worst_quality >> 3);
   int thresh_rate = rc->avg_frame_bandwidth << 3;
   // Lower rate threshold for video.
   if (cpi->oxcf.content != VP9E_CONTENT_SCREEN)
