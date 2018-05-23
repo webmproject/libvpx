@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c08d57aa_60f8d34e",
+        "filename": "test/bench.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1130011
+      },
+      "writtenOn": "2018-05-23T00:31:21Z",
+      "side": 1,
+      "message": "Since the test code is C++, we can call std::sort rather than rolling our own insertion sort.",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 29,
+        "endChar": 5
+      },
+      "revId": "71620fea678fb5e10dfe931e48a6eba740039468",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c79587d6_c56556d6",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1130011
+      },
+      "writtenOn": "2018-05-23T00:31:21Z",
+      "side": 1,
+      "message": "For consistency with other libvpx code and to resolve the win32/win64 build failures, we can allocate appropriate sized buffers on the stack and call snprintf() instead.\nThis also addresses the missing calls to free().",
+      "range": {
+        "startLine": 455,
+        "startChar": 0,
+        "endLine": 458,
+        "endChar": 54
+      },
+      "revId": "71620fea678fb5e10dfe931e48a6eba740039468",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
