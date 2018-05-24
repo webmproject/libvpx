@@ -3753,7 +3753,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     }
   }
 
-  if (cpi->oxcf.speed >= 5 && cpi->oxcf.pass == 0 &&
+  // TODO(jianj): Look into issue of skin detection with high bitdepth.
+  if (cm->bit_depth == 8 && cpi->oxcf.speed >= 5 && cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
       cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
       cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
