@@ -457,19 +457,26 @@ static int check_buffer_below_thresh(VP9_COMP *cpi, int drop_mark) {
 int vp9_rc_drop_frame(VP9_COMP *cpi) {
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
+  SVC *svc = &cpi->svc;
   int drop_frames_water_mark = oxcf->drop_frames_water_mark;
-  if (cpi->use_svc)
-    drop_frames_water_mark =
-        cpi->svc.framedrop_thresh[cpi->svc.spatial_layer_id];
+  if (cpi->use_svc) {
+    // If we have dropped max_consec_drop frames, then we don't
+    // drop this spatial layer, and reset counter to 0.
+    if (svc->drop_count[svc->spatial_layer_id] == svc->max_consec_drop) {
+      svc->drop_count[svc->spatial_layer_id] = 0;
+      return 0;
+    } else {
+      drop_frames_water_mark = svc->framedrop_thresh[svc->spatial_layer_id];
+    }
+  }
   if (!drop_frames_water_mark ||
-      (cpi->svc.spatial_layer_id > 0 &&
-       cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP)) {
+      (svc->spatial_layer_id > 0 &&
+       svc->framedrop_mode == FULL_SUPERFRAME_DROP)) {
     return 0;
   } else {
-    if ((rc->buffer_level < 0 &&
-         cpi->svc.framedrop_mode != FULL_SUPERFRAME_DROP) ||
+    if ((rc->buffer_level < 0 && svc->framedrop_mode != FULL_SUPERFRAME_DROP) ||
         (check_buffer_below_thresh(cpi, -1) &&
-         cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP)) {
+         svc->framedrop_mode == FULL_SUPERFRAME_DROP)) {
       // Always drop if buffer is below 0.
       return 1;
     } else {

@@ -4594,24 +4594,26 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
       cm->frame_type != KEY_FRAME &&
       (!cpi->use_svc ||
        !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
+    SVC *svc = &cpi->svc;
     int svc_prev_layer_dropped = 0;
     // In the constrained or full_superframe framedrop mode for svc
     // (framedrop_mode !=  LAYER_DROP), if the previous spatial layer was
     // dropped, drop the current spatial layer.
-    if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
-        cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id - 1])
+    if (cpi->use_svc && svc->spatial_layer_id > 0 &&
+        svc->drop_spatial_layer[svc->spatial_layer_id - 1])
       svc_prev_layer_dropped = 1;
-    if ((svc_prev_layer_dropped && cpi->svc.framedrop_mode != LAYER_DROP) ||
+    if ((svc_prev_layer_dropped && svc->framedrop_mode != LAYER_DROP) ||
         vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
       cpi->ext_refresh_frame_flags_pending = 0;
       cpi->last_frame_dropped = 1;
       if (cpi->use_svc) {
-        cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
-        cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
-        cpi->svc.skip_enhancement_layer = 1;
-        if (cpi->svc.framedrop_mode == LAYER_DROP ||
-            cpi->svc.drop_spatial_layer[0] == 0) {
+        svc->last_layer_dropped[svc->spatial_layer_id] = 1;
+        svc->drop_spatial_layer[svc->spatial_layer_id] = 1;
+        svc->drop_count[svc->spatial_layer_id]++;
+        svc->skip_enhancement_layer = 1;
+        if (svc->framedrop_mode == LAYER_DROP ||
+            svc->drop_spatial_layer[0] == 0) {
           // For the case of constrained drop mode where the base is dropped
           // (drop_spatial_layer[0] == 1), which means full superframe dropped,
           // we don't increment the svc frame counters. In particular temporal
@@ -4621,16 +4623,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
           // issue with temporal alignement with full superframe dropping.
           vp9_inc_frame_in_layer(cpi);
         }
-        if (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1) {
+        if (svc->spatial_layer_id == svc->number_spatial_layers - 1) {
           int i;
           int all_layers_drop = 1;
-          for (i = 0; i < cpi->svc.spatial_layer_id; i++) {
-            if (cpi->svc.drop_spatial_layer[i] == 0) {
+          for (i = 0; i < svc->spatial_layer_id; i++) {
+            if (svc->drop_spatial_layer[i] == 0) {
               all_layers_drop = 0;
               break;
             }
           }
-          if (all_layers_drop == 1) cpi->svc.skip_enhancement_layer = 0;
+          if (all_layers_drop == 1) svc->skip_enhancement_layer = 0;
         }
       }
       return;

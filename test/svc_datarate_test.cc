@@ -205,6 +205,7 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest {
         svc_drop_frame.framedrop_mode = LAYER_DROP;
         for (i = 0; i < number_spatial_layers_; i++)
           svc_drop_frame.framedrop_thresh[i] = 30;
+        svc_drop_frame.max_consec_drop = 30;
         encoder->Control(VP9E_SET_SVC_FRAME_DROP_LAYER, &svc_drop_frame);
       }
     }
