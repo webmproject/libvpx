@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "329de341_e13798d4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-05-25T01:52:57Z",
+      "side": 1,
+      "message": "can you add some detail about the fix in the body of the message?",
+      "revId": "b4457a3fc20bb301ee8dc8ec48b9fca2073b0234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
