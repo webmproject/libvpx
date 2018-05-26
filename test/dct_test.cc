@@ -684,12 +684,13 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_VSX && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
-static const FuncInfo ht_vsx_func_info[1] = {
-  { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_vsx>, 4, 1 }
+static const FuncInfo ht_vsx_func_info[2] = {
+  { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_vsx>, 4, 1 },
+  { &vp9_fht8x8_c, &iht_wrapper<vp9_iht8x8_64_add_vsx>, 8, 1 }
 };
 
 INSTANTIATE_TEST_CASE_P(VSX, TransHT,
-                        ::testing::Combine(::testing::Range(0, 1),
+                        ::testing::Combine(::testing::Range(0, 2),
                                            ::testing::Values(ht_vsx_func_info),
                                            ::testing::Range(0, 4),
                                            ::testing::Values(VPX_BITS_8)));

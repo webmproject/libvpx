@@ -19,63 +19,85 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/inv_txfm.h"
 
-static int16x8_t cospi1_v = { 16364, 16364, 16364, 16364,
-                              16364, 16364, 16364, 16364 };
-static int16x8_t cospi2_v = { 16305, 16305, 16305, 16305,
-                              16305, 16305, 16305, 16305 };
-static int16x8_t cospi3_v = { 16207, 16207, 16207, 16207,
-                              16207, 16207, 16207, 16207 };
-static int16x8_t cospi4_v = { 16069, 16069, 16069, 16069,
-                              16069, 16069, 16069, 16069 };
-static int16x8_t cospi4m_v = { -16069, -16069, -16069, -16069,
-                               -16069, -16069, -16069, -16069 };
-static int16x8_t cospi5_v = { 15893, 15893, 15893, 15893,
-                              15893, 15893, 15893, 15893 };
-static int16x8_t cospi6_v = { 15679, 15679, 15679, 15679,
-                              15679, 15679, 15679, 15679 };
-static int16x8_t cospi7_v = { 15426, 15426, 15426, 15426,
-                              15426, 15426, 15426, 15426 };
-static int16x8_t cospi8_v = { 15137, 15137, 15137, 15137,
-                              15137, 15137, 15137, 15137 };
-static int16x8_t cospi8m_v = { -15137, -15137, -15137, -15137,
-                               -15137, -15137, -15137, -15137 };
-static int16x8_t cospi9_v = { 14811, 14811, 14811, 14811,
-                              14811, 14811, 14811, 14811 };
-static int16x8_t cospi10_v = { 14449, 14449, 14449, 14449,
-                               14449, 14449, 14449, 14449 };
-static int16x8_t cospi11_v = { 14053, 14053, 14053, 14053,
-                               14053, 14053, 14053, 14053 };
-static int16x8_t cospi12_v = { 13623, 13623, 13623, 13623,
-                               13623, 13623, 13623, 13623 };
-static int16x8_t cospi13_v = { 13160, 13160, 13160, 13160,
-                               13160, 13160, 13160, 13160 };
-static int16x8_t cospi14_v = { 12665, 12665, 12665, 12665,
-                               12665, 12665, 12665, 12665 };
-static int16x8_t cospi15_v = { 12140, 12140, 12140, 12140,
-                               12140, 12140, 12140, 12140 };
-static int16x8_t cospi16_v = { 11585, 11585, 11585, 11585,
-                               11585, 11585, 11585, 11585 };
-static int16x8_t cospi17_v = { 11003, 11003, 11003, 11003,
-                               11003, 11003, 11003, 11003 };
-static int16x8_t cospi18_v = { 10394, 10394, 10394, 10394,
-                               10394, 10394, 10394, 10394 };
-static int16x8_t cospi19_v = { 9760, 9760, 9760, 9760, 9760, 9760, 9760, 9760 };
-static int16x8_t cospi20_v = { 9102, 9102, 9102, 9102, 9102, 9102, 9102, 9102 };
-static int16x8_t cospi20m_v = { -9102, -9102, -9102, -9102,
-                                -9102, -9102, -9102, -9102 };
-static int16x8_t cospi21_v = { 8423, 8423, 8423, 8423, 8423, 8423, 8423, 8423 };
-static int16x8_t cospi22_v = { 7723, 7723, 7723, 7723, 7723, 7723, 7723, 7723 };
-static int16x8_t cospi23_v = { 7005, 7005, 7005, 7005, 7005, 7005, 7005, 7005 };
-static int16x8_t cospi24_v = { 6270, 6270, 6270, 6270, 6270, 6270, 6270, 6270 };
-static int16x8_t cospi24_mv = { -6270, -6270, -6270, -6270,
-                                -6270, -6270, -6270, -6270 };
-static int16x8_t cospi25_v = { 5520, 5520, 5520, 5520, 5520, 5520, 5520, 5520 };
-static int16x8_t cospi26_v = { 4756, 4756, 4756, 4756, 4756, 4756, 4756, 4756 };
-static int16x8_t cospi27_v = { 3981, 3981, 3981, 3981, 3981, 3981, 3981, 3981 };
-static int16x8_t cospi28_v = { 3196, 3196, 3196, 3196, 3196, 3196, 3196, 3196 };
-static int16x8_t cospi29_v = { 2404, 2404, 2404, 2404, 2404, 2404, 2404, 2404 };
-static int16x8_t cospi30_v = { 1606, 1606, 1606, 1606, 1606, 1606, 1606, 1606 };
-static int16x8_t cospi31_v = { 804, 804, 804, 804, 804, 804, 804, 804 };
+static const int16x8_t cospi1_v = { 16364, 16364, 16364, 16364,
+                                    16364, 16364, 16364, 16364 };
+static const int16x8_t cospi2_v = { 16305, 16305, 16305, 16305,
+                                    16305, 16305, 16305, 16305 };
+static const int16x8_t cospi2m_v = { -16305, -16305, -16305, -16305,
+                                     -16305, -16305, -16305, -16305 };
+static const int16x8_t cospi3_v = { 16207, 16207, 16207, 16207,
+                                    16207, 16207, 16207, 16207 };
+static const int16x8_t cospi4_v = { 16069, 16069, 16069, 16069,
+                                    16069, 16069, 16069, 16069 };
+static const int16x8_t cospi4m_v = { -16069, -16069, -16069, -16069,
+                                     -16069, -16069, -16069, -16069 };
+static const int16x8_t cospi5_v = { 15893, 15893, 15893, 15893,
+                                    15893, 15893, 15893, 15893 };
+static const int16x8_t cospi6_v = { 15679, 15679, 15679, 15679,
+                                    15679, 15679, 15679, 15679 };
+static const int16x8_t cospi7_v = { 15426, 15426, 15426, 15426,
+                                    15426, 15426, 15426, 15426 };
+static const int16x8_t cospi8_v = { 15137, 15137, 15137, 15137,
+                                    15137, 15137, 15137, 15137 };
+static const int16x8_t cospi8m_v = { -15137, -15137, -15137, -15137,
+                                     -15137, -15137, -15137, -15137 };
+static const int16x8_t cospi9_v = { 14811, 14811, 14811, 14811,
+                                    14811, 14811, 14811, 14811 };
+static const int16x8_t cospi10_v = { 14449, 14449, 14449, 14449,
+                                     14449, 14449, 14449, 14449 };
+static const int16x8_t cospi10m_v = { -14449, -14449, -14449, -14449,
+                                      -14449, -14449, -14449, -14449 };
+static const int16x8_t cospi11_v = { 14053, 14053, 14053, 14053,
+                                     14053, 14053, 14053, 14053 };
+static const int16x8_t cospi12_v = { 13623, 13623, 13623, 13623,
+                                     13623, 13623, 13623, 13623 };
+static const int16x8_t cospi13_v = { 13160, 13160, 13160, 13160,
+                                     13160, 13160, 13160, 13160 };
+static const int16x8_t cospi14_v = { 12665, 12665, 12665, 12665,
+                                     12665, 12665, 12665, 12665 };
+static const int16x8_t cospi15_v = { 12140, 12140, 12140, 12140,
+                                     12140, 12140, 12140, 12140 };
+static const int16x8_t cospi16_v = { 11585, 11585, 11585, 11585,
+                                     11585, 11585, 11585, 11585 };
+static const int16x8_t cospi17_v = { 11003, 11003, 11003, 11003,
+                                     11003, 11003, 11003, 11003 };
+static const int16x8_t cospi18_v = { 10394, 10394, 10394, 10394,
+                                     10394, 10394, 10394, 10394 };
+static const int16x8_t cospi18m_v = { -10394, -10394, -10394, -10394,
+                                      -10394, -10394, -10394, -10394 };
+static const int16x8_t cospi19_v = { 9760, 9760, 9760, 9760,
+                                     9760, 9760, 9760, 9760 };
+static const int16x8_t cospi20_v = { 9102, 9102, 9102, 9102,
+                                     9102, 9102, 9102, 9102 };
+static const int16x8_t cospi20m_v = { -9102, -9102, -9102, -9102,
+                                      -9102, -9102, -9102, -9102 };
+static const int16x8_t cospi16m_v = { -11585, -11585, -11585, -11585,
+                                      -11585, -11585, -11585, -11585 };
+static const int16x8_t cospi21_v = { 8423, 8423, 8423, 8423,
+                                     8423, 8423, 8423, 8423 };
+static const int16x8_t cospi22_v = { 7723, 7723, 7723, 7723,
+                                     7723, 7723, 7723, 7723 };
+static const int16x8_t cospi23_v = { 7005, 7005, 7005, 7005,
+                                     7005, 7005, 7005, 7005 };
+static const int16x8_t cospi24_v = { 6270, 6270, 6270, 6270,
+                                     6270, 6270, 6270, 6270 };
+static const int16x8_t cospi24m_v = { -6270, -6270, -6270, -6270,
+                                      -6270, -6270, -6270, -6270 };
+static const int16x8_t cospi25_v = { 5520, 5520, 5520, 5520,
+                                     5520, 5520, 5520, 5520 };
+static const int16x8_t cospi26_v = { 4756, 4756, 4756, 4756,
+                                     4756, 4756, 4756, 4756 };
+static const int16x8_t cospi26m_v = { -4756, -4756, -4756, -4756,
+                                      -4756, -4756, -4756, -4756 };
+static const int16x8_t cospi27_v = { 3981, 3981, 3981, 3981,
+                                     3981, 3981, 3981, 3981 };
+static const int16x8_t cospi28_v = { 3196, 3196, 3196, 3196,
+                                     3196, 3196, 3196, 3196 };
+static const int16x8_t cospi29_v = { 2404, 2404, 2404, 2404,
+                                     2404, 2404, 2404, 2404 };
+static const int16x8_t cospi30_v = { 1606, 1606, 1606, 1606,
+                                     1606, 1606, 1606, 1606 };
+static const int16x8_t cospi31_v = { 804, 804, 804, 804, 804, 804, 804, 804 };
 
 static const int16x8_t sinpi_1_9_v = { 5283, 5283, 5283, 5283,
                                        5283, 5283, 5283, 5283 };
@@ -86,9 +108,14 @@ static const int16x8_t sinpi_3_9_v = { 13377, 13377, 13377, 13377,
 static const int16x8_t sinpi_4_9_v = { 15212, 15212, 15212, 15212,
                                        15212, 15212, 15212, 15212 };
 
-static const uint8x16_t mask1 = {
+static uint8x16_t tr8_mask0 = {
   0x0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,
   0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17
+};
+
+static uint8x16_t tr8_mask1 = {
+  0x8,  0x9,  0xA,  0xB,  0xC,  0xD,  0xE,  0xF,
+  0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
 };
 
 #define ROUND_SHIFT_INIT                                               \
@@ -122,13 +149,13 @@ static const uint8x16_t mask1 = {
   out1 = vec_sub(step0, step1);                                               \
   out1 = vec_perm(out1, out1, mask0);
 
-#define PACK_STORE(v0, v1)                            \
-  tmp16_0 = vec_add(vec_perm(d_u0, d_u1, mask1), v0); \
-  tmp16_1 = vec_add(vec_perm(d_u2, d_u3, mask1), v1); \
-  output_v = vec_packsu(tmp16_0, tmp16_1);            \
-                                                      \
-  vec_vsx_st(output_v, 0, tmp_dest);                  \
-  for (i = 0; i < 4; i++)                             \
+#define PACK_STORE(v0, v1)                                \
+  tmp16_0 = vec_add(vec_perm(d_u0, d_u1, tr8_mask0), v0); \
+  tmp16_1 = vec_add(vec_perm(d_u2, d_u3, tr8_mask0), v1); \
+  output_v = vec_packsu(tmp16_0, tmp16_1);                \
+                                                          \
+  vec_vsx_st(output_v, 0, tmp_dest);                      \
+  for (i = 0; i < 4; i++)                                 \
     for (j = 0; j < 4; j++) dest[j * stride + i] = tmp_dest[j * 4 + i];
 
 void vpx_round_store4x4_vsx(int16x8_t *in, int16x8_t *out, uint8_t *dest,
@@ -283,28 +310,20 @@ void vpx_idct4x4_16_add_vsx(const tran_low_t *input, uint8_t *dest,
 #define PIXEL_ADD(in, out, add, shiftx) \
   out = vec_add(vec_sra(vec_add(in, add), shiftx), out);
 
-static uint8x16_t tr8_mask0 = {
-  0x0,  0x1,  0x2,  0x3,  0x4,  0x5,  0x6,  0x7,
-  0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17
-};
-static uint8x16_t tr8_mask1 = {
-  0x8,  0x9,  0xA,  0xB,  0xC,  0xD,  0xE,  0xF,
-  0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
-};
-void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
-                            int stride) {
-  int32x4_t temp10, temp11;
+void vpx_idct8_vsx(int16x8_t *in, int16x8_t *out) {
   int16x8_t step0, step1, step2, step3, step4, step5, step6, step7;
-  int16x8_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp16_0, tmp16_1,
-      tmp16_2, tmp16_3;
-  int16x8_t src0 = load_tran_low(0, input);
-  int16x8_t src1 = load_tran_low(8 * sizeof(*input), input);
-  int16x8_t src2 = load_tran_low(16 * sizeof(*input), input);
-  int16x8_t src3 = load_tran_low(24 * sizeof(*input), input);
-  int16x8_t src4 = load_tran_low(32 * sizeof(*input), input);
-  int16x8_t src5 = load_tran_low(40 * sizeof(*input), input);
-  int16x8_t src6 = load_tran_low(48 * sizeof(*input), input);
-  int16x8_t src7 = load_tran_low(56 * sizeof(*input), input);
+  int16x8_t tmp16_0, tmp16_1, tmp16_2, tmp16_3;
+  int32x4_t temp10, temp11;
+  ROUND_SHIFT_INIT;
+
+  TRANSPOSE8x8(in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7], out[0],
+               out[1], out[2], out[3], out[4], out[5], out[6], out[7]);
+
+  IDCT8(out[0], out[1], out[2], out[3], out[4], out[5], out[6], out[7]);
+}
+
+void vpx_round_store8x8_vsx(int16x8_t *in, uint8_t *dest, int stride) {
+  uint8x16_t zerov = vec_splat_u8(0);
   uint8x16_t dest0 = vec_vsx_ld(0, dest);
   uint8x16_t dest1 = vec_vsx_ld(stride, dest);
   uint8x16_t dest2 = vec_vsx_ld(2 * stride, dest);
@@ -313,7 +332,6 @@ void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
   uint8x16_t dest5 = vec_vsx_ld(5 * stride, dest);
   uint8x16_t dest6 = vec_vsx_ld(6 * stride, dest);
   uint8x16_t dest7 = vec_vsx_ld(7 * stride, dest);
-  uint8x16_t zerov = vec_splat_u8(0);
   int16x8_t d_u0 = (int16x8_t)vec_mergeh(dest0, zerov);
   int16x8_t d_u1 = (int16x8_t)vec_mergeh(dest1, zerov);
   int16x8_t d_u2 = (int16x8_t)vec_mergeh(dest2, zerov);
@@ -325,23 +343,15 @@ void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
   int16x8_t add = vec_sl(vec_splat_s16(8), vec_splat_u16(1));
   uint16x8_t shift5 = vec_splat_u16(5);
   uint8x16_t output0, output1, output2, output3;
-  ROUND_SHIFT_INIT;
 
-  TRANSPOSE8x8(src0, src1, src2, src3, src4, src5, src6, src7, tmp0, tmp1, tmp2,
-               tmp3, tmp4, tmp5, tmp6, tmp7);
-
-  IDCT8(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7);
-  TRANSPOSE8x8(tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, src0, src1, src2,
-               src3, src4, src5, src6, src7);
-  IDCT8(src0, src1, src2, src3, src4, src5, src6, src7);
-  PIXEL_ADD(src0, d_u0, add, shift5);
-  PIXEL_ADD(src1, d_u1, add, shift5);
-  PIXEL_ADD(src2, d_u2, add, shift5);
-  PIXEL_ADD(src3, d_u3, add, shift5);
-  PIXEL_ADD(src4, d_u4, add, shift5);
-  PIXEL_ADD(src5, d_u5, add, shift5);
-  PIXEL_ADD(src6, d_u6, add, shift5);
-  PIXEL_ADD(src7, d_u7, add, shift5);
+  PIXEL_ADD(in[0], d_u0, add, shift5);
+  PIXEL_ADD(in[1], d_u1, add, shift5);
+  PIXEL_ADD(in[2], d_u2, add, shift5);
+  PIXEL_ADD(in[3], d_u3, add, shift5);
+  PIXEL_ADD(in[4], d_u4, add, shift5);
+  PIXEL_ADD(in[5], d_u5, add, shift5);
+  PIXEL_ADD(in[6], d_u6, add, shift5);
+  PIXEL_ADD(in[7], d_u7, add, shift5);
   output0 = vec_packsu(d_u0, d_u1);
   output1 = vec_packsu(d_u2, d_u3);
   output2 = vec_packsu(d_u4, d_u5);
@@ -355,6 +365,25 @@ void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
   vec_vsx_st(xxpermdi(output2, dest5, 3), 5 * stride, dest);
   vec_vsx_st(xxpermdi(output3, dest6, 1), 6 * stride, dest);
   vec_vsx_st(xxpermdi(output3, dest7, 3), 7 * stride, dest);
+}
+
+void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
+                            int stride) {
+  int16x8_t src[8], tmp[8];
+
+  src[0] = load_tran_low(0, input);
+  src[1] = load_tran_low(8 * sizeof(*input), input);
+  src[2] = load_tran_low(16 * sizeof(*input), input);
+  src[3] = load_tran_low(24 * sizeof(*input), input);
+  src[4] = load_tran_low(32 * sizeof(*input), input);
+  src[5] = load_tran_low(40 * sizeof(*input), input);
+  src[6] = load_tran_low(48 * sizeof(*input), input);
+  src[7] = load_tran_low(56 * sizeof(*input), input);
+
+  vpx_idct8_vsx(src, tmp);
+  vpx_idct8_vsx(tmp, src);
+
+  vpx_round_store8x8_vsx(src, dest, stride);
 }
 
 #define LOAD_INPUT16(load, source, offset, step, in0, in1, in2, in3, in4, in5, \
@@ -474,9 +503,9 @@ void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
   tmp16_0 = vec_mergeh(outA, outD);                                            \
   tmp16_1 = vec_mergel(outA, outD);                                            \
   temp10 =                                                                     \
-      vec_sub(vec_mule(tmp16_0, cospi24_mv), vec_mulo(tmp16_0, cospi8_v));     \
+      vec_sub(vec_mule(tmp16_0, cospi24m_v), vec_mulo(tmp16_0, cospi8_v));     \
   temp11 =                                                                     \
-      vec_sub(vec_mule(tmp16_1, cospi24_mv), vec_mulo(tmp16_1, cospi8_v));     \
+      vec_sub(vec_mule(tmp16_1, cospi24m_v), vec_mulo(tmp16_1, cospi8_v));     \
   DCT_CONST_ROUND_SHIFT(temp10);                                               \
   DCT_CONST_ROUND_SHIFT(temp11);                                               \
   inA = vec_packs(temp10, temp11);                                             \
@@ -1199,4 +1228,172 @@ void vp9_iadst4_vsx(int16x8_t *in, int16x8_t *out) {
 
   out[0] = vec_packs(u_v[0], u_v[1]);
   out[1] = vec_packs(u_v[2], u_v[3]);
+}
+
+#define MSUM_ROUND_SHIFT(a, b, cospi) \
+  b = vec_msums(a, cospi, zerov);     \
+  DCT_CONST_ROUND_SHIFT(b);
+
+#define IADST_WRAPLOW(in0, in1, tmp0, tmp1, out, cospi) \
+  MSUM_ROUND_SHIFT(in0, tmp0, cospi);                   \
+  MSUM_ROUND_SHIFT(in1, tmp1, cospi);                   \
+  out = vec_packs(tmp0, tmp1);
+
+void vp9_iadst8_vsx(int16x8_t *in, int16x8_t *out) {
+  int32x4_t tmp0[16], tmp1[16];
+
+  int32x4_t zerov = vec_splat_s32(0);
+  int16x8_t zero16v = vec_splat_s16(0);
+  int16x8_t cospi_p02_p30_v = vec_mergel(cospi2_v, cospi30_v);
+  int16x8_t cospi_p30_m02_v = vec_mergel(cospi30_v, cospi2m_v);
+  int16x8_t cospi_p10_p22_v = vec_mergel(cospi10_v, cospi22_v);
+  int16x8_t cospi_p22_m10_v = vec_mergel(cospi22_v, cospi10m_v);
+  int16x8_t cospi_p18_p14_v = vec_mergel(cospi18_v, cospi14_v);
+  int16x8_t cospi_p14_m18_v = vec_mergel(cospi14_v, cospi18m_v);
+  int16x8_t cospi_p26_p06_v = vec_mergel(cospi26_v, cospi6_v);
+  int16x8_t cospi_p06_m26_v = vec_mergel(cospi6_v, cospi26m_v);
+  int16x8_t cospi_p08_p24_v = vec_mergel(cospi8_v, cospi24_v);
+  int16x8_t cospi_p24_m08_v = vec_mergel(cospi24_v, cospi8m_v);
+  int16x8_t cospi_m24_p08_v = vec_mergel(cospi24m_v, cospi8_v);
+  int16x8_t cospi_p16_m16_v = vec_mergel(cospi16_v, cospi16m_v);
+  ROUND_SHIFT_INIT;
+
+  TRANSPOSE8x8(in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7], out[0],
+               out[1], out[2], out[3], out[4], out[5], out[6], out[7]);
+
+  // stage 1
+  // interleave and multiply/add into 32-bit integer
+  in[0] = vec_mergeh(out[7], out[0]);
+  in[1] = vec_mergel(out[7], out[0]);
+  in[2] = vec_mergeh(out[5], out[2]);
+  in[3] = vec_mergel(out[5], out[2]);
+  in[4] = vec_mergeh(out[3], out[4]);
+  in[5] = vec_mergel(out[3], out[4]);
+  in[6] = vec_mergeh(out[1], out[6]);
+  in[7] = vec_mergel(out[1], out[6]);
+
+  tmp1[0] = vec_msum(in[0], cospi_p02_p30_v, zerov);
+  tmp1[1] = vec_msum(in[1], cospi_p02_p30_v, zerov);
+  tmp1[2] = vec_msum(in[0], cospi_p30_m02_v, zerov);
+  tmp1[3] = vec_msum(in[1], cospi_p30_m02_v, zerov);
+  tmp1[4] = vec_msum(in[2], cospi_p10_p22_v, zerov);
+  tmp1[5] = vec_msum(in[3], cospi_p10_p22_v, zerov);
+  tmp1[6] = vec_msum(in[2], cospi_p22_m10_v, zerov);
+  tmp1[7] = vec_msum(in[3], cospi_p22_m10_v, zerov);
+  tmp1[8] = vec_msum(in[4], cospi_p18_p14_v, zerov);
+  tmp1[9] = vec_msum(in[5], cospi_p18_p14_v, zerov);
+  tmp1[10] = vec_msum(in[4], cospi_p14_m18_v, zerov);
+  tmp1[11] = vec_msum(in[5], cospi_p14_m18_v, zerov);
+  tmp1[12] = vec_msum(in[6], cospi_p26_p06_v, zerov);
+  tmp1[13] = vec_msum(in[7], cospi_p26_p06_v, zerov);
+  tmp1[14] = vec_msum(in[6], cospi_p06_m26_v, zerov);
+  tmp1[15] = vec_msum(in[7], cospi_p06_m26_v, zerov);
+
+  tmp0[0] = vec_add(tmp1[0], tmp1[8]);
+  tmp0[1] = vec_add(tmp1[1], tmp1[9]);
+  tmp0[2] = vec_add(tmp1[2], tmp1[10]);
+  tmp0[3] = vec_add(tmp1[3], tmp1[11]);
+  tmp0[4] = vec_add(tmp1[4], tmp1[12]);
+  tmp0[5] = vec_add(tmp1[5], tmp1[13]);
+  tmp0[6] = vec_add(tmp1[6], tmp1[14]);
+  tmp0[7] = vec_add(tmp1[7], tmp1[15]);
+  tmp0[8] = vec_sub(tmp1[0], tmp1[8]);
+  tmp0[9] = vec_sub(tmp1[1], tmp1[9]);
+  tmp0[10] = vec_sub(tmp1[2], tmp1[10]);
+  tmp0[11] = vec_sub(tmp1[3], tmp1[11]);
+  tmp0[12] = vec_sub(tmp1[4], tmp1[12]);
+  tmp0[13] = vec_sub(tmp1[5], tmp1[13]);
+  tmp0[14] = vec_sub(tmp1[6], tmp1[14]);
+  tmp0[15] = vec_sub(tmp1[7], tmp1[15]);
+
+  // shift and rounding
+  DCT_CONST_ROUND_SHIFT(tmp0[0]);
+  DCT_CONST_ROUND_SHIFT(tmp0[1]);
+  DCT_CONST_ROUND_SHIFT(tmp0[2]);
+  DCT_CONST_ROUND_SHIFT(tmp0[3]);
+  DCT_CONST_ROUND_SHIFT(tmp0[4]);
+  DCT_CONST_ROUND_SHIFT(tmp0[5]);
+  DCT_CONST_ROUND_SHIFT(tmp0[6]);
+  DCT_CONST_ROUND_SHIFT(tmp0[7]);
+  DCT_CONST_ROUND_SHIFT(tmp0[8]);
+  DCT_CONST_ROUND_SHIFT(tmp0[9]);
+  DCT_CONST_ROUND_SHIFT(tmp0[10]);
+  DCT_CONST_ROUND_SHIFT(tmp0[11]);
+  DCT_CONST_ROUND_SHIFT(tmp0[12]);
+  DCT_CONST_ROUND_SHIFT(tmp0[13]);
+  DCT_CONST_ROUND_SHIFT(tmp0[14]);
+  DCT_CONST_ROUND_SHIFT(tmp0[15]);
+
+  // back to 16-bit
+  out[0] = vec_packs(tmp0[0], tmp0[1]);
+  out[1] = vec_packs(tmp0[2], tmp0[3]);
+  out[2] = vec_packs(tmp0[4], tmp0[5]);
+  out[3] = vec_packs(tmp0[6], tmp0[7]);
+  out[4] = vec_packs(tmp0[8], tmp0[9]);
+  out[5] = vec_packs(tmp0[10], tmp0[11]);
+  out[6] = vec_packs(tmp0[12], tmp0[13]);
+  out[7] = vec_packs(tmp0[14], tmp0[15]);
+
+  // stage 2
+  in[0] = vec_add(out[0], out[2]);
+  in[1] = vec_add(out[1], out[3]);
+  in[2] = vec_sub(out[0], out[2]);
+  in[3] = vec_sub(out[1], out[3]);
+  in[4] = vec_mergeh(out[4], out[5]);
+  in[5] = vec_mergel(out[4], out[5]);
+  in[6] = vec_mergeh(out[6], out[7]);
+  in[7] = vec_mergel(out[6], out[7]);
+
+  tmp1[0] = vec_msum(in[4], cospi_p08_p24_v, zerov);
+  tmp1[1] = vec_msum(in[5], cospi_p08_p24_v, zerov);
+  tmp1[2] = vec_msum(in[4], cospi_p24_m08_v, zerov);
+  tmp1[3] = vec_msum(in[5], cospi_p24_m08_v, zerov);
+  tmp1[4] = vec_msum(in[6], cospi_m24_p08_v, zerov);
+  tmp1[5] = vec_msum(in[7], cospi_m24_p08_v, zerov);
+  tmp1[6] = vec_msum(in[6], cospi_p08_p24_v, zerov);
+  tmp1[7] = vec_msum(in[7], cospi_p08_p24_v, zerov);
+
+  tmp0[0] = vec_add(tmp1[0], tmp1[4]);
+  tmp0[1] = vec_add(tmp1[1], tmp1[5]);
+  tmp0[2] = vec_add(tmp1[2], tmp1[6]);
+  tmp0[3] = vec_add(tmp1[3], tmp1[7]);
+  tmp0[4] = vec_sub(tmp1[0], tmp1[4]);
+  tmp0[5] = vec_sub(tmp1[1], tmp1[5]);
+  tmp0[6] = vec_sub(tmp1[2], tmp1[6]);
+  tmp0[7] = vec_sub(tmp1[3], tmp1[7]);
+
+  DCT_CONST_ROUND_SHIFT(tmp0[0]);
+  DCT_CONST_ROUND_SHIFT(tmp0[1]);
+  DCT_CONST_ROUND_SHIFT(tmp0[2]);
+  DCT_CONST_ROUND_SHIFT(tmp0[3]);
+  DCT_CONST_ROUND_SHIFT(tmp0[4]);
+  DCT_CONST_ROUND_SHIFT(tmp0[5]);
+  DCT_CONST_ROUND_SHIFT(tmp0[6]);
+  DCT_CONST_ROUND_SHIFT(tmp0[7]);
+
+  in[4] = vec_packs(tmp0[0], tmp0[1]);
+  in[5] = vec_packs(tmp0[2], tmp0[3]);
+  in[6] = vec_packs(tmp0[4], tmp0[5]);
+  in[7] = vec_packs(tmp0[6], tmp0[7]);
+
+  // stage 3
+  out[0] = vec_mergeh(in[2], in[3]);
+  out[1] = vec_mergel(in[2], in[3]);
+  out[2] = vec_mergeh(in[6], in[7]);
+  out[3] = vec_mergel(in[6], in[7]);
+
+  IADST_WRAPLOW(out[0], out[1], tmp0[0], tmp0[1], in[2], cospi16_v);
+  IADST_WRAPLOW(out[0], out[1], tmp0[0], tmp0[1], in[3], cospi_p16_m16_v);
+  IADST_WRAPLOW(out[2], out[3], tmp0[0], tmp0[1], in[6], cospi16_v);
+  IADST_WRAPLOW(out[2], out[3], tmp0[0], tmp0[1], in[7], cospi_p16_m16_v);
+
+  out[0] = in[0];
+  out[2] = in[6];
+  out[4] = in[3];
+  out[6] = in[5];
+
+  out[1] = vec_sub(zero16v, in[4]);
+  out[3] = vec_sub(zero16v, in[2]);
+  out[5] = vec_sub(zero16v, in[7]);
+  out[7] = vec_sub(zero16v, in[1]);
 }

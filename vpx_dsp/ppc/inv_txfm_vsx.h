@@ -4,3 +4,7 @@ void vpx_round_store4x4_vsx(int16x8_t *in, int16x8_t *out, uint8_t *dest,
                             int stride);
 void vpx_idct4_vsx(int16x8_t *in, int16x8_t *out);
 void vp9_iadst4_vsx(int16x8_t *in, int16x8_t *out);
+
+void vpx_round_store8x8_vsx(int16x8_t *in, uint8_t *dest, int stride);
+void vpx_idct8_vsx(int16x8_t *in, int16x8_t *out);
+void vp9_iadst8_vsx(int16x8_t *in, int16x8_t *out);
