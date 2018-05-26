@@ -2345,6 +2345,8 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
     cpi->tpl_stats[frame].width = mi_cols;
     cpi->tpl_stats[frame].height = mi_rows;
     cpi->tpl_stats[frame].stride = mi_cols;
+    cpi->tpl_stats[frame].mi_rows = cm->mi_rows;
+    cpi->tpl_stats[frame].mi_cols = cm->mi_cols;
   }
 
   vp9_set_speed_features_framesize_independent(cpi);
@@ -5380,6 +5382,75 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   return bestsme;
 }
 
+int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
+                     int ref_pos_col, int block) {
+  int overlap_area;
+  int width = 0, height = 0;
+  switch (block) {
+    case 0:
+      width = grid_pos_col + MI_SIZE - ref_pos_col;
+      height = grid_pos_row + MI_SIZE - ref_pos_row;
+      break;
+    case 1:
+      width = ref_pos_col + MI_SIZE - grid_pos_col;
+      height = grid_pos_row + MI_SIZE - ref_pos_row;
+      break;
+    case 2:
+      width = grid_pos_col + MI_SIZE - ref_pos_col;
+      height = ref_pos_row + MI_SIZE - grid_pos_row;
+      break;
+    case 3:
+      width = ref_pos_col + MI_SIZE - grid_pos_col;
+      height = ref_pos_row + MI_SIZE - grid_pos_row;
+      break;
+    default: assert(0);
+  }
+
+  return overlap_area = width * height;
+}
+
+void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
+                      int mi_row, int mi_col) {
+  TplDepFrame *ref_tpl_frame = &tpl_frame[tpl_stats->ref_frame_index];
+  TplDepStats *ref_stats = ref_tpl_frame->tpl_stats_ptr;
+  MV mv = tpl_stats->mv.as_mv;
+  int mv_row = mv.row >> 3;
+  int mv_col = mv.col >> 3;
+
+  int ref_pos_row = mi_row * MI_SIZE + mv_row;
+  int ref_pos_col = mi_col * MI_SIZE + mv_col;
+
+  // top-left on grid block location
+  int grid_pos_row_base = (ref_pos_row >> MI_SIZE_LOG2) << MI_SIZE_LOG2;
+  int grid_pos_col_base = (ref_pos_col >> MI_SIZE_LOG2) << MI_SIZE_LOG2;
+  int block;
+
+  for (block = 0; block < 4; ++block) {
+    int grid_pos_row = grid_pos_row_base + MI_SIZE * (block >> 1);
+    int grid_pos_col = grid_pos_col_base + MI_SIZE * (block & 0x01);
+
+    if (grid_pos_row >= 0 && grid_pos_row < ref_tpl_frame->mi_rows * MI_SIZE &&
+        grid_pos_col >= 0 && grid_pos_col < ref_tpl_frame->mi_cols * MI_SIZE) {
+      int overlap_area = get_overlap_area(grid_pos_row, grid_pos_col,
+                                          ref_pos_row, ref_pos_col, block);
+      int ref_mi_row = grid_pos_row >> MI_SIZE_LOG2;
+      int ref_mi_col = grid_pos_col >> MI_SIZE_LOG2;
+
+      int64_t mc_flow = tpl_stats->mc_dep_cost -
+                        (tpl_stats->mc_dep_cost * tpl_stats->inter_cost) /
+                            tpl_stats->intra_cost;
+
+      ref_stats[ref_mi_row * ref_tpl_frame->stride + ref_mi_col].mc_flow +=
+          (mc_flow * overlap_area) >> (MI_SIZE_LOG2 * 2);
+
+      ref_stats[ref_mi_row * ref_tpl_frame->stride + ref_mi_col].mc_ref_cost +=
+          ((tpl_stats->intra_cost - tpl_stats->inter_cost) * overlap_area) >>
+          (MI_SIZE_LOG2 * 2);
+      assert(overlap_area >= 0);
+    }
+  }
+}
+
 void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
@@ -5441,6 +5512,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   set_error_per_bit(&cpi->td.mb, rdmult);
   vp9_initialize_me_consts(cpi, &cpi->td.mb, ARNR_FILT_QINDEX);
 
+  tpl_frame->is_valid = 1;
   for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
     // Motion estimation row boundary
     x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
@@ -5458,6 +5530,10 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
       int64_t best_intra_cost = INT64_MAX;
       int64_t intra_cost;
       PREDICTION_MODE mode;
+
+      TplDepStats *tpl_stats =
+          &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+
       // Intra prediction search
       for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
         uint8_t *src, *dst;
@@ -5558,6 +5634,15 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
       }
 
       // Motion flow dependency dispenser.
+      best_intra_cost = VPXMAX(best_intra_cost, 1);
+      best_inter_cost = VPXMIN(best_inter_cost, best_intra_cost);
+      tpl_stats->inter_cost = best_inter_cost << TPL_DEP_COST_SCALE_LOG2;
+      tpl_stats->intra_cost = best_intra_cost << TPL_DEP_COST_SCALE_LOG2;
+      tpl_stats->mc_dep_cost = tpl_stats->intra_cost + tpl_stats->mc_flow;
+      tpl_stats->ref_frame_index = gf_picture[frame_idx].ref_frame[best_rf_idx];
+      tpl_stats->mv.as_int = best_mv.as_int;
+
+      tpl_model_update(cpi->tpl_stats, tpl_stats, mi_row, mi_col);
       (void)best_mv;
       (void)best_rf_idx;
     }
