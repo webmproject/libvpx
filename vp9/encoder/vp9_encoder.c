@@ -3612,8 +3612,8 @@ static void save_encode_params(VP9_COMP *cpi) {
 }
 #endif
 
-static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
-                                       uint8_t *dest) {
+static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
+                                      uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
   int q = 0, bottom_index = 0, top_index = 0;  // Dummy variables.
   const INTERP_FILTER filter_scaler =
@@ -3730,6 +3730,17 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   if (cpi->svc.spatial_layer_id == 0)
     cpi->svc.high_source_sad_superframe = cpi->rc.high_source_sad;
 
+  // For 1 pass CBR, check if we are dropping this frame.
+  // Never drop on key frame, or if base layer is key for svc.
+  // Don't drop on scene change.
+  if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
+      cm->frame_type != KEY_FRAME && !cpi->rc.high_source_sad &&
+      !cpi->svc.high_source_sad_superframe &&
+      (!cpi->use_svc ||
+       !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
+    if (vp9_rc_drop_frame(cpi)) return 0;
+  }
+
   // For 1 pass CBR SVC, only ZEROMV is allowed for spatial reference frame
   // when svc->force_zero_mode_spatial_ref = 1. Under those conditions we can
   // avoid this frame-level upsampling (for non intra_only frames).
@@ -3836,6 +3847,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // seen in the last encoder iteration.
   // update_base_skip_probs(cpi);
   vpx_clear_system_state();
+  return 1;
 }
 
 #define MAX_QSTEP_ADJ 4
@@ -4589,57 +4601,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     }
   }
 
-  // For 1 pass CBR, check if we are dropping this frame.
-  // Never drop on key frame, or if base layer is key for svc.
-  if (oxcf->pass == 0 && oxcf->rc_mode == VPX_CBR &&
-      cm->frame_type != KEY_FRAME &&
-      (!cpi->use_svc ||
-       !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
-    SVC *svc = &cpi->svc;
-    int svc_prev_layer_dropped = 0;
-    // In the constrained or full_superframe framedrop mode for svc
-    // (framedrop_mode !=  LAYER_DROP), if the previous spatial layer was
-    // dropped, drop the current spatial layer.
-    if (cpi->use_svc && svc->spatial_layer_id > 0 &&
-        svc->drop_spatial_layer[svc->spatial_layer_id - 1])
-      svc_prev_layer_dropped = 1;
-    if ((svc_prev_layer_dropped && svc->framedrop_mode != LAYER_DROP) ||
-        vp9_rc_drop_frame(cpi)) {
-      vp9_rc_postencode_update_drop_frame(cpi);
-      cpi->ext_refresh_frame_flags_pending = 0;
-      cpi->last_frame_dropped = 1;
-      if (cpi->use_svc) {
-        svc->last_layer_dropped[svc->spatial_layer_id] = 1;
-        svc->drop_spatial_layer[svc->spatial_layer_id] = 1;
-        svc->drop_count[svc->spatial_layer_id]++;
-        svc->skip_enhancement_layer = 1;
-        if (svc->framedrop_mode == LAYER_DROP ||
-            svc->drop_spatial_layer[0] == 0) {
-          // For the case of constrained drop mode where the base is dropped
-          // (drop_spatial_layer[0] == 1), which means full superframe dropped,
-          // we don't increment the svc frame counters. In particular temporal
-          // layer counter (which is incremented in vp9_inc_frame_in_layer())
-          // won't be incremented, so on a dropped frame we try the same
-          // temporal_layer_id on next incoming frame. This is to avoid an
-          // issue with temporal alignement with full superframe dropping.
-          vp9_inc_frame_in_layer(cpi);
-        }
-        if (svc->spatial_layer_id == svc->number_spatial_layers - 1) {
-          int i;
-          int all_layers_drop = 1;
-          for (i = 0; i < svc->spatial_layer_id; i++) {
-            if (svc->drop_spatial_layer[i] == 0) {
-              all_layers_drop = 0;
-              break;
-            }
-          }
-          if (all_layers_drop == 1) svc->skip_enhancement_layer = 0;
-        }
-      }
-      return;
-    }
-  }
-
   vpx_clear_system_state();
 
 #if CONFIG_INTERNAL_STATS
@@ -4652,7 +4613,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 #endif
 
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {
-    encode_without_recode_loop(cpi, size, dest);
+    if (!encode_without_recode_loop(cpi, size, dest)) return;
   } else {
     encode_with_recode_loop(cpi, size, dest);
   }
