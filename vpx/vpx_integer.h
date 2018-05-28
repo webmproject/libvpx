@@ -18,7 +18,7 @@
 #define VPX_FORCE_INLINE __forceinline
 #define VPX_INLINE __inline
 #else
-#define VPX_FORCE_INLINE __inline__ __attribute__(always_inline)
+#define VPX_FORCE_INLINE __inline__ __attribute__((always_inline))
 // TODO(jbb): Allow a way to force inline off for older compilers.
 #define VPX_INLINE inline
 #endif
