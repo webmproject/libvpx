@@ -164,11 +164,21 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
 }
 
 class VpxMbPostProcAcrossIpTest
-    : public ::testing::TestWithParam<VpxMbPostProcAcrossIpFunc> {
+    : public AbstractBench,
+      public ::testing::TestWithParam<VpxMbPostProcAcrossIpFunc> {
  public:
+  VpxMbPostProcAcrossIpTest()
+      : rows(16), cols(16), mbPostProcAcrossIp(GetParam()),
+        src(Buffer<uint8_t>(rows, cols, 8, 8, 17, 8)) {}
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
+  const int rows;
+  const int cols;
+  const VpxMbPostProcAcrossIpFunc mbPostProcAcrossIp;
+  Buffer<uint8_t> src;
+  void run();
+
   void SetCols(unsigned char *s, int rows, int cols, int src_width) {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
@@ -197,11 +207,11 @@ class VpxMbPostProcAcrossIpTest
   }
 };
 
-TEST_P(VpxMbPostProcAcrossIpTest, CheckLowFilterOutput) {
-  const int rows = 16;
-  const int cols = 16;
+void VpxMbPostProcAcrossIpTest::run() {
+  mbPostProcAcrossIp(src.TopLeftPixel(), src.stride(), rows, cols, q2mbl(0));
+}
 
-  Buffer<uint8_t> src = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
+TEST_P(VpxMbPostProcAcrossIpTest, CheckLowFilterOutput) {
   ASSERT_TRUE(src.Init());
   src.SetPadding(10);
   SetCols(src.TopLeftPixel(), rows, cols, src.stride());
@@ -215,15 +225,11 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckLowFilterOutput) {
 }
 
 TEST_P(VpxMbPostProcAcrossIpTest, CheckMediumFilterOutput) {
-  const int rows = 16;
-  const int cols = 16;
-
-  Buffer<uint8_t> src = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
   ASSERT_TRUE(src.Init());
   src.SetPadding(10);
   SetCols(src.TopLeftPixel(), rows, cols, src.stride());
 
-  static const unsigned char kExpectedOutput[cols] = {
+  static const unsigned char kExpectedOutput[] = {
     2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 13
   };
 
@@ -232,15 +238,11 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckMediumFilterOutput) {
 }
 
 TEST_P(VpxMbPostProcAcrossIpTest, CheckHighFilterOutput) {
-  const int rows = 16;
-  const int cols = 16;
-
-  Buffer<uint8_t> src = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
   ASSERT_TRUE(src.Init());
   src.SetPadding(10);
   SetCols(src.TopLeftPixel(), rows, cols, src.stride());
 
-  static const unsigned char kExpectedOutput[cols] = {
+  static const unsigned char kExpectedOutput[] = {
     2, 2, 3, 4, 4, 5, 6, 7, 8, 9, 10, 11, 11, 12, 13, 13
   };
 
@@ -254,9 +256,6 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckHighFilterOutput) {
 }
 
 TEST_P(VpxMbPostProcAcrossIpTest, CheckCvsAssembly) {
-  const int rows = 16;
-  const int cols = 16;
-
   Buffer<uint8_t> c_mem = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
   ASSERT_TRUE(c_mem.Init());
   Buffer<uint8_t> asm_mem = Buffer<uint8_t>(cols, rows, 8, 8, 17, 8);
@@ -277,6 +276,16 @@ TEST_P(VpxMbPostProcAcrossIpTest, CheckCvsAssembly) {
 
     ASSERT_TRUE(asm_mem.CheckValues(c_mem));
   }
+}
+
+TEST_P(VpxMbPostProcAcrossIpTest, DISABLED_Speed) {
+  ASSERT_TRUE(src.Init());
+  src.SetPadding(10);
+
+  SetCols(src.TopLeftPixel(), rows, cols, src.stride());
+
+  runNTimes(100000);
+  printMedian("16x16");
 }
 
 class VpxMbPostProcDownTest
@@ -491,6 +500,10 @@ INSTANTIATE_TEST_CASE_P(MSA, VpxMbPostProcDownTest,
 #endif  // HAVE_MSA
 
 #if HAVE_VSX
+
+INSTANTIATE_TEST_CASE_P(VSX, VpxMbPostProcAcrossIpTest,
+                        ::testing::Values(vpx_mbpost_proc_across_ip_vsx));
+
 INSTANTIATE_TEST_CASE_P(VSX, VpxMbPostProcDownTest,
                         ::testing::Values(vpx_mbpost_proc_down_vsx));
 #endif  // HAVE_VSX
