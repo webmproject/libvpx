@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b7ce3008_39234e8d",
+        "filename": "tools/tiny_ssim.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2018-05-29T23:31:56Z",
+      "side": 1,
+      "message": "should this \"break\" be out side of if{}? Probably no difference in execution though.",
+      "range": {
+        "startLine": 128,
+        "startChar": 10,
+        "endLine": 128,
+        "endChar": 15
+      },
+      "revId": "8018cb937fd76c52e28d06ed2a8ec96396dcf86d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
