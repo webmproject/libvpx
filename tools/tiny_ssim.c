@@ -91,6 +91,7 @@ typedef struct input_file {
   int w;
   int h;
   int bit_depth;
+  int frame_size;
 } input_file_t;
 
 // Open a file and determine if its y4m or raw.  If y4m get the header.
@@ -119,10 +120,12 @@ static int open_input_file(const char *file_name, input_file_t *input, int w,
         fseek(input->file, 0, SEEK_SET);
         input->w = w;
         input->h = h;
-        if (bit_depth < 9)
-          input->buf = malloc(w * h * 3 / 2);
-        else
-          input->buf = malloc(w * h * 3);
+        // handle odd frame sizes
+        input->frame_size = w * h + ((w + 1) / 2 * (h + 1) / 2) * 2;
+        if (bit_depth > 8) {
+          input->frame_size *= 2;
+          input->buf = malloc(input->frame_size);
+        }
         break;
     }
   }
@@ -150,15 +153,15 @@ static size_t read_input_file(input_file_t *in, unsigned char **y,
       break;
     case RAW_YUV:
       if (bd < 9) {
-        r1 = fread(in->buf, in->w * in->h * 3 / 2, 1, in->file);
+        r1 = fread(in->buf, in->frame_size, 1, in->file);
         *y = in->buf;
         *u = in->buf + in->w * in->h;
-        *v = in->buf + 5 * in->w * in->h / 4;
+        *v = *u + (1 + in->w) / 2 * (1 + in->h) / 2;
       } else {
-        r1 = fread(in->buf, in->w * in->h * 3, 1, in->file);
+        r1 = fread(in->buf, in->frame_size, 1, in->file);
         *y = in->buf;
-        *u = in->buf + in->w * in->h / 2;
-        *v = *u + in->w * in->h / 2;
+        *u = in->buf + (in->w * in->h) * 2;
+        *v = *u + 2 * ((1 + in->w) / 2 * (1 + in->h) / 2);
       }
       break;
   }
@@ -325,7 +328,8 @@ static double highbd_ssim2(const uint8_t *img1, const uint8_t *img2,
 //    (n*sum(xi*xi)-sum(xi)*sum(xi)+n*sum(yi*yi)-sum(yi)*sum(yi)+n*n*c2))
 //
 // Replace c1 with n*n * c1 for the final step that leads to this code:
-// The final step scales by 12 bits so we don't lose precision in the constants.
+// The final step scales by 12 bits so we don't lose precision in the
+// constants.
 
 static double ssimv_similarity(const Ssimv *sv, int64_t n) {
   // Scale the constants by number of pixels.
@@ -628,9 +632,10 @@ int main(int argc, char *argv[]) {
     goto clean_up;
   }
 
-  // Number of frames to skip from file1.yuv for every frame used. Normal values
-  // 0, 1 and 3 correspond to TL2, TL1 and TL0 respectively for a 3TL encoding
-  // in mode 10. 7 would be reasonable for comparing TL0 of a 4-layer encoding.
+  // Number of frames to skip from file1.yuv for every frame used. Normal
+  // values 0, 1 and 3 correspond to TL2, TL1 and TL0 respectively for a 3TL
+  // encoding in mode 10. 7 would be reasonable for comparing TL0 of a 4-layer
+  // encoding.
   if (argc > 4) {
     sscanf(argv[4], "%d", &tl_skip);
     if (argc > 5) {
@@ -642,12 +647,6 @@ int main(int argc, char *argv[]) {
         goto clean_up;
       }
     }
-  }
-
-  if (w & 1 || h & 1) {
-    fprintf(stderr, "Invalid size %dx%d\n", w, h);
-    return_value = 1;
-    goto clean_up;
   }
 
   while (1) {
@@ -703,8 +702,10 @@ int main(int argc, char *argv[]) {
       psnrv = realloc(psnrv, allocated_frames * sizeof(*psnrv));
     }
     psnr_and_ssim(ssimy[n_frames], psnry[n_frames], y[0], y[1], w, h);
-    psnr_and_ssim(ssimu[n_frames], psnru[n_frames], u[0], u[1], w / 2, h / 2);
-    psnr_and_ssim(ssimv[n_frames], psnrv[n_frames], v[0], v[1], w / 2, h / 2);
+    psnr_and_ssim(ssimu[n_frames], psnru[n_frames], u[0], u[1], (w + 1) / 2,
+                  (h + 1) / 2);
+    psnr_and_ssim(ssimv[n_frames], psnrv[n_frames], v[0], v[1], (w + 1) / 2,
+                  (h + 1) / 2);
 
     n_frames++;
   }
