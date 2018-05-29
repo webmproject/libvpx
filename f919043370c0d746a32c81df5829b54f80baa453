@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6d788b61_0cb30add",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 16
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-29T13:28:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5766dd85_75aa7fc4",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 19
+      },
+      "revId": "f919043370c0d746a32c81df5829b54f80baa453",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f30e3484_7870445a",
         "filename": "test/bench.cc",
         "patchSetId": 16
@@ -69,6 +93,30 @@
       "revId": "f919043370c0d746a32c81df5829b54f80baa453",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b7e111d_1aea541f",
+        "filename": "test/bench.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-05-29T13:28:16Z",
+      "side": 1,
+      "message": "@Johann The reason I don\u0027t use the max distance is to be more robust to outliers. Think of the +/- more as a confidence interval rather than the full range(see https://en.wikipedia.org/wiki/Average_absolute_deviation).\n\n@David You are correct, I changed it a few times and forgot to update the commit message. For your 4.5,5,5.5 example, standard deviation would be 5.0+-0.4. So it\u0027s also not perfect. Your example illustrates why we use more than 3 values :)\n\nPeople might expect standard deviation more than mean absolute deviation from the median, but then again people might also expect the mean rather than the median. Standard deviation is better suited for the mean, whereas, mean absolute deviation fits better with the median.\n\nFor this patch, the +- indicates central tendency, and what we have right now works well. I don\u0027t want to spend too much time on this.",
+      "parentUuid": "f04066f4_680c951b",
+      "range": {
+        "startLine": 34,
+        "startChar": 4,
+        "endLine": 34,
+        "endChar": 7
+      },
+      "revId": "f919043370c0d746a32c81df5829b54f80baa453",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
