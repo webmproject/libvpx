@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dda646b2_38ba4fb8",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 737,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-05-29T23:18:07Z",
+      "side": 1,
+      "message": "remove this",
+      "range": {
+        "startLine": 737,
+        "startChar": 7,
+        "endLine": 737,
+        "endChar": 11
+      },
+      "revId": "5b4dc9a3ee66415b25f99e105ad36c87f38ba956",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
