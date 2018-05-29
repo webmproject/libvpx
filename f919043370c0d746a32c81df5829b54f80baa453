@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "5766dd85_75aa7fc4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 16
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1130011
+      },
+      "writtenOn": "2018-05-29T08:37:30Z",
+      "side": 1,
+      "message": "The current patchset reports the mean absolute deviation around the median.",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 19
+      },
+      "revId": "f919043370c0d746a32c81df5829b54f80baa453",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f30e3484_7870445a",
         "filename": "test/bench.cc",
         "patchSetId": 16
@@ -13,6 +36,30 @@
       "writtenOn": "2018-05-25T22:52:20Z",
       "side": 1,
       "message": "This looks like the cumulative difference but when I usually think about N +/- M (I didn\u0027t take statistics, so maybe my understanding is off) is that M is the maximum difference, not cumulative. So 4.5, 5, 5.5 would be 5 +/- 0.5 but the way I read this is it will be 5 +/- 1.0",
+      "range": {
+        "startLine": 34,
+        "startChar": 4,
+        "endLine": 34,
+        "endChar": 7
+      },
+      "revId": "f919043370c0d746a32c81df5829b54f80baa453",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f04066f4_680c951b",
+        "filename": "test/bench.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1130011
+      },
+      "writtenOn": "2018-05-29T08:37:30Z",
+      "side": 1,
+      "message": "Noting the division by VPX_BENCH_ROBUST_ITER below, it is the mean absolute deviation that will be reported.\nFor the (4.5, 5, 5.5) example, that is (.5 + 0 + .5) / 3, so 5.0±0.3 would be reported.",
+      "parentUuid": "f30e3484_7870445a",
       "range": {
         "startLine": 34,
         "startChar": 4,
