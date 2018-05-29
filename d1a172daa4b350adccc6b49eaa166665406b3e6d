@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6646bc16_9849e5e8",
+        "filename": "vp9/common/ppc/vp9_idct_intrin_vsx.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-29T18:41:10Z",
+      "side": 1,
+      "message": "For file names _intrin_ is used to distinguish between versions written in assembly and intrinsics when both are available (some build systems had problems with files with the same base name). If only one version exists it should be omitted (just vp9_idct_vsx.c)",
+      "range": {
+        "startLine": 2,
+        "startChar": 4,
+        "endLine": 2,
+        "endChar": 13
+      },
+      "revId": "d1a172daa4b350adccc6b49eaa166665406b3e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
