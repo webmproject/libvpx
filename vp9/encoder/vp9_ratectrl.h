@@ -34,14 +34,6 @@ extern "C" {
 
 #define FRAME_OVERHEAD_BITS 200
 
-// Threshold used to define a KF group as static (e.g. a slide show).
-// Essentially this means that no frame in the group has more than 1% of MBs
-// that are not marked as coded with 0,0 motion in the first pass.
-#define STATIC_KF_GROUP_THRESH 99
-
-// The maximum duration of a GF group that is static (for example a slide show).
-#define MAX_STATIC_GF_GROUP_LENGTH 25
-
 typedef enum {
   INTER_NORMAL = 0,
   INTER_HIGH = 1,
