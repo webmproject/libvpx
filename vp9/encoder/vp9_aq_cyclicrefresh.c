@@ -459,6 +459,15 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
       cr->rate_boost_fac = 13;
     }
   }
+  // For screen-content: keep rate_ratio_qdelta to 2.0 (segment#1 boost) and
+  // percent_refresh (refresh rate) to 10. But reduce rate boost for segment#2
+  // (rate_boost_fac = 10 disables segment#2).
+  // TODO(marpan): Consider increasing refresh rate after slide change.
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN) {
+    cr->percent_refresh = 10;
+    cr->rate_ratio_qdelta = 2.0;
+    cr->rate_boost_fac = 10;
+  }
   // Adjust some parameters for low resolutions.
   if (cm->width <= 352 && cm->height <= 288) {
     if (rc->avg_frame_bandwidth < 3000) {
@@ -588,4 +597,12 @@ void vp9_cyclic_refresh_reset_resize(VP9_COMP *const cpi) {
   cr->sb_index = 0;
   cpi->refresh_golden_frame = 1;
   cpi->refresh_alt_ref_frame = 1;
+}
+
+void vp9_cyclic_refresh_limit_q(CYCLIC_REFRESH *const cr, int prev_q, int *q) {
+  // For now apply hard limit to frame-level decrease in q, if the cyclic
+  // refresh is active (percent_refresh > 0).
+  if (cr->percent_refresh > 0 && prev_q - *q > 8) {
+    *q = prev_q - 8;
+  }
 }
