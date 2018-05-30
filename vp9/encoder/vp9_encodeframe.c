@@ -5235,7 +5235,11 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     ++td->counts->tx.tx_totals[get_uv_tx_size(mi, &xd->plane[1])];
     if (cm->seg.enabled && cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
       vp9_cyclic_refresh_update_sb_postencode(cpi, mi, mi_row, mi_col, bsize);
-    if (cpi->oxcf.pass == 0 && cpi->svc.temporal_layer_id == 0)
+    if (cpi->oxcf.pass == 0 && cpi->svc.temporal_layer_id == 0 &&
+        (!cpi->use_svc ||
+         (cpi->use_svc &&
+          !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame &&
+          cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)))
       update_zeromv_cnt(cpi, mi, mi_row, mi_col, bsize);
   }
 }
