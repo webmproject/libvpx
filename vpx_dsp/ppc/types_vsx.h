@@ -19,6 +19,7 @@ typedef vector signed short int16x8_t;
 typedef vector unsigned short uint16x8_t;
 typedef vector signed int int32x4_t;
 typedef vector unsigned int uint32x4_t;
+typedef vector bool char bool8x16_t;
 typedef vector bool short bool16x8_t;
 typedef vector bool int bool32x4_t;
 

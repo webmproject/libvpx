@@ -42,18 +42,36 @@ int q2mbl(int x) {
 }
 
 class VpxPostProcDownAndAcrossMbRowTest
-    : public ::testing::TestWithParam<VpxPostProcDownAndAcrossMbRowFunc> {
+    : public AbstractBench,
+      public ::testing::TestWithParam<VpxPostProcDownAndAcrossMbRowFunc> {
  public:
+  VpxPostProcDownAndAcrossMbRowTest() : mbPostProcDownAndAcross(GetParam()) {}
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
+
+ protected:
+  const VpxPostProcDownAndAcrossMbRowFunc mbPostProcDownAndAcross;
+  // Size of the underlying data block that will be filtered.
+  int block_width;
+  int block_height;
+  Buffer<uint8_t> *src_image;
+  Buffer<uint8_t> *dst_image;
+  uint8_t *flimits;
+  void run();
 };
+
+void VpxPostProcDownAndAcrossMbRowTest::run() {
+  mbPostProcDownAndAcross(src_image->TopLeftPixel(), dst_image->TopLeftPixel(),
+                          src_image->stride(), dst_image->stride(), block_width,
+                          flimits, 16);
+}
 
 // Test routine for the VPx post-processing function
 // vpx_post_proc_down_and_across_mb_row_c.
 
 TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckFilterOutput) {
   // Size of the underlying data block that will be filtered.
-  const int block_width = 16;
-  const int block_height = 16;
+  block_width = 16;
+  block_height = 16;
 
   // 5-tap filter needs 2 padding rows above and below the block in the input.
   Buffer<uint8_t> src_image = Buffer<uint8_t>(block_width, block_height, 2);
@@ -66,8 +84,7 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckFilterOutput) {
       Buffer<uint8_t>(block_width, block_height, 8, 16, 8, 8);
   ASSERT_TRUE(dst_image.Init());
 
-  uint8_t *const flimits =
-      reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width));
+  flimits = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width));
   (void)memset(flimits, 255, block_width);
 
   // Initialize pixels in the input:
@@ -79,13 +96,12 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckFilterOutput) {
   // Initialize pixels in the output to 99.
   dst_image.Set(99);
 
-  ASM_REGISTER_STATE_CHECK(GetParam()(
+  ASM_REGISTER_STATE_CHECK(mbPostProcDownAndAcross(
       src_image.TopLeftPixel(), dst_image.TopLeftPixel(), src_image.stride(),
       dst_image.stride(), block_width, flimits, 16));
 
-  static const uint8_t kExpectedOutput[block_height] = {
-    4, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4
-  };
+  static const uint8_t kExpectedOutput[] = { 4, 3, 1, 1, 1, 1, 1, 1,
+                                             1, 1, 1, 1, 1, 1, 3, 4 };
 
   uint8_t *pixel_ptr = dst_image.TopLeftPixel();
   for (int i = 0; i < block_height; ++i) {
@@ -103,8 +119,8 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
   // Size of the underlying data block that will be filtered.
   // Y blocks are always a multiple of 16 wide and exactly 16 high. U and V
   // blocks are always a multiple of 8 wide and exactly 8 high.
-  const int block_width = 136;
-  const int block_height = 16;
+  block_width = 136;
+  block_height = 16;
 
   // 5-tap filter needs 2 padding rows above and below the block in the input.
   // SSE2 reads in blocks of 16. Pad an extra 8 in case the width is not %16.
@@ -127,8 +143,7 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
   // can have a different filter. SSE2 assembly reads flimits in blocks of 16 so
   // it must be padded out.
   const int flimits_width = block_width % 16 ? block_width + 8 : block_width;
-  uint8_t *const flimits =
-      reinterpret_cast<uint8_t *>(vpx_memalign(16, flimits_width));
+  flimits = reinterpret_cast<uint8_t *>(vpx_memalign(16, flimits_width));
 
   ACMRandom rnd;
   rnd.Reset(ACMRandom::DeterministicSeed());
@@ -143,7 +158,6 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
 
     for (int f = 0; f < 255; f++) {
       (void)memset(flimits + blocks, f, sizeof(*flimits) * 8);
-
       dst_image.Set(0);
       dst_image_ref.Set(0);
 
@@ -151,10 +165,10 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
           src_image.TopLeftPixel(), dst_image_ref.TopLeftPixel(),
           src_image.stride(), dst_image_ref.stride(), block_width, flimits,
           block_height);
-      ASM_REGISTER_STATE_CHECK(
-          GetParam()(src_image.TopLeftPixel(), dst_image.TopLeftPixel(),
-                     src_image.stride(), dst_image.stride(), block_width,
-                     flimits, block_height));
+      ASM_REGISTER_STATE_CHECK(mbPostProcDownAndAcross(
+          src_image.TopLeftPixel(), dst_image.TopLeftPixel(),
+          src_image.stride(), dst_image.stride(), block_width, flimits,
+          block_height));
 
       ASSERT_TRUE(dst_image.CheckValues(dst_image_ref));
     }
@@ -162,6 +176,42 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
 
   vpx_free(flimits);
 }
+
+TEST_P(VpxPostProcDownAndAcrossMbRowTest, DISABLED_Speed) {
+  // Size of the underlying data block that will be filtered.
+  block_width = 16;
+  block_height = 16;
+
+  // 5-tap filter needs 2 padding rows above and below the block in the input.
+  Buffer<uint8_t> src_image = Buffer<uint8_t>(block_width, block_height, 2);
+  ASSERT_TRUE(src_image.Init());
+  this->src_image = &src_image;
+
+  // Filter extends output block by 8 samples at left and right edges.
+  // Though the left padding is only 8 bytes, the assembly code tries to
+  // read 16 bytes before the pointer.
+  Buffer<uint8_t> dst_image =
+      Buffer<uint8_t>(block_width, block_height, 8, 16, 8, 8);
+  ASSERT_TRUE(dst_image.Init());
+  this->dst_image = &dst_image;
+
+  flimits = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width));
+  (void)memset(flimits, 255, block_width);
+
+  // Initialize pixels in the input:
+  //   block pixels to value 1,
+  //   border pixels to value 10.
+  src_image.SetPadding(10);
+  src_image.Set(1);
+
+  // Initialize pixels in the output to 99.
+  dst_image.Set(99);
+
+  runNTimes(INT16_MAX);
+  printMedian("16x16");
+
+  vpx_free(flimits);
+};
 
 class VpxMbPostProcAcrossIpTest
     : public AbstractBench,
@@ -500,6 +550,9 @@ INSTANTIATE_TEST_CASE_P(MSA, VpxMbPostProcDownTest,
 #endif  // HAVE_MSA
 
 #if HAVE_VSX
+INSTANTIATE_TEST_CASE_P(
+    VSX, VpxPostProcDownAndAcrossMbRowTest,
+    ::testing::Values(vpx_post_proc_down_and_across_mb_row_vsx));
 
 INSTANTIATE_TEST_CASE_P(VSX, VpxMbPostProcAcrossIpTest,
                         ::testing::Values(vpx_mbpost_proc_across_ip_vsx));

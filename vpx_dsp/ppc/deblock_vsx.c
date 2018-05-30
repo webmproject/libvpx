@@ -19,6 +19,106 @@ static const uint8x16_t load_merge = { 0x00, 0x02, 0x04, 0x06, 0x08, 0x0A,
                                        0x0C, 0x0E, 0x18, 0x19, 0x1A, 0x1B,
                                        0x1C, 0x1D, 0x1E, 0x1F };
 
+static const uint8x16_t st8_perm = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
+                                     0x06, 0x07, 0x18, 0x19, 0x1A, 0x1B,
+                                     0x1C, 0x1D, 0x1E, 0x1F };
+
+static INLINE uint8x16_t vec_abd_s8(uint8x16_t a, uint8x16_t b) {
+  return vec_sub(vec_max(a, b), vec_min(a, b));
+}
+
+static INLINE uint8x16_t apply_filter(uint8x16_t ctx[4], uint8x16_t v,
+                                      uint8x16_t filter) {
+  const uint8x16_t k1 = vec_avg(ctx[0], ctx[1]);
+  const uint8x16_t k2 = vec_avg(ctx[3], ctx[2]);
+  const uint8x16_t k3 = vec_avg(k1, k2);
+  const uint8x16_t f_a = vec_max(vec_abd_s8(v, ctx[0]), vec_abd_s8(v, ctx[1]));
+  const uint8x16_t f_b = vec_max(vec_abd_s8(v, ctx[2]), vec_abd_s8(v, ctx[3]));
+  const bool8x16_t mask = vec_cmplt(vec_max(f_a, f_b), filter);
+  return vec_sel(v, vec_avg(k3, v), mask);
+}
+
+static INLINE void vert_ctx(uint8x16_t ctx[4], int col, uint8_t *src,
+                            int stride) {
+  ctx[0] = vec_vsx_ld(col - 2 * stride, src);
+  ctx[1] = vec_vsx_ld(col - stride, src);
+  ctx[2] = vec_vsx_ld(col + stride, src);
+  ctx[3] = vec_vsx_ld(col + 2 * stride, src);
+}
+
+static INLINE void horz_ctx(uint8x16_t ctx[4], uint8x16_t left_ctx,
+                            uint8x16_t v, uint8x16_t right_ctx) {
+  static const uint8x16_t l2_perm = { 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,
+                                      0x14, 0x15, 0x16, 0x17, 0x18, 0x19,
+                                      0x1A, 0x1B, 0x1C, 0x1D };
+
+  static const uint8x16_t l1_perm = { 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14,
+                                      0x15, 0x16, 0x17, 0x18, 0x19, 0x1A,
+                                      0x1B, 0x1C, 0x1D, 0x1E };
+
+  static const uint8x16_t r1_perm = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                                      0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C,
+                                      0x0D, 0x0E, 0x0F, 0x10 };
+
+  static const uint8x16_t r2_perm = { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                                      0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+                                      0x0E, 0x0F, 0x10, 0x11 };
+  ctx[0] = vec_perm(left_ctx, v, l2_perm);
+  ctx[1] = vec_perm(left_ctx, v, l1_perm);
+  ctx[2] = vec_perm(v, right_ctx, r1_perm);
+  ctx[3] = vec_perm(v, right_ctx, r2_perm);
+}
+void vpx_post_proc_down_and_across_mb_row_vsx(unsigned char *src_ptr,
+                                              unsigned char *dst_ptr,
+                                              int src_pixels_per_line,
+                                              int dst_pixels_per_line, int cols,
+                                              unsigned char *f, int size) {
+  int row, col;
+  uint8x16_t ctx[4], out, v, left_ctx;
+
+  for (row = 0; row < size; row++) {
+    for (col = 0; col < cols - 8; col += 16) {
+      const uint8x16_t filter = vec_vsx_ld(col, f);
+      v = vec_vsx_ld(col, src_ptr);
+      vert_ctx(ctx, col, src_ptr, src_pixels_per_line);
+      vec_vsx_st(apply_filter(ctx, v, filter), col, dst_ptr);
+    }
+
+    if (col != cols) {
+      const uint8x16_t filter = vec_vsx_ld(col, f);
+      v = vec_vsx_ld(col, src_ptr);
+      vert_ctx(ctx, col, src_ptr, src_pixels_per_line);
+      out = apply_filter(ctx, v, filter);
+      vec_vsx_st(vec_perm(out, v, st8_perm), col, dst_ptr);
+    }
+
+    /* now post_proc_across */
+    left_ctx = vec_splats(dst_ptr[0]);
+    v = vec_vsx_ld(0, dst_ptr);
+    for (col = 0; col < cols - 8; col += 16) {
+      const uint8x16_t filter = vec_vsx_ld(col, f);
+      const uint8x16_t right_ctx = (col + 16 == cols)
+                                       ? vec_splats(dst_ptr[cols - 1])
+                                       : vec_vsx_ld(col, dst_ptr + 16);
+      horz_ctx(ctx, left_ctx, v, right_ctx);
+      vec_vsx_st(apply_filter(ctx, v, filter), col, dst_ptr);
+      left_ctx = v;
+      v = right_ctx;
+    }
+
+    if (col != cols) {
+      const uint8x16_t filter = vec_vsx_ld(col, f);
+      const uint8x16_t right_ctx = vec_splats(dst_ptr[cols - 1]);
+      horz_ctx(ctx, left_ctx, v, right_ctx);
+      out = apply_filter(ctx, v, filter);
+      vec_vsx_st(vec_perm(out, v, st8_perm), col, dst_ptr);
+    }
+
+    src_ptr += src_pixels_per_line;
+    dst_ptr += dst_pixels_per_line;
+  }
+}
+
 // C: s[c + 7]
 static INLINE int16x8_t next7l_s16(uint8x16_t c) {
   static const uint8x16_t next7_perm = {
