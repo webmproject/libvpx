@@ -554,6 +554,28 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
   return 0;
 }
 
+static int adjust_q_cbr(const VP9_COMP *cpi, int q) {
+  // This makes sure q is between oscillating Qs to prevent resonance.
+  if (!cpi->rc.reset_high_source_sad &&
+      (!cpi->oxcf.gf_cbr_boost_pct ||
+       !(cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)) &&
+      (cpi->rc.rc_1_frame * cpi->rc.rc_2_frame == -1) &&
+      cpi->rc.q_1_frame != cpi->rc.q_2_frame) {
+    int qclamp = clamp(q, VPXMIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
+                       VPXMAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
+    // If the previous frame had overshoot and the current q needs to increase
+    // above the clamped value, reduce the clamp for faster reaction to
+    // overshoot.
+    if (cpi->rc.rc_1_frame == -1 && q > qclamp)
+      q = (q + qclamp) >> 1;
+    else
+      q = qclamp;
+  }
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN)
+    vp9_cyclic_refresh_limit_q(cpi, &q);
+  return q;
+}
+
 static double get_rate_correction_factor(const VP9_COMP *cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   double rcf;
@@ -713,26 +735,8 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
   } while (++i <= active_worst_quality);
 
   // Adjustment to q for CBR mode.
-  if (cpi->oxcf.rc_mode == VPX_CBR) {
-    // This makes sure q is between oscillating Qs to prevent resonance.
-    if (!cpi->rc.reset_high_source_sad &&
-        (!cpi->oxcf.gf_cbr_boost_pct ||
-         !(cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame)) &&
-        (cpi->rc.rc_1_frame * cpi->rc.rc_2_frame == -1) &&
-        cpi->rc.q_1_frame != cpi->rc.q_2_frame) {
-      int qclamp = clamp(q, VPXMIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
-                         VPXMAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
-      // If the previous frame had overshoot and the current q needs to increase
-      // above the clamped value, reduce the clamp for faster reaction to
-      // overshoot.
-      if (cpi->rc.rc_1_frame == -1 && q > qclamp)
-        q = (q + qclamp) >> 1;
-      else
-        q = qclamp;
-    }
-    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN)
-      vp9_cyclic_refresh_limit_q(cr, cpi->rc.q_1_frame, &q);
-  }
+  if (cpi->oxcf.rc_mode == VPX_CBR) return adjust_q_cbr(cpi, q);
+
   return q;
 }
 

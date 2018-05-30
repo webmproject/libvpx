@@ -599,10 +599,11 @@ void vp9_cyclic_refresh_reset_resize(VP9_COMP *const cpi) {
   cpi->refresh_alt_ref_frame = 1;
 }
 
-void vp9_cyclic_refresh_limit_q(CYCLIC_REFRESH *const cr, int prev_q, int *q) {
+void vp9_cyclic_refresh_limit_q(const VP9_COMP *cpi, int *q) {
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   // For now apply hard limit to frame-level decrease in q, if the cyclic
   // refresh is active (percent_refresh > 0).
-  if (cr->percent_refresh > 0 && prev_q - *q > 8) {
-    *q = prev_q - 8;
+  if (cr->percent_refresh > 0 && cpi->rc.q_1_frame - *q > 8) {
+    *q = cpi->rc.q_1_frame - 8;
   }
 }
