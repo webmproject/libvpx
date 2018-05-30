@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bda15dcb_50531e19",
+        "filename": "vp9/common/ppc/vp9_idct_vsx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-30T20:15:51Z",
+      "side": 1,
+      "message": "Use the path from the libvpx root:\n\"vp9/common/vp9_enums.h\"",
+      "range": {
+        "startLine": 17,
+        "startChar": 10,
+        "endLine": 17,
+        "endChar": 12
+      },
+      "revId": "802ff4a31cb77000181e4568ea2b1f5f78dbd9e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5110e2a6_23b72190",
+        "filename": "vpx_dsp/ppc/inv_txfm_vsx.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-05-30T20:15:51Z",
+      "side": 1,
+      "message": "Any non-static functions need to be prefixed with vp[89x] to avoid conflicts.\n\nAn alternative would be to move all the macros/etc into this file and make these functions static.",
+      "range": {
+        "startLine": 3,
+        "startChar": 5,
+        "endLine": 3,
+        "endChar": 23
+      },
+      "revId": "802ff4a31cb77000181e4568ea2b1f5f78dbd9e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
