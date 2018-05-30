@@ -622,6 +622,7 @@ int main(int argc, const char **argv) {
   vpx_codec_ctx_t codec;
   vpx_codec_enc_cfg_t enc_cfg;
   SvcContext svc_ctx;
+  vpx_svc_frame_drop_t svc_drop_frame;
   uint32_t i;
   uint32_t frame_cnt = 0;
   vpx_image_t raw;
@@ -731,6 +732,12 @@ int main(int argc, const char **argv) {
   vpx_codec_control(&codec, VP9E_SET_NOISE_SENSITIVITY, 0);
 
   vpx_codec_control(&codec, VP9E_SET_TUNE_CONTENT, 0);
+
+  svc_drop_frame.framedrop_mode = FULL_SUPERFRAME_DROP;
+  for (sl = 0; sl < (unsigned int)svc_ctx.spatial_layers; ++sl)
+    svc_drop_frame.framedrop_thresh[sl] = enc_cfg.rc_dropframe_thresh;
+  svc_drop_frame.max_consec_drop = INT_MAX;
+  vpx_codec_control(&codec, VP9E_SET_SVC_FRAME_DROP_LAYER, &svc_drop_frame);
 
   // Encode frames
   while (!end_of_stream) {
