@@ -52,33 +52,6 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                               int output_enabled, int mi_row, int mi_col,
                               BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx);
 
-// Machine learning-based early termination parameters.
-static const double train_mean[24] = {
-  303501.697372, 3042630.372158, 24.694696, 1.392182,
-  689.413511,    162.027012,     1.478213,  0.0,
-  135382.260230, 912738.513263,  28.845217, 1.515230,
-  544.158492,    131.807995,     1.436863,  0.0,
-  43682.377587,  208131.711766,  28.084737, 1.356677,
-  138.254122,    119.522553,     1.252322,  0.0
-};
-
-static const double train_stdm[24] = {
-  673689.212982, 5996652.516628, 0.024449, 1.989792,
-  985.880847,    0.014638,       2.001898, 0.0,
-  208798.775332, 1812548.443284, 0.018693, 1.838009,
-  396.986910,    0.015657,       1.332541, 0.0,
-  55888.847031,  448587.962714,  0.017900, 1.904776,
-  98.652832,     0.016598,       1.320992, 0.0
-};
-
-// Error tolerance: 0.01%-0.0.05%-0.1%
-static const double classifiers[24] = {
-  0.111736, 0.289977, 0.042219, 0.204765, 0.120410, -0.143863,
-  0.282376, 0.847811, 0.637161, 0.131570, 0.018636, 0.202134,
-  0.112797, 0.028162, 0.182450, 1.124367, 0.386133, 0.083700,
-  0.050028, 0.150873, 0.061119, 0.109318, 0.127255, 0.625211
-};
-
 // This is used as a reference when computing the source variance for the
 //  purpose of activity masking.
 // Eventually this should be replaced by custom no-reference routines,
@@ -3031,14 +3004,232 @@ static INLINE int get_motion_inconsistency(MOTION_DIRECTION this_mv,
 }
 #endif
 
-// Calculate the score used in machine-learning based partition search early
-// termination.
-static double compute_score(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                            PICK_MODE_CONTEXT *ctx, int mi_row, int mi_col,
-                            BLOCK_SIZE bsize) {
-  const double *clf;
-  const double *mean;
-  const double *sd;
+#define NN_MAX_HIDDEN_LAYERS 10
+#define NN_MAX_NODES_PER_LAYER 128
+
+// Neural net model config.
+typedef struct {
+  int num_inputs;         // Number of input nodes, i.e. features.
+  int num_outputs;        // Number of output nodes.
+  int num_hidden_layers;  // Number of hidden layers, maximum 10.
+  // Number of nodes for each hidden layer.
+  int num_hidden_nodes[NN_MAX_HIDDEN_LAYERS];
+  // Weight parameters, indexed by layer.
+  const float *weights[NN_MAX_HIDDEN_LAYERS + 1];
+  // Bias parameters, indexed by layer.
+  const float *bias[NN_MAX_HIDDEN_LAYERS + 1];
+} NN_CONFIG;
+
+// Calculate prediction based on the given input features and neural net config.
+// Assume there are no more than NN_MAX_NODES_PER_LAYER nodes in each hidden
+// layer.
+static void nn_predict(const float *features, const NN_CONFIG *nn_config,
+                       float *output) {
+  int num_input_nodes = nn_config->num_inputs;
+  int buf_index = 0;
+  float buf[2][NN_MAX_NODES_PER_LAYER];
+  const float *input_nodes = features;
+
+  // Propagate hidden layers.
+  const int num_layers = nn_config->num_hidden_layers;
+  int layer, node, i;
+  assert(num_layers <= NN_MAX_HIDDEN_LAYERS);
+  for (layer = 0; layer < num_layers; ++layer) {
+    const float *weights = nn_config->weights[layer];
+    const float *bias = nn_config->bias[layer];
+    float *output_nodes = buf[buf_index];
+    const int num_output_nodes = nn_config->num_hidden_nodes[layer];
+    assert(num_output_nodes < NN_MAX_NODES_PER_LAYER);
+    for (node = 0; node < num_output_nodes; ++node) {
+      float val = 0.0f;
+      for (i = 0; i < num_input_nodes; ++i) val += weights[i] * input_nodes[i];
+      val += bias[node];
+      // ReLU as activation function.
+      val = VPXMAX(val, 0.0f);
+      output_nodes[node] = val;
+      weights += num_input_nodes;
+    }
+    num_input_nodes = num_output_nodes;
+    input_nodes = output_nodes;
+    buf_index = 1 - buf_index;
+  }
+
+  // Final output layer.
+  {
+    const float *weights = nn_config->weights[num_layers];
+    for (node = 0; node < nn_config->num_outputs; ++node) {
+      const float *bias = nn_config->bias[num_layers];
+      float val = 0.0f;
+      for (i = 0; i < num_input_nodes; ++i) val += weights[i] * input_nodes[i];
+      output[node] = val + bias[node];
+      weights += num_input_nodes;
+    }
+  }
+}
+
+static const float partition_nn_weights_64x64_layer0[7 * 8] = {
+  -3.571348f, 0.014835f,  -3.255393f, -0.098090f, -0.013120f, 0.000221f,
+  0.056273f,  0.190179f,  -0.268130f, -1.828242f, -0.010655f, 0.937244f,
+  -0.435120f, 0.512125f,  1.610679f,  0.190816f,  -0.799075f, -0.377348f,
+  -0.144232f, 0.614383f,  -0.980388f, 1.754150f,  -0.185603f, -0.061854f,
+  -0.807172f, 1.240177f,  1.419531f,  -0.438544f, -5.980774f, 0.139045f,
+  -0.032359f, -0.068887f, -1.237918f, 0.115706f,  0.003164f,  2.924212f,
+  1.246838f,  -0.035833f, 0.810011f,  -0.805894f, 0.010966f,  0.076463f,
+  -4.226380f, -2.437764f, -0.010619f, -0.020935f, -0.451494f, 0.300079f,
+  -0.168961f, -3.326450f, -2.731094f, 0.002518f,  0.018840f,  -1.656815f,
+  0.068039f,  0.010586f,
+};
+
+static const float partition_nn_bias_64x64_layer0[8] = {
+  -3.469882f, 0.683989f, 0.194010f,  0.313782f,
+  -3.153335f, 2.245849f, -1.946190f, -3.740020f,
+};
+
+static const float partition_nn_weights_64x64_layer1[8] = {
+  -8.058566f, 0.108306f, -0.280620f, -0.818823f,
+  -6.445117f, 0.865364f, -1.127127f, -8.808660f,
+};
+
+static const float partition_nn_bias_64x64_layer1[1] = {
+  6.46909416f,
+};
+
+static const NN_CONFIG partition_nnconfig_64x64 = {
+  7,  // num_inputs
+  1,  // num_outputs
+  1,  // num_hidden_layers
+  {
+      8,
+  },  // num_hidden_nodes
+  {
+      partition_nn_weights_64x64_layer0,
+      partition_nn_weights_64x64_layer1,
+  },
+  {
+      partition_nn_bias_64x64_layer0,
+      partition_nn_bias_64x64_layer1,
+  },
+};
+
+static const float partition_nn_weights_32x32_layer0[7 * 8] = {
+  -0.295437f, -4.002648f, -0.205399f, -0.060919f, 0.708037f,  0.027221f,
+  -0.039137f, -0.907724f, -3.151662f, 0.007106f,  0.018726f,  -0.534928f,
+  0.022744f,  0.000159f,  -1.717189f, -3.229031f, -0.027311f, 0.269863f,
+  -0.400747f, -0.394366f, -0.108878f, 0.603027f,  0.455369f,  -0.197170f,
+  1.241746f,  -1.347820f, -0.575636f, -0.462879f, -2.296426f, 0.196696f,
+  -0.138347f, -0.030754f, -0.200774f, 0.453795f,  0.055625f,  -3.163116f,
+  -0.091003f, -0.027028f, -0.042984f, -0.605185f, 0.143240f,  -0.036439f,
+  -0.801228f, 0.313409f,  -0.159942f, 0.031267f,  0.886454f,  -1.531644f,
+  -0.089655f, 0.037683f,  -0.163441f, -0.130454f, -0.058344f, 0.060011f,
+  0.275387f,  1.552226f,
+};
+
+static const float partition_nn_bias_32x32_layer0[8] = {
+  -0.838372f, -2.609089f, -0.055763f, 1.329485f,
+  -1.297638f, -2.636622f, -0.826909f, 1.012644f,
+};
+
+static const float partition_nn_weights_32x32_layer1[8] = {
+  -1.792632f, -7.322353f, -0.683386f, 0.676564f,
+  -1.488118f, -7.527719f, 1.240163f,  0.614309f,
+};
+
+static const float partition_nn_bias_32x32_layer1[1] = {
+  4.97422546f,
+};
+
+static const NN_CONFIG partition_nnconfig_32x32 = {
+  7,  // num_inputs
+  1,  // num_outputs
+  1,  // num_hidden_layers
+  {
+      8,
+  },  // num_hidden_nodes
+  {
+      partition_nn_weights_32x32_layer0,
+      partition_nn_weights_32x32_layer1,
+  },
+  {
+      partition_nn_bias_32x32_layer0,
+      partition_nn_bias_32x32_layer1,
+  },
+};
+
+static const float partition_nn_weights_16x16_layer0[7 * 8] = {
+  -1.717673f, -4.718130f, -0.125725f, -0.183427f, -0.511764f, 0.035328f,
+  0.130891f,  -3.096753f, 0.174968f,  -0.188769f, -0.640796f, 1.305661f,
+  1.700638f,  -0.073806f, -4.006781f, -1.630999f, -0.064863f, -0.086410f,
+  -0.148617f, 0.172733f,  -0.018619f, 2.152595f,  0.778405f,  -0.156455f,
+  0.612995f,  -0.467878f, 0.152022f,  -0.236183f, 0.339635f,  -0.087119f,
+  -3.196610f, -1.080401f, -0.637704f, -0.059974f, 1.706298f,  -0.793705f,
+  -6.399260f, 0.010624f,  -0.064199f, -0.650621f, 0.338087f,  -0.001531f,
+  1.023655f,  -3.700272f, -0.055281f, -0.386884f, 0.375504f,  -0.898678f,
+  0.281156f,  -0.314611f, 0.863354f,  -0.040582f, -0.145019f, 0.029329f,
+  -2.197880f, -0.108733f,
+};
+
+static const float partition_nn_bias_16x16_layer0[8] = {
+  0.411516f,  -2.143737f, -3.693192f, 2.123142f,
+  -1.356910f, -3.561016f, -0.765045f, -2.417082f,
+};
+
+static const float partition_nn_weights_16x16_layer1[8] = {
+  -0.619755f, -2.202391f, -4.337171f, 0.611319f,
+  0.377677f,  -4.998723f, -1.052235f, 1.949922f,
+};
+
+static const float partition_nn_bias_16x16_layer1[1] = {
+  3.20981717f,
+};
+
+static const NN_CONFIG partition_nnconfig_16x16 = {
+  7,  // num_inputs
+  1,  // num_outputs
+  1,  // num_hidden_layers
+  {
+      8,
+  },  // num_hidden_nodes
+  {
+      partition_nn_weights_16x16_layer0,
+      partition_nn_weights_16x16_layer1,
+  },
+  {
+      partition_nn_bias_16x16_layer0,
+      partition_nn_bias_16x16_layer1,
+  },
+};
+
+static const float partition_feature_mean[24] = {
+  303501.697372f, 3042630.372158f, 24.694696f, 1.392182f,
+  689.413511f,    162.027012f,     1.478213f,  0.0,
+  135382.260230f, 912738.513263f,  28.845217f, 1.515230f,
+  544.158492f,    131.807995f,     1.436863f,  0.0f,
+  43682.377587f,  208131.711766f,  28.084737f, 1.356677f,
+  138.254122f,    119.522553f,     1.252322f,  0.0f,
+};
+
+static const float partition_feature_std[24] = {
+  673689.212982f, 5996652.516628f, 0.024449f, 1.989792f,
+  985.880847f,    0.014638f,       2.001898f, 0.0f,
+  208798.775332f, 1812548.443284f, 0.018693f, 1.838009f,
+  396.986910f,    0.015657f,       1.332541f, 0.0f,
+  55888.847031f,  448587.962714f,  0.017900f, 1.904776f,
+  98.652832f,     0.016598f,       1.320992f, 0.0f,
+};
+
+// Error tolerance: 0.01%-0.0.05%-0.1%
+static const float partition_linear_weights[24] = {
+  0.111736f, 0.289977f, 0.042219f, 0.204765f, 0.120410f, -0.143863f,
+  0.282376f, 0.847811f, 0.637161f, 0.131570f, 0.018636f, 0.202134f,
+  0.112797f, 0.028162f, 0.182450f, 1.124367f, 0.386133f, 0.083700f,
+  0.050028f, 0.150873f, 0.061119f, 0.109318f, 0.127255f, 0.625211f,
+};
+
+// Machine-learning based partition search early termination.
+// Return 1 to skip split and rect partitions.
+static int ml_pruning_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                                PICK_MODE_CONTEXT *ctx, int mi_row, int mi_col,
+                                BLOCK_SIZE bsize) {
   const int mag_mv =
       abs(ctx->mic.mv[0].as_mv.col) + abs(ctx->mic.mv[0].as_mv.row);
   const int left_in_image = !!xd->left_mi;
@@ -3048,11 +3239,32 @@ static double compute_score(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   int above_par = 0;  // above_partitioning
   int left_par = 0;   // left_partitioning
   int last_par = 0;   // last_partitioning
-  BLOCK_SIZE context_size;
-  double score;
   int offset = 0;
+  int i;
+  BLOCK_SIZE context_size;
+  const NN_CONFIG *nn_config = NULL;
+  const float *mean, *sd, *linear_weights;
+  float nn_score, linear_score;
+  float features[7];
 
   assert(b_width_log2_lookup[bsize] == b_height_log2_lookup[bsize]);
+  vpx_clear_system_state();
+
+  switch (bsize) {
+    case BLOCK_64X64:
+      offset = 0;
+      nn_config = &partition_nnconfig_64x64;
+      break;
+    case BLOCK_32X32:
+      offset = 8;
+      nn_config = &partition_nnconfig_32x32;
+      break;
+    case BLOCK_16X16:
+      offset = 16;
+      nn_config = &partition_nnconfig_16x16;
+      break;
+    default: assert(0 && "Unexpected block size."); return 0;
+  }
 
   if (above_in_image) {
     context_size = xd->above_mi->sb_type;
@@ -3078,25 +3290,27 @@ static double compute_score(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       last_par = 1;
   }
 
-  if (bsize == BLOCK_64X64)
-    offset = 0;
-  else if (bsize == BLOCK_32X32)
-    offset = 8;
-  else if (bsize == BLOCK_16X16)
-    offset = 16;
+  mean = &partition_feature_mean[offset];
+  sd = &partition_feature_std[offset];
+  features[0] = ((float)ctx->rate - mean[0]) / sd[0];
+  features[1] = ((float)ctx->dist - mean[1]) / sd[1];
+  features[2] = ((float)mag_mv / 2 - mean[2]) * sd[2];
+  features[3] = ((float)(left_par + above_par) / 2 - mean[3]) * sd[3];
+  features[4] = ((float)ctx->sum_y_eobs - mean[4]) / sd[4];
+  features[5] = ((float)cm->base_qindex - mean[5]) * sd[5];
+  features[6] = ((float)last_par - mean[6]) * sd[6];
 
-  // early termination score calculation
-  clf = &classifiers[offset];
-  mean = &train_mean[offset];
-  sd = &train_stdm[offset];
-  score = clf[0] * (((double)ctx->rate - mean[0]) / sd[0]) +
-          clf[1] * (((double)ctx->dist - mean[1]) / sd[1]) +
-          clf[2] * (((double)mag_mv / 2 - mean[2]) * sd[2]) +
-          clf[3] * (((double)(left_par + above_par) / 2 - mean[3]) * sd[3]) +
-          clf[4] * (((double)ctx->sum_y_eobs - mean[4]) / sd[4]) +
-          clf[5] * (((double)cm->base_qindex - mean[5]) * sd[5]) +
-          clf[6] * (((double)last_par - mean[6]) * sd[6]) + clf[7];
-  return score;
+  // Predict using linear model.
+  linear_weights = &partition_linear_weights[offset];
+  linear_score = linear_weights[7];
+  for (i = 0; i < 7; ++i) linear_score += linear_weights[i] * features[i];
+
+  // Predict using neural net model.
+  nn_predict(features, nn_config, &nn_score);
+
+  if (linear_score < -0.0f && nn_score < 0.1f) return 1;
+  if (nn_score < -0.0f && linear_score < 0.1f) return 1;
+  return 0;
 }
 
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
@@ -3298,7 +3512,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
           if (!x->e_mbd.lossless &&
               !segfeature_active(&cm->seg, mi->segment_id, SEG_LVL_SKIP) &&
               ctx->mic.mode >= INTRA_MODES && bsize >= BLOCK_16X16) {
-            if (compute_score(cm, xd, ctx, mi_row, mi_col, bsize) < 0.0) {
+            if (ml_pruning_partition(cm, xd, ctx, mi_row, mi_col, bsize)) {
               do_split = 0;
               do_rect = 0;
             }
