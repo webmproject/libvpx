@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b269fc10_82ea58cc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-05-31T18:29:12Z",
+      "side": 1,
+      "message": "put the average quality regression on RTC set relative to current speed 9",
+      "revId": "7d631bb2ecbb45d353966639b32d65ebd68f1f90",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
