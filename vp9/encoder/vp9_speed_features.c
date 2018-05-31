@@ -682,6 +682,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->disable_16x16part_nonkey = 1;
     // Allow for disabling GOLDEN reference, for CBR mode.
     if (cpi->oxcf.rc_mode == VPX_CBR) sf->disable_golden_ref = 1;
+    if (cpi->rc.avg_frame_low_motion < 65) sf->default_interp_filter = BILINEAR;
   }
 
   if (sf->use_altref_onepass) {

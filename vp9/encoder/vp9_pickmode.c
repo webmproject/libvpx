@@ -1340,6 +1340,7 @@ static void recheck_zeromv_after_denoising(
     mi->ref_frame[1] = NONE;
     mi->mv[0].as_int = 0;
     mi->interp_filter = EIGHTTAP;
+    if (cpi->sf.default_interp_filter == BILINEAR) mi->interp_filter = BILINEAR;
     xd->plane[0].pre[0] = yv12_mb[LAST_FRAME][0];
     vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
     model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
@@ -1512,6 +1513,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int svc_mv_row = 0;
   int no_scaling = 0;
   unsigned int thresh_svc_skip_golden = 500;
+  if (cpi->sf.default_interp_filter == BILINEAR) {
+    best_pred_filter = BILINEAR;
+    filter_gf_svc = BILINEAR;
+  }
   if (cpi->use_svc && svc->spatial_layer_id > 0) {
     int layer =
         LAYER_IDS_TO_IDX(svc->spatial_layer_id - 1, svc->temporal_layer_id,
@@ -1562,12 +1567,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // filter_ref, we use a less strict condition on assigning filter_ref.
   // This is to reduce the probabily of entering the flow of not assigning
   // filter_ref and then skip filter search.
-  if (xd->above_mi && is_inter_block(xd->above_mi))
-    filter_ref = xd->above_mi->interp_filter;
-  else if (xd->left_mi && is_inter_block(xd->left_mi))
-    filter_ref = xd->left_mi->interp_filter;
-  else
-    filter_ref = cm->interp_filter;
+  filter_ref = cm->interp_filter;
+  if (cpi->sf.default_interp_filter != BILINEAR) {
+    if (xd->above_mi && is_inter_block(xd->above_mi))
+      filter_ref = xd->above_mi->interp_filter;
+    else if (xd->left_mi && is_inter_block(xd->left_mi))
+      filter_ref = xd->left_mi->interp_filter;
+  }
 
   // initialize mode decisions
   vp9_rd_cost_reset(&best_rdc);
