@@ -282,18 +282,6 @@ $(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
 $(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(SO_VERSION_MAJOR)
 $(BUILD_PFX)$(LIBVPX_SO): EXPORTS_FILE = $(EXPORT_FILE)
 
-libvpx.ver: $(call enabled,CODEC_EXPORTS)
-	@echo "    [CREATE] $@"
-	$(qexec)echo "{ global:" > $@
-	$(qexec)for f in $?; do awk '{print $$2";"}' < $$f >>$@; done
-	$(qexec)echo "local: *; };" >> $@
-CLEAN-OBJS += libvpx.ver
-
-libvpx.syms: $(call enabled,CODEC_EXPORTS)
-	@echo "    [CREATE] $@"
-	$(qexec)awk '{print "_"$$2}' $^ >$@
-CLEAN-OBJS += libvpx.syms
-
 libvpx.def: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
 	$(qexec)echo LIBRARY $(LIBVPX_SO:.dll=) INITINSTANCE TERMINSTANCE > $@
@@ -352,6 +340,18 @@ INSTALL-LIBS-yes += $(LIBSUBDIR)/pkgconfig/vpx.pc
 INSTALL_MAPS += $(LIBSUBDIR)/pkgconfig/%.pc %.pc
 CLEAN-OBJS += vpx.pc
 endif
+
+libvpx.ver: $(call enabled,CODEC_EXPORTS)
+	@echo "    [CREATE] $@"
+	$(qexec)echo "{ global:" > $@
+	$(qexec)for f in $?; do awk '{print $$2";"}' < $$f >>$@; done
+	$(qexec)echo "local: *; };" >> $@
+CLEAN-OBJS += libvpx.ver
+
+libvpx.syms: $(call enabled,CODEC_EXPORTS)
+	@echo "    [CREATE] $@"
+	$(qexec)awk '{print "_"$$2}' $^ >$@
+CLEAN-OBJS += libvpx.syms
 
 #
 # Rule to make assembler configuration file from C configuration file
