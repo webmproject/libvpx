@@ -1610,7 +1610,11 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   }
 
   if (oxcf->pass == 0) {
-    if (cm->frame_type != KEY_FRAME) {
+    if (cm->frame_type != KEY_FRAME &&
+        (!cpi->use_svc ||
+         (cpi->use_svc &&
+          !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame &&
+          cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1))) {
       compute_frame_low_motion(cpi);
       if (cpi->sf.use_altref_onepass) update_altref_usage(cpi);
     }
