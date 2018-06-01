@@ -46,6 +46,30 @@
       "revId": "cfb030bdddf4ddab768bc1105b5e2fb62deec297",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4c7b3b30_df2bdd34",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-01T23:30:40Z",
+      "side": 1,
+      "message": "\u003e I haven\u0027t investigated how large they are. I\u0027m just rolling over the size_t. And qsort only allows the comparison function to return int.\n\nRight that\u0027s intentional to drive the sort order. This should be fine, you can use just one cast to promote to int64_t. There\u0027s no need to try something like what is done in md5_utils.c.",
+      "parentUuid": "cc445e33_52f18009",
+      "range": {
+        "startLine": 1531,
+        "startChar": 15,
+        "endLine": 1531,
+        "endChar": 24
+      },
+      "revId": "cfb030bdddf4ddab768bc1105b5e2fb62deec297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
