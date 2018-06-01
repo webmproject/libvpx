@@ -247,8 +247,25 @@ class DatarateTestVP9LargeOneBR
   }
 };
 
+// Params: test mode, speed setting and index for bitrate array.
+class DatarateTestVP9LargeVBR
+    : public DatarateTestVP9,
+      public ::libvpx_test::CodecTestWith3Params<libvpx_test::TestMode, int,
+                                                 int> {
+ public:
+  DatarateTestVP9LargeVBR() : DatarateTestVP9(GET_PARAM(0)) {}
+
+ protected:
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(GET_PARAM(1));
+    set_cpu_used_ = GET_PARAM(2);
+    ResetModel();
+  }
+};
+
 // Check basic rate targeting for VBR mode with 0 lag.
-TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagZero) {
+TEST_P(DatarateTestVP9LargeVBR, BasicRateTargetingVBRLagZero) {
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
   cfg_.g_error_resilient = 0;
@@ -260,7 +277,6 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagZero) {
 
   const int bitrates[2] = { 400, 800 };
   const int bitrate_index = GET_PARAM(3);
-  if (bitrate_index > 1) return;
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   ResetModel();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -271,7 +287,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagZero) {
 }
 
 // Check basic rate targeting for VBR mode with non-zero lag.
-TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZero) {
+TEST_P(DatarateTestVP9LargeVBR, BasicRateTargetingVBRLagNonZero) {
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
   cfg_.g_error_resilient = 0;
@@ -288,7 +304,6 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZero) {
                                        30, 1, 0, 300);
   const int bitrates[2] = { 400, 800 };
   const int bitrate_index = GET_PARAM(3);
-  if (bitrate_index > 1) return;
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   ResetModel();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -301,7 +316,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZero) {
 // Check basic rate targeting for VBR mode with non-zero lag, with
 // frame_parallel_decoding_mode off. This enables the adapt_coeff/mode/mv probs
 // since error_resilience is off.
-TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZeroFrameParDecOff) {
+TEST_P(DatarateTestVP9LargeVBR, BasicRateTargetingVBRLagNonZeroFrameParDecOff) {
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
   cfg_.g_error_resilient = 0;
@@ -318,7 +333,6 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingVBRLagNonZeroFrameParDecOff) {
                                        30, 1, 0, 300);
   const int bitrates[2] = { 400, 800 };
   const int bitrate_index = GET_PARAM(3);
-  if (bitrate_index > 1) return;
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   ResetModel();
   frame_parallel_decoding_mode_ = 0;
@@ -825,6 +839,11 @@ VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
                           ::testing::Values(::libvpx_test::kOnePassGood,
                                             ::libvpx_test::kRealTime),
                           ::testing::Range(2, 10), ::testing::Range(0, 4));
+
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeVBR,
+                          ::testing::Values(::libvpx_test::kOnePassGood,
+                                            ::libvpx_test::kRealTime),
+                          ::testing::Range(2, 9), ::testing::Range(0, 2));
 
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeOneBR,
                           ::testing::Values(::libvpx_test::kOnePassGood,
