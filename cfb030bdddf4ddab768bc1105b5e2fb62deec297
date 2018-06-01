@@ -22,6 +22,30 @@
       "revId": "cfb030bdddf4ddab768bc1105b5e2fb62deec297",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc445e33_52f18009",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-01T23:10:33Z",
+      "side": 1,
+      "message": "I haven\u0027t investigated how large they are. I\u0027m just rolling over the size_t. And qsort only allows the comparison function to return int.",
+      "parentUuid": "c18fd64e_5fc9e117",
+      "range": {
+        "startLine": 1531,
+        "startChar": 15,
+        "endLine": 1531,
+        "endChar": 24
+      },
+      "revId": "cfb030bdddf4ddab768bc1105b5e2fb62deec297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
