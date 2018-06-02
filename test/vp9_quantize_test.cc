@@ -72,9 +72,9 @@ class VP9QuantizeBase : public AbstractBench {
  public:
   VP9QuantizeBase(vpx_bit_depth_t bit_depth, int max_size, bool is_fp)
       : bit_depth_(bit_depth), max_size_(max_size), is_fp_(is_fp),
-        coeff(Buffer<tran_low_t>(max_size_, max_size_, 0, 16)),
-        qcoeff(Buffer<tran_low_t>(max_size_, max_size_, 0, 32)),
-        dqcoeff(Buffer<tran_low_t>(max_size_, max_size_, 0, 32)) {
+        coeff_(Buffer<tran_low_t>(max_size_, max_size_, 0, 16)),
+        qcoeff_(Buffer<tran_low_t>(max_size_, max_size_, 0, 32)),
+        dqcoeff_(Buffer<tran_low_t>(max_size_, max_size_, 0, 32)) {
     max_value_ = (1 << bit_depth_) - 1;
     zbin_ptr_ =
         reinterpret_cast<int16_t *>(vpx_memalign(16, 8 * sizeof(*zbin_ptr_)));
@@ -91,8 +91,8 @@ class VP9QuantizeBase : public AbstractBench {
     dequant_ptr_ = reinterpret_cast<int16_t *>(
         vpx_memalign(16, 8 * sizeof(*dequant_ptr_)));
 
-    r_ptr = (is_fp_) ? round_fp_ptr_ : round_ptr_;
-    q_ptr = (is_fp_) ? quant_fp_ptr_ : quant_ptr_;
+    r_ptr_ = (is_fp_) ? round_fp_ptr_ : round_ptr_;
+    q_ptr_ = (is_fp_) ? quant_fp_ptr_ : quant_ptr_;
   }
 
   ~VP9QuantizeBase() {
@@ -125,15 +125,15 @@ class VP9QuantizeBase : public AbstractBench {
   int max_value_;
   const int max_size_;
   const bool is_fp_;
-  Buffer<tran_low_t> coeff;
-  Buffer<tran_low_t> qcoeff;
-  Buffer<tran_low_t> dqcoeff;
-  int16_t *r_ptr;
-  int16_t *q_ptr;
-  int count;
-  int skip_block;
-  const scan_order *scan;
-  uint16_t eob;
+  Buffer<tran_low_t> coeff_;
+  Buffer<tran_low_t> qcoeff_;
+  Buffer<tran_low_t> dqcoeff_;
+  int16_t *r_ptr_;
+  int16_t *q_ptr_;
+  int count_;
+  int skip_block_;
+  const scan_order *scan_;
+  uint16_t eob_;
 };
 
 class VP9QuantizeTest : public VP9QuantizeBase,
@@ -144,15 +144,16 @@ class VP9QuantizeTest : public VP9QuantizeBase,
         quantize_op_(GET_PARAM(0)), ref_quantize_op_(GET_PARAM(1)) {}
 
  protected:
-  void run();
+  virtual void Run();
   const QuantizeFunc quantize_op_;
   const QuantizeFunc ref_quantize_op_;
 };
 
-void VP9QuantizeTest::run() {
-  quantize_op_(coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr, q_ptr,
-               quant_shift_ptr_, qcoeff.TopLeftPixel(), dqcoeff.TopLeftPixel(),
-               dequant_ptr_, &eob, scan->scan, scan->iscan);
+void VP9QuantizeTest::Run() {
+  quantize_op_(coeff_.TopLeftPixel(), count_, skip_block_, zbin_ptr_, r_ptr_,
+               q_ptr_, quant_shift_ptr_, qcoeff_.TopLeftPixel(),
+               dqcoeff_.TopLeftPixel(), dequant_ptr_, &eob_, scan_->scan,
+               scan_->iscan);
 }
 
 // This quantizer compares the AC coefficients to the quantization step size to
@@ -292,9 +293,9 @@ void GenerateHelperArrays(ACMRandom *rnd, int16_t *zbin, int16_t *round,
 
 TEST_P(VP9QuantizeTest, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  ASSERT_TRUE(coeff.Init());
-  ASSERT_TRUE(qcoeff.Init());
-  ASSERT_TRUE(dqcoeff.Init());
+  ASSERT_TRUE(coeff_.Init());
+  ASSERT_TRUE(qcoeff_.Init());
+  ASSERT_TRUE(dqcoeff_.Init());
   Buffer<tran_low_t> ref_qcoeff =
       Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(ref_qcoeff.Init());
@@ -302,7 +303,7 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
       Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(ref_dqcoeff.Init());
   uint16_t ref_eob = 0;
-  eob = 0;
+  eob_ = 0;
 
   for (int i = 0; i < number_of_iterations; ++i) {
     // Test skip block for the first three iterations to catch all the different
@@ -315,31 +316,31 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
       sz = TX_32X32;
     }
     const TX_TYPE tx_type = static_cast<TX_TYPE>((i >> 2) % 3);
-    scan = &vp9_scan_orders[sz][tx_type];
-    count = (4 << sz) * (4 << sz);
-    coeff.Set(&rnd, -max_value_, max_value_);
+    scan_ = &vp9_scan_orders[sz][tx_type];
+    count_ = (4 << sz) * (4 << sz);
+    coeff_.Set(&rnd, -max_value_, max_value_);
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_, round_fp_ptr_,
                          quant_fp_ptr_);
-    ref_quantize_op_(coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr,
-                     q_ptr, quant_shift_ptr_, ref_qcoeff.TopLeftPixel(),
-                     ref_dqcoeff.TopLeftPixel(), dequant_ptr_, &ref_eob,
-                     scan->scan, scan->iscan);
+    ref_quantize_op_(coeff_.TopLeftPixel(), count_, skip_block, zbin_ptr_,
+                     r_ptr_, q_ptr_, quant_shift_ptr_,
+                     ref_qcoeff.TopLeftPixel(), ref_dqcoeff.TopLeftPixel(),
+                     dequant_ptr_, &ref_eob, scan_->scan, scan_->iscan);
 
     ASM_REGISTER_STATE_CHECK(quantize_op_(
-        coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr, q_ptr,
-        quant_shift_ptr_, qcoeff.TopLeftPixel(), dqcoeff.TopLeftPixel(),
-        dequant_ptr_, &eob, scan->scan, scan->iscan));
+        coeff_.TopLeftPixel(), count_, skip_block, zbin_ptr_, r_ptr_, q_ptr_,
+        quant_shift_ptr_, qcoeff_.TopLeftPixel(), dqcoeff_.TopLeftPixel(),
+        dequant_ptr_, &eob_, scan_->scan, scan_->iscan));
 
-    EXPECT_TRUE(qcoeff.CheckValues(ref_qcoeff));
-    EXPECT_TRUE(dqcoeff.CheckValues(ref_dqcoeff));
+    EXPECT_TRUE(qcoeff_.CheckValues(ref_qcoeff));
+    EXPECT_TRUE(dqcoeff_.CheckValues(ref_dqcoeff));
 
-    EXPECT_EQ(eob, ref_eob);
+    EXPECT_EQ(eob_, ref_eob);
 
     if (HasFailure()) {
       printf("Failure on iteration %d.\n", i);
-      qcoeff.PrintDifference(ref_qcoeff);
-      dqcoeff.PrintDifference(ref_dqcoeff);
+      qcoeff_.PrintDifference(ref_qcoeff);
+      dqcoeff_.PrintDifference(ref_dqcoeff);
       return;
     }
   }
@@ -347,9 +348,9 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
 
 TEST_P(VP9QuantizeTest, EOBCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  ASSERT_TRUE(coeff.Init());
-  ASSERT_TRUE(qcoeff.Init());
-  ASSERT_TRUE(dqcoeff.Init());
+  ASSERT_TRUE(coeff_.Init());
+  ASSERT_TRUE(qcoeff_.Init());
+  ASSERT_TRUE(dqcoeff_.Init());
   Buffer<tran_low_t> ref_qcoeff =
       Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(ref_qcoeff.Init());
@@ -357,11 +358,11 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
       Buffer<tran_low_t>(max_size_, max_size_, 0, 32);
   ASSERT_TRUE(ref_dqcoeff.Init());
   uint16_t ref_eob = 0;
-  eob = 0;
+  eob_ = 0;
   const uint32_t max_index = max_size_ * max_size_ - 1;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    skip_block = 0;
+    skip_block_ = 0;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = static_cast<TX_SIZE>(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -369,36 +370,36 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
       sz = TX_32X32;
     }
     const TX_TYPE tx_type = static_cast<TX_TYPE>((i >> 2) % 3);
-    scan = &vp9_scan_orders[sz][tx_type];
-    count = (4 << sz) * (4 << sz);
+    scan_ = &vp9_scan_orders[sz][tx_type];
+    count_ = (4 << sz) * (4 << sz);
     // Two random entries
-    coeff.Set(0);
-    coeff.TopLeftPixel()[rnd.RandRange(count) & max_index] =
+    coeff_.Set(0);
+    coeff_.TopLeftPixel()[rnd.RandRange(count_) & max_index] =
         static_cast<int>(rnd.RandRange(max_value_ * 2)) - max_value_;
-    coeff.TopLeftPixel()[rnd.RandRange(count) & max_index] =
+    coeff_.TopLeftPixel()[rnd.RandRange(count_) & max_index] =
         static_cast<int>(rnd.RandRange(max_value_ * 2)) - max_value_;
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_, round_fp_ptr_,
                          quant_fp_ptr_);
-    ref_quantize_op_(coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr,
-                     q_ptr, quant_shift_ptr_, ref_qcoeff.TopLeftPixel(),
-                     ref_dqcoeff.TopLeftPixel(), dequant_ptr_, &ref_eob,
-                     scan->scan, scan->iscan);
+    ref_quantize_op_(coeff_.TopLeftPixel(), count_, skip_block_, zbin_ptr_,
+                     r_ptr_, q_ptr_, quant_shift_ptr_,
+                     ref_qcoeff.TopLeftPixel(), ref_dqcoeff.TopLeftPixel(),
+                     dequant_ptr_, &ref_eob, scan_->scan, scan_->iscan);
 
     ASM_REGISTER_STATE_CHECK(quantize_op_(
-        coeff.TopLeftPixel(), count, skip_block, zbin_ptr_, r_ptr, q_ptr,
-        quant_shift_ptr_, qcoeff.TopLeftPixel(), dqcoeff.TopLeftPixel(),
-        dequant_ptr_, &eob, scan->scan, scan->iscan));
+        coeff_.TopLeftPixel(), count_, skip_block_, zbin_ptr_, r_ptr_, q_ptr_,
+        quant_shift_ptr_, qcoeff_.TopLeftPixel(), dqcoeff_.TopLeftPixel(),
+        dequant_ptr_, &eob_, scan_->scan, scan_->iscan));
 
-    EXPECT_TRUE(qcoeff.CheckValues(ref_qcoeff));
-    EXPECT_TRUE(dqcoeff.CheckValues(ref_dqcoeff));
+    EXPECT_TRUE(qcoeff_.CheckValues(ref_qcoeff));
+    EXPECT_TRUE(dqcoeff_.CheckValues(ref_dqcoeff));
 
-    EXPECT_EQ(eob, ref_eob);
+    EXPECT_EQ(eob_, ref_eob);
 
     if (HasFailure()) {
       printf("Failure on iteration %d.\n", i);
-      qcoeff.PrintDifference(ref_qcoeff);
-      dqcoeff.PrintDifference(ref_dqcoeff);
+      qcoeff_.PrintDifference(ref_qcoeff);
+      dqcoeff_.PrintDifference(ref_dqcoeff);
       return;
     }
   }
@@ -406,9 +407,9 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
 
 TEST_P(VP9QuantizeTest, DISABLED_Speed) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  ASSERT_TRUE(coeff.Init());
-  ASSERT_TRUE(qcoeff.Init());
-  ASSERT_TRUE(dqcoeff.Init());
+  ASSERT_TRUE(coeff_.Init());
+  ASSERT_TRUE(qcoeff_.Init());
+  ASSERT_TRUE(dqcoeff_.Init());
   TX_SIZE starting_sz, ending_sz;
 
   if (max_size_ == 16) {
@@ -422,12 +423,12 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
   for (TX_SIZE sz = starting_sz; sz <= ending_sz; ++sz) {
     // zbin > coeff, zbin < coeff.
     for (int i = 0; i < 2; ++i) {
-      skip_block = 0;
+      skip_block_ = 0;
       // TX_TYPE defines the scan order. That is not relevant to the speed test.
       // Pick the first one.
       const TX_TYPE tx_type = DCT_DCT;
-      count = (4 << sz) * (4 << sz);
-      scan = &vp9_scan_orders[sz][tx_type];
+      count_ = (4 << sz) * (4 << sz);
+      scan_ = &vp9_scan_orders[sz][tx_type];
 
       GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                            quant_shift_ptr_, dequant_ptr_, round_fp_ptr_,
@@ -442,20 +443,20 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
           threshold = 200;
         }
         for (int j = 0; j < 8; ++j) zbin_ptr_[j] = threshold;
-        coeff.Set(&rnd, -99, 99);
+        coeff_.Set(&rnd, -99, 99);
       } else if (i == 1) {
         for (int j = 0; j < 8; ++j) zbin_ptr_[j] = 50;
-        coeff.Set(&rnd, -500, 500);
+        coeff_.Set(&rnd, -500, 500);
       }
 
-      runNTimes(10000000 / count);
+      RunNTimes(10000000 / count_);
       const char *type =
           (i == 0) ? "Bypass calculations " : "Full calculations ";
       char block_size[16];
       snprintf(block_size, sizeof(block_size), "%dx%d", 4 << sz, 4 << sz);
       char title[100];
       snprintf(title, sizeof(title), "%25s %8s ", type, block_size);
-      printMedian(title);
+      PrintMedian(title);
     }
   }
 }

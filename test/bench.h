@@ -16,15 +16,15 @@
 
 class AbstractBench {
  public:
-  void runNTimes(int n);
-  void printMedian(const char *title);
+  void RunNTimes(int n);
+  void PrintMedian(const char *title);
 
  protected:
   // Implement this method and put the code to benchmark in it.
-  virtual void run() = 0;
+  virtual void Run() = 0;
 
  private:
-  int times[VPX_BENCH_ROBUST_ITER];
+  int times_[VPX_BENCH_ROBUST_ITER];
 };
 
 #endif  // TEST_BENCH_H_
