@@ -16,6 +16,24 @@
       "revId": "0e7b62722275642223766a5cb326c3a7659eafe7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35521565_4d7183d4",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-04T23:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3ac3530a_de003596",
+      "revId": "0e7b62722275642223766a5cb326c3a7659eafe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
