@@ -1497,6 +1497,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int skip_ref_find_pred[4] = { 0 };
   unsigned int sse_zeromv_normalized = UINT_MAX;
   unsigned int best_sse_sofar = UINT_MAX;
+  int gf_is_longterm_ref = 0;
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_PICKMODE_CTX_DEN ctx_den;
   int64_t zero_last_cost_orig = INT64_MAX;
@@ -1537,6 +1538,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   else if (svc->spatial_layer_id > 0 && cm->base_qindex < 140 &&
            cm->base_qindex < svc->lower_layer_qindex - 20)
     thresh_svc_skip_golden = 1000;
+
+  if (!cpi->use_svc ||
+      (svc->use_longterm_ref_current_layer &&
+       !svc->layer_context[svc->temporal_layer_id].is_key_frame))
+    gf_is_longterm_ref = 1;
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
   memset(&mode_checked[0][0], 0, MB_MODE_COUNT * MAX_REF_FRAMES);
@@ -1610,7 +1616,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   }
 #endif
 
-  if (cpi->rc.frames_since_golden == 0 && !cpi->use_svc &&
+  if (cpi->rc.frames_since_golden == 0 && gf_is_longterm_ref &&
       !cpi->rc.alt_ref_gf_group && !cpi->rc.last_frame_is_src_altref) {
     usable_ref_frame = LAST_FRAME;
   } else {
@@ -1637,7 +1643,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // For svc mode, on spatial_layer_id > 0: if the reference has different scale
   // constrain the inter mode to only test zero motion.
   if (cpi->use_svc && svc->force_zero_mode_spatial_ref &&
-      svc->spatial_layer_id > 0) {
+      svc->spatial_layer_id > 0 && !gf_is_longterm_ref) {
     if (cpi->ref_frame_flags & flag_list[LAST_FRAME]) {
       struct scale_factors *const sf = &cm->frame_refs[LAST_FRAME - 1].sf;
       if (vp9_is_scaled(sf)) {
@@ -1716,7 +1722,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // The nonzero motion is half pixel shifted to left and top (-4, -4).
   if (cpi->use_svc && svc->spatial_layer_id > 0 &&
       svc_force_zero_mode[inter_layer_ref - 1] &&
-      svc->downsample_filter_phase[svc->spatial_layer_id - 1] == 8) {
+      svc->downsample_filter_phase[svc->spatial_layer_id - 1] == 8 &&
+      !gf_is_longterm_ref) {
     svc_mv_col = -4;
     svc_mv_row = -4;
     flag_svc_subpel = 1;
@@ -1789,7 +1796,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
     // For SVC, skip the golden (spatial) reference search if sse of zeromv_last
     // is below threshold.
-    if (cpi->use_svc && ref_frame == GOLDEN_FRAME &&
+    if (cpi->use_svc && ref_frame == GOLDEN_FRAME && !gf_is_longterm_ref &&
         sse_zeromv_normalized < thresh_svc_skip_golden)
       continue;
 
@@ -1909,7 +1916,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       if (frame_mv[this_mode][ref_frame].as_int != 0) continue;
 
     if (this_mode == NEWMV && !force_mv_inter_layer) {
-      if (ref_frame > LAST_FRAME && !cpi->use_svc &&
+      if (ref_frame > LAST_FRAME && gf_is_longterm_ref &&
           cpi->oxcf.rc_mode == VPX_CBR) {
         int tmp_sad;
         uint32_t dis;
@@ -2277,7 +2284,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // layer is chosen as the reference. Always perform intra prediction if
   // LAST is the only reference, or is_key_frame is set, or on base
   // temporal layer.
-  if (svc->spatial_layer_id) {
+  if (svc->spatial_layer_id && !gf_is_longterm_ref) {
     perform_intra_pred =
         svc->temporal_layer_id == 0 ||
         svc->layer_context[svc->temporal_layer_id].is_key_frame ||

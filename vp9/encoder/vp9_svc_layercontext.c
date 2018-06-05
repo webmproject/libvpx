@@ -33,6 +33,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->force_zero_mode_spatial_ref = 0;
   svc->use_base_mv = 0;
   svc->use_partition_reuse = 0;
+  svc->use_longterm_ref = 0;
+  svc->use_longterm_ref_current_layer = 0;
   svc->scaled_temp_is_alloc = 0;
   svc->scaled_one_half = 0;
   svc->current_superframe = 0;
@@ -709,6 +711,34 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
     }
   }
 
+  // For the fixed (non-flexible/bypass) SVC mode:
+  // If long term temporal reference is enabled at the sequence level
+  // (use_longterm_ref == 1), and inter_layer is disabled (on inter-frames),
+  // we can use golden as a second temporal reference
+  // (since the spatial/inter-layer reference is disabled).
+  // To be safe we use fb_index 7 for this, since for 3-3 layer system slot 7
+  // should be free/un-used. For now usage of this second temporal reference
+  // will only be used for highest spatial layer.
+  cpi->svc.use_longterm_ref_current_layer = 0;
+  cpi->svc.buffer_idx_longterm_ref = 7;
+  if (cpi->svc.use_longterm_ref &&
+      cpi->svc.temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
+      cpi->svc.disable_inter_layer_pred != INTER_LAYER_PRED_ON &&
+      cpi->svc.number_spatial_layers <= 3 &&
+      cpi->svc.number_temporal_layers <= 3 &&
+      cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1) {
+    // Enable the second (long-term) temporal reference at the frame-level.
+    cpi->svc.use_longterm_ref_current_layer = 1;
+    // Only used for prediction for on non-key superframes.
+    if (!cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame) {
+      // Use golden for this reference which will be used for prediction.
+      cpi->gld_fb_idx = cpi->svc.buffer_idx_longterm_ref;
+      // Enable prediction off LAST (last reference) and golden (which will
+      // generally be further behind/long-term reference).
+      cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
+    }
+  }
+
   // Reset the drop flags for all spatial layers, on the base layer.
   if (cpi->svc.spatial_layer_id == 0) {
     vp9_zero(cpi->svc.drop_spatial_layer);
@@ -955,7 +985,7 @@ void vp9_svc_assert_constraints_pattern(VP9_COMP *const cpi) {
   if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
       svc->disable_inter_layer_pred == INTER_LAYER_PRED_ON &&
       svc->framedrop_mode != LAYER_DROP) {
-    if (!cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame) {
+    if (!svc->layer_context[svc->temporal_layer_id].is_key_frame) {
       // On non-key frames: LAST is always temporal reference, GOLDEN is
       // spatial reference.
       if (svc->temporal_layer_id == 0)
@@ -988,5 +1018,14 @@ void vp9_svc_assert_constraints_pattern(VP9_COMP *const cpi) {
                svc->temporal_layer_id);
       }
     }
+  } else if (svc->use_longterm_ref_current_layer &&
+             !svc->layer_context[svc->temporal_layer_id].is_key_frame) {
+    // If the usage of golden as second long term reference is enabled for this
+    // layer, then temporal_layer_id of that reference must be base temporal
+    // layer 0, and spatial_layer_id of that reference must be same as current
+    // spatial_layer_id.
+    assert(svc->fb_idx_spatial_layer_id[cpi->gld_fb_idx] ==
+           svc->spatial_layer_id);
+    assert(svc->fb_idx_temporal_layer_id[cpi->gld_fb_idx] == 0);
   }
 }

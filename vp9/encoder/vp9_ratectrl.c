@@ -1597,6 +1597,18 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
       update_golden_frame_stats(cpi);
   }
 
+  // If second (long term) temporal reference is used for SVC,
+  // update the golden frame counter, only for base temporal layer.
+  if (cpi->use_svc && cpi->svc.use_longterm_ref_current_layer &&
+      cpi->svc.temporal_layer_id == 0) {
+    if (cpi->refresh_golden_frame)
+      rc->frames_since_golden = 0;
+    else
+      rc->frames_since_golden++;
+    // Decrement count down till next gf
+    if (rc->frames_till_gf_update_due > 0) rc->frames_till_gf_update_due--;
+  }
+
   if (cm->frame_type == KEY_FRAME) rc->frames_since_key = 0;
   if (cm->show_frame) {
     rc->frames_since_key++;
@@ -1861,15 +1873,37 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
   }
-
+  // If long term termporal feature is enabled, set the period of the update.
+  // The update/refresh of this reference frame  is always on base temporal
+  // layer frame.
+  if (cpi->svc.use_longterm_ref_current_layer &&
+      cpi->svc.temporal_layer_id == 0) {
+    if (cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame) {
+      // On key frame we update the buffer index used for long term reference.
+      // Use the alt_ref since it is not used or updated on key frames.
+      cpi->ext_refresh_alt_ref_frame = 1;
+      cpi->alt_fb_idx = cpi->svc.buffer_idx_longterm_ref;
+    } else if (rc->frames_till_gf_update_due == 0) {
+      // Set perdiod of next update. Make it a multiple of 10, as the cyclic
+      // refresh is typically ~10%, and we'd like the update to happen after
+      // a few cylces of the refresh (so it better quality frame). Note the
+      // cyclic refresh for SVC only operates on base temporal layer frames.
+      // Choose 20 as perdiod for now (2 cycles).
+      rc->baseline_gf_interval = 20;
+      rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+      cpi->ext_refresh_golden_frame = 1;
+      rc->gfu_boost = DEFAULT_GF_BOOST;
+    }
+  } else if (!cpi->svc.use_longterm_ref) {
+    rc->frames_till_gf_update_due = INT_MAX;
+    rc->baseline_gf_interval = INT_MAX;
+  }
   // Any update/change of global cyclic refresh parameters (amount/delta-qp)
   // should be done here, before the frame qp is selected.
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
     vp9_cyclic_refresh_update_parameters(cpi);
 
   vp9_rc_set_frame_target(cpi, target);
-  rc->frames_till_gf_update_due = INT_MAX;
-  rc->baseline_gf_interval = INT_MAX;
 }
 
 void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
