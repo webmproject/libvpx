@@ -512,6 +512,8 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   struct segmentation *const seg = &cm->seg;
   if (cm->current_video_frame == 0) cr->low_content_avg = 0.0;
+  // Reset if resoluton change has occurred.
+  if (cpi->resize_pending != 0) vp9_cyclic_refresh_reset_resize(cpi);
   if (!cr->apply_cyclic_refresh || (cpi->force_update_segmentation)) {
     // Set segmentation map to 0 and disable.
     unsigned char *const seg_map = cpi->segmentation_map;
@@ -576,9 +578,6 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
                0.1 * cr->rate_boost_fac * cr->rate_ratio_qdelta));
     cr->qindex_delta[2] = qindex_delta;
     vp9_set_segdata(seg, CR_SEGMENT_ID_BOOST2, SEG_LVL_ALT_Q, qindex_delta);
-
-    // Reset if resoluton change has occurred.
-    if (cpi->resize_pending != 0) vp9_cyclic_refresh_reset_resize(cpi);
 
     // Update the segmentation and refresh map.
     cyclic_refresh_update_map(cpi);
