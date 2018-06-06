@@ -342,6 +342,7 @@ DSP_SRCS-$(HAVE_SSE2)   += x86/sad_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/subtract_sse2.asm
 
 DSP_SRCS-$(HAVE_VSX) += ppc/sad_vsx.c
+DSP_SRCS-$(HAVE_VSX) += ppc/subtract_vsx.c
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad4d_sse2.asm

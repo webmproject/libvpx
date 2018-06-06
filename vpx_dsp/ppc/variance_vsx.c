@@ -14,13 +14,6 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/ppc/types_vsx.h"
 
-static INLINE uint8x16_t read4x2(const uint8_t *a, int stride) {
-  const uint32x4_t a0 = (uint32x4_t)vec_vsx_ld(0, a);
-  const uint32x4_t a1 = (uint32x4_t)vec_vsx_ld(0, a + stride);
-
-  return (uint8x16_t)vec_mergeh(a0, a1);
-}
-
 uint32_t vpx_get4x4sse_cs_vsx(const uint8_t *a, int a_stride, const uint8_t *b,
                               int b_stride) {
   int distortion;

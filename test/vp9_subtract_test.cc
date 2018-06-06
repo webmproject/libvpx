@@ -145,4 +145,9 @@ INSTANTIATE_TEST_CASE_P(MMI, VP9SubtractBlockTest,
                         ::testing::Values(vpx_subtract_block_mmi));
 #endif
 
+#if HAVE_VSX
+INSTANTIATE_TEST_CASE_P(VSX, VP9SubtractBlockTest,
+                        ::testing::Values(vpx_subtract_block_vsx));
+#endif
+
 }  // namespace vp9

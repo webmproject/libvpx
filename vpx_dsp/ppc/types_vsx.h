@@ -68,6 +68,13 @@ static const uint8x16_t xxpermdi3_perm = { 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
 #endif
 #endif
 
+static INLINE uint8x16_t read4x2(const uint8_t *a, int stride) {
+  const uint32x4_t a0 = (uint32x4_t)vec_vsx_ld(0, a);
+  const uint32x4_t a1 = (uint32x4_t)vec_vsx_ld(0, a + stride);
+
+  return (uint8x16_t)vec_mergeh(a0, a1);
+}
+
 static const uint8x16_t vec_zeros_u8 = { 0, 0, 0, 0, 0, 0, 0, 0,
                                          0, 0, 0, 0, 0, 0, 0, 0 };
 static const int16x8_t vec_zeros_s16 = { 0, 0, 0, 0, 0, 0, 0, 0 };
