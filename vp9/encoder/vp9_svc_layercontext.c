@@ -33,7 +33,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->force_zero_mode_spatial_ref = 0;
   svc->use_base_mv = 0;
   svc->use_partition_reuse = 0;
-  svc->use_longterm_ref = 0;
+  svc->use_longterm_ref = 1;
   svc->use_longterm_ref_current_layer = 0;
   svc->scaled_temp_is_alloc = 0;
   svc->scaled_one_half = 0;
