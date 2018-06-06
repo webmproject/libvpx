@@ -22,6 +22,30 @@
       "revId": "76f60ac90318f566ea9447bbf0169056b7d35396",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49e4aebf_df67b2e5",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-06T20:18:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dddf012c_a8373c06",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 11
+      },
+      "revId": "76f60ac90318f566ea9447bbf0169056b7d35396",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
