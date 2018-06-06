@@ -84,6 +84,9 @@ static FILE *yuv_skinmap_file = NULL;
 #ifdef OUTPUT_YUV_REC
 FILE *yuv_rec_file;
 #endif
+#ifdef OUTPUT_YUV_SVC_SRC
+FILE *yuv_svc_src[3] = { NULL, NULL, NULL };
+#endif
 
 #if 0
 FILE *framepsnr;
@@ -2250,6 +2253,11 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 #ifdef OUTPUT_YUV_REC
   yuv_rec_file = fopen("rec.yuv", "wb");
 #endif
+#ifdef OUTPUT_YUV_SVC_SRC
+  yuv_svc_src[0] = fopen("svc_src_0.yuv", "wb");
+  yuv_svc_src[1] = fopen("svc_src_1.yuv", "wb");
+  yuv_svc_src[2] = fopen("svc_src_2.yuv", "wb");
+#endif
 
 #if 0
   framepsnr = fopen("framepsnr.stt", "a");
@@ -2567,6 +2575,11 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
 #ifdef OUTPUT_YUV_REC
   fclose(yuv_rec_file);
+#endif
+#ifdef OUTPUT_YUV_SVC_SRC
+  fclose(yuv_svc_src[0]);
+  fclose(yuv_svc_src[1]);
+  fclose(yuv_svc_src[2]);
 #endif
 
 #if 0
@@ -3661,6 +3674,12 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
         cm, cpi->un_scaled_source, &cpi->scaled_source, (cpi->oxcf.pass == 0),
         filter_scaler, phase_scaler);
   }
+#ifdef OUTPUT_YUV_SVC_SRC
+  // Write out at most 3 spatial layers.
+  if (is_one_pass_cbr_svc(cpi) && cpi->svc.spatial_layer_id < 3) {
+    vpx_write_yuv_frame(yuv_svc_src[cpi->svc.spatial_layer_id], cpi->Source);
+  }
+#endif
   // Unfiltered raw source used in metrics calculation if the source
   // has been filtered.
   if (is_psnr_calc_enabled(cpi)) {
