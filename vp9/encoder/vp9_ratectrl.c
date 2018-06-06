@@ -1837,24 +1837,23 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
 void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
+  SVC *const svc = &cpi->svc;
   int target = rc->avg_frame_bandwidth;
-  int layer =
-      LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id, cpi->svc.temporal_layer_id,
-                       cpi->svc.number_temporal_layers);
+  int layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, svc->temporal_layer_id,
+                               svc->number_temporal_layers);
   // Periodic key frames is based on the super-frame counter
   // (svc.current_superframe), also only base spatial layer is key frame.
   if ((cm->current_video_frame == 0) || (cpi->frame_flags & FRAMEFLAGS_KEY) ||
       (cpi->oxcf.auto_key &&
-       (cpi->svc.current_superframe % cpi->oxcf.key_freq == 0) &&
-       cpi->svc.spatial_layer_id == 0)) {
+       (svc->current_superframe % cpi->oxcf.key_freq == 0) &&
+       svc->spatial_layer_id == 0)) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
     if (is_one_pass_cbr_svc(cpi)) {
       if (cm->current_video_frame > 0) vp9_svc_reset_key_frame(cpi);
-      layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
-                               cpi->svc.temporal_layer_id,
-                               cpi->svc.number_temporal_layers);
-      cpi->svc.layer_context[layer].is_key_frame = 1;
+      layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, svc->temporal_layer_id,
+                               svc->number_temporal_layers);
+      svc->layer_context[layer].is_key_frame = 1;
       cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
       // Assumption here is that LAST_FRAME is being updated for a keyframe.
       // Thus no change in update flags.
@@ -1863,12 +1862,12 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   } else {
     cm->frame_type = INTER_FRAME;
     if (is_one_pass_cbr_svc(cpi)) {
-      LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
-      if (cpi->svc.spatial_layer_id == cpi->svc.first_spatial_layer_to_encode) {
+      LAYER_CONTEXT *lc = &svc->layer_context[layer];
+      if (svc->spatial_layer_id == svc->first_spatial_layer_to_encode) {
         lc->is_key_frame = 0;
       } else {
         lc->is_key_frame =
-            cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame;
+            svc->layer_context[svc->temporal_layer_id].is_key_frame;
       }
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
@@ -1876,13 +1875,12 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   // If long term termporal feature is enabled, set the period of the update.
   // The update/refresh of this reference frame  is always on base temporal
   // layer frame.
-  if (cpi->svc.use_longterm_ref_current_layer &&
-      cpi->svc.temporal_layer_id == 0) {
-    if (cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame) {
+  if (svc->use_longterm_ref_current_layer && svc->temporal_layer_id == 0) {
+    if (svc->layer_context[svc->temporal_layer_id].is_key_frame) {
       // On key frame we update the buffer index used for long term reference.
       // Use the alt_ref since it is not used or updated on key frames.
       cpi->ext_refresh_alt_ref_frame = 1;
-      cpi->alt_fb_idx = cpi->svc.buffer_idx_longterm_ref;
+      cpi->alt_fb_idx = svc->buffer_longterm_ref.idx;
     } else if (rc->frames_till_gf_update_due == 0) {
       // Set perdiod of next update. Make it a multiple of 10, as the cyclic
       // refresh is typically ~10%, and we'd like the update to happen after
@@ -1894,7 +1892,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       cpi->ext_refresh_golden_frame = 1;
       rc->gfu_boost = DEFAULT_GF_BOOST;
     }
-  } else if (!cpi->svc.use_longterm_ref) {
+  } else if (!svc->use_longterm_ref) {
     rc->frames_till_gf_update_due = INT_MAX;
     rc->baseline_gf_interval = INT_MAX;
   }

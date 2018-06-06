@@ -32,6 +32,11 @@ typedef enum {
   INTER_LAYER_PRED_ON_CONSTRAINED
 } INTER_LAYER_PRED;
 
+typedef struct BUFFER_LONGTERM_REF {
+  int idx;
+  int is_used;
+} BUFFER_LONGTERM_REF;
+
 typedef struct {
   RATE_CONTROL rc;
   int target_bandwidth;
@@ -101,7 +106,7 @@ typedef struct SVC {
   int use_longterm_ref;
   // Frame level flag to enable second (long term) temporal reference.
   int use_longterm_ref_current_layer;
-  int buffer_idx_longterm_ref;
+  BUFFER_LONGTERM_REF buffer_longterm_ref;
   int current_superframe;
   int non_reference_frame;
   int use_base_mv;
