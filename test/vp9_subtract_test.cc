@@ -102,7 +102,7 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
         for (int c = 0; c < block_width_; ++c) {
           EXPECT_EQ(diff_[r * block_width_ + c],
                     (src_[r * block_width_ + c] - pred_[r * block_width_ + c]))
-              << "r = " << r << ", c = " << c << ", bs = " << bsize;
+              << "r = " << r << ", c = " << c << ", bs = " << (int)bsize;
         }
       }
 
@@ -114,7 +114,7 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
           EXPECT_EQ(diff_[r * block_width_ * 2 + c],
                     (src_[r * block_width_ * 2 + c] -
                      pred_[r * block_width_ * 2 + c]))
-              << "r = " << r << ", c = " << c << ", bs = " << bsize;
+              << "r = " << r << ", c = " << c << ", bs = " << (int)bsize;
         }
       }
     }
