@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "432dbb88_59b7acf5",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3678,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-06T23:10:52Z",
+      "side": 1,
+      "message": "if (cpi-\u003esvc.spatial_layer_id \u003c 3)",
+      "revId": "ca49898a2d335737f68d488a2b927d6e44f4f5e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c4f9e29_90565afa",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3679,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-06T23:10:52Z",
+      "side": 1,
+      "message": "put comment?: \"Write out at most first 3 spatial layers.\"",
+      "revId": "ca49898a2d335737f68d488a2b927d6e44f4f5e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
