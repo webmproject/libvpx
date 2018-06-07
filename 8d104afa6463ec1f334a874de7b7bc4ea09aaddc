@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "c03b07d1_b47008f3",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1884,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-07T19:27:26Z",
+      "side": 1,
+      "message": "added an assert, is this enough?",
+      "parentUuid": "d9b8918d_bb17a876",
+      "range": {
+        "startLine": 1884,
+        "startChar": 56,
+        "endLine": 1884,
+        "endChar": 72
+      },
+      "revId": "8d104afa6463ec1f334a874de7b7bc4ea09aaddc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9ab11910_9467fca9",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 2
@@ -84,6 +108,30 @@
       "side": 1,
       "message": "right, so layer 1 and 2 would be used for 3 spatial layers",
       "parentUuid": "9ab11910_9467fca9",
+      "range": {
+        "startLine": 743,
+        "startChar": 36,
+        "endLine": 743,
+        "endChar": 57
+      },
+      "revId": "8d104afa6463ec1f334a874de7b7bc4ea09aaddc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d2d66967_e84acc56",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-07T19:27:26Z",
+      "side": 1,
+      "message": "added a comment",
+      "parentUuid": "95f7db24_db23e4e4",
       "range": {
         "startLine": 743,
         "startChar": 36,
