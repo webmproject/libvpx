@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d2a0e902_d15e1285",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1277,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-07T22:03:54Z",
+      "side": 1,
+      "message": "since it might not be limited to darwin, should you add this here:\nhttps://chromium.googlesource.com/webm/libvpx/+/master/build/make/configure.sh#1334",
+      "revId": "1a09c43ec946687ae23a9039bc5a28fdde8ec237",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc2bf034_f94241dc",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1282,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-07T22:03:54Z",
+      "side": 1,
+      "message": "probably want a \u0027(void)x\u0027 to avoid any flag interactions",
+      "revId": "1a09c43ec946687ae23a9039bc5a28fdde8ec237",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
