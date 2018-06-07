@@ -1540,7 +1540,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     thresh_svc_skip_golden = 1000;
 
   if (!cpi->use_svc ||
-      (svc->use_longterm_ref_current_layer &&
+      (svc->use_gf_temporal_ref_current_layer &&
        !svc->layer_context[svc->temporal_layer_id].is_key_frame))
     gf_is_longterm_ref = 1;
 

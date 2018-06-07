@@ -1318,7 +1318,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     assert(yv12 != NULL);
 
     if (!(is_one_pass_cbr_svc(cpi) && cpi->svc.spatial_layer_id) ||
-        cpi->svc.use_longterm_ref_current_layer) {
+        cpi->svc.use_gf_temporal_ref_current_layer) {
       // For now, GOLDEN will not be used for non-zero spatial layers, since
       // it may not be a temporal reference.
       yv12_g = get_ref_frame_buffer(cpi, GOLDEN_FRAME);

@@ -627,6 +627,16 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_GET_SVC_REF_FRAME_CONFIG,
+
+  /*!\brief Codec control function to enable/disable use of golden reference as
+   * a second temporal reference for SVC. Only used when inter-layer prediction
+   * is disabled on INTER frames.
+   *
+   * 0: Off, 1: Enabled (default)
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_SVC_GF_TEMPORAL_REF,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -946,6 +956,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_SVC_FRAME_DROP_LAYER, vpx_svc_frame_drop_t *)
 
 VPX_CTRL_USE_TYPE(VP9E_GET_SVC_REF_FRAME_CONFIG, vpx_svc_ref_frame_config_t *)
 #define VPX_CTRL_VP9E_GET_SVC_REF_FRAME_CONFIG
+
+VPX_CTRL_USE_TYPE(VP9E_SET_SVC_GF_TEMPORAL_REF, unsigned int)
+#define VPX_CTRL_VP9E_SET_SVC_GF_TEMPORAL_REF
 
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */
