@@ -744,16 +744,6 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
       svc->spatial_layer_id >= svc->number_spatial_layers - 2) {
     // Enable the second (long-term) temporal reference at the frame-level.
     svc->use_gf_temporal_ref_current_layer = 1;
-    // Only used for prediction for on non-key superframes.
-    if (!svc->layer_context[svc->temporal_layer_id].is_key_frame) {
-      // Use golden for this reference which will be used for prediction.
-      int index = svc->spatial_layer_id;
-      if (svc->number_spatial_layers == 3) index = svc->spatial_layer_id - 1;
-      cpi->gld_fb_idx = svc->buffer_gf_temporal_ref[index].idx;
-      // Enable prediction off LAST (last reference) and golden (which will
-      // generally be further behind/long-term reference).
-      cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
-    }
   }
 
   // Reset the drop flags for all spatial layers, on the base layer.
