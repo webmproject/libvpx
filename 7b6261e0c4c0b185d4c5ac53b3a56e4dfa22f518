@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00faebf7_65fb50dd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-07T20:46:44Z",
+      "side": 1,
+      "message": "do you need to bump up ABI version?",
+      "revId": "7b6261e0c4c0b185d4c5ac53b3a56e4dfa22f518",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
