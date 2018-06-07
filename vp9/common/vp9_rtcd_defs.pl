@@ -129,7 +129,7 @@ add_proto qw/int64_t vp9_block_error/, "const tran_low_t *coeff, const tran_low_
 add_proto qw/int64_t vp9_block_error_fp/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, int block_size";
 
 add_proto qw/void vp9_quantize_fp/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *round_ptr, const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
-specialize qw/vp9_quantize_fp neon sse2 avx2/, "$ssse3_x86_64";
+specialize qw/vp9_quantize_fp neon sse2 avx2 vsx/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_quantize_fp_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *round_ptr, const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
 specialize qw/vp9_quantize_fp_32x32 neon/, "$ssse3_x86_64";

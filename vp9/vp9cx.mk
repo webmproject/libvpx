@@ -140,6 +140,8 @@ VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct8x8_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct16x16_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct_msa.h
 
+VP9_CX_SRCS-$(HAVE_VSX) += encoder/ppc/vp9_quantize_vsx.c
+
 # Strip unnecessary files with CONFIG_REALTIME_ONLY
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_firstpass.c
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_mbgraph.c

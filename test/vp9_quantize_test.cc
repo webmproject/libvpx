@@ -562,13 +562,16 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(VSX, VP9QuantizeTest,
-                        ::testing::Values(make_tuple(&vpx_quantize_b_vsx,
-                                                     &vpx_quantize_b_c,
-                                                     VPX_BITS_8, 16, false),
-                                          make_tuple(&vpx_quantize_b_32x32_vsx,
-                                                     &vpx_quantize_b_32x32_c,
-                                                     VPX_BITS_8, 32, false)));
+INSTANTIATE_TEST_CASE_P(
+    VSX, VP9QuantizeTest,
+    ::testing::Values(make_tuple(&vpx_quantize_b_vsx, &vpx_quantize_b_c,
+                                 VPX_BITS_8, 16, false),
+                      make_tuple(&vpx_quantize_b_32x32_vsx,
+                                 &vpx_quantize_b_32x32_c, VPX_BITS_8, 32,
+                                 false),
+                      make_tuple(&QuantFPWrapper<vp9_quantize_fp_vsx>,
+                                 &QuantFPWrapper<vp9_quantize_fp_c>, VPX_BITS_8,
+                                 16, true)));
 #endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
 
 // Only useful to compare "Speed" test results.
