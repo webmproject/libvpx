@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "373afda2_7c715f37",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1550,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-07T16:48:26Z",
+      "side": 1,
+      "message": "should we rename this internal variable too: use_gf_temporal_ref\n\nmy concern is that \"long term\" is not always long term, since it depends on when its updated relative to current frame....",
+      "revId": "359b361e07f2d98f9025bbb0ce243b21c9ffbcf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f4810455_d8b4364f",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1639,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-07T16:48:26Z",
+      "side": 1,
+      "message": "rename",
+      "revId": "359b361e07f2d98f9025bbb0ce243b21c9ffbcf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3854c71_abb22c86",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-07T16:48:26Z",
+      "side": 1,
+      "message": "lets call this instead:\nVP9E_SET_SVC_GF_TEMPORAL_REF\n\nSince its understood that LAST is always a reference, so GF is necessarily a second one. Also its closer to how its used/named in non-SVC case.\n\nFor description,something like:\nCodec control to enable/disable use of Golden reference as a second temporal reference for SVC. Only used when inter-layer prediction is disabled on INTER frames.\n0 : Enabled (default), 1 : off,",
+      "revId": "359b361e07f2d98f9025bbb0ce243b21c9ffbcf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da14ec7f_57fe3dcc",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 958,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-07T16:48:26Z",
+      "side": 1,
+      "message": "rename, see above",
+      "revId": "359b361e07f2d98f9025bbb0ce243b21c9ffbcf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
