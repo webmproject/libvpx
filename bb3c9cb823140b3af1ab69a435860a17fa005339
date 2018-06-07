@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "665c0e81_fdeab440",
+        "filename": "vpx_dsp/ppc/subtract_vsx.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-06-07T16:11:31Z",
+      "side": 1,
+      "message": "can you squash the 4x4 change in?",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 21
+      },
+      "revId": "bb3c9cb823140b3af1ab69a435860a17fa005339",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
