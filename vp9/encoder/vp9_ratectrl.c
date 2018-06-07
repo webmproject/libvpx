@@ -1879,8 +1879,11 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     if (svc->layer_context[svc->temporal_layer_id].is_key_frame) {
       // On key frame we update the buffer index used for long term reference.
       // Use the alt_ref since it is not used or updated on key frames.
+      int index = svc->spatial_layer_id;
       cpi->ext_refresh_alt_ref_frame = 1;
-      cpi->alt_fb_idx = svc->buffer_longterm_ref.idx;
+      if (svc->number_spatial_layers == 3) index = svc->spatial_layer_id - 1;
+      assert(index >= 0);
+      cpi->alt_fb_idx = svc->buffer_longterm_ref[index].idx;
     } else if (rc->frames_till_gf_update_due == 0) {
       // Set perdiod of next update. Make it a multiple of 10, as the cyclic
       // refresh is typically ~10%, and we'd like the update to happen after

@@ -106,7 +106,8 @@ typedef struct SVC {
   int use_longterm_ref;
   // Frame level flag to enable second (long term) temporal reference.
   int use_longterm_ref_current_layer;
-  BUFFER_LONGTERM_REF buffer_longterm_ref;
+  // Allow second reference for at most 2 top highest resolution layers.
+  BUFFER_LONGTERM_REF buffer_longterm_ref[2];
   int current_superframe;
   int non_reference_frame;
   int use_base_mv;
