@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9375c9d8_08bb16b6",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1884,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-07T18:36:15Z",
+      "side": 1,
+      "message": "would index be negative here since there is no conditions that it needs to be top layer?",
+      "range": {
+        "startLine": 1884,
+        "startChar": 56,
+        "endLine": 1884,
+        "endChar": 72
+      },
+      "revId": "8d104afa6463ec1f334a874de7b7bc4ea09aaddc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ab11910_9467fca9",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-07T18:36:15Z",
+      "side": 1,
+      "message": "if number_spatial_layers \u003d 3, then spatial_layer_id \u003e\u003d 1 will include the middle layer?",
+      "range": {
+        "startLine": 743,
+        "startChar": 36,
+        "endLine": 743,
+        "endChar": 57
+      },
+      "revId": "8d104afa6463ec1f334a874de7b7bc4ea09aaddc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
