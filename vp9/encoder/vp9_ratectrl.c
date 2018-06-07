@@ -1601,12 +1601,22 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   // update the golden frame counter, only for base temporal layer.
   if (cpi->use_svc && cpi->svc.use_gf_temporal_ref_current_layer &&
       cpi->svc.temporal_layer_id == 0) {
+    int i = 0;
+    SVC *const svc = &cpi->svc;
     if (cpi->refresh_golden_frame)
       rc->frames_since_golden = 0;
     else
       rc->frames_since_golden++;
     // Decrement count down till next gf
     if (rc->frames_till_gf_update_due > 0) rc->frames_till_gf_update_due--;
+    // Update the frames_since_golden for all upper temporal layers.
+    for (i = 1; i < svc->number_temporal_layers; ++i) {
+      const int layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, i,
+                                         svc->number_temporal_layers);
+      LAYER_CONTEXT *const lc = &svc->layer_context[layer];
+      RATE_CONTROL *const lrc = &lc->rc;
+      lrc->frames_since_golden = rc->frames_since_golden;
+    }
   }
 
   if (cm->frame_type == KEY_FRAME) rc->frames_since_key = 0;

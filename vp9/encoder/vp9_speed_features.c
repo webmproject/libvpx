@@ -629,6 +629,12 @@ static void set_rt_speed_feature_framesize_independent(
         cpi->svc.number_spatial_layers == 3 && cpi->svc.temporal_layer_id > 0 &&
         cpi->oxcf.width * cpi->oxcf.height > 640 * 480)
       sf->svc_use_lowres_part = 1;
+    // For SVC when golden is used as second temporal reference: to avoid
+    // encode time increase only use this feature on base temporal layer.
+    // (i.e remove golden flag from frame_flags for temporal_layer_id > 0).
+    if (cpi->use_svc && cpi->svc.use_gf_temporal_ref_current_layer &&
+        cpi->svc.temporal_layer_id > 0)
+      cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
   }
 
   if (speed >= 8) {
