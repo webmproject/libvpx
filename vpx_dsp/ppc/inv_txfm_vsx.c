@@ -21,6 +21,8 @@
 
 static const int16x8_t cospi1_v = { 16364, 16364, 16364, 16364,
                                     16364, 16364, 16364, 16364 };
+static const int16x8_t cospi1m_v = { -16364, -16364, -16364, -16364,
+                                     -16364, -16364, -16364, -16364 };
 static const int16x8_t cospi2_v = { 16305, 16305, 16305, 16305,
                                     16305, 16305, 16305, 16305 };
 static const int16x8_t cospi2m_v = { -16305, -16305, -16305, -16305,
@@ -33,6 +35,8 @@ static const int16x8_t cospi4m_v = { -16069, -16069, -16069, -16069,
                                      -16069, -16069, -16069, -16069 };
 static const int16x8_t cospi5_v = { 15893, 15893, 15893, 15893,
                                     15893, 15893, 15893, 15893 };
+static const int16x8_t cospi5m_v = { -15893, -15893, -15893, -15893,
+                                     -15893, -15893, -15893, -15893 };
 static const int16x8_t cospi6_v = { 15679, 15679, 15679, 15679,
                                     15679, 15679, 15679, 15679 };
 static const int16x8_t cospi7_v = { 15426, 15426, 15426, 15426,
@@ -43,6 +47,8 @@ static const int16x8_t cospi8m_v = { -15137, -15137, -15137, -15137,
                                      -15137, -15137, -15137, -15137 };
 static const int16x8_t cospi9_v = { 14811, 14811, 14811, 14811,
                                     14811, 14811, 14811, 14811 };
+static const int16x8_t cospi9m_v = { -14811, -14811, -14811, -14811,
+                                     -14811, -14811, -14811, -14811 };
 static const int16x8_t cospi10_v = { 14449, 14449, 14449, 14449,
                                      14449, 14449, 14449, 14449 };
 static const int16x8_t cospi10m_v = { -14449, -14449, -14449, -14449,
@@ -51,16 +57,24 @@ static const int16x8_t cospi11_v = { 14053, 14053, 14053, 14053,
                                      14053, 14053, 14053, 14053 };
 static const int16x8_t cospi12_v = { 13623, 13623, 13623, 13623,
                                      13623, 13623, 13623, 13623 };
+static const int16x8_t cospi12m_v = { -13623, -13623, -13623, -13623,
+                                      -13623, -13623, -13623, -13623 };
 static const int16x8_t cospi13_v = { 13160, 13160, 13160, 13160,
                                      13160, 13160, 13160, 13160 };
+static const int16x8_t cospi13m_v = { -13160, -13160, -13160, -13160,
+                                      -13160, -13160, -13160, -13160 };
 static const int16x8_t cospi14_v = { 12665, 12665, 12665, 12665,
                                      12665, 12665, 12665, 12665 };
 static const int16x8_t cospi15_v = { 12140, 12140, 12140, 12140,
                                      12140, 12140, 12140, 12140 };
 static const int16x8_t cospi16_v = { 11585, 11585, 11585, 11585,
                                      11585, 11585, 11585, 11585 };
+static const int16x8_t cospi16m_v = { -11585, -11585, -11585, -11585,
+                                      -11585, -11585, -11585, -11585 };
 static const int16x8_t cospi17_v = { 11003, 11003, 11003, 11003,
                                      11003, 11003, 11003, 11003 };
+static const int16x8_t cospi17m_v = { -11003, -11003, -11003, -11003,
+                                      -11003, -11003, -11003, -11003 };
 static const int16x8_t cospi18_v = { 10394, 10394, 10394, 10394,
                                      10394, 10394, 10394, 10394 };
 static const int16x8_t cospi18m_v = { -10394, -10394, -10394, -10394,
@@ -71,10 +85,10 @@ static const int16x8_t cospi20_v = { 9102, 9102, 9102, 9102,
                                      9102, 9102, 9102, 9102 };
 static const int16x8_t cospi20m_v = { -9102, -9102, -9102, -9102,
                                       -9102, -9102, -9102, -9102 };
-static const int16x8_t cospi16m_v = { -11585, -11585, -11585, -11585,
-                                      -11585, -11585, -11585, -11585 };
 static const int16x8_t cospi21_v = { 8423, 8423, 8423, 8423,
                                      8423, 8423, 8423, 8423 };
+static const int16x8_t cospi21m_v = { -8423, -8423, -8423, -8423,
+                                      -8423, -8423, -8423, -8423 };
 static const int16x8_t cospi22_v = { 7723, 7723, 7723, 7723,
                                      7723, 7723, 7723, 7723 };
 static const int16x8_t cospi23_v = { 7005, 7005, 7005, 7005,
@@ -85,6 +99,8 @@ static const int16x8_t cospi24m_v = { -6270, -6270, -6270, -6270,
                                       -6270, -6270, -6270, -6270 };
 static const int16x8_t cospi25_v = { 5520, 5520, 5520, 5520,
                                      5520, 5520, 5520, 5520 };
+static const int16x8_t cospi25m_v = { -5520, -5520, -5520, -5520,
+                                      -5520, -5520, -5520, -5520 };
 static const int16x8_t cospi26_v = { 4756, 4756, 4756, 4756,
                                      4756, 4756, 4756, 4756 };
 static const int16x8_t cospi26m_v = { -4756, -4756, -4756, -4756,
@@ -93,8 +109,12 @@ static const int16x8_t cospi27_v = { 3981, 3981, 3981, 3981,
                                      3981, 3981, 3981, 3981 };
 static const int16x8_t cospi28_v = { 3196, 3196, 3196, 3196,
                                      3196, 3196, 3196, 3196 };
+static const int16x8_t cospi28m_v = { -3196, -3196, -3196, -3196,
+                                      -3196, -3196, -3196, -3196 };
 static const int16x8_t cospi29_v = { 2404, 2404, 2404, 2404,
                                      2404, 2404, 2404, 2404 };
+static const int16x8_t cospi29m_v = { -2404, -2404, -2404, -2404,
+                                      -2404, -2404, -2404, -2404 };
 static const int16x8_t cospi30_v = { 1606, 1606, 1606, 1606,
                                      1606, 1606, 1606, 1606 };
 static const int16x8_t cospi31_v = { 804, 804, 804, 804, 804, 804, 804, 804 };
@@ -386,25 +406,6 @@ void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
   vpx_round_store8x8_vsx(src, dest, stride);
 }
 
-#define LOAD_INPUT16(load, source, offset, step, in0, in1, in2, in3, in4, in5, \
-                     in6, in7, in8, in9, inA, inB, inC, inD, inE, inF)         \
-  in0 = load(offset, source);                                                  \
-  in1 = load((step) + (offset), source);                                       \
-  in2 = load(2 * (step) + (offset), source);                                   \
-  in3 = load(3 * (step) + (offset), source);                                   \
-  in4 = load(4 * (step) + (offset), source);                                   \
-  in5 = load(5 * (step) + (offset), source);                                   \
-  in6 = load(6 * (step) + (offset), source);                                   \
-  in7 = load(7 * (step) + (offset), source);                                   \
-  in8 = load(8 * (step) + (offset), source);                                   \
-  in9 = load(9 * (step) + (offset), source);                                   \
-  inA = load(10 * (step) + (offset), source);                                  \
-  inB = load(11 * (step) + (offset), source);                                  \
-  inC = load(12 * (step) + (offset), source);                                  \
-  inD = load(13 * (step) + (offset), source);                                  \
-  inE = load(14 * (step) + (offset), source);                                  \
-  inF = load(15 * (step) + (offset), source);
-
 #define STEP16_1(inpt0, inpt1, outpt0, outpt1, cospi) \
   tmp16_0 = vec_mergeh(inpt0, inpt1);                 \
   tmp16_1 = vec_mergel(inpt0, inpt1);                 \
@@ -577,95 +578,131 @@ void vpx_idct8x8_64_add_vsx(const tran_low_t *input, uint8_t *dest,
   PIXEL_ADD(in1, d_ul, add, shift6);             \
   vec_vsx_st(vec_packsu(d_uh, d_ul), offset, dest);
 
-void vpx_idct16x16_256_add_vsx(const tran_low_t *input, uint8_t *dest,
-                               int stride) {
+static void half_idct16x8_vsx(int16x8_t *src) {
+  int16x8_t tmp0[8], tmp1[8];
   int32x4_t temp10, temp11, temp20, temp21, temp30;
-  int16x8_t src00, src01, src02, src03, src04, src05, src06, src07, src10,
-      src11, src12, src13, src14, src15, src16, src17;
-  int16x8_t src20, src21, src22, src23, src24, src25, src26, src27, src30,
-      src31, src32, src33, src34, src35, src36, src37;
-  int16x8_t tmp00, tmp01, tmp02, tmp03, tmp04, tmp05, tmp06, tmp07, tmp10,
-      tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp16_0, tmp16_1;
-  int16x8_t tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp30,
-      tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37;
-  uint8x16_t dest0, dest1, dest2, dest3, dest4, dest5, dest6, dest7, dest8,
-      dest9, destA, destB, destC, destD, destE, destF;
-  int16x8_t d_uh, d_ul;
-  int16x8_t add = vec_sl(vec_splat_s16(8), vec_splat_u16(2));
-  uint16x8_t shift6 = vec_splat_u16(6);
-  uint8x16_t zerov = vec_splat_u8(0);
+  int16x8_t tmp16_0, tmp16_1;
   ROUND_SHIFT_INIT;
 
-  // transform rows
-  // load and transform the upper half of 16x16 matrix
-  LOAD_INPUT16(load_tran_low, input, 0, 8 * sizeof(*input), src00, src10, src01,
-               src11, src02, src12, src03, src13, src04, src14, src05, src15,
-               src06, src16, src07, src17);
-  TRANSPOSE8x8(src00, src01, src02, src03, src04, src05, src06, src07, tmp00,
-               tmp01, tmp02, tmp03, tmp04, tmp05, tmp06, tmp07);
-  TRANSPOSE8x8(src10, src11, src12, src13, src14, src15, src16, src17, tmp10,
-               tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17);
-  IDCT16(tmp00, tmp01, tmp02, tmp03, tmp04, tmp05, tmp06, tmp07, tmp10, tmp11,
-         tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, src00, src01, src02, src03,
-         src04, src05, src06, src07, src10, src11, src12, src13, src14, src15,
-         src16, src17);
-  TRANSPOSE8x8(src00, src01, src02, src03, src04, src05, src06, src07, tmp00,
-               tmp01, tmp02, tmp03, tmp04, tmp05, tmp06, tmp07);
-  TRANSPOSE8x8(src10, src11, src12, src13, src14, src15, src16, src17, tmp10,
-               tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17);
+  TRANSPOSE8x8(src[0], src[2], src[4], src[6], src[8], src[10], src[12],
+               src[14], tmp0[0], tmp0[1], tmp0[2], tmp0[3], tmp0[4], tmp0[5],
+               tmp0[6], tmp0[7]);
+  TRANSPOSE8x8(src[1], src[3], src[5], src[7], src[9], src[11], src[13],
+               src[15], tmp1[0], tmp1[1], tmp1[2], tmp1[3], tmp1[4], tmp1[5],
+               tmp1[6], tmp1[7]);
+  IDCT16(tmp0[0], tmp0[1], tmp0[2], tmp0[3], tmp0[4], tmp0[5], tmp0[6], tmp0[7],
+         tmp1[0], tmp1[1], tmp1[2], tmp1[3], tmp1[4], tmp1[5], tmp1[6], tmp1[7],
+         src[0], src[2], src[4], src[6], src[8], src[10], src[12], src[14],
+         src[1], src[3], src[5], src[7], src[9], src[11], src[13], src[15]);
+}
 
-  // load and transform the lower half of 16x16 matrix
+void vpx_idct16_vsx(int16x8_t *src0, int16x8_t *src1) {
+  int16x8_t tmp0[8], tmp1[8], tmp2[8], tmp3[8];
+  int32x4_t temp10, temp11, temp20, temp21, temp30;
+  int16x8_t tmp16_0, tmp16_1;
+  ROUND_SHIFT_INIT;
+
+  TRANSPOSE8x8(src0[0], src0[2], src0[4], src0[6], src0[8], src0[10], src0[12],
+               src0[14], tmp0[0], tmp0[1], tmp0[2], tmp0[3], tmp0[4], tmp0[5],
+               tmp0[6], tmp0[7]);
+  TRANSPOSE8x8(src0[1], src0[3], src0[5], src0[7], src0[9], src0[11], src0[13],
+               src0[15], tmp1[0], tmp1[1], tmp1[2], tmp1[3], tmp1[4], tmp1[5],
+               tmp1[6], tmp1[7]);
+  TRANSPOSE8x8(src1[0], src1[2], src1[4], src1[6], src1[8], src1[10], src1[12],
+               src1[14], tmp2[0], tmp2[1], tmp2[2], tmp2[3], tmp2[4], tmp2[5],
+               tmp2[6], tmp2[7]);
+  TRANSPOSE8x8(src1[1], src1[3], src1[5], src1[7], src1[9], src1[11], src1[13],
+               src1[15], tmp3[0], tmp3[1], tmp3[2], tmp3[3], tmp3[4], tmp3[5],
+               tmp3[6], tmp3[7]);
+
+  IDCT16(tmp0[0], tmp0[1], tmp0[2], tmp0[3], tmp0[4], tmp0[5], tmp0[6], tmp0[7],
+         tmp1[0], tmp1[1], tmp1[2], tmp1[3], tmp1[4], tmp1[5], tmp1[6], tmp1[7],
+         src0[0], src0[2], src0[4], src0[6], src0[8], src0[10], src0[12],
+         src0[14], src1[0], src1[2], src1[4], src1[6], src1[8], src1[10],
+         src1[12], src1[14]);
+
+  IDCT16(tmp2[0], tmp2[1], tmp2[2], tmp2[3], tmp2[4], tmp2[5], tmp2[6], tmp2[7],
+         tmp3[0], tmp3[1], tmp3[2], tmp3[3], tmp3[4], tmp3[5], tmp3[6], tmp3[7],
+         src0[1], src0[3], src0[5], src0[7], src0[9], src0[11], src0[13],
+         src0[15], src1[1], src1[3], src1[5], src1[7], src1[9], src1[11],
+         src1[13], src1[15]);
+}
+
+void vpx_round_store16x16_vsx(int16x8_t *src0, int16x8_t *src1, uint8_t *dest,
+                              int stride) {
+  uint8x16_t destv[16];
+  int16x8_t d_uh, d_ul;
+  uint8x16_t zerov = vec_splat_u8(0);
+  uint16x8_t shift6 = vec_splat_u16(6);
+  int16x8_t add = vec_sl(vec_splat_s16(8), vec_splat_u16(2));
+
+  // load dest
+  LOAD_INPUT16(vec_vsx_ld, dest, 0, stride, destv);
+
+  PIXEL_ADD_STORE16(src0[0], src0[1], destv[0], 0);
+  PIXEL_ADD_STORE16(src0[2], src0[3], destv[1], stride);
+  PIXEL_ADD_STORE16(src0[4], src0[5], destv[2], 2 * stride);
+  PIXEL_ADD_STORE16(src0[6], src0[7], destv[3], 3 * stride);
+  PIXEL_ADD_STORE16(src0[8], src0[9], destv[4], 4 * stride);
+  PIXEL_ADD_STORE16(src0[10], src0[11], destv[5], 5 * stride);
+  PIXEL_ADD_STORE16(src0[12], src0[13], destv[6], 6 * stride);
+  PIXEL_ADD_STORE16(src0[14], src0[15], destv[7], 7 * stride);
+
+  PIXEL_ADD_STORE16(src1[0], src1[1], destv[8], 8 * stride);
+  PIXEL_ADD_STORE16(src1[2], src1[3], destv[9], 9 * stride);
+  PIXEL_ADD_STORE16(src1[4], src1[5], destv[10], 10 * stride);
+  PIXEL_ADD_STORE16(src1[6], src1[7], destv[11], 11 * stride);
+  PIXEL_ADD_STORE16(src1[8], src1[9], destv[12], 12 * stride);
+  PIXEL_ADD_STORE16(src1[10], src1[11], destv[13], 13 * stride);
+  PIXEL_ADD_STORE16(src1[12], src1[13], destv[14], 14 * stride);
+  PIXEL_ADD_STORE16(src1[14], src1[15], destv[15], 15 * stride);
+}
+void vpx_idct16x16_256_add_vsx(const tran_low_t *input, uint8_t *dest,
+                               int stride) {
+  int16x8_t src0[16], src1[16];
+  int16x8_t tmp0[8], tmp1[8], tmp2[8], tmp3[8];
+  int32x4_t temp10, temp11, temp20, temp21, temp30;
+  int16x8_t tmp16_0, tmp16_1;
+  ROUND_SHIFT_INIT;
+
+  LOAD_INPUT16(load_tran_low, input, 0, 8 * sizeof(*input), src0);
   LOAD_INPUT16(load_tran_low, input, 8 * 8 * 2 * sizeof(*input),
-               8 * sizeof(*input), src20, src30, src21, src31, src22, src32,
-               src23, src33, src24, src34, src25, src35, src26, src36, src27,
-               src37);
-  TRANSPOSE8x8(src20, src21, src22, src23, src24, src25, src26, src27, tmp20,
-               tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27);
-  TRANSPOSE8x8(src30, src31, src32, src33, src34, src35, src36, src37, tmp30,
-               tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37);
-  IDCT16(tmp20, tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, tmp30, tmp31,
-         tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, src20, src21, src22, src23,
-         src24, src25, src26, src27, src30, src31, src32, src33, src34, src35,
-         src36, src37);
-  TRANSPOSE8x8(src20, src21, src22, src23, src24, src25, src26, src27, tmp20,
-               tmp21, tmp22, tmp23, tmp24, tmp25, tmp26, tmp27);
-  TRANSPOSE8x8(src30, src31, src32, src33, src34, src35, src36, src37, tmp30,
-               tmp31, tmp32, tmp33, tmp34, tmp35, tmp36, tmp37);
+               8 * sizeof(*input), src1);
+
+  // transform rows
+  // transform the upper half of 16x16 matrix
+  half_idct16x8_vsx(src0);
+  TRANSPOSE8x8(src0[0], src0[2], src0[4], src0[6], src0[8], src0[10], src0[12],
+               src0[14], tmp0[0], tmp0[1], tmp0[2], tmp0[3], tmp0[4], tmp0[5],
+               tmp0[6], tmp0[7]);
+  TRANSPOSE8x8(src0[1], src0[3], src0[5], src0[7], src0[9], src0[11], src0[13],
+               src0[15], tmp1[0], tmp1[1], tmp1[2], tmp1[3], tmp1[4], tmp1[5],
+               tmp1[6], tmp1[7]);
+
+  // transform the lower half of 16x16 matrix
+  half_idct16x8_vsx(src1);
+  TRANSPOSE8x8(src1[0], src1[2], src1[4], src1[6], src1[8], src1[10], src1[12],
+               src1[14], tmp2[0], tmp2[1], tmp2[2], tmp2[3], tmp2[4], tmp2[5],
+               tmp2[6], tmp2[7]);
+  TRANSPOSE8x8(src1[1], src1[3], src1[5], src1[7], src1[9], src1[11], src1[13],
+               src1[15], tmp3[0], tmp3[1], tmp3[2], tmp3[3], tmp3[4], tmp3[5],
+               tmp3[6], tmp3[7]);
 
   // transform columns
   // left half first
-  IDCT16(tmp00, tmp01, tmp02, tmp03, tmp04, tmp05, tmp06, tmp07, tmp20, tmp21,
-         tmp22, tmp23, tmp24, tmp25, tmp26, tmp27, src00, src01, src02, src03,
-         src04, src05, src06, src07, src20, src21, src22, src23, src24, src25,
-         src26, src27);
+  IDCT16(tmp0[0], tmp0[1], tmp0[2], tmp0[3], tmp0[4], tmp0[5], tmp0[6], tmp0[7],
+         tmp2[0], tmp2[1], tmp2[2], tmp2[3], tmp2[4], tmp2[5], tmp2[6], tmp2[7],
+         src0[0], src0[2], src0[4], src0[6], src0[8], src0[10], src0[12],
+         src0[14], src1[0], src1[2], src1[4], src1[6], src1[8], src1[10],
+         src1[12], src1[14]);
   // right half
-  IDCT16(tmp10, tmp11, tmp12, tmp13, tmp14, tmp15, tmp16, tmp17, tmp30, tmp31,
-         tmp32, tmp33, tmp34, tmp35, tmp36, tmp37, src10, src11, src12, src13,
-         src14, src15, src16, src17, src30, src31, src32, src33, src34, src35,
-         src36, src37);
+  IDCT16(tmp1[0], tmp1[1], tmp1[2], tmp1[3], tmp1[4], tmp1[5], tmp1[6], tmp1[7],
+         tmp3[0], tmp3[1], tmp3[2], tmp3[3], tmp3[4], tmp3[5], tmp3[6], tmp3[7],
+         src0[1], src0[3], src0[5], src0[7], src0[9], src0[11], src0[13],
+         src0[15], src1[1], src1[3], src1[5], src1[7], src1[9], src1[11],
+         src1[13], src1[15]);
 
-  // load dest
-  LOAD_INPUT16(vec_vsx_ld, dest, 0, stride, dest0, dest1, dest2, dest3, dest4,
-               dest5, dest6, dest7, dest8, dest9, destA, destB, destC, destD,
-               destE, destF);
-
-  PIXEL_ADD_STORE16(src00, src10, dest0, 0);
-  PIXEL_ADD_STORE16(src01, src11, dest1, stride);
-  PIXEL_ADD_STORE16(src02, src12, dest2, 2 * stride);
-  PIXEL_ADD_STORE16(src03, src13, dest3, 3 * stride);
-  PIXEL_ADD_STORE16(src04, src14, dest4, 4 * stride);
-  PIXEL_ADD_STORE16(src05, src15, dest5, 5 * stride);
-  PIXEL_ADD_STORE16(src06, src16, dest6, 6 * stride);
-  PIXEL_ADD_STORE16(src07, src17, dest7, 7 * stride);
-
-  PIXEL_ADD_STORE16(src20, src30, dest8, 8 * stride);
-  PIXEL_ADD_STORE16(src21, src31, dest9, 9 * stride);
-  PIXEL_ADD_STORE16(src22, src32, destA, 10 * stride);
-  PIXEL_ADD_STORE16(src23, src33, destB, 11 * stride);
-  PIXEL_ADD_STORE16(src24, src34, destC, 12 * stride);
-  PIXEL_ADD_STORE16(src25, src35, destD, 13 * stride);
-  PIXEL_ADD_STORE16(src26, src36, destE, 14 * stride);
-  PIXEL_ADD_STORE16(src27, src37, destF, 15 * stride);
+  vpx_round_store16x16_vsx(src0, src1, dest, stride);
 }
 
 #define LOAD_8x32(load, in00, in01, in02, in03, in10, in11, in12, in13, in20, \
@@ -1396,4 +1433,396 @@ void vp9_iadst8_vsx(int16x8_t *in, int16x8_t *out) {
   out[3] = vec_sub(zero16v, in[2]);
   out[5] = vec_sub(zero16v, in[7]);
   out[7] = vec_sub(zero16v, in[1]);
+}
+
+static void iadst16x8_vsx(int16x8_t *in, int16x8_t *out) {
+  int32x4_t tmp0[32], tmp1[32];
+  int16x8_t tmp16_0[8];
+  int16x8_t cospi_p01_p31 = vec_mergel(cospi1_v, cospi31_v);
+  int16x8_t cospi_p31_m01 = vec_mergel(cospi31_v, cospi1m_v);
+  int16x8_t cospi_p05_p27 = vec_mergel(cospi5_v, cospi27_v);
+  int16x8_t cospi_p27_m05 = vec_mergel(cospi27_v, cospi5m_v);
+  int16x8_t cospi_p09_p23 = vec_mergel(cospi9_v, cospi23_v);
+  int16x8_t cospi_p23_m09 = vec_mergel(cospi23_v, cospi9m_v);
+  int16x8_t cospi_p13_p19 = vec_mergel(cospi13_v, cospi19_v);
+  int16x8_t cospi_p19_m13 = vec_mergel(cospi19_v, cospi13m_v);
+  int16x8_t cospi_p17_p15 = vec_mergel(cospi17_v, cospi15_v);
+  int16x8_t cospi_p15_m17 = vec_mergel(cospi15_v, cospi17m_v);
+  int16x8_t cospi_p21_p11 = vec_mergel(cospi21_v, cospi11_v);
+  int16x8_t cospi_p11_m21 = vec_mergel(cospi11_v, cospi21m_v);
+  int16x8_t cospi_p25_p07 = vec_mergel(cospi25_v, cospi7_v);
+  int16x8_t cospi_p07_m25 = vec_mergel(cospi7_v, cospi25m_v);
+  int16x8_t cospi_p29_p03 = vec_mergel(cospi29_v, cospi3_v);
+  int16x8_t cospi_p03_m29 = vec_mergel(cospi3_v, cospi29m_v);
+  int16x8_t cospi_p04_p28 = vec_mergel(cospi4_v, cospi28_v);
+  int16x8_t cospi_p28_m04 = vec_mergel(cospi28_v, cospi4m_v);
+  int16x8_t cospi_p20_p12 = vec_mergel(cospi20_v, cospi12_v);
+  int16x8_t cospi_p12_m20 = vec_mergel(cospi12_v, cospi20m_v);
+  int16x8_t cospi_m28_p04 = vec_mergel(cospi28m_v, cospi4_v);
+  int16x8_t cospi_m12_p20 = vec_mergel(cospi12m_v, cospi20_v);
+  int16x8_t cospi_p08_p24 = vec_mergel(cospi8_v, cospi24_v);
+  int16x8_t cospi_p24_m08 = vec_mergel(cospi24_v, cospi8m_v);
+  int16x8_t cospi_m24_p08 = vec_mergel(cospi24m_v, cospi8_v);
+  int32x4_t zerov = vec_splat_s32(0);
+  ROUND_SHIFT_INIT;
+
+  tmp16_0[0] = vec_mergeh(in[15], in[0]);
+  tmp16_0[1] = vec_mergel(in[15], in[0]);
+  tmp16_0[2] = vec_mergeh(in[13], in[2]);
+  tmp16_0[3] = vec_mergel(in[13], in[2]);
+  tmp16_0[4] = vec_mergeh(in[11], in[4]);
+  tmp16_0[5] = vec_mergel(in[11], in[4]);
+  tmp16_0[6] = vec_mergeh(in[9], in[6]);
+  tmp16_0[7] = vec_mergel(in[9], in[6]);
+  tmp16_0[8] = vec_mergeh(in[7], in[8]);
+  tmp16_0[9] = vec_mergel(in[7], in[8]);
+  tmp16_0[10] = vec_mergeh(in[5], in[10]);
+  tmp16_0[11] = vec_mergel(in[5], in[10]);
+  tmp16_0[12] = vec_mergeh(in[3], in[12]);
+  tmp16_0[13] = vec_mergel(in[3], in[12]);
+  tmp16_0[14] = vec_mergeh(in[1], in[14]);
+  tmp16_0[15] = vec_mergel(in[1], in[14]);
+
+  tmp0[0] = vec_msum(tmp16_0[0], cospi_p01_p31, zerov);
+  tmp0[1] = vec_msum(tmp16_0[1], cospi_p01_p31, zerov);
+  tmp0[2] = vec_msum(tmp16_0[0], cospi_p31_m01, zerov);
+  tmp0[3] = vec_msum(tmp16_0[1], cospi_p31_m01, zerov);
+  tmp0[4] = vec_msum(tmp16_0[2], cospi_p05_p27, zerov);
+  tmp0[5] = vec_msum(tmp16_0[3], cospi_p05_p27, zerov);
+  tmp0[6] = vec_msum(tmp16_0[2], cospi_p27_m05, zerov);
+  tmp0[7] = vec_msum(tmp16_0[3], cospi_p27_m05, zerov);
+  tmp0[8] = vec_msum(tmp16_0[4], cospi_p09_p23, zerov);
+  tmp0[9] = vec_msum(tmp16_0[5], cospi_p09_p23, zerov);
+  tmp0[10] = vec_msum(tmp16_0[4], cospi_p23_m09, zerov);
+  tmp0[11] = vec_msum(tmp16_0[5], cospi_p23_m09, zerov);
+  tmp0[12] = vec_msum(tmp16_0[6], cospi_p13_p19, zerov);
+  tmp0[13] = vec_msum(tmp16_0[7], cospi_p13_p19, zerov);
+  tmp0[14] = vec_msum(tmp16_0[6], cospi_p19_m13, zerov);
+  tmp0[15] = vec_msum(tmp16_0[7], cospi_p19_m13, zerov);
+  tmp0[16] = vec_msum(tmp16_0[8], cospi_p17_p15, zerov);
+  tmp0[17] = vec_msum(tmp16_0[9], cospi_p17_p15, zerov);
+  tmp0[18] = vec_msum(tmp16_0[8], cospi_p15_m17, zerov);
+  tmp0[19] = vec_msum(tmp16_0[9], cospi_p15_m17, zerov);
+  tmp0[20] = vec_msum(tmp16_0[10], cospi_p21_p11, zerov);
+  tmp0[21] = vec_msum(tmp16_0[11], cospi_p21_p11, zerov);
+  tmp0[22] = vec_msum(tmp16_0[10], cospi_p11_m21, zerov);
+  tmp0[23] = vec_msum(tmp16_0[11], cospi_p11_m21, zerov);
+  tmp0[24] = vec_msum(tmp16_0[12], cospi_p25_p07, zerov);
+  tmp0[25] = vec_msum(tmp16_0[13], cospi_p25_p07, zerov);
+  tmp0[26] = vec_msum(tmp16_0[12], cospi_p07_m25, zerov);
+  tmp0[27] = vec_msum(tmp16_0[13], cospi_p07_m25, zerov);
+  tmp0[28] = vec_msum(tmp16_0[14], cospi_p29_p03, zerov);
+  tmp0[29] = vec_msum(tmp16_0[15], cospi_p29_p03, zerov);
+  tmp0[30] = vec_msum(tmp16_0[14], cospi_p03_m29, zerov);
+  tmp0[31] = vec_msum(tmp16_0[15], cospi_p03_m29, zerov);
+
+  tmp1[0] = vec_add(tmp0[0], tmp0[16]);
+  tmp1[1] = vec_add(tmp0[1], tmp0[17]);
+  tmp1[2] = vec_add(tmp0[2], tmp0[18]);
+  tmp1[3] = vec_add(tmp0[3], tmp0[19]);
+  tmp1[4] = vec_add(tmp0[4], tmp0[20]);
+  tmp1[5] = vec_add(tmp0[5], tmp0[21]);
+  tmp1[6] = vec_add(tmp0[6], tmp0[22]);
+  tmp1[7] = vec_add(tmp0[7], tmp0[23]);
+  tmp1[8] = vec_add(tmp0[8], tmp0[24]);
+  tmp1[9] = vec_add(tmp0[9], tmp0[25]);
+  tmp1[10] = vec_add(tmp0[10], tmp0[26]);
+  tmp1[11] = vec_add(tmp0[11], tmp0[27]);
+  tmp1[12] = vec_add(tmp0[12], tmp0[28]);
+  tmp1[13] = vec_add(tmp0[13], tmp0[29]);
+  tmp1[14] = vec_add(tmp0[14], tmp0[30]);
+  tmp1[15] = vec_add(tmp0[15], tmp0[31]);
+  tmp1[16] = vec_sub(tmp0[0], tmp0[16]);
+  tmp1[17] = vec_sub(tmp0[1], tmp0[17]);
+  tmp1[18] = vec_sub(tmp0[2], tmp0[18]);
+  tmp1[19] = vec_sub(tmp0[3], tmp0[19]);
+  tmp1[20] = vec_sub(tmp0[4], tmp0[20]);
+  tmp1[21] = vec_sub(tmp0[5], tmp0[21]);
+  tmp1[22] = vec_sub(tmp0[6], tmp0[22]);
+  tmp1[23] = vec_sub(tmp0[7], tmp0[23]);
+  tmp1[24] = vec_sub(tmp0[8], tmp0[24]);
+  tmp1[25] = vec_sub(tmp0[9], tmp0[25]);
+  tmp1[26] = vec_sub(tmp0[10], tmp0[26]);
+  tmp1[27] = vec_sub(tmp0[11], tmp0[27]);
+  tmp1[28] = vec_sub(tmp0[12], tmp0[28]);
+  tmp1[29] = vec_sub(tmp0[13], tmp0[29]);
+  tmp1[30] = vec_sub(tmp0[14], tmp0[30]);
+  tmp1[31] = vec_sub(tmp0[15], tmp0[31]);
+
+  DCT_CONST_ROUND_SHIFT(tmp1[0]);
+  DCT_CONST_ROUND_SHIFT(tmp1[1]);
+  DCT_CONST_ROUND_SHIFT(tmp1[2]);
+  DCT_CONST_ROUND_SHIFT(tmp1[3]);
+  DCT_CONST_ROUND_SHIFT(tmp1[4]);
+  DCT_CONST_ROUND_SHIFT(tmp1[5]);
+  DCT_CONST_ROUND_SHIFT(tmp1[6]);
+  DCT_CONST_ROUND_SHIFT(tmp1[7]);
+  DCT_CONST_ROUND_SHIFT(tmp1[8]);
+  DCT_CONST_ROUND_SHIFT(tmp1[9]);
+  DCT_CONST_ROUND_SHIFT(tmp1[10]);
+  DCT_CONST_ROUND_SHIFT(tmp1[11]);
+  DCT_CONST_ROUND_SHIFT(tmp1[12]);
+  DCT_CONST_ROUND_SHIFT(tmp1[13]);
+  DCT_CONST_ROUND_SHIFT(tmp1[14]);
+  DCT_CONST_ROUND_SHIFT(tmp1[15]);
+  DCT_CONST_ROUND_SHIFT(tmp1[16]);
+  DCT_CONST_ROUND_SHIFT(tmp1[17]);
+  DCT_CONST_ROUND_SHIFT(tmp1[18]);
+  DCT_CONST_ROUND_SHIFT(tmp1[19]);
+  DCT_CONST_ROUND_SHIFT(tmp1[20]);
+  DCT_CONST_ROUND_SHIFT(tmp1[21]);
+  DCT_CONST_ROUND_SHIFT(tmp1[22]);
+  DCT_CONST_ROUND_SHIFT(tmp1[23]);
+  DCT_CONST_ROUND_SHIFT(tmp1[24]);
+  DCT_CONST_ROUND_SHIFT(tmp1[25]);
+  DCT_CONST_ROUND_SHIFT(tmp1[26]);
+  DCT_CONST_ROUND_SHIFT(tmp1[27]);
+  DCT_CONST_ROUND_SHIFT(tmp1[28]);
+  DCT_CONST_ROUND_SHIFT(tmp1[29]);
+  DCT_CONST_ROUND_SHIFT(tmp1[30]);
+  DCT_CONST_ROUND_SHIFT(tmp1[31]);
+
+  in[0] = vec_packs(tmp1[0], tmp1[1]);
+  in[1] = vec_packs(tmp1[2], tmp1[3]);
+  in[2] = vec_packs(tmp1[4], tmp1[5]);
+  in[3] = vec_packs(tmp1[6], tmp1[7]);
+  in[4] = vec_packs(tmp1[8], tmp1[9]);
+  in[5] = vec_packs(tmp1[10], tmp1[11]);
+  in[6] = vec_packs(tmp1[12], tmp1[13]);
+  in[7] = vec_packs(tmp1[14], tmp1[15]);
+  in[8] = vec_packs(tmp1[16], tmp1[17]);
+  in[9] = vec_packs(tmp1[18], tmp1[19]);
+  in[10] = vec_packs(tmp1[20], tmp1[21]);
+  in[11] = vec_packs(tmp1[22], tmp1[23]);
+  in[12] = vec_packs(tmp1[24], tmp1[25]);
+  in[13] = vec_packs(tmp1[26], tmp1[27]);
+  in[14] = vec_packs(tmp1[28], tmp1[29]);
+  in[15] = vec_packs(tmp1[30], tmp1[31]);
+
+  // stage 2
+  tmp16_0[0] = vec_mergeh(in[8], in[9]);
+  tmp16_0[1] = vec_mergel(in[8], in[9]);
+  tmp16_0[2] = vec_mergeh(in[10], in[11]);
+  tmp16_0[3] = vec_mergel(in[10], in[11]);
+  tmp16_0[4] = vec_mergeh(in[12], in[13]);
+  tmp16_0[5] = vec_mergel(in[12], in[13]);
+  tmp16_0[6] = vec_mergeh(in[14], in[15]);
+  tmp16_0[7] = vec_mergel(in[14], in[15]);
+
+  tmp0[0] = vec_msum(tmp16_0[0], cospi_p04_p28, zerov);
+  tmp0[1] = vec_msum(tmp16_0[1], cospi_p04_p28, zerov);
+  tmp0[2] = vec_msum(tmp16_0[0], cospi_p28_m04, zerov);
+  tmp0[3] = vec_msum(tmp16_0[1], cospi_p28_m04, zerov);
+  tmp0[4] = vec_msum(tmp16_0[2], cospi_p20_p12, zerov);
+  tmp0[5] = vec_msum(tmp16_0[3], cospi_p20_p12, zerov);
+  tmp0[6] = vec_msum(tmp16_0[2], cospi_p12_m20, zerov);
+  tmp0[7] = vec_msum(tmp16_0[3], cospi_p12_m20, zerov);
+  tmp0[8] = vec_msum(tmp16_0[4], cospi_m28_p04, zerov);
+  tmp0[9] = vec_msum(tmp16_0[5], cospi_m28_p04, zerov);
+  tmp0[10] = vec_msum(tmp16_0[4], cospi_p04_p28, zerov);
+  tmp0[11] = vec_msum(tmp16_0[5], cospi_p04_p28, zerov);
+  tmp0[12] = vec_msum(tmp16_0[6], cospi_m12_p20, zerov);
+  tmp0[13] = vec_msum(tmp16_0[7], cospi_m12_p20, zerov);
+  tmp0[14] = vec_msum(tmp16_0[6], cospi_p20_p12, zerov);
+  tmp0[15] = vec_msum(tmp16_0[7], cospi_p20_p12, zerov);
+
+  tmp1[0] = vec_add(tmp0[0], tmp0[8]);
+  tmp1[1] = vec_add(tmp0[1], tmp0[9]);
+  tmp1[2] = vec_add(tmp0[2], tmp0[10]);
+  tmp1[3] = vec_add(tmp0[3], tmp0[11]);
+  tmp1[4] = vec_add(tmp0[4], tmp0[12]);
+  tmp1[5] = vec_add(tmp0[5], tmp0[13]);
+  tmp1[6] = vec_add(tmp0[6], tmp0[14]);
+  tmp1[7] = vec_add(tmp0[7], tmp0[15]);
+  tmp1[8] = vec_sub(tmp0[0], tmp0[8]);
+  tmp1[9] = vec_sub(tmp0[1], tmp0[9]);
+  tmp1[10] = vec_sub(tmp0[2], tmp0[10]);
+  tmp1[11] = vec_sub(tmp0[3], tmp0[11]);
+  tmp1[12] = vec_sub(tmp0[4], tmp0[12]);
+  tmp1[13] = vec_sub(tmp0[5], tmp0[13]);
+  tmp1[14] = vec_sub(tmp0[6], tmp0[14]);
+  tmp1[15] = vec_sub(tmp0[7], tmp0[15]);
+
+  DCT_CONST_ROUND_SHIFT(tmp1[0]);
+  DCT_CONST_ROUND_SHIFT(tmp1[1]);
+  DCT_CONST_ROUND_SHIFT(tmp1[2]);
+  DCT_CONST_ROUND_SHIFT(tmp1[3]);
+  DCT_CONST_ROUND_SHIFT(tmp1[4]);
+  DCT_CONST_ROUND_SHIFT(tmp1[5]);
+  DCT_CONST_ROUND_SHIFT(tmp1[6]);
+  DCT_CONST_ROUND_SHIFT(tmp1[7]);
+  DCT_CONST_ROUND_SHIFT(tmp1[8]);
+  DCT_CONST_ROUND_SHIFT(tmp1[9]);
+  DCT_CONST_ROUND_SHIFT(tmp1[10]);
+  DCT_CONST_ROUND_SHIFT(tmp1[11]);
+  DCT_CONST_ROUND_SHIFT(tmp1[12]);
+  DCT_CONST_ROUND_SHIFT(tmp1[13]);
+  DCT_CONST_ROUND_SHIFT(tmp1[14]);
+  DCT_CONST_ROUND_SHIFT(tmp1[15]);
+
+  tmp16_0[0] = vec_add(in[0], in[4]);
+  tmp16_0[1] = vec_add(in[1], in[5]);
+  tmp16_0[2] = vec_add(in[2], in[6]);
+  tmp16_0[3] = vec_add(in[3], in[7]);
+  tmp16_0[4] = vec_sub(in[0], in[4]);
+  tmp16_0[5] = vec_sub(in[1], in[5]);
+  tmp16_0[6] = vec_sub(in[2], in[6]);
+  tmp16_0[7] = vec_sub(in[3], in[7]);
+  tmp16_0[8] = vec_packs(tmp1[0], tmp1[1]);
+  tmp16_0[9] = vec_packs(tmp1[2], tmp1[3]);
+  tmp16_0[10] = vec_packs(tmp1[4], tmp1[5]);
+  tmp16_0[11] = vec_packs(tmp1[6], tmp1[7]);
+  tmp16_0[12] = vec_packs(tmp1[8], tmp1[9]);
+  tmp16_0[13] = vec_packs(tmp1[10], tmp1[11]);
+  tmp16_0[14] = vec_packs(tmp1[12], tmp1[13]);
+  tmp16_0[15] = vec_packs(tmp1[14], tmp1[15]);
+
+  // stage 3
+  in[0] = vec_mergeh(tmp16_0[4], tmp16_0[5]);
+  in[1] = vec_mergel(tmp16_0[4], tmp16_0[5]);
+  in[2] = vec_mergeh(tmp16_0[6], tmp16_0[7]);
+  in[3] = vec_mergel(tmp16_0[6], tmp16_0[7]);
+  in[4] = vec_mergeh(tmp16_0[12], tmp16_0[13]);
+  in[5] = vec_mergel(tmp16_0[12], tmp16_0[13]);
+  in[6] = vec_mergeh(tmp16_0[14], tmp16_0[15]);
+  in[7] = vec_mergel(tmp16_0[14], tmp16_0[15]);
+
+  tmp0[0] = vec_msum(in[0], cospi_p08_p24, zerov);
+  tmp0[1] = vec_msum(in[1], cospi_p08_p24, zerov);
+  tmp0[2] = vec_msum(in[0], cospi_p24_m08, zerov);
+  tmp0[3] = vec_msum(in[1], cospi_p24_m08, zerov);
+  tmp0[4] = vec_msum(in[2], cospi_m24_p08, zerov);
+  tmp0[5] = vec_msum(in[3], cospi_m24_p08, zerov);
+  tmp0[6] = vec_msum(in[2], cospi_p08_p24, zerov);
+  tmp0[7] = vec_msum(in[3], cospi_p08_p24, zerov);
+  tmp0[8] = vec_msum(in[4], cospi_p08_p24, zerov);
+  tmp0[9] = vec_msum(in[5], cospi_p08_p24, zerov);
+  tmp0[10] = vec_msum(in[4], cospi_p24_m08, zerov);
+  tmp0[11] = vec_msum(in[5], cospi_p24_m08, zerov);
+  tmp0[12] = vec_msum(in[6], cospi_m24_p08, zerov);
+  tmp0[13] = vec_msum(in[7], cospi_m24_p08, zerov);
+  tmp0[14] = vec_msum(in[6], cospi_p08_p24, zerov);
+  tmp0[15] = vec_msum(in[7], cospi_p08_p24, zerov);
+
+  tmp1[0] = vec_add(tmp0[0], tmp0[4]);
+  tmp1[1] = vec_add(tmp0[1], tmp0[5]);
+  tmp1[2] = vec_add(tmp0[2], tmp0[6]);
+  tmp1[3] = vec_add(tmp0[3], tmp0[7]);
+  tmp1[4] = vec_sub(tmp0[0], tmp0[4]);
+  tmp1[5] = vec_sub(tmp0[1], tmp0[5]);
+  tmp1[6] = vec_sub(tmp0[2], tmp0[6]);
+  tmp1[7] = vec_sub(tmp0[3], tmp0[7]);
+  tmp1[8] = vec_add(tmp0[8], tmp0[12]);
+  tmp1[9] = vec_add(tmp0[9], tmp0[13]);
+  tmp1[10] = vec_add(tmp0[10], tmp0[14]);
+  tmp1[11] = vec_add(tmp0[11], tmp0[15]);
+  tmp1[12] = vec_sub(tmp0[8], tmp0[12]);
+  tmp1[13] = vec_sub(tmp0[9], tmp0[13]);
+  tmp1[14] = vec_sub(tmp0[10], tmp0[14]);
+  tmp1[15] = vec_sub(tmp0[11], tmp0[15]);
+
+  DCT_CONST_ROUND_SHIFT(tmp1[0]);
+  DCT_CONST_ROUND_SHIFT(tmp1[1]);
+  DCT_CONST_ROUND_SHIFT(tmp1[2]);
+  DCT_CONST_ROUND_SHIFT(tmp1[3]);
+  DCT_CONST_ROUND_SHIFT(tmp1[4]);
+  DCT_CONST_ROUND_SHIFT(tmp1[5]);
+  DCT_CONST_ROUND_SHIFT(tmp1[6]);
+  DCT_CONST_ROUND_SHIFT(tmp1[7]);
+  DCT_CONST_ROUND_SHIFT(tmp1[8]);
+  DCT_CONST_ROUND_SHIFT(tmp1[9]);
+  DCT_CONST_ROUND_SHIFT(tmp1[10]);
+  DCT_CONST_ROUND_SHIFT(tmp1[11]);
+  DCT_CONST_ROUND_SHIFT(tmp1[12]);
+  DCT_CONST_ROUND_SHIFT(tmp1[13]);
+  DCT_CONST_ROUND_SHIFT(tmp1[14]);
+  DCT_CONST_ROUND_SHIFT(tmp1[15]);
+
+  in[0] = vec_add(tmp16_0[0], tmp16_0[2]);
+  in[1] = vec_add(tmp16_0[1], tmp16_0[3]);
+  in[2] = vec_sub(tmp16_0[0], tmp16_0[2]);
+  in[3] = vec_sub(tmp16_0[1], tmp16_0[3]);
+  in[4] = vec_packs(tmp1[0], tmp1[1]);
+  in[5] = vec_packs(tmp1[2], tmp1[3]);
+  in[6] = vec_packs(tmp1[4], tmp1[5]);
+  in[7] = vec_packs(tmp1[6], tmp1[7]);
+  in[8] = vec_add(tmp16_0[8], tmp16_0[10]);
+  in[9] = vec_add(tmp16_0[9], tmp16_0[11]);
+  in[10] = vec_sub(tmp16_0[8], tmp16_0[10]);
+  in[11] = vec_sub(tmp16_0[9], tmp16_0[11]);
+  in[12] = vec_packs(tmp1[8], tmp1[9]);
+  in[13] = vec_packs(tmp1[10], tmp1[11]);
+  in[14] = vec_packs(tmp1[12], tmp1[13]);
+  in[15] = vec_packs(tmp1[14], tmp1[15]);
+
+  // stage 4
+  out[0] = vec_mergeh(in[2], in[3]);
+  out[1] = vec_mergel(in[2], in[3]);
+  out[2] = vec_mergeh(in[6], in[7]);
+  out[3] = vec_mergel(in[6], in[7]);
+  out[4] = vec_mergeh(in[10], in[11]);
+  out[5] = vec_mergel(in[10], in[11]);
+  out[6] = vec_mergeh(in[14], in[15]);
+  out[7] = vec_mergel(in[14], in[15]);
+}
+
+void vpx_iadst16_vsx(int16x8_t *src0, int16x8_t *src1) {
+  int16x8_t tmp0[16], tmp1[16], tmp2[8];
+  int32x4_t tmp3, tmp4;
+  int16x8_t zero16v = vec_splat_s16(0);
+  int32x4_t zerov = vec_splat_s32(0);
+  int16x8_t cospi_p16_m16 = vec_mergel(cospi16_v, cospi16m_v);
+  int16x8_t cospi_m16_p16 = vec_mergel(cospi16m_v, cospi16_v);
+  ROUND_SHIFT_INIT;
+
+  TRANSPOSE8x8(src0[0], src0[2], src0[4], src0[6], src0[8], src0[10], src0[12],
+               src0[14], tmp0[0], tmp0[1], tmp0[2], tmp0[3], tmp0[4], tmp0[5],
+               tmp0[6], tmp0[7]);
+  TRANSPOSE8x8(src1[0], src1[2], src1[4], src1[6], src1[8], src1[10], src1[12],
+               src1[14], tmp1[0], tmp1[1], tmp1[2], tmp1[3], tmp1[4], tmp1[5],
+               tmp1[6], tmp1[7]);
+  TRANSPOSE8x8(src0[1], src0[3], src0[5], src0[7], src0[9], src0[11], src0[13],
+               src0[15], tmp0[8], tmp0[9], tmp0[10], tmp0[11], tmp0[12],
+               tmp0[13], tmp0[14], tmp0[15]);
+  TRANSPOSE8x8(src1[1], src1[3], src1[5], src1[7], src1[9], src1[11], src1[13],
+               src1[15], tmp1[8], tmp1[9], tmp1[10], tmp1[11], tmp1[12],
+               tmp1[13], tmp1[14], tmp1[15]);
+
+  iadst16x8_vsx(tmp0, tmp2);
+  IADST_WRAPLOW(tmp2[0], tmp2[1], tmp3, tmp4, src0[14], cospi16m_v);
+  IADST_WRAPLOW(tmp2[0], tmp2[1], tmp3, tmp4, src1[0], cospi_p16_m16);
+  IADST_WRAPLOW(tmp2[2], tmp2[3], tmp3, tmp4, src0[8], cospi16_v);
+  IADST_WRAPLOW(tmp2[2], tmp2[3], tmp3, tmp4, src1[6], cospi_m16_p16);
+  IADST_WRAPLOW(tmp2[4], tmp2[5], tmp3, tmp4, src0[12], cospi16_v);
+  IADST_WRAPLOW(tmp2[4], tmp2[5], tmp3, tmp4, src1[2], cospi_m16_p16);
+  IADST_WRAPLOW(tmp2[6], tmp2[7], tmp3, tmp4, src0[10], cospi16m_v);
+  IADST_WRAPLOW(tmp2[6], tmp2[7], tmp3, tmp4, src1[4], cospi_p16_m16);
+
+  src0[0] = tmp0[0];
+  src0[2] = vec_sub(zero16v, tmp0[8]);
+  src0[4] = tmp0[12];
+  src0[6] = vec_sub(zero16v, tmp0[4]);
+  src1[8] = tmp0[5];
+  src1[10] = vec_sub(zero16v, tmp0[13]);
+  src1[12] = tmp0[9];
+  src1[14] = vec_sub(zero16v, tmp0[1]);
+
+  iadst16x8_vsx(tmp1, tmp2);
+  IADST_WRAPLOW(tmp2[0], tmp2[1], tmp3, tmp4, src0[15], cospi16m_v);
+  IADST_WRAPLOW(tmp2[0], tmp2[1], tmp3, tmp4, src1[1], cospi_p16_m16);
+  IADST_WRAPLOW(tmp2[2], tmp2[3], tmp3, tmp4, src0[9], cospi16_v);
+  IADST_WRAPLOW(tmp2[2], tmp2[3], tmp3, tmp4, src1[7], cospi_m16_p16);
+  IADST_WRAPLOW(tmp2[4], tmp2[5], tmp3, tmp4, src0[13], cospi16_v);
+  IADST_WRAPLOW(tmp2[4], tmp2[5], tmp3, tmp4, src1[3], cospi_m16_p16);
+  IADST_WRAPLOW(tmp2[6], tmp2[7], tmp3, tmp4, src0[11], cospi16m_v);
+  IADST_WRAPLOW(tmp2[6], tmp2[7], tmp3, tmp4, src1[5], cospi_p16_m16);
+
+  src0[1] = tmp1[0];
+  src0[3] = vec_sub(zero16v, tmp1[8]);
+  src0[5] = tmp1[12];
+  src0[7] = vec_sub(zero16v, tmp1[4]);
+  src1[9] = tmp1[5];
+  src1[11] = vec_sub(zero16v, tmp1[13]);
+  src1[13] = tmp1[9];
+  src1[15] = vec_sub(zero16v, tmp1[1]);
 }
