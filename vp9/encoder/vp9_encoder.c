@@ -4888,6 +4888,12 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
   check_initial_width(cpi, subsampling_x, subsampling_y);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  // Disable denoiser for high bitdepth since vp9_denoiser_filter only works for
+  // 8 bits.
+  if (cm->bit_depth > 8) cpi->oxcf.noise_sensitivity = 0;
+#endif
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
   setup_denoiser_buffer(cpi);
 #endif

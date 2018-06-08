@@ -709,8 +709,6 @@ static vpx_codec_err_t ctrl_set_noise_sensitivity(vpx_codec_alg_priv_t *ctx,
                                                   va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.noise_sensitivity = CAST(VP9E_SET_NOISE_SENSITIVITY, args);
-  // TODO(jianj): Look into issue of noise estimation with high bitdepth.
-  if (ctx->cfg.g_bit_depth > 8) extra_cfg.noise_sensitivity = 0;
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
