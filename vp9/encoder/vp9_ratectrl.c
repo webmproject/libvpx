@@ -1863,12 +1863,10 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
     if (is_one_pass_cbr_svc(cpi)) {
       LAYER_CONTEXT *lc = &svc->layer_context[layer];
-      if (svc->spatial_layer_id == svc->first_spatial_layer_to_encode) {
-        lc->is_key_frame = 0;
-      } else {
-        lc->is_key_frame =
-            svc->layer_context[svc->temporal_layer_id].is_key_frame;
-      }
+      lc->is_key_frame =
+          svc->spatial_layer_id == 0
+              ? 0
+              : svc->layer_context[svc->temporal_layer_id].is_key_frame;
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
   }
