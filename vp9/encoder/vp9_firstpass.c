@@ -3040,8 +3040,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   GF_GROUP *const gf_group = &twopass->gf_group;
   FIRSTPASS_STATS this_frame;
 
-  int target_rate;
-
   if (!twopass->stats_in) return;
 
   // If this is an arf frame then we dont want to read the stats file or
@@ -3149,8 +3147,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     cpi->partition_search_skippable_frame = is_skippable_frame(cpi);
   }
 
-  target_rate = gf_group->bit_allocation[gf_group->index];
-  rc->base_frame_target = target_rate;
+  rc->base_frame_target = gf_group->bit_allocation[gf_group->index];
 
   // The multiplication by 256 reverses a scaling factor of (>> 8)
   // applied when combining MB error values for the frame.
