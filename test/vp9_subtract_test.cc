@@ -33,12 +33,6 @@ class VP9SubtractBlockTest : public AbstractBench,
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
-  int block_width_;
-  int block_height_;
-  int16_t *diff_;
-  uint8_t *pred_;
-  uint8_t *src_;
-
   virtual void Run() {
     GetParam()(block_height_, block_width_, diff_, block_width_, src_,
                block_width_, pred_, block_width_);
@@ -54,6 +48,12 @@ class VP9SubtractBlockTest : public AbstractBench,
     src_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(16, block_width_ * block_height_ * 2));
   }
+
+  int block_width_;
+  int block_height_;
+  int16_t *diff_;
+  uint8_t *pred_;
+  uint8_t *src_;
 };
 
 using libvpx_test::ACMRandom;
@@ -82,7 +82,6 @@ TEST_P(VP9SubtractBlockTest, DISABLED_Speed) {
 TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
 
-  // FIXME(rbultje) split in its own file
   for (BLOCK_SIZE bsize = BLOCK_4X4; bsize < BLOCK_SIZES;
        bsize = static_cast<BLOCK_SIZE>(static_cast<int>(bsize) + 1)) {
     SetupBlocks(bsize);
@@ -102,7 +101,8 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
         for (int c = 0; c < block_width_; ++c) {
           EXPECT_EQ(diff_[r * block_width_ + c],
                     (src_[r * block_width_ + c] - pred_[r * block_width_ + c]))
-              << "r = " << r << ", c = " << c << ", bs = " << (int)bsize;
+              << "r = " << r << ", c = " << c
+              << ", bs = " << static_cast<int>(bsize);
         }
       }
 
@@ -114,7 +114,8 @@ TEST_P(VP9SubtractBlockTest, SimpleSubtract) {
           EXPECT_EQ(diff_[r * block_width_ * 2 + c],
                     (src_[r * block_width_ * 2 + c] -
                      pred_[r * block_width_ * 2 + c]))
-              << "r = " << r << ", c = " << c << ", bs = " << (int)bsize;
+              << "r = " << r << ", c = " << c
+              << ", bs = " << static_cast<int>(bsize);
         }
       }
     }
