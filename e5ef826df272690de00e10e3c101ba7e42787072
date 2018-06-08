@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0b564ed6_2c987336",
+        "filename": "test/vp9_subtract_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-08T05:36:24Z",
+      "side": 1,
+      "message": "prefer static_cast\u003c\u003e in this context:\n\nhttps://google.github.io/styleguide/cppguide.html#Casting",
+      "range": {
+        "startLine": 105,
+        "startChar": 62,
+        "endLine": 105,
+        "endChar": 67
+      },
+      "revId": "e5ef826df272690de00e10e3c101ba7e42787072",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
