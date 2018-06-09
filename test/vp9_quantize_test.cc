@@ -571,7 +571,10 @@ INSTANTIATE_TEST_CASE_P(
                                  false),
                       make_tuple(&QuantFPWrapper<vp9_quantize_fp_vsx>,
                                  &QuantFPWrapper<vp9_quantize_fp_c>, VPX_BITS_8,
-                                 16, true)));
+                                 16, true),
+                      make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_vsx>,
+                                 &QuantFPWrapper<vp9_quantize_fp_32x32_c>,
+                                 VPX_BITS_8, 32, true)));
 #endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
 
 // Only useful to compare "Speed" test results.
