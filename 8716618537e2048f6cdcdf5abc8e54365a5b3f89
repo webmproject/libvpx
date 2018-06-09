@@ -46,6 +46,30 @@
       "revId": "8716618537e2048f6cdcdf5abc8e54365a5b3f89",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93e8f648_9b263494",
+        "filename": "test/vp9_quantize_test.cc",
+        "patchSetId": 14
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-06-09T01:30:33Z",
+      "side": 1,
+      "message": "Thanks for the precision. I removed it. Originally, I added this while investigating why the quantize_fp benchmarks are slower than the quantize_b. I think it might be cause by the extra indirection of this wrapper.",
+      "parentUuid": "21b639a2_ce6627dc",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 6
+      },
+      "revId": "8716618537e2048f6cdcdf5abc8e54365a5b3f89",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
