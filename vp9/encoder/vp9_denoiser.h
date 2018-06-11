@@ -77,7 +77,8 @@ void vp9_denoiser_update_frame_info(
 
 void vp9_denoiser_denoise(struct VP9_COMP *cpi, MACROBLOCK *mb, int mi_row,
                           int mi_col, BLOCK_SIZE bs, PICK_MODE_CONTEXT *ctx,
-                          VP9_DENOISER_DECISION *denoiser_decision);
+                          VP9_DENOISER_DECISION *denoiser_decision,
+                          int use_gf_temporal_ref);
 
 void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx);
 
