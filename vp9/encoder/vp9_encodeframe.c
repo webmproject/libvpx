@@ -3305,6 +3305,7 @@ static int ml_pruning_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   linear_weights = &partition_linear_weights[offset];
   linear_score = linear_weights[7];
   for (i = 0; i < 7; ++i) linear_score += linear_weights[i] * features[i];
+  if (linear_score > 0.1f) return 0;
 
   // Predict using neural net model.
   nn_predict(features, nn_config, &nn_score);
