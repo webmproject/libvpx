@@ -74,7 +74,6 @@ typedef struct SVC {
   int number_temporal_layers;
 
   int spatial_layer_to_encode;
-  int first_spatial_layer_to_encode;
 
   // Workaround for multiple frame contexts
   enum { ENCODED = 0, ENCODING, NEED_TO_ENCODE } encode_empty_frame_state;

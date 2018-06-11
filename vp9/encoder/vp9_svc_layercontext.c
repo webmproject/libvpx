@@ -29,7 +29,6 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
 
   svc->spatial_layer_id = 0;
   svc->temporal_layer_id = 0;
-  svc->first_spatial_layer_to_encode = 0;
   svc->force_zero_mode_spatial_ref = 0;
   svc->use_base_mv = 0;
   svc->use_partition_reuse = 0;
