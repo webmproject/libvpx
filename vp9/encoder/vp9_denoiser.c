@@ -189,7 +189,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
     int increase_denoising, int mi_row, int mi_col, PICK_MODE_CONTEXT *ctx,
     int motion_magnitude, int is_skin, int *zeromv_filter, int consec_zeromv,
     int num_spatial_layers, int width, int lst_fb_idx, int gld_fb_idx,
-    int use_svc, int spatial_layer) {
+    int use_svc, int spatial_layer, int use_gf_temporal_ref) {
   const int sse_diff = (ctx->newmv_sse == UINT_MAX)
                            ? 0
                            : ((int)ctx->zeromv_sse - (int)ctx->newmv_sse);
@@ -220,7 +220,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
   // If the best reference frame uses inter-prediction and there is enough of a
   // difference in sum-squared-error, use it.
   if (frame != INTRA_FRAME && frame != ALTREF_FRAME &&
-      (frame != GOLDEN_FRAME || num_spatial_layers == 1) &&
+      (frame != GOLDEN_FRAME || num_spatial_layers == 1 ||
+       use_gf_temporal_ref) &&
       sse_diff > sse_diff_thresh(bs, increase_denoising, motion_magnitude)) {
     mi->ref_frame[0] = ctx->best_reference_frame;
     mi->mode = ctx->best_sse_inter_mode;
@@ -230,7 +231,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
     frame = ctx->best_zeromv_reference_frame;
     ctx->newmv_sse = ctx->zeromv_sse;
     // Bias to last reference.
-    if (num_spatial_layers > 1 || frame == ALTREF_FRAME ||
+    if ((num_spatial_layers > 1 && !use_gf_temporal_ref) ||
+        frame == ALTREF_FRAME ||
         (frame != LAST_FRAME &&
          ((ctx->zeromv_lastref_sse<(5 * ctx->zeromv_sse)>> 2) ||
           denoiser->denoising_level >= kDenHigh))) {
@@ -326,7 +328,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
 
 void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
                           BLOCK_SIZE bs, PICK_MODE_CONTEXT *ctx,
-                          VP9_DENOISER_DECISION *denoiser_decision) {
+                          VP9_DENOISER_DECISION *denoiser_decision,
+                          int use_gf_temporal_ref) {
   int mv_col, mv_row;
   int motion_magnitude = 0;
   int zeromv_filter = 0;
@@ -397,7 +400,8 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
         &cpi->common, denoiser, mb, bs, increase_denoising, mi_row, mi_col, ctx,
         motion_magnitude, is_skin, &zeromv_filter, consec_zeromv,
         cpi->svc.number_spatial_layers, cpi->Source->y_width, cpi->lst_fb_idx,
-        cpi->gld_fb_idx, cpi->use_svc, cpi->svc.spatial_layer_id);
+        cpi->gld_fb_idx, cpi->use_svc, cpi->svc.spatial_layer_id,
+        use_gf_temporal_ref);
 
   if (decision == FILTER_BLOCK) {
     decision = vp9_denoiser_filter(src.buf, src.stride, mc_avg_start,
