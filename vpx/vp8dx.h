@@ -132,6 +132,16 @@ enum vp8_dec_control_id {
    */
   VP9D_SET_ROW_MT,
 
+  /*!\brief Codec control function to set loopfilter optimization.
+   *
+   * 0 : off, Loop filter is done after all tiles have been decoded
+   * 1 : on, Loop filter is done immediately after decode without
+   *     waiting for all threads to sync.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9D_SET_LOOP_FILTER_OPT,
+
   VP8_DECODER_CTRL_ID_MAX
 };
 
@@ -191,6 +201,8 @@ VPX_CTRL_USE_TYPE(VP9_DECODE_SVC_SPATIAL_LAYER, int)
 VPX_CTRL_USE_TYPE(VP9_SET_SKIP_LOOP_FILTER, int)
 #define VPX_CTRL_VP9_DECODE_SET_ROW_MT
 VPX_CTRL_USE_TYPE(VP9D_SET_ROW_MT, int)
+#define VPX_CTRL_VP9_SET_LOOP_FILTER_OPT
+VPX_CTRL_USE_TYPE(VP9D_SET_LOOP_FILTER_OPT, int)
 
 /*!\endcond */
 /*! @} - end defgroup vp8_decoder */

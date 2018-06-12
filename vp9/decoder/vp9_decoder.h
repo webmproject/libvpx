@@ -37,6 +37,8 @@ typedef struct TileWorkerData {
   int buf_start, buf_end;  // pbi->tile_buffers to decode, inclusive
   vpx_reader bit_reader;
   FRAME_COUNTS counts;
+  LFWorkerData *lf_data;
+  VP9LfSync *lf_sync;
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
   /* dqcoeff are shared by all the planes. So planes must be decoded serially */
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
@@ -74,6 +76,7 @@ typedef struct VP9Decoder {
   int hold_ref_buf;  // hold the reference buffer.
 
   int row_mt;
+  int lpf_mt_opt;
 } VP9Decoder;
 
 int vp9_receive_compressed_data(struct VP9Decoder *pbi, size_t size,

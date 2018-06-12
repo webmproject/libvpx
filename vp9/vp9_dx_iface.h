@@ -46,6 +46,7 @@ struct vpx_codec_alg_priv {
   int svc_decoding;
   int svc_spatial_layer;
   int row_mt;
+  int lpf_opt;
 };
 
 #endif  // VPX_VP9_VP9_DX_IFACE_H_
