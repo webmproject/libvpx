@@ -82,6 +82,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
     } else {
       sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
       sf->partition_search_breakout_thr.dist = (1 << 21);
+      sf->use_ml_partition_search_breakout = 1;
     }
   }
 
@@ -112,6 +113,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   }
 
   if (speed >= 3) {
+    sf->use_ml_partition_search_breakout = 0;
     if (VPXMIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
       sf->schedule_mode_search = cm->base_qindex < 220 ? 1 : 0;
@@ -712,6 +714,7 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
   sf->partition_search_breakout_thr.dist = (1 << 19);
   sf->partition_search_breakout_thr.rate = 80;
   sf->ml_partition_search_early_termination = 0;
+  sf->use_ml_partition_search_breakout = 0;
 
   if (oxcf->mode == REALTIME) {
     set_rt_speed_feature_framesize_dependent(cpi, sf, oxcf->speed);
