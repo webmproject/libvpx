@@ -1853,10 +1853,14 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
                                svc->number_temporal_layers);
   // Periodic key frames is based on the super-frame counter
   // (svc.current_superframe), also only base spatial layer is key frame.
+  // Key frame is set for any of the following: very first frame, frame flags
+  // indicates key, superframe counter hits key frequencey, or sync flag is
+  // set for spatial layer 0.
   if ((cm->current_video_frame == 0) || (cpi->frame_flags & FRAMEFLAGS_KEY) ||
       (cpi->oxcf.auto_key &&
        (svc->current_superframe % cpi->oxcf.key_freq == 0) &&
-       svc->spatial_layer_id == 0)) {
+       svc->spatial_layer_id == 0) ||
+      (svc->spatial_layer_sync[0] == 1 && svc->spatial_layer_id == 0)) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
     if (is_one_pass_cbr_svc(cpi)) {
@@ -1880,6 +1884,10 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
   }
+
+  // Check if superframe contains a sync layer request.
+  vp9_svc_check_spatial_layer_sync(cpi);
+
   // If long term termporal feature is enabled, set the period of the update.
   // The update/refresh of this reference frame is always on base temporal
   // layer frame.

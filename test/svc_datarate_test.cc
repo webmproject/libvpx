@@ -119,6 +119,8 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest {
     layer_framedrop_ = 0;
     force_key_ = 0;
     force_key_test_ = 0;
+    insert_layer_sync_ = 0;
+    layer_sync_on_base_ = 0;
   }
   virtual void BeginPassHook(unsigned int /*pass*/) {}
 
@@ -322,6 +324,25 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest {
     else
       frame_flags_ = 0;
 
+    if (insert_layer_sync_) {
+      vpx_svc_spatial_layer_sync_t svc_layer_sync;
+      svc_layer_sync.base_layer_intra_only = 0;
+      layer_sync_on_base_ = 0;
+      for (int i = 0; i < number_spatial_layers_; i++)
+        svc_layer_sync.spatial_layer_sync[i] = 0;
+      if (video->frame() == 150) {
+        svc_layer_sync.spatial_layer_sync[1] = 1;
+        encoder->Control(VP9E_SET_SVC_SPATIAL_LAYER_SYNC, &svc_layer_sync);
+      } else if (video->frame() == 240) {
+        svc_layer_sync.spatial_layer_sync[2] = 1;
+        encoder->Control(VP9E_SET_SVC_SPATIAL_LAYER_SYNC, &svc_layer_sync);
+      } else if (video->frame() == 320) {
+        svc_layer_sync.spatial_layer_sync[0] = 1;
+        layer_sync_on_base_ = 1;
+        encoder->Control(VP9E_SET_SVC_SPATIAL_LAYER_SYNC, &svc_layer_sync);
+      }
+    }
+
     const vpx_rational_t tb = video->timebase();
     timebase_ = static_cast<double>(tb.num) / tb.den;
     duration_ = 0;
@@ -383,6 +404,12 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest {
     const bool key_frame =
         (pkt->data.frame.flags & VPX_FRAME_IS_KEY) ? true : false;
     if (key_frame) {
+      // For test that inserts layer sync frames: requesting a layer_sync on
+      // the base layer must force key frame. So if any key frame occurs after
+      // first superframe it must due to layer sync on base spatial layer.
+      if (superframe_count_ > 0 && insert_layer_sync_) {
+        ASSERT_EQ(layer_sync_on_base_, 1);
+      }
       temporal_layer_id_ = 0;
       superframe_count_ = 0;
     }
@@ -503,6 +530,8 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest {
   int force_key_;
   int force_key_test_;
   int inter_layer_pred_mode_;
+  int insert_layer_sync_;
+  int layer_sync_on_base_;
 };
 
 // Params: speed setting.
@@ -1245,6 +1274,56 @@ TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc2SL3TLSmallKf) {
   cfg_.kf_max_dist = kf_dist;
   key_frame_spacing_ = kf_dist;
   ResetModel();
+  AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
+                      cfg_.ts_number_layers, cfg_.temporal_layering_mode,
+                      layer_target_avg_bandwidth_, bits_in_buffer_model_);
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  CheckLayerRateTargeting(&cfg_, number_spatial_layers_,
+                          number_temporal_layers_, file_datarate_, 0.78, 1.15);
+#if CONFIG_VP9_DECODER
+  // The non-reference frames are expected to be mismatched frames as the
+  // encoder will avoid loopfilter on these frames.
+  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+#endif
+}
+
+// Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and 3
+// temporal layers. Run VGA clip with 1 thread, and place layer sync frames:
+// one at middle layer first, then another one for top layer, and another
+// insert for base spatial layer (which forces key frame).
+TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLSyncFrames) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.ss_number_layers = 3;
+  cfg_.ts_number_layers = 3;
+  cfg_.ts_rate_decimator[0] = 4;
+  cfg_.ts_rate_decimator[1] = 2;
+  cfg_.ts_rate_decimator[2] = 1;
+  cfg_.g_error_resilient = 1;
+  cfg_.g_threads = 1;
+  cfg_.temporal_layering_mode = 3;
+  svc_params_.scaling_factor_num[0] = 72;
+  svc_params_.scaling_factor_den[0] = 288;
+  svc_params_.scaling_factor_num[1] = 144;
+  svc_params_.scaling_factor_den[1] = 288;
+  svc_params_.scaling_factor_num[2] = 288;
+  svc_params_.scaling_factor_den[2] = 288;
+  cfg_.kf_max_dist = 9999;
+  cfg_.rc_dropframe_thresh = 10;
+  cfg_.rc_target_bitrate = 400;
+  number_spatial_layers_ = cfg_.ss_number_layers;
+  number_temporal_layers_ = cfg_.ts_number_layers;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
+  ResetModel();
+  insert_layer_sync_ = 1;
   AssignLayerBitrates(&cfg_, &svc_params_, cfg_.ss_number_layers,
                       cfg_.ts_number_layers, cfg_.temporal_layering_mode,
                       layer_target_avg_bandwidth_, bits_in_buffer_model_);

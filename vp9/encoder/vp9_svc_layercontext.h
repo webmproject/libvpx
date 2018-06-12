@@ -24,7 +24,7 @@ typedef enum {
   INTER_LAYER_PRED_ON,
   // Inter-layer prediction is off on all frames.
   INTER_LAYER_PRED_OFF,
-  // Inter-layer prediction is off on non-key frames.
+  // Inter-layer prediction is off on non-key frames and non-sync frames.
   INTER_LAYER_PRED_OFF_NONKEY,
   // Inter-layer prediction is on on all frames, but constrained such
   // that any layer S (> 0) can only predict from previous spatial
@@ -158,6 +158,10 @@ typedef struct SVC {
   // updated the frame buffer index.
   uint8_t fb_idx_spatial_layer_id[REF_FRAMES];
   uint8_t fb_idx_temporal_layer_id[REF_FRAMES];
+
+  int spatial_layer_sync[VPX_SS_MAX_LAYERS];
+  int base_layer_intra_only;
+  uint8_t superframe_has_layer_sync;
 } SVC;
 
 struct VP9_COMP;
@@ -218,6 +222,8 @@ void vp9_svc_check_reset_layer_rc_flag(struct VP9_COMP *const cpi);
 void vp9_svc_constrain_inter_layer_pred(struct VP9_COMP *const cpi);
 
 void vp9_svc_assert_constraints_pattern(struct VP9_COMP *const cpi);
+
+void vp9_svc_check_spatial_layer_sync(struct VP9_COMP *const cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
