@@ -22,6 +22,30 @@
       "revId": "5a9690c1350fb8917088489f7eba6074ba9fa666",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27a6d9bb_4f7a9bb2",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-06-13T17:49:07Z",
+      "side": 1,
+      "message": "Great find!",
+      "parentUuid": "730ccccd_b08c888e",
+      "range": {
+        "startLine": 291,
+        "startChar": 47,
+        "endLine": 291,
+        "endChar": 59
+      },
+      "revId": "5a9690c1350fb8917088489f7eba6074ba9fa666",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
