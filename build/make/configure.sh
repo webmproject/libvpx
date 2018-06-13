@@ -1335,13 +1335,15 @@ EOF
             check_gcc_machine_options $ext avx512f avx512cd avx512bw avx512dq avx512vl
 
             # Confirm that the compiler really supports avx512.
-            check_cc -mavx512f <<EOF || RTCD_OPTIONS="${RTCD_OPTIONS}--disable-avx512 " && soft_disable avx512
+            if enabled gcc; then
+              check_cc -mavx512f <<EOF || RTCD_OPTIONS="${RTCD_OPTIONS}--disable-avx512 " && soft_disable avx512
 #include <immintrin.h>
 void f(void) {
   __m512i x = _mm512_set1_epi16(0);
   (void)x;
 }
 EOF
+            fi
           else
             # use the shortened version for the flag: sse4_1 -> sse4
             check_gcc_machine_option ${ext%_*} $ext
