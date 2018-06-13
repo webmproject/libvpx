@@ -22,6 +22,30 @@
       "revId": "dc206370801477eb78c7218a1961558a0037a40c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cdddd905_ec29f9f8",
+        "filename": "vpx_dsp/ppc/sad_vsx.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-06-13T19:21:29Z",
+      "side": 1,
+      "message": "Absolutely right!",
+      "parentUuid": "6b93a047_4ebc2911",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 4
+      },
+      "revId": "dc206370801477eb78c7218a1961558a0037a40c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
