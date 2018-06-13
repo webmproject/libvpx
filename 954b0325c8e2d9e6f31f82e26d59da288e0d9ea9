@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17295027_be9d4f72",
+        "filename": "vp8/common/treecoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-13T22:01:37Z",
+      "side": 1,
+      "message": "the assert was removed along the way in vp9 and later promoted the calculation below to uint64_t unconditionally. The first instance being:\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/43384\nthe current code in prob.h:get_prob() is:\nconst int p \u003d (int)(((uint64_t)num * 256 + (den \u003e\u003e 1)) / den);",
+      "revId": "954b0325c8e2d9e6f31f82e26d59da288e0d9ea9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
