@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "730ccccd_b08c888e",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-06-13T17:43:19Z",
+      "side": 1,
+      "message": "This should use reference_data_/stride_\n\nUsing source for both might distort the results wrt caching (although the data locations probably don\u0027t look anything like they would when running the encoder)",
+      "range": {
+        "startLine": 291,
+        "startChar": 47,
+        "endLine": 291,
+        "endChar": 59
+      },
+      "revId": "5a9690c1350fb8917088489f7eba6074ba9fa666",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
