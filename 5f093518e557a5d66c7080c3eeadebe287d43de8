@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4d5b235_815f054b",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 17
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-14T00:17:22Z",
+      "side": 1,
+      "message": "this can be put into for loop since it\u0027s in C++ code. \nfor (int i \u003d 0; ...)",
+      "range": {
+        "startLine": 325,
+        "startChar": 6,
+        "endLine": 325,
+        "endChar": 12
+      },
+      "revId": "5f093518e557a5d66c7080c3eeadebe287d43de8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
