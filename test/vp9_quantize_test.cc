@@ -27,6 +27,7 @@
 #include "vp9/common/vp9_scan.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/msvc.h"
 #include "vpx_ports/vpx_timer.h"
 
 using libvpx_test::ACMRandom;

@@ -10,7 +10,6 @@
 
 #include <string.h>
 #include <limits.h>
-#include <stdio.h>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -24,6 +23,7 @@
 #include "vpx/vpx_codec.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "vpx_ports/msvc.h"
 #include "vpx_ports/vpx_timer.h"
 
 template <typename Function>
