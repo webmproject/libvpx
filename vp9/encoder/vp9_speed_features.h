@@ -274,6 +274,9 @@ typedef struct SPEED_FEATURES {
   // alternate reference frames.
   int allow_acl;
 
+  // Temporal dependency model based encoding mode optimization
+  int enable_tpl_model;
+
   // Use transform domain distortion. Use pixel domain distortion in speed 0
   // and certain situations in higher speed to improve the RD model precision.
   int allow_txfm_domain_distortion;
