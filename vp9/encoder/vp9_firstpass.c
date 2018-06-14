@@ -2128,7 +2128,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   GF_GROUP *const gf_group = &twopass->gf_group;
   FIRSTPASS_STATS frame_stats;
   int i;
-  int frame_index = 1;
+  int frame_index = 0;
   int target_frame_size;
   int key_frame;
   const int max_bits = frame_max_bits(&cpi->rc, oxcf);
@@ -2136,7 +2136,6 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   int mid_boost_bits = 0;
   int mid_frame_idx;
   unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
-  int alt_frame_index = frame_index;
   int normal_frames;
   int normal_frame_bits;
   int last_frame_reduction = 0;
@@ -2150,35 +2149,39 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
   // For key frames the frame target rate is already set and it
   // is also the golden frame.
+  // === [frame_index == 0] ===
   if (!key_frame) {
     if (rc->source_alt_ref_active) {
-      gf_group->update_type[0] = OVERLAY_UPDATE;
-      gf_group->rf_level[0] = INTER_NORMAL;
-      gf_group->bit_allocation[0] = 0;
+      gf_group->update_type[frame_index] = OVERLAY_UPDATE;
+      gf_group->rf_level[frame_index] = INTER_NORMAL;
+      gf_group->bit_allocation[frame_index] = 0;
     } else {
-      gf_group->update_type[0] = GF_UPDATE;
-      gf_group->rf_level[0] = GF_ARF_STD;
-      gf_group->bit_allocation[0] = gf_arf_bits;
+      gf_group->update_type[frame_index] = GF_UPDATE;
+      gf_group->rf_level[frame_index] = GF_ARF_STD;
+      gf_group->bit_allocation[frame_index] = gf_arf_bits;
     }
-    gf_group->arf_update_idx[0] = arf_buffer_indices[0];
-    gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
+    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
+    gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
   }
 
   // Deduct the boost bits for arf (or gf if it is not a key frame)
   // from the group total.
   if (rc->source_alt_ref_pending || !key_frame) total_group_bits -= gf_arf_bits;
 
+  ++frame_index;
+
+  // === [frame_index == 1] ===
   // Store the bits to spend on the ARF if there is one.
   if (rc->source_alt_ref_pending) {
-    gf_group->update_type[alt_frame_index] = ARF_UPDATE;
-    gf_group->rf_level[alt_frame_index] = GF_ARF_STD;
-    gf_group->bit_allocation[alt_frame_index] = gf_arf_bits;
+    gf_group->update_type[frame_index] = ARF_UPDATE;
+    gf_group->rf_level[frame_index] = GF_ARF_STD;
+    gf_group->bit_allocation[frame_index] = gf_arf_bits;
 
-    gf_group->arf_src_offset[alt_frame_index] =
+    gf_group->arf_src_offset[frame_index] =
         (unsigned char)(rc->baseline_gf_interval - 1);
 
-    gf_group->arf_update_idx[alt_frame_index] = arf_buffer_indices[0];
-    gf_group->arf_ref_idx[alt_frame_index] =
+    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
+    gf_group->arf_ref_idx[frame_index] =
         arf_buffer_indices[cpi->multi_arf_last_grp_enabled &&
                            rc->source_alt_ref_active];
     ++frame_index;
