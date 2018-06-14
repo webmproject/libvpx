@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "vp8/common/treecoder.h"
+#include "vpx/vpx_integer.h"
 
 static void tree2tok(struct vp8_token_struct *const p, vp8_tree t, int i, int v,
                      int L) {
@@ -89,10 +90,9 @@ void vp8_tree_probs_from_distribution(int n, /* n = size of alphabet */
     const unsigned int *const c = branch_ct[t];
     const unsigned int tot = c[0] + c[1];
 
-    assert(tot < (1 << 24)); /* no overflow below */
-
     if (tot) {
-      const unsigned int p = ((c[0] * Pfac) + (rd ? tot >> 1 : 0)) / tot;
+      const unsigned int p =
+          (unsigned int)(((uint64_t)c[0] * Pfac) + (rd ? tot >> 1 : 0)) / tot;
       probs[t] = p < 256 ? (p ? p : 1) : 255; /* agree w/old version for now */
     } else {
       probs[t] = vp8_prob_half;
