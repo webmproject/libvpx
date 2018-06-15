@@ -2085,7 +2085,7 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 
 VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
-  unsigned int i;
+  unsigned int i, frame;
   VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP9_COMP));
   VP9_COMMON *volatile const cm = cpi != NULL ? &cpi->common : NULL;
 
@@ -2333,6 +2333,16 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   }
 #endif  // !CONFIG_REALTIME_ONLY
 
+  for (frame = 0; frame < MAX_LAG_BUFFERS; ++frame) {
+    CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
+                    vpx_calloc(cm->mi_rows * cm->mi_cols,
+                               sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
+    cpi->tpl_stats[frame].is_valid = 1;
+    cpi->tpl_stats[frame].width = cm->mi_cols;
+    cpi->tpl_stats[frame].height = cm->mi_rows;
+    cpi->tpl_stats[frame].stride = cm->mi_cols;
+  }
+
   vp9_set_speed_features_framesize_independent(cpi);
   vp9_set_speed_features_framesize_dependent(cpi);
 
@@ -2424,7 +2434,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *cm;
-  unsigned int i;
+  unsigned int i, frame;
   int t;
 
   if (!cpi) return;
@@ -2518,6 +2528,12 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #if CONFIG_VP9_TEMPORAL_DENOISING
   vp9_denoiser_free(&(cpi->denoiser));
 #endif
+
+  for (frame = 0; frame < MAX_LAG_BUFFERS; ++frame) {
+    if (cpi->tpl_stats[frame].is_valid)
+      vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
+    cpi->tpl_stats[frame].is_valid = 0;
+  }
 
   for (t = 0; t < cpi->num_workers; ++t) {
     VPxWorker *const worker = &cpi->workers[t];
