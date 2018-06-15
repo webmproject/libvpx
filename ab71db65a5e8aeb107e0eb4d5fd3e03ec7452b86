@@ -22,6 +22,30 @@
       "revId": "ab71db65a5e8aeb107e0eb4d5fd3e03ec7452b86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca978e49_14c0aebe",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-15T22:16:04Z",
+      "side": 1,
+      "message": "\u003e I know I can check $? directly here, but I think this is more readable. Given the state of configure, every little bit helps, no?\n\nshould be fine; the variable could be a local, but that isn\u0027t being done anywhere it seems.",
+      "parentUuid": "985c73e7_89c38bfa",
+      "range": {
+        "startLine": 441,
+        "startChar": 0,
+        "endLine": 442,
+        "endChar": 38
+      },
+      "revId": "ab71db65a5e8aeb107e0eb4d5fd3e03ec7452b86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
