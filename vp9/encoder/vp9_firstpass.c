@@ -2120,28 +2120,16 @@ static double calculate_group_score(VP9_COMP *cpi, double av_score,
   return score_total;
 }
 
-static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
-                                   int gf_arf_bits) {
-  VP9EncoderConfig *const oxcf = &cpi->oxcf;
+static void define_gf_group_structure(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
-  FIRSTPASS_STATS frame_stats;
   int i;
   int frame_index = 0;
-  int target_frame_size;
   int key_frame;
-  const int max_bits = frame_max_bits(&cpi->rc, oxcf);
-  int64_t total_group_bits = gf_group_bits;
-  int mid_boost_bits = 0;
   int mid_frame_idx;
   unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
   int normal_frames;
-  int normal_frame_bits;
-  int last_frame_reduction = 0;
-  double av_score = 1.0;
-  double tot_norm_frame_score = 1.0;
-  double this_frame_score = 1.0;
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
@@ -2154,28 +2142,20 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     if (rc->source_alt_ref_active) {
       gf_group->update_type[frame_index] = OVERLAY_UPDATE;
       gf_group->rf_level[frame_index] = INTER_NORMAL;
-      gf_group->bit_allocation[frame_index] = 0;
     } else {
       gf_group->update_type[frame_index] = GF_UPDATE;
       gf_group->rf_level[frame_index] = GF_ARF_STD;
-      gf_group->bit_allocation[frame_index] = gf_arf_bits;
     }
     gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
     gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
   }
 
-  // Deduct the boost bits for arf (or gf if it is not a key frame)
-  // from the group total.
-  if (rc->source_alt_ref_pending || !key_frame) total_group_bits -= gf_arf_bits;
-
   ++frame_index;
 
   // === [frame_index == 1] ===
-  // Store the bits to spend on the ARF if there is one.
   if (rc->source_alt_ref_pending) {
     gf_group->update_type[frame_index] = ARF_UPDATE;
     gf_group->rf_level[frame_index] = GF_ARF_STD;
-    gf_group->bit_allocation[frame_index] = gf_arf_bits;
 
     gf_group->arf_src_offset[frame_index] =
         (unsigned char)(rc->baseline_gf_interval - 1);
@@ -2205,6 +2185,102 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
 
   normal_frames = (rc->baseline_gf_interval - rc->source_alt_ref_pending);
+  for (i = 0; i < normal_frames; ++i) {
+    int arf_idx = 0;
+    if (twopass->stats_in >= twopass->stats_in_end) break;
+
+    if (rc->source_alt_ref_pending && cpi->multi_arf_enabled) {
+      if (frame_index <= mid_frame_idx) arf_idx = 1;
+    }
+
+    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[arf_idx];
+    gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[arf_idx];
+
+    gf_group->update_type[frame_index] = LF_UPDATE;
+    gf_group->rf_level[frame_index] = INTER_NORMAL;
+
+    ++frame_index;
+  }
+
+  // Note:
+  // We need to configure the frame at the end of the sequence + 1 that will be
+  // the start frame for the next group. Otherwise prior to the call to
+  // vp9_rc_get_second_pass_params() the data will be undefined.
+  gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
+  gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
+
+  if (rc->source_alt_ref_pending) {
+    gf_group->update_type[frame_index] = OVERLAY_UPDATE;
+    gf_group->rf_level[frame_index] = INTER_NORMAL;
+
+    // Final setup for second arf and its overlay.
+    if (cpi->multi_arf_enabled)
+      gf_group->update_type[mid_frame_idx] = OVERLAY_UPDATE;
+  } else {
+    gf_group->update_type[frame_index] = GF_UPDATE;
+    gf_group->rf_level[frame_index] = GF_ARF_STD;
+  }
+
+  // Note whether multi-arf was enabled this group for next time.
+  cpi->multi_arf_last_grp_enabled = cpi->multi_arf_enabled;
+}
+
+static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
+                                   int gf_arf_bits) {
+  VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  RATE_CONTROL *const rc = &cpi->rc;
+  TWO_PASS *const twopass = &cpi->twopass;
+  GF_GROUP *const gf_group = &twopass->gf_group;
+  FIRSTPASS_STATS frame_stats;
+  int i;
+  int frame_index = 0;
+  int target_frame_size;
+  int key_frame;
+  const int max_bits = frame_max_bits(&cpi->rc, oxcf);
+  int64_t total_group_bits = gf_group_bits;
+  int mid_boost_bits = 0;
+  int mid_frame_idx;
+  int normal_frames;
+  int normal_frame_bits;
+  int last_frame_reduction = 0;
+  double av_score = 1.0;
+  double tot_norm_frame_score = 1.0;
+  double this_frame_score = 1.0;
+
+  // Define the GF structure and specify
+  define_gf_group_structure(cpi);
+
+  key_frame = cpi->common.frame_type == KEY_FRAME;
+
+  // For key frames the frame target rate is already set and it
+  // is also the golden frame.
+  // === [frame_index == 0] ===
+  if (!key_frame) {
+    gf_group->bit_allocation[frame_index] =
+        rc->source_alt_ref_active ? 0 : gf_arf_bits;
+  }
+
+  // Deduct the boost bits for arf (or gf if it is not a key frame)
+  // from the group total.
+  if (rc->source_alt_ref_pending || !key_frame) total_group_bits -= gf_arf_bits;
+
+  ++frame_index;
+
+  // === [frame_index == 1] ===
+  // Store the bits to spend on the ARF if there is one.
+  if (rc->source_alt_ref_pending) {
+    gf_group->bit_allocation[frame_index] = gf_arf_bits;
+
+    ++frame_index;
+
+    // Set aside a slot for a level 1 arf.
+    if (cpi->multi_arf_enabled) ++frame_index;
+  }
+
+  // Define middle frame
+  mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
+
+  normal_frames = (rc->baseline_gf_interval - rc->source_alt_ref_pending);
   if (normal_frames > 1)
     normal_frame_bits = (int)(total_group_bits / normal_frames);
   else
@@ -2217,7 +2293,6 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
   // Allocate bits to the other frames in the group.
   for (i = 0; i < normal_frames; ++i) {
-    int arf_idx = 0;
     if (EOF == input_stats(twopass, &frame_stats)) break;
     if (oxcf->vbr_corpus_complexity) {
       this_frame_score = calculate_norm_frame_score(cpi, twopass, oxcf,
@@ -2235,17 +2310,10 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     if (rc->source_alt_ref_pending && cpi->multi_arf_enabled) {
       mid_boost_bits += (target_frame_size >> 4);
       target_frame_size -= (target_frame_size >> 4);
-
-      if (frame_index <= mid_frame_idx) arf_idx = 1;
     }
-    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[arf_idx];
-    gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[arf_idx];
 
     target_frame_size =
         clamp(target_frame_size, 0, VPXMIN(max_bits, (int)total_group_bits));
-
-    gf_group->update_type[frame_index] = LF_UPDATE;
-    gf_group->rf_level[frame_index] = INTER_NORMAL;
 
     gf_group->bit_allocation[frame_index] = target_frame_size;
     ++frame_index;
@@ -2258,27 +2326,15 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   // We need to configure the frame at the end of the sequence + 1 that will be
   // the start frame for the next group. Otherwise prior to the call to
   // vp9_rc_get_second_pass_params() the data will be undefined.
-  gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
-  gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
 
   if (rc->source_alt_ref_pending) {
-    gf_group->update_type[frame_index] = OVERLAY_UPDATE;
-    gf_group->rf_level[frame_index] = INTER_NORMAL;
-
     // Final setup for second arf and its overlay.
     if (cpi->multi_arf_enabled) {
       gf_group->bit_allocation[2] =
           gf_group->bit_allocation[mid_frame_idx] + mid_boost_bits;
-      gf_group->update_type[mid_frame_idx] = OVERLAY_UPDATE;
       gf_group->bit_allocation[mid_frame_idx] = 0;
     }
-  } else {
-    gf_group->update_type[frame_index] = GF_UPDATE;
-    gf_group->rf_level[frame_index] = GF_ARF_STD;
   }
-
-  // Note whether multi-arf was enabled this group for next time.
-  cpi->multi_arf_last_grp_enabled = cpi->multi_arf_enabled;
 }
 
 // Adjusts the ARNF filter for a GF group.
