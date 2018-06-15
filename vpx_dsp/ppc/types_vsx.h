@@ -23,7 +23,7 @@ typedef vector bool char bool8x16_t;
 typedef vector bool short bool16x8_t;
 typedef vector bool int bool32x4_t;
 
-#ifdef __clang__
+#if defined(__clang__) && __clang_major__ < 6
 static const uint8x16_t xxpermdi0_perm = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
                                            0x06, 0x07, 0x10, 0x11, 0x12, 0x13,
                                            0x14, 0x15, 0x16, 0x17 };
