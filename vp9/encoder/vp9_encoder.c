@@ -2334,13 +2334,16 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 #endif  // !CONFIG_REALTIME_ONLY
 
   for (frame = 0; frame < MAX_LAG_BUFFERS; ++frame) {
+    int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+    int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+
     CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
-                    vpx_calloc(cm->mi_rows * cm->mi_cols,
+                    vpx_calloc(mi_rows * mi_cols,
                                sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
     cpi->tpl_stats[frame].is_valid = 1;
-    cpi->tpl_stats[frame].width = cm->mi_cols;
-    cpi->tpl_stats[frame].height = cm->mi_rows;
-    cpi->tpl_stats[frame].stride = cm->mi_cols;
+    cpi->tpl_stats[frame].width = mi_cols;
+    cpi->tpl_stats[frame].height = mi_rows;
+    cpi->tpl_stats[frame].stride = mi_cols;
   }
 
   vp9_set_speed_features_framesize_independent(cpi);
@@ -5248,6 +5251,173 @@ static void update_level_info(VP9_COMP *cpi, size_t *size, int arf_src_index) {
   }
 }
 
+typedef struct GF_PICTURE {
+  YV12_BUFFER_CONFIG *frame;
+  int ref_frame[3];
+} GF_PICTURE;
+
+void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
+                     const GF_GROUP *gf_group, int *tpl_group_frames) {
+  int frame_idx, i;
+  int gld_index = -1;
+  int alt_index = -1;
+  int lst_index = -1;
+  int extend_frame_count = 0;
+
+  *tpl_group_frames = 0;
+
+  // Initialize Golden reference frame.
+  gf_picture[0].frame = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+  for (i = 0; i < 3; ++i) gf_picture[0].ref_frame[i] = -1;
+  gld_index = 0;
+  ++*tpl_group_frames;
+
+  // Initialize ARF frame
+  gf_picture[1].frame = cpi->Source;
+  gf_picture[1].ref_frame[0] = gld_index;
+  gf_picture[1].ref_frame[1] = lst_index;
+  gf_picture[1].ref_frame[2] = alt_index;
+  alt_index = 1;
+  ++*tpl_group_frames;
+
+  // Initialize P frames
+  for (frame_idx = 2; frame_idx < MAX_LAG_BUFFERS; ++frame_idx) {
+    struct lookahead_entry *buf =
+        vp9_lookahead_peek(cpi->lookahead, frame_idx - 2);
+
+    if (buf == NULL) break;
+
+    gf_picture[frame_idx].frame = &buf->img;
+    gf_picture[frame_idx].ref_frame[0] = gld_index;
+    gf_picture[frame_idx].ref_frame[1] = lst_index;
+    gf_picture[frame_idx].ref_frame[2] = alt_index;
+
+    ++*tpl_group_frames;
+    lst_index = frame_idx;
+    if (gf_group->update_type[frame_idx] == OVERLAY_UPDATE) break;
+  }
+
+  gld_index = frame_idx;
+  lst_index = VPXMAX(0, frame_idx - 1);
+  alt_index = -1;
+  ++frame_idx;
+
+  // Extend two frames outside the current gf group.
+  for (; frame_idx < MAX_LAG_BUFFERS && extend_frame_count < 2; ++frame_idx) {
+    struct lookahead_entry *buf =
+        vp9_lookahead_peek(cpi->lookahead, frame_idx - 2);
+
+    if (buf == NULL) break;
+
+    gf_picture[frame_idx].frame = &buf->img;
+    gf_picture[frame_idx].ref_frame[0] = gld_index;
+    gf_picture[frame_idx].ref_frame[1] = lst_index;
+    gf_picture[frame_idx].ref_frame[2] = alt_index;
+    lst_index = frame_idx;
+    ++*tpl_group_frames;
+    ++extend_frame_count;
+  }
+}
+
+void init_tpl_stats(VP9_COMP *cpi) {
+  int frame_idx;
+  for (frame_idx = 0; frame_idx < MAX_LAG_BUFFERS; ++frame_idx) {
+    TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+    memset(tpl_frame->tpl_stats_ptr, 0,
+           tpl_frame->height * tpl_frame->width *
+               sizeof(*tpl_frame->tpl_stats_ptr));
+  }
+}
+
+void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
+  TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+  YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
+  YV12_BUFFER_CONFIG *ref_frame[3] = { NULL, NULL, NULL };
+
+  VP9_COMMON *cm = &cpi->common;
+  struct scale_factors sf;
+  int rdmult, idx;
+  ThreadData *td = &cpi->td;
+  MACROBLOCK *x = &td->mb;
+  MACROBLOCKD *xd = &x->e_mbd;
+  int mi_row, mi_col;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(16, uint16_t, predictor16[16 * 16 * 3]);
+  DECLARE_ALIGNED(16, uint8_t, predictor8[16 * 16 * 3]);
+  uint8_t *predictor;
+  (void)predictor;
+  (void)predictor16;
+  (void)predictor8;
+#else
+  DECLARE_ALIGNED(16, uint8_t, predictor[16 * 16 * 3]);
+  (void)predictor;
+#endif
+
+  // Setup scaling factor
+#if CONFIG_VP9_HIGHBITDEPTH
+  vp9_setup_scale_factors_for_frame(
+      &sf, this_frame->y_crop_width, this_frame->y_crop_height,
+      this_frame->y_crop_width, this_frame->y_crop_height,
+      cpi->common.use_highbitdepth);
+#else
+  vp9_setup_scale_factors_for_frame(
+      &sf, this_frame->y_crop_width, this_frame->y_crop_height,
+      this_frame->y_crop_width, this_frame->y_crop_height);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  // Prepare reference frame pointers. If any reference frame slot is
+  // unavailable, the pointer will be set to Null.
+  for (idx = 0; idx < 3; ++idx) {
+    int rf_idx = gf_picture[frame_idx].ref_frame[idx];
+    if (rf_idx != -1) ref_frame[idx] = gf_picture[rf_idx].frame;
+  }
+
+  // Get rd multiplier set up.
+  rdmult = (int)vp9_compute_rd_mult_based_on_qindex(cpi, ARNR_FILT_QINDEX);
+  if (rdmult < 1) rdmult = 1;
+  set_error_per_bit(&cpi->td.mb, rdmult);
+  vp9_initialize_me_consts(cpi, &cpi->td.mb, ARNR_FILT_QINDEX);
+
+  for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
+    // Motion estimation row boundary
+    x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+    x->mv_limits.row_max =
+        (cm->mi_rows - 1 - mi_row) * MI_SIZE + (17 - 2 * VP9_INTERP_EXTEND);
+    for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
+      int mb_y_offset =
+          mi_row * MI_SIZE * this_frame->y_stride + mi_col * MI_SIZE;
+
+      (void)mb_y_offset;
+      // Motion estimation column boundary
+      x->mv_limits.col_min =
+          -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+      x->mv_limits.col_max =
+          ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
+    }
+  }
+
+  (void)xd;
+  (void)tpl_frame;
+  (void)this_frame;
+  (void)ref_frame;
+}
+
+void setup_tpl_stats(VP9_COMP *cpi) {
+  GF_PICTURE gf_picture[MAX_LAG_BUFFERS];
+  const GF_GROUP *gf_group = &cpi->twopass.gf_group;
+  int tpl_group_frames = 0;
+  int frame_idx;
+
+  init_gop_frames(cpi, gf_picture, gf_group, &tpl_group_frames);
+
+  init_tpl_stats(cpi);
+
+  // Backward propagation from tpl_group_frames to 1.
+  for (frame_idx = tpl_group_frames - 1; frame_idx > 0; --frame_idx)
+    mc_flow_dispenser(cpi, gf_picture, frame_idx);
+}
+
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest, int64_t *time_stamp,
                             int64_t *time_end, int flush) {
@@ -5456,6 +5626,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (cpi->oxcf.pass != 0 || cpi->use_svc || frame_is_intra_only(cm) == 1) {
     for (i = 0; i < MAX_REF_FRAMES; ++i) cpi->scaled_ref_idx[i] = INVALID_IDX;
   }
+
+  if (arf_src_index) setup_tpl_stats(cpi);
 
   cpi->td.mb.fp_src_pred = 0;
 #if CONFIG_REALTIME_ONLY
