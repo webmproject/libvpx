@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "985c73e7_89c38bfa",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2018-06-15T18:01:41Z",
+      "side": 1,
+      "message": "I know I can check $? directly here, but I think this is more readable. Given the state of configure, every little bit helps, no?",
+      "range": {
+        "startLine": 441,
+        "startChar": 0,
+        "endLine": 442,
+        "endChar": 38
+      },
+      "revId": "ab71db65a5e8aeb107e0eb4d5fd3e03ec7452b86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "36835b8a_3fa01f33",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1339,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2018-06-15T18:01:41Z",
+      "side": 0,
+      "message": "Moved this to a function to avoid the ridiculously long line we\u0027d end up w/here:\n    check_cc -mavx512f \u003c\u003cEOF || RTCD_OPTIONS\u003d\"${RTCD_OPTIONS}--disable-avx512 \" \u0026\u0026 disable_feature avx512 \u0026\u0026 log_echo \"    disabling avx512: not supported by compiler\"",
+      "range": {
+        "startLine": 1339,
+        "startChar": 13,
+        "endLine": 1339,
+        "endChar": 112
+      },
+      "revId": "0e6ab498a109dcd1f9e0bf7e78e750d76dd7ccad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
