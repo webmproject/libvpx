@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b265859e_745b1a06",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2777,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2018-06-15T05:59:36Z",
+      "side": 1,
+      "message": "why not uint64_t instead of int64_t\n\nKeeping the sign in hash values might be a future problem",
+      "range": {
+        "startLine": 2777,
+        "startChar": 4,
+        "endLine": 2777,
+        "endChar": 11
+      },
+      "revId": "30a159532617521d07de41274d5f2c902294918d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0a69395_be72f631",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2779,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2018-06-15T05:59:36Z",
+      "side": 1,
+      "message": "use a more meaningful name for the #ifdef protection?",
+      "range": {
+        "startLine": 2779,
+        "startChar": 5,
+        "endLine": 2779,
+        "endChar": 0
+      },
+      "revId": "30a159532617521d07de41274d5f2c902294918d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6542b874_3a5a19f5",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2780,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2018-06-15T05:59:36Z",
+      "side": 1,
+      "message": "either \"1 \u0026\u0026\" or the whole test should be removed",
+      "range": {
+        "startLine": 2780,
+        "startChar": 9,
+        "endLine": 2780,
+        "endChar": 10
+      },
+      "revId": "30a159532617521d07de41274d5f2c902294918d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a5df6d6_8fe0f496",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2787,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2018-06-15T05:59:36Z",
+      "side": 1,
+      "message": "should be removed",
+      "range": {
+        "startLine": 2787,
+        "startChar": 12,
+        "endLine": 2787,
+        "endChar": 18
+      },
+      "revId": "30a159532617521d07de41274d5f2c902294918d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35ad7c30_d030b94f",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2788,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2018-06-15T05:59:36Z",
+      "side": 1,
+      "message": "should be removed",
+      "range": {
+        "startLine": 2788,
+        "startChar": 4,
+        "endLine": 2788,
+        "endChar": 5
+      },
+      "revId": "30a159532617521d07de41274d5f2c902294918d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
