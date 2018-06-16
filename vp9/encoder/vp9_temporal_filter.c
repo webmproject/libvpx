@@ -620,13 +620,6 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi) {
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
   int tile_row, tile_col;
-  MACROBLOCKD *mbd = &cpi->td.mb.e_mbd;
-  // Save input state
-  uint8_t *input_buffer[MAX_MB_PLANE];
-  int i;
-
-  for (i = 0; i < MAX_MB_PLANE; i++) input_buffer[i] = mbd->plane[i].pre[0].buf;
-
   vp9_init_tile_data(cpi);
 
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
@@ -634,9 +627,6 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi) {
       temporal_filter_iterate_tile_c(cpi, tile_row, tile_col);
     }
   }
-
-  // Restore input state
-  for (i = 0; i < MAX_MB_PLANE; i++) mbd->plane[i].pre[0].buf = input_buffer[i];
 }
 
 // Apply buffer limits and context specific adjustments to arnr filter.
