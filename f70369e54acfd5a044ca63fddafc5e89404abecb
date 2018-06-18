@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "849ca3cd_4f36a869",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-18T22:13:37Z",
+      "side": 1,
+      "message": "why do you need this, isn\u0027t use_skin_detection off for bit_depth \u003e 8?",
+      "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be066338_f632217d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4609,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-18T22:13:37Z",
+      "side": 1,
+      "message": "same: why not make use use_skin_detection is off for bit_depth \u003e 8?",
+      "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a734219_da9f71dd",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3668,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-18T22:13:37Z",
+      "side": 1,
+      "message": "didn\u0027t we already force noise_sensitivty \u003d 0 at higher level where control is invoked?",
+      "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
