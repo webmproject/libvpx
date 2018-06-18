@@ -5406,6 +5406,8 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   DECLARE_ALIGNED(16, int16_t, src_diff[16 * 16]);
   DECLARE_ALIGNED(16, tran_low_t, coeff[16 * 16]);
 
+  MODE_INFO mi_above, mi_left;
+
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
   vp9_setup_scale_factors_for_frame(
@@ -5430,6 +5432,9 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
     if (rf_idx != -1) ref_frame[idx] = gf_picture[rf_idx].frame;
   }
 
+  xd->mi = cm->mi_grid_visible;
+  xd->mi[0] = cm->mi;
+
   // Get rd multiplier set up.
   rdmult = (int)vp9_compute_rd_mult_based_on_qindex(cpi, ARNR_FILT_QINDEX);
   if (rdmult < 1) rdmult = 1;
@@ -5450,6 +5455,46 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
       int64_t inter_cost;
       int rf_idx;
 
+      int64_t best_intra_cost = INT64_MAX;
+      int64_t intra_cost;
+      PREDICTION_MODE mode;
+      // Intra prediction search
+      for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
+        uint8_t *src, *dst;
+        int src_stride, dst_stride;
+
+        xd->cur_buf = this_frame;
+
+        src = this_frame->y_buffer + mb_y_offset;
+        src_stride = this_frame->y_stride;
+
+        dst = &predictor[0];
+        dst_stride = MI_SIZE;
+
+        xd->mi[0]->sb_type = BLOCK_8X8;
+        xd->mi[0]->ref_frame[0] = INTRA_FRAME;
+        xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
+        xd->mb_to_bottom_edge = ((cm->mi_rows - 1 - mi_row) * MI_SIZE) * 8;
+        xd->mb_to_left_edge = -((mi_col * MI_SIZE) * 8);
+        xd->mb_to_right_edge = ((cm->mi_cols - 1 - mi_col) * MI_SIZE) * 8;
+        xd->above_mi = (mi_row > 0) ? &mi_above : NULL;
+        xd->left_mi = (mi_col > 0) ? &mi_left : NULL;
+
+        vp9_predict_intra_block(xd, b_width_log2_lookup[BLOCK_8X8], TX_8X8,
+                                mode, src, src_stride, dst, dst_stride, 0, 0,
+                                0);
+
+        vpx_subtract_block(MI_SIZE, MI_SIZE, src_diff, MI_SIZE, src, src_stride,
+                           dst, dst_stride);
+
+        vpx_hadamard_8x8(src_diff, MI_SIZE, coeff);
+
+        intra_cost = vpx_satd(coeff, MI_SIZE * MI_SIZE);
+
+        if (intra_cost < best_intra_cost) best_intra_cost = intra_cost;
+      }
+
+      // Motion compensated prediction
       best_mv.as_int = 0;
 
       (void)mb_y_offset;
