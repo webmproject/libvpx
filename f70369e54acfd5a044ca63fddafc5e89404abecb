@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e56a3b25_254e2789",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-18T22:24:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "849ca3cd_4f36a869",
+      "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "be066338_f632217d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "d1646312_060f327e",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4609,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-18T22:24:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "be066338_f632217d",
+      "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a734219_da9f71dd",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2018-06-18T22:13:37Z",
       "side": 1,
       "message": "didn\u0027t we already force noise_sensitivty \u003d 0 at higher level where control is invoked?",
+      "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c02db571_0e3cad51",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3668,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-18T22:24:30Z",
+      "side": 1,
+      "message": "I prefer to disabling it in encoder instead of in the API calls.",
+      "parentUuid": "0a734219_da9f71dd",
       "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
