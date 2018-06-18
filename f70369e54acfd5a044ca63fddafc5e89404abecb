@@ -104,6 +104,24 @@
       "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6543e7dd_9f9252b5",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3668,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-18T22:36:27Z",
+      "side": 1,
+      "message": "can you then disable it higher up, in or before denoiser is init/allocated?",
+      "parentUuid": "c02db571_0e3cad51",
+      "revId": "f70369e54acfd5a044ca63fddafc5e89404abecb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
