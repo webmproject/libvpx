@@ -44,10 +44,11 @@
 #include "vp9/encoder/vp9_bitstream.h"
 #include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodeframe.h"
+#include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_encoder.h"
-#include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_ethread.h"
+#include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mbgraph.h"
 #include "vp9/encoder/vp9_multi_thread.h"
@@ -5329,6 +5330,56 @@ void init_tpl_stats(VP9_COMP *cpi) {
   }
 }
 
+uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
+                                       uint8_t *cur_frame_buf,
+                                       uint8_t *ref_frame_buf, int stride,
+                                       MV *mv) {
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
+  const SEARCH_METHODS search_method = HEX;
+  int step_param;
+  int sadpb = x->sadperbit16;
+  uint32_t bestsme = UINT_MAX;
+  uint32_t distortion;
+  uint32_t sse;
+  int cost_list[5];
+  const MvLimits tmp_mv_limits = x->mv_limits;
+
+  MV best_ref_mv1 = { 0, 0 };
+  MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
+
+  best_ref_mv1_full.col = best_ref_mv1.col >> 3;
+  best_ref_mv1_full.row = best_ref_mv1.row >> 3;
+
+  // Setup frame pointers
+  x->plane[0].src.buf = cur_frame_buf;
+  x->plane[0].src.stride = stride;
+  xd->plane[0].pre[0].buf = ref_frame_buf;
+  xd->plane[0].pre[0].stride = stride;
+
+  step_param = mv_sf->reduce_first_step_size;
+  step_param = VPXMIN(step_param, MAX_MVSEARCH_STEPS - 2);
+
+  vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
+
+  vp9_full_pixel_search(cpi, x, BLOCK_8X8, &best_ref_mv1_full, step_param,
+                        search_method, sadpb, cond_cost_list(cpi, cost_list),
+                        &best_ref_mv1, mv, 0, 0);
+
+  /* restore UMV window */
+  x->mv_limits = tmp_mv_limits;
+
+  // Ignore mv costing by sending NULL pointer instead of cost array
+  bestsme = cpi->find_fractional_mv_step(
+      x, mv, &best_ref_mv1, cpi->common.allow_high_precision_mv, x->errorperbit,
+      &cpi->fn_ptr[BLOCK_8X8], 0, mv_sf->subpel_iters_per_step,
+      cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, 0,
+      0);
+
+  return bestsme;
+}
+
 void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
@@ -5341,18 +5392,19 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   MACROBLOCK *x = &td->mb;
   MACROBLOCKD *xd = &x->e_mbd;
   int mi_row, mi_col;
+  const InterpKernel *const kernel = vp9_filter_kernels[EIGHTTAP_SHARP];
 
+  // TODO(jingning): Let's keep the buffer size to support 16x16 pixel block,
+  // in case we would like to increase the operating block size.
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint16_t, predictor16[16 * 16 * 3]);
   DECLARE_ALIGNED(16, uint8_t, predictor8[16 * 16 * 3]);
   uint8_t *predictor;
-  (void)predictor;
-  (void)predictor16;
-  (void)predictor8;
 #else
   DECLARE_ALIGNED(16, uint8_t, predictor[16 * 16 * 3]);
-  (void)predictor;
 #endif
+  DECLARE_ALIGNED(16, int16_t, src_diff[16 * 16]);
+  DECLARE_ALIGNED(16, tran_low_t, coeff[16 * 16]);
 
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -5360,6 +5412,11 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
       &sf, this_frame->y_crop_width, this_frame->y_crop_height,
       this_frame->y_crop_width, this_frame->y_crop_height,
       cpi->common.use_highbitdepth);
+
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+    predictor = CONVERT_TO_BYTEPTR(predictor16);
+  else
+    predictor = predictor8;
 #else
   vp9_setup_scale_factors_for_frame(
       &sf, this_frame->y_crop_width, this_frame->y_crop_height,
@@ -5387,6 +5444,13 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
     for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
       int mb_y_offset =
           mi_row * MI_SIZE * this_frame->y_stride + mi_col * MI_SIZE;
+      int best_rf_idx = -1;
+      int_mv best_mv;
+      int64_t best_inter_cost = INT64_MAX;
+      int64_t inter_cost;
+      int rf_idx;
+
+      best_mv.as_int = 0;
 
       (void)mb_y_offset;
       // Motion estimation column boundary
@@ -5394,6 +5458,63 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
           -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
       x->mv_limits.col_max =
           ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
+
+      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        int_mv mv;
+        if (ref_frame[rf_idx] == NULL) continue;
+
+        motion_compensated_prediction(cpi, td,
+                                      this_frame->y_buffer + mb_y_offset,
+                                      ref_frame[rf_idx]->y_buffer + mb_y_offset,
+                                      this_frame->y_stride, &mv.as_mv);
+
+        // TODO(jingning): Not yet support high bit-depth in the next three
+        // steps.
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+          vp9_highbd_build_inter_predictor(
+              CONVERT_TO_SHORTPTR(ref_frame[rf_idx]->y_buffer + mb_y_offset),
+              ref_frame[rf_idx]->y_stride, CONVERT_TO_SHORTPTR(&predictor[0]),
+              MI_SIZE, &mv.as_mv, &sf, MI_SIZE, MI_SIZE, 0, kernel,
+              MV_PRECISION_Q3, mi_col * MI_SIZE, mi_row * MI_SIZE, xd->bd);
+          vpx_highbd_subtract_block(MI_SIZE, MI_SIZE, src_diff, MI_SIZE,
+                                    this_frame->y_buffer + mb_y_offset,
+                                    this_frame->y_stride, &predictor[0],
+                                    MI_SIZE, xd->bd);
+        } else {
+          vp9_build_inter_predictor(ref_frame[rf_idx]->y_buffer + mb_y_offset,
+                                    ref_frame[rf_idx]->y_stride, &predictor[0],
+                                    MI_SIZE, &mv.as_mv, &sf, MI_SIZE, MI_SIZE,
+                                    0, kernel, MV_PRECISION_Q3,
+                                    mi_col * MI_SIZE, mi_row * MI_SIZE);
+          vpx_subtract_block(MI_SIZE, MI_SIZE, src_diff, MI_SIZE,
+                             this_frame->y_buffer + mb_y_offset,
+                             this_frame->y_stride, &predictor[0], MI_SIZE);
+        }
+#else
+        vp9_build_inter_predictor(ref_frame[rf_idx]->y_buffer + mb_y_offset,
+                                  ref_frame[rf_idx]->y_stride, &predictor[0],
+                                  MI_SIZE, &mv.as_mv, &sf, MI_SIZE, MI_SIZE, 0,
+                                  kernel, MV_PRECISION_Q3, mi_col * MI_SIZE,
+                                  mi_row * MI_SIZE);
+        vpx_subtract_block(MI_SIZE, MI_SIZE, src_diff, MI_SIZE,
+                           this_frame->y_buffer + mb_y_offset,
+                           this_frame->y_stride, &predictor[0], MI_SIZE);
+#endif
+        vpx_hadamard_8x8(src_diff, MI_SIZE, coeff);
+
+        inter_cost = vpx_satd(coeff, MI_SIZE * MI_SIZE);
+
+        if (inter_cost < best_inter_cost) {
+          best_rf_idx = rf_idx;
+          best_inter_cost = inter_cost;
+          best_mv.as_int = mv.as_int;
+        }
+      }
+
+      // Motion flow dependency dispenser.
+      (void)best_mv;
+      (void)best_rf_idx;
     }
   }
 
