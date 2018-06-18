@@ -3317,20 +3317,73 @@ static int ml_pruning_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 #define FEATURES 4
-static const float partition_breakout_weights_64[FEATURES + 1] = {
-  -0.016673f, -0.001025f, -0.000032f, 0.000833f, 1.94261885f - 2.1f,
+#define Q_CTX 2
+static const float partition_breakout_weights_64[Q_CTX][FEATURES + 1] = {
+  {
+      -0.016673f,
+      -0.001025f,
+      -0.000032f,
+      0.000833f,
+      1.94261885f - 2.1f,
+  },
+  {
+      -0.160867f,
+      -0.002101f,
+      0.000011f,
+      0.002448f,
+      1.65738142f - 2.5f,
+  },
 };
 
-static const float partition_breakout_weights_32[FEATURES + 1] = {
-  -0.010554f, -0.003081f, -0.000134f, 0.004491f, 1.68445992f - 3.5f,
+static const float partition_breakout_weights_32[Q_CTX][FEATURES + 1] = {
+  {
+      -0.010554f,
+      -0.003081f,
+      -0.000134f,
+      0.004491f,
+      1.68445992f - 3.5f,
+  },
+  {
+      -0.051489f,
+      -0.007609f,
+      0.000016f,
+      0.009792f,
+      1.28089404f - 2.5f,
+  },
 };
 
-static const float partition_breakout_weights_16[FEATURES + 1] = {
-  -0.013154f, -0.002404f, -0.000977f, 0.008450f, 2.57404566f - 5.5f,
+static const float partition_breakout_weights_16[Q_CTX][FEATURES + 1] = {
+  {
+      -0.013154f,
+      -0.002404f,
+      -0.000977f,
+      0.008450f,
+      2.57404566f - 5.5f,
+  },
+  {
+      -0.019146f,
+      -0.004018f,
+      0.000064f,
+      0.008187f,
+      2.15043926f - 2.5f,
+  },
 };
 
-static const float partition_breakout_weights_8[FEATURES + 1] = {
-  -0.011807f, -0.009873f, -0.000931f, 0.034768f, 1.32254851f - 2.0f,
+static const float partition_breakout_weights_8[Q_CTX][FEATURES + 1] = {
+  {
+      -0.011807f,
+      -0.009873f,
+      -0.000931f,
+      0.034768f,
+      1.32254851f - 2.0f,
+  },
+  {
+      -0.003861f,
+      -0.002701f,
+      0.000100f,
+      0.013876f,
+      1.96755111f - 1.5f,
+  },
 };
 
 // ML-based partition search breakout.
@@ -3338,22 +3391,30 @@ static int ml_predict_breakout(const VP9_COMP *const cpi, BLOCK_SIZE bsize,
                                const MACROBLOCK *const x,
                                const RD_COST *const rd_cost) {
   DECLARE_ALIGNED(16, static const uint8_t, vp9_64_zeros[64]) = { 0 };
+  const VP9_COMMON *const cm = &cpi->common;
   float features[FEATURES];
   const float *linear_weights = NULL;  // Linear model weights.
   float linear_score = 0.0f;
+  const int qindex = cm->base_qindex;
+  const int q_ctx = qindex >= 200 ? 0 : 1;
 
   switch (bsize) {
-    case BLOCK_64X64: linear_weights = partition_breakout_weights_64; break;
-    case BLOCK_32X32: linear_weights = partition_breakout_weights_32; break;
-    case BLOCK_16X16: linear_weights = partition_breakout_weights_16; break;
-    case BLOCK_8X8: linear_weights = partition_breakout_weights_8; break;
+    case BLOCK_64X64:
+      linear_weights = partition_breakout_weights_64[q_ctx];
+      break;
+    case BLOCK_32X32:
+      linear_weights = partition_breakout_weights_32[q_ctx];
+      break;
+    case BLOCK_16X16:
+      linear_weights = partition_breakout_weights_16[q_ctx];
+      break;
+    case BLOCK_8X8: linear_weights = partition_breakout_weights_8[q_ctx]; break;
     default: assert(0 && "Unexpected block size."); return 0;
   }
   if (!linear_weights) return 0;
 
   {  // Generate feature values.
-    const VP9_COMMON *const cm = &cpi->common;
-    const int ac_q = vp9_ac_quant(cm->base_qindex, 0, cm->bit_depth);
+    const int ac_q = vp9_ac_quant(qindex, 0, cm->bit_depth);
     const int num_pels_log2 = num_pels_log2_lookup[bsize];
     int feature_index = 0;
     unsigned int var, sse;
@@ -3385,9 +3446,10 @@ static int ml_predict_breakout(const VP9_COMP *const cpi, BLOCK_SIZE bsize,
       linear_score += linear_weights[i] * features[i];
   }
 
-  return linear_score >= 0;
+  return linear_score >= cpi->sf.ml_partition_search_breakout_thresh[q_ctx];
 }
 #undef FEATURES
+#undef Q_CTX
 
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
@@ -3577,7 +3639,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
           if (!x->e_mbd.lossless && ctx->skippable) {
             int use_ml_based_breakout =
                 cpi->sf.use_ml_partition_search_breakout &&
-                cm->base_qindex >= 200;
+                cm->base_qindex >= 150;
 #if CONFIG_VP9_HIGHBITDEPTH
             if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
               use_ml_based_breakout = 0;
