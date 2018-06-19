@@ -63,7 +63,7 @@ const libvpx_test::TestMode kEncodingModeVectors[] = {
 };
 
 // Speed settings tested
-const int kCpuUsedVectors[] = { 1, 2, 3, 5, 6 };
+const int kCpuUsedVectors[] = { 1, 2, 3, 5, 6, 7 };
 
 int is_extension_y4m(const char *filename) {
   const char *dot = strrchr(filename, '.');
@@ -82,7 +82,10 @@ class EndToEndTestLarge
   EndToEndTestLarge()
       : EncoderTest(GET_PARAM(0)), test_video_param_(GET_PARAM(2)),
         cpu_used_(GET_PARAM(3)), psnr_(0.0), nframes_(0),
-        encoding_mode_(GET_PARAM(1)) {}
+        encoding_mode_(GET_PARAM(1)) {
+    cyclic_refresh_ = 0;
+    denoiser_on_ = 0;
+  }
 
   virtual ~EndToEndTestLarge() {}
 
@@ -123,6 +126,9 @@ class EndToEndTestLarge
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
         encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+      } else {
+        encoder->Control(VP9E_SET_NOISE_SENSITIVITY, denoiser_on_);
+        encoder->Control(VP9E_SET_AQ_MODE, cyclic_refresh_);
       }
     }
   }
@@ -138,6 +144,8 @@ class EndToEndTestLarge
 
   TestVideoParam test_video_param_;
   int cpu_used_;
+  int cyclic_refresh_;
+  int denoiser_on_;
 
  private:
   double psnr_;
@@ -152,6 +160,33 @@ TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
   cfg_.g_input_bit_depth = test_video_param_.input_bit_depth;
   cfg_.g_bit_depth = test_video_param_.bit_depth;
   init_flags_ = VPX_CODEC_USE_PSNR;
+  if (cfg_.g_bit_depth > 8) init_flags_ |= VPX_CODEC_USE_HIGHBITDEPTH;
+
+  testing::internal::scoped_ptr<libvpx_test::VideoSource> video;
+  if (is_extension_y4m(test_video_param_.filename)) {
+    video.reset(new libvpx_test::Y4mVideoSource(test_video_param_.filename, 0,
+                                                kFrames));
+  } else {
+    video.reset(new libvpx_test::YUVVideoSource(
+        test_video_param_.filename, test_video_param_.fmt, kWidth, kHeight,
+        kFramerate, 1, 0, kFrames));
+  }
+  ASSERT_TRUE(video.get() != NULL);
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
+  const double psnr = GetAveragePsnr();
+  EXPECT_GT(psnr, GetPsnrThreshold());
+}
+
+TEST_P(EndToEndTestLarge, EndtoEndPSNRDenoiserAQTest) {
+  cfg_.rc_target_bitrate = kBitrate;
+  cfg_.g_error_resilient = 0;
+  cfg_.g_profile = test_video_param_.profile;
+  cfg_.g_input_bit_depth = test_video_param_.input_bit_depth;
+  cfg_.g_bit_depth = test_video_param_.bit_depth;
+  init_flags_ = VPX_CODEC_USE_PSNR;
+  cyclic_refresh_ = 3;
+  denoiser_on_ = 1;
   if (cfg_.g_bit_depth > 8) init_flags_ |= VPX_CODEC_USE_HIGHBITDEPTH;
 
   testing::internal::scoped_ptr<libvpx_test::VideoSource> video;
