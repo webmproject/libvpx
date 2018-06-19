@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f14edcc2_e66b8c3b",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3493,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2018-06-19T03:39:47Z",
+      "side": 1,
+      "message": "The rate and distortion metrics are separately used as features later on to prune partition search. The refactor aims to gradually separate the way we compute rd_cost from cumulative rate and distortion cost.\n\nHence the intent here is to explicitly write out 3491 and make it separate from 3493.",
+      "parentUuid": "6efd86ef_a64c426b",
+      "range": {
+        "startLine": 3493,
+        "startChar": 8,
+        "endLine": 3493,
+        "endChar": 65
+      },
+      "revId": "d99ba0399e0ef3f78a701e01df41707d66dafb4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "080db788_855aa741",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 2
