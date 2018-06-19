@@ -3316,6 +3316,79 @@ static int ml_pruning_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   return 0;
 }
 
+#define FEATURES 4
+static const float partition_breakout_weights_64[FEATURES + 1] = {
+  -0.016673f, -0.001025f, -0.000032f, 0.000833f, 1.94261885f - 2.1f,
+};
+
+static const float partition_breakout_weights_32[FEATURES + 1] = {
+  -0.010554f, -0.003081f, -0.000134f, 0.004491f, 1.68445992f - 3.5f,
+};
+
+static const float partition_breakout_weights_16[FEATURES + 1] = {
+  -0.013154f, -0.002404f, -0.000977f, 0.008450f, 2.57404566f - 5.5f,
+};
+
+static const float partition_breakout_weights_8[FEATURES + 1] = {
+  -0.011807f, -0.009873f, -0.000931f, 0.034768f, 1.32254851f - 2.0f,
+};
+
+// ML-based partition search breakout.
+static int ml_predict_breakout(const VP9_COMP *const cpi, BLOCK_SIZE bsize,
+                               const MACROBLOCK *const x,
+                               const RD_COST *const rd_cost) {
+  DECLARE_ALIGNED(16, static const uint8_t, vp9_64_zeros[64]) = { 0 };
+  float features[FEATURES];
+  const float *linear_weights = NULL;  // Linear model weights.
+  float linear_score = 0.0f;
+
+  switch (bsize) {
+    case BLOCK_64X64: linear_weights = partition_breakout_weights_64; break;
+    case BLOCK_32X32: linear_weights = partition_breakout_weights_32; break;
+    case BLOCK_16X16: linear_weights = partition_breakout_weights_16; break;
+    case BLOCK_8X8: linear_weights = partition_breakout_weights_8; break;
+    default: assert(0 && "Unexpected block size."); return 0;
+  }
+  if (!linear_weights) return 0;
+
+  {  // Generate feature values.
+    const VP9_COMMON *const cm = &cpi->common;
+    const int ac_q = vp9_ac_quant(cm->base_qindex, 0, cm->bit_depth);
+    const int num_pels_log2 = num_pels_log2_lookup[bsize];
+    int feature_index = 0;
+    unsigned int var, sse;
+    float rate_f, dist_f;
+
+    var = cpi->fn_ptr[bsize].vf(x->plane[0].src.buf, x->plane[0].src.stride,
+                                vp9_64_zeros, 0, &sse);
+    var = var >> num_pels_log2;
+
+    vpx_clear_system_state();
+
+    rate_f = (float)VPXMIN(rd_cost->rate, INT_MAX);
+    dist_f = (float)(VPXMIN(rd_cost->dist, INT_MAX) >> num_pels_log2);
+    rate_f =
+        ((float)x->rdmult / 128.0f / 512.0f / (float)(1 << num_pels_log2)) *
+        rate_f;
+
+    features[feature_index++] = rate_f;
+    features[feature_index++] = dist_f;
+    features[feature_index++] = (float)var;
+    features[feature_index++] = (float)ac_q;
+    assert(feature_index == FEATURES);
+  }
+
+  {  // Calculate the output score.
+    int i;
+    linear_score = linear_weights[FEATURES];
+    for (i = 0; i < FEATURES; ++i)
+      linear_score += linear_weights[i] * features[i];
+  }
+
+  return linear_score >= 0;
+}
+#undef FEATURES
+
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
@@ -3501,12 +3574,27 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
           // If all y, u, v transform blocks in this partition are skippable,
           // and the dist & rate are within the thresholds, the partition search
           // is terminated for current branch of the partition search tree.
-          if (!x->e_mbd.lossless && ctx->skippable &&
-              ((best_rdc.dist < (dist_breakout_thr >> 2)) ||
-               (best_rdc.dist < dist_breakout_thr &&
-                best_rdc.rate < rate_breakout_thr))) {
-            do_split = 0;
-            do_rect = 0;
+          if (!x->e_mbd.lossless && ctx->skippable) {
+            int use_ml_based_breakout =
+                cpi->sf.use_ml_partition_search_breakout &&
+                cm->base_qindex >= 200;
+#if CONFIG_VP9_HIGHBITDEPTH
+            if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+              use_ml_based_breakout = 0;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+            if (use_ml_based_breakout) {
+              if (ml_predict_breakout(cpi, bsize, x, &this_rdc)) {
+                do_split = 0;
+                do_rect = 0;
+              }
+            } else {
+              if ((best_rdc.dist < (dist_breakout_thr >> 2)) ||
+                  (best_rdc.dist < dist_breakout_thr &&
+                   best_rdc.rate < rate_breakout_thr)) {
+                do_split = 0;
+                do_rect = 0;
+              }
+            }
           }
         } else {
           // Currently, the machine-learning based partition search early
