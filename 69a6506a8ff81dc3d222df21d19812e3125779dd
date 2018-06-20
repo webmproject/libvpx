@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "876c51e7_b10a1e5c",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 31
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-20T18:18:39Z",
+      "side": 1,
+      "message": "is this being used in webrtc? better to change its name since its meaning has changed.",
+      "range": {
+        "startLine": 28,
+        "startChar": 2,
+        "endLine": 28,
+        "endChar": 29
+      },
+      "revId": "69a6506a8ff81dc3d222df21d19812e3125779dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c85f17e5_3fe33cb3",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 31
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-20T18:18:39Z",
+      "side": 1,
+      "message": "you can use the same struct here\n\nvpx_svc_spatial_layer_sync_t\n\nsince it\u0027s already defined.",
+      "range": {
+        "startLine": 162,
+        "startChar": 2,
+        "endLine": 163,
+        "endChar": 5
+      },
+      "revId": "69a6506a8ff81dc3d222df21d19812e3125779dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
