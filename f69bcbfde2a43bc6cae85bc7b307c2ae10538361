@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4cd60b63_52b1a965",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5669,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-20T18:10:53Z",
+      "side": 1,
+      "message": "does it only fail with 10/12-bit? with this config you still have the option of encoding 8-bit. a TODO with a bug reference would be good (TODO(webm:NNN))",
+      "revId": "f69bcbfde2a43bc6cae85bc7b307c2ae10538361",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
