@@ -1769,77 +1769,6 @@ void OMITFP I422ToARGBRow_SSSE3(const uint8* y_buf,
   );
 }
 
-#ifdef HAS_I422ALPHATOARGBROW_SSSE3
-void OMITFP I422AlphaToARGBRow_SSSE3(const uint8* y_buf,
-                                     const uint8* u_buf,
-                                     const uint8* v_buf,
-                                     const uint8* a_buf,
-                                     uint8* dst_argb,
-                                     const struct YuvConstants* yuvconstants,
-                                     int width) {
-  asm volatile (
-    YUVTORGB_SETUP(yuvconstants)
-    "sub       %[u_buf],%[v_buf]               \n"
-    LABELALIGN
-  "1:                                          \n"
-    READYUVA422
-    YUVTORGB(yuvconstants)
-    STOREARGB
-    "subl      $0x8,%[width]                   \n"
-    "jg        1b                              \n"
-  : [y_buf]"+r"(y_buf),    // %[y_buf]
-    [u_buf]"+r"(u_buf),    // %[u_buf]
-    [v_buf]"+r"(v_buf),    // %[v_buf]
-    [a_buf]"+r"(a_buf),    // %[a_buf]
-    [dst_argb]"+r"(dst_argb),  // %[dst_argb]
-#if defined(__i386__) && defined(__pic__)
-    [width]"+m"(width)     // %[width]
-#else
-    [width]"+rm"(width)    // %[width]
-#endif
-  : [yuvconstants]"r"(yuvconstants)  // %[yuvconstants]
-  : "memory", "cc", NACL_R14 YUVTORGB_REGS
-    "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5"
-  );
-}
-#endif  // HAS_I422ALPHATOARGBROW_SSSE3
-
-#ifdef HAS_I411TOARGBROW_SSSE3
-void OMITFP I411ToARGBRow_SSSE3(const uint8* y_buf,
-                                const uint8* u_buf,
-                                const uint8* v_buf,
-                                uint8* dst_argb,
-                                const struct YuvConstants* yuvconstants,
-                                int width) {
-  int temp;
-  asm volatile (
-    YUVTORGB_SETUP(yuvconstants)
-    "sub       %[u_buf],%[v_buf]               \n"
-    "pcmpeqb   %%xmm5,%%xmm5                   \n"
-    LABELALIGN
-  "1:                                          \n"
-    READYUV411_TEMP
-    YUVTORGB(yuvconstants)
-    STOREARGB
-    "subl      $0x8,%[width]                   \n"
-    "jg        1b                              \n"
-  : [y_buf]"+r"(y_buf),        // %[y_buf]
-    [u_buf]"+r"(u_buf),        // %[u_buf]
-    [v_buf]"+r"(v_buf),        // %[v_buf]
-    [dst_argb]"+r"(dst_argb),  // %[dst_argb]
-    [temp]"=&r"(temp),         // %[temp]
-#if defined(__i386__) && defined(__pic__)
-    [width]"+m"(width)         // %[width]
-#else
-    [width]"+rm"(width)        // %[width]
-#endif
-  : [yuvconstants]"r"(yuvconstants)  // %[yuvconstants]
-  : "memory", "cc", NACL_R14 YUVTORGB_REGS
-    "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5"
-  );
-}
-#endif
-
 void OMITFP NV12ToARGBRow_SSSE3(const uint8* y_buf,
                                 const uint8* uv_buf,
                                 uint8* dst_argb,
@@ -2228,44 +2157,6 @@ void OMITFP I422ToARGBRow_AVX2(const uint8* y_buf,
   );
 }
 #endif  // HAS_I422TOARGBROW_AVX2
-
-#if defined(HAS_I422ALPHATOARGBROW_AVX2)
-// 16 pixels
-// 8 UV values upsampled to 16 UV, mixed with 16 Y and 16 A producing 16 ARGB.
-void OMITFP I422AlphaToARGBRow_AVX2(const uint8* y_buf,
-                               const uint8* u_buf,
-                               const uint8* v_buf,
-                               const uint8* a_buf,
-                               uint8* dst_argb,
-                               const struct YuvConstants* yuvconstants,
-                               int width) {
-  asm volatile (
-    YUVTORGB_SETUP_AVX2(yuvconstants)
-    "sub       %[u_buf],%[v_buf]               \n"
-    LABELALIGN
-  "1:                                          \n"
-    READYUVA422_AVX2
-    YUVTORGB_AVX2(yuvconstants)
-    STOREARGB_AVX2
-    "subl      $0x10,%[width]                  \n"
-    "jg        1b                              \n"
-    "vzeroupper                                \n"
-  : [y_buf]"+r"(y_buf),    // %[y_buf]
-    [u_buf]"+r"(u_buf),    // %[u_buf]
-    [v_buf]"+r"(v_buf),    // %[v_buf]
-    [a_buf]"+r"(a_buf),    // %[a_buf]
-    [dst_argb]"+r"(dst_argb),  // %[dst_argb]
-#if defined(__i386__) && defined(__pic__)
-    [width]"+m"(width)     // %[width]
-#else
-    [width]"+rm"(width)    // %[width]
-#endif
-  : [yuvconstants]"r"(yuvconstants)  // %[yuvconstants]
-  : "memory", "cc", NACL_R14 YUVTORGB_REGS_AVX2
-    "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5"
-  );
-}
-#endif  // HAS_I422ALPHATOARGBROW_AVX2
 
 #if defined(HAS_I422TORGBAROW_AVX2)
 // 16 pixels
