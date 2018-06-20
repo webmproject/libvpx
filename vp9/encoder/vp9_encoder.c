@@ -5670,6 +5670,15 @@ void setup_tpl_stats(VP9_COMP *cpi) {
   int tpl_group_frames = 0;
   int frame_idx;
 
+  // TODO(jingning): Make the model support high bit-depth route.
+#if CONFIG_VP9_HIGHBITDEPTH
+  (void)gf_picture;
+  (void)gf_group;
+  (void)tpl_group_frames;
+  (void)frame_idx;
+  return;
+#endif
+
   init_gop_frames(cpi, gf_picture, gf_group, &tpl_group_frames);
 
   init_tpl_stats(cpi);
