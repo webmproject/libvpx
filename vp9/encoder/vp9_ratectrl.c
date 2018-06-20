@@ -1242,6 +1242,14 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
       // Baseline value derived from cpi->active_worst_quality and kf boost.
       active_best_quality =
           get_kf_active_quality(rc, active_worst_quality, cm->bit_depth);
+      if (cpi->twopass.kf_zeromotion_pct >= STATIC_KF_GROUP_THRESH) {
+        active_best_quality /= 4;
+      }
+
+      // Dont allow the active min to be lossless (q0) unlesss the max q
+      // already indicates lossless.
+      active_best_quality =
+          VPXMIN(active_worst_quality, VPXMAX(1, active_best_quality));
 
       // Allow somewhat lower kf minq with small image formats.
       if ((cm->width * cm->height) <= (352 * 288)) {
@@ -2184,13 +2192,8 @@ void vp9_rc_set_gf_interval_range(const VP9_COMP *const cpi,
       rc->max_gf_interval = vp9_rc_get_default_max_gf_interval(
           cpi->framerate, rc->min_gf_interval);
 
-    // Extended interval for genuinely static scenes
-    rc->static_scene_max_gf_interval = MAX_LAG_BUFFERS * 2;
-
-    if (is_altref_enabled(cpi)) {
-      if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
-        rc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
-    }
+    // Extended max interval for genuinely static scenes like slide shows.
+    rc->static_scene_max_gf_interval = MAX_STATIC_GF_GROUP_LENGTH;
 
     if (rc->max_gf_interval > rc->static_scene_max_gf_interval)
       rc->max_gf_interval = rc->static_scene_max_gf_interval;
