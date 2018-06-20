@@ -184,10 +184,8 @@ extern "C" {
     !defined(__i386__) || defined(_MSC_VER)
 // TODO(fbarchard): fix build error on x86 debug
 // https://code.google.com/p/libyuv/issues/detail?id=524
-#define HAS_I411TOARGBROW_SSSE3
 // TODO(fbarchard): fix build error on android_full_debug=1
 // https://code.google.com/p/libyuv/issues/detail?id=517
-#define HAS_I422ALPHATOARGBROW_SSSE3
 #endif
 #endif
 
@@ -212,7 +210,6 @@ extern "C" {
 #if !(defined(_DEBUG) && defined(__i386__))
 // TODO(fbarchard): fix build error on android_full_debug=1
 // https://code.google.com/p/libyuv/issues/detail?id=517
-#define HAS_I422ALPHATOARGBROW_AVX2
 #endif
 #define HAS_I411TOARGBROW_AVX2
 #define HAS_I422TOARGB1555ROW_AVX2
@@ -264,7 +261,6 @@ extern "C" {
 // The following are also available on x64 Visual C.
 #if !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER) && defined(_M_X64) && \
     (!defined(__clang__) || defined(__SSSE3__))
-#define HAS_I422ALPHATOARGBROW_SSSE3
 #define HAS_I422TOARGBROW_SSSE3
 #endif
 

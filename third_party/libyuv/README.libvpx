@@ -13,6 +13,7 @@ which down-samples the original input video (f.g. 1280x720) a number of times
 in order to encode multiple resolution bit streams.
 
 Local Modifications:
+Disable some functions (webm:1514)
 rm -rf .gitignore .gn AUTHORS Android.mk BUILD.gn CMakeLists.txt DEPS LICENSE \
   LICENSE_THIRD_PARTY OWNERS PATENTS PRESUBMIT.py README.chromium README.md \
   all.gyp build_overrides/ chromium/ codereview.settings docs/ \
