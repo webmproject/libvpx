@@ -41,6 +41,8 @@ typedef struct {
 
 #define INVALID_ROW -1
 
+#define MAX_EXT_ARFS 2
+
 typedef struct {
   double frame_mb_intra_factor;
   double frame_mb_brightness_factor;
@@ -130,6 +132,8 @@ typedef struct {
   unsigned char arf_src_offset[(MAX_LAG_BUFFERS * 2) + 1];
   unsigned char arf_update_idx[(MAX_LAG_BUFFERS * 2) + 1];
   unsigned char arf_ref_idx[(MAX_LAG_BUFFERS * 2) + 1];
+  unsigned char brf_src_offset[(MAX_LAG_BUFFERS * 2) + 1];
+  unsigned char bidir_pred_enabled[(MAX_LAG_BUFFERS * 2) + 1];
   int bit_allocation[(MAX_LAG_BUFFERS * 2) + 1];
 } GF_GROUP;
 
