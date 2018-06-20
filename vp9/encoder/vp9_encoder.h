@@ -299,7 +299,7 @@ typedef struct TplDepFrame {
   int mi_cols;
 } TplDepFrame;
 
-#define TPL_DEP_COST_SCALE_LOG2 16
+#define TPL_DEP_COST_SCALE_LOG2 4
 
 // TODO(jingning) All spatially adaptive variables should go to TileDataEnc.
 typedef struct TileDataEnc {
