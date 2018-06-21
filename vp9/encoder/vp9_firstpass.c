@@ -2439,6 +2439,149 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
   cpi->multi_arf_last_grp_enabled = cpi->multi_arf_enabled;
 }
 
+static void allocate_gf_multi_arf_bits(VP9_COMP *cpi, int64_t gf_group_bits,
+                                       int gf_arf_bits) {
+  VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  RATE_CONTROL *const rc = &cpi->rc;
+  TWO_PASS *const twopass = &cpi->twopass;
+  GF_GROUP *const gf_group = &twopass->gf_group;
+  FIRSTPASS_STATS frame_stats;
+  int i;
+  int frame_index = 0;
+  int target_frame_size;
+  int key_frame;
+  const int max_bits = frame_max_bits(&cpi->rc, oxcf);
+  int64_t total_group_bits = gf_group_bits;
+  int normal_frames;
+  int normal_frame_bits;
+  int last_frame_reduction = 0;
+  double av_score = 1.0;
+  double tot_norm_frame_score = 1.0;
+  double this_frame_score = 1.0;
+
+  // Define the GF structure and specify
+  define_gf_multi_arf_structure(cpi);
+
+  //========================================
+
+  key_frame = cpi->common.frame_type == KEY_FRAME;
+
+  // For key frames the frame target rate is already set and it
+  // is also the golden frame.
+  // === [frame_index == 0] ===
+  if (!key_frame) {
+    gf_group->bit_allocation[frame_index] =
+        rc->source_alt_ref_active ? 0 : gf_arf_bits;
+  }
+
+  // Deduct the boost bits for arf (or gf if it is not a key frame)
+  // from the group total.
+  if (rc->source_alt_ref_pending || !key_frame) total_group_bits -= gf_arf_bits;
+
+  ++frame_index;
+
+  // === [frame_index == 1] ===
+  // Store the bits to spend on the ARF if there is one.
+  if (rc->source_alt_ref_pending) {
+    gf_group->bit_allocation[frame_index] = gf_arf_bits;
+
+    ++frame_index;
+
+    // Skip all the extra-ARF's right after ARF at the starting segment of
+    // the current GF group.
+    if (cpi->num_extra_arfs) {
+      while (gf_group->update_type[frame_index] == INTNL_ARF_UPDATE)
+        ++frame_index;
+    }
+  }
+
+  normal_frames = (rc->baseline_gf_interval - rc->source_alt_ref_pending);
+  if (normal_frames > 1)
+    normal_frame_bits = (int)(total_group_bits / normal_frames);
+  else
+    normal_frame_bits = (int)total_group_bits;
+
+  if (oxcf->vbr_corpus_complexity) {
+    av_score = get_distribution_av_err(cpi, twopass);
+    tot_norm_frame_score = calculate_group_score(cpi, av_score, normal_frames);
+  }
+
+  // Allocate bits to the other frames in the group.
+  for (i = 0; i < normal_frames; ++i) {
+    if (EOF == input_stats(twopass, &frame_stats)) break;
+
+    if (oxcf->vbr_corpus_complexity) {
+      this_frame_score = calculate_norm_frame_score(cpi, twopass, oxcf,
+                                                    &frame_stats, av_score);
+      normal_frame_bits = (int)((double)total_group_bits *
+                                (this_frame_score / tot_norm_frame_score));
+    }
+
+    target_frame_size = normal_frame_bits;
+    if ((i == (normal_frames - 1)) && (i >= 1)) {
+      last_frame_reduction = normal_frame_bits / 16;
+      target_frame_size -= last_frame_reduction;
+    }
+
+    if (rc->source_alt_ref_pending && cpi->multi_arf_enabled) {
+      target_frame_size -= (target_frame_size >> 4);
+    }
+
+    target_frame_size =
+        clamp(target_frame_size, 0, VPXMIN(max_bits, (int)total_group_bits));
+
+    if (gf_group->update_type[frame_index] == BRF_UPDATE) {
+      // Boost up the allocated bits on BWDREF_FRAME
+      gf_group->bit_allocation[frame_index] =
+          target_frame_size + (target_frame_size >> 2);
+    } else if (gf_group->update_type[frame_index] == LAST_BIPRED_UPDATE) {
+      // Press down the allocated bits on LAST_BIPRED_UPDATE frames
+      gf_group->bit_allocation[frame_index] =
+          target_frame_size - (target_frame_size >> 1);
+    } else if (gf_group->update_type[frame_index] == BIPRED_UPDATE) {
+      // TODO(zoeliu): To investigate whether the allocated bits on
+      // BIPRED_UPDATE frames need to be further adjusted.
+      gf_group->bit_allocation[frame_index] = target_frame_size;
+    } else {
+      assert(gf_group->update_type[frame_index] == LF_UPDATE ||
+             gf_group->update_type[frame_index] == INTNL_OVERLAY_UPDATE);
+      gf_group->bit_allocation[frame_index] = target_frame_size;
+    }
+
+    ++frame_index;
+
+    // Skip all the extra-ARF's.
+    if (cpi->num_extra_arfs) {
+      while (gf_group->update_type[frame_index] == INTNL_ARF_UPDATE)
+        ++frame_index;
+    }
+  }
+
+  // NOTE: We need to configure the frame at the end of the sequence + 1 that
+  //       will be the start frame for the next group. Otherwise prior to the
+  //       call to av1_rc_get_second_pass_params() the data will be undefined.
+  if (rc->source_alt_ref_pending) {
+    if (cpi->num_extra_arfs) {
+      // NOTE: For bit allocation, move the allocated bits associated with
+      //       INTNL_OVERLAY_UPDATE to the corresponding INTNL_ARF_UPDATE.
+      //       i > 0 for extra-ARF's and i == 0 for ARF:
+      //         arf_pos_for_ovrly[i]: Position for INTNL_OVERLAY_UPDATE
+      //         arf_pos_in_gf[i]: Position for INTNL_ARF_UPDATE
+      for (i = cpi->num_extra_arfs; i > 0; --i) {
+        assert(gf_group->update_type[cpi->arf_pos_for_ovrly[i]] ==
+               INTNL_OVERLAY_UPDATE);
+
+        // Encoder's choice:
+        //   Set show_existing_frame == 1 for all extra-ARF's, and hence
+        //   allocate zero bit for both all internal OVERLAY frames.
+        gf_group->bit_allocation[cpi->arf_pos_in_gf[i]] =
+            gf_group->bit_allocation[cpi->arf_pos_for_ovrly[i]];
+        gf_group->bit_allocation[cpi->arf_pos_for_ovrly[i]] = 0;
+      }
+    }
+  }
+}
+
 static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
                                    int gf_arf_bits) {
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -2462,17 +2605,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   double this_frame_score = 1.0;
 
   // Define the GF structure and specify
-  cpi->bwd_ref_allowed = 0;
-  cpi->extra_arf_allowed = 0;
-
-  cpi->num_extra_arfs = 0;
-  cpi->num_extra_arfs = cpi->extra_arf_allowed ? cpi->num_extra_arfs : 0;
-
-  if (cpi->bwd_ref_allowed) {
-    define_gf_multi_arf_structure(cpi);
-  } else {
-    define_gf_group_structure(cpi);
-  }
+  define_gf_group_structure(cpi);
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
@@ -2851,7 +2984,17 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->kf_group_error_left -= gf_group_err;
 
   // Allocate bits to each of the frames in the GF group.
-  allocate_gf_group_bits(cpi, gf_group_bits, gf_arf_bits);
+  cpi->bwd_ref_allowed = 0;
+  cpi->extra_arf_allowed = 0;
+
+  cpi->num_extra_arfs = 0;
+  cpi->num_extra_arfs = cpi->extra_arf_allowed ? cpi->num_extra_arfs : 0;
+
+  if (cpi->bwd_ref_allowed) {
+    allocate_gf_multi_arf_bits(cpi, gf_group_bits, gf_arf_bits);
+  } else {
+    allocate_gf_group_bits(cpi, gf_group_bits, gf_arf_bits);
+  }
 
   // Reset the file position.
   reset_fpf_position(twopass, start_pos);
