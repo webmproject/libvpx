@@ -1,0 +1,210 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b5d0ddd5_1990bc6c",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "static is unnecessary in an anonymous namespace; the cfg parameter could be a const\u0026 I think, but that could wait for another change.",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 6
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19f2275e_f2f02e85",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "another option would be to put this anonymous namespace in the svc_test namespace if you ended up needing a large amount from it.\n\nnamespace svc_test {\nnamespace {\n...",
+      "range": {
+        "startLine": 41,
+        "startChar": 37,
+        "endLine": 41,
+        "endChar": 47
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "098ed188_3600879f",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "dead code?",
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07ad2c0b_8735484b",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "this gets built as c++03, so add a space between the \u0027\u003e\u003e\u0027 -\u003e \u0027\u003e \u003e\u0027 for compatibility",
+      "range": {
+        "startLine": 26,
+        "startChar": 60,
+        "endLine": 26,
+        "endChar": 62
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a561ed7_e131a58c",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "default constructors don\u0027t need to be explicit",
+      "range": {
+        "startLine": 28,
+        "startChar": 2,
+        "endLine": 28,
+        "endChar": 10
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f8bd332_7c191d68",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "this could go in the constructor. that has the benefit of forgetting to call the base class\u0027 SetUp() when overriding the function.",
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99a68bcb_9f1ea37c",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "would VP9_INSTANTIATE... work here?",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 23
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a48d653f_6fff2a17",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "add {}s on this branch, if one has them they all should",
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68e72f00_18ea4ad9",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "prefer static_cast or change the 1.0 to 1.0f if the other variables are already floats.",
+      "range": {
+        "startLine": 72,
+        "startChar": 24,
+        "endLine": 72,
+        "endChar": 31
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b1887c3d_9b81f12e",
+        "filename": "test/svc_test.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-21T23:29:31Z",
+      "side": 1,
+      "message": "// TEST_SVC_TEST_H_",
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
