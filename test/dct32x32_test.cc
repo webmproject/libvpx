@@ -18,6 +18,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
+#include "test/bench.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
@@ -79,7 +80,8 @@ void idct32x32_12(const tran_low_t *in, uint8_t *out, int stride) {
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-class Trans32x32Test : public ::testing::TestWithParam<Trans32x32Param> {
+class Trans32x32Test : public AbstractBench,
+                       public ::testing::TestWithParam<Trans32x32Param> {
  public:
   virtual ~Trans32x32Test() {}
   virtual void SetUp() {
@@ -99,7 +101,13 @@ class Trans32x32Test : public ::testing::TestWithParam<Trans32x32Param> {
   int mask_;
   FwdTxfmFunc fwd_txfm_;
   InvTxfmFunc inv_txfm_;
+
+  int16_t *bench_in_;
+  tran_low_t *bench_out_;
+  virtual void Run();
 };
+
+void Trans32x32Test::Run() { fwd_txfm_(bench_in_, bench_out_, 32); }
 
 TEST_P(Trans32x32Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
@@ -235,6 +243,19 @@ TEST_P(Trans32x32Test, MemCheck) {
           << "4*DCT_MAX_VALUE";
     }
   }
+}
+
+TEST_P(Trans32x32Test, DISABLED_Speed) {
+  ACMRandom rnd(ACMRandom::DeterministicSeed());
+
+  DECLARE_ALIGNED(16, int16_t, input_extreme_block[kNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, output_block[kNumCoeffs]);
+
+  bench_in_ = input_extreme_block;
+  bench_out_ = output_block;
+
+  RunNTimes(INT16_MAX);
+  PrintMedian("32x32");
 }
 
 TEST_P(Trans32x32Test, InverseAccuracy) {
