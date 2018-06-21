@@ -79,6 +79,7 @@ static const uint8x16_t vec_zeros_u8 = { 0, 0, 0, 0, 0, 0, 0, 0,
                                          0, 0, 0, 0, 0, 0, 0, 0 };
 static const int16x8_t vec_zeros_s16 = { 0, 0, 0, 0, 0, 0, 0, 0 };
 static const int16x8_t vec_ones_s16 = { 1, 1, 1, 1, 1, 1, 1, 1 };
+static const int16x8_t vec_twos_s16 = { 2, 2, 2, 2, 2, 2, 2, 2 };
 static const uint16x8_t vec_ones_u16 = { 1, 1, 1, 1, 1, 1, 1, 1 };
 static const uint32x4_t vec_ones_u32 = { 1, 1, 1, 1 };
 static const int32x4_t vec_zeros_s32 = { 0, 0, 0, 0 };
