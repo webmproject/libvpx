@@ -2135,7 +2135,7 @@ static void define_gf_multi_arf_structure(VP9_COMP *cpi) {
   // (3) The bi-predictive group interval is strictly smaller than the
   //     golden group interval.
   const int is_bipred_enabled =
-      cpi->bwd_ref_allowed && rc->source_alt_ref_pending &&
+      cpi->extra_arf_allowed && rc->source_alt_ref_pending &&
       rc->bipred_group_interval &&
       rc->bipred_group_interval <=
           (rc->baseline_gf_interval - rc->source_alt_ref_pending);
@@ -2523,6 +2523,8 @@ static void allocate_gf_multi_arf_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       target_frame_size -= last_frame_reduction;
     }
 
+    // TODO(zoeliu): Further check whether following is needed for
+    //               hierarchical GF group structure.
     if (rc->source_alt_ref_pending && cpi->multi_arf_enabled) {
       target_frame_size -= (target_frame_size >> 4);
     }
@@ -2539,8 +2541,8 @@ static void allocate_gf_multi_arf_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       gf_group->bit_allocation[frame_index] =
           target_frame_size - (target_frame_size >> 1);
     } else if (gf_group->update_type[frame_index] == BIPRED_UPDATE) {
-      // TODO(zoeliu): To investigate whether the allocated bits on
-      // BIPRED_UPDATE frames need to be further adjusted.
+      // TODO(zoeliu): Investigate whether the allocated bits on BIPRED_UPDATE
+      //               frames need to be further adjusted.
       gf_group->bit_allocation[frame_index] = target_frame_size;
     } else {
       assert(gf_group->update_type[frame_index] == LF_UPDATE ||
@@ -2753,6 +2755,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   const int is_key_frame = frame_is_intra_only(cm);
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
 
+  int disable_bwd_extarf;
+
   // Reset the GF group data structures unless this is a key
   // frame in which case it will already have been done.
   if (is_key_frame == 0) {
@@ -2933,6 +2937,39 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   rc->frames_till_gf_update_due = rc->baseline_gf_interval;
 
+  // TODO(zoeliu): Turn on the option to disable extra ALTREFs for still GF
+  //               groups.
+  // Disable extra altrefs for "still" gf group:
+  //   zero_motion_accumulator: minimum percentage of (0,0) motion;
+  //   avg_sr_coded_error:      average of the SSE per pixel of each frame;
+  //   avg_raw_err_stdev:       average of the standard deviation of (0,0)
+  //                            motion error per block of each frame.
+#if 0
+  assert(num_mbs > 0);
+  disable_bwd_extarf =
+      (zero_motion_accumulator > MIN_ZERO_MOTION &&
+       avg_sr_coded_error / num_mbs < MAX_SR_CODED_ERROR &&
+       avg_raw_err_stdev < MAX_RAW_ERR_VAR);
+#else
+  disable_bwd_extarf = 0;
+#endif  // 0
+
+  if (disable_bwd_extarf) cpi->extra_arf_allowed = 0;
+
+  if (!cpi->extra_arf_allowed) {
+    cpi->num_extra_arfs = 0;
+  } else {
+    // Compute how many extra alt_refs we can have
+    cpi->num_extra_arfs = get_number_of_extra_arfs(rc->baseline_gf_interval,
+                                                   rc->source_alt_ref_pending);
+  }
+  // Currently at maximum two extra ARFs' are allowed
+  assert(cpi->num_extra_arfs <= MAX_EXT_ARFS);
+
+  rc->bipred_group_interval = BFG_INTERVAL;
+  // The minimum bi-predictive frame group interval is 2.
+  if (rc->bipred_group_interval < 2) rc->bipred_group_interval = 0;
+
   // Reset the file position.
   reset_fpf_position(twopass, start_pos);
 
@@ -2984,13 +3021,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->kf_group_error_left -= gf_group_err;
 
   // Allocate bits to each of the frames in the GF group.
-  cpi->bwd_ref_allowed = 0;
-  cpi->extra_arf_allowed = 0;
-
-  cpi->num_extra_arfs = 0;
-  cpi->num_extra_arfs = cpi->extra_arf_allowed ? cpi->num_extra_arfs : 0;
-
-  if (cpi->bwd_ref_allowed) {
+  if (cpi->extra_arf_allowed) {
     allocate_gf_multi_arf_bits(cpi, gf_group_bits, gf_arf_bits);
   } else {
     allocate_gf_group_bits(cpi, gf_group_bits, gf_arf_bits);
