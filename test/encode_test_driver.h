@@ -232,6 +232,9 @@ class EncoderTest {
   virtual void PreEncodeFrameHook(VideoSource * /*video*/,
                                   Encoder * /*encoder*/) {}
 
+  virtual void PreDecodeFrameHook(VideoSource * /*video*/,
+                                  Decoder * /*decoder*/) {}
+
   virtual void PostEncodeFrameHook(Encoder * /*encoder*/) {}
 
   // Hook to be called on every compressed data packet.
