@@ -758,9 +758,7 @@ typedef struct VP9_COMP {
   int num_extra_arfs;
   int arf_pos_in_gf[MAX_EXT_ARFS + 1];
   int arf_pos_for_ovrly[MAX_EXT_ARFS + 1];
-
   int extra_arf_allowed;
-  int bwd_ref_allowed;
 
   vpx_roi_map_t roi;
 } VP9_COMP;

@@ -11,6 +11,8 @@
 #ifndef VP9_ENCODER_VP9_FIRSTPASS_H_
 #define VP9_ENCODER_VP9_FIRSTPASS_H_
 
+#include <assert.h>
+
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 
@@ -41,7 +43,12 @@ typedef struct {
 
 #define INVALID_ROW -1
 
+// Length of the bi-predictive frame group (BFG)
+// NOTE: Currently each BFG contains one backward ref (BWF) frame plus a certain
+//       number of bi-predictive frames.
+#define BFG_INTERVAL 2
 #define MAX_EXT_ARFS 2
+#define MIN_EXT_ARF_INTERVAL 4
 
 typedef struct {
   double frame_mb_intra_factor;
@@ -209,6 +216,17 @@ void vp9_twopass_postencode_update(struct VP9_COMP *cpi);
 
 void calculate_coded_size(struct VP9_COMP *cpi, int *scaled_frame_width,
                           int *scaled_frame_height);
+
+static INLINE int get_number_of_extra_arfs(int interval, int arf_pending) {
+  assert(MAX_EXT_ARFS > 0);
+  if (arf_pending) {
+    if (interval >= MIN_EXT_ARF_INTERVAL * (MAX_EXT_ARFS + 1))
+      return MAX_EXT_ARFS;
+    else if (interval >= MIN_EXT_ARF_INTERVAL * MAX_EXT_ARFS)
+      return MAX_EXT_ARFS - 1;
+  }
+  return 0;
+}
 
 #ifdef __cplusplus
 }  // extern "C"
