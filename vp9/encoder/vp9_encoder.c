@@ -2952,7 +2952,7 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
   return force_recode;
 }
 
-void vp9_update_reference_frames(VP9_COMP *cpi) {
+void update_ref_frames(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
 
@@ -3016,6 +3016,14 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
   }
+}
+
+void vp9_update_reference_frames(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  BufferPool *const pool = cm->buffer_pool;
+
+  update_ref_frames(cpi);
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
       cpi->denoiser.denoising_level > kDenLowLow) {
@@ -3054,6 +3062,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
         denoise_svc_second_layer);
   }
 #endif
+
   if (is_one_pass_cbr_svc(cpi)) {
     // Keep track of frame index for each reference frame.
     SVC *const svc = &cpi->svc;
