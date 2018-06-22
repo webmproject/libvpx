@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cab3e24e_6bda0622",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "Done\n\nThis function can also be a member of the class then we don\u0027t need to pass over the arguments.\nThis will be a follow-up. For now I\u0027ll change it to const reference.",
+      "parentUuid": "b5d0ddd5_1990bc6c",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 6
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19f2275e_f2f02e85",
         "filename": "test/svc_datarate_test.cc",
         "patchSetId": 8
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "64d22fbf_b0305dcb",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "I\u0027ll just keep it like this for now. If I end up adding more classes inherited from OnePassCbrSvc, I\u0027ll put it in svc_test namespace.",
+      "parentUuid": "19f2275e_f2f02e85",
+      "range": {
+        "startLine": 41,
+        "startChar": 37,
+        "endLine": 41,
+        "endChar": 47
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "098ed188_3600879f",
         "filename": "test/svc_datarate_test.cc",
         "patchSetId": 8
@@ -62,6 +110,24 @@
       "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49f902a7_21e2aa81",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "098ed188_3600879f",
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -88,6 +154,30 @@
     },
     {
       "key": {
+        "uuid": "9ab74699_1abee153",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07ad2c0b_8735484b",
+      "range": {
+        "startLine": 26,
+        "startChar": 60,
+        "endLine": 26,
+        "endChar": 62
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a561ed7_e131a58c",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 8
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "b77647cc_f3e3568d",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a561ed7_e131a58c",
+      "range": {
+        "startLine": 28,
+        "startChar": 2,
+        "endLine": 28,
+        "endChar": 10
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8f8bd332_7c191d68",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 8
@@ -125,6 +239,24 @@
       "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fff6962c_a8e18eac",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8f8bd332_7c191d68",
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -151,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "d1958262_87f3cc2d",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "No it doesn\u0027t work here since the only parameter is the encoder instance. VP9_INSTANTIATE... requires at least one more parameter because it uses ::testing::Combine().",
+      "parentUuid": "99a68bcb_9f1ea37c",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 23
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a48d653f_6fff2a17",
         "filename": "test/svc_test.cc",
         "patchSetId": 8
@@ -165,6 +321,24 @@
       "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "85d595d7_6f89920f",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a48d653f_6fff2a17",
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -191,6 +365,30 @@
     },
     {
       "key": {
+        "uuid": "c00ffb29_12ce14d1",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68e72f00_18ea4ad9",
+      "range": {
+        "startLine": 72,
+        "startChar": 24,
+        "endLine": 72,
+        "endChar": 31
+      },
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b1887c3d_9b81f12e",
         "filename": "test/svc_test.h",
         "patchSetId": 8
@@ -205,6 +403,24 @@
       "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "308bb8d4_a5566962",
+        "filename": "test/svc_test.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-22T03:31:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b1887c3d_9b81f12e",
+      "revId": "cac63a47ce5d41fd548d215abb3017922df8be5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
