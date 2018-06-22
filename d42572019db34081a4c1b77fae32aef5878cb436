@@ -1,0 +1,164 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a7f7086d_489ebd9b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-22T03:12:57Z",
+      "side": 1,
+      "message": "structure",
+      "range": {
+        "startLine": 9,
+        "startChar": 51,
+        "endLine": 9,
+        "endChar": 60
+      },
+      "revId": "d42572019db34081a4c1b77fae32aef5878cb436",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c36e016c_ee20e86b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-22T03:12:57Z",
+      "side": 1,
+      "message": "...functionality with the defining of a GF group?",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 15
+      },
+      "revId": "d42572019db34081a4c1b77fae32aef5878cb436",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d3e06ef_9af639ab",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-22T03:12:57Z",
+      "side": 1,
+      "message": "on coding performance",
+      "range": {
+        "startLine": 14,
+        "startChar": 14,
+        "endLine": 14,
+        "endChar": 27
+      },
+      "revId": "d42572019db34081a4c1b77fae32aef5878cb436",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b39ceebd_3774f33d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2940,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-22T03:12:57Z",
+      "side": 1,
+      "message": "Turn on...",
+      "range": {
+        "startLine": 2940,
+        "startChar": 19,
+        "endLine": 2940,
+        "endChar": 26
+      },
+      "revId": "d42572019db34081a4c1b77fae32aef5878cb436",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7e2614c_29b02339",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-22T03:12:57Z",
+      "side": 1,
+      "message": "you should explicitly include assert.h not rely on surrounding includes",
+      "revId": "d42572019db34081a4c1b77fae32aef5878cb436",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e893065_c985810b",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-22T03:12:57Z",
+      "side": 1,
+      "message": "in general {}s are preferred for conditionals that are continued to the next line",
+      "revId": "d42572019db34081a4c1b77fae32aef5878cb436",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82051227_65997e57",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-22T03:12:57Z",
+      "side": 1,
+      "message": "this might be more readable as a series of branches",
+      "revId": "d42572019db34081a4c1b77fae32aef5878cb436",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0fdbb046_f96ca110",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-22T03:12:57Z",
+      "side": 1,
+      "message": "the other branch returns directly no need for an else",
+      "revId": "d42572019db34081a4c1b77fae32aef5878cb436",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
