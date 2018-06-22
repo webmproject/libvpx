@@ -109,6 +109,13 @@ typedef struct {
   // Length of the bi-predictive frame group interval
   int bipred_group_interval;
 
+  // NOTE: Different types of frames may have different bits allocated
+  //       accordingly, aiming to achieve the overall optimal RD performance.
+  int is_bwd_ref_frame;
+  int is_last_bipred_frame;
+  int is_bipred_frame;
+  int is_src_frame_ext_arf;
+
   int avg_frame_bandwidth;  // Average frame size target for clip
   int min_frame_bandwidth;  // Minimum allocation used for any frame
   int max_frame_bandwidth;  // Maximum burst rate allowed for a frame.
