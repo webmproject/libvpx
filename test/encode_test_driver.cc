@@ -128,6 +128,8 @@ static bool compare_img(const vpx_image_t *img1, const vpx_image_t *img2) {
   bool match = (img1->fmt == img2->fmt) && (img1->cs == img2->cs) &&
                (img1->d_w == img2->d_w) && (img1->d_h == img2->d_h);
 
+  if (!match) return false;
+
   const unsigned int width_y = img1->d_w;
   const unsigned int height_y = img1->d_h;
   unsigned int i;
