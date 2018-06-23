@@ -60,6 +60,13 @@ typedef struct {
 #define GOLDEN_FRAME 2
 #define ALTREF_FRAME 3
 #define MAX_REF_FRAMES 4
+
+#define LAST2_FRAME 4
+#define LAST3_FRAME 5
+#define BWDREF_FRAME 6
+#define ALTREF2_FRAME 7
+#define LAST_REF_FRAMES 3
+
 typedef int8_t MV_REFERENCE_FRAME;
 
 // This structure now relates to 8x8 block regions.
