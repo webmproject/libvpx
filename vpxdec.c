@@ -238,9 +238,10 @@ static int raw_read_frame(FILE *infile, uint8_t **buffer, size_t *bytes_read,
       return 1;
     }
     *bytes_read = frame_size;
+    return 0;
   }
 
-  return 0;
+  return 1;
 }
 
 static int read_frame(struct VpxDecInputContext *input, uint8_t **buf,
