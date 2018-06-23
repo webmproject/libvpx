@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c2b69b0_af184136",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-23T19:49:00Z",
+      "side": 1,
+      "message": "I think this condition was inverted incorrectly in the same commit",
+      "revId": "9149cd0c7145b5461c4a206b7822ee09a4a4c19d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
