@@ -138,6 +138,56 @@ unsigned int vpx_avg_4x4_sse2(const uint8_t *s, int p) {
   return (avg + 8) >> 4;
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+unsigned int vpx_highbd_avg_8x8_sse2(const uint8_t *s8, int p) {
+  __m128i s0, s1;
+  unsigned int avg;
+  const uint16_t *s = CONVERT_TO_SHORTPTR(s8);
+  const __m128i zero = _mm_setzero_si128();
+  s0 = _mm_loadu_si128((const __m128i *)(s));
+  s1 = _mm_loadu_si128((const __m128i *)(s + p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_loadu_si128((const __m128i *)(s + 2 * p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_loadu_si128((const __m128i *)(s + 3 * p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_loadu_si128((const __m128i *)(s + 4 * p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_loadu_si128((const __m128i *)(s + 5 * p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_loadu_si128((const __m128i *)(s + 6 * p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_loadu_si128((const __m128i *)(s + 7 * p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_unpackhi_epi16(s0, zero);
+  s0 = _mm_unpacklo_epi16(s0, zero);
+  s0 = _mm_add_epi32(s0, s1);
+  s0 = _mm_add_epi32(s0, _mm_srli_si128(s0, 8));
+  s0 = _mm_add_epi32(s0, _mm_srli_si128(s0, 4));
+  avg = _mm_cvtsi128_si32(s0);
+
+  return (avg + 32) >> 6;
+}
+
+unsigned int vpx_highbd_avg_4x4_sse2(const uint8_t *s8, int p) {
+  __m128i s0, s1;
+  unsigned int avg;
+  const uint16_t *s = CONVERT_TO_SHORTPTR(s8);
+  s0 = _mm_loadl_epi64((const __m128i *)(s));
+  s1 = _mm_loadl_epi64((const __m128i *)(s + p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_loadl_epi64((const __m128i *)(s + 2 * p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s1 = _mm_loadl_epi64((const __m128i *)(s + 3 * p));
+  s0 = _mm_adds_epu16(s0, s1);
+  s0 = _mm_add_epi16(s0, _mm_srli_si128(s0, 4));
+  s0 = _mm_add_epi16(s0, _mm_srli_si128(s0, 2));
+  avg = _mm_extract_epi16(s0, 0);
+
+  return (avg + 8) >> 4;
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 static void hadamard_col8_sse2(__m128i *in, int iter) {
   __m128i a0 = in[0];
   __m128i a1 = in[1];

@@ -22,27 +22,24 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
+#include "vpx/vpx_codec.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/vpx_timer.h"
 
 using libvpx_test::ACMRandom;
 
 namespace {
+
+template <typename Pixel>
 class AverageTestBase : public ::testing::Test {
  public:
   AverageTestBase(int width, int height) : width_(width), height_(height) {}
 
-  static void SetUpTestCase() {
-    source_data_ = reinterpret_cast<uint8_t *>(
-        vpx_memalign(kDataAlignment, kDataBlockSize));
-  }
-
-  static void TearDownTestCase() {
+  virtual void TearDown() {
     vpx_free(source_data_);
     source_data_ = NULL;
+    libvpx_test::ClearSystemState();
   }
-
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
   // Handle blocks up to 4 blocks 64x64 with stride up to 128
@@ -50,12 +47,16 @@ class AverageTestBase : public ::testing::Test {
   static const int kDataBlockSize = 64 * 128;
 
   virtual void SetUp() {
+    source_data_ = reinterpret_cast<Pixel *>(
+        vpx_memalign(kDataAlignment, kDataBlockSize * sizeof(source_data_[0])));
+    ASSERT_TRUE(source_data_ != NULL);
     source_stride_ = (width_ + 31) & ~31;
+    bit_depth_ = 8;
     rnd_.Reset(ACMRandom::DeterministicSeed());
   }
 
   // Sum Pixels
-  static unsigned int ReferenceAverage8x8(const uint8_t *source, int pitch) {
+  static unsigned int ReferenceAverage8x8(const Pixel *source, int pitch) {
     unsigned int average = 0;
     for (int h = 0; h < 8; ++h) {
       for (int w = 0; w < 8; ++w) average += source[h * pitch + w];
@@ -63,7 +64,7 @@ class AverageTestBase : public ::testing::Test {
     return ((average + 32) >> 6);
   }
 
-  static unsigned int ReferenceAverage4x4(const uint8_t *source, int pitch) {
+  static unsigned int ReferenceAverage4x4(const Pixel *source, int pitch) {
     unsigned int average = 0;
     for (int h = 0; h < 4; ++h) {
       for (int w = 0; w < 4; ++w) average += source[h * pitch + w];
@@ -71,7 +72,7 @@ class AverageTestBase : public ::testing::Test {
     return ((average + 8) >> 4);
   }
 
-  void FillConstant(uint8_t fill_constant) {
+  void FillConstant(Pixel fill_constant) {
     for (int i = 0; i < width_ * height_; ++i) {
       source_data_[i] = fill_constant;
     }
@@ -79,13 +80,14 @@ class AverageTestBase : public ::testing::Test {
 
   void FillRandom() {
     for (int i = 0; i < width_ * height_; ++i) {
-      source_data_[i] = rnd_.Rand8();
+      source_data_[i] = rnd_.Rand16() & ((1 << bit_depth_) - 1);
     }
   }
 
   int width_, height_;
-  static uint8_t *source_data_;
+  Pixel *source_data_;
   int source_stride_;
+  int bit_depth_;
 
   ACMRandom rnd_;
 };
@@ -93,7 +95,7 @@ typedef unsigned int (*AverageFunction)(const uint8_t *s, int pitch);
 
 typedef ::testing::tuple<int, int, int, int, AverageFunction> AvgFunc;
 
-class AverageTest : public AverageTestBase,
+class AverageTest : public AverageTestBase<uint8_t>,
                     public ::testing::WithParamInterface<AvgFunc> {
  public:
   AverageTest() : AverageTestBase(GET_PARAM(0), GET_PARAM(1)) {}
@@ -119,12 +121,40 @@ class AverageTest : public AverageTestBase,
   }
 };
 
+#if CONFIG_VP9_HIGHBITDEPTH
+class AverageTestHBD : public AverageTestBase<uint16_t>,
+                       public ::testing::WithParamInterface<AvgFunc> {
+ public:
+  AverageTestHBD() : AverageTestBase(GET_PARAM(0), GET_PARAM(1)) {}
+
+ protected:
+  void CheckAverages() {
+    const int block_size = GET_PARAM(3);
+    unsigned int expected = 0;
+    if (block_size == 8) {
+      expected =
+          ReferenceAverage8x8(source_data_ + GET_PARAM(2), source_stride_);
+    } else if (block_size == 4) {
+      expected =
+          ReferenceAverage4x4(source_data_ + GET_PARAM(2), source_stride_);
+    }
+
+    ASM_REGISTER_STATE_CHECK(GET_PARAM(4)(
+        CONVERT_TO_BYTEPTR(source_data_ + GET_PARAM(2)), source_stride_));
+    unsigned int actual = GET_PARAM(4)(
+        CONVERT_TO_BYTEPTR(source_data_ + GET_PARAM(2)), source_stride_);
+
+    EXPECT_EQ(expected, actual);
+  }
+};
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 typedef void (*IntProRowFunc)(int16_t hbuf[16], uint8_t const *ref,
                               const int ref_stride, const int height);
 
 typedef ::testing::tuple<int, IntProRowFunc, IntProRowFunc> IntProRowParam;
 
-class IntProRowTest : public AverageTestBase,
+class IntProRowTest : public AverageTestBase<uint8_t>,
                       public ::testing::WithParamInterface<IntProRowParam> {
  public:
   IntProRowTest()
@@ -135,6 +165,10 @@ class IntProRowTest : public AverageTestBase,
 
  protected:
   virtual void SetUp() {
+    source_data_ = reinterpret_cast<uint8_t *>(
+        vpx_memalign(kDataAlignment, kDataBlockSize * sizeof(source_data_[0])));
+    ASSERT_TRUE(source_data_ != NULL);
+
     hbuf_asm_ = reinterpret_cast<int16_t *>(
         vpx_memalign(kDataAlignment, sizeof(*hbuf_asm_) * 16));
     hbuf_c_ = reinterpret_cast<int16_t *>(
@@ -142,6 +176,8 @@ class IntProRowTest : public AverageTestBase,
   }
 
   virtual void TearDown() {
+    vpx_free(source_data_);
+    source_data_ = NULL;
     vpx_free(hbuf_c_);
     hbuf_c_ = NULL;
     vpx_free(hbuf_asm_);
@@ -166,7 +202,7 @@ typedef int16_t (*IntProColFunc)(uint8_t const *ref, const int width);
 
 typedef ::testing::tuple<int, IntProColFunc, IntProColFunc> IntProColParam;
 
-class IntProColTest : public AverageTestBase,
+class IntProColTest : public AverageTestBase<uint8_t>,
                       public ::testing::WithParamInterface<IntProColParam> {
  public:
   IntProColTest() : AverageTestBase(GET_PARAM(0), 1), sum_asm_(0), sum_c_(0) {
@@ -288,8 +324,6 @@ class BlockErrorTestFP
   ACMRandom rnd_;
 };
 
-uint8_t *AverageTestBase::source_data_ = NULL;
-
 TEST_P(AverageTest, MinValue) {
   FillConstant(0);
   CheckAverages();
@@ -308,6 +342,27 @@ TEST_P(AverageTest, Random) {
     CheckAverages();
   }
 }
+#if CONFIG_VP9_HIGHBITDEPTH
+TEST_P(AverageTestHBD, MinValue) {
+  FillConstant(0);
+  CheckAverages();
+}
+
+TEST_P(AverageTestHBD, MaxValue) {
+  FillConstant((1 << VPX_BITS_12) - 1);
+  CheckAverages();
+}
+
+TEST_P(AverageTestHBD, Random) {
+  bit_depth_ = VPX_BITS_12;
+  // The reference frame, but not the source frame, may be unaligned for
+  // certain types of searches.
+  for (int i = 0; i < 1000; i++) {
+    FillRandom();
+    CheckAverages();
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 TEST_P(IntProRowTest, MinValue) {
   FillConstant(0);
@@ -434,6 +489,20 @@ INSTANTIATE_TEST_CASE_P(
     C, AverageTest,
     ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_avg_8x8_c),
                       make_tuple(16, 16, 1, 4, &vpx_avg_4x4_c)));
+
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(
+    C, AverageTestHBD,
+    ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_highbd_avg_8x8_c),
+                      make_tuple(16, 16, 1, 4, &vpx_highbd_avg_4x4_c)));
+
+#if HAVE_SSE2
+INSTANTIATE_TEST_CASE_P(
+    SSE2, AverageTestHBD,
+    ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_highbd_avg_8x8_sse2),
+                      make_tuple(16, 16, 1, 4, &vpx_highbd_avg_4x4_sse2)));
+#endif  // HAVE_SSE2
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 INSTANTIATE_TEST_CASE_P(C, SatdTest,
                         ::testing::Values(make_tuple(16, &vpx_satd_c),
