@@ -3320,101 +3320,206 @@ static int ml_pruning_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
 #define FEATURES 4
 #define Q_CTX 3
-static const float partition_breakout_weights_64[Q_CTX][FEATURES + 1] = {
-  {
-      -0.016673f,
-      -0.001025f,
-      -0.000032f,
-      0.000833f,
-      1.94261885f - 2.1f,
-  },
-  {
-      -0.160867f,
-      -0.002101f,
-      0.000011f,
-      0.002448f,
-      1.65738142f - 2.5f,
-  },
-  {
-      -0.628934f,
-      -0.011459f,
-      -0.000009f,
-      0.013833f,
-      1.47982645f - 1.6f,
-  },
-};
+#define RESOLUTION_CTX 2
+static const float partition_breakout_weights_64[RESOLUTION_CTX][Q_CTX]
+                                                [FEATURES + 1] = {
+                                                  {
+                                                      {
+                                                          -0.016673f,
+                                                          -0.001025f,
+                                                          -0.000032f,
+                                                          0.000833f,
+                                                          1.94261885f - 2.1f,
+                                                      },
+                                                      {
+                                                          -0.160867f,
+                                                          -0.002101f,
+                                                          0.000011f,
+                                                          0.002448f,
+                                                          1.65738142f - 2.5f,
+                                                      },
+                                                      {
+                                                          -0.628934f,
+                                                          -0.011459f,
+                                                          -0.000009f,
+                                                          0.013833f,
+                                                          1.47982645f - 1.6f,
+                                                      },
+                                                  },
+                                                  {
+                                                      {
+                                                          -0.064309f,
+                                                          -0.006121f,
+                                                          0.000232f,
+                                                          0.005778f,
+                                                          0.7989465f - 5.0f,
+                                                      },
+                                                      {
+                                                          -0.314957f,
+                                                          -0.009346f,
+                                                          -0.000225f,
+                                                          0.010072f,
+                                                          2.80695581f - 5.5f,
+                                                      },
+                                                      {
+                                                          -0.635535f,
+                                                          -0.015135f,
+                                                          0.000091f,
+                                                          0.015247f,
+                                                          2.90381241f - 5.0f,
+                                                      },
+                                                  },
+                                                };
 
-static const float partition_breakout_weights_32[Q_CTX][FEATURES + 1] = {
-  {
-      -0.010554f,
-      -0.003081f,
-      -0.000134f,
-      0.004491f,
-      1.68445992f - 3.5f,
-  },
-  {
-      -0.051489f,
-      -0.007609f,
-      0.000016f,
-      0.009792f,
-      1.28089404f - 2.5f,
-  },
-  {
-      -0.163097f,
-      -0.013081f,
-      0.000022f,
-      0.019006f,
-      1.36129403f - 3.2f,
-  },
-};
+static const float partition_breakout_weights_32[RESOLUTION_CTX][Q_CTX]
+                                                [FEATURES + 1] = {
+                                                  {
+                                                      {
+                                                          -0.010554f,
+                                                          -0.003081f,
+                                                          -0.000134f,
+                                                          0.004491f,
+                                                          1.68445992f - 3.5f,
+                                                      },
+                                                      {
+                                                          -0.051489f,
+                                                          -0.007609f,
+                                                          0.000016f,
+                                                          0.009792f,
+                                                          1.28089404f - 2.5f,
+                                                      },
+                                                      {
+                                                          -0.163097f,
+                                                          -0.013081f,
+                                                          0.000022f,
+                                                          0.019006f,
+                                                          1.36129403f - 3.2f,
+                                                      },
+                                                  },
+                                                  {
+                                                      {
+                                                          -0.024629f,
+                                                          -0.006492f,
+                                                          -0.000254f,
+                                                          0.004895f,
+                                                          1.27919173f - 4.5f,
+                                                      },
+                                                      {
+                                                          -0.083936f,
+                                                          -0.009827f,
+                                                          -0.000200f,
+                                                          0.010399f,
+                                                          2.73731065f - 4.5f,
+                                                      },
+                                                      {
+                                                          -0.279052f,
+                                                          -0.013334f,
+                                                          0.000289f,
+                                                          0.023203f,
+                                                          2.43595719f - 3.5f,
+                                                      },
+                                                  },
+                                                };
 
-static const float partition_breakout_weights_16[Q_CTX][FEATURES + 1] = {
-  {
-      -0.013154f,
-      -0.002404f,
-      -0.000977f,
-      0.008450f,
-      2.57404566f - 5.5f,
-  },
-  {
-      -0.019146f,
-      -0.004018f,
-      0.000064f,
-      0.008187f,
-      2.15043926f - 2.5f,
-  },
-  {
-      -0.075755f,
-      -0.010858f,
-      0.000030f,
-      0.024505f,
-      2.06848121f - 2.5f,
-  },
-};
+static const float partition_breakout_weights_16[RESOLUTION_CTX][Q_CTX]
+                                                [FEATURES + 1] = {
+                                                  {
+                                                      {
+                                                          -0.013154f,
+                                                          -0.002404f,
+                                                          -0.000977f,
+                                                          0.008450f,
+                                                          2.57404566f - 5.5f,
+                                                      },
+                                                      {
+                                                          -0.019146f,
+                                                          -0.004018f,
+                                                          0.000064f,
+                                                          0.008187f,
+                                                          2.15043926f - 2.5f,
+                                                      },
+                                                      {
+                                                          -0.075755f,
+                                                          -0.010858f,
+                                                          0.000030f,
+                                                          0.024505f,
+                                                          2.06848121f - 2.5f,
+                                                      },
+                                                  },
+                                                  {
+                                                      {
+                                                          -0.007636f,
+                                                          -0.002751f,
+                                                          -0.000682f,
+                                                          0.005968f,
+                                                          0.19225763f - 4.5f,
+                                                      },
+                                                      {
+                                                          -0.047306f,
+                                                          -0.009113f,
+                                                          -0.000518f,
+                                                          0.016007f,
+                                                          2.61068869f - 4.0f,
+                                                      },
+                                                      {
+                                                          -0.069336f,
+                                                          -0.010448f,
+                                                          -0.001120f,
+                                                          0.023083f,
+                                                          1.47591054f - 5.5f,
+                                                      },
+                                                  },
+                                                };
 
-static const float partition_breakout_weights_8[Q_CTX][FEATURES + 1] = {
-  {
-      -0.011807f,
-      -0.009873f,
-      -0.000931f,
-      0.034768f,
-      1.32254851f - 2.0f,
-  },
-  {
-      -0.003861f,
-      -0.002701f,
-      0.000100f,
-      0.013876f,
-      1.96755111f - 1.5f,
-  },
-  {
-      -0.013522f,
-      -0.008677f,
-      -0.000562f,
-      0.034468f,
-      1.53440356f - 1.5f,
-  },
-};
+static const float partition_breakout_weights_8[RESOLUTION_CTX][Q_CTX]
+                                               [FEATURES + 1] = {
+                                                 {
+                                                     {
+                                                         -0.011807f,
+                                                         -0.009873f,
+                                                         -0.000931f,
+                                                         0.034768f,
+                                                         1.32254851f - 2.0f,
+                                                     },
+                                                     {
+                                                         -0.003861f,
+                                                         -0.002701f,
+                                                         0.000100f,
+                                                         0.013876f,
+                                                         1.96755111f - 1.5f,
+                                                     },
+                                                     {
+                                                         -0.013522f,
+                                                         -0.008677f,
+                                                         -0.000562f,
+                                                         0.034468f,
+                                                         1.53440356f - 1.5f,
+                                                     },
+                                                 },
+                                                 {
+                                                     {
+                                                         -0.003221f,
+                                                         -0.002125f,
+                                                         0.000993f,
+                                                         0.012768f,
+                                                         0.03541421f - 2.0f,
+                                                     },
+                                                     {
+                                                         -0.006069f,
+                                                         -0.007335f,
+                                                         0.000229f,
+                                                         0.026104f,
+                                                         0.17135315f - 1.5f,
+                                                     },
+                                                     {
+                                                         -0.039894f,
+                                                         -0.011419f,
+                                                         0.000070f,
+                                                         0.061817f,
+                                                         0.6739977f - 1.5f,
+                                                     },
+                                                 },
+                                               };
 
 // ML-based partition search breakout.
 static int ml_predict_breakout(const VP9_COMP *const cpi, BLOCK_SIZE bsize,
@@ -3427,18 +3532,22 @@ static int ml_predict_breakout(const VP9_COMP *const cpi, BLOCK_SIZE bsize,
   float linear_score = 0.0f;
   const int qindex = cm->base_qindex;
   const int q_ctx = qindex >= 200 ? 0 : (qindex >= 150 ? 1 : 2);
+  const int is_720p_or_larger = VPXMIN(cm->width, cm->height) >= 720;
+  const int resolution_ctx = is_720p_or_larger ? 1 : 0;
 
   switch (bsize) {
     case BLOCK_64X64:
-      linear_weights = partition_breakout_weights_64[q_ctx];
+      linear_weights = partition_breakout_weights_64[resolution_ctx][q_ctx];
       break;
     case BLOCK_32X32:
-      linear_weights = partition_breakout_weights_32[q_ctx];
+      linear_weights = partition_breakout_weights_32[resolution_ctx][q_ctx];
       break;
     case BLOCK_16X16:
-      linear_weights = partition_breakout_weights_16[q_ctx];
+      linear_weights = partition_breakout_weights_16[resolution_ctx][q_ctx];
       break;
-    case BLOCK_8X8: linear_weights = partition_breakout_weights_8[q_ctx]; break;
+    case BLOCK_8X8:
+      linear_weights = partition_breakout_weights_8[resolution_ctx][q_ctx];
+      break;
     default: assert(0 && "Unexpected block size."); return 0;
   }
   if (!linear_weights) return 0;
@@ -3480,6 +3589,7 @@ static int ml_predict_breakout(const VP9_COMP *const cpi, BLOCK_SIZE bsize,
 }
 #undef FEATURES
 #undef Q_CTX
+#undef RESOLUTION_CTX
 
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
