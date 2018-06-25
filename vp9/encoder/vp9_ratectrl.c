@@ -414,9 +414,12 @@ static int check_buffer_above_thresh(VP9_COMP *cpi, int drop_mark) {
                                          svc->number_temporal_layers);
       LAYER_CONTEXT *lc = &svc->layer_context[layer];
       RATE_CONTROL *lrc = &lc->rc;
-      const int drop_mark_layer =
-          (int)(cpi->svc.framedrop_thresh[i] * lrc->optimal_buffer_level / 100);
-      if (!(lrc->buffer_level > drop_mark_layer)) return 0;
+      // Exclude check for layer whose bitrate is 0.
+      if (lc->target_bandwidth > 0) {
+        const int drop_mark_layer = (int)(cpi->svc.framedrop_thresh[i] *
+                                          lrc->optimal_buffer_level / 100);
+        if (!(lrc->buffer_level > drop_mark_layer)) return 0;
+      }
     }
     return 1;
   }
@@ -439,12 +442,15 @@ static int check_buffer_below_thresh(VP9_COMP *cpi, int drop_mark) {
                                          svc->number_temporal_layers);
       LAYER_CONTEXT *lc = &svc->layer_context[layer];
       RATE_CONTROL *lrc = &lc->rc;
-      const int drop_mark_layer =
-          (int)(cpi->svc.framedrop_thresh[i] * lrc->optimal_buffer_level / 100);
-      if (cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP) {
-        if (lrc->buffer_level <= drop_mark_layer) return 1;
-      } else {
-        if (!(lrc->buffer_level <= drop_mark_layer)) return 0;
+      // Exclude check for layer whose bitrate is 0.
+      if (lc->target_bandwidth > 0) {
+        const int drop_mark_layer = (int)(cpi->svc.framedrop_thresh[i] *
+                                          lrc->optimal_buffer_level / 100);
+        if (cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP) {
+          if (lrc->buffer_level <= drop_mark_layer) return 1;
+        } else {
+          if (!(lrc->buffer_level <= drop_mark_layer)) return 0;
+        }
       }
     }
     if (cpi->svc.framedrop_mode == FULL_SUPERFRAME_DROP)
