@@ -3319,7 +3319,7 @@ static int ml_pruning_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 }
 
 #define FEATURES 4
-#define Q_CTX 2
+#define Q_CTX 3
 static const float partition_breakout_weights_64[Q_CTX][FEATURES + 1] = {
   {
       -0.016673f,
@@ -3334,6 +3334,13 @@ static const float partition_breakout_weights_64[Q_CTX][FEATURES + 1] = {
       0.000011f,
       0.002448f,
       1.65738142f - 2.5f,
+  },
+  {
+      -0.628934f,
+      -0.011459f,
+      -0.000009f,
+      0.013833f,
+      1.47982645f - 1.6f,
   },
 };
 
@@ -3352,6 +3359,13 @@ static const float partition_breakout_weights_32[Q_CTX][FEATURES + 1] = {
       0.009792f,
       1.28089404f - 2.5f,
   },
+  {
+      -0.163097f,
+      -0.013081f,
+      0.000022f,
+      0.019006f,
+      1.36129403f - 3.2f,
+  },
 };
 
 static const float partition_breakout_weights_16[Q_CTX][FEATURES + 1] = {
@@ -3368,6 +3382,13 @@ static const float partition_breakout_weights_16[Q_CTX][FEATURES + 1] = {
       0.000064f,
       0.008187f,
       2.15043926f - 2.5f,
+  },
+  {
+      -0.075755f,
+      -0.010858f,
+      0.000030f,
+      0.024505f,
+      2.06848121f - 2.5f,
   },
 };
 
@@ -3386,6 +3407,13 @@ static const float partition_breakout_weights_8[Q_CTX][FEATURES + 1] = {
       0.013876f,
       1.96755111f - 1.5f,
   },
+  {
+      -0.013522f,
+      -0.008677f,
+      -0.000562f,
+      0.034468f,
+      1.53440356f - 1.5f,
+  },
 };
 
 // ML-based partition search breakout.
@@ -3398,7 +3426,7 @@ static int ml_predict_breakout(const VP9_COMP *const cpi, BLOCK_SIZE bsize,
   const float *linear_weights = NULL;  // Linear model weights.
   float linear_score = 0.0f;
   const int qindex = cm->base_qindex;
-  const int q_ctx = qindex >= 200 ? 0 : 1;
+  const int q_ctx = qindex >= 200 ? 0 : (qindex >= 150 ? 1 : 2);
 
   switch (bsize) {
     case BLOCK_64X64:
@@ -3641,7 +3669,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
           if (!x->e_mbd.lossless && ctx->skippable) {
             int use_ml_based_breakout =
                 cpi->sf.use_ml_partition_search_breakout &&
-                cm->base_qindex >= 150;
+                cm->base_qindex >= 100;
 #if CONFIG_VP9_HIGHBITDEPTH
             if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
               use_ml_based_breakout = 0;

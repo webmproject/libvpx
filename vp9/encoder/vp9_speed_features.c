@@ -85,6 +85,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
       sf->use_ml_partition_search_breakout = 1;
       sf->ml_partition_search_breakout_thresh[0] = 0.0f;
       sf->ml_partition_search_breakout_thresh[1] = 0.0f;
+      sf->ml_partition_search_breakout_thresh[2] = 0.0f;
     }
   }
 
@@ -101,6 +102,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
       sf->partition_search_breakout_thr.rate = 100;
       sf->ml_partition_search_breakout_thresh[0] = 0.0f;
       sf->ml_partition_search_breakout_thresh[1] = -1.0f;
+      sf->ml_partition_search_breakout_thresh[2] = -4.0f;
     }
     sf->rd_auto_partition_min_limit = set_partition_min_limit(cm);
 
