@@ -2431,7 +2431,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
   }
 
   x->skip = ctx->skip;
-  x->skip_txfm[0] = mi->segment_id ? 0 : ctx->skip_txfm[0];
+  x->skip_txfm[0] = (mi->segment_id || xd->lossless) ? 0 : ctx->skip_txfm[0];
 }
 
 static void encode_b_rt(VP9_COMP *cpi, ThreadData *td,
