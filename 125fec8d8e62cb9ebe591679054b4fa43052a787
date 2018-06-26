@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "211346fb_e51ad3f3",
+        "filename": "vpx_dsp/ppc/fdct32x32_vsx.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-06-26T19:17:01Z",
+      "side": 1,
+      "message": "Probably you might use a single permutation to pack and reorder at the same time.\n\n(vec_pack is a vec_perm under the hood)",
+      "revId": "125fec8d8e62cb9ebe591679054b4fa43052a787",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
