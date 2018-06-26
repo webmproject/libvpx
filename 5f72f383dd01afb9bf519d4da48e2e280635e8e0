@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "db91d0a0_6d2990f1",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-26T04:27:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1e328286_f78fd007",
+      "revId": "5f72f383dd01afb9bf519d4da48e2e280635e8e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3b740ff0_84b22fc6",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 8
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "acd3e47a_307a14c1",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-26T04:27:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3b740ff0_84b22fc6",
+      "range": {
+        "startLine": 43,
+        "startChar": 7,
+        "endLine": 43,
+        "endChar": 24
+      },
+      "revId": "5f72f383dd01afb9bf519d4da48e2e280635e8e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c09191a_66669c9b",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 8
@@ -53,6 +95,24 @@
       "writtenOn": "2018-06-26T04:00:16Z",
       "side": 1,
       "message": "it may be best to call this first and treat these functions as overrides to avoid the potential of code changes affecting the local settings",
+      "revId": "5f72f383dd01afb9bf519d4da48e2e280635e8e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e28ac4b4_a9a6f3b2",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-26T04:27:00Z",
+      "side": 1,
+      "message": "what do you mean \"treat these functions as overrides\"? declare them as virtual functions?",
+      "parentUuid": "3c09191a_66669c9b",
       "revId": "5f72f383dd01afb9bf519d4da48e2e280635e8e0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
