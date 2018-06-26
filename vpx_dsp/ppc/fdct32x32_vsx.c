@@ -15,10 +15,6 @@
 #include "vpx_dsp/ppc/txfm_common_vsx.h"
 #include "vpx_dsp/ppc/transpose_vsx.h"
 
-static const uint8x16_t vec_perm_pack = { 0x00, 0x01, 0x10, 0x11, 0x04, 0x05,
-                                          0x14, 0x15, 0x08, 0x09, 0x18, 0x19,
-                                          0x0C, 0x0D, 0x1C, 0x1D };
-
 // Returns ((a +/- b) * cospi16 + (2 << 13)) >> 14.
 static INLINE void single_butterfly(int16x8_t a, int16x8_t b, int16x8_t *add,
                                     int16x8_t *sub) {
@@ -47,8 +43,8 @@ static INLINE void single_butterfly(int16x8_t a, int16x8_t b, int16x8_t *add,
   const int32x4_t sdiff_e = vec_sra(rdiff_e, vec_dct_const_bits);
 
   // There's no pack operation for even and odd, so we need to permute.
-  *add = (int16x8_t)vec_perm(ssum_e, ssum_o, vec_perm_pack);
-  *sub = (int16x8_t)vec_perm(sdiff_e, sdiff_o, vec_perm_pack);
+  *add = (int16x8_t)vec_perm(ssum_e, ssum_o, vec_perm_odd_even_pack);
+  *sub = (int16x8_t)vec_perm(sdiff_e, sdiff_o, vec_perm_odd_even_pack);
 }
 
 // Returns (a * c1 +/- b * c2 + (2 << 13)) >> 14
@@ -82,8 +78,8 @@ static INLINE void double_butterfly(int16x8_t a, int16x8_t c1, int16x8_t b,
   const int32x4_t sdiff_e = vec_sra(rdiff_e, vec_dct_const_bits);
 
   // There's no pack operation for even and odd, so we need to permute.
-  *add = (int16x8_t)vec_perm(ssum_e, ssum_o, vec_perm_pack);
-  *sub = (int16x8_t)vec_perm(sdiff_e, sdiff_o, vec_perm_pack);
+  *add = (int16x8_t)vec_perm(ssum_e, ssum_o, vec_perm_odd_even_pack);
+  *sub = (int16x8_t)vec_perm(sdiff_e, sdiff_o, vec_perm_odd_even_pack);
 }
 
 // While other architecture combine the load and the stage 1 operations, Power9

@@ -68,7 +68,6 @@ static INLINE int16x8_t quantize_coeff_32(int16x8_t coeff, int16x8_t coeff_abs,
 // vec_mladd results in overflow.
 static INLINE int16x8_t dequantize_coeff_32(int16x8_t qcoeff,
                                             int16x8_t dequant) {
-  int16x8_t dqcoeff;
   int32x4_t dqcoeffe = vec_mule(qcoeff, dequant);
   int32x4_t dqcoeffo = vec_mulo(qcoeff, dequant);
   // Add 1 if negative to round towards zero because the C uses division.
@@ -76,8 +75,7 @@ static INLINE int16x8_t dequantize_coeff_32(int16x8_t qcoeff,
   dqcoeffo = vec_add(dqcoeffo, vec_is_neg(dqcoeffo));
   dqcoeffe = vec_sra(dqcoeffe, vec_ones_u32);
   dqcoeffo = vec_sra(dqcoeffo, vec_ones_u32);
-  dqcoeff = vec_pack(dqcoeffe, dqcoeffo);
-  return vec_perm(dqcoeff, dqcoeff, vec_perm_merge);
+  return (int16x8_t)vec_perm(dqcoeffe, dqcoeffo, vec_perm_odd_even_pack);
 }
 
 static INLINE int16x8_t nonzero_scanindex(int16x8_t qcoeff, bool16x8_t mask,
