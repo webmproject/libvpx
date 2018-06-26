@@ -20,7 +20,11 @@ extern "C" {
 unsigned int vp9_vaq_segment_id(int energy);
 void vp9_vaq_frame_setup(VP9_COMP *cpi);
 
+void vp9_get_sub_block_energy(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row,
+                              int mi_col, BLOCK_SIZE bsize, int *min_e,
+                              int *max_e);
 int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
+
 double vp9_log_block_var(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs);
 
 #ifdef __cplusplus

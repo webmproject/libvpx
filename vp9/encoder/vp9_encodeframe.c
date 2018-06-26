@@ -1903,13 +1903,22 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
   }
 
   if (aq_mode == VARIANCE_AQ) {
-    const int energy =
-        bsize <= BLOCK_16X16 ? x->mb_energy : vp9_block_energy(cpi, x, bsize);
-
     if (cm->frame_type == KEY_FRAME || cpi->refresh_alt_ref_frame ||
         cpi->force_update_segmentation ||
         (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
-      mi->segment_id = vp9_vaq_segment_id(energy);
+      int min_energy;
+      int max_energy;
+
+      // Get sub block energy range
+      if (bsize >= BLOCK_32X32) {
+        vp9_get_sub_block_energy(cpi, x, mi_row, mi_col, bsize, &min_energy,
+                                 &max_energy);
+      } else {
+        min_energy = bsize <= BLOCK_16X16 ? x->mb_energy
+                                          : vp9_block_energy(cpi, x, bsize);
+      }
+
+      mi->segment_id = vp9_vaq_segment_id(min_energy);
     } else {
       const uint8_t *const map =
           cm->seg.update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
@@ -3528,15 +3537,16 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   int64_t dist_breakout_thr = cpi->sf.partition_search_breakout_thr.dist;
   int rate_breakout_thr = cpi->sf.partition_search_breakout_thr.rate;
+  int must_split = 0;
 
   (void)*tp_orig;
 
   assert(num_8x8_blocks_wide_lookup[bsize] ==
          num_8x8_blocks_high_lookup[bsize]);
 
-  // Adjust dist breakout threshold according to the partition size.
   dist_breakout_thr >>=
       8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
+
   rate_breakout_thr *= num_pels_log2_lookup[bsize];
 
   vp9_rd_cost_init(&this_rdc);
@@ -3560,10 +3570,18 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       set_partition_range(cm, xd, mi_row, mi_col, bsize, &min_size, &max_size);
   }
 
+  // Get sub block energy range
+  if (bsize >= BLOCK_16X16) {
+    int min_energy, max_energy;
+    vp9_get_sub_block_energy(cpi, x, mi_row, mi_col, bsize, &min_energy,
+                             &max_energy);
+    must_split = (min_energy < -3) && (max_energy - min_energy > 2);
+  }
+
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
   if (cpi->sf.auto_min_max_partition_size) {
-    partition_none_allowed &= (bsize <= max_size && bsize >= min_size);
+    partition_none_allowed &= (bsize <= max_size);
     partition_horz_allowed &=
         ((bsize <= max_size && bsize > min_size) || force_horz_split);
     partition_vert_allowed &=
@@ -3767,7 +3785,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // PARTITION_SPLIT
   // TODO(jingning): use the motion vectors given by the above search as
   // the starting point of motion search in the following partition type check.
-  if (do_split) {
+  if (do_split || must_split) {
     subsize = get_subsize(bsize, PARTITION_SPLIT);
     if (bsize == BLOCK_8X8) {
       i = 4;
@@ -3778,7 +3796,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
       if (sum_rdc.rate == INT_MAX) sum_rdc.rdcost = INT64_MAX;
     } else {
-      for (i = 0; i < 4 && sum_rdc.rdcost < best_rdc.rdcost; ++i) {
+      for (i = 0; (i < 4) && ((sum_rdc.rdcost < best_rdc.rdcost) || must_split);
+           ++i) {
         const int x_idx = (i & 1) * mi_step;
         const int y_idx = (i >> 1) * mi_step;
 
@@ -3790,6 +3809,13 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         pc_tree->split[i]->index = i;
         rd_pick_partition(cpi, td, tile_data, tp, mi_row + y_idx,
                           mi_col + x_idx, subsize, &this_rdc,
+                          // A must split test here increases the number of sub
+                          // partitions but hurts metrics results quite a bit,
+                          // so this extra test is commented out pending
+                          // further tests on whether it adds much in terms of
+                          // visual quality.
+                          // (must_split) ? best_rdc.rdcost
+                          //              : best_rdc.rdcost - sum_rdc.rdcost,
                           best_rdc.rdcost - sum_rdc.rdcost, pc_tree->split[i]);
 
         if (this_rdc.rate == INT_MAX) {
@@ -3803,12 +3829,13 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       }
     }
 
-    if (sum_rdc.rdcost < best_rdc.rdcost && i == 4) {
+    if (((sum_rdc.rdcost < best_rdc.rdcost) || must_split) && i == 4) {
       sum_rdc.rdcost += RDCOST(x->rdmult, x->rddiv,
                                cpi->partition_cost[pl][PARTITION_SPLIT], 0);
       sum_rdc.rate += cpi->partition_cost[pl][PARTITION_SPLIT];
 
-      if (sum_rdc.rdcost < best_rdc.rdcost) {
+      if ((sum_rdc.rdcost < best_rdc.rdcost) ||
+          (must_split && (sum_rdc.dist < best_rdc.dist))) {
         best_rdc = sum_rdc;
         pc_tree->partitioning = PARTITION_SPLIT;
 
