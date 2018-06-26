@@ -80,6 +80,24 @@
       "revId": "125fec8d8e62cb9ebe591679054b4fa43052a787",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "019c1cc4_d072ebca",
+        "filename": "vpx_dsp/ppc/fdct32x32_vsx.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1283694
+      },
+      "writtenOn": "2018-06-26T20:41:26Z",
+      "side": 1,
+      "message": "Ok, now I get it, in twos complement negative values are right padded with ones. So you get the sign bit for free for any type bigger than the current value.",
+      "parentUuid": "3483fd36_b2ee2d12",
+      "revId": "125fec8d8e62cb9ebe591679054b4fa43052a787",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
