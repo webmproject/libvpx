@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "3b1bb18e_e01ec77c",
+        "filename": "vpx_dsp/ppc/fdct32x32_vsx.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-06-26T19:47:53Z",
+      "side": 1,
+      "message": "Should these go in vpx_dsp/ppc/transform_common_vsx.h? or types_vsx.h?",
+      "range": {
+        "startLine": 17,
+        "startChar": 23,
+        "endLine": 17,
+        "endChar": 45
+      },
+      "revId": "125fec8d8e62cb9ebe591679054b4fa43052a787",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bc22289_579b2ecf",
+        "filename": "vpx_dsp/ppc/fdct32x32_vsx.c",
+        "patchSetId": 29
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-06-26T19:47:53Z",
+      "side": 1,
+      "message": "INLINE needs vpx_config.h",
+      "range": {
+        "startLine": 22,
+        "startChar": 7,
+        "endLine": 22,
+        "endChar": 13
+      },
+      "revId": "125fec8d8e62cb9ebe591679054b4fa43052a787",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "211346fb_e51ad3f3",
         "filename": "vpx_dsp/ppc/fdct32x32_vsx.c",
         "patchSetId": 29
