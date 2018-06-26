@@ -116,6 +116,24 @@
       "revId": "5f72f383dd01afb9bf519d4da48e2e280635e8e0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee97d6e9_f41f1a21",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-06-26T04:52:12Z",
+      "side": 1,
+      "message": "\u003e what do you mean \"treat these functions as overrides\"? declare them as virtual functions?\n\nNo, sorry I wasn\u0027t clear. I just meant these functions which call the default SetConfigSvcParam() should make their additions after the call to that function to avoid any side-effects rather than before.",
+      "parentUuid": "e28ac4b4_a9a6f3b2",
+      "revId": "5f72f383dd01afb9bf519d4da48e2e280635e8e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
