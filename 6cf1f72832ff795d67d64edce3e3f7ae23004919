@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c367453a_f0f8fb76",
+        "filename": "vpx_dsp/ppc/fdct32x32_vsx.c",
+        "patchSetId": 31
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-06-26T23:19:41Z",
+      "side": 1,
+      "message": "woops, ./vpx_config.h to avoid the style warning",
+      "range": {
+        "startLine": 13,
+        "startChar": 10,
+        "endLine": 13,
+        "endChar": 20
+      },
+      "revId": "6cf1f72832ff795d67d64edce3e3f7ae23004919",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
