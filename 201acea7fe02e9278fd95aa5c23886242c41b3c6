@@ -46,6 +46,47 @@
       "revId": "201acea7fe02e9278fd95aa5c23886242c41b3c6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "621ba020_420a60c2",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1253,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-06-27T22:02:33Z",
+      "side": 1,
+      "message": "Both the testing \"${tune_cflags}${tune_cpu}\" and the printing a failure message happen down below.",
+      "parentUuid": "86292dca_90778bbe",
+      "range": {
+        "startLine": 1253,
+        "startChar": 31,
+        "endLine": 1253,
+        "endChar": 32
+      },
+      "revId": "201acea7fe02e9278fd95aa5c23886242c41b3c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0deedca5_b541455f",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1458,
+      "author": {
+        "id": 1002404
+      },
+      "writtenOn": "2018-06-27T22:02:33Z",
+      "side": 1,
+      "message": "Here the test happens.",
+      "revId": "201acea7fe02e9278fd95aa5c23886242c41b3c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
