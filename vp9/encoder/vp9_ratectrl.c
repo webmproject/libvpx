@@ -1517,6 +1517,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   const VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
+  SVC *const svc = &cpi->svc;
   const int qindex = cm->base_qindex;
 
   // Update rate control heuristics
@@ -1605,10 +1606,9 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   // If second (long term) temporal reference is used for SVC,
   // update the golden frame counter, only for base temporal layer.
-  if (cpi->use_svc && cpi->svc.use_gf_temporal_ref_current_layer &&
-      cpi->svc.temporal_layer_id == 0) {
+  if (cpi->use_svc && svc->use_gf_temporal_ref_current_layer &&
+      svc->temporal_layer_id == 0) {
     int i = 0;
-    SVC *const svc = &cpi->svc;
     if (cpi->refresh_golden_frame)
       rc->frames_since_golden = 0;
     else
@@ -1642,19 +1642,31 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     if (cm->frame_type != KEY_FRAME &&
         (!cpi->use_svc ||
          (cpi->use_svc &&
-          !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame &&
-          cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1))) {
+          !svc->layer_context[svc->temporal_layer_id].is_key_frame &&
+          svc->spatial_layer_id == svc->number_spatial_layers - 1))) {
       compute_frame_low_motion(cpi);
       if (cpi->sf.use_altref_onepass) update_altref_usage(cpi);
+    }
+    // For SVC: set avg_frame_low_motion (only computed on top spatial layer)
+    // to all lower spatial layers.
+    if (cpi->use_svc &&
+        svc->spatial_layer_id == svc->number_spatial_layers - 1) {
+      int i;
+      for (i = 0; i < svc->number_spatial_layers - 1; ++i) {
+        const int layer = LAYER_IDS_TO_IDX(i, svc->temporal_layer_id,
+                                           svc->number_temporal_layers);
+        LAYER_CONTEXT *const lc = &svc->layer_context[layer];
+        RATE_CONTROL *const lrc = &lc->rc;
+        lrc->avg_frame_low_motion = rc->avg_frame_low_motion;
+      }
     }
     cpi->rc.last_frame_is_src_altref = cpi->rc.is_src_frame_alt_ref;
   }
   if (cm->frame_type != KEY_FRAME) rc->reset_high_source_sad = 0;
 
   rc->last_avg_frame_bandwidth = rc->avg_frame_bandwidth;
-  if (cpi->use_svc &&
-      cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)
-    cpi->svc.lower_layer_qindex = cm->base_qindex;
+  if (cpi->use_svc && svc->spatial_layer_id < svc->number_spatial_layers - 1)
+    svc->lower_layer_qindex = cm->base_qindex;
 }
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
