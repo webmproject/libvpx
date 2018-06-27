@@ -23,7 +23,7 @@ LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
                 third_party/libyuv/source/row_any.cc \
                 third_party/libyuv/source/row_common.cc \
                 third_party/libyuv/source/row_gcc.cc \
-                third_party/libyuv/source/row_mips.cc \
+                third_party/libyuv/source/row_msa.cc \
                 third_party/libyuv/source/row_neon.cc \
                 third_party/libyuv/source/row_neon64.cc \
                 third_party/libyuv/source/row_win.cc \
@@ -31,7 +31,7 @@ LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
                 third_party/libyuv/source/scale_any.cc \
                 third_party/libyuv/source/scale_common.cc \
                 third_party/libyuv/source/scale_gcc.cc \
-                third_party/libyuv/source/scale_mips.cc \
+                third_party/libyuv/source/scale_msa.cc \
                 third_party/libyuv/source/scale_neon.cc \
                 third_party/libyuv/source/scale_neon64.cc \
                 third_party/libyuv/source/scale_win.cc \
