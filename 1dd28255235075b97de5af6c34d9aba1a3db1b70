@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "656b3245_334e3729",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-27T17:13:34Z",
+      "side": 1,
+      "message": "use strlcat instead? (and for all following strncat)",
+      "range": {
+        "startLine": 254,
+        "startChar": 6,
+        "endLine": 254,
+        "endChar": 13
+      },
+      "revId": "1dd28255235075b97de5af6c34d9aba1a3db1b70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
