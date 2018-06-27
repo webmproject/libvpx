@@ -79,6 +79,7 @@ static const uint8x16_t vec_zeros_u8 = { 0, 0, 0, 0, 0, 0, 0, 0,
                                          0, 0, 0, 0, 0, 0, 0, 0 };
 static const int16x8_t vec_zeros_s16 = { 0, 0, 0, 0, 0, 0, 0, 0 };
 static const int16x8_t vec_ones_s16 = { 1, 1, 1, 1, 1, 1, 1, 1 };
+static const int16x8_t vec_twos_s16 = { 2, 2, 2, 2, 2, 2, 2, 2 };
 static const uint16x8_t vec_ones_u16 = { 1, 1, 1, 1, 1, 1, 1, 1 };
 static const uint32x4_t vec_ones_u32 = { 1, 1, 1, 1 };
 static const int32x4_t vec_zeros_s32 = { 0, 0, 0, 0 };
@@ -95,8 +96,9 @@ static const uint8x16_t vec_perm16 = { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
                                        0x08, 0x09, 0x0A, 0x0B, 0x0E, 0x0D,
                                        0x0E, 0x0F, 0x00, 0x01 };
 
-static const uint8x16_t vec_perm_merge = { 0x00, 0x01, 0x08, 0x09, 0x02, 0x03,
-                                           0x0A, 0x0B, 0x04, 0x05, 0x0C, 0x0D,
-                                           0x06, 0x07, 0x0E, 0x0F };
+static const uint8x16_t vec_perm_odd_even_pack = { 0x00, 0x01, 0x10, 0x11,
+                                                   0x04, 0x05, 0x14, 0x15,
+                                                   0x08, 0x09, 0x18, 0x19,
+                                                   0x0C, 0x0D, 0x1C, 0x1D };
 
 #endif  // VPX_DSP_PPC_TYPES_VSX_H_

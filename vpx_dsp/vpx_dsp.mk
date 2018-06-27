@@ -207,6 +207,7 @@ DSP_SRCS-$(HAVE_NEON)   += arm/fwd_txfm_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.h
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_dct32x32_msa.c
+DSP_SRCS-$(HAVE_VSX)    += ppc/fdct32x32_vsx.c
 endif  # CONFIG_VP9_ENCODER
 
 # inverse transform
@@ -392,6 +393,7 @@ DSP_SRCS-$(HAVE_NEON) += arm/vpx_convolve8_neon.h
 
 # PPC VSX utilities
 DSP_SRCS-$(HAVE_VSX)  += ppc/types_vsx.h
+DSP_SRCS-$(HAVE_VSX)  += ppc/txfm_common_vsx.h
 DSP_SRCS-$(HAVE_VSX)  += ppc/transpose_vsx.h
 DSP_SRCS-$(HAVE_VSX)  += ppc/bitdepth_conversion_vsx.h
 
