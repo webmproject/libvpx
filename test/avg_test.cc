@@ -33,7 +33,9 @@ namespace {
 template <typename Pixel>
 class AverageTestBase : public ::testing::Test {
  public:
-  AverageTestBase(int width, int height) : width_(width), height_(height) {}
+  AverageTestBase(int width, int height)
+      : width_(width), height_(height), source_data_(NULL), source_stride_(0),
+        bit_depth_(8) {}
 
   virtual void TearDown() {
     vpx_free(source_data_);
