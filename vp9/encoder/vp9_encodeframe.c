@@ -3662,33 +3662,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         best_rdc = this_rdc;
         if (bsize >= BLOCK_8X8) pc_tree->partitioning = PARTITION_NONE;
 
-        if (!cpi->sf.ml_partition_search_early_termination) {
-          // If all y, u, v transform blocks in this partition are skippable,
-          // and the dist & rate are within the thresholds, the partition search
-          // is terminated for current branch of the partition search tree.
-          if (!x->e_mbd.lossless && ctx->skippable) {
-            int use_ml_based_breakout =
-                cpi->sf.use_ml_partition_search_breakout &&
-                cm->base_qindex >= 100;
-#if CONFIG_VP9_HIGHBITDEPTH
-            if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-              use_ml_based_breakout = 0;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-            if (use_ml_based_breakout) {
-              if (ml_predict_breakout(cpi, bsize, x, &this_rdc)) {
-                do_split = 0;
-                do_rect = 0;
-              }
-            } else {
-              if ((best_rdc.dist < (dist_breakout_thr >> 2)) ||
-                  (best_rdc.dist < dist_breakout_thr &&
-                   best_rdc.rate < rate_breakout_thr)) {
-                do_split = 0;
-                do_rect = 0;
-              }
-            }
-          }
-        } else {
+        if (cpi->sf.ml_partition_search_early_termination) {
           // Currently, the machine-learning based partition search early
           // termination is only used while bsize is 16x16, 32x32 or 64x64,
           // VPXMIN(cm->width, cm->height) >= 480, and speed = 0.
@@ -3698,6 +3672,31 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
             if (ml_pruning_partition(cm, xd, ctx, mi_row, mi_col, bsize)) {
               do_split = 0;
               do_rect = 0;
+            }
+          }
+        }
+
+        if ((do_split || do_rect) && !x->e_mbd.lossless && ctx->skippable) {
+          int use_ml_based_breakout =
+              cpi->sf.use_ml_partition_search_breakout &&
+              cm->base_qindex >= 100;
+#if CONFIG_VP9_HIGHBITDEPTH
+          if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+            use_ml_based_breakout = 0;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+          if (use_ml_based_breakout) {
+            if (ml_predict_breakout(cpi, bsize, x, &this_rdc)) {
+              do_split = 0;
+              do_rect = 0;
+            }
+          } else {
+            if (!cpi->sf.ml_partition_search_early_termination) {
+              if ((best_rdc.dist < (dist_breakout_thr >> 2)) ||
+                  (best_rdc.dist < dist_breakout_thr &&
+                   best_rdc.rate < rate_breakout_thr)) {
+                do_split = 0;
+                do_rect = 0;
+              }
             }
           }
         }
