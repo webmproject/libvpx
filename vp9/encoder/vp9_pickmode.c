@@ -1541,8 +1541,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
   if (!cpi->use_svc ||
       (svc->use_gf_temporal_ref_current_layer &&
-       !svc->layer_context[svc->temporal_layer_id].is_key_frame))
+       !svc->layer_context[svc->temporal_layer_id].is_key_frame)) {
     gf_temporal_ref = 1;
+    thresh_svc_skip_golden = 500;
+  }
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
   memset(&mode_checked[0][0], 0, MB_MODE_COUNT * MAX_REF_FRAMES);
@@ -1796,7 +1798,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
     // For SVC, skip the golden (spatial) reference search if sse of zeromv_last
     // is below threshold.
-    if (cpi->use_svc && ref_frame == GOLDEN_FRAME && !gf_temporal_ref &&
+    if (cpi->use_svc && ref_frame == GOLDEN_FRAME &&
         sse_zeromv_normalized < thresh_svc_skip_golden)
       continue;
 
