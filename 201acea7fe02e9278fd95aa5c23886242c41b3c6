@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "f8a004a8_3cca263a",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1253,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-06-27T22:11:48Z",
+      "side": 1,
+      "message": "Geez, who designed it that way?! What a mess.\n\nIn that case you can set tune_cflags unconditionally here. This does have the benefit of hinting at supported tune_cpu options.",
+      "parentUuid": "621ba020_420a60c2",
+      "range": {
+        "startLine": 1253,
+        "startChar": 31,
+        "endLine": 1253,
+        "endChar": 32
+      },
+      "revId": "201acea7fe02e9278fd95aa5c23886242c41b3c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0deedca5_b541455f",
         "filename": "build/make/configure.sh",
         "patchSetId": 1
