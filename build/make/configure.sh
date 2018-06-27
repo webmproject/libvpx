@@ -1247,6 +1247,13 @@ EOF
       link_with_cc=gcc
       setup_gnu_toolchain
       check_gcc_machine_option "vsx"
+      if [ -n "${tune_cpu}" ]; then
+        case ${tune_cpu} in
+          power?)
+            tune_cflags="-mcpu="
+            ;;
+        esac
+      fi
       ;;
     x86*)
       case  ${tgt_os} in
