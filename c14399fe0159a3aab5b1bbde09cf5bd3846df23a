@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ee9e783_6335060d",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 53
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-28T23:42:22Z",
+      "side": 1,
+      "message": "do you need to pass (#temporal_layers) also to SetConfig?",
+      "range": {
+        "startLine": 46,
+        "startChar": 4,
+        "endLine": 46,
+        "endChar": 13
+      },
+      "revId": "c14399fe0159a3aab5b1bbde09cf5bd3846df23a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
