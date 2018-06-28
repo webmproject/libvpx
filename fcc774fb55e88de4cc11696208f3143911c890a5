@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "36f65f69_cf1bbee6",
+        "filename": "third_party/libyuv/include/libyuv/row.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-06-28T20:20:08Z",
+      "side": 1,
+      "message": "Ack, will disable it here instead",
+      "parentUuid": "98e443aa_53053e6a",
+      "range": {
+        "startLine": 61,
+        "startChar": 68,
+        "endLine": 62,
+        "endChar": 0
+      },
+      "revId": "fcc774fb55e88de4cc11696208f3143911c890a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fc6ac82c_27de52c3",
         "filename": "third_party/libyuv/source/row_gcc.cc",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "fcc774fb55e88de4cc11696208f3143911c890a5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37e09b8b_2d352143",
+        "filename": "third_party/libyuv/source/row_gcc.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-06-28T20:20:08Z",
+      "side": 1,
+      "message": "Ack, was just confused about the Jenkins failures.",
+      "parentUuid": "fc6ac82c_27de52c3",
+      "range": {
+        "startLine": 557,
+        "startChar": 14,
+        "endLine": 557,
+        "endChar": 43
+      },
+      "revId": "fcc774fb55e88de4cc11696208f3143911c890a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
