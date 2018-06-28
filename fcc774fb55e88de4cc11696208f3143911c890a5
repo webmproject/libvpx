@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "98e443aa_53053e6a",
+        "filename": "third_party/libyuv/include/libyuv/row.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1115898
+      },
+      "writtenOn": "2018-06-28T18:08:57Z",
+      "side": 1,
+      "message": "Note that if you this ifdef is likely going wrong.\nIOS simulator does not support AVX512 and the __clang_major__ is misleading... they set it to xcode version?\nperhaps the is a __has_feature() alternative",
+      "range": {
+        "startLine": 61,
+        "startChar": 68,
+        "endLine": 62,
+        "endChar": 0
+      },
+      "revId": "fcc774fb55e88de4cc11696208f3143911c890a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "fc6ac82c_27de52c3",
         "filename": "third_party/libyuv/source/row_gcc.cc",
         "patchSetId": 2
