@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc6ac82c_27de52c3",
+        "filename": "third_party/libyuv/source/row_gcc.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 1115898
+      },
+      "writtenOn": "2018-06-28T18:05:50Z",
+      "side": 1,
+      "message": "row.h change is the correct thing to do.  That will disable the calling code and any variations as well.  You shouldnt need to change the row_gcc.cc since it has the ifdef.",
+      "range": {
+        "startLine": 557,
+        "startChar": 14,
+        "endLine": 557,
+        "endChar": 43
+      },
+      "revId": "fcc774fb55e88de4cc11696208f3143911c890a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
