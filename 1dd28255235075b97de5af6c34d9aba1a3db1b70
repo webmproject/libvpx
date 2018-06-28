@@ -22,6 +22,30 @@
       "revId": "1dd28255235075b97de5af6c34d9aba1a3db1b70",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "42d10e6b_272c07fa",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1262464
+      },
+      "writtenOn": "2018-06-28T09:12:13Z",
+      "side": 1,
+      "message": "strlcat is not a standard function. Using it will add dependency on libbsd. I don\u0027t think we want that.",
+      "parentUuid": "656b3245_334e3729",
+      "range": {
+        "startLine": 254,
+        "startChar": 6,
+        "endLine": 254,
+        "endChar": 13
+      },
+      "revId": "1dd28255235075b97de5af6c34d9aba1a3db1b70",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
