@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "db3ec863_0dcf3c48",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "do you mean #spatial layers? the difference between these two functions is the number of spatial layers.",
+      "parentUuid": "1e5111ab_e41419df",
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a60cf33f_106309e3",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 51
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "42441c77_0150a07c",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a60cf33f_106309e3",
+      "range": {
+        "startLine": 82,
+        "startChar": 24,
+        "endLine": 82,
+        "endChar": 25
+      },
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df7b7e86_ac945118",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 51
@@ -56,6 +98,24 @@
       "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c1e1a28_178be4bd",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df7b7e86_ac945118",
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -76,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "e6efd919_b1a5172d",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39ee728a_f612ef18",
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ce602ac7_d8c96795",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 51
@@ -90,6 +168,24 @@
       "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3cafdf94_37564ba6",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ce602ac7_d8c96795",
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -110,6 +206,24 @@
     },
     {
       "key": {
+        "uuid": "ee580bef_253e9d3a",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c352799_a47563d3",
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08e4b4ec_9d60dc3b",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 51
@@ -127,6 +241,24 @@
     },
     {
       "key": {
+        "uuid": "475b624e_a4afb648",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08e4b4ec_9d60dc3b",
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56891c2a_8a5c1c1f",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 51
@@ -138,6 +270,24 @@
       "writtenOn": "2018-06-28T22:18:17Z",
       "side": 1,
       "message": "20?",
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0c35454_dbe7e14f",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "As far as I understand, we must start decoding from the very beginning because HD and VGA have temporal prediction from previous frames.",
+      "parentUuid": "56891c2a_8a5c1c1f",
       "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
@@ -161,6 +311,24 @@
     },
     {
       "key": {
+        "uuid": "cc1b8f56_f7bc0834",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7cdc5e9d_8623aa4d",
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8e5ba14_72f8a3f5",
         "filename": "test/svc_end_to_end_test.cc",
         "patchSetId": 51
@@ -172,6 +340,30 @@
       "writtenOn": "2018-06-28T22:18:17Z",
       "side": 1,
       "message": "20?",
+      "range": {
+        "startLine": 297,
+        "startChar": 24,
+        "endLine": 297,
+        "endChar": 25
+      },
+      "revId": "ac60ebf1b3bcdfd5249bd8a924313f2b8bc1e247",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "97a476e6_27c7fe5b",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 51
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-28T22:49:02Z",
+      "side": 1,
+      "message": "Same here. HD has temporal prediction from previous frames.",
+      "parentUuid": "c8e5ba14_72f8a3f5",
       "range": {
         "startLine": 297,
         "startChar": 24,
