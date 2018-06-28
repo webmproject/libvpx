@@ -495,7 +495,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     enc_cfg->rc_buf_initial_sz = 500;
     enc_cfg->rc_buf_optimal_sz = 600;
     enc_cfg->rc_buf_sz = 1000;
-    enc_cfg->rc_dropframe_thresh = 0;
   }
 
   if (enc_cfg->g_error_resilient == 0 && si->use_multiple_frame_contexts == 0)
