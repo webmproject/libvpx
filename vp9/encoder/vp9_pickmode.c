@@ -1543,7 +1543,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       (svc->use_gf_temporal_ref_current_layer &&
        !svc->layer_context[svc->temporal_layer_id].is_key_frame)) {
     gf_temporal_ref = 1;
-    thresh_svc_skip_golden = 500;
+    if (cpi->rc.avg_frame_low_motion > 70)
+      thresh_svc_skip_golden = 500;
+    else
+      thresh_svc_skip_golden = 0;
   }
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
