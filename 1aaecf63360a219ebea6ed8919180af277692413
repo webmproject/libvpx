@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a222f157_fb219bec",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 55
+      },
+      "lineNbr": 1770,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-29T02:12:36Z",
+      "side": 1,
+      "message": "this is for the overlap/copy frame: we only want to use ZEROMV on LAST reference for every block",
+      "parentUuid": "54a6c300_07edeb66",
+      "range": {
+        "startLine": 1770,
+        "startChar": 37,
+        "endLine": 1770,
+        "endChar": 79
+      },
+      "revId": "1aaecf63360a219ebea6ed8919180af277692413",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1d19b334_23deb0bf",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 55
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5d16e27e_dac9d10a",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 55
+      },
+      "lineNbr": 1892,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-29T02:12:36Z",
+      "side": 1,
+      "message": "want to have lowest fb_idx applied to last, next-to-lowest to golden, etc.",
+      "parentUuid": "1d19b334_23deb0bf",
+      "range": {
+        "startLine": 1892,
+        "startChar": 36,
+        "endLine": 1892,
+        "endChar": 41
+      },
+      "revId": "1aaecf63360a219ebea6ed8919180af277692413",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0fb0ee74_e2285dda",
         "filename": "vp9/encoder/vp9_svc_layercontext.h",
         "patchSetId": 55
@@ -59,6 +107,30 @@
       "writtenOn": "2018-06-29T01:17:51Z",
       "side": 1,
       "message": "this func is not used?",
+      "range": {
+        "startLine": 233,
+        "startChar": 4,
+        "endLine": 233,
+        "endChar": 36
+      },
+      "revId": "1aaecf63360a219ebea6ed8919180af277692413",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e98e5a6_5d5e130d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.h",
+        "patchSetId": 55
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-29T02:12:36Z",
+      "side": 1,
+      "message": "removed, done.",
+      "parentUuid": "0fb0ee74_e2285dda",
       "range": {
         "startLine": 233,
         "startChar": 4,
