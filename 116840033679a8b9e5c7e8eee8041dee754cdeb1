@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "68a42181_1eb82bca",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-29T02:04:58Z",
+      "side": 1,
+      "message": "Do we have coverage for denoiser and layer-sync? if not, we should add another layer-sync test with denoiser enabled.",
+      "revId": "116840033679a8b9e5c7e8eee8041dee754cdeb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bfee243e_9020aeb8",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-29T02:04:58Z",
+      "side": 1,
+      "message": "I think in the current/open intra-only patch you can add the change:\n(frame_type \u003d\u003d KEY_FRAME)  --\u003e frame_is_intra_only(cm)\n\nFor this current patch is it enough to just add the additional check?\n... || svc-\u003espatial_layer_sync[svc-\u003espatial_layer_id]...",
+      "revId": "116840033679a8b9e5c7e8eee8041dee754cdeb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f4564c6_53c66cf8",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3042,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-29T02:04:58Z",
+      "side": 1,
+      "message": "i think you can leave this as is:svc_base_is_key \u003d lc-\u003eis_key_frame, see the change in denoiser.c",
+      "revId": "116840033679a8b9e5c7e8eee8041dee754cdeb1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
