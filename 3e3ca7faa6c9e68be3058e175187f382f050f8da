@@ -46,6 +46,30 @@
       "revId": "3e3ca7faa6c9e68be3058e175187f382f050f8da",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d3bb5c0a_80451c4e",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1970,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2018-06-29T20:19:30Z",
+      "side": 1,
+      "message": "Seems we need one more intermediate step to change this order. I temporarily revert the order back in https://chromium-review.googlesource.com/c/webm/libvpx/+/1115211\n\nIt should be back back to this change again next..",
+      "parentUuid": "dcc44dcf_f48b1169",
+      "range": {
+        "startLine": 1970,
+        "startChar": 2,
+        "endLine": 1970,
+        "endChar": 26
+      },
+      "revId": "3e3ca7faa6c9e68be3058e175187f382f050f8da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
