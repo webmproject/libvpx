@@ -593,7 +593,8 @@ void vp9_cyclic_refresh_reset_resize(VP9_COMP *const cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   memset(cr->map, 0, cm->mi_rows * cm->mi_cols);
-  memset(cr->last_coded_q_map, MAXQ, cm->mi_rows * cm->mi_cols);
+  memset(cr->last_coded_q_map, MAXQ,
+         cm->mi_rows * cm->mi_cols * sizeof(*cr->last_coded_q_map));
   cr->sb_index = 0;
   cpi->refresh_golden_frame = 1;
   cpi->refresh_alt_ref_frame = 1;
