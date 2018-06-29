@@ -1967,13 +1967,14 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
     vp9_caq_select_segment(cpi, x, bsize, mi_row, mi_col, rd_cost->rate);
   }
 
-  rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
-
   x->rdmult = orig_rdmult;
 
   // TODO(jingning) The rate-distortion optimization flow needs to be
   // refactored to provide proper exit/return handle.
-  if (rd_cost->rate == INT_MAX) rd_cost->rdcost = INT64_MAX;
+  if (rd_cost->rate == INT_MAX)
+    rd_cost->rdcost = INT64_MAX;
+  else
+    rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
 
   ctx->rate = rd_cost->rate;
   ctx->dist = rd_cost->dist;
