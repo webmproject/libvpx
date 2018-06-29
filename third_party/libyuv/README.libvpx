@@ -13,6 +13,7 @@ example which down-samples the original input video (f.g. 1280x720) a number of
 times in order to encode multiple resolution bit streams.
 
 Local Modifications:
+Disable ARGBToRGB24Row_AVX512VBMI due to build failure on Mac.
 rm libyuv/include/libyuv.h libyuv/include/libyuv/compare_row.h
 mv libyuv/include tmp/
 mv libyuv/source tmp/

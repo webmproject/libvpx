@@ -57,11 +57,13 @@ extern "C" {
 
 // clang >= 6.0.0 required for AVX512.
 // TODO(fbarchard): fix xcode 9 ios b/789.
+#if 0  // Build fails in libvpx on Mac
 #if defined(__clang__) && (defined(__x86_64__) || defined(__i386__))
 #if (__clang_major__ >= 7) && !defined(__APPLE_EMBEDDED_SIMULATOR__)
 #define CLANG_HAS_AVX512 1
 #endif  // clang >= 7
 #endif  // __clang__
+#endif  // 0
 
 // Visual C 2012 required for AVX2.
 #if defined(_M_IX86) && !defined(__clang__) && defined(_MSC_VER) && \
