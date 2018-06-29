@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7fc3da9a_25263bf5",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 54
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-06-29T00:04:49Z",
+      "side": 1,
+      "message": "else if (num_temporal_layer \u003d\u003d 2) {\n  cfg_.ts_rate_decimator[0] \u003d 2;\n  cfg_.ts_rate_decimator[1] \u003d 1;\n  cfg_.temporal_layering_mode \u003d 2;\n} else if (num_temporal_layer \u003d\u003d 1) {\n  cfg_.ts_rate_decimator[0] \u003d 1;\n  cfg_.temporal_layering_mode \u003d 1;\n}",
+      "revId": "55fcdc50d42c5212e08222f1f8865cdcee370ffe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
