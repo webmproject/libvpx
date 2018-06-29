@@ -16,6 +16,24 @@
       "revId": "55fcdc50d42c5212e08222f1f8865cdcee370ffe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "819d50c6_9ea767e6",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 54
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-06-29T00:24:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7fc3da9a_25263bf5",
+      "revId": "55fcdc50d42c5212e08222f1f8865cdcee370ffe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
