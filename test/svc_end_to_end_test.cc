@@ -28,7 +28,8 @@ class SyncFrameOnePassCbrSvc : public ::svc_test::OnePassCbrSvc,
       : OnePassCbrSvc(GET_PARAM(0)), current_video_frame_(0),
         frame_to_start_decode_(0), frame_to_sync_(0), mismatch_nframes_(0),
         num_nonref_frames_(0), inter_layer_pred_mode_(GET_PARAM(1)),
-        decode_to_layer_before_sync_(-1), decode_to_layer_after_sync_(-1) {
+        decode_to_layer_before_sync_(-1), decode_to_layer_after_sync_(-1),
+        denoiser_on_(0) {
     SetMode(::libvpx_test::kRealTime);
     memset(&svc_layer_sync_, 0, sizeof(svc_layer_sync_));
   }
@@ -75,8 +76,10 @@ class SyncFrameOnePassCbrSvc : public ::svc_test::OnePassCbrSvc,
                                   ::libvpx_test::Encoder *encoder) {
     current_video_frame_ = video->frame();
     PreEncodeFrameHookSetup(video, encoder);
-    if (video->frame() == 0)
+    if (video->frame() == 0) {
       encoder->Control(VP9E_SET_SVC_INTER_LAYER_PRED, inter_layer_pred_mode_);
+      encoder->Control(VP9E_SET_NOISE_SENSITIVITY, denoiser_on_);
+    }
     if (video->frame() == frame_to_sync_) {
       encoder->Control(VP9E_SET_SVC_SPATIAL_LAYER_SYNC, &svc_layer_sync_);
     }
@@ -123,6 +126,7 @@ class SyncFrameOnePassCbrSvc : public ::svc_test::OnePassCbrSvc,
   int inter_layer_pred_mode_;
   int decode_to_layer_before_sync_;
   int decode_to_layer_after_sync_;
+  int denoiser_on_;
   vpx_svc_spatial_layer_sync_t svc_layer_sync_;
 
  private:
@@ -253,6 +257,36 @@ TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc3SL3TLSyncFrameVGAHD) {
   EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
 #endif
 }
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+// Test for sync layer for 1 pass CBR SVC: 2 spatial layers and
+// 3 temporal layers. Decoding QVGA before sync frame and decode up to
+// VGA on and after sync.
+TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc2SL3TLSyncFrameVGADenoise) {
+  Set2SpatialLayerConfig();
+  frame_to_start_decode_ = 0;
+  frame_to_sync_ = 100;
+  decode_to_layer_before_sync_ = 0;
+  decode_to_layer_after_sync_ = 1;
+
+  denoiser_on_ = 1;
+  // Set up svc layer sync structure.
+  svc_layer_sync_.base_layer_intra_only = 0;
+  svc_layer_sync_.spatial_layer_sync[0] = 0;
+  svc_layer_sync_.spatial_layer_sync[1] = 1;
+
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  cfg_.rc_target_bitrate = 400;
+  AssignLayerBitrates();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+#if CONFIG_VP9_DECODER
+  // The non-reference frames are expected to be mismatched frames as the
+  // encoder will avoid loopfilter on these frames.
+  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+#endif
+}
+#endif
 
 VP9_INSTANTIATE_TEST_CASE(SyncFrameOnePassCbrSvc, ::testing::Range(0, 3));
 
