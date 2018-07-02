@@ -5438,7 +5438,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
     if (sf->partition_search_type == SOURCE_VAR_BASED_PARTITION)
       source_var_based_partition_search_method(cpi);
-  } else if (cpi->twopass.gf_group.index) {
+  } else if (cpi->twopass.gf_group.index && cpi->sf.enable_tpl_model) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[cpi->twopass.gf_group.index];
     TplDepStats *tpl_stats = tpl_frame->tpl_stats_ptr;
 
