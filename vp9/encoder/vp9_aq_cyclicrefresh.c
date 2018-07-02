@@ -503,6 +503,14 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
                    num8x8bl;
   if (weight_segment_target < 7 * weight_segment / 8)
     weight_segment = weight_segment_target;
+  // For screen-content: don't include target for the weight segment, since
+  // all for all flat areas the segment is reset, so its more accurate to
+  // just use the previous actual number of seg blocks for the weight.
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN)
+    weight_segment =
+        (double)((cr->actual_num_seg1_blocks + cr->actual_num_seg2_blocks) >>
+                 1) /
+        num8x8bl;
   cr->weight_segment = weight_segment;
 }
 
