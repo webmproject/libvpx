@@ -180,6 +180,8 @@ struct macroblock {
 
   int sb_pickmode_part;
 
+  int zero_temp_sad_source;
+
   // For each superblock: saves the content value (e.g., low/high sad/sumdiff)
   // based on source sad, prior to encoding the frame.
   uint8_t content_state_sb;

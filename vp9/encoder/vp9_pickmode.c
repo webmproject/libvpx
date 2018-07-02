@@ -350,7 +350,7 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
   struct macroblockd_plane *const pd = &xd->plane[0];
   const uint32_t dc_quant = pd->dequant[0];
   const uint32_t ac_quant = pd->dequant[1];
-  const int64_t dc_thr = dc_quant * dc_quant >> 6;
+  int64_t dc_thr = dc_quant * dc_quant >> 6;
   int64_t ac_thr = ac_quant * ac_quant >> 6;
   unsigned int var;
   int sum;
@@ -413,6 +413,10 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
   assert(tx_size >= TX_8X8);
   xd->mi[0]->tx_size = tx_size;
+
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && x->zero_temp_sad_source &&
+      x->source_variance == 0)
+    dc_thr = dc_thr << 1;
 
   // Evaluate if the partition block is a skippable block in Y plane.
   {
@@ -1605,6 +1609,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       x->source_variance =
           vp9_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
+
+    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && mi->segment_id > 0 &&
+        x->zero_temp_sad_source && x->source_variance == 0) {
+      mi->segment_id = 0;
+      vp9_init_plane_quantizers(cpi, x);
+    }
   }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING

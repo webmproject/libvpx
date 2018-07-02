@@ -1183,6 +1183,7 @@ static uint64_t avg_source_sad(VP9_COMP *cpi, MACROBLOCK *x, int shift,
       cpi->content_state_sb_fd[sb_offset] = 0;
     }
   }
+  if (tmp_sad == 0) x->zero_temp_sad_source = 1;
   return tmp_sad;
 }
 
@@ -4950,6 +4951,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     x->skip_low_source_sad = 0;
     x->lowvar_highsumdiff = 0;
     x->content_state_sb = 0;
+    x->zero_temp_sad_source = 0;
     x->sb_use_mv_part = 0;
     x->sb_mvcol_part = 0;
     x->sb_mvrow_part = 0;
