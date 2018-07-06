@@ -116,6 +116,12 @@ struct macroblock {
   int *nmvsadcost_hp[2];
   int **mvsadcost;
 
+  // sharpness is used to disable skip mode and change rd_mult
+  int sharpness;
+
+  // aq mode is used to adjust rd based on segment.
+  int adjust_rdmult_by_segment;
+
   // These define limits to motion vector components to prevent them
   // from extending outside the UMV borders
   MvLimits mv_limits;

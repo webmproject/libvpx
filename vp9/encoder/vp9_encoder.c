@@ -1876,6 +1876,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   int last_w = cpi->oxcf.width;
   int last_h = cpi->oxcf.height;
 
+  vp9_init_quantizer(cpi);
   if (cm->profile != oxcf->profile) cm->profile = oxcf->profile;
   cm->bit_depth = oxcf->bit_depth;
   cm->color_space = oxcf->color_space;

@@ -5475,6 +5475,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   x->optimize = sf->optimize_coefficients == 1 && cpi->oxcf.pass != 1;
 #endif
   if (xd->lossless) x->optimize = 0;
+  x->sharpness = cpi->oxcf.sharpness;
+  x->adjust_rdmult_by_segment = (cpi->oxcf.aq_mode == VARIANCE_AQ);
 
   cm->tx_mode = select_tx_mode(cpi, xd);
 
