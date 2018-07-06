@@ -512,6 +512,9 @@ typedef struct VP9_COMP {
   int gld_fb_idx;
   int alt_fb_idx;
 
+  int ref_fb_idx[REF_FRAMES];
+  int last_show_frame_buf_idx;  // last show frame buffer index
+
   int refresh_last_frame;
   int refresh_golden_frame;
   int refresh_bwd_ref_frame;
@@ -551,7 +554,7 @@ typedef struct VP9_COMP {
   RATE_CONTROL rc;
   double framerate;
 
-  int interp_filter_selected[MAX_REF_FRAMES][SWITCHABLE];
+  int interp_filter_selected[REF_FRAMES][SWITCHABLE];
 
   struct vpx_codec_pkt_list *output_pkt_list;
 
@@ -758,6 +761,7 @@ typedef struct VP9_COMP {
 
   // Parameters on multi-layer ALTREFs
   int num_extra_arfs;
+  int arf_map[MAX_EXT_ARFS + 1];
   int arf_pos_in_gf[MAX_EXT_ARFS + 1];
   int arf_pos_for_ovrly[MAX_EXT_ARFS + 1];
   int extra_arf_allowed;
