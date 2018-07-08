@@ -23,17 +23,13 @@ static const uint8x16_t st8_perm = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05,
                                      0x06, 0x07, 0x18, 0x19, 0x1A, 0x1B,
                                      0x1C, 0x1D, 0x1E, 0x1F };
 
-static INLINE uint8x16_t vec_abd_s8(uint8x16_t a, uint8x16_t b) {
-  return vec_sub(vec_max(a, b), vec_min(a, b));
-}
-
 static INLINE uint8x16_t apply_filter(uint8x16_t ctx[4], uint8x16_t v,
                                       uint8x16_t filter) {
   const uint8x16_t k1 = vec_avg(ctx[0], ctx[1]);
   const uint8x16_t k2 = vec_avg(ctx[3], ctx[2]);
   const uint8x16_t k3 = vec_avg(k1, k2);
-  const uint8x16_t f_a = vec_max(vec_abd_s8(v, ctx[0]), vec_abd_s8(v, ctx[1]));
-  const uint8x16_t f_b = vec_max(vec_abd_s8(v, ctx[2]), vec_abd_s8(v, ctx[3]));
+  const uint8x16_t f_a = vec_max(vec_absd(v, ctx[0]), vec_absd(v, ctx[1]));
+  const uint8x16_t f_b = vec_max(vec_absd(v, ctx[2]), vec_absd(v, ctx[3]));
   const bool8x16_t mask = vec_cmplt(vec_max(f_a, f_b), filter);
   return vec_sel(v, vec_avg(k3, v), mask);
 }

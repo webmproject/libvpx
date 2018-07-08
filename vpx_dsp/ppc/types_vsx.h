@@ -75,6 +75,10 @@ static INLINE uint8x16_t read4x2(const uint8_t *a, int stride) {
   return (uint8x16_t)vec_mergeh(a0, a1);
 }
 
+#ifndef __POWER9_VECTOR__
+#define vec_absd(a, b) vec_sub(vec_max(a, b), vec_min(a, b))
+#endif
+
 static const uint8x16_t vec_zeros_u8 = { 0, 0, 0, 0, 0, 0, 0, 0,
                                          0, 0, 0, 0, 0, 0, 0, 0 };
 static const int16x8_t vec_zeros_s16 = { 0, 0, 0, 0, 0, 0, 0, 0 };
