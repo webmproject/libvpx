@@ -17,10 +17,10 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
 
-#define PROCESS16(offset)                                \
-  v_a = vec_vsx_ld(offset, a);                           \
-  v_b = vec_vsx_ld(offset, b);                           \
-  v_abs = vec_sub(vec_max(v_a, v_b), vec_min(v_a, v_b)); \
+#define PROCESS16(offset)      \
+  v_a = vec_vsx_ld(offset, a); \
+  v_b = vec_vsx_ld(offset, b); \
+  v_abs = vec_absd(v_a, v_b);  \
   v_sad = vec_sum4s(v_abs, v_sad);
 
 #define SAD8(height)                                                     \
