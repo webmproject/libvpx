@@ -110,6 +110,18 @@ class SyncFrameOnePassCbrSvc : public ::svc_test::OnePassCbrSvc,
         pkt->data.frame.spatial_layer_encoded[number_spatial_layers_ - 1] &&
         current_video_frame_ >= frame_to_sync_)
       num_nonref_frames_++;
+
+    if (intra_only_test_ && current_video_frame_ == frame_to_sync_) {
+      // Intra-only frame is only generated for spatial layers > 1 and <= 3,
+      // among other conditions (see constraint in set_intra_only_frame(). If
+      // intra-only is no allowed then encoder will insert key frame instead.
+      const bool key_frame =
+          (pkt->data.frame.flags & VPX_FRAME_IS_KEY) ? true : false;
+      if (number_spatial_layers_ == 1 || number_spatial_layers_ > 3)
+        ASSERT_TRUE(key_frame);
+      else
+        ASSERT_FALSE(key_frame);
+    }
   }
 
   virtual void MismatchHook(const vpx_image_t * /*img1*/,
@@ -345,6 +357,31 @@ TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc3SL3TLSyncFrameIntraOnlyVGA) {
   svc_layer_sync_.spatial_layer_sync[0] = 1;
   svc_layer_sync_.spatial_layer_sync[1] = 1;
   svc_layer_sync_.spatial_layer_sync[2] = 0;
+
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
+  cfg_.rc_target_bitrate = 600;
+  AssignLayerBitrates();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+#if CONFIG_VP9_DECODER
+  // The non-reference frames are expected to be mismatched frames as the
+  // encoder will avoid loopfilter on these frames.
+  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+#endif
+}
+
+// Start decoding from sync frame, insert intra-only on base/qvga layer. Decode
+// all layers. For 1 spatial layer, it inserts a key frame.
+TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc1SL3TLSyncFrameIntraOnlyQVGA) {
+  SetSvcConfig(1, 3);
+  frame_to_start_decode_ = 20;
+  frame_to_sync_ = 20;
+  decode_to_layer_before_sync_ = 0;
+  decode_to_layer_after_sync_ = 0;
+  intra_only_test_ = true;
+
+  // Set up svc layer sync structure.
+  svc_layer_sync_.base_layer_intra_only = 1;
+  svc_layer_sync_.spatial_layer_sync[0] = 1;
 
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   cfg_.rc_target_bitrate = 600;
