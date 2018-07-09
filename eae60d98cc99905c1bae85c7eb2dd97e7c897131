@@ -22,6 +22,30 @@
       "revId": "eae60d98cc99905c1bae85c7eb2dd97e7c897131",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7ef73daa_532aba37",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-07-09T20:00:17Z",
+      "side": 1,
+      "message": "\u003e It looks like this will only work for raw files which will output 1 frame. It would be good to either document this or pass in the number of expected frames.\n\nvpxdec_vp9_webm_less_than_50_frames has the same structure, single file test with an expectation. Really all the tests are tuned to one input file.",
+      "parentUuid": "9e6caa64_97b25831",
+      "range": {
+        "startLine": 115,
+        "startChar": 28,
+        "endLine": 115,
+        "endChar": 29
+      },
+      "revId": "eae60d98cc99905c1bae85c7eb2dd97e7c897131",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
