@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e99bfbb_f0568cf6",
+        "filename": "vpx_dsp/arm/vpx_convolve_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-07-10T13:27:40Z",
+      "side": 1,
+      "message": "These are really repetitive. Can you make this a macro where you pass in type1/type2 and generate the rest?",
+      "range": {
+        "startLine": 68,
+        "startChar": 5,
+        "endLine": 68,
+        "endChar": 39
+      },
+      "revId": "3ae8da2cef7cf077886eb81b8f6a08ce630468c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "708f360d_bafe751c",
+        "filename": "vpx_dsp/arm/vpx_convolve_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 546,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-07-10T13:27:40Z",
+      "side": 1,
+      "message": "what is the difference between type1 and type2? Both appear to be calling vpx_convolve8_vert_neon with the same arguments?",
+      "range": {
+        "startLine": 546,
+        "startChar": 2,
+        "endLine": 546,
+        "endChar": 25
+      },
+      "revId": "3ae8da2cef7cf077886eb81b8f6a08ce630468c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
