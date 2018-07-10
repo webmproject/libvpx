@@ -3631,6 +3631,8 @@ int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
 
   if (tpl_frame->is_valid == 0) return orig_rdmult;
 
+  if (cpi->common.show_frame) return orig_rdmult;
+
   r0 = cpi->rd.r0;
 
   for (row = mi_row; row < mi_row + mi_high; ++row) {
