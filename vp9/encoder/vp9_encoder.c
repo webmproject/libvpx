@@ -2350,7 +2350,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
       CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
                       vpx_calloc(mi_rows * mi_cols,
                                  sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
-      cpi->tpl_stats[frame].is_valid = 1;
+      cpi->tpl_stats[frame].is_valid = 0;
       cpi->tpl_stats[frame].width = mi_cols;
       cpi->tpl_stats[frame].height = mi_rows;
       cpi->tpl_stats[frame].stride = mi_cols;
@@ -2543,8 +2543,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
 
   for (frame = 0; frame < MAX_LAG_BUFFERS; ++frame) {
-    if (cpi->tpl_stats[frame].is_valid)
-      vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
+    vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
     cpi->tpl_stats[frame].is_valid = 0;
   }
 
@@ -5567,6 +5566,7 @@ void init_tpl_stats(VP9_COMP *cpi) {
     memset(tpl_frame->tpl_stats_ptr, 0,
            tpl_frame->height * tpl_frame->width *
                sizeof(*tpl_frame->tpl_stats_ptr));
+    tpl_frame->is_valid = 0;
   }
 }
 

@@ -3629,6 +3629,8 @@ int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
   int count = 0;
   double r0, rk, beta;
 
+  if (tpl_frame->is_valid == 0) return orig_rdmult;
+
   r0 = cpi->rd.r0;
 
   for (row = mi_row; row < mi_row + mi_high; ++row) {
@@ -5455,7 +5457,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       }
     }
 
-    cpi->rd.r0 = (double)intra_cost_base / (intra_cost_base + mc_dep_cost_base);
+    if (tpl_frame->is_valid)
+      cpi->rd.r0 =
+          (double)intra_cost_base / (intra_cost_base + mc_dep_cost_base);
   }
 
   {
