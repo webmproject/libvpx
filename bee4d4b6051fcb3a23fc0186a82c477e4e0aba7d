@@ -34,6 +34,24 @@
       "revId": "bee4d4b6051fcb3a23fc0186a82c477e4e0aba7d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57847730_79543817",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-07-10T00:54:00Z",
+      "side": 1,
+      "message": "ok, but it would be good to also verify that there is no key frame when intra-only is requested and actually generated in the encoder (i.e for SL\u003d3 tests).",
+      "parentUuid": "22dc9d37_cdb97544",
+      "revId": "bee4d4b6051fcb3a23fc0186a82c477e4e0aba7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
