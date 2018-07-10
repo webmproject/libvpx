@@ -1518,6 +1518,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int svc_mv_row = 0;
   int no_scaling = 0;
   unsigned int thresh_svc_skip_golden = 500;
+  x->source_variance = UINT_MAX;
   if (cpi->sf.default_interp_filter == BILINEAR) {
     best_pred_filter = BILINEAR;
     filter_gf_svc = BILINEAR;
