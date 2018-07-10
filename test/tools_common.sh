@@ -150,7 +150,7 @@ is_windows_target() {
 # empty string. Caller is responsible for testing the string once the function
 # returns.
 vpx_tool_path() {
-  local readonly tool_name="$1"
+  local tool_name="$1"
   local tool_path="${LIBVPX_BIN_PATH}/${tool_name}${VPX_TEST_EXE_SUFFIX}"
   if [ ! -x "${tool_path}" ]; then
     # Try one directory up: when running via examples.sh the tool could be in
