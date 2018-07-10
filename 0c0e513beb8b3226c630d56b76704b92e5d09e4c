@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "049a7973_fe61d0a7",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-07-10T22:15:39Z",
+      "side": 1,
+      "message": "add comment here so we remember this condition, something like:\n\"Intra-only frame is only generated for spatial layers \u003e 1 and \u003c\u003d 3, among other conditions (see constraint in set_intra_only_frame() in vp9_ratecrtrl.c). If intra-only is no allowed then encoder will insert key frame instead.\"",
+      "revId": "0c0e513beb8b3226c630d56b76704b92e5d09e4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23bce947_7aeae07f",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-07-10T22:15:39Z",
+      "side": 1,
+      "message": "comment needs to updated? \"insert intra-only sync on base/qvga layer\" (there is no syn on middle layer).",
+      "revId": "0c0e513beb8b3226c630d56b76704b92e5d09e4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05af9776_3abb1822",
+        "filename": "test/svc_end_to_end_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2018-07-10T22:15:39Z",
+      "side": 1,
+      "message": "isn\u0027t it stronger test if we start decoding at sync frame for this?",
+      "range": {
+        "startLine": 374,
+        "startChar": 2,
+        "endLine": 374,
+        "endChar": 24
+      },
+      "revId": "0c0e513beb8b3226c630d56b76704b92e5d09e4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
