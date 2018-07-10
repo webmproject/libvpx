@@ -3652,8 +3652,8 @@ int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
   beta = r0 / rk;
   dr = vp9_get_adaptive_rdmult(cpi, beta);
 
-  dr = VPXMIN(dr, orig_rdmult * 5 / 4);
-  dr = VPXMAX(dr, orig_rdmult * 3 / 4);
+  dr = VPXMIN(dr, orig_rdmult * 3 / 2);
+  dr = VPXMAX(dr, orig_rdmult * 1 / 2);
 
   dr = VPXMAX(1, dr);
   return dr;
