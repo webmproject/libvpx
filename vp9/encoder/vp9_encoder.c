@@ -2339,23 +2339,25 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   }
 #endif  // !CONFIG_REALTIME_ONLY
 
-  for (frame = 0; frame < MAX_LAG_BUFFERS; ++frame) {
-    int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-    int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
-
-    CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
-                    vpx_calloc(mi_rows * mi_cols,
-                               sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
-    cpi->tpl_stats[frame].is_valid = 1;
-    cpi->tpl_stats[frame].width = mi_cols;
-    cpi->tpl_stats[frame].height = mi_rows;
-    cpi->tpl_stats[frame].stride = mi_cols;
-    cpi->tpl_stats[frame].mi_rows = cm->mi_rows;
-    cpi->tpl_stats[frame].mi_cols = cm->mi_cols;
-  }
-
   vp9_set_speed_features_framesize_independent(cpi);
   vp9_set_speed_features_framesize_dependent(cpi);
+
+  if (cpi->sf.enable_tpl_model) {
+    for (frame = 0; frame < MAX_LAG_BUFFERS; ++frame) {
+      int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+      int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+
+      CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
+                      vpx_calloc(mi_rows * mi_cols,
+                                 sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
+      cpi->tpl_stats[frame].is_valid = 1;
+      cpi->tpl_stats[frame].width = mi_cols;
+      cpi->tpl_stats[frame].height = mi_rows;
+      cpi->tpl_stats[frame].stride = mi_cols;
+      cpi->tpl_stats[frame].mi_rows = cm->mi_rows;
+      cpi->tpl_stats[frame].mi_cols = cm->mi_cols;
+    }
+  }
 
   // Allocate memory to store variances for a frame.
   CHECK_MEM_ERROR(cm, cpi->source_diff_var, vpx_calloc(cm->MBs, sizeof(diff)));
