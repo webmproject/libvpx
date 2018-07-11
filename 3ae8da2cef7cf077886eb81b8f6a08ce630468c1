@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "930a1eb6_3cc234c4",
+        "filename": "vp9/common/vp9_scale.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-07-11T22:15:21Z",
+      "side": 1,
+      "message": "This should be applied to all platforms. We don\u0027t want to have disparate paths for C and one specific arm target.",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 79,
+        "endChar": 45
+      },
+      "revId": "3ae8da2cef7cf077886eb81b8f6a08ce630468c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3e99bfbb_f0568cf6",
         "filename": "vpx_dsp/arm/vpx_convolve_neon.c",
         "patchSetId": 7
