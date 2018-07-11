@@ -5900,15 +5900,8 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
       tpl_stats->mv.as_int = best_mv.as_int;
 
       tpl_model_update(cpi->tpl_stats, tpl_stats, mi_row, mi_col, bsize);
-      (void)best_mv;
-      (void)best_rf_idx;
     }
   }
-
-  (void)xd;
-  (void)tpl_frame;
-  (void)this_frame;
-  (void)ref_frame;
 }
 
 void setup_tpl_stats(VP9_COMP *cpi) {
