@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0154dab4_756159f1",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 5653,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-07-11T11:48:31Z",
+      "side": 1,
+      "message": "Elsewhere you appear top have used 4 * MI_SIZE... is there any reason for using a hard wired number here rather than linking back to MI_SIZE or creating a new #define for the size of a 32x32.",
+      "range": {
+        "startLine": 5653,
+        "startChar": 35,
+        "endLine": 5653,
+        "endChar": 37
+      },
+      "revId": "34f970c4e8f97c98dcd5a89040506eb2bd51e2fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5ee3a9e8_f427b293",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 5692,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-07-11T11:48:31Z",
+      "side": 1,
+      "message": "Again hard wired number here lacks clarity as to its meaning",
+      "range": {
+        "startLine": 5692,
+        "startChar": 37,
+        "endLine": 5692,
+        "endChar": 41
+      },
+      "revId": "34f970c4e8f97c98dcd5a89040506eb2bd51e2fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2d2074d_02591170",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 5764,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-07-11T11:48:31Z",
+      "side": 1,
+      "message": "A comment here to clarify that the +\u003d 4 is because you are working at 32x32 scale might help readability.",
+      "range": {
+        "startLine": 5764,
+        "startChar": 48,
+        "endLine": 5764,
+        "endChar": 52
+      },
+      "revId": "34f970c4e8f97c98dcd5a89040506eb2bd51e2fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b0190aff_28687c92",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 5847,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-07-11T11:48:31Z",
+      "side": 1,
+      "message": "As per previous comments use of a #define here might be good",
+      "range": {
+        "startLine": 5847,
+        "startChar": 34,
+        "endLine": 5847,
+        "endChar": 36
+      },
+      "revId": "34f970c4e8f97c98dcd5a89040506eb2bd51e2fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95c92390_f3186ae7",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 5851,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-07-11T11:48:31Z",
+      "side": 1,
+      "message": "Is this wrong....why 16 and not 32 (MI_SIZE * 4)",
+      "range": {
+        "startLine": 5851,
+        "startChar": 51,
+        "endLine": 5851,
+        "endChar": 53
+      },
+      "revId": "34f970c4e8f97c98dcd5a89040506eb2bd51e2fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
