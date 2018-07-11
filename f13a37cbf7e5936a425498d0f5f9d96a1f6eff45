@@ -22,6 +22,30 @@
       "revId": "f13a37cbf7e5936a425498d0f5f9d96a1f6eff45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6060e983_cded9f4d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3651,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2018-07-11T13:50:32Z",
+      "side": 1,
+      "message": "Yes, mc_dep_cost \u003d intra_cost + mc_flow, where we cap minimum intra_cost to be 1.",
+      "parentUuid": "076e2bc7_27ae4540",
+      "range": {
+        "startLine": 3651,
+        "startChar": 28,
+        "endLine": 3651,
+        "endChar": 39
+      },
+      "revId": "f13a37cbf7e5936a425498d0f5f9d96a1f6eff45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
