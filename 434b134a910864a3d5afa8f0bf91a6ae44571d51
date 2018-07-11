@@ -16,6 +16,24 @@
       "revId": "434b134a910864a3d5afa8f0bf91a6ae44571d51",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d6d04114_69ae2a85",
+        "filename": "test/vp8_multi_resolution_encoder.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2018-07-11T17:13:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2043f01a_2fc51e23",
+      "revId": "434b134a910864a3d5afa8f0bf91a6ae44571d51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
