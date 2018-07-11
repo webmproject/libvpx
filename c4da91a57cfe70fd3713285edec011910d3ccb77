@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c192c799_8493856c",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-07-11T00:11:43Z",
+      "side": 1,
+      "message": "just set this to the return and invert the check (ctx-\u003erow_mt \u003d\u003d...); we try not to use checks of the other form",
+      "range": {
+        "startLine": 253,
+        "startChar": 21,
+        "endLine": 253,
+        "endChar": 40
+      },
+      "revId": "c4da91a57cfe70fd3713285edec011910d3ccb77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "688cb838_785b820b",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-07-11T00:11:43Z",
+      "side": 1,
+      "message": "multi-threading\n\nSince vpxenc already defines a parameter like this the name here should match (row-mt). It should also accept an argument to allow it to be disabled without needing to drop the flag.",
+      "range": {
+        "startLine": 102,
+        "startChar": 46,
+        "endLine": 102,
+        "endChar": 61
+      },
+      "revId": "c4da91a57cfe70fd3713285edec011910d3ccb77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7498f3c_34851bed",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-07-11T00:11:43Z",
+      "side": 1,
+      "message": "all of these can be lowercase, they\u0027re not really a proper noun that requires capitalization",
+      "range": {
+        "startLine": 761,
+        "startChar": 46,
+        "endLine": 761,
+        "endChar": 67
+      },
+      "revId": "c4da91a57cfe70fd3713285edec011910d3ccb77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
