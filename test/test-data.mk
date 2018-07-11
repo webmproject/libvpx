@@ -789,6 +789,7 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-crbug-629481.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-crbug-629481.webm.res
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-crbug-667044.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-crbug-667044.webm.res
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += crbug-1539.rawfile
 
 ifeq ($(CONFIG_DECODE_PERF_TESTS),yes)
 # Encode / Decode test
