@@ -843,6 +843,7 @@ static void vp9_enc_free_mi(VP9_COMMON *cm) {
   cm->mi_grid_base = NULL;
   vpx_free(cm->prev_mi_grid_base);
   cm->prev_mi_grid_base = NULL;
+  cm->mi_alloc_size = 0;
 }
 
 static void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
