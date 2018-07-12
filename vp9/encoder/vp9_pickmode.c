@@ -1518,6 +1518,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int svc_mv_row = 0;
   int no_scaling = 0;
   unsigned int thresh_svc_skip_golden = 500;
+  int scene_change_detected =
+      cpi->rc.high_source_sad ||
+      (cpi->use_svc && cpi->svc.high_source_sad_superframe);
   x->source_variance = UINT_MAX;
   if (cpi->sf.default_interp_filter == BILINEAR) {
     best_pred_filter = BILINEAR;
@@ -2328,6 +2331,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
   if (best_rdc.rdcost == INT64_MAX ||
+      (scene_change_detected && perform_intra_pred) ||
       ((!force_skip_low_temp_var || bsize < BLOCK_32X32 ||
         x->content_state_sb == kVeryHighSad) &&
        perform_intra_pred && !x->skip && best_rdc.rdcost > inter_mode_thresh &&
