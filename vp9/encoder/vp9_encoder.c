@@ -5717,7 +5717,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   MACROBLOCK *x = &td->mb;
   MACROBLOCKD *xd = &x->e_mbd;
   int mi_row, mi_col;
-  const InterpKernel *const kernel = vp9_filter_kernels[EIGHTTAP_SHARP];
+  const InterpKernel *const kernel = vp9_filter_kernels[EIGHTTAP];
 
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint16_t, predictor16[32 * 32 * 3]);
