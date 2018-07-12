@@ -1958,9 +1958,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
     if (cyclic_refresh_segment_id_boosted(
             get_segment_id(cm, map, bsize, mi_row, mi_col)))
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
+  } else {
+    if (cpi->sf.enable_tpl_model) x->rdmult = x->cb_rdmult;
   }
-
-  if (cpi->sf.enable_tpl_model) x->rdmult = x->cb_rdmult;
 
   // Find best coding mode & reconstruct the MB so it is available
   // as a predictor for MBs that follow in the SB
@@ -2122,7 +2122,10 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile, ThreadData *td,
                      PICK_MODE_CONTEXT *ctx) {
   MACROBLOCK *const x = &td->mb;
   set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
-  if (cpi->sf.enable_tpl_model) x->rdmult = x->cb_rdmult;
+
+  if (cpi->sf.enable_tpl_model && cpi->oxcf.aq_mode == NO_AQ)
+    x->rdmult = x->cb_rdmult;
+
   update_state(cpi, td, ctx, mi_row, mi_col, bsize, output_enabled);
   encode_superblock(cpi, td, tp, output_enabled, mi_row, mi_col, bsize, ctx);
 
@@ -3708,7 +3711,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   int rate_breakout_thr = cpi->sf.partition_search_breakout_thr.rate;
   int must_split = 0;
 
-  int partition_mul = cpi->sf.enable_tpl_model ? x->cb_rdmult : cpi->rd.RDMULT;
+  int partition_mul = cpi->sf.enable_tpl_model && cpi->oxcf.aq_mode == NO_AQ
+                          ? x->cb_rdmult
+                          : cpi->rd.RDMULT;
 
   (void)*tp_orig;
 
