@@ -304,6 +304,10 @@ void vp9_scene_detection_onepass(struct VP9_COMP *cpi);
 
 int vp9_encodedframe_overshoot(struct VP9_COMP *cpi, int frame_size, int *q);
 
+void vp9_configure_buffer_updates(struct VP9_COMP *cpi, int gf_group_index);
+
+void vp9_estimate_qp_gop(struct VP9_COMP *cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

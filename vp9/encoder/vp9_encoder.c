@@ -6138,7 +6138,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     for (i = 0; i < MAX_REF_FRAMES; ++i) cpi->scaled_ref_idx[i] = INVALID_IDX;
   }
 
-  if (arf_src_index && cpi->sf.enable_tpl_model) setup_tpl_stats(cpi);
+  if (arf_src_index && cpi->sf.enable_tpl_model) {
+    setup_tpl_stats(cpi);
+    vp9_estimate_qp_gop(cpi);
+    vp9_configure_buffer_updates(cpi, cpi->twopass.gf_group.index);
+  }
 
   cpi->td.mb.fp_src_pred = 0;
 #if CONFIG_REALTIME_ONLY

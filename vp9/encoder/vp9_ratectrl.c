@@ -1402,6 +1402,60 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi, int *bottom_index,
   return q;
 }
 
+void vp9_configure_buffer_updates(VP9_COMP *cpi, int gf_group_index) {
+  TWO_PASS *const twopass = &cpi->twopass;
+
+  cpi->rc.is_src_frame_alt_ref = 0;
+  switch (twopass->gf_group.update_type[gf_group_index]) {
+    case KF_UPDATE:
+      cpi->refresh_last_frame = 1;
+      cpi->refresh_golden_frame = 1;
+      cpi->refresh_alt_ref_frame = 1;
+      break;
+    case LF_UPDATE:
+      cpi->refresh_last_frame = 1;
+      cpi->refresh_golden_frame = 0;
+      cpi->refresh_alt_ref_frame = 0;
+      break;
+    case GF_UPDATE:
+      cpi->refresh_last_frame = 1;
+      cpi->refresh_golden_frame = 1;
+      cpi->refresh_alt_ref_frame = 0;
+      break;
+    case OVERLAY_UPDATE:
+      cpi->refresh_last_frame = 0;
+      cpi->refresh_golden_frame = 1;
+      cpi->refresh_alt_ref_frame = 0;
+      cpi->rc.is_src_frame_alt_ref = 1;
+      break;
+    default:
+      assert(twopass->gf_group.update_type[gf_group_index] == ARF_UPDATE);
+      cpi->refresh_last_frame = 0;
+      cpi->refresh_golden_frame = 0;
+      cpi->refresh_alt_ref_frame = 1;
+      break;
+  }
+}
+
+void vp9_estimate_qp_gop(VP9_COMP *cpi) {
+  int gop_length = cpi->rc.baseline_gf_interval;
+  int bottom_index, top_index;
+  int idx;
+  int q;
+  const int gf_index = cpi->twopass.gf_group.index;
+
+  for (idx = 1; idx <= gop_length; ++idx) {
+    int target_rate = cpi->twopass.gf_group.bit_allocation[idx];
+    cpi->twopass.gf_group.index = idx;
+    vp9_rc_set_frame_target(cpi, target_rate);
+    vp9_configure_buffer_updates(cpi, idx);
+    q = rc_pick_q_and_bounds_two_pass(cpi, &bottom_index, &top_index, idx);
+    (void)q;
+  }
+  // Reset the actual index
+  cpi->twopass.gf_group.index = gf_index;
+}
+
 void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi, int frame_target,
                                       int *frame_under_shoot_limit,
                                       int *frame_over_shoot_limit) {
