@@ -5504,6 +5504,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   int alt_index = -1;
   int lst_index = -1;
   int extend_frame_count = 0;
+  int pframe_qindex = cpi->tpl_stats[2].base_qindex;
 
   *tpl_group_frames = 0;
 
@@ -5549,6 +5550,8 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
         vp9_lookahead_peek(cpi->lookahead, frame_idx - 2);
 
     if (buf == NULL) break;
+
+    cpi->tpl_stats[frame_idx].base_qindex = pframe_qindex;
 
     gf_picture[frame_idx].frame = &buf->img;
     gf_picture[frame_idx].ref_frame[0] = gld_index;
@@ -5767,12 +5770,14 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   xd->mi[0] = cm->mi;
 
   // Get rd multiplier set up.
-  rdmult = (int)vp9_compute_rd_mult_based_on_qindex(cpi, ARNR_FILT_QINDEX);
+  rdmult =
+      (int)vp9_compute_rd_mult_based_on_qindex(cpi, tpl_frame->base_qindex);
   if (rdmult < 1) rdmult = 1;
   set_error_per_bit(&cpi->td.mb, rdmult);
-  vp9_initialize_me_consts(cpi, &cpi->td.mb, ARNR_FILT_QINDEX);
+  vp9_initialize_me_consts(cpi, &cpi->td.mb, tpl_frame->base_qindex);
 
   tpl_frame->is_valid = 1;
+
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     // Motion estimation row boundary
     x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
