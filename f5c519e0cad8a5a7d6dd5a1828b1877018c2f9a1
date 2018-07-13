@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f518087d_0638da5b",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-07-13T07:51:46Z",
+      "side": 1,
+      "message": "This is a bit different to the encoder where the value is taken as is and then range checked [0, 1]. Allowing other non-zero values to indicate a separate mode would allow this implementation to be extended. At the very least let\u0027s be consistent with the existing implementation.",
+      "revId": "f5c519e0cad8a5a7d6dd5a1828b1877018c2f9a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1629f1c8_bcb3b039",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-07-13T07:51:46Z",
+      "side": 1,
+      "message": "You should structure this comment like the one in vp8cx.h",
+      "range": {
+        "startLine": 129,
+        "startChar": 22,
+        "endLine": 129,
+        "endChar": 73
+      },
+      "revId": "f5c519e0cad8a5a7d6dd5a1828b1877018c2f9a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
