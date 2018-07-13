@@ -69,6 +69,7 @@ static void vp9_dec_free_mi(VP9_COMMON *cm) {
   cm->mip = NULL;
   vpx_free(cm->mi_grid_base);
   cm->mi_grid_base = NULL;
+  cm->mi_alloc_size = 0;
 }
 
 VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
