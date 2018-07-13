@@ -6139,9 +6139,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (arf_src_index && cpi->sf.enable_tpl_model) {
-    setup_tpl_stats(cpi);
     vp9_estimate_qp_gop(cpi);
-    vp9_configure_buffer_updates(cpi, cpi->twopass.gf_group.index);
+    setup_tpl_stats(cpi);
   }
 
   cpi->td.mb.fp_src_pred = 0;

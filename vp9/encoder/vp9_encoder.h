@@ -297,6 +297,7 @@ typedef struct TplDepFrame {
   int height;
   int mi_rows;
   int mi_cols;
+  int base_qindex;
 } TplDepFrame;
 
 #define TPL_DEP_COST_SCALE_LOG2 4

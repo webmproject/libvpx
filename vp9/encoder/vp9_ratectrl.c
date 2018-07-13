@@ -1441,19 +1441,20 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
   int gop_length = cpi->rc.baseline_gf_interval;
   int bottom_index, top_index;
   int idx;
-  int q;
   const int gf_index = cpi->twopass.gf_group.index;
 
   for (idx = 1; idx <= gop_length; ++idx) {
+    TplDepFrame *tpl_frame = &cpi->tpl_stats[idx];
     int target_rate = cpi->twopass.gf_group.bit_allocation[idx];
     cpi->twopass.gf_group.index = idx;
     vp9_rc_set_frame_target(cpi, target_rate);
     vp9_configure_buffer_updates(cpi, idx);
-    q = rc_pick_q_and_bounds_two_pass(cpi, &bottom_index, &top_index, idx);
-    (void)q;
+    tpl_frame->base_qindex =
+        rc_pick_q_and_bounds_two_pass(cpi, &bottom_index, &top_index, idx);
   }
-  // Reset the actual index
+  // Reset the actual index and frame update
   cpi->twopass.gf_group.index = gf_index;
+  vp9_configure_buffer_updates(cpi, gf_index);
 }
 
 void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi, int frame_target,
