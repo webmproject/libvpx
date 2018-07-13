@@ -1198,7 +1198,7 @@ int vp9_frame_type_qdelta(const VP9_COMP *cpi, int rf_level, int q) {
 
 #define STATIC_MOTION_THRESH 95
 static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
-                                         int *top_index) {
+                                         int *top_index, int gf_group_index) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -1284,7 +1284,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
 
         // Modify best quality for second level arfs. For mode VPX_Q this
         // becomes the baseline frame q.
-        if (gf_group->rf_level[gf_group->index] == GF_ARF_LOW)
+        if (gf_group->rf_level[gf_group_index] == GF_ARF_LOW)
           active_best_quality = (active_best_quality + cq_level + 1) / 2;
       }
     } else {
@@ -1325,7 +1325,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
   // Static forced key frames Q restrictions dealt with elsewhere.
   if (!frame_is_intra_only(cm) || !rc->this_key_frame_forced ||
       cpi->twopass.last_kfgroup_zeromotion_pct < STATIC_MOTION_THRESH) {
-    int qdelta = vp9_frame_type_qdelta(cpi, gf_group->rf_level[gf_group->index],
+    int qdelta = vp9_frame_type_qdelta(cpi, gf_group->rf_level[gf_group_index],
                                        active_worst_quality);
     active_worst_quality =
         VPXMAX(active_worst_quality + qdelta, active_best_quality);
@@ -1381,13 +1381,15 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
 int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi, int *bottom_index,
                              int *top_index) {
   int q;
+  const int gf_group_index = cpi->twopass.gf_group.index;
   if (cpi->oxcf.pass == 0) {
     if (cpi->oxcf.rc_mode == VPX_CBR)
       q = rc_pick_q_and_bounds_one_pass_cbr(cpi, bottom_index, top_index);
     else
       q = rc_pick_q_and_bounds_one_pass_vbr(cpi, bottom_index, top_index);
   } else {
-    q = rc_pick_q_and_bounds_two_pass(cpi, bottom_index, top_index);
+    q = rc_pick_q_and_bounds_two_pass(cpi, bottom_index, top_index,
+                                      gf_group_index);
   }
   if (cpi->sf.use_nonrd_pick_mode) {
     if (cpi->sf.force_frame_boost == 1) q -= cpi->sf.max_delta_qindex;
