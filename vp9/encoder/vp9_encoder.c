@@ -35,6 +35,7 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_tile_common.h"
+#include "vp9/common/vp9_scan.h"
 
 #include "vp9/encoder/vp9_alt_ref_aq.h"
 #include "vp9/encoder/vp9_aq_360.h"
@@ -5709,6 +5710,26 @@ void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
   }
 }
 
+void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
+                        tran_low_t *qcoeff, tran_low_t *dqcoeff,
+                        TX_SIZE tx_size, int64_t *recon_error, int64_t *sse) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  const struct macroblock_plane *const p = &x->plane[plane];
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+  uint16_t eob;
+  int pix_num = 1 << num_pels_log2_lookup[txsize_to_bsize[tx_size]];
+
+  vp9_quantize_fp_32x32(coeff, pix_num, x->skip_block, p->round_fp, p->quant_fp,
+                        qcoeff, dqcoeff, pd->dequant, &eob, scan_order->scan,
+                        scan_order->iscan);
+
+  *recon_error = vp9_block_error(coeff, dqcoeff, pix_num, sse);
+
+  *recon_error = VPXMAX(*recon_error, 1);
+  *sse = VPXMAX(*sse, 1);
+}
+
 void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
@@ -5732,6 +5753,8 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
 #endif
   DECLARE_ALIGNED(16, int16_t, src_diff[32 * 32]);
   DECLARE_ALIGNED(16, tran_low_t, coeff[32 * 32]);
+  DECLARE_ALIGNED(16, tran_low_t, qcoeff[32 * 32]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
 
   MODE_INFO mi_above, mi_left;
 
@@ -5741,6 +5764,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int pix_num = bw * bh;
+  int64_t recon_error, sse;
 
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -5777,6 +5801,9 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   vp9_initialize_me_consts(cpi, &cpi->td.mb, tpl_frame->base_qindex);
 
   tpl_frame->is_valid = 1;
+
+  cm->base_qindex = tpl_frame->base_qindex;
+  vp9_frame_init_quantizer(cpi);
 
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     // Motion estimation row boundary
@@ -5893,6 +5920,8 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
           best_rf_idx = rf_idx;
           best_inter_cost = inter_cost;
           best_mv.as_int = mv.as_int;
+          get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, TX_32X32,
+                             &recon_error, &sse);
         }
       }
 
