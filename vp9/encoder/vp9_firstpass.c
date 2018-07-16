@@ -2115,7 +2115,6 @@ static double calculate_group_score(VP9_COMP *cpi, double av_score,
     ++s;
     ++i;
   }
-  assert(i == frame_count);
 
   return score_total;
 }
