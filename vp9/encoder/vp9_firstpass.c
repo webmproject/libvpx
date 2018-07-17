@@ -2714,6 +2714,7 @@ static void adjust_group_arnr_filter(VP9_COMP *cpi, double section_noise,
 #define ARF_DECAY_BREAKOUT 0.10
 #define ARF_ABS_ZOOM_THRESH 4.0
 
+#define MAX_GF_BOOST 5400
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2932,7 +2933,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             ? 1
             : 0;
   } else {
-    rc->gfu_boost = calc_arf_boost(cpi, 0, (i - 1));
+    rc->gfu_boost = VPXMIN(MAX_GF_BOOST, calc_arf_boost(cpi, 0, (i - 1)));
     rc->source_alt_ref_pending = 0;
   }
 
