@@ -4340,6 +4340,18 @@ static void hybrid_search_svc_baseiskey(VP9_COMP *cpi, MACROBLOCK *const x,
   }
 }
 
+static void hybrid_search_scene_change(VP9_COMP *cpi, MACROBLOCK *const x,
+                                       RD_COST *rd_cost, BLOCK_SIZE bsize,
+                                       PICK_MODE_CONTEXT *ctx,
+                                       TileDataEnc *tile_data, int mi_row,
+                                       int mi_col) {
+  if (!cpi->sf.nonrd_keyframe && bsize <= BLOCK_8X8) {
+    vp9_rd_pick_intra_mode_sb(cpi, x, rd_cost, bsize, ctx, INT64_MAX);
+  } else {
+    vp9_pick_inter_mode(cpi, x, tile_data, mi_row, mi_col, rd_cost, bsize, ctx);
+  }
+}
+
 static void nonrd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
                                 MACROBLOCK *const x, int mi_row, int mi_col,
                                 RD_COST *rd_cost, BLOCK_SIZE bsize,
@@ -4377,10 +4389,16 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
                                 mi_col);
   else if (segfeature_active(&cm->seg, mi->segment_id, SEG_LVL_SKIP))
     set_mode_info_seg_skip(x, cm->tx_mode, rd_cost, bsize);
-  else if (bsize >= BLOCK_8X8)
-    vp9_pick_inter_mode(cpi, x, tile_data, mi_row, mi_col, rd_cost, bsize, ctx);
-  else
+  else if (bsize >= BLOCK_8X8) {
+    if (cpi->rc.hybrid_intra_scene_change)
+      hybrid_search_scene_change(cpi, x, rd_cost, bsize, ctx, tile_data, mi_row,
+                                 mi_col);
+    else
+      vp9_pick_inter_mode(cpi, x, tile_data, mi_row, mi_col, rd_cost, bsize,
+                          ctx);
+  } else {
     vp9_pick_inter_mode_sub8x8(cpi, x, mi_row, mi_col, rd_cost, bsize, ctx);
+  }
 
   duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
 
