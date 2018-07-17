@@ -89,11 +89,92 @@ void reference_hadamard16x16(const int16_t *a, int a_stride, tran_low_t *b) {
   }
 }
 
+void reference_hadamard32x32(const int16_t *a, int a_stride, tran_low_t *b) {
+  reference_hadamard16x16(a + 0 + 0 * a_stride, a_stride, b + 0);
+  reference_hadamard16x16(a + 16 + 0 * a_stride, a_stride, b + 256);
+  reference_hadamard16x16(a + 0 + 16 * a_stride, a_stride, b + 512);
+  reference_hadamard16x16(a + 16 + 16 * a_stride, a_stride, b + 768);
+
+  for (int i = 0; i < 256; ++i) {
+    const tran_low_t a0 = b[0];
+    const tran_low_t a1 = b[256];
+    const tran_low_t a2 = b[512];
+    const tran_low_t a3 = b[768];
+
+    const tran_low_t b0 = (a0 + a1) >> 2;
+    const tran_low_t b1 = (a0 - a1) >> 2;
+    const tran_low_t b2 = (a2 + a3) >> 2;
+    const tran_low_t b3 = (a2 - a3) >> 2;
+
+    b[0] = b0 + b2;
+    b[256] = b1 + b3;
+    b[512] = b0 - b2;
+    b[768] = b1 - b3;
+
+    ++b;
+  }
+}
+
 class HadamardTestBase : public ::testing::TestWithParam<HadamardFunc> {
  public:
   virtual void SetUp() {
     h_func_ = GetParam();
     rnd_.Reset(ACMRandom::DeterministicSeed());
+  }
+
+  void ReferenceHadamard(const int16_t *a, int a_stride, tran_low_t *b,
+                         int bwh) {
+    if (bwh == 32)
+      reference_hadamard32x32(a, a_stride, b);
+    else if (bwh == 16)
+      reference_hadamard16x16(a, a_stride, b);
+    else
+      reference_hadamard8x8(a, a_stride, b);
+  }
+
+  template <int bwh>
+  void CompareReferenceRandom() {
+    const int kBlockSize = bwh * bwh;
+    DECLARE_ALIGNED(16, int16_t, a[kBlockSize]);
+    DECLARE_ALIGNED(16, tran_low_t, b[kBlockSize]);
+    tran_low_t b_ref[kBlockSize];
+    for (int i = 0; i < kBlockSize; ++i) {
+      a[i] = rnd_.Rand9Signed();
+    }
+    memset(b, 0, sizeof(b));
+    memset(b_ref, 0, sizeof(b_ref));
+
+    ReferenceHadamard(a, bwh, b_ref, bwh);
+    ASM_REGISTER_STATE_CHECK(h_func_(a, bwh, b));
+
+    // The order of the output is not important. Sort before checking.
+    std::sort(b, b + kBlockSize);
+    std::sort(b_ref, b_ref + kBlockSize);
+    EXPECT_EQ(0, memcmp(b, b_ref, sizeof(b)));
+  }
+
+  template <int bwh>
+  void VaryStride() {
+    const int kBlockSize = bwh * bwh;
+    DECLARE_ALIGNED(16, int16_t, a[kBlockSize * 8]);
+    DECLARE_ALIGNED(16, tran_low_t, b[kBlockSize]);
+    tran_low_t b_ref[kBlockSize];
+    for (int i = 0; i < kBlockSize * 8; ++i) {
+      a[i] = rnd_.Rand9Signed();
+    }
+
+    for (int i = 8; i < 64; i += 8) {
+      memset(b, 0, sizeof(b));
+      memset(b_ref, 0, sizeof(b_ref));
+
+      ReferenceHadamard(a, i, b_ref, bwh);
+      ASM_REGISTER_STATE_CHECK(h_func_(a, i, b));
+
+      // The order of the output is not important. Sort before checking.
+      std::sort(b, b + kBlockSize);
+      std::sort(b_ref, b_ref + kBlockSize);
+      EXPECT_EQ(0, memcmp(b, b_ref, sizeof(b)));
+    }
   }
 
  protected:
@@ -126,46 +207,9 @@ void HadamardSpeedTest8x8(HadamardFunc const func, int times) {
   HadamardSpeedTest("Hadamard8x8", func, input, 8, output, times);
 }
 
-TEST_P(Hadamard8x8Test, CompareReferenceRandom) {
-  DECLARE_ALIGNED(16, int16_t, a[64]);
-  DECLARE_ALIGNED(16, tran_low_t, b[64]);
-  tran_low_t b_ref[64];
-  for (int i = 0; i < 64; ++i) {
-    a[i] = rnd_.Rand9Signed();
-  }
-  memset(b, 0, sizeof(b));
-  memset(b_ref, 0, sizeof(b_ref));
+TEST_P(Hadamard8x8Test, CompareReferenceRandom) { CompareReferenceRandom<8>(); }
 
-  reference_hadamard8x8(a, 8, b_ref);
-  ASM_REGISTER_STATE_CHECK(h_func_(a, 8, b));
-
-  // The order of the output is not important. Sort before checking.
-  std::sort(b, b + 64);
-  std::sort(b_ref, b_ref + 64);
-  EXPECT_EQ(0, memcmp(b, b_ref, sizeof(b)));
-}
-
-TEST_P(Hadamard8x8Test, VaryStride) {
-  DECLARE_ALIGNED(16, int16_t, a[64 * 8]);
-  DECLARE_ALIGNED(16, tran_low_t, b[64]);
-  tran_low_t b_ref[64];
-  for (int i = 0; i < 64 * 8; ++i) {
-    a[i] = rnd_.Rand9Signed();
-  }
-
-  for (int i = 8; i < 64; i += 8) {
-    memset(b, 0, sizeof(b));
-    memset(b_ref, 0, sizeof(b_ref));
-
-    reference_hadamard8x8(a, i, b_ref);
-    ASM_REGISTER_STATE_CHECK(h_func_(a, i, b));
-
-    // The order of the output is not important. Sort before checking.
-    std::sort(b, b + 64);
-    std::sort(b_ref, b_ref + 64);
-    EXPECT_EQ(0, memcmp(b, b_ref, sizeof(b)));
-  }
-}
+TEST_P(Hadamard8x8Test, VaryStride) { VaryStride<8>(); }
 
 TEST_P(Hadamard8x8Test, DISABLED_Speed) {
   HadamardSpeedTest8x8(h_func_, 10);
@@ -215,45 +259,10 @@ void HadamardSpeedTest16x16(HadamardFunc const func, int times) {
 }
 
 TEST_P(Hadamard16x16Test, CompareReferenceRandom) {
-  DECLARE_ALIGNED(16, int16_t, a[16 * 16]);
-  DECLARE_ALIGNED(16, tran_low_t, b[16 * 16]);
-  tran_low_t b_ref[16 * 16];
-  for (int i = 0; i < 16 * 16; ++i) {
-    a[i] = rnd_.Rand9Signed();
-  }
-  memset(b, 0, sizeof(b));
-  memset(b_ref, 0, sizeof(b_ref));
-
-  reference_hadamard16x16(a, 16, b_ref);
-  ASM_REGISTER_STATE_CHECK(h_func_(a, 16, b));
-
-  // The order of the output is not important. Sort before checking.
-  std::sort(b, b + 16 * 16);
-  std::sort(b_ref, b_ref + 16 * 16);
-  EXPECT_EQ(0, memcmp(b, b_ref, sizeof(b)));
+  CompareReferenceRandom<16>();
 }
 
-TEST_P(Hadamard16x16Test, VaryStride) {
-  DECLARE_ALIGNED(16, int16_t, a[16 * 16 * 8]);
-  DECLARE_ALIGNED(16, tran_low_t, b[16 * 16]);
-  tran_low_t b_ref[16 * 16];
-  for (int i = 0; i < 16 * 16 * 8; ++i) {
-    a[i] = rnd_.Rand9Signed();
-  }
-
-  for (int i = 8; i < 64; i += 8) {
-    memset(b, 0, sizeof(b));
-    memset(b_ref, 0, sizeof(b_ref));
-
-    reference_hadamard16x16(a, i, b_ref);
-    ASM_REGISTER_STATE_CHECK(h_func_(a, i, b));
-
-    // The order of the output is not important. Sort before checking.
-    std::sort(b, b + 16 * 16);
-    std::sort(b_ref, b_ref + 16 * 16);
-    EXPECT_EQ(0, memcmp(b, b_ref, sizeof(b)));
-  }
-}
+TEST_P(Hadamard16x16Test, VaryStride) { VaryStride<16>(); }
 
 TEST_P(Hadamard16x16Test, DISABLED_Speed) {
   HadamardSpeedTest16x16(h_func_, 10);
@@ -290,4 +299,15 @@ INSTANTIATE_TEST_CASE_P(MSA, Hadamard16x16Test,
                         ::testing::Values(&vpx_hadamard_16x16_msa));
 #endif  // HAVE_MSA
 #endif  // !CONFIG_VP9_HIGHBITDEPTH
+
+class Hadamard32x32Test : public HadamardTestBase {};
+
+TEST_P(Hadamard32x32Test, CompareReferenceRandom) {
+  CompareReferenceRandom<32>();
+}
+
+TEST_P(Hadamard32x32Test, VaryStride) { VaryStride<32>(); }
+
+INSTANTIATE_TEST_CASE_P(C, Hadamard32x32Test,
+                        ::testing::Values(&vpx_hadamard_32x32_c));
 }  // namespace
