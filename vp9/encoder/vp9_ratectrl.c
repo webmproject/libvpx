@@ -1443,7 +1443,7 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
   int idx;
   const int gf_index = cpi->twopass.gf_group.index;
 
-  for (idx = 1; idx <= gop_length; ++idx) {
+  for (idx = 1; idx <= gop_length + 1 && idx < MAX_LAG_BUFFERS; ++idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[idx];
     int target_rate = cpi->twopass.gf_group.bit_allocation[idx];
     cpi->twopass.gf_group.index = idx;
@@ -1451,6 +1451,7 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
     vp9_configure_buffer_updates(cpi, idx);
     tpl_frame->base_qindex =
         rc_pick_q_and_bounds_two_pass(cpi, &bottom_index, &top_index, idx);
+    tpl_frame->base_qindex = VPXMAX(tpl_frame->base_qindex, 1);
   }
   // Reset the actual index and frame update
   cpi->twopass.gf_group.index = gf_index;
