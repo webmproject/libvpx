@@ -3633,8 +3633,6 @@ int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
 
   if (cpi->common.show_frame) return orig_rdmult;
 
-  r0 = cpi->rd.r0;
-
   for (row = mi_row; row < mi_row + mi_high; ++row) {
     for (col = mi_col; col < mi_col + mi_wide; ++col) {
       TplDepStats *this_stats = &tpl_stats[row * tpl_stride + col];
@@ -3648,6 +3646,9 @@ int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
     }
   }
 
+  vpx_clear_system_state();
+
+  r0 = cpi->rd.r0;
   rk = (double)intra_cost / mc_dep_cost;
   beta = r0 / rk;
   dr = vp9_get_adaptive_rdmult(cpi, beta);
@@ -3656,6 +3657,7 @@ int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
   dr = VPXMAX(dr, orig_rdmult * 1 / 2);
 
   dr = VPXMAX(1, dr);
+
   return dr;
 }
 
@@ -5476,6 +5478,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
         mc_dep_cost_base += this_stats->mc_dep_cost;
       }
     }
+
+    vpx_clear_system_state();
 
     if (tpl_frame->is_valid)
       cpi->rd.r0 = (double)intra_cost_base / mc_dep_cost_base;
