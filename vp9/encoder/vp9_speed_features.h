@@ -338,6 +338,9 @@ typedef struct SPEED_FEATURES {
   // Prune reference frames for rectangular partitions.
   int prune_ref_frame_for_rect_partitions;
 
+  // Threshold values used for ML based rectangular partition search pruning.
+  int ml_prune_rect_partition_threhold[4];
+
   // Sets min and max partition sizes for this 64x64 region based on the
   // same 64x64 in last encoded frame, and the left and above neighbor.
   AUTO_MIN_MAX_MODE auto_min_max_partition_size;
