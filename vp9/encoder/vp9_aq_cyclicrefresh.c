@@ -39,6 +39,7 @@ CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
   }
   assert(MAXQ <= 255);
   memset(cr->last_coded_q_map, MAXQ, last_coded_q_map_size);
+  cr->counter_encode_maxq_scene_change = 0;
   return cr;
 }
 
@@ -466,6 +467,9 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   // TODO(marpan): Consider increasing refresh rate after slide change.
   if (cpi->oxcf.content == VP9E_CONTENT_SCREEN) {
     cr->percent_refresh = 10;
+    // Increase the amount of refresh on scene change that is encoded at max Q,
+    // increase for a few cycles of the refresh period (~30 frames).
+    if (cr->counter_encode_maxq_scene_change < 30) cr->percent_refresh = 15;
     cr->rate_ratio_qdelta = 2.0;
     cr->rate_boost_fac = 10;
   }
@@ -533,12 +537,14 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
              cm->mi_rows * cm->mi_cols * sizeof(*cr->last_coded_q_map));
       cr->sb_index = 0;
       cr->reduce_refresh = 0;
+      cr->counter_encode_maxq_scene_change = 0;
     }
     return;
   } else {
     int qindex_delta = 0;
     int qindex2;
     const double q = vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
+    cr->counter_encode_maxq_scene_change++;
     vpx_clear_system_state();
     // Set rate threshold to some multiple (set to 2 for now) of the target
     // rate (target is given by sb64_target_rate and scaled by 256).
@@ -606,6 +612,7 @@ void vp9_cyclic_refresh_reset_resize(VP9_COMP *const cpi) {
   cr->sb_index = 0;
   cpi->refresh_golden_frame = 1;
   cpi->refresh_alt_ref_frame = 1;
+  cr->counter_encode_maxq_scene_change = 0;
 }
 
 void vp9_cyclic_refresh_limit_q(const VP9_COMP *cpi, int *q) {

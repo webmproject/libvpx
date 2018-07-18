@@ -68,6 +68,7 @@ struct CYCLIC_REFRESH {
   int reduce_refresh;
   double weight_segment;
   int apply_cyclic_refresh;
+  int counter_encode_maxq_scene_change;
 };
 
 struct VP9_COMP;

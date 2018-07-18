@@ -2809,6 +2809,7 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
     int enumerator;
     // Force a re-encode, and for now use max-QP.
     *q = cpi->rc.worst_quality;
+    cpi->cyclic_refresh->counter_encode_maxq_scene_change = 0;
     // If the frame_size is much larger than the threshold (big content change)
     // and the encoded frame used alot of Intra modes, then force hybrid_intra
     // encoding for the re-encode on this scene change. hybrid_intra will
