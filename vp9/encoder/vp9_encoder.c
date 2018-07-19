@@ -5731,6 +5731,16 @@ void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
   *sse = VPXMAX(*sse, 1);
 }
 
+void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
+                  TX_SIZE tx_size) {
+  switch (tx_size) {
+    case TX_8X8: vpx_hadamard_8x8(src_diff, bw, coeff); break;
+    case TX_16X16: vpx_hadamard_16x16(src_diff, bw, coeff); break;
+    case TX_32X32: vpx_hadamard_32x32(src_diff, bw, coeff); break;
+    default: assert(0);
+  }
+}
+
 void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
@@ -5760,6 +5770,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   MODE_INFO mi_above, mi_left;
 
   const BLOCK_SIZE bsize = BLOCK_32X32;
+  const TX_SIZE tx_size = TX_32X32;
   const int bw = 4 << b_width_log2_lookup[bsize];
   const int bh = 4 << b_height_log2_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
@@ -5856,7 +5867,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
         vpx_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst,
                            dst_stride);
 
-        vpx_hadamard_32x32(src_diff, bw, coeff);
+        wht_fwd_txfm(src_diff, bw, coeff, tx_size);
 
         intra_cost = vpx_satd(coeff, pix_num);
 
@@ -5913,7 +5924,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
                            this_frame->y_buffer + mb_y_offset,
                            this_frame->y_stride, &predictor[0], bw);
 #endif
-        vpx_hadamard_32x32(src_diff, bw, coeff);
+        wht_fwd_txfm(src_diff, bw, coeff, tx_size);
 
         inter_cost = vpx_satd(coeff, pix_num);
 
