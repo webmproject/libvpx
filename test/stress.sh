@@ -30,7 +30,7 @@ SHA1_FILE="$(dirname $0)/test-data.sha1"
 # Download a file from the url and check its sha1sum.
 download_and_check_file() {
   # Get the file from the file path.
-  local readonly root="${1#${LIBVPX_TEST_DATA_PATH}/}"
+  local root="${1#${LIBVPX_TEST_DATA_PATH}/}"
 
   # Download the file using curl. Trap to insure non partial file.
   (trap "rm -f $1" INT TERM \
@@ -72,13 +72,13 @@ stress_verify_environment() {
 # This function runs tests on libvpx that run multiple encodes and decodes
 # in parallel in hopes of catching synchronization and/or threading issues.
 stress() {
-  local readonly decoder="$(vpx_tool_path vpxdec)"
-  local readonly encoder="$(vpx_tool_path vpxenc)"
-  local readonly codec="$1"
-  local readonly webm="$2"
-  local readonly decode_count="$3"
-  local readonly threads="$4"
-  local readonly enc_args="$5"
+  local decoder="$(vpx_tool_path vpxdec)"
+  local encoder="$(vpx_tool_path vpxenc)"
+  local codec="$1"
+  local webm="$2"
+  local decode_count="$3"
+  local threads="$4"
+  local enc_args="$5"
   local pids=""
   local rt_max_jobs=${STRESS_RT_MAX_JOBS:-5}
   local onepass_max_jobs=${STRESS_ONEPASS_MAX_JOBS:-5}
