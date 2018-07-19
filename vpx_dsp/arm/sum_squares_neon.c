@@ -14,7 +14,7 @@
 #include "./vpx_dsp_rtcd.h"
 
 uint64_t vpx_sum_squares_2d_i16_neon(const int16_t *src, int stride, int size) {
-  int64x1_t s2;
+  uint64x1_t s2;
 
   if (size == 4) {
     int16x4_t s[4];
