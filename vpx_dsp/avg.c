@@ -130,7 +130,7 @@ void vpx_hadamard_32x32_c(const int16_t *src_diff, ptrdiff_t src_stride,
     // src_diff: 9 bit, dynamic range [-255, 255]
     const int16_t *src_ptr =
         src_diff + (idx >> 1) * 16 * src_stride + (idx & 0x01) * 16;
-    vpx_hadamard_16x16(src_ptr, src_stride, coeff + idx * 256);
+    vpx_hadamard_16x16_c(src_ptr, src_stride, coeff + idx * 256);
   }
 
   // coeff: 15 bit, dynamic range [-16320, 16320]
