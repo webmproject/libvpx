@@ -302,12 +302,30 @@ INSTANTIATE_TEST_CASE_P(MSA, Hadamard16x16Test,
 
 class Hadamard32x32Test : public HadamardTestBase {};
 
+void HadamardSpeedTest32x32(HadamardFunc const func, int times) {
+  DECLARE_ALIGNED(16, int16_t, input[1024]);
+  DECLARE_ALIGNED(16, tran_low_t, output[1024]);
+  memset(input, 1, sizeof(input));
+  HadamardSpeedTest("Hadamard32x32", func, input, 32, output, times);
+}
+
 TEST_P(Hadamard32x32Test, CompareReferenceRandom) {
   CompareReferenceRandom<32>();
 }
 
 TEST_P(Hadamard32x32Test, VaryStride) { VaryStride<32>(); }
 
+TEST_P(Hadamard32x32Test, DISABLED_Speed) {
+  HadamardSpeedTest32x32(h_func_, 10);
+  HadamardSpeedTest32x32(h_func_, 10000);
+  HadamardSpeedTest32x32(h_func_, 10000000);
+}
+
 INSTANTIATE_TEST_CASE_P(C, Hadamard32x32Test,
                         ::testing::Values(&vpx_hadamard_32x32_c));
+
+#if HAVE_SSE2
+INSTANTIATE_TEST_CASE_P(SSE2, Hadamard32x32Test,
+                        ::testing::Values(&vpx_hadamard_32x32_sse2));
+#endif  // HAVE_SSE2
 }  // namespace
