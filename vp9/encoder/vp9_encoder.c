@@ -5851,7 +5851,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
         dst = &predictor[0];
         dst_stride = bw;
 
-        xd->mi[0]->sb_type = BLOCK_32X32;
+        xd->mi[0]->sb_type = bsize;
         xd->mi[0]->ref_frame[0] = INTRA_FRAME;
         xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
         xd->mb_to_bottom_edge = ((cm->mi_rows - 1 - mi_row) * MI_SIZE) * 8;
@@ -5860,9 +5860,8 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
         xd->above_mi = (mi_row > 0) ? &mi_above : NULL;
         xd->left_mi = (mi_col > 0) ? &mi_left : NULL;
 
-        vp9_predict_intra_block(xd, b_width_log2_lookup[BLOCK_32X32], TX_32X32,
-                                mode, src, src_stride, dst, dst_stride, 0, 0,
-                                0);
+        vp9_predict_intra_block(xd, b_width_log2_lookup[bsize], tx_size, mode,
+                                src, src_stride, dst, dst_stride, 0, 0, 0);
 
         vpx_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst,
                            dst_stride);
