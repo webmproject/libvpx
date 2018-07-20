@@ -319,6 +319,9 @@ typedef struct SPEED_FEATURES {
   int use_square_partition_only;
   BLOCK_SIZE use_square_only_threshold;
 
+  // Prune reference frames for rectangular partitions.
+  int prune_ref_frame_for_rect_partitions;
+
   // Sets min and max partition sizes for this 64x64 region based on the
   // same 64x64 in last encoded frame, and the left and above neighbor.
   AUTO_MIN_MAX_MODE auto_min_max_partition_size;

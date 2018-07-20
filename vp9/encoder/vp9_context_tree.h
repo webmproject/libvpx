@@ -75,6 +75,8 @@ typedef struct {
 
   // Used for the machine learning-based early termination
   int32_t sum_y_eobs;
+  // Skip certain ref frames during RD search of rectangular partitions.
+  uint8_t skip_ref_frame_mask;
 } PICK_MODE_CONTEXT;
 
 typedef struct PC_TREE {
