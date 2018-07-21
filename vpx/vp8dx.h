@@ -124,6 +124,14 @@ enum vp8_dec_control_id {
    */
   VPXD_GET_LAST_QUANTIZER,
 
+  /*!\brief Codec control function to set row level multi-threading.
+   *
+   * 0 : off, 1 : on
+   *
+   * Supported in codecs: VP9
+   */
+  VP9D_SET_ROW_MT,
+
   VP8_DECODER_CTRL_ID_MAX
 };
 
@@ -181,6 +189,8 @@ VPX_CTRL_USE_TYPE(VP9_INVERT_TILE_DECODE_ORDER, int)
 VPX_CTRL_USE_TYPE(VP9_DECODE_SVC_SPATIAL_LAYER, int)
 #define VPX_CTRL_VP9_SET_SKIP_LOOP_FILTER
 VPX_CTRL_USE_TYPE(VP9_SET_SKIP_LOOP_FILTER, int)
+#define VPX_CTRL_VP9_DECODE_SET_ROW_MT
+VPX_CTRL_USE_TYPE(VP9D_SET_ROW_MT, int)
 
 /*!\endcond */
 /*! @} - end defgroup vp8_decoder */
