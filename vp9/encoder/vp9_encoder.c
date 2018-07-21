@@ -5720,14 +5720,16 @@ void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
   const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
   uint16_t eob;
   int pix_num = 1 << num_pels_log2_lookup[txsize_to_bsize[tx_size]];
+  const int shift = tx_size == TX_32X32 ? 0 : 2;
 
   vp9_quantize_fp_32x32(coeff, pix_num, x->skip_block, p->round_fp, p->quant_fp,
                         qcoeff, dqcoeff, pd->dequant, &eob, scan_order->scan,
                         scan_order->iscan);
 
-  *recon_error = vp9_block_error(coeff, dqcoeff, pix_num, sse);
-
+  *recon_error = vp9_block_error(coeff, dqcoeff, pix_num, sse) >> shift;
   *recon_error = VPXMAX(*recon_error, 1);
+
+  *sse = (*sse) >> shift;
   *sse = VPXMAX(*sse, 1);
 }
 
