@@ -5780,7 +5780,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   MODE_INFO mi_above, mi_left;
 
   const BLOCK_SIZE bsize = BLOCK_32X32;
-  const TX_SIZE tx_size = TX_32X32;
+  const TX_SIZE tx_size = max_txsize_lookup[bsize];
   const int bw = 4 << b_width_log2_lookup[bsize];
   const int bh = 4 << b_height_log2_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
