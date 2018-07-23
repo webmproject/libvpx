@@ -2917,6 +2917,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Should we use the alternate reference frame.
   if ((zero_motion_accumulator < 0.995) && allow_alt_ref &&
+      (twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH) &&
       (i < cpi->oxcf.lag_in_frames) && (i >= rc->min_gf_interval)) {
     const int forward_frames = (rc->frames_to_key - i >= i - 1)
                                    ? i - 1
