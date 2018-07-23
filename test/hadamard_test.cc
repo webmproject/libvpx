@@ -328,4 +328,9 @@ INSTANTIATE_TEST_CASE_P(C, Hadamard32x32Test,
 INSTANTIATE_TEST_CASE_P(SSE2, Hadamard32x32Test,
                         ::testing::Values(&vpx_hadamard_32x32_sse2));
 #endif  // HAVE_SSE2
+
+#if HAVE_AVX2
+INSTANTIATE_TEST_CASE_P(AVX2, Hadamard32x32Test,
+                        ::testing::Values(&vpx_hadamard_32x32_avx2));
+#endif  // HAVE_AVX2
 }  // namespace
