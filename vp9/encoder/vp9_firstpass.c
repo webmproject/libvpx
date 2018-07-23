@@ -44,7 +44,6 @@
 #define COMPLEXITY_STATS_OUTPUT 0
 
 #define FIRST_PASS_Q 10.0
-#define INTRA_MODE_PENALTY 1024
 #define MIN_ARF_GF_BOOST 240
 #define MIN_DECAY_FACTOR 0.01
 #define NEW_MV_MODE_PENALTY 32
@@ -812,6 +811,8 @@ static void accumulate_fp_mb_row_stat(TileDataEnc *this_tile,
                    fp_acc_data->image_data_start_row);
 }
 
+#define NZ_MOTION_PENALTY 128
+#define INTRA_MODE_PENALTY 1024
 void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
                                        FIRSTPASS_DATA *fp_acc_data,
                                        TileDataEnc *tile_data, MV *best_ref_mv,
@@ -1059,7 +1060,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
 
       // Compute the motion error of the 0,0 motion using the last source
       // frame as the reference. Skip the further motion search on
-      // reconstructed frame if this error is small.
+      // reconstructed frame if this error is very small.
       unscaled_last_source_buf_2d.buf =
           cpi->unscaled_last_source->y_buffer + recon_yoffset;
       unscaled_last_source_buf_2d.stride = cpi->unscaled_last_source->y_stride;
@@ -1076,8 +1077,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
                                               &unscaled_last_source_buf_2d);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-      // TODO(pengchong): Replace the hard-coded threshold
-      if (raw_motion_error > 25) {
+      if (raw_motion_error > NZ_MOTION_PENALTY) {
         // Test last reference frame using the previous best mv as the
         // starting point (best reference) for the search.
         first_pass_motion_search(cpi, x, best_ref_mv, &mv, &motion_error);
@@ -2861,7 +2861,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
       // Monitor for static sections.
       if ((rc->frames_since_key + i - 1) > 1) {
-        zero_motion_accumulator *= get_zero_motion_factor(cpi, &next_frame);
+        zero_motion_accumulator = VPXMIN(
+            zero_motion_accumulator, get_zero_motion_factor(cpi, &next_frame));
       }
 
       // Break clause to detect very still sections after motion. For example,
