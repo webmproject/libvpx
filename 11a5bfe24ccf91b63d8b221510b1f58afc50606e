@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4b4f8c4_d8c9caf6",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2018-07-23T16:15:41Z",
+      "side": 1,
+      "message": "move this below vp9/common/",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 40
+      },
+      "revId": "11a5bfe24ccf91b63d8b221510b1f58afc50606e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34b68a50_911aeaa3",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2018-07-23T16:15:41Z",
+      "side": 1,
+      "message": "probably better to type convert first before subtraction operation?",
+      "range": {
+        "startLine": 41,
+        "startChar": 25,
+        "endLine": 41,
+        "endChar": 50
+      },
+      "revId": "11a5bfe24ccf91b63d8b221510b1f58afc50606e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7c65ecea_f529c63b",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2018-07-23T16:15:41Z",
+      "side": 1,
+      "message": "using clamp() macro if defined in libvpx?",
+      "range": {
+        "startLine": 44,
+        "startChar": 1,
+        "endLine": 45,
+        "endChar": 37
+      },
+      "revId": "11a5bfe24ccf91b63d8b221510b1f58afc50606e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "779caf5d_40121138",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2018-07-23T16:15:41Z",
+      "side": 1,
+      "message": "does l mean local or log? so maybe spelling out in the name helps?",
+      "range": {
+        "startLine": 84,
+        "startChar": 20,
+        "endLine": 84,
+        "endChar": 35
+      },
+      "revId": "11a5bfe24ccf91b63d8b221510b1f58afc50606e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c7ec157_e7e4a9fd",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2018-07-23T16:15:41Z",
+      "side": 1,
+      "message": "This typically is required during transition from mmx -\u003e floating point.\nGiven what is happening block_lvariance(), this may no longer be necessary here.",
+      "range": {
+        "startLine": 140,
+        "startChar": 2,
+        "endLine": 140,
+        "endChar": 24
+      },
+      "revId": "11a5bfe24ccf91b63d8b221510b1f58afc50606e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
