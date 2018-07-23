@@ -172,6 +172,41 @@ void vpx_hadamard_16x16_avx2(int16_t const *src_diff, ptrdiff_t src_stride,
   }
 }
 
+void vpx_hadamard_32x32_avx2(const int16_t *src_diff, ptrdiff_t src_stride,
+                             tran_low_t *coeff) {
+  int idx;
+  for (idx = 0; idx < 4; ++idx) {
+    // src_diff: 9 bit, dynamic range [-255, 255]
+    const int16_t *src_ptr =
+        src_diff + (idx >> 1) * 16 * src_stride + (idx & 0x01) * 16;
+    vpx_hadamard_16x16_avx2(src_ptr, src_stride, coeff + idx * 256);
+  }
+
+  for (idx = 0; idx < 256; idx += 16) {
+    const __m256i coeff0 = load_tran_low(coeff);
+    const __m256i coeff1 = load_tran_low(coeff + 256);
+    const __m256i coeff2 = load_tran_low(coeff + 512);
+    const __m256i coeff3 = load_tran_low(coeff + 768);
+
+    __m256i b0 = _mm256_add_epi16(coeff0, coeff1);
+    __m256i b1 = _mm256_sub_epi16(coeff0, coeff1);
+    __m256i b2 = _mm256_add_epi16(coeff2, coeff3);
+    __m256i b3 = _mm256_sub_epi16(coeff2, coeff3);
+
+    b0 = _mm256_srai_epi16(b0, 2);
+    b1 = _mm256_srai_epi16(b1, 2);
+    b2 = _mm256_srai_epi16(b2, 2);
+    b3 = _mm256_srai_epi16(b3, 2);
+
+    store_tran_low(_mm256_add_epi16(b0, b2), coeff);
+    store_tran_low(_mm256_add_epi16(b1, b3), coeff + 256);
+    store_tran_low(_mm256_sub_epi16(b0, b2), coeff + 512);
+    store_tran_low(_mm256_sub_epi16(b1, b3), coeff + 768);
+
+    coeff += 16;
+  }
+}
+
 int vpx_satd_avx2(const tran_low_t *coeff, int length) {
   const __m256i one = _mm256_set1_epi16(1);
   __m256i accum = _mm256_setzero_si256();
