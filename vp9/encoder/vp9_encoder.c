@@ -5579,7 +5579,7 @@ void init_tpl_stats(VP9_COMP *cpi) {
 uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
                                        uint8_t *cur_frame_buf,
                                        uint8_t *ref_frame_buf, int stride,
-                                       MV *mv) {
+                                       MV *mv, BLOCK_SIZE bsize) {
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
@@ -5609,7 +5609,7 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 
   vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
 
-  vp9_full_pixel_search(cpi, x, BLOCK_32X32, &best_ref_mv1_full, step_param,
+  vp9_full_pixel_search(cpi, x, bsize, &best_ref_mv1_full, step_param,
                         search_method, sadpb, cond_cost_list(cpi, cost_list),
                         &best_ref_mv1, mv, 0, 0);
 
@@ -5619,7 +5619,7 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   // Ignore mv costing by sending NULL pointer instead of cost array
   bestsme = cpi->find_fractional_mv_step(
       x, mv, &best_ref_mv1, cpi->common.allow_high_precision_mv, x->errorperbit,
-      &cpi->fn_ptr[BLOCK_32X32], 0, mv_sf->subpel_iters_per_step,
+      &cpi->fn_ptr[bsize], 0, mv_sf->subpel_iters_per_step,
       cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, 0,
       0);
 
@@ -5903,7 +5903,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
         motion_compensated_prediction(cpi, td,
                                       this_frame->y_buffer + mb_y_offset,
                                       ref_frame[rf_idx]->y_buffer + mb_y_offset,
-                                      this_frame->y_stride, &mv.as_mv);
+                                      this_frame->y_stride, &mv.as_mv, bsize);
 
         // TODO(jingning): Not yet support high bit-depth in the next three
         // steps.
