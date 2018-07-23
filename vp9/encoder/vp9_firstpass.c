@@ -3433,7 +3433,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Special case for static / slide show content but dont apply
   // if the kf group is very short.
   if ((zero_motion_accumulator > 0.99) && (rc->frames_to_key > 8)) {
-    rc->kf_boost = VPXMAX((rc->frames_to_key * 100), MAX_KF_TOT_BOOST);
+    rc->kf_boost = MAX_KF_TOT_BOOST;
   } else {
     // Apply various clamps for min and max boost
     rc->kf_boost = VPXMAX((int)boost_score, (rc->frames_to_key * 3));
