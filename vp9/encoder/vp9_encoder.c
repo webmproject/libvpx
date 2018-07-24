@@ -5627,25 +5627,28 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 }
 
 int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
-                     int ref_pos_col, int block) {
+                     int ref_pos_col, int block, BLOCK_SIZE bsize) {
   int overlap_area;
   int width = 0, height = 0;
+  int bw = 4 << b_width_log2_lookup[bsize];
+  int bh = 4 << b_height_log2_lookup[bsize];
+
   switch (block) {
     case 0:
-      width = grid_pos_col + 4 * MI_SIZE - ref_pos_col;
-      height = grid_pos_row + 4 * MI_SIZE - ref_pos_row;
+      width = grid_pos_col + bw - ref_pos_col;
+      height = grid_pos_row + bh - ref_pos_row;
       break;
     case 1:
-      width = ref_pos_col + 4 * MI_SIZE - grid_pos_col;
-      height = grid_pos_row + 4 * MI_SIZE - ref_pos_row;
+      width = ref_pos_col + bw - grid_pos_col;
+      height = grid_pos_row + bh - ref_pos_row;
       break;
     case 2:
-      width = grid_pos_col + 4 * MI_SIZE - ref_pos_col;
-      height = ref_pos_row + 4 * MI_SIZE - grid_pos_row;
+      width = grid_pos_col + bw - ref_pos_col;
+      height = ref_pos_row + bh - grid_pos_row;
       break;
     case 3:
-      width = ref_pos_col + 4 * MI_SIZE - grid_pos_col;
-      height = ref_pos_row + 4 * MI_SIZE - grid_pos_row;
+      width = ref_pos_col + bw - grid_pos_col;
+      height = ref_pos_row + bh - grid_pos_row;
       break;
     default: assert(0);
   }
@@ -5691,8 +5694,8 @@ void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
 
     if (grid_pos_row >= 0 && grid_pos_row < ref_tpl_frame->mi_rows * MI_SIZE &&
         grid_pos_col >= 0 && grid_pos_col < ref_tpl_frame->mi_cols * MI_SIZE) {
-      int overlap_area = get_overlap_area(grid_pos_row, grid_pos_col,
-                                          ref_pos_row, ref_pos_col, block);
+      int overlap_area = get_overlap_area(
+          grid_pos_row, grid_pos_col, ref_pos_row, ref_pos_col, block, bsize);
       int ref_mi_row = round_floor(grid_pos_row, bh) * mi_height;
       int ref_mi_col = round_floor(grid_pos_col, bw) * mi_width;
 
