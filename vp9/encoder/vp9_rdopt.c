@@ -3073,6 +3073,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
                                // lock mechanism involved with reads from
                                // tile_mode_map
   const int mode_search_skip_flags = sf->mode_search_skip_flags;
+  const int is_rect_partition =
+      num_4x4_blocks_wide_lookup[bsize] != num_4x4_blocks_high_lookup[bsize];
   int64_t mask_filter = 0;
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
 
@@ -3223,6 +3225,13 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
     second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
     vp9_zero(x->sum_y_eobs);
+
+    if (is_rect_partition) {
+      if (ctx->skip_ref_frame_mask & (1 << ref_frame)) continue;
+      if (second_ref_frame > 0 &&
+          (ctx->skip_ref_frame_mask & (1 << second_ref_frame)))
+        continue;
+    }
 
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
