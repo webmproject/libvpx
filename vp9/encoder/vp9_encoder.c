@@ -5666,8 +5666,34 @@ int round_floor(int ref_pos, int bsize_pix) {
   return round;
 }
 
-void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
-                      int mi_row, int mi_col, const BLOCK_SIZE bsize) {
+void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
+                     BLOCK_SIZE bsize, int stride, int64_t intra_cost,
+                     int64_t inter_cost, int ref_frame_idx, int_mv mv) {
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  int idx, idy;
+
+  intra_cost = intra_cost / (mi_height * mi_width);
+  inter_cost = inter_cost / (mi_height * mi_width);
+
+  intra_cost = VPXMAX(1, intra_cost);
+  inter_cost = VPXMAX(1, inter_cost);
+
+  for (idy = 0; idy < mi_height; ++idy) {
+    for (idx = 0; idx < mi_width; ++idx) {
+      TplDepStats *tpl_ptr =
+          &tpl_stats[(mi_row + idy) * stride + (mi_col + idx)];
+      tpl_ptr->intra_cost = intra_cost;
+      tpl_ptr->inter_cost = inter_cost;
+      tpl_ptr->mc_dep_cost = tpl_ptr->intra_cost + tpl_ptr->mc_flow;
+      tpl_ptr->ref_frame_index = ref_frame_idx;
+      tpl_ptr->mv.as_int = mv.as_int;
+    }
+  }
+}
+
+void tpl_model_update_b(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
+                        int mi_row, int mi_col, const BLOCK_SIZE bsize) {
   TplDepFrame *ref_tpl_frame = &tpl_frame[tpl_stats->ref_frame_index];
   TplDepStats *ref_stats = ref_tpl_frame->tpl_stats_ptr;
   MV mv = tpl_stats->mv.as_mv;
@@ -5718,6 +5744,22 @@ void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
           assert(overlap_area >= 0);
         }
       }
+    }
+  }
+}
+
+void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
+                      int mi_row, int mi_col, const BLOCK_SIZE bsize) {
+  int idx, idy;
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+
+  for (idy = 0; idy < mi_height; ++idy) {
+    for (idx = 0; idx < mi_width; ++idx) {
+      TplDepStats *tpl_ptr =
+          &tpl_stats[(mi_row + idy) * tpl_frame->stride + (mi_col + idx)];
+      tpl_model_update_b(tpl_frame, tpl_ptr, mi_row + idy, mi_col + idx,
+                         BLOCK_8X8);
     }
   }
 }
@@ -5848,9 +5890,6 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
       int64_t intra_cost;
       PREDICTION_MODE mode;
 
-      TplDepStats *tpl_stats =
-          &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-
       // Intra prediction search
       for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
         uint8_t *src, *dst;
@@ -5952,13 +5991,16 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
       // Motion flow dependency dispenser.
       best_intra_cost = VPXMAX(best_intra_cost, 1);
       best_inter_cost = VPXMIN(best_inter_cost, best_intra_cost);
-      tpl_stats->inter_cost = best_inter_cost << TPL_DEP_COST_SCALE_LOG2;
-      tpl_stats->intra_cost = best_intra_cost << TPL_DEP_COST_SCALE_LOG2;
-      tpl_stats->mc_dep_cost = tpl_stats->intra_cost + tpl_stats->mc_flow;
-      tpl_stats->ref_frame_index = gf_picture[frame_idx].ref_frame[best_rf_idx];
-      tpl_stats->mv.as_int = best_mv.as_int;
 
-      tpl_model_update(cpi->tpl_stats, tpl_stats, mi_row, mi_col, bsize);
+      best_intra_cost <<= TPL_DEP_COST_SCALE_LOG2;
+      best_inter_cost <<= TPL_DEP_COST_SCALE_LOG2;
+
+      tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
+                      tpl_frame->stride, best_intra_cost, best_inter_cost,
+                      gf_picture[frame_idx].ref_frame[best_rf_idx], best_mv);
+
+      tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
+                       bsize);
     }
   }
 }
