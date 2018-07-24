@@ -5700,13 +5700,21 @@ void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
                         (tpl_stats->mc_dep_cost * tpl_stats->inter_cost) /
                             tpl_stats->intra_cost;
 
-      ref_stats[ref_mi_row * ref_tpl_frame->stride + ref_mi_col].mc_flow +=
-          (mc_flow * overlap_area) / pix_num;
+      int idx, idy;
 
-      ref_stats[ref_mi_row * ref_tpl_frame->stride + ref_mi_col].mc_ref_cost +=
-          ((tpl_stats->intra_cost - tpl_stats->inter_cost) * overlap_area) /
-          pix_num;
-      assert(overlap_area >= 0);
+      for (idy = 0; idy < mi_height; ++idy) {
+        for (idx = 0; idx < mi_width; ++idx) {
+          TplDepStats *des_stats =
+              &ref_stats[(ref_mi_row + idy) * ref_tpl_frame->stride +
+                         (ref_mi_col + idx)];
+
+          des_stats->mc_flow += (mc_flow * overlap_area) / pix_num;
+          des_stats->mc_ref_cost +=
+              ((tpl_stats->intra_cost - tpl_stats->inter_cost) * overlap_area) /
+              pix_num;
+          assert(overlap_area >= 0);
+        }
+      }
     }
   }
 }
