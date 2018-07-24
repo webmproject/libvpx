@@ -264,7 +264,7 @@ static void hadamard_col8_sse2(__m128i *in, int iter) {
   }
 }
 
-static INLINE void hadamard_8x8_sse2(int16_t const *src_diff,
+static INLINE void hadamard_8x8_sse2(const int16_t *src_diff,
                                      ptrdiff_t src_stride, tran_low_t *_coeff,
                                      int is_final) {
   __m128i src[8];
@@ -316,12 +316,12 @@ static INLINE void hadamard_8x8_sse2(int16_t const *src_diff,
   }
 }
 
-void vpx_hadamard_8x8_sse2(int16_t const *src_diff, ptrdiff_t src_stride,
+void vpx_hadamard_8x8_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
                            tran_low_t *coeff) {
   hadamard_8x8_sse2(src_diff, src_stride, coeff, 1);
 }
 
-void vpx_hadamard_16x16_sse2(int16_t const *src_diff, ptrdiff_t src_stride,
+void vpx_hadamard_16x16_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
                              tran_low_t *coeff) {
 #if CONFIG_VP9_HIGHBITDEPTH
   // For high bitdepths, it is unnecessary to store_tran_low
@@ -335,7 +335,7 @@ void vpx_hadamard_16x16_sse2(int16_t const *src_diff, ptrdiff_t src_stride,
 #endif
   int idx;
   for (idx = 0; idx < 4; ++idx) {
-    int16_t const *src_ptr =
+    const int16_t *src_ptr =
         src_diff + (idx >> 1) * 8 * src_stride + (idx & 0x01) * 8;
     hadamard_8x8_sse2(src_ptr, src_stride, (tran_low_t *)(t_coeff + idx * 64),
                       0);
@@ -437,7 +437,7 @@ int vpx_satd_sse2(const tran_low_t *coeff, int length) {
   return _mm_cvtsi128_si32(accum);
 }
 
-void vpx_int_pro_row_sse2(int16_t *hbuf, uint8_t const *ref,
+void vpx_int_pro_row_sse2(int16_t *hbuf, const uint8_t *ref,
                           const int ref_stride, const int height) {
   int idx;
   __m128i zero = _mm_setzero_si128();
@@ -486,7 +486,7 @@ void vpx_int_pro_row_sse2(int16_t *hbuf, uint8_t const *ref,
   _mm_storeu_si128((__m128i *)hbuf, s1);
 }
 
-int16_t vpx_int_pro_col_sse2(uint8_t const *ref, const int width) {
+int16_t vpx_int_pro_col_sse2(const uint8_t *ref, const int width) {
   __m128i zero = _mm_setzero_si128();
   __m128i src_line = _mm_load_si128((const __m128i *)ref);
   __m128i s0 = _mm_sad_epu8(src_line, zero);
@@ -506,7 +506,7 @@ int16_t vpx_int_pro_col_sse2(uint8_t const *ref, const int width) {
   return _mm_extract_epi16(s0, 0);
 }
 
-int vpx_vector_var_sse2(int16_t const *ref, int16_t const *src, const int bwl) {
+int vpx_vector_var_sse2(const int16_t *ref, const int16_t *src, const int bwl) {
   int idx;
   int width = 4 << bwl;
   int16_t mean;
