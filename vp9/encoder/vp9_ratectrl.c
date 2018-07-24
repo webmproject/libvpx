@@ -1329,6 +1329,14 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
     }
   }
 
+  // For normal frames do not allow an active minq lower than the q used for
+  // the last boosted frame.
+  if (!frame_is_intra_only(cm) &&
+      (!(cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) ||
+       rc->is_src_frame_alt_ref)) {
+    active_best_quality = VPXMAX(active_best_quality, rc->last_boosted_qindex);
+  }
+
 #if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
   vpx_clear_system_state();
   // Static forced key frames Q restrictions dealt with elsewhere.
