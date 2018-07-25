@@ -351,7 +351,8 @@ static const arg_def_t arnr_maxframes =
     ARG_DEF(NULL, "arnr-maxframes", 1, "AltRef max frames (0..15)");
 static const arg_def_t arnr_strength =
     ARG_DEF(NULL, "arnr-strength", 1, "AltRef filter strength (0..6)");
-static const arg_def_t arnr_type = ARG_DEF(NULL, "arnr-type", 1, "AltRef type");
+static const arg_def_t arnr_type =
+    ARG_DEF(NULL, "arnr-type", 1, "AltRef filter type (1..3)");
 static const struct arg_enum_list tuning_enum[] = {
   { "psnr", VP8_TUNE_PSNR }, { "ssim", VP8_TUNE_SSIM }, { NULL, 0 }
 };
