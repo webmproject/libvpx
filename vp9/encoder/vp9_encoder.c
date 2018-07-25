@@ -5797,6 +5797,134 @@ void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
   }
 }
 
+void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
+                     struct scale_factors *sf, GF_PICTURE *gf_picture,
+                     int frame_idx, int16_t *src_diff, tran_low_t *coeff,
+                     tran_low_t *qcoeff, tran_low_t *dqcoeff, int mi_row,
+                     int mi_col, BLOCK_SIZE bsize, TX_SIZE tx_size,
+                     YV12_BUFFER_CONFIG *ref_frame[], uint8_t *predictor,
+                     int64_t *recon_error, int64_t *sse,
+                     TplDepStats *tpl_stats) {
+  VP9_COMMON *cm = &cpi->common;
+  ThreadData *td = &cpi->td;
+
+  const int bw = 4 << b_width_log2_lookup[bsize];
+  const int bh = 4 << b_height_log2_lookup[bsize];
+  const int pix_num = bw * bh;
+  int best_rf_idx = -1;
+  int_mv best_mv;
+  int64_t best_inter_cost = INT64_MAX;
+  int64_t inter_cost;
+  int rf_idx;
+  const InterpKernel *const kernel = vp9_filter_kernels[EIGHTTAP];
+
+  int64_t best_intra_cost = INT64_MAX;
+  int64_t intra_cost;
+  PREDICTION_MODE mode;
+  int mb_y_offset = mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
+  MODE_INFO mi_above, mi_left;
+
+  xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
+  xd->mb_to_bottom_edge = ((cm->mi_rows - 1 - mi_row) * MI_SIZE) * 8;
+  xd->mb_to_left_edge = -((mi_col * MI_SIZE) * 8);
+  xd->mb_to_right_edge = ((cm->mi_cols - 1 - mi_col) * MI_SIZE) * 8;
+  xd->above_mi = (mi_row > 0) ? &mi_above : NULL;
+  xd->left_mi = (mi_col > 0) ? &mi_left : NULL;
+
+  // Intra prediction search
+  for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
+    uint8_t *src, *dst;
+    int src_stride, dst_stride;
+
+    src = xd->cur_buf->y_buffer + mb_y_offset;
+    src_stride = xd->cur_buf->y_stride;
+
+    dst = &predictor[0];
+    dst_stride = bw;
+
+    xd->mi[0]->sb_type = bsize;
+    xd->mi[0]->ref_frame[0] = INTRA_FRAME;
+
+    vp9_predict_intra_block(xd, b_width_log2_lookup[bsize], tx_size, mode, src,
+                            src_stride, dst, dst_stride, 0, 0, 0);
+
+    vpx_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst, dst_stride);
+
+    wht_fwd_txfm(src_diff, bw, coeff, tx_size);
+
+    intra_cost = vpx_satd(coeff, pix_num);
+
+    if (intra_cost < best_intra_cost) best_intra_cost = intra_cost;
+  }
+
+  // Motion compensated prediction
+  best_mv.as_int = 0;
+
+  (void)mb_y_offset;
+  // Motion estimation column boundary
+  x->mv_limits.col_min = -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+  x->mv_limits.col_max =
+      ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
+
+  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    int_mv mv;
+    if (ref_frame[rf_idx] == NULL) continue;
+
+    motion_compensated_prediction(cpi, td, xd->cur_buf->y_buffer + mb_y_offset,
+                                  ref_frame[rf_idx]->y_buffer + mb_y_offset,
+                                  xd->cur_buf->y_stride, &mv.as_mv, bsize);
+
+    // TODO(jingning): Not yet support high bit-depth in the next three
+    // steps.
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      vp9_highbd_build_inter_predictor(
+          CONVERT_TO_SHORTPTR(ref_frame[rf_idx]->y_buffer + mb_y_offset),
+          ref_frame[rf_idx]->y_stride, CONVERT_TO_SHORTPTR(&predictor[0]), bw,
+          &mv.as_mv, sf, bw, bh, 0, kernel, MV_PRECISION_Q3, mi_col * MI_SIZE,
+          mi_row * MI_SIZE, xd->bd);
+      vpx_highbd_subtract_block(
+          bh, bw, src_diff, bw, xd->cur_buf->y_buffer + mb_y_offset,
+          xd->cur_buf->y_stride, &predictor[0], bw, xd->bd);
+    } else {
+      vp9_build_inter_predictor(
+          ref_frame[rf_idx]->y_buffer + mb_y_offset,
+          ref_frame[rf_idx]->y_stride, &predictor[0], bw, &mv.as_mv, sf, bw, bh,
+          0, kernel, MV_PRECISION_Q3, mi_col * MI_SIZE, mi_row * MI_SIZE);
+      vpx_subtract_block(bh, bw, src_diff, bw,
+                         xd->cur_buf->y_buffer + mb_y_offset,
+                         xd->cur_buf->y_stride, &predictor[0], bw);
+    }
+#else
+    vp9_build_inter_predictor(ref_frame[rf_idx]->y_buffer + mb_y_offset,
+                              ref_frame[rf_idx]->y_stride, &predictor[0], bw,
+                              &mv.as_mv, sf, bw, bh, 0, kernel, MV_PRECISION_Q3,
+                              mi_col * MI_SIZE, mi_row * MI_SIZE);
+    vpx_subtract_block(bh, bw, src_diff, bw,
+                       xd->cur_buf->y_buffer + mb_y_offset,
+                       xd->cur_buf->y_stride, &predictor[0], bw);
+#endif
+    wht_fwd_txfm(src_diff, bw, coeff, tx_size);
+
+    inter_cost = vpx_satd(coeff, pix_num);
+
+    if (inter_cost < best_inter_cost) {
+      best_rf_idx = rf_idx;
+      best_inter_cost = inter_cost;
+      best_mv.as_int = mv.as_int;
+      get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size, recon_error,
+                         sse);
+    }
+  }
+  best_intra_cost = VPXMAX(best_intra_cost, 1);
+  best_inter_cost = VPXMIN(best_intra_cost, best_inter_cost);
+  tpl_stats->inter_cost = best_inter_cost << TPL_DEP_COST_SCALE_LOG2;
+  tpl_stats->intra_cost = best_intra_cost << TPL_DEP_COST_SCALE_LOG2;
+  tpl_stats->mc_dep_cost = tpl_stats->intra_cost + tpl_stats->mc_flow;
+  tpl_stats->ref_frame_index = gf_picture[frame_idx].ref_frame[best_rf_idx];
+  tpl_stats->mv.as_int = best_mv.as_int;
+}
+
 void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
@@ -5809,7 +5937,6 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   MACROBLOCK *x = &td->mb;
   MACROBLOCKD *xd = &x->e_mbd;
   int mi_row, mi_col;
-  const InterpKernel *const kernel = vp9_filter_kernels[EIGHTTAP];
 
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint16_t, predictor16[32 * 32 * 3]);
@@ -5823,15 +5950,10 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   DECLARE_ALIGNED(16, tran_low_t, qcoeff[32 * 32]);
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
 
-  MODE_INFO mi_above, mi_left;
-
   const BLOCK_SIZE bsize = BLOCK_32X32;
   const TX_SIZE tx_size = max_txsize_lookup[bsize];
-  const int bw = 4 << b_width_log2_lookup[bsize];
-  const int bh = 4 << b_height_log2_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
-  const int pix_num = bw * bh;
   int64_t recon_error, sse;
 
   // Setup scaling factor
@@ -5879,126 +6001,17 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
     x->mv_limits.row_max =
         (cm->mi_rows - 1 - mi_row) * MI_SIZE + (17 - 2 * VP9_INTERP_EXTEND);
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-      int mb_y_offset =
-          mi_row * MI_SIZE * this_frame->y_stride + mi_col * MI_SIZE;
-      int best_rf_idx = -1;
-      int_mv best_mv;
-      int64_t best_inter_cost = INT64_MAX;
-      int64_t inter_cost;
-      int rf_idx;
-
-      int64_t best_intra_cost = INT64_MAX;
-      int64_t intra_cost;
-      PREDICTION_MODE mode;
-
-      // Intra prediction search
-      for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
-        uint8_t *src, *dst;
-        int src_stride, dst_stride;
-
-        xd->cur_buf = this_frame;
-
-        src = this_frame->y_buffer + mb_y_offset;
-        src_stride = this_frame->y_stride;
-
-        dst = &predictor[0];
-        dst_stride = bw;
-
-        xd->mi[0]->sb_type = bsize;
-        xd->mi[0]->ref_frame[0] = INTRA_FRAME;
-        xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
-        xd->mb_to_bottom_edge = ((cm->mi_rows - 1 - mi_row) * MI_SIZE) * 8;
-        xd->mb_to_left_edge = -((mi_col * MI_SIZE) * 8);
-        xd->mb_to_right_edge = ((cm->mi_cols - 1 - mi_col) * MI_SIZE) * 8;
-        xd->above_mi = (mi_row > 0) ? &mi_above : NULL;
-        xd->left_mi = (mi_col > 0) ? &mi_left : NULL;
-
-        vp9_predict_intra_block(xd, b_width_log2_lookup[bsize], tx_size, mode,
-                                src, src_stride, dst, dst_stride, 0, 0, 0);
-
-        vpx_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst,
-                           dst_stride);
-
-        wht_fwd_txfm(src_diff, bw, coeff, tx_size);
-
-        intra_cost = vpx_satd(coeff, pix_num);
-
-        if (intra_cost < best_intra_cost) best_intra_cost = intra_cost;
-      }
-
-      // Motion compensated prediction
-      best_mv.as_int = 0;
-
-      (void)mb_y_offset;
-      // Motion estimation column boundary
-      x->mv_limits.col_min =
-          -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
-      x->mv_limits.col_max =
-          ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
-
-      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-        int_mv mv;
-        if (ref_frame[rf_idx] == NULL) continue;
-
-        motion_compensated_prediction(cpi, td,
-                                      this_frame->y_buffer + mb_y_offset,
-                                      ref_frame[rf_idx]->y_buffer + mb_y_offset,
-                                      this_frame->y_stride, &mv.as_mv, bsize);
-
-        // TODO(jingning): Not yet support high bit-depth in the next three
-        // steps.
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-          vp9_highbd_build_inter_predictor(
-              CONVERT_TO_SHORTPTR(ref_frame[rf_idx]->y_buffer + mb_y_offset),
-              ref_frame[rf_idx]->y_stride, CONVERT_TO_SHORTPTR(&predictor[0]),
-              bw, &mv.as_mv, &sf, bw, bh, 0, kernel, MV_PRECISION_Q3,
-              mi_col * MI_SIZE, mi_row * MI_SIZE, xd->bd);
-          vpx_highbd_subtract_block(
-              bh, bw, src_diff, bw, this_frame->y_buffer + mb_y_offset,
-              this_frame->y_stride, &predictor[0], bw, xd->bd);
-        } else {
-          vp9_build_inter_predictor(ref_frame[rf_idx]->y_buffer + mb_y_offset,
-                                    ref_frame[rf_idx]->y_stride, &predictor[0],
-                                    bw, &mv.as_mv, &sf, bw, bh, 0, kernel,
-                                    MV_PRECISION_Q3, mi_col * MI_SIZE,
-                                    mi_row * MI_SIZE);
-          vpx_subtract_block(bh, bw, src_diff, bw,
-                             this_frame->y_buffer + mb_y_offset,
-                             this_frame->y_stride, &predictor[0], bw);
-        }
-#else
-        vp9_build_inter_predictor(
-            ref_frame[rf_idx]->y_buffer + mb_y_offset,
-            ref_frame[rf_idx]->y_stride, &predictor[0], bw, &mv.as_mv, &sf, bw,
-            bh, 0, kernel, MV_PRECISION_Q3, mi_col * MI_SIZE, mi_row * MI_SIZE);
-        vpx_subtract_block(bh, bw, src_diff, bw,
-                           this_frame->y_buffer + mb_y_offset,
-                           this_frame->y_stride, &predictor[0], bw);
-#endif
-        wht_fwd_txfm(src_diff, bw, coeff, tx_size);
-
-        inter_cost = vpx_satd(coeff, pix_num);
-
-        if (inter_cost < best_inter_cost) {
-          best_rf_idx = rf_idx;
-          best_inter_cost = inter_cost;
-          best_mv.as_int = mv.as_int;
-          get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, TX_32X32,
-                             &recon_error, &sse);
-        }
-      }
+      TplDepStats tpl_stats;
+      xd->cur_buf = this_frame;
+      mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, src_diff, coeff,
+                      qcoeff, dqcoeff, mi_row, mi_col, bsize, tx_size,
+                      ref_frame, predictor, &recon_error, &sse, &tpl_stats);
 
       // Motion flow dependency dispenser.
-      best_intra_cost = VPXMAX(best_intra_cost, 1);
-      best_inter_cost = VPXMIN(best_inter_cost, best_intra_cost);
-
-      best_intra_cost <<= TPL_DEP_COST_SCALE_LOG2;
-      best_inter_cost <<= TPL_DEP_COST_SCALE_LOG2;
-
       tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
-                      tpl_frame->stride, best_intra_cost, best_inter_cost,
-                      gf_picture[frame_idx].ref_frame[best_rf_idx], best_mv);
+                      tpl_frame->stride, tpl_stats.intra_cost,
+                      tpl_stats.inter_cost, tpl_stats.ref_frame_index,
+                      tpl_stats.mv);
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
