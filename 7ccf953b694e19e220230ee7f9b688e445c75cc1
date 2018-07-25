@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2bd64e08_df443157",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 11
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-07-25T20:42:02Z",
+      "side": 0,
+      "message": "Have these two files been removed? They were not deleted as part of the changelist.",
+      "range": {
+        "startLine": 115,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 48
+      },
+      "revId": "7ccf953b694e19e220230ee7f9b688e445c75cc1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
