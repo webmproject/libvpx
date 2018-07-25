@@ -3985,6 +3985,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // (need to check encoding time cost for doing this for speed 8).
   cpi->rc.high_source_sad = 0;
   cpi->rc.hybrid_intra_scene_change = 0;
+  cpi->rc.re_encode_maxq_scene_change = 0;
   if (cm->show_frame && cpi->oxcf.mode == REALTIME &&
       (cpi->oxcf.rc_mode == VPX_VBR ||
        cpi->oxcf.content == VP9E_CONTENT_SCREEN ||

@@ -364,6 +364,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->reset_high_source_sad = 0;
   rc->high_source_sad_lagindex = -1;
   rc->hybrid_intra_scene_change = 0;
+  rc->re_encode_maxq_scene_change = 0;
   rc->alt_ref_gf_group = 0;
   rc->last_frame_is_src_altref = 0;
   rc->fac_active_worst_inter = 150;
@@ -2813,6 +2814,7 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
     // Force a re-encode, and for now use max-QP.
     *q = cpi->rc.worst_quality;
     cpi->cyclic_refresh->counter_encode_maxq_scene_change = 0;
+    cpi->rc.re_encode_maxq_scene_change = 1;
     // If the frame_size is much larger than the threshold (big content change)
     // and the encoded frame used alot of Intra modes, then force hybrid_intra
     // encoding for the re-encode on this scene change. hybrid_intra will
