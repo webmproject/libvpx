@@ -99,7 +99,7 @@ static const arg_def_t svcdecodingarg = ARG_DEF(
 static const arg_def_t framestatsarg =
     ARG_DEF(NULL, "framestats", 1, "Output per-frame stats (.csv format)");
 static const arg_def_t rowmtarg =
-    ARG_DEF(NULL, "row-mt", 1, "Enable multi-threading to run row-wise");
+    ARG_DEF(NULL, "row-mt", 1, "Enable multi-threading to run row-wise in VP9");
 
 static const arg_def_t *all_args[] = {
   &help,           &codecarg,      &use_yv12,         &use_i420,
@@ -758,7 +758,8 @@ static int main_loop(int argc, const char **argv_) {
       goto fail;
     }
   }
-  if (vpx_codec_control(&decoder, VP9D_SET_ROW_MT, enable_row_mt)) {
+  if (interface->fourcc == VP9_FOURCC &&
+      vpx_codec_control(&decoder, VP9D_SET_ROW_MT, enable_row_mt)) {
     fprintf(stderr, "Failed to set decoder in row multi-thread mode: %s\n",
             vpx_codec_error(&decoder));
     goto fail;
