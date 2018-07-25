@@ -97,7 +97,7 @@ static vpx_codec_err_t decoder_peek_si_internal(
     const uint8_t *data, unsigned int data_sz, vpx_codec_stream_info_t *si,
     int *is_intra_only, vpx_decrypt_cb decrypt_cb, void *decrypt_state) {
   int intra_only_flag = 0;
-  uint8_t clear_buffer[10];
+  uint8_t clear_buffer[11];
 
   if (data + data_sz <= data) return VPX_CODEC_INVALID_PARAM;
 
@@ -158,6 +158,9 @@ static vpx_codec_err_t decoder_peek_si_internal(
         if (profile > PROFILE_0) {
           if (!parse_bitdepth_colorspace_sampling(profile, &rb))
             return VPX_CODEC_UNSUP_BITSTREAM;
+          // The colorspace info may cause vp9_read_frame_size() to need 11
+          // bytes.
+          if (data_sz < 11) return VPX_CODEC_UNSUP_BITSTREAM;
         }
         rb.bit_offset += REF_FRAMES;  // refresh_frame_flags
         vp9_read_frame_size(&rb, (int *)&si->w, (int *)&si->h);
