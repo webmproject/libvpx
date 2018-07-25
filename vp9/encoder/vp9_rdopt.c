@@ -783,7 +783,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 static void txfm_rd_in_plane(const VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                              int64_t *distortion, int *skippable, int64_t *sse,
                              int64_t ref_best_rd, int plane, BLOCK_SIZE bsize,
-                             TX_SIZE tx_size, int use_fast_coef_casting) {
+                             TX_SIZE tx_size, int use_fast_coef_costing) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   struct rdcost_block_args args;
@@ -791,7 +791,7 @@ static void txfm_rd_in_plane(const VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   args.cpi = cpi;
   args.x = x;
   args.best_rd = ref_best_rd;
-  args.use_fast_coef_costing = use_fast_coef_casting;
+  args.use_fast_coef_costing = use_fast_coef_costing;
   args.skippable = 1;
 
   if (plane == 0) xd->mi[0]->tx_size = tx_size;
