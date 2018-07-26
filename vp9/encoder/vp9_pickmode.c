@@ -1828,7 +1828,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
     if (sf->short_circuit_flat_blocks && x->source_variance == 0 &&
         (frame_mv[this_mode][ref_frame].as_int != 0 ||
-         (svc->spatial_layer_id == 0 && cpi->rc.re_encode_maxq_scene_change &&
+         (cpi->oxcf.content == VP9E_CONTENT_SCREEN && !svc->spatial_layer_id &&
           !x->zero_temp_sad_source))) {
       continue;
     }
