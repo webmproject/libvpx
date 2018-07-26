@@ -4471,12 +4471,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     vp9_encode_frame(cpi);
     vpx_clear_system_state();
     restore_coding_context(cpi);
-    vp9_pack_bitstream(cpi, dest, size);
-
-    vp9_encode_frame(cpi);
-    vpx_clear_system_state();
-
-    restore_coding_context(cpi);
   }
 }
 
