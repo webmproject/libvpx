@@ -406,6 +406,11 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
       tx_size = TX_8X8;
     else if (tx_size > TX_16X16)
       tx_size = TX_16X16;
+
+    // For screen-content force 4X4 tx_size over 8X8, for large variance.
+    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && tx_size == TX_8X8 &&
+        bsize <= BLOCK_16X16 && var > (ac_thr << 6))
+      tx_size = TX_4X4;
   } else {
     tx_size = VPXMIN(max_txsize_lookup[bsize],
                      tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
@@ -588,6 +593,12 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
       xd->mi[0]->tx_size = TX_8X8;
     else if (xd->mi[0]->tx_size > TX_16X16)
       xd->mi[0]->tx_size = TX_16X16;
+
+    // For screen-content force 4X4 tx_size over 8X8, for large variance.
+    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
+        xd->mi[0]->tx_size == TX_8X8 && bsize <= BLOCK_16X16 &&
+        var > (ac_thr << 6))
+      xd->mi[0]->tx_size = TX_4X4;
   } else {
     xd->mi[0]->tx_size =
         VPXMIN(max_txsize_lookup[bsize],
