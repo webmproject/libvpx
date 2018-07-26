@@ -5629,7 +5629,6 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 
 int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
                      int ref_pos_col, int block, BLOCK_SIZE bsize) {
-  int overlap_area;
   int width = 0, height = 0;
   int bw = 4 << b_width_log2_lookup[bsize];
   int bh = 4 << b_height_log2_lookup[bsize];
@@ -5654,7 +5653,7 @@ int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
     default: assert(0);
   }
 
-  return overlap_area = width * height;
+  return width * height;
 }
 
 int round_floor(int ref_pos, int bsize_pix) {
