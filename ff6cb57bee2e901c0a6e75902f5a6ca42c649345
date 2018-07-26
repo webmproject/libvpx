@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f27ba2c0_e09e88fb",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon_asm.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1289407
+      },
+      "writtenOn": "2018-07-26T23:30:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b7838dc8_c6e1fbc0",
+      "range": {
+        "startLine": 15,
+        "startChar": 5,
+        "endLine": 15,
+        "endChar": 29
+      },
+      "revId": "ff6cb57bee2e901c0a6e75902f5a6ca42c649345",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ae1f82bf_a463e32a",
         "filename": "vpx_dsp/arm/vpx_convolve8_neon_asm.c",
         "patchSetId": 11
@@ -45,6 +69,30 @@
       "revId": "ff6cb57bee2e901c0a6e75902f5a6ca42c649345",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dee0dc9a_f19116ea",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon_asm.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1289407
+      },
+      "writtenOn": "2018-07-26T23:30:44Z",
+      "side": 1,
+      "message": "Type1 and Type2 functions are called depending on the position of the negative and positive coefficients in the filter. Comment added.",
+      "parentUuid": "ae1f82bf_a463e32a",
+      "range": {
+        "startLine": 21,
+        "startChar": 4,
+        "endLine": 21,
+        "endChar": 41
+      },
+      "revId": "ff6cb57bee2e901c0a6e75902f5a6ca42c649345",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
