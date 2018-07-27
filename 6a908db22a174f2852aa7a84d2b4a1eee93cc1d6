@@ -16,6 +16,24 @@
       "revId": "6a908db22a174f2852aa7a84d2b4a1eee93cc1d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d15d61bd_cefcda98",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2018-07-27T17:19:10Z",
+      "side": 1,
+      "message": "I didn\u0027t realize this CL was already merged. You can ignore this comment.",
+      "parentUuid": "45241bed_18952d4c",
+      "revId": "6a908db22a174f2852aa7a84d2b4a1eee93cc1d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
