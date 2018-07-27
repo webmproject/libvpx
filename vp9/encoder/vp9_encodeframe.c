@@ -4008,6 +4008,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
 
         pc_tree->split[i]->index = i;
+        if (cpi->sf.prune_ref_frame_for_rect_partitions)
+          pc_tree->split[i]->none.rate = INT_MAX;
         rd_pick_partition(cpi, td, tile_data, tp, mi_row + y_idx,
                           mi_col + x_idx, subsize, &this_rdc,
                           // A must split test here increases the number of sub
