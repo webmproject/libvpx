@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "45241bed_18952d4c",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2018-07-27T17:17:48Z",
+      "side": 1,
+      "message": "Tom: I was planning to move the width/height limit check here. It probably doesn\u0027t matter either way, so I leave the decision to you, and I\u0027ll make the same change in libaom.\n\nI should explain why I put the width/height limit check inside the if (ybf) block. This function has the following structure:\n\nint vpx_realloc_frame_buffer(...) {\n  if (ybf) {\n    ... the bulk of the code ..\n    return 0;\n  }\n  return -2;\n}\n\nThis function returns -2 immediately if ybf is a null pointer. I didn\u0027t want to change that behavior.",
+      "revId": "6a908db22a174f2852aa7a84d2b4a1eee93cc1d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
