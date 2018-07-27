@@ -501,6 +501,7 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG *raw_source_frame;
 
   TplDepFrame tpl_stats[MAX_LAG_BUFFERS];
+  YV12_BUFFER_CONFIG *tpl_recon_frames[REFS_PER_FRAME + 1];
 
   TileDataEnc *tile_data;
   int allocated_tiles;  // Keep track of memory allocated for tiles.

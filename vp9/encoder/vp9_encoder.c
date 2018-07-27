@@ -5496,12 +5496,40 @@ typedef struct GF_PICTURE {
 
 void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
                      const GF_GROUP *gf_group, int *tpl_group_frames) {
-  int frame_idx, i;
+  VP9_COMMON *cm = &cpi->common;
+  int frame_idx = 0;
+  int i;
   int gld_index = -1;
   int alt_index = -1;
   int lst_index = -1;
   int extend_frame_count = 0;
   int pframe_qindex = cpi->tpl_stats[2].base_qindex;
+
+  RefCntBuffer *frame_bufs = cm->buffer_pool->frame_bufs;
+  int recon_frame_index[REFS_PER_FRAME + 1] = { -1, -1, -1, -1 };
+
+  for (i = 0; i < FRAME_BUFFERS && frame_idx < REFS_PER_FRAME + 1; ++i) {
+    if (frame_bufs[i].ref_count == 0) {
+      alloc_frame_mvs(cm, i);
+      if (vpx_realloc_frame_buffer(&frame_bufs[i].buf, cm->width, cm->height,
+                                   cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                   cm->use_highbitdepth,
+#endif
+                                   VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                                   NULL, NULL, NULL))
+        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate frame buffer");
+
+      recon_frame_index[frame_idx] = i;
+      ++frame_idx;
+    }
+  }
+
+  for (i = 0; i < REFS_PER_FRAME + 1; ++i) {
+    assert(recon_frame_index[i] >= 0);
+    cpi->tpl_recon_frames[i] = &frame_bufs[recon_frame_index[i]].buf;
+  }
 
   *tpl_group_frames = 0;
 
