@@ -5661,27 +5661,29 @@ int round_floor(int ref_pos, int bsize_pix) {
 }
 
 void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
-                     BLOCK_SIZE bsize, int stride, int64_t intra_cost,
-                     int64_t inter_cost, int ref_frame_idx, int_mv mv) {
+                     BLOCK_SIZE bsize, int stride,
+                     const TplDepStats *src_stats) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int idx, idy;
 
-  intra_cost = intra_cost / (mi_height * mi_width);
-  inter_cost = inter_cost / (mi_height * mi_width);
+  int64_t intra_cost = src_stats->intra_cost / (mi_height * mi_width);
+  int64_t inter_cost = src_stats->inter_cost / (mi_height * mi_width);
+
+  TplDepStats *tpl_ptr;
 
   intra_cost = VPXMAX(1, intra_cost);
   inter_cost = VPXMAX(1, inter_cost);
 
   for (idy = 0; idy < mi_height; ++idy) {
+    tpl_ptr = &tpl_stats[(mi_row + idy) * stride + mi_col];
     for (idx = 0; idx < mi_width; ++idx) {
-      TplDepStats *tpl_ptr =
-          &tpl_stats[(mi_row + idy) * stride + (mi_col + idx)];
       tpl_ptr->intra_cost = intra_cost;
       tpl_ptr->inter_cost = inter_cost;
       tpl_ptr->mc_dep_cost = tpl_ptr->intra_cost + tpl_ptr->mc_flow;
-      tpl_ptr->ref_frame_index = ref_frame_idx;
-      tpl_ptr->mv.as_int = mv.as_int;
+      tpl_ptr->ref_frame_index = src_stats->ref_frame_index;
+      tpl_ptr->mv.as_int = src_stats->mv.as_int;
+      ++tpl_ptr;
     }
   }
 }
@@ -5816,6 +5818,8 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   PREDICTION_MODE mode;
   int mb_y_offset = mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
   MODE_INFO mi_above, mi_left;
+
+  memset(tpl_stats, 0, sizeof(*tpl_stats));
 
   xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
   xd->mb_to_bottom_edge = ((cm->mi_rows - 1 - mi_row) * MI_SIZE) * 8;
@@ -6002,9 +6006,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
 
       // Motion flow dependency dispenser.
       tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
-                      tpl_frame->stride, tpl_stats.intra_cost,
-                      tpl_stats.inter_cost, tpl_stats.ref_frame_index,
-                      tpl_stats.mv);
+                      tpl_frame->stride, &tpl_stats);
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
