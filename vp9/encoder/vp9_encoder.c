@@ -5979,6 +5979,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
 
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
+  xd->cur_buf = this_frame;
 
   // Get rd multiplier set up.
   rdmult =
@@ -5999,7 +6000,6 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
         (cm->mi_rows - 1 - mi_row) * MI_SIZE + (17 - 2 * VP9_INTERP_EXTEND);
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
       TplDepStats tpl_stats;
-      xd->cur_buf = this_frame;
       mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, src_diff, coeff,
                       qcoeff, dqcoeff, mi_row, mi_col, bsize, tx_size,
                       ref_frame, predictor, &recon_error, &sse, &tpl_stats);
