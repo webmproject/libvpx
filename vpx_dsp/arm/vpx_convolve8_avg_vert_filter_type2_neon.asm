@@ -20,7 +20,6 @@
     ARM
     REQUIRE8
     PRESERVE8
-    .syntax unified
 
     AREA  ||.text||, CODE, READONLY, ALIGN=2
 
