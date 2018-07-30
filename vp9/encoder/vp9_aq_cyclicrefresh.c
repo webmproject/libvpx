@@ -523,15 +523,19 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   struct segmentation *const seg = &cm->seg;
+  int scene_change_detected =
+      cpi->rc.high_source_sad ||
+      (cpi->use_svc && cpi->svc.high_source_sad_superframe);
   if (cm->current_video_frame == 0) cr->low_content_avg = 0.0;
   // Reset if resoluton change has occurred.
   if (cpi->resize_pending != 0) vp9_cyclic_refresh_reset_resize(cpi);
-  if (!cr->apply_cyclic_refresh || (cpi->force_update_segmentation)) {
+  if (!cr->apply_cyclic_refresh || (cpi->force_update_segmentation) ||
+      scene_change_detected) {
     // Set segmentation map to 0 and disable.
     unsigned char *const seg_map = cpi->segmentation_map;
     memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
     vp9_disable_segmentation(&cm->seg);
-    if (cm->frame_type == KEY_FRAME) {
+    if (cm->frame_type == KEY_FRAME || scene_change_detected) {
       memset(cr->last_coded_q_map, MAXQ,
              cm->mi_rows * cm->mi_cols * sizeof(*cr->last_coded_q_map));
       cr->sb_index = 0;
