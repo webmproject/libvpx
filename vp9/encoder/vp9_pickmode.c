@@ -334,6 +334,35 @@ static int ac_thr_factor(const int speed, const int width, const int height,
   return 1;
 }
 
+static TX_SIZE calculate_tx_size(VP9_COMP *const cpi, BLOCK_SIZE bsize,
+                                 MACROBLOCKD *const xd, unsigned int var,
+                                 unsigned int sse, int64_t ac_thr) {
+  TX_SIZE tx_size;
+  if (cpi->common.tx_mode == TX_MODE_SELECT) {
+    if (sse > (var << 2))
+      tx_size = VPXMIN(max_txsize_lookup[bsize],
+                       tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+    else
+      tx_size = TX_8X8;
+
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
+        cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id))
+      tx_size = TX_8X8;
+    else if (tx_size > TX_16X16)
+      tx_size = TX_16X16;
+
+    // For screen-content force 4X4 tx_size over 8X8, for large variance.
+    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && tx_size == TX_8X8 &&
+        bsize <= BLOCK_16X16 && var > (ac_thr << 6))
+      tx_size = TX_4X4;
+  } else {
+    tx_size = VPXMIN(max_txsize_lookup[bsize],
+                     tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+  }
+
+  return tx_size;
+}
+
 static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
                                     MACROBLOCK *x, MACROBLOCKD *xd,
                                     int *out_rate_sum, int64_t *out_dist_sum,
@@ -394,28 +423,7 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
                           cpi->common.height, abs(sum) >> (bw + bh));
 #endif
 
-  if (cpi->common.tx_mode == TX_MODE_SELECT) {
-    if (sse > (var << 2))
-      tx_size = VPXMIN(max_txsize_lookup[bsize],
-                       tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
-    else
-      tx_size = TX_8X8;
-
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
-        cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id))
-      tx_size = TX_8X8;
-    else if (tx_size > TX_16X16)
-      tx_size = TX_16X16;
-
-    // For screen-content force 4X4 tx_size over 8X8, for large variance.
-    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && tx_size == TX_8X8 &&
-        bsize <= BLOCK_16X16 && var > (ac_thr << 6))
-      tx_size = TX_4X4;
-  } else {
-    tx_size = VPXMIN(max_txsize_lookup[bsize],
-                     tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
-  }
-
+  tx_size = calculate_tx_size(cpi, bsize, xd, var, sse, ac_thr);
   // The code below for setting skip flag assumes tranform size of at least 8x8,
   // so force this lower limit on transform.
   if (tx_size < TX_8X8) tx_size = TX_8X8;
@@ -582,30 +590,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
   *var_y = var;
   *sse_y = sse;
 
-  if (cpi->common.tx_mode == TX_MODE_SELECT) {
-    if (sse > (var << 2))
-      xd->mi[0]->tx_size =
-          VPXMIN(max_txsize_lookup[bsize],
-                 tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
-    else
-      xd->mi[0]->tx_size = TX_8X8;
-
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
-        cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id))
-      xd->mi[0]->tx_size = TX_8X8;
-    else if (xd->mi[0]->tx_size > TX_16X16)
-      xd->mi[0]->tx_size = TX_16X16;
-
-    // For screen-content force 4X4 tx_size over 8X8, for large variance.
-    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
-        xd->mi[0]->tx_size == TX_8X8 && bsize <= BLOCK_16X16 &&
-        var > (ac_thr << 6))
-      xd->mi[0]->tx_size = TX_4X4;
-  } else {
-    xd->mi[0]->tx_size =
-        VPXMIN(max_txsize_lookup[bsize],
-               tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
-  }
+  xd->mi[0]->tx_size = calculate_tx_size(cpi, bsize, xd, var, sse, ac_thr);
 
   // Evaluate if the partition block is a skippable block in Y plane.
   {
