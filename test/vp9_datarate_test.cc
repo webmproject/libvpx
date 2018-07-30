@@ -110,7 +110,10 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (video->frame() == 0) encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
+    if (video->frame() == 0) {
+      encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
+      encoder->Control(VP9E_SET_AQ_MODE, 3);
+    }
 
     if (denoiser_offon_test_) {
       ASSERT_GT(denoiser_offon_period_, 0)
@@ -128,6 +131,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
 
     if (use_roi_) {
       encoder->Control(VP9E_SET_ROI_MAP, &roi_);
+      encoder->Control(VP9E_SET_AQ_MODE, 0);
     }
 
     if (cfg_.ts_number_layers > 1) {

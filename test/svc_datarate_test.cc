@@ -207,6 +207,8 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
     }
 
     if (dynamic_drop_layer_) {
+      // TODO(jian): Disable AQ Mode for this test for now.
+      encoder->Control(VP9E_SET_AQ_MODE, 0);
       if (video->frame() == 0) {
         // Change layer bitrates to set top layers to 0. This will trigger skip
         // encoding/dropping of top two spatial layers.
@@ -838,7 +840,7 @@ TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc2SL3TL4Threads) {
   layer_framedrop_ = GET_PARAM(2);
   AssignLayerBitrates();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.75,
+  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.71,
                           1.45);
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
@@ -885,7 +887,7 @@ TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc3SL3TL4Threads) {
   layer_framedrop_ = GET_PARAM(2);
   AssignLayerBitrates();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.73,
+  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.58,
                           1.2);
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
@@ -1137,7 +1139,7 @@ TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc3SL3TLSmallKf) {
   ResetModel();
   AssignLayerBitrates();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.78,
+  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.77,
                           1.15);
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
