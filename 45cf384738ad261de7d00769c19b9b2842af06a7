@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de4a3509_3e00cb90",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2018-07-30T22:51:02Z",
+      "side": 1,
+      "message": "One concern is about using of pc-\u003eerror. In this case, multiple threads use pc-\u003eerror, and pc-\u003eerror can be reset by one thread that would cause problem for other threads. We saw it in AV1. You can refer to:\nhttps://aomedia-review.googlesource.com/c/aom/+/63841\nIt would be easier if you can test it.",
+      "range": {
+        "startLine": 419,
+        "startChar": 28,
+        "endLine": 419,
+        "endChar": 37
+      },
+      "revId": "45cf384738ad261de7d00769c19b9b2842af06a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
