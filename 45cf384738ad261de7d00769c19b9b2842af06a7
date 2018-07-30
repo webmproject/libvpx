@@ -22,6 +22,30 @@
       "revId": "45cf384738ad261de7d00769c19b9b2842af06a7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48f49624_9b6e80d3",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2018-07-30T23:12:40Z",
+      "side": 1,
+      "message": "There is no error info in thread data in vp8...",
+      "parentUuid": "de4a3509_3e00cb90",
+      "range": {
+        "startLine": 419,
+        "startChar": 28,
+        "endLine": 419,
+        "endChar": 37
+      },
+      "revId": "45cf384738ad261de7d00769c19b9b2842af06a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
