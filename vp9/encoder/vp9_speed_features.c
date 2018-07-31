@@ -201,15 +201,16 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
 
   if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) {
     sf->exhaustive_searches_thresh = (1 << 22);
-    for (i = 0; i < MAX_MESH_STEP; ++i) {
-      int mesh_density_level = 0;
-      sf->mesh_patterns[i].range =
-          good_quality_mesh_patterns[mesh_density_level][i].range;
-      sf->mesh_patterns[i].interval =
-          good_quality_mesh_patterns[mesh_density_level][i].interval;
-    }
   } else {
     sf->exhaustive_searches_thresh = INT_MAX;
+  }
+
+  for (i = 0; i < MAX_MESH_STEP; ++i) {
+    const int mesh_density_level = 0;
+    sf->mesh_patterns[i].range =
+        good_quality_mesh_patterns[mesh_density_level][i].range;
+    sf->mesh_patterns[i].interval =
+        good_quality_mesh_patterns[mesh_density_level][i].interval;
   }
 
   if (speed >= 1) {
