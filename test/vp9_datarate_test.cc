@@ -34,6 +34,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
     tot_frame_number_ = 0;
     first_drop_ = 0;
     num_drops_ = 0;
+    aq_mode_ = 3;
     // Denoiser is off by default.
     denoiser_on_ = 0;
     // For testing up to 3 layers.
@@ -112,7 +113,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
-      encoder->Control(VP9E_SET_AQ_MODE, 3);
+      encoder->Control(VP9E_SET_AQ_MODE, aq_mode_);
     }
 
     if (denoiser_offon_test_) {
@@ -210,6 +211,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
   int64_t bits_in_buffer_model_;
   vpx_codec_pts_t first_drop_;
   int num_drops_;
+  int aq_mode_;
   int denoiser_on_;
   int denoiser_offon_test_;
   int denoiser_offon_period_;
@@ -531,6 +533,8 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
   // 60-40 bitrate allocation for 2 temporal layers.
   cfg_.layer_target_bitrate[0] = 60 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[1] = cfg_.rc_target_bitrate;
+  // TODO(jianj): Disable AQ Mode for this test for now.
+  aq_mode_ = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
     ASSERT_GE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 0.85)
@@ -574,6 +578,8 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayers) {
   cfg_.layer_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[1] = 60 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[2] = cfg_.rc_target_bitrate;
+  // TODO(jianj): Disable AQ Mode for this test for now.
+  aq_mode_ = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
     // TODO(yaowu): Work out more stable rc control strategy and
@@ -623,6 +629,8 @@ TEST_P(DatarateTestVP9LargeOneBR,
   cfg_.layer_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[1] = 60 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[2] = cfg_.rc_target_bitrate;
+  // TODO(jianj): Disable AQ Mode for this test for now.
+  aq_mode_ = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
     ASSERT_GE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 0.85)
