@@ -416,7 +416,6 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
                      tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
   }
 
-  assert(tx_size >= TX_8X8);
   xd->mi[0]->tx_size = tx_size;
 
   if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && x->zero_temp_sad_source &&
