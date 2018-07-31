@@ -846,7 +846,8 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->quant_opt_thresh = 99.0;
   sf->allow_acl = 1;
 #if CONFIG_VP9_HIGHBITDEPTH
-  sf->enable_tpl_model = 0;
+  // TODO(jingning): Make the model support high bit-depth route.
+  sf->enable_tpl_model = !cm->use_highbitdepth;
 #else
   sf->enable_tpl_model = 1;
 #endif
