@@ -1427,6 +1427,70 @@ static INLINE int get_force_skip_low_temp_var(uint8_t *variance_low, int mi_row,
   return force_skip_low_temp_var;
 }
 
+static void search_filter_ref(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
+                              int mi_row, int mi_col, PRED_BUFFER *tmp,
+                              BLOCK_SIZE bsize, int reuse_inter_pred,
+                              PRED_BUFFER **this_mode_pred, unsigned int *var_y,
+                              unsigned int *sse_y) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MODE_INFO *const mi = xd->mi[0];
+  struct macroblockd_plane *const pd = &xd->plane[0];
+  const int bw = num_4x4_blocks_wide_lookup[bsize] << 2;
+
+  int pf_rate[3] = { 0 };
+  int64_t pf_dist[3] = { 0 };
+  int curr_rate[3] = { 0 };
+  unsigned int pf_var[3] = { 0 };
+  unsigned int pf_sse[3] = { 0 };
+  TX_SIZE pf_tx_size[3] = { 0 };
+  int64_t best_cost = INT64_MAX;
+  INTERP_FILTER best_filter = SWITCHABLE, filter;
+  PRED_BUFFER *current_pred = *this_mode_pred;
+  uint8_t skip_txfm = SKIP_TXFM_NONE;
+
+  for (filter = EIGHTTAP; filter <= EIGHTTAP_SMOOTH; ++filter) {
+    int64_t cost;
+    mi->interp_filter = filter;
+    vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+    model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[filter], &pf_dist[filter],
+                      &pf_var[filter], &pf_sse[filter]);
+    curr_rate[filter] = pf_rate[filter];
+    pf_rate[filter] += vp9_get_switchable_rate(cpi, xd);
+    cost = RDCOST(x->rdmult, x->rddiv, pf_rate[filter], pf_dist[filter]);
+    pf_tx_size[filter] = mi->tx_size;
+    if (cost < best_cost) {
+      best_filter = filter;
+      best_cost = cost;
+      skip_txfm = x->skip_txfm[0];
+
+      if (reuse_inter_pred) {
+        if (*this_mode_pred != current_pred) {
+          free_pred_buffer(*this_mode_pred);
+          *this_mode_pred = current_pred;
+        }
+        current_pred = &tmp[get_pred_buffer(tmp, 3)];
+        pd->dst.buf = current_pred->data;
+        pd->dst.stride = bw;
+      }
+    }
+  }
+
+  if (reuse_inter_pred && *this_mode_pred != current_pred)
+    free_pred_buffer(current_pred);
+
+  mi->interp_filter = best_filter;
+  mi->tx_size = pf_tx_size[best_filter];
+  this_rdc->rate = curr_rate[best_filter];
+  this_rdc->dist = pf_dist[best_filter];
+  *var_y = pf_var[best_filter];
+  *sse_y = pf_sse[best_filter];
+  x->skip_txfm[0] = skip_txfm;
+  if (reuse_inter_pred) {
+    pd->dst.buf = (*this_mode_pred)->data;
+    pd->dst.stride = (*this_mode_pred)->stride;
+  }
+}
+
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
@@ -1447,7 +1511,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
   RD_COST this_rdc, best_rdc;
-  uint8_t skip_txfm = SKIP_TXFM_NONE, best_mode_skip_txfm = SKIP_TXFM_NONE;
+  uint8_t best_mode_skip_txfm = SKIP_TXFM_NONE;
   // var_y and sse_y are saved to be used in skipping checking
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
@@ -2085,58 +2149,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
          (ref_frame == GOLDEN_FRAME && !force_mv_inter_layer &&
           (cpi->use_svc || cpi->oxcf.rc_mode == VPX_VBR))) &&
         (((mi->mv[0].as_mv.row | mi->mv[0].as_mv.col) & 0x07) != 0)) {
-      int pf_rate[3];
-      int64_t pf_dist[3];
-      int curr_rate[3];
-      unsigned int pf_var[3];
-      unsigned int pf_sse[3];
-      TX_SIZE pf_tx_size[3];
-      int64_t best_cost = INT64_MAX;
-      INTERP_FILTER best_filter = SWITCHABLE, filter;
-      PRED_BUFFER *current_pred = this_mode_pred;
       rd_computed = 1;
-
-      for (filter = EIGHTTAP; filter <= EIGHTTAP_SMOOTH; ++filter) {
-        int64_t cost;
-        mi->interp_filter = filter;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[filter], &pf_dist[filter],
-                          &pf_var[filter], &pf_sse[filter]);
-        curr_rate[filter] = pf_rate[filter];
-        pf_rate[filter] += vp9_get_switchable_rate(cpi, xd);
-        cost = RDCOST(x->rdmult, x->rddiv, pf_rate[filter], pf_dist[filter]);
-        pf_tx_size[filter] = mi->tx_size;
-        if (cost < best_cost) {
-          best_filter = filter;
-          best_cost = cost;
-          skip_txfm = x->skip_txfm[0];
-
-          if (reuse_inter_pred) {
-            if (this_mode_pred != current_pred) {
-              free_pred_buffer(this_mode_pred);
-              this_mode_pred = current_pred;
-            }
-            current_pred = &tmp[get_pred_buffer(tmp, 3)];
-            pd->dst.buf = current_pred->data;
-            pd->dst.stride = bw;
-          }
-        }
-      }
-
-      if (reuse_inter_pred && this_mode_pred != current_pred)
-        free_pred_buffer(current_pred);
-
-      mi->interp_filter = best_filter;
-      mi->tx_size = pf_tx_size[best_filter];
-      this_rdc.rate = curr_rate[best_filter];
-      this_rdc.dist = pf_dist[best_filter];
-      var_y = pf_var[best_filter];
-      sse_y = pf_sse[best_filter];
-      x->skip_txfm[0] = skip_txfm;
-      if (reuse_inter_pred) {
-        pd->dst.buf = this_mode_pred->data;
-        pd->dst.stride = this_mode_pred->stride;
-      }
+      search_filter_ref(cpi, x, &this_rdc, mi_row, mi_col, tmp, bsize,
+                        reuse_inter_pred, &this_mode_pred, &var_y, &sse_y);
     } else {
       // For low motion content use x->sb_is_skin in addition to VeryHighSad
       // for setting large_block.
