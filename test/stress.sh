@@ -144,6 +144,19 @@ vp8_stress_test() {
   fi
 }
 
+vp8_stress_test_token_parititions() {
+  local vp8_max_jobs=${STRESS_VP8_DECODE_MAX_JOBS:-40}
+  if [ "$(vp8_decode_available)" = "yes" -a \
+       "$(vp8_encode_available)" = "yes" ]; then
+    for threads in 2 4 8; do
+      for token_partitions in 1 2 3; do
+        stress vp8 "${VP8}" "${vp8_max_jobs}" ${threads} \
+          "--token-parts=$token_partitions"
+      done
+    done
+  fi
+}
+
 vp9_stress() {
   local vp9_max_jobs=${STRESS_VP9_DECODE_MAX_JOBS:-25}
 
@@ -166,4 +179,5 @@ vp9_stress_test_row_mt() {
 }
 
 run_tests stress_verify_environment \
-  "vp8_stress_test vp9_stress_test vp9_stress_test_row_mt"
+  "vp8_stress_test vp8_stress_test_token_parititions
+   vp9_stress_test vp9_stress_test_row_mt"
