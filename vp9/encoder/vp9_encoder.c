@@ -6014,7 +6014,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   }
 }
 
-void setup_tpl_stats(VP9_COMP *cpi) {
+static void setup_tpl_stats(VP9_COMP *cpi) {
   GF_PICTURE gf_picture[MAX_LAG_BUFFERS];
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
   int tpl_group_frames = 0;
