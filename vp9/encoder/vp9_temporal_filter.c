@@ -103,7 +103,7 @@ void vp9_temporal_filter_apply_c(const uint8_t *frame1, unsigned int stride,
   unsigned int i, j, k;
   int modifier;
   int byte = 0;
-  const int rounding = strength > 0 ? 1 << (strength - 1) : 0;
+  const int rounding = (1 << strength) >> 1;
 
   assert(strength >= 0);
   assert(strength <= 6);
