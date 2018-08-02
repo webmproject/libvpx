@@ -1491,6 +1491,104 @@ static void search_filter_ref(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
   }
 }
 
+static int search_new_mv(VP9_COMP *cpi, MACROBLOCK *x,
+                         int_mv frame_mv[][MAX_REF_FRAMES],
+                         MV_REFERENCE_FRAME ref_frame, int gf_temporal_ref,
+                         BLOCK_SIZE bsize, int mi_row, int mi_col,
+                         int best_pred_sad, int *rate_mv,
+                         unsigned int best_sse_sofar, RD_COST *best_rdc) {
+  SVC *const svc = &cpi->svc;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MODE_INFO *const mi = xd->mi[0];
+  SPEED_FEATURES *const sf = &cpi->sf;
+
+  if (ref_frame > LAST_FRAME && gf_temporal_ref &&
+      cpi->oxcf.rc_mode == VPX_CBR) {
+    int tmp_sad;
+    uint32_t dis;
+    int cost_list[5] = { INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX };
+
+    if (bsize < BLOCK_16X16) return -1;
+
+    tmp_sad = vp9_int_pro_motion_estimation(
+        cpi, x, bsize, mi_row, mi_col,
+        &x->mbmi_ext->ref_mvs[ref_frame][0].as_mv);
+
+    if (tmp_sad > x->pred_mv_sad[LAST_FRAME]) return -1;
+    if (tmp_sad + (num_pels_log2_lookup[bsize] << 4) > best_pred_sad) return -1;
+
+    frame_mv[NEWMV][ref_frame].as_int = mi->mv[0].as_int;
+    *rate_mv = vp9_mv_bit_cost(&frame_mv[NEWMV][ref_frame].as_mv,
+                               &x->mbmi_ext->ref_mvs[ref_frame][0].as_mv,
+                               x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
+    frame_mv[NEWMV][ref_frame].as_mv.row >>= 3;
+    frame_mv[NEWMV][ref_frame].as_mv.col >>= 3;
+
+    cpi->find_fractional_mv_step(
+        x, &frame_mv[NEWMV][ref_frame].as_mv,
+        &x->mbmi_ext->ref_mvs[ref_frame][0].as_mv,
+        cpi->common.allow_high_precision_mv, x->errorperbit,
+        &cpi->fn_ptr[bsize], cpi->sf.mv.subpel_force_stop,
+        cpi->sf.mv.subpel_iters_per_step, cond_cost_list(cpi, cost_list),
+        x->nmvjointcost, x->mvcost, &dis, &x->pred_sse[ref_frame], NULL, 0, 0);
+  } else if (svc->use_base_mv && svc->spatial_layer_id) {
+    if (frame_mv[NEWMV][ref_frame].as_int != INVALID_MV) {
+      const int pre_stride = xd->plane[0].pre[0].stride;
+      unsigned int base_mv_sse = UINT_MAX;
+      int scale = (cpi->rc.avg_frame_low_motion > 60) ? 2 : 4;
+      const uint8_t *const pre_buf =
+          xd->plane[0].pre[0].buf +
+          (frame_mv[NEWMV][ref_frame].as_mv.row >> 3) * pre_stride +
+          (frame_mv[NEWMV][ref_frame].as_mv.col >> 3);
+      cpi->fn_ptr[bsize].vf(x->plane[0].src.buf, x->plane[0].src.stride,
+                            pre_buf, pre_stride, &base_mv_sse);
+
+      // Exit NEWMV search if base_mv is (0,0) && bsize < BLOCK_16x16,
+      // for SVC encoding.
+      if (cpi->use_svc && svc->use_base_mv && bsize < BLOCK_16X16 &&
+          frame_mv[NEWMV][ref_frame].as_mv.row == 0 &&
+          frame_mv[NEWMV][ref_frame].as_mv.col == 0)
+        return -1;
+
+      // Exit NEWMV search if base_mv_sse is large.
+      if (sf->base_mv_aggressive && base_mv_sse > (best_sse_sofar << scale))
+        return -1;
+      if (base_mv_sse < (best_sse_sofar << 1)) {
+        // Base layer mv is good.
+        // Exit NEWMV search if the base_mv is (0, 0) and sse is low, since
+        // (0, 0) mode is already tested.
+        unsigned int base_mv_sse_normalized =
+            base_mv_sse >>
+            (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
+        if (sf->base_mv_aggressive && base_mv_sse <= best_sse_sofar &&
+            base_mv_sse_normalized < 400 &&
+            frame_mv[NEWMV][ref_frame].as_mv.row == 0 &&
+            frame_mv[NEWMV][ref_frame].as_mv.col == 0)
+          return -1;
+        if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
+                                    &frame_mv[NEWMV][ref_frame], rate_mv,
+                                    best_rdc->rdcost, 1)) {
+          return -1;
+        }
+      } else if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
+                                         &frame_mv[NEWMV][ref_frame], rate_mv,
+                                         best_rdc->rdcost, 0)) {
+        return -1;
+      }
+    } else if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
+                                       &frame_mv[NEWMV][ref_frame], rate_mv,
+                                       best_rdc->rdcost, 0)) {
+      return -1;
+    }
+  } else if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
+                                     &frame_mv[NEWMV][ref_frame], rate_mv,
+                                     best_rdc->rdcost, 0)) {
+    return -1;
+  }
+
+  return 0;
+}
+
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
@@ -2004,91 +2102,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       if (frame_mv[this_mode][ref_frame].as_int != 0) continue;
 
     if (this_mode == NEWMV && !force_mv_inter_layer) {
-      if (ref_frame > LAST_FRAME && gf_temporal_ref &&
-          cpi->oxcf.rc_mode == VPX_CBR) {
-        int tmp_sad;
-        uint32_t dis;
-        int cost_list[5] = { INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX };
-
-        if (bsize < BLOCK_16X16) continue;
-
-        tmp_sad = vp9_int_pro_motion_estimation(
-            cpi, x, bsize, mi_row, mi_col,
-            &x->mbmi_ext->ref_mvs[ref_frame][0].as_mv);
-
-        if (tmp_sad > x->pred_mv_sad[LAST_FRAME]) continue;
-        if (tmp_sad + (num_pels_log2_lookup[bsize] << 4) > best_pred_sad)
-          continue;
-
-        frame_mv[NEWMV][ref_frame].as_int = mi->mv[0].as_int;
-        rate_mv = vp9_mv_bit_cost(&frame_mv[NEWMV][ref_frame].as_mv,
-                                  &x->mbmi_ext->ref_mvs[ref_frame][0].as_mv,
-                                  x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
-        frame_mv[NEWMV][ref_frame].as_mv.row >>= 3;
-        frame_mv[NEWMV][ref_frame].as_mv.col >>= 3;
-
-        cpi->find_fractional_mv_step(
-            x, &frame_mv[NEWMV][ref_frame].as_mv,
-            &x->mbmi_ext->ref_mvs[ref_frame][0].as_mv,
-            cpi->common.allow_high_precision_mv, x->errorperbit,
-            &cpi->fn_ptr[bsize], cpi->sf.mv.subpel_force_stop,
-            cpi->sf.mv.subpel_iters_per_step, cond_cost_list(cpi, cost_list),
-            x->nmvjointcost, x->mvcost, &dis, &x->pred_sse[ref_frame], NULL, 0,
-            0);
-      } else if (svc->use_base_mv && svc->spatial_layer_id) {
-        if (frame_mv[NEWMV][ref_frame].as_int != INVALID_MV) {
-          const int pre_stride = xd->plane[0].pre[0].stride;
-          unsigned int base_mv_sse = UINT_MAX;
-          int scale = (cpi->rc.avg_frame_low_motion > 60) ? 2 : 4;
-          const uint8_t *const pre_buf =
-              xd->plane[0].pre[0].buf +
-              (frame_mv[NEWMV][ref_frame].as_mv.row >> 3) * pre_stride +
-              (frame_mv[NEWMV][ref_frame].as_mv.col >> 3);
-          cpi->fn_ptr[bsize].vf(x->plane[0].src.buf, x->plane[0].src.stride,
-                                pre_buf, pre_stride, &base_mv_sse);
-
-          // Exit NEWMV search if base_mv is (0,0) && bsize < BLOCK_16x16,
-          // for SVC encoding.
-          if (cpi->use_svc && svc->use_base_mv && bsize < BLOCK_16X16 &&
-              frame_mv[NEWMV][ref_frame].as_mv.row == 0 &&
-              frame_mv[NEWMV][ref_frame].as_mv.col == 0)
-            continue;
-
-          // Exit NEWMV search if base_mv_sse is large.
-          if (sf->base_mv_aggressive && base_mv_sse > (best_sse_sofar << scale))
-            continue;
-          if (base_mv_sse < (best_sse_sofar << 1)) {
-            // Base layer mv is good.
-            // Exit NEWMV search if the base_mv is (0, 0) and sse is low, since
-            // (0, 0) mode is already tested.
-            unsigned int base_mv_sse_normalized =
-                base_mv_sse >>
-                (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
-            if (sf->base_mv_aggressive && base_mv_sse <= best_sse_sofar &&
-                base_mv_sse_normalized < 400 &&
-                frame_mv[NEWMV][ref_frame].as_mv.row == 0 &&
-                frame_mv[NEWMV][ref_frame].as_mv.col == 0)
-              continue;
-            if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
-                                        &frame_mv[NEWMV][ref_frame], &rate_mv,
-                                        best_rdc.rdcost, 1)) {
-              continue;
-            }
-          } else if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
-                                             &frame_mv[NEWMV][ref_frame],
-                                             &rate_mv, best_rdc.rdcost, 0)) {
-            continue;
-          }
-        } else if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
-                                           &frame_mv[NEWMV][ref_frame],
-                                           &rate_mv, best_rdc.rdcost, 0)) {
-          continue;
-        }
-      } else if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
-                                         &frame_mv[NEWMV][ref_frame], &rate_mv,
-                                         best_rdc.rdcost, 0)) {
+      if (search_new_mv(cpi, x, frame_mv, ref_frame, gf_temporal_ref, bsize,
+                        mi_row, mi_col, best_pred_sad, &rate_mv, best_sse_sofar,
+                        &best_rdc))
         continue;
-      }
     }
 
     // TODO(jianj): Skipping the testing of (duplicate) non-zero motion vector
