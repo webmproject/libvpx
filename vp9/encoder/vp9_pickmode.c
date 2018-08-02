@@ -41,6 +41,17 @@ typedef struct {
   int in_use;
 } PRED_BUFFER;
 
+typedef struct {
+  PRED_BUFFER *best_pred;
+  PREDICTION_MODE best_mode;
+  TX_SIZE best_tx_size;
+  TX_SIZE best_intra_tx_size;
+  MV_REFERENCE_FRAME best_ref_frame;
+  MV_REFERENCE_FRAME best_second_ref_frame;
+  uint8_t best_mode_skip_txfm;
+  INTERP_FILTER best_pred_filter;
+} BEST_PICKMODE;
+
 static const int pos_shift_16x16[4][4] = {
   { 9, 10, 13, 14 }, { 11, 12, 15, 16 }, { 17, 18, 21, 22 }, { 19, 20, 23, 24 }
 };
@@ -1302,18 +1313,16 @@ static void vp9_pickmode_ctx_den_update(
     VP9_PICKMODE_CTX_DEN *ctx_den, int64_t zero_last_cost_orig,
     int ref_frame_cost[MAX_REF_FRAMES],
     int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES], int reuse_inter_pred,
-    TX_SIZE best_tx_size, PREDICTION_MODE best_mode,
-    MV_REFERENCE_FRAME best_ref_frame, INTERP_FILTER best_pred_filter,
-    uint8_t best_mode_skip_txfm) {
+    BEST_PICKMODE *bp) {
   ctx_den->zero_last_cost_orig = zero_last_cost_orig;
   ctx_den->ref_frame_cost = ref_frame_cost;
   ctx_den->frame_mv = frame_mv;
   ctx_den->reuse_inter_pred = reuse_inter_pred;
-  ctx_den->best_tx_size = best_tx_size;
-  ctx_den->best_mode = best_mode;
-  ctx_den->best_ref_frame = best_ref_frame;
-  ctx_den->best_pred_filter = best_pred_filter;
-  ctx_den->best_mode_skip_txfm = best_mode_skip_txfm;
+  ctx_den->best_tx_size = bp->best_tx_size;
+  ctx_den->best_mode = bp->best_mode;
+  ctx_den->best_ref_frame = bp->best_ref_frame;
+  ctx_den->best_pred_filter = bp->best_pred_filter;
+  ctx_den->best_mode_skip_txfm = bp->best_mode_skip_txfm;
 }
 
 static void recheck_zeromv_after_denoising(
@@ -1589,6 +1598,17 @@ static int search_new_mv(VP9_COMP *cpi, MACROBLOCK *x,
   return 0;
 }
 
+static INLINE void init_best_pickmode(BEST_PICKMODE *bp) {
+  bp->best_mode = ZEROMV;
+  bp->best_ref_frame = LAST_FRAME;
+  bp->best_tx_size = TX_SIZES;
+  bp->best_intra_tx_size = TX_SIZES;
+  bp->best_pred_filter = EIGHTTAP;
+  bp->best_mode_skip_txfm = SKIP_TXFM_NONE;
+  bp->best_second_ref_frame = NONE;
+  bp->best_pred = NULL;
+}
+
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
@@ -1598,18 +1618,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mi = xd->mi[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
-  PREDICTION_MODE best_mode = ZEROMV;
-  MV_REFERENCE_FRAME ref_frame, best_ref_frame = LAST_FRAME;
+
+  BEST_PICKMODE best_pickmode;
+
+  MV_REFERENCE_FRAME ref_frame;
   MV_REFERENCE_FRAME usable_ref_frame, second_ref_frame;
-  TX_SIZE best_tx_size = TX_SIZES;
-  INTERP_FILTER best_pred_filter = EIGHTTAP;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   uint8_t mode_checked[MB_MODE_COUNT][MAX_REF_FRAMES];
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
   RD_COST this_rdc, best_rdc;
-  uint8_t best_mode_skip_txfm = SKIP_TXFM_NONE;
   // var_y and sse_y are saved to be used in skipping checking
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
@@ -1645,7 +1664,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   DECLARE_ALIGNED(16, uint16_t, pred_buf_16[3 * 64 * 64]);
 #endif
   struct buf_2d orig_dst = pd->dst;
-  PRED_BUFFER *best_pred = NULL;
   PRED_BUFFER *this_mode_pred = NULL;
   const int pixels_in_block = bh * bw;
   int reuse_inter_pred = cpi->sf.reuse_inter_pred_sby && ctx->pred_pixel_ready;
@@ -1668,7 +1686,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int denoise_svc_pickmode = 1;
 #endif
   INTERP_FILTER filter_gf_svc = EIGHTTAP;
-  MV_REFERENCE_FRAME best_second_ref_frame = NONE;
   MV_REFERENCE_FRAME inter_layer_ref = GOLDEN_FRAME;
   const struct segmentation *const seg = &cm->seg;
   int comp_modes = 0;
@@ -1681,9 +1698,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int scene_change_detected =
       cpi->rc.high_source_sad ||
       (cpi->use_svc && cpi->svc.high_source_sad_superframe);
+
+  init_best_pickmode(&best_pickmode);
+
   x->source_variance = UINT_MAX;
   if (cpi->sf.default_interp_filter == BILINEAR) {
-    best_pred_filter = BILINEAR;
+    best_pickmode.best_pred_filter = BILINEAR;
     filter_gf_svc = BILINEAR;
   }
   if (cpi->use_svc && svc->spatial_layer_id > 0) {
@@ -2084,8 +2104,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
 
     mode_index = mode_idx[ref_frame][INTER_OFFSET(this_mode)];
-    mode_rd_thresh = best_mode_skip_txfm ? rd_threshes[mode_index] << 1
-                                         : rd_threshes[mode_index];
+    mode_rd_thresh = best_pickmode.best_mode_skip_txfm
+                         ? rd_threshes[mode_index] << 1
+                         : rd_threshes[mode_index];
 
     // Increase mode_rd_thresh value for GOLDEN_FRAME for improved encoding
     // speed with little/no subjective quality loss.
@@ -2301,17 +2322,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
     if (this_rdc.rdcost < best_rdc.rdcost || x->skip) {
       best_rdc = this_rdc;
-      best_mode = this_mode;
-      best_pred_filter = mi->interp_filter;
-      best_tx_size = mi->tx_size;
-      best_ref_frame = ref_frame;
-      best_mode_skip_txfm = x->skip_txfm[0];
       best_early_term = this_early_term;
-      best_second_ref_frame = second_ref_frame;
+      best_pickmode.best_mode = this_mode;
+      best_pickmode.best_pred_filter = mi->interp_filter;
+      best_pickmode.best_tx_size = mi->tx_size;
+      best_pickmode.best_ref_frame = ref_frame;
+      best_pickmode.best_mode_skip_txfm = x->skip_txfm[0];
+      best_pickmode.best_second_ref_frame = second_ref_frame;
 
       if (reuse_inter_pred) {
-        free_pred_buffer(best_pred);
-        best_pred = this_mode_pred;
+        free_pred_buffer(best_pickmode.best_pred);
+        best_pickmode.best_pred = this_mode_pred;
       }
     } else {
       if (reuse_inter_pred) free_pred_buffer(this_mode_pred);
@@ -2327,14 +2348,15 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     }
   }
 
-  mi->mode = best_mode;
-  mi->interp_filter = best_pred_filter;
-  mi->tx_size = best_tx_size;
-  mi->ref_frame[0] = best_ref_frame;
-  mi->mv[0].as_int = frame_mv[best_mode][best_ref_frame].as_int;
+  mi->mode = best_pickmode.best_mode;
+  mi->interp_filter = best_pickmode.best_pred_filter;
+  mi->tx_size = best_pickmode.best_tx_size;
+  mi->ref_frame[0] = best_pickmode.best_ref_frame;
+  mi->mv[0].as_int =
+      frame_mv[best_pickmode.best_mode][best_pickmode.best_ref_frame].as_int;
   xd->mi[0]->bmi[0].as_mv[0].as_int = mi->mv[0].as_int;
-  x->skip_txfm[0] = best_mode_skip_txfm;
-  mi->ref_frame[1] = best_second_ref_frame;
+  x->skip_txfm[0] = best_pickmode.best_mode_skip_txfm;
+  mi->ref_frame[1] = best_pickmode.best_second_ref_frame;
 
   // For spatial enhancemanent layer: perform intra prediction only if base
   // layer is chosen as the reference. Always perform intra prediction if
@@ -2346,7 +2368,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         svc->layer_context[svc->temporal_layer_id].is_key_frame ||
         !(cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) ||
         (!svc->layer_context[svc->temporal_layer_id].is_key_frame &&
-         svc_force_zero_mode[best_ref_frame - 1]);
+         svc_force_zero_mode[best_pickmode.best_ref_frame - 1]);
     inter_mode_thresh = (inter_mode_thresh << 1) + inter_mode_thresh;
   }
   if ((cpi->oxcf.lag_in_frames > 0 && cpi->oxcf.rc_mode == VPX_VBR &&
@@ -2371,7 +2393,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
        !x->lowvar_highsumdiff)) {
     struct estimate_block_intra_args args = { cpi, x, DC_PRED, 1, 0 };
     int i;
-    TX_SIZE best_intra_tx_size = TX_SIZES;
+    PRED_BUFFER *const best_pred = best_pickmode.best_pred;
     TX_SIZE intra_tx_size =
         VPXMIN(max_txsize_lookup[bsize],
                tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
@@ -2396,7 +2418,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                           this_mode_pred->data, this_mode_pred->stride, NULL, 0,
                           0, 0, 0, bw, bh);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        best_pred = this_mode_pred;
+        best_pickmode.best_pred = this_mode_pred;
       }
     }
     pd->dst = orig_dst;
@@ -2456,36 +2478,37 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
       if (this_rdc.rdcost < best_rdc.rdcost) {
         best_rdc = this_rdc;
-        best_mode = this_mode;
-        best_intra_tx_size = mi->tx_size;
-        best_ref_frame = INTRA_FRAME;
-        best_second_ref_frame = NONE;
+        best_pickmode.best_mode = this_mode;
+        best_pickmode.best_intra_tx_size = mi->tx_size;
+        best_pickmode.best_ref_frame = INTRA_FRAME;
+        best_pickmode.best_second_ref_frame = NONE;
         mi->uv_mode = this_mode;
         mi->mv[0].as_int = INVALID_MV;
         mi->mv[1].as_int = INVALID_MV;
-        best_mode_skip_txfm = x->skip_txfm[0];
+        best_pickmode.best_mode_skip_txfm = x->skip_txfm[0];
       }
     }
 
     // Reset mb_mode_info to the best inter mode.
-    if (best_ref_frame != INTRA_FRAME) {
-      mi->tx_size = best_tx_size;
+    if (best_pickmode.best_ref_frame != INTRA_FRAME) {
+      mi->tx_size = best_pickmode.best_tx_size;
     } else {
-      mi->tx_size = best_intra_tx_size;
+      mi->tx_size = best_pickmode.best_intra_tx_size;
     }
   }
 
   pd->dst = orig_dst;
-  mi->mode = best_mode;
-  mi->ref_frame[0] = best_ref_frame;
-  mi->ref_frame[1] = best_second_ref_frame;
-  x->skip_txfm[0] = best_mode_skip_txfm;
+  mi->mode = best_pickmode.best_mode;
+  mi->ref_frame[0] = best_pickmode.best_ref_frame;
+  mi->ref_frame[1] = best_pickmode.best_second_ref_frame;
+  x->skip_txfm[0] = best_pickmode.best_mode_skip_txfm;
 
   if (!is_inter_block(mi)) {
     mi->interp_filter = SWITCHABLE_FILTERS;
   }
 
-  if (reuse_inter_pred && best_pred != NULL) {
+  if (reuse_inter_pred && best_pickmode.best_pred != NULL) {
+    PRED_BUFFER *const best_pred = best_pickmode.best_pred;
     if (best_pred->data != orig_dst.buf && is_inter_mode(mi->mode)) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth)
@@ -2514,26 +2537,26 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     // Remove this condition when the issue is resolved.
     if (x->sb_pickmode_part) ctx->sb_skip_denoising = 1;
     vp9_pickmode_ctx_den_update(&ctx_den, zero_last_cost_orig, ref_frame_cost,
-                                frame_mv, reuse_inter_pred, best_tx_size,
-                                best_mode, best_ref_frame, best_pred_filter,
-                                best_mode_skip_txfm);
+                                frame_mv, reuse_inter_pred, &best_pickmode);
     vp9_denoiser_denoise(cpi, x, mi_row, mi_col, bsize, ctx, &decision,
                          gf_temporal_ref);
     recheck_zeromv_after_denoising(cpi, mi, x, xd, decision, &ctx_den, yv12_mb,
                                    &best_rdc, bsize, mi_row, mi_col);
-    best_ref_frame = ctx_den.best_ref_frame;
+    best_pickmode.best_ref_frame = ctx_den.best_ref_frame;
   }
 #endif
 
-  if (best_ref_frame == ALTREF_FRAME || best_second_ref_frame == ALTREF_FRAME)
+  if (best_pickmode.best_ref_frame == ALTREF_FRAME ||
+      best_pickmode.best_second_ref_frame == ALTREF_FRAME)
     x->arf_frame_usage++;
-  else if (best_ref_frame != INTRA_FRAME)
+  else if (best_pickmode.best_ref_frame != INTRA_FRAME)
     x->lastgolden_frame_usage++;
 
   if (cpi->sf.adaptive_rd_thresh) {
-    THR_MODES best_mode_idx = mode_idx[best_ref_frame][mode_offset(mi->mode)];
+    THR_MODES best_mode_idx =
+        mode_idx[best_pickmode.best_ref_frame][mode_offset(mi->mode)];
 
-    if (best_ref_frame == INTRA_FRAME) {
+    if (best_pickmode.best_ref_frame == INTRA_FRAME) {
       // Only consider the modes that are included in the intra_mode_list.
       int intra_modes = sizeof(intra_mode_list) / sizeof(PREDICTION_MODE);
       int i;
@@ -2553,7 +2576,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     } else {
       for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
         PREDICTION_MODE this_mode;
-        if (best_ref_frame != ref_frame) continue;
+        if (best_pickmode.best_ref_frame != ref_frame) continue;
         for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
           if (cpi->sf.adaptive_rd_thresh_row_mt)
             update_thresh_freq_fact_row_mt(cpi, tile_data, x->source_variance,
