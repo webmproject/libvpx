@@ -2186,7 +2186,7 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   const SEARCH_METHODS method = (SEARCH_METHODS)search_method;
   vp9_variance_fn_ptr_t *fn_ptr = &cpi->fn_ptr[bsize];
   int var = 0;
-  int run_mesh_search = (method == MESH);
+  int run_exhaustive_search = 0;
 
   if (cost_list) {
     cost_list[0] = INT_MAX;
@@ -2217,39 +2217,39 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       var = bigdia_search(x, mvp_full, step_param, error_per_bit, 1, cost_list,
                           fn_ptr, 1, ref_mv, tmp_mv);
       break;
-    default:
-      assert(method == NSTEP || method == MESH);
+    case NSTEP:
+    case MESH:
       var = full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
                                MAX_MVSEARCH_STEPS - 1 - step_param, 1,
                                cost_list, fn_ptr, ref_mv, tmp_mv);
-
-      // Should we allow a follow on exhaustive search, in regular rd search
-      // mode.
-      if (run_mesh_search == 0) {
-        if ((sf->exhaustive_searches_thresh < INT_MAX) &&
-            !cpi->rc.is_src_frame_alt_ref) {
-          int64_t exhuastive_thr = sf->exhaustive_searches_thresh;
-          exhuastive_thr >>=
-              8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
-          if (var > exhuastive_thr) run_mesh_search = 1;
-        }
-      }
-
-      if (run_mesh_search) {
-        int var_ex;
-        MV tmp_mv_ex;
-        var_ex = full_pixel_exhaustive(cpi, x, tmp_mv, error_per_bit, cost_list,
-                                       fn_ptr, ref_mv, &tmp_mv_ex);
-
-        if (var_ex < var) {
-          var = var_ex;
-          *tmp_mv = tmp_mv_ex;
-        }
-      }
       break;
+    default: assert(0 && "Unknown search method");
   }
 
-  if (method != NSTEP && rd && var < var_max)
+  if (method == NSTEP) {
+    if (sf->exhaustive_searches_thresh < INT_MAX &&
+        !cpi->rc.is_src_frame_alt_ref) {
+      const int64_t exhuastive_thr =
+          sf->exhaustive_searches_thresh >>
+          (8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]));
+      if (var > exhuastive_thr) run_exhaustive_search = 1;
+    }
+  } else if (method == MESH) {
+    run_exhaustive_search = 1;
+  }
+
+  if (run_exhaustive_search) {
+    int var_ex;
+    MV tmp_mv_ex;
+    var_ex = full_pixel_exhaustive(cpi, x, tmp_mv, error_per_bit, cost_list,
+                                   fn_ptr, ref_mv, &tmp_mv_ex);
+    if (var_ex < var) {
+      var = var_ex;
+      *tmp_mv = tmp_mv_ex;
+    }
+  }
+
+  if (method != NSTEP && method != MESH && rd && var < var_max)
     var = vp9_get_mvpred_var(x, tmp_mv, ref_mv, fn_ptr, 1);
 
   return var;
