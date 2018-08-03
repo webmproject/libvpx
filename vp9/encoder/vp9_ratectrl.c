@@ -2640,6 +2640,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
     int frames_to_buffer = 1;
     int frame = 0;
     int scene_cut_force_key_frame = 0;
+    int num_zero_temp_sad = 0;
     uint64_t avg_sad_current = 0;
     uint32_t min_thresh = 10000;
     float thresh = 8.0f;
@@ -2703,6 +2704,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
           last_src_y = frames[frame + 1]->y_buffer;
           last_src_ystride = frames[frame + 1]->y_stride;
         }
+        num_zero_temp_sad = 0;
         for (sbi_row = 0; sbi_row < sb_rows; ++sbi_row) {
           for (sbi_col = 0; sbi_col < sb_cols; ++sbi_col) {
             // Checker-board pattern, ignore boundary.
@@ -2714,6 +2716,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
                                                last_src_ystride);
               avg_sad += tmp_sad;
               num_samples++;
+              if (tmp_sad == 0) num_zero_temp_sad++;
             }
             src_y += 64;
             last_src_y += 64;
@@ -2730,7 +2733,8 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
           if (avg_sad >
                   VPXMAX(min_thresh,
                          (unsigned int)(rc->avg_source_sad[0] * thresh)) &&
-              rc->frames_since_key > 1)
+              rc->frames_since_key > 1 &&
+              num_zero_temp_sad < 3 * (num_samples >> 2))
             rc->high_source_sad = 1;
           else
             rc->high_source_sad = 0;
