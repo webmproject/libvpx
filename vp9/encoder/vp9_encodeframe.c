@@ -4088,13 +4088,21 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // PARTITION_HORZ
   if (partition_horz_allowed &&
       (do_rect || vp9_active_h_edge(cpi, mi_row, mi_step))) {
+    const int part_mode_rate = cpi->partition_cost[pl][PARTITION_HORZ];
+    const int64_t part_mode_rdcost =
+        RDCOST(partition_mul, x->rddiv, part_mode_rate, 0);
     subsize = get_subsize(bsize, PARTITION_HORZ);
     if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
       pc_tree->horizontal[0].pred_interp_filter = pred_interp_filter;
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
-                     &pc_tree->horizontal[0], best_rdc.rdcost);
+                     &pc_tree->horizontal[0],
+                     best_rdc.rdcost - part_mode_rdcost);
+    if (sum_rdc.rdcost < INT64_MAX) {
+      sum_rdc.rdcost += part_mode_rdcost;
+      sum_rdc.rate += part_mode_rate;
+    }
 
     if (sum_rdc.rdcost < best_rdc.rdcost && mi_row + mi_step < cm->mi_rows &&
         bsize > BLOCK_8X8) {
@@ -4119,17 +4127,12 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     }
 
     if (sum_rdc.rdcost < best_rdc.rdcost) {
-      sum_rdc.rdcost += RDCOST(partition_mul, x->rddiv,
-                               cpi->partition_cost[pl][PARTITION_HORZ], 0);
-      sum_rdc.rate += cpi->partition_cost[pl][PARTITION_HORZ];
-      if (sum_rdc.rdcost < best_rdc.rdcost) {
-        best_rdc = sum_rdc;
-        pc_tree->partitioning = PARTITION_HORZ;
+      best_rdc = sum_rdc;
+      pc_tree->partitioning = PARTITION_HORZ;
 
-        if ((cpi->sf.less_rectangular_check) &&
-            (bsize > cpi->sf.use_square_only_threshold))
-          do_rect = 0;
-      }
+      if ((cpi->sf.less_rectangular_check) &&
+          (bsize > cpi->sf.use_square_only_threshold))
+        do_rect = 0;
     }
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
   }
@@ -4137,14 +4140,21 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // PARTITION_VERT
   if (partition_vert_allowed &&
       (do_rect || vp9_active_v_edge(cpi, mi_col, mi_step))) {
+    const int part_mode_rate = cpi->partition_cost[pl][PARTITION_VERT];
+    const int64_t part_mode_rdcost =
+        RDCOST(partition_mul, x->rddiv, part_mode_rate, 0);
     subsize = get_subsize(bsize, PARTITION_VERT);
-
     if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
       pc_tree->vertical[0].pred_interp_filter = pred_interp_filter;
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
-                     &pc_tree->vertical[0], best_rdc.rdcost);
+                     &pc_tree->vertical[0], best_rdc.rdcost - part_mode_rdcost);
+    if (sum_rdc.rdcost < INT64_MAX) {
+      sum_rdc.rdcost += part_mode_rdcost;
+      sum_rdc.rate += part_mode_rate;
+    }
+
     if (sum_rdc.rdcost < best_rdc.rdcost && mi_col + mi_step < cm->mi_cols &&
         bsize > BLOCK_8X8) {
       update_state(cpi, td, &pc_tree->vertical[0], mi_row, mi_col, subsize, 0);
@@ -4168,13 +4178,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     }
 
     if (sum_rdc.rdcost < best_rdc.rdcost) {
-      sum_rdc.rdcost += RDCOST(partition_mul, x->rddiv,
-                               cpi->partition_cost[pl][PARTITION_VERT], 0);
-      sum_rdc.rate += cpi->partition_cost[pl][PARTITION_VERT];
-      if (sum_rdc.rdcost < best_rdc.rdcost) {
-        best_rdc = sum_rdc;
-        pc_tree->partitioning = PARTITION_VERT;
-      }
+      best_rdc = sum_rdc;
+      pc_tree->partitioning = PARTITION_VERT;
     }
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
   }
