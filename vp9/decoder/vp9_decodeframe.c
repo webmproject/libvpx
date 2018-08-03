@@ -1532,9 +1532,9 @@ static int tile_worker_hook(void *arg1, void *arg2) {
 
 // sorts in descending order
 static int compare_tile_buffers(const void *a, const void *b) {
-  const TileBuffer *const buf1 = (const TileBuffer *)a;
-  const TileBuffer *const buf2 = (const TileBuffer *)b;
-  return (int)((int64_t)buf2->size - buf1->size);
+  const TileBuffer *const buf_a = (const TileBuffer *)a;
+  const TileBuffer *const buf_b = (const TileBuffer *)b;
+  return (buf_a->size < buf_b->size) - (buf_a->size > buf_b->size);
 }
 
 static const uint8_t *decode_tiles_mt(VP9Decoder *pbi, const uint8_t *data,
