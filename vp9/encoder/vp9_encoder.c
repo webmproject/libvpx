@@ -4053,6 +4053,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   }
 
   if (!cpi->sf.re_encode_overshoot_rt &&
+      cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
       (cpi->rc.high_source_sad ||
        (cpi->use_svc && cpi->svc.high_source_sad_superframe))) {
     // Check if this high_source_sad (scene/slide change) frame should be
