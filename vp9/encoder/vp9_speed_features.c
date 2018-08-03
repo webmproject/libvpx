@@ -581,6 +581,7 @@ static void set_rt_speed_feature_framesize_independent(
   }
 
   if (speed >= 6) {
+    sf->re_encode_overshoot_rt = 0;
     if (cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0) {
       sf->use_altref_onepass = 1;
       sf->use_compound_nonrd_pickmode = 1;

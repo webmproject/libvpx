@@ -4052,6 +4052,18 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     vp9_svc_assert_constraints_pattern(cpi);
   }
 
+  if (!cpi->sf.re_encode_overshoot_rt &&
+      (cpi->rc.high_source_sad ||
+       (cpi->use_svc && cpi->svc.high_source_sad_superframe))) {
+    // Check if this high_source_sad (scene/slide change) frame should be
+    // encoded at high/max QP, and if so, set the q and adjust some rate
+    // control parameters.
+    if (vp9_encodedframe_overshoot(cpi, -1, &q)) {
+      vp9_set_quantizer(cm, q);
+      vp9_set_variance_partition_thresholds(cpi, q, 0);
+    }
+  }
+
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
