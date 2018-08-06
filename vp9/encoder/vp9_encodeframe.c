@@ -3978,6 +3978,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // the starting point of motion search in the following partition type check.
   if (do_split || must_split) {
     subsize = get_subsize(bsize, PARTITION_SPLIT);
+    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
     if (bsize == BLOCK_8X8) {
       i = 4;
       if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
@@ -4004,8 +4005,6 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
         if (mi_row + y_idx >= cm->mi_rows || mi_col + x_idx >= cm->mi_cols)
           continue;
-
-        if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
 
         pc_tree->split[i]->index = i;
         if (cpi->sf.prune_ref_frame_for_rect_partitions)
@@ -4109,8 +4108,6 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
       update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
       encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
-
-      if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
         pc_tree->horizontal[1].pred_interp_filter = pred_interp_filter;
@@ -4160,8 +4157,6 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       update_state(cpi, td, &pc_tree->vertical[0], mi_row, mi_col, subsize, 0);
       encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize,
                         &pc_tree->vertical[0]);
-
-      if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
         pc_tree->vertical[1].pred_interp_filter = pred_interp_filter;
