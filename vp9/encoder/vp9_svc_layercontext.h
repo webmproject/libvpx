@@ -143,12 +143,14 @@ typedef struct SVC {
   int high_source_sad_superframe;
 
   // Flags used to get SVC pattern info.
-  uint8_t update_last[VPX_SS_MAX_LAYERS];
-  uint8_t update_golden[VPX_SS_MAX_LAYERS];
-  uint8_t update_altref[VPX_SS_MAX_LAYERS];
+  int update_buffer_slot[VPX_SS_MAX_LAYERS];
   uint8_t reference_last[VPX_SS_MAX_LAYERS];
   uint8_t reference_golden[VPX_SS_MAX_LAYERS];
   uint8_t reference_altref[VPX_SS_MAX_LAYERS];
+  // TODO(jianj): Remove these last 3, deprecated.
+  uint8_t update_last[VPX_SS_MAX_LAYERS];
+  uint8_t update_golden[VPX_SS_MAX_LAYERS];
+  uint8_t update_altref[VPX_SS_MAX_LAYERS];
 
   // Keep track of the frame buffer index updated/refreshed on the base
   // temporal superframe.
@@ -229,6 +231,8 @@ void vp9_svc_assert_constraints_pattern(struct VP9_COMP *const cpi);
 void vp9_svc_check_spatial_layer_sync(struct VP9_COMP *const cpi);
 
 void vp9_svc_update_ref_frame_buffer_idx(struct VP9_COMP *const cpi);
+
+void vp9_svc_update_ref_frame_bypass_mode(struct VP9_COMP *const cpi);
 
 #ifdef __cplusplus
 }  // extern "C"

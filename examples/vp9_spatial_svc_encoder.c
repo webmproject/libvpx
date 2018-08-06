@@ -596,36 +596,11 @@ void set_frame_flags_bypass_mode(int tl, int num_spatial_layers,
                                  int is_key_frame,
                                  vpx_svc_ref_frame_config_t *ref_frame_config) {
   int sl;
+  for (sl = 0; sl < num_spatial_layers; ++sl)
+    ref_frame_config->update_buffer_slot[sl] = 0;
+
   for (sl = 0; sl < num_spatial_layers; ++sl) {
-    if (!tl) {
-      if (!sl) {
-        ref_frame_config->frame_flags[sl] =
-            VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_GF |
-            VP8_EFLAG_NO_UPD_ARF;
-      } else {
-        if (is_key_frame) {
-          ref_frame_config->frame_flags[sl] =
-              VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
-              VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_ARF;
-        } else {
-          ref_frame_config->frame_flags[sl] =
-              VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
-        }
-      }
-    } else if (tl == 1) {
-      if (!sl) {
-        ref_frame_config->frame_flags[sl] =
-            VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_LAST |
-            VP8_EFLAG_NO_UPD_GF;
-      } else {
-        ref_frame_config->frame_flags[sl] =
-            VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
-        if (sl == num_spatial_layers - 1)
-          ref_frame_config->frame_flags[sl] =
-              VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_REF_ARF |
-              VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
-      }
-    }
+    // Set the buffer idx.
     if (tl == 0) {
       ref_frame_config->lst_fb_idx[sl] = sl;
       if (sl) {
@@ -643,6 +618,56 @@ void set_frame_flags_bypass_mode(int tl, int num_spatial_layers,
       ref_frame_config->lst_fb_idx[sl] = sl;
       ref_frame_config->gld_fb_idx[sl] = num_spatial_layers + sl - 1;
       ref_frame_config->alt_fb_idx[sl] = num_spatial_layers + sl;
+    }
+    // Set the reference and update flags.
+    if (!tl) {
+      if (!sl) {
+        // Base spatial and base temporal (sl = 0, tl = 0)
+        ref_frame_config->reference_last[sl] = 1;
+        ref_frame_config->reference_golden[sl] = 0;
+        ref_frame_config->reference_alt_ref[sl] = 0;
+        ref_frame_config->update_buffer_slot[sl] |=
+            1 << ref_frame_config->lst_fb_idx[sl];
+      } else {
+        if (is_key_frame) {
+          ref_frame_config->reference_last[sl] = 1;
+          ref_frame_config->reference_golden[sl] = 0;
+          ref_frame_config->reference_alt_ref[sl] = 0;
+          ref_frame_config->update_buffer_slot[sl] |=
+              1 << ref_frame_config->gld_fb_idx[sl];
+        } else {
+          // Non-zero spatiall layer.
+          ref_frame_config->reference_last[sl] = 1;
+          ref_frame_config->reference_golden[sl] = 1;
+          ref_frame_config->reference_alt_ref[sl] = 1;
+          ref_frame_config->update_buffer_slot[sl] |=
+              1 << ref_frame_config->lst_fb_idx[sl];
+        }
+      }
+    } else if (tl == 1) {
+      if (!sl) {
+        // Base spatial and top temporal (tl = 1)
+        ref_frame_config->reference_last[sl] = 1;
+        ref_frame_config->reference_golden[sl] = 0;
+        ref_frame_config->reference_alt_ref[sl] = 0;
+        ref_frame_config->update_buffer_slot[sl] |=
+            1 << ref_frame_config->alt_fb_idx[sl];
+      } else {
+        // Non-zero spatial.
+        if (sl < num_spatial_layers - 1) {
+          ref_frame_config->reference_last[sl] = 1;
+          ref_frame_config->reference_golden[sl] = 1;
+          ref_frame_config->reference_alt_ref[sl] = 0;
+          ref_frame_config->update_buffer_slot[sl] |=
+              1 << ref_frame_config->alt_fb_idx[sl];
+        } else if (sl == num_spatial_layers - 1) {
+          // Top spatial and top temporal (non-reference -- doesn't update any
+          // reference buffers)
+          ref_frame_config->reference_last[sl] = 1;
+          ref_frame_config->reference_golden[sl] = 1;
+          ref_frame_config->reference_alt_ref[sl] = 0;
+        }
+      }
     }
   }
 }

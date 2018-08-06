@@ -15,6 +15,7 @@
 #include "test/svc_test.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
+#include "vp9/common/vp9_onyxc_int.h"
 #include "vpx/vpx_codec.h"
 #include "vpx_ports/bitops.h"
 
@@ -69,34 +70,10 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
   void set_frame_flags_bypass_mode(
       int tl, int num_spatial_layers, int is_key_frame,
       vpx_svc_ref_frame_config_t *ref_frame_config) {
+    for (int sl = 0; sl < num_spatial_layers; ++sl)
+      ref_frame_config->update_buffer_slot[sl] = 0;
+
     for (int sl = 0; sl < num_spatial_layers; ++sl) {
-      if (!tl) {
-        if (!sl) {
-          ref_frame_config->frame_flags[sl] =
-              VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_GF |
-              VP8_EFLAG_NO_UPD_ARF;
-        } else {
-          if (is_key_frame) {
-            ref_frame_config->frame_flags[sl] =
-                VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
-                VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_ARF;
-          } else {
-            ref_frame_config->frame_flags[sl] =
-                VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_GF |
-                VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_REF_GF;
-          }
-        }
-      } else if (tl == 1) {
-        if (!sl) {
-          ref_frame_config->frame_flags[sl] =
-              VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
-              VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
-        } else {
-          ref_frame_config->frame_flags[sl] =
-              VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_UPD_LAST |
-              VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_REF_GF;
-        }
-      }
       if (tl == 0) {
         ref_frame_config->lst_fb_idx[sl] = sl;
         if (sl) {
@@ -112,8 +89,47 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
         ref_frame_config->alt_fb_idx[sl] = 0;
       } else if (tl == 1) {
         ref_frame_config->lst_fb_idx[sl] = sl;
-        ref_frame_config->gld_fb_idx[sl] = num_spatial_layers + sl - 1;
-        ref_frame_config->alt_fb_idx[sl] = num_spatial_layers + sl;
+        ref_frame_config->gld_fb_idx[sl] =
+            VPXMIN(REF_FRAMES - 1, num_spatial_layers + sl - 1);
+        ref_frame_config->alt_fb_idx[sl] =
+            VPXMIN(REF_FRAMES - 1, num_spatial_layers + sl);
+      }
+      if (!tl) {
+        if (!sl) {
+          ref_frame_config->reference_last[sl] = 1;
+          ref_frame_config->reference_golden[sl] = 0;
+          ref_frame_config->reference_alt_ref[sl] = 0;
+          ref_frame_config->update_buffer_slot[sl] |=
+              1 << ref_frame_config->lst_fb_idx[sl];
+        } else {
+          if (is_key_frame) {
+            ref_frame_config->reference_last[sl] = 1;
+            ref_frame_config->reference_golden[sl] = 0;
+            ref_frame_config->reference_alt_ref[sl] = 0;
+            ref_frame_config->update_buffer_slot[sl] |=
+                1 << ref_frame_config->gld_fb_idx[sl];
+          } else {
+            ref_frame_config->reference_last[sl] = 1;
+            ref_frame_config->reference_golden[sl] = 0;
+            ref_frame_config->reference_alt_ref[sl] = 0;
+            ref_frame_config->update_buffer_slot[sl] |=
+                1 << ref_frame_config->lst_fb_idx[sl];
+          }
+        }
+      } else if (tl == 1) {
+        if (!sl) {
+          ref_frame_config->reference_last[sl] = 1;
+          ref_frame_config->reference_golden[sl] = 0;
+          ref_frame_config->reference_alt_ref[sl] = 0;
+          ref_frame_config->update_buffer_slot[sl] |=
+              1 << ref_frame_config->alt_fb_idx[sl];
+        } else {
+          ref_frame_config->reference_last[sl] = 1;
+          ref_frame_config->reference_golden[sl] = 0;
+          ref_frame_config->reference_alt_ref[sl] = 0;
+          ref_frame_config->update_buffer_slot[sl] |=
+              1 << ref_frame_config->alt_fb_idx[sl];
+        }
       }
     }
   }
