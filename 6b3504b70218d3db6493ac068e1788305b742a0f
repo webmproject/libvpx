@@ -22,6 +22,30 @@
       "revId": "6b3504b70218d3db6493ac068e1788305b742a0f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ead05c7b_5cc47e13",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1537,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-08-06T22:42:55Z",
+      "side": 1,
+      "message": "Oops. I was looking at the documentation for qsort:\n\nThe comparison function must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.\n\nIt looks like the old behavior was the opposite. I don\u0027t know what the sorted values are used for, but I can switch the behavior back to the old style.",
+      "parentUuid": "6808d2fe_b7208323",
+      "range": {
+        "startLine": 1537,
+        "startChar": 10,
+        "endLine": 1537,
+        "endChar": 15
+      },
+      "revId": "6b3504b70218d3db6493ac068e1788305b742a0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
