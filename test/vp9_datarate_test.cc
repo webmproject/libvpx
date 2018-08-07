@@ -522,8 +522,6 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
 
   cfg_.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
 
-  if (deadline_ == VPX_DL_REALTIME) cfg_.g_error_resilient = 1;
-
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 200);
   const int bitrates[4] = { 200, 400, 600, 800 };
@@ -533,8 +531,11 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
   // 60-40 bitrate allocation for 2 temporal layers.
   cfg_.layer_target_bitrate[0] = 60 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[1] = cfg_.rc_target_bitrate;
-  // TODO(jianj): Disable AQ Mode for this test for now.
   aq_mode_ = 0;
+  if (deadline_ == VPX_DL_REALTIME) {
+    aq_mode_ = 3;
+    cfg_.g_error_resilient = 1;
+  }
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
     ASSERT_GE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 0.85)
@@ -578,8 +579,11 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayers) {
   cfg_.layer_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[1] = 60 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[2] = cfg_.rc_target_bitrate;
-  // TODO(jianj): Disable AQ Mode for this test for now.
   aq_mode_ = 0;
+  if (deadline_ == VPX_DL_REALTIME) {
+    aq_mode_ = 3;
+    cfg_.g_error_resilient = 1;
+  }
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
     // TODO(yaowu): Work out more stable rc control strategy and
@@ -629,8 +633,11 @@ TEST_P(DatarateTestVP9LargeOneBR,
   cfg_.layer_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[1] = 60 * cfg_.rc_target_bitrate / 100;
   cfg_.layer_target_bitrate[2] = cfg_.rc_target_bitrate;
-  // TODO(jianj): Disable AQ Mode for this test for now.
   aq_mode_ = 0;
+  if (deadline_ == VPX_DL_REALTIME) {
+    aq_mode_ = 3;
+    cfg_.g_error_resilient = 1;
+  }
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   for (int j = 0; j < static_cast<int>(cfg_.ts_number_layers); ++j) {
     ASSERT_GE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 0.85)
