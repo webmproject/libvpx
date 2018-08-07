@@ -33,8 +33,8 @@ typedef struct EncWorkerData {
 // Encoder row synchronization
 typedef struct VP9RowMTSyncData {
 #if CONFIG_MULTITHREAD
-  pthread_mutex_t *mutex_;
-  pthread_cond_t *cond_;
+  pthread_mutex_t *mutex;
+  pthread_cond_t *cond;
 #endif
   // Allocate memory to store the sb/mb block index in each row.
   int *cur_col;

@@ -38,11 +38,11 @@ static INLINE void sync_read(VP9LfSync *const lf_sync, int r, int c) {
   const int nsync = lf_sync->sync_range;
 
   if (r && !(c & (nsync - 1))) {
-    pthread_mutex_t *const mutex = &lf_sync->mutex_[r - 1];
+    pthread_mutex_t *const mutex = &lf_sync->mutex[r - 1];
     mutex_lock(mutex);
 
     while (c > lf_sync->cur_sb_col[r - 1] - nsync) {
-      pthread_cond_wait(&lf_sync->cond_[r - 1], mutex);
+      pthread_cond_wait(&lf_sync->cond[r - 1], mutex);
     }
     pthread_mutex_unlock(mutex);
   }
@@ -69,12 +69,12 @@ static INLINE void sync_write(VP9LfSync *const lf_sync, int r, int c,
   }
 
   if (sig) {
-    mutex_lock(&lf_sync->mutex_[r]);
+    mutex_lock(&lf_sync->mutex[r]);
 
     lf_sync->cur_sb_col[r] = cur;
 
-    pthread_cond_signal(&lf_sync->cond_[r]);
-    pthread_mutex_unlock(&lf_sync->mutex_[r]);
+    pthread_cond_signal(&lf_sync->cond[r]);
+    pthread_mutex_unlock(&lf_sync->mutex[r]);
   }
 #else
   (void)lf_sync;
@@ -253,19 +253,19 @@ void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
   {
     int i;
 
-    CHECK_MEM_ERROR(cm, lf_sync->mutex_,
-                    vpx_malloc(sizeof(*lf_sync->mutex_) * rows));
-    if (lf_sync->mutex_) {
+    CHECK_MEM_ERROR(cm, lf_sync->mutex,
+                    vpx_malloc(sizeof(*lf_sync->mutex) * rows));
+    if (lf_sync->mutex) {
       for (i = 0; i < rows; ++i) {
-        pthread_mutex_init(&lf_sync->mutex_[i], NULL);
+        pthread_mutex_init(&lf_sync->mutex[i], NULL);
       }
     }
 
-    CHECK_MEM_ERROR(cm, lf_sync->cond_,
-                    vpx_malloc(sizeof(*lf_sync->cond_) * rows));
-    if (lf_sync->cond_) {
+    CHECK_MEM_ERROR(cm, lf_sync->cond,
+                    vpx_malloc(sizeof(*lf_sync->cond) * rows));
+    if (lf_sync->cond) {
       for (i = 0; i < rows; ++i) {
-        pthread_cond_init(&lf_sync->cond_[i], NULL);
+        pthread_cond_init(&lf_sync->cond[i], NULL);
       }
     }
   }
@@ -288,17 +288,17 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync) {
 #if CONFIG_MULTITHREAD
     int i;
 
-    if (lf_sync->mutex_ != NULL) {
+    if (lf_sync->mutex != NULL) {
       for (i = 0; i < lf_sync->rows; ++i) {
-        pthread_mutex_destroy(&lf_sync->mutex_[i]);
+        pthread_mutex_destroy(&lf_sync->mutex[i]);
       }
-      vpx_free(lf_sync->mutex_);
+      vpx_free(lf_sync->mutex);
     }
-    if (lf_sync->cond_ != NULL) {
+    if (lf_sync->cond != NULL) {
       for (i = 0; i < lf_sync->rows; ++i) {
-        pthread_cond_destroy(&lf_sync->cond_[i]);
+        pthread_cond_destroy(&lf_sync->cond[i]);
       }
-      vpx_free(lf_sync->cond_);
+      vpx_free(lf_sync->cond);
     }
 #endif  // CONFIG_MULTITHREAD
     vpx_free(lf_sync->lfdata);

@@ -24,8 +24,8 @@ struct FRAME_COUNTS;
 // Loopfilter row synchronization
 typedef struct VP9LfSyncData {
 #if CONFIG_MULTITHREAD
-  pthread_mutex_t *mutex_;
-  pthread_cond_t *cond_;
+  pthread_mutex_t *mutex;
+  pthread_cond_t *cond;
 #endif
   // Allocate memory to store the loop-filtered superblock index in each row.
   int *cur_sb_col;
