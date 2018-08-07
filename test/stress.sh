@@ -167,13 +167,13 @@ vp9_stress() {
 }
 
 vp9_stress_test() {
-  for threads in 4 8 100; do
+  for threads in 4 8 64; do
     vp9_stress "$threads" "--row-mt=0"
   done
 }
 
 vp9_stress_test_row_mt() {
-  for threads in 4 8 100; do
+  for threads in 4 8 64; do
     vp9_stress "$threads" "--row-mt=1"
   done
 }
