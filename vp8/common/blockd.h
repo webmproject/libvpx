@@ -13,6 +13,7 @@
 
 void vpx_log(const char *format, ...);
 
+#include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "mv.h"
@@ -287,6 +288,8 @@ typedef struct macroblockd {
   void *current_bc;
 
   int corrupted;
+
+  struct vpx_internal_error_info error_info;
 
 #if ARCH_X86 || ARCH_X86_64
   /* This is an intermediate buffer currently used in sub-pixel motion search
