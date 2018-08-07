@@ -353,6 +353,9 @@ typedef struct SPEED_FEATURES {
   // point for this motion search and limits the search range around it.
   int adaptive_motion_search;
 
+  // Do extra full pixel motion search to obtain better motion vector.
+  int enhanced_full_pixel_motion_search;
+
   // Threshold for allowing exhaistive motion search.
   int exhaustive_searches_thresh;
 
