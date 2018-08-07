@@ -2409,6 +2409,31 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method, sadpb,
       cond_cost_list(cpi, cost_list), &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
 
+  if (cpi->sf.enhanced_full_pixel_motion_search) {
+    if (x->mv_best_ref_index[ref] == 2) {
+      const int diff_row = ((int)pred_mv[0].row - pred_mv[2].row) >> 3;
+      const int diff_col = ((int)pred_mv[0].col - pred_mv[2].col) >> 3;
+      const int diff_sse = diff_row * diff_row + diff_col * diff_col;
+      // If pred_mv[0] and pred_mv[2] are very different, also search around
+      // pred_mv[0].
+      if (diff_sse > 10) {
+        int this_me;
+        MV this_mv;
+        mvp_full = pred_mv[0];
+        mvp_full.col >>= 3;
+        mvp_full.row >>= 3;
+        this_me = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
+                                        cpi->sf.mv.search_method, sadpb,
+                                        cond_cost_list(cpi, cost_list), &ref_mv,
+                                        &this_mv, INT_MAX, 1);
+        if (this_me < bestsme) {
+          tmp_mv->as_mv = this_mv;
+          bestsme = this_me;
+        }
+      }
+    }
+  }
+
   x->mv_limits = tmp_mv_limits;
 
   if (bestsme < INT_MAX) {

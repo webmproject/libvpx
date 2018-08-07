@@ -277,6 +277,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->recode_tolerance_low = 15;
     sf->recode_tolerance_high = 45;
+    sf->enhanced_full_pixel_motion_search = 0;
 
     if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) {
       for (i = 0; i < MAX_MESH_STEP; ++i) {
@@ -408,6 +409,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->disable_16x16part_nonkey = 0;
   sf->disable_golden_ref = 0;
   sf->enable_tpl_model = 0;
+  sf->enhanced_full_pixel_motion_search = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -817,6 +819,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->tx_size_search_method = USE_FULL_RD;
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;
+  sf->enhanced_full_pixel_motion_search = 1;
   sf->adaptive_pred_interp_filter = 0;
   sf->adaptive_mode_search = 0;
   sf->cb_pred_filter_search = 0;
