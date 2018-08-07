@@ -265,7 +265,7 @@ static void hadamard_col8_sse2(__m128i *in, int iter) {
 }
 
 static INLINE void hadamard_8x8_sse2(const int16_t *src_diff,
-                                     ptrdiff_t src_stride, tran_low_t *_coeff,
+                                     ptrdiff_t src_stride, tran_low_t *coeff,
                                      int is_final) {
   __m128i src[8];
   src[0] = _mm_load_si128((const __m128i *)src_diff);
@@ -281,38 +281,38 @@ static INLINE void hadamard_8x8_sse2(const int16_t *src_diff,
   hadamard_col8_sse2(src, 1);
 
   if (is_final) {
-    store_tran_low(src[0], _coeff);
-    _coeff += 8;
-    store_tran_low(src[1], _coeff);
-    _coeff += 8;
-    store_tran_low(src[2], _coeff);
-    _coeff += 8;
-    store_tran_low(src[3], _coeff);
-    _coeff += 8;
-    store_tran_low(src[4], _coeff);
-    _coeff += 8;
-    store_tran_low(src[5], _coeff);
-    _coeff += 8;
-    store_tran_low(src[6], _coeff);
-    _coeff += 8;
-    store_tran_low(src[7], _coeff);
+    store_tran_low(src[0], coeff);
+    coeff += 8;
+    store_tran_low(src[1], coeff);
+    coeff += 8;
+    store_tran_low(src[2], coeff);
+    coeff += 8;
+    store_tran_low(src[3], coeff);
+    coeff += 8;
+    store_tran_low(src[4], coeff);
+    coeff += 8;
+    store_tran_low(src[5], coeff);
+    coeff += 8;
+    store_tran_low(src[6], coeff);
+    coeff += 8;
+    store_tran_low(src[7], coeff);
   } else {
-    int16_t *coeff = (int16_t *)_coeff;
-    _mm_store_si128((__m128i *)coeff, src[0]);
-    coeff += 8;
-    _mm_store_si128((__m128i *)coeff, src[1]);
-    coeff += 8;
-    _mm_store_si128((__m128i *)coeff, src[2]);
-    coeff += 8;
-    _mm_store_si128((__m128i *)coeff, src[3]);
-    coeff += 8;
-    _mm_store_si128((__m128i *)coeff, src[4]);
-    coeff += 8;
-    _mm_store_si128((__m128i *)coeff, src[5]);
-    coeff += 8;
-    _mm_store_si128((__m128i *)coeff, src[6]);
-    coeff += 8;
-    _mm_store_si128((__m128i *)coeff, src[7]);
+    int16_t *coeff16 = (int16_t *)coeff;
+    _mm_store_si128((__m128i *)coeff16, src[0]);
+    coeff16 += 8;
+    _mm_store_si128((__m128i *)coeff16, src[1]);
+    coeff16 += 8;
+    _mm_store_si128((__m128i *)coeff16, src[2]);
+    coeff16 += 8;
+    _mm_store_si128((__m128i *)coeff16, src[3]);
+    coeff16 += 8;
+    _mm_store_si128((__m128i *)coeff16, src[4]);
+    coeff16 += 8;
+    _mm_store_si128((__m128i *)coeff16, src[5]);
+    coeff16 += 8;
+    _mm_store_si128((__m128i *)coeff16, src[6]);
+    coeff16 += 8;
+    _mm_store_si128((__m128i *)coeff16, src[7]);
   }
 }
 
@@ -321,8 +321,9 @@ void vpx_hadamard_8x8_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
   hadamard_8x8_sse2(src_diff, src_stride, coeff, 1);
 }
 
-void vpx_hadamard_16x16_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
-                             tran_low_t *coeff) {
+static INLINE void hadamard_16x16_sse2(const int16_t *src_diff,
+                                       ptrdiff_t src_stride, tran_low_t *coeff,
+                                       int is_final) {
 #if CONFIG_VP9_HIGHBITDEPTH
   // For high bitdepths, it is unnecessary to store_tran_low
   // (mult/unpack/store), then load_tran_low (load/pack) the same memory in the
@@ -333,6 +334,7 @@ void vpx_hadamard_16x16_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
 #else
   int16_t *t_coeff = coeff;
 #endif
+  int16_t *coeff16 = (int16_t *)coeff;
   int idx;
   for (idx = 0; idx < 4; ++idx) {
     const int16_t *src_ptr =
@@ -359,33 +361,57 @@ void vpx_hadamard_16x16_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
 
     coeff0 = _mm_add_epi16(b0, b2);
     coeff1 = _mm_add_epi16(b1, b3);
-    store_tran_low(coeff0, coeff);
-    store_tran_low(coeff1, coeff + 64);
-
     coeff2 = _mm_sub_epi16(b0, b2);
     coeff3 = _mm_sub_epi16(b1, b3);
-    store_tran_low(coeff2, coeff + 128);
-    store_tran_low(coeff3, coeff + 192);
 
-    coeff += 8;
+    if (is_final) {
+      store_tran_low(coeff0, coeff);
+      store_tran_low(coeff1, coeff + 64);
+      store_tran_low(coeff2, coeff + 128);
+      store_tran_low(coeff3, coeff + 192);
+      coeff += 8;
+    } else {
+      _mm_store_si128((__m128i *)coeff16, coeff0);
+      _mm_store_si128((__m128i *)(coeff16 + 64), coeff1);
+      _mm_store_si128((__m128i *)(coeff16 + 128), coeff2);
+      _mm_store_si128((__m128i *)(coeff16 + 192), coeff3);
+      coeff16 += 8;
+    }
+
     t_coeff += 8;
   }
 }
 
+void vpx_hadamard_16x16_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
+                             tran_low_t *coeff) {
+  hadamard_16x16_sse2(src_diff, src_stride, coeff, 1);
+}
+
 void vpx_hadamard_32x32_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
                              tran_low_t *coeff) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  // For high bitdepths, it is unnecessary to store_tran_low
+  // (mult/unpack/store), then load_tran_low (load/pack) the same memory in the
+  // next stage.  Output to an intermediate buffer first, then store_tran_low()
+  // in the final stage.
+  DECLARE_ALIGNED(32, int16_t, temp_coeff[32 * 32]);
+  int16_t *t_coeff = temp_coeff;
+#else
+  int16_t *t_coeff = coeff;
+#endif
   int idx;
   for (idx = 0; idx < 4; ++idx) {
     const int16_t *src_ptr =
         src_diff + (idx >> 1) * 16 * src_stride + (idx & 0x01) * 16;
-    vpx_hadamard_16x16_sse2(src_ptr, src_stride, coeff + idx * 256);
+    hadamard_16x16_sse2(src_ptr, src_stride,
+                        (tran_low_t *)(t_coeff + idx * 256), 0);
   }
 
   for (idx = 0; idx < 256; idx += 8) {
-    __m128i coeff0 = load_tran_low(coeff);
-    __m128i coeff1 = load_tran_low(coeff + 256);
-    __m128i coeff2 = load_tran_low(coeff + 512);
-    __m128i coeff3 = load_tran_low(coeff + 768);
+    __m128i coeff0 = _mm_load_si128((const __m128i *)t_coeff);
+    __m128i coeff1 = _mm_load_si128((const __m128i *)(t_coeff + 256));
+    __m128i coeff2 = _mm_load_si128((const __m128i *)(t_coeff + 512));
+    __m128i coeff3 = _mm_load_si128((const __m128i *)(t_coeff + 768));
 
     __m128i b0 = _mm_add_epi16(coeff0, coeff1);
     __m128i b1 = _mm_sub_epi16(coeff0, coeff1);
@@ -408,6 +434,7 @@ void vpx_hadamard_32x32_sse2(const int16_t *src_diff, ptrdiff_t src_stride,
     store_tran_low(coeff3, coeff + 768);
 
     coeff += 8;
+    t_coeff += 8;
   }
 }
 
