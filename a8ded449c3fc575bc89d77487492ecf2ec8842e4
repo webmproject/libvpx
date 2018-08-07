@@ -1,0 +1,176 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82636b67_a4a92b3d",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-07T03:47:19Z",
+      "side": 1,
+      "message": "the alloc function with cm \u0026 lf_sync reverses the order of these parameters, let\u0027s keep it consistent between these two",
+      "range": {
+        "startLine": 234,
+        "startChar": 21,
+        "endLine": 234,
+        "endChar": 55
+      },
+      "revId": "a8ded449c3fc575bc89d77487492ecf2ec8842e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e181d39_3204a325",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-07T03:47:19Z",
+      "side": 1,
+      "message": "this comment seems misplaced, I don\u0027t think it\u0027s relevant to this function.",
+      "revId": "a8ded449c3fc575bc89d77487492ecf2ec8842e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af03f861_d90b42b3",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-07T03:47:19Z",
+      "side": 1,
+      "message": "we prefer not to have these reverse-style comparisons, please swap these here and throughout",
+      "range": {
+        "startLine": 358,
+        "startChar": 8,
+        "endLine": 358,
+        "endChar": 15
+      },
+      "revId": "a8ded449c3fc575bc89d77487492ecf2ec8842e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a717c4b_2a42b8b2",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-07T03:47:19Z",
+      "side": 1,
+      "message": "drop these ()s",
+      "range": {
+        "startLine": 427,
+        "startChar": 24,
+        "endLine": 427,
+        "endChar": 25
+      },
+      "revId": "a8ded449c3fc575bc89d77487492ecf2ec8842e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "41659435_875f48b2",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-07T03:47:19Z",
+      "side": 1,
+      "message": "you could just say \u0027the last 2 rows both wait on the final...\u0027",
+      "range": {
+        "startLine": 444,
+        "startChar": 13,
+        "endLine": 444,
+        "endChar": 43
+      },
+      "revId": "a8ded449c3fc575bc89d77487492ecf2ec8842e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "83906548_1540c453",
+        "filename": "vp9/common/vp9_thread_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-07T03:47:19Z",
+      "side": 1,
+      "message": "let\u0027s not propagate the \u0027_\u0027. vpx_thread.c has this as an artifact of copying it from webp, other uses should be fixed.\n\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/1164626",
+      "range": {
+        "startLine": 43,
+        "startChar": 35,
+        "endLine": 43,
+        "endChar": 36
+      },
+      "revId": "a8ded449c3fc575bc89d77487492ecf2ec8842e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "baf84804_acec84a3",
+        "filename": "vp9/common/vp9_thread_common.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-07T03:47:19Z",
+      "side": 1,
+      "message": "\u0027num_\u0027 would work",
+      "range": {
+        "startLine": 46,
+        "startChar": 7,
+        "endLine": 46,
+        "endChar": 12
+      },
+      "revId": "a8ded449c3fc575bc89d77487492ecf2ec8842e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d992d45e_1e38816c",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1530,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-07T03:47:19Z",
+      "side": 1,
+      "message": "this can be const",
+      "revId": "a8ded449c3fc575bc89d77487492ecf2ec8842e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
