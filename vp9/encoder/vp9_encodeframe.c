@@ -3963,7 +3963,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   }
 
   // store estimated motion vector
-  if (cpi->sf.adaptive_motion_search) store_pred_mv(x, ctx);
+  store_pred_mv(x, ctx);
 
   // If the interp_filter is marked as SWITCHABLE_FILTERS, it was for an
   // intra block and used for context purposes.
@@ -3978,7 +3978,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // the starting point of motion search in the following partition type check.
   if (do_split || must_split) {
     subsize = get_subsize(bsize, PARTITION_SPLIT);
-    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+    load_pred_mv(x, ctx);
     if (bsize == BLOCK_8X8) {
       i = 4;
       if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
@@ -4091,7 +4091,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     const int64_t part_mode_rdcost =
         RDCOST(partition_mul, x->rddiv, part_mode_rate, 0);
     subsize = get_subsize(bsize, PARTITION_HORZ);
-    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+    load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
       pc_tree->horizontal[0].pred_interp_filter = pred_interp_filter;
@@ -4141,7 +4141,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     const int64_t part_mode_rdcost =
         RDCOST(partition_mul, x->rddiv, part_mode_rate, 0);
     subsize = get_subsize(bsize, PARTITION_VERT);
-    if (cpi->sf.adaptive_motion_search) load_pred_mv(x, ctx);
+    load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
         partition_none_allowed)
       pc_tree->vertical[0].pred_interp_filter = pred_interp_filter;
@@ -4683,7 +4683,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // PARTITION_HORZ
   if (partition_horz_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_HORZ);
-    if (sf->adaptive_motion_search) load_pred_mv(x, ctx);
+    load_pred_mv(x, ctx);
     pc_tree->horizontal[0].pred_pixel_ready = 1;
     nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
                         &pc_tree->horizontal[0]);
@@ -4727,7 +4727,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // PARTITION_VERT
   if (partition_vert_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_VERT);
-    if (sf->adaptive_motion_search) load_pred_mv(x, ctx);
+    load_pred_mv(x, ctx);
     pc_tree->vertical[0].pred_pixel_ready = 1;
     nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &sum_rdc, subsize,
                         &pc_tree->vertical[0]);
