@@ -435,17 +435,17 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         }
 #else
         // Apply the filter (YUV)
-        vp9_temporal_filter_apply(f->y_buffer + mb_y_offset, f->y_stride,
-                                  predictor, 16, 16, strength, filter_weight,
-                                  accumulator, count);
-        vp9_temporal_filter_apply(f->u_buffer + mb_uv_offset, f->uv_stride,
-                                  predictor + 256, mb_uv_width, mb_uv_height,
-                                  strength, filter_weight, accumulator + 256,
-                                  count + 256);
-        vp9_temporal_filter_apply(f->v_buffer + mb_uv_offset, f->uv_stride,
-                                  predictor + 512, mb_uv_width, mb_uv_height,
-                                  strength, filter_weight, accumulator + 512,
-                                  count + 512);
+        vp9_temporal_filter_apply_c(f->y_buffer + mb_y_offset, f->y_stride,
+                                    predictor, 16, 16, strength, filter_weight,
+                                    accumulator, count);
+        vp9_temporal_filter_apply_c(f->u_buffer + mb_uv_offset, f->uv_stride,
+                                    predictor + 256, mb_uv_width, mb_uv_height,
+                                    strength, filter_weight, accumulator + 256,
+                                    count + 256);
+        vp9_temporal_filter_apply_c(f->v_buffer + mb_uv_offset, f->uv_stride,
+                                    predictor + 512, mb_uv_width, mb_uv_height,
+                                    strength, filter_weight, accumulator + 512,
+                                    count + 512);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
     }
