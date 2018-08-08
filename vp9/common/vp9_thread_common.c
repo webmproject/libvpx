@@ -91,6 +91,7 @@ static INLINE void thread_loop_filter_rows(
     int y_only, VP9LfSync *const lf_sync) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   const int sb_cols = mi_cols_aligned_to_sb(cm->mi_cols) >> MI_BLOCK_SIZE_LOG2;
+  const int num_active_workers = VPXMIN(lf_sync->num_workers, lf_sync->rows);
   int mi_row, mi_col;
   enum lf_path path;
   if (y_only)
@@ -103,7 +104,7 @@ static INLINE void thread_loop_filter_rows(
     path = LF_PATH_SLOW;
 
   for (mi_row = start; mi_row < stop;
-       mi_row += lf_sync->num_workers * MI_BLOCK_SIZE) {
+       mi_row += num_active_workers * MI_BLOCK_SIZE) {
     MODE_INFO **const mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
     LOOP_FILTER_MASK *lfm = get_lfm(&cm->lf, mi_row, 0);
 
@@ -157,10 +158,7 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame, VP9_COMMON *cm,
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
-  // Decoder may allocate more threads than number of tiles based on user's
-  // input.
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int num_workers = VPXMIN(nworkers, tile_cols);
+  const int num_workers = VPXMIN(nworkers, sb_rows);
   int i;
 
   if (!lf_sync->sync_range || sb_rows != lf_sync->rows ||
