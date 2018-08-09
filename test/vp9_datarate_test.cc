@@ -360,8 +360,8 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
   cfg_.rc_end_usage = VPX_CBR;
   cfg_.g_lag_in_frames = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 140);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   const int bitrates[4] = { 150, 350, 550, 750 };
   const int bitrate_index = GET_PARAM(3);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
@@ -386,8 +386,8 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingFrameParDecOff) {
   cfg_.g_lag_in_frames = 0;
   cfg_.g_error_resilient = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 140);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   const int bitrates[4] = { 150, 350, 550, 750 };
   const int bitrate_index = GET_PARAM(3);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
@@ -413,8 +413,8 @@ TEST_P(DatarateTestVP9LargeOneBR, BasicRateTargetingDropFramesMultiThreads) {
   // Encode using multiple threads.
   cfg_.g_threads = 2;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 140);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   cfg_.rc_target_bitrate = 200;
   ResetModel();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -472,8 +472,8 @@ TEST_P(DatarateTestVP9Large, ChangingDropFrameThresh) {
   // interval (128).
   cfg_.kf_max_dist = 9999;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 140);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
 
   const int kDropFrameThreshTestStep = 30;
   const int bitrates[2] = { 50, 150 };
@@ -522,8 +522,8 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
 
   cfg_.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 200);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   const int bitrates[4] = { 200, 400, 600, 800 };
   const int bitrate_index = GET_PARAM(3);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
@@ -569,8 +569,8 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayers) {
 
   cfg_.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 200);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   const int bitrates[4] = { 200, 400, 600, 800 };
   const int bitrate_index = GET_PARAM(3);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
@@ -625,8 +625,8 @@ TEST_P(DatarateTestVP9LargeOneBR,
 
   cfg_.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 200);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
   cfg_.rc_target_bitrate = 200;
   ResetModel();
   // 40-20-40 bitrate allocation for 3 temporal layers.
@@ -683,12 +683,12 @@ TEST_P(DatarateTestVP9RealTime, RegionOfInterest) {
   cfg_.rc_end_usage = VPX_CBR;
   cfg_.g_lag_in_frames = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 300);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
 
   cfg_.rc_target_bitrate = 450;
-  cfg_.g_w = 352;
-  cfg_.g_h = 288;
+  cfg_.g_w = 640;
+  cfg_.g_h = 480;
 
   ResetModel();
 
@@ -746,8 +746,8 @@ TEST_P(DatarateTestVP9LargeDenoiser, LowNoise) {
   cfg_.rc_end_usage = VPX_CBR;
   cfg_.g_lag_in_frames = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 140);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
 
   // For the temporal denoiser (#if CONFIG_VP9_TEMPORAL_DENOISING),
   // there is only one denoiser mode: denoiserYonly(which is 1),
@@ -833,8 +833,8 @@ TEST_P(DatarateTestVP9LargeDenoiser, DenoiserOffOn) {
   cfg_.rc_end_usage = VPX_CBR;
   cfg_.g_lag_in_frames = 0;
 
-  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
-                                       30, 1, 0, 299);
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
 
   // For the temporal denoiser (#if CONFIG_VP9_TEMPORAL_DENOISING),
   // there is only one denoiser mode: denoiserYonly(which is 1),
