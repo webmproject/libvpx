@@ -2019,8 +2019,7 @@ static int64_t rd_pick_best_sub8x8_mode(
             seg_mvs[i][mi->ref_frame[0]].as_mv = *new_mv;
           }
 
-          if (sf->adaptive_motion_search)
-            x->pred_mv[mi->ref_frame[0]] = *new_mv;
+          x->pred_mv[mi->ref_frame[0]] = *new_mv;
 
           // restore src pointers
           mi_buf_restore(x, orig_src, orig_pre);
@@ -2363,7 +2362,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   }
 
   if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64) {
-    int boffset =
+    const int boffset =
         2 * (b_width_log2_lookup[BLOCK_64X64] -
              VPXMIN(b_height_log2_lookup[bsize], b_width_log2_lookup[bsize]));
     step_param = VPXMAX(step_param, boffset);
@@ -2447,7 +2446,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv, x->nmvjointcost,
                              x->mvcost, MV_COST_WEIGHT);
 
-  if (cpi->sf.adaptive_motion_search) x->pred_mv[ref] = tmp_mv->as_mv;
+  x->pred_mv[ref] = tmp_mv->as_mv;
 
   if (scaled_ref_frame) {
     int i;
