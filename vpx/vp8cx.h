@@ -789,12 +789,11 @@ typedef struct vpx_svc_layer_id {
  *
  */
 typedef struct vpx_svc_ref_frame_config {
-  // TODO(jianj/marpan): Remove the usage of frame_flags, instead use the
-  // update and reference flags.
-  int frame_flags[VPX_SS_MAX_LAYERS];       /**< Frame flags. */
-  int lst_fb_idx[VPX_SS_MAX_LAYERS];        /**< Last buffer index. */
-  int gld_fb_idx[VPX_SS_MAX_LAYERS];        /**< Golden buffer index. */
-  int alt_fb_idx[VPX_SS_MAX_LAYERS];        /**< Altref buffer index. */
+  int lst_fb_idx[VPX_SS_MAX_LAYERS];         /**< Last buffer index. */
+  int gld_fb_idx[VPX_SS_MAX_LAYERS];         /**< Golden buffer index. */
+  int alt_fb_idx[VPX_SS_MAX_LAYERS];         /**< Altref buffer index. */
+  int update_buffer_slot[VPX_SS_MAX_LAYERS]; /**< Update reference frames. */
+  // TODO(jianj): Remove update_last/golden/alt_ref, these are deprecated.
   int update_last[VPX_SS_MAX_LAYERS];       /**< Update last. */
   int update_golden[VPX_SS_MAX_LAYERS];     /**< Update golden. */
   int update_alt_ref[VPX_SS_MAX_LAYERS];    /**< Update altref. */

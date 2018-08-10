@@ -1489,15 +1489,17 @@ static vpx_codec_err_t ctrl_get_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
   vpx_svc_ref_frame_config_t *data = va_arg(args, vpx_svc_ref_frame_config_t *);
   int sl;
   for (sl = 0; sl <= cpi->svc.spatial_layer_id; sl++) {
-    data->update_last[sl] = cpi->svc.update_last[sl];
-    data->update_golden[sl] = cpi->svc.update_golden[sl];
-    data->update_alt_ref[sl] = cpi->svc.update_altref[sl];
+    data->update_buffer_slot[sl] = cpi->svc.update_buffer_slot[sl];
     data->reference_last[sl] = cpi->svc.reference_last[sl];
     data->reference_golden[sl] = cpi->svc.reference_golden[sl];
     data->reference_alt_ref[sl] = cpi->svc.reference_altref[sl];
     data->lst_fb_idx[sl] = cpi->svc.lst_fb_idx[sl];
     data->gld_fb_idx[sl] = cpi->svc.gld_fb_idx[sl];
     data->alt_fb_idx[sl] = cpi->svc.alt_fb_idx[sl];
+    // TODO(jianj): Remove these 3, deprecated.
+    data->update_last[sl] = cpi->svc.update_last[sl];
+    data->update_golden[sl] = cpi->svc.update_golden[sl];
+    data->update_alt_ref[sl] = cpi->svc.update_altref[sl];
   }
   return VPX_CODEC_OK;
 }
@@ -1508,7 +1510,10 @@ static vpx_codec_err_t ctrl_set_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
   vpx_svc_ref_frame_config_t *data = va_arg(args, vpx_svc_ref_frame_config_t *);
   int sl;
   for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
-    cpi->svc.ext_frame_flags[sl] = data->frame_flags[sl];
+    cpi->svc.update_buffer_slot[sl] = data->update_buffer_slot[sl];
+    cpi->svc.reference_last[sl] = data->reference_last[sl];
+    cpi->svc.reference_golden[sl] = data->reference_golden[sl];
+    cpi->svc.reference_altref[sl] = data->reference_alt_ref[sl];
     cpi->svc.lst_fb_idx[sl] = data->lst_fb_idx[sl];
     cpi->svc.gld_fb_idx[sl] = data->gld_fb_idx[sl];
     cpi->svc.alt_fb_idx[sl] = data->alt_fb_idx[sl];

@@ -3277,8 +3277,10 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
 #endif
 
   if (is_one_pass_cbr_svc(cpi)) {
-    // Keep track of frame index for each reference frame.
-    if (cm->frame_type == KEY_FRAME) {
+    if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+      vp9_svc_update_ref_frame_bypass_mode(cpi);
+    } else if (cm->frame_type == KEY_FRAME) {
+      // Keep track of frame index for each reference frame.
       int i;
       // On key frame update all reference frame slots.
       for (i = 0; i < REF_FRAMES; i++) {
@@ -3312,10 +3314,12 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
 static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   MACROBLOCKD *xd = &cpi->td.mb.e_mbd;
   struct loopfilter *lf = &cm->lf;
-
-  const int is_reference_frame =
+  int is_reference_frame =
       (cm->frame_type == KEY_FRAME || cpi->refresh_last_frame ||
        cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame);
+  if (cpi->use_svc &&
+      cpi->svc.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS)
+    is_reference_frame = !cpi->svc.non_reference_frame;
 
   if (xd->lossless) {
     lf->filter_level = 0;
