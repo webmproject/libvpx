@@ -627,7 +627,7 @@ TEST_P(DatarateTestVP9LargeOneBR,
 
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
-  cfg_.rc_target_bitrate = 200;
+  cfg_.rc_target_bitrate = 400;
   ResetModel();
   // 40-20-40 bitrate allocation for 3 temporal layers.
   cfg_.layer_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
@@ -650,8 +650,8 @@ TEST_P(DatarateTestVP9LargeOneBR,
         << j;
     // Expect some frame drops in this test: for this 200 frames test,
     // expect at least 10% and not more than 60% drops.
-    ASSERT_GE(num_drops_, 20);
-    ASSERT_LE(num_drops_, 130);
+    ASSERT_GE(num_drops_, 40);
+    ASSERT_LE(num_drops_, 240);
   }
 }
 
@@ -752,7 +752,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, LowNoise) {
   // For the temporal denoiser (#if CONFIG_VP9_TEMPORAL_DENOISING),
   // there is only one denoiser mode: denoiserYonly(which is 1),
   // but may add more modes in the future.
-  cfg_.rc_target_bitrate = 300;
+  cfg_.rc_target_bitrate = 400;
   ResetModel();
   // Turn on the denoiser.
   denoiser_on_ = 1;
@@ -839,7 +839,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, DenoiserOffOn) {
   // For the temporal denoiser (#if CONFIG_VP9_TEMPORAL_DENOISING),
   // there is only one denoiser mode: denoiserYonly(which is 1),
   // but may add more modes in the future.
-  cfg_.rc_target_bitrate = 300;
+  cfg_.rc_target_bitrate = 400;
   ResetModel();
   // The denoiser is off by default.
   denoiser_on_ = 0;
