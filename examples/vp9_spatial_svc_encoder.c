@@ -592,9 +592,9 @@ vpx_codec_err_t parse_superframe_index(const uint8_t *data, size_t data_sz,
 // bypass/flexible mode. The pattern corresponds to the pattern
 // VP9E_TEMPORAL_LAYERING_MODE_0101 (temporal_layering_mode == 2) used in
 // non-flexible mode.
-void set_frame_flags_bypass_mode(int tl, int num_spatial_layers,
-                                 int is_key_frame,
-                                 vpx_svc_ref_frame_config_t *ref_frame_config) {
+static void set_frame_flags_bypass_mode_ex0(
+    int tl, int num_spatial_layers, int is_key_frame,
+    vpx_svc_ref_frame_config_t *ref_frame_config) {
   int sl;
   for (sl = 0; sl < num_spatial_layers; ++sl)
     ref_frame_config->update_buffer_slot[sl] = 0;
@@ -672,6 +672,71 @@ void set_frame_flags_bypass_mode(int tl, int num_spatial_layers,
   }
 }
 
+// Example pattern for 2 spatial layers and 2 temporal layers used in the
+// bypass/flexible mode, except only 1 spatial layer when temporal_layer_id = 1.
+static void set_frame_flags_bypass_mode_ex1(
+    int tl, int num_spatial_layers, int is_key_frame,
+    vpx_svc_ref_frame_config_t *ref_frame_config) {
+  int sl;
+  for (sl = 0; sl < num_spatial_layers; ++sl)
+    ref_frame_config->update_buffer_slot[sl] = 0;
+
+  if (tl == 0) {
+    if (is_key_frame) {
+      ref_frame_config->lst_fb_idx[1] = 0;
+      ref_frame_config->gld_fb_idx[1] = 1;
+    } else {
+      ref_frame_config->lst_fb_idx[1] = 1;
+      ref_frame_config->gld_fb_idx[1] = 0;
+    }
+    ref_frame_config->alt_fb_idx[1] = 0;
+
+    ref_frame_config->lst_fb_idx[0] = 0;
+    ref_frame_config->gld_fb_idx[0] = 0;
+    ref_frame_config->alt_fb_idx[0] = 0;
+  }
+  if (tl == 1) {
+    ref_frame_config->lst_fb_idx[0] = 0;
+    ref_frame_config->gld_fb_idx[0] = 1;
+    ref_frame_config->alt_fb_idx[0] = 2;
+
+    ref_frame_config->lst_fb_idx[1] = 1;
+    ref_frame_config->gld_fb_idx[1] = 2;
+    ref_frame_config->alt_fb_idx[1] = 3;
+  }
+  // Set the reference and update flags.
+  if (tl == 0) {
+    // Base spatial and base temporal (sl = 0, tl = 0)
+    ref_frame_config->reference_last[0] = 1;
+    ref_frame_config->reference_golden[0] = 0;
+    ref_frame_config->reference_alt_ref[0] = 0;
+    ref_frame_config->update_buffer_slot[0] |=
+        1 << ref_frame_config->lst_fb_idx[0];
+
+    if (is_key_frame) {
+      ref_frame_config->reference_last[1] = 1;
+      ref_frame_config->reference_golden[1] = 0;
+      ref_frame_config->reference_alt_ref[1] = 0;
+      ref_frame_config->update_buffer_slot[1] |=
+          1 << ref_frame_config->gld_fb_idx[1];
+    } else {
+      // Non-zero spatiall layer.
+      ref_frame_config->reference_last[1] = 1;
+      ref_frame_config->reference_golden[1] = 1;
+      ref_frame_config->reference_alt_ref[1] = 1;
+      ref_frame_config->update_buffer_slot[1] |=
+          1 << ref_frame_config->lst_fb_idx[1];
+    }
+  }
+  if (tl == 1) {
+    // Top spatial and top temporal (non-reference -- doesn't update any
+    // reference buffers)
+    ref_frame_config->reference_last[1] = 1;
+    ref_frame_config->reference_golden[1] = 0;
+    ref_frame_config->reference_alt_ref[1] = 0;
+  }
+}
+
 int main(int argc, const char **argv) {
   AppInput app_input;
   VpxVideoWriter *writer = NULL;
@@ -704,6 +769,8 @@ int main(int argc, const char **argv) {
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   memset(&app_input, 0, sizeof(AppInput));
   memset(&info, 0, sizeof(VpxVideoInfo));
+  memset(&layer_id, 0, sizeof(vpx_svc_layer_id_t));
+  memset(&rc, 0, sizeof(struct RateControlStats));
   exec_name = argv[0];
   parse_command_line(argc, argv, &app_input, &svc_ctx, &enc_cfg);
 
@@ -801,6 +868,12 @@ int main(int argc, const char **argv) {
   while (!end_of_stream) {
     vpx_codec_iter_t iter = NULL;
     const vpx_codec_cx_pkt_t *cx_pkt;
+    // Example patterns for bypass/flexible mode:
+    // example_pattern = 0: 2 temporal layers, and spatial_layers = 1,2,3. Exact
+    // to fixed SVC patterns. example_pattern = 1: 2 spatial and 2 temporal
+    // layers, with SL0 only has TL0, and SL1 has both TL0 and TL1. This example
+    // uses the extended API.
+    int example_pattern = 1;
     if (frame_cnt >= app_input.frames_to_code || !vpx_img_read(&raw, infile)) {
       // We need one extra vpx_svc_encode call at end of stream to flush
       // encoder and get remaining data
@@ -809,26 +882,49 @@ int main(int argc, const char **argv) {
 
     // For BYPASS/FLEXIBLE mode, set the frame flags (reference and updates)
     // and the buffer indices for each spatial layer of the current
-    // (super)frame to be encoded. The temporal layer_id for the current frame
-    // also needs to be set.
+    // (super)frame to be encoded. The spatial and temporal layer_id for the
+    // current frame also needs to be set.
     // TODO(marpan): Should rename the "VP9E_TEMPORAL_LAYERING_MODE_BYPASS"
     // mode to "VP9E_LAYERING_MODE_BYPASS".
     if (svc_ctx.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
       layer_id.spatial_layer_id = 0;
       // Example for 2 temporal layers.
-      if (frame_cnt % 2 == 0)
+      if (frame_cnt % 2 == 0) {
         layer_id.temporal_layer_id = 0;
-      else
+        for (i = 0; i < VPX_SS_MAX_LAYERS; i++)
+          layer_id.temporal_layer_id_per_spatial[i] = 0;
+      } else {
         layer_id.temporal_layer_id = 1;
-      // Note that we only set the temporal layer_id, since we are calling
-      // the encode for the whole superframe. The encoder will internally loop
-      // over all the spatial layers for the current superframe.
+        for (i = 0; i < VPX_SS_MAX_LAYERS; i++)
+          layer_id.temporal_layer_id_per_spatial[i] = 1;
+      }
+      if (example_pattern == 1) {
+        // example_pattern 1 is hard-coded for 2 spatial and 2 temporal layers.
+        assert(svc_ctx.spatial_layers == 2);
+        assert(svc_ctx.temporal_layers == 2);
+        if (frame_cnt % 2 == 0) {
+          // Spatial layer 0 and 1 are encoded.
+          layer_id.temporal_layer_id_per_spatial[0] = 0;
+          layer_id.temporal_layer_id_per_spatial[1] = 0;
+          layer_id.spatial_layer_id = 0;
+        } else {
+          // Only spatial layer 1 is encoded here.
+          layer_id.temporal_layer_id_per_spatial[1] = 1;
+          layer_id.spatial_layer_id = 1;
+        }
+      }
       vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id);
       // TODO(jianj): Fix the parameter passing for "is_key_frame" in
       // set_frame_flags_bypass_model() for case of periodic key frames.
-      set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
-                                  svc_ctx.spatial_layers, frame_cnt == 0,
-                                  &ref_frame_config);
+      if (example_pattern == 0) {
+        set_frame_flags_bypass_mode_ex0(layer_id.temporal_layer_id,
+                                        svc_ctx.spatial_layers, frame_cnt == 0,
+                                        &ref_frame_config);
+      } else if (example_pattern == 1) {
+        set_frame_flags_bypass_mode_ex1(layer_id.temporal_layer_id,
+                                        svc_ctx.spatial_layers, frame_cnt == 0,
+                                        &ref_frame_config);
+      }
       vpx_codec_control(&codec, VP9E_SET_SVC_REF_FRAME_CONFIG,
                         &ref_frame_config);
       // Keep track of input frames, to account for frame drops in rate control

@@ -144,6 +144,8 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
       frame_flags_ = GetFrameFlags(video->frame(), cfg_.ts_number_layers);
       layer_id.temporal_layer_id =
           SetLayerId(video->frame(), cfg_.ts_number_layers);
+      layer_id.temporal_layer_id_per_spatial[0] =
+          SetLayerId(video->frame(), cfg_.ts_number_layers);
       encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
     }
     const vpx_rational_t tb = video->timebase();
