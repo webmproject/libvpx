@@ -3228,87 +3228,16 @@ void update_ref_frames(VP9_COMP *cpi) {
 }
 
 void vp9_update_reference_frames(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  BufferPool *const pool = cm->buffer_pool;
-  SVC *const svc = &cpi->svc;
-
   if (cpi->extra_arf_allowed)
     update_multi_arf_ref_frames(cpi);
   else
     update_ref_frames(cpi);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
-      cpi->denoiser.denoising_level > kDenLowLow) {
-    int svc_refresh_denoiser_buffers = 0;
-    int denoise_svc_second_layer = 0;
-    FRAME_TYPE frame_type = cm->intra_only ? KEY_FRAME : cm->frame_type;
-    if (cpi->use_svc) {
-      int realloc_fail = 0;
-      const int svc_buf_shift =
-          svc->number_spatial_layers - svc->spatial_layer_id == 2
-              ? cpi->denoiser.num_ref_frames
-              : 0;
-      int layer =
-          LAYER_IDS_TO_IDX(svc->spatial_layer_id, svc->temporal_layer_id,
-                           svc->number_temporal_layers);
-      LAYER_CONTEXT *const lc = &svc->layer_context[layer];
-      svc_refresh_denoiser_buffers =
-          lc->is_key_frame || svc->spatial_layer_sync[svc->spatial_layer_id];
-      denoise_svc_second_layer =
-          svc->number_spatial_layers - svc->spatial_layer_id == 2 ? 1 : 0;
-      // Check if we need to allocate extra buffers in the denoiser
-      // for
-      // refreshed frames.
-      realloc_fail = vp9_denoiser_realloc_svc(
-          cm, &cpi->denoiser, svc_buf_shift, cpi->refresh_alt_ref_frame,
-          cpi->refresh_golden_frame, cpi->refresh_last_frame, cpi->alt_fb_idx,
-          cpi->gld_fb_idx, cpi->lst_fb_idx);
-      if (realloc_fail)
-        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                           "Failed to re-allocate denoiser for SVC");
-    }
-    vp9_denoiser_update_frame_info(
-        &cpi->denoiser, *cpi->Source, frame_type, cpi->refresh_alt_ref_frame,
-        cpi->refresh_golden_frame, cpi->refresh_last_frame, cpi->alt_fb_idx,
-        cpi->gld_fb_idx, cpi->lst_fb_idx, cpi->resize_pending,
-        svc_refresh_denoiser_buffers, denoise_svc_second_layer);
-  }
+  vp9_denoiser_update_ref_frame(cpi);
 #endif
 
-  if (is_one_pass_cbr_svc(cpi)) {
-    if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
-      vp9_svc_update_ref_frame_bypass_mode(cpi);
-    } else if (cm->frame_type == KEY_FRAME) {
-      // Keep track of frame index for each reference frame.
-      int i;
-      // On key frame update all reference frame slots.
-      for (i = 0; i < REF_FRAMES; i++) {
-        svc->fb_idx_spatial_layer_id[i] = svc->spatial_layer_id;
-        svc->fb_idx_temporal_layer_id[i] = svc->temporal_layer_id;
-        // LAST/GOLDEN/ALTREF is already updated above.
-        if (i != cpi->lst_fb_idx && i != cpi->gld_fb_idx &&
-            i != cpi->alt_fb_idx)
-          ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[i], cm->new_fb_idx);
-      }
-    } else {
-      if (cpi->refresh_last_frame) {
-        svc->fb_idx_spatial_layer_id[cpi->lst_fb_idx] = svc->spatial_layer_id;
-        svc->fb_idx_temporal_layer_id[cpi->lst_fb_idx] = svc->temporal_layer_id;
-      }
-      if (cpi->refresh_golden_frame) {
-        svc->fb_idx_spatial_layer_id[cpi->gld_fb_idx] = svc->spatial_layer_id;
-        svc->fb_idx_temporal_layer_id[cpi->gld_fb_idx] = svc->temporal_layer_id;
-      }
-      if (cpi->refresh_alt_ref_frame) {
-        svc->fb_idx_spatial_layer_id[cpi->alt_fb_idx] = svc->spatial_layer_id;
-        svc->fb_idx_temporal_layer_id[cpi->alt_fb_idx] = svc->temporal_layer_id;
-      }
-    }
-    // Copy flags from encoder to SVC struct.
-    vp9_copy_flags_ref_update_idx(cpi);
-    vp9_svc_update_ref_frame_buffer_idx(cpi);
-  }
+  if (is_one_pass_cbr_svc(cpi)) vp9_svc_update_ref_frame(cpi);
 }
 
 static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {

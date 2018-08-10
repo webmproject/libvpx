@@ -717,6 +717,44 @@ int64_t vp9_scale_acskip_thresh(int64_t threshold,
     return threshold;
 }
 
+void vp9_denoiser_update_ref_frame(VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  SVC *const svc = &cpi->svc;
+  if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
+      cpi->denoiser.denoising_level > kDenLowLow) {
+    int svc_refresh_denoiser_buffers = 0;
+    int denoise_svc_second_layer = 0;
+    FRAME_TYPE frame_type = cm->intra_only ? KEY_FRAME : cm->frame_type;
+    if (cpi->use_svc) {
+      const int svc_buf_shift =
+          svc->number_spatial_layers - svc->spatial_layer_id == 2
+              ? cpi->denoiser.num_ref_frames
+              : 0;
+      int layer =
+          LAYER_IDS_TO_IDX(svc->spatial_layer_id, svc->temporal_layer_id,
+                           svc->number_temporal_layers);
+      LAYER_CONTEXT *const lc = &svc->layer_context[layer];
+      svc_refresh_denoiser_buffers =
+          lc->is_key_frame || svc->spatial_layer_sync[svc->spatial_layer_id];
+      denoise_svc_second_layer =
+          svc->number_spatial_layers - svc->spatial_layer_id == 2 ? 1 : 0;
+      // Check if we need to allocate extra buffers in the denoiser
+      // for refreshed frames.
+      if (vp9_denoiser_realloc_svc(
+              cm, &cpi->denoiser, svc_buf_shift, cpi->refresh_alt_ref_frame,
+              cpi->refresh_golden_frame, cpi->refresh_last_frame,
+              cpi->alt_fb_idx, cpi->gld_fb_idx, cpi->lst_fb_idx))
+        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                           "Failed to re-allocate denoiser for SVC");
+    }
+    vp9_denoiser_update_frame_info(
+        &cpi->denoiser, *cpi->Source, frame_type, cpi->refresh_alt_ref_frame,
+        cpi->refresh_golden_frame, cpi->refresh_last_frame, cpi->alt_fb_idx,
+        cpi->gld_fb_idx, cpi->lst_fb_idx, cpi->resize_pending,
+        svc_refresh_denoiser_buffers, denoise_svc_second_layer);
+  }
+}
+
 #ifdef OUTPUT_YUV_DENOISED
 static void make_grayscale(YV12_BUFFER_CONFIG *yuv) {
   int r, c;

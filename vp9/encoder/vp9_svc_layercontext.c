@@ -1126,7 +1126,7 @@ void vp9_svc_update_ref_frame_buffer_idx(VP9_COMP *const cpi) {
   }
 }
 
-void vp9_svc_update_ref_frame_bypass_mode(VP9_COMP *const cpi) {
+static void vp9_svc_update_ref_frame_bypass_mode(VP9_COMP *const cpi) {
   // For non-flexible/bypass SVC mode: check for refreshing other buffer
   // slots.
   SVC *const svc = &cpi->svc;
@@ -1141,4 +1141,41 @@ void vp9_svc_update_ref_frame_bypass_mode(VP9_COMP *const cpi) {
       svc->fb_idx_temporal_layer_id[i] = svc->temporal_layer_id;
     }
   }
+}
+
+void vp9_svc_update_ref_frame(VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  SVC *const svc = &cpi->svc;
+  BufferPool *const pool = cm->buffer_pool;
+
+  if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+    vp9_svc_update_ref_frame_bypass_mode(cpi);
+  } else if (cm->frame_type == KEY_FRAME) {
+    // Keep track of frame index for each reference frame.
+    int i;
+    // On key frame update all reference frame slots.
+    for (i = 0; i < REF_FRAMES; i++) {
+      svc->fb_idx_spatial_layer_id[i] = svc->spatial_layer_id;
+      svc->fb_idx_temporal_layer_id[i] = svc->temporal_layer_id;
+      // LAST/GOLDEN/ALTREF is already updated above.
+      if (i != cpi->lst_fb_idx && i != cpi->gld_fb_idx && i != cpi->alt_fb_idx)
+        ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[i], cm->new_fb_idx);
+    }
+  } else {
+    if (cpi->refresh_last_frame) {
+      svc->fb_idx_spatial_layer_id[cpi->lst_fb_idx] = svc->spatial_layer_id;
+      svc->fb_idx_temporal_layer_id[cpi->lst_fb_idx] = svc->temporal_layer_id;
+    }
+    if (cpi->refresh_golden_frame) {
+      svc->fb_idx_spatial_layer_id[cpi->gld_fb_idx] = svc->spatial_layer_id;
+      svc->fb_idx_temporal_layer_id[cpi->gld_fb_idx] = svc->temporal_layer_id;
+    }
+    if (cpi->refresh_alt_ref_frame) {
+      svc->fb_idx_spatial_layer_id[cpi->alt_fb_idx] = svc->spatial_layer_id;
+      svc->fb_idx_temporal_layer_id[cpi->alt_fb_idx] = svc->temporal_layer_id;
+    }
+  }
+  // Copy flags from encoder to SVC struct.
+  vp9_copy_flags_ref_update_idx(cpi);
+  vp9_svc_update_ref_frame_buffer_idx(cpi);
 }

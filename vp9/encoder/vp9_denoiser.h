@@ -120,6 +120,8 @@ int64_t vp9_scale_acskip_thresh(int64_t threshold,
                                 VP9_DENOISER_LEVEL noise_level, int abs_sumdiff,
                                 int temporal_layer_id);
 
+void vp9_denoiser_update_ref_frame(struct VP9_COMP *const cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
