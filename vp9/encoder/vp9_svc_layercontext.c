@@ -44,6 +44,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->set_intra_only_frame = 0;
   svc->previous_frame_is_intra_only = 0;
   svc->superframe_has_layer_sync = 0;
+  svc->use_set_ref_frame_config = 0;
 
   for (i = 0; i < REF_FRAMES; ++i) {
     svc->fb_idx_spatial_layer_id[i] = -1;
@@ -730,9 +731,9 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   } else if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0101) {
     set_flags_and_fb_idx_for_temporal_mode2(cpi);
   } else if (svc->temporal_layering_mode ==
-             VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
-    if (cpi->ext_refresh_frame_flags_pending == 0)
-      set_flags_and_fb_idx_bypass_via_set_ref_frame_config(cpi);
+                 VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
+             svc->use_set_ref_frame_config) {
+    set_flags_and_fb_idx_bypass_via_set_ref_frame_config(cpi);
   }
 
   if (cpi->lst_fb_idx == svc->buffer_gf_temporal_ref[0].idx ||
@@ -1148,7 +1149,8 @@ void vp9_svc_update_ref_frame(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
   BufferPool *const pool = cm->buffer_pool;
 
-  if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+  if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
+      svc->use_set_ref_frame_config) {
     vp9_svc_update_ref_frame_bypass_mode(cpi);
   } else if (cm->frame_type == KEY_FRAME) {
     // Keep track of frame index for each reference frame.

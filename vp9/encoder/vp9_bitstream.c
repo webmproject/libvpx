@@ -913,7 +913,7 @@ int vp9_get_refresh_mask(VP9_COMP *cpi) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       arf_idx = gf_group->arf_update_idx[gf_group->index];
     }
-    if (cpi->use_svc &&
+    if (cpi->use_svc && cpi->svc.use_set_ref_frame_config &&
         cpi->svc.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS)
       return cpi->svc.update_buffer_slot[cpi->svc.spatial_layer_id];
     return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
