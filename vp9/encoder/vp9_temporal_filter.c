@@ -136,6 +136,11 @@ static void apply_temporal_filter(
       int diff_sse[9] = { 0 };
       int idx, idy, index = 0;
 
+      const int uv_r = i >> ss_y;
+      const int uv_c = j >> ss_x;
+
+      int diff;
+
       for (idy = -1; idy <= 1; ++idy) {
         for (idx = -1; idx <= 1; ++idx) {
           const int row = (int)i + idy;
@@ -156,6 +161,16 @@ static void apply_temporal_filter(
       modifier = 0;
       for (idx = 0; idx < 9; ++idx) modifier += diff_sse[idx];
 
+      diff = u_frame1[uv_r * uv_stride + uv_c] -
+             u_pred[uv_r * uv_buf_stride + uv_c];
+      modifier += diff * diff;
+
+      diff = v_frame1[uv_r * uv_stride + uv_c] -
+             v_pred[uv_r * uv_buf_stride + uv_c];
+      modifier += diff * diff;
+
+      index += 2;
+
       modifier = mod_index(modifier, index, rounding, strength, filter_weight);
 
       y_count[k] += modifier;
@@ -165,9 +180,6 @@ static void apply_temporal_filter(
 
       // Process chroma component
       if (!(i & ss_y) && !(j & ss_x)) {
-        const int uv_r = i >> ss_y;
-        const int uv_c = j >> ss_x;
-
         const int u_pixel_value = u_pred[uv_r * uv_buf_stride + uv_c];
         const int v_pixel_value = v_pred[uv_r * uv_buf_stride + uv_c];
 
@@ -176,6 +188,7 @@ static void apply_temporal_filter(
         int v_diff_sse[9] = { 0 };
         int idx, idy, index = 0;
         int u_mod = 0, v_mod = 0;
+        int y_diff = 0;
 
         for (idy = -1; idy <= 1; ++idy) {
           for (idx = -1; idx <= 1; ++idx) {
@@ -203,6 +216,20 @@ static void apply_temporal_filter(
           u_mod += u_diff_sse[idx];
           v_mod += v_diff_sse[idx];
         }
+
+        for (idy = 0; idy < 1 + ss_y; ++idy) {
+          for (idx = 0; idx < 1 + ss_x; ++idx) {
+            const int row = (uv_r << ss_y) + idy;
+            const int col = (uv_c << ss_x) + idx;
+            const int diff = y_frame1[row * (int)y_stride + col] -
+                             y_pred[row * (int)block_width + col];
+            y_diff += diff * diff;
+            ++index;
+          }
+        }
+
+        u_mod += y_diff;
+        v_mod += y_diff;
 
         u_mod = mod_index(u_mod, index, rounding, strength, filter_weight);
         v_mod = mod_index(v_mod, index, rounding, strength, filter_weight);
@@ -517,6 +544,13 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         // score is lower. If not applying MC default behavior
         // is to weight all MBs equal.
         filter_weight = err < thresh_low ? 2 : err < thresh_high ? 1 : 0;
+
+        switch (abs(frame - alt_ref_index)) {
+          case 1: filter_weight = VPXMIN(filter_weight, 2); break;
+          case 2:
+          case 3: filter_weight = VPXMIN(filter_weight, 1); break;
+          default: break;
+        }
       }
 
       if (filter_weight != 0) {
