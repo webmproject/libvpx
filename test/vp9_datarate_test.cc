@@ -221,34 +221,17 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
 };
 
 // Params: test mode, speed setting and index for bitrate array.
-class DatarateTestVP9Large
+class DatarateTestVP9RealTimeMultiBR
     : public DatarateTestVP9,
-      public ::libvpx_test::CodecTestWith3Params<libvpx_test::TestMode, int,
-                                                 int> {
+      public ::libvpx_test::CodecTestWith2Params<int, int> {
  public:
-  DatarateTestVP9Large() : DatarateTestVP9(GET_PARAM(0)) {}
+  DatarateTestVP9RealTimeMultiBR() : DatarateTestVP9(GET_PARAM(0)) {}
 
  protected:
   virtual void SetUp() {
     InitializeConfig();
-    SetMode(GET_PARAM(1));
-    set_cpu_used_ = GET_PARAM(2);
-    ResetModel();
-  }
-};
-
-// Params: test mode, speed setting.
-class DatarateTestVP9LargeOneBR
-    : public DatarateTestVP9,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
- public:
-  DatarateTestVP9LargeOneBR() : DatarateTestVP9(GET_PARAM(0)) {}
-
- protected:
-  virtual void SetUp() {
-    InitializeConfig();
-    SetMode(GET_PARAM(1));
-    set_cpu_used_ = GET_PARAM(2);
+    SetMode(::libvpx_test::kRealTime);
+    set_cpu_used_ = GET_PARAM(1);
     ResetModel();
   }
 };
@@ -350,7 +333,7 @@ TEST_P(DatarateTestVP9LargeVBR, BasicRateTargetingVBRLagNonZeroFrameParDecOff) {
 }
 
 // Check basic rate targeting for CBR mode.
-TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
+TEST_P(DatarateTestVP9RealTimeMultiBR, BasicRateTargeting) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -363,7 +346,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   const int bitrates[4] = { 150, 350, 550, 750 };
-  const int bitrate_index = GET_PARAM(3);
+  const int bitrate_index = GET_PARAM(2);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   ResetModel();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -375,7 +358,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting) {
 
 // Check basic rate targeting for CBR mode, with frame_parallel_decoding_mode
 // off( and error_resilience off).
-TEST_P(DatarateTestVP9Large, BasicRateTargetingFrameParDecOff) {
+TEST_P(DatarateTestVP9RealTimeMultiBR, BasicRateTargetingFrameParDecOff) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -389,7 +372,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingFrameParDecOff) {
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   const int bitrates[4] = { 150, 350, 550, 750 };
-  const int bitrate_index = GET_PARAM(3);
+  const int bitrate_index = GET_PARAM(2);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   ResetModel();
   frame_parallel_decoding_mode_ = 0;
@@ -400,32 +383,8 @@ TEST_P(DatarateTestVP9Large, BasicRateTargetingFrameParDecOff) {
       << " The datarate for the file is greater than target by too much!";
 }
 
-// Check basic rate targeting for CBR mode, with 2 threads and dropped frames.
-TEST_P(DatarateTestVP9LargeOneBR, BasicRateTargetingDropFramesMultiThreads) {
-  cfg_.rc_buf_initial_sz = 500;
-  cfg_.rc_buf_optimal_sz = 500;
-  cfg_.rc_buf_sz = 1000;
-  cfg_.rc_dropframe_thresh = 30;
-  cfg_.rc_min_quantizer = 0;
-  cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  // Encode using multiple threads.
-  cfg_.g_threads = 2;
-
-  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
-                                       0, 400);
-  cfg_.rc_target_bitrate = 200;
-  ResetModel();
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
-      << " The datarate for the file is lower than target by too much!";
-  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
-      << " The datarate for the file is greater than target by too much!";
-}
-
 // Check basic rate targeting for CBR.
-TEST_P(DatarateTestVP9Large, BasicRateTargeting444) {
+TEST_P(DatarateTestVP9RealTimeMultiBR, BasicRateTargeting444) {
   ::libvpx_test::Y4mVideoSource video("rush_hour_444.y4m", 0, 140);
 
   cfg_.g_profile = 1;
@@ -439,7 +398,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting444) {
   cfg_.rc_max_quantizer = 63;
   cfg_.rc_end_usage = VPX_CBR;
   const int bitrates[4] = { 250, 450, 650, 850 };
-  const int bitrate_index = GET_PARAM(3);
+  const int bitrate_index = GET_PARAM(2);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   ResetModel();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -456,7 +415,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting444) {
 // as the drop frame threshold is increased, and (2) that the total number of
 // frame drops does not decrease as we increase frame drop threshold.
 // Use a lower qp-max to force some frame drops.
-TEST_P(DatarateTestVP9Large, ChangingDropFrameThresh) {
+TEST_P(DatarateTestVP9RealTimeMultiBR, ChangingDropFrameThresh) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -477,7 +436,7 @@ TEST_P(DatarateTestVP9Large, ChangingDropFrameThresh) {
 
   const int kDropFrameThreshTestStep = 30;
   const int bitrates[2] = { 50, 150 };
-  const int bitrate_index = GET_PARAM(3);
+  const int bitrate_index = GET_PARAM(2);
   if (bitrate_index > 1) return;
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   vpx_codec_pts_t last_drop = 140;
@@ -504,7 +463,7 @@ TEST_P(DatarateTestVP9Large, ChangingDropFrameThresh) {
 }  // namespace
 
 // Check basic rate targeting for 2 temporal layers.
-TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
+TEST_P(DatarateTestVP9RealTimeMultiBR, BasicRateTargeting2TemporalLayers) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -525,7 +484,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   const int bitrates[4] = { 200, 400, 600, 800 };
-  const int bitrate_index = GET_PARAM(3);
+  const int bitrate_index = GET_PARAM(2);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   ResetModel();
   // 60-40 bitrate allocation for 2 temporal layers.
@@ -550,7 +509,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
 }
 
 // Check basic rate targeting for 3 temporal layers.
-TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayers) {
+TEST_P(DatarateTestVP9RealTimeMultiBR, BasicRateTargeting3TemporalLayers) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -572,7 +531,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayers) {
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   const int bitrates[4] = { 200, 400, 600, 800 };
-  const int bitrate_index = GET_PARAM(3);
+  const int bitrate_index = GET_PARAM(2);
   cfg_.rc_target_bitrate = bitrates[bitrate_index];
   ResetModel();
   // 40-20-40 bitrate allocation for 3 temporal layers.
@@ -601,10 +560,50 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayers) {
   }
 }
 
+// Params: speed setting.
+class DatarateTestVP9RealTime : public DatarateTestVP9,
+                                public ::libvpx_test::CodecTestWithParam<int> {
+ public:
+  DatarateTestVP9RealTime() : DatarateTestVP9(GET_PARAM(0)) {}
+  virtual ~DatarateTestVP9RealTime() {}
+
+ protected:
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(::libvpx_test::kRealTime);
+    set_cpu_used_ = GET_PARAM(1);
+    ResetModel();
+  }
+};
+
+// Check basic rate targeting for CBR mode, with 2 threads and dropped frames.
+TEST_P(DatarateTestVP9RealTime, BasicRateTargetingDropFramesMultiThreads) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_dropframe_thresh = 30;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  // Encode using multiple threads.
+  cfg_.g_threads = 2;
+
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  cfg_.rc_target_bitrate = 200;
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+      << " The datarate for the file is greater than target by too much!";
+}
+
 // Check basic rate targeting for 3 temporal layers, with frame dropping.
 // Only for one (low) bitrate with lower max_quantizer, and somewhat higher
 // frame drop threshold, to force frame dropping.
-TEST_P(DatarateTestVP9LargeOneBR,
+TEST_P(DatarateTestVP9RealTime,
        BasicRateTargeting3TemporalLayersFrameDropping) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -654,22 +653,6 @@ TEST_P(DatarateTestVP9LargeOneBR,
     ASSERT_LE(num_drops_, 280);
   }
 }
-
-// Params: speed setting.
-class DatarateTestVP9RealTime : public DatarateTestVP9,
-                                public ::libvpx_test::CodecTestWithParam<int> {
- public:
-  DatarateTestVP9RealTime() : DatarateTestVP9(GET_PARAM(0)) {}
-  virtual ~DatarateTestVP9RealTime() {}
-
- protected:
-  virtual void SetUp() {
-    InitializeConfig();
-    SetMode(::libvpx_test::kRealTime);
-    set_cpu_used_ = GET_PARAM(1);
-    ResetModel();
-  }
-};
 
 // Check VP9 region of interest feature.
 TEST_P(DatarateTestVP9RealTime, RegionOfInterest) {
@@ -730,13 +713,13 @@ TEST_P(DatarateTestVP9RealTime, RegionOfInterest) {
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 // Params: speed setting.
-class DatarateTestVP9LargeDenoiser : public DatarateTestVP9RealTime {
+class DatarateTestVP9RealTimeDenoiser : public DatarateTestVP9RealTime {
  public:
-  virtual ~DatarateTestVP9LargeDenoiser() {}
+  virtual ~DatarateTestVP9RealTimeDenoiser() {}
 };
 
 // Check basic datarate targeting, for a single bitrate, when denoiser is on.
-TEST_P(DatarateTestVP9LargeDenoiser, LowNoise) {
+TEST_P(DatarateTestVP9RealTimeDenoiser, LowNoise) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -765,7 +748,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, LowNoise) {
 
 // Check basic datarate targeting, for a single bitrate, when denoiser is on,
 // for clip with high noise level. Use 2 threads.
-TEST_P(DatarateTestVP9LargeDenoiser, HighNoise) {
+TEST_P(DatarateTestVP9RealTimeDenoiser, HighNoise) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -794,7 +777,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, HighNoise) {
 
 // Check basic datarate targeting, for a single bitrate, when denoiser is on,
 // for 1280x720 clip with 4 threads.
-TEST_P(DatarateTestVP9LargeDenoiser, 4threads) {
+TEST_P(DatarateTestVP9RealTimeDenoiser, 4threads) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -823,7 +806,7 @@ TEST_P(DatarateTestVP9LargeDenoiser, 4threads) {
 
 // Check basic datarate targeting, for a single bitrate, when denoiser is off
 // and on.
-TEST_P(DatarateTestVP9LargeDenoiser, DenoiserOffOn) {
+TEST_P(DatarateTestVP9RealTimeDenoiser, DenoiserOffOn) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
@@ -854,25 +837,18 @@ TEST_P(DatarateTestVP9LargeDenoiser, DenoiserOffOn) {
 }
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
-                          ::testing::Values(::libvpx_test::kOnePassGood,
-                                            ::libvpx_test::kRealTime),
-                          ::testing::Range(2, 10), ::testing::Range(0, 4));
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTimeMultiBR,
+                          ::testing::Range(5, 10), ::testing::Range(0, 4));
 
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeVBR,
                           ::testing::Values(::libvpx_test::kOnePassGood,
                                             ::libvpx_test::kRealTime),
                           ::testing::Range(2, 9), ::testing::Range(0, 2));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeOneBR,
-                          ::testing::Values(::libvpx_test::kOnePassGood,
-                                            ::libvpx_test::kRealTime),
-                          ::testing::Range(2, 10));
-
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTime, ::testing::Range(5, 10));
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeDenoiser,
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTimeDenoiser,
                           ::testing::Range(5, 10));
 #endif
 }  // namespace
