@@ -2825,11 +2825,13 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
   if (cpi->oxcf.content != VP9E_CONTENT_SCREEN)
     thresh_qp = rc->worst_quality >> 1;
   // If this decision is not based on an encoded frame size but just on
-  // scene/slide change detection (i.e., re_encode_overshoot_rt = 1),
-  // for now skip the (frame_size > thresh_rate) condition in this case.
+  // scene/slide change detection (i.e., re_encode_overshoot_cbr_rt ==
+  // FAST_DETECTION_MAXQ), for now skip the (frame_size > thresh_rate)
+  // condition in this case.
   // TODO(marpan): Use a better size/rate condition for this case and
   // adjust thresholds.
-  if ((sf->overshoot_detection_rt == 1 || frame_size > thresh_rate) &&
+  if ((sf->overshoot_detection_cbr_rt == FAST_DETECTION_MAXQ ||
+       frame_size > thresh_rate) &&
       cm->base_qindex < thresh_qp) {
     double rate_correction_factor =
         cpi->rc.rate_correction_factors[INTER_NORMAL];
@@ -2846,8 +2848,8 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
     // and the encoded frame used alot of Intra modes, then force hybrid_intra
     // encoding for the re-encode on this scene change. hybrid_intra will
     // use rd-based intra mode selection for small blocks.
-    if (sf->overshoot_detection_rt == 2 && frame_size > (thresh_rate << 1) &&
-        cpi->svc.spatial_layer_id == 0) {
+    if (sf->overshoot_detection_cbr_rt == RE_ENCODE_MAXQ &&
+        frame_size > (thresh_rate << 1) && cpi->svc.spatial_layer_id == 0) {
       MODE_INFO **mi = cm->mi_grid_visible;
       int sum_intra_usage = 0;
       int mi_row, mi_col;

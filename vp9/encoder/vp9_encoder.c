@@ -3988,7 +3988,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // Check if this high_source_sad (scene/slide change) frame should be
   // encoded at high/max QP, and if so, set the q and adjust some rate
   // control parameters.
-  if (cpi->sf.overshoot_detection_rt == 1 &&
+  if (cpi->sf.overshoot_detection_cbr_rt == FAST_DETECTION_MAXQ &&
       (cpi->rc.high_source_sad ||
        (cpi->use_svc && cpi->svc.high_source_sad_superframe))) {
     if (vp9_encodedframe_overshoot(cpi, -1, &q)) {
@@ -4023,7 +4023,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // overshoot based on the encoded frame size. Only for frames where
   // high temporal-source SAD is detected.
   // For SVC: all spatial layers are checked for re-encoding.
-  if (cpi->sf.overshoot_detection_rt == 2 &&
+  if (cpi->sf.overshoot_detection_cbr_rt == RE_ENCODE_MAXQ &&
       (cpi->rc.high_source_sad ||
        (cpi->use_svc && cpi->svc.high_source_sad_superframe))) {
     int frame_size = 0;
