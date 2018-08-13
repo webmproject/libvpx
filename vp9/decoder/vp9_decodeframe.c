@@ -1736,6 +1736,7 @@ static INLINE void flush_all_fb_on_key(VP9_COMMON *cm) {
     BufferPool *const pool = cm->buffer_pool;
     int i;
     for (i = 0; i < FRAME_BUFFERS; ++i) {
+      if (i == cm->new_fb_idx) continue;
       frame_bufs[i].ref_count = 0;
       if (!frame_bufs[i].released) {
         pool->release_fb_cb(pool->cb_priv, &frame_bufs[i].raw_frame_buffer);
