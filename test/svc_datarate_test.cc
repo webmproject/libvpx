@@ -1307,6 +1307,60 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL1TLSyncWithIntraOnly) {
 #endif
 }
 
+// Run SVC encoder for 2 quality layers (same resolution different,
+// bitrates), 1 temporal layer, with screen content mode.
+TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2QL1TLScreen) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.ss_number_layers = 2;
+  cfg_.ts_number_layers = 1;
+  cfg_.ts_rate_decimator[0] = 1;
+  cfg_.temporal_layering_mode = 0;
+  cfg_.g_error_resilient = 1;
+  cfg_.g_threads = 2;
+  svc_params_.scaling_factor_num[0] = 1;
+  svc_params_.scaling_factor_den[0] = 1;
+  svc_params_.scaling_factor_num[1] = 1;
+  svc_params_.scaling_factor_den[1] = 1;
+  cfg_.rc_dropframe_thresh = 30;
+  cfg_.kf_max_dist = 9999;
+  number_spatial_layers_ = cfg_.ss_number_layers;
+  number_temporal_layers_ = cfg_.ts_number_layers;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
+  ResetModel();
+  tune_content_ = 1;
+  base_speed_setting_ = speed_setting_;
+  // Set the layer bitrates, for 2 spatial layers, 1 temporal.
+  cfg_.rc_target_bitrate = 400;
+  cfg_.ss_target_bitrate[0] = 100;
+  cfg_.ss_target_bitrate[1] = 300;
+  cfg_.layer_target_bitrate[0] = 100;
+  cfg_.layer_target_bitrate[1] = 300;
+  for (int sl = 0; sl < 2; ++sl) {
+    float layer_framerate = 30.0;
+    layer_target_avg_bandwidth_[sl] = static_cast<int>(
+        cfg_.layer_target_bitrate[sl] * 1000.0 / layer_framerate);
+    bits_in_buffer_model_[sl] =
+        cfg_.layer_target_bitrate[sl] * cfg_.rc_buf_initial_sz;
+  }
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.73,
+                          1.2);
+#if CONFIG_VP9_DECODER
+  // The non-reference frames are expected to be mismatched frames as the
+  // encoder will avoid loopfilter on these frames.
+  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+#endif
+}
+
 VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcSingleBR,
                           ::testing::Range(5, 10));
 
