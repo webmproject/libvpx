@@ -146,6 +146,9 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
         size_t consec_zero_mv_size;
         VP9_COMMON *const cm = &cpi->common;
         lc->sb_index = 0;
+        lc->actual_num_seg1_blocks = 0;
+        lc->actual_num_seg2_blocks = 0;
+        lc->counter_encode_maxq_scene_change = 0;
         CHECK_MEM_ERROR(cm, lc->map,
                         vpx_malloc(mi_rows * mi_cols * sizeof(*lc->map)));
         memset(lc->map, 0, mi_rows * mi_cols);
@@ -349,6 +352,9 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
     cpi->consec_zero_mv = lc->consec_zero_mv;
     lc->consec_zero_mv = temp3;
     cr->sb_index = lc->sb_index;
+    cr->actual_num_seg1_blocks = lc->actual_num_seg1_blocks;
+    cr->actual_num_seg2_blocks = lc->actual_num_seg2_blocks;
+    cr->counter_encode_maxq_scene_change = lc->counter_encode_maxq_scene_change;
   }
 }
 
@@ -376,6 +382,9 @@ void vp9_save_layer_context(VP9_COMP *const cpi) {
     lc->consec_zero_mv = cpi->consec_zero_mv;
     cpi->consec_zero_mv = temp3;
     lc->sb_index = cr->sb_index;
+    lc->actual_num_seg1_blocks = cr->actual_num_seg1_blocks;
+    lc->actual_num_seg2_blocks = cr->actual_num_seg2_blocks;
+    lc->counter_encode_maxq_scene_change = cr->counter_encode_maxq_scene_change;
   }
 }
 
