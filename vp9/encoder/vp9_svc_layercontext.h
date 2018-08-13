@@ -60,10 +60,14 @@ typedef struct {
   size_t layer_size;
   struct vpx_psnr_pkt psnr_pkt;
   // Cyclic refresh parameters (aq-mode=3), that need to be updated per-frame.
+  // TODO(jianj/marpan): Is it better to use the full cyclic refresh struct.
   int sb_index;
   signed char *map;
   uint8_t *last_coded_q_map;
   uint8_t *consec_zero_mv;
+  int actual_num_seg1_blocks;
+  int actual_num_seg2_blocks;
+  int counter_encode_maxq_scene_change;
   uint8_t speed;
 } LAYER_CONTEXT;
 
