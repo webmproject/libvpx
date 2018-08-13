@@ -12,6 +12,7 @@
 
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
+#include "test/i420_video_source.h"
 #include "test/util.h"
 #include "test/y4m_video_source.h"
 #include "test/yuv_video_source.h"
@@ -73,6 +74,43 @@ int is_extension_y4m(const char *filename) {
     return !strcmp(dot, ".y4m");
   }
 }
+
+class EndToEndTestAdaptiveRDThresh
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWith2Params<int, int> {
+ protected:
+  EndToEndTestAdaptiveRDThresh()
+      : EncoderTest(GET_PARAM(0)), cpu_used_start_(GET_PARAM(1)),
+        cpu_used_end_(GET_PARAM(2)) {}
+
+  virtual ~EndToEndTestAdaptiveRDThresh() {}
+
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(::libvpx_test::kRealTime);
+    cfg_.g_lag_in_frames = 0;
+    cfg_.rc_end_usage = VPX_CBR;
+    cfg_.rc_buf_sz = 1000;
+    cfg_.rc_buf_initial_sz = 500;
+    cfg_.rc_buf_optimal_sz = 600;
+    dec_cfg_.threads = 4;
+  }
+
+  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                                  ::libvpx_test::Encoder *encoder) {
+    if (video->frame() == 0) {
+      encoder->Control(VP8E_SET_CPUUSED, cpu_used_start_);
+      encoder->Control(VP9E_SET_ROW_MT, 1);
+      encoder->Control(VP9E_SET_TILE_COLUMNS, 2);
+    }
+    if (video->frame() == 100)
+      encoder->Control(VP8E_SET_CPUUSED, cpu_used_end_);
+  }
+
+ private:
+  int cpu_used_start_;
+  int cpu_used_end_;
+};
 
 class EndToEndTestLarge
     : public ::libvpx_test::EncoderTest,
@@ -205,8 +243,21 @@ TEST_P(EndToEndTestLarge, EndtoEndPSNRDenoiserAQTest) {
   EXPECT_GT(psnr, GetPsnrThreshold());
 }
 
+TEST_P(EndToEndTestAdaptiveRDThresh, EndtoEndAdaptiveRDThreshRowMT) {
+  cfg_.rc_target_bitrate = kBitrate;
+  cfg_.g_error_resilient = 0;
+  cfg_.g_threads = 2;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+}
+
 VP9_INSTANTIATE_TEST_CASE(EndToEndTestLarge,
                           ::testing::ValuesIn(kEncodingModeVectors),
                           ::testing::ValuesIn(kTestVectors),
                           ::testing::ValuesIn(kCpuUsedVectors));
+
+VP9_INSTANTIATE_TEST_CASE(EndToEndTestAdaptiveRDThresh,
+                          ::testing::Values(5, 6, 7), ::testing::Values(8, 9));
 }  // namespace

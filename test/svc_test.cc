@@ -27,7 +27,6 @@ void OnePassCbrSvc::PreEncodeFrameHookSetup(::libvpx_test::VideoSource *video,
     encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);
     encoder->Control(VP8E_SET_CPUUSED, speed_setting_);
     encoder->Control(VP9E_SET_AQ_MODE, 3);
-    encoder->Control(VP9E_SET_TILE_COLUMNS, 0);
     encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 300);
     encoder->Control(VP9E_SET_TILE_COLUMNS, get_msb(cfg_.g_threads));
     encoder->Control(VP9E_SET_ROW_MT, 1);
