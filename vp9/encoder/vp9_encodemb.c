@@ -77,13 +77,19 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   const scan_order *const so = get_scan(xd, tx_size, plane_type, block);
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
+  const MODE_INFO *mbmi = xd->mi[0];
+  const int sharpness = mb->sharpness;
+  const int64_t rdadj = (int64_t)mb->rdmult * plane_rd_mult[ref][plane_type];
   const int64_t rdmult =
-      ((int64_t)mb->rdmult * plane_rd_mult[ref][plane_type]) >> 1;
+      (sharpness == 0 ? rdadj >> 1
+                      : (rdadj * (8 - sharpness + mbmi->segment_id)) >> 4);
+
   const int64_t rddiv = mb->rddiv;
   int64_t rd_cost0, rd_cost1;
   int64_t rate0, rate1;
   int16_t t0, t1;
   int i, final_eob;
+  int count_high_values_after_eob = 0;
 #if CONFIG_VP9_HIGHBITDEPTH
   const uint16_t *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
 #else
@@ -263,6 +269,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
           assert(distortion0 <= distortion_for_zero);
           token_cache[rc] = vp9_pt_energy_class[t0];
         }
+        if (sharpness > 0 && abs(qcoeff[rc]) > 1) count_high_values_after_eob++;
         assert(accu_error >= 0);
         x_prev = qcoeff[rc];  // Update based on selected quantized value.
 
@@ -273,6 +280,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
         if (best_eob_cost_cur < best_block_rd_cost) {
           best_block_rd_cost = best_eob_cost_cur;
           final_eob = i + 1;
+          count_high_values_after_eob = 0;
           if (use_x1) {
             before_best_eob_qc = x1;
             before_best_eob_dqc = dqc1;
@@ -284,19 +292,31 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
       }
     }
   }
-  assert(final_eob <= eob);
-  if (final_eob > 0) {
-    int rc;
-    assert(before_best_eob_qc != 0);
-    i = final_eob - 1;
-    rc = scan[i];
-    qcoeff[rc] = before_best_eob_qc;
-    dqcoeff[rc] = before_best_eob_dqc;
-  }
-  for (i = final_eob; i < eob; i++) {
-    int rc = scan[i];
-    qcoeff[rc] = 0;
-    dqcoeff[rc] = 0;
+  if (count_high_values_after_eob > 0) {
+    final_eob = eob - 1;
+    for (; final_eob >= 0; final_eob--) {
+      const int rc = scan[final_eob];
+      const int x = qcoeff[rc];
+      if (x) {
+        break;
+      }
+    }
+    final_eob++;
+  } else {
+    assert(final_eob <= eob);
+    if (final_eob > 0) {
+      int rc;
+      assert(before_best_eob_qc != 0);
+      i = final_eob - 1;
+      rc = scan[i];
+      qcoeff[rc] = before_best_eob_qc;
+      dqcoeff[rc] = before_best_eob_dqc;
+    }
+    for (i = final_eob; i < eob; i++) {
+      int rc = scan[i];
+      qcoeff[rc] = 0;
+      dqcoeff[rc] = 0;
+    }
   }
   mb->plane[plane].eobs[block] = final_eob;
   return final_eob;

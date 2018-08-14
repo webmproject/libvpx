@@ -763,7 +763,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   rd = VPXMIN(rd1, rd2);
   if (plane == 0) {
     x->zcoeff_blk[tx_size][block] =
-        !x->plane[plane].eobs[block] || (rd1 > rd2 && !xd->lossless);
+        !x->plane[plane].eobs[block] ||
+        (x->sharpness == 0 && rd1 > rd2 && !xd->lossless);
     x->sum_y_eobs[tx_size] += x->plane[plane].eobs[block];
   }
 

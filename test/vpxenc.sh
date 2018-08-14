@@ -429,6 +429,42 @@ vpxenc_vp9_webm_non_square_par() {
   fi
 }
 
+vpxenc_vp9_webm_sharpness() {
+  if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
+    local sharpnesses="0 1 2 3 4 5 6 7"
+    local output="${VPX_TEST_OUTPUT_DIR}/vpxenc_vp9_webm_sharpness.ivf"
+    local last_size=0
+    local this_size=0
+
+    for sharpness in ${sharpnesses}; do
+
+      vpxenc $(yuv_input_hantro_collage) \
+        --sharpness="${sharpness}" \
+        --codec=vp9 \
+        --limit=1 \
+        --cpu-used=2 \
+        --end-usage=q \
+        --cq-level=40 \
+        --output="${output}" \
+        "${passes}"
+
+      if [ ! -e "${output}" ]; then
+        elog "Output file does not exist."
+        return 1
+      fi
+
+      this_size=$(stat -c '%s' "${output}")
+      if [ "${this_size}" -lt "${last_size}" ]; then
+        elog "Higher sharpness value yielded lower file size."
+        echo "${this_size}" " < " "${last_size}"
+        return 1
+      fi
+      last_size="${this_size}"
+
+    done
+  fi
+}
+
 vpxenc_tests="vpxenc_vp8_ivf
               vpxenc_vp8_webm
               vpxenc_vp8_webm_rt
@@ -441,7 +477,9 @@ vpxenc_tests="vpxenc_vp8_ivf
               vpxenc_vp9_ivf_lossless
               vpxenc_vp9_ivf_minq0_maxq0
               vpxenc_vp9_webm_lag10_frames20
-              vpxenc_vp9_webm_non_square_par"
+              vpxenc_vp9_webm_non_square_par
+              vpxenc_vp9_webm_sharpness"
+
 if [ "$(vpx_config_option_enabled CONFIG_REALTIME_ONLY)" != "yes" ]; then
   vpxenc_tests="$vpxenc_tests
                 vpxenc_vp8_webm_2pass

@@ -220,13 +220,20 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
   int i, q, quant;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
-    const int qzbin_factor = get_qzbin_factor(q, cm->bit_depth);
-    const int qrounding_factor = q == 0 ? 64 : 48;
+    int qzbin_factor = get_qzbin_factor(q, cm->bit_depth);
+    int qrounding_factor = q == 0 ? 64 : 48;
+    const int sharpness_adjustment = 16 * (7 - cpi->oxcf.sharpness) / 7;
+
+    if (cpi->oxcf.sharpness > 0 && q > 0) {
+      qzbin_factor = 64 + sharpness_adjustment;
+      qrounding_factor = 64 - sharpness_adjustment;
+    }
 
     for (i = 0; i < 2; ++i) {
       int qrounding_factor_fp = i == 0 ? 48 : 42;
       if (q == 0) qrounding_factor_fp = 64;
-
+      if (cpi->oxcf.sharpness > 0)
+        qrounding_factor_fp = 64 - sharpness_adjustment;
       // y
       quant = i == 0 ? vp9_dc_quant(q, cm->y_dc_delta_q, cm->bit_depth)
                      : vp9_ac_quant(q, 0, cm->bit_depth);
