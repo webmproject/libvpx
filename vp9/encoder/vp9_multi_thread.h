@@ -29,6 +29,9 @@ void vp9_multi_thread_tile_init(VP9_COMP *cpi);
 
 void vp9_row_mt_mem_alloc(VP9_COMP *cpi);
 
+void vp9_row_mt_alloc_rd_thresh(VP9_COMP *const cpi,
+                                TileDataEnc *const this_tile);
+
 void vp9_row_mt_mem_dealloc(VP9_COMP *cpi);
 
 int vp9_get_tiles_proc_status(MultiThreadHandle *multi_thread_ctxt,

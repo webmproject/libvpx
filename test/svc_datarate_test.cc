@@ -532,7 +532,6 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2SL1TLScreenContent1) {
   cfg_.rc_target_bitrate = 500;
   ResetModel();
   tune_content_ = 1;
-  base_speed_setting_ = speed_setting_;
   AssignLayerBitrates();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.78,
@@ -1337,7 +1336,6 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2QL1TLScreen) {
   top_sl_height_ = 480;
   ResetModel();
   tune_content_ = 1;
-  base_speed_setting_ = speed_setting_;
   // Set the layer bitrates, for 2 spatial layers, 1 temporal.
   cfg_.rc_target_bitrate = 400;
   cfg_.ss_target_bitrate[0] = 100;
