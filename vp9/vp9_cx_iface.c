@@ -30,6 +30,7 @@ struct vp9_extracfg {
   unsigned int static_thresh;
   unsigned int tile_columns;
   unsigned int tile_rows;
+  unsigned int enable_tpl_model;
   unsigned int arnr_max_frames;
   unsigned int arnr_strength;
   unsigned int min_gf_interval;
@@ -63,6 +64,7 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                     // static_thresh
   6,                     // tile_columns
   0,                     // tile_rows
+  1,                     // enable_tpl_model
   7,                     // arnr_max_frames
   5,                     // arnr_strength
   0,                     // min_gf_interval; 0 -> default decision
@@ -544,6 +546,8 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->tile_columns = extra_cfg->tile_columns;
 
+  oxcf->enable_tpl_model = extra_cfg->enable_tpl_model;
+
   // TODO(yunqing): The dependencies between row tiles cause error in multi-
   // threaded encoding. For now, tile_rows is forced to be 0 in this case.
   // The further fix can be done by adding synchronizations after a tile row
@@ -737,6 +741,13 @@ static vpx_codec_err_t ctrl_set_tile_rows(vpx_codec_alg_priv_t *ctx,
                                           va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.tile_rows = CAST(VP9E_SET_TILE_ROWS, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_set_tpl_model(vpx_codec_alg_priv_t *ctx,
+                                          va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.enable_tpl_model = CAST(VP9E_SET_TPL, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1618,6 +1629,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP8E_SET_STATIC_THRESHOLD, ctrl_set_static_thresh },
   { VP9E_SET_TILE_COLUMNS, ctrl_set_tile_columns },
   { VP9E_SET_TILE_ROWS, ctrl_set_tile_rows },
+  { VP9E_SET_TPL, ctrl_set_tpl_model },
   { VP8E_SET_ARNR_MAXFRAMES, ctrl_set_arnr_max_frames },
   { VP8E_SET_ARNR_STRENGTH, ctrl_set_arnr_strength },
   { VP8E_SET_ARNR_TYPE, ctrl_set_arnr_type },
