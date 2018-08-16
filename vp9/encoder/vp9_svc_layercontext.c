@@ -108,6 +108,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       lrc->ni_frames = 0;
       lrc->decimation_count = 0;
       lrc->decimation_factor = 0;
+      lrc->worst_quality = oxcf->worst_allowed_q;
+      lrc->best_quality = oxcf->best_allowed_q;
 
       for (i = 0; i < RATE_FACTOR_LEVELS; ++i) {
         lrc->rate_correction_factors[i] = 1.0;
@@ -816,7 +818,8 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
 
   // Setting the worst/best_quality via the encoder control: SET_SVC_PARAMETERS,
   // only for non-BYPASS mode for now.
-  if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+  if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS ||
+      svc->use_set_ref_frame_config) {
     RATE_CONTROL *const lrc = &lc->rc;
     lrc->worst_quality = vp9_quantizer_to_qindex(lc->max_q);
     lrc->best_quality = vp9_quantizer_to_qindex(lc->min_q);

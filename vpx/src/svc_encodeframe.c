@@ -497,6 +497,17 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     enc_cfg->rc_buf_sz = 1000;
   }
 
+  for (tl = 0; tl < svc_ctx->temporal_layers; ++tl) {
+    for (sl = 0; sl < svc_ctx->spatial_layers; ++sl) {
+      i = sl * svc_ctx->temporal_layers + tl;
+      if (enc_cfg->rc_end_usage == VPX_CBR &&
+          enc_cfg->g_pass == VPX_RC_ONE_PASS) {
+        si->svc_params.max_quantizers[i] = enc_cfg->rc_max_quantizer;
+        si->svc_params.min_quantizers[i] = enc_cfg->rc_min_quantizer;
+      }
+    }
+  }
+
   if (enc_cfg->g_error_resilient == 0 && si->use_multiple_frame_contexts == 0)
     enc_cfg->g_error_resilient = 1;
 
