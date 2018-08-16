@@ -118,6 +118,8 @@ vp9_spatial_svc_encoder.SRCS        += video_common.h
 vp9_spatial_svc_encoder.SRCS        += video_writer.h video_writer.c
 vp9_spatial_svc_encoder.SRCS        += vpx_ports/msvc.h
 vp9_spatial_svc_encoder.SRCS        += vpxstats.c vpxstats.h
+vp9_spatial_svc_encoder.SRCS        += examples/svc_encodeframe.c
+vp9_spatial_svc_encoder.SRCS        += examples/svc_context.h
 vp9_spatial_svc_encoder.GUID        = 4A38598D-627D-4505-9C7B-D4020C84100D
 vp9_spatial_svc_encoder.DESCRIPTION = VP9 Spatial SVC Encoder
 
