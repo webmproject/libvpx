@@ -5455,6 +5455,9 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   RefCntBuffer *frame_bufs = cm->buffer_pool->frame_bufs;
   int recon_frame_index[REFS_PER_FRAME + 1] = { -1, -1, -1, -1 };
 
+  // TODO(jingning): To be used later for gf frame type parsing.
+  (void)gf_group;
+
   for (i = 0; i < FRAME_BUFFERS && frame_idx < REFS_PER_FRAME + 1; ++i) {
     if (frame_bufs[i].ref_count == 0) {
       alloc_frame_mvs(cm, i);
@@ -5508,7 +5511,8 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
     ++*tpl_group_frames;
     lst_index = frame_idx;
-    if (gf_group->update_type[frame_idx] == OVERLAY_UPDATE) break;
+
+    if (frame_idx == cpi->rc.baseline_gf_interval + 1) break;
   }
 
   gld_index = frame_idx;
