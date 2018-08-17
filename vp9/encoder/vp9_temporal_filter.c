@@ -94,8 +94,8 @@ void vp9_temporal_filter_init(void) {
   for (i = 1; i < 512; ++i) fixed_divide[i] = 0x80000 / i;
 }
 
-static int mod_index(int sum_dist, int index, int rounding, int strength,
-                     int filter_weight) {
+static INLINE int mod_index(int sum_dist, int index, int rounding, int strength,
+                            int filter_weight) {
   int mod = (sum_dist * 3) / index;
   mod += rounding;
   mod >>= strength;
