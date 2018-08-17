@@ -335,7 +335,6 @@ class ExternalFrameBufferTest : public ::testing::Test {
     return VPX_CODEC_OK;
   }
 
- protected:
   void CheckDecodedFrames() {
     libvpx_test::DxDataIterator dec_iter = decoder_->GetDxData();
     const vpx_image_t *img = NULL;
