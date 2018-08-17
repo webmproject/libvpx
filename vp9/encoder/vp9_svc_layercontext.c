@@ -19,6 +19,14 @@
 #define SMALL_FRAME_WIDTH 32
 #define SMALL_FRAME_HEIGHT 16
 
+static void swap_ptr(void *a, void *b) {
+  void **a_p = (void **)a;
+  void **b_p = (void **)b;
+  void *c = *a_p;
+  *a_p = *b_p;
+  *b_p = c;
+}
+
 void vp9_init_layer_context(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -344,15 +352,9 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
       cpi->svc.number_spatial_layers > 1 && cpi->svc.temporal_layer_id == 0) {
     CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
-    signed char *temp = cr->map;
-    uint8_t *temp2 = cr->last_coded_q_map;
-    uint8_t *temp3 = cpi->consec_zero_mv;
-    cr->map = lc->map;
-    lc->map = temp;
-    cr->last_coded_q_map = lc->last_coded_q_map;
-    lc->last_coded_q_map = temp2;
-    cpi->consec_zero_mv = lc->consec_zero_mv;
-    lc->consec_zero_mv = temp3;
+    swap_ptr(&cr->map, &lc->map);
+    swap_ptr(&cr->last_coded_q_map, &lc->last_coded_q_map);
+    swap_ptr(&cpi->consec_zero_mv, &lc->consec_zero_mv);
     cr->sb_index = lc->sb_index;
     cr->actual_num_seg1_blocks = lc->actual_num_seg1_blocks;
     cr->actual_num_seg2_blocks = lc->actual_num_seg2_blocks;
