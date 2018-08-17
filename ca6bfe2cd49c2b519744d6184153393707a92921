@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46498741_cdd32eaf",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-17T06:34:25Z",
+      "side": 1,
+      "message": "this is small, but still worth marking INLINE",
+      "revId": "ca6bfe2cd49c2b519744d6184153393707a92921",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de64b284_7448590c",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-17T06:34:25Z",
+      "side": 1,
+      "message": "this can produce a -Wshadow for a system function in some builds",
+      "range": {
+        "startLine": 137,
+        "startChar": 20,
+        "endLine": 137,
+        "endChar": 25
+      },
+      "revId": "ca6bfe2cd49c2b519744d6184153393707a92921",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
