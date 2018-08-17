@@ -25,7 +25,7 @@
 #include "../video_writer.h"
 
 #include "../vpx_ports/vpx_timer.h"
-#include "vpx/svc_context.h"
+#include "./svc_context.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 #include "../vpxstats.h"

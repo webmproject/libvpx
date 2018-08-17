@@ -16,8 +16,8 @@
 #ifndef VPX_SVC_CONTEXT_H_
 #define VPX_SVC_CONTEXT_H_
 
-#include "./vp8cx.h"
-#include "./vpx_encoder.h"
+#include "vpx/vp8cx.h"
+#include "vpx/vpx_encoder.h"
 
 #ifdef __cplusplus
 extern "C" {
