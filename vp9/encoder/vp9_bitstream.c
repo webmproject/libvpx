@@ -1192,7 +1192,13 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 
   write_profile(cm->profile, wb);
 
-  vpx_wb_write_bit(wb, 0);  // show_existing_frame
+  // If to use show existing frame.
+  vpx_wb_write_bit(wb, cm->show_existing_frame);
+  if (cm->show_existing_frame) {
+    vpx_wb_write_literal(wb, cpi->alt_fb_idx, 3);
+    return;
+  }
+
   vpx_wb_write_bit(wb, cm->frame_type);
   vpx_wb_write_bit(wb, cm->show_frame);
   vpx_wb_write_bit(wb, cm->error_resilient_mode);
