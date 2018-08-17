@@ -1989,8 +1989,11 @@ static int64_t rd_pick_best_sub8x8_mode(
           mvp_full.col = bsi->mvp.as_mv.col >> 3;
 
           if (sf->adaptive_motion_search) {
-            mvp_full.row = x->pred_mv[mi->ref_frame[0]].row >> 3;
-            mvp_full.col = x->pred_mv[mi->ref_frame[0]].col >> 3;
+            if (x->pred_mv[mi->ref_frame[0]].row != INT16_MAX &&
+                x->pred_mv[mi->ref_frame[0]].col != INT16_MAX) {
+              mvp_full.row = x->pred_mv[mi->ref_frame[0]].row >> 3;
+              mvp_full.col = x->pred_mv[mi->ref_frame[0]].col >> 3;
+            }
             step_param = VPXMAX(step_param, 8);
           }
 
@@ -2330,7 +2333,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   MV ref_mv = x->mbmi_ext->ref_mvs[ref][0].as_mv;
   const MvLimits tmp_mv_limits = x->mv_limits;
   int cost_list[5];
-
+  const int best_predmv_idx = x->mv_best_ref_index[ref];
   const YV12_BUFFER_CONFIG *scaled_ref_frame =
       vp9_get_scaled_ref_frame(cpi, ref);
 
@@ -2381,8 +2384,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       int i;
       for (i = LAST_FRAME; i <= ALTREF_FRAME && cm->show_frame; ++i) {
         if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
-          x->pred_mv[ref].row = 0;
-          x->pred_mv[ref].col = 0;
+          x->pred_mv[ref].row = INT16_MAX;
+          x->pred_mv[ref].col = INT16_MAX;
           tmp_mv->as_int = INVALID_MV;
 
           if (scaled_ref_frame) {
@@ -2400,8 +2403,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   // after full-pixel motion search.
   vp9_set_mv_search_range(&x->mv_limits, &ref_mv);
 
-  mvp_full = pred_mv[x->mv_best_ref_index[ref]];
-
+  mvp_full = pred_mv[best_predmv_idx];
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
@@ -2410,26 +2412,40 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       cond_cost_list(cpi, cost_list), &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
 
   if (cpi->sf.enhanced_full_pixel_motion_search) {
-    if (x->mv_best_ref_index[ref] == 2) {
-      const int diff_row = ((int)pred_mv[0].row - pred_mv[2].row) >> 3;
-      const int diff_col = ((int)pred_mv[0].col - pred_mv[2].col) >> 3;
-      const int diff_sse = diff_row * diff_row + diff_col * diff_col;
-      // If pred_mv[0] and pred_mv[2] are very different, also search around
-      // pred_mv[0].
-      if (diff_sse > 10) {
-        int this_me;
-        MV this_mv;
-        mvp_full = pred_mv[0];
-        mvp_full.col >>= 3;
-        mvp_full.row >>= 3;
-        this_me = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
-                                        cpi->sf.mv.search_method, sadpb,
-                                        cond_cost_list(cpi, cost_list), &ref_mv,
-                                        &this_mv, INT_MAX, 1);
-        if (this_me < bestsme) {
-          tmp_mv->as_mv = this_mv;
-          bestsme = this_me;
-        }
+    int i;
+    for (i = 0; i < 3; ++i) {
+      int this_me;
+      MV this_mv;
+      int diff_row;
+      int diff_col;
+      int step;
+
+      if (pred_mv[i].row == INT16_MAX || pred_mv[i].col == INT16_MAX) continue;
+      if (i == best_predmv_idx) continue;
+
+      diff_row = ((int)pred_mv[i].row -
+                  pred_mv[i > 0 ? (i - 1) : best_predmv_idx].row) >>
+                 3;
+      diff_col = ((int)pred_mv[i].col -
+                  pred_mv[i > 0 ? (i - 1) : best_predmv_idx].col) >>
+                 3;
+      if (diff_row == 0 && diff_col == 0) continue;
+      if (diff_row < 0) diff_row = -diff_row;
+      if (diff_col < 0) diff_col = -diff_col;
+      step = get_msb((diff_row + diff_col + 1) >> 1);
+      if (step <= 0) continue;
+
+      mvp_full = pred_mv[i];
+      mvp_full.col >>= 3;
+      mvp_full.row >>= 3;
+      this_me = vp9_full_pixel_search(
+          cpi, x, bsize, &mvp_full,
+          VPXMAX(step_param, MAX_MVSEARCH_STEPS - step),
+          cpi->sf.mv.search_method, sadpb, cond_cost_list(cpi, cost_list),
+          &ref_mv, &this_mv, INT_MAX, 1);
+      if (this_me < bestsme) {
+        tmp_mv->as_mv = this_mv;
+        bestsme = this_me;
       }
     }
   }

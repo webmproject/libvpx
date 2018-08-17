@@ -4252,7 +4252,10 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
       }
     }
 
-    vp9_zero(x->pred_mv);
+    for (i = 0; i < MAX_REF_FRAMES; ++i) {
+      x->pred_mv[i].row = INT16_MAX;
+      x->pred_mv[i].col = INT16_MAX;
+    }
     td->pc_root->index = 0;
 
     if (seg->enabled) {
@@ -5067,6 +5070,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     PARTITION_SEARCH_TYPE partition_search_type = sf->partition_search_type;
     BLOCK_SIZE bsize = BLOCK_64X64;
     int seg_skip = 0;
+    int i;
 
     (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, sb_row,
                                    sb_col_in_tile);
@@ -5076,7 +5080,10 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
     }
 
     x->source_variance = UINT_MAX;
-    vp9_zero(x->pred_mv);
+    for (i = 0; i < MAX_REF_FRAMES; ++i) {
+      x->pred_mv[i].row = INT16_MAX;
+      x->pred_mv[i].col = INT16_MAX;
+    }
     vp9_rd_cost_init(&dummy_rdc);
     x->color_sensitivity[0] = 0;
     x->color_sensitivity[1] = 0;
