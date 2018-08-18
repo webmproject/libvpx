@@ -1,0 +1,101 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "02164d12_41d57216",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-18T03:52:11Z",
+      "side": 1,
+      "message": "this can be const",
+      "revId": "e31ccb4c980dbc2458bc73804a3d48eb10494dfe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d73bbb83_ee6fc100",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-18T03:52:11Z",
+      "side": 1,
+      "message": "this can be const",
+      "revId": "e31ccb4c980dbc2458bc73804a3d48eb10494dfe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d16bb18_3a0013cf",
+        "filename": "vp9/common/vp9_thread_common.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-18T03:52:11Z",
+      "side": 1,
+      "message": "this won\u0027t build under windows (non-posix, i.e., visual studio). there\u0027s no mapping for pthread_cond_broadcast currently.",
+      "revId": "e31ccb4c980dbc2458bc73804a3d48eb10494dfe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "49eb0c1c_62a077c0",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-18T03:52:11Z",
+      "side": 1,
+      "message": "drop these inner ()s and the ?: can be removed",
+      "range": {
+        "startLine": 1531,
+        "startChar": 25,
+        "endLine": 1531,
+        "endChar": 26
+      },
+      "revId": "e31ccb4c980dbc2458bc73804a3d48eb10494dfe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5ced756_d95b2bde",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1532,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-08-18T03:52:11Z",
+      "side": 1,
+      "message": "drop these ()s",
+      "range": {
+        "startLine": 1532,
+        "startChar": 29,
+        "endLine": 1532,
+        "endChar": 30
+      },
+      "revId": "e31ccb4c980dbc2458bc73804a3d48eb10494dfe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
