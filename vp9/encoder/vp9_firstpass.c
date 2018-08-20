@@ -2951,8 +2951,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
           ? i
           : (i - (is_key_frame || rc->source_alt_ref_pending));
 
-  rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-
   // TODO(zoeliu): Turn on the option to disable extra ALTREFs for still GF
   //               groups.
   // Disable extra altrefs for "still" gf group:
