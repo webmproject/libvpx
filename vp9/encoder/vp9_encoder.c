@@ -5512,6 +5512,9 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
     ++*tpl_group_frames;
     lst_index = frame_idx;
 
+    // The length of group of pictures is baseline_gf_interval, plus the
+    // beginning golden frame from last GOP, plus the last overlay frame in
+    // the same GOP.
     if (frame_idx == cpi->rc.baseline_gf_interval + 1) break;
   }
 
