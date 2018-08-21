@@ -4829,6 +4829,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     encode_with_recode_loop(cpi, size, dest);
   }
 
+  // TODO(jingning): When using show existing frame mode, we assume that the
+  // current ARF will be directly used as the final reconstructed frame. This is
+  // an encoder control scheme. One could in principle explore other
+  // possibilities to arrange the reference frame buffer and their coding order.
+  if (cm->show_existing_frame)
+    cm->new_fb_idx = cm->ref_frame_map[cpi->alt_fb_idx];
+
   cpi->last_frame_dropped = 0;
   cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 0;
   // Keep track of the frame buffer index updated/refreshed for the
