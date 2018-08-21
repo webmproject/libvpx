@@ -134,7 +134,8 @@ static void apply_temporal_filter(
 
       // non-local mean approach
       int diff_sse[9] = { 0 };
-      int idx, idy, index = 0;
+      int idx, idy;
+      int y_index = 0;
 
       const int uv_r = i >> ss_y;
       const int uv_c = j >> ss_x;
@@ -150,13 +151,13 @@ static void apply_temporal_filter(
               col < (int)block_width) {
             const int diff = y_frame1[row * (int)y_stride + col] -
                              y_pred[row * (int)block_width + col];
-            diff_sse[index] = diff * diff;
-            ++index;
+            diff_sse[y_index] = diff * diff;
+            ++y_index;
           }
         }
       }
 
-      assert(index > 0);
+      assert(y_index > 0);
 
       modifier = 0;
       for (idx = 0; idx < 9; ++idx) modifier += diff_sse[idx];
@@ -169,9 +170,10 @@ static void apply_temporal_filter(
              v_pred[uv_r * uv_buf_stride + uv_c];
       modifier += diff * diff;
 
-      index += 2;
+      y_index += 2;
 
-      modifier = mod_index(modifier, index, rounding, strength, filter_weight);
+      modifier =
+          mod_index(modifier, y_index, rounding, strength, filter_weight);
 
       y_count[k] += modifier;
       y_accumulator[k] += modifier * pixel_value;
@@ -186,7 +188,8 @@ static void apply_temporal_filter(
         // non-local mean approach
         int u_diff_sse[9] = { 0 };
         int v_diff_sse[9] = { 0 };
-        int idx, idy, index = 0;
+        int idx, idy;
+        int cr_index = 0;
         int u_mod = 0, v_mod = 0;
         int y_diff = 0;
 
@@ -199,18 +202,18 @@ static void apply_temporal_filter(
                 col < uv_block_width) {
               int diff = u_frame1[row * uv_stride + col] -
                          u_pred[row * uv_buf_stride + col];
-              u_diff_sse[index] = diff * diff;
+              u_diff_sse[cr_index] = diff * diff;
 
               diff = v_frame1[row * uv_stride + col] -
                      v_pred[row * uv_buf_stride + col];
-              v_diff_sse[index] = diff * diff;
+              v_diff_sse[cr_index] = diff * diff;
 
-              ++index;
+              ++cr_index;
             }
           }
         }
 
-        assert(index > 0);
+        assert(cr_index > 0);
 
         for (idx = 0; idx < 9; ++idx) {
           u_mod += u_diff_sse[idx];
@@ -224,15 +227,15 @@ static void apply_temporal_filter(
             const int diff = y_frame1[row * (int)y_stride + col] -
                              y_pred[row * (int)block_width + col];
             y_diff += diff * diff;
-            ++index;
+            ++cr_index;
           }
         }
 
         u_mod += y_diff;
         v_mod += y_diff;
 
-        u_mod = mod_index(u_mod, index, rounding, strength, filter_weight);
-        v_mod = mod_index(v_mod, index, rounding, strength, filter_weight);
+        u_mod = mod_index(u_mod, cr_index, rounding, strength, filter_weight);
+        v_mod = mod_index(v_mod, cr_index, rounding, strength, filter_weight);
 
         u_count[m] += u_mod;
         u_accumulator[m] += u_mod * u_pixel_value;
