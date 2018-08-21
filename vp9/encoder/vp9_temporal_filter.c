@@ -783,6 +783,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi) {
 static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
                                int *arnr_frames, int *arnr_strength) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
   const int frames_after_arf =
       vp9_lookahead_depth(cpi->lookahead) - distance - 1;
   int frames_fwd = (cpi->oxcf.arnr_max_frames - 1) >> 1;
@@ -836,12 +837,15 @@ static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
   }
 
   // Adjustments for second level arf in multi arf case.
-  if (cpi->oxcf.pass == 2 && cpi->multi_arf_allowed) {
-    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-    if (gf_group->rf_level[gf_group->index] != GF_ARF_STD) {
-      strength >>= 1;
-    }
-  }
+  if (cpi->oxcf.pass == 2 && cpi->multi_arf_allowed)
+    if (gf_group->rf_level[gf_group->index] != GF_ARF_STD) strength >>= 1;
+
+  // TODO(jingning): Skip temporal filtering for intermediate frames that will
+  // be used as show_existing_frame. Need to further explore the possibility to
+  // apply certain filter.
+  if (gf_group->arf_src_offset[gf_group->index] <
+      cpi->rc.baseline_gf_interval - 1)
+    frames = 1;
 
   *arnr_frames = frames;
   *arnr_strength = strength;
