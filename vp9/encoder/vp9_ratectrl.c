@@ -1446,6 +1446,12 @@ void vp9_configure_buffer_updates(VP9_COMP *cpi, int gf_group_index) {
       cpi->refresh_alt_ref_frame = 0;
       cpi->rc.is_src_frame_alt_ref = 1;
       break;
+    case USE_BUF_FRAME:
+      cpi->refresh_last_frame = 0;
+      cpi->refresh_golden_frame = 0;
+      cpi->refresh_alt_ref_frame = 0;
+      cpi->rc.is_src_frame_alt_ref = 1;
+      break;
     default:
       assert(twopass->gf_group.update_type[gf_group_index] == ARF_UPDATE);
       cpi->refresh_last_frame = 0;
