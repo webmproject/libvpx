@@ -4517,18 +4517,14 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(
 
 static void set_arf_sign_bias(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  int arf_sign_bias;
+  const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+  const int gfg_index = gf_group->index;
 
-  if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
-    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-    arf_sign_bias = cpi->rc.source_alt_ref_active &&
-                    (!cpi->refresh_alt_ref_frame ||
-                     (gf_group->rf_level[gf_group->index] == GF_ARF_LOW));
-  } else {
-    arf_sign_bias =
-        (cpi->rc.source_alt_ref_active && !cpi->refresh_alt_ref_frame);
-  }
-  cm->ref_frame_sign_bias[ALTREF_FRAME] = arf_sign_bias;
+  // If arf_src_offset is less than the GOP length, its arf is on the direction
+  // 1 side.
+  cm->ref_frame_sign_bias[ALTREF_FRAME] =
+      cpi->rc.source_alt_ref_active &&
+      gf_group->arf_src_offset[gfg_index] < cpi->rc.baseline_gf_interval - 1;
 }
 
 static int setup_interp_filter_search_mask(VP9_COMP *cpi) {
