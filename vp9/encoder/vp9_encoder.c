@@ -3816,6 +3816,8 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
           ? cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id]
           : 0;
 
+  if (cm->show_existing_frame) return 1;
+
   // Flag to check if its valid to compute the source sad (used for
   // scene detection and for superblock content state in CBR mode).
   // The flag may get reset below based on SVC or resizing state.
@@ -4092,6 +4094,8 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 #ifdef AGGRESSIVE_VBR
   int qrange_adj = 1;
 #endif
+
+  if (cm->show_existing_frame) return;
 
   set_size_independent_vars(cpi);
 
