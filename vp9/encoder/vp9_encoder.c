@@ -3251,6 +3251,12 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
       cpi->svc.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS)
     is_reference_frame = !cpi->svc.non_reference_frame;
 
+  // Skip loop filter in show_existing_frame mode.
+  if (cm->show_existing_frame) {
+    lf->filter_level = 0;
+    return;
+  }
+
   if (xd->lossless) {
     lf->filter_level = 0;
     lf->last_filt_level = 0;
