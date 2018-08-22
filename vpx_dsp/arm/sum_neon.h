@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_ARM_SUM_NEON_H_
-#define VPX_DSP_ARM_SUM_NEON_H_
+#ifndef VPX_VPX_DSP_ARM_SUM_NEON_H_
+#define VPX_VPX_DSP_ARM_SUM_NEON_H_
 
 #include <arm_neon.h>
 
@@ -35,4 +35,4 @@ static INLINE uint32x2_t horizontal_add_uint32x4(const uint32x4_t a) {
   return vadd_u32(vreinterpret_u32_u64(vget_low_u64(b)),
                   vreinterpret_u32_u64(vget_high_u64(b)));
 }
-#endif  // VPX_DSP_ARM_SUM_NEON_H_
+#endif  // VPX_VPX_DSP_ARM_SUM_NEON_H_

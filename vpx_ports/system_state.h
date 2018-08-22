@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_PORTS_SYSTEM_STATE_H_
-#define VPX_PORTS_SYSTEM_STATE_H_
+#ifndef VPX_VPX_PORTS_SYSTEM_STATE_H_
+#define VPX_VPX_PORTS_SYSTEM_STATE_H_
 
 #include "./vpx_config.h"
 
@@ -27,4 +27,4 @@ extern void vpx_clear_system_state();
 }  // extern "C"
 #endif
 
-#endif  // VPX_PORTS_SYSTEM_STATE_H_
+#endif  // VPX_VPX_PORTS_SYSTEM_STATE_H_

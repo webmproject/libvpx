@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_X86_MEM_SSE2_H_
-#define VPX_DSP_X86_MEM_SSE2_H_
+#ifndef VPX_VPX_DSP_X86_MEM_SSE2_H_
+#define VPX_VPX_DSP_X86_MEM_SSE2_H_
 
 #include <emmintrin.h>  // SSE2
 
@@ -126,4 +126,4 @@ static INLINE void storeu_8bit_16x4(const __m128i *const s, uint8_t *const d,
   _mm_storeu_si128((__m128i *)(d + 3 * stride), s[3]);
 }
 
-#endif  // VPX_DSP_X86_MEM_SSE2_H_
+#endif  // VPX_VPX_DSP_X86_MEM_SSE2_H_

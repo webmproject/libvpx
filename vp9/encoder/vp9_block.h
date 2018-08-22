@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_BLOCK_H_
-#define VP9_ENCODER_VP9_BLOCK_H_
+#ifndef VPX_VP9_ENCODER_VP9_BLOCK_H_
+#define VPX_VP9_ENCODER_VP9_BLOCK_H_
 
 #include "vpx_util/vpx_thread.h"
 
@@ -214,4 +214,4 @@ struct macroblock {
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_BLOCK_H_
+#endif  // VPX_VP9_ENCODER_VP9_BLOCK_H_

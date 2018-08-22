@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_COMMON_RECONINTRA4X4_H_
-#define VP8_COMMON_RECONINTRA4X4_H_
+#ifndef VPX_VP8_COMMON_RECONINTRA4X4_H_
+#define VPX_VP8_COMMON_RECONINTRA4X4_H_
 #include "vp8/common/blockd.h"
 
 #ifdef __cplusplus
@@ -42,4 +42,4 @@ void vp8_init_intra4x4_predictors_internal(void);
 }  // extern "C"
 #endif
 
-#endif  // VP8_COMMON_RECONINTRA4X4_H_
+#endif  // VPX_VP8_COMMON_RECONINTRA4X4_H_

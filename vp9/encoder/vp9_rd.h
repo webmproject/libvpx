@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_RD_H_
-#define VP9_ENCODER_VP9_RD_H_
+#ifndef VPX_VP9_ENCODER_VP9_RD_H_
+#define VPX_VP9_ENCODER_VP9_RD_H_
 
 #include <limits.h>
 
@@ -219,4 +219,4 @@ unsigned int vp9_high_get_sby_perpixel_variance(struct VP9_COMP *cpi,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_RD_H_
+#endif  // VPX_VP9_ENCODER_VP9_RD_H_

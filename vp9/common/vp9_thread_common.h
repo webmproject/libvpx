@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_THREAD_COMMON_H_
-#define VP9_COMMON_VP9_THREAD_COMMON_H_
+#ifndef VPX_VP9_COMMON_VP9_THREAD_COMMON_H_
+#define VPX_VP9_COMMON_VP9_THREAD_COMMON_H_
 #include "./vpx_config.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vpx_util/vpx_thread.h"
@@ -78,4 +78,4 @@ void vp9_accumulate_frame_counts(struct FRAME_COUNTS *accum,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_THREAD_COMMON_H_
+#endif  // VPX_VP9_COMMON_VP9_THREAD_COMMON_H_

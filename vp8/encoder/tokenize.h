@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_ENCODER_TOKENIZE_H_
-#define VP8_ENCODER_TOKENIZE_H_
+#ifndef VPX_VP8_ENCODER_TOKENIZE_H_
+#define VPX_VP8_ENCODER_TOKENIZE_H_
 
 #include "vp8/common/entropy.h"
 #include "block.h"
@@ -53,4 +53,4 @@ extern const TOKENVALUE *const vp8_dct_value_tokens_ptr;
 }  // extern "C"
 #endif
 
-#endif  // VP8_ENCODER_TOKENIZE_H_
+#endif  // VPX_VP8_ENCODER_TOKENIZE_H_

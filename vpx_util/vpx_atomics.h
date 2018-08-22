@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_UTIL_VPX_ATOMICS_H_
-#define VPX_UTIL_VPX_ATOMICS_H_
+#ifndef VPX_VPX_UTIL_VPX_ATOMICS_H_
+#define VPX_VPX_UTIL_VPX_ATOMICS_H_
 
 #include "./vpx_config.h"
 
@@ -108,4 +108,4 @@ static INLINE int vpx_atomic_load_acquire(const vpx_atomic_int *atomic) {
 }  // extern "C"
 #endif  // __cplusplus
 
-#endif  // VPX_UTIL_VPX_ATOMICS_H_
+#endif  // VPX_VPX_UTIL_VPX_ATOMICS_H_

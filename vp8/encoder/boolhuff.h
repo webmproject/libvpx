@@ -15,8 +15,8 @@
  *   Description  :     Bool Coder header file.
  *
  ****************************************************************************/
-#ifndef VP8_ENCODER_BOOLHUFF_H_
-#define VP8_ENCODER_BOOLHUFF_H_
+#ifndef VPX_VP8_ENCODER_BOOLHUFF_H_
+#define VPX_VP8_ENCODER_BOOLHUFF_H_
 
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
@@ -121,4 +121,4 @@ static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
 }  // extern "C"
 #endif
 
-#endif  // VP8_ENCODER_BOOLHUFF_H_
+#endif  // VPX_VP8_ENCODER_BOOLHUFF_H_

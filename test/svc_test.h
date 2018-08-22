@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef TEST_SVC_TEST_H_
-#define TEST_SVC_TEST_H_
+#ifndef VPX_TEST_SVC_TEST_H_
+#define VPX_TEST_SVC_TEST_H_
 
 #include "./vpx_config.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
@@ -59,4 +59,4 @@ class OnePassCbrSvc : public ::libvpx_test::EncoderTest {
 };
 }  // namespace svc_test
 
-#endif  // TEST_SVC_TEST_H_
+#endif  // VPX_TEST_SVC_TEST_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_COMMON_ONYXD_H_
-#define VP8_COMMON_ONYXD_H_
+#ifndef VPX_VP8_COMMON_ONYXD_H_
+#define VPX_VP8_COMMON_ONYXD_H_
 
 /* Create/destroy static data structures. */
 #ifdef __cplusplus
@@ -60,4 +60,4 @@ int vp8dx_get_quantizer(const struct VP8D_COMP *c);
 }
 #endif
 
-#endif  // VP8_COMMON_ONYXD_H_
+#endif  // VPX_VP8_COMMON_ONYXD_H_

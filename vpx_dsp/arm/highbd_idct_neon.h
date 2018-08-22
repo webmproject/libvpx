@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_ARM_HIGHBD_IDCT_NEON_H_
-#define VPX_DSP_ARM_HIGHBD_IDCT_NEON_H_
+#ifndef VPX_VPX_DSP_ARM_HIGHBD_IDCT_NEON_H_
+#define VPX_VPX_DSP_ARM_HIGHBD_IDCT_NEON_H_
 
 #include <arm_neon.h>
 
@@ -471,4 +471,4 @@ void vpx_highbd_idct16x16_256_add_half1d(const int32_t *input, int32_t *output,
                                          uint16_t *dest, const int stride,
                                          const int bd);
 
-#endif  // VPX_DSP_ARM_HIGHBD_IDCT_NEON_H_
+#endif  // VPX_VPX_DSP_ARM_HIGHBD_IDCT_NEON_H_

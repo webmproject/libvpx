@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_COMMON_RECONINTER_H_
-#define VP8_COMMON_RECONINTER_H_
+#ifndef VPX_VP8_COMMON_RECONINTER_H_
+#define VPX_VP8_COMMON_RECONINTER_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,4 +34,4 @@ extern void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x);
 }  // extern "C"
 #endif
 
-#endif  // VP8_COMMON_RECONINTER_H_
+#endif  // VPX_VP8_COMMON_RECONINTER_H_

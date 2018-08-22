@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_ARM_MEM_NEON_H_
-#define VPX_DSP_ARM_MEM_NEON_H_
+#ifndef VPX_VPX_DSP_ARM_MEM_NEON_H_
+#define VPX_VPX_DSP_ARM_MEM_NEON_H_
 
 #include <arm_neon.h>
 #include <assert.h>
@@ -181,4 +181,4 @@ static INLINE void store_u8(uint8_t *buf, int stride, const uint8x8_t a) {
   buf += stride;
   vst1_lane_u32((uint32_t *)buf, a_u32, 1);
 }
-#endif  // VPX_DSP_ARM_MEM_NEON_H_
+#endif  // VPX_VPX_DSP_ARM_MEM_NEON_H_

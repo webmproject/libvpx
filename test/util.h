@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef TEST_UTIL_H_
-#define TEST_UTIL_H_
+#ifndef VPX_TEST_UTIL_H_
+#define VPX_TEST_UTIL_H_
 
 #include <stdio.h>
 #include <math.h>
@@ -43,4 +43,4 @@ inline double compute_psnr(const vpx_image_t *img1, const vpx_image_t *img2) {
   return psnr;
 }
 
-#endif  // TEST_UTIL_H_
+#endif  // VPX_TEST_UTIL_H_

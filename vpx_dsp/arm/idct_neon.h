@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_ARM_IDCT_NEON_H_
-#define VPX_DSP_ARM_IDCT_NEON_H_
+#ifndef VPX_VPX_DSP_ARM_IDCT_NEON_H_
+#define VPX_VPX_DSP_ARM_IDCT_NEON_H_
 
 #include <arm_neon.h>
 
@@ -916,4 +916,4 @@ void vpx_idct32_6_neon(const tran_low_t *input, int16_t *output);
 void vpx_idct32_8_neon(const int16_t *input, void *const output, int stride,
                        const int highbd_flag);
 
-#endif  // VPX_DSP_ARM_IDCT_NEON_H_
+#endif  // VPX_VPX_DSP_ARM_IDCT_NEON_H_

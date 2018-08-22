@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_ARM_NEON_VP9_IHT_NEON_H_
-#define VP9_COMMON_ARM_NEON_VP9_IHT_NEON_H_
+#ifndef VPX_VP9_COMMON_ARM_NEON_VP9_IHT_NEON_H_
+#define VPX_VP9_COMMON_ARM_NEON_VP9_IHT_NEON_H_
 
 #include <arm_neon.h>
 
@@ -269,4 +269,4 @@ typedef struct {
   iht_1d cols, rows;  // vertical and horizontal
 } iht_2d;
 
-#endif  // VP9_COMMON_ARM_NEON_VP9_IHT_NEON_H_
+#endif  // VPX_VP9_COMMON_ARM_NEON_VP9_IHT_NEON_H_

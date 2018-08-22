@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_PPC_TYPES_VSX_H_
-#define VPX_DSP_PPC_TYPES_VSX_H_
+#ifndef VPX_VPX_DSP_PPC_TYPES_VSX_H_
+#define VPX_VPX_DSP_PPC_TYPES_VSX_H_
 
 #include <altivec.h>
 
@@ -105,4 +105,4 @@ static const uint8x16_t vec_perm_odd_even_pack = { 0x00, 0x01, 0x10, 0x11,
                                                    0x08, 0x09, 0x18, 0x19,
                                                    0x0C, 0x0D, 0x1C, 0x1D };
 
-#endif  // VPX_DSP_PPC_TYPES_VSX_H_
+#endif  // VPX_VPX_DSP_PPC_TYPES_VSX_H_

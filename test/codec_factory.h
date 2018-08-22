@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef TEST_CODEC_FACTORY_H_
-#define TEST_CODEC_FACTORY_H_
+#ifndef VPX_TEST_CODEC_FACTORY_H_
+#define VPX_TEST_CODEC_FACTORY_H_
 
 #include "./vpx_config.h"
 #include "vpx/vpx_decoder.h"
@@ -263,4 +263,4 @@ const libvpx_test::VP9CodecFactory kVP9;
 #endif  // CONFIG_VP9
 
 }  // namespace libvpx_test
-#endif  // TEST_CODEC_FACTORY_H_
+#endif  // VPX_TEST_CODEC_FACTORY_H_

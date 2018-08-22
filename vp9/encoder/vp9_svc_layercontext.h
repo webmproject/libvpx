@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_SVC_LAYERCONTEXT_H_
-#define VP9_ENCODER_VP9_SVC_LAYERCONTEXT_H_
+#ifndef VPX_VP9_ENCODER_VP9_SVC_LAYERCONTEXT_H_
+#define VPX_VP9_ENCODER_VP9_SVC_LAYERCONTEXT_H_
 
 #include "vpx/vpx_encoder.h"
 
@@ -254,4 +254,4 @@ void vp9_svc_adjust_frame_rate(struct VP9_COMP *const cpi);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_SVC_LAYERCONTEXT_
+#endif  // VPX_VP9_ENCODER_VP9_SVC_LAYERCONTEXT_H_

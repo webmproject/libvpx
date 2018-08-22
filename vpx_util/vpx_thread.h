@@ -12,8 +12,8 @@
 // Original source:
 //  https://chromium.googlesource.com/webm/libwebp
 
-#ifndef VPX_THREAD_H_
-#define VPX_THREAD_H_
+#ifndef VPX_VPX_UTIL_VPX_THREAD_H_
+#define VPX_VPX_UTIL_VPX_THREAD_H_
 
 #include "./vpx_config.h"
 
@@ -429,4 +429,4 @@ const VPxWorkerInterface *vpx_get_worker_interface(void);
 }  // extern "C"
 #endif
 
-#endif  // VPX_THREAD_H_
+#endif  // VPX_VPX_UTIL_VPX_THREAD_H_

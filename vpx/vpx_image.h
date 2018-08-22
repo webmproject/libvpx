@@ -12,8 +12,8 @@
  * \brief Describes the vpx image descriptor and associated operations
  *
  */
-#ifndef VPX_VPX_IMAGE_H_
-#define VPX_VPX_IMAGE_H_
+#ifndef VPX_VPX_VPX_IMAGE_H_
+#define VPX_VPX_VPX_IMAGE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -204,4 +204,4 @@ void vpx_img_free(vpx_image_t *img);
 }  // extern "C"
 #endif
 
-#endif  // VPX_VPX_IMAGE_H_
+#endif  // VPX_VPX_VPX_IMAGE_H_

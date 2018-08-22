@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_VP9_DX_IFACE_H_
-#define VP9_VP9_DX_IFACE_H_
+#ifndef VPX_VP9_VP9_DX_IFACE_H_
+#define VPX_VP9_VP9_DX_IFACE_H_
 
 #include "vp9/decoder/vp9_decoder.h"
 
@@ -48,4 +48,4 @@ struct vpx_codec_alg_priv {
   int row_mt;
 };
 
-#endif  // VP9_VP9_DX_IFACE_H_
+#endif  // VPX_VP9_VP9_DX_IFACE_H_

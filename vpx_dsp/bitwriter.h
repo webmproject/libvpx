@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_BITWRITER_H_
-#define VPX_DSP_BITWRITER_H_
+#ifndef VPX_VPX_DSP_BITWRITER_H_
+#define VPX_VPX_DSP_BITWRITER_H_
 
 #include "vpx_ports/mem.h"
 
@@ -94,4 +94,4 @@ static INLINE void vpx_write_literal(vpx_writer *w, int data, int bits) {
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_BITWRITER_H_
+#endif  // VPX_VPX_DSP_BITWRITER_H_

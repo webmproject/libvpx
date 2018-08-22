@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_X86_CONVOLVE_AVX2_H_
-#define VPX_DSP_X86_CONVOLVE_AVX2_H_
+#ifndef VPX_VPX_DSP_X86_CONVOLVE_AVX2_H_
+#define VPX_VPX_DSP_X86_CONVOLVE_AVX2_H_
 
 #include <immintrin.h>  // AVX2
 
@@ -102,4 +102,4 @@ static INLINE __m128i convolve8_8_avx2(const __m256i *const s,
 
 #undef MM256_BROADCASTSI128_SI256
 
-#endif  // VPX_DSP_X86_CONVOLVE_AVX2_H_
+#endif  // VPX_VPX_DSP_X86_CONVOLVE_AVX2_H_

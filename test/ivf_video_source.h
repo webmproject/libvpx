@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef TEST_IVF_VIDEO_SOURCE_H_
-#define TEST_IVF_VIDEO_SOURCE_H_
+#ifndef VPX_TEST_IVF_VIDEO_SOURCE_H_
+#define VPX_TEST_IVF_VIDEO_SOURCE_H_
 #include <cstdio>
 #include <cstdlib>
 #include <new>
@@ -103,4 +103,4 @@ class IVFVideoSource : public CompressedVideoSource {
 
 }  // namespace libvpx_test
 
-#endif  // TEST_IVF_VIDEO_SOURCE_H_
+#endif  // VPX_TEST_IVF_VIDEO_SOURCE_H_

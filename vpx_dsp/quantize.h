@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_QUANTIZE_H_
-#define VPX_DSP_QUANTIZE_H_
+#ifndef VPX_VPX_DSP_QUANTIZE_H_
+#define VPX_VPX_DSP_QUANTIZE_H_
 
 #include "./vpx_config.h"
 #include "vpx_dsp/vpx_dsp_common.h"
@@ -45,4 +45,4 @@ void vpx_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr, int skip_block,
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_QUANTIZE_H_
+#endif  // VPX_VPX_DSP_QUANTIZE_H_
