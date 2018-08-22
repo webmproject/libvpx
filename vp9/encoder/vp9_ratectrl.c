@@ -1421,9 +1421,11 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi, int *bottom_index,
 }
 
 void vp9_configure_buffer_updates(VP9_COMP *cpi, int gf_group_index) {
+  VP9_COMMON *cm = &cpi->common;
   TWO_PASS *const twopass = &cpi->twopass;
 
   cpi->rc.is_src_frame_alt_ref = 0;
+  cm->show_existing_frame = 0;
   switch (twopass->gf_group.update_type[gf_group_index]) {
     case KF_UPDATE:
       cpi->refresh_last_frame = 1;
@@ -1451,6 +1453,8 @@ void vp9_configure_buffer_updates(VP9_COMP *cpi, int gf_group_index) {
       cpi->refresh_golden_frame = 0;
       cpi->refresh_alt_ref_frame = 0;
       cpi->rc.is_src_frame_alt_ref = 1;
+      cm->show_existing_frame = 1;
+      cm->refresh_frame_context = 0;
       break;
     default:
       assert(twopass->gf_group.update_type[gf_group_index] == ARF_UPDATE);
