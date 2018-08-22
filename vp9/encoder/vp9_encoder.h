@@ -818,6 +818,22 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
 
 void vp9_set_svc(VP9_COMP *cpi, int use_svc);
 
+static INLINE int stack_pop(int *stack, int stack_size) {
+  int idx;
+  const int r = stack[0];
+  for (idx = 1; idx < stack_size; ++idx) stack[idx - 1] = stack[idx];
+
+  return r;
+}
+
+static INLINE int stack_top(const int *stack) { return stack[0]; }
+
+static INLINE void stack_push(int *stack, int new_item, int stack_size) {
+  int idx;
+  for (idx = stack_size; idx > 0; --idx) stack[idx] = stack[idx - 1];
+  stack[0] = new_item;
+}
+
 int vp9_get_quantizer(struct VP9_COMP *cpi);
 
 static INLINE int frame_is_kf_gf_arf(const VP9_COMP *cpi) {
