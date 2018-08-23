@@ -4972,7 +4972,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   cm->last_height = cm->height;
 
   // reset to normal state now that we are done.
-  if (!cm->show_existing_frame) cm->last_show_frame = cm->show_frame;
+  if (!cm->show_existing_frame) {
+    cm->last_show_frame = cm->show_frame;
+    cm->prev_frame = cm->cur_frame;
+  }
 
   if (cm->show_frame) {
     vp9_swap_mi_and_prev_mi(cm);
@@ -4981,7 +4984,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     ++cm->current_video_frame;
     if (cpi->use_svc) vp9_inc_frame_in_layer(cpi);
   }
-  cm->prev_frame = cm->cur_frame;
 
   if (cpi->use_svc) {
     cpi->svc
