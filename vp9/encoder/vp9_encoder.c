@@ -851,6 +851,10 @@ static void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
   // Current mip will be the prev_mip for the next frame.
   MODE_INFO **temp_base = cm->prev_mi_grid_base;
   MODE_INFO *temp = cm->prev_mip;
+
+  // Skip update prev_mi frame in show_existing_frame mode.
+  if (cm->show_existing_frame) return;
+
   cm->prev_mip = cm->mip;
   cm->mip = temp;
 
