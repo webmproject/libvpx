@@ -4950,6 +4950,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
   vp9_rc_postencode_update(cpi, *size);
 
+  *size = VPXMAX(1, *size);
+
 #if 0
   output_frame_level_debug_stats(cpi);
 #endif
