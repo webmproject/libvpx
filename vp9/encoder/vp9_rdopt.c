@@ -3103,7 +3103,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
   const int intra_cost_penalty =
       vp9_get_intra_cost_penalty(cpi, bsize, cm->base_qindex, cm->y_dc_delta_q);
   int best_skip2 = 0;
-  uint8_t ref_frame_skip_mask[2] = { 0 };
+  uint8_t ref_frame_skip_mask[2] = { 0, 1 };
   uint16_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
   int mode_skip_start = sf->mode_skip_start + 1;
   const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
@@ -3279,13 +3279,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
     if (midx == mode_skip_start && best_mode_index >= 0) {
       switch (best_mbmode.ref_frame[0]) {
         case INTRA_FRAME: break;
-        case LAST_FRAME:
-          ref_frame_skip_mask[0] |= LAST_FRAME_MODE_MASK;
-          ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
-          break;
+        case LAST_FRAME: ref_frame_skip_mask[0] |= LAST_FRAME_MODE_MASK; break;
         case GOLDEN_FRAME:
           ref_frame_skip_mask[0] |= GOLDEN_FRAME_MODE_MASK;
-          ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
           break;
         case ALTREF_FRAME: ref_frame_skip_mask[0] |= ALT_REF_MODE_MASK; break;
         case NONE:
