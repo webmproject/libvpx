@@ -909,10 +909,25 @@ int vp9_get_refresh_mask(VP9_COMP *cpi) {
            (cpi->refresh_golden_frame << cpi->alt_fb_idx);
   } else {
     int arf_idx = cpi->alt_fb_idx;
+    GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       arf_idx = gf_group->arf_update_idx[gf_group->index];
     }
+
+    if (cpi->multi_layer_arf) {
+      for (arf_idx = 0; arf_idx < REF_FRAMES; ++arf_idx) {
+        if (arf_idx != cpi->alt_fb_idx && arf_idx != cpi->lst_fb_idx &&
+            arf_idx != cpi->gld_fb_idx) {
+          int idx;
+          for (idx = 0; idx < gf_group->stack_size; ++idx)
+            if (arf_idx == gf_group->arf_index_stack[idx]) break;
+          if (idx == gf_group->stack_size) break;
+        }
+      }
+    }
+    cpi->twopass.gf_group.top_arf_idx = arf_idx;
+
     if (cpi->use_svc && cpi->svc.use_set_ref_frame_config &&
         cpi->svc.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS)
       return cpi->svc.update_buffer_slot[cpi->svc.spatial_layer_id];

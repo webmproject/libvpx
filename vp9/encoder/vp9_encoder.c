@@ -3169,6 +3169,15 @@ void update_multi_arf_ref_frames(VP9_COMP *cpi) {
 void update_ref_frames(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
+  GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+
+  // Pop ARF.
+  if (cm->show_existing_frame) {
+    cpi->lst_fb_idx = cpi->alt_fb_idx;
+    cpi->alt_fb_idx =
+        stack_pop(gf_group->arf_index_stack, gf_group->stack_size);
+    --gf_group->stack_size;
+  }
 
   // At this point the new frame has been encoded.
   // If any buffer copy / swapping is signaled it should be done here.
@@ -3196,16 +3205,25 @@ void update_ref_frames(VP9_COMP *cpi) {
     cpi->gld_fb_idx = tmp;
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
-      int arf_idx = cpi->alt_fb_idx;
+      int arf_idx = gf_group->top_arf_idx;
       if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
         const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
         arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
 
+      // Push new ARF into stack.
+      stack_push(gf_group->arf_index_stack, cpi->alt_fb_idx,
+                 gf_group->stack_size);
+      ++gf_group->stack_size;
+
+      assert(arf_idx < REF_FRAMES);
+
       ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
       memcpy(cpi->interp_filter_selected[ALTREF_FRAME],
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
+
+      cpi->alt_fb_idx = arf_idx;
     }
 
     if (cpi->refresh_golden_frame) {
@@ -6091,9 +6109,14 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     }
   }
 
+  // Clear arf index stack before group of pictures processing starts.
+  if (cpi->twopass.gf_group.index == 1) {
+    stack_init(cpi->twopass.gf_group.arf_index_stack, MAX_LAG_BUFFERS * 2);
+    cpi->twopass.gf_group.stack_size = 0;
+  }
+
   if (arf_src_index) {
     assert(arf_src_index <= rc->frames_to_key);
-
     if ((source = vp9_lookahead_peek(cpi->lookahead, arf_src_index)) != NULL) {
       cpi->alt_ref_source = source;
 
