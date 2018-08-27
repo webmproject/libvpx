@@ -128,6 +128,8 @@ typedef struct VP9Common {
 
   int new_fb_idx;
 
+  int cur_show_frame_fb_idx;
+
 #if CONFIG_VP9_POSTPROC
   YV12_BUFFER_CONFIG post_proc_buffer;
   YV12_BUFFER_CONFIG post_proc_buffer_int;
@@ -259,6 +261,12 @@ typedef struct VP9Common {
 
   int lf_row;
 } VP9_COMMON;
+
+static INLINE YV12_BUFFER_CONFIG *get_buf_frame(VP9_COMMON *cm, int index) {
+  if (index < 0 || index >= FRAME_BUFFERS) return NULL;
+  if (cm->error.error_code != VPX_CODEC_OK) return NULL;
+  return &cm->buffer_pool->frame_bufs[index].buf;
+}
 
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP9_COMMON *cm, int index) {
   if (index < 0 || index >= REF_FRAMES) return NULL;

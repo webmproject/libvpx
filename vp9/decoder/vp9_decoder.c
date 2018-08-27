@@ -365,6 +365,8 @@ int vp9_receive_compressed_data(VP9Decoder *pbi, size_t size,
     if (cm->seg.enabled) vp9_swap_current_and_last_seg_map(cm);
   }
 
+  if (cm->show_frame) cm->cur_show_frame_fb_idx = cm->new_fb_idx;
+
   // Update progress in frame parallel decode.
   cm->last_width = cm->width;
   cm->last_height = cm->height;

@@ -6280,6 +6280,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 #endif  // CONFIG_REALTIME_ONLY
 
+  if (cm->show_frame) cm->cur_show_frame_fb_idx = cm->new_fb_idx;
+
   if (cm->refresh_frame_context)
     cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
 
