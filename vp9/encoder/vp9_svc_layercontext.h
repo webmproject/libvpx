@@ -173,6 +173,8 @@ typedef struct SVC {
   uint8_t fb_idx_base[REF_FRAMES];
 
   int use_set_ref_frame_config;
+
+  int temporal_layer_id_per_spatial[VPX_SS_MAX_LAYERS];
 } SVC;
 
 struct VP9_COMP;

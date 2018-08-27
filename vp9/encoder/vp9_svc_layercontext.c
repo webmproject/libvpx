@@ -678,6 +678,7 @@ static void set_flags_and_fb_idx_bypass_via_set_ref_frame_config(
     VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
   int sl = svc->spatial_layer_id = svc->spatial_layer_to_encode;
+  cpi->svc.temporal_layer_id = cpi->svc.temporal_layer_id_per_spatial[sl];
   cpi->ext_refresh_frame_flags_pending = 1;
   cpi->lst_fb_idx = svc->lst_fb_idx[sl];
   cpi->gld_fb_idx = svc->gld_fb_idx[sl];

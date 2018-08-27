@@ -592,7 +592,7 @@ int main(int argc, char **argv) {
 #if ROI_MAP
   vpx_roi_map_t roi;
 #endif
-  vpx_svc_layer_id_t layer_id = { 0, 0 };
+  vpx_svc_layer_id_t layer_id;
   const VpxInterface *encoder = NULL;
   FILE *infile = NULL;
   struct RateControlMetrics rc;
@@ -610,7 +610,7 @@ int main(int argc, char **argv) {
   double framerate = 30.0;
 
   zero(rc.layer_target_bitrate);
-
+  memset(&layer_id, 0, sizeof(vpx_svc_layer_id_t));
   exec_name = argv[0];
   // Check usage and arguments.
   if (argc < min_args) {
@@ -856,6 +856,7 @@ int main(int argc, char **argv) {
     layer_id.spatial_layer_id = 0;
     layer_id.temporal_layer_id =
         cfg.ts_layer_id[frame_cnt % cfg.ts_periodicity];
+    layer_id.temporal_layer_id_per_spatial[0] = layer_id.temporal_layer_id;
     if (strncmp(encoder->name, "vp9", 3) == 0) {
       vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id);
     } else if (strncmp(encoder->name, "vp8", 3) == 0) {

@@ -186,6 +186,8 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
       layer_id.spatial_layer_id = 0;
       layer_id.temporal_layer_id = (video->frame() % 2 != 0);
       temporal_layer_id_ = layer_id.temporal_layer_id;
+      for (int i = 0; i < number_spatial_layers_; i++)
+        layer_id.temporal_layer_id_per_spatial[i] = temporal_layer_id_;
       encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
       set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
                                   number_spatial_layers_, 0, &ref_frame_config);
