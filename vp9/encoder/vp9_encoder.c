@@ -3831,6 +3831,20 @@ static void save_encode_params(VP9_COMP *cpi) {
 }
 #endif
 
+static INLINE void set_raw_source_frame(VP9_COMP *cpi) {
+#ifdef ENABLE_KF_DENOISE
+  if (is_spatial_denoise_enabled(cpi)) {
+    cpi->raw_source_frame = vp9_scale_if_required(
+        cm, &cpi->raw_unscaled_source, &cpi->raw_scaled_source,
+        (oxcf->pass == 0), EIGHTTAP, 0);
+  } else {
+    cpi->raw_source_frame = cpi->Source;
+  }
+#else
+  cpi->raw_source_frame = cpi->Source;
+#endif
+}
+
 static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                       uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
@@ -3844,7 +3858,10 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
           ? cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id]
           : 0;
 
-  if (cm->show_existing_frame) return 1;
+  if (cm->show_existing_frame) {
+    if (is_psnr_calc_enabled(cpi)) set_raw_source_frame(cpi);
+    return 1;
+  }
 
   // Flag to check if its valid to compute the source sad (used for
   // scene detection and for superblock content state in CBR mode).
@@ -4123,7 +4140,10 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
   int qrange_adj = 1;
 #endif
 
-  if (cm->show_existing_frame) return;
+  if (cm->show_existing_frame) {
+    if (is_psnr_calc_enabled(cpi)) set_raw_source_frame(cpi);
+    return;
+  }
 
   set_size_independent_vars(cpi);
 
