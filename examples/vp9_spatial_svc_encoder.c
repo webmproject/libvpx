@@ -873,7 +873,7 @@ int main(int argc, const char **argv) {
     // to fixed SVC patterns. example_pattern = 1: 2 spatial and 2 temporal
     // layers, with SL0 only has TL0, and SL1 has both TL0 and TL1. This example
     // uses the extended API.
-    int example_pattern = 1;
+    int example_pattern = 0;
     if (frame_cnt >= app_input.frames_to_code || !vpx_img_read(&raw, infile)) {
       // We need one extra vpx_svc_encode call at end of stream to flush
       // encoder and get remaining data
