@@ -32,8 +32,6 @@ extern "C" {
 #define FIXED_GF_INTERVAL 8  // Used in some testing modes only
 #define ONEHALFONLY_RESIZE 0
 
-#define FRAME_OVERHEAD_BITS 200
-
 // Threshold used to define a KF group as static (e.g. a slide show).
 // Essentially this means that no frame in the group has more than 1% of MBs
 // that are not marked as coded with 0,0 motion in the first pass.
