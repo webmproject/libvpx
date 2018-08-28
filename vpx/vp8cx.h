@@ -660,6 +660,16 @@ enum vp8e_enc_control_id {
    * 1. The default value is set to be 1.
    */
   VP9E_SET_TPL,
+
+  /*!\brief Codec control function to enable postencode frame drop.
+   *
+   * This will allow encoder to drop frame after it's encoded.
+   *
+   * 0: Off (default), 1: Enabled
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_POSTENCODE_DROP,
 };
 
 /*!\brief vpx 1-D scaling mode

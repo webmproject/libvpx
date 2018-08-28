@@ -186,6 +186,14 @@ typedef struct {
   int force_qpmin;
   int reset_high_source_sad;
   double perc_arf_usage;
+  int force_max_q;
+  // Last frame was dropped post encode on scene change.
+  int last_post_encode_dropped_scene_change;
+  // Enable post encode frame dropping for screen content. Only enabled when
+  // ext_use_post_encode_drop is enabled by user.
+  int use_post_encode_drop;
+  // External flag to enable post encode frame dropping, controlled by user.
+  int ext_use_post_encode_drop;
 } RATE_CONTROL;
 
 struct VP9_COMP;
@@ -246,6 +254,9 @@ void vp9_rc_postencode_update_drop_frame(struct VP9_COMP *cpi);
 // Updates rate correction factors
 // Changes only the rate correction factors in the rate control structure.
 void vp9_rc_update_rate_correction_factors(struct VP9_COMP *cpi);
+
+// Post encode drop for CBR screen-content mode.
+int post_encode_drop_screen_content(struct VP9_COMP *cpi, size_t *size);
 
 // Decide if we should drop this frame: For 1-pass CBR.
 // Changes only the decimation count in the rate control structure

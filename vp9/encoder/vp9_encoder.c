@@ -3488,6 +3488,11 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q, int *bottom_index,
   // Decide q and q bounds.
   *q = vp9_rc_pick_q_and_bounds(cpi, bottom_index, top_index);
 
+  if (cpi->oxcf.rc_mode == VPX_CBR && cpi->rc.force_max_q) {
+    *q = cpi->rc.worst_quality;
+    cpi->rc.force_max_q = 0;
+  }
+
   if (!frame_is_intra_only(cm)) {
     vp9_set_high_precision_mv(cpi, (*q) < HIGH_PRECISION_MV_QTHRESH);
   }
@@ -3693,6 +3698,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                       uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
   int q = 0, bottom_index = 0, top_index = 0;
+  int no_drop_scene_change = 0;
   const INTERP_FILTER filter_scaler =
       (is_one_pass_cbr_svc(cpi))
           ? cpi->svc.downsample_filter_type[cpi->svc.spatial_layer_id]
@@ -3823,9 +3829,11 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame, if base layer is key for svc,
   // on scene change, or if superframe has layer sync.
+  if ((cpi->rc.high_source_sad || cpi->svc.high_source_sad_superframe) &&
+      !(cpi->rc.use_post_encode_drop && cpi->svc.last_layer_dropped[0]))
+    no_drop_scene_change = 1;
   if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
-      !frame_is_intra_only(cm) && !cpi->rc.high_source_sad &&
-      !cpi->svc.high_source_sad_superframe &&
+      !frame_is_intra_only(cm) && !no_drop_scene_change &&
       !cpi->svc.superframe_has_layer_sync &&
       (!cpi->use_svc ||
        !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
@@ -3863,6 +3871,12 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     cpi->use_skin_detection = 1;
   }
 
+  // Enable post encode frame dropping for CBR on non key frame, when
+  // ext_use_post_encode_drop is specified by user.
+  cpi->rc.use_post_encode_drop = cpi->rc.ext_use_post_encode_drop &&
+                                 cpi->oxcf.rc_mode == VPX_CBR &&
+                                 cm->frame_type != KEY_FRAME;
+
   vp9_set_quantizer(cm, q);
   vp9_set_variance_partition_thresholds(cpi, q, 0);
 
@@ -3877,6 +3891,14 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     vp9_svc_assert_constraints_pattern(cpi);
   }
 
+  if (cpi->rc.last_post_encode_dropped_scene_change) {
+    cpi->rc.high_source_sad = 1;
+    cpi->svc.high_source_sad_superframe = 1;
+    // For now disable use_source_sad since Last_Source will not be the previous
+    // encoded but the dropped one.
+    cpi->sf.use_source_sad = 0;
+    cpi->rc.last_post_encode_dropped_scene_change = 0;
+  }
   // Check if this high_source_sad (scene/slide change) frame should be
   // encoded at high/max QP, and if so, set the q and adjust some rate
   // control parameters.
@@ -4751,19 +4773,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
                cm->ref_frame_map[cpi->alt_fb_idx]);
   }
 
-  cpi->last_frame_dropped = 0;
-  cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 0;
-  // Keep track of the frame buffer index updated/refreshed for the
-  // current encoded TL0 superframe.
-  if (cpi->svc.temporal_layer_id == 0) {
-    if (cpi->refresh_last_frame)
-      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->lst_fb_idx;
-    else if (cpi->refresh_golden_frame)
-      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->gld_fb_idx;
-    else if (cpi->refresh_alt_ref_frame)
-      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->alt_fb_idx;
-  }
-
   // Disable segmentation if it decrease rate/distortion ratio
   if (cpi->oxcf.aq_mode == LOOKAHEAD_AQ)
     vp9_try_disable_lookahead_aq(cpi, size, dest);
@@ -4810,8 +4819,30 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
 
+  if (cpi->rc.use_post_encode_drop) save_coding_context(cpi);
+
   // build the bitstream
   vp9_pack_bitstream(cpi, dest, size);
+
+  if (cpi->rc.use_post_encode_drop && cm->base_qindex < cpi->rc.worst_quality &&
+      cpi->svc.spatial_layer_id == 0 &&
+      post_encode_drop_screen_content(cpi, size)) {
+    restore_coding_context(cpi);
+    return;
+  }
+
+  cpi->last_frame_dropped = 0;
+  cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 0;
+  // Keep track of the frame buffer index updated/refreshed for the
+  // current encoded TL0 superframe.
+  if (cpi->svc.temporal_layer_id == 0) {
+    if (cpi->refresh_last_frame)
+      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->lst_fb_idx;
+    else if (cpi->refresh_golden_frame)
+      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->gld_fb_idx;
+    else if (cpi->refresh_alt_ref_frame)
+      cpi->svc.fb_idx_upd_tl0[cpi->svc.spatial_layer_id] = cpi->alt_fb_idx;
+  }
 
   if (cm->seg.update_map) update_reference_segmentation_map(cpi);
 
