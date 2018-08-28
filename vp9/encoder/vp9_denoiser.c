@@ -449,10 +449,10 @@ static void swap_frame_buffer(YV12_BUFFER_CONFIG *const dest,
 }
 
 void vp9_denoiser_update_frame_info(
-    VP9_DENOISER *denoiser, YV12_BUFFER_CONFIG src, FRAME_TYPE frame_type,
-    int refresh_alt_ref_frame, int refresh_golden_frame, int refresh_last_frame,
-    int alt_fb_idx, int gld_fb_idx, int lst_fb_idx, int resized,
-    int svc_refresh_denoiser_buffers, int second_spatial_layer) {
+    VP9_DENOISER *denoiser, YV12_BUFFER_CONFIG src, struct SVC *svc,
+    FRAME_TYPE frame_type, int refresh_alt_ref_frame, int refresh_golden_frame,
+    int refresh_last_frame, int alt_fb_idx, int gld_fb_idx, int lst_fb_idx,
+    int resized, int svc_refresh_denoiser_buffers, int second_spatial_layer) {
   const int shift = second_spatial_layer ? denoiser->num_ref_frames : 0;
   // Copy source into denoised reference buffers on KEY_FRAME or
   // if the just encoded frame was resized. For SVC, copy source if the base
@@ -469,32 +469,43 @@ void vp9_denoiser_update_frame_info(
     return;
   }
 
-  // If more than one refresh occurs, must copy frame buffer.
-  if ((refresh_alt_ref_frame + refresh_golden_frame + refresh_last_frame) > 1) {
-    if (refresh_alt_ref_frame) {
-      copy_frame(&denoiser->running_avg_y[alt_fb_idx + 1 + shift],
-                 &denoiser->running_avg_y[INTRA_FRAME + shift]);
-    }
-    if (refresh_golden_frame) {
-      copy_frame(&denoiser->running_avg_y[gld_fb_idx + 1 + shift],
-                 &denoiser->running_avg_y[INTRA_FRAME + shift]);
-    }
-    if (refresh_last_frame) {
-      copy_frame(&denoiser->running_avg_y[lst_fb_idx + 1 + shift],
-                 &denoiser->running_avg_y[INTRA_FRAME + shift]);
+  if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
+      svc->use_set_ref_frame_config) {
+    int i;
+    for (i = 0; i < REF_FRAMES; i++) {
+      if (svc->update_buffer_slot[svc->spatial_layer_id] & (1 << i))
+        copy_frame(&denoiser->running_avg_y[i + 1 + shift],
+                   &denoiser->running_avg_y[INTRA_FRAME + shift]);
     }
   } else {
-    if (refresh_alt_ref_frame) {
-      swap_frame_buffer(&denoiser->running_avg_y[alt_fb_idx + 1 + shift],
-                        &denoiser->running_avg_y[INTRA_FRAME + shift]);
-    }
-    if (refresh_golden_frame) {
-      swap_frame_buffer(&denoiser->running_avg_y[gld_fb_idx + 1 + shift],
-                        &denoiser->running_avg_y[INTRA_FRAME + shift]);
-    }
-    if (refresh_last_frame) {
-      swap_frame_buffer(&denoiser->running_avg_y[lst_fb_idx + 1 + shift],
-                        &denoiser->running_avg_y[INTRA_FRAME + shift]);
+    // If more than one refresh occurs, must copy frame buffer.
+    if ((refresh_alt_ref_frame + refresh_golden_frame + refresh_last_frame) >
+        1) {
+      if (refresh_alt_ref_frame) {
+        copy_frame(&denoiser->running_avg_y[alt_fb_idx + 1 + shift],
+                   &denoiser->running_avg_y[INTRA_FRAME + shift]);
+      }
+      if (refresh_golden_frame) {
+        copy_frame(&denoiser->running_avg_y[gld_fb_idx + 1 + shift],
+                   &denoiser->running_avg_y[INTRA_FRAME + shift]);
+      }
+      if (refresh_last_frame) {
+        copy_frame(&denoiser->running_avg_y[lst_fb_idx + 1 + shift],
+                   &denoiser->running_avg_y[INTRA_FRAME + shift]);
+      }
+    } else {
+      if (refresh_alt_ref_frame) {
+        swap_frame_buffer(&denoiser->running_avg_y[alt_fb_idx + 1 + shift],
+                          &denoiser->running_avg_y[INTRA_FRAME + shift]);
+      }
+      if (refresh_golden_frame) {
+        swap_frame_buffer(&denoiser->running_avg_y[gld_fb_idx + 1 + shift],
+                          &denoiser->running_avg_y[INTRA_FRAME + shift]);
+      }
+      if (refresh_last_frame) {
+        swap_frame_buffer(&denoiser->running_avg_y[lst_fb_idx + 1 + shift],
+                          &denoiser->running_avg_y[INTRA_FRAME + shift]);
+      }
     }
   }
 }
@@ -543,26 +554,38 @@ static int vp9_denoiser_realloc_svc_helper(VP9_COMMON *cm,
 }
 
 int vp9_denoiser_realloc_svc(VP9_COMMON *cm, VP9_DENOISER *denoiser,
-                             int svc_buf_shift, int refresh_alt,
-                             int refresh_gld, int refresh_lst, int alt_fb_idx,
-                             int gld_fb_idx, int lst_fb_idx) {
+                             struct SVC *svc, int svc_buf_shift,
+                             int refresh_alt, int refresh_gld, int refresh_lst,
+                             int alt_fb_idx, int gld_fb_idx, int lst_fb_idx) {
   int fail = 0;
-  if (refresh_alt) {
-    // Increase the frame buffer index by 1 to map it to the buffer index in the
-    // denoiser.
-    fail = vp9_denoiser_realloc_svc_helper(cm, denoiser,
-                                           alt_fb_idx + 1 + svc_buf_shift);
-    if (fail) return 1;
-  }
-  if (refresh_gld) {
-    fail = vp9_denoiser_realloc_svc_helper(cm, denoiser,
-                                           gld_fb_idx + 1 + svc_buf_shift);
-    if (fail) return 1;
-  }
-  if (refresh_lst) {
-    fail = vp9_denoiser_realloc_svc_helper(cm, denoiser,
-                                           lst_fb_idx + 1 + svc_buf_shift);
-    if (fail) return 1;
+  if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
+      svc->use_set_ref_frame_config) {
+    int i;
+    for (i = 0; i < REF_FRAMES; i++) {
+      if (cm->frame_type == KEY_FRAME ||
+          svc->update_buffer_slot[svc->spatial_layer_id] & (1 << i)) {
+        fail = vp9_denoiser_realloc_svc_helper(cm, denoiser,
+                                               i + 1 + svc_buf_shift);
+      }
+    }
+  } else {
+    if (refresh_alt) {
+      // Increase the frame buffer index by 1 to map it to the buffer index in
+      // the denoiser.
+      fail = vp9_denoiser_realloc_svc_helper(cm, denoiser,
+                                             alt_fb_idx + 1 + svc_buf_shift);
+      if (fail) return 1;
+    }
+    if (refresh_gld) {
+      fail = vp9_denoiser_realloc_svc_helper(cm, denoiser,
+                                             gld_fb_idx + 1 + svc_buf_shift);
+      if (fail) return 1;
+    }
+    if (refresh_lst) {
+      fail = vp9_denoiser_realloc_svc_helper(cm, denoiser,
+                                             lst_fb_idx + 1 + svc_buf_shift);
+      if (fail) return 1;
+    }
   }
   return 0;
 }
@@ -740,18 +763,20 @@ void vp9_denoiser_update_ref_frame(VP9_COMP *const cpi) {
           svc->number_spatial_layers - svc->spatial_layer_id == 2 ? 1 : 0;
       // Check if we need to allocate extra buffers in the denoiser
       // for refreshed frames.
-      if (vp9_denoiser_realloc_svc(
-              cm, &cpi->denoiser, svc_buf_shift, cpi->refresh_alt_ref_frame,
-              cpi->refresh_golden_frame, cpi->refresh_last_frame,
-              cpi->alt_fb_idx, cpi->gld_fb_idx, cpi->lst_fb_idx))
+      if (vp9_denoiser_realloc_svc(cm, &cpi->denoiser, svc, svc_buf_shift,
+                                   cpi->refresh_alt_ref_frame,
+                                   cpi->refresh_golden_frame,
+                                   cpi->refresh_last_frame, cpi->alt_fb_idx,
+                                   cpi->gld_fb_idx, cpi->lst_fb_idx))
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                            "Failed to re-allocate denoiser for SVC");
     }
     vp9_denoiser_update_frame_info(
-        &cpi->denoiser, *cpi->Source, frame_type, cpi->refresh_alt_ref_frame,
-        cpi->refresh_golden_frame, cpi->refresh_last_frame, cpi->alt_fb_idx,
-        cpi->gld_fb_idx, cpi->lst_fb_idx, cpi->resize_pending,
-        svc_refresh_denoiser_buffers, denoise_svc_second_layer);
+        &cpi->denoiser, *cpi->Source, svc, frame_type,
+        cpi->refresh_alt_ref_frame, cpi->refresh_golden_frame,
+        cpi->refresh_last_frame, cpi->alt_fb_idx, cpi->gld_fb_idx,
+        cpi->lst_fb_idx, cpi->resize_pending, svc_refresh_denoiser_buffers,
+        denoise_svc_second_layer);
   }
 }
 
