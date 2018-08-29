@@ -810,6 +810,7 @@ typedef struct vpx_svc_ref_frame_config {
   int reference_last[VPX_SS_MAX_LAYERS];    /**< Last as eference. */
   int reference_golden[VPX_SS_MAX_LAYERS];  /**< Golden as reference. */
   int reference_alt_ref[VPX_SS_MAX_LAYERS]; /**< Altref as reference. */
+  int64_t duration[VPX_SS_MAX_LAYERS];      /**< Duration per spatial layer. */
 } vpx_svc_ref_frame_config_t;
 
 /*!\brief VP9 svc frame dropping mode.

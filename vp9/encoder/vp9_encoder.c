@@ -6237,7 +6237,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   // adjust frame rates based on timestamps given
   if (cm->show_frame) {
-    adjust_frame_rate(cpi, source);
+    if (cpi->use_svc && cpi->svc.use_set_ref_frame_config &&
+        cpi->svc.duration[cpi->svc.spatial_layer_id] > 0)
+      vp9_svc_adjust_frame_rate(cpi);
+    else
+      adjust_frame_rate(cpi, source);
   }
 
   if (is_one_pass_cbr_svc(cpi)) {

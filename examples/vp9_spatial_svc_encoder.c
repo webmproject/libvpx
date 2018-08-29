@@ -925,6 +925,9 @@ int main(int argc, const char **argv) {
                                         svc_ctx.spatial_layers, frame_cnt == 0,
                                         &ref_frame_config);
       }
+      ref_frame_config.duration[0] = frame_duration * 1;
+      ref_frame_config.duration[1] = frame_duration * 1;
+
       vpx_codec_control(&codec, VP9E_SET_SVC_REF_FRAME_CONFIG,
                         &ref_frame_config);
       // Keep track of input frames, to account for frame drops in rate control
