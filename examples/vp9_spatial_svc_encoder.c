@@ -976,34 +976,31 @@ int main(int argc, const char **argv) {
 #if OUTPUT_RC_STATS
             // TODO(marpan): Put this (to line728) in separate function.
             if (svc_ctx.output_rc_stat) {
+              int num_layers_encoded = 0;
               vpx_codec_control(&codec, VP9E_GET_SVC_LAYER_ID, &layer_id);
               parse_superframe_index(cx_pkt->data.frame.buf,
                                      cx_pkt->data.frame.sz, sizes_parsed,
                                      &count);
               if (enc_cfg.ss_number_layers == 1)
                 sizes[0] = cx_pkt->data.frame.sz;
-              if (svc_ctx.temporal_layering_mode !=
-                  VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
-                int num_layers_encoded = 0;
-                for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                  sizes[sl] = 0;
-                  if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
-                    sizes[sl] = sizes_parsed[num_layers_encoded];
-                    num_layers_encoded++;
-                  }
+              for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+                sizes[sl] = 0;
+                if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
+                  sizes[sl] = sizes_parsed[num_layers_encoded];
+                  num_layers_encoded++;
                 }
-                for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                  unsigned int sl2;
-                  uint64_t tot_size = 0;
-                  for (sl2 = 0; sl2 <= sl; ++sl2) {
-                    if (cx_pkt->data.frame.spatial_layer_encoded[sl2])
-                      tot_size += sizes[sl2];
-                  }
-                  if (tot_size > 0)
-                    vpx_video_writer_write_frame(
-                        outfile[sl], cx_pkt->data.frame.buf, (size_t)(tot_size),
-                        cx_pkt->data.frame.pts);
+              }
+              for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+                unsigned int sl2;
+                uint64_t tot_size = 0;
+                for (sl2 = 0; sl2 <= sl; ++sl2) {
+                  if (cx_pkt->data.frame.spatial_layer_encoded[sl2])
+                    tot_size += sizes[sl2];
                 }
+                if (tot_size > 0)
+                  vpx_video_writer_write_frame(
+                      outfile[sl], cx_pkt->data.frame.buf, (size_t)(tot_size),
+                      cx_pkt->data.frame.pts);
               }
               for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
                 if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
@@ -1086,15 +1083,6 @@ int main(int argc, const char **argv) {
     if (!end_of_stream) {
       ++frame_cnt;
       pts += frame_duration;
-    }
-  }
-
-  // Compensate for the extra frame count for the bypass mode.
-  if (svc_ctx.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
-    for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-      const int layer =
-          sl * enc_cfg.ts_number_layers + layer_id.temporal_layer_id;
-      --rc.layer_input_frames[layer];
     }
   }
 
