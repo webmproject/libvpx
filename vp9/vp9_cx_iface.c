@@ -1449,6 +1449,7 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
   int sl;
 
   svc->spatial_layer_to_encode = data->spatial_layer_id;
+  svc->first_spatial_layer_to_encode = data->spatial_layer_id;
   // TODO(jianj): Deprecated to be removed.
   svc->temporal_layer_id = data->temporal_layer_id;
   // Allow for setting temporal layer per spatial layer for superframe.

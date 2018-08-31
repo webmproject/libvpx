@@ -175,6 +175,8 @@ typedef struct SVC {
   int use_set_ref_frame_config;
 
   int temporal_layer_id_per_spatial[VPX_SS_MAX_LAYERS];
+
+  int first_spatial_layer_to_encode;
 } SVC;
 
 struct VP9_COMP;

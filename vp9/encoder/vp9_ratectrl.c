@@ -2003,6 +2003,8 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   int target = rc->avg_frame_bandwidth;
   int layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, svc->temporal_layer_id,
                                svc->number_temporal_layers);
+  if (svc->first_spatial_layer_to_encode)
+    svc->layer_context[svc->temporal_layer_id].is_key_frame = 0;
   // Periodic key frames is based on the super-frame counter
   // (svc.current_superframe), also only base spatial layer is key frame.
   // Key frame is set for any of the following: very first frame, frame flags
