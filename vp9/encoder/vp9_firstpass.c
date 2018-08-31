@@ -2355,7 +2355,7 @@ static void find_arf_order(GF_GROUP *gf_group, int *layer_depth,
   // Process ARF frame
   layer_depth[*index_counter] = depth;
   gf_group->update_type[*index_counter] = ARF_UPDATE;
-  gf_group->arf_src_offset[*index_counter] = mid;
+  gf_group->arf_src_offset[*index_counter] = mid - start;
   gf_group->rf_level[*index_counter] = GF_ARF_LOW;
   ++(*index_counter);
 
