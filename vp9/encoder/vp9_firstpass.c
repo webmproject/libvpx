@@ -2333,6 +2333,32 @@ static void define_gf_multi_arf_structure(VP9_COMP *cpi) {
   gf_group->brf_src_offset[frame_index] = 0;
 }
 
+static void init_arf_order(int *stack, int *layer_depth) {
+  int idx;
+  for (idx = 0; idx < MAX_LAG_BUFFERS; ++idx) {
+    stack[idx] = -1;
+    layer_depth[idx] = 0;
+  }
+}
+
+static void find_arf_order(int *stack, int *layer_depth, int *index_counter,
+                           int *stack_size, int depth, int start, int end) {
+  int mid = (start + end + 1) >> 1;
+  if (end - start < 3) return;
+
+  if (abs(mid - start) > 1 && abs(mid - end) > 1) {
+    stack_push(stack, mid, *stack_size);
+    ++(*stack_size);
+    layer_depth[*index_counter] = depth;
+    ++(*index_counter);
+  }
+
+  find_arf_order(stack, layer_depth, index_counter, stack_size, depth + 1,
+                 start, mid);
+  find_arf_order(stack, layer_depth, index_counter, stack_size, depth + 1, mid,
+                 end);
+}
+
 static void define_gf_group_structure(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
@@ -2343,6 +2369,12 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
   int mid_frame_idx;
   unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
   int normal_frames;
+  int arf_order[MAX_LAG_BUFFERS];
+  int layer_depth[MAX_LAG_BUFFERS];
+  int index_counter = 0;
+  int stack_size = 0;
+
+  init_arf_order(arf_order, layer_depth);
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
@@ -2389,7 +2421,17 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
       gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
       ++frame_index;
     }
+
+    stack_push(arf_order, gf_group->arf_src_offset[1], stack_size);
+    ++stack_size;
+    layer_depth[index_counter] = 1;
+    ++index_counter;
+    find_arf_order(arf_order, layer_depth, &index_counter, &stack_size, 2, 0,
+                   rc->baseline_gf_interval - 1);
   }
+
+  (void)arf_order;
+  (void)layer_depth;
 
   // Note index of the first normal inter frame int eh group (not gf kf arf)
   gf_group->first_inter_index = frame_index;
