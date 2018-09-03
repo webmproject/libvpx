@@ -1005,11 +1005,13 @@ void vp9_svc_constrain_inter_layer_pred(VP9_COMP *const cpi) {
       }
     }
   }
-  // Check for disabling inter-layer prediction if the reference for inter-layer
-  // prediction (the reference that is scaled) is not the previous spatial layer
-  // from the same superframe, then we disable inter-layer prediction.
-  // Only need to check when inter_layer prediction is not set to OFF mode.
-  if (svc->disable_inter_layer_pred != INTER_LAYER_PRED_OFF) {
+  // For fixed/non-flexible SVC: check for disabling inter-layer prediction.
+  // If the reference for inter-layer prediction (the reference that is scaled)
+  // is not the previous spatial layer from the same superframe, then we disable
+  // inter-layer prediction. Only need to check when inter_layer prediction is
+  // not set to OFF mode.
+  if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
+      svc->disable_inter_layer_pred != INTER_LAYER_PRED_OFF) {
     // We only use LAST and GOLDEN for prediction in real-time mode, so we
     // check both here.
     MV_REFERENCE_FRAME ref_frame;
