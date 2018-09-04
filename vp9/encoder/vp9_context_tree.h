@@ -56,6 +56,7 @@ typedef struct {
   // scope of refactoring.
   int rate;
   int64_t dist;
+  int64_t rdcost;
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   unsigned int newmv_sse;

@@ -196,8 +196,13 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   sf->adaptive_rd_thresh_row_mt = 0;
   sf->allow_skip_recode = 1;
   sf->less_rectangular_check = 1;
-  sf->use_square_partition_only = !frame_is_boosted(cpi);
+  sf->use_square_partition_only = !boosted;
   sf->prune_ref_frame_for_rect_partitions = 1;
+
+  sf->ml_prune_rect_partition_threhold[0] = -1;
+  sf->ml_prune_rect_partition_threhold[1] = 350;
+  sf->ml_prune_rect_partition_threhold[2] = 325;
+  sf->ml_prune_rect_partition_threhold[3] = 250;
 
   if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) {
     sf->exhaustive_searches_thresh = (1 << 22);
@@ -216,11 +221,17 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   if (speed >= 1) {
     sf->enable_tpl_model = 0;
     sf->prune_ref_frame_for_rect_partitions = 0;
+
+    sf->ml_prune_rect_partition_threhold[0] = -1;
+    sf->ml_prune_rect_partition_threhold[1] = -1;
+    sf->ml_prune_rect_partition_threhold[2] = -1;
+    sf->ml_prune_rect_partition_threhold[3] = -1;
+
     if (oxcf->pass == 2) {
       TWO_PASS *const twopass = &cpi->twopass;
       if ((twopass->fr_content_type == FC_GRAPHICS_ANIMATION) ||
           vp9_internal_image_edge(cpi)) {
-        sf->use_square_partition_only = !frame_is_boosted(cpi);
+        sf->use_square_partition_only = !boosted;
       } else {
         sf->use_square_partition_only = !frame_is_intra_only(cm);
       }
@@ -887,6 +898,10 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->limit_newmv_early_exit = 0;
   sf->bias_golden = 0;
   sf->base_mv_aggressive = 0;
+  sf->ml_prune_rect_partition_threhold[0] = -1;
+  sf->ml_prune_rect_partition_threhold[1] = -1;
+  sf->ml_prune_rect_partition_threhold[2] = -1;
+  sf->ml_prune_rect_partition_threhold[3] = -1;
 
   // Some speed-up features even for best quality as minimal impact on quality.
   sf->adaptive_rd_thresh = 1;
