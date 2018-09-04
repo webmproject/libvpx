@@ -143,6 +143,11 @@ typedef struct {
   unsigned char brf_src_offset[MAX_STATIC_GF_GROUP_LENGTH + 2];
   unsigned char bidir_pred_enabled[MAX_STATIC_GF_GROUP_LENGTH + 2];
   int bit_allocation[MAX_STATIC_GF_GROUP_LENGTH + 2];
+
+  // TODO(jingning): The array size of arf_stack could be reduced.
+  int arf_index_stack[MAX_LAG_BUFFERS * 2];
+  int top_arf_idx;
+  int stack_size;
 } GF_GROUP;
 
 typedef struct {

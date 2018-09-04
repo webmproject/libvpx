@@ -834,6 +834,11 @@ static INLINE void stack_push(int *stack, int new_item, int stack_size) {
   stack[0] = new_item;
 }
 
+static INLINE void stack_init(int *stack, int length) {
+  int idx;
+  for (idx = 0; idx < length; ++idx) stack[idx] = -1;
+}
+
 int vp9_get_quantizer(struct VP9_COMP *cpi);
 
 static INLINE int frame_is_kf_gf_arf(const VP9_COMP *cpi) {
