@@ -64,6 +64,7 @@ VP9_CX_SRCS-yes += encoder/vp9_ratectrl.c
 VP9_CX_SRCS-yes += encoder/vp9_rd.c
 VP9_CX_SRCS-yes += encoder/vp9_rdopt.c
 VP9_CX_SRCS-yes += encoder/vp9_pickmode.c
+VP9_CX_SRCS-yes += encoder/vp9_partition_models.h
 VP9_CX_SRCS-yes += encoder/vp9_segmentation.c
 VP9_CX_SRCS-yes += encoder/vp9_segmentation.h
 VP9_CX_SRCS-yes += encoder/vp9_speed_features.c
