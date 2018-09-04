@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e21c083_42d952b3",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2430,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-09-04T10:39:42Z",
+      "side": 1,
+      "message": "This does not seem to relate to the purpose detailed in the patch info. I.e. what is this to do with setting the minimum frame size to 1. Did you mean this setting of multi-layer to be included in this patch?",
+      "range": {
+        "startLine": 2430,
+        "startChar": 7,
+        "endLine": 2430,
+        "endChar": 22
+      },
+      "revId": "c1710b92d79d375c259ef0fee2730a9b13ad09e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
