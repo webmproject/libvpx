@@ -331,14 +331,19 @@ typedef struct SPEED_FEATURES {
   // rd than partition type split.
   int less_rectangular_check;
 
-  // Disable testing non square partitions. (eg 16x32)
+  // Disable testing non square partitions(eg 16x32) for block sizes larger than
+  // use_square_only_thresh_high or smaller than use_square_only_thresh_low.
   int use_square_partition_only;
-  BLOCK_SIZE use_square_only_threshold;
+  BLOCK_SIZE use_square_only_thresh_high;
+  BLOCK_SIZE use_square_only_thresh_low;
 
   // Prune reference frames for rectangular partitions.
   int prune_ref_frame_for_rect_partitions;
 
   // Threshold values used for ML based rectangular partition search pruning.
+  // If < 0, the feature is turned off.
+  // Higher values mean more aggressiveness to skip rectangular partition
+  // search that results in better encoding speed but worse coding performance.
   int ml_prune_rect_partition_threhold[4];
 
   // Sets min and max partition sizes for this 64x64 region based on the
@@ -497,6 +502,8 @@ typedef struct SPEED_FEATURES {
 
   // Use ML-based partition search early breakout.
   int use_ml_partition_search_breakout;
+  // Higher values mean more aggressiveness for partition search breakout that
+  // results in better encoding  speed but worse compression performance.
   float ml_partition_search_breakout_thresh[3];
 
   // Machine-learning based partition search early termination

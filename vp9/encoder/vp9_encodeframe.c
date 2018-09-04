@@ -3546,7 +3546,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   }
 
   if (cpi->sf.use_square_partition_only &&
-      bsize > cpi->sf.use_square_only_threshold) {
+      (bsize > cpi->sf.use_square_only_thresh_high ||
+       bsize < cpi->sf.use_square_only_thresh_low)) {
     if (cpi->use_svc) {
       if (!vp9_active_h_edge(cpi, mi_row, mi_step) || x->e_mbd.lossless)
         partition_horz_allowed &= force_horz_split;
@@ -3839,9 +3840,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     } else {
       // skip rectangular partition test when larger block size
       // gives better rd cost
-      if ((cpi->sf.less_rectangular_check) &&
-          ((bsize > cpi->sf.use_square_only_threshold) ||
-           (best_rdc.dist < dist_breakout_thr)))
+      if (cpi->sf.less_rectangular_check &&
+          (bsize > cpi->sf.use_square_only_thresh_high ||
+           best_rdc.dist < dist_breakout_thr))
         do_rect &= !partition_none_allowed;
     }
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -3921,8 +3922,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       best_rdc = sum_rdc;
       pc_tree->partitioning = PARTITION_HORZ;
 
-      if ((cpi->sf.less_rectangular_check) &&
-          (bsize > cpi->sf.use_square_only_threshold))
+      if (cpi->sf.less_rectangular_check &&
+          bsize > cpi->sf.use_square_only_thresh_high)
         do_rect = 0;
     }
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);

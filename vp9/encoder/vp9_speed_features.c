@@ -70,14 +70,15 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   // speed 0 features
   sf->partition_search_breakout_thr.dist = (1 << 20);
   sf->partition_search_breakout_thr.rate = 80;
-  sf->use_square_only_threshold = BLOCK_SIZES;
+  sf->use_square_only_thresh_high = BLOCK_SIZES;
+  sf->use_square_only_thresh_low = BLOCK_4X4;
 
   if (is_480p_or_larger) {
     // Currently, the machine-learning based partition search early termination
     // is only used while VPXMIN(cm->width, cm->height) >= 480 and speed = 0.
     sf->ml_partition_search_early_termination = 1;
   } else {
-    sf->use_square_only_threshold = BLOCK_32X32;
+    sf->use_square_only_thresh_high = BLOCK_32X32;
   }
 
   if (!is_1080p_or_larger) {
@@ -95,29 +96,49 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
 
   if (speed >= 1) {
     sf->ml_partition_search_early_termination = 0;
-    sf->use_square_only_threshold = BLOCK_4X4;
-
+    sf->use_ml_partition_search_breakout = 1;
+    if (is_480p_or_larger)
+      sf->use_square_only_thresh_high = BLOCK_64X64;
+    else
+      sf->use_square_only_thresh_high = BLOCK_32X32;
+    sf->use_square_only_thresh_low = BLOCK_16X16;
     if (is_720p_or_larger) {
       sf->disable_split_mask =
           cm->show_frame ? DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
-      sf->partition_search_breakout_thr.dist = (1 << 23);
-      sf->use_ml_partition_search_breakout = 0;
+      sf->partition_search_breakout_thr.dist = (1 << 22);
+      sf->ml_partition_search_breakout_thresh[0] = -5.0f;
+      sf->ml_partition_search_breakout_thresh[1] = -5.0f;
+      sf->ml_partition_search_breakout_thresh[2] = -9.0f;
     } else {
       sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
       sf->partition_search_breakout_thr.dist = (1 << 21);
-      sf->ml_partition_search_breakout_thresh[0] = 0.0f;
-      sf->ml_partition_search_breakout_thresh[1] = 0.0f;
-      sf->ml_partition_search_breakout_thresh[2] = 0.0f;
+      sf->ml_partition_search_breakout_thresh[0] = -1.0f;
+      sf->ml_partition_search_breakout_thresh[1] = -1.0f;
+      sf->ml_partition_search_breakout_thresh[2] = -1.0f;
     }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH) {
+      sf->use_square_only_thresh_high = BLOCK_4X4;
+      sf->use_square_only_thresh_low = BLOCK_SIZES;
+      if (is_720p_or_larger) {
+        sf->partition_search_breakout_thr.dist = (1 << 23);
+        sf->use_ml_partition_search_breakout = 0;
+      }
+    }
+#endif
   }
 
   if (speed >= 2) {
+    sf->use_square_only_thresh_high = BLOCK_4X4;
+    sf->use_square_only_thresh_low = BLOCK_SIZES;
     if (is_720p_or_larger) {
       sf->disable_split_mask =
           cm->show_frame ? DISABLE_ALL_SPLIT : DISABLE_ALL_INTER_SPLIT;
       sf->adaptive_pred_interp_filter = 0;
       sf->partition_search_breakout_thr.dist = (1 << 24);
       sf->partition_search_breakout_thr.rate = 120;
+      sf->use_ml_partition_search_breakout = 0;
     } else {
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
       sf->partition_search_breakout_thr.dist = (1 << 22);
@@ -220,12 +241,13 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
 
   if (speed >= 1) {
     sf->enable_tpl_model = 0;
-    sf->prune_ref_frame_for_rect_partitions = 0;
-
-    sf->ml_prune_rect_partition_threhold[0] = -1;
-    sf->ml_prune_rect_partition_threhold[1] = -1;
-    sf->ml_prune_rect_partition_threhold[2] = -1;
-    sf->ml_prune_rect_partition_threhold[3] = -1;
+    sf->ml_prune_rect_partition_threhold[1] = 200;
+    sf->ml_prune_rect_partition_threhold[2] = 200;
+    sf->ml_prune_rect_partition_threhold[3] = 200;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH)
+      sf->prune_ref_frame_for_rect_partitions = 0;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     if (oxcf->pass == 2) {
       TWO_PASS *const twopass = &cpi->twopass;
@@ -289,6 +311,10 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->recode_tolerance_low = 15;
     sf->recode_tolerance_high = 45;
     sf->enhanced_full_pixel_motion_search = 0;
+    sf->prune_ref_frame_for_rect_partitions = 0;
+    sf->ml_prune_rect_partition_threhold[1] = -1;
+    sf->ml_prune_rect_partition_threhold[2] = -1;
+    sf->ml_prune_rect_partition_threhold[3] = -1;
 
     if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) {
       for (i = 0; i < MAX_MESH_STEP; ++i) {
@@ -839,7 +865,8 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->partition_search_type = SEARCH_PARTITION;
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
-  sf->use_square_only_threshold = BLOCK_SIZES;
+  sf->use_square_only_thresh_high = BLOCK_SIZES;
+  sf->use_square_only_thresh_low = BLOCK_4X4;
   sf->auto_min_max_partition_size = NOT_IN_USE;
   sf->rd_auto_partition_min_limit = BLOCK_4X4;
   sf->default_max_partition_size = BLOCK_64X64;
