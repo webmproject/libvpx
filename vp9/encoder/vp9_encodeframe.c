@@ -4448,6 +4448,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   }
 #endif
 
+  pc_tree->partitioning = PARTITION_NONE;
+
   // PARTITION_NONE
   if (partition_none_allowed) {
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &this_rdc, bsize, ctx,
