@@ -5722,6 +5722,15 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
   for (idy = 0; idy < mi_height; ++idy) {
     tpl_ptr = &tpl_stats[(mi_row + idy) * stride + mi_col];
     for (idx = 0; idx < mi_width; ++idx) {
+#if CONFIG_NON_GREEDY_MV
+      int rf_idx;
+      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        tpl_ptr->inter_cost_arr[rf_idx] = src_stats->inter_cost;
+        tpl_ptr->recon_error_arr[rf_idx] = src_stats->recon_error_arr[rf_idx];
+        tpl_ptr->sse_arr[rf_idx] = src_stats->sse_arr[rf_idx];
+        tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv.as_int;
+      }
+#endif
       tpl_ptr->intra_cost = intra_cost;
       tpl_ptr->inter_cost = inter_cost;
       tpl_ptr->mc_dep_cost = tpl_ptr->intra_cost + tpl_ptr->mc_flow;
@@ -5909,7 +5918,12 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     int_mv mv;
-    if (ref_frame[rf_idx] == NULL) continue;
+    if (ref_frame[rf_idx] == NULL) {
+#if CONFIG_NON_GREEDY_MV
+      tpl_stats->inter_cost_arr[rf_idx] = -1;
+#endif
+      continue;
+    }
 
     motion_compensated_prediction(cpi, td, xd->cur_buf->y_buffer + mb_y_offset,
                                   ref_frame[rf_idx]->y_buffer + mb_y_offset,
@@ -5949,12 +5963,25 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
     inter_cost = vpx_satd(coeff, pix_num);
 
+#if CONFIG_NON_GREEDY_MV
+    tpl_stats->inter_cost_arr[rf_idx] = inter_cost;
+    tpl_stats->mv_arr[rf_idx].as_int = mv.as_int;
+    get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size,
+                       &tpl_stats->recon_error_arr[rf_idx],
+                       &tpl_stats->sse_arr[rf_idx]);
+#endif
+
     if (inter_cost < best_inter_cost) {
       best_rf_idx = rf_idx;
       best_inter_cost = inter_cost;
       best_mv.as_int = mv.as_int;
+#if CONFIG_NON_GREEDY_MV
+      *recon_error = tpl_stats->recon_error_arr[rf_idx];
+      *sse = tpl_stats->sse_arr[rf_idx];
+#else
       get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size, recon_error,
                          sse);
+#endif
     }
   }
   best_intra_cost = VPXMAX(best_intra_cost, 1);
@@ -6058,6 +6085,50 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   }
 }
 
+#if CONFIG_NON_GREEDY_MV
+#define DUMP_TPL_STATS 0
+#if DUMP_TPL_STATS
+static void dump_buf(uint8_t *buf, int stride, int row, int col, int h, int w) {
+  printf("%d %d\n", h, w);
+  for (int i = 0; i < h; ++i) {
+    for (int j = 0; j < w; ++j) {
+      printf("%d ", buf[(row + i) * stride + col + j]);
+    }
+  }
+  printf("\n");
+}
+
+static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames) {
+  int frame_idx;
+  const VP9_COMMON *cm = &cpi->common;
+  const ThreadData *td = &cpi->td;
+  const MACROBLOCK *x = &td->mb;
+  const MACROBLOCKD *xd = &x->e_mbd;
+  for (frame_idx = 0; frame_idx < tpl_group_frames; ++frame_idx) {
+    const TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+    int mi_row, mi_col;
+    printf("=\n");
+    printf("frame_idx %d mi_rows %d mi_cols %d\n", frame_idx, cm->mi_rows,
+           cm->mi_cols);
+    for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
+      for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
+        const TplDepStats *tpl_ptr =
+            &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+        int_mv mv = tpl_ptr->mv_arr[0];
+        printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row, mv.as_mv.col);
+      }
+    }
+    dump_buf(xd->cur_buf->y_buffer, xd->cur_buf->y_stride, 0, 0,
+             xd->cur_buf->y_height, xd->cur_buf->y_width);
+    dump_buf(xd->cur_buf->u_buffer, xd->cur_buf->uv_stride, 0, 0,
+             xd->cur_buf->uv_height, xd->cur_buf->uv_width);
+    dump_buf(xd->cur_buf->v_buffer, xd->cur_buf->uv_stride, 0, 0,
+             xd->cur_buf->uv_height, xd->cur_buf->uv_width);
+  }
+}
+#endif  // DUMP_TPL_STATS
+#endif  // CONFIG_NON_GREEDY_MV
+
 static void setup_tpl_stats(VP9_COMP *cpi) {
   GF_PICTURE gf_picture[MAX_LAG_BUFFERS];
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
@@ -6069,8 +6140,14 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
   init_tpl_stats(cpi);
 
   // Backward propagation from tpl_group_frames to 1.
-  for (frame_idx = tpl_group_frames - 1; frame_idx > 0; --frame_idx)
+  for (frame_idx = tpl_group_frames - 1; frame_idx > 0; --frame_idx) {
     mc_flow_dispenser(cpi, gf_picture, frame_idx);
+  }
+#if CONFIG_NON_GREEDY_MV
+#if DUMP_TPL_STATS
+  dump_tpl_stats(cpi, tpl_group_frames);
+#endif  // DUMP_TPL_STATS
+#endif  // CONFIG_NON_GREEDY_MV
 }
 
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,

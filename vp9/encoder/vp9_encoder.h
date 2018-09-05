@@ -289,6 +289,13 @@ typedef struct TplDepStats {
 
   int ref_frame_index;
   int_mv mv;
+
+#if CONFIG_NON_GREEDY_MV
+  int64_t inter_cost_arr[3];
+  int64_t recon_error_arr[3];
+  int64_t sse_arr[3];
+  int_mv mv_arr[3];
+#endif
 } TplDepStats;
 
 typedef struct TplDepFrame {
