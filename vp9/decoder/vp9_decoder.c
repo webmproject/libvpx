@@ -397,7 +397,7 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
 
 #if CONFIG_VP9_POSTPROC
   if (!cm->show_existing_frame) {
-    ret = vp9_post_proc_frame(cm, sd, flags);
+    ret = vp9_post_proc_frame(cm, sd, flags, cm->width);
   } else {
     *sd = *cm->frame_to_show;
     ret = 0;
