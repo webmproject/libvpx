@@ -177,6 +177,10 @@ typedef struct SVC {
   int temporal_layer_id_per_spatial[VPX_SS_MAX_LAYERS];
 
   int first_spatial_layer_to_encode;
+
+  int64_t duration[VPX_SS_MAX_LAYERS];
+
+  int64_t timebase_fac;
 } SVC;
 
 struct VP9_COMP;
@@ -243,6 +247,8 @@ void vp9_svc_check_spatial_layer_sync(struct VP9_COMP *const cpi);
 void vp9_svc_update_ref_frame_buffer_idx(struct VP9_COMP *const cpi);
 
 void vp9_svc_update_ref_frame(struct VP9_COMP *const cpi);
+
+void vp9_svc_adjust_frame_rate(struct VP9_COMP *const cpi);
 
 #ifdef __cplusplus
 }  // extern "C"
