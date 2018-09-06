@@ -44,6 +44,7 @@
 #define COMPLEXITY_STATS_OUTPUT 0
 
 #define FIRST_PASS_Q 10.0
+#define NORMAL_BOOST 100
 #define MIN_ARF_GF_BOOST 240
 #define MIN_DECAY_FACTOR 0.01
 #define NEW_MV_MODE_PENALTY 32
@@ -2070,7 +2071,7 @@ static int calculate_boost_bits(int frame_count, int boost,
   // return 0 for invalid inputs (could arise e.g. through rounding errors)
   if (!boost || (total_group_bits <= 0) || (frame_count < 0)) return 0;
 
-  allocation_chunks = (frame_count * 100) + boost;
+  allocation_chunks = (frame_count * NORMAL_BOOST) + boost;
 
   // Prevent overflow.
   if (boost > 1023) {
