@@ -22,6 +22,30 @@
       "revId": "bf3f26a93548b37c186d9be7ac2108f4dbcd60c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a1d16cdc_e98338ab",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2370,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2018-09-06T15:37:38Z",
+      "side": 1,
+      "message": "Right, probably should be gradually going from 240 -\u003e 100+. We need more thinking on how to properly distribute the bit budget across the ARFs.",
+      "parentUuid": "7db54c47_7a48d7cb",
+      "range": {
+        "startLine": 2370,
+        "startChar": 6,
+        "endLine": 2370,
+        "endChar": 22
+      },
+      "revId": "bf3f26a93548b37c186d9be7ac2108f4dbcd60c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
