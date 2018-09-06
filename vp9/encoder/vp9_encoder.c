@@ -4342,8 +4342,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
           // Special case if the projected size is > the max allowed.
           if ((q == q_high) &&
               ((rc->projected_frame_size >= rc->max_frame_bandwidth) ||
-               (rc->projected_frame_size >=
-                big_rate_miss_high_threshold(cpi)))) {
+               (!rc->is_src_frame_alt_ref &&
+                (rc->projected_frame_size >=
+                 big_rate_miss_high_threshold(cpi))))) {
             int max_rate = VPXMAX(1, VPXMIN(rc->max_frame_bandwidth,
                                             big_rate_miss_high_threshold(cpi)));
             double q_val_high;
@@ -4448,7 +4449,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 #endif
     // Have we been forced to adapt Q outside the expected range by an extreme
     // rate miss. If so adjust the active maxQ for the subsequent frames.
-    if (q > cpi->twopass.active_worst_quality) {
+    if (!rc->is_src_frame_alt_ref && (q > cpi->twopass.active_worst_quality)) {
       cpi->twopass.active_worst_quality = q;
     } else if (oxcf->vbr_corpus_complexity && q == q_low &&
                rc->projected_frame_size < rc->this_frame_target) {
