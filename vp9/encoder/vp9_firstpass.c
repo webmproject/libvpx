@@ -2704,24 +2704,38 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
   if (cpi->multi_layer_arf) {
     int idx;
-    int total_delta = 0;
-    int gap_bits;
-    target_frame_size = normal_frame_bits;
-    target_frame_size =
-        clamp(target_frame_size, 0, VPXMIN(max_bits, (int)total_group_bits));
-
-    gap_bits = VPXMAX(0, gf_arf_bits - target_frame_size);
+    int arf_depth_bits[10] = { 0 };
+    int arf_depth_counts[10] = { 0 };
+    int total_arfs = 1;  // Account for the base layer ARF.
+    int arf_boost_factor = 0;
+    int arf_group_bits;
 
     for (idx = frame_index; idx < gop_frames; ++idx) {
-      int layer_arf_delta;
-      if (gf_group->update_type[idx] == ARF_UPDATE) {
-        layer_arf_delta = gap_bits >> (gf_group->layer_depth[idx] + 2);
-        total_delta += layer_arf_delta;
-      }
+      if (gf_group->update_type[idx] == ARF_UPDATE)
+        ++arf_depth_counts[gf_group->layer_depth[idx]];
     }
 
-    total_group_bits -= total_delta;
+    for (idx = 2; idx < 10; ++idx) {
+      int depth_boost_factor =
+          VPXMAX(MIN_ARF_GF_BOOST, rc->gfu_boost >> (idx + 1));
 
+      if (arf_depth_counts[idx] == 0) break;
+
+      arf_boost_factor = depth_boost_factor * arf_depth_counts[idx];
+
+      arf_group_bits =
+          calculate_boost_bits(rc->baseline_gf_interval - total_arfs,
+                               arf_boost_factor, total_group_bits);
+
+      arf_depth_bits[idx] = (arf_group_bits + (arf_depth_counts[idx] >> 1)) /
+                            arf_depth_counts[idx];
+
+      total_group_bits -= arf_group_bits;
+      total_arfs += arf_depth_counts[idx];
+    }
+
+    // offset the base layer arf
+    normal_frames -= (total_arfs - 1);
     if (normal_frames > 1)
       normal_frame_bits = (int)(total_group_bits / normal_frames);
     else
@@ -2733,20 +2747,16 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
     // The first layer ARF has its bit allocation assigned.
     for (idx = frame_index; idx < gop_frames; ++idx) {
-      int layer_arf_delta;
       switch (gf_group->update_type[idx]) {
         case ARF_UPDATE:
-          layer_arf_delta = gap_bits >> (gf_group->layer_depth[idx] + 1);
-          gf_group->bit_allocation[idx] = target_frame_size + layer_arf_delta;
+          gf_group->bit_allocation[idx] =
+              arf_depth_bits[gf_group->layer_depth[idx]];
           break;
         case USE_BUF_FRAME: gf_group->bit_allocation[idx] = 0; break;
         default: gf_group->bit_allocation[idx] = target_frame_size; break;
       }
     }
     gf_group->bit_allocation[idx] = 0;
-
-    // Adjust the first layer ARF rate allocation.
-    gf_group->bit_allocation[1] = gf_arf_bits;
 
     for (idx = 0; idx < gop_frames; ++idx)
       if (gf_group->update_type[idx] == LF_UPDATE) break;
