@@ -3074,11 +3074,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 200);
 #endif
 
-  rc->baseline_gf_interval =
-      ((twopass->kf_zeromotion_pct >= STATIC_KF_GROUP_THRESH) &&
-       (i >= rc->frames_to_key))
-          ? i
-          : (i - (is_key_frame || rc->source_alt_ref_pending));
+  rc->baseline_gf_interval = i - rc->source_alt_ref_pending;
 
   // TODO(zoeliu): Turn on the option to disable extra ALTREFs for still GF
   //               groups.
