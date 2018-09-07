@@ -16,6 +16,24 @@
       "revId": "7625c803b3b72385c3990e9b36ff1527634b3f00",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6dd565f_450fcedf",
+        "filename": "vpx_dsp/arm/idct32x32_1_add_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:51:24Z",
+      "side": 1,
+      "message": "good point, this file is definitely due a cleanup. for now let\u0027s clear the noise then during the normalizing the naming we can make some other structural changes",
+      "parentUuid": "e6dd565f_c5473e19",
+      "revId": "7625c803b3b72385c3990e9b36ff1527634b3f00",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
