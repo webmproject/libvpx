@@ -34,6 +34,24 @@
       "revId": "bc144598f47355580134719cd10562ca553c4af9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//36U\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T07:02:24Z",
+      "side": 1,
+      "message": "I think the macros should go for something like this. functions won\u0027t hurt anything and will help readability.",
+      "parentUuid": "AAAAdn//3/M\u003d",
+      "revId": "bc144598f47355580134719cd10562ca553c4af9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
