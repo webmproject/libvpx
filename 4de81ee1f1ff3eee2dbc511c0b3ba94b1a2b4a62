@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ec93547_b195f832",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:51:58Z",
+      "side": 1,
+      "message": "these could be in the #if; usually we separate sections with a blank line (one before assert.h)",
+      "revId": "4de81ee1f1ff3eee2dbc511c0b3ba94b1a2b4a62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ec93547_d18e8427",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:51:58Z",
+      "side": 1,
+      "message": "you could drop this line and in the others that are logically related",
+      "revId": "4de81ee1f1ff3eee2dbc511c0b3ba94b1a2b4a62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ec93547_d1b524c9",
+        "filename": "vpx_util/debug_util.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:51:58Z",
+      "side": 1,
+      "message": "the \u0027*\u0027 is associated with the variable in this project, you missed:\n\nRebase first if necessary, otherwise:\nrun clang-format on these files or apply the diff in the console output:\n    \nhttps://build.webmproject.org/jenkins/job/libvpx__style_check/30147/\nhttps://build.webmproject.org/jenkins/job/libvpx__style_check/30147/console\nvpx_util/debug_util.c",
+      "revId": "4de81ee1f1ff3eee2dbc511c0b3ba94b1a2b4a62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
