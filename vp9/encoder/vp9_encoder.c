@@ -780,6 +780,7 @@ void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
 
 static void setup_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
+  GF_GROUP *const gf_group = &cpi->twopass.gf_group;
   // Set up entropy context depending on frame type. The decoder mandates
   // the use of the default context, index 0, for keyframes and inter
   // frames where the error_resilient_mode or intra_only flag is set. For
@@ -790,6 +791,13 @@ static void setup_frame(VP9_COMP *cpi) {
   } else {
     if (!cpi->use_svc) cm->frame_context_idx = cpi->refresh_alt_ref_frame;
   }
+
+  // TODO(jingning): Overwrite the frame_context_idx index in multi-layer ARF
+  // case. Need some further investigation on if we could apply this to single
+  // layer ARF case as well.
+  if (cpi->multi_layer_arf && !cpi->use_svc)
+    cm->frame_context_idx = clamp(gf_group->layer_depth[gf_group->index] - 1, 0,
+                                  FRAME_CONTEXTS - 1);
 
   if (cm->frame_type == KEY_FRAME) {
     cpi->refresh_golden_frame = 1;

@@ -2413,6 +2413,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     }
     gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
     gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
+    gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
   }
 
   ++frame_index;
