@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d0d99e70_729154a0",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0d42a38_ef5210ed",
+      "range": {
+        "startLine": 284,
+        "startChar": 16,
+        "endLine": 284,
+        "endChar": 26
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d0d99e70_78970ec2",
         "filename": "vp8/common/alloccommon.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-04-27T18:44:13Z",
       "side": 1,
       "message": "alignment",
+      "range": {
+        "startLine": 108,
+        "startChar": 37,
+        "endLine": 108,
+        "endChar": 47
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0d99e70_5286586b",
+        "filename": "vp8/common/alloccommon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0d99e70_78970ec2",
       "range": {
         "startLine": 108,
         "startChar": 37,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b0d42a38_c02dcc3e",
+        "filename": "vp8/common/common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "I think I\u0027d prefer to drop them",
+      "parentUuid": "b0d42a38_afd768c2",
+      "range": {
+        "startLine": 44,
+        "startChar": 8,
+        "endLine": 44,
+        "endChar": 22
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f0f222e5_047c246d",
         "filename": "vp8/common/loopfilter.c",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2015-04-27T18:44:13Z",
       "side": 1,
       "message": "wasn\u0027t aligned previously either ... now it\u0027s only 1 space off",
+      "range": {
+        "startLine": 86,
+        "startChar": 20,
+        "endLine": 86,
+        "endChar": 24
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0d42a38_bd4c26cf",
+        "filename": "vp8/common/loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0f222e5_047c246d",
       "range": {
         "startLine": 86,
         "startChar": 20,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "f0f222e5_0a277c32",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0d99e70_58e8d226",
+      "range": {
+        "startLine": 145,
+        "startChar": 15,
+        "endLine": 145,
+        "endChar": 28
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f0f222e5_845b740f",
         "filename": "vp9/common/vp9_entropymode.c",
         "patchSetId": 1
@@ -128,6 +248,30 @@
       "writtenOn": "2015-04-27T18:44:13Z",
       "side": 1,
       "message": "wow",
+      "range": {
+        "startLine": 463,
+        "startChar": 13,
+        "endLine": 463,
+        "endChar": 15
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0d99e70_d29a48b9",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0f222e5_845b740f",
       "range": {
         "startLine": 463,
         "startChar": 13,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "d0d99e70_92772002",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 654,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0d42a38_6f33c0a2",
+      "range": {
+        "startLine": 654,
+        "startChar": 18,
+        "endLine": 654,
+        "endChar": 20
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0d42a38_cf763454",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 1
@@ -174,6 +342,30 @@
       "writtenOn": "2015-04-27T18:44:13Z",
       "side": 1,
       "message": "vp9 was auto-formatted once, yeah?",
+      "range": {
+        "startLine": 943,
+        "startChar": 13,
+        "endLine": 943,
+        "endChar": 26
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0f222e5_8a336c6f",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 943,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "maybe twice with astyle. it\u0027s something that should be looked at again, maybe clang-format is ready now...",
+      "parentUuid": "b0d42a38_cf763454",
       "range": {
         "startLine": 943,
         "startChar": 13,
@@ -232,6 +424,30 @@
     },
     {
       "key": {
+        "uuid": "b0d42a38_b0ee8d01",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 931,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b0d42a38_4f8b64b8",
+      "range": {
+        "startLine": 931,
+        "startChar": 13,
+        "endLine": 931,
+        "endChar": 30
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0d42a38_ef58d0df",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 1
@@ -243,6 +459,24 @@
       "writtenOn": "2015-04-27T18:44:13Z",
       "side": 1,
       "message": "here",
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0d42a38_90eb91f2",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2918,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done here and elsewhere",
+      "parentUuid": "b0d42a38_ef58d0df",
       "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -272,6 +506,30 @@
     },
     {
       "key": {
+        "uuid": "d0d99e70_325d0c7c",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0d99e70_98a07ae9",
+      "range": {
+        "startLine": 265,
+        "startChar": 13,
+        "endLine": 265,
+        "endChar": 25
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f0f222e5_c4d29cd4",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 1
@@ -283,6 +541,30 @@
       "writtenOn": "2015-04-27T18:44:13Z",
       "side": 1,
       "message": "perfect for vp9_zero, i think?",
+      "range": {
+        "startLine": 960,
+        "startChar": 12,
+        "endLine": 960,
+        "endChar": 21
+      },
+      "revId": "220a7868fbedde225c37ea04b4dd3bae1ca558d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0f222e5_5be439a8",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 960,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-07T06:58:42Z",
+      "side": 1,
+      "message": "maybe if it sticks around; this change should only deal with the search and replace though",
+      "parentUuid": "f0f222e5_c4d29cd4",
       "range": {
         "startLine": 960,
         "startChar": 12,
