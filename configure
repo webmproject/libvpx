@@ -278,6 +278,7 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     fp_mb_stats
     emulate_hardware
+    non_greedy_mv
 "
 CONFIG_LIST="
     dependency_tracking
