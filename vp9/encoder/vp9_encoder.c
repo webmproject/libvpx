@@ -2921,9 +2921,12 @@ static int big_rate_miss(VP9_COMP *cpi) {
 static int two_pass_first_group_inter(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
-  if ((cpi->oxcf.pass == 2) &&
-      (gf_group->index == gf_group->first_inter_index)) {
-    return 1;
+  const int gfg_index = gf_group->index;
+
+  if (cpi->oxcf.pass == 2) {
+    if (gfg_index == 0) return gf_group->update_type[gfg_index] == LF_UPDATE;
+    return gf_group->update_type[gfg_index - 1] != LF_UPDATE &&
+           gf_group->update_type[gfg_index] == LF_UPDATE;
   } else {
     return 0;
   }
