@@ -2527,8 +2527,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   const int is_key_frame = frame_is_intra_only(cm);
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
 
-  int disable_bwd_extarf;
-
   // Reset the GF group data structures unless this is a key
   // frame in which case it will already have been done.
   if (is_key_frame == 0) {
@@ -2717,39 +2715,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
 
   rc->baseline_gf_interval = i - rc->source_alt_ref_pending;
-
-  // TODO(zoeliu): Turn on the option to disable extra ALTREFs for still GF
-  //               groups.
-  // Disable extra altrefs for "still" gf group:
-  //   zero_motion_accumulator: minimum percentage of (0,0) motion;
-  //   avg_sr_coded_error:      average of the SSE per pixel of each frame;
-  //   avg_raw_err_stdev:       average of the standard deviation of (0,0)
-  //                            motion error per block of each frame.
-#if 0
-  assert(num_mbs > 0);
-  disable_bwd_extarf =
-      (zero_motion_accumulator > MIN_ZERO_MOTION &&
-       avg_sr_coded_error / num_mbs < MAX_SR_CODED_ERROR &&
-       avg_raw_err_stdev < MAX_RAW_ERR_VAR);
-#else
-  disable_bwd_extarf = 0;
-#endif  // 0
-
-  if (disable_bwd_extarf) cpi->extra_arf_allowed = 0;
-
-  if (!cpi->extra_arf_allowed) {
-    cpi->num_extra_arfs = 0;
-  } else {
-    // Compute how many extra alt_refs we can have
-    cpi->num_extra_arfs = get_number_of_extra_arfs(rc->baseline_gf_interval,
-                                                   rc->source_alt_ref_pending);
-  }
-  // Currently at maximum two extra ARFs' are allowed
-  assert(cpi->num_extra_arfs <= MAX_EXT_ARFS);
-
-  rc->bipred_group_interval = BFG_INTERVAL;
-  // The minimum bi-predictive frame group interval is 2.
-  if (rc->bipred_group_interval < 2) rc->bipred_group_interval = 0;
 
   // Reset the file position.
   reset_fpf_position(twopass, start_pos);
