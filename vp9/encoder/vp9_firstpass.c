@@ -2407,13 +2407,14 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     if (rc->source_alt_ref_active) {
       gf_group->update_type[frame_index] = OVERLAY_UPDATE;
       gf_group->rf_level[frame_index] = INTER_NORMAL;
+      gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
     } else {
       gf_group->update_type[frame_index] = GF_UPDATE;
       gf_group->rf_level[frame_index] = GF_ARF_STD;
+      gf_group->layer_depth[frame_index] = 0;
     }
     gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
     gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
-    gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
   }
 
   ++frame_index;
