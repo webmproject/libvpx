@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a80b1d81_f87c1990",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 783,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-09-11T12:09:01Z",
+      "side": 1,
+      "message": "Very minor point but isn\u0027t this only used in the if(cpi-\u003emulti_layer_arf \u0026\u0026 !cpi-\u003euse_svc) clause?",
+      "range": {
+        "startLine": 783,
+        "startChar": 2,
+        "endLine": 783,
+        "endChar": 52
+      },
+      "revId": "740083a97bb3ef0a11e45977611402a047099cfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a37d425_b1e24c26",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2416,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2018-09-11T12:09:01Z",
+      "side": 1,
+      "message": "I am not sure that I understand this being set to the maximum depth here especially if the current frame is a GF update not an overlay update.",
+      "revId": "740083a97bb3ef0a11e45977611402a047099cfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
