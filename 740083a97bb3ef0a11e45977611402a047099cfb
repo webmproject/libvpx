@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "32c9e272_6301feb3",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 783,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2018-09-11T16:25:14Z",
+      "side": 1,
+      "message": "Done\n\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/1220187",
+      "parentUuid": "a80b1d81_f87c1990",
+      "range": {
+        "startLine": 783,
+        "startChar": 2,
+        "endLine": 783,
+        "endChar": 52
+      },
+      "revId": "740083a97bb3ef0a11e45977611402a047099cfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a37d425_b1e24c26",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 1
@@ -39,6 +63,24 @@
       "revId": "740083a97bb3ef0a11e45977611402a047099cfb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b743d91a_f4f2b785",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2416,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2018-09-11T16:25:14Z",
+      "side": 1,
+      "message": "Done\n\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/1220186",
+      "parentUuid": "2a37d425_b1e24c26",
+      "revId": "740083a97bb3ef0a11e45977611402a047099cfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
