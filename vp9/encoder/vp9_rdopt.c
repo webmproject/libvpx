@@ -701,17 +701,18 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
                       blk_row, blk_col, plane_bsize, tx_bsize);
       dist = (int64_t)tmp * 16;
     }
-  } else if (max_txsize_lookup[plane_bsize] == tx_size) {
-    if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
-        SKIP_TXFM_NONE) {
+  } else {
+    int skip_txfm_flag = SKIP_TXFM_NONE;
+    if (max_txsize_lookup[plane_bsize] == tx_size)
+      skip_txfm_flag = x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))];
+    if (skip_txfm_flag == SKIP_TXFM_NONE) {
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
       if (x->block_qcoeff_opt)
         vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
       dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
                  tx_size, &dist, &sse);
-    } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] ==
-               SKIP_TXFM_AC_ONLY) {
+    } else if (skip_txfm_flag == SKIP_TXFM_AC_ONLY) {
       // compute DC coefficient
       tran_low_t *const coeff = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
@@ -738,13 +739,6 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       sse = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       dist = sse;
     }
-  } else {
-    // full forward transform and quantization
-    vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
-    if (x->block_qcoeff_opt)
-      vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
-    dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
-               tx_size, &dist, &sse);
   }
 
   rd = RDCOST(x->rdmult, x->rddiv, 0, dist);
