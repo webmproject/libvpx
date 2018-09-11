@@ -2842,7 +2842,6 @@ static void adjust_group_arnr_filter(VP9_COMP *cpi, double section_noise,
 }
 
 // Analyse and define a gf/arf group.
-#define ARF_DECAY_BREAKOUT 0.10
 #define ARF_ABS_ZOOM_THRESH 4.0
 
 #define MAX_GF_BOOST 5400
