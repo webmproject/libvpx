@@ -1188,13 +1188,10 @@ int vp9_frame_type_qdelta(const VP9_COMP *cpi, int rf_level, int q) {
     1.75,  // GF_ARF_STD
     2.00,  // KF_STD
   };
-  static const FRAME_TYPE frame_type[RATE_FACTOR_LEVELS] = {
-    INTER_FRAME, INTER_FRAME, INTER_FRAME, INTER_FRAME, KEY_FRAME
-  };
   const VP9_COMMON *const cm = &cpi->common;
-  int qdelta =
-      vp9_compute_qdelta_by_rate(&cpi->rc, frame_type[rf_level], q,
-                                 rate_factor_deltas[rf_level], cm->bit_depth);
+
+  int qdelta = vp9_compute_qdelta_by_rate(
+      &cpi->rc, cm->frame_type, q, rate_factor_deltas[rf_level], cm->bit_depth);
   return qdelta;
 }
 
