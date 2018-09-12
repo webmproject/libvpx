@@ -164,8 +164,14 @@ void vp9_init_me_luts(void) {
 
 static const int rd_boost_factor[16] = { 64, 32, 32, 32, 24, 16, 12, 12,
                                          8,  8,  4,  4,  2,  2,  1,  0 };
+
+// Note that the element below for frame type "USE_BUF_FRAME", which indicates
+// that the show frame flag is set, should not be used as no real frame
+// is encoded so we should not reach here. However, a dummy value
+// is inserted here to make sure the data structure has the right number
+// of values assigned.
 static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = { 128, 144, 128,
-                                                              128, 144 };
+                                                              128, 144, 144 };
 
 int64_t vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
   const int64_t q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);

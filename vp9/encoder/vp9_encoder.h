@@ -528,8 +528,6 @@ typedef struct VP9_COMP {
 
   int refresh_last_frame;
   int refresh_golden_frame;
-  int refresh_bwd_ref_frame;
-  int refresh_alt2_ref_frame;
   int refresh_alt_ref_frame;
 
   int ext_refresh_frame_flags_pending;
@@ -774,7 +772,6 @@ typedef struct VP9_COMP {
   int arf_map[MAX_EXT_ARFS + 1];
   int arf_pos_in_gf[MAX_EXT_ARFS + 1];
   int arf_pos_for_ovrly[MAX_EXT_ARFS + 1];
-  int extra_arf_allowed;
 
   int multi_layer_arf;
   vpx_roi_map_t roi;

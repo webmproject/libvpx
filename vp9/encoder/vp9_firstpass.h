@@ -117,13 +117,8 @@ typedef enum {
   GF_UPDATE = 2,
   ARF_UPDATE = 3,
   OVERLAY_UPDATE = 4,
-  USE_BUF_FRAME = 5,         // Use show existing frame, no ref buffer update
-  BRF_UPDATE = 6,            // Backward Reference Frame
-  LAST_BIPRED_UPDATE = 7,    // Last Bi-predictive Frame
-  BIPRED_UPDATE = 8,         // Bi-predictive Frame, but not the last one
-  INTNL_OVERLAY_UPDATE = 9,  // Internal Overlay Frame
-  INTNL_ARF_UPDATE = 10,     // Internal Altref Frame (candidate for ALTREF2)
-  FRAME_UPDATE_TYPES = 11
+  USE_BUF_FRAME = 5,  // Use show existing frame, no ref buffer update
+  FRAME_UPDATE_TYPES = 6
 } FRAME_UPDATE_TYPE;
 
 #define FC_ANIMATION_THRESH 0.15
