@@ -5728,7 +5728,7 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
         tpl_ptr->inter_cost_arr[rf_idx] = src_stats->inter_cost;
         tpl_ptr->recon_error_arr[rf_idx] = src_stats->recon_error_arr[rf_idx];
         tpl_ptr->sse_arr[rf_idx] = src_stats->sse_arr[rf_idx];
-        tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv.as_int;
+        tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv_arr[rf_idx].as_int;
       }
 #endif
       tpl_ptr->intra_cost = intra_cost;
