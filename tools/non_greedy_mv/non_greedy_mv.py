@@ -89,8 +89,10 @@ def read_frame_dpl_stats(fp):
   frame_idx = int(word_ls[1])
   mi_rows = int(word_ls[3])
   mi_cols = int(word_ls[5])
+  bs = int(word_ls[7])
+  mi_size = bs / 8
   mv_ls = []
-  for i in range(mi_rows * mi_cols):
+  for i in range((mi_rows / mi_size) * (mi_cols / mi_size)):
     line = fp.readline()
     word_ls = line.split()
     row = int(word_ls[0]) * 8.
@@ -105,7 +107,7 @@ def read_frame_dpl_stats(fp):
   word_ls = line.split()
   if int(word_ls[1]):
     ref = yuv_to_rgb(read_frame(fp))
-  return frame_idx, mv_ls, img, ref
+  return frame_idx, mv_ls, img, ref, bs
 
 
 def read_dpl_stats_file(filename, frame_num=0):
@@ -125,9 +127,8 @@ def read_dpl_stats_file(filename, frame_num=0):
 
 if __name__ == '__main__':
   filename = sys.argv[1]
-  data_ls = read_dpl_stats_file(filename, frame_num=2)
-  bs = 8
-  for frame_idx, mv_ls, img, ref in data_ls:
+  data_ls = read_dpl_stats_file(filename, frame_num=5)
+  for frame_idx, mv_ls, img, ref, bs in data_ls:
     fig, axes = plt.subplots(1, 2)
 
     axes[0].imshow(img)
