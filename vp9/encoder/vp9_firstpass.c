@@ -2247,9 +2247,6 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     return frame_index;
   }
 
-  // Note index of the first normal inter frame int eh group (not gf kf arf)
-  gf_group->first_inter_index = frame_index;
-
   // Define middle frame
   mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
 
@@ -2413,7 +2410,6 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
     for (idx = 0; idx < gop_frames; ++idx)
       if (gf_group->update_type[idx] == LF_UPDATE) break;
-    gf_group->first_inter_index = idx;
 
     return;
   }
