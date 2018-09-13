@@ -130,7 +130,6 @@ typedef enum {
 
 typedef struct {
   unsigned char index;
-  unsigned char first_inter_index;
   RATE_FACTOR_LEVEL rf_level[MAX_STATIC_GF_GROUP_LENGTH + 2];
   FRAME_UPDATE_TYPE update_type[MAX_STATIC_GF_GROUP_LENGTH + 2];
   unsigned char arf_src_offset[MAX_STATIC_GF_GROUP_LENGTH + 2];
