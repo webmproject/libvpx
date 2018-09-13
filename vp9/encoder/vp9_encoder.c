@@ -5907,15 +5907,24 @@ static void dump_buf(uint8_t *buf, int stride, int row, int col, int h, int w) {
   printf("\n");
 }
 
-static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames) {
+static void dump_frame_buf(const YV12_BUFFER_CONFIG *frame_buf) {
+  dump_buf(frame_buf->y_buffer, frame_buf->y_stride, 0, 0, frame_buf->y_height,
+           frame_buf->y_width);
+  dump_buf(frame_buf->u_buffer, frame_buf->uv_stride, 0, 0,
+           frame_buf->uv_height, frame_buf->uv_width);
+  dump_buf(frame_buf->v_buffer, frame_buf->uv_stride, 0, 0,
+           frame_buf->uv_height, frame_buf->uv_width);
+}
+
+static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
+                           const GF_PICTURE *gf_picture) {
   int frame_idx;
   const VP9_COMMON *cm = &cpi->common;
-  const ThreadData *td = &cpi->td;
-  const MACROBLOCK *x = &td->mb;
-  const MACROBLOCKD *xd = &x->e_mbd;
-  for (frame_idx = 0; frame_idx < tpl_group_frames; ++frame_idx) {
+  for (frame_idx = 1; frame_idx < tpl_group_frames; ++frame_idx) {
     const TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+    int idx = 0;
     int mi_row, mi_col;
+    int rf_idx;
     printf("=\n");
     printf("frame_idx %d mi_rows %d mi_cols %d\n", frame_idx, cm->mi_rows,
            cm->mi_cols);
@@ -5923,16 +5932,19 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames) {
       for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
         const TplDepStats *tpl_ptr =
             &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-        int_mv mv = tpl_ptr->mv_arr[0];
+        int_mv mv = tpl_ptr->mv_arr[idx];
         printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row, mv.as_mv.col);
       }
     }
-    dump_buf(xd->cur_buf->y_buffer, xd->cur_buf->y_stride, 0, 0,
-             xd->cur_buf->y_height, xd->cur_buf->y_width);
-    dump_buf(xd->cur_buf->u_buffer, xd->cur_buf->uv_stride, 0, 0,
-             xd->cur_buf->uv_height, xd->cur_buf->uv_width);
-    dump_buf(xd->cur_buf->v_buffer, xd->cur_buf->uv_stride, 0, 0,
-             xd->cur_buf->uv_height, xd->cur_buf->uv_width);
+
+    dump_frame_buf(gf_picture[frame_idx].frame);
+
+    rf_idx = gf_picture[frame_idx].ref_frame[idx];
+    printf("has_ref %d\n", rf_idx != -1);
+    if (rf_idx != -1) {
+      YV12_BUFFER_CONFIG *ref_frame_buf = gf_picture[rf_idx].frame;
+      dump_frame_buf(ref_frame_buf);
+    }
   }
 }
 #endif  // DUMP_TPL_STATS
@@ -5954,7 +5966,7 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
   }
 #if CONFIG_NON_GREEDY_MV
 #if DUMP_TPL_STATS
-  dump_tpl_stats(cpi, tpl_group_frames);
+  dump_tpl_stats(cpi, tpl_group_frames, gf_picture);
 #endif  // DUMP_TPL_STATS
 #endif  // CONFIG_NON_GREEDY_MV
 }
