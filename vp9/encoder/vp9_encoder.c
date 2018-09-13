@@ -5984,16 +5984,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // Is multi-arf enabled.
   // Note that at the moment multi_arf is only configured for 2 pass VBR and
   // will not work properly with svc.
-  // TODO(jingning): enable dual ARF encoding when auto-alt-ref is set to be 2.
-  // We will refactor and integrate the dual ARF and multi-layer ARF system
-  // next and deprecate this special control setting, instead make auto-alt-ref
-  // directly controls the ARF layer depth.
-  if ((oxcf->pass == 2) && !cpi->use_svc && (cpi->oxcf.enable_auto_arf == 2))
-    cpi->multi_arf_allowed = 1;
-  else
-    cpi->multi_arf_allowed = 0;
-
-  if (oxcf->pass == 2 && !cpi->use_svc && cpi->oxcf.enable_auto_arf > 2)
+  // Enable the Jingning's new "multi_layer_arf" code if "enable_auto_arf"
+  // is greater than or equal to 2.
+  cpi->multi_arf_allowed = 0;
+  if ((oxcf->pass == 2) && !cpi->use_svc && (cpi->oxcf.enable_auto_arf >= 2))
     cpi->multi_layer_arf = 1;
   else
     cpi->multi_layer_arf = 0;

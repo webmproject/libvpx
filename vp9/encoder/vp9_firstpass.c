@@ -2130,7 +2130,8 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
   int idx;
 
   // Process regular P frames
-  if (end - start < min_frame_interval) {
+  if ((end - start < min_frame_interval) ||
+      (depth > cpi->oxcf.enable_auto_arf)) {
     int idx;
     for (idx = start; idx < end; ++idx) {
       gf_group->update_type[*index_counter] = LF_UPDATE;
