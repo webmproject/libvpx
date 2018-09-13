@@ -767,12 +767,6 @@ typedef struct VP9_COMP {
   uint8_t *count_arf_frame_usage;
   uint8_t *count_lastgolden_frame_usage;
 
-  // Parameters on multi-layer ALTREFs
-  int num_extra_arfs;
-  int arf_map[MAX_EXT_ARFS + 1];
-  int arf_pos_in_gf[MAX_EXT_ARFS + 1];
-  int arf_pos_for_ovrly[MAX_EXT_ARFS + 1];
-
   int multi_layer_arf;
   vpx_roi_map_t roi;
 } VP9_COMP;
