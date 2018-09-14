@@ -124,8 +124,8 @@ static int open_input_file(const char *file_name, input_file_t *input, int w,
         input->frame_size = w * h + ((w + 1) / 2 * (h + 1) / 2) * 2;
         if (bit_depth > 8) {
           input->frame_size *= 2;
-          input->buf = malloc(input->frame_size);
         }
+        input->buf = malloc(input->frame_size);
         break;
     }
   }
