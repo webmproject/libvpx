@@ -5537,7 +5537,7 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
         tpl_ptr->inter_cost_arr[rf_idx] = src_stats->inter_cost;
         tpl_ptr->recon_error_arr[rf_idx] = src_stats->recon_error_arr[rf_idx];
         tpl_ptr->sse_arr[rf_idx] = src_stats->sse_arr[rf_idx];
-        tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv.as_int;
+        tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv_arr[rf_idx].as_int;
       }
 #endif
       tpl_ptr->intra_cost = intra_cost;
@@ -5802,7 +5802,8 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   tpl_stats->mv.as_int = best_mv.as_int;
 }
 
-void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
+void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
+                       BLOCK_SIZE bsize) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
   YV12_BUFFER_CONFIG *ref_frame[3] = { NULL, NULL, NULL };
@@ -5827,7 +5828,6 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx) {
   DECLARE_ALIGNED(16, tran_low_t, qcoeff[32 * 32]);
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
 
-  const BLOCK_SIZE bsize = BLOCK_32X32;
   const TX_SIZE tx_size = max_txsize_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
@@ -5917,7 +5917,7 @@ static void dump_frame_buf(const YV12_BUFFER_CONFIG *frame_buf) {
 }
 
 static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
-                           const GF_PICTURE *gf_picture) {
+                           const GF_PICTURE *gf_picture, BLOCK_SIZE bsize) {
   int frame_idx;
   const VP9_COMMON *cm = &cpi->common;
   for (frame_idx = 1; frame_idx < tpl_group_frames; ++frame_idx) {
@@ -5925,15 +5925,19 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
     int idx = 0;
     int mi_row, mi_col;
     int rf_idx;
+    const int mi_height = num_8x8_blocks_high_lookup[bsize];
+    const int mi_width = num_8x8_blocks_wide_lookup[bsize];
     printf("=\n");
-    printf("frame_idx %d mi_rows %d mi_cols %d\n", frame_idx, cm->mi_rows,
-           cm->mi_cols);
+    printf("frame_idx %d mi_rows %d mi_cols %d bsize %d\n", frame_idx,
+           cm->mi_rows, cm->mi_cols, mi_width * MI_SIZE);
     for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
       for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
-        const TplDepStats *tpl_ptr =
-            &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-        int_mv mv = tpl_ptr->mv_arr[idx];
-        printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row, mv.as_mv.col);
+        if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
+          const TplDepStats *tpl_ptr =
+              &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+          int_mv mv = tpl_ptr->mv_arr[idx];
+          printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row, mv.as_mv.col);
+        }
       }
     }
 
@@ -5955,6 +5959,7 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
   int tpl_group_frames = 0;
   int frame_idx;
+  const BLOCK_SIZE bsize = BLOCK_32X32;
 
   init_gop_frames(cpi, gf_picture, gf_group, &tpl_group_frames);
 
@@ -5962,11 +5967,11 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
 
   // Backward propagation from tpl_group_frames to 1.
   for (frame_idx = tpl_group_frames - 1; frame_idx > 0; --frame_idx) {
-    mc_flow_dispenser(cpi, gf_picture, frame_idx);
+    mc_flow_dispenser(cpi, gf_picture, frame_idx, bsize);
   }
 #if CONFIG_NON_GREEDY_MV
 #if DUMP_TPL_STATS
-  dump_tpl_stats(cpi, tpl_group_frames, gf_picture);
+  dump_tpl_stats(cpi, tpl_group_frames, gf_picture, bsize);
 #endif  // DUMP_TPL_STATS
 #endif  // CONFIG_NON_GREEDY_MV
 }
