@@ -2230,6 +2230,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
       gf_group->update_type[frame_index] = GF_UPDATE;
       gf_group->rf_level[frame_index] = GF_ARF_STD;
     }
+    gf_group->arf_src_offset[frame_index] = 0;
 
     return frame_index;
   }
@@ -2246,6 +2247,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
 
     gf_group->update_type[frame_index] = LF_UPDATE;
     gf_group->rf_level[frame_index] = INTER_NORMAL;
+    gf_group->arf_src_offset[frame_index] = 0;
     gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
 
     ++frame_index;
@@ -2265,6 +2267,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->update_type[frame_index] = GF_UPDATE;
     gf_group->rf_level[frame_index] = GF_ARF_STD;
   }
+  gf_group->arf_src_offset[frame_index] = 0;
 
   return frame_index;
 }
