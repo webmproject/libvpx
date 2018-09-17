@@ -3017,10 +3017,6 @@ void update_ref_frames(VP9_COMP *cpi) {
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = gf_group->top_arf_idx;
-      if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
-        const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-        arf_idx = gf_group->arf_update_idx[gf_group->index];
-      }
 
       // Push new ARF into stack.
       stack_push(gf_group->arf_index_stack, cpi->alt_fb_idx,
@@ -6003,7 +5999,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // will not work properly with svc.
   // Enable the Jingning's new "multi_layer_arf" code if "enable_auto_arf"
   // is greater than or equal to 2.
-  cpi->multi_arf_allowed = 0;
   if ((oxcf->pass == 2) && !cpi->use_svc && (cpi->oxcf.enable_auto_arf >= 2))
     cpi->multi_layer_arf = 1;
   else
@@ -6165,15 +6160,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (cm->new_fb_idx == INVALID_IDX) return -1;
 
   cm->cur_frame = &pool->frame_bufs[cm->new_fb_idx];
-
-  if (!cpi->use_svc && cpi->multi_arf_allowed) {
-    if (cm->frame_type == KEY_FRAME) {
-      init_buffer_indices(cpi);
-    } else if (oxcf->pass == 2) {
-      const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-      cpi->alt_fb_idx = gf_group->arf_ref_idx[gf_group->index];
-    }
-  }
 
   // Start with a 0 size frame.
   *size = 0;

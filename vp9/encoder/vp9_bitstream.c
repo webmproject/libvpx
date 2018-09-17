@@ -910,10 +910,6 @@ int vp9_get_refresh_mask(VP9_COMP *cpi) {
   } else {
     int arf_idx = cpi->alt_fb_idx;
     GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-    if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
-      const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-      arf_idx = gf_group->arf_update_idx[gf_group->index];
-    }
 
     if (cpi->multi_layer_arf) {
       for (arf_idx = 0; arf_idx < REF_FRAMES; ++arf_idx) {

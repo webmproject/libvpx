@@ -38,8 +38,8 @@ void vp9_bitstream_encode_tiles_buffer_dealloc(VP9_COMP *const cpi);
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size);
 
 static INLINE int vp9_preserve_existing_gf(VP9_COMP *cpi) {
-  return !cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
-         cpi->rc.is_src_frame_alt_ref && !cpi->use_svc;
+  return cpi->refresh_golden_frame && cpi->rc.is_src_frame_alt_ref &&
+         !cpi->use_svc;
 }
 
 #ifdef __cplusplus

@@ -840,8 +840,10 @@ static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
   }
 
   // Adjustments for second level arf in multi arf case.
-  if (cpi->oxcf.pass == 2 && cpi->multi_arf_allowed)
-    if (gf_group->rf_level[gf_group->index] != GF_ARF_STD) strength >>= 1;
+  // Leave commented out place holder for possible filtering adjustment with
+  // new multi-layer arf code.
+  // if (cpi->oxcf.pass == 2 && cpi->multi_arf_allowed)
+  //   if (gf_group->rf_level[gf_group->index] != GF_ARF_STD) strength >>= 1;
 
   // TODO(jingning): Skip temporal filtering for intermediate frames that will
   // be used as show_existing_frame. Need to further explore the possibility to

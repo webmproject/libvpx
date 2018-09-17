@@ -689,7 +689,6 @@ typedef struct VP9_COMP {
   // Indices are:  max_tx_size-1,  tx_size_ctx,    tx_size
   int tx_size_cost[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 
-  int multi_arf_allowed;
   int multi_arf_enabled;
   int multi_arf_last_grp_enabled;
 

@@ -2571,29 +2571,25 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     active_min_gf_interval =
         VPXMIN(active_min_gf_interval, rc->max_gf_interval + arf_active_or_kf);
 
-    if (cpi->multi_arf_allowed) {
-      active_max_gf_interval = rc->max_gf_interval;
+    // The value chosen depends on the active Q range. At low Q we have
+    // bits to spare and are better with a smaller interval and smaller boost.
+    // At high Q when there are few bits to spare we are better with a longer
+    // interval to spread the cost of the GF.
+    active_max_gf_interval = 12 + arf_active_or_kf + VPXMIN(4, (int_lbq / 6));
+
+    // We have: active_min_gf_interval <=
+    // rc->max_gf_interval + arf_active_or_kf.
+    if (active_max_gf_interval < active_min_gf_interval) {
+      active_max_gf_interval = active_min_gf_interval;
     } else {
-      // The value chosen depends on the active Q range. At low Q we have
-      // bits to spare and are better with a smaller interval and smaller boost.
-      // At high Q when there are few bits to spare we are better with a longer
-      // interval to spread the cost of the GF.
-      active_max_gf_interval = 12 + arf_active_or_kf + VPXMIN(4, (int_lbq / 6));
-
-      // We have: active_min_gf_interval <=
-      // rc->max_gf_interval + arf_active_or_kf.
-      if (active_max_gf_interval < active_min_gf_interval) {
-        active_max_gf_interval = active_min_gf_interval;
-      } else {
-        active_max_gf_interval = VPXMIN(active_max_gf_interval,
-                                        rc->max_gf_interval + arf_active_or_kf);
-      }
-
-      // Would the active max drop us out just before the near the next kf?
-      if ((active_max_gf_interval <= rc->frames_to_key) &&
-          (active_max_gf_interval >= (rc->frames_to_key - rc->min_gf_interval)))
-        active_max_gf_interval = rc->frames_to_key / 2;
+      active_max_gf_interval = VPXMIN(active_max_gf_interval,
+                                      rc->max_gf_interval + arf_active_or_kf);
     }
+
+    // Would the active max drop us out just before the near the next kf?
+    if ((active_max_gf_interval <= rc->frames_to_key) &&
+        (active_max_gf_interval >= (rc->frames_to_key - rc->min_gf_interval)))
+      active_max_gf_interval = rc->frames_to_key / 2;
   }
 
   i = 0;
@@ -2695,11 +2691,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->source_alt_ref_pending = 1;
 
     // Test to see if multi arf is appropriate.
-    cpi->multi_arf_enabled =
-        (cpi->multi_arf_allowed && (rc->baseline_gf_interval >= 6) &&
-         (zero_motion_accumulator < 0.995))
-            ? 1
-            : 0;
+    cpi->multi_arf_enabled = 0;
   } else {
     rc->gfu_boost = VPXMIN(MAX_GF_BOOST, calc_arf_boost(cpi, 0, (i - 1)));
     rc->source_alt_ref_pending = 0;
