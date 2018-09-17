@@ -689,8 +689,6 @@ typedef struct VP9_COMP {
   // Indices are:  max_tx_size-1,  tx_size_ctx,    tx_size
   int tx_size_cost[TX_SIZES - 1][TX_SIZE_CONTEXTS][TX_SIZES];
 
-  int multi_arf_last_grp_enabled;
-
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_DENOISER denoiser;
 #endif

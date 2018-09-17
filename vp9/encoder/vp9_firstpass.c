@@ -2215,9 +2215,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
         (unsigned char)(rc->baseline_gf_interval - 1);
 
     gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
-    gf_group->arf_ref_idx[frame_index] =
-        arf_buffer_indices[cpi->multi_arf_last_grp_enabled &&
-                           rc->source_alt_ref_active];
+    gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
     ++frame_index;
   }
 
@@ -2267,9 +2265,6 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->update_type[frame_index] = GF_UPDATE;
     gf_group->rf_level[frame_index] = GF_ARF_STD;
   }
-
-  // Note whether multi-arf was enabled this group for next time.
-  cpi->multi_arf_last_grp_enabled = 0;
 
   return frame_index;
 }
@@ -2916,7 +2911,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Clear the alt ref active flag and last group multi arf flags as they
   // can never be set for a key frame.
   rc->source_alt_ref_active = 0;
-  cpi->multi_arf_last_grp_enabled = 0;
 
   // KF is always a GF so clear frames till next gf counter.
   rc->frames_till_gf_update_due = 0;
