@@ -4587,6 +4587,16 @@ static void vp9_try_disable_lookahead_aq(VP9_COMP *cpi, size_t *size,
     }
 }
 
+static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
+  RefCntBuffer *const ref_buffer = get_ref_cnt_buffer(cm, cm->new_fb_idx);
+
+  if (ref_buffer) {
+    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+    ref_buffer->frame_index =
+        cm->current_video_frame + gf_group->arf_src_offset[gf_group->index];
+  }
+}
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
                                       uint8_t *dest,
                                       unsigned int *frame_flags) {
@@ -4750,6 +4760,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
   // build the bitstream
   vp9_pack_bitstream(cpi, dest, size);
+
+  // Update frame index
+  set_frame_index(cpi, cm);
 
   if (cm->seg.update_map) update_reference_segmentation_map(cpi);
 
