@@ -4370,7 +4370,7 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(
   }
 }
 
-static void set_arf_sign_bias(VP9_COMP *cpi) {
+static void set_ref_sign_bias(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RefCntBuffer *const ref_buffer = get_ref_cnt_buffer(cm, cm->new_fb_idx);
   const int cur_frame_index = ref_buffer->frame_index;
@@ -4646,7 +4646,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     set_frame_index(cpi, cm);
 
     // Set the arf sign bias for this frame.
-    set_arf_sign_bias(cpi);
+    set_ref_sign_bias(cpi);
   }
 
   // Set default state for segment based loop filter update flags.
