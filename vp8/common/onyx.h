@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_COMMON_ONYX_H_
-#define VP8_COMMON_ONYX_H_
+#ifndef VPX_VP8_COMMON_ONYX_H_
+#define VPX_VP8_COMMON_ONYX_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -281,4 +281,4 @@ int vp8_get_quantizer(struct VP8_COMP *c);
 }
 #endif
 
-#endif  // VP8_COMMON_ONYX_H_
+#endif  // VPX_VP8_COMMON_ONYX_H_

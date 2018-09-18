@@ -17,8 +17,8 @@
  * \brief Provides definitions for using VP8 or VP9 within the vpx Decoder
  *        interface.
  */
-#ifndef VPX_VP8DX_H_
-#define VPX_VP8DX_H_
+#ifndef VPX_VPX_VP8DX_H_
+#define VPX_VPX_VP8DX_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -199,4 +199,4 @@ VPX_CTRL_USE_TYPE(VP9D_SET_ROW_MT, int)
 }  // extern "C"
 #endif
 
-#endif  // VPX_VP8DX_H_
+#endif  // VPX_VPX_VP8DX_H_

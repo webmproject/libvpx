@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
-#define VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
+#ifndef VPX_VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
+#define VPX_VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
 
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_blockd.h"
@@ -147,4 +147,4 @@ void vp9_cyclic_refresh_limit_q(const struct VP9_COMP *cpi, int *q);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_
+#endif  // VPX_VP9_ENCODER_VP9_AQ_CYCLICREFRESH_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_PSNR_H_
-#define VPX_DSP_PSNR_H_
+#ifndef VPX_VPX_DSP_PSNR_H_
+#define VPX_VPX_DSP_PSNR_H_
 
 #include "vpx_scale/yv12config.h"
 
@@ -54,4 +54,4 @@ double vpx_psnrhvs(const YV12_BUFFER_CONFIG *source,
 #ifdef __cplusplus
 }  // extern "C"
 #endif
-#endif  // VPX_DSP_PSNR_H_
+#endif  // VPX_VPX_DSP_PSNR_H_

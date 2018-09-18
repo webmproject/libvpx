@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_DECODER_ONYXD_INT_H_
-#define VP8_DECODER_ONYXD_INT_H_
+#ifndef VPX_VP8_DECODER_ONYXD_INT_H_
+#define VPX_VP8_DECODER_ONYXD_INT_H_
 
 #include "vpx_config.h"
 #include "vp8/common/onyxd.h"
@@ -150,4 +150,4 @@ int vp8_remove_decoder_instances(struct frame_buffers *fb);
 }  // extern "C"
 #endif
 
-#endif  // VP8_DECODER_ONYXD_INT_H_
+#endif  // VPX_VP8_DECODER_ONYXD_INT_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_PPC_TRANSPOSE_VSX_H_
-#define VPX_DSP_PPC_TRANSPOSE_VSX_H_
+#ifndef VPX_VPX_DSP_PPC_TRANSPOSE_VSX_H_
+#define VPX_VPX_DSP_PPC_TRANSPOSE_VSX_H_
 
 #include "./vpx_config.h"
 #include "vpx_dsp/ppc/types_vsx.h"
@@ -130,4 +130,4 @@ static INLINE void transpose_8x8(const int16x8_t *a, int16x8_t *b) {
   b[7] = vec_mergel(s2_3, s2_7);
 }
 
-#endif  // VPX_DSP_PPC_TRANSPOSE_VSX_H_
+#endif  // VPX_VPX_DSP_PPC_TRANSPOSE_VSX_H_

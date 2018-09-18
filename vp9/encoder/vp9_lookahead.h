@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_LOOKAHEAD_H_
-#define VP9_ENCODER_VP9_LOOKAHEAD_H_
+#ifndef VPX_VP9_ENCODER_VP9_LOOKAHEAD_H_
+#define VPX_VP9_ENCODER_VP9_LOOKAHEAD_H_
 
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_encoder.h"
@@ -111,4 +111,4 @@ unsigned int vp9_lookahead_depth(struct lookahead_ctx *ctx);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_LOOKAHEAD_H_
+#endif  // VPX_VP9_ENCODER_VP9_LOOKAHEAD_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef TEST_BENCH_H_
-#define TEST_BENCH_H_
+#ifndef VPX_TEST_BENCH_H_
+#define VPX_TEST_BENCH_H_
 
 // Number of iterations used to compute median run time.
 #define VPX_BENCH_ROBUST_ITER 15
@@ -27,4 +27,4 @@ class AbstractBench {
   int times_[VPX_BENCH_ROBUST_ITER];
 };
 
-#endif  // TEST_BENCH_H_
+#endif  // VPX_TEST_BENCH_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_ENCODEMV_H_
-#define VP9_ENCODER_VP9_ENCODEMV_H_
+#ifndef VPX_VP9_ENCODER_VP9_ENCODEMV_H_
+#define VPX_VP9_ENCODER_VP9_ENCODEMV_H_
 
 #include "vp9/encoder/vp9_encoder.h"
 
@@ -35,4 +35,4 @@ void vp9_update_mv_count(ThreadData *td);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_ENCODEMV_H_
+#endif  // VPX_VP9_ENCODER_VP9_ENCODEMV_H_

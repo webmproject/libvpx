@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_ARM_VPX_CONVOLVE8_NEON_ASM_H_
-#define VPX_DSP_ARM_VPX_CONVOLVE8_NEON_ASM_H_
+#ifndef VPX_VPX_DSP_ARM_VPX_CONVOLVE8_NEON_ASM_H_
+#define VPX_VPX_DSP_ARM_VPX_CONVOLVE8_NEON_ASM_H_
 
 #define DECLARE_FILTER(dir, type)                                  \
   void vpx_convolve8_##dir##_filter_##type##_neon(                 \
@@ -26,4 +26,4 @@ DECLARE_FILTER(avg_vert, type1);
 DECLARE_FILTER(vert, type2);
 DECLARE_FILTER(avg_vert, type2);
 
-#endif /* VPX_DSP_ARM_VPX_CONVOLVE8_NEON_ASM_H_ */
+#endif  // VPX_VPX_DSP_ARM_VPX_CONVOLVE8_NEON_ASM_H_

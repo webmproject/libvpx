@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef VPX_DSP_X86_CONVOLVE_H_
-#define VPX_DSP_X86_CONVOLVE_H_
+#ifndef VPX_VPX_DSP_X86_CONVOLVE_H_
+#define VPX_VPX_DSP_X86_CONVOLVE_H_
 
 #include <assert.h>
 
@@ -200,4 +200,4 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#endif  // VPX_DSP_X86_CONVOLVE_H_
+#endif  // VPX_VPX_DSP_X86_CONVOLVE_H_

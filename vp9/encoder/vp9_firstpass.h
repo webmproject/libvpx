@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_FIRSTPASS_H_
-#define VP9_ENCODER_VP9_FIRSTPASS_H_
+#ifndef VPX_VP9_ENCODER_VP9_FIRSTPASS_H_
+#define VPX_VP9_ENCODER_VP9_FIRSTPASS_H_
 
 #include <assert.h>
 
@@ -235,4 +235,4 @@ static INLINE int get_number_of_extra_arfs(int interval, int arf_pending) {
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_FIRSTPASS_H_
+#endif  // VPX_VP9_ENCODER_VP9_FIRSTPASS_H_

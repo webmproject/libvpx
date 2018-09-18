@@ -7,8 +7,8 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#ifndef VP9_VP9_IFACE_COMMON_H_
-#define VP9_VP9_IFACE_COMMON_H_
+#ifndef VPX_VP9_VP9_IFACE_COMMON_H_
+#define VPX_VP9_VP9_IFACE_COMMON_H_
 
 #include "vpx_ports/mem.h"
 
@@ -142,4 +142,4 @@ static VP9_REFFRAME ref_frame_to_vp9_reframe(vpx_ref_frame_type_t frame) {
   assert(0 && "Invalid Reference Frame");
   return VP9_LAST_FLAG;
 }
-#endif  // VP9_VP9_IFACE_COMMON_H_
+#endif  // VPX_VP9_VP9_IFACE_COMMON_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_CONTEXT_TREE_H_
-#define VP9_ENCODER_VP9_CONTEXT_TREE_H_
+#ifndef VPX_VP9_ENCODER_VP9_CONTEXT_TREE_H_
+#define VPX_VP9_ENCODER_VP9_CONTEXT_TREE_H_
 
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/encoder/vp9_block.h"
@@ -100,4 +100,4 @@ void vp9_free_pc_tree(struct ThreadData *td);
 }  // extern "C"
 #endif
 
-#endif /* VP9_ENCODER_VP9_CONTEXT_TREE_H_ */
+#endif  // VPX_VP9_ENCODER_VP9_CONTEXT_TREE_H_

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_COMMON_VP9_SCALE_H_
-#define VP9_COMMON_VP9_SCALE_H_
+#ifndef VPX_VP9_COMMON_VP9_SCALE_H_
+#define VPX_VP9_COMMON_VP9_SCALE_H_
 
 #include "vp9/common/vp9_mv.h"
 #include "vpx_dsp/vpx_convolve.h"
@@ -68,4 +68,4 @@ static INLINE int valid_ref_frame_size(int ref_width, int ref_height,
 }  // extern "C"
 #endif
 
-#endif  // VP9_COMMON_VP9_SCALE_H_
+#endif  // VPX_VP9_COMMON_VP9_SCALE_H_

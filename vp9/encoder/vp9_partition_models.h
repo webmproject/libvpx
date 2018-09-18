@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_PARTITION_MODELS_H_
-#define VP9_ENCODER_VP9_PARTITION_MODELS_H_
+#ifndef VPX_VP9_ENCODER_VP9_PARTITION_MODELS_H_
+#define VPX_VP9_ENCODER_VP9_PARTITION_MODELS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -865,4 +865,4 @@ static const float vp9_partition_linear_weights[24] = {
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_PARTITION_MODELS_H_
+#endif  // VPX_VP9_ENCODER_VP9_PARTITION_MODELS_H_

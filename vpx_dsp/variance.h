@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_DSP_VARIANCE_H_
-#define VPX_DSP_VARIANCE_H_
+#ifndef VPX_VPX_DSP_VARIANCE_H_
+#define VPX_VPX_DSP_VARIANCE_H_
 
 #include "./vpx_config.h"
 
@@ -82,4 +82,4 @@ typedef struct vp9_variance_vtable {
 }  // extern "C"
 #endif
 
-#endif  // VPX_DSP_VARIANCE_H_
+#endif  // VPX_VPX_DSP_VARIANCE_H_

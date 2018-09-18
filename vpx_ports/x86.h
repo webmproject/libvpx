@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_PORTS_X86_H_
-#define VPX_PORTS_X86_H_
+#ifndef VPX_VPX_PORTS_X86_H_
+#define VPX_VPX_PORTS_X86_H_
 #include <stdlib.h>
 
 #if defined(_MSC_VER)
@@ -332,4 +332,4 @@ static INLINE unsigned int x87_set_double_precision(void) {
 }  // extern "C"
 #endif
 
-#endif  // VPX_PORTS_X86_H_
+#endif  // VPX_VPX_PORTS_X86_H_

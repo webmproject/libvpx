@@ -27,8 +27,8 @@
 /*!\file
  * \brief Provides controls common to both the VP8 encoder and decoder.
  */
-#ifndef VPX_VP8_H_
-#define VPX_VP8_H_
+#ifndef VPX_VPX_VP8_H_
+#define VPX_VPX_VP8_H_
 
 #include "./vpx_codec.h"
 #include "./vpx_image.h"
@@ -150,4 +150,4 @@ VPX_CTRL_USE_TYPE(VP9_GET_REFERENCE, vp9_ref_frame_t *)
 }  // extern "C"
 #endif
 
-#endif  // VPX_VP8_H_
+#endif  // VPX_VPX_VP8_H_

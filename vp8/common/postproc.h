@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_COMMON_POSTPROC_H_
-#define VP8_COMMON_POSTPROC_H_
+#ifndef VPX_VP8_COMMON_POSTPROC_H_
+#define VPX_VP8_COMMON_POSTPROC_H_
 
 #include "vpx_ports/mem.h"
 struct postproc_state {
@@ -43,4 +43,4 @@ void vp8_multiframe_quality_enhance(struct VP8Common *cm);
 }  // extern "C"
 #endif
 
-#endif  // VP8_COMMON_POSTPROC_H_
+#endif  // VPX_VP8_COMMON_POSTPROC_H_

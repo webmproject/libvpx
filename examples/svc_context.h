@@ -13,8 +13,8 @@
  * spatial SVC frame
  */
 
-#ifndef VPX_SVC_CONTEXT_H_
-#define VPX_SVC_CONTEXT_H_
+#ifndef VPX_EXAMPLES_SVC_CONTEXT_H_
+#define VPX_EXAMPLES_SVC_CONTEXT_H_
 
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
@@ -109,4 +109,4 @@ void vpx_svc_dump_statistics(SvcContext *svc_ctx);
 }  // extern "C"
 #endif
 
-#endif  // VPX_SVC_CONTEXT_H_
+#endif  // VPX_EXAMPLES_SVC_CONTEXT_H_

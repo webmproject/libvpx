@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP8_DECODER_DBOOLHUFF_H_
-#define VP8_DECODER_DBOOLHUFF_H_
+#ifndef VPX_VP8_DECODER_DBOOLHUFF_H_
+#define VPX_VP8_DECODER_DBOOLHUFF_H_
 
 #include <stddef.h>
 #include <limits.h>
@@ -127,4 +127,4 @@ static INLINE int vp8dx_bool_error(BOOL_DECODER *br) {
 }  // extern "C"
 #endif
 
-#endif  // VP8_DECODER_DBOOLHUFF_H_
+#endif  // VPX_VP8_DECODER_DBOOLHUFF_H_

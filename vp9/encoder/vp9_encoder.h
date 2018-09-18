@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_ENCODER_H_
-#define VP9_ENCODER_VP9_ENCODER_H_
+#ifndef VPX_VP9_ENCODER_VP9_ENCODER_H_
+#define VPX_VP9_ENCODER_VP9_ENCODER_H_
 
 #include <stdio.h>
 
@@ -1008,4 +1008,4 @@ void vp9_set_row_mt(VP9_COMP *cpi);
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_ENCODER_H_
+#endif  // VPX_VP9_ENCODER_VP9_ENCODER_H_
