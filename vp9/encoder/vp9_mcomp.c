@@ -734,20 +734,30 @@ uint32_t vp9_find_best_sub_pixel_tree(
       bc = tc;
     }
 
-    if (iters_per_step > 1 && best_idx != -1) {
+    if (iters_per_step > 0 && best_idx != -1) {
       unsigned int second;
       const int br0 = br;
       const int bc0 = bc;
       assert(tr == br || tc == bc);
+
       if (tr == br && tc != bc) {
         kc = bc - tc;
+        if (iters_per_step == 1) {
+          CHECK_BETTER(second, br0, bc0 + kc);
+        }
       } else if (tr != br && tc == bc) {
         kr = br - tr;
+        if (iters_per_step == 1) {
+          CHECK_BETTER(second, br0 + kr, bc0);
+        }
       }
-      CHECK_BETTER(second, br0 + kr, bc0);
-      CHECK_BETTER(second, br0, bc0 + kc);
-      if (br0 != br || bc0 != bc) {
-        CHECK_BETTER(second, br0 + kr, bc0 + kc);
+
+      if (iters_per_step > 1) {
+        CHECK_BETTER(second, br0 + kr, bc0);
+        CHECK_BETTER(second, br0, bc0 + kc);
+        if (br0 != br || bc0 != bc) {
+          CHECK_BETTER(second, br0 + kr, bc0 + kc);
+        }
       }
     }
 

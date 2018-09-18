@@ -246,7 +246,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     cpi->find_fractional_mv_step(
         x, &tmp_mv->as_mv, &ref_mv, cpi->common.allow_high_precision_mv,
         x->errorperbit, &cpi->fn_ptr[bsize], subpel_force_stop,
-        cpi->sf.mv.subpel_iters_per_step, cond_cost_list(cpi, cost_list),
+        cpi->sf.mv.subpel_search_level, cond_cost_list(cpi, cost_list),
         x->nmvjointcost, x->mvcost, &dis, &x->pred_sse[ref], NULL, 0, 0);
     *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv, x->nmvjointcost,
                                x->mvcost, MV_COST_WEIGHT);
@@ -1538,7 +1538,7 @@ static int search_new_mv(VP9_COMP *cpi, MACROBLOCK *x,
         &x->mbmi_ext->ref_mvs[ref_frame][0].as_mv,
         cpi->common.allow_high_precision_mv, x->errorperbit,
         &cpi->fn_ptr[bsize], cpi->sf.mv.subpel_force_stop,
-        cpi->sf.mv.subpel_iters_per_step, cond_cost_list(cpi, cost_list),
+        cpi->sf.mv.subpel_search_level, cond_cost_list(cpi, cost_list),
         x->nmvjointcost, x->mvcost, &dis, &x->pred_sse[ref_frame], NULL, 0, 0);
   } else if (svc->use_base_mv && svc->spatial_layer_id) {
     if (frame_mv[NEWMV][ref_frame].as_int != INVALID_MV) {
@@ -2756,9 +2756,9 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x, int mi_row,
                 x, &tmp_mv, &mbmi_ext->ref_mvs[ref_frame][0].as_mv,
                 cpi->common.allow_high_precision_mv, x->errorperbit,
                 &cpi->fn_ptr[bsize], cpi->sf.mv.subpel_force_stop,
-                cpi->sf.mv.subpel_iters_per_step,
-                cond_cost_list(cpi, cost_list), x->nmvjointcost, x->mvcost,
-                &dummy_dist, &x->pred_sse[ref_frame], NULL, 0, 0);
+                cpi->sf.mv.subpel_search_level, cond_cost_list(cpi, cost_list),
+                x->nmvjointcost, x->mvcost, &dummy_dist,
+                &x->pred_sse[ref_frame], NULL, 0, 0);
 
             xd->mi[0]->bmi[i].as_mv[0].as_mv = tmp_mv;
           } else {

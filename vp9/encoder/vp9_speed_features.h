@@ -191,8 +191,9 @@ typedef struct MV_SPEED_FEATURES {
   // the same process. Along the way it skips many diagonals.
   SUBPEL_SEARCH_METHODS subpel_search_method;
 
-  // Maximum number of steps in logarithmic subpel search before giving up.
-  int subpel_iters_per_step;
+  // Subpel MV search level. Can take values 0 - 2. Higher values mean more
+  // extensive subpel search.
+  int subpel_search_level;
 
   // Control when to stop subpel search:
   // 0: Full subpel search.
