@@ -3985,6 +3985,11 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, TileDataEnc *tile_data,
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
       if (!cpi->allow_comp_inter_inter) continue;
+
+      if (cm->ref_frame_sign_bias[ref_frame] ==
+          cm->ref_frame_sign_bias[second_ref_frame])
+        continue;
+
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame])) continue;
       // Do not allow compound prediction if the segment level reference frame
       // feature is in use as in this case there can only be one reference.
