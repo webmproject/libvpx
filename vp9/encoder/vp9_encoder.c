@@ -6323,7 +6323,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
             ppflags.post_proc_flag = VP9D_DEBLOCK;
             ppflags.deblocking_level = 0;  // not used in vp9_post_proc_frame()
             ppflags.noise_level = 0;       // not used in vp9_post_proc_frame()
-            vp9_post_proc_frame(cm, pp, &ppflags);
+            vp9_post_proc_frame(cm, pp, &ppflags,
+                                cpi->un_scaled_source->y_width);
           }
 #endif
           vpx_clear_system_state();
@@ -6456,7 +6457,7 @@ int vp9_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
   } else {
     int ret;
 #if CONFIG_VP9_POSTPROC
-    ret = vp9_post_proc_frame(cm, dest, flags);
+    ret = vp9_post_proc_frame(cm, dest, flags, cpi->un_scaled_source->y_width);
 #else
     if (cm->frame_to_show) {
       *dest = *cm->frame_to_show;
