@@ -4372,14 +4372,19 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(
 
 static void set_arf_sign_bias(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-  const int gfg_index = gf_group->index;
+  RefCntBuffer *const ref_buffer = get_ref_cnt_buffer(cm, cm->new_fb_idx);
+  const int cur_frame_index = ref_buffer->frame_index;
+  MV_REFERENCE_FRAME ref_frame;
 
-  // If arf_src_offset is less than the GOP length, its arf is on the direction
-  // 1 side.
-  cm->ref_frame_sign_bias[ALTREF_FRAME] =
-      cpi->rc.source_alt_ref_active &&
-      gf_group->arf_src_offset[gfg_index] < cpi->rc.baseline_gf_interval - 1;
+  for (ref_frame = LAST_FRAME; ref_frame < MAX_REF_FRAMES; ++ref_frame) {
+    const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+    const RefCntBuffer *const ref_cnt_buf =
+        get_ref_cnt_buffer(&cpi->common, buf_idx);
+    if (ref_cnt_buf) {
+      cm->ref_frame_sign_bias[ref_frame] =
+          cur_frame_index < ref_cnt_buf->frame_index;
+    }
+  }
 }
 
 static int setup_interp_filter_search_mask(VP9_COMP *cpi) {
@@ -4636,8 +4641,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   if (is_spatial_denoise_enabled(cpi)) spatial_denoise_frame(cpi);
 #endif
 
-  // Set the arf sign bias for this frame.
-  set_arf_sign_bias(cpi);
+  if (cm->show_existing_frame == 0) {
+    // Update frame index
+    set_frame_index(cpi, cm);
+
+    // Set the arf sign bias for this frame.
+    set_arf_sign_bias(cpi);
+  }
 
   // Set default state for segment based loop filter update flags.
   cm->lf.mode_ref_delta_update = 0;
@@ -4760,9 +4770,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
   // build the bitstream
   vp9_pack_bitstream(cpi, dest, size);
-
-  // Update frame index
-  set_frame_index(cpi, cm);
 
   if (cm->seg.update_map) update_reference_segmentation_map(cpi);
 
