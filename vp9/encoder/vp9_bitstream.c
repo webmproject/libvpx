@@ -217,7 +217,8 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *const xd,
     }
 
     if (is_compound) {
-      vpx_write(w, mi->ref_frame[0] == GOLDEN_FRAME,
+      const int idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
+      vpx_write(w, mi->ref_frame[!idx] == cm->comp_var_ref[1],
                 vp9_get_pred_prob_comp_ref_p(cm, xd));
     } else {
       const int bit0 = mi->ref_frame[0] != LAST_FRAME;
