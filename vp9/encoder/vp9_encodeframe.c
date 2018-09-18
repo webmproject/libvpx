@@ -2027,8 +2027,10 @@ static void update_stats(VP9_COMMON *cm, ThreadData *td) {
                             [has_second_ref(mi)]++;
 
         if (has_second_ref(mi)) {
-          counts->comp_ref[vp9_get_pred_context_comp_ref_p(cm, xd)]
-                          [ref0 == GOLDEN_FRAME]++;
+          const int idx = cm->ref_frame_sign_bias[cm->comp_fixed_ref];
+          const int ctx = vp9_get_pred_context_comp_ref_p(cm, xd);
+          const int bit = mi->ref_frame[!idx] == cm->comp_var_ref[1];
+          counts->comp_ref[ctx][bit]++;
         } else {
           counts->single_ref[vp9_get_pred_context_single_ref_p1(xd)][0]
                             [ref0 != LAST_FRAME]++;
