@@ -751,9 +751,6 @@ uint32_t vp9_find_best_sub_pixel_tree(
       }
     }
 
-    tr = br;
-    tc = bc;
-
     search_step += 4;
     hstep >>= 1;
     best_idx = -1;
