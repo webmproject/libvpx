@@ -3350,6 +3350,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
     if (comp_pred) {
       if (!cpi->allow_comp_inter_inter) continue;
 
+      if (cm->ref_frame_sign_bias[ref_frame] ==
+          cm->ref_frame_sign_bias[second_ref_frame])
+        continue;
+
       // Skip compound inter modes if ARF is not available.
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame])) continue;
 
