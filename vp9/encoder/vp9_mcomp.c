@@ -263,27 +263,6 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
     }                                                             \
   }
 
-// TODO(yunqingwang): SECOND_LEVEL_CHECKS_BEST was a rewrote of
-// SECOND_LEVEL_CHECKS, and SECOND_LEVEL_CHECKS should be rewritten
-// later in the same way.
-#define SECOND_LEVEL_CHECKS_BEST                \
-  {                                             \
-    unsigned int second;                        \
-    int br0 = br;                               \
-    int bc0 = bc;                               \
-    assert(tr == br || tc == bc);               \
-    if (tr == br && tc != bc) {                 \
-      kc = bc - tc;                             \
-    } else if (tr != br && tc == bc) {          \
-      kr = br - tr;                             \
-    }                                           \
-    CHECK_BETTER(second, br0 + kr, bc0);        \
-    CHECK_BETTER(second, br0, bc0 + kc);        \
-    if (br0 != br || bc0 != bc) {               \
-      CHECK_BETTER(second, br0 + kr, bc0 + kc); \
-    }                                           \
-  }
-
 #define SETUP_SUBPEL_SEARCH                                                 \
   const uint8_t *const z = x->plane[0].src.buf;                             \
   const int src_stride = x->plane[0].src.stride;                            \
@@ -755,7 +734,22 @@ uint32_t vp9_find_best_sub_pixel_tree(
       bc = tc;
     }
 
-    if (iters_per_step > 1 && best_idx != -1) SECOND_LEVEL_CHECKS_BEST;
+    if (iters_per_step > 1 && best_idx != -1) {
+      unsigned int second;
+      const int br0 = br;
+      const int bc0 = bc;
+      assert(tr == br || tc == bc);
+      if (tr == br && tc != bc) {
+        kc = bc - tc;
+      } else if (tr != br && tc == bc) {
+        kr = br - tr;
+      }
+      CHECK_BETTER(second, br0 + kr, bc0);
+      CHECK_BETTER(second, br0, bc0 + kc);
+      if (br0 != br || bc0 != bc) {
+        CHECK_BETTER(second, br0 + kr, bc0 + kc);
+      }
+    }
 
     tr = br;
     tc = bc;
