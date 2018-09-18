@@ -141,6 +141,8 @@ typedef struct {
   int bit_allocation[MAX_STATIC_GF_GROUP_LENGTH + 2];
   int gfu_boost[MAX_STATIC_GF_GROUP_LENGTH + 2];
 
+  int frame_start;
+  int frame_end;
   // TODO(jingning): The array size of arf_stack could be reduced.
   int arf_index_stack[MAX_LAG_BUFFERS * 2];
   int top_arf_idx;
