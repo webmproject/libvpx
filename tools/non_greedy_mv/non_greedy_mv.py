@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib import colors as mcolors
 import numpy as np
+import math
 
 
 def draw_mv_ls(axis, mv_ls, mode=0):
@@ -92,7 +93,9 @@ def read_frame_dpl_stats(fp):
   bs = int(word_ls[7])
   mi_size = bs / 8
   mv_ls = []
-  for i in range((mi_rows / mi_size) * (mi_cols / mi_size)):
+  mv_rows = int((math.ceil(mi_rows * 1. / mi_size)))
+  mv_cols = int((math.ceil(mi_cols * 1. / mi_size)))
+  for i in range(mv_rows * mv_cols):
     line = fp.readline()
     word_ls = line.split()
     row = int(word_ls[0]) * 8.
