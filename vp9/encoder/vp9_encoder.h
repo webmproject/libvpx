@@ -295,6 +295,7 @@ typedef struct TplDepStats {
   int64_t recon_error_arr[3];
   int64_t sse_arr[3];
   int_mv mv_arr[3];
+  double feature_score;
 #endif
 } TplDepStats;
 

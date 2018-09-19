@@ -5730,6 +5730,7 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
         tpl_ptr->sse_arr[rf_idx] = src_stats->sse_arr[rf_idx];
         tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv_arr[rf_idx].as_int;
       }
+      tpl_ptr->feature_score = src_stats->feature_score;
 #endif
       tpl_ptr->intra_cost = intra_cost;
       tpl_ptr->inter_cost = inter_cost;
@@ -5845,6 +5846,31 @@ void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
   }
 }
 
+#if CONFIG_NON_GREEDY_MV
+double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows, int cols) {
+  double IxIx = 0;
+  double IxIy = 0;
+  double IyIy = 0;
+  double score;
+  int r, c;
+  vpx_clear_system_state();
+  for (r = 0; r + 1 < rows; ++r) {
+    for (c = 0; c + 1 < cols; ++c) {
+      int diff_x = buf[r * stride + c] - buf[r * stride + c + 1];
+      int diff_y = buf[r * stride + c] - buf[(r + 1) * stride + c];
+      IxIx += diff_x * diff_x;
+      IxIy += diff_x * diff_y;
+      IyIy += diff_y * diff_y;
+    }
+  }
+  IxIx /= (rows - 1) * (cols - 1);
+  IxIy /= (rows - 1) * (cols - 1);
+  IyIy /= (rows - 1) * (cols - 1);
+  score = IxIx * IyIy - IxIy * IxIy - 0.04 * (IxIx + IyIy) * (IxIx + IyIy);
+  return score;
+}
+#endif
+
 void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                      struct scale_factors *sf, GF_PICTURE *gf_picture,
                      int frame_idx, int16_t *src_diff, tran_low_t *coeff,
@@ -5915,6 +5941,11 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   x->mv_limits.col_min = -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
   x->mv_limits.col_max =
       ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
+
+#if CONFIG_NON_GREEDY_MV
+  tpl_stats->feature_score = get_feature_score(
+      xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
+#endif
 
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     int_mv mv;
@@ -6133,6 +6164,17 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
     }
 
     dump_frame_buf(gf_picture[frame_idx].frame);
+
+    for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
+      for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
+        if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
+          const TplDepStats *tpl_ptr =
+              &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+          printf("%f ", tpl_ptr->feature_score);
+        }
+      }
+    }
+    printf("\n");
 
     rf_idx = gf_picture[frame_idx].ref_frame[idx];
     printf("has_ref %d\n", rf_idx != -1);
