@@ -20,3 +20,7 @@ Local Modifications:
    LICENSE
    README.md
    src
+
+- Make WithParamInterface<T>::GetParam static in order to avoid
+  initialization issues
+  https://github.com/google/googletest/pull/1830
