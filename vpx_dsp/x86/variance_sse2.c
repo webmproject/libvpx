@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
+#include "vpx_dsp/x86/mem_sse2.h"
 
 static INLINE unsigned int add32x4_sse2(__m128i val) {
   val = _mm_add_epi32(val, _mm_srli_si128(val, 8));
@@ -35,8 +36,8 @@ unsigned int vpx_get_mb_ss_sse2(const int16_t *src) {
 }
 
 static INLINE __m128i load4x2_sse2(const uint8_t *const p, const int stride) {
-  const __m128i p0 = _mm_cvtsi32_si128(*(const uint32_t *)(p + 0 * stride));
-  const __m128i p1 = _mm_cvtsi32_si128(*(const uint32_t *)(p + 1 * stride));
+  const __m128i p0 = _mm_cvtsi32_si128(loadu_uint32(p + 0 * stride));
+  const __m128i p1 = _mm_cvtsi32_si128(loadu_uint32(p + 1 * stride));
   const __m128i p01 = _mm_unpacklo_epi32(p0, p1);
   return _mm_unpacklo_epi8(p01, _mm_setzero_si128());
 }
