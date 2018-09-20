@@ -13,6 +13,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/emmintrin_compat.h"
+#include "vpx_dsp/x86/mem_sse2.h"
 
 static INLINE __m128i abs_diff(__m128i a, __m128i b) {
   return _mm_or_si128(_mm_subs_epu8(a, b), _mm_subs_epu8(b, a));
@@ -212,21 +213,21 @@ void vpx_lpf_vertical_4_sse2(uint8_t *s, int p /* pitch */,
   // 00 10 20 30 01 11 21 31  02 12 22 32 03 13 23 33
   ps1ps0 = _mm_unpacklo_epi8(ps1ps0, x0);
 
-  *(int *)(s + 0 * p - 2) = _mm_cvtsi128_si32(ps1ps0);
+  storeu_uint32(s + 0 * p - 2, _mm_cvtsi128_si32(ps1ps0));
   ps1ps0 = _mm_srli_si128(ps1ps0, 4);
-  *(int *)(s + 1 * p - 2) = _mm_cvtsi128_si32(ps1ps0);
+  storeu_uint32(s + 1 * p - 2, _mm_cvtsi128_si32(ps1ps0));
   ps1ps0 = _mm_srli_si128(ps1ps0, 4);
-  *(int *)(s + 2 * p - 2) = _mm_cvtsi128_si32(ps1ps0);
+  storeu_uint32(s + 2 * p - 2, _mm_cvtsi128_si32(ps1ps0));
   ps1ps0 = _mm_srli_si128(ps1ps0, 4);
-  *(int *)(s + 3 * p - 2) = _mm_cvtsi128_si32(ps1ps0);
+  storeu_uint32(s + 3 * p - 2, _mm_cvtsi128_si32(ps1ps0));
 
-  *(int *)(s + 4 * p - 2) = _mm_cvtsi128_si32(qs1qs0);
+  storeu_uint32(s + 4 * p - 2, _mm_cvtsi128_si32(qs1qs0));
   qs1qs0 = _mm_srli_si128(qs1qs0, 4);
-  *(int *)(s + 5 * p - 2) = _mm_cvtsi128_si32(qs1qs0);
+  storeu_uint32(s + 5 * p - 2, _mm_cvtsi128_si32(qs1qs0));
   qs1qs0 = _mm_srli_si128(qs1qs0, 4);
-  *(int *)(s + 6 * p - 2) = _mm_cvtsi128_si32(qs1qs0);
+  storeu_uint32(s + 6 * p - 2, _mm_cvtsi128_si32(qs1qs0));
   qs1qs0 = _mm_srli_si128(qs1qs0, 4);
-  *(int *)(s + 7 * p - 2) = _mm_cvtsi128_si32(qs1qs0);
+  storeu_uint32(s + 7 * p - 2, _mm_cvtsi128_si32(qs1qs0));
 }
 
 void vpx_lpf_horizontal_16_sse2(unsigned char *s, int p,

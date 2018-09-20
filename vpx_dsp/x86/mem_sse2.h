@@ -12,8 +12,19 @@
 #define VPX_VPX_DSP_X86_MEM_SSE2_H_
 
 #include <emmintrin.h>  // SSE2
+#include <string.h>
 
 #include "./vpx_config.h"
+
+static INLINE void storeu_uint32(void *dst, uint32_t v) {
+  memcpy(dst, &v, sizeof(v));
+}
+
+static INLINE uint32_t loadu_uint32(const void *src) {
+  uint32_t v;
+  memcpy(&v, src, sizeof(v));
+  return v;
+}
 
 static INLINE __m128i loadh_epi64(const __m128i s, const void *const src) {
   return _mm_castps_si128(
