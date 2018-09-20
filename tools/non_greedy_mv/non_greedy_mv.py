@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib import colors as mcolors
 import numpy as np
+import math
 
 
 def draw_mv_ls(axis, mv_ls, mode=0):
@@ -83,6 +84,14 @@ def yuv_to_rgb(yuv):
   return rgb / 255.
 
 
+def read_feature_score(fp, mv_rows, mv_cols):
+  line = fp.readline()
+  word_ls = line.split()
+  feature_score = np.array([float(v) for v in word_ls])
+  feature_score = feature_score.reshape(mv_rows, mv_cols)
+  return feature_score
+
+
 def read_frame_dpl_stats(fp):
   line = fp.readline()
   word_ls = line.split()
@@ -92,7 +101,9 @@ def read_frame_dpl_stats(fp):
   bs = int(word_ls[7])
   mi_size = bs / 8
   mv_ls = []
-  for i in range((mi_rows / mi_size) * (mi_cols / mi_size)):
+  mv_rows = int((math.ceil(mi_rows * 1. / mi_size)))
+  mv_cols = int((math.ceil(mi_cols * 1. / mi_size)))
+  for i in range(mv_rows * mv_cols):
     line = fp.readline()
     word_ls = line.split()
     row = int(word_ls[0]) * 8.
@@ -102,12 +113,13 @@ def read_frame_dpl_stats(fp):
     mv_ls.append([col, row, mv_col, mv_row])
   mv_ls = np.array(mv_ls)
   img = yuv_to_rgb(read_frame(fp))
+  feature_score = read_feature_score(fp, mv_rows, mv_cols)
   ref = None
   line = fp.readline()
   word_ls = line.split()
   if int(word_ls[1]):
     ref = yuv_to_rgb(read_frame(fp))
-  return frame_idx, mv_ls, img, ref, bs
+  return frame_idx, mv_ls, img, ref, bs, feature_score
 
 
 def read_dpl_stats_file(filename, frame_num=0):
@@ -128,8 +140,8 @@ def read_dpl_stats_file(filename, frame_num=0):
 if __name__ == '__main__':
   filename = sys.argv[1]
   data_ls = read_dpl_stats_file(filename, frame_num=5)
-  for frame_idx, mv_ls, img, ref, bs in data_ls:
-    fig, axes = plt.subplots(1, 2)
+  for frame_idx, mv_ls, img, ref, bs, feature_score in data_ls:
+    fig, axes = plt.subplots(1, 3)
 
     axes[0].imshow(img)
     draw_mv_ls(axes[0], mv_ls)
@@ -145,6 +157,8 @@ if __name__ == '__main__':
       #axes[1].grid(color='k', linestyle='-')
       axes[1].set_ylim(ref.shape[0], 0)
       axes[1].set_xlim(0, ref.shape[1])
+
+    axes[2].imshow(feature_score)
 
     plt.show()
     print frame_idx, len(mv_ls)
