@@ -16,6 +16,40 @@
       "revId": "0a67136453d1af3caede73300eab82eee1177fd8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1e35013e_a1ff64f1",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-20T03:54:04Z",
+      "side": 1,
+      "message": "these should be CHECK_MEM_ERROR",
+      "revId": "0a67136453d1af3caede73300eab82eee1177fd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6e71988f_d3647f68",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-09-20T03:54:04Z",
+      "side": 1,
+      "message": "I think these are only used with row_mt\u003d\u003d1. I think we can break this out to another structure and allocate the contents to avoid the size increase",
+      "revId": "0a67136453d1af3caede73300eab82eee1177fd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
