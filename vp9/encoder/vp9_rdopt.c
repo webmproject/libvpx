@@ -3939,7 +3939,8 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, TileDataEnc *tile_data,
 #if CONFIG_BETTER_HW_COMPATIBILITY
     // forbid 8X4 and 4X8 partitions if any reference frame is scaled.
     if (bsize == BLOCK_8X4 || bsize == BLOCK_4X8) {
-      int ref_scaled = vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf);
+      int ref_scaled = ref_frame > INTRA_FRAME &&
+                       vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf);
       if (second_ref_frame > INTRA_FRAME)
         ref_scaled += vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf);
       if (ref_scaled) continue;
