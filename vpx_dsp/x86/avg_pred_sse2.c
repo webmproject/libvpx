@@ -13,6 +13,7 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/x86/mem_sse2.h"
 
 void vpx_comp_avg_pred_sse2(uint8_t *comp, const uint8_t *pred, int width,
                             int height, const uint8_t *ref, int ref_stride) {
@@ -45,10 +46,9 @@ void vpx_comp_avg_pred_sse2(uint8_t *comp, const uint8_t *pred, int width,
         r = _mm_loadu_si128((const __m128i *)ref);
         ref += 16;
       } else if (width == 4) {
-        r = _mm_set_epi32(*(const uint32_t *)(ref + 3 * ref_stride),
-                          *(const uint32_t *)(ref + 2 * ref_stride),
-                          *(const uint32_t *)(ref + ref_stride),
-                          *(const uint32_t *)(ref));
+        r = _mm_set_epi32(loadu_uint32(ref + 3 * ref_stride),
+                          loadu_uint32(ref + 2 * ref_stride),
+                          loadu_uint32(ref + ref_stride), loadu_uint32(ref));
 
         ref += 4 * ref_stride;
       } else {
