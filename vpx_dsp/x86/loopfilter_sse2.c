@@ -1627,16 +1627,12 @@ static INLINE void transpose(unsigned char *src[], int in_p,
     x5 = _mm_unpacklo_epi16(x2, x3);
     // 00 10 20 30 40 50 60 70 01 11 21 31 41 51 61 71
     x6 = _mm_unpacklo_epi32(x4, x5);
-    _mm_storel_pd((double *)(out + 0 * out_p),
-                  _mm_castsi128_pd(x6));  // 00 10 20 30 40 50 60 70
-    _mm_storeh_pd((double *)(out + 1 * out_p),
-                  _mm_castsi128_pd(x6));  // 01 11 21 31 41 51 61 71
+    mm_storelu(out + 0 * out_p, x6);  // 00 10 20 30 40 50 60 70
+    mm_storehu(out + 1 * out_p, x6);  // 01 11 21 31 41 51 61 71
     // 02 12 22 32 42 52 62 72 03 13 23 33 43 53 63 73
     x7 = _mm_unpackhi_epi32(x4, x5);
-    _mm_storel_pd((double *)(out + 2 * out_p),
-                  _mm_castsi128_pd(x7));  // 02 12 22 32 42 52 62 72
-    _mm_storeh_pd((double *)(out + 3 * out_p),
-                  _mm_castsi128_pd(x7));  // 03 13 23 33 43 53 63 73
+    mm_storelu(out + 2 * out_p, x7);  // 02 12 22 32 42 52 62 72
+    mm_storehu(out + 3 * out_p, x7);  // 03 13 23 33 43 53 63 73
 
     // 04 14 24 34 05 15 25 35 06 16 26 36 07 17 27 37
     x4 = _mm_unpackhi_epi16(x0, x1);
@@ -1644,17 +1640,13 @@ static INLINE void transpose(unsigned char *src[], int in_p,
     x5 = _mm_unpackhi_epi16(x2, x3);
     // 04 14 24 34 44 54 64 74 05 15 25 35 45 55 65 75
     x6 = _mm_unpacklo_epi32(x4, x5);
-    _mm_storel_pd((double *)(out + 4 * out_p),
-                  _mm_castsi128_pd(x6));  // 04 14 24 34 44 54 64 74
-    _mm_storeh_pd((double *)(out + 5 * out_p),
-                  _mm_castsi128_pd(x6));  // 05 15 25 35 45 55 65 75
+    mm_storelu(out + 4 * out_p, x6);  // 04 14 24 34 44 54 64 74
+    mm_storehu(out + 5 * out_p, x6);  // 05 15 25 35 45 55 65 75
     // 06 16 26 36 46 56 66 76 07 17 27 37 47 57 67 77
     x7 = _mm_unpackhi_epi32(x4, x5);
 
-    _mm_storel_pd((double *)(out + 6 * out_p),
-                  _mm_castsi128_pd(x7));  // 06 16 26 36 46 56 66 76
-    _mm_storeh_pd((double *)(out + 7 * out_p),
-                  _mm_castsi128_pd(x7));  // 07 17 27 37 47 57 67 77
+    mm_storelu(out + 6 * out_p, x7);  // 06 16 26 36 46 56 66 76
+    mm_storehu(out + 7 * out_p, x7);  // 07 17 27 37 47 57 67 77
   } while (++idx8x8 < num_8x8_to_transpose);
 }
 
