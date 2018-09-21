@@ -2236,9 +2236,11 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   if (cpi->b_calculate_consistency) {
     CHECK_MEM_ERROR(cm, cpi->ssim_vars,
-                    vpx_malloc(sizeof(*cpi->ssim_vars) * 4 *
-                               cpi->common.mi_rows * cpi->common.mi_cols));
+                    vpx_calloc(cpi->common.mi_rows * cpi->common.mi_cols,
+                               sizeof(*cpi->ssim_vars) * 4));
     cpi->worst_consistency = 100.0;
+  } else {
+    cpi->ssim_vars = NULL;
   }
 
 #endif
@@ -2466,6 +2468,10 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
   if (!cpi) return;
 
+#if CONFIG_INTERNAL_STATS
+  vpx_free(cpi->ssim_vars);
+#endif
+
   cm = &cpi->common;
   if (cm->current_video_frame > 0) {
 #if CONFIG_INTERNAL_STATS
@@ -2537,7 +2543,6 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
       fclose(f);
     }
-
 #endif
 
 #if 0
