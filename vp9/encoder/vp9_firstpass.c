@@ -2184,6 +2184,9 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
+  gf_group->frame_start = cpi->common.current_video_frame;
+  gf_group->frame_end = gf_group->frame_start + rc->baseline_gf_interval - 1;
+
   get_arf_buffer_indices(arf_buffer_indices);
 
   // For key frames the frame target rate is already set and it
