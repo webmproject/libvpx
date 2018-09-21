@@ -87,7 +87,7 @@ def yuv_to_rgb(yuv):
 def read_feature_score(fp, mv_rows, mv_cols):
   line = fp.readline()
   word_ls = line.split()
-  feature_score = np.array([float(v) for v in word_ls])
+  feature_score = np.array([math.log(float(v) + 1, 2) for v in word_ls])
   feature_score = feature_score.reshape(mv_rows, mv_cols)
   return feature_score
 
@@ -141,24 +141,30 @@ if __name__ == '__main__':
   filename = sys.argv[1]
   data_ls = read_dpl_stats_file(filename, frame_num=5)
   for frame_idx, mv_ls, img, ref, bs, feature_score in data_ls:
-    fig, axes = plt.subplots(1, 3)
+    fig, axes = plt.subplots(2, 2)
 
-    axes[0].imshow(img)
-    draw_mv_ls(axes[0], mv_ls)
-    draw_pred_block_ls(axes[0], mv_ls, bs, mode=0)
+    axes[0][0].imshow(img)
+    draw_mv_ls(axes[0][0], mv_ls)
+    draw_pred_block_ls(axes[0][0], mv_ls, bs, mode=0)
     #axes[0].grid(color='k', linestyle='-')
-    axes[0].set_ylim(img.shape[0], 0)
-    axes[0].set_xlim(0, img.shape[1])
+    axes[0][0].set_ylim(img.shape[0], 0)
+    axes[0][0].set_xlim(0, img.shape[1])
 
     if ref is not None:
-      axes[1].imshow(ref)
-      draw_mv_ls(axes[1], mv_ls, mode=1)
-      draw_pred_block_ls(axes[1], mv_ls, bs, mode=1)
+      axes[0][1].imshow(ref)
+      draw_mv_ls(axes[0][1], mv_ls, mode=1)
+      draw_pred_block_ls(axes[0][1], mv_ls, bs, mode=1)
       #axes[1].grid(color='k', linestyle='-')
-      axes[1].set_ylim(ref.shape[0], 0)
-      axes[1].set_xlim(0, ref.shape[1])
+      axes[0][1].set_ylim(ref.shape[0], 0)
+      axes[0][1].set_xlim(0, ref.shape[1])
 
-    axes[2].imshow(feature_score)
+    axes[1][0].imshow(feature_score)
+    feature_score_arr = feature_score.flatten()
+    feature_score_max = feature_score_arr.max()
+    feature_score_min = feature_score_arr.min()
+    step = (feature_score_max - feature_score_min) / 20.
+    feature_score_bins = np.arange(feature_score_min, feature_score_max, step)
+    axes[1][1].hist(feature_score_arr, bins=feature_score_bins)
 
     plt.show()
     print frame_idx, len(mv_ls)

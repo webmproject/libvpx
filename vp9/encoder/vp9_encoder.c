@@ -5689,7 +5689,7 @@ double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows, int cols) {
   IxIx /= (rows - 1) * (cols - 1);
   IxIy /= (rows - 1) * (cols - 1);
   IyIy /= (rows - 1) * (cols - 1);
-  score = IxIx * IyIy - IxIy * IxIy - 0.04 * (IxIx + IyIy) * (IxIx + IyIy);
+  score = (IxIx * IyIy - IxIy * IxIy + 0.0001) / (IxIx + IyIy + 0.0001);
   return score;
 }
 #endif
