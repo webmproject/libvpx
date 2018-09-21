@@ -13,6 +13,14 @@
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
 
+int vp9_compound_reference_allowed(const VP9_COMMON *cm) {
+  int i;
+  for (i = 1; i < REFS_PER_FRAME; ++i)
+    if (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1]) return 1;
+
+  return 0;
+}
+
 void vp9_setup_compound_reference_mode(VP9_COMMON *cm) {
   if (cm->ref_frame_sign_bias[LAST_FRAME] ==
       cm->ref_frame_sign_bias[GOLDEN_FRAME]) {

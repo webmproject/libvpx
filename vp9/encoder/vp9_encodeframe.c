@@ -5480,14 +5480,11 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   // side behavior is where the ALT ref buffer has opposite sign bias to
   // the other two.
   if (!frame_is_intra_only(cm)) {
-    if ((cm->ref_frame_sign_bias[ALTREF_FRAME] ==
-         cm->ref_frame_sign_bias[GOLDEN_FRAME]) ||
-        (cm->ref_frame_sign_bias[ALTREF_FRAME] ==
-         cm->ref_frame_sign_bias[LAST_FRAME])) {
-      cpi->allow_comp_inter_inter = 0;
-    } else {
+    if (vp9_compound_reference_allowed(cm)) {
       cpi->allow_comp_inter_inter = 1;
       vp9_setup_compound_reference_mode(cm);
+    } else {
+      cpi->allow_comp_inter_inter = 0;
     }
   }
 
