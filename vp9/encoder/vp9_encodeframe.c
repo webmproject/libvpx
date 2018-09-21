@@ -5487,9 +5487,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       cpi->allow_comp_inter_inter = 0;
     } else {
       cpi->allow_comp_inter_inter = 1;
-      cm->comp_fixed_ref = ALTREF_FRAME;
-      cm->comp_var_ref[0] = LAST_FRAME;
-      cm->comp_var_ref[1] = GOLDEN_FRAME;
+      vp9_setup_compound_reference_mode(cm);
     }
   }
 
