@@ -45,14 +45,6 @@
 
 #define MAX_VP9_HEADER_SIZE 80
 
-static int is_compound_reference_allowed(const VP9_COMMON *cm) {
-  int i;
-  for (i = 1; i < REFS_PER_FRAME; ++i)
-    if (cm->ref_frame_sign_bias[i + 1] != cm->ref_frame_sign_bias[1]) return 1;
-
-  return 0;
-}
-
 static int read_is_valid(const uint8_t *start, size_t len, const uint8_t *end) {
   return len != 0 && len <= (size_t)(end - start);
 }
@@ -100,7 +92,7 @@ static void read_inter_mode_probs(FRAME_CONTEXT *fc, vpx_reader *r) {
 
 static REFERENCE_MODE read_frame_reference_mode(const VP9_COMMON *cm,
                                                 vpx_reader *r) {
-  if (is_compound_reference_allowed(cm)) {
+  if (vp9_compound_reference_allowed(cm)) {
     return vpx_read_bit(r)
                ? (vpx_read_bit(r) ? REFERENCE_MODE_SELECT : COMPOUND_REFERENCE)
                : SINGLE_REFERENCE;
