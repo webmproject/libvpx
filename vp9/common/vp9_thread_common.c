@@ -229,26 +229,6 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame, VP9_COMMON *cm,
                       workers, num_workers, lf_sync);
 }
 
-void vp9_lpf_mt_init(VP9LfSync *lf_sync, VP9_COMMON *cm, int frame_filter_level,
-                     int num_workers) {
-  const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
-
-  if (!frame_filter_level) return;
-
-  if (!lf_sync->sync_range || sb_rows != lf_sync->rows ||
-      num_workers > lf_sync->num_workers) {
-    vp9_loop_filter_dealloc(lf_sync);
-    vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width, num_workers);
-  }
-
-  // Initialize cur_sb_col to -1 for all SB rows.
-  memset(lf_sync->cur_sb_col, -1, sizeof(*lf_sync->cur_sb_col) * sb_rows);
-
-  memset(lf_sync->num_tiles_done, 0,
-         sizeof(*lf_sync->num_tiles_done) * sb_rows);
-  cm->lf_row = 0;
-}
-
 // Set up nsync by width.
 static INLINE int get_sync_range(int width) {
   // nsync numbers are picked by testing. For example, for 4k
@@ -286,25 +266,6 @@ void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
         pthread_cond_init(&lf_sync->cond[i], NULL);
       }
     }
-    pthread_mutex_init(&lf_sync->lf_mutex, NULL);
-
-    CHECK_MEM_ERROR(cm, lf_sync->recon_done_mutex,
-                    vpx_malloc(sizeof(*lf_sync->recon_done_mutex) * rows));
-    if (lf_sync->recon_done_mutex) {
-      int i;
-      for (i = 0; i < rows; ++i) {
-        pthread_mutex_init(&lf_sync->recon_done_mutex[i], NULL);
-      }
-    }
-
-    CHECK_MEM_ERROR(cm, lf_sync->recon_done_cond,
-                    vpx_malloc(sizeof(*lf_sync->recon_done_cond) * rows));
-    if (lf_sync->recon_done_cond) {
-      int i;
-      for (i = 0; i < rows; ++i) {
-        pthread_cond_init(&lf_sync->recon_done_cond[i], NULL);
-      }
-    }
   }
 #endif  // CONFIG_MULTITHREAD
 
@@ -314,11 +275,6 @@ void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
 
   CHECK_MEM_ERROR(cm, lf_sync->cur_sb_col,
                   vpx_malloc(sizeof(*lf_sync->cur_sb_col) * rows));
-
-  CHECK_MEM_ERROR(cm, lf_sync->num_tiles_done,
-                  vpx_malloc(sizeof(*lf_sync->num_tiles_done) *
-                                 mi_cols_aligned_to_sb(cm->mi_rows) >>
-                             MI_BLOCK_SIZE_LOG2));
 
   // Set up nsync.
   lf_sync->sync_range = get_sync_range(width);
@@ -342,116 +298,13 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync) {
       }
       vpx_free(lf_sync->cond);
     }
-    if (lf_sync->recon_done_mutex != NULL) {
-      int i;
-      for (i = 0; i < lf_sync->rows; ++i) {
-        pthread_mutex_destroy(&lf_sync->recon_done_mutex[i]);
-      }
-      vpx_free(lf_sync->recon_done_mutex);
-    }
-
-    pthread_mutex_destroy(&lf_sync->lf_mutex);
-    if (lf_sync->recon_done_cond != NULL) {
-      int i;
-      for (i = 0; i < lf_sync->rows; ++i) {
-        pthread_cond_destroy(&lf_sync->recon_done_cond[i]);
-      }
-      vpx_free(lf_sync->recon_done_cond);
-    }
 #endif  // CONFIG_MULTITHREAD
-
     vpx_free(lf_sync->lfdata);
     vpx_free(lf_sync->cur_sb_col);
-    vpx_free(lf_sync->num_tiles_done);
     // clear the structure as the source of this call may be a resize in which
     // case this call will be followed by an _alloc() which may fail.
     vp9_zero(*lf_sync);
   }
-}
-
-static int get_next_row(VP9_COMMON *cm, VP9LfSync *lf_sync) {
-  int return_val = -1;
-  int cur_row;
-  const int max_rows = cm->mi_rows;
-
-#if CONFIG_MULTITHREAD
-  const int tile_cols = 1 << cm->log2_tile_cols;
-
-  pthread_mutex_lock(&lf_sync->lf_mutex);
-  if (cm->lf_row < max_rows) {
-    cur_row = cm->lf_row >> MI_BLOCK_SIZE_LOG2;
-    return_val = cm->lf_row;
-    cm->lf_row += MI_BLOCK_SIZE;
-    if (cm->lf_row < max_rows) {
-      /* If this is not the last row, make sure the next row is also decoded.
-       * This is because the intra predict has to happen before loop filter */
-      cur_row += 1;
-    }
-  }
-  pthread_mutex_unlock(&lf_sync->lf_mutex);
-
-  if (return_val == -1) return return_val;
-
-  pthread_mutex_lock(&lf_sync->recon_done_mutex[cur_row]);
-  if (lf_sync->num_tiles_done[cur_row] < tile_cols) {
-    pthread_cond_wait(&lf_sync->recon_done_cond[cur_row],
-                      &lf_sync->recon_done_mutex[cur_row]);
-  }
-  pthread_mutex_unlock(&lf_sync->recon_done_mutex[cur_row]);
-#else
-  (void)lf_sync;
-  if (cm->lf_row < max_rows) {
-    cur_row = cm->lf_row >> MI_BLOCK_SIZE_LOG2;
-    return_val = cm->lf_row;
-    cm->lf_row += MI_BLOCK_SIZE;
-    if (cm->lf_row < max_rows) {
-      /* If this is not the last row, make sure the next row is also decoded.
-       * This is because the intra predict has to happen before loop filter */
-      cur_row += 1;
-    }
-  }
-#endif  // CONFIG_MULTITHREAD
-
-  return return_val;
-}
-
-void vp9_loopfilter_rows(LFWorkerData *lf_data, VP9LfSync *lf_sync,
-                         MACROBLOCKD *xd) {
-  int mi_row;
-  VP9_COMMON *cm = lf_data->cm;
-
-  while (!xd->corrupted && (mi_row = get_next_row(cm, lf_sync)) != -1 &&
-         mi_row < cm->mi_rows) {
-    lf_data->start = mi_row;
-    lf_data->stop = mi_row + MI_BLOCK_SIZE;
-
-    thread_loop_filter_rows(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
-                            lf_data->start, lf_data->stop, lf_data->y_only,
-                            lf_sync);
-  }
-}
-
-void vp9_set_row(VP9LfSync *lf_sync, int num_tiles, int row, int is_last_row) {
-#if CONFIG_MULTITHREAD
-  pthread_mutex_lock(&lf_sync->recon_done_mutex[row]);
-  lf_sync->num_tiles_done[row] += 1;
-  if (num_tiles == lf_sync->num_tiles_done[row]) {
-    if (is_last_row) {
-      /* The last 2 rows wait on the last row to be done.
-       * So, we have to broadcast the signal in this case.
-       */
-      pthread_cond_broadcast(&lf_sync->recon_done_cond[row]);
-    } else {
-      pthread_cond_signal(&lf_sync->recon_done_cond[row]);
-    }
-  }
-  pthread_mutex_unlock(&lf_sync->recon_done_mutex[row]);
-#else
-  (void)lf_sync;
-  (void)num_tiles;
-  (void)row;
-  (void)is_last_row;
-#endif  // CONFIG_MULTITHREAD
 }
 
 // Accumulate frame counts.
