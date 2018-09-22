@@ -756,6 +756,9 @@ static void setup_token_decoder(VP8D_COMP *pbi,
       ptrdiff_t ext_first_part_size = token_part_sizes -
                                       pbi->fragments.ptrs[0] +
                                       3 * (num_token_partitions - 1);
+      if (fragment_size < (unsigned int)ext_first_part_size)
+        vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME,
+                           "Corrupted fragment size %d", fragment_size);
       fragment_size -= (unsigned int)ext_first_part_size;
       if (fragment_size > 0) {
         pbi->fragments.sizes[0] = (unsigned int)ext_first_part_size;
@@ -773,6 +776,9 @@ static void setup_token_decoder(VP8D_COMP *pbi,
           first_fragment_end, fragment_end, fragment_idx - 1,
           num_token_partitions);
       pbi->fragments.sizes[fragment_idx] = (unsigned int)partition_size;
+      if (fragment_size < (unsigned int)partition_size)
+        vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME,
+                           "Corrupted fragment size %d", fragment_size);
       fragment_size -= (unsigned int)partition_size;
       assert(fragment_idx <= num_token_partitions);
       if (fragment_size > 0) {
