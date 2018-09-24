@@ -263,6 +263,8 @@ class SatdTest : public ::testing::Test,
     EXPECT_EQ(expected, total);
   }
 
+  tran_low_t *GetCoeff() const { return src_; }
+
   int satd_size_;
 
  private:
@@ -316,6 +318,10 @@ class BlockErrorTestFP
         total = block_error_func_(coeff_, dqcoeff_, txfm_size_));
     EXPECT_EQ(expected, total);
   }
+
+  tran_low_t *GetCoeff() const { return coeff_; }
+
+  tran_low_t *GetDQCoeff() const { return dqcoeff_; }
 
   int txfm_size_;
 
@@ -428,8 +434,9 @@ TEST_P(SatdTest, Random) {
 TEST_P(SatdTest, DISABLED_Speed) {
   const int kCountSpeedTestBlock = 20000;
   vpx_usec_timer timer;
-  DECLARE_ALIGNED(16, tran_low_t, coeff[1024]);
   const int blocksize = GET_PARAM(0);
+  FillRandom();
+  tran_low_t *coeff = GetCoeff();
 
   vpx_usec_timer_start(&timer);
   for (int i = 0; i < kCountSpeedTestBlock; ++i) {
@@ -472,9 +479,10 @@ TEST_P(BlockErrorTestFP, Random) {
 TEST_P(BlockErrorTestFP, DISABLED_Speed) {
   const int kCountSpeedTestBlock = 20000;
   vpx_usec_timer timer;
-  DECLARE_ALIGNED(16, tran_low_t, coeff[1024]);
-  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[1024]);
   const int blocksize = GET_PARAM(0);
+  FillRandom();
+  tran_low_t *coeff = GetCoeff();
+  tran_low_t *dqcoeff = GetDQCoeff();
 
   vpx_usec_timer_start(&timer);
   for (int i = 0; i < kCountSpeedTestBlock; ++i) {
