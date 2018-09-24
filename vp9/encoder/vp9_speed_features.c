@@ -270,7 +270,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->adaptive_motion_search = 1;
     sf->mv.auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
-    sf->mv.subpel_iters_per_step = 1;
+    sf->mv.subpel_search_level = 1;
     sf->mode_skip_start = 10;
     sf->adaptive_pred_interp_filter = 1;
     sf->allow_acl = 0;
@@ -315,6 +315,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->ml_prune_rect_partition_threhold[1] = -1;
     sf->ml_prune_rect_partition_threhold[2] = -1;
     sf->ml_prune_rect_partition_threhold[3] = -1;
+    sf->mv.subpel_search_level = 0;
 
     if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) {
       for (i = 0; i < MAX_MESH_STEP; ++i) {
@@ -513,7 +514,7 @@ static void set_rt_speed_feature_framesize_independent(
     sf->disable_filter_search_var_thresh = 100;
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
-    sf->mv.subpel_iters_per_step = 1;
+    sf->mv.subpel_search_level = 0;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
     sf->allow_skip_recode = 0;
@@ -842,7 +843,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->mv.search_method = NSTEP;
   sf->recode_loop = ALLOW_RECODE_FIRST;
   sf->mv.subpel_search_method = SUBPEL_TREE;
-  sf->mv.subpel_iters_per_step = 2;
+  sf->mv.subpel_search_level = 2;
   sf->mv.subpel_force_stop = 0;
   sf->optimize_coefficients = !is_lossless_requested(&cpi->oxcf);
   sf->mv.reduce_first_step_size = 0;

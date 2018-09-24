@@ -1820,7 +1820,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       bestsme = cpi->find_fractional_mv_step(
           x, &tmp_mv, &ref_mv[id].as_mv, cpi->common.allow_high_precision_mv,
           x->errorperbit, &cpi->fn_ptr[bsize], 0,
-          cpi->sf.mv.subpel_iters_per_step, NULL, x->nmvjointcost, x->mvcost,
+          cpi->sf.mv.subpel_search_level, NULL, x->nmvjointcost, x->mvcost,
           &dis, &sse, second_pred, pw, ph);
     }
 
@@ -2009,7 +2009,7 @@ static int64_t rd_pick_best_sub8x8_mode(
             cpi->find_fractional_mv_step(
                 x, new_mv, &bsi->ref_mv[0]->as_mv, cm->allow_high_precision_mv,
                 x->errorperbit, &cpi->fn_ptr[bsize], sf->mv.subpel_force_stop,
-                sf->mv.subpel_iters_per_step, cond_cost_list(cpi, cost_list),
+                sf->mv.subpel_search_level, cond_cost_list(cpi, cost_list),
                 x->nmvjointcost, x->mvcost, &distortion,
                 &x->pred_sse[mi->ref_frame[0]], NULL, 0, 0);
 
@@ -2451,7 +2451,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     cpi->find_fractional_mv_step(
         x, &tmp_mv->as_mv, &ref_mv, cm->allow_high_precision_mv, x->errorperbit,
         &cpi->fn_ptr[bsize], cpi->sf.mv.subpel_force_stop,
-        cpi->sf.mv.subpel_iters_per_step, cond_cost_list(cpi, cost_list),
+        cpi->sf.mv.subpel_search_level, cond_cost_list(cpi, cost_list),
         x->nmvjointcost, x->mvcost, &dis, &x->pred_sse[ref], NULL, 0, 0);
   }
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv, x->nmvjointcost,
