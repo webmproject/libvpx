@@ -208,6 +208,9 @@ struct macroblock {
   void (*highbd_inv_txfm_add)(const tran_low_t *input, uint16_t *dest,
                               int stride, int eob, int bd);
 #endif
+#if CONFIG_ML_VAR_PARTITION
+  DECLARE_ALIGNED(16, uint8_t, est_pred[64 * 64]);
+#endif  // CONFIG_ML_VAR_PARTITION
 };
 
 #ifdef __cplusplus
