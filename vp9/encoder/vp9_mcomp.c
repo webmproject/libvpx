@@ -1577,6 +1577,153 @@ static int exhuastive_mesh_search(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
   return best_sad;
 }
 
+#if CONFIG_NON_GREEDY_MV
+#define NB_MVS_NUM 4
+
+static double nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
+                                   double lambda) {
+  int i;
+  double best_cost = -1;
+  vpx_clear_system_state();
+  for (i = 0; i < NB_MVS_NUM; ++i) {
+    if (nb_mvs[i].as_int != INVALID_MV) {
+      MV nb_mv = nb_mvs[i].as_mv;
+      const double row_diff = mv->row - nb_mv.row;
+      const double col_diff = mv->col - nb_mv.col;
+      double cost = row_diff * row_diff + col_diff * col_diff;
+      cost = log2(1 + cost);
+      if (best_cost < 0) {
+        best_cost = cost;
+      } else {
+        best_cost = cost < best_cost ? cost : best_cost;
+      }
+    }
+  }
+  if (best_cost < 0) {
+    return 0;
+  } else {
+    return best_cost * lambda;
+  }
+}
+
+double vp9_diamond_search_sad_new(const MACROBLOCK *x,
+                                  const search_site_config *cfg,
+                                  const MV *init_full_mv, MV *best_full_mv,
+                                  int search_param, double lambda, int *num00,
+                                  const vp9_variance_fn_ptr_t *fn_ptr,
+                                  const int_mv *nb_full_mvs) {
+  int i, j, step;
+
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  uint8_t *what = x->plane[0].src.buf;
+  const int what_stride = x->plane[0].src.stride;
+  const uint8_t *in_what;
+  const int in_what_stride = xd->plane[0].pre[0].stride;
+  const uint8_t *best_address;
+
+  double bestsad;
+  int best_site = -1;
+  int last_site = -1;
+
+  // search_param determines the length of the initial step and hence the number
+  // of iterations.
+  // 0 = initial step (MAX_FIRST_STEP) pel
+  // 1 = (MAX_FIRST_STEP/2) pel,
+  // 2 = (MAX_FIRST_STEP/4) pel...
+  //  const search_site *ss = &cfg->ss[search_param * cfg->searches_per_step];
+  const MV *ss_mv = &cfg->ss_mv[search_param * cfg->searches_per_step];
+  const intptr_t *ss_os = &cfg->ss_os[search_param * cfg->searches_per_step];
+  const int tot_steps = cfg->total_steps - search_param;
+  vpx_clear_system_state();
+
+  *best_full_mv = *init_full_mv;
+  clamp_mv(best_full_mv, x->mv_limits.col_min, x->mv_limits.col_max,
+           x->mv_limits.row_min, x->mv_limits.row_max);
+  *num00 = 0;
+
+  // Work out the start point for the search
+  in_what = xd->plane[0].pre[0].buf + best_full_mv->row * in_what_stride +
+            best_full_mv->col;
+  best_address = in_what;
+
+  // Check the starting position
+  bestsad = fn_ptr->sdf(what, what_stride, in_what, in_what_stride) +
+            nb_mvs_inconsistency(best_full_mv, nb_full_mvs, lambda);
+
+  i = 0;
+
+  for (step = 0; step < tot_steps; step++) {
+    int all_in = 1, t;
+
+    // All_in is true if every one of the points we are checking are within
+    // the bounds of the image.
+    all_in &= ((best_full_mv->row + ss_mv[i].row) > x->mv_limits.row_min);
+    all_in &= ((best_full_mv->row + ss_mv[i + 1].row) < x->mv_limits.row_max);
+    all_in &= ((best_full_mv->col + ss_mv[i + 2].col) > x->mv_limits.col_min);
+    all_in &= ((best_full_mv->col + ss_mv[i + 3].col) < x->mv_limits.col_max);
+
+    // If all the pixels are within the bounds we don't check whether the
+    // search point is valid in this loop,  otherwise we check each point
+    // for validity..
+    if (all_in) {
+      unsigned int sad_array[4];
+
+      for (j = 0; j < cfg->searches_per_step; j += 4) {
+        unsigned char const *block_offset[4];
+
+        for (t = 0; t < 4; t++) block_offset[t] = ss_os[i + t] + best_address;
+
+        fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride,
+                       sad_array);
+
+        for (t = 0; t < 4; t++, i++) {
+          if (sad_array[t] < bestsad) {
+            const MV this_mv = { best_full_mv->row + ss_mv[i].row,
+                                 best_full_mv->col + ss_mv[i].col };
+            double thissad = sad_array[t] + nb_mvs_inconsistency(
+                                                &this_mv, nb_full_mvs, lambda);
+            if (thissad < bestsad) {
+              bestsad = thissad;
+              best_site = i;
+            }
+          }
+        }
+      }
+    } else {
+      for (j = 0; j < cfg->searches_per_step; j++) {
+        // Trap illegal vectors
+        const MV this_mv = { best_full_mv->row + ss_mv[i].row,
+                             best_full_mv->col + ss_mv[i].col };
+
+        if (is_mv_in(&x->mv_limits, &this_mv)) {
+          const uint8_t *const check_here = ss_os[i] + best_address;
+          double thissad =
+              fn_ptr->sdf(what, what_stride, check_here, in_what_stride);
+
+          if (thissad < bestsad) {
+            thissad += nb_mvs_inconsistency(&this_mv, nb_full_mvs, lambda);
+            if (thissad < bestsad) {
+              bestsad = thissad;
+              best_site = i;
+            }
+          }
+        }
+        i++;
+      }
+    }
+    if (best_site != last_site) {
+      best_full_mv->row += ss_mv[best_site].row;
+      best_full_mv->col += ss_mv[best_site].col;
+      best_address += ss_os[best_site];
+      last_site = best_site;
+    } else if (best_address == in_what) {
+      (*num00)++;
+    }
+  }
+  return bestsad;
+}
+#endif  // CONFIG_NON_GREEDY_MV
+
 int vp9_diamond_search_sad_c(const MACROBLOCK *x, const search_site_config *cfg,
                              MV *ref_mv, MV *best_mv, int search_param,
                              int sad_per_bit, int *num00,
