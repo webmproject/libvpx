@@ -25,7 +25,6 @@ extern "C" {
 #if HAVE_DSPR2
 #define DCT_CONST_ROUND_SHIFT_TWICE_COSPI_16_64(input)                         \
   ({                                                                           \
-                                                                               \
     int32_t tmp, out;                                                          \
     int dct_cost_rounding = DCT_CONST_ROUNDING;                                \
     int in = input;                                                            \

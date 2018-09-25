@@ -111,7 +111,6 @@ void vpx_subtract_block_vsx(int rows, int cols, int16_t *diff,
                           pred, pred_stride);
       }
       break;
-    default:
-      assert(0);  // unreachable
+    default: assert(0);  // unreachable
   }
 }

@@ -49,7 +49,7 @@ static struct vp8_extracfg default_extracfg = {
 #if !(CONFIG_REALTIME_ONLY)
   0, /* cpu_used      */
 #else
-  4, /* cpu_used      */
+  4,                      /* cpu_used      */
 #endif
   0, /* enable_auto_alt_ref */
   0, /* noise_sensitivity */
