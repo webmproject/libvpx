@@ -35,8 +35,8 @@ typedef void (*VP8Quantize)(BLOCK *b, BLOCKD *d);
 
 typedef ::testing::tuple<VP8Quantize, VP8Quantize> VP8QuantizeParam;
 
-using ::testing::make_tuple;
 using libvpx_test::ACMRandom;
+using ::testing::make_tuple;
 
 // Create and populate a VP8_COMP instance which has a complete set of
 // quantization inputs as well as a second MACROBLOCKD for output.
