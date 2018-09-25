@@ -2201,6 +2201,83 @@ static int full_pixel_exhaustive(VP9_COMP *cpi, MACROBLOCK *x,
   return bestsme;
 }
 
+#if CONFIG_NON_GREEDY_MV
+double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
+                                   double lambda, int search_range,
+                                   const vp9_variance_fn_ptr_t *fn_ptr,
+                                   const int_mv *nb_full_mvs) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  const MV neighbors[4] = { { -1, 0 }, { 0, -1 }, { 0, 1 }, { 1, 0 } };
+  const struct buf_2d *const what = &x->plane[0].src;
+  const struct buf_2d *const in_what = &xd->plane[0].pre[0];
+  const uint8_t *best_address = get_buf_from_mv(in_what, best_full_mv);
+  double best_sad =
+      fn_ptr->sdf(what->buf, what->stride, best_address, in_what->stride) +
+      nb_mvs_inconsistency(best_full_mv, nb_full_mvs, lambda);
+  int i, j;
+  vpx_clear_system_state();
+
+  for (i = 0; i < search_range; i++) {
+    int best_site = -1;
+    const int all_in = ((best_full_mv->row - 1) > x->mv_limits.row_min) &
+                       ((best_full_mv->row + 1) < x->mv_limits.row_max) &
+                       ((best_full_mv->col - 1) > x->mv_limits.col_min) &
+                       ((best_full_mv->col + 1) < x->mv_limits.col_max);
+
+    if (all_in) {
+      unsigned int sads[4];
+      const uint8_t *const positions[4] = { best_address - in_what->stride,
+                                            best_address - 1, best_address + 1,
+                                            best_address + in_what->stride };
+
+      fn_ptr->sdx4df(what->buf, what->stride, positions, in_what->stride, sads);
+
+      for (j = 0; j < 4; ++j) {
+        double thissad = sads[j];
+        if (sads[j] < best_sad) {
+          const MV mv = { best_full_mv->row + neighbors[j].row,
+                          best_full_mv->col + neighbors[j].col };
+
+          thissad += nb_mvs_inconsistency(&mv, nb_full_mvs, lambda);
+          if (thissad < best_sad) {
+            best_sad = thissad;
+            best_site = j;
+          }
+        }
+      }
+    } else {
+      for (j = 0; j < 4; ++j) {
+        const MV mv = { best_full_mv->row + neighbors[j].row,
+                        best_full_mv->col + neighbors[j].col };
+
+        if (is_mv_in(&x->mv_limits, &mv)) {
+          double thissad =
+              fn_ptr->sdf(what->buf, what->stride,
+                          get_buf_from_mv(in_what, &mv), in_what->stride);
+          if (thissad < best_sad) {
+            thissad += nb_mvs_inconsistency(&mv, nb_full_mvs, lambda);
+            if (thissad < best_sad) {
+              best_sad = thissad;
+              best_site = j;
+            }
+          }
+        }
+      }
+    }
+
+    if (best_site == -1) {
+      break;
+    } else {
+      best_full_mv->row += neighbors[best_site].row;
+      best_full_mv->col += neighbors[best_site].col;
+      best_address = get_buf_from_mv(in_what, best_full_mv);
+    }
+  }
+
+  return best_sad;
+}
+#endif  // CONFIG_NON_GREEDY_MV
+
 int vp9_refining_search_sad(const MACROBLOCK *x, MV *ref_mv, int error_per_bit,
                             int search_range,
                             const vp9_variance_fn_ptr_t *fn_ptr,
