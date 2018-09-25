@@ -52,9 +52,11 @@ CYCLIC_REFRESH *vp9_cyclic_refresh_alloc(int mi_rows, int mi_cols) {
 }
 
 void vp9_cyclic_refresh_free(CYCLIC_REFRESH *cr) {
-  vpx_free(cr->map);
-  vpx_free(cr->last_coded_q_map);
-  vpx_free(cr);
+  if (cr != NULL) {
+    vpx_free(cr->map);
+    vpx_free(cr->last_coded_q_map);
+    vpx_free(cr);
+  }
 }
 
 // Check if this coding block, of size bsize, should be considered for refresh
