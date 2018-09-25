@@ -1578,8 +1578,6 @@ static int exhuastive_mesh_search(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
 }
 
 #if CONFIG_NON_GREEDY_MV
-#define NB_MVS_NUM 4
-
 static double nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
                                    double lambda) {
   int i;
@@ -2077,6 +2075,61 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 
   return best_sad;
 }
+
+#if CONFIG_NON_GREEDY_MV
+// Runs sequence of diamond searches in smaller steps for RD.
+/* do_refine: If last step (1-away) of n-step search doesn't pick the center
+              point as the best match, we will do a final 1-away diamond
+              refining search  */
+double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
+                                  MV *mvp_full, int step_param, double lambda,
+                                  int further_steps, int do_refine,
+                                  const vp9_variance_fn_ptr_t *fn_ptr,
+                                  const int_mv *nb_full_mvs, MV *dst_mv) {
+  MV temp_mv;
+  int n, num00 = 0;
+  double thissme;
+  double bestsme =
+      vp9_diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, &temp_mv,
+                                 step_param, lambda, &n, fn_ptr, nb_full_mvs);
+  *dst_mv = temp_mv;
+
+  // If there won't be more n-step search, check to see if refining search is
+  // needed.
+  if (n > further_steps) do_refine = 0;
+
+  while (n < further_steps) {
+    ++n;
+    if (num00) {
+      num00--;
+    } else {
+      thissme = vp9_diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, &temp_mv,
+                                           step_param + n, lambda, &num00,
+                                           fn_ptr, nb_full_mvs);
+      // check to see if refining search is needed.
+      if (num00 > further_steps - n) do_refine = 0;
+
+      if (thissme < bestsme) {
+        bestsme = thissme;
+        *dst_mv = temp_mv;
+      }
+    }
+  }
+
+  // final 1-away diamond refining search
+  if (do_refine) {
+    const int search_range = 8;
+    MV best_mv = *dst_mv;
+    thissme = vp9_refining_search_sad_new(x, &best_mv, lambda, search_range,
+                                          fn_ptr, nb_full_mvs);
+    if (thissme < bestsme) {
+      bestsme = thissme;
+      *dst_mv = best_mv;
+    }
+  }
+  return bestsme;
+}
+#endif  // CONFIG_NON_GREEDY_MV
 
 // Runs sequence of diamond searches in smaller steps for RD.
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center

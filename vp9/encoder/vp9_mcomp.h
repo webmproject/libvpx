@@ -119,6 +119,19 @@ void vp9_set_subpel_mv_search_range(MvLimits *subpel_mv_limits,
                                     const MvLimits *umv_window_limits,
                                     const MV *ref_mv);
 
+#if CONFIG_NON_GREEDY_MV
+#define NB_MVS_NUM 4
+double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
+                                   double lambda, int search_range,
+                                   const vp9_variance_fn_ptr_t *fn_ptr,
+                                   const int_mv *nb_full_mvs);
+
+double vp9_full_pixel_diamond_new(const struct VP9_COMP *cpi, MACROBLOCK *x,
+                                  MV *mvp_full, int step_param, double lambda,
+                                  int further_steps, int do_refine,
+                                  const vp9_variance_fn_ptr_t *fn_ptr,
+                                  const int_mv *nb_full_mvs, MV *dst_mv);
+#endif  // CONFIG_NON_GREEDY_MV
 #ifdef __cplusplus
 }  // extern "C"
 #endif
