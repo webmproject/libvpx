@@ -13,6 +13,7 @@ sanitizer="${1}"
 
 case "${sanitizer}" in
   address) ;;
+  cfi) ;;
   integer) ;;
   memory) ;;
   thread) ;;
@@ -20,7 +21,7 @@ case "${sanitizer}" in
   clear)
     echo "Clearing environment:"
     set -x
-    unset CC CXX LD
+    unset CC CXX LD AR
     unset CFLAGS CXXFLAGS LDFLAGS
     unset ASAN_OPTIONS MSAN_OPTIONS TSAN_OPTIONS UBSAN_OPTIONS
     set +x
@@ -74,6 +75,13 @@ cflags="${cflags} -fno-omit-frame-pointer"
 # Exact backtraces.
 cflags="${cflags} -fno-optimize-sibling-calls"
 
+if [ "${sanitizer}" = "cfi" ]; then
+  # https://clang.llvm.org/docs/ControlFlowIntegrity.html
+  cflags="${cflags} -flto -fvisibility=hidden"
+  ldflags="${ldflags} -flto -fuse-ld=gold"
+  export AR="llvm-ar"
+fi
+
 set -x
 export CC="clang"
 export CXX="clang++"
@@ -99,6 +107,9 @@ case "${sanitizer}" in
     set -x
     export ASAN_OPTIONS="${sanitizer_options}"
     set +x
+    ;;
+  cfi)
+    # No environment settings
     ;;
   memory)
     set -x
