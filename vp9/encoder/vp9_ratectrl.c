@@ -777,13 +777,19 @@ static int get_kf_active_quality(const RATE_CONTROL *const rc, int q,
                             kf_low_motion_minq, kf_high_motion_minq);
 }
 
-static int get_gf_active_quality(const RATE_CONTROL *const rc, int q,
+static int get_gf_active_quality(const VP9_COMP *const cpi, int q,
                                  vpx_bit_depth_t bit_depth) {
+  const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+  const RATE_CONTROL *const rc = &cpi->rc;
+
   int *arfgf_low_motion_minq;
   int *arfgf_high_motion_minq;
+  const int gfu_boost = cpi->multi_layer_arf
+                            ? gf_group->gfu_boost[gf_group->index]
+                            : rc->gfu_boost;
   ASSIGN_MINQ_TABLE(bit_depth, arfgf_low_motion_minq);
   ASSIGN_MINQ_TABLE(bit_depth, arfgf_high_motion_minq);
-  return get_active_quality(q, rc->gfu_boost, gf_low, gf_high,
+  return get_active_quality(q, gfu_boost, gf_low, gf_high,
                             arfgf_low_motion_minq, arfgf_high_motion_minq);
 }
 
@@ -935,7 +941,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
     } else {
       q = active_worst_quality;
     }
-    active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
+    active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
   } else {
     // Use the lower of active_worst_quality and recent/average Q.
     if (cm->current_video_frame > 1) {
@@ -1082,7 +1088,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     if (oxcf->rc_mode == VPX_CQ) {
       if (q < cq_level) q = cq_level;
 
-      active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
+      active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
 
       // Constrained quality use slightly lower active best.
       active_best_quality = active_best_quality * 15 / 16;
@@ -1097,7 +1103,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
         delta_qindex = vp9_compute_qdelta(rc, q, q * 0.50, cm->bit_depth);
       active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
     } else {
-      active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
+      active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
     }
   } else {
     if (oxcf->rc_mode == VPX_Q) {
@@ -1278,7 +1284,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
     if (oxcf->rc_mode == VPX_CQ) {
       if (q < cq_level) q = cq_level;
 
-      active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
+      active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
 
       // Constrained quality use slightly lower active best.
       active_best_quality = active_best_quality * 15 / 16;
@@ -1287,7 +1293,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
       if (!cpi->refresh_alt_ref_frame) {
         active_best_quality = cq_level;
       } else {
-        active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
+        active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
 
         // Modify best quality for second level arfs. For mode VPX_Q this
         // becomes the baseline frame q.
@@ -1295,7 +1301,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
           active_best_quality = (active_best_quality + cq_level + 1) / 2;
       }
     } else {
-      active_best_quality = get_gf_active_quality(rc, q, cm->bit_depth);
+      active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
     }
   } else {
     if (oxcf->rc_mode == VPX_Q) {
