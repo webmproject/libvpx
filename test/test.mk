@@ -75,6 +75,7 @@ LIBWEBM_PARSER_SRCS += ../third_party/libwebm/mkvparser/mkvparser.cc
 LIBWEBM_PARSER_SRCS += ../third_party/libwebm/mkvparser/mkvreader.cc
 LIBWEBM_PARSER_SRCS += ../third_party/libwebm/mkvparser/mkvparser.h
 LIBWEBM_PARSER_SRCS += ../third_party/libwebm/mkvparser/mkvreader.h
+LIBWEBM_PARSER_SRCS += ../third_party/libwebm/common/webmids.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(LIBWEBM_PARSER_SRCS)
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../tools_common.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.cc
