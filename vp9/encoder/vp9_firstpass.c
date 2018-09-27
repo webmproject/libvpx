@@ -2383,9 +2383,6 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     }
     gf_group->bit_allocation[idx] = 0;
 
-    for (idx = 0; idx < gop_frames; ++idx)
-      if (gf_group->update_type[idx] == LF_UPDATE) break;
-
     return;
   }
 
