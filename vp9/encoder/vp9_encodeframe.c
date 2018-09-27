@@ -4404,6 +4404,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     partition_vert_allowed &= force_vert_split;
   }
 
+  if (!partition_none_allowed && !do_split) do_rect = 1;
+
   ctx->pred_pixel_ready =
       !(partition_vert_allowed || partition_horz_allowed || do_split);
 
