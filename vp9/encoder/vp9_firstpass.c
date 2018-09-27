@@ -2172,6 +2172,20 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
   find_arf_order(cpi, gf_group, index_counter, depth + 1, mid + 1, end);
 }
 
+static INLINE void set_gf_overlay_frame_type(GF_GROUP *gf_group,
+                                             int frame_index,
+                                             int source_alt_ref_active) {
+  if (source_alt_ref_active) {
+    gf_group->update_type[frame_index] = OVERLAY_UPDATE;
+    gf_group->rf_level[frame_index] = INTER_NORMAL;
+    gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
+  } else {
+    gf_group->update_type[frame_index] = GF_UPDATE;
+    gf_group->rf_level[frame_index] = GF_ARF_STD;
+    gf_group->layer_depth[frame_index] = 0;
+  }
+}
+
 static int define_gf_group_structure(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
@@ -2193,15 +2207,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
   // is also the golden frame.
   // === [frame_index == 0] ===
   if (!key_frame) {
-    if (rc->source_alt_ref_active) {
-      gf_group->update_type[frame_index] = OVERLAY_UPDATE;
-      gf_group->rf_level[frame_index] = INTER_NORMAL;
-      gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
-    } else {
-      gf_group->update_type[frame_index] = GF_UPDATE;
-      gf_group->rf_level[frame_index] = GF_ARF_STD;
-      gf_group->layer_depth[frame_index] = 0;
-    }
+    set_gf_overlay_frame_type(gf_group, frame_index, rc->source_alt_ref_active);
     gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
     gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
   }
@@ -2226,13 +2232,9 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     find_arf_order(cpi, gf_group, &frame_index, 2, 0,
                    rc->baseline_gf_interval - 1);
 
-    if (rc->source_alt_ref_pending) {
-      gf_group->update_type[frame_index] = OVERLAY_UPDATE;
-      gf_group->rf_level[frame_index] = INTER_NORMAL;
-    } else {
-      gf_group->update_type[frame_index] = GF_UPDATE;
-      gf_group->rf_level[frame_index] = GF_ARF_STD;
-    }
+    set_gf_overlay_frame_type(gf_group, frame_index,
+                              rc->source_alt_ref_pending);
+
     gf_group->arf_src_offset[frame_index] = 0;
 
     return frame_index;
@@ -2262,6 +2264,8 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
   // vp9_rc_get_second_pass_params() the data will be undefined.
   gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
   gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
+
+  set_gf_overlay_frame_type(gf_group, frame_index, rc->source_alt_ref_pending);
 
   if (rc->source_alt_ref_pending) {
     gf_group->update_type[frame_index] = OVERLAY_UPDATE;
