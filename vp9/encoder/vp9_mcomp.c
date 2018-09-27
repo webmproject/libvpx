@@ -2092,6 +2092,7 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
   double bestsme =
       vp9_diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, &temp_mv,
                                  step_param, lambda, &n, fn_ptr, nb_full_mvs);
+  vpx_clear_system_state();
   *dst_mv = temp_mv;
 
   // If there won't be more n-step search, check to see if refining search is
