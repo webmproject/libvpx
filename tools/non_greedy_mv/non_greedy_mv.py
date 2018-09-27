@@ -7,7 +7,7 @@ import math
 
 
 def draw_mv_ls(axis, mv_ls, mode=0):
-  colors = np.array([(0., 0., 0., 1.)])
+  colors = np.array([(1., 0., 0., 1.)])
   segs = np.array([
       np.array([[ptr[0], ptr[1]], [ptr[0] + ptr[2], ptr[1] + ptr[3]]])
       for ptr in mv_ls
