@@ -2482,6 +2482,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   const int is_key_frame = frame_is_intra_only(cm);
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
 
+  double gop_intra_factor = 1.0;
+
   // Reset the GF group data structures unless this is a key
   // frame in which case it will already have been done.
   if (is_key_frame == 0) {
@@ -2547,6 +2549,17 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if ((active_max_gf_interval <= rc->frames_to_key) &&
         (active_max_gf_interval >= (rc->frames_to_key - rc->min_gf_interval)))
       active_max_gf_interval = rc->frames_to_key / 2;
+  }
+
+  if (cpi->multi_layer_arf) {
+    int layers = 0;
+    int max_layers = VPXMIN(MAX_ARF_LAYERS, cpi->oxcf.enable_auto_arf);
+
+    // Adapt the intra_error factor to active_max_gf_interval limit.
+    for (i = active_max_gf_interval; i > 0; i >>= 1) ++layers;
+
+    layers = VPXMIN(max_layers, layers);
+    gop_intra_factor += (layers * 0.25);
   }
 
   i = 0;
@@ -2625,7 +2638,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             (!flash_detected) &&
             ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
              (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
-             (sr_accumulator > next_frame.intra_error)))) {
+             (sr_accumulator > gop_intra_factor * next_frame.intra_error)))) {
       break;
     }
 
