@@ -117,8 +117,9 @@ typedef enum {
   GF_UPDATE = 2,
   ARF_UPDATE = 3,
   OVERLAY_UPDATE = 4,
-  USE_BUF_FRAME = 5,  // Use show existing frame, no ref buffer update
-  FRAME_UPDATE_TYPES = 6
+  MID_OVERLAY_UPDATE = 5,
+  USE_BUF_FRAME = 6,  // Use show existing frame, no ref buffer update
+  FRAME_UPDATE_TYPES = 7
 } FRAME_UPDATE_TYPE;
 
 #define FC_ANIMATION_THRESH 0.15
