@@ -2085,18 +2085,6 @@ static int calculate_boost_bits(int frame_count, int boost,
                 0);
 }
 
-// Current limit on maximum number of active arfs in a GF/ARF group.
-#define MAX_ACTIVE_ARFS 2
-#define ARF_SLOT1 2
-#define ARF_SLOT2 3
-// This function indirects the choice of buffers for arfs.
-// At the moment the values are fixed but this may change as part of
-// the integration process with other codec features that swap buffers around.
-static void get_arf_buffer_indices(unsigned char *arf_buffer_indices) {
-  arf_buffer_indices[0] = ARF_SLOT1;
-  arf_buffer_indices[1] = ARF_SLOT2;
-}
-
 // Used in corpus vbr: Calculates the total normalized group complexity score
 // for a given number of frames starting at the current position in the stats
 // file.
@@ -2193,15 +2181,12 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
   int i;
   int frame_index = 0;
   int key_frame;
-  unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
   int normal_frames;
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
   gf_group->frame_start = cpi->common.current_video_frame;
   gf_group->frame_end = gf_group->frame_start + rc->baseline_gf_interval - 1;
-
-  get_arf_buffer_indices(arf_buffer_indices);
 
   // For key frames the frame target rate is already set and it
   // is also the golden frame.
