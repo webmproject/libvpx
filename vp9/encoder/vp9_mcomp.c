@@ -1578,8 +1578,7 @@ static int exhuastive_mesh_search(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
 }
 
 #if CONFIG_NON_GREEDY_MV
-static double nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
-                                   double lambda) {
+static double nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs) {
   int i;
   double best_cost = -1;
   vpx_clear_system_state();
@@ -1600,7 +1599,7 @@ static double nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
   if (best_cost < 0) {
     return 0;
   } else {
-    return best_cost * lambda;
+    return best_cost;
   }
 }
 
@@ -1646,7 +1645,7 @@ double vp9_diamond_search_sad_new(const MACROBLOCK *x,
 
   // Check the starting position
   bestsad = fn_ptr->sdf(what, what_stride, in_what, in_what_stride) +
-            nb_mvs_inconsistency(best_full_mv, nb_full_mvs, lambda);
+            lambda * nb_mvs_inconsistency(best_full_mv, nb_full_mvs);
 
   i = 0;
 
@@ -1678,8 +1677,8 @@ double vp9_diamond_search_sad_new(const MACROBLOCK *x,
           if (sad_array[t] < bestsad) {
             const MV this_mv = { best_full_mv->row + ss_mv[i].row,
                                  best_full_mv->col + ss_mv[i].col };
-            double thissad = sad_array[t] + nb_mvs_inconsistency(
-                                                &this_mv, nb_full_mvs, lambda);
+            double thissad = sad_array[t] + lambda * nb_mvs_inconsistency(
+                                                         &this_mv, nb_full_mvs);
             if (thissad < bestsad) {
               bestsad = thissad;
               best_site = i;
@@ -1699,7 +1698,7 @@ double vp9_diamond_search_sad_new(const MACROBLOCK *x,
               fn_ptr->sdf(what, what_stride, check_here, in_what_stride);
 
           if (thissad < bestsad) {
-            thissad += nb_mvs_inconsistency(&this_mv, nb_full_mvs, lambda);
+            thissad += lambda * nb_mvs_inconsistency(&this_mv, nb_full_mvs);
             if (thissad < bestsad) {
               bestsad = thissad;
               best_site = i;
@@ -2265,11 +2264,12 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
   const uint8_t *best_address = get_buf_from_mv(in_what, best_full_mv);
-  double best_sad =
-      fn_ptr->sdf(what->buf, what->stride, best_address, in_what->stride) +
-      nb_mvs_inconsistency(best_full_mv, nb_full_mvs, lambda);
+  double best_sad;
   int i, j;
   vpx_clear_system_state();
+  best_sad =
+      fn_ptr->sdf(what->buf, what->stride, best_address, in_what->stride) +
+      lambda * nb_mvs_inconsistency(best_full_mv, nb_full_mvs);
 
   for (i = 0; i < search_range; i++) {
     int best_site = -1;
@@ -2292,7 +2292,7 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
           const MV mv = { best_full_mv->row + neighbors[j].row,
                           best_full_mv->col + neighbors[j].col };
 
-          thissad += nb_mvs_inconsistency(&mv, nb_full_mvs, lambda);
+          thissad += lambda * nb_mvs_inconsistency(&mv, nb_full_mvs);
           if (thissad < best_sad) {
             best_sad = thissad;
             best_site = j;
@@ -2309,7 +2309,7 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
               fn_ptr->sdf(what->buf, what->stride,
                           get_buf_from_mv(in_what, &mv), in_what->stride);
           if (thissad < best_sad) {
-            thissad += nb_mvs_inconsistency(&mv, nb_full_mvs, lambda);
+            thissad += lambda * nb_mvs_inconsistency(&mv, nb_full_mvs);
             if (thissad < best_sad) {
               best_sad = thissad;
               best_site = j;
