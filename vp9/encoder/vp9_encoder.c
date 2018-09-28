@@ -3058,6 +3058,12 @@ void update_ref_frames(VP9_COMP *cpi) {
              cpi->interp_filter_selected[0],
              sizeof(cpi->interp_filter_selected[0]));
   }
+
+  if (gf_group->update_type[gf_group->index] == MID_OVERLAY_UPDATE) {
+    cpi->alt_fb_idx =
+        stack_pop(gf_group->arf_index_stack, gf_group->stack_size);
+    --gf_group->stack_size;
+  }
 }
 
 void vp9_update_reference_frames(VP9_COMP *cpi) {
