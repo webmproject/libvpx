@@ -2485,6 +2485,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   const int is_key_frame = frame_is_intra_only(cm);
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
 
+  int gop_intra_factor = 0;
+
   // Reset the GF group data structures unless this is a key
   // frame in which case it will already have been done.
   if (is_key_frame == 0) {
@@ -2537,6 +2539,12 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // interval to spread the cost of the GF.
     active_max_gf_interval = 12 + arf_active_or_kf + VPXMIN(4, (int_lbq / 6));
 
+    // TODO(jingning, paulwilkins): Temporary solution to work around
+    // multi-layer ARF rate control issues at extremely low bit-rate cases.
+    // We would deprecate this soon.
+    if (cpi->multi_layer_arf && is_key_frame)
+      active_max_gf_interval = 7 + arf_active_or_kf + VPXMIN(4, (int_lbq / 6));
+
     // We have: active_min_gf_interval <=
     // rc->max_gf_interval + arf_active_or_kf.
     if (active_max_gf_interval < active_min_gf_interval) {
@@ -2551,6 +2559,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         (active_max_gf_interval >= (rc->frames_to_key - rc->min_gf_interval)))
       active_max_gf_interval = rc->frames_to_key / 2;
   }
+
+  // Adapt the intra_error factor to active_max_gf_interval limit.
+  for (i = active_max_gf_interval; i > 0; i >>= 1) ++gop_intra_factor;
+
+  gop_intra_factor = VPXMIN(MAX_ARF_LAYERS, gop_intra_factor);
 
   i = 0;
   while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
@@ -2628,7 +2641,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             (!flash_detected) &&
             ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
              (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
-             (sr_accumulator > next_frame.intra_error)))) {
+             (sr_accumulator > gop_intra_factor * next_frame.intra_error)))) {
       break;
     }
 
