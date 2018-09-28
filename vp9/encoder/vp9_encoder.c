@@ -5608,6 +5608,8 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
 #if CONFIG_NON_GREEDY_MV
       int rf_idx;
       for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        tpl_ptr->mv_dist[rf_idx] = src_stats->mv_dist[rf_idx];
+        tpl_ptr->mv_cost[rf_idx] = src_stats->mv_cost[rf_idx];
         tpl_ptr->inter_cost_arr[rf_idx] = src_stats->inter_cost;
         tpl_ptr->recon_error_arr[rf_idx] = src_stats->recon_error_arr[rf_idx];
         tpl_ptr->sse_arr[rf_idx] = src_stats->sse_arr[rf_idx];
