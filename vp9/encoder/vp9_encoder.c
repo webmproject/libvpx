@@ -5449,10 +5449,37 @@ void init_tpl_stats(VP9_COMP *cpi) {
   }
 }
 
+#if CONFIG_NON_GREEDY_MV
+static void prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
+                                int mi_col, int_mv *nb_full_mvs) {
+  const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+  int i;
+  for (i = 0; i < NB_MVS_NUM; ++i) {
+    int r = dirs[i][0];
+    int c = dirs[i][1];
+    if (mi_row + r >= 0 && mi_row + r < tpl_frame->mi_rows && mi_col + c >= 0 &&
+        mi_col + c < tpl_frame->mi_cols) {
+      const TplDepStats *tpl_ptr =
+          &tpl_frame
+               ->tpl_stats_ptr[(mi_row + r) * tpl_frame->stride + mi_col + c];
+      if (tpl_ptr->ready) {
+        nb_full_mvs[i].as_mv.row = tpl_ptr->mv.as_mv.row >> 3;
+        nb_full_mvs[i].as_mv.col = tpl_ptr->mv.as_mv.col >> 3;
+      } else {
+        nb_full_mvs[i].as_int = INVALID_MV;
+      }
+    } else {
+      nb_full_mvs[i].as_int = INVALID_MV;
+    }
+  }
+}
+#endif
+
 uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
-                                       uint8_t *cur_frame_buf,
+                                       int frame_idx, uint8_t *cur_frame_buf,
                                        uint8_t *ref_frame_buf, int stride,
-                                       MV *mv, BLOCK_SIZE bsize) {
+                                       MV *mv, BLOCK_SIZE bsize, int mi_row,
+                                       int mi_col) {
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
@@ -5464,6 +5491,12 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   uint32_t sse;
   int cost_list[5];
   const MvLimits tmp_mv_limits = x->mv_limits;
+#if CONFIG_NON_GREEDY_MV
+  // lambda is used to adjust the importance of motion vector consitency.
+  // TODO(angiebird): Figure out lambda's proper value.
+  double lambda = 10000;
+  int_mv nb_full_mvs[NB_MVS_NUM];
+#endif
 
   MV best_ref_mv1 = { 0, 0 };
   MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
@@ -5482,9 +5515,21 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 
   vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
 
+#if CONFIG_NON_GREEDY_MV
+  (void)search_method;
+  (void)sadpb;
+  prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, nb_full_mvs);
+  vp9_full_pixel_diamond_new(cpi, x, &best_ref_mv1_full, step_param, lambda,
+                             MAX_MVSEARCH_STEPS - 1 - step_param, 1,
+                             &cpi->fn_ptr[bsize], nb_full_mvs, mv);
+#else
+  (void)frame_idx;
+  (void)mi_row;
+  (void)mi_col;
   vp9_full_pixel_search(cpi, x, bsize, &best_ref_mv1_full, step_param,
                         search_method, sadpb, cond_cost_list(cpi, cost_list),
                         &best_ref_mv1, mv, 0, 0);
+#endif
 
   /* restore UMV window */
   x->mv_limits = tmp_mv_limits;
@@ -5565,6 +5610,7 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
         tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv_arr[rf_idx].as_int;
       }
       tpl_ptr->feature_score = src_stats->feature_score;
+      tpl_ptr->ready = 1;
 #endif
       tpl_ptr->intra_cost = intra_cost;
       tpl_ptr->inter_cost = inter_cost;
@@ -5790,9 +5836,10 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       continue;
     }
 
-    motion_compensated_prediction(cpi, td, xd->cur_buf->y_buffer + mb_y_offset,
-                                  ref_frame[rf_idx]->y_buffer + mb_y_offset,
-                                  xd->cur_buf->y_stride, &mv.as_mv, bsize);
+    motion_compensated_prediction(
+        cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
+        ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride,
+        &mv.as_mv, bsize, mi_row, mi_col);
 
     // TODO(jingning): Not yet support high bit-depth in the next three
     // steps.
