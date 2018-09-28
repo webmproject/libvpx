@@ -2527,8 +2527,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   {
     int int_max_q = (int)(vp9_convert_qindex_to_q(twopass->active_worst_quality,
                                                   cpi->common.bit_depth));
-    int int_lbq = (int)(vp9_convert_qindex_to_q(rc->last_boosted_qindex,
-                                                cpi->common.bit_depth));
+    int q_term = (cm->current_video_frame == 0)
+                     ? int_max_q / 32
+                     : (int)(vp9_convert_qindex_to_q(rc->last_boosted_qindex,
+                                                     cpi->common.bit_depth) /
+                             6);
     active_min_gf_interval =
         rc->min_gf_interval + arf_active_or_kf + VPXMIN(2, int_max_q / 200);
     active_min_gf_interval =
@@ -2538,7 +2541,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // bits to spare and are better with a smaller interval and smaller boost.
     // At high Q when there are few bits to spare we are better with a longer
     // interval to spread the cost of the GF.
-    active_max_gf_interval = 12 + arf_active_or_kf + VPXMIN(4, (int_lbq / 6));
+    active_max_gf_interval = 12 + arf_active_or_kf + VPXMIN(4, q_term);
 
     // We have: active_min_gf_interval <=
     // rc->max_gf_interval + arf_active_or_kf.
