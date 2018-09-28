@@ -2084,7 +2084,9 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
                                   MV *mvp_full, int step_param, double lambda,
                                   int further_steps, int do_refine,
                                   const vp9_variance_fn_ptr_t *fn_ptr,
-                                  const int_mv *nb_full_mvs, MV *dst_mv) {
+                                  const int_mv *nb_full_mvs,
+                                  TplDepStats *tpl_stats, int rf_idx) {
+  MV *dst_mv = &tpl_stats->mv_arr[rf_idx].as_mv;
   MV temp_mv;
   int n, num00 = 0;
   double thissme;
