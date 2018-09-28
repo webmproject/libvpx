@@ -5948,6 +5948,9 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int64_t recon_error, sse;
+#if CONFIG_NON_GREEDY_MV
+  int rf_idx;
+#endif
 
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -5989,6 +5992,12 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   cm->base_qindex = tpl_frame->base_qindex;
   vp9_frame_init_quantizer(cpi);
 
+#if CONFIG_NON_GREEDY_MV
+  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    tpl_frame->mv_dist_sum[rf_idx] = 0;
+    tpl_frame->mv_cost_sum[rf_idx] = 0;
+  }
+#endif
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     // Motion estimation row boundary
     x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
@@ -6006,6 +6015,16 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
+#if CONFIG_NON_GREEDY_MV
+      {
+        TplDepStats *this_tpl_stats =
+            &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+        for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+          tpl_frame->mv_dist_sum[rf_idx] += this_tpl_stats->mv_dist[rf_idx];
+          tpl_frame->mv_cost_sum[rf_idx] += this_tpl_stats->mv_cost[rf_idx];
+        }
+      }
+#endif
     }
   }
 }
