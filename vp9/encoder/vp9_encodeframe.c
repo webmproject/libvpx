@@ -3393,6 +3393,140 @@ static void ml_prune_rect_partition(VP9_COMP *const cpi, MACROBLOCK *const x,
 #undef FEATURES
 #undef LABELS
 
+// Use a neural net model to prune partition-none and partition-split search.
+// The model uses prediction residue variance and quantization step size as
+// input features.
+#define FEATURES 6
+static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
+                                          BLOCK_SIZE bsize, int mi_row,
+                                          int mi_col, int *none, int *split) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *xd = &x->e_mbd;
+  MODE_INFO *mi = xd->mi[0];
+  const NN_CONFIG *nn_config = NULL;
+  DECLARE_ALIGNED(16, uint8_t, pred_buf[64 * 64]);
+  int i;
+  float thresh_low = -1.0f;
+  float thresh_high = 0.0f;
+
+  switch (bsize) {
+    case BLOCK_64X64:
+      nn_config = &vp9_var_rd_part_nnconfig_64;
+      thresh_low = -3.0f;
+      thresh_high = 3.0f;
+      break;
+    case BLOCK_32X32:
+      nn_config = &vp9_var_rd_part_nnconfig_32;
+      thresh_low = -3.0;
+      thresh_high = 3.0f;
+      break;
+    case BLOCK_16X16:
+      nn_config = &vp9_var_rd_part_nnconfig_16;
+      thresh_low = -4.0;
+      thresh_high = 4.0f;
+      break;
+    case BLOCK_8X8:
+      nn_config = &vp9_var_rd_part_nnconfig_8;
+      thresh_low = -2.0;
+      thresh_high = 2.0f;
+      break;
+    default: assert(0 && "Unexpected block size."); return;
+  }
+
+  if (!nn_config) return;
+
+  mi->ref_frame[1] = NONE;
+  mi->sb_type = bsize;
+  // Do a simple single motion search to find a prediction for current block.
+  // The variance of the residue will be used as input features.
+  {
+    const MV_REFERENCE_FRAME ref =
+        cpi->rc.is_src_frame_alt_ref ? ALTREF_FRAME : LAST_FRAME;
+    YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref);
+    MV ref_mv = { 0, 0 };
+    MV ref_mv_full = { 0, 0 };
+    const int step_param = 1;
+    const MvLimits tmp_mv_limits = x->mv_limits;
+    const SEARCH_METHODS search_method = NSTEP;
+    const int sadpb = x->sadperbit16;
+    MV best_mv = { 0, 0 };
+    int cost_list[5];
+
+    assert(yv12 != NULL);
+    if (!yv12) return;
+    vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
+                         &cm->frame_refs[ref - 1].sf);
+    mi->ref_frame[0] = ref;
+    vp9_set_mv_search_range(&x->mv_limits, &ref_mv);
+    vp9_full_pixel_search(cpi, x, bsize, &ref_mv_full, step_param,
+                          search_method, sadpb, cond_cost_list(cpi, cost_list),
+                          &ref_mv, &best_mv, 0, 0);
+    best_mv.row *= 8;
+    best_mv.col *= 8;
+    x->mv_limits = tmp_mv_limits;
+    mi->mv[0].as_mv = best_mv;
+
+    set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
+    xd->plane[0].dst.buf = pred_buf;
+    xd->plane[0].dst.stride = 64;
+    vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+  }
+
+  vpx_clear_system_state();
+
+  {
+    float features[FEATURES] = { 0.0f };
+    const int dc_q = vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth);
+    int feature_idx = 0;
+    float score;
+
+    // Generate model input features.
+    features[feature_idx++] = logf((float)(dc_q * dc_q) / 256.0f + 1.0f);
+    vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
+    // Get the variance of the residue as input features.
+    {
+      const int bs = 4 * num_4x4_blocks_wide_lookup[bsize];
+      const BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_SPLIT);
+      const uint8_t *pred = pred_buf;
+      const uint8_t *src = x->plane[0].src.buf;
+      const int src_stride = x->plane[0].src.stride;
+      const int pred_stride = 64;
+      unsigned int sse;
+      // Variance of whole block.
+      const unsigned int var =
+          cpi->fn_ptr[bsize].vf(src, src_stride, pred, pred_stride, &sse);
+      const float factor = (var == 0) ? 1.0f : (1.0f / (float)var);
+
+      features[feature_idx++] = logf((float)var + 1.0f);
+      for (i = 0; i < 4; ++i) {
+        const int x_idx = (i & 1) * bs / 2;
+        const int y_idx = (i >> 1) * bs / 2;
+        const int src_offset = y_idx * src_stride + x_idx;
+        const int pred_offset = y_idx * pred_stride + x_idx;
+        // Variance of quarter block.
+        const unsigned int sub_var =
+            cpi->fn_ptr[subsize].vf(src + src_offset, src_stride,
+                                    pred + pred_offset, pred_stride, &sse);
+        const float var_ratio = (var == 0) ? 1.0f : factor * (float)sub_var;
+        features[feature_idx++] = var_ratio;
+      }
+    }
+    assert(feature_idx == FEATURES);
+
+    // Feed the features into the model to get the confidence score.
+    nn_predict(features, nn_config, &score);
+
+    // Higher score means that the model has higher confidence that the split
+    // partition is better than the non-split partition. So if the score is
+    // high enough, we skip the none-split partition search; if the score is
+    // low enough, we skip the split partition search.
+    if (score > thresh_high) *none = 0;
+    if (score < thresh_low) *split = 0;
+  }
+}
+#undef FEATURES
+#undef LABELS
+
 int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
                      int orig_rdmult) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[cpi->twopass.gf_group.index];
@@ -3624,6 +3758,21 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   pc_tree->partitioning = PARTITION_NONE;
 
+  if (cpi->sf.ml_var_partition_pruning) {
+    int do_ml_var_partition_pruning =
+        !frame_is_intra_only(cm) && partition_none_allowed && do_split &&
+        mi_row + num_8x8_blocks_high_lookup[bsize] <= cm->mi_rows &&
+        mi_col + num_8x8_blocks_wide_lookup[bsize] <= cm->mi_cols;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+      do_ml_var_partition_pruning = 0;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    if (do_ml_var_partition_pruning) {
+      ml_predict_var_rd_paritioning(cpi, x, bsize, mi_row, mi_col,
+                                    &partition_none_allowed, &do_split);
+    }
+  }
+
   // PARTITION_NONE
   if (partition_none_allowed) {
     rd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, &this_rdc, bsize, ctx,
@@ -3738,6 +3887,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       }
     }
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
+  } else {
+    vp9_zero(ctx->pred_mv);
+    ctx->mic.interp_filter = EIGHTTAP;
   }
 
   // store estimated motion vector

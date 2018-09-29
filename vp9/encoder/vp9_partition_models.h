@@ -18,7 +18,9 @@ extern "C" {
 #define NN_MAX_HIDDEN_LAYERS 10
 #define NN_MAX_NODES_PER_LAYER 128
 
-// Neural net model config.
+// Neural net model config. It defines the layout of a neural net model, such as
+// the number of inputs/outputs, number of layers, the number of nodes in each
+// layer, as well as the weights and bias of each node.
 typedef struct {
   int num_inputs;         // Number of input nodes, i.e. features.
   int num_outputs;        // Number of output nodes.
@@ -963,6 +965,178 @@ static const NN_CONFIG vp9_var_part_nnconfig_16 = {
 };
 #undef FEATURES
 #endif  // CONFIG_ML_VAR_PARTITION
+
+#define FEATURES 6
+#define LABELS 1
+static const float vp9_var_rd_part_nn_weights_64_layer0[FEATURES * 8] = {
+  -0.100129f, 0.128867f,  -1.375086f, -2.268096f, -1.470368f, -2.296274f,
+  0.034445f,  -0.062993f, -2.151904f, 0.523215f,  1.611269f,  1.530051f,
+  0.418182f,  -1.330239f, 0.828388f,  0.386546f,  -0.026188f, -0.055459f,
+  -0.474437f, 0.861295f,  -2.208743f, -0.652991f, -2.985873f, -1.728956f,
+  0.388052f,  -0.420720f, 2.015495f,  1.280342f,  3.040914f,  1.760749f,
+  -0.009062f, 0.009623f,  1.579270f,  -2.012891f, 1.629662f,  -1.796016f,
+  -0.279782f, -0.288359f, 1.875618f,  1.639855f,  0.903020f,  0.906438f,
+  0.553394f,  -1.621589f, 0.185063f,  0.605207f,  -0.133560f, 0.588689f,
+};
+
+static const float vp9_var_rd_part_nn_bias_64_layer0[8] = {
+  0.659717f, 0.120912f, 0.329894f, -1.586385f,
+  1.715839f, 0.085754f, 2.038774f, 0.268119f,
+};
+
+static const float vp9_var_rd_part_nn_weights_64_layer1[8 * LABELS] = {
+  -3.445586f, 2.375620f, 1.236970f, 0.804030f,
+  -2.448384f, 2.827254f, 2.291478f, 0.790252f,
+};
+
+static const float vp9_var_rd_part_nn_bias_64_layer1[LABELS] = {
+  -1.16608453f,
+};
+
+static const NN_CONFIG vp9_var_rd_part_nnconfig_64 = {
+  FEATURES,  // num_inputs
+  LABELS,    // num_outputs
+  1,         // num_hidden_layers
+  {
+      8,
+  },  // num_hidden_nodes
+  {
+      vp9_var_rd_part_nn_weights_64_layer0,
+      vp9_var_rd_part_nn_weights_64_layer1,
+  },
+  {
+      vp9_var_rd_part_nn_bias_64_layer0,
+      vp9_var_rd_part_nn_bias_64_layer1,
+  },
+};
+
+static const float vp9_var_rd_part_nn_weights_32_layer0[FEATURES * 8] = {
+  0.022420f,  -0.032201f, 1.228065f,  -2.767655f, 1.928743f,  0.566863f,
+  0.459229f,  0.422048f,  0.833395f,  0.822960f,  -0.232227f, 0.586895f,
+  0.442856f,  -0.018564f, 0.227672f,  -1.291306f, 0.119428f,  -0.776563f,
+  -0.042947f, 0.183129f,  0.592231f,  1.174859f,  -0.503868f, 0.270102f,
+  -0.330537f, -0.036340f, 1.144630f,  1.783710f,  1.216929f,  2.038085f,
+  0.373782f,  -0.430258f, 1.957002f,  1.383908f,  2.012261f,  1.585693f,
+  -0.394399f, -0.337523f, -0.238335f, 0.007819f,  -0.368294f, 0.437875f,
+  -0.318923f, -0.242000f, 2.276263f,  1.501432f,  0.645706f,  0.344774f,
+};
+
+static const float vp9_var_rd_part_nn_bias_32_layer0[8] = {
+  -0.023846f, -1.348117f, 1.365007f,  -1.644164f,
+  0.062992f,  1.257980f,  -0.098642f, 1.388472f,
+};
+
+static const float vp9_var_rd_part_nn_weights_32_layer1[8 * LABELS] = {
+  3.016729f, 0.622684f,  -1.021302f, 1.490383f,
+  1.702046f, -2.964618f, 0.689045f,  1.711754f,
+};
+
+static const float vp9_var_rd_part_nn_bias_32_layer1[LABELS] = {
+  -1.28798676f,
+};
+
+static const NN_CONFIG vp9_var_rd_part_nnconfig_32 = {
+  FEATURES,  // num_inputs
+  LABELS,    // num_outputs
+  1,         // num_hidden_layers
+  {
+      8,
+  },  // num_hidden_nodes
+  {
+      vp9_var_rd_part_nn_weights_32_layer0,
+      vp9_var_rd_part_nn_weights_32_layer1,
+  },
+  {
+      vp9_var_rd_part_nn_bias_32_layer0,
+      vp9_var_rd_part_nn_bias_32_layer1,
+  },
+};
+
+static const float vp9_var_rd_part_nn_weights_16_layer0[FEATURES * 8] = {
+  -0.726813f, -0.026748f, 1.376946f,  1.467961f,  1.961810f,  1.690412f,
+  0.596484f,  -0.261486f, -0.310905f, -0.366311f, -1.300086f, -0.534336f,
+  0.040520f,  -0.032391f, -1.194214f, 2.438063f,  -3.915334f, 1.997270f,
+  0.673696f,  -0.676393f, 1.654886f,  1.553838f,  1.129691f,  1.360201f,
+  0.255001f,  0.336442f,  -0.487759f, -0.634555f, 0.479170f,  -0.110475f,
+  -0.661852f, -0.158872f, -0.350243f, -0.303957f, -0.045018f, 0.586151f,
+  -0.262463f, 0.228079f,  -1.688776f, -1.594502f, -2.261078f, -1.802535f,
+  0.034748f,  -0.028476f, 2.713258f,  0.212446f,  -1.529202f, -2.560178f,
+};
+
+static const float vp9_var_rd_part_nn_bias_16_layer0[8] = {
+  0.495983f,  1.858545f, 0.162974f, 1.992247f,
+  -2.698863f, 0.110020f, 0.550830f, 0.420941f,
+};
+
+static const float vp9_var_rd_part_nn_weights_16_layer1[8 * LABELS] = {
+  1.768409f, -1.394240f, 1.076846f,  -1.762808f,
+  1.517405f, 0.535195f,  -0.426827f, 1.002272f,
+};
+
+static const float vp9_var_rd_part_nn_bias_16_layer1[LABELS] = {
+  -1.65894794f,
+};
+
+static const NN_CONFIG vp9_var_rd_part_nnconfig_16 = {
+  FEATURES,  // num_inputs
+  LABELS,    // num_outputs
+  1,         // num_hidden_layers
+  {
+      8,
+  },  // num_hidden_nodes
+  {
+      vp9_var_rd_part_nn_weights_16_layer0,
+      vp9_var_rd_part_nn_weights_16_layer1,
+  },
+  {
+      vp9_var_rd_part_nn_bias_16_layer0,
+      vp9_var_rd_part_nn_bias_16_layer1,
+  },
+};
+
+static const float vp9_var_rd_part_nn_weights_8_layer0[FEATURES * 8] = {
+  -0.804900f, -1.214983f, 0.840202f, 0.686566f,  0.155804f,  0.025542f,
+  -1.244635f, -0.368403f, 0.364150f, 1.081073f,  0.552387f,  0.452715f,
+  0.652968f,  -0.293058f, 0.048967f, 0.021240f,  -0.662981f, 0.424700f,
+  0.008293f,  -0.013088f, 0.747007f, -1.453907f, -1.498226f, 1.593252f,
+  -0.239557f, -0.143766f, 0.064311f, 1.320998f,  -0.477411f, 0.026374f,
+  0.730884f,  -0.675124f, 0.965521f, 0.863658f,  0.809186f,  0.812280f,
+  0.513131f,  0.185102f,  0.211354f, 0.793666f,  0.121714f,  -0.015383f,
+  -0.650980f, -0.046581f, 0.911141f, 0.806319f,  0.974773f,  0.815893f,
+};
+
+static const float vp9_var_rd_part_nn_bias_8_layer0[8] = {
+  0.176134f, 0.651308f, 2.007761f,  0.068812f,
+  1.061517f, 1.487161f, -2.308147f, 1.099828f,
+};
+
+static const float vp9_var_rd_part_nn_weights_8_layer1[8 * LABELS] = {
+  0.683032f, 1.326393f,  -1.661539f, 1.438920f,
+  1.118023f, -2.237380f, 1.518468f,  2.010416f,
+};
+
+static const float vp9_var_rd_part_nn_bias_8_layer1[LABELS] = {
+  -1.65423989f,
+};
+
+static const NN_CONFIG vp9_var_rd_part_nnconfig_8 = {
+  FEATURES,  // num_inputs
+  LABELS,    // num_outputs
+  1,         // num_hidden_layers
+  {
+      8,
+  },  // num_hidden_nodes
+  {
+      vp9_var_rd_part_nn_weights_8_layer0,
+      vp9_var_rd_part_nn_weights_8_layer1,
+  },
+  {
+      vp9_var_rd_part_nn_bias_8_layer0,
+      vp9_var_rd_part_nn_bias_8_layer1,
+  },
+};
+#undef FEATURES
+#undef LABELS
 
 // Partition pruning model(linear).
 static const float vp9_partition_feature_mean[24] = {

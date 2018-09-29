@@ -219,6 +219,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   sf->less_rectangular_check = 1;
   sf->use_square_partition_only = !boosted;
   sf->prune_ref_frame_for_rect_partitions = 1;
+  sf->ml_var_partition_pruning = 1;
 
   sf->ml_prune_rect_partition_threhold[0] = -1;
   sf->ml_prune_rect_partition_threhold[1] = 350;
@@ -241,6 +242,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
 
   if (speed >= 1) {
     sf->enable_tpl_model = 0;
+    sf->ml_var_partition_pruning = 0;
     sf->ml_prune_rect_partition_threhold[1] = 200;
     sf->ml_prune_rect_partition_threhold[2] = 200;
     sf->ml_prune_rect_partition_threhold[3] = 200;
@@ -939,6 +941,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->ml_prune_rect_partition_threhold[1] = -1;
   sf->ml_prune_rect_partition_threhold[2] = -1;
   sf->ml_prune_rect_partition_threhold[3] = -1;
+  sf->ml_var_partition_pruning = 0;
 
   // Some speed-up features even for best quality as minimal impact on quality.
   sf->adaptive_rd_thresh = 1;
