@@ -136,20 +136,25 @@ typedef enum {
 } INTERP_FILTER_MASK;
 
 typedef enum {
-  // Search partitions using RD/NONRD criterion
+  // Search partitions using RD/NONRD criterion.
   SEARCH_PARTITION,
 
-  // Always use a fixed size partition
+  // Always use a fixed size partition.
   FIXED_PARTITION,
 
   REFERENCE_PARTITION,
 
   // Use an arbitrary partitioning scheme based on source variance within
-  // a 64X64 SB
+  // a 64X64 SB.
   VAR_BASED_PARTITION,
 
-  // Use non-fixed partitions based on source variance
-  SOURCE_VAR_BASED_PARTITION
+  // Use non-fixed partitions based on source variance.
+  SOURCE_VAR_BASED_PARTITION,
+
+#if CONFIG_ML_VAR_PARTITION
+  // Make partition decisions with machine learning models.
+  ML_BASED_PARTITION
+#endif  // CONFIG_ML_VAR_PARTITION
 } PARTITION_SEARCH_TYPE;
 
 typedef enum {

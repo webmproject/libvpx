@@ -4345,6 +4345,83 @@ static void pred_pixel_ready_reset(PC_TREE *pc_tree, BLOCK_SIZE bsize) {
   }
 }
 
+#if CONFIG_ML_VAR_PARTITION
+#define FEATURES 6
+#define LABELS 2
+static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
+                                      BLOCK_SIZE bsize, int mi_row,
+                                      int mi_col) {
+  VP9_COMMON *const cm = &cpi->common;
+  const NN_CONFIG *nn_config = NULL;
+  float thresh_low = -0.2f;
+  float thresh_high = 0.0f;
+
+  switch (bsize) {
+    case BLOCK_64X64:
+      nn_config = &vp9_var_part_nnconfig_64;
+      thresh_low = -0.3f;
+      thresh_high = -0.1f;
+      break;
+    case BLOCK_32X32: nn_config = &vp9_var_part_nnconfig_32; break;
+    case BLOCK_16X16: nn_config = &vp9_var_part_nnconfig_16; break;
+    case BLOCK_8X8: break;
+    default: assert(0 && "Unexpected block size."); return -1;
+  }
+
+  if (!nn_config) return -1;
+
+  vpx_clear_system_state();
+
+  {
+    float features[FEATURES] = { 0.0f };
+    const int dc_q = vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth);
+    int feature_idx = 0;
+    float score[LABELS];
+
+    features[feature_idx++] = logf((float)(dc_q * dc_q) / 256.0f + 1.0f);
+    vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
+    {
+      const int bs = 4 * num_4x4_blocks_wide_lookup[bsize];
+      const BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_SPLIT);
+      const int sb_offset_row = 8 * (mi_row & 7);
+      const int sb_offset_col = 8 * (mi_col & 7);
+      const uint8_t *pred = x->est_pred + sb_offset_row * 64 + sb_offset_col;
+      const uint8_t *src = x->plane[0].src.buf;
+      const int src_stride = x->plane[0].src.stride;
+      const int pred_stride = 64;
+      unsigned int sse;
+      int i;
+      // Variance of whole block.
+      const unsigned int var =
+          cpi->fn_ptr[bsize].vf(src, src_stride, pred, pred_stride, &sse);
+      const float factor = (var == 0) ? 1.0f : (1.0f / (float)var);
+
+      features[feature_idx++] = logf((float)var + 1.0f);
+      for (i = 0; i < 4; ++i) {
+        const int x_idx = (i & 1) * bs / 2;
+        const int y_idx = (i >> 1) * bs / 2;
+        const int src_offset = y_idx * src_stride + x_idx;
+        const int pred_offset = y_idx * pred_stride + x_idx;
+        // Variance of quarter block.
+        const unsigned int sub_var =
+            cpi->fn_ptr[subsize].vf(src + src_offset, src_stride,
+                                    pred + pred_offset, pred_stride, &sse);
+        const float var_ratio = (var == 0) ? 1.0f : factor * (float)sub_var;
+        features[feature_idx++] = var_ratio;
+      }
+    }
+
+    assert(feature_idx == FEATURES);
+    nn_predict(features, nn_config, score);
+    if (score[0] > thresh_high) return 3;
+    if (score[0] < thresh_low) return 0;
+    return -1;
+  }
+}
+#undef FEATURES
+#undef LABELS
+#endif  // CONFIG_ML_VAR_PARTITION
+
 static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                                  TileDataEnc *tile_data, TOKENEXTRA **tp,
                                  int mi_row, int mi_col, BLOCK_SIZE bsize,
@@ -4374,6 +4451,11 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       !force_vert_split && yss <= xss && bsize >= BLOCK_8X8;
   int partition_vert_allowed =
       !force_horz_split && xss <= yss && bsize >= BLOCK_8X8;
+#if CONFIG_ML_VAR_PARTITION
+  const int use_ml_based_partitioning =
+      sf->partition_search_type == ML_BASED_PARTITION;
+#endif  // CONFIG_ML_VAR_PARTITION
+
   (void)*tp_orig;
 
   // Avoid checking for rectangular partitions for speed >= 6.
@@ -4404,6 +4486,18 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     partition_vert_allowed &= force_vert_split;
   }
 
+#if CONFIG_ML_VAR_PARTITION
+  if (use_ml_based_partitioning) {
+    if (partition_none_allowed || do_split) do_rect = 0;
+    if (partition_none_allowed && do_split) {
+      const int ml_predicted_partition =
+          ml_predict_var_paritioning(cpi, x, bsize, mi_row, mi_col);
+      if (ml_predicted_partition == 0) do_split = 0;
+      if (ml_predicted_partition == 3) partition_none_allowed = 0;
+    }
+  }
+#endif  // CONFIG_ML_VAR_PARTITION
+
   if (!partition_none_allowed && !do_split) do_rect = 1;
 
   ctx->pred_pixel_ready =
@@ -4419,26 +4513,28 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     ctx->skip = x->skip;
 
     if (this_rdc.rate != INT_MAX) {
-      int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
+      const int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       this_rdc.rate += cpi->partition_cost[pl][PARTITION_NONE];
       this_rdc.rdcost =
           RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
       if (this_rdc.rdcost < best_rdc.rdcost) {
-        int64_t dist_breakout_thr = sf->partition_search_breakout_thr.dist;
-        int64_t rate_breakout_thr = sf->partition_search_breakout_thr.rate;
-
-        dist_breakout_thr >>=
-            8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
-
-        rate_breakout_thr *= num_pels_log2_lookup[bsize];
-
         best_rdc = this_rdc;
         if (bsize >= BLOCK_8X8) pc_tree->partitioning = PARTITION_NONE;
 
-        if (!x->e_mbd.lossless && this_rdc.rate < rate_breakout_thr &&
-            this_rdc.dist < dist_breakout_thr) {
-          do_split = 0;
-          do_rect = 0;
+#if CONFIG_ML_VAR_PARTITION
+        if (!use_ml_based_partitioning)
+#endif  // CONFIG_ML_VAR_PARTITION
+        {
+          int64_t dist_breakout_thr = sf->partition_search_breakout_thr.dist;
+          int64_t rate_breakout_thr = sf->partition_search_breakout_thr.rate;
+          dist_breakout_thr >>=
+              8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
+          rate_breakout_thr *= num_pels_log2_lookup[bsize];
+          if (!x->e_mbd.lossless && this_rdc.rate < rate_breakout_thr &&
+              this_rdc.dist < dist_breakout_thr) {
+            do_split = 0;
+            do_rect = 0;
+          }
         }
       }
     }
@@ -4837,6 +4933,111 @@ static void nonrd_use_partition(VP9_COMP *cpi, ThreadData *td,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
+#if CONFIG_ML_VAR_PARTITION
+// Get a prediction(stored in x->est_pred) for the whole 64x64 superblock.
+static void get_estimated_pred(VP9_COMP *cpi, const TileInfo *const tile,
+                               MACROBLOCK *x, int mi_row, int mi_col) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int is_key_frame = frame_is_intra_only(cm);
+
+  set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
+
+  if (!is_key_frame) {
+    MACROBLOCKD *xd = &x->e_mbd;
+    MODE_INFO *mi = xd->mi[0];
+    YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
+    const YV12_BUFFER_CONFIG *yv12_g = NULL;
+    const BLOCK_SIZE bsize = BLOCK_32X32 + (mi_col + 4 < cm->mi_cols) * 2 +
+                             (mi_row + 4 < cm->mi_rows);
+    int pixels_wide = 64, pixels_high = 64;
+    unsigned int y_sad_g, y_sad_thr;
+    unsigned int y_sad = UINT_MAX;
+
+    assert(yv12 != NULL);
+
+    if (xd->mb_to_right_edge < 0) pixels_wide += (xd->mb_to_right_edge >> 3);
+    if (xd->mb_to_bottom_edge < 0) pixels_high += (xd->mb_to_bottom_edge >> 3);
+
+    if (!(is_one_pass_cbr_svc(cpi) && cpi->svc.spatial_layer_id) ||
+        cpi->svc.use_gf_temporal_ref_current_layer) {
+      // For now, GOLDEN will not be used for non-zero spatial layers, since
+      // it may not be a temporal reference.
+      yv12_g = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+    }
+
+    // Only compute y_sad_g (sad for golden reference) for speed < 8.
+    if (cpi->oxcf.speed < 8 && yv12_g && yv12_g != yv12 &&
+        (cpi->ref_frame_flags & VP9_GOLD_FLAG)) {
+      vp9_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
+                           &cm->frame_refs[GOLDEN_FRAME - 1].sf);
+      y_sad_g = cpi->fn_ptr[bsize].sdf(
+          x->plane[0].src.buf, x->plane[0].src.stride, xd->plane[0].pre[0].buf,
+          xd->plane[0].pre[0].stride);
+    } else {
+      y_sad_g = UINT_MAX;
+    }
+
+    if (cpi->oxcf.lag_in_frames > 0 && cpi->oxcf.rc_mode == VPX_VBR &&
+        cpi->rc.is_src_frame_alt_ref) {
+      yv12 = get_ref_frame_buffer(cpi, ALTREF_FRAME);
+      vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
+                           &cm->frame_refs[ALTREF_FRAME - 1].sf);
+      mi->ref_frame[0] = ALTREF_FRAME;
+      y_sad_g = UINT_MAX;
+    } else {
+      vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
+                           &cm->frame_refs[LAST_FRAME - 1].sf);
+      mi->ref_frame[0] = LAST_FRAME;
+    }
+    mi->ref_frame[1] = NONE;
+    mi->sb_type = BLOCK_64X64;
+    mi->mv[0].as_int = 0;
+    mi->interp_filter = BILINEAR;
+
+    {
+      const MV dummy_mv = { 0, 0 };
+      y_sad = vp9_int_pro_motion_estimation(cpi, x, bsize, mi_row, mi_col,
+                                            &dummy_mv);
+      x->sb_use_mv_part = 1;
+      x->sb_mvcol_part = mi->mv[0].as_mv.col;
+      x->sb_mvrow_part = mi->mv[0].as_mv.row;
+    }
+
+    // Pick ref frame for partitioning, bias last frame when y_sad_g and y_sad
+    // are close if short_circuit_low_temp_var is on.
+    y_sad_thr = cpi->sf.short_circuit_low_temp_var ? (y_sad * 7) >> 3 : y_sad;
+    if (y_sad_g < y_sad_thr) {
+      vp9_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
+                           &cm->frame_refs[GOLDEN_FRAME - 1].sf);
+      mi->ref_frame[0] = GOLDEN_FRAME;
+      mi->mv[0].as_int = 0;
+      y_sad = y_sad_g;
+    } else {
+      x->pred_mv[LAST_FRAME] = mi->mv[0].as_mv;
+    }
+
+    set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
+    xd->plane[0].dst.buf = x->est_pred;
+    xd->plane[0].dst.stride = 64;
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
+  } else {
+#if CONFIG_VP9_HIGHBITDEPTH
+    switch (xd->bd) {
+      case 8: memset(x->est_pred, 128, 64 * 64 * sizeof(x->est_pred[0])); break;
+      case 10:
+        memset(x->est_pred, 128 * 4, 64 * 64 * sizeof(x->est_pred[0]));
+        break;
+      case 12:
+        memset(x->est_pred, 128 * 16, 64 * 64 * sizeof(x->est_pred[0]));
+        break;
+    }
+#else
+    memset(x->est_pred, 128, 64 * 64 * sizeof(x->est_pred[0]));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
+}
+#endif  // CONFIG_ML_VAR_PARTITION
+
 static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
                                 TileDataEnc *tile_data, int mi_row,
                                 TOKENEXTRA **tp) {
@@ -4928,6 +5129,17 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
                             BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
         break;
+#if CONFIG_ML_VAR_PARTITION
+      case ML_BASED_PARTITION:
+        get_estimated_pred(cpi, tile_info, x, mi_row, mi_col);
+        x->max_partition_size = BLOCK_64X64;
+        x->min_partition_size = BLOCK_8X8;
+        x->sb_pickmode_part = 1;
+        nonrd_pick_partition(cpi, td, tile_data, tp, mi_row, mi_col,
+                             BLOCK_64X64, &dummy_rdc, 1, INT64_MAX,
+                             td->pc_root);
+        break;
+#endif  // CONFIG_ML_VAR_PARTITION
       case SOURCE_VAR_BASED_PARTITION:
         set_source_var_based_partition(cpi, tile_info, x, mi, mi_row, mi_col);
         nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,

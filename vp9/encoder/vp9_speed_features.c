@@ -623,7 +623,18 @@ static void set_rt_speed_feature_framesize_independent(
       sf->use_altref_onepass = 1;
       sf->use_compound_nonrd_pickmode = 1;
     }
+#if CONFIG_ML_VAR_PARTITION
+    if (!frame_is_intra_only(cm) && cm->width >= 360 && cm->height >= 360)
+      sf->partition_search_type = ML_BASED_PARTITION;
+    else
+      sf->partition_search_type = VAR_BASED_PARTITION;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH)
+      sf->partition_search_type = VAR_BASED_PARTITION;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#else
     sf->partition_search_type = VAR_BASED_PARTITION;
+#endif  // CONFIG_ML_VAR_PARTITION
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
     sf->skip_encode_sb = 0;
