@@ -135,8 +135,6 @@ typedef struct {
   FRAME_UPDATE_TYPE update_type[MAX_STATIC_GF_GROUP_LENGTH + 2];
   unsigned char arf_src_offset[MAX_STATIC_GF_GROUP_LENGTH + 2];
   unsigned char layer_depth[MAX_STATIC_GF_GROUP_LENGTH + 2];
-  unsigned char arf_update_idx[MAX_STATIC_GF_GROUP_LENGTH + 2];
-  unsigned char arf_ref_idx[MAX_STATIC_GF_GROUP_LENGTH + 2];
   int bit_allocation[MAX_STATIC_GF_GROUP_LENGTH + 2];
   int gfu_boost[MAX_STATIC_GF_GROUP_LENGTH + 2];
 

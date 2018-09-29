@@ -2206,11 +2206,8 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
   // For key frames the frame target rate is already set and it
   // is also the golden frame.
   // === [frame_index == 0] ===
-  if (!key_frame) {
+  if (!key_frame)
     set_gf_overlay_frame_type(gf_group, frame_index, rc->source_alt_ref_active);
-    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
-    gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
-  }
 
   ++frame_index;
 
@@ -2219,12 +2216,8 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->update_type[frame_index] = ARF_UPDATE;
     gf_group->rf_level[frame_index] = GF_ARF_STD;
     gf_group->layer_depth[frame_index] = 1;
-
     gf_group->arf_src_offset[frame_index] =
         (unsigned char)(rc->baseline_gf_interval - 1);
-
-    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
-    gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
     ++frame_index;
   }
 
@@ -2244,11 +2237,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
       rc->baseline_gf_interval - (key_frame || rc->source_alt_ref_pending);
 
   for (i = 0; i < normal_frames; ++i) {
-    int arf_idx = 0;
     if (twopass->stats_in >= twopass->stats_in_end) break;
-
-    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[arf_idx];
-    gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[arf_idx];
 
     gf_group->update_type[frame_index] = LF_UPDATE;
     gf_group->rf_level[frame_index] = INTER_NORMAL;
@@ -2262,8 +2251,6 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
   // We need to configure the frame at the end of the sequence + 1 that will be
   // the start frame for the next group. Otherwise prior to the call to
   // vp9_rc_get_second_pass_params() the data will be undefined.
-  gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
-  gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
 
   set_gf_overlay_frame_type(gf_group, frame_index, rc->source_alt_ref_pending);
 
