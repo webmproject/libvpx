@@ -6473,8 +6473,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           {
             FILE *f = fopen("q_used.stt", "a");
             fprintf(f, "%5d : Y%f7.3:U%f7.3:V%f7.3:F%f7.3:S%7.3f\n",
-                    cpi->common.current_video_frame, y2, u2, v2,
-                    frame_psnr2, frame_ssim2);
+                    cpi->common.current_video_frame, psnr2.psnr[1],
+                    psnr2.psnr[2], psnr2.psnr[3], psnr2.psnr[0], frame_ssim2);
             fclose(f);
           }
 #endif
