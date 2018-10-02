@@ -59,7 +59,7 @@ class MotionVectorTestLarge
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (video->frame() == 1) {
+    if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       encoder->Control(VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST, mv_test_mode_);
       if (encoding_mode_ != ::libvpx_test::kRealTime) {
