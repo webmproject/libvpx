@@ -2513,7 +2513,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // bits to spare and are better with a smaller interval and smaller boost.
     // At high Q when there are few bits to spare we are better with a longer
     // interval to spread the cost of the GF.
-    active_max_gf_interval = 12 + arf_active_or_kf + VPXMIN(4, q_term);
+    active_max_gf_interval = 11 + arf_active_or_kf + VPXMIN(5, q_term);
+
+    // Force max GF interval to be odd.
+    active_max_gf_interval = active_max_gf_interval | 0x01;
 
     // We have: active_min_gf_interval <=
     // rc->max_gf_interval + arf_active_or_kf.
@@ -2613,7 +2616,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
             // Don't break out with a very short interval.
             (i >= active_min_gf_interval) &&
             // If possible dont break very close to a kf
-            ((rc->frames_to_key - i) >= rc->min_gf_interval) &&
+            ((rc->frames_to_key - i) >= rc->min_gf_interval) && (i & 0x01) &&
             (!flash_detected) &&
             ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
              (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
