@@ -242,7 +242,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
 
   if (speed >= 1) {
     sf->enable_tpl_model = 0;
-    sf->ml_var_partition_pruning = 0;
+    sf->ml_var_partition_pruning = !boosted;
     sf->ml_prune_rect_partition_threhold[1] = 200;
     sf->ml_prune_rect_partition_threhold[2] = 200;
     sf->ml_prune_rect_partition_threhold[3] = 200;
@@ -291,6 +291,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   }
 
   if (speed >= 2) {
+    sf->ml_var_partition_pruning = 0;
     if (oxcf->vbr_corpus_complexity)
       sf->recode_loop = ALLOW_RECODE_FIRST;
     else
