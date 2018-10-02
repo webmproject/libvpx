@@ -6470,7 +6470,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           cpi->summedp_quality += frame_ssim2 * weight;
           cpi->summedp_weights += weight;
 #if 0
-          {
+          if (cm->show_frame) {
             FILE *f = fopen("q_used.stt", "a");
             fprintf(f, "%5d : Y%f7.3:U%f7.3:V%f7.3:F%f7.3:S%7.3f\n",
                     cpi->common.current_video_frame, psnr2.psnr[1],
