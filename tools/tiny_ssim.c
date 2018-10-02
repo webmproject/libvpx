@@ -605,7 +605,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (open_input_file(argv[1], &in[0], w, h, bit_depth) < 0) {
-    fprintf(stderr, "File %s can't be opened or parsed!\n", argv[2]);
+    fprintf(stderr, "File %s can't be opened or parsed!\n", argv[1]);
     goto clean_up;
   }
 
@@ -617,7 +617,7 @@ int main(int argc, char *argv[]) {
   }
   if (bit_depth == 10) peak = 1023.0;
 
-  if (bit_depth == 12) peak = 4095;
+  if (bit_depth == 12) peak = 4095.0;
 
   if (open_input_file(argv[2], &in[1], w, h, bit_depth) < 0) {
     fprintf(stderr, "File %s can't be opened or parsed!\n", argv[2]);
