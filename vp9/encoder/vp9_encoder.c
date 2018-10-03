@@ -5475,11 +5475,20 @@ static void prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
 }
 #endif
 
+#if CONFIG_NON_GREEDY_MV
 uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
                                        int frame_idx, uint8_t *cur_frame_buf,
                                        uint8_t *ref_frame_buf, int stride,
-                                       MV *mv, BLOCK_SIZE bsize, int mi_row,
-                                       int mi_col) {
+                                       BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                       TplDepStats *tpl_stats, int rf_idx) {
+  MV *mv = &tpl_stats->mv_arr[rf_idx].as_mv;
+#else   // CONFIG_NON_GREEDY_MV
+uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
+                                       int frame_idx, uint8_t *cur_frame_buf,
+                                       uint8_t *ref_frame_buf, int stride,
+                                       BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                       MV *mv) {
+#endif  // CONFIG_NON_GREEDY_MV
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
@@ -5521,7 +5530,8 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, nb_full_mvs);
   vp9_full_pixel_diamond_new(cpi, x, &best_ref_mv1_full, step_param, lambda,
                              MAX_MVSEARCH_STEPS - 1 - step_param, 1,
-                             &cpi->fn_ptr[bsize], nb_full_mvs, mv);
+                             &cpi->fn_ptr[bsize], nb_full_mvs, tpl_stats,
+                             rf_idx);
 #else
   (void)frame_idx;
   (void)mi_row;
@@ -5604,6 +5614,8 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
 #if CONFIG_NON_GREEDY_MV
       int rf_idx;
       for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        tpl_ptr->mv_dist[rf_idx] = src_stats->mv_dist[rf_idx];
+        tpl_ptr->mv_cost[rf_idx] = src_stats->mv_cost[rf_idx];
         tpl_ptr->inter_cost_arr[rf_idx] = src_stats->inter_cost;
         tpl_ptr->recon_error_arr[rf_idx] = src_stats->recon_error_arr[rf_idx];
         tpl_ptr->sse_arr[rf_idx] = src_stats->sse_arr[rf_idx];
@@ -5836,10 +5848,18 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       continue;
     }
 
+#if CONFIG_NON_GREEDY_MV
     motion_compensated_prediction(
         cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
-        ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride,
-        &mv.as_mv, bsize, mi_row, mi_col);
+        ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
+        mi_row, mi_col, tpl_stats, rf_idx);
+    mv.as_int = tpl_stats->mv_arr[rf_idx].as_int;
+#else
+    motion_compensated_prediction(
+        cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
+        ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
+        mi_row, mi_col, &mv.as_mv);
+#endif
 
     // TODO(jingning): Not yet support high bit-depth in the next three
     // steps.
@@ -5877,7 +5897,6 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
 #if CONFIG_NON_GREEDY_MV
     tpl_stats->inter_cost_arr[rf_idx] = inter_cost;
-    tpl_stats->mv_arr[rf_idx].as_int = mv.as_int;
     get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size,
                        &tpl_stats->recon_error_arr[rf_idx],
                        &tpl_stats->sse_arr[rf_idx]);
