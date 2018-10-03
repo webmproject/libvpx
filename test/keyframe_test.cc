@@ -38,7 +38,7 @@ class KeyframeTest
     if (kf_do_force_kf_) {
       frame_flags_ = (video->frame() % 3) ? 0 : VPX_EFLAG_FORCE_KF;
     }
-    if (set_cpu_used_ && video->frame() == 1) {
+    if (set_cpu_used_ && video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
     }
   }
