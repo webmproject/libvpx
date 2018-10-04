@@ -291,7 +291,7 @@ typedef struct TplDepStats {
   int_mv mv;
 
 #if CONFIG_NON_GREEDY_MV
-  int ready;
+  int ready[3];
   double mv_dist[3];
   double mv_cost[3];
   int64_t inter_cost_arr[3];
