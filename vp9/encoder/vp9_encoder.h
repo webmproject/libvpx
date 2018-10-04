@@ -311,6 +311,10 @@ typedef struct TplDepFrame {
   int mi_rows;
   int mi_cols;
   int base_qindex;
+#if CONFIG_NON_GREEDY_MV
+  double mv_dist_sum[3];
+  double mv_cost_sum[3];
+#endif
 } TplDepFrame;
 
 #define TPL_DEP_COST_SCALE_LOG2 4
