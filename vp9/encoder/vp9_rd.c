@@ -631,6 +631,7 @@ YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
   const VP9_COMMON *const cm = &cpi->common;
   const int scaled_idx = cpi->scaled_ref_idx[ref_frame - 1];
   const int ref_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+  assert(ref_frame >= LAST_FRAME && ref_frame <= ALTREF_FRAME);
   return (scaled_idx != ref_idx && scaled_idx != INVALID_IDX)
              ? &cm->buffer_pool->frame_bufs[scaled_idx].buf
              : NULL;
