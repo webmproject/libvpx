@@ -288,6 +288,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->exhaustive_searches_thresh =
         (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ? (1 << 23)
                                                                 : INT_MAX;
+    sf->use_accurate_subpel_search = USE_2_TAPS;
   }
 
   if (speed >= 2) {
@@ -450,6 +451,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->disable_golden_ref = 0;
   sf->enable_tpl_model = 0;
   sf->enhanced_full_pixel_motion_search = 0;
+  sf->use_accurate_subpel_search = USE_2_TAPS;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -942,6 +944,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->ml_prune_rect_partition_threhold[2] = -1;
   sf->ml_prune_rect_partition_threhold[3] = -1;
   sf->ml_var_partition_pruning = 0;
+  sf->use_accurate_subpel_search = USE_8_TAPS;
 
   // Some speed-up features even for best quality as minimal impact on quality.
   sf->adaptive_rd_thresh = 1;

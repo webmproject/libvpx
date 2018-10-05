@@ -243,6 +243,12 @@ typedef enum {
   RE_ENCODE_MAXQ = 2
 } OVERSHOOT_DETECTION_CBR_RT;
 
+typedef enum {
+  USE_2_TAPS = 0,
+  USE_4_TAPS,
+  USE_8_TAPS,
+} SUBPEL_SEARCH_TYPE;
+
 typedef struct SPEED_FEATURES {
   MV_SPEED_FEATURES mv;
 
@@ -586,6 +592,10 @@ typedef struct SPEED_FEATURES {
 
   // Allow for disabling golden reference.
   int disable_golden_ref;
+
+  // Allow sub-pixel search to use interpolation filters with different taps in
+  // order to achieve accurate motion search result.
+  SUBPEL_SEARCH_TYPE use_accurate_subpel_search;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
