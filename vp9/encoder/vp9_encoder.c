@@ -5451,7 +5451,7 @@ void init_tpl_stats(VP9_COMP *cpi) {
 
 #if CONFIG_NON_GREEDY_MV
 static void prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
-                                int mi_col, int_mv *nb_full_mvs) {
+                                int mi_col, int rf_idx, int_mv *nb_full_mvs) {
   const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
   int i;
   for (i = 0; i < NB_MVS_NUM; ++i) {
@@ -5462,9 +5462,9 @@ static void prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
       const TplDepStats *tpl_ptr =
           &tpl_frame
                ->tpl_stats_ptr[(mi_row + r) * tpl_frame->stride + mi_col + c];
-      if (tpl_ptr->ready) {
-        nb_full_mvs[i].as_mv.row = tpl_ptr->mv.as_mv.row >> 3;
-        nb_full_mvs[i].as_mv.col = tpl_ptr->mv.as_mv.col >> 3;
+      if (tpl_ptr->ready[rf_idx]) {
+        nb_full_mvs[i].as_mv.row = tpl_ptr->mv_arr[rf_idx].as_mv.row >> 3;
+        nb_full_mvs[i].as_mv.col = tpl_ptr->mv_arr[rf_idx].as_mv.col >> 3;
       } else {
         nb_full_mvs[i].as_int = INVALID_MV;
       }
@@ -5527,7 +5527,8 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 #if CONFIG_NON_GREEDY_MV
   (void)search_method;
   (void)sadpb;
-  prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, nb_full_mvs);
+  prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, rf_idx,
+                      nb_full_mvs);
   vp9_full_pixel_diamond_new(cpi, x, &best_ref_mv1_full, step_param, lambda,
                              MAX_MVSEARCH_STEPS - 1 - step_param, 1,
                              &cpi->fn_ptr[bsize], nb_full_mvs, tpl_stats,
@@ -5614,6 +5615,7 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
 #if CONFIG_NON_GREEDY_MV
       int rf_idx;
       for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        tpl_ptr->ready[rf_idx] = src_stats->ready[rf_idx];
         tpl_ptr->mv_dist[rf_idx] = src_stats->mv_dist[rf_idx];
         tpl_ptr->mv_cost[rf_idx] = src_stats->mv_cost[rf_idx];
         tpl_ptr->inter_cost_arr[rf_idx] = src_stats->inter_cost;
@@ -5622,7 +5624,6 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
         tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv_arr[rf_idx].as_int;
       }
       tpl_ptr->feature_score = src_stats->feature_score;
-      tpl_ptr->ready = 1;
 #endif
       tpl_ptr->intra_cost = intra_cost;
       tpl_ptr->inter_cost = inter_cost;
@@ -5843,9 +5844,13 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
     int_mv mv;
     if (ref_frame[rf_idx] == NULL) {
 #if CONFIG_NON_GREEDY_MV
-      tpl_stats->inter_cost_arr[rf_idx] = -1;
+      tpl_stats->ready[rf_idx] = 0;
 #endif
       continue;
+    } else {
+#if CONFIG_NON_GREEDY_MV
+      tpl_stats->ready[rf_idx] = 1;
+#endif
     }
 
 #if CONFIG_NON_GREEDY_MV
