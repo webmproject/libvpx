@@ -5545,12 +5545,13 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   /* restore UMV window */
   x->mv_limits = tmp_mv_limits;
 
+  // TODO(yunqing): may use higher tap interp filter than 2 taps.
   // Ignore mv costing by sending NULL pointer instead of cost array
   bestsme = cpi->find_fractional_mv_step(
       x, mv, &best_ref_mv1, cpi->common.allow_high_precision_mv, x->errorperbit,
       &cpi->fn_ptr[bsize], 0, mv_sf->subpel_search_level,
-      cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, 0,
-      0);
+      cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, 0, 0,
+      USE_2_TAPS);
 
   return bestsme;
 }
