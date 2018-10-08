@@ -5835,11 +5835,6 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
   set_mv_limits(cm, x, mi_row, mi_col);
 
-#if CONFIG_NON_GREEDY_MV
-  tpl_stats->feature_score = get_feature_score(
-      xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
-#endif
-
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     int_mv mv;
     if (ref_frame[rf_idx] == NULL) {
@@ -6005,6 +6000,20 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
 
 #if CONFIG_NON_GREEDY_MV
   tpl_frame->lambda = 250;
+
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+      const int mb_y_offset =
+          mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
+      const int bw = 4 << b_width_log2_lookup[bsize];
+      const int bh = 4 << b_height_log2_lookup[bsize];
+      TplDepStats *tpl_stats =
+          &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+      tpl_stats->feature_score = get_feature_score(
+          xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
+    }
+  }
+
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     tpl_frame->mv_dist_sum[rf_idx] = 0;
     tpl_frame->mv_cost_sum[rf_idx] = 0;
@@ -6016,6 +6025,11 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
       mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, src_diff, coeff,
                       qcoeff, dqcoeff, mi_row, mi_col, bsize, tx_size,
                       ref_frame, predictor, &recon_error, &sse, &tpl_stats);
+#if CONFIG_NON_GREEDY_MV
+      tpl_stats.feature_score =
+          tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col]
+              .feature_score;
+#endif
 
       // Motion flow dependency dispenser.
       tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
