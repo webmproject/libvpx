@@ -3217,8 +3217,8 @@ void vp9_scale_references(VP9_COMP *cpi) {
         if (cpi->oxcf.pass == 0 && !cpi->use_svc) {
           // Check for release of scaled reference.
           buf_idx = cpi->scaled_ref_idx[ref_frame - 1];
-          buf = (buf_idx != INVALID_IDX) ? &pool->frame_bufs[buf_idx] : NULL;
-          if (buf != NULL) {
+          if (buf_idx != INVALID_IDX) {
+            buf = &pool->frame_bufs[buf_idx];
             --buf->ref_count;
             cpi->scaled_ref_idx[ref_frame - 1] = INVALID_IDX;
           }
@@ -3249,22 +3249,21 @@ static void release_scaled_references(VP9_COMP *cpi) {
     refresh[2] = (cpi->refresh_alt_ref_frame) ? 1 : 0;
     for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
       const int idx = cpi->scaled_ref_idx[i - 1];
-      RefCntBuffer *const buf =
-          idx != INVALID_IDX ? &cm->buffer_pool->frame_bufs[idx] : NULL;
-      const YV12_BUFFER_CONFIG *const ref = get_ref_frame_buffer(cpi, i);
-      if (buf != NULL &&
-          (refresh[i - 1] || (buf->buf.y_crop_width == ref->y_crop_width &&
-                              buf->buf.y_crop_height == ref->y_crop_height))) {
-        --buf->ref_count;
-        cpi->scaled_ref_idx[i - 1] = INVALID_IDX;
+      if (idx != INVALID_IDX) {
+        RefCntBuffer *const buf = &cm->buffer_pool->frame_bufs[idx];
+        const YV12_BUFFER_CONFIG *const ref = get_ref_frame_buffer(cpi, i);
+        if (refresh[i - 1] || (buf->buf.y_crop_width == ref->y_crop_width &&
+                               buf->buf.y_crop_height == ref->y_crop_height)) {
+          --buf->ref_count;
+          cpi->scaled_ref_idx[i - 1] = INVALID_IDX;
+        }
       }
     }
   } else {
     for (i = 0; i < MAX_REF_FRAMES; ++i) {
       const int idx = cpi->scaled_ref_idx[i];
-      RefCntBuffer *const buf =
-          idx != INVALID_IDX ? &cm->buffer_pool->frame_bufs[idx] : NULL;
-      if (buf != NULL) {
+      if (idx != INVALID_IDX) {
+        RefCntBuffer *const buf = &cm->buffer_pool->frame_bufs[idx];
         --buf->ref_count;
         cpi->scaled_ref_idx[i] = INVALID_IDX;
       }
