@@ -3405,30 +3405,29 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
   MODE_INFO *mi = xd->mi[0];
   const NN_CONFIG *nn_config = NULL;
   DECLARE_ALIGNED(16, uint8_t, pred_buf[64 * 64]);
+  const int speed = cpi->oxcf.speed;
   int i;
-  float thresh_low = -1.0f;
-  float thresh_high = 0.0f;
+  float thresh = 0.0f;
 
   switch (bsize) {
     case BLOCK_64X64:
       nn_config = &vp9_var_rd_part_nnconfig_64;
-      thresh_low = -3.0f;
-      thresh_high = 3.0f;
+      thresh = speed > 0 ? 3.5f : 3.0f;
       break;
     case BLOCK_32X32:
       nn_config = &vp9_var_rd_part_nnconfig_32;
-      thresh_low = -3.0;
-      thresh_high = 3.0f;
+      thresh = speed > 0 ? 3.5f : 3.0f;
       break;
     case BLOCK_16X16:
       nn_config = &vp9_var_rd_part_nnconfig_16;
-      thresh_low = -4.0;
-      thresh_high = 4.0f;
+      thresh = speed > 0 ? 3.5f : 4.0f;
       break;
     case BLOCK_8X8:
       nn_config = &vp9_var_rd_part_nnconfig_8;
-      thresh_low = -2.0;
-      thresh_high = 2.0f;
+      if (cm->width >= 720 && cm->height >= 720)
+        thresh = speed > 0 ? 2.5f : 2.0f;
+      else
+        thresh = speed > 0 ? 3.5f : 2.0f;
       break;
     default: assert(0 && "Unexpected block size."); return;
   }
@@ -3520,8 +3519,8 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
     // partition is better than the non-split partition. So if the score is
     // high enough, we skip the none-split partition search; if the score is
     // low enough, we skip the split partition search.
-    if (score > thresh_high) *none = 0;
-    if (score < thresh_low) *split = 0;
+    if (score > thresh) *none = 0;
+    if (score < -thresh) *split = 0;
   }
 }
 #undef FEATURES
