@@ -5758,6 +5758,16 @@ double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows, int cols) {
 }
 #endif
 
+static void set_mv_limits(const VP9_COMMON *cm, MACROBLOCK *x, int mi_row,
+                          int mi_col) {
+  x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+  x->mv_limits.row_max =
+      (cm->mi_rows - 1 - mi_row) * MI_SIZE + (17 - 2 * VP9_INTERP_EXTEND);
+  x->mv_limits.col_min = -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+  x->mv_limits.col_max =
+      ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
+}
+
 void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                      struct scale_factors *sf, GF_PICTURE *gf_picture,
                      int frame_idx, int16_t *src_diff, tran_low_t *coeff,
@@ -5823,11 +5833,7 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   // Motion compensated prediction
   best_mv.as_int = 0;
 
-  (void)mb_y_offset;
-  // Motion estimation column boundary
-  x->mv_limits.col_min = -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
-  x->mv_limits.col_max =
-      ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
+  set_mv_limits(cm, x, mi_row, mi_col);
 
 #if CONFIG_NON_GREEDY_MV
   tpl_stats->feature_score = get_feature_score(
@@ -6005,10 +6011,6 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   }
 #endif
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
-    // Motion estimation row boundary
-    x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
-    x->mv_limits.row_max =
-        (cm->mi_rows - 1 - mi_row) * MI_SIZE + (17 - 2 * VP9_INTERP_EXTEND);
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
       TplDepStats tpl_stats;
       mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, src_diff, coeff,
