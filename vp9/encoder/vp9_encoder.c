@@ -5497,7 +5497,7 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 #if CONFIG_NON_GREEDY_MV
   // lambda is used to adjust the importance of motion vector consitency.
   // TODO(angiebird): Figure out lambda's proper value.
-  double lambda = 10000;
+  double lambda = cpi->tpl_stats[frame_idx].lambda;
   int_mv nb_full_mvs[NB_MVS_NUM];
 #endif
 
@@ -5998,6 +5998,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   vp9_frame_init_quantizer(cpi);
 
 #if CONFIG_NON_GREEDY_MV
+  tpl_frame->lambda = 250;
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     tpl_frame->mv_dist_sum[rf_idx] = 0;
     tpl_frame->mv_cost_sum[rf_idx] = 0;
