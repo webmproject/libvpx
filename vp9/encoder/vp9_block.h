@@ -211,6 +211,8 @@ struct macroblock {
 #if CONFIG_ML_VAR_PARTITION
   DECLARE_ALIGNED(16, uint8_t, est_pred[64 * 64]);
 #endif  // CONFIG_ML_VAR_PARTITION
+
+  struct scale_factors *me_sf;
 };
 
 #ifdef __cplusplus
