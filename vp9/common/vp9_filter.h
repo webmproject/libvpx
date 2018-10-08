@@ -25,6 +25,7 @@ extern "C" {
 #define EIGHTTAP_SHARP 2
 #define SWITCHABLE_FILTERS 3 /* Number of switchable filters */
 #define BILINEAR 3
+#define FOURTAP 4
 // The codec can operate in four possible inter prediction filter mode:
 // 8-tap, 8-tap-smooth, 8-tap-sharp, and switching between the three.
 #define SWITCHABLE_FILTER_CONTEXTS (SWITCHABLE_FILTERS + 1)
@@ -32,7 +33,7 @@ extern "C" {
 
 typedef uint8_t INTERP_FILTER;
 
-extern const InterpKernel *vp9_filter_kernels[4];
+extern const InterpKernel *vp9_filter_kernels[5];
 
 #ifdef __cplusplus
 }  // extern "C"

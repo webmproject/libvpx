@@ -63,6 +63,20 @@ DECLARE_ALIGNED(256, static const InterpKernel,
   { 0, -3, 2, 41, 63, 29, -2, -2 },   { 0, -3, 1, 38, 64, 32, -1, -3 }
 };
 
-const InterpKernel *vp9_filter_kernels[4] = {
-  sub_pel_filters_8, sub_pel_filters_8lp, sub_pel_filters_8s, bilinear_filters
+// 4-tap filter
+DECLARE_ALIGNED(256, static const InterpKernel,
+                sub_pel_filters_4[SUBPEL_SHIFTS]) = {
+  { 0, 0, 0, 128, 0, 0, 0, 0 },     { 0, 0, -3, 125, 8, -2, 0, 0 },
+  { 0, 0, -6, 120, 18, -4, 0, 0 },  { 0, 0, -8, 115, 27, -6, 0, 0 },
+  { 0, 0, -10, 108, 37, -7, 0, 0 }, { 0, 0, -11, 101, 47, -9, 0, 0 },
+  { 0, 0, -11, 93, 56, -10, 0, 0 }, { 0, 0, -12, 85, 66, -11, 0, 0 },
+  { 0, 0, -11, 75, 75, -11, 0, 0 }, { 0, 0, -11, 66, 85, -12, 0, 0 },
+  { 0, 0, -10, 56, 93, -11, 0, 0 }, { 0, 0, -9, 47, 101, -11, 0, 0 },
+  { 0, 0, -7, 37, 108, -10, 0, 0 }, { 0, 0, -6, 27, 115, -8, 0, 0 },
+  { 0, 0, -4, 18, 120, -6, 0, 0 },  { 0, 0, -2, 8, 125, -3, 0, 0 }
+};
+
+const InterpKernel *vp9_filter_kernels[5] = {
+  sub_pel_filters_8, sub_pel_filters_8lp, sub_pel_filters_8s, bilinear_filters,
+  sub_pel_filters_4
 };
