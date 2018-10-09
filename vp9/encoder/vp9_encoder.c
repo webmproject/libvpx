@@ -2449,6 +2449,17 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   vp9_loop_filter_init(cm);
 
+  // Set up the unit scaling factor used during motion search.
+#if CONFIG_VP9_HIGHBITDEPTH
+  vp9_setup_scale_factors_for_frame(&cpi->me_sf, cm->width, cm->height,
+                                    cm->width, cm->height,
+                                    cm->use_highbitdepth);
+#else
+  vp9_setup_scale_factors_for_frame(&cpi->me_sf, cm->width, cm->height,
+                                    cm->width, cm->height);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  cpi->td.mb.me_sf = &cpi->me_sf;
+
   cm->error.setjmp = 0;
 
   return cpi;
