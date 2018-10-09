@@ -5515,7 +5515,7 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 #if CONFIG_NON_GREEDY_MV
   // lambda is used to adjust the importance of motion vector consitency.
   // TODO(angiebird): Figure out lambda's proper value.
-  double lambda = 10000;
+  double lambda = cpi->tpl_stats[frame_idx].lambda;
   int_mv nb_full_mvs[NB_MVS_NUM];
 #endif
 
@@ -5777,6 +5777,16 @@ double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows, int cols) {
 }
 #endif
 
+static void set_mv_limits(const VP9_COMMON *cm, MACROBLOCK *x, int mi_row,
+                          int mi_col) {
+  x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+  x->mv_limits.row_max =
+      (cm->mi_rows - 1 - mi_row) * MI_SIZE + (17 - 2 * VP9_INTERP_EXTEND);
+  x->mv_limits.col_min = -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
+  x->mv_limits.col_max =
+      ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
+}
+
 void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                      struct scale_factors *sf, GF_PICTURE *gf_picture,
                      int frame_idx, int16_t *src_diff, tran_low_t *coeff,
@@ -5842,16 +5852,7 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   // Motion compensated prediction
   best_mv.as_int = 0;
 
-  (void)mb_y_offset;
-  // Motion estimation column boundary
-  x->mv_limits.col_min = -((mi_col * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
-  x->mv_limits.col_max =
-      ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
-
-#if CONFIG_NON_GREEDY_MV
-  tpl_stats->feature_score = get_feature_score(
-      xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
-#endif
+  set_mv_limits(cm, x, mi_row, mi_col);
 
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     int_mv mv;
@@ -6017,21 +6018,37 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   vp9_frame_init_quantizer(cpi);
 
 #if CONFIG_NON_GREEDY_MV
+  tpl_frame->lambda = 250;
+
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+      const int mb_y_offset =
+          mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
+      const int bw = 4 << b_width_log2_lookup[bsize];
+      const int bh = 4 << b_height_log2_lookup[bsize];
+      TplDepStats *tpl_stats =
+          &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+      tpl_stats->feature_score = get_feature_score(
+          xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
+    }
+  }
+
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     tpl_frame->mv_dist_sum[rf_idx] = 0;
     tpl_frame->mv_cost_sum[rf_idx] = 0;
   }
 #endif
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
-    // Motion estimation row boundary
-    x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
-    x->mv_limits.row_max =
-        (cm->mi_rows - 1 - mi_row) * MI_SIZE + (17 - 2 * VP9_INTERP_EXTEND);
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
       TplDepStats tpl_stats;
       mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, src_diff, coeff,
                       qcoeff, dqcoeff, mi_row, mi_col, bsize, tx_size,
                       ref_frame, predictor, &recon_error, &sse, &tpl_stats);
+#if CONFIG_NON_GREEDY_MV
+      tpl_stats.feature_score =
+          tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col]
+              .feature_score;
+#endif
 
       // Motion flow dependency dispenser.
       tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
