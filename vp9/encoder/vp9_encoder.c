@@ -5595,13 +5595,7 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int idx, idy;
 
-  int64_t intra_cost = src_stats->intra_cost / (mi_height * mi_width);
-  int64_t inter_cost = src_stats->inter_cost / (mi_height * mi_width);
-
   TplDepStats *tpl_ptr;
-
-  intra_cost = VPXMAX(1, intra_cost);
-  inter_cost = VPXMAX(1, inter_cost);
 
   for (idy = 0; idy < mi_height; ++idy) {
     tpl_ptr = &tpl_stats[(mi_row + idy) * stride + mi_col];
@@ -5619,8 +5613,8 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
       }
       tpl_ptr->feature_score = src_stats->feature_score;
 #endif
-      tpl_ptr->intra_cost = intra_cost;
-      tpl_ptr->inter_cost = inter_cost;
+      tpl_ptr->intra_cost = src_stats->intra_cost;
+      tpl_ptr->inter_cost = src_stats->inter_cost;
       tpl_ptr->mc_dep_cost = tpl_ptr->intra_cost + tpl_ptr->mc_flow;
       tpl_ptr->ref_frame_index = src_stats->ref_frame_index;
       tpl_ptr->mv.as_int = src_stats->mv.as_int;
@@ -5794,6 +5788,8 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   PREDICTION_MODE mode;
   int mb_y_offset = mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
   MODE_INFO mi_above, mi_left;
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
 
   memset(tpl_stats, 0, sizeof(*tpl_stats));
 
@@ -5917,9 +5913,10 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   }
   best_intra_cost = VPXMAX(best_intra_cost, 1);
   best_inter_cost = VPXMIN(best_intra_cost, best_inter_cost);
-  tpl_stats->inter_cost = best_inter_cost << TPL_DEP_COST_SCALE_LOG2;
-  tpl_stats->intra_cost = best_intra_cost << TPL_DEP_COST_SCALE_LOG2;
-  tpl_stats->mc_dep_cost = tpl_stats->intra_cost + tpl_stats->mc_flow;
+  tpl_stats->inter_cost = VPXMAX(
+      1, (best_inter_cost << TPL_DEP_COST_SCALE_LOG2) / (mi_height * mi_width));
+  tpl_stats->intra_cost = VPXMAX(
+      1, (best_intra_cost << TPL_DEP_COST_SCALE_LOG2) / (mi_height * mi_width));
   tpl_stats->ref_frame_index = gf_picture[frame_idx].ref_frame[best_rf_idx];
   tpl_stats->mv.as_int = best_mv.as_int;
 }
