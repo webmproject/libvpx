@@ -5589,36 +5589,21 @@ int round_floor(int ref_pos, int bsize_pix) {
 }
 
 void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
-                     BLOCK_SIZE bsize, int stride,
-                     const TplDepStats *src_stats) {
+                     BLOCK_SIZE bsize, int stride) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  const TplDepStats *src_stats = &tpl_stats[mi_row * stride + mi_col];
   int idx, idy;
 
-  TplDepStats *tpl_ptr;
-
   for (idy = 0; idy < mi_height; ++idy) {
-    tpl_ptr = &tpl_stats[(mi_row + idy) * stride + mi_col];
     for (idx = 0; idx < mi_width; ++idx) {
-#if CONFIG_NON_GREEDY_MV
-      int rf_idx;
-      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-        tpl_ptr->ready[rf_idx] = src_stats->ready[rf_idx];
-        tpl_ptr->mv_dist[rf_idx] = src_stats->mv_dist[rf_idx];
-        tpl_ptr->mv_cost[rf_idx] = src_stats->mv_cost[rf_idx];
-        tpl_ptr->inter_cost_arr[rf_idx] = src_stats->inter_cost;
-        tpl_ptr->recon_error_arr[rf_idx] = src_stats->recon_error_arr[rf_idx];
-        tpl_ptr->sse_arr[rf_idx] = src_stats->sse_arr[rf_idx];
-        tpl_ptr->mv_arr[rf_idx].as_int = src_stats->mv_arr[rf_idx].as_int;
-      }
-      tpl_ptr->feature_score = src_stats->feature_score;
-#endif
-      tpl_ptr->intra_cost = src_stats->intra_cost;
-      tpl_ptr->inter_cost = src_stats->inter_cost;
+      TplDepStats *tpl_ptr = &tpl_stats[(mi_row + idy) * stride + mi_col + idx];
+      const int64_t mc_flow = tpl_ptr->mc_flow;
+      const int64_t mc_ref_cost = tpl_ptr->mc_ref_cost;
+      *tpl_ptr = *src_stats;
+      tpl_ptr->mc_flow = mc_flow;
+      tpl_ptr->mc_ref_cost = mc_ref_cost;
       tpl_ptr->mc_dep_cost = tpl_ptr->intra_cost + tpl_ptr->mc_flow;
-      tpl_ptr->ref_frame_index = src_stats->ref_frame_index;
-      tpl_ptr->mv.as_int = src_stats->mv.as_int;
-      ++tpl_ptr;
     }
   }
 }
@@ -5764,12 +5749,11 @@ static void set_mv_limits(const VP9_COMMON *cm, MACROBLOCK *x, int mi_row,
 
 void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                      struct scale_factors *sf, GF_PICTURE *gf_picture,
-                     int frame_idx, int16_t *src_diff, tran_low_t *coeff,
-                     tran_low_t *qcoeff, tran_low_t *dqcoeff, int mi_row,
-                     int mi_col, BLOCK_SIZE bsize, TX_SIZE tx_size,
+                     int frame_idx, TplDepFrame *tpl_frame, int16_t *src_diff,
+                     tran_low_t *coeff, tran_low_t *qcoeff, tran_low_t *dqcoeff,
+                     int mi_row, int mi_col, BLOCK_SIZE bsize, TX_SIZE tx_size,
                      YV12_BUFFER_CONFIG *ref_frame[], uint8_t *predictor,
-                     int64_t *recon_error, int64_t *sse,
-                     TplDepStats *tpl_stats) {
+                     int64_t *recon_error, int64_t *sse) {
   VP9_COMMON *cm = &cpi->common;
   ThreadData *td = &cpi->td;
 
@@ -5790,8 +5774,8 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   MODE_INFO mi_above, mi_left;
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
-
-  memset(tpl_stats, 0, sizeof(*tpl_stats));
+  TplDepStats *tpl_stats =
+      &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
 
   xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
   xd->mb_to_bottom_edge = ((cm->mi_rows - 1 - mi_row) * MI_SIZE) * 8;
@@ -6018,19 +6002,12 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
 #endif
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-      TplDepStats tpl_stats;
-      mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, src_diff, coeff,
-                      qcoeff, dqcoeff, mi_row, mi_col, bsize, tx_size,
-                      ref_frame, predictor, &recon_error, &sse, &tpl_stats);
-#if CONFIG_NON_GREEDY_MV
-      tpl_stats.feature_score =
-          tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col]
-              .feature_score;
-#endif
-
+      mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, tpl_frame,
+                      src_diff, coeff, qcoeff, dqcoeff, mi_row, mi_col, bsize,
+                      tx_size, ref_frame, predictor, &recon_error, &sse);
       // Motion flow dependency dispenser.
       tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
-                      tpl_frame->stride, &tpl_stats);
+                      tpl_frame->stride);
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
