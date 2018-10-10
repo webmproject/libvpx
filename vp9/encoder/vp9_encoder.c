@@ -5445,12 +5445,14 @@ void init_tpl_stats(VP9_COMP *cpi) {
 
 #if CONFIG_NON_GREEDY_MV
 static void prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
-                                int mi_col, int rf_idx, int_mv *nb_full_mvs) {
+                                int mi_col, int rf_idx, BLOCK_SIZE bsize,
+                                int_mv *nb_full_mvs) {
+  const int mi_unit = num_8x8_blocks_wide_lookup[bsize];
   const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
   int i;
   for (i = 0; i < NB_MVS_NUM; ++i) {
-    int r = dirs[i][0];
-    int c = dirs[i][1];
+    int r = dirs[i][0] * mi_unit;
+    int c = dirs[i][1] * mi_unit;
     if (mi_row + r >= 0 && mi_row + r < tpl_frame->mi_rows && mi_col + c >= 0 &&
         mi_col + c < tpl_frame->mi_cols) {
       const TplDepStats *tpl_ptr =
@@ -5521,7 +5523,7 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 #if CONFIG_NON_GREEDY_MV
   (void)search_method;
   (void)sadpb;
-  prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, rf_idx,
+  prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, rf_idx, bsize,
                       nb_full_mvs);
   vp9_full_pixel_diamond_new(cpi, x, &best_ref_mv1_full, step_param, lambda,
                              MAX_MVSEARCH_STEPS - 1 - step_param, 1,
@@ -5818,21 +5820,12 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     int_mv mv;
     if (ref_frame[rf_idx] == NULL) {
-#if CONFIG_NON_GREEDY_MV
-      tpl_stats->ready[rf_idx] = 0;
-#endif
       continue;
     } else {
-#if CONFIG_NON_GREEDY_MV
-      tpl_stats->ready[rf_idx] = 1;
-#endif
     }
 
 #if CONFIG_NON_GREEDY_MV
-    motion_compensated_prediction(
-        cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
-        ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
-        mi_row, mi_col, tpl_stats, rf_idx);
+    (void)td;
     mv.as_int = tpl_stats->mv_arr[rf_idx].as_int;
 #else
     motion_compensated_prediction(
@@ -5999,6 +5992,31 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
     tpl_frame->mv_dist_sum[rf_idx] = 0;
     tpl_frame->mv_cost_sum[rf_idx] = 0;
   }
+
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+      const int mb_y_offset =
+          mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
+      TplDepStats *tpl_stats =
+          &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+
+      set_mv_limits(cm, x, mi_row, mi_col);
+
+      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        if (ref_frame[rf_idx] == NULL) {
+          tpl_stats->ready[rf_idx] = 0;
+          continue;
+        } else {
+          tpl_stats->ready[rf_idx] = 1;
+        }
+        motion_compensated_prediction(
+            cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
+            ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride,
+            bsize, mi_row, mi_col, tpl_stats, rf_idx);
+      }
+    }
+  }
+
 #endif
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
