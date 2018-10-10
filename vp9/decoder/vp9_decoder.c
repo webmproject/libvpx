@@ -55,6 +55,43 @@ static void vp9_dec_setup_mi(VP9_COMMON *cm) {
          cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
+void vp9_dec_alloc_row_mt_mem(RowMTWorkerData *row_mt_worker_data,
+                              VP9_COMMON *cm, int num_sbs) {
+  int plane;
+  const size_t dqcoeff_size = (num_sbs << DQCOEFFS_PER_SB_LOG2) *
+                              sizeof(*row_mt_worker_data->dqcoeff[0]);
+  row_mt_worker_data->num_sbs = num_sbs;
+  for (plane = 0; plane < 3; ++plane) {
+    CHECK_MEM_ERROR(cm, row_mt_worker_data->dqcoeff[plane],
+                    vpx_memalign(16, dqcoeff_size));
+    memset(row_mt_worker_data->dqcoeff[plane], 0, dqcoeff_size);
+    CHECK_MEM_ERROR(cm, row_mt_worker_data->eob[plane],
+                    vpx_calloc(num_sbs << EOBS_PER_SB_LOG2,
+                               sizeof(*row_mt_worker_data->eob[plane])));
+  }
+  CHECK_MEM_ERROR(cm, row_mt_worker_data->partition,
+                  vpx_calloc(num_sbs * PARTITIONS_PER_SB,
+                             sizeof(*row_mt_worker_data->partition)));
+  CHECK_MEM_ERROR(cm, row_mt_worker_data->recon_map,
+                  vpx_calloc(num_sbs, sizeof(*row_mt_worker_data->recon_map)));
+}
+
+void vp9_dec_free_row_mt_mem(RowMTWorkerData *row_mt_worker_data) {
+  if (row_mt_worker_data != NULL) {
+    int plane;
+    for (plane = 0; plane < 3; ++plane) {
+      vpx_free(row_mt_worker_data->eob[plane]);
+      row_mt_worker_data->eob[plane] = NULL;
+      vpx_free(row_mt_worker_data->dqcoeff[plane]);
+      row_mt_worker_data->dqcoeff[plane] = NULL;
+    }
+    vpx_free(row_mt_worker_data->partition);
+    row_mt_worker_data->partition = NULL;
+    vpx_free(row_mt_worker_data->recon_map);
+    row_mt_worker_data->recon_map = NULL;
+  }
+}
+
 static int vp9_dec_alloc_mi(VP9_COMMON *cm, int mi_size) {
   cm->mip = vpx_calloc(mi_size, sizeof(*cm->mip));
   if (!cm->mip) return 1;
@@ -140,6 +177,10 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
     vp9_loop_filter_dealloc(&pbi->lf_row_sync);
   }
 
+  if (pbi->row_mt == 1) {
+    vp9_dec_free_row_mt_mem(pbi->row_mt_worker_data);
+    vpx_free(pbi->row_mt_worker_data);
+  }
   vp9_remove_common(&pbi->common);
   vpx_free(pbi);
 }

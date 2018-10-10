@@ -26,6 +26,10 @@
 extern "C" {
 #endif
 
+#define EOBS_PER_SB_LOG2 8
+#define DQCOEFFS_PER_SB_LOG2 12
+#define PARTITIONS_PER_SB 85
+
 typedef struct TileBuffer {
   const uint8_t *data;
   size_t size;
@@ -44,6 +48,14 @@ typedef struct TileWorkerData {
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
   struct vpx_internal_error_info error_info;
 } TileWorkerData;
+
+typedef struct RowMTWorkerData {
+  int num_sbs;
+  int *eob[MAX_MB_PLANE];
+  PARTITION_TYPE *partition;
+  tran_low_t *dqcoeff[MAX_MB_PLANE];
+  int8_t *recon_map;
+} RowMTWorkerData;
 
 typedef struct VP9Decoder {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
@@ -77,6 +89,7 @@ typedef struct VP9Decoder {
 
   int row_mt;
   int lpf_mt_opt;
+  RowMTWorkerData *row_mt_worker_data;
 } VP9Decoder;
 
 int vp9_receive_compressed_data(struct VP9Decoder *pbi, size_t size,
@@ -113,6 +126,10 @@ vpx_codec_err_t vp9_parse_superframe_index(const uint8_t *data, size_t data_sz,
 struct VP9Decoder *vp9_decoder_create(BufferPool *const pool);
 
 void vp9_decoder_remove(struct VP9Decoder *pbi);
+
+void vp9_dec_alloc_row_mt_mem(RowMTWorkerData *row_mt_worker_data,
+                              VP9_COMMON *cm, int num_sbs);
+void vp9_dec_free_row_mt_mem(RowMTWorkerData *row_mt_worker_data);
 
 static INLINE void decrease_ref_count(int idx, RefCntBuffer *const frame_bufs,
                                       BufferPool *const pool) {
