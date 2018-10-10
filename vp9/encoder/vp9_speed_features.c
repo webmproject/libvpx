@@ -288,7 +288,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->exhaustive_searches_thresh =
         (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ? (1 << 23)
                                                                 : INT_MAX;
-    sf->use_accurate_subpel_search = USE_2_TAPS;
+    sf->use_accurate_subpel_search = USE_4_TAPS;
   }
 
   if (speed >= 2) {
@@ -330,6 +330,8 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
             good_quality_mesh_patterns[mesh_density_level][i].interval;
       }
     }
+
+    sf->use_accurate_subpel_search = USE_2_TAPS;
   }
 
   if (speed >= 3) {

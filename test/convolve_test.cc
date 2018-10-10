@@ -789,7 +789,7 @@ TEST_P(ConvolveTest, Copy2D) {
   }
 }
 
-const int kNumFilterBanks = 4;
+const int kNumFilterBanks = 5;
 const int kNumFilters = 16;
 
 TEST(ConvolveTest, FiltersWontSaturateWhenAddedPairwise) {
