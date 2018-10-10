@@ -155,7 +155,7 @@ SECTION .text
     lea ecx, [GLOBAL(bilin_filter_m)]
     mov g_bilin_filterm, ecx
 
-   lea ecx, [GLOBAL(pw_8)]
+    lea ecx, [GLOBAL(pw_8)]
     mov g_pw_8m, ecx
 
     LOAD_IF_USED 0, 1         ; load eax, ecx back
