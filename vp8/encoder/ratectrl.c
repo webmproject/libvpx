@@ -1474,7 +1474,7 @@ int vp8_drop_encodedframe_overshoot(VP8_COMP *cpi, int Q) {
     // QP threshold: only allow dropping if we are not close to qp_max.
     int thresh_qp = 3 * cpi->worst_quality >> 2;
     // Rate threshold, in bytes.
-    int thresh_rate = 3 * (cpi->av_per_frame_bandwidth >> 3);
+    int thresh_rate = 2 * (cpi->av_per_frame_bandwidth >> 3);
     // Threshold for the average (over all macroblocks) of the pixel-sum
     // residual error over 16x16 block.
     int thresh_pred_err_mb = (200 << 4);
