@@ -4018,13 +4018,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   }
 
   {
-    int do_ml_rect_partition_pruning =
+    const int do_ml_rect_partition_pruning =
         !frame_is_intra_only(cm) && !force_horz_split && !force_vert_split &&
         (partition_horz_allowed || partition_vert_allowed) && bsize > BLOCK_8X8;
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-      do_ml_rect_partition_pruning = 0;
-#endif
     if (do_ml_rect_partition_pruning) {
       ml_prune_rect_partition(cpi, x, bsize, pc_tree, &partition_horz_allowed,
                               &partition_vert_allowed, best_rdc.rdcost, mi_row,
