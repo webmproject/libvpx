@@ -1451,6 +1451,25 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi, const uint8_t *data,
   return vpx_reader_find_end(&tile_data->bit_reader);
 }
 
+static void set_rows_after_error(VP9LfSync *lf_sync, int start_row, int mi_rows,
+                                 int num_tiles_left, int total_num_tiles) {
+  do {
+    int mi_row;
+    const int aligned_rows = mi_cols_aligned_to_sb(mi_rows);
+    const int sb_rows = (aligned_rows >> MI_BLOCK_SIZE_LOG2);
+    const int corrupted = 1;
+    for (mi_row = start_row; mi_row < mi_rows; mi_row += MI_BLOCK_SIZE) {
+      const int is_last_row = (sb_rows - 1 == mi_row >> MI_BLOCK_SIZE_LOG2);
+      vp9_set_row(lf_sync, total_num_tiles, mi_row >> MI_BLOCK_SIZE_LOG2,
+                  is_last_row, corrupted);
+    }
+    /* If there are multiple tiles, the second tile should start marking row
+     * progress from row 0.
+     */
+    start_row = 0;
+  } while (num_tiles_left--);
+}
+
 // On entry 'tile_data->data_end' points to the end of the input frame, on exit
 // it is updated to reflect the bitreader position of the final tile column if
 // present in the tile buffer group or NULL otherwise.
@@ -1461,6 +1480,12 @@ static int tile_worker_hook(void *arg1, void *arg2) {
   TileInfo *volatile tile = &tile_data->xd.tile;
   const int final_col = (1 << pbi->common.log2_tile_cols) - 1;
   const uint8_t *volatile bit_reader_end = NULL;
+  VP9_COMMON *cm = &pbi->common;
+
+  LFWorkerData *lf_data = tile_data->lf_data;
+  VP9LfSync *lf_sync = tile_data->lf_sync;
+
+  volatile int mi_row = 0;
   volatile int n = tile_data->buf_start;
   tile_data->error_info.setjmp = 1;
 
@@ -1468,14 +1493,26 @@ static int tile_worker_hook(void *arg1, void *arg2) {
     tile_data->error_info.setjmp = 0;
     tile_data->xd.corrupted = 1;
     tile_data->data_end = NULL;
+    if (pbi->lpf_mt_opt && cm->lf.filter_level && !cm->skip_loop_filter) {
+      const int num_tiles_left = tile_data->buf_end - n;
+      const int mi_row_start = mi_row;
+      set_rows_after_error(lf_sync, mi_row_start, cm->mi_rows, num_tiles_left,
+                           1 << cm->log2_tile_cols);
+    }
     return 0;
   }
 
   tile_data->xd.corrupted = 0;
 
   do {
-    int mi_row, mi_col;
+    int mi_col;
     const TileBuffer *const buf = pbi->tile_buffers + n;
+
+    /* Initialize to 0 is safe since we do not deal with streams that have
+     * more than one row of tiles. (So tile->mi_row_start will be 0)
+     */
+    assert(cm->log2_tile_rows == 0);
+    mi_row = 0;
     vp9_zero(tile_data->dqcoeff);
     vp9_tile_init(tile, &pbi->common, 0, buf->col);
     setup_token_decoder(buf->data, tile_data->data_end, buf->size,
@@ -1493,12 +1530,35 @@ static int tile_worker_hook(void *arg1, void *arg2) {
            mi_col += MI_BLOCK_SIZE) {
         decode_partition(tile_data, pbi, mi_row, mi_col, BLOCK_64X64, 4);
       }
+      if (pbi->lpf_mt_opt && cm->lf.filter_level && !cm->skip_loop_filter) {
+        const int aligned_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+        const int sb_rows = (aligned_rows >> MI_BLOCK_SIZE_LOG2);
+        const int is_last_row = (sb_rows - 1 == mi_row >> MI_BLOCK_SIZE_LOG2);
+        vp9_set_row(lf_sync, 1 << cm->log2_tile_cols,
+                    mi_row >> MI_BLOCK_SIZE_LOG2, is_last_row,
+                    tile_data->xd.corrupted);
+      }
     }
 
     if (buf->col == final_col) {
       bit_reader_end = vpx_reader_find_end(&tile_data->bit_reader);
     }
   } while (!tile_data->xd.corrupted && ++n <= tile_data->buf_end);
+
+  if (pbi->lpf_mt_opt && n < tile_data->buf_end && cm->lf.filter_level &&
+      !cm->skip_loop_filter) {
+    /* This was not incremented in the tile loop, so increment before tiles left
+     * calculation
+     */
+    ++n;
+    set_rows_after_error(lf_sync, 0, cm->mi_rows, tile_data->buf_end - n,
+                         1 << cm->log2_tile_cols);
+  }
+
+  if (pbi->lpf_mt_opt && !tile_data->xd.corrupted && cm->lf.filter_level &&
+      !cm->skip_loop_filter) {
+    vp9_loopfilter_rows(lf_data, lf_sync);
+  }
 
   tile_data->data_end = bit_reader_end;
   return !tile_data->xd.corrupted;
@@ -1516,6 +1576,8 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi, const uint8_t *data,
   VP9_COMMON *const cm = &pbi->common;
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   const uint8_t *bit_reader_end = NULL;
+  VP9LfSync *lf_row_sync = &pbi->lf_row_sync;
+  YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -1542,12 +1604,26 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi, const uint8_t *data,
     }
   }
 
+  // Initialize LPF
+  if (pbi->lpf_mt_opt && cm->lf.filter_level && !cm->skip_loop_filter) {
+    vp9_lpf_mt_init(lf_row_sync, cm, cm->lf.filter_level,
+                    pbi->num_tile_workers);
+  }
+
   // Reset tile decoding hook
   for (n = 0; n < num_workers; ++n) {
     VPxWorker *const worker = &pbi->tile_workers[n];
     TileWorkerData *const tile_data =
         &pbi->tile_worker_data[n + pbi->total_tiles];
     winterface->sync(worker);
+
+    if (pbi->lpf_mt_opt && cm->lf.filter_level && !cm->skip_loop_filter) {
+      tile_data->lf_sync = lf_row_sync;
+      tile_data->lf_data = &tile_data->lf_sync->lfdata[n];
+      vp9_loop_filter_data_reset(tile_data->lf_data, new_fb, cm, pbi->mb.plane);
+      tile_data->lf_data->y_only = 0;
+    }
+
     tile_data->xd = pbi->mb;
     tile_data->xd.counts =
         cm->frame_parallel_decoding_mode ? NULL : &tile_data->counts;
@@ -2069,17 +2145,19 @@ void vp9_decode_frame(VP9Decoder *pbi, const uint8_t *data,
   if (pbi->max_threads > 1 && tile_rows == 1 && tile_cols > 1) {
     // Multi-threaded tile decoder
     *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
-    if (!xd->corrupted) {
-      if (!cm->skip_loop_filter) {
-        // If multiple threads are used to decode tiles, then we use those
-        // threads to do parallel loopfiltering.
-        vp9_loop_filter_frame_mt(new_fb, cm, pbi->mb.plane, cm->lf.filter_level,
-                                 0, 0, pbi->tile_workers, pbi->num_tile_workers,
-                                 &pbi->lf_row_sync);
+    if (!pbi->lpf_mt_opt) {
+      if (!xd->corrupted) {
+        if (!cm->skip_loop_filter) {
+          // If multiple threads are used to decode tiles, then we use those
+          // threads to do parallel loopfiltering.
+          vp9_loop_filter_frame_mt(new_fb, cm, pbi->mb.plane,
+                                   cm->lf.filter_level, 0, 0, pbi->tile_workers,
+                                   pbi->num_tile_workers, &pbi->lf_row_sync);
+        }
+      } else {
+        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Decode failed. Frame data is corrupted.");
       }
-    } else {
-      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Decode failed. Frame data is corrupted.");
     }
   } else {
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);

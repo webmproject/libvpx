@@ -270,6 +270,9 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
   RANGE_CHECK(ctx, row_mt, 0, 1);
   ctx->pbi->row_mt = ctx->row_mt;
 
+  RANGE_CHECK(ctx, lpf_opt, 0, 1);
+  ctx->pbi->lpf_mt_opt = ctx->lpf_opt;
+
   // If postprocessing was enabled by the application and a
   // configuration has not been provided, default it.
   if (!ctx->postproc_cfg_set && (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC))
@@ -658,6 +661,13 @@ static vpx_codec_err_t ctrl_set_row_mt(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_enable_lpf_opt(vpx_codec_alg_priv_t *ctx,
+                                           va_list args) {
+  ctx->lpf_opt = va_arg(args, int);
+
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   { VP8_COPY_REFERENCE, ctrl_copy_reference },
 
@@ -670,6 +680,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   { VP9_SET_SKIP_LOOP_FILTER, ctrl_set_skip_loop_filter },
   { VP9_DECODE_SVC_SPATIAL_LAYER, ctrl_set_spatial_layer_svc },
   { VP9D_SET_ROW_MT, ctrl_set_row_mt },
+  { VP9D_SET_LOOP_FILTER_OPT, ctrl_enable_lpf_opt },
 
   // Getters
   { VPXD_GET_LAST_QUANTIZER, ctrl_get_quantizer },

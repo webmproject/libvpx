@@ -100,19 +100,39 @@ static const arg_def_t framestatsarg =
     ARG_DEF(NULL, "framestats", 1, "Output per-frame stats (.csv format)");
 static const arg_def_t rowmtarg =
     ARG_DEF(NULL, "row-mt", 1, "Enable multi-threading to run row-wise in VP9");
+static const arg_def_t lpfoptarg =
+    ARG_DEF(NULL, "lpf-opt", 1,
+            "Do loopfilter without waiting for all threads to sync.");
 
-static const arg_def_t *all_args[] = {
-  &help,           &codecarg,      &use_yv12,         &use_i420,
-  &flipuvarg,      &rawvideo,      &noblitarg,        &progressarg,
-  &limitarg,       &skiparg,       &postprocarg,      &summaryarg,
-  &outputfile,     &threadsarg,    &frameparallelarg, &verbosearg,
-  &scalearg,       &fb_arg,        &md5arg,           &error_concealment,
-  &continuearg,
+static const arg_def_t *all_args[] = { &help,
+                                       &codecarg,
+                                       &use_yv12,
+                                       &use_i420,
+                                       &flipuvarg,
+                                       &rawvideo,
+                                       &noblitarg,
+                                       &progressarg,
+                                       &limitarg,
+                                       &skiparg,
+                                       &postprocarg,
+                                       &summaryarg,
+                                       &outputfile,
+                                       &threadsarg,
+                                       &frameparallelarg,
+                                       &verbosearg,
+                                       &scalearg,
+                                       &fb_arg,
+                                       &md5arg,
+                                       &error_concealment,
+                                       &continuearg,
 #if CONFIG_VP9_HIGHBITDEPTH
-  &outbitdeptharg,
+                                       &outbitdeptharg,
 #endif
-  &svcdecodingarg, &framestatsarg, &rowmtarg,         NULL
-};
+                                       &svcdecodingarg,
+                                       &framestatsarg,
+                                       &rowmtarg,
+                                       &lpfoptarg,
+                                       NULL };
 
 #if CONFIG_VP8_DECODER
 static const arg_def_t addnoise_level =
@@ -509,6 +529,7 @@ static int main_loop(int argc, const char **argv_) {
   int ec_enabled = 0;
   int keep_going = 0;
   int enable_row_mt = 0;
+  int enable_lpf_opt = 0;
   const VpxInterface *interface = NULL;
   const VpxInterface *fourcc_interface = NULL;
   uint64_t dx_time = 0;
@@ -633,6 +654,8 @@ static int main_loop(int argc, const char **argv_) {
       }
     } else if (arg_match(&arg, &rowmtarg, argi)) {
       enable_row_mt = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &lpfoptarg, argi)) {
+      enable_lpf_opt = arg_parse_uint(&arg);
     }
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
@@ -761,6 +784,12 @@ static int main_loop(int argc, const char **argv_) {
   if (interface->fourcc == VP9_FOURCC &&
       vpx_codec_control(&decoder, VP9D_SET_ROW_MT, enable_row_mt)) {
     fprintf(stderr, "Failed to set decoder in row multi-thread mode: %s\n",
+            vpx_codec_error(&decoder));
+    goto fail;
+  }
+  if (interface->fourcc == VP9_FOURCC &&
+      vpx_codec_control(&decoder, VP9D_SET_LOOP_FILTER_OPT, enable_lpf_opt)) {
+    fprintf(stderr, "Failed to set decoder in optimized loopfilter mode: %s\n",
             vpx_codec_error(&decoder));
     goto fail;
   }
