@@ -503,6 +503,13 @@ typedef struct EncFrameBuf {
 
 // Maximum operating frame buffer size needed for a GOP using ARF reference.
 #define MAX_ARF_GOP_SIZE (2 * MAX_LAG_BUFFERS)
+#if CONFIG_NON_GREEDY_MV
+typedef struct FEATURE_SCORE_LOC {
+  double feature_score;
+  int mi_row;
+  int mi_col;
+} FEATURE_SCORE_LOC;
+#endif
 
 typedef struct VP9_COMP {
   QUANTS quants;
@@ -530,6 +537,9 @@ typedef struct VP9_COMP {
   TplDepFrame tpl_stats[MAX_ARF_GOP_SIZE];
   YV12_BUFFER_CONFIG *tpl_recon_frames[REF_FRAMES];
   EncFrameBuf enc_frame_buf[REF_FRAMES];
+#if CONFIG_NON_GREEDY_MV
+  FEATURE_SCORE_LOC *feature_score_loc_arr;
+#endif
 
   TileDataEnc *tile_data;
   int allocated_tiles;  // Keep track of memory allocated for tiles.
