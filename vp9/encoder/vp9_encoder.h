@@ -495,6 +495,9 @@ typedef struct ARNRFilterData {
   struct scale_factors sf;
 } ARNRFilterData;
 
+// Maximum operating frame buffer size needed for a GOP using ARF reference.
+#define MAX_ARF_GOP_SIZE (2 * MAX_LAG_BUFFERS)
+
 typedef struct VP9_COMP {
   QUANTS quants;
   ThreadData td;
@@ -518,7 +521,7 @@ typedef struct VP9_COMP {
 #endif
   YV12_BUFFER_CONFIG *raw_source_frame;
 
-  TplDepFrame tpl_stats[MAX_LAG_BUFFERS];
+  TplDepFrame tpl_stats[MAX_ARF_GOP_SIZE];
   YV12_BUFFER_CONFIG *tpl_recon_frames[REFS_PER_FRAME + 1];
 
   TileDataEnc *tile_data;

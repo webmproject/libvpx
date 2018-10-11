@@ -2359,7 +2359,8 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   vp9_set_speed_features_framesize_dependent(cpi);
 
   if (cpi->sf.enable_tpl_model) {
-    for (frame = 0; frame < MAX_LAG_BUFFERS; ++frame) {
+    // TODO(jingning): Reduce the actual memory use for tpl model build up.
+    for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
       int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
       int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
 
@@ -2572,7 +2573,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   vp9_denoiser_free(&(cpi->denoiser));
 #endif
 
-  for (frame = 0; frame < MAX_LAG_BUFFERS; ++frame) {
+  for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
     cpi->tpl_stats[frame].is_valid = 0;
   }
@@ -5361,12 +5362,14 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   int pframe_qindex = cpi->tpl_stats[2].base_qindex;
 
   RefCntBuffer *frame_bufs = cm->buffer_pool->frame_bufs;
-  int recon_frame_index[REFS_PER_FRAME + 1] = { -1, -1, -1, -1 };
+  int8_t recon_frame_index[REFS_PER_FRAME + MAX_ARF_LAYERS];
+
+  memset(recon_frame_index, -1, sizeof(recon_frame_index));
 
   // TODO(jingning): To be used later for gf frame type parsing.
   (void)gf_group;
 
-  for (i = 0; i < FRAME_BUFFERS && frame_idx < REFS_PER_FRAME + 1; ++i) {
+  for (i = 0; i < FRAME_BUFFERS; ++i) {
     if (frame_bufs[i].ref_count == 0) {
       alloc_frame_mvs(cm, i);
       if (vpx_realloc_frame_buffer(&frame_bufs[i].buf, cm->width, cm->height,
@@ -5381,6 +5384,8 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
       recon_frame_index[frame_idx] = i;
       ++frame_idx;
+
+      if (frame_idx >= REFS_PER_FRAME + cpi->oxcf.enable_auto_arf) break;
     }
   }
 
@@ -5452,7 +5457,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
 void init_tpl_stats(VP9_COMP *cpi) {
   int frame_idx;
-  for (frame_idx = 0; frame_idx < MAX_LAG_BUFFERS; ++frame_idx) {
+  for (frame_idx = 0; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
     memset(tpl_frame->tpl_stats_ptr, 0,
            tpl_frame->height * tpl_frame->width *
@@ -6116,7 +6121,7 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
 #endif  // CONFIG_NON_GREEDY_MV
 
 static void setup_tpl_stats(VP9_COMP *cpi) {
-  GF_PICTURE gf_picture[MAX_LAG_BUFFERS];
+  GF_PICTURE gf_picture[MAX_ARF_GOP_SIZE];
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
   int tpl_group_frames = 0;
   int frame_idx;
