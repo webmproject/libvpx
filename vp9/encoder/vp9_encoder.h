@@ -533,7 +533,6 @@ typedef struct VP9_COMP {
   int alt_fb_idx;
 
   int ref_fb_idx[REF_FRAMES];
-  int last_show_frame_buf_idx;  // last show frame buffer index
 
   int refresh_last_frame;
   int refresh_golden_frame;
