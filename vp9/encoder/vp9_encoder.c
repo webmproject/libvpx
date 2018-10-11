@@ -6347,7 +6347,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     for (i = 0; i < MAX_REF_FRAMES; ++i) cpi->scaled_ref_idx[i] = INVALID_IDX;
   }
 
-  if (arf_src_index && cpi->sf.enable_tpl_model) {
+  if (cpi->twopass.gf_group.index == 1 && cpi->sf.enable_tpl_model) {
     vp9_estimate_qp_gop(cpi);
     setup_tpl_stats(cpi);
   }
