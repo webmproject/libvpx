@@ -4504,15 +4504,9 @@ static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
                                       int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   const NN_CONFIG *nn_config = NULL;
-  float thresh_low = -0.2f;
-  float thresh_high = 0.0f;
 
   switch (bsize) {
-    case BLOCK_64X64:
-      nn_config = &vp9_var_part_nnconfig_64;
-      thresh_low = -0.3f;
-      thresh_high = -0.1f;
-      break;
+    case BLOCK_64X64: nn_config = &vp9_var_part_nnconfig_64; break;
     case BLOCK_32X32: nn_config = &vp9_var_part_nnconfig_32; break;
     case BLOCK_16X16: nn_config = &vp9_var_part_nnconfig_16; break;
     case BLOCK_8X8: break;
@@ -4524,6 +4518,7 @@ static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_clear_system_state();
 
   {
+    const float thresh = 0.0f;
     float features[FEATURES] = { 0.0f };
     const int dc_q = vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth);
     int feature_idx = 0;
@@ -4564,8 +4559,8 @@ static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
 
     assert(feature_idx == FEATURES);
     nn_predict(features, nn_config, score);
-    if (score[0] > thresh_high) return 3;
-    if (score[0] < thresh_low) return 0;
+    if (score[0] > thresh) return PARTITION_SPLIT;
+    if (score[0] < thresh) return PARTITION_NONE;
     return -1;
   }
 }
@@ -4643,8 +4638,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     if (partition_none_allowed && do_split) {
       const int ml_predicted_partition =
           ml_predict_var_paritioning(cpi, x, bsize, mi_row, mi_col);
-      if (ml_predicted_partition == 0) do_split = 0;
-      if (ml_predicted_partition == 3) partition_none_allowed = 0;
+      if (ml_predicted_partition == PARTITION_NONE) do_split = 0;
+      if (ml_predicted_partition == PARTITION_SPLIT) partition_none_allowed = 0;
     }
   }
 #endif  // CONFIG_ML_VAR_PARTITION
