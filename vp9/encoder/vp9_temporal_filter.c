@@ -119,8 +119,13 @@ static void apply_temporal_filter(
   unsigned int i, j, k, m;
   int modifier;
   const int rounding = (1 << strength) >> 1;
-  const int uv_block_width = block_width >> ss_x;
-  const int uv_block_height = block_height >> ss_y;
+  const unsigned int uv_block_width = block_width >> ss_x;
+  const unsigned int uv_block_height = block_height >> ss_y;
+  DECLARE_ALIGNED(16, uint16_t, y_diff_sse[256]);
+  DECLARE_ALIGNED(16, uint16_t, u_diff_sse[256]);
+  DECLARE_ALIGNED(16, uint16_t, v_diff_sse[256]);
+
+  int idx = 0, idy;
 
   assert(strength >= 0);
   assert(strength <= 6);
@@ -128,19 +133,42 @@ static void apply_temporal_filter(
   assert(filter_weight >= 0);
   assert(filter_weight <= 2);
 
+  memset(y_diff_sse, 0, 256 * sizeof(uint16_t));
+  memset(u_diff_sse, 0, 256 * sizeof(uint16_t));
+  memset(v_diff_sse, 0, 256 * sizeof(uint16_t));
+
+  // Calculate diff^2 for each pixel of the 16x16 block.
+  // TODO(yunqing): the following code needs to be optimized.
+  for (i = 0; i < block_height; i++) {
+    for (j = 0; j < block_width; j++) {
+      const int16_t diff =
+          y_frame1[i * (int)y_stride + j] - y_pred[i * (int)block_width + j];
+      y_diff_sse[idx++] = diff * diff;
+    }
+  }
+  idx = 0;
+  for (i = 0; i < uv_block_height; i++) {
+    for (j = 0; j < uv_block_width; j++) {
+      const int16_t diffu =
+          u_frame1[i * uv_stride + j] - u_pred[i * uv_buf_stride + j];
+      const int16_t diffv =
+          v_frame1[i * uv_stride + j] - v_pred[i * uv_buf_stride + j];
+      u_diff_sse[idx] = diffu * diffu;
+      v_diff_sse[idx] = diffv * diffv;
+      idx++;
+    }
+  }
+
   for (i = 0, k = 0, m = 0; i < block_height; i++) {
     for (j = 0; j < block_width; j++) {
       const int pixel_value = y_pred[i * y_buf_stride + j];
 
       // non-local mean approach
-      int diff_sse[9] = { 0 };
-      int idx, idy;
       int y_index = 0;
 
       const int uv_r = i >> ss_y;
       const int uv_c = j >> ss_x;
-
-      int diff;
+      modifier = 0;
 
       for (idy = -1; idy <= 1; ++idy) {
         for (idx = -1; idx <= 1; ++idx) {
@@ -149,9 +177,7 @@ static void apply_temporal_filter(
 
           if (row >= 0 && row < (int)block_height && col >= 0 &&
               col < (int)block_width) {
-            const int diff = y_frame1[row * (int)y_stride + col] -
-                             y_pred[row * (int)block_width + col];
-            diff_sse[y_index] = diff * diff;
+            modifier += y_diff_sse[row * (int)block_width + col];
             ++y_index;
           }
         }
@@ -159,16 +185,8 @@ static void apply_temporal_filter(
 
       assert(y_index > 0);
 
-      modifier = 0;
-      for (idx = 0; idx < 9; ++idx) modifier += diff_sse[idx];
-
-      diff = u_frame1[uv_r * uv_stride + uv_c] -
-             u_pred[uv_r * uv_buf_stride + uv_c];
-      modifier += diff * diff;
-
-      diff = v_frame1[uv_r * uv_stride + uv_c] -
-             v_pred[uv_r * uv_buf_stride + uv_c];
-      modifier += diff * diff;
+      modifier += u_diff_sse[uv_r * uv_block_width + uv_c];
+      modifier += v_diff_sse[uv_r * uv_block_width + uv_c];
 
       y_index += 2;
 
@@ -186,9 +204,6 @@ static void apply_temporal_filter(
         const int v_pixel_value = v_pred[uv_r * uv_buf_stride + uv_c];
 
         // non-local mean approach
-        int u_diff_sse[9] = { 0 };
-        int v_diff_sse[9] = { 0 };
-        int idx, idy;
         int cr_index = 0;
         int u_mod = 0, v_mod = 0;
         int y_diff = 0;
@@ -198,16 +213,10 @@ static void apply_temporal_filter(
             const int row = uv_r + idy;
             const int col = uv_c + idx;
 
-            if (row >= 0 && row < uv_block_height && col >= 0 &&
-                col < uv_block_width) {
-              int diff = u_frame1[row * uv_stride + col] -
-                         u_pred[row * uv_buf_stride + col];
-              u_diff_sse[cr_index] = diff * diff;
-
-              diff = v_frame1[row * uv_stride + col] -
-                     v_pred[row * uv_buf_stride + col];
-              v_diff_sse[cr_index] = diff * diff;
-
+            if (row >= 0 && row < (int)uv_block_height && col >= 0 &&
+                col < (int)uv_block_width) {
+              u_mod += u_diff_sse[row * uv_block_width + col];
+              v_mod += v_diff_sse[row * uv_block_width + col];
               ++cr_index;
             }
           }
@@ -215,18 +224,11 @@ static void apply_temporal_filter(
 
         assert(cr_index > 0);
 
-        for (idx = 0; idx < 9; ++idx) {
-          u_mod += u_diff_sse[idx];
-          v_mod += v_diff_sse[idx];
-        }
-
         for (idy = 0; idy < 1 + ss_y; ++idy) {
           for (idx = 0; idx < 1 + ss_x; ++idx) {
             const int row = (uv_r << ss_y) + idy;
             const int col = (uv_c << ss_x) + idx;
-            const int diff = y_frame1[row * (int)y_stride + col] -
-                             y_pred[row * (int)block_width + col];
-            y_diff += diff * diff;
+            y_diff += y_diff_sse[row * (int)block_width + col];
             ++cr_index;
           }
         }
