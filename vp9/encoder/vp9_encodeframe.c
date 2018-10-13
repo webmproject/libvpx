@@ -3404,7 +3404,15 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   MODE_INFO *mi = xd->mi[0];
   const NN_CONFIG *nn_config = NULL;
-  DECLARE_ALIGNED(16, uint8_t, pred_buf[64 * 64]);
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(16, uint8_t, pred_buffer[64 * 64 * 2]);
+  uint8_t *const pred_buf = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+                                ? (CONVERT_TO_BYTEPTR(pred_buffer))
+                                : pred_buffer;
+#else
+  DECLARE_ALIGNED(16, uint8_t, pred_buffer[64 * 64]);
+  uint8_t *const pred_buf = pred_buffer;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   const int speed = cpi->oxcf.speed;
   int i;
   float thresh = 0.0f;
@@ -3475,7 +3483,12 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
 
   {
     float features[FEATURES] = { 0.0f };
+#if CONFIG_VP9_HIGHBITDEPTH
+    const int dc_q =
+        vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth) >> (xd->bd - 8);
+#else
     const int dc_q = vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     int feature_idx = 0;
     float score;
 
@@ -3758,14 +3771,10 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   pc_tree->partitioning = PARTITION_NONE;
 
   if (cpi->sf.ml_var_partition_pruning) {
-    int do_ml_var_partition_pruning =
+    const int do_ml_var_partition_pruning =
         !frame_is_intra_only(cm) && partition_none_allowed && do_split &&
         mi_row + num_8x8_blocks_high_lookup[bsize] <= cm->mi_rows &&
         mi_col + num_8x8_blocks_wide_lookup[bsize] <= cm->mi_cols;
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-      do_ml_var_partition_pruning = 0;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
     if (do_ml_var_partition_pruning) {
       ml_predict_var_rd_paritioning(cpi, x, bsize, mi_row, mi_col,
                                     &partition_none_allowed, &do_split);
