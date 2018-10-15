@@ -2124,6 +2124,7 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
     for (idx = start; idx < end; ++idx) {
       gf_group->update_type[*index_counter] = LF_UPDATE;
       gf_group->arf_src_offset[*index_counter] = 0;
+      gf_group->frame_gop_index[*index_counter] = idx;
       gf_group->rf_level[*index_counter] = INTER_NORMAL;
       gf_group->layer_depth[*index_counter] = depth;
       ++(*index_counter);
@@ -2137,6 +2138,7 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
   gf_group->layer_depth[*index_counter] = depth;
   gf_group->update_type[*index_counter] = ARF_UPDATE;
   gf_group->arf_src_offset[*index_counter] = mid - start;
+  gf_group->frame_gop_index[*index_counter] = mid;
   gf_group->rf_level[*index_counter] = GF_ARF_LOW;
 
   for (idx = 0; idx <= mid; ++idx)
@@ -2153,6 +2155,7 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
 
   gf_group->update_type[*index_counter] = USE_BUF_FRAME;
   gf_group->arf_src_offset[*index_counter] = 0;
+  gf_group->frame_gop_index[*index_counter] = mid;
   gf_group->rf_level[*index_counter] = INTER_NORMAL;
   gf_group->layer_depth[*index_counter] = depth;
   ++(*index_counter);
@@ -2203,17 +2206,18 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->layer_depth[frame_index] = 1;
     gf_group->arf_src_offset[frame_index] =
         (unsigned char)(rc->baseline_gf_interval - 1);
+    gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
     ++frame_index;
   }
 
   if (rc->source_alt_ref_pending && cpi->multi_layer_arf) {
-    find_arf_order(cpi, gf_group, &frame_index, 2, 0,
-                   rc->baseline_gf_interval - 1);
+    find_arf_order(cpi, gf_group, &frame_index, 2, 1, rc->baseline_gf_interval);
 
     set_gf_overlay_frame_type(gf_group, frame_index,
                               rc->source_alt_ref_pending);
 
     gf_group->arf_src_offset[frame_index] = 0;
+    gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
 
     return frame_index;
   }
@@ -2227,6 +2231,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->update_type[frame_index] = LF_UPDATE;
     gf_group->rf_level[frame_index] = INTER_NORMAL;
     gf_group->arf_src_offset[frame_index] = 0;
+    gf_group->frame_gop_index[frame_index] = i + 1;
     gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
 
     ++frame_index;
@@ -2247,6 +2252,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->rf_level[frame_index] = GF_ARF_STD;
   }
   gf_group->arf_src_offset[frame_index] = 0;
+  gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
 
   return frame_index;
 }
