@@ -539,6 +539,7 @@ typedef struct VP9_COMP {
   EncFrameBuf enc_frame_buf[REF_FRAMES];
 #if CONFIG_NON_GREEDY_MV
   FEATURE_SCORE_LOC *feature_score_loc_arr;
+  FEATURE_SCORE_LOC **feature_score_loc_sort;
 #endif
 
   TileDataEnc *tile_data;

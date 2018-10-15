@@ -2365,6 +2365,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
     CHECK_MEM_ERROR(
         cm, cpi->feature_score_loc_arr,
         vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_arr)));
+    CHECK_MEM_ERROR(
+        cm, cpi->feature_score_loc_sort,
+        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_sort)));
 #endif
     // TODO(jingning): Reduce the actual memory use for tpl model build up.
     for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
@@ -2584,6 +2587,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
 #if CONFIG_NON_GREEDY_MV
   vpx_free(cpi->feature_score_loc_arr);
+  vpx_free(cpi->feature_score_loc_sort);
 #endif
   for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
@@ -5964,8 +5968,8 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
 #if CONFIG_NON_GREEDY_MV
 int compare_feature_score(const void *a, const void *b) {
-  const FEATURE_SCORE_LOC *aa = (const FEATURE_SCORE_LOC *)a;
-  const FEATURE_SCORE_LOC *bb = (const FEATURE_SCORE_LOC *)b;
+  const FEATURE_SCORE_LOC *aa = *(FEATURE_SCORE_LOC *const *)a;
+  const FEATURE_SCORE_LOC *bb = *(FEATURE_SCORE_LOC *const *)b;
   if (aa->feature_score < bb->feature_score) {
     return 1;
   } else if (aa->feature_score > bb->feature_score) {
@@ -6008,7 +6012,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   int64_t recon_error, sse;
 #if CONFIG_NON_GREEDY_MV
   int rf_idx;
-  int fs_loc_arr_size;
+  int fs_loc_sort_size;
   int i;
 #endif
 
@@ -6054,8 +6058,8 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
 
 #if CONFIG_NON_GREEDY_MV
   tpl_frame->lambda = 250;
+  fs_loc_sort_size = 0;
 
-  fs_loc_arr_size = 0;
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
       const int mb_y_offset =
@@ -6064,24 +6068,27 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
       const int bh = 4 << b_height_log2_lookup[bsize];
       TplDepStats *tpl_stats =
           &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-      FEATURE_SCORE_LOC *fs_loc = &cpi->feature_score_loc_arr[fs_loc_arr_size];
+      FEATURE_SCORE_LOC *fs_loc =
+          &cpi->feature_score_loc_arr[mi_row * tpl_frame->stride + mi_col];
       tpl_stats->feature_score = get_feature_score(
           xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
       fs_loc->feature_score = tpl_stats->feature_score;
       fs_loc->mi_row = mi_row;
       fs_loc->mi_col = mi_col;
-      ++fs_loc_arr_size;
+      cpi->feature_score_loc_sort[fs_loc_sort_size] = fs_loc;
+      ++fs_loc_sort_size;
     }
   }
 
-  qsort(cpi->feature_score_loc_arr, fs_loc_arr_size,
-        sizeof(*cpi->feature_score_loc_arr), compare_feature_score);
+  qsort(cpi->feature_score_loc_sort, fs_loc_sort_size,
+        sizeof(*cpi->feature_score_loc_sort), compare_feature_score);
 
-  for (i = 0; i < fs_loc_arr_size; ++i) {
+  for (i = 0; i < fs_loc_sort_size; ++i) {
     int mb_y_offset;
     TplDepStats *tpl_stats;
-    mi_row = cpi->feature_score_loc_arr[i].mi_row;
-    mi_col = cpi->feature_score_loc_arr[i].mi_col;
+    FEATURE_SCORE_LOC *fs_loc = cpi->feature_score_loc_sort[i];
+    mi_row = fs_loc->mi_row;
+    mi_col = fs_loc->mi_col;
 
     mb_y_offset = mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
     tpl_stats = &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
