@@ -13,6 +13,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/x86/convolve.h"
+#include "vpx_dsp/x86/convolve_sse2.h"
 #include "vpx_ports/mem.h"
 
 void vpx_filter_block1d16_h4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
@@ -26,8 +27,6 @@ void vpx_filter_block1d16_h4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
   __m128i src_reg, src_reg_shift_1, src_reg_shift_2, src_reg_shift_3;
   __m128i dst_first, dst_second;
   __m128i even, odd;
-  __m128i tmp_1, tmp_2;
-  __m128i madd_1, madd_2;
 
   // Start one pixel before as we need tap/2 - 1 = 1 sample from the past
   src_ptr -= 1;
@@ -35,10 +34,8 @@ void vpx_filter_block1d16_h4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
   // Load Kernel
   kernel_reg = _mm_loadu_si128((const __m128i *)kernel);
   kernel_reg = _mm_srai_epi16(kernel_reg, 1);
-  tmp_1 = _mm_unpacklo_epi32(kernel_reg, kernel_reg);
-  kernel_reg_23 = _mm_unpackhi_epi64(tmp_1, tmp_1);
-  tmp_2 = _mm_unpackhi_epi32(kernel_reg, kernel_reg);
-  kernel_reg_45 = _mm_unpacklo_epi64(tmp_2, tmp_2);
+  kernel_reg_23 = extract_quarter_2_epi16_sse2(&kernel_reg);
+  kernel_reg_45 = extract_quarter_3_epi16_sse2(&kernel_reg);
 
   for (h = height; h > 0; --h) {
     // We will load multiple shifted versions of the row and shuffle them into
@@ -57,23 +54,15 @@ void vpx_filter_block1d16_h4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
     src_reg_shift_3 = _mm_srli_si128(src_reg, 3);
 
     // Output 6 4 2 0
-    tmp_1 = _mm_unpacklo_epi8(src_reg, _mm_setzero_si128());
-    tmp_2 = _mm_unpacklo_epi8(src_reg_shift_2, _mm_setzero_si128());
-    madd_1 = _mm_madd_epi16(tmp_1, kernel_reg_23);
-    madd_2 = _mm_madd_epi16(tmp_2, kernel_reg_45);
-    even = _mm_add_epi32(madd_1, madd_2);
+    even = pad_multiply_add_add_epi8_sse2(&src_reg, &src_reg_shift_2,
+                                          &kernel_reg_23, &kernel_reg_45);
 
     // Output 7 5 3 1
-    tmp_1 = _mm_unpacklo_epi8(src_reg_shift_1, _mm_setzero_si128());
-    tmp_2 = _mm_unpacklo_epi8(src_reg_shift_3, _mm_setzero_si128());
-    madd_1 = _mm_madd_epi16(tmp_1, kernel_reg_23);
-    madd_2 = _mm_madd_epi16(tmp_2, kernel_reg_45);
-    odd = _mm_add_epi32(madd_1, madd_2);
+    odd = pad_multiply_add_add_epi8_sse2(&src_reg_shift_1, &src_reg_shift_3,
+                                         &kernel_reg_23, &kernel_reg_45);
 
     // Combine to get the first half of the dst
-    tmp_1 = _mm_unpacklo_epi32(even, odd);
-    tmp_2 = _mm_unpackhi_epi32(even, odd);
-    dst_first = _mm_packs_epi32(tmp_1, tmp_2);
+    dst_first = combine_epi32_sse2(&even, &odd);
 
     // Do again to get the second half of dst
     src_reg = _mm_loadu_si128((const __m128i *)(src_ptr + 8));
@@ -82,29 +71,19 @@ void vpx_filter_block1d16_h4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
     src_reg_shift_3 = _mm_srli_si128(src_reg, 3);
 
     // Output 14 12 10 8
-    tmp_1 = _mm_unpacklo_epi8(src_reg, _mm_setzero_si128());
-    tmp_2 = _mm_unpacklo_epi8(src_reg_shift_2, _mm_setzero_si128());
-    madd_1 = _mm_madd_epi16(tmp_1, kernel_reg_23);
-    madd_2 = _mm_madd_epi16(tmp_2, kernel_reg_45);
-    even = _mm_add_epi32(madd_1, madd_2);
+    even = pad_multiply_add_add_epi8_sse2(&src_reg, &src_reg_shift_2,
+                                          &kernel_reg_23, &kernel_reg_45);
 
     // Output 15 13 11 9
-    tmp_1 = _mm_unpacklo_epi8(src_reg_shift_1, _mm_setzero_si128());
-    tmp_2 = _mm_unpacklo_epi8(src_reg_shift_3, _mm_setzero_si128());
-    madd_1 = _mm_madd_epi16(tmp_1, kernel_reg_23);
-    madd_2 = _mm_madd_epi16(tmp_2, kernel_reg_45);
-    odd = _mm_add_epi32(madd_1, madd_2);
+    odd = pad_multiply_add_add_epi8_sse2(&src_reg_shift_1, &src_reg_shift_3,
+                                         &kernel_reg_23, &kernel_reg_45);
 
     // Combine to get the second half of the dst
-    tmp_1 = _mm_unpacklo_epi32(even, odd);
-    tmp_2 = _mm_unpackhi_epi32(even, odd);
-    dst_second = _mm_packs_epi32(tmp_1, tmp_2);
+    dst_second = combine_epi32_sse2(&even, &odd);
 
     // Round each result
-    dst_first = _mm_adds_epi16(dst_first, reg_32);
-    dst_first = _mm_srai_epi16(dst_first, 6);
-    dst_second = _mm_adds_epi16(dst_second, reg_32);
-    dst_second = _mm_srai_epi16(dst_second, 6);
+    dst_first = round_epi16_sse2(&dst_first, &reg_32, 6);
+    dst_second = round_epi16_sse2(&dst_second, &reg_32, 6);
 
     // Finally combine to get the final dst
     dst_first = _mm_packus_epi16(dst_first, dst_second);
@@ -143,7 +122,6 @@ void vpx_filter_block1d16_v4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
   __m128i res_reg_m1012_lo, res_reg_0123_lo, res_reg_m1012_hi, res_reg_0123_hi;
 
   const __m128i reg_32 = _mm_set1_epi16(32);  // Used for rounding
-  __m128i tmp_0, tmp_1;
 
   // We will compute the result two rows at a time
   const ptrdiff_t src_stride_unrolled = src_stride << 1;
@@ -157,13 +135,12 @@ void vpx_filter_block1d16_v4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
   // Load Kernel
   kernel_reg = _mm_loadu_si128((const __m128i *)kernel);
   kernel_reg = _mm_srai_epi16(kernel_reg, 1);
-  tmp_0 = _mm_unpacklo_epi32(kernel_reg, kernel_reg);
-  kernel_reg_23 = _mm_unpackhi_epi64(tmp_0, tmp_0);
-  tmp_1 = _mm_unpackhi_epi32(kernel_reg, kernel_reg);
-  kernel_reg_45 = _mm_unpacklo_epi64(tmp_1, tmp_1);
+  kernel_reg_23 = extract_quarter_2_epi16_sse2(&kernel_reg);
+  kernel_reg_45 = extract_quarter_3_epi16_sse2(&kernel_reg);
 
   // We will load two rows of pixels as 8-bit words, rearrange them as 16-bit
-  // words, shuffle the data into the form
+  // words,
+  // shuffle the data into the form
   // ... s[0,1] s[-1,1] s[0,0] s[-1,0]
   // ... s[0,7] s[-1,7] s[0,6] s[-1,6]
   // ... s[0,9] s[-1,9] s[0,8] s[-1,8]
@@ -204,25 +181,21 @@ void vpx_filter_block1d16_v4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
     src_reg_23_hi = _mm_unpackhi_epi8(src_reg_2, src_reg_3);
 
     // Partial output from first half
-    tmp_0 = _mm_madd_epi16(src_reg_m10_lo_1, kernel_reg_23);
-    tmp_1 = _mm_madd_epi16(src_reg_m10_lo_2, kernel_reg_23);
-    res_reg_m10_lo = _mm_packs_epi32(tmp_0, tmp_1);
+    res_reg_m10_lo = multiply_add_packs_epi16_sse2(
+        &src_reg_m10_lo_1, &src_reg_m10_lo_2, &kernel_reg_23);
 
-    tmp_0 = _mm_madd_epi16(src_reg_01_lo_1, kernel_reg_23);
-    tmp_1 = _mm_madd_epi16(src_reg_01_lo_2, kernel_reg_23);
-    res_reg_01_lo = _mm_packs_epi32(tmp_0, tmp_1);
+    res_reg_01_lo = multiply_add_packs_epi16_sse2(
+        &src_reg_01_lo_1, &src_reg_01_lo_2, &kernel_reg_23);
 
     src_reg_12_lo_1 = _mm_unpacklo_epi8(src_reg_12_lo, _mm_setzero_si128());
     src_reg_12_lo_2 = _mm_unpackhi_epi8(src_reg_12_lo, _mm_setzero_si128());
-    tmp_0 = _mm_madd_epi16(src_reg_12_lo_1, kernel_reg_45);
-    tmp_1 = _mm_madd_epi16(src_reg_12_lo_2, kernel_reg_45);
-    res_reg_12_lo = _mm_packs_epi32(tmp_0, tmp_1);
+    res_reg_12_lo = multiply_add_packs_epi16_sse2(
+        &src_reg_12_lo_1, &src_reg_12_lo_2, &kernel_reg_45);
 
     src_reg_23_lo_1 = _mm_unpacklo_epi8(src_reg_23_lo, _mm_setzero_si128());
     src_reg_23_lo_2 = _mm_unpackhi_epi8(src_reg_23_lo, _mm_setzero_si128());
-    tmp_0 = _mm_madd_epi16(src_reg_23_lo_1, kernel_reg_45);
-    tmp_1 = _mm_madd_epi16(src_reg_23_lo_2, kernel_reg_45);
-    res_reg_23_lo = _mm_packs_epi32(tmp_0, tmp_1);
+    res_reg_23_lo = multiply_add_packs_epi16_sse2(
+        &src_reg_23_lo_1, &src_reg_23_lo_2, &kernel_reg_45);
 
     // Add to get first half of the results
     res_reg_m1012_lo = _mm_adds_epi16(res_reg_m10_lo, res_reg_12_lo);
@@ -230,39 +203,31 @@ void vpx_filter_block1d16_v4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
 
     // Now repeat everything again for the second half
     // Partial output for second half
-    tmp_0 = _mm_madd_epi16(src_reg_m10_hi_1, kernel_reg_23);
-    tmp_1 = _mm_madd_epi16(src_reg_m10_hi_2, kernel_reg_23);
-    res_reg_m10_hi = _mm_packs_epi32(tmp_0, tmp_1);
+    res_reg_m10_hi = multiply_add_packs_epi16_sse2(
+        &src_reg_m10_hi_1, &src_reg_m10_hi_2, &kernel_reg_23);
 
-    tmp_0 = _mm_madd_epi16(src_reg_01_hi_1, kernel_reg_23);
-    tmp_1 = _mm_madd_epi16(src_reg_01_hi_2, kernel_reg_23);
-    res_reg_01_hi = _mm_packs_epi32(tmp_0, tmp_1);
+    res_reg_01_hi = multiply_add_packs_epi16_sse2(
+        &src_reg_01_hi_1, &src_reg_01_hi_2, &kernel_reg_23);
 
     src_reg_12_hi_1 = _mm_unpacklo_epi8(src_reg_12_hi, _mm_setzero_si128());
     src_reg_12_hi_2 = _mm_unpackhi_epi8(src_reg_12_hi, _mm_setzero_si128());
-    tmp_0 = _mm_madd_epi16(src_reg_12_hi_1, kernel_reg_45);
-    tmp_1 = _mm_madd_epi16(src_reg_12_hi_2, kernel_reg_45);
-    res_reg_12_hi = _mm_packs_epi32(tmp_0, tmp_1);
+    res_reg_12_hi = multiply_add_packs_epi16_sse2(
+        &src_reg_12_hi_1, &src_reg_12_hi_2, &kernel_reg_45);
 
     src_reg_23_hi_1 = _mm_unpacklo_epi8(src_reg_23_hi, _mm_setzero_si128());
     src_reg_23_hi_2 = _mm_unpackhi_epi8(src_reg_23_hi, _mm_setzero_si128());
-    tmp_0 = _mm_madd_epi16(src_reg_23_hi_1, kernel_reg_45);
-    tmp_1 = _mm_madd_epi16(src_reg_23_hi_2, kernel_reg_45);
-    res_reg_23_hi = _mm_packs_epi32(tmp_0, tmp_1);
+    res_reg_23_hi = multiply_add_packs_epi16_sse2(
+        &src_reg_23_hi_1, &src_reg_23_hi_2, &kernel_reg_45);
 
-    // First half of the results
+    // Second half of the results
     res_reg_m1012_hi = _mm_adds_epi16(res_reg_m10_hi, res_reg_12_hi);
     res_reg_0123_hi = _mm_adds_epi16(res_reg_01_hi, res_reg_23_hi);
 
     // Round the words
-    res_reg_m1012_lo = _mm_adds_epi16(res_reg_m1012_lo, reg_32);
-    res_reg_0123_lo = _mm_adds_epi16(res_reg_0123_lo, reg_32);
-    res_reg_m1012_hi = _mm_adds_epi16(res_reg_m1012_hi, reg_32);
-    res_reg_0123_hi = _mm_adds_epi16(res_reg_0123_hi, reg_32);
-    res_reg_m1012_lo = _mm_srai_epi16(res_reg_m1012_lo, 6);
-    res_reg_0123_lo = _mm_srai_epi16(res_reg_0123_lo, 6);
-    res_reg_m1012_hi = _mm_srai_epi16(res_reg_m1012_hi, 6);
-    res_reg_0123_hi = _mm_srai_epi16(res_reg_0123_hi, 6);
+    res_reg_m1012_lo = round_epi16_sse2(&res_reg_m1012_lo, &reg_32, 6);
+    res_reg_0123_lo = round_epi16_sse2(&res_reg_0123_lo, &reg_32, 6);
+    res_reg_m1012_hi = round_epi16_sse2(&res_reg_m1012_hi, &reg_32, 6);
+    res_reg_0123_hi = round_epi16_sse2(&res_reg_0123_hi, &reg_32, 6);
 
     // Combine to get the result
     res_reg_m1012 = _mm_packus_epi16(res_reg_m1012_lo, res_reg_m1012_hi);
