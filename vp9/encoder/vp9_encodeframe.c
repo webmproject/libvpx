@@ -4539,7 +4539,7 @@ static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
   vpx_clear_system_state();
 
   {
-    const float thresh = 0.0f;
+    const float thresh = cpi->oxcf.speed <= 5 ? 1.25f : 0.0f;
     float features[FEATURES] = { 0.0f };
     const int dc_q = vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth);
     int feature_idx = 0;
@@ -4581,7 +4581,7 @@ static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
     assert(feature_idx == FEATURES);
     nn_predict(features, nn_config, score);
     if (score[0] > thresh) return PARTITION_SPLIT;
-    if (score[0] < thresh) return PARTITION_NONE;
+    if (score[0] < -thresh) return PARTITION_NONE;
     return -1;
   }
 }
