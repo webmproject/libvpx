@@ -139,6 +139,7 @@ typedef struct {
   int arf_index_stack[MAX_LAG_BUFFERS * 2];
   int top_arf_idx;
   int stack_size;
+  int gf_group_size;
 } GF_GROUP;
 
 typedef struct {

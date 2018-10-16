@@ -2281,6 +2281,8 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   // Define the GF structure and specify
   int gop_frames = define_gf_group_structure(cpi);
 
+  gf_group->gf_group_size = gop_frames;
+
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
   // For key frames the frame target rate is already set and it
