@@ -2368,6 +2368,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
     CHECK_MEM_ERROR(
         cm, cpi->feature_score_loc_sort,
         vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_sort)));
+    CHECK_MEM_ERROR(
+        cm, cpi->feature_score_loc_heap,
+        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_heap)));
 #endif
     // TODO(jingning): Reduce the actual memory use for tpl model build up.
     for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
@@ -2588,6 +2591,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #if CONFIG_NON_GREEDY_MV
   vpx_free(cpi->feature_score_loc_arr);
   vpx_free(cpi->feature_score_loc_sort);
+  vpx_free(cpi->feature_score_loc_heap);
 #endif
   for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
@@ -5967,7 +5971,7 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 }
 
 #if CONFIG_NON_GREEDY_MV
-int compare_feature_score(const void *a, const void *b) {
+static int compare_feature_score(const void *a, const void *b) {
   const FEATURE_SCORE_LOC *aa = *(FEATURE_SCORE_LOC *const *)a;
   const FEATURE_SCORE_LOC *bb = *(FEATURE_SCORE_LOC *const *)b;
   if (aa->feature_score < bb->feature_score) {
@@ -5978,7 +5982,86 @@ int compare_feature_score(const void *a, const void *b) {
     return 0;
   }
 }
-#endif
+
+#define USE_PQSORT 1
+
+#if USE_PQSORT
+static void max_heap_pop(FEATURE_SCORE_LOC **heap, int *size,
+                         FEATURE_SCORE_LOC **output) {
+  if (*size > 0) {
+    *output = heap[0];
+    --*size;
+    if (*size > 0) {
+      int p, l, r;
+      heap[0] = heap[*size];
+      p = 0;
+      l = 2 * p + 1;
+      r = 2 * p + 2;
+      while (l < *size) {
+        FEATURE_SCORE_LOC *tmp;
+        int c = l;
+        if (r < *size && heap[r]->feature_score > heap[l]->feature_score) {
+          c = r;
+        }
+        if (heap[p]->feature_score >= heap[c]->feature_score) {
+          break;
+        }
+        tmp = heap[p];
+        heap[p] = heap[c];
+        heap[c] = tmp;
+        p = c;
+        l = 2 * p + 1;
+        r = 2 * p + 2;
+      }
+    }
+  } else {
+    assert(0);
+  }
+}
+
+static void max_heap_push(FEATURE_SCORE_LOC **heap, int *size,
+                          FEATURE_SCORE_LOC *input) {
+  int c, p;
+  FEATURE_SCORE_LOC *tmp;
+  heap[*size] = input;
+  ++*size;
+  c = *size - 1;
+  p = c >> 1;
+  while (c > 0) {
+    if (heap[c]->feature_score > heap[p]->feature_score) {
+      tmp = heap[p];
+      heap[p] = heap[c];
+      heap[c] = tmp;
+      c = p;
+      p = c >> 1;
+    } else {
+      break;
+    }
+  }
+}
+
+static void add_nb_blocks_to_heap(VP9_COMP *cpi, const TplDepFrame *tpl_frame,
+                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                  int *heap_size) {
+  const int mi_unit = num_8x8_blocks_wide_lookup[bsize];
+  const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+  int i;
+  for (i = 0; i < NB_MVS_NUM; ++i) {
+    int r = dirs[i][0] * mi_unit;
+    int c = dirs[i][1] * mi_unit;
+    if (mi_row + r >= 0 && mi_row + r < tpl_frame->mi_rows && mi_col + c >= 0 &&
+        mi_col + c < tpl_frame->mi_cols) {
+      FEATURE_SCORE_LOC *fs_loc =
+          &cpi->feature_score_loc_arr[(mi_row + r) * tpl_frame->stride +
+                                      (mi_col + c)];
+      if (fs_loc->visited == 0) {
+        max_heap_push(cpi->feature_score_loc_heap, heap_size, fs_loc);
+      }
+    }
+  }
+}
+#endif  // USE_PQSORT
+#endif  // CONFIG_NON_GREEDY_MV
 
 void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
                        BLOCK_SIZE bsize) {
@@ -6013,8 +6096,12 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
 #if CONFIG_NON_GREEDY_MV
   int rf_idx;
   int fs_loc_sort_size;
+#if USE_PQSORT
+  int fs_loc_heap_size;
+#else
   int i;
-#endif
+#endif  // USE_PQSORT
+#endif  // CONFIG_NON_GREEDY_MV
 
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -6072,6 +6159,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
           &cpi->feature_score_loc_arr[mi_row * tpl_frame->stride + mi_col];
       tpl_stats->feature_score = get_feature_score(
           xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
+      fs_loc->visited = 0;
       fs_loc->feature_score = tpl_stats->feature_score;
       fs_loc->mi_row = mi_row;
       fs_loc->mi_col = mi_col;
@@ -6083,6 +6171,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   qsort(cpi->feature_score_loc_sort, fs_loc_sort_size,
         sizeof(*cpi->feature_score_loc_sort), compare_feature_score);
 
+#if !USE_PQSORT
   for (i = 0; i < fs_loc_sort_size; ++i) {
     int mb_y_offset;
     TplDepStats *tpl_stats;
@@ -6108,8 +6197,45 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
           bsize, mi_row, mi_col, tpl_stats, rf_idx);
     }
   }
+#else   // !USE_PQSORT
+  fs_loc_heap_size = 0;
+  max_heap_push(cpi->feature_score_loc_heap, &fs_loc_heap_size,
+                cpi->feature_score_loc_sort[0]);
 
-#endif
+  while (fs_loc_heap_size > 0) {
+    int mb_y_offset;
+    TplDepStats *tpl_stats;
+    FEATURE_SCORE_LOC *fs_loc;
+
+    max_heap_pop(cpi->feature_score_loc_heap, &fs_loc_heap_size, &fs_loc);
+
+    fs_loc->visited = 1;
+
+    mi_row = fs_loc->mi_row;
+    mi_col = fs_loc->mi_col;
+
+    mb_y_offset = mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
+    tpl_stats = &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+
+    set_mv_limits(cm, x, mi_row, mi_col);
+
+    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+      if (ref_frame[rf_idx] == NULL) {
+        tpl_stats->ready[rf_idx] = 0;
+        continue;
+      } else {
+        tpl_stats->ready[rf_idx] = 1;
+      }
+      motion_compensated_prediction(
+          cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
+          ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride,
+          bsize, mi_row, mi_col, tpl_stats, rf_idx);
+    }
+    add_nb_blocks_to_heap(cpi, tpl_frame, bsize, mi_row, mi_col,
+                          &fs_loc_heap_size);
+  }
+#endif  // !USE_PQSORT
+#endif  // CONFIG_NON_GREEDY_MV
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
       mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, tpl_frame,
