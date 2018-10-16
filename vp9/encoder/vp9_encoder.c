@@ -5362,6 +5362,8 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   int gld_index = -1;
   int alt_index = -1;
   int lst_index = -1;
+  int arf_index_stack[MAX_ARF_LAYERS];
+  int arf_stack_size = 0;
   int extend_frame_count = 0;
   int pframe_qindex = cpi->tpl_stats[2].base_qindex;
 
@@ -5369,6 +5371,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   int8_t recon_frame_index[REFS_PER_FRAME + MAX_ARF_LAYERS];
 
   memset(recon_frame_index, -1, sizeof(recon_frame_index));
+  stack_init(arf_index_stack, MAX_ARF_LAYERS);
 
   // TODO(jingning): To be used later for gf frame type parsing.
   (void)gf_group;
@@ -5406,7 +5409,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   gld_index = 0;
   ++*tpl_group_frames;
 
-  // Initialize ARF frame
+  // Initialize base layer ARF frame
   gf_picture[1].frame = cpi->Source;
   gf_picture[1].ref_frame[0] = gld_index;
   gf_picture[1].ref_frame[1] = lst_index;
@@ -5427,8 +5430,27 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
     gf_picture[frame_idx].ref_frame[1] = lst_index;
     gf_picture[frame_idx].ref_frame[2] = alt_index;
 
+    switch (gf_group->update_type[frame_idx]) {
+      case ARF_UPDATE:
+        stack_push(arf_index_stack, alt_index, arf_stack_size);
+        ++arf_stack_size;
+        alt_index = frame_idx;
+        break;
+      case LF_UPDATE: lst_index = frame_idx; break;
+      case OVERLAY_UPDATE:
+        gld_index = frame_idx;
+        alt_index = stack_pop(arf_index_stack, arf_stack_size);
+        --arf_stack_size;
+        break;
+      case USE_BUF_FRAME:
+        lst_index = frame_idx;
+        alt_index = stack_pop(arf_index_stack, arf_stack_size);
+        --arf_stack_size;
+        break;
+      default: break;
+    }
+
     ++*tpl_group_frames;
-    lst_index = frame_idx;
 
     // The length of group of pictures is baseline_gf_interval, plus the
     // beginning golden frame from last GOP, plus the last overlay frame in
@@ -5436,8 +5458,6 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
     if (frame_idx == gf_group->gf_group_size) break;
   }
 
-  gld_index = frame_idx;
-  lst_index = VPXMAX(0, frame_idx - 1);
   alt_index = -1;
   ++frame_idx;
 
