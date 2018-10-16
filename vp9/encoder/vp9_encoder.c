@@ -5415,7 +5415,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   ++*tpl_group_frames;
 
   // Initialize P frames
-  for (frame_idx = 2; frame_idx < MAX_LAG_BUFFERS; ++frame_idx) {
+  for (frame_idx = 2; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
     const int frame_gop_offset = gf_group->frame_gop_index[frame_idx];
     struct lookahead_entry *buf =
         vp9_lookahead_peek(cpi->lookahead, frame_gop_offset - 1);
@@ -5433,7 +5433,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
     // The length of group of pictures is baseline_gf_interval, plus the
     // beginning golden frame from last GOP, plus the last overlay frame in
     // the same GOP.
-    if (frame_idx == cpi->rc.baseline_gf_interval + 1) break;
+    if (frame_idx == gf_group->gf_group_size) break;
   }
 
   gld_index = frame_idx;
