@@ -5416,8 +5416,9 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
   // Initialize P frames
   for (frame_idx = 2; frame_idx < MAX_LAG_BUFFERS; ++frame_idx) {
+    const int frame_gop_offset = gf_group->frame_gop_index[frame_idx];
     struct lookahead_entry *buf =
-        vp9_lookahead_peek(cpi->lookahead, frame_idx - 2);
+        vp9_lookahead_peek(cpi->lookahead, frame_gop_offset - 1);
 
     if (buf == NULL) break;
 
