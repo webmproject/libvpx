@@ -56,10 +56,10 @@ typedef void filter8_1dfunction(const uint8_t *src_ptr, ptrdiff_t src_pitch,
         w -= 16;                                                             \
       }                                                                      \
       if (w == 8) {                                                          \
-        vpx_filter_block1d8_##dir##8_##avg##opt(src_start, src_stride, dst,  \
+        vpx_filter_block1d8_##dir##4_##avg##opt(src_start, src_stride, dst,  \
                                                 dst_stride, h, filter);      \
       } else if (w == 4) {                                                   \
-        vpx_filter_block1d4_##dir##8_##avg##opt(src_start, src_stride, dst,  \
+        vpx_filter_block1d4_##dir##4_##avg##opt(src_start, src_stride, dst,  \
                                                 dst_stride, h, filter);      \
       }                                                                      \
     } else {                                                                 \
