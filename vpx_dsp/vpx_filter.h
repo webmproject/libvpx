@@ -11,6 +11,7 @@
 #ifndef VPX_VPX_DSP_VPX_FILTER_H_
 #define VPX_VPX_DSP_VPX_FILTER_H_
 
+#include <assert.h>
 #include "vpx/vpx_integer.h"
 
 #ifdef __cplusplus
@@ -25,6 +26,14 @@ extern "C" {
 #define SUBPEL_TAPS 8
 
 typedef int16_t InterpKernel[SUBPEL_TAPS];
+
+static INLINE int vpx_get_filter_taps(const int16_t *const filter) {
+  assert(filter[3] != 128);
+  if (!filter[0] && !filter[1] && !filter[2])
+    return 2;
+  else
+    return 8;
+}
 
 #ifdef __cplusplus
 }  // extern "C"
