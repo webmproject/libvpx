@@ -3303,7 +3303,12 @@ static void ml_prune_rect_partition(VP9_COMP *const cpi, MACROBLOCK *const x,
   {
     const int64_t none_rdcost = pc_tree->none.rdcost;
     const VP9_COMMON *const cm = &cpi->common;
+#if CONFIG_VP9_HIGHBITDEPTH
+    const int dc_q =
+        vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth) >> (x->e_mbd.bd - 8);
+#else
     const int dc_q = vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     int feature_index = 0;
     unsigned int block_var = 0;
     unsigned int sub_block_var[4] = { 0 };
