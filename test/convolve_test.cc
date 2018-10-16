@@ -789,13 +789,7 @@ TEST_P(ConvolveTest, Copy2D) {
   }
 }
 
-#if HAVE_MSA
-// TODO(any) MSA optimizations doesn't work with 4-tap interp filter. Need to be
-// fixed.
-const int kNumFilterBanks = 4;
-#else
 const int kNumFilterBanks = 5;
-#endif
 const int kNumFilters = 16;
 
 TEST(ConvolveTest, FiltersWontSaturateWhenAddedPairwise) {
