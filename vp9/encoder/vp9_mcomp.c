@@ -1733,7 +1733,7 @@ static int exhuastive_mesh_search(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
 }
 
 #if CONFIG_NON_GREEDY_MV
-static double nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs) {
+double av1_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs) {
   int i;
   double best_cost = -1;
   vpx_clear_system_state();
@@ -1801,7 +1801,7 @@ double vp9_diamond_search_sad_new(const MACROBLOCK *x,
 
   // Check the starting position
   *best_mv_dist = fn_ptr->sdf(what, what_stride, in_what, in_what_stride);
-  *best_mv_cost = nb_mvs_inconsistency(best_full_mv, nb_full_mvs);
+  *best_mv_cost = av1_nb_mvs_inconsistency(best_full_mv, nb_full_mvs);
   bestsad = (*best_mv_dist) + lambda * (*best_mv_cost);
 
   i = 0;
@@ -1834,7 +1834,8 @@ double vp9_diamond_search_sad_new(const MACROBLOCK *x,
           const MV this_mv = { best_full_mv->row + ss_mv[i].row,
                                best_full_mv->col + ss_mv[i].col };
           const double mv_dist = sad_array[t];
-          const double mv_cost = nb_mvs_inconsistency(&this_mv, nb_full_mvs);
+          const double mv_cost =
+              av1_nb_mvs_inconsistency(&this_mv, nb_full_mvs);
           double thissad = mv_dist + lambda * mv_cost;
           if (thissad < bestsad) {
             bestsad = thissad;
@@ -1854,7 +1855,8 @@ double vp9_diamond_search_sad_new(const MACROBLOCK *x,
           const uint8_t *const check_here = ss_os[i] + best_address;
           const double mv_dist =
               fn_ptr->sdf(what, what_stride, check_here, in_what_stride);
-          const double mv_cost = nb_mvs_inconsistency(&this_mv, nb_full_mvs);
+          const double mv_cost =
+              av1_nb_mvs_inconsistency(&this_mv, nb_full_mvs);
           double thissad = mv_dist + lambda * mv_cost;
           if (thissad < bestsad) {
             bestsad = thissad;
@@ -2440,7 +2442,7 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
   vpx_clear_system_state();
   *best_mv_dist =
       fn_ptr->sdf(what->buf, what->stride, best_address, in_what->stride);
-  *best_mv_cost = nb_mvs_inconsistency(best_full_mv, nb_full_mvs);
+  *best_mv_cost = av1_nb_mvs_inconsistency(best_full_mv, nb_full_mvs);
   best_sad = (*best_mv_dist) + lambda * (*best_mv_cost);
 
   for (i = 0; i < search_range; i++) {
@@ -2462,7 +2464,7 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
         const MV mv = { best_full_mv->row + neighbors[j].row,
                         best_full_mv->col + neighbors[j].col };
         const double mv_dist = sads[j];
-        const double mv_cost = nb_mvs_inconsistency(&mv, nb_full_mvs);
+        const double mv_cost = av1_nb_mvs_inconsistency(&mv, nb_full_mvs);
         const double thissad = mv_dist + lambda * mv_cost;
         if (thissad < best_sad) {
           best_sad = thissad;
@@ -2480,7 +2482,7 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
           const double mv_dist =
               fn_ptr->sdf(what->buf, what->stride,
                           get_buf_from_mv(in_what, &mv), in_what->stride);
-          const double mv_cost = nb_mvs_inconsistency(&mv, nb_full_mvs);
+          const double mv_cost = av1_nb_mvs_inconsistency(&mv, nb_full_mvs);
           const double thissad = mv_dist + lambda * mv_cost;
           if (thissad < best_sad) {
             best_sad = thissad;
