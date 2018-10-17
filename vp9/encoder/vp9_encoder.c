@@ -5983,8 +5983,10 @@ static int compare_feature_score(const void *a, const void *b) {
   }
 }
 
+#define CHANGE_MV_SEARCH_ORDER 1
 #define USE_PQSORT 1
 
+#if CHANGE_MV_SEARCH_ORDER
 #if USE_PQSORT
 static void max_heap_pop(FEATURE_SCORE_LOC **heap, int *size,
                          FEATURE_SCORE_LOC **output) {
@@ -6061,6 +6063,7 @@ static void add_nb_blocks_to_heap(VP9_COMP *cpi, const TplDepFrame *tpl_frame,
   }
 }
 #endif  // USE_PQSORT
+#endif  // CHANGE_MV_SEARCH_ORDER
 #endif  // CONFIG_NON_GREEDY_MV
 
 void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
@@ -6096,11 +6099,13 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
 #if CONFIG_NON_GREEDY_MV
   int rf_idx;
   int fs_loc_sort_size;
+#if CHANGE_MV_SEARCH_ORDER
 #if USE_PQSORT
   int fs_loc_heap_size;
 #else
   int i;
 #endif  // USE_PQSORT
+#endif  // CHANGE_MV_SEARCH_ORDER
 #endif  // CONFIG_NON_GREEDY_MV
 
   // Setup scaling factor
@@ -6171,6 +6176,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   qsort(cpi->feature_score_loc_sort, fs_loc_sort_size,
         sizeof(*cpi->feature_score_loc_sort), compare_feature_score);
 
+#if CHANGE_MV_SEARCH_ORDER
 #if !USE_PQSORT
   for (i = 0; i < fs_loc_sort_size; ++i) {
     int mb_y_offset;
@@ -6235,6 +6241,29 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
                           &fs_loc_heap_size);
   }
 #endif  // !USE_PQSORT
+#else   // CHANGE_MV_SEARCH_ORDER
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+      const int mb_y_offset =
+          mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
+      TplDepStats *tpl_stats =
+          &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+      set_mv_limits(cm, x, mi_row, mi_col);
+      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        if (ref_frame[rf_idx] == NULL) {
+          tpl_stats->ready[rf_idx] = 0;
+          continue;
+        } else {
+          tpl_stats->ready[rf_idx] = 1;
+        }
+        motion_compensated_prediction(
+            cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
+            ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride,
+            bsize, mi_row, mi_col, tpl_stats, rf_idx);
+      }
+    }
+  }
+#endif  // CHANGE_MV_SEARCH_ORDER
 #endif  // CONFIG_NON_GREEDY_MV
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
