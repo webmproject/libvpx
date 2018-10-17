@@ -5983,6 +5983,35 @@ static int compare_feature_score(const void *a, const void *b) {
   }
 }
 
+static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
+                             YV12_BUFFER_CONFIG **ref_frame, BLOCK_SIZE bsize,
+                             int mi_row, int mi_col) {
+  VP9_COMMON *cm = &cpi->common;
+  MACROBLOCK *x = &td->mb;
+  MACROBLOCKD *xd = &x->e_mbd;
+  TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+  TplDepStats *tpl_stats =
+      &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+  const int mb_y_offset =
+      mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
+  int rf_idx;
+
+  set_mv_limits(cm, x, mi_row, mi_col);
+
+  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    if (ref_frame[rf_idx] == NULL) {
+      tpl_stats->ready[rf_idx] = 0;
+      continue;
+    } else {
+      tpl_stats->ready[rf_idx] = 1;
+    }
+    motion_compensated_prediction(
+        cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
+        ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
+        mi_row, mi_col, tpl_stats, rf_idx);
+  }
+}
+
 #define CHANGE_MV_SEARCH_ORDER 1
 #define USE_PQSORT 1
 
@@ -6179,29 +6208,9 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
 #if CHANGE_MV_SEARCH_ORDER
 #if !USE_PQSORT
   for (i = 0; i < fs_loc_sort_size; ++i) {
-    int mb_y_offset;
-    TplDepStats *tpl_stats;
     FEATURE_SCORE_LOC *fs_loc = cpi->feature_score_loc_sort[i];
-    mi_row = fs_loc->mi_row;
-    mi_col = fs_loc->mi_col;
-
-    mb_y_offset = mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
-    tpl_stats = &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-
-    set_mv_limits(cm, x, mi_row, mi_col);
-
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-      if (ref_frame[rf_idx] == NULL) {
-        tpl_stats->ready[rf_idx] = 0;
-        continue;
-      } else {
-        tpl_stats->ready[rf_idx] = 1;
-      }
-      motion_compensated_prediction(
-          cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
-          ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride,
-          bsize, mi_row, mi_col, tpl_stats, rf_idx);
-    }
+    do_motion_search(cpi, td, frame_idx, ref_frame, bsize, fs_loc->mi_row,
+                     fs_loc->mi_col);
   }
 #else   // !USE_PQSORT
   fs_loc_heap_size = 0;
@@ -6209,58 +6218,22 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
                 cpi->feature_score_loc_sort[0]);
 
   while (fs_loc_heap_size > 0) {
-    int mb_y_offset;
-    TplDepStats *tpl_stats;
     FEATURE_SCORE_LOC *fs_loc;
-
     max_heap_pop(cpi->feature_score_loc_heap, &fs_loc_heap_size, &fs_loc);
 
     fs_loc->visited = 1;
 
-    mi_row = fs_loc->mi_row;
-    mi_col = fs_loc->mi_col;
+    do_motion_search(cpi, td, frame_idx, ref_frame, bsize, fs_loc->mi_row,
+                     fs_loc->mi_col);
 
-    mb_y_offset = mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
-    tpl_stats = &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-
-    set_mv_limits(cm, x, mi_row, mi_col);
-
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-      if (ref_frame[rf_idx] == NULL) {
-        tpl_stats->ready[rf_idx] = 0;
-        continue;
-      } else {
-        tpl_stats->ready[rf_idx] = 1;
-      }
-      motion_compensated_prediction(
-          cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
-          ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride,
-          bsize, mi_row, mi_col, tpl_stats, rf_idx);
-    }
-    add_nb_blocks_to_heap(cpi, tpl_frame, bsize, mi_row, mi_col,
+    add_nb_blocks_to_heap(cpi, tpl_frame, bsize, fs_loc->mi_row, fs_loc->mi_col,
                           &fs_loc_heap_size);
   }
 #endif  // !USE_PQSORT
 #else   // CHANGE_MV_SEARCH_ORDER
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-      const int mb_y_offset =
-          mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
-      TplDepStats *tpl_stats =
-          &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-      set_mv_limits(cm, x, mi_row, mi_col);
-      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-        if (ref_frame[rf_idx] == NULL) {
-          tpl_stats->ready[rf_idx] = 0;
-          continue;
-        } else {
-          tpl_stats->ready[rf_idx] = 1;
-        }
-        motion_compensated_prediction(
-            cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
-            ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride,
-            bsize, mi_row, mi_col, tpl_stats, rf_idx);
-      }
+      do_motion_search(cpi, td, frame_idx, ref_frame, bsize, mi_row, mi_col);
     }
   }
 #endif  // CHANGE_MV_SEARCH_ORDER
