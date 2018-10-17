@@ -3578,7 +3578,7 @@ int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
 
   if (cpi->common.show_frame) return orig_rdmult;
 
-  if (cpi->twopass.gf_group.index >= MAX_LAG_BUFFERS) return orig_rdmult;
+  if (cpi->twopass.gf_group.index >= MAX_ARF_GOP_SIZE) return orig_rdmult;
 
   for (row = mi_row; row < mi_row + mi_high; ++row) {
     for (col = mi_col; col < mi_col + mi_wide; ++col) {
@@ -5708,7 +5708,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
     if (sf->partition_search_type == SOURCE_VAR_BASED_PARTITION)
       source_var_based_partition_search_method(cpi);
-  } else if (gf_group_index && gf_group_index < MAX_LAG_BUFFERS &&
+  } else if (gf_group_index && gf_group_index < MAX_ARF_GOP_SIZE &&
              cpi->sf.enable_tpl_model) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[cpi->twopass.gf_group.index];
     TplDepStats *tpl_stats = tpl_frame->tpl_stats_ptr;
