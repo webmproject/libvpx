@@ -376,6 +376,25 @@ filter8_1dfunction vpx_filter_block1d4_h2_avg_ssse3;
 #define vpx_filter_block1d8_h2_avg_avx2 vpx_filter_block1d8_h2_avg_ssse3
 #define vpx_filter_block1d4_v2_avg_avx2 vpx_filter_block1d4_v2_avg_ssse3
 #define vpx_filter_block1d4_h2_avg_avx2 vpx_filter_block1d4_h2_avg_ssse3
+#if HAVE_SSE2
+filter8_1dfunction vpx_filter_block1d16_v4_sse2;
+filter8_1dfunction vpx_filter_block1d16_h4_sse2;
+#define vpx_filter_block1d16_v4_avx2 vpx_filter_block1d16_v4_sse2
+#define vpx_filter_block1d16_h4_avx2 vpx_filter_block1d16_h4_sse2
+#else
+#define vpx_filter_block1d16_v4_avx2 vpx_filter_block1d16_v8_avx2
+#define vpx_filter_block1d16_h4_avx2 vpx_filter_block1d16_h8_avx2
+#define vpx_filter_block1d8_v4_avx2 vpx_filter_block1d8_v8_avx2
+#define vpx_filter_block1d8_h4_avx2 vpx_filter_block1d8_h8_avx2
+#define vpx_filter_block1d4_v4_avx2 vpx_filter_block1d4_v8_avx2
+#define vpx_filter_block1d4_h4_avx2 vpx_filter_block1d4_h8_avx2
+#endif
+#define vpx_filter_block1d16_v4_avg_avx2 vpx_filter_block1d16_v8_avg_avx2
+#define vpx_filter_block1d16_h4_avg_avx2 vpx_filter_block1d16_h8_avg_avx2
+#define vpx_filter_block1d8_v4_avg_avx2 vpx_filter_block1d8_v8_avg_avx2
+#define vpx_filter_block1d8_h4_avg_avx2 vpx_filter_block1d8_h8_avg_avx2
+#define vpx_filter_block1d4_v4_avg_avx2 vpx_filter_block1d4_v8_avg_avx2
+#define vpx_filter_block1d4_h4_avg_avx2 vpx_filter_block1d4_h8_avg_avx2
 // void vpx_convolve8_horiz_avx2(const uint8_t *src, ptrdiff_t src_stride,
 //                                uint8_t *dst, ptrdiff_t dst_stride,
 //                                const InterpKernel *filter, int x0_q4,

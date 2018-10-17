@@ -674,6 +674,74 @@ TEST_P(ConvolveTest, DISABLED_8Tap_Vert_Speed) {
          UUT_->use_highbd_ ? UUT_->use_highbd_ : 8, elapsed_time);
 }
 
+TEST_P(ConvolveTest, DISABLED_4Tap_Speed) {
+  const uint8_t *const in = input();
+  uint8_t *const out = output();
+  const InterpKernel *const fourtap = vp9_filter_kernels[FOURTAP];
+  const int kNumTests = 5000000;
+  const int width = Width();
+  const int height = Height();
+  vpx_usec_timer timer;
+
+  SetConstantInput(127);
+
+  vpx_usec_timer_start(&timer);
+  for (int n = 0; n < kNumTests; ++n) {
+    UUT_->hv8_[0](in, kInputStride, out, kOutputStride, fourtap, 8, 16, 8, 16,
+                  width, height);
+  }
+  vpx_usec_timer_mark(&timer);
+
+  const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
+  printf("convolve4_%dx%d_%d: %d us\n", width, height,
+         UUT_->use_highbd_ ? UUT_->use_highbd_ : 8, elapsed_time);
+}
+
+TEST_P(ConvolveTest, DISABLED_4Tap_Horiz_Speed) {
+  const uint8_t *const in = input();
+  uint8_t *const out = output();
+  const InterpKernel *const fourtap = vp9_filter_kernels[FOURTAP];
+  const int kNumTests = 5000000;
+  const int width = Width();
+  const int height = Height();
+  vpx_usec_timer timer;
+
+  SetConstantInput(127);
+
+  vpx_usec_timer_start(&timer);
+  for (int n = 0; n < kNumTests; ++n) {
+    UUT_->h8_[0](in, kInputStride, out, kOutputStride, fourtap, 8, 16, 8, 16,
+                 width, height);
+  }
+  vpx_usec_timer_mark(&timer);
+
+  const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
+  printf("convolve4_horiz_%dx%d_%d: %d us\n", width, height,
+         UUT_->use_highbd_ ? UUT_->use_highbd_ : 8, elapsed_time);
+}
+
+TEST_P(ConvolveTest, DISABLED_4Tap_Vert_Speed) {
+  const uint8_t *const in = input();
+  uint8_t *const out = output();
+  const InterpKernel *const fourtap = vp9_filter_kernels[FOURTAP];
+  const int kNumTests = 5000000;
+  const int width = Width();
+  const int height = Height();
+  vpx_usec_timer timer;
+
+  SetConstantInput(127);
+
+  vpx_usec_timer_start(&timer);
+  for (int n = 0; n < kNumTests; ++n) {
+    UUT_->v8_[0](in, kInputStride, out, kOutputStride, fourtap, 8, 16, 8, 16,
+                 width, height);
+  }
+  vpx_usec_timer_mark(&timer);
+
+  const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
+  printf("convolve4_vert_%dx%d_%d: %d us\n", width, height,
+         UUT_->use_highbd_ ? UUT_->use_highbd_ : 8, elapsed_time);
+}
 TEST_P(ConvolveTest, DISABLED_8Tap_Avg_Speed) {
   const uint8_t *const in = input();
   uint8_t *const out = output();

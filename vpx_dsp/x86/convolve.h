@@ -32,9 +32,24 @@ typedef void filter8_1dfunction(const uint8_t *src_ptr, ptrdiff_t src_pitch,
     (void)y_step_q4;                                                         \
     assert(filter[3] != 128);                                                \
     assert(step_q4 == 16);                                                   \
-    if (filter[0] | filter[1] | filter[2]) {                                 \
+    if (filter[0] | filter[1] | filter[6] | filter[7]) {                     \
       while (w >= 16) {                                                      \
         vpx_filter_block1d16_##dir##8_##avg##opt(src_start, src_stride, dst, \
+                                                 dst_stride, h, filter);     \
+        src += 16;                                                           \
+        dst += 16;                                                           \
+        w -= 16;                                                             \
+      }                                                                      \
+      if (w == 8) {                                                          \
+        vpx_filter_block1d8_##dir##8_##avg##opt(src_start, src_stride, dst,  \
+                                                dst_stride, h, filter);      \
+      } else if (w == 4) {                                                   \
+        vpx_filter_block1d4_##dir##8_##avg##opt(src_start, src_stride, dst,  \
+                                                dst_stride, h, filter);      \
+      }                                                                      \
+    } else if (filter[2] | filter[5]) {                                      \
+      while (w >= 16) {                                                      \
+        vpx_filter_block1d16_##dir##4_##avg##opt(src_start, src_stride, dst, \
                                                  dst_stride, h, filter);     \
         src += 16;                                                           \
         dst += 16;                                                           \
