@@ -37,10 +37,9 @@ extern "C" {
 #define REF_FRAMES_LOG2 3
 #define REF_FRAMES (1 << REF_FRAMES_LOG2)
 
-// 1 scratch frame for the new frame, 3 for scaled references on the encoder.
-// TODO(jkoleszar): These 3 extra references could probably come from the
-// normal reference pool.
-#define FRAME_BUFFERS (REF_FRAMES + 4)
+// 1 scratch frame for the new frame, REFS_PER_FRAME for scaled references on
+// the encoder.
+#define FRAME_BUFFERS (REF_FRAMES + 1 + REFS_PER_FRAME)
 
 #define FRAME_CONTEXTS_LOG2 2
 #define FRAME_CONTEXTS (1 << FRAME_CONTEXTS_LOG2)

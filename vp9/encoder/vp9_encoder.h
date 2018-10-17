@@ -537,7 +537,7 @@ typedef struct VP9_COMP {
   // For a still frame, this flag is set to 1 to skip partition search.
   int partition_search_skippable_frame;
 
-  int scaled_ref_idx[MAX_REF_FRAMES];
+  int scaled_ref_idx[REFS_PER_FRAME];
   int lst_fb_idx;
   int gld_fb_idx;
   int alt_fb_idx;

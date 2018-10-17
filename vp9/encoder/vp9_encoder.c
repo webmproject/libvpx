@@ -3276,7 +3276,7 @@ static void release_scaled_references(VP9_COMP *cpi) {
       }
     }
   } else {
-    for (i = 0; i < MAX_REF_FRAMES; ++i) {
+    for (i = 0; i < REFS_PER_FRAME; ++i) {
       const int idx = cpi->scaled_ref_idx[i];
       if (idx != INVALID_IDX) {
         RefCntBuffer *const buf = &cm->buffer_pool->frame_bufs[idx];
@@ -6392,7 +6392,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     level_rc_framerate(cpi, arf_src_index);
 
   if (cpi->oxcf.pass != 0 || cpi->use_svc || frame_is_intra_only(cm) == 1) {
-    for (i = 0; i < MAX_REF_FRAMES; ++i) cpi->scaled_ref_idx[i] = INVALID_IDX;
+    for (i = 0; i < REFS_PER_FRAME; ++i) cpi->scaled_ref_idx[i] = INVALID_IDX;
   }
 
   if (cpi->twopass.gf_group.index == 1 && cpi->sf.enable_tpl_model) {
