@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "89a805e1_8333fe8d",
+        "filename": "vpx_dsp/x86/convolve_sse2.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-17T22:04:49Z",
+      "side": 1,
+      "message": "this is unused here",
+      "range": {
+        "startLine": 14,
+        "startChar": 10,
+        "endLine": 14,
+        "endChar": 16
+      },
+      "revId": "62830c53a644f5feaa49431b39c85093d2e387fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2831177_01640023",
+        "filename": "vpx_dsp/x86/convolve_sse2.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-17T22:04:49Z",
+      "side": 1,
+      "message": "you could just say \u0027zero extends...\u0027",
+      "revId": "62830c53a644f5feaa49431b39c85093d2e387fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69f2feaa_ecbf909c",
+        "filename": "vpx_dsp/x86/convolve_sse2.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-17T22:04:49Z",
+      "side": 1,
+      "message": "I\u0027m not sure this name is all that helpful, maybe just multiply and accumulate?",
+      "revId": "62830c53a644f5feaa49431b39c85093d2e387fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8660a9df_0cd84422",
+        "filename": "vpx_dsp/x86/convolve_sse2.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-17T22:04:49Z",
+      "side": 1,
+      "message": "add a newline",
+      "revId": "62830c53a644f5feaa49431b39c85093d2e387fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7623adaf_c82874e6",
+        "filename": "vpx_dsp/x86/convolve_sse2.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-17T22:04:49Z",
+      "side": 1,
+      "message": "note in neon this is referred to as zip. you might add a note that this is interleaving the two.",
+      "revId": "62830c53a644f5feaa49431b39c85093d2e387fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
