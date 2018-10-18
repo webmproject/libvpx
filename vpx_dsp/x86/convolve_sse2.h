@@ -11,7 +11,6 @@
 #ifndef VPX_VPX_DSP_X86_CONVOLVE_SSE2_H_
 #define VPX_VPX_DSP_X86_CONVOLVE_SSE2_H_
 
-#include <assert.h>
 #include <emmintrin.h>  // SSE2
 
 #include "./vpx_config.h"
@@ -30,12 +29,13 @@ static INLINE __m128i extract_quarter_3_epi16_sse2(const __m128i *const reg) {
   return _mm_unpacklo_epi64(tmp, tmp);
 }
 
-// Interprets src as 8-bit words, pads each word with zeroes to form 16-bit
-// words, then multiplies with ker and add the adjacent results to form 32-bit
-// words. Finally adds the result from 1 and 2 together.
-static INLINE __m128i pad_multiply_add_add_epi8_sse2(
-    const __m128i *const src_1, const __m128i *const src_2,
-    const __m128i *const ker_1, const __m128i *const ker_2) {
+// Interprets src as 8-bit words, zero extends to form 16-bit words, then
+// multiplies with ker and add the adjacent results to form 32-bit words.
+// Finally adds the result from 1 and 2 together.
+static INLINE __m128i multiply_add_epi8_sse2(const __m128i *const src_1,
+                                             const __m128i *const src_2,
+                                             const __m128i *const ker_1,
+                                             const __m128i *const ker_2) {
   const __m128i src_1_half = _mm_unpacklo_epi8(*src_1, _mm_setzero_si128());
   const __m128i src_2_half = _mm_unpacklo_epi8(*src_2, _mm_setzero_si128());
   const __m128i madd_1 = _mm_madd_epi16(src_1_half, *ker_1);
@@ -50,6 +50,8 @@ static INLINE __m128i multiply_add_packs_epi16_sse2(const __m128i *const src_0,
   const __m128i madd_2 = _mm_madd_epi16(*src_1, *ker);
   return _mm_packs_epi32(madd_1, madd_2);
 }
+
+// Interleaves src_1 and src_2
 static INLINE __m128i combine_epi32_sse2(const __m128i *const src_1,
                                          const __m128i *const src_2) {
   const __m128i tmp_1 = _mm_unpacklo_epi32(*src_1, *src_2);
