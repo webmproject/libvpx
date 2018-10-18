@@ -1735,7 +1735,8 @@ static int exhuastive_mesh_search(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
 #if CONFIG_NON_GREEDY_MV
 double av1_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs) {
   int i;
-  double best_cost = -1;
+  int update = 0;
+  double best_cost = 0;
   vpx_clear_system_state();
   for (i = 0; i < NB_MVS_NUM; ++i) {
     if (nb_mvs[i].as_int != INVALID_MV) {
@@ -1744,18 +1745,15 @@ double av1_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs) {
       const double col_diff = mv->col - nb_mv.col;
       double cost = row_diff * row_diff + col_diff * col_diff;
       cost = log2(1 + cost);
-      if (best_cost < 0) {
+      if (update == 0) {
         best_cost = cost;
+        update = 1;
       } else {
         best_cost = cost < best_cost ? cost : best_cost;
       }
     }
   }
-  if (best_cost < 0) {
-    return 0;
-  } else {
-    return best_cost;
-  }
+  return best_cost;
 }
 
 double vp9_diamond_search_sad_new(const MACROBLOCK *x,
