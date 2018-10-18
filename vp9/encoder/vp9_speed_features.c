@@ -116,17 +116,13 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
       sf->ml_partition_search_breakout_thresh[1] = -1.0f;
       sf->ml_partition_search_breakout_thresh[2] = -1.0f;
     }
-
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH) {
-      sf->use_square_only_thresh_high = BLOCK_4X4;
-      sf->use_square_only_thresh_low = BLOCK_SIZES;
-      if (is_720p_or_larger) {
-        sf->partition_search_breakout_thr.dist = (1 << 23);
-        sf->use_ml_partition_search_breakout = 0;
-      }
+      sf->ml_partition_search_breakout_thresh[0] -= 1.0f;
+      sf->ml_partition_search_breakout_thresh[1] -= 1.0f;
+      sf->ml_partition_search_breakout_thresh[2] -= 1.0f;
     }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
   if (speed >= 2) {
@@ -246,10 +242,6 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->ml_prune_rect_partition_threhold[1] = 200;
     sf->ml_prune_rect_partition_threhold[2] = 200;
     sf->ml_prune_rect_partition_threhold[3] = 200;
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH)
-      sf->prune_ref_frame_for_rect_partitions = 0;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     if (oxcf->pass == 2) {
       TWO_PASS *const twopass = &cpi->twopass;
