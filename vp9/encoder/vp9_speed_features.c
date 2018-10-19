@@ -562,6 +562,16 @@ static void set_rt_speed_feature_framesize_independent(
         (frames_since_key % (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = is_keyframe ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
+#if CONFIG_ML_VAR_PARTITION
+    if (!frame_is_intra_only(cm) && cm->width >= 360 && cm->height >= 360)
+      sf->partition_search_type = ML_BASED_PARTITION;
+    else
+      sf->partition_search_type = REFERENCE_PARTITION;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH)
+      sf->partition_search_type = REFERENCE_PARTITION;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_ML_VAR_PARTITION
     if (cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0 &&
         cpi->rc.is_src_frame_alt_ref) {
       sf->partition_search_type = VAR_BASED_PARTITION;
@@ -623,9 +633,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->use_compound_nonrd_pickmode = 1;
     }
 #if CONFIG_ML_VAR_PARTITION
-    if (!frame_is_intra_only(cm) && cm->width >= 360 && cm->height >= 360)
-      sf->partition_search_type = ML_BASED_PARTITION;
-    else
+    if (frame_is_intra_only(cm) || cm->width < 360 || cm->height < 360)
       sf->partition_search_type = VAR_BASED_PARTITION;
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH)
