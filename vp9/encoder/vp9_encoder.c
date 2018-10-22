@@ -5382,6 +5382,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   int arf_stack_size = 0;
   int extend_frame_count = 0;
   int pframe_qindex = cpi->tpl_stats[2].base_qindex;
+  int frame_gop_offset = 0;
 
   RefCntBuffer *frame_bufs = cm->buffer_pool->frame_bufs;
   int8_t recon_frame_index[REFS_PER_FRAME + MAX_ARF_LAYERS];
@@ -5435,9 +5436,9 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
   // Initialize P frames
   for (frame_idx = 2; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
-    const int frame_gop_offset = gf_group->frame_gop_index[frame_idx];
-    struct lookahead_entry *buf =
-        vp9_lookahead_peek(cpi->lookahead, frame_gop_offset - 1);
+    struct lookahead_entry *buf;
+    frame_gop_offset = gf_group->frame_gop_index[frame_idx];
+    buf = vp9_lookahead_peek(cpi->lookahead, frame_gop_offset - 1);
 
     if (buf == NULL) break;
 
@@ -5476,11 +5477,12 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
   alt_index = -1;
   ++frame_idx;
+  ++frame_gop_offset;
 
   // Extend two frames outside the current gf group.
   for (; frame_idx < MAX_LAG_BUFFERS && extend_frame_count < 2; ++frame_idx) {
     struct lookahead_entry *buf =
-        vp9_lookahead_peek(cpi->lookahead, frame_idx - 2);
+        vp9_lookahead_peek(cpi->lookahead, frame_gop_offset - 1);
 
     if (buf == NULL) break;
 
@@ -5493,6 +5495,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
     lst_index = frame_idx;
     ++*tpl_group_frames;
     ++extend_frame_count;
+    ++frame_gop_offset;
   }
 }
 
