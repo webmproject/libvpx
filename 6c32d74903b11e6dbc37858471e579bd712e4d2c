@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b10e12f5_ff25df05",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-23T03:07:56Z",
+      "side": 1,
+      "message": "these ()s are unnecessary",
+      "range": {
+        "startLine": 73,
+        "startChar": 57,
+        "endLine": 73,
+        "endChar": 58
+      },
+      "revId": "6c32d74903b11e6dbc37858471e579bd712e4d2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "905fa870_47241c1a",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-23T03:07:56Z",
+      "side": 1,
+      "message": "most other uses of CHECK_MEM_ERROR don\u0027t explicitly cast the allocation return",
+      "range": {
+        "startLine": 77,
+        "startChar": 6,
+        "endLine": 77,
+        "endChar": 16
+      },
+      "revId": "6c32d74903b11e6dbc37858471e579bd712e4d2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "724eadc7_1f0cc5bf",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-23T03:07:56Z",
+      "side": 1,
+      "message": "it may be better to move this check to the free call as other calls are tolerant of NULL pointers. that should be safer should the code shift around.",
+      "revId": "6c32d74903b11e6dbc37858471e579bd712e4d2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
