@@ -5891,10 +5891,7 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
     int_mv mv;
-    if (ref_frame[rf_idx] == NULL) {
-      continue;
-    } else {
-    }
+    if (ref_frame[rf_idx] == NULL) continue;
 
 #if CONFIG_NON_GREEDY_MV
     (void)td;
