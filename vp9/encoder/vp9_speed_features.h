@@ -247,6 +247,7 @@ typedef enum {
   USE_2_TAPS = 0,
   USE_4_TAPS,
   USE_8_TAPS,
+  USE_8_TAPS_SHARP,
 } SUBPEL_SEARCH_TYPE;
 
 typedef struct SPEED_FEATURES {

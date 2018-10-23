@@ -763,11 +763,14 @@ uint32_t vp9_find_best_sub_pixel_tree(
 
   // TODO(yunqing): need to add 4-tap filter optimization to speed up the
   // encoder.
-  const InterpKernel *kernel = (use_accurate_subpel_search > 0)
-                                   ? ((use_accurate_subpel_search == USE_4_TAPS)
-                                          ? vp9_filter_kernels[FOURTAP]
-                                          : vp9_filter_kernels[EIGHTTAP])
-                                   : vp9_filter_kernels[BILINEAR];
+  const InterpKernel *kernel =
+      (use_accurate_subpel_search > 0)
+          ? ((use_accurate_subpel_search == USE_4_TAPS)
+                 ? vp9_filter_kernels[FOURTAP]
+                 : ((use_accurate_subpel_search == USE_8_TAPS)
+                        ? vp9_filter_kernels[EIGHTTAP]
+                        : vp9_filter_kernels[EIGHTTAP_SHARP]))
+          : vp9_filter_kernels[BILINEAR];
 
   vp9_set_subpel_mv_search_range(&subpel_mv_limits, &x->mv_limits, ref_mv);
   minc = subpel_mv_limits.col_min;
