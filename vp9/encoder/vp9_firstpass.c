@@ -2127,6 +2127,7 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
       gf_group->frame_gop_index[*index_counter] = idx;
       gf_group->rf_level[*index_counter] = INTER_NORMAL;
       gf_group->layer_depth[*index_counter] = depth;
+      gf_group->gfu_boost[*index_counter] = NORMAL_BOOST;
       ++(*index_counter);
     }
     return;
@@ -2170,6 +2171,7 @@ static INLINE void set_gf_overlay_frame_type(GF_GROUP *gf_group,
     gf_group->update_type[frame_index] = OVERLAY_UPDATE;
     gf_group->rf_level[frame_index] = INTER_NORMAL;
     gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
+    gf_group->gfu_boost[frame_index] = NORMAL_BOOST;
   } else {
     gf_group->update_type[frame_index] = GF_UPDATE;
     gf_group->rf_level[frame_index] = GF_ARF_STD;

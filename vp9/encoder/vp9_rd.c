@@ -197,7 +197,10 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
-    const int boost_index = VPXMIN(15, (cpi->rc.gfu_boost / 100));
+    const int gfu_boost = cpi->multi_layer_arf
+                              ? gf_group->gfu_boost[gf_group->index]
+                              : cpi->rc.gfu_boost;
+    const int boost_index = VPXMIN(15, (gfu_boost / 100));
 
     rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
     rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
@@ -229,7 +232,10 @@ int vp9_get_adaptive_rdmult(const VP9_COMP *cpi, double beta) {
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
-    const int boost_index = VPXMIN(15, (cpi->rc.gfu_boost / 100));
+    const int gfu_boost = cpi->multi_layer_arf
+                              ? gf_group->gfu_boost[gf_group->index]
+                              : cpi->rc.gfu_boost;
+    const int boost_index = VPXMIN(15, (gfu_boost / 100));
 
     rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
     rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
