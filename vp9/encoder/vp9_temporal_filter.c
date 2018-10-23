@@ -428,8 +428,8 @@ static uint32_t temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   bestsme = cpi->find_fractional_mv_step(
       x, ref_mv, &best_ref_mv1, cpi->common.allow_high_precision_mv,
       x->errorperbit, &cpi->fn_ptr[BLOCK_16X16], 0, mv_sf->subpel_search_level,
-      cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, 0, 0,
-      USE_2_TAPS);
+      cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, 16,
+      16, USE_8_TAPS_SHARP);
 
   // Restore input state
   x->plane[0].src = src;
