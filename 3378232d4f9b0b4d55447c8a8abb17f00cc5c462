@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55835646_c3bb0225",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-24T06:22:02Z",
+      "side": 1,
+      "message": "this should be size_t given the use of sizeof()",
+      "range": {
+        "startLine": 61,
+        "startChar": 8,
+        "endLine": 61,
+        "endChar": 12
+      },
+      "revId": "3378232d4f9b0b4d55447c8a8abb17f00cc5c462",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53dcdc27_cb59412a",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-24T06:22:02Z",
+      "side": 1,
+      "message": "this can go inside the branch",
+      "revId": "3378232d4f9b0b4d55447c8a8abb17f00cc5c462",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e11893e1_567f4095",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-10-24T06:22:02Z",
+      "side": 1,
+      "message": "this is OK, we might consider normalizing this name and e.g., TileWorkerData  to have some common suffix as a followup.",
+      "range": {
+        "startLine": 52,
+        "startChar": 15,
+        "endLine": 52,
+        "endChar": 27
+      },
+      "revId": "3378232d4f9b0b4d55447c8a8abb17f00cc5c462",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
