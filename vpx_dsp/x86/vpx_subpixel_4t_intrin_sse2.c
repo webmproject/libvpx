@@ -54,12 +54,12 @@ void vpx_filter_block1d16_h4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
     src_reg_shift_3 = _mm_srli_si128(src_reg, 3);
 
     // Output 6 4 2 0
-    even = pad_multiply_add_add_epi8_sse2(&src_reg, &src_reg_shift_2,
-                                          &kernel_reg_23, &kernel_reg_45);
+    even = multiply_add_epi8_sse2(&src_reg, &src_reg_shift_2, &kernel_reg_23,
+                                  &kernel_reg_45);
 
     // Output 7 5 3 1
-    odd = pad_multiply_add_add_epi8_sse2(&src_reg_shift_1, &src_reg_shift_3,
-                                         &kernel_reg_23, &kernel_reg_45);
+    odd = multiply_add_epi8_sse2(&src_reg_shift_1, &src_reg_shift_3,
+                                 &kernel_reg_23, &kernel_reg_45);
 
     // Combine to get the first half of the dst
     dst_first = combine_epi32_sse2(&even, &odd);
@@ -71,12 +71,12 @@ void vpx_filter_block1d16_h4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
     src_reg_shift_3 = _mm_srli_si128(src_reg, 3);
 
     // Output 14 12 10 8
-    even = pad_multiply_add_add_epi8_sse2(&src_reg, &src_reg_shift_2,
-                                          &kernel_reg_23, &kernel_reg_45);
+    even = multiply_add_epi8_sse2(&src_reg, &src_reg_shift_2, &kernel_reg_23,
+                                  &kernel_reg_45);
 
     // Output 15 13 11 9
-    odd = pad_multiply_add_add_epi8_sse2(&src_reg_shift_1, &src_reg_shift_3,
-                                         &kernel_reg_23, &kernel_reg_45);
+    odd = multiply_add_epi8_sse2(&src_reg_shift_1, &src_reg_shift_3,
+                                 &kernel_reg_23, &kernel_reg_45);
 
     // Combine to get the second half of the dst
     dst_second = combine_epi32_sse2(&even, &odd);
@@ -288,12 +288,12 @@ void vpx_filter_block1d8_h4_sse2(const uint8_t *src_ptr, ptrdiff_t src_stride,
     src_reg_shift_3 = _mm_srli_si128(src_reg, 3);
 
     // Output 6 4 2 0
-    even = pad_multiply_add_add_epi8_sse2(&src_reg, &src_reg_shift_2,
-                                          &kernel_reg_23, &kernel_reg_45);
+    even = multiply_add_epi8_sse2(&src_reg, &src_reg_shift_2, &kernel_reg_23,
+                                  &kernel_reg_45);
 
     // Output 7 5 3 1
-    odd = pad_multiply_add_add_epi8_sse2(&src_reg_shift_1, &src_reg_shift_3,
-                                         &kernel_reg_23, &kernel_reg_45);
+    odd = multiply_add_epi8_sse2(&src_reg_shift_1, &src_reg_shift_3,
+                                 &kernel_reg_23, &kernel_reg_45);
 
     // Combine to get the first half of the dst
     dst_first = combine_epi32_sse2(&even, &odd);
