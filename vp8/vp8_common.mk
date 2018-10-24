@@ -86,6 +86,7 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/copy_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_blk_sse2.c
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idctllm_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/recon_sse2.asm
+VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/bilinear_filter_sse2.c
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/subpixel_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/iwalsh_sse2.asm
