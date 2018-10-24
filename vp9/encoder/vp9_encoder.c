@@ -5773,9 +5773,21 @@ void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
   int pix_num = 1 << num_pels_log2_lookup[txsize_to_bsize[tx_size]];
   const int shift = tx_size == TX_32X32 ? 0 : 2;
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    vp9_highbd_quantize_fp_32x32(coeff, pix_num, x->skip_block, p->round_fp,
+                                 p->quant_fp, qcoeff, dqcoeff, pd->dequant,
+                                 &eob, scan_order->scan, scan_order->iscan);
+  } else {
+    vp9_quantize_fp_32x32(coeff, pix_num, x->skip_block, p->round_fp,
+                          p->quant_fp, qcoeff, dqcoeff, pd->dequant, &eob,
+                          scan_order->scan, scan_order->iscan);
+  }
+#else
   vp9_quantize_fp_32x32(coeff, pix_num, x->skip_block, p->round_fp, p->quant_fp,
                         qcoeff, dqcoeff, pd->dequant, &eob, scan_order->scan,
                         scan_order->iscan);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   *recon_error = vp9_block_error(coeff, dqcoeff, pix_num, sse) >> shift;
   *recon_error = VPXMAX(*recon_error, 1);
@@ -5783,6 +5795,19 @@ void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
   *sse = (*sse) >> shift;
   *sse = VPXMAX(*sse, 1);
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
+                         TX_SIZE tx_size) {
+  // TODO(sdeng): Implement SIMD based high bit-depth Hadamard transforms.
+  switch (tx_size) {
+    case TX_8X8: vpx_hadamard_8x8_c(src_diff, bw, coeff); break;
+    case TX_16X16: vpx_hadamard_16x16_c(src_diff, bw, coeff); break;
+    case TX_32X32: vpx_hadamard_32x32_c(src_diff, bw, coeff); break;
+    default: assert(0);
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
                   TX_SIZE tx_size) {
@@ -5883,11 +5908,24 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
     vp9_predict_intra_block(xd, b_width_log2_lookup[bsize], tx_size, mode, src,
                             src_stride, dst, dst_stride, 0, 0, 0);
 
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      vpx_highbd_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst,
+                                dst_stride, xd->bd);
+      highbd_wht_fwd_txfm(src_diff, bw, coeff, tx_size);
+      // TODO(sdeng): Implement SIMD based high bit-depth satd.
+      intra_cost = vpx_satd_c(coeff, pix_num);
+    } else {
+      vpx_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst,
+                         dst_stride);
+      wht_fwd_txfm(src_diff, bw, coeff, tx_size);
+      intra_cost = vpx_satd(coeff, pix_num);
+    }
+#else
     vpx_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst, dst_stride);
-
     wht_fwd_txfm(src_diff, bw, coeff, tx_size);
-
     intra_cost = vpx_satd(coeff, pix_num);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     if (intra_cost < best_intra_cost) best_intra_cost = intra_cost;
   }
@@ -5911,8 +5949,6 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
         mi_row, mi_col, &mv.as_mv);
 #endif
 
-    // TODO(jingning): Not yet support high bit-depth in the next three
-    // steps.
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       vp9_highbd_build_inter_predictor(
@@ -5923,6 +5959,8 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       vpx_highbd_subtract_block(
           bh, bw, src_diff, bw, xd->cur_buf->y_buffer + mb_y_offset,
           xd->cur_buf->y_stride, &predictor[0], bw, xd->bd);
+      highbd_wht_fwd_txfm(src_diff, bw, coeff, tx_size);
+      inter_cost = vpx_satd_c(coeff, pix_num);
     } else {
       vp9_build_inter_predictor(
           ref_frame[rf_idx]->y_buffer + mb_y_offset,
@@ -5931,6 +5969,8 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       vpx_subtract_block(bh, bw, src_diff, bw,
                          xd->cur_buf->y_buffer + mb_y_offset,
                          xd->cur_buf->y_stride, &predictor[0], bw);
+      wht_fwd_txfm(src_diff, bw, coeff, tx_size);
+      inter_cost = vpx_satd(coeff, pix_num);
     }
 #else
     vp9_build_inter_predictor(ref_frame[rf_idx]->y_buffer + mb_y_offset,
@@ -5940,10 +5980,9 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
     vpx_subtract_block(bh, bw, src_diff, bw,
                        xd->cur_buf->y_buffer + mb_y_offset,
                        xd->cur_buf->y_stride, &predictor[0], bw);
-#endif
     wht_fwd_txfm(src_diff, bw, coeff, tx_size);
-
     inter_cost = vpx_satd(coeff, pix_num);
+#endif
 
 #if CONFIG_NON_GREEDY_MV
     tpl_stats->inter_cost_arr[rf_idx] = inter_cost;
