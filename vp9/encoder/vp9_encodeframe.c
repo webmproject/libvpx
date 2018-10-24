@@ -3561,7 +3561,8 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
 
 int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
                      int orig_rdmult) {
-  TplDepFrame *tpl_frame = &cpi->tpl_stats[cpi->twopass.gf_group.index];
+  const int gf_group_index = cpi->twopass.gf_group.index;
+  TplDepFrame *tpl_frame = &cpi->tpl_stats[gf_group_index];
   TplDepStats *tpl_stats = tpl_frame->tpl_stats_ptr;
   int tpl_stride = tpl_frame->stride;
   int64_t intra_cost = 0;
@@ -3576,9 +3577,9 @@ int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
 
   if (tpl_frame->is_valid == 0) return orig_rdmult;
 
-  if (cpi->common.show_frame) return orig_rdmult;
+  if (cpi->twopass.gf_group.layer_depth[gf_group_index] > 1) return orig_rdmult;
 
-  if (cpi->twopass.gf_group.index >= MAX_ARF_GOP_SIZE) return orig_rdmult;
+  if (gf_group_index >= MAX_ARF_GOP_SIZE) return orig_rdmult;
 
   for (row = mi_row; row < mi_row + mi_high; ++row) {
     for (col = mi_col; col < mi_col + mi_wide; ++col) {
