@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <limits.h>
 #include "./vpx_config.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
@@ -402,6 +403,11 @@ static int get_next_row(VP9_COMMON *cm, VP9LfSync *lf_sync) {
   pthread_mutex_unlock(&lf_sync->recon_done_mutex[cur_row]);
   pthread_mutex_lock(&lf_sync->lf_mutex);
   if (lf_sync->corrupted) {
+    int row = return_val >> MI_BLOCK_SIZE_LOG2;
+    pthread_mutex_lock(&lf_sync->mutex[row]);
+    lf_sync->cur_sb_col[row] = INT_MAX;
+    pthread_cond_signal(&lf_sync->cond[row]);
+    pthread_mutex_unlock(&lf_sync->mutex[row]);
     return_val = -1;
   }
   pthread_mutex_unlock(&lf_sync->lf_mutex);
