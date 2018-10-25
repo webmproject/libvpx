@@ -1485,6 +1485,8 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
   int bottom_index, top_index;
   int idx;
   const int gf_index = cpi->twopass.gf_group.index;
+  const int is_src_frame_alt_ref = cpi->rc.is_src_frame_alt_ref;
+  const int refresh_frame_context = cpi->common.refresh_frame_context;
 
   for (idx = 1; idx <= gop_length; ++idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[idx];
@@ -1498,6 +1500,8 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
   }
   // Reset the actual index and frame update
   cpi->twopass.gf_group.index = gf_index;
+  cpi->rc.is_src_frame_alt_ref = is_src_frame_alt_ref;
+  cpi->common.refresh_frame_context = refresh_frame_context;
   vp9_configure_buffer_updates(cpi, gf_index);
 }
 
