@@ -16,6 +16,24 @@
       "revId": "ea198e68551b6c07be89739ff6c198525254fca0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08d53ffc_c7c4f775",
+        "filename": "vpx_dsp/x86/mem_sse2.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-10-25T22:07:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "566a7245_48b5445d",
+      "revId": "ea198e68551b6c07be89739ff6c198525254fca0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
