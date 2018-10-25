@@ -379,17 +379,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(8, 4, &vp8_bilinear_predict8x4_neon),
                       make_tuple(4, 4, &vp8_bilinear_predict4x4_neon)));
 #endif
-#if HAVE_MMX
-INSTANTIATE_TEST_CASE_P(
-    MMX, BilinearPredictTest,
-    ::testing::Values(make_tuple(4, 4, &vp8_bilinear_predict4x4_mmx)));
-#endif
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, BilinearPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_bilinear_predict16x16_sse2),
                       make_tuple(8, 8, &vp8_bilinear_predict8x8_sse2),
-                      make_tuple(8, 4, &vp8_bilinear_predict8x4_sse2)));
+                      make_tuple(8, 4, &vp8_bilinear_predict8x4_sse2),
+                      make_tuple(4, 4, &vp8_bilinear_predict4x4_sse2)));
 #endif
 #if HAVE_SSSE3
 INSTANTIATE_TEST_CASE_P(

@@ -14,6 +14,7 @@
 #include "./vp8_rtcd.h"
 #include "./vpx_config.h"
 #include "vp8/common/filter.h"
+#include "vpx_dsp/x86/mem_sse2.h"
 #include "vpx_ports/mem.h"
 
 static INLINE void horizontal_16x16(uint8_t *src, const int stride,
@@ -240,4 +241,96 @@ void vp8_bilinear_predict8x4_sse2(uint8_t *src_ptr, int src_pixels_per_line,
   horizontal_8xN(src_ptr, src_pixels_per_line, FData, xoffset, 5);
 
   vertical_8xN(FData, dst_ptr, dst_pitch, yoffset, 4);
+}
+
+static INLINE void horizontal_4x4(uint8_t *src, const int stride, uint16_t *dst,
+                                  const int xoffset) {
+  int h;
+  const __m128i zero = _mm_setzero_si128();
+
+  if (xoffset == 0) {
+    for (h = 0; h < 5; ++h) {
+      const __m128i a = load_unaligned_u32(src);
+      const __m128i a_u16 = _mm_unpacklo_epi8(a, zero);
+      _mm_storel_epi64((__m128i *)dst, a_u16);
+      src += stride;
+      dst += 4;
+    }
+    return;
+  }
+
+  {
+    const __m128i round_factor = _mm_set1_epi16(1 << (VP8_FILTER_SHIFT - 1));
+    const __m128i hfilter_0 = _mm_set1_epi16(vp8_bilinear_filters[xoffset][0]);
+    const __m128i hfilter_1 = _mm_set1_epi16(vp8_bilinear_filters[xoffset][1]);
+
+    for (h = 0; h < 5; ++h) {
+      const __m128i a = load_unaligned_u32(src);
+      const __m128i b = load_unaligned_u32(src + 1);
+      const __m128i a_u16 = _mm_unpacklo_epi8(a, zero);
+      const __m128i b_u16 = _mm_unpacklo_epi8(b, zero);
+      const __m128i a_filtered = _mm_mullo_epi16(a_u16, hfilter_0);
+      const __m128i b_filtered = _mm_mullo_epi16(b_u16, hfilter_1);
+      const __m128i sum = _mm_add_epi16(a_filtered, b_filtered);
+      const __m128i compensated = _mm_add_epi16(sum, round_factor);
+      const __m128i shifted = _mm_srai_epi16(compensated, VP8_FILTER_SHIFT);
+      _mm_storel_epi64((__m128i *)dst, shifted);
+      src += stride;
+      dst += 4;
+    }
+  }
+}
+
+static INLINE void vertical_4x4(uint16_t *src, uint8_t *dst, const int stride,
+                                const int yoffset) {
+  int h;
+
+  if (yoffset == 0) {
+    for (h = 0; h < 4; h += 2) {
+      const __m128i row = _mm_load_si128((__m128i *)src);
+      __m128i packed = _mm_packus_epi16(row, row);
+      store_unaligned_u32(dst, packed);
+      dst += stride;
+      packed = _mm_srli_si128(packed, 4);
+      store_unaligned_u32(dst, packed);
+      dst += stride;
+      src += 8;
+    }
+    return;
+  }
+
+  {
+    const __m128i round_factor = _mm_set1_epi16(1 << (VP8_FILTER_SHIFT - 1));
+    const __m128i vfilter_0 = _mm_set1_epi16(vp8_bilinear_filters[yoffset][0]);
+    const __m128i vfilter_1 = _mm_set1_epi16(vp8_bilinear_filters[yoffset][1]);
+
+    for (h = 0; h < 4; h += 2) {
+      const __m128i row_0 = _mm_load_si128((__m128i *)src);
+      const __m128i row_1 = _mm_loadu_si128((__m128i *)(src + 4));
+      const __m128i row_0_filtered = _mm_mullo_epi16(row_0, vfilter_0);
+      const __m128i row_1_filtered = _mm_mullo_epi16(row_1, vfilter_1);
+      const __m128i sum = _mm_add_epi16(row_0_filtered, row_1_filtered);
+      const __m128i compensated = _mm_add_epi16(sum, round_factor);
+      const __m128i shifted = _mm_srai_epi16(compensated, VP8_FILTER_SHIFT);
+      __m128i packed = _mm_packus_epi16(shifted, shifted);
+      storeu_uint32(dst, _mm_cvtsi128_si32(packed));
+      packed = _mm_srli_si128(packed, 4);
+      dst += stride;
+      storeu_uint32(dst, _mm_cvtsi128_si32(packed));
+      dst += stride;
+      src += 8;
+    }
+  }
+}
+
+void vp8_bilinear_predict4x4_sse2(uint8_t *src_ptr, int src_pixels_per_line,
+                                  int xoffset, int yoffset, uint8_t *dst_ptr,
+                                  int dst_pitch) {
+  uint16_t FData[4 * 5];
+
+  assert((xoffset | yoffset) != 0);
+
+  horizontal_4x4(src_ptr, src_pixels_per_line, FData, xoffset);
+
+  vertical_4x4(FData, dst_ptr, dst_pitch, yoffset);
 }
