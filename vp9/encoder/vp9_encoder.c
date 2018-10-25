@@ -5368,6 +5368,7 @@ static void update_level_info(VP9_COMP *cpi, size_t *size, int arf_src_index) {
 typedef struct GF_PICTURE {
   YV12_BUFFER_CONFIG *frame;
   int ref_frame[3];
+  FRAME_UPDATE_TYPE update_type;
 } GF_PICTURE;
 
 void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
@@ -5423,6 +5424,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   // Initialize Golden reference frame.
   gf_picture[0].frame = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
   for (i = 0; i < 3; ++i) gf_picture[0].ref_frame[i] = -1;
+  gf_picture[0].update_type = gf_group->update_type[0];
   gld_index = 0;
   ++*tpl_group_frames;
 
@@ -5431,6 +5433,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   gf_picture[1].ref_frame[0] = gld_index;
   gf_picture[1].ref_frame[1] = lst_index;
   gf_picture[1].ref_frame[2] = alt_index;
+  gf_picture[1].update_type = gf_group->update_type[1];
   alt_index = 1;
   ++*tpl_group_frames;
 
@@ -5446,6 +5449,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
     gf_picture[frame_idx].ref_frame[0] = gld_index;
     gf_picture[frame_idx].ref_frame[1] = lst_index;
     gf_picture[frame_idx].ref_frame[2] = alt_index;
+    gf_picture[frame_idx].update_type = gf_group->update_type[frame_idx];
 
     switch (gf_group->update_type[frame_idx]) {
       case ARF_UPDATE:
@@ -5460,7 +5464,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
         --arf_stack_size;
         break;
       case USE_BUF_FRAME:
-        lst_index = frame_idx;
+        lst_index = alt_index;
         alt_index = stack_pop(arf_index_stack, arf_stack_size);
         --arf_stack_size;
         break;
@@ -5492,6 +5496,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
     gf_picture[frame_idx].ref_frame[0] = gld_index;
     gf_picture[frame_idx].ref_frame[1] = lst_index;
     gf_picture[frame_idx].ref_frame[2] = alt_index;
+    gf_picture[frame_idx].update_type = LF_UPDATE;
     lst_index = frame_idx;
     ++*tpl_group_frames;
     ++extend_frame_count;
@@ -6347,6 +6352,7 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
 
   // Backward propagation from tpl_group_frames to 1.
   for (frame_idx = tpl_group_frames - 1; frame_idx > 0; --frame_idx) {
+    if (gf_picture[frame_idx].update_type == USE_BUF_FRAME) continue;
     mc_flow_dispenser(cpi, gf_picture, frame_idx, bsize);
   }
 #if CONFIG_NON_GREEDY_MV
