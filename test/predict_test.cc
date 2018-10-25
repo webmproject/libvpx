@@ -16,6 +16,7 @@
 #include "./vp8_rtcd.h"
 #include "./vpx_config.h"
 #include "test/acm_random.h"
+#include "test/bench.h"
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
@@ -33,7 +34,8 @@ typedef void (*PredictFunc)(uint8_t *src_ptr, int src_pixels_per_line,
 
 typedef ::testing::tuple<int, int, PredictFunc> PredictParam;
 
-class PredictTestBase : public ::testing::TestWithParam<PredictParam> {
+class PredictTestBase : public AbstractBench,
+                        public ::testing::TestWithParam<PredictParam> {
  public:
   PredictTestBase()
       : width_(GET_PARAM(0)), height_(GET_PARAM(1)), predict_(GET_PARAM(2)),
@@ -204,7 +206,20 @@ class PredictTestBase : public ::testing::TestWithParam<PredictParam> {
       }
     }
   }
-};
+
+  void Run() {
+    for (int xoffset = 0; xoffset < 8; ++xoffset) {
+      for (int yoffset = 0; yoffset < 8; ++yoffset) {
+        if (xoffset == 0 && yoffset == 0) {
+          continue;
+        }
+
+        predict_(&src_[kSrcStride * 2 + 2], kSrcStride, xoffset, yoffset, dst_,
+                 dst_stride_);
+      }
+    }
+  }
+};  // namespace
 
 class SixtapPredictTest : public PredictTestBase {};
 
@@ -341,6 +356,14 @@ TEST_P(BilinearPredictTest, TestWithRandomData) {
 TEST_P(BilinearPredictTest, TestWithUnalignedDst) {
   TestWithUnalignedDst(vp8_bilinear_predict16x16_c);
 }
+TEST_P(BilinearPredictTest, DISABLED_Speed) {
+  const int kCountSpeedTestBlock = 5000000 / (width_ * height_);
+  RunNTimes(kCountSpeedTestBlock);
+
+  char title[16];
+  snprintf(title, sizeof(title), "%dx%d", width_, height_);
+  PrintMedian(title);
+}
 
 INSTANTIATE_TEST_CASE_P(
     C, BilinearPredictTest,
@@ -359,14 +382,14 @@ INSTANTIATE_TEST_CASE_P(
 #if HAVE_MMX
 INSTANTIATE_TEST_CASE_P(
     MMX, BilinearPredictTest,
-    ::testing::Values(make_tuple(8, 4, &vp8_bilinear_predict8x4_mmx),
-                      make_tuple(4, 4, &vp8_bilinear_predict4x4_mmx)));
+    ::testing::Values(make_tuple(4, 4, &vp8_bilinear_predict4x4_mmx)));
 #endif
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, BilinearPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_bilinear_predict16x16_sse2),
-                      make_tuple(8, 8, &vp8_bilinear_predict8x8_sse2)));
+                      make_tuple(8, 8, &vp8_bilinear_predict8x8_sse2),
+                      make_tuple(8, 4, &vp8_bilinear_predict8x4_sse2)));
 #endif
 #if HAVE_SSSE3
 INSTANTIATE_TEST_CASE_P(
