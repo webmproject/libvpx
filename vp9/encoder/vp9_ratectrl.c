@@ -1486,7 +1486,7 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
   int idx;
   const int gf_index = cpi->twopass.gf_group.index;
 
-  for (idx = 1; idx < gop_length; ++idx) {
+  for (idx = 1; idx <= gop_length; ++idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[idx];
     int target_rate = cpi->twopass.gf_group.bit_allocation[idx];
     cpi->twopass.gf_group.index = idx;
