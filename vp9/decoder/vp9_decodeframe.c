@@ -1984,6 +1984,28 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   setup_segmentation_dequant(cm);
 
   setup_tile_info(cm, rb);
+  if (pbi->row_mt == 1) {
+    int num_sbs = 1;
+
+    if (pbi->row_mt_worker_data == NULL) {
+      CHECK_MEM_ERROR(cm, pbi->row_mt_worker_data,
+                      vpx_calloc(1, sizeof(*pbi->row_mt_worker_data)));
+    }
+
+    if (pbi->max_threads > 1) {
+      const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+      const int sb_cols = aligned_cols >> MI_BLOCK_SIZE_LOG2;
+      const int aligned_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+      const int sb_rows = aligned_rows >> MI_BLOCK_SIZE_LOG2;
+
+      num_sbs = sb_cols * sb_rows;
+    }
+
+    if (num_sbs > pbi->row_mt_worker_data->num_sbs) {
+      vp9_dec_free_row_mt_mem(pbi->row_mt_worker_data);
+      vp9_dec_alloc_row_mt_mem(pbi->row_mt_worker_data, cm, num_sbs);
+    }
+  }
   sz = vpx_rb_read_literal(rb, 16);
 
   if (sz == 0)
