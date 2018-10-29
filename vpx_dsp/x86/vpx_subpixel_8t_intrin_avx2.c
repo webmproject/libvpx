@@ -623,7 +623,7 @@ void vpx_filter_block1d8_h4_avx2(const uint8_t *src_ptr, ptrdiff_t src_stride,
                               _mm256_castsi256_si128(kernel_reg_45));
     dst_reg = _mm_adds_epi16(tmp_0, tmp_1);
 
-    dst_reg = round_epi16_sse2(&dst_reg, &reg_32, 6);
+    dst_reg = mm_round_epi16_sse2(&dst_reg, &reg_32, 6);
 
     dst_reg = _mm_packus_epi16(dst_reg, _mm_setzero_si128());
 
@@ -797,7 +797,7 @@ void vpx_filter_block1d4_h4_avx2(const uint8_t *src_ptr, ptrdiff_t src_stride,
     dst = _mm_hadds_epi16(dst, _mm_setzero_si128());
 
     // Round result
-    dst = round_epi16_sse2(&dst, &reg_32, 6);
+    dst = mm_round_epi16_sse2(&dst, &reg_32, 6);
 
     // Pack to 8-bits
     dst = _mm_packus_epi16(dst, _mm_setzero_si128());
