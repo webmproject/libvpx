@@ -131,7 +131,7 @@ static INLINE void vertical_16x16(uint16_t *src, uint8_t *dst, const int stride,
 void vp8_bilinear_predict16x16_sse2(uint8_t *src_ptr, int src_pixels_per_line,
                                     int xoffset, int yoffset, uint8_t *dst_ptr,
                                     int dst_pitch) {
-  uint16_t FData[16 * 17];
+  DECLARE_ALIGNED(16, uint16_t, FData[16 * 17]);
 
   assert((xoffset | yoffset) != 0);
 
