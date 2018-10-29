@@ -222,7 +222,7 @@ static INLINE void vertical_8xN(uint16_t *src, uint8_t *dst, const int stride,
 void vp8_bilinear_predict8x8_sse2(uint8_t *src_ptr, int src_pixels_per_line,
                                   int xoffset, int yoffset, uint8_t *dst_ptr,
                                   int dst_pitch) {
-  uint16_t FData[8 * 9];
+  DECLARE_ALIGNED(16, uint16_t, FData[8 * 9]);
 
   assert((xoffset | yoffset) != 0);
 
@@ -234,7 +234,7 @@ void vp8_bilinear_predict8x8_sse2(uint8_t *src_ptr, int src_pixels_per_line,
 void vp8_bilinear_predict8x4_sse2(uint8_t *src_ptr, int src_pixels_per_line,
                                   int xoffset, int yoffset, uint8_t *dst_ptr,
                                   int dst_pitch) {
-  uint16_t FData[8 * 5];
+  DECLARE_ALIGNED(16, uint16_t, FData[8 * 5]);
 
   assert((xoffset | yoffset) != 0);
 
@@ -326,7 +326,7 @@ static INLINE void vertical_4x4(uint16_t *src, uint8_t *dst, const int stride,
 void vp8_bilinear_predict4x4_sse2(uint8_t *src_ptr, int src_pixels_per_line,
                                   int xoffset, int yoffset, uint8_t *dst_ptr,
                                   int dst_pitch) {
-  uint16_t FData[4 * 5];
+  DECLARE_ALIGNED(16, uint16_t, FData[4 * 5]);
 
   assert((xoffset | yoffset) != 0);
 
