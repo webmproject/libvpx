@@ -1303,8 +1303,14 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
 
         // Modify best quality for second level arfs. For mode VPX_Q this
         // becomes the baseline frame q.
-        if (gf_group->rf_level[gf_group_index] == GF_ARF_LOW)
-          active_best_quality = (active_best_quality + cq_level + 1) / 2;
+        if (gf_group->rf_level[gf_group_index] == GF_ARF_LOW) {
+          const int layer_depth = gf_group->layer_depth[gf_group_index];
+          // linearly fit the frame q depending on the layer depth index from
+          // the base layer ARF.
+          active_best_quality = ((layer_depth - 1) * cq_level +
+                                 active_best_quality + layer_depth / 2) /
+                                layer_depth;
+        }
       }
     } else {
       active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
