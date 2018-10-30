@@ -5973,8 +5973,7 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       vpx_highbd_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst,
                                 dst_stride, xd->bd);
       highbd_wht_fwd_txfm(src_diff, bw, coeff, tx_size);
-      // TODO(sdeng): Implement SIMD based high bit-depth satd.
-      intra_cost = vpx_satd_c(coeff, pix_num);
+      intra_cost = vpx_highbd_satd(coeff, pix_num);
     } else {
       vpx_subtract_block(bh, bw, src_diff, bw, src, src_stride, dst,
                          dst_stride);
@@ -6020,7 +6019,7 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
           bh, bw, src_diff, bw, xd->cur_buf->y_buffer + mb_y_offset,
           xd->cur_buf->y_stride, &predictor[0], bw, xd->bd);
       highbd_wht_fwd_txfm(src_diff, bw, coeff, tx_size);
-      inter_cost = vpx_satd_c(coeff, pix_num);
+      inter_cost = vpx_highbd_satd(coeff, pix_num);
     } else {
       vp9_build_inter_predictor(
           ref_frame[rf_idx]->y_buffer + mb_y_offset,

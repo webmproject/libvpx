@@ -375,3 +375,26 @@ int vpx_satd_avx2(const tran_low_t *coeff, int length) {
     return _mm_cvtsi128_si32(accum_128);
   }
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+int vpx_highbd_satd_avx2(const tran_low_t *coeff, int length) {
+  __m256i accum = _mm256_setzero_si256();
+  int i;
+
+  for (i = 0; i < length; i += 8, coeff += 8) {
+    const __m256i src_line = _mm256_loadu_si256((const __m256i *)coeff);
+    const __m256i abs = _mm256_abs_epi32(src_line);
+    accum = _mm256_add_epi32(accum, abs);
+  }
+
+  {  // 32 bit horizontal add
+    const __m256i a = _mm256_srli_si256(accum, 8);
+    const __m256i b = _mm256_add_epi32(accum, a);
+    const __m256i c = _mm256_srli_epi64(b, 32);
+    const __m256i d = _mm256_add_epi32(b, c);
+    const __m128i accum_128 = _mm_add_epi32(_mm256_castsi256_si128(d),
+                                            _mm256_extractf128_si256(d, 1));
+    return _mm_cvtsi128_si32(accum_128);
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
