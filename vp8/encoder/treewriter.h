@@ -91,9 +91,9 @@ static INLINE int vp8_cost_token(vp8_tree t, const vp8_prob *const p,
 
 /* Fill array of costs for all possible token values. */
 
-void vp8_cost_tokens(int *Costs, const vp8_prob *, vp8_tree);
+void vp8_cost_tokens(int *c, const vp8_prob *, vp8_tree);
 
-void vp8_cost_tokens2(int *Costs, const vp8_prob *, vp8_tree, int);
+void vp8_cost_tokens2(int *c, const vp8_prob *, vp8_tree, int);
 
 #ifdef __cplusplus
 }  // extern "C"
