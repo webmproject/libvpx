@@ -20,12 +20,12 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                          const int16_t *round_ptr, const int16_t *quant_ptr,
                          const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
                          tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                         uint16_t *eob_ptr, const int16_t *scan_ptr,
-                         const int16_t *iscan_ptr) {
+                         uint16_t *eob_ptr, const int16_t *scan,
+                         const int16_t *iscan) {
   const int16x8_t one = vdupq_n_s16(1);
   const int16x8_t neg_one = vdupq_n_s16(-1);
   uint16x8_t eob_max;
-  (void)scan_ptr;
+  (void)scan;
   (void)skip_block;
   assert(!skip_block);
 
@@ -38,8 +38,8 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     const int16x8_t quant_shift = vld1q_s16(quant_shift_ptr);
     const int16x8_t dequant = vld1q_s16(dequant_ptr);
     // Add one because the eob does not index from 0.
-    const uint16x8_t iscan =
-        vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan_ptr), one));
+    const uint16x8_t v_iscan =
+        vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan), one));
 
     const int16x8_t coeff = load_tran_low_to_s16q(coeff_ptr);
     const int16x8_t coeff_sign = vshrq_n_s16(coeff, 15);
@@ -65,10 +65,10 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     qcoeff = vandq_s16(qcoeff, zbin_mask);
 
     // Set non-zero elements to -1 and use that to extract values for eob.
-    eob_max = vandq_u16(vtstq_s16(qcoeff, neg_one), iscan);
+    eob_max = vandq_u16(vtstq_s16(qcoeff, neg_one), v_iscan);
 
     coeff_ptr += 8;
-    iscan_ptr += 8;
+    iscan += 8;
 
     store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
     qcoeff_ptr += 8;
@@ -90,8 +90,8 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
     do {
       // Add one because the eob is not its index.
-      const uint16x8_t iscan =
-          vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan_ptr), one));
+      const uint16x8_t v_iscan =
+          vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan), one));
 
       const int16x8_t coeff = load_tran_low_to_s16q(coeff_ptr);
       const int16x8_t coeff_sign = vshrq_n_s16(coeff, 15);
@@ -118,10 +118,10 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
       // Set non-zero elements to -1 and use that to extract values for eob.
       eob_max =
-          vmaxq_u16(eob_max, vandq_u16(vtstq_s16(qcoeff, neg_one), iscan));
+          vmaxq_u16(eob_max, vandq_u16(vtstq_s16(qcoeff, neg_one), v_iscan));
 
       coeff_ptr += 8;
-      iscan_ptr += 8;
+      iscan += 8;
 
       store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
       qcoeff_ptr += 8;
@@ -150,17 +150,19 @@ static INLINE int32x4_t extract_sign_bit(int32x4_t a) {
 
 // Main difference is that zbin values are halved before comparison and dqcoeff
 // values are divided by 2. zbin is rounded but dqcoeff is not.
-void vpx_quantize_b_32x32_neon(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
-    const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr,
-    const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
-    tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
-    const int16_t *scan_ptr, const int16_t *iscan_ptr) {
+void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+                               int skip_block, const int16_t *zbin_ptr,
+                               const int16_t *round_ptr,
+                               const int16_t *quant_ptr,
+                               const int16_t *quant_shift_ptr,
+                               tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                               const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                               const int16_t *scan, const int16_t *iscan) {
   const int16x8_t one = vdupq_n_s16(1);
   const int16x8_t neg_one = vdupq_n_s16(-1);
   uint16x8_t eob_max;
   int i;
-  (void)scan_ptr;
+  (void)scan;
   (void)n_coeffs;  // Because we will always calculate 32*32.
   (void)skip_block;
   assert(!skip_block);
@@ -174,8 +176,8 @@ void vpx_quantize_b_32x32_neon(
     const int16x8_t quant_shift = vld1q_s16(quant_shift_ptr);
     const int16x8_t dequant = vld1q_s16(dequant_ptr);
     // Add one because the eob does not index from 0.
-    const uint16x8_t iscan =
-        vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan_ptr), one));
+    const uint16x8_t v_iscan =
+        vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan), one));
 
     const int16x8_t coeff = load_tran_low_to_s16q(coeff_ptr);
     const int16x8_t coeff_sign = vshrq_n_s16(coeff, 15);
@@ -203,10 +205,10 @@ void vpx_quantize_b_32x32_neon(
     qcoeff = vandq_s16(qcoeff, zbin_mask);
 
     // Set non-zero elements to -1 and use that to extract values for eob.
-    eob_max = vandq_u16(vtstq_s16(qcoeff, neg_one), iscan);
+    eob_max = vandq_u16(vtstq_s16(qcoeff, neg_one), v_iscan);
 
     coeff_ptr += 8;
-    iscan_ptr += 8;
+    iscan += 8;
 
     store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
     qcoeff_ptr += 8;
@@ -234,8 +236,8 @@ void vpx_quantize_b_32x32_neon(
 
     for (i = 1; i < 32 * 32 / 8; ++i) {
       // Add one because the eob is not its index.
-      const uint16x8_t iscan =
-          vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan_ptr), one));
+      const uint16x8_t v_iscan =
+          vreinterpretq_u16_s16(vaddq_s16(vld1q_s16(iscan), one));
 
       const int16x8_t coeff = load_tran_low_to_s16q(coeff_ptr);
       const int16x8_t coeff_sign = vshrq_n_s16(coeff, 15);
@@ -264,10 +266,10 @@ void vpx_quantize_b_32x32_neon(
 
       // Set non-zero elements to -1 and use that to extract values for eob.
       eob_max =
-          vmaxq_u16(eob_max, vandq_u16(vtstq_s16(qcoeff, neg_one), iscan));
+          vmaxq_u16(eob_max, vandq_u16(vtstq_s16(qcoeff, neg_one), v_iscan));
 
       coeff_ptr += 8;
-      iscan_ptr += 8;
+      iscan += 8;
 
       store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
       qcoeff_ptr += 8;

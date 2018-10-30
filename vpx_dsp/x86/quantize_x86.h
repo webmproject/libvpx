@@ -48,17 +48,17 @@ static INLINE __m128i calculate_dqcoeff(__m128i qcoeff, __m128i dequant) {
   return _mm_mullo_epi16(qcoeff, dequant);
 }
 
-// Scan 16 values for eob reference in scan_ptr. Use masks (-1) from comparing
-// to zbin to add 1 to the index in 'scan'.
+// Scan 16 values for eob reference in scan. Use masks (-1) from comparing to
+// zbin to add 1 to the index in 'scan'.
 static INLINE __m128i scan_for_eob(__m128i *coeff0, __m128i *coeff1,
                                    const __m128i zbin_mask0,
                                    const __m128i zbin_mask1,
-                                   const int16_t *scan_ptr, const int index,
+                                   const int16_t *scan, const int index,
                                    const __m128i zero) {
   const __m128i zero_coeff0 = _mm_cmpeq_epi16(*coeff0, zero);
   const __m128i zero_coeff1 = _mm_cmpeq_epi16(*coeff1, zero);
-  __m128i scan0 = _mm_load_si128((const __m128i *)(scan_ptr + index));
-  __m128i scan1 = _mm_load_si128((const __m128i *)(scan_ptr + index + 8));
+  __m128i scan0 = _mm_load_si128((const __m128i *)(scan + index));
+  __m128i scan1 = _mm_load_si128((const __m128i *)(scan + index + 8));
   __m128i eob0, eob1;
   // Add one to convert from indices to counts
   scan0 = _mm_sub_epi16(scan0, zbin_mask0);

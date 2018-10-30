@@ -20,7 +20,7 @@ void vpx_highbd_convolve_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
                                    uint16_t *dst, ptrdiff_t dst_stride,
                                    const InterpKernel *filter, int x0_q4,
                                    int x_step_q4, int y0_q4, int y_step_q4,
-                                   int width, int h, int bd) {
+                                   int w, int h, int bd) {
   (void)filter;
   (void)x0_q4;
   (void)x_step_q4;
@@ -28,8 +28,8 @@ void vpx_highbd_convolve_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
   (void)y_step_q4;
   (void)bd;
 
-  assert(width % 4 == 0);
-  if (width > 32) {  // width = 64
+  assert(w % 4 == 0);
+  if (w > 32) {  // w = 64
     do {
       const __m256i p0 = _mm256_loadu_si256((const __m256i *)src);
       const __m256i p1 = _mm256_loadu_si256((const __m256i *)(src + 16));
@@ -43,7 +43,7 @@ void vpx_highbd_convolve_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
       dst += dst_stride;
       h--;
     } while (h > 0);
-  } else if (width > 16) {  // width = 32
+  } else if (w > 16) {  // w = 32
     do {
       const __m256i p0 = _mm256_loadu_si256((const __m256i *)src);
       const __m256i p1 = _mm256_loadu_si256((const __m256i *)(src + 16));
@@ -53,7 +53,7 @@ void vpx_highbd_convolve_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
       dst += dst_stride;
       h--;
     } while (h > 0);
-  } else if (width > 8) {  // width = 16
+  } else if (w > 8) {  // w = 16
     __m256i p0, p1;
     do {
       p0 = _mm256_loadu_si256((const __m256i *)src);
@@ -67,7 +67,7 @@ void vpx_highbd_convolve_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
       dst += dst_stride;
       h -= 2;
     } while (h > 0);
-  } else if (width > 4) {  // width = 8
+  } else if (w > 4) {  // w = 8
     __m128i p0, p1;
     do {
       p0 = _mm_loadu_si128((const __m128i *)src);
@@ -81,7 +81,7 @@ void vpx_highbd_convolve_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
       dst += dst_stride;
       h -= 2;
     } while (h > 0);
-  } else {  // width = 4
+  } else {  // w = 4
     __m128i p0, p1;
     do {
       p0 = _mm_loadl_epi64((const __m128i *)src);
@@ -102,7 +102,7 @@ void vpx_highbd_convolve_avg_avx2(const uint16_t *src, ptrdiff_t src_stride,
                                   uint16_t *dst, ptrdiff_t dst_stride,
                                   const InterpKernel *filter, int x0_q4,
                                   int x_step_q4, int y0_q4, int y_step_q4,
-                                  int width, int h, int bd) {
+                                  int w, int h, int bd) {
   (void)filter;
   (void)x0_q4;
   (void)x_step_q4;
@@ -110,8 +110,8 @@ void vpx_highbd_convolve_avg_avx2(const uint16_t *src, ptrdiff_t src_stride,
   (void)y_step_q4;
   (void)bd;
 
-  assert(width % 4 == 0);
-  if (width > 32) {  // width = 64
+  assert(w % 4 == 0);
+  if (w > 32) {  // w = 64
     __m256i p0, p1, p2, p3, u0, u1, u2, u3;
     do {
       p0 = _mm256_loadu_si256((const __m256i *)src);
@@ -130,7 +130,7 @@ void vpx_highbd_convolve_avg_avx2(const uint16_t *src, ptrdiff_t src_stride,
       dst += dst_stride;
       h--;
     } while (h > 0);
-  } else if (width > 16) {  // width = 32
+  } else if (w > 16) {  // w = 32
     __m256i p0, p1, u0, u1;
     do {
       p0 = _mm256_loadu_si256((const __m256i *)src);
@@ -143,7 +143,7 @@ void vpx_highbd_convolve_avg_avx2(const uint16_t *src, ptrdiff_t src_stride,
       dst += dst_stride;
       h--;
     } while (h > 0);
-  } else if (width > 8) {  // width = 16
+  } else if (w > 8) {  // w = 16
     __m256i p0, p1, u0, u1;
     do {
       p0 = _mm256_loadu_si256((const __m256i *)src);
@@ -158,7 +158,7 @@ void vpx_highbd_convolve_avg_avx2(const uint16_t *src, ptrdiff_t src_stride,
       dst += dst_stride << 1;
       h -= 2;
     } while (h > 0);
-  } else if (width > 4) {  // width = 8
+  } else if (w > 4) {  // w = 8
     __m128i p0, p1, u0, u1;
     do {
       p0 = _mm_loadu_si128((const __m128i *)src);
@@ -172,7 +172,7 @@ void vpx_highbd_convolve_avg_avx2(const uint16_t *src, ptrdiff_t src_stride,
       dst += dst_stride << 1;
       h -= 2;
     } while (h > 0);
-  } else {  // width = 4
+  } else {  // w = 4
     __m128i p0, p1, u0, u1;
     do {
       p0 = _mm_loadl_epi64((const __m128i *)src);

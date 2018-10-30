@@ -45,7 +45,7 @@
 
     ;Compute max and min values of a pixel
     mov         rdx, 0x00010001
-    movsxd      rcx, DWORD PTR arg(6)      ;bps
+    movsxd      rcx, DWORD PTR arg(6)      ;bd
     movq        xmm0, rdx
     movq        xmm1, rcx
     pshufd      xmm0, xmm0, 0b
@@ -121,7 +121,7 @@
 
     ;Compute max and min values of a pixel
     mov         rdx, 0x00010001
-    movsxd      rcx, DWORD PTR arg(6)       ;bps
+    movsxd      rcx, DWORD PTR arg(6)       ;bd
     movq        xmm0, rdx
     movq        xmm1, rcx
     pshufd      xmm0, xmm0, 0b
