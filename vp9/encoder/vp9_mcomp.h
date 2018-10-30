@@ -59,7 +59,7 @@ struct SPEED_FEATURES;
 int vp9_init_search_range(int size);
 
 int vp9_refining_search_sad(const struct macroblock *x, struct mv *ref_mv,
-                            int sad_per_bit, int distance,
+                            int error_per_bit, int search_range,
                             const struct vp9_variance_vtable *fn_ptr,
                             const struct mv *center_mv);
 

@@ -194,7 +194,7 @@ struct VP9EncoderConfig;
 void vp9_rc_init(const struct VP9EncoderConfig *oxcf, int pass,
                  RATE_CONTROL *rc);
 
-int vp9_estimate_bits_at_q(FRAME_TYPE frame_kind, int q, int mbs,
+int vp9_estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
                            double correction_factor, vpx_bit_depth_t bit_depth);
 
 double vp9_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth);
@@ -205,9 +205,9 @@ void vp9_rc_init_minq_luts(void);
 
 int vp9_rc_get_default_min_gf_interval(int width, int height, double framerate);
 // Note vp9_rc_get_default_max_gf_interval() requires the min_gf_interval to
-// be passed in to ensure that the max_gf_interval returned is at least as bis
+// be passed in to ensure that the max_gf_interval returned is at least as big
 // as that.
-int vp9_rc_get_default_max_gf_interval(double framerate, int min_frame_rate);
+int vp9_rc_get_default_max_gf_interval(double framerate, int min_gf_interval);
 
 // Generally at the high level, the following flow is expected
 // to be enforced for rate control:
@@ -253,7 +253,7 @@ int vp9_rc_drop_frame(struct VP9_COMP *cpi);
 
 // Computes frame size bounds.
 void vp9_rc_compute_frame_size_bounds(const struct VP9_COMP *cpi,
-                                      int this_frame_target,
+                                      int frame_target,
                                       int *frame_under_shoot_limit,
                                       int *frame_over_shoot_limit);
 

@@ -42,8 +42,8 @@ void vp9_quantize_fp_vsx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                          int skip_block, const int16_t *round_ptr,
                          const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
                          tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                         uint16_t *eob_ptr, const int16_t *scan_ptr,
-                         const int16_t *iscan_ptr) {
+                         uint16_t *eob_ptr, const int16_t *scan,
+                         const int16_t *iscan) {
   int16x8_t qcoeff0, qcoeff1, dqcoeff0, dqcoeff1, eob;
   bool16x8_t zero_coeff0, zero_coeff1;
 
@@ -52,10 +52,10 @@ void vp9_quantize_fp_vsx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   int16x8_t dequant = vec_vsx_ld(0, dequant_ptr);
   int16x8_t coeff0 = vec_vsx_ld(0, coeff_ptr);
   int16x8_t coeff1 = vec_vsx_ld(16, coeff_ptr);
-  int16x8_t scan0 = vec_vsx_ld(0, iscan_ptr);
-  int16x8_t scan1 = vec_vsx_ld(16, iscan_ptr);
+  int16x8_t scan0 = vec_vsx_ld(0, iscan);
+  int16x8_t scan1 = vec_vsx_ld(16, iscan);
 
-  (void)scan_ptr;
+  (void)scan;
   (void)skip_block;
   assert(!skip_block);
 
@@ -103,9 +103,9 @@ void vp9_quantize_fp_vsx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       coeff0 = vec_vsx_ld(off0, coeff_ptr);
       coeff1 = vec_vsx_ld(off1, coeff_ptr);
       coeff2 = vec_vsx_ld(off2, coeff_ptr);
-      scan0 = vec_vsx_ld(off0, iscan_ptr);
-      scan1 = vec_vsx_ld(off1, iscan_ptr);
-      scan2 = vec_vsx_ld(off2, iscan_ptr);
+      scan0 = vec_vsx_ld(off0, iscan);
+      scan1 = vec_vsx_ld(off1, iscan);
+      scan2 = vec_vsx_ld(off2, iscan);
 
       qcoeff0 = vec_mulhi(vec_vaddshs(vec_abs(coeff0), round), quant);
       zero_coeff0 = vec_cmpeq(qcoeff0, vec_zeros_s16);
@@ -169,8 +169,7 @@ void vp9_quantize_fp_32x32_vsx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                                const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
                                tran_low_t *dqcoeff_ptr,
                                const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                               const int16_t *scan_ptr,
-                               const int16_t *iscan_ptr) {
+                               const int16_t *scan, const int16_t *iscan) {
   // In stage 1, we quantize 16 coeffs (DC + 15 AC)
   // In stage 2, we loop 42 times and quantize 24 coeffs per iteration
   // (32 * 32 - 16) / 24 = 42
@@ -188,13 +187,13 @@ void vp9_quantize_fp_32x32_vsx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   int16x8_t dequant = vec_vsx_ld(0, dequant_ptr);
   int16x8_t coeff0 = vec_vsx_ld(0, coeff_ptr);
   int16x8_t coeff1 = vec_vsx_ld(16, coeff_ptr);
-  int16x8_t scan0 = vec_vsx_ld(0, iscan_ptr);
-  int16x8_t scan1 = vec_vsx_ld(16, iscan_ptr);
+  int16x8_t scan0 = vec_vsx_ld(0, iscan);
+  int16x8_t scan1 = vec_vsx_ld(16, iscan);
   int16x8_t thres = vec_sra(dequant, vec_splats((uint16_t)2));
   int16x8_t abs_coeff0 = vec_abs(coeff0);
   int16x8_t abs_coeff1 = vec_abs(coeff1);
 
-  (void)scan_ptr;
+  (void)scan;
   (void)skip_block;
   (void)n_coeffs;
   assert(!skip_block);
@@ -238,9 +237,9 @@ void vp9_quantize_fp_32x32_vsx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     coeff0 = vec_vsx_ld(off0, coeff_ptr);
     coeff1 = vec_vsx_ld(off1, coeff_ptr);
     coeff2 = vec_vsx_ld(off2, coeff_ptr);
-    scan0 = vec_vsx_ld(off0, iscan_ptr);
-    scan1 = vec_vsx_ld(off1, iscan_ptr);
-    scan2 = vec_vsx_ld(off2, iscan_ptr);
+    scan0 = vec_vsx_ld(off0, iscan);
+    scan1 = vec_vsx_ld(off1, iscan);
+    scan2 = vec_vsx_ld(off2, iscan);
 
     abs_coeff0 = vec_abs(coeff0);
     abs_coeff1 = vec_abs(coeff1);
