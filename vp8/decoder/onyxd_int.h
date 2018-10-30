@@ -122,7 +122,7 @@ typedef struct VP8D_COMP {
 
 void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
 void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);
-int vp8_decode_frame(VP8D_COMP *cpi);
+int vp8_decode_frame(VP8D_COMP *pbi);
 
 int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf);
 int vp8_remove_decoder_instances(struct frame_buffers *fb);
