@@ -201,8 +201,9 @@ typedef struct blockd {
   union b_mode_info bmi;
 } BLOCKD;
 
-typedef void (*vp8_subpix_fn_t)(unsigned char *src, int src_pitch, int xofst,
-                                int yofst, unsigned char *dst, int dst_pitch);
+typedef void (*vp8_subpix_fn_t)(unsigned char *src_ptr, int src_pixels_per_line,
+                                int xoffset, int yoffset,
+                                unsigned char *dst_ptr, int dst_pitch);
 
 typedef struct macroblockd {
   DECLARE_ALIGNED(16, unsigned char, predictor[384]);

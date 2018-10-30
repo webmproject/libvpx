@@ -43,42 +43,42 @@ void vp8_dequant_idct_add_y_block_neon(short *q, short *dq, unsigned char *dst,
 }
 
 void vp8_dequant_idct_add_uv_block_neon(short *q, short *dq,
-                                        unsigned char *dstu,
-                                        unsigned char *dstv, int stride,
+                                        unsigned char *dst_u,
+                                        unsigned char *dst_v, int stride,
                                         char *eobs) {
   if (((short *)(eobs))[0]) {
     if (((short *)eobs)[0] & 0xfefe)
-      idct_dequant_full_2x_neon(q, dq, dstu, stride);
+      idct_dequant_full_2x_neon(q, dq, dst_u, stride);
     else
-      idct_dequant_0_2x_neon(q, dq[0], dstu, stride);
+      idct_dequant_0_2x_neon(q, dq[0], dst_u, stride);
   }
 
   q += 32;
-  dstu += 4 * stride;
+  dst_u += 4 * stride;
 
   if (((short *)(eobs))[1]) {
     if (((short *)eobs)[1] & 0xfefe)
-      idct_dequant_full_2x_neon(q, dq, dstu, stride);
+      idct_dequant_full_2x_neon(q, dq, dst_u, stride);
     else
-      idct_dequant_0_2x_neon(q, dq[0], dstu, stride);
+      idct_dequant_0_2x_neon(q, dq[0], dst_u, stride);
   }
 
   q += 32;
 
   if (((short *)(eobs))[2]) {
     if (((short *)eobs)[2] & 0xfefe)
-      idct_dequant_full_2x_neon(q, dq, dstv, stride);
+      idct_dequant_full_2x_neon(q, dq, dst_v, stride);
     else
-      idct_dequant_0_2x_neon(q, dq[0], dstv, stride);
+      idct_dequant_0_2x_neon(q, dq[0], dst_v, stride);
   }
 
   q += 32;
-  dstv += 4 * stride;
+  dst_v += 4 * stride;
 
   if (((short *)(eobs))[3]) {
     if (((short *)eobs)[3] & 0xfefe)
-      idct_dequant_full_2x_neon(q, dq, dstv, stride);
+      idct_dequant_full_2x_neon(q, dq, dst_v, stride);
     else
-      idct_dequant_0_2x_neon(q, dq[0], dstv, stride);
+      idct_dequant_0_2x_neon(q, dq[0], dst_v, stride);
   }
 }

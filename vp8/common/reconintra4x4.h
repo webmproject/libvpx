@@ -31,7 +31,7 @@ static INLINE void intra_prediction_down_copy(MACROBLOCKD *xd,
   *dst_ptr2 = *src_ptr;
 }
 
-void vp8_intra4x4_predict(unsigned char *Above, unsigned char *yleft,
+void vp8_intra4x4_predict(unsigned char *above, unsigned char *yleft,
                           int left_stride, B_PREDICTION_MODE b_mode,
                           unsigned char *dst, int dst_stride,
                           unsigned char top_left);

@@ -70,7 +70,7 @@ static INLINE unsigned int vp8_check_mv_bounds(int_mv *mv, int mb_to_left_edge,
 }
 
 void vp8_find_near_mvs(MACROBLOCKD *xd, const MODE_INFO *here, int_mv *nearest,
-                       int_mv *nearby, int_mv *best, int near_mv_ref_cts[4],
+                       int_mv *nearby, int_mv *best_mv, int near_mv_ref_cnts[4],
                        int refframe, int *ref_frame_sign_bias);
 
 int vp8_find_near_mvs_bias(MACROBLOCKD *xd, const MODE_INFO *here,
