@@ -134,11 +134,27 @@ static INLINE void mm256_storeu2_epi32(__m128i *const dst_ptr_1,
       _mm_cvtsi128_si32(_mm256_extractf128_si256(*src, 1));
 }
 
+static INLINE __m256i mm256_round_epi32(const __m256i *const src,
+                                        const __m256i *const half_depth,
+                                        const int depth) {
+  const __m256i nearest_src = _mm256_add_epi32(*src, *half_depth);
+  return _mm256_srai_epi32(nearest_src, depth);
+}
+
 static INLINE __m256i mm256_round_epi16(const __m256i *const src,
                                         const __m256i *const half_depth,
                                         const int depth) {
   const __m256i nearest_src = _mm256_adds_epi16(*src, *half_depth);
   return _mm256_srai_epi16(nearest_src, depth);
+}
+
+static INLINE __m256i mm256_madd_add_epi32(const __m256i *const src_0,
+                                           const __m256i *const src_1,
+                                           const __m256i *const ker_0,
+                                           const __m256i *const ker_1) {
+  const __m256i tmp_0 = _mm256_madd_epi16(*src_0, *ker_0);
+  const __m256i tmp_1 = _mm256_madd_epi16(*src_1, *ker_1);
+  return _mm256_add_epi32(tmp_0, tmp_1);
 }
 
 #undef MM256_BROADCASTSI128_SI256

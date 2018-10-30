@@ -128,7 +128,7 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
       int x_step_q4, int y0_q4, int y_step_q4, int w, int h, int bd) {        \
     const int16_t *filter = filter_kernel[offset];                            \
     if (step_q4 == 16 && filter[3] != 128) {                                  \
-      if (filter[0] | filter[1] | filter[2]) {                                \
+      if (filter[0] | filter[1] | filter[6] | filter[7]) {                    \
         while (w >= 16) {                                                     \
           vpx_highbd_filter_block1d16_##dir##8_##avg##opt(                    \
               src_start, src_stride, dst, dst_stride, h, filter, bd);         \
@@ -145,6 +145,28 @@ typedef void highbd_filter8_1dfunction(const uint16_t *src_ptr,
         }                                                                     \
         while (w >= 4) {                                                      \
           vpx_highbd_filter_block1d4_##dir##8_##avg##opt(                     \
+              src_start, src_stride, dst, dst_stride, h, filter, bd);         \
+          src += 4;                                                           \
+          dst += 4;                                                           \
+          w -= 4;                                                             \
+        }                                                                     \
+      } else if (filter[2] | filter[5]) {                                     \
+        while (w >= 16) {                                                     \
+          vpx_highbd_filter_block1d16_##dir##4_##avg##opt(                    \
+              src_start, src_stride, dst, dst_stride, h, filter, bd);         \
+          src += 16;                                                          \
+          dst += 16;                                                          \
+          w -= 16;                                                            \
+        }                                                                     \
+        while (w >= 8) {                                                      \
+          vpx_highbd_filter_block1d8_##dir##4_##avg##opt(                     \
+              src_start, src_stride, dst, dst_stride, h, filter, bd);         \
+          src += 8;                                                           \
+          dst += 8;                                                           \
+          w -= 8;                                                             \
+        }                                                                     \
+        while (w >= 4) {                                                      \
+          vpx_highbd_filter_block1d4_##dir##4_##avg##opt(                     \
               src_start, src_stride, dst, dst_stride, h, filter, bd);         \
           src += 4;                                                           \
           dst += 4;                                                           \
