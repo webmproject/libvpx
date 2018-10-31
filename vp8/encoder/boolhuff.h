@@ -35,11 +35,11 @@ typedef struct {
   struct vpx_internal_error_info *error;
 } BOOL_CODER;
 
-void vp8_start_encode(BOOL_CODER *br, unsigned char *source,
+void vp8_start_encode(BOOL_CODER *bc, unsigned char *source,
                       unsigned char *source_end);
 
-void vp8_encode_value(BOOL_CODER *br, int data, int bits);
-void vp8_stop_encode(BOOL_CODER *br);
+void vp8_encode_value(BOOL_CODER *bc, int data, int bits);
+void vp8_stop_encode(BOOL_CODER *bc);
 extern const unsigned int vp8_prob_cost[256];
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
@@ -56,11 +56,11 @@ static int validate_buffer(const unsigned char *start, size_t len,
 
   return 0;
 }
-static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
+static void vp8_encode_bool(BOOL_CODER *bc, int bit, int probability) {
   unsigned int split;
-  int count = br->count;
-  unsigned int range = br->range;
-  unsigned int lowvalue = br->lowvalue;
+  int count = bc->count;
+  unsigned int range = bc->range;
+  unsigned int lowvalue = bc->lowvalue;
   int shift;
 
 #ifdef VP8_ENTROPY_STATS
@@ -80,7 +80,7 @@ static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
 
   if (bit) {
     lowvalue += split;
-    range = br->range - split;
+    range = bc->range - split;
   }
 
   shift = vp8_norm[range];
@@ -92,18 +92,18 @@ static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
     int offset = shift - count;
 
     if ((lowvalue << (offset - 1)) & 0x80000000) {
-      int x = br->pos - 1;
+      int x = bc->pos - 1;
 
-      while (x >= 0 && br->buffer[x] == 0xff) {
-        br->buffer[x] = (unsigned char)0;
+      while (x >= 0 && bc->buffer[x] == 0xff) {
+        bc->buffer[x] = (unsigned char)0;
         x--;
       }
 
-      br->buffer[x] += 1;
+      bc->buffer[x] += 1;
     }
 
-    validate_buffer(br->buffer + br->pos, 1, br->buffer_end, br->error);
-    br->buffer[br->pos++] = (lowvalue >> (24 - offset));
+    validate_buffer(bc->buffer + bc->pos, 1, bc->buffer_end, bc->error);
+    bc->buffer[bc->pos++] = (lowvalue >> (24 - offset));
 
     lowvalue <<= offset;
     shift = count;
@@ -112,9 +112,9 @@ static void vp8_encode_bool(BOOL_CODER *br, int bit, int probability) {
   }
 
   lowvalue <<= shift;
-  br->count = count;
-  br->lowvalue = lowvalue;
-  br->range = range;
+  bc->count = count;
+  bc->lowvalue = lowvalue;
+  bc->range = range;
 }
 
 #ifdef __cplusplus
