@@ -2358,11 +2358,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
   rd_update_mvcount(x, &best_ref_mv);
 }
 
-void vp8_rd_pick_intra_mode(MACROBLOCK *x, int *rate_) {
+void vp8_rd_pick_intra_mode(MACROBLOCK *x, int *rate) {
   int error4x4, error16x16;
   int rate4x4, rate16x16 = 0, rateuv;
   int dist4x4, dist16x16, distuv;
-  int rate;
+  int rate_;
   int rate4x4_tokenonly = 0;
   int rate16x16_tokenonly = 0;
   int rateuv_tokenonly = 0;
@@ -2370,7 +2370,7 @@ void vp8_rd_pick_intra_mode(MACROBLOCK *x, int *rate_) {
   x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
   rd_pick_intra_mbuv_mode(x, &rateuv, &rateuv_tokenonly, &distuv);
-  rate = rateuv;
+  rate_ = rateuv;
 
   error16x16 = rd_pick_intra16x16mby_mode(x, &rate16x16, &rate16x16_tokenonly,
                                           &dist16x16);
@@ -2380,10 +2380,10 @@ void vp8_rd_pick_intra_mode(MACROBLOCK *x, int *rate_) {
 
   if (error4x4 < error16x16) {
     x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
-    rate += rate4x4;
+    rate_ += rate4x4;
   } else {
-    rate += rate16x16;
+    rate_ += rate16x16;
   }
 
-  *rate_ = rate;
+  *rate = rate_;
 }

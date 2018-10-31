@@ -35,11 +35,11 @@ typedef struct {
   struct vpx_internal_error_info *error;
 } BOOL_CODER;
 
-extern void vp8_start_encode(BOOL_CODER *bc, unsigned char *buffer,
-                             unsigned char *buffer_end);
+void vp8_start_encode(BOOL_CODER *br, unsigned char *source,
+                      unsigned char *source_end);
 
-extern void vp8_encode_value(BOOL_CODER *br, int data, int bits);
-extern void vp8_stop_encode(BOOL_CODER *bc);
+void vp8_encode_value(BOOL_CODER *br, int data, int bits);
+void vp8_stop_encode(BOOL_CODER *br);
 extern const unsigned int vp8_prob_cost[256];
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);

@@ -173,9 +173,8 @@ static int get_prediction_error(BLOCK *be, BLOCKD *b) {
 
 static int pick_intra4x4block(MACROBLOCK *x, int ib,
                               B_PREDICTION_MODE *best_mode,
-                              const int *mode_costs,
-
-                              int *bestrate, int *bestdistortion) {
+                              const int *mode_costs, int *bestrate,
+                              int *bestdistortion) {
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
   int dst_stride = x->e_mbd.dst.y_stride;
@@ -1303,9 +1302,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
   update_mvcount(x, &best_ref_mv);
 }
 
-void vp8_pick_intra_mode(MACROBLOCK *x, int *rate_) {
+void vp8_pick_intra_mode(MACROBLOCK *x, int *rate) {
   int error4x4, error16x16 = INT_MAX;
-  int rate, best_rate = 0, distortion, best_sse;
+  int rate_, best_rate = 0, distortion, best_sse;
   MB_PREDICTION_MODE mode, best_mode = DC_PRED;
   int this_rd;
   unsigned int sse;
@@ -1323,23 +1322,23 @@ void vp8_pick_intra_mode(MACROBLOCK *x, int *rate_) {
                                      xd->predictor, 16);
     distortion = vpx_variance16x16(*(b->base_src), b->src_stride, xd->predictor,
                                    16, &sse);
-    rate = x->mbmode_cost[xd->frame_type][mode];
-    this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+    rate_ = x->mbmode_cost[xd->frame_type][mode];
+    this_rd = RDCOST(x->rdmult, x->rddiv, rate_, distortion);
 
     if (error16x16 > this_rd) {
       error16x16 = this_rd;
       best_mode = mode;
       best_sse = sse;
-      best_rate = rate;
+      best_rate = rate_;
     }
   }
   xd->mode_info_context->mbmi.mode = best_mode;
 
-  error4x4 = pick_intra4x4mby_modes(x, &rate, &best_sse);
+  error4x4 = pick_intra4x4mby_modes(x, &rate_, &best_sse);
   if (error4x4 < error16x16) {
     xd->mode_info_context->mbmi.mode = B_PRED;
-    best_rate = rate;
+    best_rate = rate_;
   }
 
-  *rate_ = best_rate;
+  *rate = best_rate;
 }

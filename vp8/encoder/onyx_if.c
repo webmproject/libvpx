@@ -2106,8 +2106,8 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   return cpi;
 }
 
-void vp8_remove_compressor(VP8_COMP **ptr) {
-  VP8_COMP *cpi = *ptr;
+void vp8_remove_compressor(VP8_COMP **comp) {
+  VP8_COMP *cpi = *comp;
 
   if (!cpi) return;
 
@@ -2326,7 +2326,7 @@ void vp8_remove_compressor(VP8_COMP **ptr) {
 
   vp8_remove_common(&cpi->common);
   vpx_free(cpi);
-  *ptr = 0;
+  *comp = 0;
 
 #ifdef OUTPUT_YUV_SRC
   fclose(yuv_file);
