@@ -246,8 +246,8 @@ void vpx_filter_block1d16_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
     dst_second = _mm_adds_epi16(tmp_0, tmp_1);
 
     // Round each result
-    dst_first = round_epi16_sse2(&dst_first, &reg_32, 6);
-    dst_second = round_epi16_sse2(&dst_second, &reg_32, 6);
+    dst_first = mm_round_epi16_sse2(&dst_first, &reg_32, 6);
+    dst_second = mm_round_epi16_sse2(&dst_second, &reg_32, 6);
 
     // Finally combine to get the final dst
     dst_first = _mm_packus_epi16(dst_first, dst_second);
@@ -348,10 +348,10 @@ void vpx_filter_block1d16_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
     res_reg_0123_hi = _mm_adds_epi16(res_reg_01_hi, res_reg_23_hi);
 
     // Round the words
-    res_reg_m1012_lo = round_epi16_sse2(&res_reg_m1012_lo, &reg_32, 6);
-    res_reg_0123_lo = round_epi16_sse2(&res_reg_0123_lo, &reg_32, 6);
-    res_reg_m1012_hi = round_epi16_sse2(&res_reg_m1012_hi, &reg_32, 6);
-    res_reg_0123_hi = round_epi16_sse2(&res_reg_0123_hi, &reg_32, 6);
+    res_reg_m1012_lo = mm_round_epi16_sse2(&res_reg_m1012_lo, &reg_32, 6);
+    res_reg_0123_lo = mm_round_epi16_sse2(&res_reg_0123_lo, &reg_32, 6);
+    res_reg_m1012_hi = mm_round_epi16_sse2(&res_reg_m1012_hi, &reg_32, 6);
+    res_reg_0123_hi = mm_round_epi16_sse2(&res_reg_0123_hi, &reg_32, 6);
 
     // Combine to get the result
     res_reg_m1012 = _mm_packus_epi16(res_reg_m1012_lo, res_reg_m1012_hi);
@@ -421,7 +421,7 @@ void vpx_filter_block1d8_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
     dst_first = _mm_adds_epi16(tmp_0, tmp_1);
 
     // Round round result
-    dst_first = round_epi16_sse2(&dst_first, &reg_32, 6);
+    dst_first = mm_round_epi16_sse2(&dst_first, &reg_32, 6);
 
     // Pack to 8-bits
     dst_first = _mm_packus_epi16(dst_first, _mm_setzero_si128());
@@ -504,8 +504,8 @@ void vpx_filter_block1d8_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
     res_reg_0123 = _mm_adds_epi16(res_reg_01, res_reg_23);
 
     // Round the words
-    res_reg_m1012 = round_epi16_sse2(&res_reg_m1012, &reg_32, 6);
-    res_reg_0123 = round_epi16_sse2(&res_reg_0123, &reg_32, 6);
+    res_reg_m1012 = mm_round_epi16_sse2(&res_reg_m1012, &reg_32, 6);
+    res_reg_0123 = mm_round_epi16_sse2(&res_reg_0123, &reg_32, 6);
 
     // Pack from 16-bit to 8-bit
     res_reg_m1012 = _mm_packus_epi16(res_reg_m1012, _mm_setzero_si128());
@@ -563,7 +563,7 @@ void vpx_filter_block1d4_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
     dst_first = _mm_hadds_epi16(dst_first, _mm_setzero_si128());
 
     // Round result
-    dst_first = round_epi16_sse2(&dst_first, &reg_32, 6);
+    dst_first = mm_round_epi16_sse2(&dst_first, &reg_32, 6);
 
     // Pack to 8-bits
     dst_first = _mm_packus_epi16(dst_first, _mm_setzero_si128());
@@ -648,8 +648,8 @@ void vpx_filter_block1d4_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
     reg_1 = _mm_hadds_epi16(reg_1, _mm_setzero_si128());
 
     // Round the words
-    reg_0 = round_epi16_sse2(&reg_0, &reg_32, 6);
-    reg_1 = round_epi16_sse2(&reg_1, &reg_32, 6);
+    reg_0 = mm_round_epi16_sse2(&reg_0, &reg_32, 6);
+    reg_1 = mm_round_epi16_sse2(&reg_1, &reg_32, 6);
 
     // Pack from 16-bit to 8-bit and put them in the right order
     reg_0 = _mm_packus_epi16(reg_0, reg_0);
