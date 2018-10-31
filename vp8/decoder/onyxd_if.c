@@ -471,6 +471,6 @@ int vp8_remove_decoder_instances(struct frame_buffers *fb) {
   return VPX_CODEC_OK;
 }
 
-int vp8dx_get_quantizer(const VP8D_COMP *cpi) {
-  return cpi->common.base_qindex;
+int vp8dx_get_quantizer(const VP8D_COMP *pbi) {
+  return pbi->common.base_qindex;
 }

@@ -54,7 +54,7 @@ vpx_codec_err_t vp8dx_get_reference(struct VP8D_COMP *pbi,
 vpx_codec_err_t vp8dx_set_reference(struct VP8D_COMP *pbi,
                                     enum vpx_ref_frame_type ref_frame_flag,
                                     YV12_BUFFER_CONFIG *sd);
-int vp8dx_get_quantizer(const struct VP8D_COMP *cpi);
+int vp8dx_get_quantizer(const struct VP8D_COMP *pbi);
 
 #ifdef __cplusplus
 }
