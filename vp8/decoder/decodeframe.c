@@ -1220,7 +1220,8 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   if (vpx_atomic_load_acquire(&pbi->b_multithreaded_rd) &&
       pc->multi_token_partition != ONE_PARTITION) {
     unsigned int thread;
-    vp8mt_decode_mb_rows(pbi, xd);
+    if (vp8mt_decode_mb_rows(pbi, xd))
+      vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME, NULL);
     vp8_yv12_extend_frame_borders(yv12_fb_new);
     for (thread = 0; thread < pbi->decoding_thread_count; ++thread) {
       corrupt_tokens |= pbi->mb_row_di[thread].mbd.corrupted;

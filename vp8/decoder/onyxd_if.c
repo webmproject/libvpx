@@ -331,6 +331,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
     if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0) {
       cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
     }
+    pbi->common.error.setjmp = 0;
     goto decode_exit;
   }
 
@@ -344,6 +345,12 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
     }
 
     pbi->common.error.error_code = VPX_CODEC_ERROR;
+    // Propagate the error info.
+    if (pbi->mb.error_info.error_code != 0) {
+      pbi->common.error.error_code = pbi->mb.error_info.error_code;
+      memcpy(pbi->common.error.detail, pbi->mb.error_info.detail,
+             sizeof(pbi->mb.error_info.detail));
+    }
     goto decode_exit;
   }
 
@@ -382,7 +389,6 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
   pbi->last_time_stamp = time_stamp;
 
 decode_exit:
-  pbi->common.error.setjmp = 0;
   vpx_clear_system_state();
   return retcode;
 }
