@@ -811,7 +811,7 @@ void vp9_change_config(VP9_COMP *cpi, const VP9EncoderConfig *oxcf);
 // frame is made and not just a copy of the pointer..
 int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
-                          int64_t end_time_stamp);
+                          int64_t end_time);
 
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest, int64_t *time_stamp,
@@ -832,9 +832,11 @@ int vp9_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
 
 int vp9_update_entropy(VP9_COMP *cpi, int update);
 
-int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols);
+int vp9_set_active_map(VP9_COMP *cpi, unsigned char *new_map_16x16, int rows,
+                       int cols);
 
-int vp9_get_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols);
+int vp9_get_active_map(VP9_COMP *cpi, unsigned char *new_map_16x16, int rows,
+                       int cols);
 
 int vp9_set_internal_size(VP9_COMP *cpi, VPX_SCALING horiz_mode,
                           VPX_SCALING vert_mode);

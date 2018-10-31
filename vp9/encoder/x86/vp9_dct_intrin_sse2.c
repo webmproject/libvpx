@@ -185,8 +185,8 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
                             int skip_block, const int16_t *round_ptr,
                             const int16_t *quant_ptr, int16_t *qcoeff_ptr,
                             int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                            uint16_t *eob_ptr, const int16_t *scan_ptr,
-                            const int16_t *iscan_ptr) {
+                            uint16_t *eob_ptr, const int16_t *scan,
+                            const int16_t *iscan) {
   __m128i zero;
   int pass;
 
@@ -215,7 +215,7 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
   __m128i *in[8];
   int index = 0;
 
-  (void)scan_ptr;
+  (void)scan;
   (void)coeff_ptr;
 
   // Pre-condition input (shift by two)
@@ -449,7 +449,7 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
     in7 = _mm_srai_epi16(in7, 1);
   }
 
-  iscan_ptr += n_coeffs;
+  iscan += n_coeffs;
   qcoeff_ptr += n_coeffs;
   dqcoeff_ptr += n_coeffs;
   n_coeffs = -n_coeffs;
@@ -518,8 +518,8 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
         zero_coeff1 = _mm_cmpeq_epi16(coeff1, zero);
         nzero_coeff0 = _mm_cmpeq_epi16(zero_coeff0, zero);
         nzero_coeff1 = _mm_cmpeq_epi16(zero_coeff1, zero);
-        iscan0 = _mm_load_si128((const __m128i *)(iscan_ptr + n_coeffs));
-        iscan1 = _mm_load_si128((const __m128i *)(iscan_ptr + n_coeffs) + 1);
+        iscan0 = _mm_load_si128((const __m128i *)(iscan + n_coeffs));
+        iscan1 = _mm_load_si128((const __m128i *)(iscan + n_coeffs) + 1);
         // Add one to convert from indices to counts
         iscan0 = _mm_sub_epi16(iscan0, nzero_coeff0);
         iscan1 = _mm_sub_epi16(iscan1, nzero_coeff1);
@@ -582,8 +582,8 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
         zero_coeff1 = _mm_cmpeq_epi16(coeff1, zero);
         nzero_coeff0 = _mm_cmpeq_epi16(zero_coeff0, zero);
         nzero_coeff1 = _mm_cmpeq_epi16(zero_coeff1, zero);
-        iscan0 = _mm_load_si128((const __m128i *)(iscan_ptr + n_coeffs));
-        iscan1 = _mm_load_si128((const __m128i *)(iscan_ptr + n_coeffs) + 1);
+        iscan0 = _mm_load_si128((const __m128i *)(iscan + n_coeffs));
+        iscan1 = _mm_load_si128((const __m128i *)(iscan + n_coeffs) + 1);
         // Add one to convert from indices to counts
         iscan0 = _mm_sub_epi16(iscan0, nzero_coeff0);
         iscan1 = _mm_sub_epi16(iscan1, nzero_coeff1);
