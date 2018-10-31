@@ -880,12 +880,12 @@ void vp9_adjust_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
 // This function sets up the bit masks for the entire 64x64 region represented
 // by mi_row, mi_col.
 void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
-                    MODE_INFO **mi, const int mode_info_stride,
+                    MODE_INFO **mi8x8, const int mode_info_stride,
                     LOOP_FILTER_MASK *lfm) {
   int idx_32, idx_16, idx_8;
   const loop_filter_info_n *const lfi_n = &cm->lf_info;
-  MODE_INFO **mip = mi;
-  MODE_INFO **mip2 = mi;
+  MODE_INFO **mip = mi8x8;
+  MODE_INFO **mip2 = mi8x8;
 
   // These are offsets to the next mi in the 64x64 block. It is what gets
   // added to the mi ptr as we go through each loop. It helps us to avoid

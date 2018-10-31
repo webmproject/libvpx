@@ -61,15 +61,15 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                    BLOCK_SIZE bsize);
 
 void vp9_build_inter_predictor(const uint8_t *src, int src_stride, uint8_t *dst,
-                               int dst_stride, const MV *mv_q3,
+                               int dst_stride, const MV *src_mv,
                                const struct scale_factors *sf, int w, int h,
-                               int do_avg, const InterpKernel *kernel,
+                               int ref, const InterpKernel *kernel,
                                enum mv_precision precision, int x, int y);
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp9_highbd_build_inter_predictor(
     const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride,
-    const MV *mv_q3, const struct scale_factors *sf, int w, int h, int do_avg,
+    const MV *src_mv, const struct scale_factors *sf, int w, int h, int ref,
     const InterpKernel *kernel, enum mv_precision precision, int x, int y,
     int bd);
 #endif

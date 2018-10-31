@@ -62,7 +62,7 @@ add_proto qw/void vp9_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, i
 
 add_proto qw/void vp9_iht8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int stride, int tx_type";
 
-add_proto qw/void vp9_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
+add_proto qw/void vp9_iht16x16_256_add/, "const tran_low_t *input, uint8_t *dest, int stride, int tx_type";
 
 if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
   # Note that there are more specializations appended when
@@ -100,7 +100,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_highbd_iht8x8_64_add/, "const tran_low_t *input, uint16_t *dest, int stride, int tx_type, int bd";
 
-  add_proto qw/void vp9_highbd_iht16x16_256_add/, "const tran_low_t *input, uint16_t *output, int pitch, int tx_type, int bd";
+  add_proto qw/void vp9_highbd_iht16x16_256_add/, "const tran_low_t *input, uint16_t *dest, int stride, int tx_type, int bd";
 
   if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
     specialize qw/vp9_highbd_iht4x4_16_add neon sse4_1/;
