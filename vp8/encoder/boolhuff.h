@@ -63,17 +63,6 @@ static void vp8_encode_bool(BOOL_CODER *bc, int bit, int probability) {
   unsigned int lowvalue = bc->lowvalue;
   int shift;
 
-#ifdef VP8_ENTROPY_STATS
-#if defined(SECTIONBITS_OUTPUT)
-
-  if (bit)
-    Sectionbits[active_section] += vp8_prob_cost[255 - probability];
-  else
-    Sectionbits[active_section] += vp8_prob_cost[probability];
-
-#endif
-#endif
-
   split = 1 + (((range - 1) * probability) >> 8);
 
   range = split;

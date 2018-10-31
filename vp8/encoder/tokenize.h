@@ -34,14 +34,6 @@ typedef struct {
 
 int rd_cost_mby(MACROBLOCKD *);
 
-#ifdef VP8_ENTROPY_STATS
-void init_context_counters();
-void print_context_counters();
-
-extern _int64 context_counters[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS]
-                              [MAX_ENTROPY_TOKENS];
-#endif
-
 extern const short *const vp8_dct_value_cost_ptr;
 /* TODO: The Token field should be broken out into a separate char array to
  *  improve cache locality, since it's needed for costing when the rest of the

@@ -65,9 +65,7 @@ extern int vp8_update_coef_context(VP8_COMP *cpi);
 extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source,
                               YV12_BUFFER_CONFIG *post, int filt_lvl,
                               int low_var_thresh, int flag);
-extern void print_parms(VP8_CONFIG *ocf, char *filenam);
 extern unsigned int vp8_get_processor_freq();
-extern void print_tree_update_probs();
 
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
@@ -99,10 +97,6 @@ FILE *keyfile;
 #if 0
 extern int skip_true_count;
 extern int skip_false_count;
-#endif
-
-#ifdef VP8_ENTROPY_STATS
-extern int intra_mode_stats[10][10][10];
 #endif
 
 #ifdef SPEEDSTATS
@@ -1893,10 +1887,6 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   CHECK_MEM_ERROR(cpi->consec_zero_last_mvbias,
                   vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
 
-#ifdef VP8_ENTROPY_STATS
-  init_context_counters();
-#endif
-
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
 
@@ -2004,10 +1994,6 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   for (i = 0; i < MAX_MODES; ++i) {
     cpi->mb.rd_thresh_mult[i] = 128;
   }
-
-#ifdef VP8_ENTROPY_STATS
-  init_mv_ref_counts();
-#endif
 
 #if CONFIG_MULTITHREAD
   if (vp8cx_create_encoder_threads(cpi)) {
@@ -2118,12 +2104,6 @@ void vp8_remove_compressor(VP8_COMP **comp) {
       vp8_end_second_pass(cpi);
     }
 
-#endif
-
-#ifdef VP8_ENTROPY_STATS
-    print_context_counters();
-    print_tree_update_probs();
-    print_mode_context();
 #endif
 
 #if CONFIG_INTERNAL_STATS
@@ -2249,40 +2229,6 @@ void vp8_remove_compressor(VP8_COMP **comp) {
               inter_b_modes[NEW4X4]);
 
       fclose(f);
-    }
-#endif
-
-#ifdef VP8_ENTROPY_STATS
-    {
-      int i, j, k;
-      FILE *fmode = fopen("modecontext.c", "w");
-
-      fprintf(fmode, "\n#include \"entropymode.h\"\n\n");
-      fprintf(fmode, "const unsigned int vp8_kf_default_bmode_counts ");
-      fprintf(fmode,
-              "[VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES] =\n{\n");
-
-      for (i = 0; i < 10; ++i) {
-        fprintf(fmode, "    { /* Above Mode :  %d */\n", i);
-
-        for (j = 0; j < 10; ++j) {
-          fprintf(fmode, "        {");
-
-          for (k = 0; k < 10; ++k) {
-            if (!intra_mode_stats[i][j][k])
-              fprintf(fmode, " %5d, ", 1);
-            else
-              fprintf(fmode, " %5d, ", intra_mode_stats[i][j][k]);
-          }
-
-          fprintf(fmode, "}, /* left_mode %d */\n", j);
-        }
-
-        fprintf(fmode, "    },\n");
-      }
-
-      fprintf(fmode, "};\n");
-      fclose(fmode);
     }
 #endif
 

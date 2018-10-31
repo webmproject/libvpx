@@ -18,11 +18,6 @@
 extern "C" {
 #endif
 
-#ifdef VP8_ENTROPY_STATS
-void init_mv_ref_counts();
-void accum_mv_refs(MB_PREDICTION_MODE, const int near_mv_ref_cts[4]);
-#endif
-
 /* The maximum number of steps in a step search given the largest allowed
  * initial step
  */
@@ -34,7 +29,6 @@ void accum_mv_refs(MB_PREDICTION_MODE, const int near_mv_ref_cts[4]);
 /* Maximum size of the first step in full pel units */
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS - 1))
 
-void print_mode_context(void);
 int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight);
 void vp8_init_dsmotion_compensation(MACROBLOCK *x, int stride);
 void vp8_init3smotion_compensation(MACROBLOCK *x, int stride);
