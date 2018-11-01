@@ -1190,7 +1190,7 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] = {
 static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] = {
   { 0,
     {
-        0, /* g_usage */
+        0, /* g_usage (unused) */
         0, /* g_threads */
         0, /* g_profile */
 

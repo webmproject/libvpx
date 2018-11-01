@@ -278,12 +278,9 @@ typedef struct vpx_codec_enc_cfg {
    * generic settings (g)
    */
 
-  /*!\brief Algorithm specific "usage" value
+  /*!\brief Deprecated: Algorithm specific "usage" value
    *
-   * Algorithms may define multiple values for usage, which may convey the
-   * intent of how the application intends to use the stream. If this value
-   * is non-zero, consult the documentation for the codec to determine its
-   * meaning.
+   * This value must be zero.
    */
   unsigned int g_usage;
 
@@ -482,8 +479,7 @@ typedef struct vpx_codec_enc_cfg {
    * The quantizer is the most direct control over the quality of the
    * encoded image. The range of valid values for the quantizer is codec
    * specific. Consult the documentation for the codec to determine the
-   * values to use. To determine the range programmatically, call
-   * vpx_codec_enc_config_default() with a usage value of 0.
+   * values to use.
    */
   unsigned int rc_min_quantizer;
 
@@ -492,8 +488,7 @@ typedef struct vpx_codec_enc_cfg {
    * The quantizer is the most direct control over the quality of the
    * encoded image. The range of valid values for the quantizer is codec
    * specific. Consult the documentation for the codec to determine the
-   * values to use. To determine the range programmatically, call
-   * vpx_codec_enc_config_default() with a usage value of 0.
+   * values to use.
    */
   unsigned int rc_max_quantizer;
 
@@ -799,7 +794,7 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(
  *
  * \param[in]    iface     Pointer to the algorithm interface to use.
  * \param[out]   cfg       Configuration buffer to populate.
- * \param[in]    reserved  Must set to 0 for VP8 and VP9.
+ * \param[in]    usage     Must be set to 0.
  *
  * \retval #VPX_CODEC_OK
  *     The configuration was populated.
@@ -810,7 +805,7 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(
  */
 vpx_codec_err_t vpx_codec_enc_config_default(vpx_codec_iface_t *iface,
                                              vpx_codec_enc_cfg_t *cfg,
-                                             unsigned int reserved);
+                                             unsigned int usage);
 
 /*!\brief Set or change configuration
  *
