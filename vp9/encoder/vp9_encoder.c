@@ -5801,9 +5801,9 @@ void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
                          TX_SIZE tx_size) {
   // TODO(sdeng): Implement SIMD based high bit-depth Hadamard transforms.
   switch (tx_size) {
-    case TX_8X8: vpx_hadamard_8x8_c(src_diff, bw, coeff); break;
-    case TX_16X16: vpx_hadamard_16x16_c(src_diff, bw, coeff); break;
-    case TX_32X32: vpx_hadamard_32x32_c(src_diff, bw, coeff); break;
+    case TX_8X8: vpx_highbd_hadamard_8x8(src_diff, bw, coeff); break;
+    case TX_16X16: vpx_highbd_hadamard_16x16(src_diff, bw, coeff); break;
+    case TX_32X32: vpx_highbd_hadamard_32x32(src_diff, bw, coeff); break;
     default: assert(0);
   }
 }

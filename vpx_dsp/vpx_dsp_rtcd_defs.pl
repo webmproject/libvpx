@@ -785,6 +785,15 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
     add_proto qw/void vpx_hadamard_32x32/, "const int16_t *src_diff, ptrdiff_t src_stride, tran_low_t *coeff";
     specialize qw/vpx_hadamard_32x32 sse2 avx2/;
 
+    add_proto qw/void vpx_highbd_hadamard_8x8/, "const int16_t *src_diff, ptrdiff_t src_stride, tran_low_t *coeff";
+    specialize qw/vpx_highbd_hadamard_8x8/;
+
+    add_proto qw/void vpx_highbd_hadamard_16x16/, "const int16_t *src_diff, ptrdiff_t src_stride, tran_low_t *coeff";
+    specialize qw/vpx_highbd_hadamard_16x16/;
+
+    add_proto qw/void vpx_highbd_hadamard_32x32/, "const int16_t *src_diff, ptrdiff_t src_stride, tran_low_t *coeff";
+    specialize qw/vpx_highbd_hadamard_32x32/;
+
     add_proto qw/int vpx_satd/, "const tran_low_t *coeff, int length";
     specialize qw/vpx_satd avx2 sse2 neon/;
   } else {
