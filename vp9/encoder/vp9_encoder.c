@@ -4013,9 +4013,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 
   set_size_independent_vars(cpi);
 
-  enable_acl = cpi->sf.allow_acl
-                   ? (cm->frame_type == KEY_FRAME) || (cm->show_frame == 0)
-                   : 0;
+  enable_acl = cpi->sf.allow_acl ? (cm->frame_type == KEY_FRAME) ||
+                                       (cpi->twopass.gf_group.index == 1)
+                                 : 0;
 
   do {
     vpx_clear_system_state();
