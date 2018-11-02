@@ -164,11 +164,11 @@ static INLINE void variance64_avx2(const uint8_t *src, const int src_stride,
   }
 }
 
-void vpx_get16x16var_avx2(const uint8_t *src, int src_stride,
-                          const uint8_t *ref, int ref_stride, unsigned int *sse,
-                          int *sum) {
+void vpx_get16x16var_avx2(const uint8_t *src_ptr, int src_stride,
+                          const uint8_t *ref_ptr, int ref_stride,
+                          unsigned int *sse, int *sum) {
   __m256i vsse, vsum;
-  variance16_avx2(src, src_stride, ref, ref_stride, 16, &vsse, &vsum);
+  variance16_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 16, &vsse, &vsum);
   variance_final_from_16bit_sum_avx2(vsse, vsum, sse, sum);
 }
 
@@ -224,8 +224,9 @@ void vpx_get16x16var_avx2(const uint8_t *src, int src_stride,
 
 static INLINE void spv32_x0_y0(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg) {
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg) {
   const __m256i zero_reg = _mm256_setzero_si256();
   __m256i exp_src_lo, exp_src_hi, exp_dst_lo, exp_dst_hi;
   int i;
@@ -233,11 +234,11 @@ static INLINE void spv32_x0_y0(const uint8_t *src, int src_stride,
     const __m256i dst_reg = _mm256_loadu_si256((__m256i const *)dst);
     const __m256i src_reg = _mm256_loadu_si256((__m256i const *)src);
     if (do_sec) {
-      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)sec);
+      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)second_pred);
       const __m256i avg_reg = _mm256_avg_epu8(src_reg, sec_reg);
       exp_src_lo = _mm256_unpacklo_epi8(avg_reg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(avg_reg, zero_reg);
-      sec += sec_stride;
+      second_pred += second_stride;
     } else {
       exp_src_lo = _mm256_unpacklo_epi8(src_reg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(src_reg, zero_reg);
@@ -251,9 +252,10 @@ static INLINE void spv32_x0_y0(const uint8_t *src, int src_stride,
 // (x == 0, y == 4) or (x == 4, y == 0).  sstep determines the direction.
 static INLINE void spv32_half_zero(const uint8_t *src, int src_stride,
                                    const uint8_t *dst, int dst_stride,
-                                   const uint8_t *sec, int sec_stride,
-                                   int do_sec, int height, __m256i *sum_reg,
-                                   __m256i *sse_reg, int sstep) {
+                                   const uint8_t *second_pred,
+                                   int second_stride, int do_sec, int height,
+                                   __m256i *sum_reg, __m256i *sse_reg,
+                                   int sstep) {
   const __m256i zero_reg = _mm256_setzero_si256();
   __m256i exp_src_lo, exp_src_hi, exp_dst_lo, exp_dst_hi;
   int i;
@@ -263,11 +265,11 @@ static INLINE void spv32_half_zero(const uint8_t *src, int src_stride,
     const __m256i src_1 = _mm256_loadu_si256((__m256i const *)(src + sstep));
     const __m256i src_avg = _mm256_avg_epu8(src_0, src_1);
     if (do_sec) {
-      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)sec);
+      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)second_pred);
       const __m256i avg_reg = _mm256_avg_epu8(src_avg, sec_reg);
       exp_src_lo = _mm256_unpacklo_epi8(avg_reg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(avg_reg, zero_reg);
-      sec += sec_stride;
+      second_pred += second_stride;
     } else {
       exp_src_lo = _mm256_unpacklo_epi8(src_avg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(src_avg, zero_reg);
@@ -280,24 +282,27 @@ static INLINE void spv32_half_zero(const uint8_t *src, int src_stride,
 
 static INLINE void spv32_x0_y4(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg) {
-  spv32_half_zero(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, sum_reg, sse_reg, src_stride);
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg) {
+  spv32_half_zero(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, sum_reg, sse_reg, src_stride);
 }
 
 static INLINE void spv32_x4_y0(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg) {
-  spv32_half_zero(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, sum_reg, sse_reg, 1);
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg) {
+  spv32_half_zero(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, sum_reg, sse_reg, 1);
 }
 
 static INLINE void spv32_x4_y4(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg) {
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg) {
   const __m256i zero_reg = _mm256_setzero_si256();
   const __m256i src_a = _mm256_loadu_si256((__m256i const *)src);
   const __m256i src_b = _mm256_loadu_si256((__m256i const *)(src + 1));
@@ -314,11 +319,11 @@ static INLINE void spv32_x4_y4(const uint8_t *src, int src_stride,
     prev_src_avg = src_avg;
 
     if (do_sec) {
-      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)sec);
+      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)second_pred);
       const __m256i avg_reg = _mm256_avg_epu8(current_avg, sec_reg);
       exp_src_lo = _mm256_unpacklo_epi8(avg_reg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(avg_reg, zero_reg);
-      sec += sec_stride;
+      second_pred += second_stride;
     } else {
       exp_src_lo = _mm256_unpacklo_epi8(current_avg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(current_avg, zero_reg);
@@ -333,9 +338,10 @@ static INLINE void spv32_x4_y4(const uint8_t *src, int src_stride,
 // (x == 0, y == bil) or (x == 4, y == bil).  sstep determines the direction.
 static INLINE void spv32_bilin_zero(const uint8_t *src, int src_stride,
                                     const uint8_t *dst, int dst_stride,
-                                    const uint8_t *sec, int sec_stride,
-                                    int do_sec, int height, __m256i *sum_reg,
-                                    __m256i *sse_reg, int offset, int sstep) {
+                                    const uint8_t *second_pred,
+                                    int second_stride, int do_sec, int height,
+                                    __m256i *sum_reg, __m256i *sse_reg,
+                                    int offset, int sstep) {
   const __m256i zero_reg = _mm256_setzero_si256();
   const __m256i pw8 = _mm256_set1_epi16(8);
   const __m256i filter = _mm256_load_si256(
@@ -351,10 +357,10 @@ static INLINE void spv32_bilin_zero(const uint8_t *src, int src_stride,
 
     FILTER_SRC(filter)
     if (do_sec) {
-      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)sec);
+      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)second_pred);
       const __m256i exp_src = _mm256_packus_epi16(exp_src_lo, exp_src_hi);
       const __m256i avg_reg = _mm256_avg_epu8(exp_src, sec_reg);
-      sec += sec_stride;
+      second_pred += second_stride;
       exp_src_lo = _mm256_unpacklo_epi8(avg_reg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(avg_reg, zero_reg);
     }
@@ -366,27 +372,27 @@ static INLINE void spv32_bilin_zero(const uint8_t *src, int src_stride,
 
 static INLINE void spv32_x0_yb(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg,
-                               int y_offset) {
-  spv32_bilin_zero(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                   height, sum_reg, sse_reg, y_offset, src_stride);
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg, int y_offset) {
+  spv32_bilin_zero(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                   do_sec, height, sum_reg, sse_reg, y_offset, src_stride);
 }
 
 static INLINE void spv32_xb_y0(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg,
-                               int x_offset) {
-  spv32_bilin_zero(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                   height, sum_reg, sse_reg, x_offset, 1);
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg, int x_offset) {
+  spv32_bilin_zero(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                   do_sec, height, sum_reg, sse_reg, x_offset, 1);
 }
 
 static INLINE void spv32_x4_yb(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg,
-                               int y_offset) {
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg, int y_offset) {
   const __m256i zero_reg = _mm256_setzero_si256();
   const __m256i pw8 = _mm256_set1_epi16(8);
   const __m256i filter = _mm256_load_si256(
@@ -408,12 +414,12 @@ static INLINE void spv32_x4_yb(const uint8_t *src, int src_stride,
 
     FILTER_SRC(filter)
     if (do_sec) {
-      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)sec);
+      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)second_pred);
       const __m256i exp_src_avg = _mm256_packus_epi16(exp_src_lo, exp_src_hi);
       const __m256i avg_reg = _mm256_avg_epu8(exp_src_avg, sec_reg);
       exp_src_lo = _mm256_unpacklo_epi8(avg_reg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(avg_reg, zero_reg);
-      sec += sec_stride;
+      second_pred += second_stride;
     }
     CALC_SUM_SSE_INSIDE_LOOP
     dst += dst_stride;
@@ -423,9 +429,9 @@ static INLINE void spv32_x4_yb(const uint8_t *src, int src_stride,
 
 static INLINE void spv32_xb_y4(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg,
-                               int x_offset) {
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg, int x_offset) {
   const __m256i zero_reg = _mm256_setzero_si256();
   const __m256i pw8 = _mm256_set1_epi16(8);
   const __m256i filter = _mm256_load_si256(
@@ -456,11 +462,11 @@ static INLINE void spv32_xb_y4(const uint8_t *src, int src_stride,
     src_pack = _mm256_avg_epu8(src_pack, src_reg);
 
     if (do_sec) {
-      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)sec);
+      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)second_pred);
       const __m256i avg_pack = _mm256_avg_epu8(src_pack, sec_reg);
       exp_src_lo = _mm256_unpacklo_epi8(avg_pack, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(avg_pack, zero_reg);
-      sec += sec_stride;
+      second_pred += second_stride;
     } else {
       exp_src_lo = _mm256_unpacklo_epi8(src_pack, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(src_pack, zero_reg);
@@ -474,9 +480,9 @@ static INLINE void spv32_xb_y4(const uint8_t *src, int src_stride,
 
 static INLINE void spv32_xb_yb(const uint8_t *src, int src_stride,
                                const uint8_t *dst, int dst_stride,
-                               const uint8_t *sec, int sec_stride, int do_sec,
-                               int height, __m256i *sum_reg, __m256i *sse_reg,
-                               int x_offset, int y_offset) {
+                               const uint8_t *second_pred, int second_stride,
+                               int do_sec, int height, __m256i *sum_reg,
+                               __m256i *sse_reg, int x_offset, int y_offset) {
   const __m256i zero_reg = _mm256_setzero_si256();
   const __m256i pw8 = _mm256_set1_epi16(8);
   const __m256i xfilter = _mm256_load_si256(
@@ -511,12 +517,12 @@ static INLINE void spv32_xb_yb(const uint8_t *src, int src_stride,
 
     FILTER_SRC(yfilter)
     if (do_sec) {
-      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)sec);
+      const __m256i sec_reg = _mm256_loadu_si256((__m256i const *)second_pred);
       const __m256i exp_src = _mm256_packus_epi16(exp_src_lo, exp_src_hi);
       const __m256i avg_reg = _mm256_avg_epu8(exp_src, sec_reg);
       exp_src_lo = _mm256_unpacklo_epi8(avg_reg, zero_reg);
       exp_src_hi = _mm256_unpackhi_epi8(avg_reg, zero_reg);
-      sec += sec_stride;
+      second_pred += second_stride;
     }
 
     prev_src_pack = src_pack;
@@ -530,7 +536,7 @@ static INLINE void spv32_xb_yb(const uint8_t *src, int src_stride,
 static INLINE int sub_pix_var32xh(const uint8_t *src, int src_stride,
                                   int x_offset, int y_offset,
                                   const uint8_t *dst, int dst_stride,
-                                  const uint8_t *sec, int sec_stride,
+                                  const uint8_t *second_pred, int second_stride,
                                   int do_sec, int height, unsigned int *sse) {
   const __m256i zero_reg = _mm256_setzero_si256();
   __m256i sum_reg = _mm256_setzero_si256();
@@ -540,44 +546,44 @@ static INLINE int sub_pix_var32xh(const uint8_t *src, int src_stride,
   // x_offset = 0 and y_offset = 0
   if (x_offset == 0) {
     if (y_offset == 0) {
-      spv32_x0_y0(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg);
+      spv32_x0_y0(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg);
       // x_offset = 0 and y_offset = 4
     } else if (y_offset == 4) {
-      spv32_x0_y4(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg);
+      spv32_x0_y4(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg);
       // x_offset = 0 and y_offset = bilin interpolation
     } else {
-      spv32_x0_yb(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg, y_offset);
+      spv32_x0_yb(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg, y_offset);
     }
     // x_offset = 4  and y_offset = 0
   } else if (x_offset == 4) {
     if (y_offset == 0) {
-      spv32_x4_y0(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg);
+      spv32_x4_y0(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg);
       // x_offset = 4  and y_offset = 4
     } else if (y_offset == 4) {
-      spv32_x4_y4(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg);
+      spv32_x4_y4(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg);
       // x_offset = 4  and y_offset = bilin interpolation
     } else {
-      spv32_x4_yb(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg, y_offset);
+      spv32_x4_yb(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg, y_offset);
     }
     // x_offset = bilin interpolation and y_offset = 0
   } else {
     if (y_offset == 0) {
-      spv32_xb_y0(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg, x_offset);
+      spv32_xb_y0(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg, x_offset);
       // x_offset = bilin interpolation and y_offset = 4
     } else if (y_offset == 4) {
-      spv32_xb_y4(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg, x_offset);
+      spv32_xb_y4(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg, x_offset);
       // x_offset = bilin interpolation and y_offset = bilin interpolation
     } else {
-      spv32_xb_yb(src, src_stride, dst, dst_stride, sec, sec_stride, do_sec,
-                  height, &sum_reg, &sse_reg, x_offset, y_offset);
+      spv32_xb_yb(src, src_stride, dst, dst_stride, second_pred, second_stride,
+                  do_sec, height, &sum_reg, &sse_reg, x_offset, y_offset);
     }
   }
   CALC_SUM_AND_SSE
@@ -593,63 +599,63 @@ static unsigned int sub_pixel_variance32xh_avx2(
 
 static unsigned int sub_pixel_avg_variance32xh_avx2(
     const uint8_t *src, int src_stride, int x_offset, int y_offset,
-    const uint8_t *dst, int dst_stride, const uint8_t *sec, int sec_stride,
-    int height, unsigned int *sse) {
+    const uint8_t *dst, int dst_stride, const uint8_t *second_pred,
+    int second_stride, int height, unsigned int *sse) {
   return sub_pix_var32xh(src, src_stride, x_offset, y_offset, dst, dst_stride,
-                         sec, sec_stride, 1, height, sse);
+                         second_pred, second_stride, 1, height, sse);
 }
 
-typedef void (*get_var_avx2)(const uint8_t *src, int src_stride,
-                             const uint8_t *ref, int ref_stride,
+typedef void (*get_var_avx2)(const uint8_t *src_ptr, int src_stride,
+                             const uint8_t *ref_ptr, int ref_stride,
                              unsigned int *sse, int *sum);
 
-unsigned int vpx_variance16x8_avx2(const uint8_t *src, int src_stride,
-                                   const uint8_t *ref, int ref_stride,
+unsigned int vpx_variance16x8_avx2(const uint8_t *src_ptr, int src_stride,
+                                   const uint8_t *ref_ptr, int ref_stride,
                                    unsigned int *sse) {
   int sum;
   __m256i vsse, vsum;
-  variance16_avx2(src, src_stride, ref, ref_stride, 8, &vsse, &vsum);
+  variance16_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 8, &vsse, &vsum);
   variance_final_from_16bit_sum_avx2(vsse, vsum, sse, &sum);
   return *sse - (uint32_t)(((int64_t)sum * sum) >> 7);
 }
 
-unsigned int vpx_variance16x16_avx2(const uint8_t *src, int src_stride,
-                                    const uint8_t *ref, int ref_stride,
+unsigned int vpx_variance16x16_avx2(const uint8_t *src_ptr, int src_stride,
+                                    const uint8_t *ref_ptr, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   __m256i vsse, vsum;
-  variance16_avx2(src, src_stride, ref, ref_stride, 16, &vsse, &vsum);
+  variance16_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 16, &vsse, &vsum);
   variance_final_from_16bit_sum_avx2(vsse, vsum, sse, &sum);
   return *sse - (uint32_t)(((int64_t)sum * sum) >> 8);
 }
 
-unsigned int vpx_variance16x32_avx2(const uint8_t *src, int src_stride,
-                                    const uint8_t *ref, int ref_stride,
+unsigned int vpx_variance16x32_avx2(const uint8_t *src_ptr, int src_stride,
+                                    const uint8_t *ref_ptr, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   __m256i vsse, vsum;
-  variance16_avx2(src, src_stride, ref, ref_stride, 32, &vsse, &vsum);
+  variance16_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 32, &vsse, &vsum);
   variance_final_from_16bit_sum_avx2(vsse, vsum, sse, &sum);
   return *sse - (uint32_t)(((int64_t)sum * sum) >> 9);
 }
 
-unsigned int vpx_variance32x16_avx2(const uint8_t *src, int src_stride,
-                                    const uint8_t *ref, int ref_stride,
+unsigned int vpx_variance32x16_avx2(const uint8_t *src_ptr, int src_stride,
+                                    const uint8_t *ref_ptr, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   __m256i vsse, vsum;
-  variance32_avx2(src, src_stride, ref, ref_stride, 16, &vsse, &vsum);
+  variance32_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 16, &vsse, &vsum);
   variance_final_from_16bit_sum_avx2(vsse, vsum, sse, &sum);
   return *sse - (uint32_t)(((int64_t)sum * sum) >> 9);
 }
 
-unsigned int vpx_variance32x32_avx2(const uint8_t *src, int src_stride,
-                                    const uint8_t *ref, int ref_stride,
+unsigned int vpx_variance32x32_avx2(const uint8_t *src_ptr, int src_stride,
+                                    const uint8_t *ref_ptr, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   __m256i vsse, vsum;
   __m128i vsum_128;
-  variance32_avx2(src, src_stride, ref, ref_stride, 32, &vsse, &vsum);
+  variance32_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 32, &vsse, &vsum);
   vsum_128 = _mm_add_epi16(_mm256_castsi256_si128(vsum),
                            _mm256_extractf128_si256(vsum, 1));
   vsum_128 = _mm_add_epi32(_mm_cvtepi16_epi32(vsum_128),
@@ -658,13 +664,13 @@ unsigned int vpx_variance32x32_avx2(const uint8_t *src, int src_stride,
   return *sse - (uint32_t)(((int64_t)sum * sum) >> 10);
 }
 
-unsigned int vpx_variance32x64_avx2(const uint8_t *src, int src_stride,
-                                    const uint8_t *ref, int ref_stride,
+unsigned int vpx_variance32x64_avx2(const uint8_t *src_ptr, int src_stride,
+                                    const uint8_t *ref_ptr, int ref_stride,
                                     unsigned int *sse) {
   int sum;
   __m256i vsse, vsum;
   __m128i vsum_128;
-  variance32_avx2(src, src_stride, ref, ref_stride, 64, &vsse, &vsum);
+  variance32_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 64, &vsse, &vsum);
   vsum = sum_to_32bit_avx2(vsum);
   vsum_128 = _mm_add_epi32(_mm256_castsi256_si128(vsum),
                            _mm256_extractf128_si256(vsum, 1));
@@ -672,14 +678,14 @@ unsigned int vpx_variance32x64_avx2(const uint8_t *src, int src_stride,
   return *sse - (uint32_t)(((int64_t)sum * sum) >> 11);
 }
 
-unsigned int vpx_variance64x32_avx2(const uint8_t *src, int src_stride,
-                                    const uint8_t *ref, int ref_stride,
+unsigned int vpx_variance64x32_avx2(const uint8_t *src_ptr, int src_stride,
+                                    const uint8_t *ref_ptr, int ref_stride,
                                     unsigned int *sse) {
   __m256i vsse = _mm256_setzero_si256();
   __m256i vsum = _mm256_setzero_si256();
   __m128i vsum_128;
   int sum;
-  variance64_avx2(src, src_stride, ref, ref_stride, 32, &vsse, &vsum);
+  variance64_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 32, &vsse, &vsum);
   vsum = sum_to_32bit_avx2(vsum);
   vsum_128 = _mm_add_epi32(_mm256_castsi256_si128(vsum),
                            _mm256_extractf128_si256(vsum, 1));
@@ -687,8 +693,8 @@ unsigned int vpx_variance64x32_avx2(const uint8_t *src, int src_stride,
   return *sse - (uint32_t)(((int64_t)sum * sum) >> 11);
 }
 
-unsigned int vpx_variance64x64_avx2(const uint8_t *src, int src_stride,
-                                    const uint8_t *ref, int ref_stride,
+unsigned int vpx_variance64x64_avx2(const uint8_t *src_ptr, int src_stride,
+                                    const uint8_t *ref_ptr, int ref_stride,
                                     unsigned int *sse) {
   __m256i vsse = _mm256_setzero_si256();
   __m256i vsum = _mm256_setzero_si256();
@@ -698,8 +704,9 @@ unsigned int vpx_variance64x64_avx2(const uint8_t *src, int src_stride,
 
   for (i = 0; i < 2; i++) {
     __m256i vsum16;
-    variance64_avx2(src + 32 * i * src_stride, src_stride,
-                    ref + 32 * i * ref_stride, ref_stride, 32, &vsse, &vsum16);
+    variance64_avx2(src_ptr + 32 * i * src_stride, src_stride,
+                    ref_ptr + 32 * i * ref_stride, ref_stride, 32, &vsse,
+                    &vsum16);
     vsum = _mm256_add_epi32(vsum, sum_to_32bit_avx2(vsum16));
   }
   vsum_128 = _mm_add_epi32(_mm256_castsi256_si128(vsum),
@@ -708,63 +715,61 @@ unsigned int vpx_variance64x64_avx2(const uint8_t *src, int src_stride,
   return *sse - (unsigned int)(((int64_t)sum * sum) >> 12);
 }
 
-unsigned int vpx_mse16x8_avx2(const uint8_t *src, int src_stride,
-                              const uint8_t *ref, int ref_stride,
+unsigned int vpx_mse16x8_avx2(const uint8_t *src_ptr, int src_stride,
+                              const uint8_t *ref_ptr, int ref_stride,
                               unsigned int *sse) {
   int sum;
   __m256i vsse, vsum;
-  variance16_avx2(src, src_stride, ref, ref_stride, 8, &vsse, &vsum);
+  variance16_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 8, &vsse, &vsum);
   variance_final_from_16bit_sum_avx2(vsse, vsum, sse, &sum);
   return *sse;
 }
 
-unsigned int vpx_mse16x16_avx2(const uint8_t *src, int src_stride,
-                               const uint8_t *ref, int ref_stride,
+unsigned int vpx_mse16x16_avx2(const uint8_t *src_ptr, int src_stride,
+                               const uint8_t *ref_ptr, int ref_stride,
                                unsigned int *sse) {
   int sum;
   __m256i vsse, vsum;
-  variance16_avx2(src, src_stride, ref, ref_stride, 16, &vsse, &vsum);
+  variance16_avx2(src_ptr, src_stride, ref_ptr, ref_stride, 16, &vsse, &vsum);
   variance_final_from_16bit_sum_avx2(vsse, vsum, sse, &sum);
   return *sse;
 }
 
-unsigned int vpx_sub_pixel_variance64x64_avx2(const uint8_t *src,
-                                              int src_stride, int x_offset,
-                                              int y_offset, const uint8_t *dst,
-                                              int dst_stride,
-                                              unsigned int *sse) {
+unsigned int vpx_sub_pixel_variance64x64_avx2(
+    const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset,
+    const uint8_t *ref_ptr, int ref_stride, unsigned int *sse) {
   unsigned int sse1;
   const int se1 = sub_pixel_variance32xh_avx2(
-      src, src_stride, x_offset, y_offset, dst, dst_stride, 64, &sse1);
+      src_ptr, src_stride, x_offset, y_offset, ref_ptr, ref_stride, 64, &sse1);
   unsigned int sse2;
   const int se2 =
-      sub_pixel_variance32xh_avx2(src + 32, src_stride, x_offset, y_offset,
-                                  dst + 32, dst_stride, 64, &sse2);
+      sub_pixel_variance32xh_avx2(src_ptr + 32, src_stride, x_offset, y_offset,
+                                  ref_ptr + 32, ref_stride, 64, &sse2);
   const int se = se1 + se2;
   *sse = sse1 + sse2;
   return *sse - (uint32_t)(((int64_t)se * se) >> 12);
 }
 
-unsigned int vpx_sub_pixel_variance32x32_avx2(const uint8_t *src,
-                                              int src_stride, int x_offset,
-                                              int y_offset, const uint8_t *dst,
-                                              int dst_stride,
-                                              unsigned int *sse) {
+unsigned int vpx_sub_pixel_variance32x32_avx2(
+    const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset,
+    const uint8_t *ref_ptr, int ref_stride, unsigned int *sse) {
   const int se = sub_pixel_variance32xh_avx2(
-      src, src_stride, x_offset, y_offset, dst, dst_stride, 32, sse);
+      src_ptr, src_stride, x_offset, y_offset, ref_ptr, ref_stride, 32, sse);
   return *sse - (uint32_t)(((int64_t)se * se) >> 10);
 }
 
 unsigned int vpx_sub_pixel_avg_variance64x64_avx2(
-    const uint8_t *src, int src_stride, int x_offset, int y_offset,
-    const uint8_t *dst, int dst_stride, unsigned int *sse, const uint8_t *sec) {
+    const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset,
+    const uint8_t *ref_ptr, int ref_stride, unsigned int *sse,
+    const uint8_t *second_pred) {
   unsigned int sse1;
-  const int se1 = sub_pixel_avg_variance32xh_avx2(
-      src, src_stride, x_offset, y_offset, dst, dst_stride, sec, 64, 64, &sse1);
+  const int se1 = sub_pixel_avg_variance32xh_avx2(src_ptr, src_stride, x_offset,
+                                                  y_offset, ref_ptr, ref_stride,
+                                                  second_pred, 64, 64, &sse1);
   unsigned int sse2;
   const int se2 = sub_pixel_avg_variance32xh_avx2(
-      src + 32, src_stride, x_offset, y_offset, dst + 32, dst_stride, sec + 32,
-      64, 64, &sse2);
+      src_ptr + 32, src_stride, x_offset, y_offset, ref_ptr + 32, ref_stride,
+      second_pred + 32, 64, 64, &sse2);
   const int se = se1 + se2;
 
   *sse = sse1 + sse2;
@@ -773,10 +778,12 @@ unsigned int vpx_sub_pixel_avg_variance64x64_avx2(
 }
 
 unsigned int vpx_sub_pixel_avg_variance32x32_avx2(
-    const uint8_t *src, int src_stride, int x_offset, int y_offset,
-    const uint8_t *dst, int dst_stride, unsigned int *sse, const uint8_t *sec) {
+    const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset,
+    const uint8_t *ref_ptr, int ref_stride, unsigned int *sse,
+    const uint8_t *second_pred) {
   // Process 32 elements in parallel.
-  const int se = sub_pixel_avg_variance32xh_avx2(
-      src, src_stride, x_offset, y_offset, dst, dst_stride, sec, 32, 32, sse);
+  const int se = sub_pixel_avg_variance32xh_avx2(src_ptr, src_stride, x_offset,
+                                                 y_offset, ref_ptr, ref_stride,
+                                                 second_pred, 32, 32, sse);
   return *sse - (uint32_t)(((int64_t)se * se) >> 10);
 }

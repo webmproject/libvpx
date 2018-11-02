@@ -14,14 +14,16 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/ppc/types_vsx.h"
 
-uint32_t vpx_get4x4sse_cs_vsx(const uint8_t *a, int a_stride, const uint8_t *b,
-                              int b_stride) {
+uint32_t vpx_get4x4sse_cs_vsx(const uint8_t *src_ptr, int src_stride,
+                              const uint8_t *ref_ptr, int ref_stride) {
   int distortion;
 
-  const int16x8_t a0 = unpack_to_s16_h(read4x2(a, a_stride));
-  const int16x8_t a1 = unpack_to_s16_h(read4x2(a + a_stride * 2, a_stride));
-  const int16x8_t b0 = unpack_to_s16_h(read4x2(b, b_stride));
-  const int16x8_t b1 = unpack_to_s16_h(read4x2(b + b_stride * 2, b_stride));
+  const int16x8_t a0 = unpack_to_s16_h(read4x2(src_ptr, src_stride));
+  const int16x8_t a1 =
+      unpack_to_s16_h(read4x2(src_ptr + src_stride * 2, src_stride));
+  const int16x8_t b0 = unpack_to_s16_h(read4x2(ref_ptr, ref_stride));
+  const int16x8_t b1 =
+      unpack_to_s16_h(read4x2(ref_ptr + ref_stride * 2, ref_stride));
   const int16x8_t d0 = vec_sub(a0, b0);
   const int16x8_t d1 = vec_sub(a1, b1);
   const int32x4_t ds = vec_msum(d1, d1, vec_msum(d0, d0, vec_splat_s32(0)));
@@ -33,12 +35,12 @@ uint32_t vpx_get4x4sse_cs_vsx(const uint8_t *a, int a_stride, const uint8_t *b,
 }
 
 // TODO(lu_zero): Unroll
-uint32_t vpx_get_mb_ss_vsx(const int16_t *a) {
+uint32_t vpx_get_mb_ss_vsx(const int16_t *src_ptr) {
   unsigned int i, sum = 0;
   int32x4_t s = vec_splat_s32(0);
 
   for (i = 0; i < 256; i += 8) {
-    const int16x8_t v = vec_vsx_ld(0, a + i);
+    const int16x8_t v = vec_vsx_ld(0, src_ptr + i);
     s = vec_msum(v, v, s);
   }
 
@@ -96,15 +98,16 @@ void vpx_comp_avg_pred_vsx(uint8_t *comp_pred, const uint8_t *pred, int width,
   }
 }
 
-static INLINE void variance_inner_32(const uint8_t *a, const uint8_t *b,
+static INLINE void variance_inner_32(const uint8_t *src_ptr,
+                                     const uint8_t *ref_ptr,
                                      int32x4_t *sum_squared, int32x4_t *sum) {
   int32x4_t s = *sum;
   int32x4_t ss = *sum_squared;
 
-  const uint8x16_t va0 = vec_vsx_ld(0, a);
-  const uint8x16_t vb0 = vec_vsx_ld(0, b);
-  const uint8x16_t va1 = vec_vsx_ld(16, a);
-  const uint8x16_t vb1 = vec_vsx_ld(16, b);
+  const uint8x16_t va0 = vec_vsx_ld(0, src_ptr);
+  const uint8x16_t vb0 = vec_vsx_ld(0, ref_ptr);
+  const uint8x16_t va1 = vec_vsx_ld(16, src_ptr);
+  const uint8x16_t vb1 = vec_vsx_ld(16, ref_ptr);
 
   const int16x8_t a0 = unpack_to_s16_h(va0);
   const int16x8_t b0 = unpack_to_s16_h(vb0);
@@ -131,9 +134,9 @@ static INLINE void variance_inner_32(const uint8_t *a, const uint8_t *b,
   *sum_squared = ss;
 }
 
-static INLINE void variance(const uint8_t *a, int a_stride, const uint8_t *b,
-                            int b_stride, int w, int h, uint32_t *sse,
-                            int *sum) {
+static INLINE void variance(const uint8_t *src_ptr, int src_stride,
+                            const uint8_t *ref_ptr, int ref_stride, int w,
+                            int h, uint32_t *sse, int *sum) {
   int i;
 
   int32x4_t s = vec_splat_s32(0);
@@ -142,31 +145,31 @@ static INLINE void variance(const uint8_t *a, int a_stride, const uint8_t *b,
   switch (w) {
     case 4:
       for (i = 0; i < h / 2; ++i) {
-        const int16x8_t a0 = unpack_to_s16_h(read4x2(a, a_stride));
-        const int16x8_t b0 = unpack_to_s16_h(read4x2(b, b_stride));
+        const int16x8_t a0 = unpack_to_s16_h(read4x2(src_ptr, src_stride));
+        const int16x8_t b0 = unpack_to_s16_h(read4x2(ref_ptr, ref_stride));
         const int16x8_t d = vec_sub(a0, b0);
         s = vec_sum4s(d, s);
         ss = vec_msum(d, d, ss);
-        a += a_stride * 2;
-        b += b_stride * 2;
+        src_ptr += src_stride * 2;
+        ref_ptr += ref_stride * 2;
       }
       break;
     case 8:
       for (i = 0; i < h; ++i) {
-        const int16x8_t a0 = unpack_to_s16_h(vec_vsx_ld(0, a));
-        const int16x8_t b0 = unpack_to_s16_h(vec_vsx_ld(0, b));
+        const int16x8_t a0 = unpack_to_s16_h(vec_vsx_ld(0, src_ptr));
+        const int16x8_t b0 = unpack_to_s16_h(vec_vsx_ld(0, ref_ptr));
         const int16x8_t d = vec_sub(a0, b0);
 
         s = vec_sum4s(d, s);
         ss = vec_msum(d, d, ss);
-        a += a_stride;
-        b += b_stride;
+        src_ptr += src_stride;
+        ref_ptr += ref_stride;
       }
       break;
     case 16:
       for (i = 0; i < h; ++i) {
-        const uint8x16_t va = vec_vsx_ld(0, a);
-        const uint8x16_t vb = vec_vsx_ld(0, b);
+        const uint8x16_t va = vec_vsx_ld(0, src_ptr);
+        const uint8x16_t vb = vec_vsx_ld(0, ref_ptr);
         const int16x8_t a0 = unpack_to_s16_h(va);
         const int16x8_t b0 = unpack_to_s16_h(vb);
         const int16x8_t a1 = unpack_to_s16_l(va);
@@ -179,24 +182,24 @@ static INLINE void variance(const uint8_t *a, int a_stride, const uint8_t *b,
         s = vec_sum4s(d1, s);
         ss = vec_msum(d1, d1, ss);
 
-        a += a_stride;
-        b += b_stride;
+        src_ptr += src_stride;
+        ref_ptr += ref_stride;
       }
       break;
     case 32:
       for (i = 0; i < h; ++i) {
-        variance_inner_32(a, b, &ss, &s);
-        a += a_stride;
-        b += b_stride;
+        variance_inner_32(src_ptr, ref_ptr, &ss, &s);
+        src_ptr += src_stride;
+        ref_ptr += ref_stride;
       }
       break;
     case 64:
       for (i = 0; i < h; ++i) {
-        variance_inner_32(a, b, &ss, &s);
-        variance_inner_32(a + 32, b + 32, &ss, &s);
+        variance_inner_32(src_ptr, ref_ptr, &ss, &s);
+        variance_inner_32(src_ptr + 32, ref_ptr + 32, &ss, &s);
 
-        a += a_stride;
-        b += b_stride;
+        src_ptr += src_stride;
+        ref_ptr += ref_stride;
       }
       break;
   }
@@ -214,33 +217,33 @@ static INLINE void variance(const uint8_t *a, int a_stride, const uint8_t *b,
  * and returns that value using pass-by-reference instead of returning
  * sse - sum^2 / w*h
  */
-#define GET_VAR(W, H)                                            \
-  void vpx_get##W##x##H##var_vsx(const uint8_t *a, int a_stride, \
-                                 const uint8_t *b, int b_stride, \
-                                 uint32_t *sse, int *sum) {      \
-    variance(a, a_stride, b, b_stride, W, H, sse, sum);          \
+#define GET_VAR(W, H)                                                    \
+  void vpx_get##W##x##H##var_vsx(const uint8_t *src_ptr, int src_stride, \
+                                 const uint8_t *ref_ptr, int ref_stride, \
+                                 uint32_t *sse, int *sum) {              \
+    variance(src_ptr, src_stride, ref_ptr, ref_stride, W, H, sse, sum);  \
   }
 
 /* Identical to the variance call except it does not calculate the
  * sse - sum^2 / w*h and returns sse in addtion to modifying the passed in
  * variable.
  */
-#define MSE(W, H)                                                 \
-  uint32_t vpx_mse##W##x##H##_vsx(const uint8_t *a, int a_stride, \
-                                  const uint8_t *b, int b_stride, \
-                                  uint32_t *sse) {                \
-    int sum;                                                      \
-    variance(a, a_stride, b, b_stride, W, H, sse, &sum);          \
-    return *sse;                                                  \
+#define MSE(W, H)                                                         \
+  uint32_t vpx_mse##W##x##H##_vsx(const uint8_t *src_ptr, int src_stride, \
+                                  const uint8_t *ref_ptr, int ref_stride, \
+                                  uint32_t *sse) {                        \
+    int sum;                                                              \
+    variance(src_ptr, src_stride, ref_ptr, ref_stride, W, H, sse, &sum);  \
+    return *sse;                                                          \
   }
 
-#define VAR(W, H)                                                      \
-  uint32_t vpx_variance##W##x##H##_vsx(const uint8_t *a, int a_stride, \
-                                       const uint8_t *b, int b_stride, \
-                                       uint32_t *sse) {                \
-    int sum;                                                           \
-    variance(a, a_stride, b, b_stride, W, H, sse, &sum);               \
-    return *sse - (uint32_t)(((int64_t)sum * sum) / (W * H));          \
+#define VAR(W, H)                                                              \
+  uint32_t vpx_variance##W##x##H##_vsx(const uint8_t *src_ptr, int src_stride, \
+                                       const uint8_t *ref_ptr, int ref_stride, \
+                                       uint32_t *sse) {                        \
+    int sum;                                                                   \
+    variance(src_ptr, src_stride, ref_ptr, ref_stride, W, H, sse, &sum);       \
+    return *sse - (uint32_t)(((int64_t)sum * sum) / (W * H));                  \
   }
 
 #define VARIANCES(W, H) VAR(W, H)
