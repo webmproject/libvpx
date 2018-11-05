@@ -43,6 +43,8 @@ int ifd_inspect(insp_frame_data *fd, void *decoder) {
   fd->frame_type = cm->frame_type;
   fd->base_qindex = cm->base_qindex;
   // TODO(jimbankoski): copy tile data
+  fd->show_existing_frame = cm->show_existing_frame;
+
   // fd->tile_mi_cols = cm->tile_width;
   // fd->tile_mi_rows = cm->tile_height;
 #if CONFIG_ACCOUNTING
@@ -64,8 +66,14 @@ int ifd_inspect(insp_frame_data *fd, void *decoder) {
       // Motion Vectors
       mi->mv[0].row = bmi->mv[0].as_mv.row;
       mi->mv[0].col = bmi->mv[0].as_mv.col;
-      mi->mv[1].row = bmi->mv[1].as_mv.row;
-      mi->mv[1].col = bmi->mv[1].as_mv.col;
+
+      if (bmi->ref_frame[1] == -1) {
+        mi->mv[1].row = 0;
+        mi->mv[1].col = 0;
+      } else {
+        mi->mv[1].row = bmi->mv[1].as_mv.row;
+        mi->mv[1].col = bmi->mv[1].as_mv.col;
+      }
       // Reference Frames
       mi->ref_frame[0] = bmi->ref_frame[0];
       mi->ref_frame[1] = bmi->ref_frame[1];

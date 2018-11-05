@@ -64,6 +64,23 @@ typedef struct vpx_inspect_init {
   void *inspect_ctx;
 } vpx_inspect_init;
 
+/*!\brief Structure to hold decoder return.
+ *
+ * Defines a structure to hold the buffer and return an index
+ * when calling decode from inspect. This enables us to decode
+ * non showable sub frames.
+ */
+typedef struct {
+  /*! Pointer for new position in compressed buffer after decoding 1 OBU. */
+  const unsigned char *buf;
+  /*! Index into reference buffer array to see result of decoding 1 OBU. */
+  int idx;
+  /*! Is a show existing frame. */
+  int show_existing;
+  /*! Whether we've decoded all the superframes. */
+  int finished_superframes;
+} VpxDecodeReturn;
+
 /*!\enum vp8_dec_control_id
  * \brief VP8 decoder control functions
  *

@@ -279,7 +279,10 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
     set_default_ppflags(&ctx->postproc_cfg);
 
   init_buffer_callbacks(ctx);
-
+#if CONFIG_INSPECTION
+  ctx->frame_count = 0;
+  ctx->which_frame = 0;
+#endif
   return VPX_CODEC_OK;
 }
 
@@ -333,6 +336,68 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+#if CONFIG_INSPECTION
+// This function enables the inspector to inspect non visible frames.
+static vpx_codec_err_t decoder_inspect(vpx_codec_alg_priv_t *ctx,
+                                       const uint8_t *data, size_t data_sz,
+                                       void *user_priv, int64_t deadline) {
+  vpx_codec_err_t res = VPX_CODEC_OK;
+
+  if (ctx->pbi == NULL) {
+    const vpx_codec_err_t res = init_decoder(ctx);
+    if (res != VPX_CODEC_OK) return res;
+  }
+
+  if (ctx->which_frame >= ctx->frame_count) {
+    int i;
+    const uint8_t *data_start = data;
+    const uint8_t *const data_end = data + data_sz;
+    res = vp9_parse_superframe_index(data, data_sz, ctx->frame_sizes,
+                                     &ctx->frame_count, ctx->decrypt_cb,
+                                     ctx->decrypt_state);
+
+    if (res != VPX_CODEC_OK) return res;
+    if (ctx->svc_decoding && ctx->svc_spatial_layer < ctx->frame_count - 1)
+      ctx->frame_count = ctx->svc_spatial_layer + 1;
+
+    ctx->which_frame = 0;
+
+    // Double check that we don't have problems with the index;
+    for (i = 0; i < ctx->frame_count; ++i) {
+      const uint32_t frame_size = ctx->frame_sizes[i];
+      if (data_start < data || frame_size > (uint32_t)(data_end - data_start)) {
+        set_error_detail(ctx, "Invalid frame size in index");
+        return VPX_CODEC_CORRUPT_FRAME;
+      }
+      data_start += frame_size;
+    }
+  }
+  if (ctx->frame_count == 0) ctx->frame_sizes[0] = data_sz;
+
+  // Decode in serial mode.
+  if (ctx->frame_count >= 0) {
+    int i;
+    vpx_codec_err_t res;
+    VP9_COMMON *const cm = &ctx->pbi->common;
+    VpxDecodeReturn *data2 = (VpxDecodeReturn *)user_priv;
+    const uint8_t *data_start = data;
+
+    res =
+        decode_one(ctx, &data, ctx->frame_sizes[ctx->which_frame], 0, deadline);
+    if (res != VPX_CODEC_OK) return res;
+
+    data2->idx = cm->new_fb_idx;
+
+    data2->buf = data_start + ctx->frame_sizes[ctx->which_frame];
+    data2->show_existing = cm->show_existing_frame;
+    ctx->which_frame++;
+    data2->finished_superframes = (ctx->which_frame >= ctx->frame_count);
+    return res;
+  }
+  return VPX_CODEC_OK;
+}
+#endif
+
 static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
                                       const uint8_t *data, unsigned int data_sz,
                                       void *user_priv, long deadline) {
@@ -341,7 +406,11 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
   vpx_codec_err_t res;
   uint32_t frame_sizes[8];
   int frame_count;
-
+#if CONFIG_INSPECTION
+  if (user_priv != 0) {
+    return decoder_inspect(ctx, data, data_sz, user_priv, deadline);
+  }
+#endif
   if (data == NULL && data_sz == 0) {
     ctx->flushed = 1;
     return VPX_CODEC_OK;
@@ -479,7 +548,11 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
   vp9_ref_frame_t *data = va_arg(args, vp9_ref_frame_t *);
 
   if (data) {
+#if CONFIG_INSPECTION
+    const int fb_idx = data->idx;
+#else
     const int fb_idx = ctx->pbi->common.cur_show_frame_fb_idx;
+#endif
     YV12_BUFFER_CONFIG *fb = get_buf_frame(&ctx->pbi->common, fb_idx);
     if (fb == NULL) return VPX_CODEC_ERROR;
     yuvconfig2image(&data->img, fb, NULL);

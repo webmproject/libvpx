@@ -51,6 +51,9 @@ struct vpx_codec_alg_priv {
 #if CONFIG_INSPECTION
   vpx_inspect_cb inspect_cb;
   void *inspect_ctx;
+  uint32_t frame_sizes[8];
+  int frame_count;
+  int which_frame;
 #endif
 };
 

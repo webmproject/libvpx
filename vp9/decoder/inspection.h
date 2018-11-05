@@ -58,6 +58,7 @@ struct insp_frame_data {
   int show_frame;
   int frame_type;
   int base_qindex;
+  int show_existing_frame;
   int mi_rows;
   int mi_cols;
   int tile_mi_rows;

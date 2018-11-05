@@ -548,22 +548,51 @@ int open_file(char *file) {
   return EXIT_SUCCESS;
 }
 
+VpxDecodeReturn adr;
+int have_frame = 0;
+const unsigned char *frame;
+const unsigned char *end_frame;
+size_t frame_size = 0;
+vpx_codec_iter_t iter = NULL;
 EMSCRIPTEN_KEEPALIVE
 int read_frame() {
-  if (!vpx_video_reader_read_frame(reader)) return EXIT_FAILURE;
+  int got_any_frames = 0;
+  struct vpx_ref_frame ref_dec;
   img = NULL;
-  vpx_codec_iter_t iter = NULL;
-  size_t frame_size = 0;
-  const unsigned char *frame = vpx_video_reader_get_frame(reader, &frame_size);
-  if (vpx_codec_decode(&codec, frame, (unsigned int)frame_size, NULL, 0) !=
-      VPX_CODEC_OK) {
-    die_codec(&codec, "Failed to decode frame.");
+
+  // This loop skips over any frames that are show_existing_frames,  as
+  // there is nothing to analyze.
+  do {
+    if (!have_frame) {
+      if (!vpx_video_reader_read_frame(reader)) return EXIT_FAILURE;
+      frame = vpx_video_reader_get_frame(reader, &frame_size);
+
+      have_frame = 1;
+      end_frame = frame + frame_size;
+    }
+
+    if (vpx_codec_decode(&codec, frame, (unsigned int)frame_size, &adr, 0) !=
+        VPX_CODEC_OK) {
+      die_codec(&codec, "Failed to decode frame.");
+    }
+
+    frame = adr.buf;
+    if (adr.finished_superframes) have_frame = 0;
+  } while (adr.show_existing);
+
+  // ref_dec.idx is the index to the reference buffer idx to VP9_GET_REFERENCE
+  // if its -1 the decoder didn't update any reference buffer and the only
+  // way to see the frame is aom_codec_get_frame.
+  ref_dec.frame_type = adr.idx;
+
+  if (!vpx_codec_control(&codec, VP9_GET_REFERENCE, &ref_dec)) {
+    img = &ref_dec.img;
+    ++frame_count;
+    got_any_frames = 1;
   }
-  img = vpx_codec_get_frame(&codec, &iter);
-  if (img == NULL) {
+  if (!got_any_frames) {
     return EXIT_FAILURE;
   }
-  ++frame_count;
   return EXIT_SUCCESS;
 }
 

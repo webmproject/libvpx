@@ -32,7 +32,7 @@ if [ ! -d ".inspect" ]; then
     --disable-docs \
     --disable-unit-tests \
     --enable-inspection \
-    --extra-cflags="-D_POSIX_SOURCE"
+    --extra-cflags="-D_POSIX_SOURCE -s ALLOW_MEMORY_GROWTH=1"
   cd ..
 fi
 
@@ -43,6 +43,7 @@ emcc -O3 inspect.bc -o inspect.js \
   -s TOTAL_MEMORY=134217728 \
   -s MODULARIZE=1 \
   -s EXPORT_NAME="'DecoderModule'" \
+  -s ALLOW_MEMORY_GROWTH=1 \
   --post-js "../inspect-post.js" \
   --memory-init-file 0
 cp inspect.js ../inspect.js
