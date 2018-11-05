@@ -1464,7 +1464,7 @@ int vp8_drop_encodedframe_overshoot(VP8_COMP *cpi, int Q) {
       (cpi->oxcf.screen_content_mode == 2 ||
        (cpi->drop_frames_allowed &&
         (force_drop_overshoot ||
-         (cpi->rate_correction_factor < (4.0f * MIN_BPB_FACTOR) &&
+         (cpi->rate_correction_factor < (8.0f * MIN_BPB_FACTOR) &&
           cpi->frames_since_last_drop_overshoot > (int)cpi->framerate))))) {
     // Note: the "projected_frame_size" from encode_frame() only gives estimate
     // of mode/motion vector rate (in non-rd mode): so below we only require
