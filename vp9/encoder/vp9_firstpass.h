@@ -140,6 +140,8 @@ typedef struct {
   int top_arf_idx;
   int stack_size;
   int gf_group_size;
+  int max_layer_depth;
+  int allowed_max_layer_depth;
 } GF_GROUP;
 
 typedef struct {
