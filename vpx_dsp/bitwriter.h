@@ -27,8 +27,8 @@ typedef struct vpx_writer {
   uint8_t *buffer;
 } vpx_writer;
 
-void vpx_start_encode(vpx_writer *bc, uint8_t *buffer);
-void vpx_stop_encode(vpx_writer *bc);
+void vpx_start_encode(vpx_writer *br, uint8_t *source);
+void vpx_stop_encode(vpx_writer *br);
 
 static INLINE void vpx_write(vpx_writer *br, int bit, int probability) {
   unsigned int split;

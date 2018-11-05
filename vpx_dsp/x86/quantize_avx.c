@@ -24,8 +24,8 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                         const int16_t *round_ptr, const int16_t *quant_ptr,
                         const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
                         tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                        uint16_t *eob_ptr, const int16_t *scan_ptr,
-                        const int16_t *iscan_ptr) {
+                        uint16_t *eob_ptr, const int16_t *scan,
+                        const int16_t *iscan) {
   const __m128i zero = _mm_setzero_si128();
   const __m256i big_zero = _mm256_setzero_si256();
   int index;
@@ -37,7 +37,7 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   __m128i all_zero;
   __m128i eob = zero, eob0;
 
-  (void)scan_ptr;
+  (void)scan;
   (void)skip_block;
   assert(!skip_block);
 
@@ -97,8 +97,7 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     store_tran_low(coeff0, dqcoeff_ptr);
     store_tran_low(coeff1, dqcoeff_ptr + 8);
 
-    eob = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan_ptr, 0,
-                       zero);
+    eob = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan, 0, zero);
   }
 
   // AC only loop.
@@ -141,20 +140,22 @@ void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     store_tran_low(coeff0, dqcoeff_ptr + index);
     store_tran_low(coeff1, dqcoeff_ptr + index + 8);
 
-    eob0 = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan_ptr,
-                        index, zero);
+    eob0 = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan, index,
+                        zero);
     eob = _mm_max_epi16(eob, eob0);
   }
 
   *eob_ptr = accumulate_eob(eob);
 }
 
-void vpx_quantize_b_32x32_avx(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block,
-    const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr,
-    const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
-    tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
-    const int16_t *scan_ptr, const int16_t *iscan_ptr) {
+void vpx_quantize_b_32x32_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+                              int skip_block, const int16_t *zbin_ptr,
+                              const int16_t *round_ptr,
+                              const int16_t *quant_ptr,
+                              const int16_t *quant_shift_ptr,
+                              tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                              const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                              const int16_t *scan, const int16_t *iscan) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i one = _mm_set1_epi16(1);
   const __m256i big_zero = _mm256_setzero_si256();
@@ -167,7 +168,7 @@ void vpx_quantize_b_32x32_avx(
   __m128i all_zero;
   __m128i eob = zero, eob0;
 
-  (void)scan_ptr;
+  (void)scan;
   (void)n_coeffs;
   (void)skip_block;
   assert(!skip_block);
@@ -253,8 +254,7 @@ void vpx_quantize_b_32x32_avx(
     store_tran_low(coeff0, dqcoeff_ptr);
     store_tran_low(coeff1, dqcoeff_ptr + 8);
 
-    eob = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan_ptr, 0,
-                       zero);
+    eob = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan, 0, zero);
   }
 
   // AC only loop.
@@ -306,8 +306,8 @@ void vpx_quantize_b_32x32_avx(
     store_tran_low(coeff0, dqcoeff_ptr + index);
     store_tran_low(coeff1, dqcoeff_ptr + index + 8);
 
-    eob0 = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan_ptr,
-                        index, zero);
+    eob0 = scan_for_eob(&coeff0, &coeff1, cmp_mask0, cmp_mask1, iscan, index,
+                        zero);
     eob = _mm_max_epi16(eob, eob0);
   }
 
