@@ -2176,7 +2176,7 @@ static INLINE void set_gf_overlay_frame_type(GF_GROUP *gf_group,
   }
 }
 
-static int define_gf_group_structure(VP9_COMP *cpi) {
+static void define_gf_group_structure(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
@@ -2219,7 +2219,8 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->arf_src_offset[frame_index] = 0;
     gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
 
-    return frame_index;
+    gf_group->gf_group_size = frame_index;
+    return;
   }
 
   normal_frames =
@@ -2245,7 +2246,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
   gf_group->arf_src_offset[frame_index] = 0;
   gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
 
-  return frame_index;
+  gf_group->gf_group_size = frame_index;
 }
 
 static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
@@ -2270,9 +2271,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   double this_frame_score = 1.0;
 
   // Define the GF structure and specify
-  int gop_frames = define_gf_group_structure(cpi);
-
-  gf_group->gf_group_size = gop_frames;
+  int gop_frames = gf_group->gf_group_size;
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
@@ -2703,6 +2702,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Adjust KF group bits and error remaining.
   twopass->kf_group_error_left -= gf_group_err;
+
+  // Decide GOP structure.
+  define_gf_group_structure(cpi);
 
   // Allocate bits to each of the frames in the GF group.
   allocate_gf_group_bits(cpi, gf_group_bits, gf_arf_bits);
