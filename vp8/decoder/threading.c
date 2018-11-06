@@ -415,13 +415,17 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd,
                            "Corrupted reference frame");
       }
 
-      xd->pre.y_buffer =
-          ref_buffer[xd->mode_info_context->mbmi.ref_frame][0] + recon_yoffset;
-      xd->pre.u_buffer =
-          ref_buffer[xd->mode_info_context->mbmi.ref_frame][1] + recon_uvoffset;
-      xd->pre.v_buffer =
-          ref_buffer[xd->mode_info_context->mbmi.ref_frame][2] + recon_uvoffset;
-
+      if (xd->mode_info_context->mbmi.ref_frame >= LAST_FRAME) {
+        const MV_REFERENCE_FRAME ref = xd->mode_info_context->mbmi.ref_frame;
+        xd->pre.y_buffer = ref_buffer[ref][0] + recon_yoffset;
+        xd->pre.u_buffer = ref_buffer[ref][1] + recon_uvoffset;
+        xd->pre.v_buffer = ref_buffer[ref][2] + recon_uvoffset;
+      } else {
+        // ref_frame is INTRA_FRAME, pre buffer should not be used.
+        xd->pre.y_buffer = 0;
+        xd->pre.u_buffer = 0;
+        xd->pre.v_buffer = 0;
+      }
       mt_decode_macroblock(pbi, xd, 0);
 
       xd->left_available = 1;
