@@ -794,6 +794,13 @@ static void set_rt_speed_feature_framesize_independent(
     sf->partition_search_type = FIXED_PARTITION;
     sf->always_this_block_size = BLOCK_64X64;
   }
+  // Special case for screen content: increase motion search when high motion
+  // is detected.
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && cpi->oxcf.speed > 5 &&
+      cpi->rc.high_num_blocks_with_motion && cpi->svc.spatial_layer_id == 0) {
+    sf->mv.search_method = NSTEP;
+    sf->mv.fullpel_search_step_param = 2;
+  }
 }
 
 void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
