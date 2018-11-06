@@ -2127,6 +2127,7 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
       gf_group->gfu_boost[*index_counter] = NORMAL_BOOST;
       ++(*index_counter);
     }
+    gf_group->max_layer_depth = VPXMAX(gf_group->max_layer_depth, depth);
     return;
   }
 
@@ -2189,6 +2190,7 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
 
   gf_group->frame_start = cpi->common.current_video_frame;
   gf_group->frame_end = gf_group->frame_start + rc->baseline_gf_interval;
+  gf_group->max_layer_depth = 0;
 
   // For key frames the frame target rate is already set and it
   // is also the golden frame.
@@ -2206,6 +2208,7 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->arf_src_offset[frame_index] =
         (unsigned char)(rc->baseline_gf_interval - 1);
     gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
+    gf_group->max_layer_depth = 1;
     ++frame_index;
   }
 
