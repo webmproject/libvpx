@@ -1378,6 +1378,20 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
       x->sb_use_mv_part = 1;
       x->sb_mvcol_part = mi->mv[0].as_mv.col;
       x->sb_mvrow_part = mi->mv[0].as_mv.row;
+      if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
+          cpi->svc.spatial_layer_id == 0 &&
+          cpi->rc.high_num_blocks_with_motion && !x->zero_temp_sad_source &&
+          cm->width >= 1280 && cm->height >= 720) {
+        // Disable split below 16x16 block size when scroll motion is detected.
+        // TODO(marpan/jianj): Improve this condition: issue is that search
+        // range is hard-coded/limited in vp9_int_pro_motion_estimation() so
+        // scroll motion may not be detected here.
+        if ((abs(x->sb_mvrow_part) >= 48 && abs(x->sb_mvcol_part) <= 8) ||
+            y_sad < 100000) {
+          compute_minmax_variance = 0;
+          thresholds[2] = INT64_MAX;
+        }
+      }
     }
 
     y_sad_last = y_sad;

@@ -175,6 +175,7 @@ typedef struct {
   uint64_t avg_source_sad[MAX_LAG_BUFFERS];
   uint64_t prev_avg_source_sad_lag;
   int high_source_sad_lagindex;
+  int high_num_blocks_with_motion;
   int alt_ref_gf_group;
   int last_frame_is_src_altref;
   int high_source_sad;

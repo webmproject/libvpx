@@ -363,6 +363,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->high_source_sad = 0;
   rc->reset_high_source_sad = 0;
   rc->high_source_sad_lagindex = -1;
+  rc->high_num_blocks_with_motion = 0;
   rc->hybrid_intra_scene_change = 0;
   rc->re_encode_maxq_scene_change = 0;
   rc->alt_ref_gf_group = 0;
@@ -2670,6 +2671,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
   if (cm->use_highbitdepth) return;
 #endif
   rc->high_source_sad = 0;
+  rc->high_num_blocks_with_motion = 0;
   if (cpi->svc.spatial_layer_id == 0 && src_width == last_src_width &&
       src_height == last_src_height) {
     YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS] = { NULL };
@@ -2788,6 +2790,8 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
         } else {
           rc->avg_source_sad[lagframe_idx] = avg_sad;
         }
+        if (num_zero_temp_sad < (num_samples >> 1))
+          rc->high_num_blocks_with_motion = 1;
       }
     }
     // For CBR non-screen content mode, check if we should reset the rate
