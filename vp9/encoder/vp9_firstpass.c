@@ -2116,7 +2116,7 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
 
   // Process regular P frames
   if ((end - start < min_frame_interval) ||
-      (depth > cpi->oxcf.enable_auto_arf)) {
+      (depth > gf_group->allowed_max_layer_depth)) {
     int idx;
     for (idx = start; idx < end; ++idx) {
       gf_group->update_type[*index_counter] = LF_UPDATE;
@@ -2210,6 +2210,7 @@ static int define_gf_group_structure(VP9_COMP *cpi) {
   }
 
   if (rc->source_alt_ref_pending && cpi->multi_layer_arf) {
+    gf_group->allowed_max_layer_depth = cpi->oxcf.enable_auto_arf;
     find_arf_order(cpi, gf_group, &frame_index, 2, 1, rc->baseline_gf_interval);
 
     set_gf_overlay_frame_type(gf_group, frame_index,
