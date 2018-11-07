@@ -22,7 +22,9 @@ namespace {
 class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
  public:
   explicit DatarateTestVP9(const ::libvpx_test::CodecFactory *codec)
-      : EncoderTest(codec) {}
+      : EncoderTest(codec) {
+    tune_content_ = 0;
+  }
 
  protected:
   virtual ~DatarateTestVP9() {}
@@ -114,6 +116,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
       encoder->Control(VP9E_SET_AQ_MODE, aq_mode_);
+      encoder->Control(VP9E_SET_TUNE_CONTENT, tune_content_);
     }
 
     if (denoiser_offon_test_) {
@@ -204,6 +207,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
 
   vpx_codec_pts_t last_pts_;
   double timebase_;
+  int tune_content_;
   int frame_number_;      // Counter for number of non-dropped/encoded frames.
   int tot_frame_number_;  // Counter for total number of input frames.
   int64_t bits_total_[3];
@@ -713,6 +717,47 @@ TEST_P(DatarateTestVP9RealTime, RegionOfInterest) {
   free(roi_.roi_map);
 }
 
+// Params: test mode, speed setting and index for bitrate array.
+class DatarateTestVP9PostEncodeDrop
+    : public DatarateTestVP9,
+      public ::libvpx_test::CodecTestWithParam<int> {
+ public:
+  DatarateTestVP9PostEncodeDrop() : DatarateTestVP9(GET_PARAM(0)) {}
+
+ protected:
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(::libvpx_test::kRealTime);
+    set_cpu_used_ = GET_PARAM(1);
+    ResetModel();
+  }
+};
+
+// Check basic rate targeting for CBR mode, with 2 threads and dropped frames.
+TEST_P(DatarateTestVP9PostEncodeDrop, PostEncodeDropScreenContent) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_dropframe_thresh = 30;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  // Encode using multiple threads.
+  cfg_.g_threads = 2;
+  cfg_.g_error_resilient = 0;
+  tune_content_ = 1;
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 300);
+  cfg_.rc_target_bitrate = 300;
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(effective_datarate_[0], cfg_.rc_target_bitrate * 0.85)
+      << " The datarate for the file is lower than target by too much!";
+  ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
+      << " The datarate for the file is greater than target by too much!";
+}
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
 // Params: speed setting.
 class DatarateTestVP9RealTimeDenoiser : public DatarateTestVP9RealTime {
@@ -848,6 +893,9 @@ VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeVBR,
                           ::testing::Range(2, 9), ::testing::Range(0, 2));
 
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTime, ::testing::Range(5, 10));
+
+VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9PostEncodeDrop,
+                          ::testing::Range(4, 5));
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTimeDenoiser,

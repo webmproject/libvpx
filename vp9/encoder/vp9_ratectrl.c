@@ -399,6 +399,11 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
     rc->max_gf_interval = vp9_rc_get_default_max_gf_interval(
         oxcf->init_framerate, rc->min_gf_interval);
   rc->baseline_gf_interval = (rc->min_gf_interval + rc->max_gf_interval) / 2;
+
+  rc->force_max_q = 0;
+  rc->last_post_encode_dropped_scene_change = 0;
+  rc->use_post_encode_drop = 0;
+  rc->ext_use_post_encode_drop = 0;
 }
 
 static int check_buffer_above_thresh(VP9_COMP *cpi, int drop_mark) {
@@ -514,6 +519,39 @@ static int drop_frame(VP9_COMP *cpi) {
       }
     }
   }
+}
+
+int post_encode_drop_screen_content(VP9_COMP *cpi, size_t *size) {
+  size_t frame_size = *size << 3;
+  int64_t new_buffer_level =
+      cpi->rc.buffer_level + cpi->rc.avg_frame_bandwidth - (int64_t)frame_size;
+
+  // For now we drop if new buffer level (given the encoded frame size) goes
+  // below 0.
+  if (new_buffer_level < 0) {
+    *size = 0;
+    vp9_rc_postencode_update_drop_frame(cpi);
+    // Update flag to use for next frame.
+    if (cpi->rc.high_source_sad ||
+        (cpi->use_svc && cpi->svc.high_source_sad_superframe))
+      cpi->rc.last_post_encode_dropped_scene_change = 1;
+    // Force max_q on next fame.
+    cpi->rc.force_max_q = 1;
+    cpi->rc.avg_frame_qindex[INTER_FRAME] = cpi->rc.worst_quality;
+    cpi->last_frame_dropped = 1;
+    cpi->ext_refresh_frame_flags_pending = 0;
+    if (cpi->use_svc) {
+      cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
+      cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
+      cpi->svc.drop_count[cpi->svc.spatial_layer_id]++;
+      cpi->svc.skip_enhancement_layer = 1;
+    }
+    return 1;
+  }
+
+  cpi->rc.force_max_q = 0;
+  cpi->rc.last_post_encode_dropped_scene_change = 0;
+  return 0;
 }
 
 int vp9_rc_drop_frame(VP9_COMP *cpi) {
@@ -835,7 +873,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   int active_worst_quality;
   int ambient_qp;
   unsigned int num_frames_weight_key = 5 * cpi->svc.number_temporal_layers;
-  if (frame_is_intra_only(cm) || rc->reset_high_source_sad)
+  if (frame_is_intra_only(cm) || rc->reset_high_source_sad || rc->force_max_q)
     return rc->worst_quality;
   // For ambient_qp we use minimum of avg_frame_qindex[KEY_FRAME/INTER_FRAME]
   // for the first few frames following key frame. These are both initialized
