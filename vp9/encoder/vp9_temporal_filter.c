@@ -952,8 +952,7 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   }
 
   // Initialize errorperbit and sabperbit.
-  rdmult = (int)vp9_compute_rd_mult_based_on_qindex(cpi, ARNR_FILT_QINDEX);
-  if (rdmult < 1) rdmult = 1;
+  rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, ARNR_FILT_QINDEX);
   set_error_per_bit(&cpi->td.mb, rdmult);
   vp9_initialize_me_consts(cpi, &cpi->td.mb, ARNR_FILT_QINDEX);
 
