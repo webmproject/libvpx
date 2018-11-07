@@ -2119,7 +2119,6 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
   // Process regular P frames
   if ((end - start < min_frame_interval) ||
       (depth > gf_group->allowed_max_layer_depth)) {
-    int idx;
     for (idx = start; idx < end; ++idx) {
       gf_group->update_type[*index_counter] = LF_UPDATE;
       gf_group->arf_src_offset[*index_counter] = 0;
