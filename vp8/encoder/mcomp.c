@@ -21,11 +21,6 @@
 #include "vp8/common/common.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
-#ifdef VP8_ENTROPY_STATS
-static int mv_ref_ct[31][4][2];
-static int mv_mode_cts[4][2];
-#endif
-
 int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight) {
   /* MV costing is based on the distribution of vectors in the previous
    * frame and as such will tend to over state the cost of vectors. In
@@ -1821,96 +1816,3 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   return fn_ptr->vf(what, what_stride, best_address, in_what_stride, &thissad) +
          mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
 }
-
-#ifdef VP8_ENTROPY_STATS
-void print_mode_context(void) {
-  FILE *f = fopen("modecont.c", "w");
-  int i, j;
-
-  fprintf(f, "#include \"entropy.h\"\n");
-  fprintf(f, "const int vp8_mode_contexts[6][4] =\n");
-  fprintf(f, "{\n");
-
-  for (j = 0; j < 6; ++j) {
-    fprintf(f, "  { /* %d */\n", j);
-    fprintf(f, "    ");
-
-    for (i = 0; i < 4; ++i) {
-      int overal_prob;
-      int this_prob;
-      int count;
-
-      /* Overall probs */
-      count = mv_mode_cts[i][0] + mv_mode_cts[i][1];
-
-      if (count)
-        overal_prob = 256 * mv_mode_cts[i][0] / count;
-      else
-        overal_prob = 128;
-
-      if (overal_prob == 0) overal_prob = 1;
-
-      /* context probs */
-      count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1];
-
-      if (count)
-        this_prob = 256 * mv_ref_ct[j][i][0] / count;
-      else
-        this_prob = 128;
-
-      if (this_prob == 0) this_prob = 1;
-
-      fprintf(f, "%5d, ", this_prob);
-    }
-
-    fprintf(f, "  },\n");
-  }
-
-  fprintf(f, "};\n");
-  fclose(f);
-}
-
-/* MV ref count VP8_ENTROPY_STATS stats code */
-#ifdef VP8_ENTROPY_STATS
-void init_mv_ref_counts() {
-  memset(mv_ref_ct, 0, sizeof(mv_ref_ct));
-  memset(mv_mode_cts, 0, sizeof(mv_mode_cts));
-}
-
-void accum_mv_refs(MB_PREDICTION_MODE m, const int ct[4]) {
-  if (m == ZEROMV) {
-    ++mv_ref_ct[ct[0]][0][0];
-    ++mv_mode_cts[0][0];
-  } else {
-    ++mv_ref_ct[ct[0]][0][1];
-    ++mv_mode_cts[0][1];
-
-    if (m == NEARESTMV) {
-      ++mv_ref_ct[ct[1]][1][0];
-      ++mv_mode_cts[1][0];
-    } else {
-      ++mv_ref_ct[ct[1]][1][1];
-      ++mv_mode_cts[1][1];
-
-      if (m == NEARMV) {
-        ++mv_ref_ct[ct[2]][2][0];
-        ++mv_mode_cts[2][0];
-      } else {
-        ++mv_ref_ct[ct[2]][2][1];
-        ++mv_mode_cts[2][1];
-
-        if (m == NEWMV) {
-          ++mv_ref_ct[ct[3]][3][0];
-          ++mv_mode_cts[3][0];
-        } else {
-          ++mv_ref_ct[ct[3]][3][1];
-          ++mv_mode_cts[3][1];
-        }
-      }
-    }
-  }
-}
-
-#endif /* END MV ref count VP8_ENTROPY_STATS stats code */
-
-#endif
