@@ -6241,9 +6241,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
   xd->cur_buf = this_frame;
 
   // Get rd multiplier set up.
-  rdmult =
-      (int)vp9_compute_rd_mult_based_on_qindex(cpi, tpl_frame->base_qindex);
-  if (rdmult < 1) rdmult = 1;
+  rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, tpl_frame->base_qindex);
   set_error_per_bit(&cpi->td.mb, rdmult);
   vp9_initialize_me_consts(cpi, &cpi->td.mb, tpl_frame->base_qindex);
 
