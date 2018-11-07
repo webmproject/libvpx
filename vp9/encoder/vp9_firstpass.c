@@ -2181,16 +2181,16 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
-  int i;
   int frame_index = 0;
   int key_frame;
-  int normal_frames;
+  int layer_depth = 1;
 
   key_frame = cpi->common.frame_type == KEY_FRAME;
 
   gf_group->frame_start = cpi->common.current_video_frame;
   gf_group->frame_end = gf_group->frame_start + rc->baseline_gf_interval;
   gf_group->max_layer_depth = 0;
+  gf_group->allowed_max_layer_depth = 0;
 
   // For key frames the frame target rate is already set and it
   // is also the golden frame.
@@ -2204,51 +2204,24 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
   if (rc->source_alt_ref_pending) {
     gf_group->update_type[frame_index] = ARF_UPDATE;
     gf_group->rf_level[frame_index] = GF_ARF_STD;
-    gf_group->layer_depth[frame_index] = 1;
+    gf_group->layer_depth[frame_index] = layer_depth;
     gf_group->arf_src_offset[frame_index] =
         (unsigned char)(rc->baseline_gf_interval - 1);
     gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
     gf_group->max_layer_depth = 1;
     ++frame_index;
-  }
-
-  if (rc->source_alt_ref_pending && cpi->multi_layer_arf) {
+    ++layer_depth;
     gf_group->allowed_max_layer_depth = cpi->oxcf.enable_auto_arf;
-    find_arf_order(cpi, gf_group, &frame_index, 2, 1, rc->baseline_gf_interval);
-
-    set_gf_overlay_frame_type(gf_group, frame_index,
-                              rc->source_alt_ref_pending);
-
-    gf_group->arf_src_offset[frame_index] = 0;
-    gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
-
-    gf_group->gf_group_size = frame_index;
-    return;
   }
 
-  normal_frames =
-      rc->baseline_gf_interval - (key_frame || rc->source_alt_ref_pending);
+  find_arf_order(cpi, gf_group, &frame_index, layer_depth, 1,
+                 rc->baseline_gf_interval);
 
-  for (i = 0; i < normal_frames; ++i) {
-    if (twopass->stats_in >= twopass->stats_in_end) break;
-
-    gf_group->update_type[frame_index] = LF_UPDATE;
-    gf_group->rf_level[frame_index] = INTER_NORMAL;
-    gf_group->arf_src_offset[frame_index] = 0;
-    gf_group->frame_gop_index[frame_index] = i + 1;
-    gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
-
-    ++frame_index;
-  }
-
-  // Note:
-  // We need to configure the frame at the end of the sequence + 1 that will be
-  // the start frame for the next group. Otherwise prior to the call to
-  // vp9_rc_get_second_pass_params() the data will be undefined.
   set_gf_overlay_frame_type(gf_group, frame_index, rc->source_alt_ref_pending);
   gf_group->arf_src_offset[frame_index] = 0;
   gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
 
+  // Set the frame ops number.
   gf_group->gf_group_size = frame_index;
 }
 
