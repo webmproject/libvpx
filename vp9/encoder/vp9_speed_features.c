@@ -794,10 +794,12 @@ static void set_rt_speed_feature_framesize_independent(
     sf->partition_search_type = FIXED_PARTITION;
     sf->always_this_block_size = BLOCK_64X64;
   }
-  // Special case for screen content: increase motion search when high motion
-  // is detected.
+  // Special case for screen content: increase motion search on baase spatial
+  // layer when high motion is detected or previous SL0 frame was dropped.
+  // Avoid speed 5 for as there is an issue with SVC datarate test.
   if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && cpi->oxcf.speed > 5 &&
-      cpi->rc.high_num_blocks_with_motion && cpi->svc.spatial_layer_id == 0) {
+      cpi->svc.spatial_layer_id == 0 &&
+      (cpi->rc.high_num_blocks_with_motion || cpi->svc.last_layer_dropped[0])) {
     sf->mv.search_method = NSTEP;
     sf->mv.fullpel_search_step_param = 2;
   }
