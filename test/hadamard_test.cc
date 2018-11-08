@@ -124,6 +124,10 @@ struct HadamardFuncWithSize {
   int block_size;
 };
 
+std::ostream &operator<<(std::ostream &os, const HadamardFuncWithSize &hfs) {
+  return os << "block size: " << hfs.block_size;
+}
+
 class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
  public:
   virtual void SetUp() {
