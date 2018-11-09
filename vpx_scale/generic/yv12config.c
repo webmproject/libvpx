@@ -61,6 +61,14 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width,
 
     if (!ybf->buffer_alloc) {
       ybf->buffer_alloc = (uint8_t *)vpx_memalign(32, frame_size);
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+      // This memset is needed for fixing the issue of using uninitialized
+      // value in msan test. It will cause a perf loss, so only do this for
+      // msan test.
+      memset(ybf->buffer_alloc, 0, frame_size);
+#endif
+#endif
       ybf->buffer_alloc_sz = frame_size;
     }
 
