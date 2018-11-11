@@ -188,8 +188,7 @@ int vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
   return rdmult > 0 ? rdmult : 1;
 }
 
-int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
-  int64_t rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, qindex);
+static int modulate_rdmult(const VP9_COMP *cpi, int64_t rdmult) {
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
@@ -204,39 +203,17 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   return (int)rdmult;
 }
 
+int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
+  int64_t rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, qindex);
+  return modulate_rdmult(cpi, rdmult);
+}
+
 int vp9_get_adaptive_rdmult(const VP9_COMP *cpi, double beta) {
-  const VP9_COMMON *cm = &cpi->common;
-  int64_t q = vp9_dc_quant(cm->base_qindex, 0, cpi->common.bit_depth);
-
-#if CONFIG_VP9_HIGHBITDEPTH
-  int64_t rdmult = 0;
-  switch (cpi->common.bit_depth) {
-    case VPX_BITS_8: rdmult = (int)((88 * q * q / beta) / 24); break;
-    case VPX_BITS_10:
-      rdmult = ROUND_POWER_OF_TWO((int)((88 * q * q / beta) / 24), 4);
-      break;
-    default:
-      assert(cpi->common.bit_depth == VPX_BITS_12);
-      rdmult = ROUND_POWER_OF_TWO((int)((88 * q * q / beta) / 24), 8);
-      break;
-  }
-#else
-  int64_t rdmult = (int)((88 * q * q / beta) / 24);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
-    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-    const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
-    const int gfu_boost = cpi->multi_layer_arf
-                              ? gf_group->gfu_boost[gf_group->index]
-                              : cpi->rc.gfu_boost;
-    const int boost_index = VPXMIN(15, (gfu_boost / 100));
-
-    rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
-    rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
-  }
-  if (rdmult < 1) rdmult = 1;
-  return (int)rdmult;
+  int64_t rdmult =
+      vp9_compute_rd_mult_based_on_qindex(cpi, cpi->common.base_qindex);
+  rdmult = (int64_t)((double)rdmult / beta);
+  rdmult = rdmult > 0 ? rdmult : 1;
+  return modulate_rdmult(cpi, rdmult);
 }
 
 static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
