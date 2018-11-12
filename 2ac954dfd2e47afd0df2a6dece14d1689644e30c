@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5f5e46ed_aceb12f6",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-11-12T19:50:44Z",
+      "side": 1,
+      "message": "Shouldn\u0027t calloc be zeroing the arrays for you?\n\nThe calloc() function allocates memory for an array of nmemb elements of size bytes each and returns a pointer to the allocated memory.  The memory  is set to zero.",
+      "range": {
+        "startLine": 779,
+        "startChar": 4,
+        "endLine": 779,
+        "endChar": 16
+      },
+      "revId": "2ac954dfd2e47afd0df2a6dece14d1689644e30c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
