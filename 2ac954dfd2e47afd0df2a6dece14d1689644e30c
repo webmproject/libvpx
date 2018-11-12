@@ -22,6 +22,30 @@
       "revId": "2ac954dfd2e47afd0df2a6dece14d1689644e30c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1122d76d_210225ee",
+        "filename": "vp8/decoder/threading.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-11-12T19:52:33Z",
+      "side": 1,
+      "message": "Sorry, maybe that\u0027s not the array in question. vpx_memalign seems to be allocating additional space.",
+      "parentUuid": "5f5e46ed_aceb12f6",
+      "range": {
+        "startLine": 779,
+        "startChar": 4,
+        "endLine": 779,
+        "endChar": 16
+      },
+      "revId": "2ac954dfd2e47afd0df2a6dece14d1689644e30c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
