@@ -63,6 +63,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     arm64-android-gcc
     arm64-darwin-gcc
     arm64-linux-gcc
+    arm64-win64-vs15
     armv7-android-gcc
     armv7-darwin-gcc
     armv7-linux-rvct

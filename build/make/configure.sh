@@ -1010,18 +1010,29 @@ EOF
           fi
           ;;
         vs*)
-          asm_conversion_cmd="${source_path}/build/make/ads2armasm_ms.pl"
-          AS_SFX=.S
-          msvs_arch_dir=arm-msvs
-          disable_feature multithread
-          disable_feature unit_tests
-          vs_version=${tgt_cc##vs}
-          if [ $vs_version -ge 12 ]; then
-            # MSVC 2013 doesn't allow doing plain .exe projects for ARM,
-            # only "AppContainerApplication" which requires an AppxManifest.
-            # Therefore disable the examples, just build the library.
-            disable_feature examples
-            disable_feature tools
+          # A number of ARM-based Windows platforms are constrained by their
+          # respective SDKs' limitations. Fortunately, these are all 32-bit ABIs
+          # and so can be selected as 'win32'.
+          if [ ${tgt_os} = "win32" ]; then
+            asm_conversion_cmd="${source_path}/build/make/ads2armasm_ms.pl"
+            AS_SFX=.S
+            msvs_arch_dir=arm-msvs
+            disable_feature multithread
+            disable_feature unit_tests
+            vs_version=${tgt_cc##vs}
+            if [ $vs_version -ge 12 ]; then
+              # MSVC 2013 doesn't allow doing plain .exe projects for ARM32,
+              # only "AppContainerApplication" which requires an AppxManifest.
+              # Therefore disable the examples, just build the library.
+              disable_feature examples
+              disable_feature tools
+            fi
+          #else
+            # Windows 10 on ARM, on the other hand, has full Windows SDK support
+            # for building Win32 ARM64 applications in addition to ARM64
+            # Windows Store apps. It is the only 64-bit ARM ABI that
+            # Windows supports, so it is the default definition of 'win64'.
+            # ARM64 build support officially shipped in Visual Studio 15.9.0.
           fi
           ;;
         rvct)
