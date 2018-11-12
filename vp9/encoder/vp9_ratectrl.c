@@ -247,20 +247,65 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
   return target;
 }
 
+// Update the buffer level before encoding with the per-frame-bandwidth,
+static void update_buffer_level_preencode(VP9_COMP *cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+  rc->bits_off_target += rc->avg_frame_bandwidth;
+  // Clip the buffer level to the maximum specified buffer size.
+  rc->bits_off_target = VPXMIN(rc->bits_off_target, rc->maximum_buffer_size);
+  rc->buffer_level = rc->bits_off_target;
+}
+
+// Update the buffer level before encoding with the per-frame-bandwidth
+// for SVC. The current and all upper temporal layers are updated, needed
+// for the layered rate control which involves cumulative buffer levels for
+// the temporal layers. Allow for using the timestamp(pts) delta for the
+// framerate when the set_ref_frame_config is used.
+static void update_buffer_level_svc_preencode(VP9_COMP *cpi) {
+  SVC *const svc = &cpi->svc;
+  int i;
+  // Set this to 1 to use timestamp delta for "framerate" under
+  // ref_frame_config usage.
+  int use_timestamp = 1;
+  const int64_t ts_delta =
+      svc->time_stamp_superframe - svc->time_stamp_prev[svc->spatial_layer_id];
+  for (i = svc->temporal_layer_id; i < svc->number_temporal_layers; ++i) {
+    const int layer =
+        LAYER_IDS_TO_IDX(svc->spatial_layer_id, i, svc->number_temporal_layers);
+    LAYER_CONTEXT *const lc = &svc->layer_context[layer];
+    RATE_CONTROL *const lrc = &lc->rc;
+    if (use_timestamp && cpi->svc.use_set_ref_frame_config && ts_delta > 0 &&
+        svc->current_superframe > 0) {
+      const double framerate_pts = 10000000.0 / ts_delta;
+      const double lc_framerate_pts =
+          framerate_pts / cpi->oxcf.ts_rate_decimator[i];
+      lrc->bits_off_target += (int)(lc->target_bandwidth / lc_framerate_pts);
+    } else {
+      lrc->bits_off_target += (int)(lc->target_bandwidth / lc->framerate);
+    }
+    // Clip buffer level to maximum buffer size for the layer.
+    lrc->bits_off_target =
+        VPXMIN(lrc->bits_off_target, lrc->maximum_buffer_size);
+    lrc->buffer_level = lrc->bits_off_target;
+    if (i == svc->temporal_layer_id) {
+      cpi->rc.bits_off_target = lrc->bits_off_target;
+      cpi->rc.buffer_level = lrc->buffer_level;
+    }
+  }
+}
+
 // Update the buffer level for higher temporal layers, given the encoded current
 // temporal layer.
-static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
+static void update_layer_buffer_level_postencode(SVC *svc,
+                                                 int encoded_frame_size) {
   int i = 0;
-  int current_temporal_layer = svc->temporal_layer_id;
+  const int current_temporal_layer = svc->temporal_layer_id;
   for (i = current_temporal_layer + 1; i < svc->number_temporal_layers; ++i) {
     const int layer =
         LAYER_IDS_TO_IDX(svc->spatial_layer_id, i, svc->number_temporal_layers);
     LAYER_CONTEXT *lc = &svc->layer_context[layer];
     RATE_CONTROL *lrc = &lc->rc;
-    int bits_off_for_this_layer =
-        (int)(lc->target_bandwidth / lc->framerate - encoded_frame_size);
-    lrc->bits_off_target += bits_off_for_this_layer;
-
+    lrc->bits_off_target -= encoded_frame_size;
     // Clip buffer level to maximum buffer size for the layer.
     lrc->bits_off_target =
         VPXMIN(lrc->bits_off_target, lrc->maximum_buffer_size);
@@ -268,29 +313,13 @@ static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
   }
 }
 
-// Update the buffer level: leaky bucket model.
-static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
-  const VP9_COMMON *const cm = &cpi->common;
+// Update the buffer level after encoding with encoded frame size.
+static void update_buffer_level_postencode(VP9_COMP *cpi,
+                                           int encoded_frame_size) {
   RATE_CONTROL *const rc = &cpi->rc;
-
-  // On dropped frame, don't update buffer if its currently stable
-  // (above optimal level). This can cause issues when full superframe
-  // can drop (!= LAYER_DROP), since QP is adjusted downwards with buffer
-  // overflow, which can cause more frame drops.
-  if (cpi->svc.framedrop_mode != LAYER_DROP && encoded_frame_size == 0 &&
-      rc->buffer_level > rc->optimal_buffer_level)
-    return;
-
-  // Non-viewable frames are a special case and are treated as pure overhead.
-  if (!cm->show_frame) {
-    rc->bits_off_target -= encoded_frame_size;
-  } else {
-    rc->bits_off_target += rc->avg_frame_bandwidth - encoded_frame_size;
-  }
-
+  rc->bits_off_target -= encoded_frame_size;
   // Clip the buffer level to the maximum specified buffer size.
   rc->bits_off_target = VPXMIN(rc->bits_off_target, rc->maximum_buffer_size);
-
   // For screen-content mode, and if frame-dropper is off, don't let buffer
   // level go below threshold, given here as -rc->maximum_ buffer_size.
   if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
@@ -300,7 +329,7 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   rc->buffer_level = rc->bits_off_target;
 
   if (is_one_pass_cbr_svc(cpi)) {
-    update_layer_buffer_level(&cpi->svc, encoded_frame_size);
+    update_layer_buffer_level_postencode(&cpi->svc, encoded_frame_size);
   }
 }
 
@@ -884,6 +913,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
                    ? VPXMIN(rc->avg_frame_qindex[INTER_FRAME],
                             rc->avg_frame_qindex[KEY_FRAME])
                    : rc->avg_frame_qindex[INTER_FRAME];
+  active_worst_quality = VPXMIN(rc->worst_quality, (ambient_qp * 5) >> 2);
   // For SVC if the current base spatial layer was key frame, use the QP from
   // that base layer for ambient_qp.
   if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) {
@@ -893,9 +923,9 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
     if (lc->is_key_frame) {
       const RATE_CONTROL *lrc = &lc->rc;
       ambient_qp = VPXMIN(ambient_qp, lrc->last_q[KEY_FRAME]);
+      active_worst_quality = VPXMIN(rc->worst_quality, (ambient_qp * 9) >> 3);
     }
   }
-  active_worst_quality = VPXMIN(rc->worst_quality, ambient_qp * 5 >> 2);
   if (rc->buffer_level > rc->optimal_buffer_level) {
     // Adjust down.
     // Maximum limit for down adjustment ~30%; make it lower for screen content.
@@ -1727,7 +1757,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   }
   if (frame_is_intra_only(cm)) rc->last_kf_qindex = qindex;
 
-  update_buffer_level(cpi, rc->projected_frame_size);
+  update_buffer_level_postencode(cpi, rc->projected_frame_size);
 
   // Rolling monitors of whether we are over or underspending used to help
   // regulate min and Max Q in two pass.
@@ -1824,14 +1854,20 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 }
 
 void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
-  // Update buffer level with zero size, update frame counters, and return.
-  update_buffer_level(cpi, 0);
   cpi->common.current_video_frame++;
   cpi->rc.frames_since_key++;
   cpi->rc.frames_to_key--;
   cpi->rc.rc_2_frame = 0;
   cpi->rc.rc_1_frame = 0;
   cpi->rc.last_avg_frame_bandwidth = cpi->rc.avg_frame_bandwidth;
+  // For SVC on dropped frame when framedrop_mode != LAYER_DROP:
+  // in this mode the whole superframe may be dropped if only a single layer
+  // has buffer underflow (below threshold). Since this can then lead to
+  // increasing buffer levels/overflow for certain layers even though whole
+  // superframe is dropped, we cap buffer level if its already stable.
+  if (cpi->use_svc && cpi->svc.framedrop_mode != LAYER_DROP &&
+      cpi->rc.buffer_level > cpi->rc.optimal_buffer_level)
+    cpi->rc.buffer_level = cpi->rc.optimal_buffer_level;
 }
 
 static int calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
@@ -2165,6 +2201,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     vp9_cyclic_refresh_update_parameters(cpi);
 
   vp9_rc_set_frame_target(cpi, target);
+  if (cm->show_frame) update_buffer_level_svc_preencode(cpi);
 }
 
 void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
@@ -2206,6 +2243,9 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     target = calc_pframe_target_size_one_pass_cbr(cpi);
 
   vp9_rc_set_frame_target(cpi, target);
+
+  if (cm->show_frame) update_buffer_level_preencode(cpi);
+
   if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC)
     cpi->resize_pending = vp9_resize_one_pass_cbr(cpi);
   else

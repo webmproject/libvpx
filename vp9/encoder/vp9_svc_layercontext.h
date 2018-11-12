@@ -178,9 +178,12 @@ typedef struct SVC {
 
   int first_spatial_layer_to_encode;
 
+  // Parameters for allowing framerate per spatial layer, and buffer
+  // update based on timestamps.
   int64_t duration[VPX_SS_MAX_LAYERS];
-
   int64_t timebase_fac;
+  int64_t time_stamp_superframe;
+  int64_t time_stamp_prev[VPX_SS_MAX_LAYERS];
 } SVC;
 
 struct VP9_COMP;

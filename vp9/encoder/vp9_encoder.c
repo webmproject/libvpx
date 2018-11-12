@@ -3716,6 +3716,9 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     return 1;
   }
 
+  cpi->svc.time_stamp_prev[cpi->svc.spatial_layer_id] =
+      cpi->svc.time_stamp_superframe;
+
   // Flag to check if its valid to compute the source sad (used for
   // scene detection and for superblock content state in CBR mode).
   // The flag may get reset below based on SVC or resizing state.

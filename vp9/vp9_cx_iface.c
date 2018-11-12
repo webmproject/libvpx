@@ -1151,6 +1151,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     unsigned char *cx_data;
 
     cpi->svc.timebase_fac = timebase_units_to_ticks(timebase, 1);
+    cpi->svc.time_stamp_superframe = dst_time_stamp;
 
     // Set up internal flags
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR) cpi->b_calculate_psnr = 1;
