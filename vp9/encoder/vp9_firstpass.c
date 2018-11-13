@@ -2301,8 +2301,9 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
     for (idx = 2; idx < MAX_ARF_LAYERS; ++idx) {
       if (arf_depth_boost[idx] == 0) break;
-      arf_depth_bits[idx] = calculate_boost_bits(
-          rc->baseline_gf_interval, arf_depth_boost[idx], total_group_bits);
+      arf_depth_bits[idx] =
+          calculate_boost_bits(rc->baseline_gf_interval - total_arfs,
+                               arf_depth_boost[idx], total_group_bits);
 
       total_group_bits -= arf_depth_bits[idx];
       total_arfs += arf_depth_count[idx];
