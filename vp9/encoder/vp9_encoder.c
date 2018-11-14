@@ -6442,6 +6442,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   struct lookahead_entry *last_source = NULL;
   struct lookahead_entry *source = NULL;
   int arf_src_index;
+  const int gf_group_index = cpi->twopass.gf_group.index;
   int i;
 
   if (is_one_pass_cbr_svc(cpi)) {
@@ -6489,7 +6490,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   // Clear arf index stack before group of pictures processing starts.
-  if (cpi->twopass.gf_group.index == 1) {
+  if (gf_group_index == 1) {
     stack_init(cpi->twopass.gf_group.arf_index_stack, MAX_LAG_BUFFERS * 2);
     cpi->twopass.gf_group.stack_size = 0;
   }
@@ -6640,7 +6641,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     for (i = 0; i < REFS_PER_FRAME; ++i) cpi->scaled_ref_idx[i] = INVALID_IDX;
   }
 
-  if (cpi->twopass.gf_group.index == 1 && cpi->sf.enable_tpl_model) {
+  if (gf_group_index == 1 &&
+      cpi->twopass.gf_group.update_type[gf_group_index] == ARF_UPDATE &&
+      cpi->sf.enable_tpl_model) {
     vp9_estimate_qp_gop(cpi);
     setup_tpl_stats(cpi);
   }
