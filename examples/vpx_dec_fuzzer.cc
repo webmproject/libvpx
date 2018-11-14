@@ -38,15 +38,13 @@
  * Build libvpx
    $make -j32
 
- * Build vp9 threaded fuzzer
-   $ $CXX $CXXFLAGS -std=c++11 -DDECODE_MODE_threaded -DDECODER=vp9 \
+ * Build vp9 fuzzer
+   $ $CXX $CXXFLAGS -std=c++11 -DDECODER=vp9 \
    -fsanitize=fuzzer -I../libvpx -I. -Wl,--start-group \
-   ../libvpx/examples/vpx_dec_fuzzer.cc -o ./vpx_dec_fuzzer_threaded_vp9 \
+   ../libvpx/examples/vpx_dec_fuzzer.cc -o ./vpx_dec_fuzzer_vp9 \
    ./libvpx.a ./tools_common.c.o -Wl,--end-group
 
  * DECODER should be defined as vp9 or vp8 to enable vp9/vp8
- * DECODE_MODE_threaded or DECODE_MODE_serial needs to be defined to test
- * multi-threaded or single core implementation
  *
  * create a corpus directory and copy some ivf files there.
  * Based on which codec (vp8/vp9) is being tested, it is recommended to
@@ -55,7 +53,7 @@
    $mkdir CORPUS && cp some-files CORPUS
 
  * Run fuzzing:
-   $./vpx_dec_fuzzer_threaded_vp9 CORPUS
+   $./vpx_dec_fuzzer_vp9 CORPUS
 
  * References:
  * http://llvm.org/docs/LibFuzzer.html
@@ -66,9 +64,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#if defined(DECODE_MODE_threaded)
-#include <algorithm>
-#endif
 #include <memory>
 
 #include "./tools_common.h"
@@ -142,14 +137,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   }
 
   vpx_codec_ctx_t codec;
-#if defined(DECODE_MODE_serial)
-  const unsigned int threads = 1;
-#elif defined(DECODE_MODE_threaded)
-  // Set thread count in the range [2, 64].
-  const unsigned int threads = std::max((data[IVF_FILE_HDR_SZ] & 0x3f) + 1, 2);
-#else
-#error define one of DECODE_MODE_(serial|threaded)
-#endif
+  // Set thread count in the range [1, 64].
+  const unsigned int threads = (data[IVF_FILE_HDR_SZ] & 0x3f) + 1;
   vpx_codec_dec_cfg_t cfg = { threads, 0, 0 };
   if (vpx_codec_dec_init(&codec, decoder->codec_interface(), &cfg, 0)) {
     return 0;
