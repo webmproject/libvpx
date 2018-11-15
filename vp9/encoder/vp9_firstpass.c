@@ -2112,14 +2112,14 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
   TWO_PASS *twopass = &cpi->twopass;
   const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
   FIRSTPASS_STATS fpf_frame;
-  const int mid = (start + end) >> 1;
-  const int min_frame_interval = 3;
+  const int mid = (start + end + 1) >> 1;
+  const int min_frame_interval = 2;
   int idx;
 
   // Process regular P frames
   if ((end - start < min_frame_interval) ||
       (depth > gf_group->allowed_max_layer_depth)) {
-    for (idx = start; idx < end; ++idx) {
+    for (idx = start; idx <= end; ++idx) {
       gf_group->update_type[*index_counter] = LF_UPDATE;
       gf_group->arf_src_offset[*index_counter] = 0;
       gf_group->frame_gop_index[*index_counter] = idx;
@@ -2151,7 +2151,7 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
 
   ++(*index_counter);
 
-  find_arf_order(cpi, gf_group, index_counter, depth + 1, start, mid);
+  find_arf_order(cpi, gf_group, index_counter, depth + 1, start, mid - 1);
 
   gf_group->update_type[*index_counter] = USE_BUF_FRAME;
   gf_group->arf_src_offset[*index_counter] = 0;
@@ -2183,10 +2183,10 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
   int frame_index = 0;
-  int key_frame;
+  int key_frame = cpi->common.frame_type == KEY_FRAME;
   int layer_depth = 1;
-
-  key_frame = cpi->common.frame_type == KEY_FRAME;
+  int gop_frames =
+      rc->baseline_gf_interval - (key_frame || rc->source_alt_ref_pending);
 
   gf_group->frame_start = cpi->common.current_video_frame;
   gf_group->frame_end = gf_group->frame_start + rc->baseline_gf_interval;
@@ -2215,8 +2215,7 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
     gf_group->allowed_max_layer_depth = cpi->oxcf.enable_auto_arf;
   }
 
-  find_arf_order(cpi, gf_group, &frame_index, layer_depth, 1,
-                 rc->baseline_gf_interval);
+  find_arf_order(cpi, gf_group, &frame_index, layer_depth, 1, gop_frames);
 
   set_gf_overlay_frame_type(gf_group, frame_index, rc->source_alt_ref_pending);
   gf_group->arf_src_offset[frame_index] = 0;
