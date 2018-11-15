@@ -449,6 +449,7 @@ process_targets() {
     enabled child || write_common_config_banner
     write_common_target_config_h ${BUILD_PFX}vpx_config.h
     write_common_config_targets
+    enabled win_arm64_neon_h_workaround && write_win_arm64_neon_h_workaround ${BUILD_PFX}arm_neon.h
 
     # Calculate the default distribution name, based on the enabled features
     cf=""
