@@ -2144,8 +2144,9 @@ static void find_arf_order(VP9_COMP *cpi, GF_GROUP *gf_group,
   for (idx = 0; idx <= mid; ++idx)
     if (EOF == input_stats(twopass, &fpf_frame)) break;
 
-  gf_group->gfu_boost[*index_counter] = VPXMAX(
-      MIN_ARF_GF_BOOST, calc_arf_boost(cpi, end - mid, mid - start) >> depth);
+  gf_group->gfu_boost[*index_counter] =
+      VPXMAX(MIN_ARF_GF_BOOST,
+             calc_arf_boost(cpi, end - mid + 1, mid - start) >> depth);
 
   reset_fpf_position(twopass, start_pos);
 
