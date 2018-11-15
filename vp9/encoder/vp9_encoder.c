@@ -52,6 +52,9 @@
 #include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mbgraph.h"
+#if CONFIG_NON_GREEDY_MV
+#include "vp9/encoder/vp9_mcomp.h"
+#endif
 #include "vp9/encoder/vp9_multi_thread.h"
 #include "vp9/encoder/vp9_noise_estimate.h"
 #include "vp9/encoder/vp9_picklpf.h"
@@ -6089,6 +6092,7 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
 
 #define CHANGE_MV_SEARCH_ORDER 1
 #define USE_PQSORT 1
+#define RE_COMPUTE_MV_INCONSISTENCY 1
 
 #if CHANGE_MV_SEARCH_ORDER
 #if USE_PQSORT
@@ -6327,11 +6331,21 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
         TplDepStats *this_tpl_stats =
             &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
         for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+#if RE_COMPUTE_MV_INCONSISTENCY
+          MV full_mv;
+          int_mv nb_full_mvs[NB_MVS_NUM];
+          prepare_nb_full_mvs(tpl_frame, mi_row, mi_col, rf_idx, bsize,
+                              nb_full_mvs);
+          full_mv.row = this_tpl_stats->mv_arr[rf_idx].as_mv.row >> 3;
+          full_mv.col = this_tpl_stats->mv_arr[rf_idx].as_mv.col >> 3;
+          this_tpl_stats->mv_cost[rf_idx] =
+              av1_nb_mvs_inconsistency(&full_mv, nb_full_mvs);
+#endif  // RE_COMPUTE_MV_INCONSISTENCY
           tpl_frame->mv_dist_sum[rf_idx] += this_tpl_stats->mv_dist[rf_idx];
           tpl_frame->mv_cost_sum[rf_idx] += this_tpl_stats->mv_cost[rf_idx];
         }
       }
-#endif
+#endif  // CONFIG_NON_GREEDY_MV
     }
   }
 }
