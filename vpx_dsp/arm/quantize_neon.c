@@ -135,6 +135,9 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     } while (n_coeffs > 0);
   }
 
+#ifdef __aarch64__
+  *eob_ptr = vmaxvq_u16(eob_max);
+#else
   {
     const uint16x4_t eob_max_0 =
         vmax_u16(vget_low_u16(eob_max), vget_high_u16(eob_max));
@@ -142,6 +145,7 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     const uint16x4_t eob_max_2 = vpmax_u16(eob_max_1, eob_max_1);
     vst1_lane_u16(eob_ptr, eob_max_2, 0);
   }
+#endif  // __aarch64__
 }
 
 static INLINE int32x4_t extract_sign_bit(int32x4_t a) {
@@ -288,6 +292,9 @@ void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     }
   }
 
+#ifdef __aarch64__
+  *eob_ptr = vmaxvq_u16(eob_max);
+#else
   {
     const uint16x4_t eob_max_0 =
         vmax_u16(vget_low_u16(eob_max), vget_high_u16(eob_max));
@@ -295,4 +302,5 @@ void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     const uint16x4_t eob_max_2 = vpmax_u16(eob_max_1, eob_max_1);
     vst1_lane_u16(eob_ptr, eob_max_2, 0);
   }
+#endif  // __aarch64__
 }
