@@ -29,6 +29,11 @@ uint8_t avg_with_rounding(uint8_t a, uint8_t b) { return (a + b + 1) >> 1; }
 
 void reference_pred(const Buffer<uint8_t> &pred, const Buffer<uint8_t> &ref,
                     int width, int height, Buffer<uint8_t> *avg) {
+  if (avg->TopLeftPixel() == NULL || pred.TopLeftPixel() == NULL ||
+      ref.TopLeftPixel() == NULL) {
+    assert(0);
+    return;
+  }
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
       avg->TopLeftPixel()[y * avg->stride() + x] =
