@@ -3700,15 +3700,16 @@ static INLINE void set_raw_source_frame(VP9_COMP *cpi) {
 static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                       uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
+  SVC *const svc = &cpi->svc;
   int q = 0, bottom_index = 0, top_index = 0;
   int no_drop_scene_change = 0;
   const INTERP_FILTER filter_scaler =
       (is_one_pass_cbr_svc(cpi))
-          ? cpi->svc.downsample_filter_type[cpi->svc.spatial_layer_id]
+          ? svc->downsample_filter_type[svc->spatial_layer_id]
           : EIGHTTAP;
   const int phase_scaler =
       (is_one_pass_cbr_svc(cpi))
-          ? cpi->svc.downsample_filter_phase[cpi->svc.spatial_layer_id]
+          ? svc->downsample_filter_phase[svc->spatial_layer_id]
           : 0;
 
   if (cm->show_existing_frame) {
@@ -3716,8 +3717,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     return 1;
   }
 
-  cpi->svc.time_stamp_prev[cpi->svc.spatial_layer_id] =
-      cpi->svc.time_stamp_superframe;
+  svc->time_stamp_prev[svc->spatial_layer_id] = svc->time_stamp_superframe;
 
   // Flag to check if its valid to compute the source sad (used for
   // scene detection and for superblock content state in CBR mode).
@@ -3731,25 +3731,25 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   if (is_one_pass_cbr_svc(cpi) &&
       cpi->un_scaled_source->y_width == cm->width << 2 &&
       cpi->un_scaled_source->y_height == cm->height << 2 &&
-      cpi->svc.scaled_temp.y_width == cm->width << 1 &&
-      cpi->svc.scaled_temp.y_height == cm->height << 1) {
+      svc->scaled_temp.y_width == cm->width << 1 &&
+      svc->scaled_temp.y_height == cm->height << 1) {
     // For svc, if it is a 1/4x1/4 downscaling, do a two-stage scaling to take
     // advantage of the 1:2 optimized scaler. In the process, the 1/2x1/2
     // result will be saved in scaled_temp and might be used later.
-    const INTERP_FILTER filter_scaler2 = cpi->svc.downsample_filter_type[1];
-    const int phase_scaler2 = cpi->svc.downsample_filter_phase[1];
+    const INTERP_FILTER filter_scaler2 = svc->downsample_filter_type[1];
+    const int phase_scaler2 = svc->downsample_filter_phase[1];
     cpi->Source = vp9_svc_twostage_scale(
-        cm, cpi->un_scaled_source, &cpi->scaled_source, &cpi->svc.scaled_temp,
+        cm, cpi->un_scaled_source, &cpi->scaled_source, &svc->scaled_temp,
         filter_scaler, phase_scaler, filter_scaler2, phase_scaler2);
-    cpi->svc.scaled_one_half = 1;
+    svc->scaled_one_half = 1;
   } else if (is_one_pass_cbr_svc(cpi) &&
              cpi->un_scaled_source->y_width == cm->width << 1 &&
              cpi->un_scaled_source->y_height == cm->height << 1 &&
-             cpi->svc.scaled_one_half) {
+             svc->scaled_one_half) {
     // If the spatial layer is 1/2x1/2 and the scaling is already done in the
     // two-stage scaling, use the result directly.
-    cpi->Source = &cpi->svc.scaled_temp;
-    cpi->svc.scaled_one_half = 0;
+    cpi->Source = &svc->scaled_temp;
+    svc->scaled_one_half = 0;
   } else {
     cpi->Source = vp9_scale_if_required(
         cm, cpi->un_scaled_source, &cpi->scaled_source, (cpi->oxcf.pass == 0),
@@ -3757,8 +3757,8 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   }
 #ifdef OUTPUT_YUV_SVC_SRC
   // Write out at most 3 spatial layers.
-  if (is_one_pass_cbr_svc(cpi) && cpi->svc.spatial_layer_id < 3) {
-    vpx_write_yuv_frame(yuv_svc_src[cpi->svc.spatial_layer_id], cpi->Source);
+  if (is_one_pass_cbr_svc(cpi) && svc->spatial_layer_id < 3) {
+    vpx_write_yuv_frame(yuv_svc_src[svc->spatial_layer_id], cpi->Source);
   }
 #endif
   // Unfiltered raw source used in metrics calculation if the source
@@ -3778,9 +3778,9 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   }
 
   if ((cpi->use_svc &&
-       (cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1 ||
-        cpi->svc.temporal_layer_id < cpi->svc.number_temporal_layers - 1 ||
-        cpi->svc.current_superframe < 1)) ||
+       (svc->spatial_layer_id < svc->number_spatial_layers - 1 ||
+        svc->temporal_layer_id < svc->number_temporal_layers - 1 ||
+        svc->current_superframe < 1)) ||
       cpi->resize_pending || cpi->resize_state || cpi->external_resize ||
       cpi->resize_state != ORIG) {
     cpi->compute_source_sad_onepass = 0;
@@ -3829,20 +3829,31 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
        (cpi->oxcf.speed >= 5 && cpi->oxcf.speed < 8)))
     vp9_scene_detection_onepass(cpi);
 
-  if (cpi->svc.spatial_layer_id == 0)
-    cpi->svc.high_source_sad_superframe = cpi->rc.high_source_sad;
+  if (svc->spatial_layer_id == svc->first_spatial_layer_to_encode) {
+    svc->high_source_sad_superframe = cpi->rc.high_source_sad;
+    // On scene change reset temporal layer pattern to TL0.
+    // TODO(marpan/jianj): Fix this to handle case where base
+    // spatial layers are skipped, in which case we should insert
+    // and reset to spatial layer 0 on scene change.
+    if (svc->high_source_sad_superframe && svc->temporal_layer_id > 0) {
+      // rc->high_source_sad will get reset so copy it to restore it.
+      int tmp_high_source_sad = cpi->rc.high_source_sad;
+      vp9_svc_reset_temporal_layers(cpi, cm->frame_type == KEY_FRAME);
+      cpi->rc.high_source_sad = tmp_high_source_sad;
+    }
+  }
 
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame, if base layer is key for svc,
   // on scene change, or if superframe has layer sync.
-  if ((cpi->rc.high_source_sad || cpi->svc.high_source_sad_superframe) &&
-      !(cpi->rc.use_post_encode_drop && cpi->svc.last_layer_dropped[0]))
+  if ((cpi->rc.high_source_sad || svc->high_source_sad_superframe) &&
+      !(cpi->rc.use_post_encode_drop && svc->last_layer_dropped[0]))
     no_drop_scene_change = 1;
   if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
       !frame_is_intra_only(cm) && !no_drop_scene_change &&
-      !cpi->svc.superframe_has_layer_sync &&
+      !svc->superframe_has_layer_sync &&
       (!cpi->use_svc ||
-       !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame)) {
+       !svc->layer_context[svc->temporal_layer_id].is_key_frame)) {
     if (vp9_rc_drop_frame(cpi)) return 0;
   }
 
@@ -3850,7 +3861,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // when svc->force_zero_mode_spatial_ref = 1. Under those conditions we can
   // avoid this frame-level upsampling (for non intra_only frames).
   if (frame_is_intra_only(cm) == 0 &&
-      !(is_one_pass_cbr_svc(cpi) && cpi->svc.force_zero_mode_spatial_ref)) {
+      !(is_one_pass_cbr_svc(cpi) && svc->force_zero_mode_spatial_ref)) {
     vp9_scale_references(cpi);
   }
 
@@ -3860,12 +3871,12 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   if (cpi->sf.copy_partition_flag) alloc_copy_partition_data(cpi);
 
   if (cpi->sf.svc_use_lowres_part &&
-      cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2) {
-    if (cpi->svc.prev_partition_svc == NULL) {
+      svc->spatial_layer_id == svc->number_spatial_layers - 2) {
+    if (svc->prev_partition_svc == NULL) {
       CHECK_MEM_ERROR(
-          cm, cpi->svc.prev_partition_svc,
+          cm, svc->prev_partition_svc,
           (BLOCK_SIZE *)vpx_calloc(cm->mi_stride * cm->mi_rows,
-                                   sizeof(*cpi->svc.prev_partition_svc)));
+                                   sizeof(*svc->prev_partition_svc)));
     }
   }
 
@@ -3893,13 +3904,13 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   if (cpi->use_svc) {
     // On non-zero spatial layer, check for disabling inter-layer
     // prediction.
-    if (cpi->svc.spatial_layer_id > 0) vp9_svc_constrain_inter_layer_pred(cpi);
+    if (svc->spatial_layer_id > 0) vp9_svc_constrain_inter_layer_pred(cpi);
     vp9_svc_assert_constraints_pattern(cpi);
   }
 
   if (cpi->rc.last_post_encode_dropped_scene_change) {
     cpi->rc.high_source_sad = 1;
-    cpi->svc.high_source_sad_superframe = 1;
+    svc->high_source_sad_superframe = 1;
     // For now disable use_source_sad since Last_Source will not be the previous
     // encoded but the dropped one.
     cpi->sf.use_source_sad = 0;
@@ -3910,7 +3921,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // control parameters.
   if (cpi->sf.overshoot_detection_cbr_rt == FAST_DETECTION_MAXQ &&
       (cpi->rc.high_source_sad ||
-       (cpi->use_svc && cpi->svc.high_source_sad_superframe))) {
+       (cpi->use_svc && svc->high_source_sad_superframe))) {
     if (vp9_encodedframe_overshoot(cpi, -1, &q)) {
       vp9_set_quantizer(cm, q);
       vp9_set_variance_partition_thresholds(cpi, q, 0);
@@ -3945,7 +3956,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // For SVC: all spatial layers are checked for re-encoding.
   if (cpi->sf.overshoot_detection_cbr_rt == RE_ENCODE_MAXQ &&
       (cpi->rc.high_source_sad ||
-       (cpi->use_svc && cpi->svc.high_source_sad_superframe))) {
+       (cpi->use_svc && svc->high_source_sad_superframe))) {
     int frame_size = 0;
     // Get an estimate of the encoded frame size.
     save_coding_context(cpi);

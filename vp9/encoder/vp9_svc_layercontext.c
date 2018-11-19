@@ -932,7 +932,7 @@ void vp9_free_svc_cyclic_refresh(VP9_COMP *const cpi) {
 }
 
 // Reset on key frame: reset counters, references and buffer updates.
-void vp9_svc_reset_key_frame(VP9_COMP *const cpi) {
+void vp9_svc_reset_temporal_layers(VP9_COMP *const cpi, int is_key) {
   int sl, tl;
   SVC *const svc = &cpi->svc;
   LAYER_CONTEXT *lc = NULL;
@@ -940,7 +940,7 @@ void vp9_svc_reset_key_frame(VP9_COMP *const cpi) {
     for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
       lc = &cpi->svc.layer_context[sl * svc->number_temporal_layers + tl];
       lc->current_video_frame_in_layer = 0;
-      lc->frames_from_key_frame = 0;
+      if (is_key) lc->frames_from_key_frame = 0;
     }
   }
   if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0212) {
@@ -1108,7 +1108,8 @@ void vp9_svc_check_spatial_layer_sync(VP9_COMP *const cpi) {
     if (svc->spatial_layer_id == 0) {
       // On base spatial layer: if the current superframe has a layer sync then
       // reset the pattern counters and reset to base temporal layer.
-      if (svc->superframe_has_layer_sync) vp9_svc_reset_key_frame(cpi);
+      if (svc->superframe_has_layer_sync)
+        vp9_svc_reset_temporal_layers(cpi, cpi->common.frame_type == KEY_FRAME);
     }
     // If the layer sync is set for this current spatial layer then
     // disable the temporal reference.

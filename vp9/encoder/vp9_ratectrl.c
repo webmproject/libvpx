@@ -2122,7 +2122,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
     if (is_one_pass_cbr_svc(cpi)) {
-      if (cm->current_video_frame > 0) vp9_svc_reset_key_frame(cpi);
+      if (cm->current_video_frame > 0) vp9_svc_reset_temporal_layers(cpi, 1);
       layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, svc->temporal_layer_id,
                                svc->number_temporal_layers);
       svc->layer_context[layer].is_key_frame = 1;
@@ -2750,8 +2750,10 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
 #endif
   rc->high_source_sad = 0;
   rc->high_num_blocks_with_motion = 0;
-  if (cpi->svc.spatial_layer_id == 0 && src_width == last_src_width &&
-      src_height == last_src_height) {
+  // For SVC: scene detection is only checked on first spatial layer of
+  // the superframe using the original/unscaled resolutions.
+  if (cpi->svc.spatial_layer_id == cpi->svc.first_spatial_layer_to_encode &&
+      src_width == last_src_width && src_height == last_src_height) {
     YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS] = { NULL };
     int num_mi_cols = cm->mi_cols;
     int num_mi_rows = cm->mi_rows;
