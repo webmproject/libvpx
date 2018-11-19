@@ -274,12 +274,12 @@ static void update_buffer_level_svc_preencode(VP9_COMP *cpi) {
         LAYER_IDS_TO_IDX(svc->spatial_layer_id, i, svc->number_temporal_layers);
     LAYER_CONTEXT *const lc = &svc->layer_context[layer];
     RATE_CONTROL *const lrc = &lc->rc;
-    if (use_timestamp && cpi->svc.use_set_ref_frame_config && ts_delta > 0 &&
+    if (use_timestamp && cpi->svc.use_set_ref_frame_config &&
+        svc->number_temporal_layers == 1 && ts_delta > 0 &&
         svc->current_superframe > 0) {
+      // TODO(marpan): This may need to be modified for temporal layers.
       const double framerate_pts = 10000000.0 / ts_delta;
-      const double lc_framerate_pts =
-          framerate_pts / cpi->oxcf.ts_rate_decimator[i];
-      lrc->bits_off_target += (int)(lc->target_bandwidth / lc_framerate_pts);
+      lrc->bits_off_target += (int)(lc->target_bandwidth / framerate_pts);
     } else {
       lrc->bits_off_target += (int)(lc->target_bandwidth / lc->framerate);
     }

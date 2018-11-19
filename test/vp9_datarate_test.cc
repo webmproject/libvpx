@@ -649,7 +649,7 @@ TEST_P(DatarateTestVP9RealTime,
         << " The datarate for the file is lower than target by too much, "
            "for layer: "
         << j;
-    ASSERT_LE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 1.15)
+    ASSERT_LE(effective_datarate_[j], cfg_.layer_target_bitrate[j] * 1.20)
         << " The datarate for the file is greater than target by too much, "
            "for layer: "
         << j;

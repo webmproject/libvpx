@@ -1163,7 +1163,7 @@ TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc3SL3TLSmallKf) {
   AssignLayerBitrates();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   // TODO(jianj): webm:1554
-  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.76,
+  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.70,
                           1.15);
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
