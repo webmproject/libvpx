@@ -237,7 +237,7 @@ int vp9_one_pass_cbr_svc_start_layer(struct VP9_COMP *const cpi);
 
 void vp9_free_svc_cyclic_refresh(struct VP9_COMP *const cpi);
 
-void vp9_svc_reset_key_frame(struct VP9_COMP *const cpi);
+void vp9_svc_reset_temporal_layers(struct VP9_COMP *const cpi, int is_key);
 
 void vp9_svc_check_reset_layer_rc_flag(struct VP9_COMP *const cpi);
 
