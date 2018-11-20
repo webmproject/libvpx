@@ -6140,16 +6140,12 @@ static void max_heap_push(FEATURE_SCORE_LOC **heap, int *size,
   ++*size;
   c = *size - 1;
   p = c >> 1;
-  while (c > 0) {
-    if (heap[c]->feature_score > heap[p]->feature_score) {
-      tmp = heap[p];
-      heap[p] = heap[c];
-      heap[c] = tmp;
-      c = p;
-      p = c >> 1;
-    } else {
-      break;
-    }
+  while (c > 0 && heap[c]->feature_score > heap[p]->feature_score) {
+    tmp = heap[p];
+    heap[p] = heap[c];
+    heap[c] = tmp;
+    c = p;
+    p >>= 1;
   }
 }
 
