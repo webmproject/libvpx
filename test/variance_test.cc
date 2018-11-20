@@ -561,15 +561,16 @@ class SubpelVarianceTest
     if (!use_high_bit_depth()) {
       src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size()));
       sec_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size()));
-      ref_ = new uint8_t[block_size() + width() + height() + 1];
+      ref_ = reinterpret_cast<uint8_t *>(
+          vpx_malloc(block_size() + width() + height() + 1));
 #if CONFIG_VP9_HIGHBITDEPTH
     } else {
       src_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(
           vpx_memalign(16, block_size() * sizeof(uint16_t))));
       sec_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(
           vpx_memalign(16, block_size() * sizeof(uint16_t))));
-      ref_ = CONVERT_TO_BYTEPTR(
-          new uint16_t[block_size() + width() + height() + 1]);
+      ref_ = CONVERT_TO_BYTEPTR(reinterpret_cast<uint16_t *>(vpx_malloc(
+          (block_size() + width() + height() + 1) * sizeof(uint16_t))));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
     ASSERT_TRUE(src_ != NULL);
@@ -580,12 +581,12 @@ class SubpelVarianceTest
   virtual void TearDown() {
     if (!use_high_bit_depth()) {
       vpx_free(src_);
-      delete[] ref_;
       vpx_free(sec_);
+      vpx_free(ref_);
 #if CONFIG_VP9_HIGHBITDEPTH
     } else {
       vpx_free(CONVERT_TO_SHORTPTR(src_));
-      delete[] CONVERT_TO_SHORTPTR(ref_);
+      vpx_free(CONVERT_TO_SHORTPTR(ref_));
       vpx_free(CONVERT_TO_SHORTPTR(sec_));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
