@@ -53,6 +53,10 @@ static uint64_t calc_plane_error(uint8_t *orig, int orig_stride, uint8_t *recon,
   unsigned int row, col;
   uint64_t total_sse = 0;
   int diff;
+  if (orig == NULL || recon == NULL) {
+    assert(0);
+    return 0;
+  }
 
   for (row = 0; row < rows; row++) {
     for (col = 0; col < cols; col++) {
@@ -99,6 +103,9 @@ static int open_input_file(const char *file_name, input_file_t *input, int w,
                            int h, int bit_depth) {
   char y4m_buf[4];
   size_t r1;
+  input->w = w;
+  input->h = h;
+  input->bit_depth = bit_depth;
   input->type = RAW_YUV;
   input->buf = NULL;
   input->file = strcmp(file_name, "-") ? fopen(file_name, "rb") : stdin;
@@ -187,6 +194,11 @@ void ssim_parms_8x8(const uint8_t *s, int sp, const uint8_t *r, int rp,
                     uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s,
                     uint32_t *sum_sq_r, uint32_t *sum_sxr) {
   int i, j;
+  if (s == NULL || r == NULL || sum_s == NULL || sum_r == NULL ||
+      sum_sq_s == NULL || sum_sq_r || sum_sxr == NULL) {
+    assert(0);
+    return;
+  }
   for (i = 0; i < 8; i++, s += sp, r += rp) {
     for (j = 0; j < 8; j++) {
       *sum_s += s[j];

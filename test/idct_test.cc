@@ -72,49 +72,57 @@ TEST_P(IDCTTest, TestAllZeros) {
 
 TEST_P(IDCTTest, TestAllOnes) {
   input->Set(0);
-  // When the first element is '4' it will fill the output buffer with '1'.
-  input->TopLeftPixel()[0] = 4;
-  predict->Set(0);
-  output->Set(0);
+  if (input->TopLeftPixel() != NULL) {
+    // When the first element is '4' it will fill the output buffer with '1'.
+    input->TopLeftPixel()[0] = 4;
+    predict->Set(0);
+    output->Set(0);
 
-  ASM_REGISTER_STATE_CHECK(UUT(input->TopLeftPixel(), predict->TopLeftPixel(),
-                               predict->stride(), output->TopLeftPixel(),
-                               output->stride()));
+    ASM_REGISTER_STATE_CHECK(UUT(input->TopLeftPixel(), predict->TopLeftPixel(),
+                                 predict->stride(), output->TopLeftPixel(),
+                                 output->stride()));
 
-  ASSERT_TRUE(output->CheckValues(1));
-  ASSERT_TRUE(output->CheckPadding());
+    ASSERT_TRUE(output->CheckValues(1));
+    ASSERT_TRUE(output->CheckPadding());
+  } else {
+    assert(0);
+  }
 }
 
 TEST_P(IDCTTest, TestAddOne) {
   // Set the transform output to '1' and make sure it gets added to the
   // prediction buffer.
   input->Set(0);
-  input->TopLeftPixel()[0] = 4;
-  output->Set(0);
+  if (input->TopLeftPixel() != NULL) {
+    input->TopLeftPixel()[0] = 4;
+    output->Set(0);
 
-  uint8_t *pred = predict->TopLeftPixel();
-  for (int y = 0; y < 4; ++y) {
-    for (int x = 0; x < 4; ++x) {
-      pred[y * predict->stride() + x] = y * 4 + x;
+    uint8_t *pred = predict->TopLeftPixel();
+    for (int y = 0; y < 4; ++y) {
+      for (int x = 0; x < 4; ++x) {
+        pred[y * predict->stride() + x] = y * 4 + x;
+      }
     }
-  }
 
-  ASM_REGISTER_STATE_CHECK(UUT(input->TopLeftPixel(), predict->TopLeftPixel(),
-                               predict->stride(), output->TopLeftPixel(),
-                               output->stride()));
+    ASM_REGISTER_STATE_CHECK(UUT(input->TopLeftPixel(), predict->TopLeftPixel(),
+                                 predict->stride(), output->TopLeftPixel(),
+                                 output->stride()));
 
-  uint8_t const *out = output->TopLeftPixel();
-  for (int y = 0; y < 4; ++y) {
-    for (int x = 0; x < 4; ++x) {
-      EXPECT_EQ(1 + y * 4 + x, out[y * output->stride() + x]);
+    uint8_t const *out = output->TopLeftPixel();
+    for (int y = 0; y < 4; ++y) {
+      for (int x = 0; x < 4; ++x) {
+        EXPECT_EQ(1 + y * 4 + x, out[y * output->stride() + x]);
+      }
     }
-  }
 
-  if (HasFailure()) {
-    output->DumpBuffer();
-  }
+    if (HasFailure()) {
+      output->DumpBuffer();
+    }
 
-  ASSERT_TRUE(output->CheckPadding());
+    ASSERT_TRUE(output->CheckPadding());
+  } else {
+    assert(0);
+  }
 }
 
 TEST_P(IDCTTest, TestWithData) {
