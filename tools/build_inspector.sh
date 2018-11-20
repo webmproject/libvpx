@@ -28,21 +28,25 @@ if [ ! -d ".inspect" ]; then
   cd .inspect && emconfigure ../../configure \
     --disable-multithread \
     --disable-runtime-cpu-detect \
+    --enable-vp9-highbitdepth \
     --target=generic-gnu \
     --disable-docs \
     --disable-unit-tests \
     --enable-inspection \
-    --extra-cflags="-D_POSIX_SOURCE -s ALLOW_MEMORY_GROWTH=1"
+    --enable-debug \
+    --extra-cflags='-s ALLOW_MEMORY_GROWTH=1 -DEMCC_DEBUG=1'
+    #--extra-cflags="-D_POSIX_SOURCE -s ALLOW_MEMORY_GROWTH=1"
   cd ..
 fi
 
 cd .inspect
-emmake make -j 8
+EMCC_DEBUG=1 emmake make -j 8
 cp examples/inspect inspect.bc
 emcc -O3 inspect.bc -o inspect.js \
   -s TOTAL_MEMORY=134217728 \
   -s MODULARIZE=1 \
   -s EXPORT_NAME="'DecoderModule'" \
+  -s EXTRA_EXPORTED_RUNTIME_METHODS=["UTF8ToString"] \
   -s ALLOW_MEMORY_GROWTH=1 \
   --post-js "../inspect-post.js" \
   --memory-init-file 0

@@ -64,8 +64,13 @@ int ifd_inspect(insp_frame_data *fd, void *decoder) {
       // Segment
       mi->segment_id = bmi->segment_id;
       // Motion Vectors
-      mi->mv[0].row = bmi->mv[0].as_mv.row;
-      mi->mv[0].col = bmi->mv[0].as_mv.col;
+      if (bmi->ref_frame[0] > 0) {
+        mi->mv[0].row = bmi->mv[0].as_mv.row;
+        mi->mv[0].col = bmi->mv[0].as_mv.col;
+      } else {
+        mi->mv[0].row = 0;
+        mi->mv[0].col = 0;
+      }
 
       if (bmi->ref_frame[1] == -1) {
         mi->mv[1].row = 0;
