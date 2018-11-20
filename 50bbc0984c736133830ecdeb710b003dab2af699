@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98347e42_27ea4ec3",
+        "filename": "test/dct_partial_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2018-11-20T19:43:38Z",
+      "side": 1,
+      "message": "in tests it would be better to use ASSERT_TRUE(in.TopLeftPixel() !\u003d NULL)",
+      "revId": "50bbc0984c736133830ecdeb710b003dab2af699",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
