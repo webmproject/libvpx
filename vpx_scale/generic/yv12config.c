@@ -57,7 +57,7 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width,
      *  uv_stride == y_stride/2, so enforce this here. */
     int uv_stride = y_stride >> 1;
     int uvplane_size = (uv_height + border) * uv_stride;
-    const int frame_size = yplane_size + 2 * uvplane_size;
+    const size_t frame_size = yplane_size + 2 * uvplane_size;
 
     if (!ybf->buffer_alloc) {
       ybf->buffer_alloc = (uint8_t *)vpx_memalign(32, frame_size);
@@ -185,9 +185,9 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
 
     uint8_t *buf = NULL;
 
-    // frame_size is stored in buffer_alloc_sz, which is an int. If it won't
+    // frame_size is stored in buffer_alloc_sz, which is a size_t. If it won't
     // fit, fail early.
-    if (frame_size > INT_MAX) {
+    if (frame_size > SIZE_MAX) {
       return -1;
     }
 
@@ -211,10 +211,10 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
       // This memset is needed for fixing the issue of using uninitialized
       // value in msan test. It will cause a perf loss, so only do this for
       // msan test.
-      memset(ybf->buffer_alloc, 0, (int)frame_size);
+      memset(ybf->buffer_alloc, 0, (size_t)frame_size);
 #endif
 #endif
-    } else if (frame_size > (size_t)ybf->buffer_alloc_sz) {
+    } else if (frame_size > ybf->buffer_alloc_sz) {
       // Allocation to hold larger frame, or first allocation.
       vpx_free(ybf->buffer_alloc);
       ybf->buffer_alloc = NULL;
@@ -222,7 +222,7 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
       ybf->buffer_alloc = (uint8_t *)vpx_memalign(32, (size_t)frame_size);
       if (!ybf->buffer_alloc) return -1;
 
-      ybf->buffer_alloc_sz = (int)frame_size;
+      ybf->buffer_alloc_sz = (size_t)frame_size;
 
       // This memset is needed for fixing valgrind error from C loop filter
       // due to access uninitialized memory in frame border. It could be
@@ -243,7 +243,7 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
     ybf->uv_stride = uv_stride;
 
     ybf->border = border;
-    ybf->frame_size = (int)frame_size;
+    ybf->frame_size = (size_t)frame_size;
     ybf->subsampling_x = ss_x;
     ybf->subsampling_y = ss_y;
 
