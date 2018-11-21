@@ -214,6 +214,8 @@ void highbd_filter_block2d_8_c(const uint16_t *src_ptr,
   const int intermediate_next_stride =
       1 - static_cast<int>(intermediate_height * output_width);
 
+  vp9_zero(intermediate_buffer);
+
   // Horizontal pass (src -> transposed intermediate).
   {
     uint16_t *output_ptr = intermediate_buffer;
