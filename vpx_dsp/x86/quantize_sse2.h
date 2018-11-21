@@ -48,6 +48,24 @@ static INLINE __m128i calculate_dqcoeff(__m128i qcoeff, __m128i dequant) {
   return _mm_mullo_epi16(qcoeff, dequant);
 }
 
+static INLINE void calculate_dqcoeff_and_store(__m128i qcoeff, __m128i dequant,
+                                               tran_low_t *dqcoeff) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  const __m128i low = _mm_mullo_epi16(qcoeff, dequant);
+  const __m128i high = _mm_mulhi_epi16(qcoeff, dequant);
+
+  const __m128i dqcoeff32_0 = _mm_unpacklo_epi16(low, high);
+  const __m128i dqcoeff32_1 = _mm_unpackhi_epi16(low, high);
+
+  _mm_store_si128((__m128i *)(dqcoeff), dqcoeff32_0);
+  _mm_store_si128((__m128i *)(dqcoeff + 4), dqcoeff32_1);
+#else
+  const __m128i dqcoeff16 = _mm_mullo_epi16(qcoeff, dequant);
+
+  _mm_store_si128((__m128i *)(dqcoeff), dqcoeff16);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+}
+
 // Scan 16 values for eob reference in scan. Use masks (-1) from comparing to
 // zbin to add 1 to the index in 'scan'.
 static INLINE __m128i scan_for_eob(__m128i *coeff0, __m128i *coeff1,
