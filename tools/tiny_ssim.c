@@ -34,6 +34,10 @@ static uint64_t calc_plane_error16(uint16_t *orig, int orig_stride,
   unsigned int row, col;
   uint64_t total_sse = 0;
   int diff;
+  if (orig == NULL || recon == NULL) {
+    assert(0);
+    return 0;
+  }
 
   for (row = 0; row < rows; row++) {
     for (col = 0; col < cols; col++) {
@@ -195,7 +199,7 @@ void ssim_parms_8x8(const uint8_t *s, int sp, const uint8_t *r, int rp,
                     uint32_t *sum_sq_r, uint32_t *sum_sxr) {
   int i, j;
   if (s == NULL || r == NULL || sum_s == NULL || sum_r == NULL ||
-      sum_sq_s == NULL || sum_sq_r || sum_sxr == NULL) {
+      sum_sq_s == NULL || sum_sq_r == NULL || sum_sxr == NULL) {
     assert(0);
     return;
   }
@@ -214,6 +218,11 @@ void highbd_ssim_parms_8x8(const uint16_t *s, int sp, const uint16_t *r, int rp,
                            uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s,
                            uint32_t *sum_sq_r, uint32_t *sum_sxr) {
   int i, j;
+  if (s == NULL || r == NULL || sum_s == NULL || sum_r == NULL ||
+      sum_sq_s == NULL || sum_sq_r == NULL || sum_sxr == NULL) {
+    assert(0);
+    return;
+  }
   for (i = 0; i < 8; i++, s += sp, r += rp) {
     for (j = 0; j < 8; j++) {
       *sum_s += s[j];
