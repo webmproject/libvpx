@@ -496,6 +496,32 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
+#if CONFIG_VP9_HIGHBITDEPTH
+#if ARCH_X86_64
+INSTANTIATE_TEST_CASE_P(
+    SSSE3, VP9QuantizeTest,
+    ::testing::Values(make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c,
+                                 VPX_BITS_8, 16, false),
+                      make_tuple(&vpx_quantize_b_32x32_ssse3,
+                                 &vpx_quantize_b_32x32_c, VPX_BITS_8, 32,
+                                 false),
+                      make_tuple(&QuantFPWrapper<vp9_quantize_fp_ssse3>,
+                                 &QuantFPWrapper<quantize_fp_nz_c>, VPX_BITS_8,
+                                 16, true),
+                      make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_ssse3>,
+                                 &QuantFPWrapper<quantize_fp_32x32_nz_c>,
+                                 VPX_BITS_8, 32, true)));
+#else
+INSTANTIATE_TEST_CASE_P(
+    SSSE3, VP9QuantizeTest,
+    ::testing::Values(make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c,
+                                 VPX_BITS_8, 16, false),
+                      make_tuple(&vpx_quantize_b_32x32_ssse3,
+                                 &vpx_quantize_b_32x32_c, VPX_BITS_8, 32,
+                                 false)));
+
+#endif  // ARCH_X86_64
+#else
 #if ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(
     SSSE3, VP9QuantizeTest,
@@ -507,28 +533,41 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_ssse3>,
                                  &QuantFPWrapper<quantize_fp_32x32_nz_c>,
                                  VPX_BITS_8, 32, true)));
+
 #else
 INSTANTIATE_TEST_CASE_P(SSSE3, VP9QuantizeTest,
                         ::testing::Values(make_tuple(&vpx_quantize_b_ssse3,
                                                      &vpx_quantize_b_c,
                                                      VPX_BITS_8, 16, false)));
 #endif  // ARCH_X86_64
-
-// TODO(johannkoenig): fix 32x32
+// TODO(webm:1448): lowbd truncates results in C.
 INSTANTIATE_TEST_CASE_P(DISABLED_SSSE3, VP9QuantizeTest,
                         ::testing::Values(make_tuple(
                             &vpx_quantize_b_32x32_ssse3,
                             &vpx_quantize_b_32x32_c, VPX_BITS_8, 32, false)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSSE3
 
 #if HAVE_AVX
-INSTANTIATE_TEST_CASE_P(
-    AVX, VP9QuantizeTest,
-    ::testing::Values(make_tuple(&vpx_quantize_b_avx, &vpx_quantize_b_c,
-                                 VPX_BITS_8, 16, false),
-                      make_tuple(&vpx_quantize_b_32x32_avx,
-                                 &vpx_quantize_b_32x32_ssse3, VPX_BITS_8, 32,
-                                 false)));
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_CASE_P(AVX, VP9QuantizeTest,
+                        ::testing::Values(make_tuple(&vpx_quantize_b_avx,
+                                                     &vpx_quantize_b_c,
+                                                     VPX_BITS_8, 16, false),
+                                          make_tuple(&vpx_quantize_b_32x32_avx,
+                                                     &vpx_quantize_b_32x32_c,
+                                                     VPX_BITS_8, 32, false)));
+#else
+INSTANTIATE_TEST_CASE_P(AVX, VP9QuantizeTest,
+                        ::testing::Values(make_tuple(&vpx_quantize_b_avx,
+                                                     &vpx_quantize_b_c,
+                                                     VPX_BITS_8, 16, false)));
+// TODO(webm:1448): lowbd truncates results in C.
+INSTANTIATE_TEST_CASE_P(DISABLED_AVX, VP9QuantizeTest,
+                        ::testing::Values(make_tuple(&vpx_quantize_b_32x32_avx,
+                                                     &vpx_quantize_b_32x32_c,
+                                                     VPX_BITS_8, 32, false)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_AVX
 
 #if ARCH_X86_64 && HAVE_AVX2

@@ -44,10 +44,6 @@ static INLINE void calculate_qcoeff(__m128i *coeff, const __m128i round,
   *coeff = _mm_mulhi_epi16(qcoeff, shift);
 }
 
-static INLINE __m128i calculate_dqcoeff(__m128i qcoeff, __m128i dequant) {
-  return _mm_mullo_epi16(qcoeff, dequant);
-}
-
 static INLINE void calculate_dqcoeff_and_store(__m128i qcoeff, __m128i dequant,
                                                tran_low_t *dqcoeff) {
 #if CONFIG_VP9_HIGHBITDEPTH
