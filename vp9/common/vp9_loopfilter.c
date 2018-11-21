@@ -1087,12 +1087,18 @@ void vp9_filter_block_plane_non420(VP9_COMMON *cm,
   const int row_step_stride = cm->mi_stride * row_step;
   struct buf_2d *const dst = &plane->dst;
   uint8_t *const dst0 = dst->buf;
-  unsigned int mask_16x16[MI_BLOCK_SIZE] = { 0 };
-  unsigned int mask_8x8[MI_BLOCK_SIZE] = { 0 };
-  unsigned int mask_4x4[MI_BLOCK_SIZE] = { 0 };
-  unsigned int mask_4x4_int[MI_BLOCK_SIZE] = { 0 };
+  unsigned int mask_16x16[MI_BLOCK_SIZE];
+  unsigned int mask_8x8[MI_BLOCK_SIZE];
+  unsigned int mask_4x4[MI_BLOCK_SIZE];
+  unsigned int mask_4x4_int[MI_BLOCK_SIZE];
   uint8_t lfl[MI_BLOCK_SIZE * MI_BLOCK_SIZE];
   int r, c;
+
+  vp9_zero(mask_16x16);
+  vp9_zero(mask_8x8);
+  vp9_zero(mask_4x4);
+  vp9_zero(mask_4x4_int);
+  vp9_zero(lfl);
 
   for (r = 0; r < MI_BLOCK_SIZE && mi_row + r < cm->mi_rows; r += row_step) {
     unsigned int mask_16x16_c = 0;
@@ -1329,6 +1335,8 @@ void vp9_filter_block_plane_ss11(VP9_COMMON *const cm,
   uint16_t mask_8x8 = lfm->left_uv[TX_8X8];
   uint16_t mask_4x4 = lfm->left_uv[TX_4X4];
   uint16_t mask_4x4_int = lfm->int_4x4_uv;
+
+  vp9_zero(lfl_uv);
 
   assert(plane->subsampling_x == 1 && plane->subsampling_y == 1);
 
