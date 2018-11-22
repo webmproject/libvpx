@@ -804,8 +804,12 @@ static void set_rt_speed_feature_framesize_independent(
       cpi->svc.spatial_layer_id == 0 &&
       (cpi->rc.high_num_blocks_with_motion || cpi->svc.last_layer_dropped[0])) {
     sf->mv.search_method = NSTEP;
-    // TODO(marpan/jianj): Investigate issue for lower setting of step_param.
-    sf->mv.fullpel_search_step_param = 4;
+    sf->mv.fullpel_search_step_param = 2;
+    // TODO(marpan/jianj): Investigate issue for lower setting of step_param
+    // for spatial layers (namely on lower layers).
+    if (cpi->use_svc && cm->width != cpi->oxcf.width &&
+        cm->height != cpi->oxcf.height)
+      sf->mv.fullpel_search_step_param = 4;
   }
 }
 
