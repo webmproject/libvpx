@@ -4692,8 +4692,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   TX_SIZE t;
 
   // SVC: skip encoding of enhancement layer if the layer target bandwidth = 0.
+  // If in constrained layer drop mode (svc.framedrop_mode != LAYER_DROP) and
+  // base spatial layer was dropped, no need to set svc.skip_enhancement_layer,
+  // as whole superframe will be dropped.
   if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
-      cpi->oxcf.target_bandwidth == 0) {
+      cpi->oxcf.target_bandwidth == 0 &&
+      !(cpi->svc.framedrop_mode != LAYER_DROP &&
+        cpi->svc.drop_spatial_layer[0])) {
     cpi->svc.skip_enhancement_layer = 1;
     vp9_rc_postencode_update_drop_frame(cpi);
     cpi->ext_refresh_frame_flags_pending = 0;
