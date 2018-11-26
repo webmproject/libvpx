@@ -15,7 +15,7 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_dsp/x86/bitdepth_conversion_avx2.h"
-#include "vpx_dsp/x86/quantize_x86.h"
+#include "vpx_dsp/x86/quantize_sse2.h"
 
 // Zero fill 8 positions in the output buffer.
 static INLINE void store_zero_tran_low(tran_low_t *a) {
