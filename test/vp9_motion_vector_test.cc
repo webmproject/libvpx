@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <memory>
+
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "test/codec_factory.h"
@@ -81,7 +83,7 @@ TEST_P(MotionVectorTestLarge, OverallTest) {
   cfg_.g_profile = 0;
   init_flags_ = VPX_CODEC_USE_PSNR;
 
-  testing::internal::scoped_ptr<libvpx_test::VideoSource> video;
+  std::unique_ptr<libvpx_test::VideoSource> video;
   video.reset(new libvpx_test::YUVVideoSource(
       "niklas_640_480_30.yuv", VPX_IMG_FMT_I420, 3840, 2160,  // 2048, 1080,
       30, 1, 0, 5));
