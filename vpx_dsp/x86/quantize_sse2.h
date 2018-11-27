@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_VPX_DSP_X86_QUANTIZE_X86_H_
-#define VPX_VPX_DSP_X86_QUANTIZE_X86_H_
+#ifndef VPX_VPX_DSP_X86_QUANTIZE_SSE2_H_
+#define VPX_VPX_DSP_X86_QUANTIZE_SSE2_H_
 
 #include <emmintrin.h>
 
@@ -79,4 +79,4 @@ static INLINE int16_t accumulate_eob(__m128i eob) {
   return _mm_extract_epi16(eob, 1);
 }
 
-#endif  // VPX_VPX_DSP_X86_QUANTIZE_X86_H_
+#endif  // VPX_VPX_DSP_X86_QUANTIZE_SSE2_H_

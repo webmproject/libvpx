@@ -17,7 +17,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
-#include "vpx_dsp/x86/quantize_x86.h"
+#include "vpx_dsp/x86/quantize_sse2.h"
 
 void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                         int skip_block, const int16_t *zbin_ptr,
