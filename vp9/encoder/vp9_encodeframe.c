@@ -930,7 +930,9 @@ static int scale_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   PARTITION_TYPE partition_high;
 
   if (mi_row_high >= cm->mi_rows || mi_col_high >= cm->mi_cols) return 0;
-  if (mi_row >= (cm->mi_rows >> 1) || mi_col >= (cm->mi_cols >> 1)) return 0;
+  if (mi_row >= svc->mi_rows[svc->spatial_layer_id - 1] ||
+      mi_col >= svc->mi_cols[svc->spatial_layer_id - 1])
+    return 0;
 
   // Find corresponding (mi_col/mi_row) block down-scaled by 2x2.
   start_pos = mi_row * (svc->mi_stride[svc->spatial_layer_id - 1]) + mi_col;
@@ -5658,7 +5660,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
-
   vp9_zero(*td->counts);
   vp9_zero(cpi->td.rd_counts);
 

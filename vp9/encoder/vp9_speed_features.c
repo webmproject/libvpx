@@ -713,8 +713,7 @@ static void set_rt_speed_feature_framesize_independent(
     // TODO(jianj): Investigate webm:1578
     if (cpi->use_svc && cpi->svc.use_partition_reuse &&
         cpi->svc.number_spatial_layers == 3 && cpi->svc.temporal_layer_id > 0 &&
-        cpi->oxcf.width * cpi->oxcf.height > 640 * 480 &&
-        cpi->oxcf.width * cpi->oxcf.height < 1920 * 1080)
+        cpi->oxcf.width * cpi->oxcf.height > 640 * 480)
       sf->svc_use_lowres_part = 1;
     // For SVC when golden is used as second temporal reference: to avoid
     // encode time increase only use this feature on base temporal layer.

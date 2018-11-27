@@ -737,6 +737,8 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   }
   svc->force_zero_mode_spatial_ref = 1;
   svc->mi_stride[svc->spatial_layer_id] = cpi->common.mi_stride;
+  svc->mi_rows[svc->spatial_layer_id] = cpi->common.mi_rows;
+  svc->mi_cols[svc->spatial_layer_id] = cpi->common.mi_cols;
 
   if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_0212) {
     set_flags_and_fb_idx_for_temporal_mode3(cpi);
