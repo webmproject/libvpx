@@ -263,6 +263,14 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
     denoise_layer_idx = num_spatial_layers - spatial_layer - 1;
   }
 
+  // Force copy (no denoise, copy source in denoised buffer) if
+  // running_avg_y[frame] is NULL.
+  if (denoiser->running_avg_y[frame].buffer_alloc == NULL) {
+    // Restore everything to its original state
+    *mi = saved_mi;
+    return COPY_BLOCK;
+  }
+
   if (ctx->newmv_sse > sse_thresh(bs, increase_denoising)) {
     // Restore everything to its original state
     *mi = saved_mi;
