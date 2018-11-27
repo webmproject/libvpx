@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <memory>
 #include <string>
 
 #include "./vpx_config.h"
@@ -392,7 +393,7 @@ TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
 #endif
 
   // Open compressed video file.
-  testing::internal::scoped_ptr<libvpx_test::CompressedVideoSource> video;
+  std::unique_ptr<libvpx_test::CompressedVideoSource> video;
   if (filename.substr(filename.length() - 3, 3) == "ivf") {
     video.reset(new libvpx_test::IVFVideoSource(filename));
   } else {
