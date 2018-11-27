@@ -125,6 +125,8 @@ typedef struct SVC {
 
   BLOCK_SIZE *prev_partition_svc;
   int mi_stride[VPX_MAX_LAYERS];
+  int mi_rows[VPX_MAX_LAYERS];
+  int mi_cols[VPX_MAX_LAYERS];
 
   int first_layer_denoise;
 
