@@ -1092,13 +1092,16 @@ void vp9_svc_assert_constraints_pattern(VP9_COMP *const cpi) {
     }
   } else if (svc->use_gf_temporal_ref_current_layer &&
              !svc->layer_context[svc->temporal_layer_id].is_key_frame) {
-    // If the usage of golden as second long term reference is enabled for this
-    // layer, then temporal_layer_id of that reference must be base temporal
-    // layer 0, and spatial_layer_id of that reference must be same as current
-    // spatial_layer_id.
-    assert(svc->fb_idx_spatial_layer_id[cpi->gld_fb_idx] ==
-           svc->spatial_layer_id);
-    assert(svc->fb_idx_temporal_layer_id[cpi->gld_fb_idx] == 0);
+    // For the usage of golden as second long term reference: the
+    // temporal_layer_id of that reference must be base temporal layer 0, and
+    // spatial_layer_id of that reference must be same as current
+    // spatial_layer_id. If not, disable feature.
+    // TODO(marpan): Investigate when this can happen, and maybe put this check
+    // and reset in a different place.
+    if (svc->fb_idx_spatial_layer_id[cpi->gld_fb_idx] !=
+            svc->spatial_layer_id ||
+        svc->fb_idx_temporal_layer_id[cpi->gld_fb_idx] != 0)
+      svc->use_gf_temporal_ref_current_layer = 0;
   }
 }
 
