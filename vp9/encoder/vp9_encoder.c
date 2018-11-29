@@ -4855,6 +4855,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
   cpi->last_frame_dropped = 0;
   cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 0;
+  if (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)
+    cpi->svc.num_encoded_top_layer++;
+
   // Keep track of the frame buffer index updated/refreshed for the
   // current encoded TL0 superframe.
   if (cpi->svc.temporal_layer_id == 0) {

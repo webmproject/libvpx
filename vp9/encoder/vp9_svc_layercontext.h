@@ -186,6 +186,8 @@ typedef struct SVC {
   int64_t timebase_fac;
   int64_t time_stamp_superframe;
   int64_t time_stamp_prev[VPX_SS_MAX_LAYERS];
+
+  int num_encoded_top_layer;
 } SVC;
 
 struct VP9_COMP;

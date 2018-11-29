@@ -53,6 +53,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->previous_frame_is_intra_only = 0;
   svc->superframe_has_layer_sync = 0;
   svc->use_set_ref_frame_config = 0;
+  svc->num_encoded_top_layer = 0;
 
   for (i = 0; i < REF_FRAMES; ++i) {
     svc->fb_idx_spatial_layer_id[i] = -1;
