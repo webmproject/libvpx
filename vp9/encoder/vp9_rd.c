@@ -174,23 +174,10 @@ static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = { 128, 144, 128,
                                                               128, 144, 144 };
 
 int vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
-  // largest dc_quant is 21387, therefore rdmult should always fit in uint32_t
-  // i.e. 21387 * 21387 * 8 = 3659230152 = 0xDA1B6BC8
+  // largest dc_quant is 21387, therefore rdmult should always fit in int32_t
   const int q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
-  uint32_t rdmult = q * q;
-
-  if (cpi->common.frame_type != KEY_FRAME) {
-    rdmult = rdmult * 3 + (rdmult * 2 / 3);
-  } else {
-    if (qindex < 64)
-      rdmult = rdmult * 4;
-    else if (qindex <= 128)
-      rdmult = rdmult * 3 + rdmult / 2;
-    else if (qindex < 190)
-      rdmult = rdmult * 4 + rdmult / 2;
-    else
-      rdmult = rdmult * 7 + rdmult / 2;
-  }
+  int rdmult = q * q;
+  rdmult = rdmult * 3 + (rdmult * 2 / 3);
 #if CONFIG_VP9_HIGHBITDEPTH
   switch (cpi->common.bit_depth) {
     case VPX_BITS_10: rdmult = ROUND_POWER_OF_TWO(rdmult, 4); break;
