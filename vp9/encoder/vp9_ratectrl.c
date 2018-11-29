@@ -1271,6 +1271,77 @@ int vp9_frame_type_qdelta(const VP9_COMP *cpi, int rf_level, int q) {
 }
 
 #define STATIC_MOTION_THRESH 95
+
+static int pick_kf_q_bound_two_pass(const VP9_COMP *cpi, int *bottom_index,
+                                    int *top_index) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const RATE_CONTROL *const rc = &cpi->rc;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const int cq_level = get_active_cq_level_two_pass(&cpi->twopass, rc, oxcf);
+
+  int q = cq_level;
+  int active_best_quality;
+  int active_worst_quality = cpi->twopass.active_worst_quality;
+
+  if (rc->this_key_frame_forced) {
+    // Handle the special case for key frames forced when we have reached
+    // the maximum key frame interval. Here force the Q to a range
+    // based on the ambient Q to reduce the risk of popping.
+    double last_boosted_q;
+    int delta_qindex;
+    int qindex;
+
+    if (cpi->twopass.last_kfgroup_zeromotion_pct >= STATIC_MOTION_THRESH) {
+      qindex = VPXMIN(rc->last_kf_qindex, rc->last_boosted_qindex);
+      active_best_quality = qindex;
+      last_boosted_q = vp9_convert_qindex_to_q(qindex, cm->bit_depth);
+      delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
+                                        last_boosted_q * 1.25, cm->bit_depth);
+      active_worst_quality =
+          VPXMIN(qindex + delta_qindex, active_worst_quality);
+    } else {
+      qindex = rc->last_boosted_qindex;
+      last_boosted_q = vp9_convert_qindex_to_q(qindex, cm->bit_depth);
+      delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
+                                        last_boosted_q * 0.75, cm->bit_depth);
+      active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
+    }
+  } else {
+    // Not forced keyframe.
+    double q_adj_factor = 1.0;
+    double q_val;
+    // Baseline value derived from cpi->active_worst_quality and kf boost.
+    active_best_quality =
+        get_kf_active_quality(rc, active_worst_quality, cm->bit_depth);
+    if (cpi->twopass.kf_zeromotion_pct >= STATIC_KF_GROUP_THRESH) {
+      active_best_quality /= 4;
+    }
+
+    // Dont allow the active min to be lossless (q0) unlesss the max q
+    // already indicates lossless.
+    active_best_quality =
+        VPXMIN(active_worst_quality, VPXMAX(1, active_best_quality));
+
+    // Allow somewhat lower kf minq with small image formats.
+    if ((cm->width * cm->height) <= (352 * 288)) {
+      q_adj_factor -= 0.25;
+    }
+
+    // Make a further adjustment based on the kf zero motion measure.
+    q_adj_factor += 0.05 - (0.001 * (double)cpi->twopass.kf_zeromotion_pct);
+
+    // Convert the adjustment factor to a qindex delta
+    // on active_best_quality.
+    q_val = vp9_convert_qindex_to_q(active_best_quality, cm->bit_depth);
+    active_best_quality +=
+        vp9_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
+  }
+  *top_index = active_worst_quality;
+  *bottom_index = active_best_quality;
+
+  return q;
+}
+
 static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
                                          int *top_index, int gf_group_index) {
   const VP9_COMMON *const cm = &cpi->common;
@@ -1291,58 +1362,9 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
       // as q.
       active_best_quality = cq_level;
       active_worst_quality = cq_level;
-    } else if (rc->this_key_frame_forced) {
-      // Handle the special case for key frames forced when we have reached
-      // the maximum key frame interval. Here force the Q to a range
-      // based on the ambient Q to reduce the risk of popping.
-      double last_boosted_q;
-      int delta_qindex;
-      int qindex;
-
-      if (cpi->twopass.last_kfgroup_zeromotion_pct >= STATIC_MOTION_THRESH) {
-        qindex = VPXMIN(rc->last_kf_qindex, rc->last_boosted_qindex);
-        active_best_quality = qindex;
-        last_boosted_q = vp9_convert_qindex_to_q(qindex, cm->bit_depth);
-        delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
-                                          last_boosted_q * 1.25, cm->bit_depth);
-        active_worst_quality =
-            VPXMIN(qindex + delta_qindex, active_worst_quality);
-      } else {
-        qindex = rc->last_boosted_qindex;
-        last_boosted_q = vp9_convert_qindex_to_q(qindex, cm->bit_depth);
-        delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
-                                          last_boosted_q * 0.75, cm->bit_depth);
-        active_best_quality = VPXMAX(qindex + delta_qindex, rc->best_quality);
-      }
     } else {
-      // Not forced keyframe.
-      double q_adj_factor = 1.0;
-      double q_val;
-      // Baseline value derived from cpi->active_worst_quality and kf boost.
-      active_best_quality =
-          get_kf_active_quality(rc, active_worst_quality, cm->bit_depth);
-      if (cpi->twopass.kf_zeromotion_pct >= STATIC_KF_GROUP_THRESH) {
-        active_best_quality /= 4;
-      }
-
-      // Dont allow the active min to be lossless (q0) unlesss the max q
-      // already indicates lossless.
-      active_best_quality =
-          VPXMIN(active_worst_quality, VPXMAX(1, active_best_quality));
-
-      // Allow somewhat lower kf minq with small image formats.
-      if ((cm->width * cm->height) <= (352 * 288)) {
-        q_adj_factor -= 0.25;
-      }
-
-      // Make a further adjustment based on the kf zero motion measure.
-      q_adj_factor += 0.05 - (0.001 * (double)cpi->twopass.kf_zeromotion_pct);
-
-      // Convert the adjustment factor to a qindex delta
-      // on active_best_quality.
-      q_val = vp9_convert_qindex_to_q(active_best_quality, cm->bit_depth);
-      active_best_quality +=
-          vp9_compute_qdelta(rc, q_val, q_val * q_adj_factor, cm->bit_depth);
+      pick_kf_q_bound_two_pass(cpi, &active_best_quality,
+                               &active_worst_quality);
     }
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
