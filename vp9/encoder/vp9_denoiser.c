@@ -692,6 +692,7 @@ int vp9_denoiser_alloc(VP9_COMMON *cm, struct SVC *svc, VP9_DENOISER *denoiser,
   denoiser->denoising_level = kDenLow;
   denoiser->prev_denoising_level = kDenLow;
   denoiser->reset = 0;
+  denoiser->current_denoiser_frame = 0;
   return 0;
 }
 
@@ -716,13 +717,29 @@ void vp9_denoiser_free(VP9_DENOISER *denoiser) {
   vpx_free_frame_buffer(&denoiser->last_source);
 }
 
-void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser, int noise_level) {
+static void force_refresh_longterm_ref(VP9_COMP *const cpi) {
+  SVC *const svc = &cpi->svc;
+  // If long term reference is used, force refresh of that slot, so
+  // denoiser buffer for long term reference stays in sync.
+  if (svc->use_gf_temporal_ref_current_layer) {
+    int index = svc->spatial_layer_id;
+    if (svc->number_spatial_layers == 3) index = svc->spatial_layer_id - 1;
+    assert(index >= 0);
+    cpi->alt_fb_idx = svc->buffer_gf_temporal_ref[index].idx;
+    cpi->refresh_alt_ref_frame = 1;
+  }
+}
+
+void vp9_denoiser_set_noise_level(VP9_COMP *const cpi, int noise_level) {
+  VP9_DENOISER *const denoiser = &cpi->denoiser;
   denoiser->denoising_level = noise_level;
   if (denoiser->denoising_level > kDenLowLow &&
-      denoiser->prev_denoising_level == kDenLowLow)
+      denoiser->prev_denoising_level == kDenLowLow) {
     denoiser->reset = 1;
-  else
+    force_refresh_longterm_ref(cpi);
+  } else {
     denoiser->reset = 0;
+  }
   denoiser->prev_denoising_level = denoiser->denoising_level;
 }
 
@@ -754,14 +771,24 @@ int64_t vp9_scale_acskip_thresh(int64_t threshold,
     return threshold;
 }
 
+void vp9_denoiser_reset_on_first_frame(VP9_COMP *const cpi) {
+  if (vp9_denoise_svc_non_key(cpi) &&
+      cpi->denoiser.current_denoiser_frame == 0) {
+    cpi->denoiser.reset = 1;
+    force_refresh_longterm_ref(cpi);
+  }
+}
+
 void vp9_denoiser_update_ref_frame(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
   SVC *const svc = &cpi->svc;
+
   if (cpi->oxcf.noise_sensitivity > 0 && denoise_svc(cpi) &&
       cpi->denoiser.denoising_level > kDenLowLow) {
     int svc_refresh_denoiser_buffers = 0;
     int denoise_svc_second_layer = 0;
     FRAME_TYPE frame_type = cm->intra_only ? KEY_FRAME : cm->frame_type;
+    cpi->denoiser.current_denoiser_frame++;
     if (cpi->use_svc) {
       const int svc_buf_shift =
           svc->number_spatial_layers - svc->spatial_layer_id == 2

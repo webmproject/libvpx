@@ -50,6 +50,7 @@ typedef struct vp9_denoiser {
   int reset;
   int num_ref_frames;
   int num_layers;
+  unsigned int current_denoiser_frame;
   VP9_DENOISER_LEVEL denoising_level;
   VP9_DENOISER_LEVEL prev_denoising_level;
 } VP9_DENOISER;
@@ -111,7 +112,9 @@ static INLINE int total_adj_strong_thresh(BLOCK_SIZE bs,
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser);
 
-void vp9_denoiser_set_noise_level(VP9_DENOISER *denoiser, int noise_level);
+void vp9_denoiser_set_noise_level(struct VP9_COMP *const cpi, int noise_level);
+
+void vp9_denoiser_reset_on_first_frame(struct VP9_COMP *const cpi);
 
 int64_t vp9_scale_part_thresh(int64_t threshold, VP9_DENOISER_LEVEL noise_level,
                               int content_state, int temporal_layer_id);

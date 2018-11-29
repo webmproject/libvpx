@@ -235,6 +235,10 @@ struct lookahead_entry *vp9_svc_lookahead_pop(struct VP9_COMP *const cpi,
 // Start a frame and initialize svc parameters
 int vp9_svc_start_frame(struct VP9_COMP *const cpi);
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+int vp9_denoise_svc_non_key(struct VP9_COMP *const cpi);
+#endif
+
 void vp9_copy_flags_ref_update_idx(struct VP9_COMP *const cpi);
 
 int vp9_one_pass_cbr_svc_start_layer(struct VP9_COMP *const cpi);
