@@ -2240,24 +2240,18 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
               refining search  */
 double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
                                   MV *mvp_full, int step_param, double lambda,
-                                  int further_steps, int do_refine,
+                                  int do_refine,
                                   const vp9_variance_fn_ptr_t *fn_ptr,
-                                  const int_mv *nb_full_mvs,
-                                  TplDepStats *tpl_stats, int rf_idx) {
-  MV *dst_mv = &tpl_stats->mv_arr[rf_idx].as_mv;
-  MV temp_mv;
+                                  const int_mv *nb_full_mvs, MV *best_mv,
+                                  double *best_mv_dist, double *best_mv_cost) {
   int n, num00 = 0;
   double thissme;
-  double mv_dist;
-  double mv_cost;
   double bestsme;
+  const int further_steps = MAX_MVSEARCH_STEPS - 1 - step_param;
   vpx_clear_system_state();
-  bestsme = vp9_diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, &temp_mv,
-                                       &mv_dist, &mv_cost, step_param, lambda,
-                                       &n, fn_ptr, nb_full_mvs);
-  *dst_mv = temp_mv;
-  tpl_stats->mv_dist[rf_idx] = mv_dist;
-  tpl_stats->mv_cost[rf_idx] = mv_cost;
+  bestsme = vp9_diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, best_mv,
+                                       best_mv_dist, best_mv_cost, step_param,
+                                       lambda, &n, fn_ptr, nb_full_mvs);
 
   // If there won't be more n-step search, check to see if refining search is
   // needed.
@@ -2268,6 +2262,9 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
     if (num00) {
       num00--;
     } else {
+      MV temp_mv;
+      double mv_dist;
+      double mv_cost;
       thissme = vp9_diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, &temp_mv,
                                            &mv_dist, &mv_cost, step_param + n,
                                            lambda, &num00, fn_ptr, nb_full_mvs);
@@ -2276,9 +2273,9 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
 
       if (thissme < bestsme) {
         bestsme = thissme;
-        *dst_mv = temp_mv;
-        tpl_stats->mv_dist[rf_idx] = mv_dist;
-        tpl_stats->mv_cost[rf_idx] = mv_cost;
+        *best_mv = temp_mv;
+        *best_mv_dist = mv_dist;
+        *best_mv_cost = mv_cost;
       }
     }
   }
@@ -2286,15 +2283,17 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
   // final 1-away diamond refining search
   if (do_refine) {
     const int search_range = 8;
-    MV best_mv = *dst_mv;
+    MV temp_mv = *best_mv;
+    double mv_dist;
+    double mv_cost;
     thissme =
-        vp9_refining_search_sad_new(x, &best_mv, &mv_dist, &mv_cost, lambda,
+        vp9_refining_search_sad_new(x, &temp_mv, &mv_dist, &mv_cost, lambda,
                                     search_range, fn_ptr, nb_full_mvs);
     if (thissme < bestsme) {
       bestsme = thissme;
-      *dst_mv = best_mv;
-      tpl_stats->mv_dist[rf_idx] = mv_dist;
-      tpl_stats->mv_cost[rf_idx] = mv_cost;
+      *best_mv = temp_mv;
+      *best_mv_dist = mv_dist;
+      *best_mv_cost = mv_cost;
     }
   }
   return bestsme;
