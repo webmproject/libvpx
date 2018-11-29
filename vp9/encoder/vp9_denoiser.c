@@ -360,6 +360,7 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
   int is_skin = 0;
   int increase_denoising = 0;
   int consec_zeromv = 0;
+  int last_is_reference = cpi->ref_frame_flags & VP9_LAST_FLAG;
   mv_col = ctx->best_sse_mv.as_mv.col;
   mv_row = ctx->best_sse_mv.as_mv.row;
   motion_magnitude = mv_row * mv_row + mv_col * mv_col;
@@ -403,7 +404,12 @@ void vp9_denoiser_denoise(VP9_COMP *cpi, MACROBLOCK *mb, int mi_row, int mi_col,
   }
   if (!is_skin && denoiser->denoising_level == kDenHigh) increase_denoising = 1;
 
-  if (denoiser->denoising_level >= kDenLow && !ctx->sb_skip_denoising)
+  // Copy block if LAST_FRAME is not a reference.
+  // Last doesn't always exist when SVC layers are dynamically changed, e.g. top
+  // spatial layer doesn't have last reference when it's brought up for the
+  // first time on the fly.
+  if (last_is_reference && denoiser->denoising_level >= kDenLow &&
+      !ctx->sb_skip_denoising)
     decision = perform_motion_compensation(
         &cpi->common, denoiser, mb, bs, increase_denoising, mi_row, mi_col, ctx,
         motion_magnitude, is_skin, &zeromv_filter, consec_zeromv,
