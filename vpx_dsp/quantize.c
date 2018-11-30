@@ -12,6 +12,7 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/quantize.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 
 void vpx_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs, int skip_block,
@@ -259,7 +260,15 @@ void vpx_quantize_b_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
           15;
 
     qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
+#if (ARCH_X86 || ARCH_X86_64) && !CONFIG_VP9_HIGHBITDEPTH
+    // When tran_low_t is only 16 bits dqcoeff can outrange it. Rather than
+    // truncating with a cast, saturate the value. This is easier to implement
+    // on x86 and preserves the sign of the value.
+    dqcoeff_ptr[rc] =
+        clamp(qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2, INT16_MIN, INT16_MAX);
+#else
     dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2;
+#endif  // ARCH_X86 && CONFIG_VP9_HIGHBITDEPTH
 
     if (tmp) eob = idx_arr[i];
   }
