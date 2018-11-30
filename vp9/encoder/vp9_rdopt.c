@@ -2322,9 +2322,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   const VP9_COMMON *cm = &cpi->common;
   MODE_INFO *mi = xd->mi[0];
   struct buf_2d backup_yv12[MAX_MB_PLANE] = { { 0, 0 } };
-  int bestsme = INT_MAX;
   int step_param;
-  int sadpb = x->sadperbit16;
   MV mvp_full;
   int ref = mi->ref_frame[0];
   MV ref_mv = x->mbmi_ext->ref_mvs[ref][0].as_mv;
@@ -2335,8 +2333,21 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       vp9_get_scaled_ref_frame(cpi, ref);
   const int pw = num_4x4_blocks_wide_lookup[bsize] << 2;
   const int ph = num_4x4_blocks_high_lookup[bsize] << 2;
-
   MV pred_mv[3];
+
+#if CONFIG_NON_GREEDY_MV
+  double mv_dist = 0;
+  double mv_cost = 0;
+  double lambda = 0;
+  double bestsme;
+  int_mv nb_full_mvs[NB_MVS_NUM];
+  // TODO(angiebird): Set nb_full_mvs properly.
+  vp9_zero(nb_full_mvs);
+#else   // CONFIG_NON_GREEDY_MV
+  int bestsme = INT_MAX;
+  int sadpb = x->sadperbit16;
+#endif  // CONFIG_NON_GREEDY_MV
+
   pred_mv[0] = x->mbmi_ext->ref_mvs[ref][0].as_mv;
   pred_mv[1] = x->mbmi_ext->ref_mvs[ref][1].as_mv;
   pred_mv[2] = x->pred_mv[ref];
@@ -2406,14 +2417,24 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
+#if CONFIG_NON_GREEDY_MV
+  bestsme = vp9_full_pixel_diamond_new(cpi, x, &mvp_full, step_param, lambda, 1,
+                                       &cpi->fn_ptr[bsize], nb_full_mvs,
+                                       &tmp_mv->as_mv, &mv_dist, &mv_cost);
+#else   // CONFIG_NON_GREEDY_MV
   bestsme = vp9_full_pixel_search(
       cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method, sadpb,
       cond_cost_list(cpi, cost_list), &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
+#endif  // CONFIG_NON_GREEDY_MV
 
   if (cpi->sf.enhanced_full_pixel_motion_search) {
     int i;
     for (i = 0; i < 3; ++i) {
+#if CONFIG_NON_GREEDY_MV
+      double this_me;
+#else   // CONFIG_NON_GREEDY_MV
       int this_me;
+#endif  // CONFIG_NON_GREEDY_MV
       MV this_mv;
       int diff_row;
       int diff_col;
@@ -2437,11 +2458,18 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       mvp_full = pred_mv[i];
       mvp_full.col >>= 3;
       mvp_full.row >>= 3;
+#if CONFIG_NON_GREEDY_MV
+      this_me = vp9_full_pixel_diamond_new(
+          cpi, x, &mvp_full, VPXMAX(step_param, MAX_MVSEARCH_STEPS - step),
+          lambda, 1, &cpi->fn_ptr[bsize], nb_full_mvs, &tmp_mv->as_mv, &mv_dist,
+          &mv_cost);
+#else   // CONFIG_NON_GREEDY_MV
       this_me = vp9_full_pixel_search(
           cpi, x, bsize, &mvp_full,
           VPXMAX(step_param, MAX_MVSEARCH_STEPS - step),
           cpi->sf.mv.search_method, sadpb, cond_cost_list(cpi, cost_list),
           &ref_mv, &this_mv, INT_MAX, 1);
+#endif  // CONFIG_NON_GREEDY_MV
       if (this_me < bestsme) {
         tmp_mv->as_mv = this_mv;
         bestsme = this_me;
