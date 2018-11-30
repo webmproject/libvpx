@@ -1394,16 +1394,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
     return rc_constant_q(cpi, bottom_index, top_index, gf_group_index);
 
   if (frame_is_intra_only(cm)) {
-    if (rc->frames_to_key == 1 && oxcf->rc_mode == VPX_Q) {
-      // If the next frame is also a key frame or the current frame is the
-      // only frame in the sequence in AOM_Q mode, just use the cq_level
-      // as q.
-      active_best_quality = cq_level;
-      active_worst_quality = cq_level;
-    } else {
-      pick_kf_q_bound_two_pass(cpi, &active_best_quality,
-                               &active_worst_quality);
-    }
+    pick_kf_q_bound_two_pass(cpi, &active_best_quality, &active_worst_quality);
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
     // Use the lower of active_worst_quality and recent
@@ -1434,54 +1425,31 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
             ((layer_depth - 1) * q + active_best_quality + layer_depth / 2) /
             layer_depth;
       }
-    } else if (oxcf->rc_mode == VPX_Q) {
-      if (!cpi->refresh_alt_ref_frame) {
-        active_best_quality = cq_level;
-      } else {
-        active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
-
-        // Modify best quality for second level arfs. For mode VPX_Q this
-        // becomes the baseline frame q.
-        if (gf_group->rf_level[gf_group_index] == GF_ARF_LOW) {
-          const int layer_depth = gf_group->layer_depth[gf_group_index];
-          // linearly fit the frame q depending on the layer depth index from
-          // the base layer ARF.
-          active_best_quality = ((layer_depth - 1) * cq_level +
-                                 active_best_quality + layer_depth / 2) /
-                                layer_depth;
-        }
-      }
     } else {
       active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
     }
   } else {
-    if (oxcf->rc_mode == VPX_Q) {
-      active_best_quality = cq_level;
-    } else {
-      active_best_quality = inter_minq[active_worst_quality];
+    active_best_quality = inter_minq[active_worst_quality];
 
-      // For the constrained quality mode we don't want
-      // q to fall below the cq level.
-      if ((oxcf->rc_mode == VPX_CQ) && (active_best_quality < cq_level)) {
-        active_best_quality = cq_level;
-      }
+    // For the constrained quality mode we don't want
+    // q to fall below the cq level.
+    if ((oxcf->rc_mode == VPX_CQ) && (active_best_quality < cq_level)) {
+      active_best_quality = cq_level;
     }
   }
 
   // Extension to max or min Q if undershoot or overshoot is outside
   // the permitted range.
-  if (cpi->oxcf.rc_mode != VPX_Q) {
-    if (frame_is_intra_only(cm) ||
-        (!rc->is_src_frame_alt_ref &&
-         (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
-      active_best_quality -=
-          (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast);
-      active_worst_quality += (cpi->twopass.extend_maxq / 2);
-    } else {
-      active_best_quality -=
-          (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast) / 2;
-      active_worst_quality += cpi->twopass.extend_maxq;
-    }
+  if (frame_is_intra_only(cm) ||
+      (!rc->is_src_frame_alt_ref &&
+       (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
+    active_best_quality -=
+        (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast);
+    active_worst_quality += (cpi->twopass.extend_maxq / 2);
+  } else {
+    active_best_quality -=
+        (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast) / 2;
+    active_worst_quality += cpi->twopass.extend_maxq;
   }
 
   // For normal frames do not allow an active minq lower than the q used for
@@ -1517,10 +1485,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
   active_worst_quality =
       clamp(active_worst_quality, active_best_quality, rc->worst_quality);
 
-  if (oxcf->rc_mode == VPX_Q) {
-    q = active_best_quality;
-    // Special case code to try and match quality with forced key frames.
-  } else if (frame_is_intra_only(cm) && rc->this_key_frame_forced) {
+  if (frame_is_intra_only(cm) && rc->this_key_frame_forced) {
     // If static since last kf use better of last boosted and last kf q.
     if (cpi->twopass.last_kfgroup_zeromotion_pct >= STATIC_MOTION_THRESH) {
       q = VPXMIN(rc->last_kf_qindex, rc->last_boosted_qindex);
