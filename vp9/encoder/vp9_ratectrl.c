@@ -1272,14 +1272,10 @@ int vp9_frame_type_qdelta(const VP9_COMP *cpi, int rf_level, int q) {
 
 #define STATIC_MOTION_THRESH 95
 
-static int pick_kf_q_bound_two_pass(const VP9_COMP *cpi, int *bottom_index,
-                                    int *top_index) {
+static void pick_kf_q_bound_two_pass(const VP9_COMP *cpi, int *bottom_index,
+                                     int *top_index) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  const int cq_level = get_active_cq_level_two_pass(&cpi->twopass, rc, oxcf);
-
-  int q = cq_level;
   int active_best_quality;
   int active_worst_quality = cpi->twopass.active_worst_quality;
 
@@ -1338,7 +1334,46 @@ static int pick_kf_q_bound_two_pass(const VP9_COMP *cpi, int *bottom_index,
   }
   *top_index = active_worst_quality;
   *bottom_index = active_best_quality;
+}
 
+static int rc_constant_q(const VP9_COMP *cpi, int *bottom_index, int *top_index,
+                         int gf_group_index) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const RATE_CONTROL *const rc = &cpi->rc;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const GF_GROUP *gf_group = &cpi->twopass.gf_group;
+  const int is_intra_frame = frame_is_intra_only(cm);
+
+  const int cq_level = get_active_cq_level_two_pass(&cpi->twopass, rc, oxcf);
+
+  int q = cq_level;
+  int active_best_quality = cq_level;
+  int active_worst_quality = cq_level;
+
+  // Key frame qp decision
+  if (is_intra_frame && rc->frames_to_key > 1)
+    pick_kf_q_bound_two_pass(cpi, &active_best_quality, &active_worst_quality);
+
+  // ARF / GF qp decision
+  if (!is_intra_frame && !rc->is_src_frame_alt_ref &&
+      cpi->refresh_alt_ref_frame) {
+    active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
+
+    // Modify best quality for second level arfs. For mode VPX_Q this
+    // becomes the baseline frame q.
+    if (gf_group->rf_level[gf_group_index] == GF_ARF_LOW) {
+      const int layer_depth = gf_group->layer_depth[gf_group_index];
+      // linearly fit the frame q depending on the layer depth index from
+      // the base layer ARF.
+      active_best_quality = ((layer_depth - 1) * cq_level +
+                             active_best_quality + layer_depth / 2) /
+                            layer_depth;
+    }
+  }
+
+  q = active_best_quality;
+  *top_index = active_worst_quality;
+  *bottom_index = active_best_quality;
   return q;
 }
 
@@ -1354,6 +1389,9 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
   int q;
   int *inter_minq;
   ASSIGN_MINQ_TABLE(cm->bit_depth, inter_minq);
+
+  if (oxcf->rc_mode == VPX_Q)
+    return rc_constant_q(cpi, bottom_index, top_index, gf_group_index);
 
   if (frame_is_intra_only(cm)) {
     if (rc->frames_to_key == 1 && oxcf->rc_mode == VPX_Q) {
