@@ -540,8 +540,7 @@ INSTANTIATE_TEST_CASE_P(
                                  16, true)));
 #endif  // HAVE_AVX2
 
-// TODO(webm:1448): dqcoeff is not handled correctly in HBD builds.
-#if HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(
     NEON, VP9QuantizeTest,
     ::testing::Values(make_tuple(&vpx_quantize_b_neon, &vpx_quantize_b_c,
@@ -555,7 +554,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_neon>,
                                  &QuantFPWrapper<vp9_quantize_fp_32x32_c>,
                                  VPX_BITS_8, 32, true)));
-#endif  // HAVE_NEON && !CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_NEON
 
 #if HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(

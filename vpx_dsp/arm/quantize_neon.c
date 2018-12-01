@@ -15,6 +15,22 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/arm/mem_neon.h"
 
+static INLINE void calculate_dqcoeff_and_store(const int16x8_t qcoeff,
+                                               const int16x8_t dequant,
+                                               tran_low_t *dqcoeff) {
+  const int32x4_t dqcoeff_0 =
+      vmull_s16(vget_low_s16(qcoeff), vget_low_s16(dequant));
+  const int32x4_t dqcoeff_1 =
+      vmull_s16(vget_high_s16(qcoeff), vget_high_s16(dequant));
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  vst1q_s32(dqcoeff, dqcoeff_0);
+  vst1q_s32(dqcoeff + 4, dqcoeff_1);
+#else
+  vst1q_s16(dqcoeff, vcombine_s16(vmovn_s32(dqcoeff_0), vmovn_s32(dqcoeff_1)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+}
+
 void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                          int skip_block, const int16_t *zbin_ptr,
                          const int16_t *round_ptr, const int16_t *quant_ptr,
@@ -73,9 +89,7 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
     qcoeff_ptr += 8;
 
-    qcoeff = vmulq_s16(qcoeff, dequant);
-
-    store_s16q_to_tran_low(dqcoeff_ptr, qcoeff);
+    calculate_dqcoeff_and_store(qcoeff, dequant, dqcoeff_ptr);
     dqcoeff_ptr += 8;
   }
 
@@ -126,9 +140,7 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
       qcoeff_ptr += 8;
 
-      qcoeff = vmulq_s16(qcoeff, dequant);
-
-      store_s16q_to_tran_low(dqcoeff_ptr, qcoeff);
+      calculate_dqcoeff_and_store(qcoeff, dequant, dqcoeff_ptr);
       dqcoeff_ptr += 8;
 
       n_coeffs -= 8;
@@ -150,6 +162,28 @@ void vpx_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
 static INLINE int32x4_t extract_sign_bit(int32x4_t a) {
   return vreinterpretq_s32_u32(vshrq_n_u32(vreinterpretq_u32_s32(a), 31));
+}
+
+static INLINE void calculate_dqcoeff_and_store_32x32(const int16x8_t qcoeff,
+                                                     const int16x8_t dequant,
+                                                     tran_low_t *dqcoeff) {
+  int32x4_t dqcoeff_0 = vmull_s16(vget_low_s16(qcoeff), vget_low_s16(dequant));
+  int32x4_t dqcoeff_1 =
+      vmull_s16(vget_high_s16(qcoeff), vget_high_s16(dequant));
+
+  // Add 1 if negative to round towards zero because the C uses division.
+  dqcoeff_0 = vaddq_s32(dqcoeff_0, extract_sign_bit(dqcoeff_0));
+  dqcoeff_1 = vaddq_s32(dqcoeff_1, extract_sign_bit(dqcoeff_1));
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  dqcoeff_0 = vshrq_n_s32(dqcoeff_0, 1);
+  dqcoeff_1 = vshrq_n_s32(dqcoeff_1, 1);
+  vst1q_s32(dqcoeff, dqcoeff_0);
+  vst1q_s32(dqcoeff + 4, dqcoeff_1);
+#else
+  vst1q_s16(dqcoeff,
+            vcombine_s16(vshrn_n_s32(dqcoeff_0, 1), vshrn_n_s32(dqcoeff_1, 1)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
 // Main difference is that zbin values are halved before comparison and dqcoeff
@@ -194,8 +228,6 @@ void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
     // (round * quant * 2) >> 16 >> 1 == (round * quant) >> 16
     int16x8_t qcoeff = vshrq_n_s16(vqdmulhq_s16(rounded, quant), 1);
-    int16x8_t dqcoeff;
-    int32x4_t dqcoeff_0, dqcoeff_1;
 
     qcoeff = vaddq_s16(qcoeff, rounded);
 
@@ -217,17 +249,7 @@ void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
     qcoeff_ptr += 8;
 
-    dqcoeff_0 = vmull_s16(vget_low_s16(qcoeff), vget_low_s16(dequant));
-    dqcoeff_1 = vmull_s16(vget_high_s16(qcoeff), vget_high_s16(dequant));
-
-    // Add 1 if negative to round towards zero because the C uses division.
-    dqcoeff_0 = vaddq_s32(dqcoeff_0, extract_sign_bit(dqcoeff_0));
-    dqcoeff_1 = vaddq_s32(dqcoeff_1, extract_sign_bit(dqcoeff_1));
-
-    dqcoeff =
-        vcombine_s16(vshrn_n_s32(dqcoeff_0, 1), vshrn_n_s32(dqcoeff_1, 1));
-
-    store_s16q_to_tran_low(dqcoeff_ptr, dqcoeff);
+    calculate_dqcoeff_and_store_32x32(qcoeff, dequant, dqcoeff_ptr);
     dqcoeff_ptr += 8;
   }
 
@@ -254,8 +276,6 @@ void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
       // (round * quant * 2) >> 16 >> 1 == (round * quant) >> 16
       int16x8_t qcoeff = vshrq_n_s16(vqdmulhq_s16(rounded, quant), 1);
-      int16x8_t dqcoeff;
-      int32x4_t dqcoeff_0, dqcoeff_1;
 
       qcoeff = vaddq_s16(qcoeff, rounded);
 
@@ -278,16 +298,7 @@ void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       store_s16q_to_tran_low(qcoeff_ptr, qcoeff);
       qcoeff_ptr += 8;
 
-      dqcoeff_0 = vmull_s16(vget_low_s16(qcoeff), vget_low_s16(dequant));
-      dqcoeff_1 = vmull_s16(vget_high_s16(qcoeff), vget_high_s16(dequant));
-
-      dqcoeff_0 = vaddq_s32(dqcoeff_0, extract_sign_bit(dqcoeff_0));
-      dqcoeff_1 = vaddq_s32(dqcoeff_1, extract_sign_bit(dqcoeff_1));
-
-      dqcoeff =
-          vcombine_s16(vshrn_n_s32(dqcoeff_0, 1), vshrn_n_s32(dqcoeff_1, 1));
-
-      store_s16q_to_tran_low(dqcoeff_ptr, dqcoeff);
+      calculate_dqcoeff_and_store_32x32(qcoeff, dequant, dqcoeff_ptr);
       dqcoeff_ptr += 8;
     }
   }
