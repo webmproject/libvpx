@@ -3081,21 +3081,27 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
       cpi->rc.rate_correction_factors[INTER_NORMAL] = rate_correction_factor;
     }
     // For temporal layers, reset the rate control parametes across all
-    // temporal layers.
+    // temporal layers. If the first_spatial_layer_to_encode > 0, then this
+    // superframe has skipped lower base layers. So in this case we should also
+    // reset and force max-q for spatial layers < first_spatial_layer_to_encode.
     if (cpi->use_svc) {
-      int i = 0;
+      int tl = 0;
+      int sl = 0;
       SVC *svc = &cpi->svc;
-      for (i = 0; i < svc->number_temporal_layers; ++i) {
-        const int layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, i,
-                                           svc->number_temporal_layers);
-        LAYER_CONTEXT *lc = &svc->layer_context[layer];
-        RATE_CONTROL *lrc = &lc->rc;
-        lrc->avg_frame_qindex[INTER_FRAME] = *q;
-        lrc->buffer_level = lrc->optimal_buffer_level;
-        lrc->bits_off_target = lrc->optimal_buffer_level;
-        lrc->rc_1_frame = 0;
-        lrc->rc_2_frame = 0;
-        lrc->rate_correction_factors[INTER_NORMAL] = rate_correction_factor;
+      for (sl = 0; sl < svc->first_spatial_layer_to_encode; ++sl) {
+        for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
+          const int layer =
+              LAYER_IDS_TO_IDX(sl, tl, svc->number_temporal_layers);
+          LAYER_CONTEXT *lc = &svc->layer_context[layer];
+          RATE_CONTROL *lrc = &lc->rc;
+          lrc->avg_frame_qindex[INTER_FRAME] = *q;
+          lrc->buffer_level = lrc->optimal_buffer_level;
+          lrc->bits_off_target = lrc->optimal_buffer_level;
+          lrc->rc_1_frame = 0;
+          lrc->rc_2_frame = 0;
+          lrc->rate_correction_factors[INTER_NORMAL] = rate_correction_factor;
+          lrc->force_max_q = 1;
+        }
       }
     }
     return 1;
