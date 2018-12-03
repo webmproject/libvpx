@@ -570,10 +570,25 @@ int post_encode_drop_cbr(VP9_COMP *cpi, size_t *size) {
     cpi->last_frame_dropped = 1;
     cpi->ext_refresh_frame_flags_pending = 0;
     if (cpi->use_svc) {
-      cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
-      cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
-      cpi->svc.drop_count[cpi->svc.spatial_layer_id]++;
-      cpi->svc.skip_enhancement_layer = 1;
+      SVC *svc = &cpi->svc;
+      int sl = 0;
+      int tl = 0;
+      svc->last_layer_dropped[svc->spatial_layer_id] = 1;
+      svc->drop_spatial_layer[svc->spatial_layer_id] = 1;
+      svc->drop_count[svc->spatial_layer_id]++;
+      svc->skip_enhancement_layer = 1;
+      // Postencode drop is only checked on base spatial layer,
+      // for now if max-q is set on base we force it on all layers.
+      for (sl = 0; sl < svc->number_spatial_layers; ++sl) {
+        for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
+          const int layer =
+              LAYER_IDS_TO_IDX(sl, tl, svc->number_temporal_layers);
+          LAYER_CONTEXT *lc = &svc->layer_context[layer];
+          RATE_CONTROL *lrc = &lc->rc;
+          lrc->force_max_q = 1;
+          lrc->avg_frame_qindex[INTER_FRAME] = cpi->rc.worst_quality;
+        }
+      }
     }
     return 1;
   }
