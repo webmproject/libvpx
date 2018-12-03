@@ -550,7 +550,7 @@ static int drop_frame(VP9_COMP *cpi) {
   }
 }
 
-int post_encode_drop_screen_content(VP9_COMP *cpi, size_t *size) {
+int post_encode_drop_cbr(VP9_COMP *cpi, size_t *size) {
   size_t frame_size = *size << 3;
   int64_t new_buffer_level =
       cpi->rc.buffer_level + cpi->rc.avg_frame_bandwidth - (int64_t)frame_size;
