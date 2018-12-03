@@ -256,8 +256,8 @@ void vp9_rc_postencode_update_drop_frame(struct VP9_COMP *cpi);
 // Changes only the rate correction factors in the rate control structure.
 void vp9_rc_update_rate_correction_factors(struct VP9_COMP *cpi);
 
-// Post encode drop for CBR screen-content mode.
-int post_encode_drop_screen_content(struct VP9_COMP *cpi, size_t *size);
+// Post encode drop for CBR mode.
+int post_encode_drop_cbr(struct VP9_COMP *cpi, size_t *size);
 
 // Decide if we should drop this frame: For 1-pass CBR.
 // Changes only the decimation count in the rate control structure

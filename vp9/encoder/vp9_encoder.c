@@ -4848,8 +4848,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
   vp9_pack_bitstream(cpi, dest, size);
 
   if (cpi->rc.use_post_encode_drop && cm->base_qindex < cpi->rc.worst_quality &&
-      cpi->svc.spatial_layer_id == 0 &&
-      post_encode_drop_screen_content(cpi, size)) {
+      cpi->svc.spatial_layer_id == 0 && post_encode_drop_cbr(cpi, size)) {
     restore_coding_context(cpi);
     return;
   }
