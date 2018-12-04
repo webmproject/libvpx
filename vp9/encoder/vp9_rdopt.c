@@ -2461,7 +2461,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 #if CONFIG_NON_GREEDY_MV
       this_me = vp9_full_pixel_diamond_new(
           cpi, x, &mvp_full, VPXMAX(step_param, MAX_MVSEARCH_STEPS - step),
-          lambda, 1, &cpi->fn_ptr[bsize], nb_full_mvs, &tmp_mv->as_mv, &mv_dist,
+          lambda, 1, &cpi->fn_ptr[bsize], nb_full_mvs, &this_mv, &mv_dist,
           &mv_cost);
 #else   // CONFIG_NON_GREEDY_MV
       this_me = vp9_full_pixel_search(
