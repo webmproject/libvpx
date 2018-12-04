@@ -306,5 +306,12 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(HadamardFuncWithSize(&vpx_highbd_hadamard_8x8_c, 8),
                       HadamardFuncWithSize(&vpx_highbd_hadamard_16x16_c, 16),
                       HadamardFuncWithSize(&vpx_highbd_hadamard_32x32_c, 32)));
+
+#if HAVE_AVX2
+INSTANTIATE_TEST_CASE_P(
+    AVX2, HadamardHighbdTest,
+    ::testing::Values(HadamardFuncWithSize(&vpx_highbd_hadamard_8x8_avx2, 8)));
+#endif  // HAVE_AVX2
+
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace
