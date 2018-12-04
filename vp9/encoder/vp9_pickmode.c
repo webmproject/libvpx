@@ -1815,13 +1815,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
-    if (cpi->use_svc) {
-      int layer =
-          LAYER_IDS_TO_IDX(svc->spatial_layer_id, svc->temporal_layer_id,
-                           svc->number_temporal_layers);
-      LAYER_CONTEXT *lc = &svc->layer_context[layer];
-      denoise_svc_pickmode = denoise_svc(cpi) && !lc->is_key_frame;
-    }
+    if (cpi->use_svc) denoise_svc_pickmode = vp9_denoise_svc_non_key(cpi);
     if (cpi->denoiser.denoising_level > kDenLowLow && denoise_svc_pickmode)
       vp9_denoiser_reset_frame_stats(ctx);
   }

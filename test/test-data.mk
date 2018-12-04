@@ -3,6 +3,7 @@ LIBVPX_TEST_SRCS-yes += test-data.mk
 # Encoder test source
 LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += hantro_collage_w352h288.yuv
 LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += hantro_odd.yuv
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += desktop_office1.1280_720-020.yuv
 
 LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_10_420.y4m
 LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_10_422.y4m
