@@ -126,16 +126,17 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
                                    double *best_mv_dist, double *best_mv_cost,
                                    double lambda, int search_range,
                                    const vp9_variance_fn_ptr_t *fn_ptr,
-                                   const int_mv *nb_full_mvs);
+                                   const int_mv *nb_full_mvs, int full_mv_num);
 
 double vp9_full_pixel_diamond_new(const struct VP9_COMP *cpi, MACROBLOCK *x,
                                   MV *mvp_full, int step_param, double lambda,
                                   int do_refine,
                                   const vp9_variance_fn_ptr_t *fn_ptr,
-                                  const int_mv *nb_full_mvs, MV *best_mv,
-                                  double *best_mv_dist, double *best_mv_cost);
+                                  const int_mv *nb_full_mvs, int full_mv_num,
+                                  MV *best_mv, double *best_mv_dist,
+                                  double *best_mv_cost);
 
-double av1_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs);
+double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs, int mv_num);
 #endif  // CONFIG_NON_GREEDY_MV
 #ifdef __cplusplus
 }  // extern "C"

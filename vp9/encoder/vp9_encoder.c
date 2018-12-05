@@ -5666,7 +5666,7 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
                       nb_full_mvs);
   vp9_full_pixel_diamond_new(
       cpi, x, &best_ref_mv1_full, step_param, lambda, 1, &cpi->fn_ptr[bsize],
-      nb_full_mvs, &tpl_stats->mv_arr[rf_idx].as_mv,
+      nb_full_mvs, NB_MVS_NUM, &tpl_stats->mv_arr[rf_idx].as_mv,
       &tpl_stats->mv_dist[rf_idx], &tpl_stats->mv_cost[rf_idx]);
 #else
   (void)frame_idx;
@@ -6361,7 +6361,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
           full_mv.row = this_tpl_stats->mv_arr[rf_idx].as_mv.row >> 3;
           full_mv.col = this_tpl_stats->mv_arr[rf_idx].as_mv.col >> 3;
           this_tpl_stats->mv_cost[rf_idx] =
-              av1_nb_mvs_inconsistency(&full_mv, nb_full_mvs);
+              vp9_nb_mvs_inconsistency(&full_mv, nb_full_mvs, NB_MVS_NUM);
 #endif  // RE_COMPUTE_MV_INCONSISTENCY
           tpl_frame->mv_dist_sum[rf_idx] += this_tpl_stats->mv_dist[rf_idx];
           tpl_frame->mv_cost_sum[rf_idx] += this_tpl_stats->mv_cost[rf_idx];
