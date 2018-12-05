@@ -797,18 +797,11 @@ static void set_rt_speed_feature_framesize_independent(
   }
   // Special case for screen content: increase motion search on base spatial
   // layer when high motion is detected or previous SL0 frame was dropped.
-  // Avoid speed 5 for as there is an issue with SVC datarate test.
-  // TODO(marpan/jianj): Investigate issue at speed 5.
-  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && cpi->oxcf.speed > 5 &&
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && cpi->oxcf.speed >= 5 &&
       cpi->svc.spatial_layer_id == 0 &&
       (cpi->rc.high_num_blocks_with_motion || cpi->svc.last_layer_dropped[0])) {
     sf->mv.search_method = NSTEP;
     sf->mv.fullpel_search_step_param = 2;
-    // TODO(marpan/jianj): Investigate issue for lower setting of step_param
-    // for spatial layers (namely on lower layers).
-    if (cpi->use_svc && cm->width != cpi->oxcf.width &&
-        cm->height != cpi->oxcf.height)
-      sf->mv.fullpel_search_step_param = 4;
   }
 }
 

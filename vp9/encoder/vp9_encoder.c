@@ -3873,6 +3873,9 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   set_size_independent_vars(cpi);
   set_size_dependent_vars(cpi, &q, &bottom_index, &top_index);
 
+  // search method and step parameter might be changed in speed settings.
+  init_motion_estimation(cpi);
+
   if (cpi->sf.copy_partition_flag) alloc_copy_partition_data(cpi);
 
   if (cpi->sf.svc_use_lowres_part &&
