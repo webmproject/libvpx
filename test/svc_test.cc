@@ -11,6 +11,31 @@
 #include "test/svc_test.h"
 
 namespace svc_test {
+void OnePassCbrSvc::SetSvcConfig(const int num_spatial_layer,
+                                 const int num_temporal_layer) {
+  SetConfig(num_temporal_layer);
+  cfg_.ss_number_layers = num_spatial_layer;
+  cfg_.ts_number_layers = num_temporal_layer;
+  if (num_spatial_layer == 1) {
+    svc_params_.scaling_factor_num[0] = 288;
+    svc_params_.scaling_factor_den[0] = 288;
+  } else if (num_spatial_layer == 2) {
+    svc_params_.scaling_factor_num[0] = 144;
+    svc_params_.scaling_factor_den[0] = 288;
+    svc_params_.scaling_factor_num[1] = 288;
+    svc_params_.scaling_factor_den[1] = 288;
+  } else if (num_spatial_layer == 3) {
+    svc_params_.scaling_factor_num[0] = 72;
+    svc_params_.scaling_factor_den[0] = 288;
+    svc_params_.scaling_factor_num[1] = 144;
+    svc_params_.scaling_factor_den[1] = 288;
+    svc_params_.scaling_factor_num[2] = 288;
+    svc_params_.scaling_factor_den[2] = 288;
+  }
+  number_spatial_layers_ = cfg_.ss_number_layers;
+  number_temporal_layers_ = cfg_.ts_number_layers;
+}
+
 void OnePassCbrSvc::PreEncodeFrameHookSetup(::libvpx_test::VideoSource *video,
                                             ::libvpx_test::Encoder *encoder) {
   if (video->frame() == 0) {

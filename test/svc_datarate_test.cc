@@ -535,6 +535,26 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
   bool denoiser_off_on_;
   // Top layer enabled on the fly.
   bool denoiser_enable_layers_;
+
+ private:
+  void SetConfig(int num_temporal_layer) {
+    cfg_.rc_end_usage = VPX_CBR;
+    cfg_.g_lag_in_frames = 0;
+    cfg_.g_error_resilient = 1;
+    if (num_temporal_layer == 3) {
+      cfg_.ts_rate_decimator[0] = 4;
+      cfg_.ts_rate_decimator[1] = 2;
+      cfg_.ts_rate_decimator[2] = 1;
+      cfg_.temporal_layering_mode = 3;
+    } else if (num_temporal_layer == 2) {
+      cfg_.ts_rate_decimator[0] = 2;
+      cfg_.ts_rate_decimator[1] = 1;
+      cfg_.temporal_layering_mode = 2;
+    } else if (num_temporal_layer == 1) {
+      cfg_.ts_rate_decimator[0] = 1;
+      cfg_.temporal_layering_mode = 0;
+    }
+  }
 };
 
 // Params: speed setting.
@@ -560,27 +580,16 @@ class DatarateOnePassCbrSvcSingleBR
 // temporal layer, with screen content mode on and same speed setting for all
 // layers.
 TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2SL1TLScreenContent1) {
+  SetSvcConfig(2, 1);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 2;
-  cfg_.ts_number_layers = 1;
-  cfg_.ts_rate_decimator[0] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  cfg_.temporal_layering_mode = 0;
-  svc_params_.scaling_factor_num[0] = 144;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 288;
-  svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 10;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
+
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   top_sl_width_ = 1280;
   top_sl_height_ = 720;
@@ -601,31 +610,15 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2SL1TLScreenContent1) {
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and
 // 3 temporal layers, with force key frame after frame drop
 TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLForceKey) {
+  SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
@@ -648,30 +641,15 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLForceKey) {
 // generate via SVC_SET_REF_FRAME_CONFIG. The new pattern also disables
 // inter-layer prediction.
 TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL2TLDynamicPatternChange) {
+  SetSvcConfig(3, 2);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 2;
-  cfg_.ts_rate_decimator[0] = 2;
-  cfg_.ts_rate_decimator[1] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  cfg_.temporal_layering_mode = 2;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   // Change SVC pattern on the fly.
   update_pattern_ = 1;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
@@ -697,31 +675,15 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL2TLDynamicPatternChange) {
 // 1000 so denoise is enabled on non-key.
 TEST_P(DatarateOnePassCbrSvcSingleBR,
        OnePassCbrSvc3SL3TL_DenoiserOffOnFixedLayers) {
+  SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.temporal_layering_mode = 3;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 1000;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("desktop_office1.1280_720-020.yuv", 1280,
                                        720, 30, 1, 0, 300);
   top_sl_width_ = 1280;
@@ -751,31 +713,15 @@ TEST_P(DatarateOnePassCbrSvcSingleBR,
 // at frame > 100, after the key frame sync.
 TEST_P(DatarateOnePassCbrSvcSingleBR,
        OnePassCbrSvc3SL3TL_DenoiserOffOnEnableLayers) {
+  SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.temporal_layering_mode = 3;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.kf_max_dist = 100;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("desktop_office1.1280_720-020.yuv", 1280,
                                        720, 30, 1, 0, 300);
   top_sl_width_ = 1280;
@@ -802,29 +748,16 @@ TEST_P(DatarateOnePassCbrSvcSingleBR,
 // is done by setting spatial layer bitrates to 0, and then back to non-zero,
 // during the sequence.
 TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL_DisableEnableLayers) {
+  SetSvcConfig(3, 1);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 1;
-  cfg_.ts_rate_decimator[0] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
   cfg_.temporal_layering_mode = 0;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
@@ -917,29 +850,15 @@ class DatarateOnePassCbrSvcMultiBR
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and
 // 3 temporal layers. Run CIF clip with 1 thread.
 TEST_P(DatarateOnePassCbrSvcMultiBR, OnePassCbrSvc2SL3TL) {
+  SetSvcConfig(2, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 2;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 144;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 288;
-  svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
@@ -983,29 +902,15 @@ class DatarateOnePassCbrSvcFrameDropMultiBR
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and
 // 3 temporal layers. Run HD clip with 4 threads.
 TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc2SL3TL4Threads) {
+  SetSvcConfig(2, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 2;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 4;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 144;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 288;
-  svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   top_sl_width_ = 1280;
   top_sl_height_ = 720;
@@ -1028,31 +933,15 @@ TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc2SL3TL4Threads) {
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and
 // 3 temporal layers. Run HD clip with 4 threads.
 TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc3SL3TL4Threads) {
+  SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 4;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
   top_sl_width_ = 1280;
   top_sl_height_ = 720;
@@ -1097,31 +986,16 @@ class DatarateOnePassCbrSvcInterLayerPredSingleBR
 // pass CBR SVC: 3 spatial layers and 3 temporal layers. Run CIF clip with 1
 // thread.
 TEST_P(DatarateOnePassCbrSvcInterLayerPredSingleBR, OnePassCbrSvc3SL3TL) {
+  SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
   cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
@@ -1143,31 +1017,15 @@ TEST_P(DatarateOnePassCbrSvcInterLayerPredSingleBR, OnePassCbrSvc3SL3TL) {
 // CBR SVC: 3 spatial layers and 3 temporal layers, changing the target bitrate
 // at the middle of encoding.
 TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLDynamicBitrateChange) {
+  SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
@@ -1209,25 +1067,13 @@ class DatarateOnePassCbrSvcDenoiser
 // Check basic rate targeting for 1 pass CBR SVC with denoising.
 // 2 spatial layers and 3 temporal layer. Run HD clip with 2 threads.
 TEST_P(DatarateOnePassCbrSvcDenoiser, OnePassCbrSvc2SL3TLDenoiserOn) {
+  SetSvcConfig(2, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 2;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 2;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 144;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 288;
-  svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   number_spatial_layers_ = cfg_.ss_number_layers;
@@ -1278,31 +1124,15 @@ class DatarateOnePassCbrSvcSmallKF
 // Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and 3
 // temporal layers. Run CIF clip with 1 thread, and few short key frame periods.
 TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc3SL3TLSmallKf) {
+  SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 10;
   cfg_.rc_target_bitrate = 800;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
@@ -1328,29 +1158,15 @@ TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc3SL3TLSmallKf) {
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and 3
 // temporal layers. Run CIF clip with 1 thread, and few short key frame periods.
 TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc2SL3TLSmallKf) {
+  SetSvcConfig(2, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 2;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 144;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 288;
-  svc_params_.scaling_factor_den[1] = 288;
   cfg_.rc_dropframe_thresh = 10;
   cfg_.rc_target_bitrate = 400;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
@@ -1377,32 +1193,16 @@ TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc2SL3TLSmallKf) {
 // one at middle layer first, then another one for top layer, and another
 // insert for base spatial layer (which forces key frame).
 TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLSyncFrames) {
+  SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 3;
-  cfg_.ts_rate_decimator[0] = 4;
-  cfg_.ts_rate_decimator[1] = 2;
-  cfg_.ts_rate_decimator[2] = 1;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 1;
-  cfg_.temporal_layering_mode = 3;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.kf_max_dist = 9999;
   cfg_.rc_dropframe_thresh = 10;
   cfg_.rc_target_bitrate = 400;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
@@ -1424,30 +1224,16 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLSyncFrames) {
 // intra-only frame as sync frame on base spatial layer.
 // Intra_only is inserted at start and in middle of sequence.
 TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL1TLSyncWithIntraOnly) {
+  SetSvcConfig(3, 1);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
   cfg_.rc_min_quantizer = 0;
   cfg_.rc_max_quantizer = 63;
-  cfg_.rc_end_usage = VPX_CBR;
-  cfg_.g_lag_in_frames = 0;
-  cfg_.ss_number_layers = 3;
-  cfg_.ts_number_layers = 1;
-  cfg_.ts_rate_decimator[0] = 1;
-  cfg_.temporal_layering_mode = 0;
-  cfg_.g_error_resilient = 1;
   cfg_.g_threads = 4;
-  svc_params_.scaling_factor_num[0] = 72;
-  svc_params_.scaling_factor_den[0] = 288;
-  svc_params_.scaling_factor_num[1] = 144;
-  svc_params_.scaling_factor_den[1] = 288;
-  svc_params_.scaling_factor_num[2] = 288;
-  svc_params_.scaling_factor_den[2] = 288;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   cfg_.rc_target_bitrate = 400;
-  number_spatial_layers_ = cfg_.ss_number_layers;
-  number_temporal_layers_ = cfg_.ts_number_layers;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
