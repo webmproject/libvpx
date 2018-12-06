@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43f65428_b8d38ddf",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2018-12-06T18:57:49Z",
+      "side": 1,
+      "message": "How are these formulas derived? I was trying to train a model to calculate rdmult, but the results were not good. It\u0027s tricky to get the ground truth values for training.",
+      "range": {
+        "startLine": 185,
+        "startChar": 4,
+        "endLine": 192,
+        "endChar": 39
+      },
+      "revId": "b13f6154df9c0834d74f7e3d41e41c4208f56d18",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
