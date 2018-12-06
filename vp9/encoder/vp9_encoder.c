@@ -5598,8 +5598,7 @@ static void prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
           &tpl_frame
                ->tpl_stats_ptr[(mi_row + r) * tpl_frame->stride + mi_col + c];
       if (tpl_ptr->ready[rf_idx]) {
-        nb_full_mvs[i].as_mv.row = tpl_ptr->mv_arr[rf_idx].as_mv.row >> 3;
-        nb_full_mvs[i].as_mv.col = tpl_ptr->mv_arr[rf_idx].as_mv.col >> 3;
+        nb_full_mvs[i].as_mv = get_full_mv(&tpl_ptr->mv_arr[rf_idx].as_mv);
       } else {
         nb_full_mvs[i].as_int = INVALID_MV;
       }

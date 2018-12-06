@@ -137,6 +137,12 @@ double vp9_full_pixel_diamond_new(const struct VP9_COMP *cpi, MACROBLOCK *x,
                                   double *best_mv_cost);
 
 double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs, int mv_num);
+static INLINE MV get_full_mv(const MV *mv) {
+  MV out_mv;
+  out_mv.row = mv->row >> 3;
+  out_mv.col = mv->col >> 3;
+  return out_mv;
+}
 #endif  // CONFIG_NON_GREEDY_MV
 #ifdef __cplusplus
 }  // extern "C"
