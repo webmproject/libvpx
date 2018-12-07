@@ -233,10 +233,10 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (rv && search_subpel) {
-    int subpel_force_stop = cpi->sf.mv.subpel_force_stop;
-    if (use_base_mv && cpi->sf.base_mv_aggressive) subpel_force_stop = 2;
+    SUBPEL_FORCE_STOP subpel_force_stop = cpi->sf.mv.subpel_force_stop;
+    if (use_base_mv && cpi->sf.base_mv_aggressive) subpel_force_stop = HALF_PEL;
     if (cpi->sf.mv.enable_adaptive_subpel_force_stop) {
-      int mv_thresh = cpi->sf.mv.adapt_subpel_force_stop.mv_thresh;
+      const int mv_thresh = cpi->sf.mv.adapt_subpel_force_stop.mv_thresh;
       if (abs(tmp_mv->as_mv.row) >= mv_thresh ||
           abs(tmp_mv->as_mv.col) >= mv_thresh)
         subpel_force_stop = cpi->sf.mv.adapt_subpel_force_stop.force_stop_above;

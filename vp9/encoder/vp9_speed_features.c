@@ -533,7 +533,7 @@ static void set_rt_speed_feature_framesize_independent(
     sf->adjust_partitioning_from_last_frame =
         cm->last_frame_type != cm->frame_type ||
         (0 == (frames_since_key + 1) % sf->last_partitioning_redo_frequency);
-    sf->mv.subpel_force_stop = 1;
+    sf->mv.subpel_force_stop = QUARTER_PEL;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
       sf->intra_uv_mode_mask[i] = INTRA_DC;
@@ -731,7 +731,7 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
       sf->adaptive_rd_thresh_row_mt = 1;
 
-    if (content == VP9E_CONTENT_SCREEN) sf->mv.subpel_force_stop = 3;
+    if (content == VP9E_CONTENT_SCREEN) sf->mv.subpel_force_stop = FULL_PEL;
     if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     // Only keep INTRA_DC mode for speed 8.
     if (!is_keyframe) {
@@ -767,8 +767,8 @@ static void set_rt_speed_feature_framesize_independent(
     sf->mv.adapt_subpel_force_stop.mv_thresh = 2;
     if (cpi->rc.avg_frame_low_motion < 40)
       sf->mv.adapt_subpel_force_stop.mv_thresh = 1;
-    sf->mv.adapt_subpel_force_stop.force_stop_below = 1;
-    sf->mv.adapt_subpel_force_stop.force_stop_above = 2;
+    sf->mv.adapt_subpel_force_stop.force_stop_below = QUARTER_PEL;
+    sf->mv.adapt_subpel_force_stop.force_stop_above = HALF_PEL;
     // Disable partition blocks below 16x16, except for low-resolutions.
     if (cm->frame_type != KEY_FRAME && cm->width >= 320 && cm->height >= 240)
       sf->disable_16x16part_nonkey = 1;
@@ -876,7 +876,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->recode_loop = ALLOW_RECODE_FIRST;
   sf->mv.subpel_search_method = SUBPEL_TREE;
   sf->mv.subpel_search_level = 2;
-  sf->mv.subpel_force_stop = 0;
+  sf->mv.subpel_force_stop = EIGHTH_PEL;
   sf->optimize_coefficients = !is_lossless_requested(&cpi->oxcf);
   sf->mv.reduce_first_step_size = 0;
   sf->coeff_prob_appx_step = 1;
@@ -993,7 +993,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
     sf->optimize_coefficients = 0;
   }
 
-  if (sf->mv.subpel_force_stop == 3) {
+  if (sf->mv.subpel_force_stop == FULL_PEL) {
     // Whole pel only
     cpi->find_fractional_mv_step = vp9_skip_sub_pixel_tree;
   } else if (sf->mv.subpel_search_method == SUBPEL_TREE) {
