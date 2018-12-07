@@ -2999,8 +2999,8 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
 // on the relative variance of the source and reconstruction.
 #define VERY_LOW_VAR_THRESH 2
 #define LOW_VAR_THRESH 5
-#define VAR_MULT 100
-static unsigned int max_var_adjust[VP9E_CONTENT_INVALID] = { 16, 16, 100 };
+#define VAR_MULT 250
+static unsigned int max_var_adjust[VP9E_CONTENT_INVALID] = { 16, 16, 250 };
 
 static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
                                    BLOCK_SIZE bsize, int64_t *this_rd,
