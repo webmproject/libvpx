@@ -2315,6 +2315,61 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                 block_size);
 }
 
+#if CONFIG_NON_GREEDY_MV
+#define MAX_PREV_NB_FULL_MV_NUM 8
+static int find_prev_nb_full_mvs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                                 int ref_frame, BLOCK_SIZE bsize, int mi_row,
+                                 int mi_col, int_mv *nb_full_mvs) {
+  int i;
+  const TileInfo *tile = &xd->tile;
+  int full_mv_num = 0;
+  assert(bsize >= BLOCK_8X8);
+  for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
+    const POSITION *mv_ref = &mv_ref_blocks[bsize][i];
+    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+      const MODE_INFO *nb_mi =
+          xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride];
+      if (nb_mi->sb_type >= BLOCK_8X8) {
+        if (nb_mi->ref_frame[0] == ref_frame) {
+          nb_full_mvs[full_mv_num].as_mv = get_full_mv(&nb_mi->mv[0].as_mv);
+          ++full_mv_num;
+          if (full_mv_num >= MAX_PREV_NB_FULL_MV_NUM) {
+            return full_mv_num;
+          }
+        } else if (nb_mi->ref_frame[1] == ref_frame) {
+          nb_full_mvs[full_mv_num].as_mv = get_full_mv(&nb_mi->mv[1].as_mv);
+          ++full_mv_num;
+          if (full_mv_num >= MAX_PREV_NB_FULL_MV_NUM) {
+            return full_mv_num;
+          }
+        }
+      } else {
+        int j;
+        for (j = 0; j < 4; ++j) {
+          // TODO(angiebird): avoid using duplicated mvs
+          if (nb_mi->ref_frame[0] == ref_frame) {
+            nb_full_mvs[full_mv_num].as_mv =
+                get_full_mv(&nb_mi->bmi[j].as_mv[0].as_mv);
+            ++full_mv_num;
+            if (full_mv_num >= MAX_PREV_NB_FULL_MV_NUM) {
+              return full_mv_num;
+            }
+          } else if (nb_mi->ref_frame[1] == ref_frame) {
+            nb_full_mvs[full_mv_num].as_mv =
+                get_full_mv(&nb_mi->bmi[j].as_mv[1].as_mv);
+            ++full_mv_num;
+            if (full_mv_num >= MAX_PREV_NB_FULL_MV_NUM) {
+              return full_mv_num;
+            }
+          }
+        }
+      }
+    }
+  }
+  return full_mv_num;
+}
+#endif  // CONFIG_NON_GREEDY_MV
+
 static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
                                  int mi_row, int mi_col, int_mv *tmp_mv,
                                  int *rate_mv) {
@@ -2338,11 +2393,12 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 #if CONFIG_NON_GREEDY_MV
   double mv_dist = 0;
   double mv_cost = 0;
-  double lambda = 0;
+  double lambda = (pw * ph) / 4;
   double bestsme;
-  int_mv nb_full_mvs[NB_MVS_NUM];
-  // TODO(angiebird): Set nb_full_mvs properly.
-  vp9_zero(nb_full_mvs);
+  int_mv nb_full_mvs[MAX_PREV_NB_FULL_MV_NUM];
+
+  const int nb_full_mv_num =
+      find_prev_nb_full_mvs(cm, xd, ref, bsize, mi_row, mi_col, nb_full_mvs);
 #else   // CONFIG_NON_GREEDY_MV
   int bestsme = INT_MAX;
   int sadpb = x->sadperbit16;
@@ -2418,9 +2474,9 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   mvp_full.row >>= 3;
 
 #if CONFIG_NON_GREEDY_MV
-  bestsme = vp9_full_pixel_diamond_new(cpi, x, &mvp_full, step_param, lambda, 1,
-                                       &cpi->fn_ptr[bsize], nb_full_mvs,
-                                       &tmp_mv->as_mv, &mv_dist, &mv_cost);
+  bestsme = vp9_full_pixel_diamond_new(
+      cpi, x, &mvp_full, step_param, lambda, 1, &cpi->fn_ptr[bsize],
+      nb_full_mvs, nb_full_mv_num, &tmp_mv->as_mv, &mv_dist, &mv_cost);
 #else   // CONFIG_NON_GREEDY_MV
   bestsme = vp9_full_pixel_search(
       cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method, sadpb,
@@ -2461,8 +2517,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 #if CONFIG_NON_GREEDY_MV
       this_me = vp9_full_pixel_diamond_new(
           cpi, x, &mvp_full, VPXMAX(step_param, MAX_MVSEARCH_STEPS - step),
-          lambda, 1, &cpi->fn_ptr[bsize], nb_full_mvs, &this_mv, &mv_dist,
-          &mv_cost);
+          lambda, 1, &cpi->fn_ptr[bsize], nb_full_mvs, nb_full_mv_num, &this_mv,
+          &mv_dist, &mv_cost);
 #else   // CONFIG_NON_GREEDY_MV
       this_me = vp9_full_pixel_search(
           cpi, x, bsize, &mvp_full,
