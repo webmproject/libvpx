@@ -302,6 +302,44 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
     cm->frame_refs[ref_index].idx = -1;
 }
 
+static void release_fb_on_decoder_exit(VP9Decoder *pbi) {
+  const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
+  VP9_COMMON *volatile const cm = &pbi->common;
+  BufferPool *volatile const pool = cm->buffer_pool;
+  RefCntBuffer *volatile const frame_bufs = cm->buffer_pool->frame_bufs;
+  int i;
+
+  // Synchronize all threads immediately as a subsequent decode call may
+  // cause a resize invalidating some allocations.
+  winterface->sync(&pbi->lf_worker);
+  for (i = 0; i < pbi->num_tile_workers; ++i) {
+    winterface->sync(&pbi->tile_workers[i]);
+  }
+
+  // Release all the reference buffers if worker thread is holding them.
+  if (pbi->hold_ref_buf == 1) {
+    int ref_index = 0, mask;
+    for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
+      const int old_idx = cm->ref_frame_map[ref_index];
+      // Current thread releases the holding of reference frame.
+      decrease_ref_count(old_idx, frame_bufs, pool);
+
+      // Release the reference frame in reference map.
+      if (mask & 1) {
+        decrease_ref_count(old_idx, frame_bufs, pool);
+      }
+      ++ref_index;
+    }
+
+    // Current thread releases the holding of reference frame.
+    for (; ref_index < REF_FRAMES && !cm->show_existing_frame; ++ref_index) {
+      const int old_idx = cm->ref_frame_map[ref_index];
+      decrease_ref_count(old_idx, frame_bufs, pool);
+    }
+    pbi->hold_ref_buf = 0;
+  }
+}
+
 int vp9_receive_compressed_data(VP9Decoder *pbi, size_t size,
                                 const uint8_t **psource) {
   VP9_COMMON *volatile const cm = &pbi->common;
@@ -339,6 +377,9 @@ int vp9_receive_compressed_data(VP9Decoder *pbi, size_t size,
   // Find a free frame buffer. Return error if can not find any.
   cm->new_fb_idx = get_free_fb(cm);
   if (cm->new_fb_idx == INVALID_IDX) {
+    pbi->ready_for_new_data = 1;
+    release_fb_on_decoder_exit(pbi);
+    vpx_clear_system_state();
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Unable to find free frame buffer");
     return cm->error.error_code;
@@ -351,44 +392,11 @@ int vp9_receive_compressed_data(VP9Decoder *pbi, size_t size,
   pbi->cur_buf = &frame_bufs[cm->new_fb_idx];
 
   if (setjmp(cm->error.jmp)) {
-    const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
-    int i;
-
     cm->error.setjmp = 0;
     pbi->ready_for_new_data = 1;
-
-    // Synchronize all threads immediately as a subsequent decode call may
-    // cause a resize invalidating some allocations.
-    winterface->sync(&pbi->lf_worker);
-    for (i = 0; i < pbi->num_tile_workers; ++i) {
-      winterface->sync(&pbi->tile_workers[i]);
-    }
-
-    // Release all the reference buffers if worker thread is holding them.
-    if (pbi->hold_ref_buf == 1) {
-      int ref_index = 0, mask;
-      for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
-        const int old_idx = cm->ref_frame_map[ref_index];
-        // Current thread releases the holding of reference frame.
-        decrease_ref_count(old_idx, frame_bufs, pool);
-
-        // Release the reference frame in reference map.
-        if (mask & 1) {
-          decrease_ref_count(old_idx, frame_bufs, pool);
-        }
-        ++ref_index;
-      }
-
-      // Current thread releases the holding of reference frame.
-      for (; ref_index < REF_FRAMES && !cm->show_existing_frame; ++ref_index) {
-        const int old_idx = cm->ref_frame_map[ref_index];
-        decrease_ref_count(old_idx, frame_bufs, pool);
-      }
-      pbi->hold_ref_buf = 0;
-    }
+    release_fb_on_decoder_exit(pbi);
     // Release current frame.
     decrease_ref_count(cm->new_fb_idx, frame_bufs, pool);
-
     vpx_clear_system_state();
     return -1;
   }
