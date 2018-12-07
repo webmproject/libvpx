@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 #include <math.h>
+#include <tuple>
+
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
@@ -26,7 +28,7 @@ typedef void (*AddNoiseFunc)(uint8_t *start, const int8_t *noise,
                              int blackclamp, int whiteclamp, int width,
                              int height, int pitch);
 
-typedef ::testing::tuple<double, AddNoiseFunc> AddNoiseTestFPParam;
+typedef std::tuple<double, AddNoiseFunc> AddNoiseTestFPParam;
 
 class AddNoiseTest : public ::testing::Test,
                      public ::testing::WithParamInterface<AddNoiseTestFPParam> {
@@ -125,7 +127,7 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
   vpx_free(s);
 }
 
-using ::testing::make_tuple;
+using std::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(
     C, AddNoiseTest,

@@ -9,6 +9,8 @@
  */
 
 #include <string>
+#include <tuple>
+
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/encode_test_driver.h"
@@ -21,7 +23,7 @@
 #include "./ivfenc.h"
 #include "./vpx_version.h"
 
-using ::testing::make_tuple;
+using std::make_tuple;
 
 namespace {
 
@@ -34,7 +36,7 @@ const char kNewEncodeOutputFile[] = "new_encode.ivf";
 /*
  DecodePerfTest takes a tuple of filename + number of threads to decode with
  */
-typedef ::testing::tuple<const char *, unsigned> DecodePerfParam;
+typedef std::tuple<const char *, unsigned> DecodePerfParam;
 
 const DecodePerfParam kVP9DecodePerfVectors[] = {
   make_tuple("vp90-2-bbb_426x240_tile_1x1_180kbps.webm", 1),

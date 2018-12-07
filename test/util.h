@@ -13,11 +13,13 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <tuple>
+
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx/vpx_image.h"
 
 // Macros
-#define GET_PARAM(k) ::testing::get<k>(GetParam())
+#define GET_PARAM(k) std::get<k>(GetParam())
 
 inline double compute_psnr(const vpx_image_t *img1, const vpx_image_t *img2) {
   assert((img1->fmt == img2->fmt) && (img1->d_w == img2->d_w) &&

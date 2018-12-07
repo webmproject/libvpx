@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
+#include <tuple>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -141,7 +142,7 @@ class BlockinessTestBase : public ::testing::Test {
 };
 
 #if CONFIG_VP9_ENCODER
-typedef ::testing::tuple<int, int> BlockinessParam;
+typedef std::tuple<int, int> BlockinessParam;
 class BlockinessVP9Test
     : public BlockinessTestBase,
       public ::testing::WithParamInterface<BlockinessParam> {
@@ -208,7 +209,7 @@ TEST_P(BlockinessVP9Test, WorstCaseBlockiness) {
 }
 #endif  // CONFIG_VP9_ENCODER
 
-using ::testing::make_tuple;
+using std::make_tuple;
 
 //------------------------------------------------------------------------------
 // C functions

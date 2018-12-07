@@ -11,6 +11,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <tuple>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -43,8 +44,8 @@ typedef void (*QuantizeFunc)(const tran_low_t *coeff, intptr_t count,
                              tran_low_t *dqcoeff, const int16_t *dequant,
                              uint16_t *eob, const int16_t *scan,
                              const int16_t *iscan);
-typedef ::testing::tuple<QuantizeFunc, QuantizeFunc, vpx_bit_depth_t,
-                         int /*max_size*/, bool /*is_fp*/>
+typedef std::tuple<QuantizeFunc, QuantizeFunc, vpx_bit_depth_t,
+                   int /*max_size*/, bool /*is_fp*/>
     QuantizeParam;
 
 // Wrapper for FP version which does not use zbin or quant_shift.
@@ -462,7 +463,7 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
   }
 }
 
-using ::testing::make_tuple;
+using std::make_tuple;
 
 #if HAVE_SSE2
 #if CONFIG_VP9_HIGHBITDEPTH
