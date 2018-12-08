@@ -34,6 +34,18 @@ class ACMRandom {
     return (value >> 15) & 0xffff;
   }
 
+  int32_t Rand20Signed(void) {
+    // Use 20 bits: values between 524287 and -524288.
+    const uint32_t value = random_.Generate(1048576);
+    return static_cast<int32_t>(value) - 524288;
+  }
+
+  int16_t Rand16Signed(void) {
+    // Use 16 bits: values between 32767 and -32768.
+    const uint32_t value = random_.Generate(65536);
+    return static_cast<int16_t>(value) - 32768;
+  }
+
   int16_t Rand13Signed(void) {
     // Use 13 bits: values between 4095 and -4096.
     const uint32_t value = random_.Generate(8192);
