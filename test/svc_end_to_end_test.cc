@@ -123,7 +123,7 @@ class SyncFrameOnePassCbrSvc : public ::svc_test::OnePassCbrSvc,
   vpx_svc_spatial_layer_sync_t svc_layer_sync_;
 
  private:
-  void SetConfig(int num_temporal_layer) {
+  virtual void SetConfig(const int num_temporal_layer) {
     cfg_.rc_buf_initial_sz = 500;
     cfg_.rc_buf_optimal_sz = 500;
     cfg_.rc_buf_sz = 1000;

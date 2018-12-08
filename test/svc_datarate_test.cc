@@ -537,7 +537,7 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
   bool denoiser_enable_layers_;
 
  private:
-  void SetConfig(int num_temporal_layer) {
+  virtual void SetConfig(const int num_temporal_layer) {
     cfg_.rc_end_usage = VPX_CBR;
     cfg_.g_lag_in_frames = 0;
     cfg_.g_error_resilient = 1;
