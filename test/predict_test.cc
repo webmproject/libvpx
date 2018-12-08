@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <tuple>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -27,13 +28,13 @@
 namespace {
 
 using libvpx_test::ACMRandom;
-using ::testing::make_tuple;
+using std::make_tuple;
 
 typedef void (*PredictFunc)(uint8_t *src_ptr, int src_pixels_per_line,
                             int xoffset, int yoffset, uint8_t *dst_ptr,
                             int dst_pitch);
 
-typedef ::testing::tuple<int, int, PredictFunc> PredictParam;
+typedef std::tuple<int, int, PredictFunc> PredictParam;
 
 class PredictTestBase : public AbstractBench,
                         public ::testing::TestWithParam<PredictParam> {

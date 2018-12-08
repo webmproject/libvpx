@@ -11,8 +11,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <limits>
+#include <tuple>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -28,8 +28,8 @@
 
 using libvpx_test::ACMRandom;
 using libvpx_test::Buffer;
-using ::testing::make_tuple;
-using ::testing::tuple;
+using std::make_tuple;
+using std::tuple;
 
 namespace {
 typedef void (*PartialFdctFunc)(const int16_t *in, tran_low_t *out, int stride);

@@ -11,6 +11,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <tuple>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -229,11 +230,9 @@ typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
 typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
                         int tx_type);
 
-typedef ::testing::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t>
-    Dct16x16Param;
-typedef ::testing::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t> Ht16x16Param;
-typedef ::testing::tuple<IdctFunc, IdctFunc, int, vpx_bit_depth_t>
-    Idct16x16Param;
+typedef std::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t> Dct16x16Param;
+typedef std::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t> Ht16x16Param;
+typedef std::tuple<IdctFunc, IdctFunc, int, vpx_bit_depth_t> Idct16x16Param;
 
 void fdct16x16_ref(const int16_t *in, tran_low_t *out, int stride,
                    int /*tx_type*/) {
@@ -745,7 +744,7 @@ TEST_P(InvTrans16x16DCT, CompareReference) {
   CompareInvReference(ref_txfm_, thresh_);
 }
 
-using ::testing::make_tuple;
+using std::make_tuple;
 
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(

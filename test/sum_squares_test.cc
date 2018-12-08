@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <string>
+#include <tuple>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -28,7 +29,7 @@ namespace {
 const int kNumIterations = 10000;
 
 typedef uint64_t (*SSI16Func)(const int16_t *src, int stride, int size);
-typedef ::testing::tuple<SSI16Func, SSI16Func> SumSquaresParam;
+typedef std::tuple<SSI16Func, SSI16Func> SumSquaresParam;
 
 class SumSquaresTest : public ::testing::TestWithParam<SumSquaresParam> {
  public:
@@ -102,7 +103,7 @@ TEST_P(SumSquaresTest, ExtremeValues) {
   }
 }
 
-using ::testing::make_tuple;
+using std::make_tuple;
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(

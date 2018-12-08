@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <tuple>
+
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "test/codec_factory.h"
@@ -21,7 +23,7 @@ namespace {
 class DecodeCorruptedFrameTest
     : public ::libvpx_test::EncoderTest,
       public ::testing::TestWithParam<
-          ::testing::tuple<const libvpx_test::CodecFactory *> > {
+          std::tuple<const libvpx_test::CodecFactory *> > {
  public:
   DecodeCorruptedFrameTest() : EncoderTest(GET_PARAM(0)) {}
 
