@@ -710,7 +710,6 @@ static void set_rt_speed_feature_framesize_independent(
     // For SVC: enable use of lower resolution partition for higher resolution,
     // only for 3 spatial layers and when config/top resolution is above VGA.
     // Enable only for non-base temporal layer frames.
-    // TODO(jianj): Investigate webm:1578
     if (cpi->use_svc && cpi->svc.use_partition_reuse &&
         cpi->svc.number_spatial_layers == 3 && cpi->svc.temporal_layer_id > 0 &&
         cpi->oxcf.width * cpi->oxcf.height > 640 * 480)

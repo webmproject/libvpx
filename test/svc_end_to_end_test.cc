@@ -20,6 +20,82 @@
 
 namespace {
 
+class ScalePartitionOnePassCbrSvc
+    : public ::svc_test::OnePassCbrSvc,
+      public ::testing::TestWithParam<const ::libvpx_test::CodecFactory *> {
+ public:
+  ScalePartitionOnePassCbrSvc()
+      : OnePassCbrSvc(GetParam()), mismatch_nframes_(0), num_nonref_frames_(0) {
+    SetMode(::libvpx_test::kRealTime);
+  }
+
+ protected:
+  virtual ~ScalePartitionOnePassCbrSvc() {}
+
+  virtual void SetUp() {
+    InitializeConfig();
+    speed_setting_ = 7;
+  }
+
+  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                                  ::libvpx_test::Encoder *encoder) {
+    PreEncodeFrameHookSetup(video, encoder);
+  }
+
+  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+    // Keep track of number of non-reference frames, needed for mismatch check.
+    // Non-reference frames are top spatial and temporal layer frames,
+    // for TL > 0.
+    if (temporal_layer_id_ == number_temporal_layers_ - 1 &&
+        temporal_layer_id_ > 0 &&
+        pkt->data.frame.spatial_layer_encoded[number_spatial_layers_ - 1])
+      num_nonref_frames_++;
+  }
+
+  virtual void MismatchHook(const vpx_image_t * /*img1*/,
+                            const vpx_image_t * /*img2*/) {
+    ++mismatch_nframes_;
+  }
+
+  virtual void SetConfig(int /* num_temporal_layer*/) {}
+
+  unsigned int GetMismatchFrames() const { return mismatch_nframes_; }
+
+  unsigned int mismatch_nframes_;
+  unsigned int num_nonref_frames_;
+};
+
+TEST_P(ScalePartitionOnePassCbrSvc, OnePassCbrSvc3SL3TL1080P) {
+  SetSvcConfig(3, 3);
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.g_threads = 1;
+  cfg_.rc_dropframe_thresh = 10;
+  cfg_.rc_target_bitrate = 800;
+  cfg_.kf_max_dist = 9999;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.g_error_resilient = 1;
+  cfg_.ts_rate_decimator[0] = 4;
+  cfg_.ts_rate_decimator[1] = 2;
+  cfg_.ts_rate_decimator[2] = 1;
+  cfg_.temporal_layering_mode = 3;
+  ::libvpx_test::I420VideoSource video(
+      "slides_code_term_web_plot.1920_1080.yuv", 1920, 1080, 30, 1, 0, 100);
+  // For this 3 temporal layer case, pattern repeats every 4 frames, so choose
+  // 4 key neighboring key frame periods (so key frame will land on 0-2-1-2).
+  AssignLayerBitrates();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+#if CONFIG_VP9_DECODER
+  // The non-reference frames are expected to be mismatched frames as the
+  // encoder will avoid loopfilter on these frames.
+  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+#endif
+}
+
 // Params: Inter layer prediction modes.
 class SyncFrameOnePassCbrSvc : public ::svc_test::OnePassCbrSvc,
                                public ::libvpx_test::CodecTestWithParam<int> {
@@ -374,5 +450,10 @@ TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc1SL3TLSyncFrameIntraOnlyQVGA) {
 }
 
 VP9_INSTANTIATE_TEST_CASE(SyncFrameOnePassCbrSvc, ::testing::Range(0, 3));
+
+INSTANTIATE_TEST_CASE_P(
+    VP9, ScalePartitionOnePassCbrSvc,
+    ::testing::Values(
+        static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)));
 
 }  // namespace
