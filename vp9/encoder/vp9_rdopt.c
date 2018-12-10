@@ -2316,59 +2316,20 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 #if CONFIG_NON_GREEDY_MV
-#define MAX_PREV_NB_FULL_MV_NUM 8
-static int find_prev_nb_full_mvs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                                 int ref_frame, BLOCK_SIZE bsize, int mi_row,
-                                 int mi_col, int_mv *nb_full_mvs) {
-  int i;
-  const TileInfo *tile = &xd->tile;
-  int full_mv_num = 0;
-  assert(bsize >= BLOCK_8X8);
-  for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
-    const POSITION *mv_ref = &mv_ref_blocks[bsize][i];
-    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
-      const MODE_INFO *nb_mi =
-          xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride];
-      if (nb_mi->sb_type >= BLOCK_8X8) {
-        if (nb_mi->ref_frame[0] == ref_frame) {
-          nb_full_mvs[full_mv_num].as_mv = get_full_mv(&nb_mi->mv[0].as_mv);
-          ++full_mv_num;
-          if (full_mv_num >= MAX_PREV_NB_FULL_MV_NUM) {
-            return full_mv_num;
-          }
-        } else if (nb_mi->ref_frame[1] == ref_frame) {
-          nb_full_mvs[full_mv_num].as_mv = get_full_mv(&nb_mi->mv[1].as_mv);
-          ++full_mv_num;
-          if (full_mv_num >= MAX_PREV_NB_FULL_MV_NUM) {
-            return full_mv_num;
-          }
-        }
-      } else {
-        int j;
-        for (j = 0; j < 4; ++j) {
-          // TODO(angiebird): avoid using duplicated mvs
-          if (nb_mi->ref_frame[0] == ref_frame) {
-            nb_full_mvs[full_mv_num].as_mv =
-                get_full_mv(&nb_mi->bmi[j].as_mv[0].as_mv);
-            ++full_mv_num;
-            if (full_mv_num >= MAX_PREV_NB_FULL_MV_NUM) {
-              return full_mv_num;
-            }
-          } else if (nb_mi->ref_frame[1] == ref_frame) {
-            nb_full_mvs[full_mv_num].as_mv =
-                get_full_mv(&nb_mi->bmi[j].as_mv[1].as_mv);
-            ++full_mv_num;
-            if (full_mv_num >= MAX_PREV_NB_FULL_MV_NUM) {
-              return full_mv_num;
-            }
-          }
-        }
-      }
-    }
+static int ref_frame_to_gf_rf_idx(int ref_frame) {
+  if (ref_frame == GOLDEN_FRAME) {
+    return 0;
   }
-  return full_mv_num;
+  if (ref_frame == LAST_FRAME) {
+    return 1;
+  }
+  if (ref_frame == ALTREF_FRAME) {
+    return 2;
+  }
+  assert(0);
+  return -1;
 }
-#endif  // CONFIG_NON_GREEDY_MV
+#endif
 
 static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
                                  int mi_row, int mi_col, int_mv *tmp_mv,
@@ -2395,10 +2356,13 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   double mv_cost = 0;
   double lambda = (pw * ph) / 4;
   double bestsme;
-  int_mv nb_full_mvs[MAX_PREV_NB_FULL_MV_NUM];
-
-  const int nb_full_mv_num =
-      find_prev_nb_full_mvs(cm, xd, ref, bsize, mi_row, mi_col, nb_full_mvs);
+  int_mv nb_full_mvs[NB_MVS_NUM];
+  const int nb_full_mv_num = NB_MVS_NUM;
+  int gf_group_idx = cpi->twopass.gf_group.index;
+  int gf_rf_idx = ref_frame_to_gf_rf_idx(ref);
+  BLOCK_SIZE square_bsize = get_square_block_size(bsize);
+  vp9_prepare_nb_full_mvs(&cpi->tpl_stats[gf_group_idx], mi_row, mi_col,
+                          gf_rf_idx, square_bsize, nb_full_mvs);
 #else   // CONFIG_NON_GREEDY_MV
   int bestsme = INT_MAX;
   int sadpb = x->sadperbit16;
