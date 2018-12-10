@@ -614,10 +614,6 @@ process_toolchain() {
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunused
-        # -Wextra has some tricky cases. Rather than fix them all now, get the
-        # flag for as many files as possible and fix the remaining issues
-        # piecemeal.
-        # https://bugs.chromium.org/p/webm/issues/detail?id=1069
         check_add_cflags -Wextra
         # check_add_cflags also adds to cxxflags. gtest does not do well with
         # these flags so add them explicitly to CFLAGS only.
