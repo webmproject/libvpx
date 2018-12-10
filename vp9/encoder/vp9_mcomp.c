@@ -1879,6 +1879,32 @@ double vp9_diamond_search_sad_new(const MACROBLOCK *x,
   }
   return bestsad;
 }
+
+void vp9_prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
+                             int mi_col, int rf_idx, BLOCK_SIZE bsize,
+                             int_mv *nb_full_mvs) {
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+  int i;
+  for (i = 0; i < NB_MVS_NUM; ++i) {
+    int r = dirs[i][0] * mi_height;
+    int c = dirs[i][1] * mi_width;
+    if (mi_row + r >= 0 && mi_row + r < tpl_frame->mi_rows && mi_col + c >= 0 &&
+        mi_col + c < tpl_frame->mi_cols) {
+      const TplDepStats *tpl_ptr =
+          &tpl_frame
+               ->tpl_stats_ptr[(mi_row + r) * tpl_frame->stride + mi_col + c];
+      if (tpl_ptr->ready[rf_idx]) {
+        nb_full_mvs[i].as_mv = get_full_mv(&tpl_ptr->mv_arr[rf_idx].as_mv);
+      } else {
+        nb_full_mvs[i].as_int = INVALID_MV;
+      }
+    } else {
+      nb_full_mvs[i].as_int = INVALID_MV;
+    }
+  }
+}
 #endif  // CONFIG_NON_GREEDY_MV
 
 int vp9_diamond_search_sad_c(const MACROBLOCK *x, const search_site_config *cfg,

@@ -5586,33 +5586,6 @@ void init_tpl_stats(VP9_COMP *cpi) {
 }
 
 #if CONFIG_NON_GREEDY_MV
-static void prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
-                                int mi_col, int rf_idx, BLOCK_SIZE bsize,
-                                int_mv *nb_full_mvs) {
-  const int mi_unit = num_8x8_blocks_wide_lookup[bsize];
-  const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
-  int i;
-  for (i = 0; i < NB_MVS_NUM; ++i) {
-    int r = dirs[i][0] * mi_unit;
-    int c = dirs[i][1] * mi_unit;
-    if (mi_row + r >= 0 && mi_row + r < tpl_frame->mi_rows && mi_col + c >= 0 &&
-        mi_col + c < tpl_frame->mi_cols) {
-      const TplDepStats *tpl_ptr =
-          &tpl_frame
-               ->tpl_stats_ptr[(mi_row + r) * tpl_frame->stride + mi_col + c];
-      if (tpl_ptr->ready[rf_idx]) {
-        nb_full_mvs[i].as_mv = get_full_mv(&tpl_ptr->mv_arr[rf_idx].as_mv);
-      } else {
-        nb_full_mvs[i].as_int = INVALID_MV;
-      }
-    } else {
-      nb_full_mvs[i].as_int = INVALID_MV;
-    }
-  }
-}
-#endif
-
-#if CONFIG_NON_GREEDY_MV
 uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
                                        int frame_idx, uint8_t *cur_frame_buf,
                                        uint8_t *ref_frame_buf, int stride,
@@ -5664,8 +5637,8 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 #if CONFIG_NON_GREEDY_MV
   (void)search_method;
   (void)sadpb;
-  prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, rf_idx, bsize,
-                      nb_full_mvs);
+  vp9_prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, rf_idx,
+                          bsize, nb_full_mvs);
   vp9_full_pixel_diamond_new(
       cpi, x, &best_ref_mv1_full, step_param, lambda, 1, &cpi->fn_ptr[bsize],
       nb_full_mvs, NB_MVS_NUM, &tpl_stats->mv_arr[rf_idx].as_mv,
@@ -6357,8 +6330,8 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
 #if RE_COMPUTE_MV_INCONSISTENCY
           MV full_mv;
           int_mv nb_full_mvs[NB_MVS_NUM];
-          prepare_nb_full_mvs(tpl_frame, mi_row, mi_col, rf_idx, bsize,
-                              nb_full_mvs);
+          vp9_prepare_nb_full_mvs(tpl_frame, mi_row, mi_col, rf_idx, bsize,
+                                  nb_full_mvs);
           full_mv.row = this_tpl_stats->mv_arr[rf_idx].as_mv.row >> 3;
           full_mv.col = this_tpl_stats->mv_arr[rf_idx].as_mv.col >> 3;
           this_tpl_stats->mv_cost[rf_idx] =
