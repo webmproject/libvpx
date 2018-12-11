@@ -1403,6 +1403,10 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
   int active_worst_quality = cpi->twopass.active_worst_quality;
   int q;
   int *inter_minq;
+  const int boost_frame =
+      !rc->is_src_frame_alt_ref &&
+      (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame);
+
   ASSIGN_MINQ_TABLE(cm->bit_depth, inter_minq);
 
   if (oxcf->rc_mode == VPX_Q)
@@ -1410,8 +1414,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
 
   if (frame_is_intra_only(cm)) {
     pick_kf_q_bound_two_pass(cpi, &active_best_quality, &active_worst_quality);
-  } else if (!rc->is_src_frame_alt_ref &&
-             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
+  } else if (boost_frame) {
     // Use the lower of active_worst_quality and recent
     // average Q as basis for GF/ARF best Q limit unless last frame was
     // a key frame.
@@ -1455,9 +1458,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
 
   // Extension to max or min Q if undershoot or overshoot is outside
   // the permitted range.
-  if (frame_is_intra_only(cm) ||
-      (!rc->is_src_frame_alt_ref &&
-       (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
+  if (frame_is_intra_only(cm) || boost_frame) {
     active_best_quality -=
         (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast);
     active_worst_quality += (cpi->twopass.extend_maxq / 2);
@@ -1465,13 +1466,9 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
     active_best_quality -=
         (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast) / 2;
     active_worst_quality += cpi->twopass.extend_maxq;
-  }
 
-  // For normal frames do not allow an active minq lower than the q used for
-  // the last boosted frame.
-  if (!frame_is_intra_only(cm) &&
-      (!(cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) ||
-       rc->is_src_frame_alt_ref)) {
+    // For normal frames do not allow an active minq lower than the q used for
+    // the last boosted frame.
     active_best_quality = VPXMAX(active_best_quality, rc->last_boosted_qindex);
   }
 
