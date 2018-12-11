@@ -19,9 +19,10 @@
 #include "vpx/vpx_codec.h"
 #include "vpx_ports/bitops.h"
 
+namespace svc_test {
 namespace {
 
-class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
+class DatarateOnePassCbrSvc : public OnePassCbrSvc {
  public:
   explicit DatarateOnePassCbrSvc(const ::libvpx_test::CodecFactory *codec)
       : OnePassCbrSvc(codec) {
@@ -498,6 +499,7 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
   }
 
   unsigned int GetMismatchFrames() { return mismatch_nframes_; }
+  unsigned int GetNonRefFrames() { return num_nonref_frames_; }
 
   vpx_codec_pts_t last_pts_;
   double timebase_;
@@ -506,7 +508,6 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
   double file_datarate_[VPX_MAX_LAYERS];
   size_t bits_in_last_frame_;
   double mismatch_psnr_;
-  int mismatch_nframes_;
   int denoiser_on_;
   int tune_content_;
   int spatial_layer_id_;
@@ -520,7 +521,6 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
   int middle_bitrate_;
   int top_bitrate_;
   int key_frame_spacing_;
-  unsigned int num_nonref_frames_;
   int layer_framedrop_;
   int force_key_;
   int force_key_test_;
@@ -555,6 +555,9 @@ class DatarateOnePassCbrSvc : public ::svc_test::OnePassCbrSvc {
       cfg_.temporal_layering_mode = 0;
     }
   }
+
+  unsigned int num_nonref_frames_;
+  unsigned int mismatch_nframes_;
 };
 
 // Params: speed setting.
@@ -603,7 +606,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2SL1TLScreenContent1) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -632,7 +635,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLForceKey) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -665,7 +668,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL2TLDynamicPatternChange) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -701,7 +704,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR,
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -739,7 +742,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR,
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -774,7 +777,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL_DisableEnableLayers) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -824,7 +827,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2SL1TL5x5MultipleRuns) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -875,7 +878,7 @@ TEST_P(DatarateOnePassCbrSvcMultiBR, OnePassCbrSvc2SL3TL) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -926,7 +929,7 @@ TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc2SL3TL4Threads) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -957,7 +960,7 @@ TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc3SL3TL4Threads) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1009,7 +1012,7 @@ TEST_P(DatarateOnePassCbrSvcInterLayerPredSingleBR, OnePassCbrSvc3SL3TL) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1040,7 +1043,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLDynamicBitrateChange) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1097,7 +1100,7 @@ TEST_P(DatarateOnePassCbrSvcDenoiser, OnePassCbrSvc2SL3TLDenoiserOn) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 #endif
@@ -1151,7 +1154,7 @@ TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc3SL3TLSmallKf) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1184,7 +1187,7 @@ TEST_P(DatarateOnePassCbrSvcSmallKF, OnePassCbrSvc2SL3TLSmallKf) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1216,7 +1219,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLSyncFrames) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1249,7 +1252,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL1TLSyncWithIntraOnly) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1302,7 +1305,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2QL1TLScreen) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1376,7 +1379,7 @@ TEST_P(DatarateOnePassCbrSvcPostencodeDrop, OnePassCbrSvc2QL1TLScreen) {
 #if CONFIG_VP9_DECODER
   // The non-reference frames are expected to be mismatched frames as the
   // encoder will avoid loopfilter on these frames.
-  EXPECT_EQ(num_nonref_frames_, GetMismatchFrames());
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
 }
 
@@ -1405,3 +1408,4 @@ VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcDenoiser,
 VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcSmallKF, ::testing::Range(5, 10),
                           ::testing::Range(32, 36));
 }  // namespace
+}  // namespace svc_test
