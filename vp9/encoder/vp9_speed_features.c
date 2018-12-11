@@ -847,12 +847,6 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
   if (!sf->adaptive_rd_thresh_row_mt && cpi->row_mt_bit_exact &&
       oxcf->max_threads > 1)
     sf->adaptive_rd_thresh = 0;
-
-  // This is only used in motion vector unit test.
-  if (cpi->oxcf.motion_vector_unit_test == 1)
-    cpi->find_fractional_mv_step = vp9_return_max_sub_pixel_mv;
-  else if (cpi->oxcf.motion_vector_unit_test == 2)
-    cpi->find_fractional_mv_step = vp9_return_min_sub_pixel_mv;
 }
 
 void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
@@ -998,6 +992,12 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree_pruned_evenmore;
   }
 
+  // This is only used in motion vector unit test.
+  if (cpi->oxcf.motion_vector_unit_test == 1)
+    cpi->find_fractional_mv_step = vp9_return_max_sub_pixel_mv;
+  else if (cpi->oxcf.motion_vector_unit_test == 2)
+    cpi->find_fractional_mv_step = vp9_return_min_sub_pixel_mv;
+
   x->optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;
 
   x->min_partition_size = sf->default_min_partition_size;
@@ -1015,10 +1015,4 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   if (!sf->adaptive_rd_thresh_row_mt && cpi->row_mt_bit_exact &&
       oxcf->max_threads > 1)
     sf->adaptive_rd_thresh = 0;
-
-  // This is only used in motion vector unit test.
-  if (cpi->oxcf.motion_vector_unit_test == 1)
-    cpi->find_fractional_mv_step = vp9_return_max_sub_pixel_mv;
-  else if (cpi->oxcf.motion_vector_unit_test == 2)
-    cpi->find_fractional_mv_step = vp9_return_min_sub_pixel_mv;
 }
