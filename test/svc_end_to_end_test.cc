@@ -57,7 +57,7 @@ class ScalePartitionOnePassCbrSvc
     ++mismatch_nframes_;
   }
 
-  virtual void SetConfig(int /* num_temporal_layer*/) {}
+  virtual void SetConfig(const int /*num_temporal_layer*/) {}
 
   unsigned int GetMismatchFrames() const { return mismatch_nframes_; }
 
