@@ -195,6 +195,8 @@ typedef struct {
   int use_post_encode_drop;
   // External flag to enable post encode frame dropping, controlled by user.
   int ext_use_post_encode_drop;
+
+  int damped_adjustment[RATE_FACTOR_LEVELS];
 } RATE_CONTROL;
 
 struct VP9_COMP;

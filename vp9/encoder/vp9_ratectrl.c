@@ -417,6 +417,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
 
   for (i = 0; i < RATE_FACTOR_LEVELS; ++i) {
     rc->rate_correction_factors[i] = 1.0;
+    rc->damped_adjustment[i] = 0;
   }
 
   rc->min_gf_interval = oxcf->min_gf_interval;
@@ -720,6 +721,8 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi) {
   int correction_factor = 100;
   double rate_correction_factor = get_rate_correction_factor(cpi);
   double adjustment_limit;
+  RATE_FACTOR_LEVEL rf_lvl =
+      cpi->twopass.gf_group.rf_level[cpi->twopass.gf_group.index];
 
   int projected_size_based_on_q = 0;
 
@@ -746,10 +749,16 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi) {
     correction_factor = (int)((100 * (int64_t)cpi->rc.projected_frame_size) /
                               projected_size_based_on_q);
 
-  // More heavily damped adjustment used if we have been oscillating either side
-  // of target.
-  adjustment_limit =
-      0.25 + 0.5 * VPXMIN(1, fabs(log10(0.01 * correction_factor)));
+  // Do not use damped adjustment for the first frame of each frame type
+  if (!cpi->rc.damped_adjustment[rf_lvl]) {
+    adjustment_limit = 1.0;
+    cpi->rc.damped_adjustment[rf_lvl] = 1;
+  } else {
+    // More heavily damped adjustment used if we have been oscillating either
+    // side of target.
+    adjustment_limit =
+        0.25 + 0.5 * VPXMIN(1, fabs(log10(0.01 * correction_factor)));
+  }
 
   cpi->rc.q_2_frame = cpi->rc.q_1_frame;
   cpi->rc.q_1_frame = cm->base_qindex;
