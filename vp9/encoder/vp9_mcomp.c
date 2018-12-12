@@ -1895,8 +1895,10 @@ void vp9_prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
       const TplDepStats *tpl_ptr =
           &tpl_frame
                ->tpl_stats_ptr[(mi_row + r) * tpl_frame->stride + mi_col + c];
+      int_mv *mv =
+          get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row + r, mi_col + c);
       if (tpl_ptr->ready[rf_idx]) {
-        nb_full_mvs[i].as_mv = get_full_mv(&tpl_ptr->mv_arr[rf_idx].as_mv);
+        nb_full_mvs[i].as_mv = get_full_mv(&mv->as_mv);
       } else {
         nb_full_mvs[i].as_int = INVALID_MV;
       }
