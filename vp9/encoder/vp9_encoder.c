@@ -2377,6 +2377,19 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 #endif
     // TODO(jingning): Reduce the actual memory use for tpl model build up.
     for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
+#if CONFIG_NON_GREEDY_MV
+      int sqr_bsize;
+      int rf_idx;
+      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
+          CHECK_MEM_ERROR(
+              cm, cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize],
+              vpx_calloc(mi_rows * mi_cols,
+                         sizeof(*cpi->tpl_stats[frame]
+                                     .pyramid_mv_arr[rf_idx][sqr_bsize])));
+        }
+      }
+#endif
       CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
                       vpx_calloc(mi_rows * mi_cols,
                                  sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
@@ -5974,7 +5987,8 @@ void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
 #if CONFIG_NON_GREEDY_MV
     (void)td;
-    mv.as_int = tpl_stats->mv_arr[rf_idx].as_int;
+    mv.as_int =
+        get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col)->as_int;
 #else
     motion_compensated_prediction(
         cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
@@ -6076,6 +6090,7 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
   set_mv_limits(cm, x, mi_row, mi_col);
 
   for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    int_mv *mv = get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
     if (ref_frame[rf_idx] == NULL) {
       tpl_stats->ready[rf_idx] = 0;
       continue;
@@ -6085,8 +6100,8 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
     motion_compensated_prediction(
         cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
         ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
-        mi_row, mi_col, &tpl_stats->mv_arr[rf_idx].as_mv, rf_idx,
-        &tpl_stats->mv_dist[rf_idx], &tpl_stats->mv_cost[rf_idx]);
+        mi_row, mi_col, &mv->as_mv, rf_idx, &tpl_stats->mv_dist[rf_idx],
+        &tpl_stats->mv_cost[rf_idx]);
   }
 }
 
@@ -6328,12 +6343,14 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
             &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
         for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
 #if RE_COMPUTE_MV_INCONSISTENCY
+          MV this_mv =
+              get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col)->as_mv;
           MV full_mv;
           int_mv nb_full_mvs[NB_MVS_NUM];
           vp9_prepare_nb_full_mvs(tpl_frame, mi_row, mi_col, rf_idx, bsize,
                                   nb_full_mvs);
-          full_mv.row = this_tpl_stats->mv_arr[rf_idx].as_mv.row >> 3;
-          full_mv.col = this_tpl_stats->mv_arr[rf_idx].as_mv.col >> 3;
+          full_mv.row = this_mv.row >> 3;
+          full_mv.col = this_mv.col >> 3;
           this_tpl_stats->mv_cost[rf_idx] =
               vp9_nb_mvs_inconsistency(&full_mv, nb_full_mvs, NB_MVS_NUM);
 #endif  // RE_COMPUTE_MV_INCONSISTENCY
@@ -6387,7 +6404,7 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
         if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
           const TplDepStats *tpl_ptr =
               &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-          int_mv mv = tpl_ptr->mv_arr[idx];
+          int_mv mv = *get_pyramid_mv(tpl_frame, idx, bsize, mi_row, mi_col);
           printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row, mv.as_mv.col);
         }
       }

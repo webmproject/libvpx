@@ -297,10 +297,13 @@ typedef struct TplDepStats {
   int64_t inter_cost_arr[3];
   int64_t recon_error_arr[3];
   int64_t sse_arr[3];
-  int_mv mv_arr[3];
   double feature_score;
 #endif
 } TplDepStats;
+
+#if CONFIG_NON_GREEDY_MV
+#define SQUARE_BLOCK_SIZES 4
+#endif
 
 typedef struct TplDepFrame {
   uint8_t is_valid;
@@ -315,8 +318,35 @@ typedef struct TplDepFrame {
   double lambda;
   double mv_dist_sum[3];
   double mv_cost_sum[3];
+  int_mv *pyramid_mv_arr[3][SQUARE_BLOCK_SIZES];
 #endif
 } TplDepFrame;
+
+#if CONFIG_NON_GREEDY_MV
+static INLINE int get_square_block_idx(BLOCK_SIZE bsize) {
+  if (bsize == BLOCK_4X4) {
+    return 0;
+  }
+  if (bsize == BLOCK_8X8) {
+    return 1;
+  }
+  if (bsize == BLOCK_16X16) {
+    return 2;
+  }
+  if (bsize == BLOCK_32X32) {
+    return 3;
+  }
+  printf("ERROR: non-square block size\n");
+  assert(0);
+  return -1;
+}
+
+static INLINE int_mv *get_pyramid_mv(const TplDepFrame *tpl_frame, int rf_idx,
+                                     BLOCK_SIZE bsize, int mi_row, int mi_col) {
+  return &tpl_frame->pyramid_mv_arr[rf_idx][get_square_block_idx(bsize)]
+                                   [mi_row * tpl_frame->stride + mi_col];
+}
+#endif
 
 #define TPL_DEP_COST_SCALE_LOG2 4
 
