@@ -6183,92 +6183,22 @@ static void add_nb_blocks_to_heap(VP9_COMP *cpi, const TplDepFrame *tpl_frame,
 }
 #endif  // USE_PQSORT
 #endif  // CHANGE_MV_SEARCH_ORDER
-#endif  // CONFIG_NON_GREEDY_MV
 
-void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
-                       BLOCK_SIZE bsize) {
-  TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-  YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
-  YV12_BUFFER_CONFIG *ref_frame[3] = { NULL, NULL, NULL };
-
+static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
+                               YV12_BUFFER_CONFIG *ref_frame[3],
+                               BLOCK_SIZE bsize) {
   VP9_COMMON *cm = &cpi->common;
-  struct scale_factors sf;
-  int rdmult, idx;
   ThreadData *td = &cpi->td;
-  MACROBLOCK *x = &td->mb;
-  MACROBLOCKD *xd = &x->e_mbd;
-  int mi_row, mi_col;
-
-#if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, predictor16[32 * 32 * 3]);
-  DECLARE_ALIGNED(16, uint8_t, predictor8[32 * 32 * 3]);
-  uint8_t *predictor;
-#else
-  DECLARE_ALIGNED(16, uint8_t, predictor[32 * 32 * 3]);
-#endif
-  DECLARE_ALIGNED(16, int16_t, src_diff[32 * 32]);
-  DECLARE_ALIGNED(16, tran_low_t, coeff[32 * 32]);
-  DECLARE_ALIGNED(16, tran_low_t, qcoeff[32 * 32]);
-  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
-
-  const TX_SIZE tx_size = max_txsize_lookup[bsize];
+  TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
-  int64_t recon_error, sse;
-#if CONFIG_NON_GREEDY_MV
-  int rf_idx;
   int fs_loc_sort_size;
-#if CHANGE_MV_SEARCH_ORDER
-#if USE_PQSORT
   int fs_loc_heap_size;
-#else
-  int i;
-#endif  // USE_PQSORT
-#endif  // CHANGE_MV_SEARCH_ORDER
-#endif  // CONFIG_NON_GREEDY_MV
+  int mi_row, mi_col;
 
-  // Setup scaling factor
-#if CONFIG_VP9_HIGHBITDEPTH
-  vp9_setup_scale_factors_for_frame(
-      &sf, this_frame->y_crop_width, this_frame->y_crop_height,
-      this_frame->y_crop_width, this_frame->y_crop_height,
-      cpi->common.use_highbitdepth);
-
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
-    predictor = CONVERT_TO_BYTEPTR(predictor16);
-  else
-    predictor = predictor8;
-#else
-  vp9_setup_scale_factors_for_frame(
-      &sf, this_frame->y_crop_width, this_frame->y_crop_height,
-      this_frame->y_crop_width, this_frame->y_crop_height);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  // Prepare reference frame pointers. If any reference frame slot is
-  // unavailable, the pointer will be set to Null.
-  for (idx = 0; idx < 3; ++idx) {
-    int rf_idx = gf_picture[frame_idx].ref_frame[idx];
-    if (rf_idx != -1) ref_frame[idx] = gf_picture[rf_idx].frame;
-  }
-
-  xd->mi = cm->mi_grid_visible;
-  xd->mi[0] = cm->mi;
-  xd->cur_buf = this_frame;
-
-  // Get rd multiplier set up.
-  rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, tpl_frame->base_qindex);
-  set_error_per_bit(&cpi->td.mb, rdmult);
-  vp9_initialize_me_consts(cpi, &cpi->td.mb, tpl_frame->base_qindex);
-
-  tpl_frame->is_valid = 1;
-
-  cm->base_qindex = tpl_frame->base_qindex;
-  vp9_frame_init_quantizer(cpi);
-
-#if CONFIG_NON_GREEDY_MV
   tpl_frame->lambda = 250;
-  fs_loc_sort_size = 0;
 
+  fs_loc_sort_size = 0;
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
       const int mb_y_offset =
@@ -6325,7 +6255,82 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
     }
   }
 #endif  // CHANGE_MV_SEARCH_ORDER
+}
 #endif  // CONFIG_NON_GREEDY_MV
+
+void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
+                       BLOCK_SIZE bsize) {
+  TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+  YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
+  YV12_BUFFER_CONFIG *ref_frame[3] = { NULL, NULL, NULL };
+
+  VP9_COMMON *cm = &cpi->common;
+  struct scale_factors sf;
+  int rdmult, idx;
+  ThreadData *td = &cpi->td;
+  MACROBLOCK *x = &td->mb;
+  MACROBLOCKD *xd = &x->e_mbd;
+  int mi_row, mi_col;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED(16, uint16_t, predictor16[32 * 32 * 3]);
+  DECLARE_ALIGNED(16, uint8_t, predictor8[32 * 32 * 3]);
+  uint8_t *predictor;
+#else
+  DECLARE_ALIGNED(16, uint8_t, predictor[32 * 32 * 3]);
+#endif
+  DECLARE_ALIGNED(16, int16_t, src_diff[32 * 32]);
+  DECLARE_ALIGNED(16, tran_low_t, coeff[32 * 32]);
+  DECLARE_ALIGNED(16, tran_low_t, qcoeff[32 * 32]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[32 * 32]);
+
+  const TX_SIZE tx_size = max_txsize_lookup[bsize];
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  int64_t recon_error, sse;
+
+  // Setup scaling factor
+#if CONFIG_VP9_HIGHBITDEPTH
+  vp9_setup_scale_factors_for_frame(
+      &sf, this_frame->y_crop_width, this_frame->y_crop_height,
+      this_frame->y_crop_width, this_frame->y_crop_height,
+      cpi->common.use_highbitdepth);
+
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+    predictor = CONVERT_TO_BYTEPTR(predictor16);
+  else
+    predictor = predictor8;
+#else
+  vp9_setup_scale_factors_for_frame(
+      &sf, this_frame->y_crop_width, this_frame->y_crop_height,
+      this_frame->y_crop_width, this_frame->y_crop_height);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  // Prepare reference frame pointers. If any reference frame slot is
+  // unavailable, the pointer will be set to Null.
+  for (idx = 0; idx < 3; ++idx) {
+    int rf_idx = gf_picture[frame_idx].ref_frame[idx];
+    if (rf_idx != -1) ref_frame[idx] = gf_picture[rf_idx].frame;
+  }
+
+  xd->mi = cm->mi_grid_visible;
+  xd->mi[0] = cm->mi;
+  xd->cur_buf = this_frame;
+
+  // Get rd multiplier set up.
+  rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, tpl_frame->base_qindex);
+  set_error_per_bit(&cpi->td.mb, rdmult);
+  vp9_initialize_me_consts(cpi, &cpi->td.mb, tpl_frame->base_qindex);
+
+  tpl_frame->is_valid = 1;
+
+  cm->base_qindex = tpl_frame->base_qindex;
+  vp9_frame_init_quantizer(cpi);
+
+#if CONFIG_NON_GREEDY_MV
+  build_motion_field(cpi, xd, frame_idx, ref_frame, bsize);
+#endif
+
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
       mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, tpl_frame,
@@ -6339,6 +6344,7 @@ void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
                        bsize);
 #if CONFIG_NON_GREEDY_MV
       {
+        int rf_idx;
         TplDepStats *this_tpl_stats =
             &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
         for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
