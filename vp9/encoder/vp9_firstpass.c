@@ -2317,9 +2317,9 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
     for (idx = 2; idx < MAX_ARF_LAYERS; ++idx) {
       if (arf_depth_boost[idx] == 0) break;
-      arf_depth_bits[idx] =
-          calculate_boost_bits(rc->baseline_gf_interval - total_arfs,
-                               arf_depth_boost[idx], total_group_bits);
+      arf_depth_bits[idx] = calculate_boost_bits(
+          rc->baseline_gf_interval - total_arfs - arf_depth_count[idx],
+          arf_depth_boost[idx], total_group_bits);
 
       total_group_bits -= arf_depth_bits[idx];
       total_arfs += arf_depth_count[idx];
@@ -2691,8 +2691,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 
   // Calculate the extra bits to be used for boosted frame(s)
-  gf_arf_bits = calculate_boost_bits(rc->baseline_gf_interval, rc->gfu_boost,
-                                     gf_group_bits);
+  gf_arf_bits = calculate_boost_bits((rc->baseline_gf_interval - 1),
+                                     rc->gfu_boost, gf_group_bits);
 
   // Adjust KF group bits and error remaining.
   twopass->kf_group_error_left -= gf_group_err;
