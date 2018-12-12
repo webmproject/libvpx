@@ -70,12 +70,7 @@ enum vp8_postproc_level {
   VP8_DEBLOCK = 1 << 0,
   VP8_DEMACROBLOCK = 1 << 1,
   VP8_ADDNOISE = 1 << 2,
-  VP8_DEBUG_TXT_FRAME_INFO = 1 << 3, /**< print frame information */
-  VP8_DEBUG_TXT_MBLK_MODES =
-      1 << 4, /**< print macro block modes over each macro block */
-  VP8_DEBUG_TXT_DC_DIFF = 1 << 5,   /**< print dc diff for each macro block */
-  VP8_DEBUG_TXT_RATE_INFO = 1 << 6, /**< print video rate info (encoder only) */
-  VP8_MFQE = 1 << 10
+  VP8_MFQE = 1 << 3
 };
 
 /*!\brief post process flags
