@@ -143,6 +143,11 @@ static INLINE MV get_full_mv(const MV *mv) {
   out_mv.col = mv->col >> 3;
   return out_mv;
 }
+
+struct TplDepFrame;
+void vp9_prepare_nb_full_mvs(const struct TplDepFrame *tpl_frame, int mi_row,
+                             int mi_col, int rf_idx, BLOCK_SIZE bsize,
+                             int_mv *nb_full_mvs);
 #endif  // CONFIG_NON_GREEDY_MV
 #ifdef __cplusplus
 }  // extern "C"
