@@ -404,3 +404,4 @@ CLEAN-OBJS += examples.doxy samples.dox $(ALL_EXAMPLES:.c=.dox)
 DOCS-yes += examples.doxy samples.dox
 examples.doxy: samples.dox $(ALL_EXAMPLES:.c=.dox)
 	@echo "INPUT += $^" > $@
+	@echo "ENABLED_SECTIONS += samples" >> $@
