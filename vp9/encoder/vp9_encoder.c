@@ -3835,7 +3835,9 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     // TODO(marpan/jianj): Fix this to handle case where base
     // spatial layers are skipped, in which case we should insert
     // and reset to spatial layer 0 on scene change.
-    if (svc->high_source_sad_superframe && svc->temporal_layer_id > 0) {
+    // Only do this reset for bypass/flexible mode.
+    if (svc->high_source_sad_superframe && svc->temporal_layer_id > 0 &&
+        svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
       // rc->high_source_sad will get reset so copy it to restore it.
       int tmp_high_source_sad = cpi->rc.high_source_sad;
       vp9_svc_reset_temporal_layers(cpi, cm->frame_type == KEY_FRAME);
