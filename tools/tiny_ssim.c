@@ -272,12 +272,11 @@ static double ssim_8x8(const uint8_t *s, int sp, const uint8_t *r, int rp) {
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static double highbd_ssim_8x8(const uint16_t *s, int sp, const uint16_t *r,
-                              int rp, uint32_t bd, uint32_t shift) {
+                              int rp, uint32_t bd) {
   uint32_t sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
   highbd_ssim_parms_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
                         &sum_sxr);
-  return similarity(sum_s >> shift, sum_r >> shift, sum_sq_s >> (2 * shift),
-                    sum_sq_r >> (2 * shift), sum_sxr >> (2 * shift), 64, bd);
+  return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64, bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -306,7 +305,7 @@ static double ssim2(const uint8_t *img1, const uint8_t *img2, int stride_img1,
 #if CONFIG_VP9_HIGHBITDEPTH
 static double highbd_ssim2(const uint8_t *img1, const uint8_t *img2,
                            int stride_img1, int stride_img2, int width,
-                           int height, uint32_t bd, uint32_t shift) {
+                           int height, uint32_t bd) {
   int i, j;
   int samples = 0;
   double ssim_total = 0;
@@ -315,9 +314,9 @@ static double highbd_ssim2(const uint8_t *img1, const uint8_t *img2,
   for (i = 0; i <= height - 8;
        i += 4, img1 += stride_img1 * 4, img2 += stride_img2 * 4) {
     for (j = 0; j <= width - 8; j += 4) {
-      double v = highbd_ssim_8x8(CONVERT_TO_SHORTPTR(img1 + j), stride_img1,
-                                 CONVERT_TO_SHORTPTR(img2 + j), stride_img2, bd,
-                                 shift);
+      double v =
+          highbd_ssim_8x8(CONVERT_TO_SHORTPTR(img1 + j), stride_img1,
+                          CONVERT_TO_SHORTPTR(img2 + j), stride_img2, bd);
       ssim_total += v;
       samples++;
     }
@@ -688,7 +687,7 @@ int main(int argc, char *argv[]) {
     psnr = calc_plane_error(buf0, w, buf1, w, w, h);                           \
   } else {                                                                     \
     ssim = highbd_ssim2(CONVERT_TO_BYTEPTR(buf0), CONVERT_TO_BYTEPTR(buf1), w, \
-                        w, w, h, bit_depth, bit_depth - 8);                    \
+                        w, w, h, bit_depth);                                   \
     psnr = calc_plane_error16(CAST_TO_SHORTPTR(buf0), w,                       \
                               CAST_TO_SHORTPTR(buf1), w, w, h);                \
   }
