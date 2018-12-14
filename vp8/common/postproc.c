@@ -325,7 +325,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest,
   vpx_clear_system_state();
 
   if ((flags & VP8D_MFQE) && oci->postproc_state.last_frame_valid &&
-      oci->current_video_frame >= 2 &&
+      oci->current_video_frame > 10 &&
       oci->postproc_state.last_base_qindex < 60 &&
       oci->base_qindex - oci->postproc_state.last_base_qindex >= 20) {
     vp8_multiframe_quality_enhance(oci);
