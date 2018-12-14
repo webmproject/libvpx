@@ -50,7 +50,8 @@ static uint64_t calc_plane_error16(uint16_t *orig, int orig_stride,
   }
   return total_sse;
 }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 static uint64_t calc_plane_error(uint8_t *orig, int orig_stride, uint8_t *recon,
                                  int recon_stride, unsigned int cols,
                                  unsigned int rows) {
@@ -269,6 +270,7 @@ static double ssim_8x8(const uint8_t *s, int sp, const uint8_t *r, int rp) {
   return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64, 8);
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
 static double highbd_ssim_8x8(const uint16_t *s, int sp, const uint16_t *r,
                               int rp, uint32_t bd, uint32_t shift) {
   uint32_t sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
@@ -277,6 +279,7 @@ static double highbd_ssim_8x8(const uint16_t *s, int sp, const uint16_t *r,
   return similarity(sum_s >> shift, sum_r >> shift, sum_sq_s >> (2 * shift),
                     sum_sq_r >> (2 * shift), sum_sxr >> (2 * shift), 64, bd);
 }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 // We are using a 8x8 moving window with starting location of each 8x8 window
 // on the 4x4 pixel grid. Such arrangement allows the windows to overlap
@@ -300,6 +303,7 @@ static double ssim2(const uint8_t *img1, const uint8_t *img2, int stride_img1,
   return ssim_total;
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
 static double highbd_ssim2(const uint8_t *img1, const uint8_t *img2,
                            int stride_img1, int stride_img2, int width,
                            int height, uint32_t bd, uint32_t shift) {
@@ -321,6 +325,7 @@ static double highbd_ssim2(const uint8_t *img1, const uint8_t *img2,
   ssim_total /= samples;
   return ssim_total;
 }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 // traditional ssim as per: http://en.wikipedia.org/wiki/Structural_similarity
 //
@@ -565,35 +570,6 @@ double get_ssim_metrics(uint8_t *img1, int img1_pitch, uint8_t *img2,
   return inconsistency_total;
 }
 
-double highbd_calc_ssim(const YV12_BUFFER_CONFIG *source,
-                        const YV12_BUFFER_CONFIG *dest, double *weight,
-                        uint32_t bd, uint32_t in_bd) {
-  double a, b, c;
-  double ssimv;
-  uint32_t shift = 0;
-
-  assert(bd >= in_bd);
-  shift = bd - in_bd;
-
-  a = highbd_ssim2(source->y_buffer, dest->y_buffer, source->y_stride,
-                   dest->y_stride, source->y_crop_width, source->y_crop_height,
-                   in_bd, shift);
-
-  b = highbd_ssim2(source->u_buffer, dest->u_buffer, source->uv_stride,
-                   dest->uv_stride, source->uv_crop_width,
-                   source->uv_crop_height, in_bd, shift);
-
-  c = highbd_ssim2(source->v_buffer, dest->v_buffer, source->uv_stride,
-                   dest->uv_stride, source->uv_crop_width,
-                   source->uv_crop_height, in_bd, shift);
-
-  ssimv = a * .8 + .1 * (b + c);
-
-  *weight = 1;
-
-  return ssimv;
-}
-
 int main(int argc, char *argv[]) {
   FILE *framestats = NULL;
   int bit_depth = 8;
@@ -711,7 +687,7 @@ int main(int argc, char *argv[]) {
 #define psnr_and_ssim(ssim, psnr, buf0, buf1, w, h) \
   ssim = ssim2(buf0, buf1, w, w, w, h);             \
   psnr = calc_plane_error(buf0, w, buf1, w, w, h);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     if (n_frames == allocated_frames) {
       allocated_frames = allocated_frames == 0 ? 1024 : allocated_frames * 2;
