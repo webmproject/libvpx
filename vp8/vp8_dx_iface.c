@@ -335,8 +335,8 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
 
   if (!res) {
     VP8D_COMP *pbi = ctx->yv12_frame_buffers.pbi[0];
+    VP8_COMMON *const pc = &pbi->common;
     if (resolution_change) {
-      VP8_COMMON *const pc = &pbi->common;
       MACROBLOCKD *const xd = &pbi->mb;
 #if CONFIG_MULTITHREAD
       int i;
@@ -427,6 +427,23 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
       /* required to get past the first get_free_fb() call */
       pbi->common.fb_idx_ref_cnt[0] = 0;
     }
+
+    if (setjmp(pbi->common.error.jmp)) {
+      /* We do not know if the missing frame(s) was supposed to update
+       * any of the reference buffers, but we act conservative and
+       * mark only the last buffer as corrupted.
+       */
+      pc->yv12_fb[pc->lst_fb_idx].corrupted = 1;
+
+      if (pc->fb_idx_ref_cnt[pc->new_fb_idx] > 0) {
+        pc->fb_idx_ref_cnt[pc->new_fb_idx]--;
+      }
+      pc->error.setjmp = 0;
+      res = update_error_state(ctx, &pbi->common.error);
+      return res;
+    }
+
+    pbi->common.error.setjmp = 1;
 
     /* update the pbi fragment data */
     pbi->fragments = ctx->fragments;

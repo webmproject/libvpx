@@ -321,22 +321,6 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, size_t size,
   pbi->dec_fb_ref[GOLDEN_FRAME] = &cm->yv12_fb[cm->gld_fb_idx];
   pbi->dec_fb_ref[ALTREF_FRAME] = &cm->yv12_fb[cm->alt_fb_idx];
 
-  if (setjmp(pbi->common.error.jmp)) {
-    /* We do not know if the missing frame(s) was supposed to update
-     * any of the reference buffers, but we act conservative and
-     * mark only the last buffer as corrupted.
-     */
-    cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
-
-    if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0) {
-      cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
-    }
-    pbi->common.error.setjmp = 0;
-    goto decode_exit;
-  }
-
-  pbi->common.error.setjmp = 1;
-
   retcode = vp8_decode_frame(pbi);
 
   if (retcode < 0) {

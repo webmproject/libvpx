@@ -16,6 +16,7 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_once.h"
 #include "vp8/encoder/onyx_int.h"
 #include "vpx/vp8cx.h"
@@ -796,9 +797,11 @@ static vpx_codec_err_t set_reference_and_update(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
                                    const vpx_image_t *img, vpx_codec_pts_t pts,
                                    unsigned long duration,
-                                   vpx_enc_frame_flags_t flags,
+                                   vpx_enc_frame_flags_t enc_flags,
                                    unsigned long deadline) {
-  vpx_codec_err_t res = VPX_CODEC_OK;
+  volatile vpx_codec_err_t res = VPX_CODEC_OK;
+  // Make a copy as volatile to avoid -Wclobbered with longjmp.
+  volatile vpx_enc_frame_flags_t flags = enc_flags;
 
   if (!ctx->cfg.rc_target_bitrate) {
 #if CONFIG_MULTI_RES_ENCODING
@@ -838,6 +841,12 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
       flags |= VPX_EFLAG_FORCE_KF;
       ctx->fixed_kf_cntr = 1;
     }
+  }
+
+  if (setjmp(ctx->cpi->common.error.jmp)) {
+    ctx->cpi->common.error.setjmp = 0;
+    vpx_clear_system_state();
+    return VPX_CODEC_CORRUPT_FRAME;
   }
 
   /* Initialize the encoder instance on the first frame*/
@@ -885,6 +894,8 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
     cx_data_sz = ctx->cx_data_sz;
     cx_data_end = ctx->cx_data + cx_data_sz;
     lib_flags = 0;
+
+    ctx->cpi->common.error.setjmp = 1;
 
     while (cx_data_sz >= ctx->cx_data_sz / 2) {
       comp_data_state = vp8_get_compressed_data(
