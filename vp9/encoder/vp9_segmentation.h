@@ -26,6 +26,8 @@ void vp9_disable_segfeature(struct segmentation *seg, int segment_id,
 void vp9_clear_segdata(struct segmentation *seg, int segment_id,
                        SEG_LVL_FEATURES feature_id);
 
+void vp9_psnr_aq_mode_setup(struct segmentation *seg);
+
 // The values given for each segment can be either deltas (from the default
 // value chosen for the frame) or absolute values.
 //
