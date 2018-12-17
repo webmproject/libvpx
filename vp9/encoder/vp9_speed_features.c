@@ -424,6 +424,7 @@ static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
 static void set_rt_speed_feature_framesize_independent(
     VP9_COMP *cpi, SPEED_FEATURES *sf, int speed, vp9e_tune_content content) {
   VP9_COMMON *const cm = &cpi->common;
+  SVC *const svc = &cpi->svc;
   const int is_keyframe = cm->frame_type == KEY_FRAME;
   const int frames_since_key = is_keyframe ? 0 : cpi->rc.frames_since_key;
   sf->static_segmentation = 0;
@@ -479,7 +480,7 @@ static void set_rt_speed_feature_framesize_independent(
     // Reference masking only enabled for 1 spatial layer, and if none of the
     // references have been scaled. The latter condition needs to be checked
     // for external or internal dynamic resize.
-    sf->reference_masking = (cpi->svc.number_spatial_layers == 1);
+    sf->reference_masking = (svc->number_spatial_layers == 1);
     if (sf->reference_masking == 1 &&
         (cpi->external_resize == 1 ||
          cpi->oxcf.resize_mode == RESIZE_DYNAMIC)) {
@@ -615,7 +616,7 @@ static void set_rt_speed_feature_framesize_independent(
     }
     // Keep nonrd_keyframe = 1 for non-base spatial layers to prevent
     // increase in encoding time.
-    if (cpi->use_svc && cpi->svc.spatial_layer_id > 0) sf->nonrd_keyframe = 1;
+    if (cpi->use_svc && svc->spatial_layer_id > 0) sf->nonrd_keyframe = 1;
     if (cm->frame_type != KEY_FRAME && cpi->resize_state == ORIG &&
         cpi->oxcf.rc_mode == VPX_CBR)
       sf->overshoot_detection_cbr_rt = FAST_DETECTION_MAXQ;
@@ -653,7 +654,7 @@ static void set_rt_speed_feature_framesize_independent(
           (cm->width * cm->height <= 640 * 360) ? 40000 : 60000;
       if (cpi->content_state_sb_fd == NULL &&
           (!cpi->use_svc ||
-           cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
+           svc->spatial_layer_id == svc->number_spatial_layers - 1)) {
         cpi->content_state_sb_fd = (uint8_t *)vpx_calloc(
             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
       }
@@ -662,7 +663,7 @@ static void set_rt_speed_feature_framesize_independent(
       // Enable short circuit for low temporal variance.
       sf->short_circuit_low_temp_var = 1;
     }
-    if (cpi->svc.temporal_layer_id > 0) {
+    if (svc->temporal_layer_id > 0) {
       sf->adaptive_rd_thresh = 4;
       sf->limit_newmv_early_exit = 0;
       sf->base_mv_aggressive = 1;
@@ -676,16 +677,15 @@ static void set_rt_speed_feature_framesize_independent(
     sf->mv.fullpel_search_step_param = 10;
     // For SVC: use better mv search on base temporal layer, and only
     // on base spatial layer if highest resolution is above 640x360.
-    if (cpi->svc.number_temporal_layers > 2 &&
-        cpi->svc.temporal_layer_id == 0 &&
-        (cpi->svc.spatial_layer_id == 0 ||
+    if (svc->number_temporal_layers > 2 && svc->temporal_layer_id == 0 &&
+        (svc->spatial_layer_id == 0 ||
          cpi->oxcf.width * cpi->oxcf.height <= 640 * 360)) {
       sf->mv.search_method = NSTEP;
       sf->mv.fullpel_search_step_param = 6;
     }
-    if (cpi->svc.temporal_layer_id > 0 || cpi->svc.spatial_layer_id > 1) {
+    if (svc->temporal_layer_id > 0 || svc->spatial_layer_id > 1) {
       sf->use_simple_block_yrd = 1;
-      if (cpi->svc.non_reference_frame)
+      if (svc->non_reference_frame)
         sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_EVENMORE;
     }
     if (cpi->use_svc && cpi->row_mt && cpi->oxcf.max_threads > 1)
@@ -696,28 +696,28 @@ static void set_rt_speed_feature_framesize_independent(
     if (!cpi->last_frame_dropped && cpi->resize_state == ORIG &&
         !cpi->external_resize &&
         (!cpi->use_svc ||
-         (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1 &&
-          !cpi->svc.last_layer_dropped[cpi->svc.number_spatial_layers - 1]))) {
+         (svc->spatial_layer_id == svc->number_spatial_layers - 1 &&
+          !svc->last_layer_dropped[svc->number_spatial_layers - 1]))) {
       sf->copy_partition_flag = 1;
       cpi->max_copied_frame = 2;
       // The top temporal enhancement layer (for number of temporal layers > 1)
       // are non-reference frames, so use large/max value for max_copied_frame.
-      if (cpi->svc.number_temporal_layers > 1 &&
-          cpi->svc.temporal_layer_id == cpi->svc.number_temporal_layers - 1)
+      if (svc->number_temporal_layers > 1 &&
+          svc->temporal_layer_id == svc->number_temporal_layers - 1)
         cpi->max_copied_frame = 255;
     }
     // For SVC: enable use of lower resolution partition for higher resolution,
     // only for 3 spatial layers and when config/top resolution is above VGA.
     // Enable only for non-base temporal layer frames.
-    if (cpi->use_svc && cpi->svc.use_partition_reuse &&
-        cpi->svc.number_spatial_layers == 3 && cpi->svc.temporal_layer_id > 0 &&
+    if (cpi->use_svc && svc->use_partition_reuse &&
+        svc->number_spatial_layers == 3 && svc->temporal_layer_id > 0 &&
         cpi->oxcf.width * cpi->oxcf.height > 640 * 480)
       sf->svc_use_lowres_part = 1;
     // For SVC when golden is used as second temporal reference: to avoid
     // encode time increase only use this feature on base temporal layer.
     // (i.e remove golden flag from frame_flags for temporal_layer_id > 0).
-    if (cpi->use_svc && cpi->svc.use_gf_temporal_ref_current_layer &&
-        cpi->svc.temporal_layer_id > 0)
+    if (cpi->use_svc && svc->use_gf_temporal_ref_current_layer &&
+        svc->temporal_layer_id > 0)
       cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
   }
 
@@ -789,15 +789,15 @@ static void set_rt_speed_feature_framesize_independent(
           (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
                                 sizeof(*cpi->count_lastgolden_frame_usage));
   }
-  if (cpi->svc.previous_frame_is_intra_only) {
+  if (svc->previous_frame_is_intra_only) {
     sf->partition_search_type = FIXED_PARTITION;
     sf->always_this_block_size = BLOCK_64X64;
   }
   // Special case for screen content: increase motion search on base spatial
   // layer when high motion is detected or previous SL0 frame was dropped.
   if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && cpi->oxcf.speed >= 5 &&
-      cpi->svc.spatial_layer_id == 0 &&
-      (cpi->rc.high_num_blocks_with_motion || cpi->svc.last_layer_dropped[0])) {
+      svc->spatial_layer_id == 0 &&
+      (svc->high_num_blocks_with_motion || svc->last_layer_dropped[0])) {
     sf->mv.search_method = NSTEP;
     sf->mv.fullpel_search_step_param = 2;
   }
