@@ -143,10 +143,11 @@ typedef struct SVC {
 
   INTER_LAYER_PRED disable_inter_layer_pred;
 
-  // Flag to indicate scene change at current superframe, scene detection is
-  // currently checked for each superframe prior to encoding, on the full
-  // resolution source.
+  // Flag to indicate scene change and high num of motion blocks at current
+  // superframe, scene detection is currently checked for each superframe prior
+  // to encoding, on the full resolution source.
   int high_source_sad_superframe;
+  int high_num_blocks_with_motion;
 
   // Flags used to get SVC pattern info.
   int update_buffer_slot[VPX_SS_MAX_LAYERS];

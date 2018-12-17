@@ -884,7 +884,10 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
       svc->non_reference_frame = 0;
   }
 
-  if (svc->spatial_layer_id == 0) svc->high_source_sad_superframe = 0;
+  if (svc->spatial_layer_id == 0) {
+    svc->high_source_sad_superframe = 0;
+    svc->high_num_blocks_with_motion = 0;
+  }
 
   if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
       svc->last_layer_dropped[svc->spatial_layer_id] &&
