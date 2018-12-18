@@ -240,11 +240,8 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
       mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
     vp9_init_plane_quantizers(cpi, x);
-
-    x->encode_breakout = cpi->segment_encode_breakout[mi->segment_id];
   } else {
     mi->segment_id = 0;
-    x->encode_breakout = cpi->encode_breakout;
   }
 
   // required by vp9_append_sub8x8_mvs_for_idx() and vp9_find_best_ref_mvs()

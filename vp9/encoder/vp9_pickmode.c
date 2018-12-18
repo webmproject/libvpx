@@ -898,6 +898,7 @@ static void encode_breakout_test(
   // Skipping threshold for dc.
   unsigned int thresh_dc;
   int motion_low = 1;
+
   if (cpi->use_svc && ref_frame == GOLDEN_FRAME) return;
   if (mi->mv[0].as_mv.row > 64 || mi->mv[0].as_mv.row < -64 ||
       mi->mv[0].as_mv.col > 64 || mi->mv[0].as_mv.col < -64)
@@ -1702,6 +1703,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       (cpi->use_svc && cpi->svc.high_source_sad_superframe);
 
   init_best_pickmode(&best_pickmode);
+
+  x->encode_breakout = seg->enabled
+                           ? cpi->segment_encode_breakout[mi->segment_id]
+                           : cpi->encode_breakout;
 
   x->source_variance = UINT_MAX;
   if (cpi->sf.default_interp_filter == BILINEAR) {
