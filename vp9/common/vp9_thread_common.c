@@ -470,6 +470,12 @@ void vp9_set_row(VP9LfSync *lf_sync, int num_tiles, int row, int is_last_row,
 #endif  // CONFIG_MULTITHREAD
 }
 
+void vp9_loopfilter_job(LFWorkerData *lf_data, VP9LfSync *lf_sync) {
+  thread_loop_filter_rows(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
+                          lf_data->start, lf_data->stop, lf_data->y_only,
+                          lf_sync);
+}
+
 // Accumulate frame counts.
 void vp9_accumulate_frame_counts(FRAME_COUNTS *accum,
                                  const FRAME_COUNTS *counts, int is_dec) {
