@@ -796,7 +796,6 @@ static void set_rt_speed_feature_framesize_independent(
   // Special case for screen content: increase motion search on base spatial
   // layer when high motion is detected or previous SL0 frame was dropped.
   if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && cpi->oxcf.speed >= 5 &&
-      svc->spatial_layer_id == 0 &&
       (svc->high_num_blocks_with_motion || svc->last_layer_dropped[0])) {
     sf->mv.search_method = NSTEP;
     // TODO(marpan/jianj): Tune this setting for screensharing. For now use
