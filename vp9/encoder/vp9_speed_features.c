@@ -799,8 +799,8 @@ static void set_rt_speed_feature_framesize_independent(
       (svc->high_num_blocks_with_motion || svc->last_layer_dropped[0])) {
     sf->mv.search_method = NSTEP;
     // TODO(marpan/jianj): Tune this setting for screensharing. For now use
-    // larger step_param for non-base layer, to avoid increase in encode time.
-    sf->mv.fullpel_search_step_param = (svc->spatial_layer_id == 0) ? 2 : 4;
+    // small step_param for all spatial layers.
+    sf->mv.fullpel_search_step_param = 2;
   }
 }
 
