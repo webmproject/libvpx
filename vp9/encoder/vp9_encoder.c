@@ -4104,6 +4104,8 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
       vp9_setup_in_frame_q_adj(cpi);
     } else if (oxcf->aq_mode == LOOKAHEAD_AQ) {
       vp9_alt_ref_aq_setup_map(cpi->alt_ref_aq, cpi);
+    } else if (oxcf->aq_mode == PSNR_AQ) {
+      vp9_psnr_aq_mode_setup(&cm->seg);
     }
 
     vp9_encode_frame(cpi);
