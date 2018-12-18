@@ -5734,7 +5734,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     int64_t mc_dep_cost_base = 0;
     int row, col;
 
-    for (row = 0; row < cm->mi_rows; ++row) {
+    for (row = 0; row < cm->mi_rows && tpl_frame->is_valid; ++row) {
       for (col = 0; col < cm->mi_cols; ++col) {
         TplDepStats *this_stats = &tpl_stats[row * tpl_stride + col];
         intra_cost_base += this_stats->intra_cost;

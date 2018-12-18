@@ -2110,7 +2110,7 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 
 VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
-  unsigned int i, frame;
+  unsigned int i;
   VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP9_COMP));
   VP9_COMMON *volatile const cm = cpi != NULL ? &cpi->common : NULL;
 
@@ -2361,51 +2361,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   vp9_set_speed_features_framesize_independent(cpi);
   vp9_set_speed_features_framesize_dependent(cpi);
 
-  if (cpi->sf.enable_tpl_model) {
-    const int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-    const int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
 #if CONFIG_NON_GREEDY_MV
-    CHECK_MEM_ERROR(
-        cm, cpi->feature_score_loc_arr,
-        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_arr)));
-    CHECK_MEM_ERROR(
-        cm, cpi->feature_score_loc_sort,
-        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_sort)));
-    CHECK_MEM_ERROR(
-        cm, cpi->feature_score_loc_heap,
-        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_heap)));
-#endif
-    // TODO(jingning): Reduce the actual memory use for tpl model build up.
-    for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
-#if CONFIG_NON_GREEDY_MV
-      int sqr_bsize;
-      int rf_idx;
-      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-        for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
-          CHECK_MEM_ERROR(
-              cm, cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize],
-              vpx_calloc(mi_rows * mi_cols,
-                         sizeof(*cpi->tpl_stats[frame]
-                                     .pyramid_mv_arr[rf_idx][sqr_bsize])));
-        }
-      }
-#endif
-      CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
-                      vpx_calloc(mi_rows * mi_cols,
-                                 sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
-      cpi->tpl_stats[frame].is_valid = 0;
-      cpi->tpl_stats[frame].width = mi_cols;
-      cpi->tpl_stats[frame].height = mi_rows;
-      cpi->tpl_stats[frame].stride = mi_cols;
-      cpi->tpl_stats[frame].mi_rows = cm->mi_rows;
-      cpi->tpl_stats[frame].mi_cols = cm->mi_cols;
-    }
-
-    for (frame = 0; frame < REF_FRAMES; ++frame) {
-      cpi->enc_frame_buf[frame].mem_valid = 0;
-      cpi->enc_frame_buf[frame].released = 1;
-    }
-  }
+  cpi->feature_score_loc_alloc = 0;
+#endif  // CONFIG_NON_GREEDY_MV
+  for (i = 0; i < MAX_ARF_GOP_SIZE; ++i) cpi->tpl_stats[i].tpl_stats_ptr = NULL;
 
   // Allocate memory to store variances for a frame.
   CHECK_MEM_ERROR(cm, cpi->source_diff_var, vpx_calloc(cm->MBs, sizeof(diff)));
@@ -6434,6 +6393,71 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
 #endif  // DUMP_TPL_STATS
 #endif  // CONFIG_NON_GREEDY_MV
 
+static void init_tpl_buffer(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  int frame;
+
+  const int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+  const int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+#if CONFIG_NON_GREEDY_MV
+  int sqr_bsize;
+  int rf_idx;
+
+  // TODO(angiebird): This probably needs further modifications to support
+  // frame scaling later on.
+  if (cpi->feature_score_loc_alloc == 0) {
+    CHECK_MEM_ERROR(
+        cm, cpi->feature_score_loc_arr,
+        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_arr)));
+    CHECK_MEM_ERROR(
+        cm, cpi->feature_score_loc_sort,
+        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_sort)));
+    CHECK_MEM_ERROR(
+        cm, cpi->feature_score_loc_heap,
+        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_heap)));
+
+    cpi->feature_score_loc_alloc = 1;
+  }
+#endif
+
+  // TODO(jingning): Reduce the actual memory use for tpl model build up.
+  for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
+    if (cpi->tpl_stats[frame].width >= mi_cols &&
+        cpi->tpl_stats[frame].height >= mi_rows &&
+        cpi->tpl_stats[frame].tpl_stats_ptr)
+      continue;
+
+#if CONFIG_NON_GREEDY_MV
+    vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr);
+    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+      for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
+        CHECK_MEM_ERROR(
+            cm, cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize],
+            vpx_calloc(
+                mi_rows * mi_cols,
+                sizeof(
+                    *cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize])));
+      }
+    }
+#endif
+    vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
+    CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
+                    vpx_calloc(mi_rows * mi_cols,
+                               sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
+    cpi->tpl_stats[frame].is_valid = 0;
+    cpi->tpl_stats[frame].width = mi_cols;
+    cpi->tpl_stats[frame].height = mi_rows;
+    cpi->tpl_stats[frame].stride = mi_cols;
+    cpi->tpl_stats[frame].mi_rows = cm->mi_rows;
+    cpi->tpl_stats[frame].mi_cols = cm->mi_cols;
+  }
+
+  for (frame = 0; frame < REF_FRAMES; ++frame) {
+    cpi->enc_frame_buf[frame].mem_valid = 0;
+    cpi->enc_frame_buf[frame].released = 1;
+  }
+}
+
 static void setup_tpl_stats(VP9_COMP *cpi) {
   GF_PICTURE gf_picture[MAX_ARF_GOP_SIZE];
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
@@ -6671,6 +6695,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (gf_group_index == 1 &&
       cpi->twopass.gf_group.update_type[gf_group_index] == ARF_UPDATE &&
       cpi->sf.enable_tpl_model) {
+    init_tpl_buffer(cpi);
     vp9_estimate_qp_gop(cpi);
     setup_tpl_stats(cpi);
   }
