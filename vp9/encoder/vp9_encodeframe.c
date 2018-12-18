@@ -180,6 +180,29 @@ static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi, MACROBLOCK *x,
     return BLOCK_8X8;
 }
 
+static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
+                              int mi_col, BLOCK_SIZE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
+  const struct segmentation *const seg = &cm->seg;
+  MACROBLOCKD *const xd = &x->e_mbd;
+
+  MODE_INFO *mi = xd->mi[0];
+
+  // Initialize the segmentation index as 0.
+  mi->segment_id = 0;
+
+  // Skip the rest if AQ mode is disabled.
+  if (!seg->enabled) return;
+
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+    const uint8_t *const map =
+        seg->update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
+    mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+  }
+
+  vp9_init_plane_quantizers(cpi, x);
+}
+
 // Lighter version of set_offsets that only sets the mode info
 // pointers.
 static INLINE void set_mode_info_offsets(VP9_COMMON *const cm,
@@ -197,17 +220,13 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
                         BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MODE_INFO *mi;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
-  const struct segmentation *const seg = &cm->seg;
   MvLimits *const mv_limits = &x->mv_limits;
 
   set_skip_context(xd, mi_row, mi_col);
 
   set_mode_info_offsets(cm, x, xd, mi_row, mi_col);
-
-  mi = xd->mi[0];
 
   // Set up destination pointers.
   vp9_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
@@ -230,19 +249,6 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   // R/D setup.
   x->rddiv = cpi->rd.RDDIV;
   x->rdmult = cpi->rd.RDMULT;
-
-  // Setup segment ID.
-  if (seg->enabled) {
-    if (cpi->oxcf.aq_mode != VARIANCE_AQ && cpi->oxcf.aq_mode != LOOKAHEAD_AQ &&
-        cpi->oxcf.aq_mode != EQUATOR360_AQ) {
-      const uint8_t *const map =
-          seg->update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
-      mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
-    }
-    vp9_init_plane_quantizers(cpi, x);
-  } else {
-    mi->segment_id = 0;
-  }
 
   // required by vp9_append_sub8x8_mvs_for_idx() and vp9_find_best_ref_mvs()
   xd->tile = *tile;
@@ -1251,6 +1257,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
+  set_segment_index(cpi, x, mi_row, mi_col, BLOCK_64X64);
   segment_id = xd->mi[0]->segment_id;
 
   if (cpi->oxcf.speed >= 8 || (cpi->use_svc && cpi->svc.non_reference_frame))
@@ -1878,6 +1885,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
   x->use_lp32x32fdct = 1;
 
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
+  set_segment_index(cpi, x, mi_row, mi_col, bsize);
   mi = xd->mi[0];
   mi->sb_type = bsize;
 
@@ -4410,6 +4418,9 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
   int plane;
 
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
+
+  set_segment_index(cpi, x, mi_row, mi_col, bsize);
+
   mi = xd->mi[0];
   mi->sb_type = bsize;
 
