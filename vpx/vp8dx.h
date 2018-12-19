@@ -163,10 +163,6 @@ typedef struct vpx_decrypt_init {
   void *decrypt_state;
 } vpx_decrypt_init;
 
-/*!\brief A deprecated alias for vpx_decrypt_init.
- */
-typedef vpx_decrypt_init vp8_decrypt_init;
-
 /*!\cond */
 /*!\brief VP8 decoder control function parameter type
  *
