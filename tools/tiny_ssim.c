@@ -629,6 +629,15 @@ int main(int argc, char *argv[]) {
     goto clean_up;
   }
 
+  if (in[0].bit_depth != in[1].bit_depth) {
+    fprintf(stderr,
+            "Failing: Image bit depths don't match or are unspecified!\n");
+    return_value = 1;
+    goto clean_up;
+  }
+
+  bit_depth = in[0].bit_depth;
+
   // Number of frames to skip from file1.yuv for every frame used. Normal
   // values 0, 1 and 3 correspond to TL2, TL1 and TL0 respectively for a 3TL
   // encoding in mode 10. 7 would be reasonable for comparing TL0 of a 4-layer
