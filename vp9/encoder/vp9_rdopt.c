@@ -2892,7 +2892,7 @@ static int64_t handle_inter_mode(
   memcpy(x->skip_txfm, skip_txfm, sizeof(skip_txfm));
   memcpy(x->bsse, bsse, sizeof(bsse));
 
-  if (!skip_txfm_sb) {
+  if (!skip_txfm_sb || xd->lossless) {
     int skippable_y, skippable_uv;
     int64_t sseuv = INT64_MAX;
     int64_t rdcosty = INT64_MAX;
