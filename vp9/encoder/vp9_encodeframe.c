@@ -181,7 +181,7 @@ static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
-                              int mi_col, BLOCK_SIZE bsize) {
+                              int mi_col, BLOCK_SIZE bsize, int segment_index) {
   VP9_COMMON *const cm = &cpi->common;
   const struct segmentation *const seg = &cm->seg;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -229,6 +229,7 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
       else
         mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
       break;
+    case PSNR_AQ: mi->segment_id = segment_index; break;
     default:
       // NO_AQ or PSNR_AQ
       break;
@@ -1291,7 +1292,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
-  set_segment_index(cpi, x, mi_row, mi_col, BLOCK_64X64);
+  set_segment_index(cpi, x, mi_row, mi_col, BLOCK_64X64, 0);
   segment_id = xd->mi[0]->segment_id;
 
   if (cpi->oxcf.speed >= 8 || (cpi->use_svc && cpi->svc.non_reference_frame))
@@ -1919,7 +1920,6 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
   x->use_lp32x32fdct = 1;
 
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
-  set_segment_index(cpi, x, mi_row, mi_col, bsize);
   mi = xd->mi[0];
   mi->sb_type = bsize;
 
@@ -1968,6 +1968,8 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
     x->block_tx_domain = cpi->sf.allow_txfm_domain_distortion;
     x->block_qcoeff_opt = cpi->sf.allow_quant_coeff_opt;
   }
+
+  set_segment_index(cpi, x, mi_row, mi_col, bsize, 0);
 
   if (aq_mode == VARIANCE_AQ) {
     x->rdmult = set_segment_rdmult(cpi, x, mi->segment_id);
@@ -4420,7 +4422,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
 
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
 
-  set_segment_index(cpi, x, mi_row, mi_col, bsize);
+  set_segment_index(cpi, x, mi_row, mi_col, bsize, 0);
 
   mi = xd->mi[0];
   mi->sb_type = bsize;
