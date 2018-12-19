@@ -154,7 +154,7 @@ enum vp8e_enc_control_id {
    */
   VP8E_SET_CPUUSED = 13,
 
-  /*!\brief Codec control function to enable automatic set and use alf frames.
+  /*!\brief Codec control function to enable automatic use of arf frames.
    *
    * Supported in codecs: VP8, VP9
    */
@@ -817,7 +817,7 @@ typedef struct vpx_svc_ref_frame_config {
   int update_last[VPX_SS_MAX_LAYERS];       /**< Update last. */
   int update_golden[VPX_SS_MAX_LAYERS];     /**< Update golden. */
   int update_alt_ref[VPX_SS_MAX_LAYERS];    /**< Update altref. */
-  int reference_last[VPX_SS_MAX_LAYERS];    /**< Last as eference. */
+  int reference_last[VPX_SS_MAX_LAYERS];    /**< Last as reference. */
   int reference_golden[VPX_SS_MAX_LAYERS];  /**< Golden as reference. */
   int reference_alt_ref[VPX_SS_MAX_LAYERS]; /**< Altref as reference. */
   int64_t duration[VPX_SS_MAX_LAYERS];      /**< Duration per spatial layer. */
@@ -837,7 +837,7 @@ typedef enum {
 
 /*!\brief vp9 svc frame dropping parameters.
  *
- * This defines the frame drop thresholds for each spatial layer, and the
+ * This defines the frame drop thresholds for each spatial layer, and
  * the frame dropping mode: 0 = layer based frame dropping (default),
  * 1 = constrained dropping where current layer drop forces all upper
  * spatial layers to drop.
