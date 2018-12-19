@@ -185,8 +185,11 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
   VP9_COMMON *const cm = &cpi->common;
   const struct segmentation *const seg = &cm->seg;
   MACROBLOCKD *const xd = &x->e_mbd;
-
   MODE_INFO *mi = xd->mi[0];
+
+  const AQ_MODE aq_mode = cpi->oxcf.aq_mode;
+  const uint8_t *const map =
+      seg->update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
 
   // Initialize the segmentation index as 0.
   mi->segment_id = 0;
@@ -194,10 +197,41 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
   // Skip the rest if AQ mode is disabled.
   if (!seg->enabled) return;
 
-  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-    const uint8_t *const map =
-        seg->update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
-    mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+  switch (aq_mode) {
+    case CYCLIC_REFRESH_AQ:
+      mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+      break;
+    case VARIANCE_AQ:
+      if (cm->frame_type == KEY_FRAME || cpi->refresh_alt_ref_frame ||
+          cpi->force_update_segmentation ||
+          (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
+        int min_energy;
+        int max_energy;
+        // Get sub block energy range
+        if (bsize >= BLOCK_32X32) {
+          vp9_get_sub_block_energy(cpi, x, mi_row, mi_col, bsize, &min_energy,
+                                   &max_energy);
+        } else {
+          min_energy = bsize <= BLOCK_16X16 ? x->mb_energy
+                                            : vp9_block_energy(cpi, x, bsize);
+        }
+        mi->segment_id = vp9_vaq_segment_id(min_energy);
+      } else {
+        mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+      }
+      break;
+    case LOOKAHEAD_AQ:
+      mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+      break;
+    case EQUATOR360_AQ:
+      if (cm->frame_type == KEY_FRAME || cpi->force_update_segmentation)
+        mi->segment_id = vp9_360aq_segment_id(mi_row, cm->mi_rows);
+      else
+        mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+      break;
+    default:
+      // NO_AQ or PSNR_AQ
+      break;
   }
 
   vp9_init_plane_quantizers(cpi, x);
@@ -1936,41 +1970,8 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
   }
 
   if (aq_mode == VARIANCE_AQ) {
-    if (cm->frame_type == KEY_FRAME || cpi->refresh_alt_ref_frame ||
-        cpi->force_update_segmentation ||
-        (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
-      int min_energy;
-      int max_energy;
-
-      // Get sub block energy range
-      if (bsize >= BLOCK_32X32) {
-        vp9_get_sub_block_energy(cpi, x, mi_row, mi_col, bsize, &min_energy,
-                                 &max_energy);
-      } else {
-        min_energy = bsize <= BLOCK_16X16 ? x->mb_energy
-                                          : vp9_block_energy(cpi, x, bsize);
-      }
-
-      mi->segment_id = vp9_vaq_segment_id(min_energy);
-    } else {
-      const uint8_t *const map =
-          cm->seg.update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
-      mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
-    }
     x->rdmult = set_segment_rdmult(cpi, x, mi->segment_id);
-  } else if (aq_mode == LOOKAHEAD_AQ) {
-    const uint8_t *const map = cpi->segmentation_map;
-
-    // I do not change rdmult here consciously.
-    mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
   } else if (aq_mode == EQUATOR360_AQ) {
-    if (cm->frame_type == KEY_FRAME || cpi->force_update_segmentation) {
-      mi->segment_id = vp9_360aq_segment_id(mi_row, cm->mi_rows);
-    } else {
-      const uint8_t *const map =
-          cm->seg.update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
-      mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
-    }
     x->rdmult = set_segment_rdmult(cpi, x, mi->segment_id);
   } else if (aq_mode == COMPLEXITY_AQ) {
     x->rdmult = set_segment_rdmult(cpi, x, mi->segment_id);
