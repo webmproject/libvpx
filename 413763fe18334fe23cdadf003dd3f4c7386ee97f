@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11d28688_9b49d069",
+        "filename": "vpx/vpx_integer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2018-12-19T23:48:44Z",
+      "side": 1,
+      "message": "Yeah this doesn\u0027t show up anywhere else in the code base. Could definitely go. Quick search on the internet doesn\u0027t seem to show anyone using it.",
+      "range": {
+        "startLine": 26,
+        "startChar": 12,
+        "endLine": 26,
+        "endChar": 32
+      },
+      "revId": "413763fe18334fe23cdadf003dd3f4c7386ee97f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
