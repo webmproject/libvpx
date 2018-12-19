@@ -439,6 +439,9 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
         pc->fb_idx_ref_cnt[pc->new_fb_idx]--;
       }
       pc->error.setjmp = 0;
+      ctx->si.w = 0;
+      ctx->si.h = 0;
+      ctx->decoder_init = 0;
       res = update_error_state(ctx, &pbi->common.error);
       return res;
     }

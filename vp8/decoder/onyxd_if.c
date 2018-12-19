@@ -428,6 +428,7 @@ int vp8dx_references_buffer(VP8_COMMON *oci, int ref_frame) {
 }
 
 int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf) {
+  if (fb->pbi[0]) remove_decompressor(fb->pbi[0]);
   /* decoder instance for single thread mode */
   fb->pbi[0] = create_decompressor(oxcf);
   if (!fb->pbi[0]) return VPX_CODEC_ERROR;
