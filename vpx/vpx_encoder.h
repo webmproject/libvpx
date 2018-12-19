@@ -208,8 +208,6 @@ typedef struct vpx_codec_cx_pkt {
  * This callback function, when registered, returns with packets when each
  * spatial layer is encoded.
  */
-// putting the definitions here for now. (agrange: find if there
-// is a better place for this)
 typedef void (*vpx_codec_enc_output_cx_pkt_cb_fn_t)(vpx_codec_cx_pkt_t *pkt,
                                                     void *user_data);
 
@@ -391,9 +389,6 @@ typedef struct vpx_codec_enc_cfg {
    * trade-off is often acceptable, but for many applications is not. It can
    * be disabled in these cases.
    *
-   * Note that not all codecs support this feature. All vpx VPx codecs do.
-   * For other codecs, consult the documentation for that algorithm.
-   *
    * This threshold is described as a percentage of the target data buffer.
    * When the data buffer falls below this percentage of fullness, a
    * dropped frame is indicated. Set the threshold to zero (0) to disable
@@ -504,7 +499,7 @@ typedef struct vpx_codec_enc_cfg {
    * be subtracted from the target bitrate in order to compensate
    * for prior overshoot.
    * VP9: Expressed as a percentage of the target bitrate, a threshold
-   * undershoot level (current rate vs target) beyond which more agressive
+   * undershoot level (current rate vs target) beyond which more aggressive
    * corrective measures are taken.
    *   *
    * Valid values in the range VP8:0-1000 VP9: 0-100.
@@ -519,7 +514,7 @@ typedef struct vpx_codec_enc_cfg {
    * be added to the target bitrate in order to compensate for
    * prior undershoot.
    * VP9: Expressed as a percentage of the target bitrate, a threshold
-   * overshoot level (current rate vs target) beyond which more agressive
+   * overshoot level (current rate vs target) beyond which more aggressive
    * corrective measures are taken.
    *
    * Valid values in the range VP8:0-1000 VP9: 0-100.
@@ -854,7 +849,7 @@ vpx_fixed_buf_t *vpx_codec_get_global_headers(vpx_codec_ctx_t *ctx);
  * implicit that limiting the available time to encode will degrade the
  * output quality. The encoder can be given an unlimited time to produce the
  * best possible frame by specifying a deadline of '0'. This deadline
- * supercedes the VPx notion of "best quality, good quality, realtime".
+ * supersedes the VPx notion of "best quality, good quality, realtime".
  * Applications that wish to map these former settings to the new deadline
  * based system can use the symbols #VPX_DL_REALTIME, #VPX_DL_GOOD_QUALITY,
  * and #VPX_DL_BEST_QUALITY.
