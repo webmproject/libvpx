@@ -1891,14 +1891,33 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   vp9_rd_cost_init(rd_cost);
 }
 
-static int set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
-                              int8_t segment_id) {
+static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
+                               int mi_row, int mi_col, BLOCK_SIZE bsize,
+                               AQ_MODE aq_mode) {
   int segment_qindex;
   VP9_COMMON *const cm = &cpi->common;
+  const uint8_t *const map =
+      cm->seg.update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
+
   vp9_init_plane_quantizers(cpi, x);
   vpx_clear_system_state();
-  segment_qindex = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
-  return vp9_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
+  segment_qindex =
+      vp9_get_qindex(&cm->seg, x->e_mbd.mi[0]->segment_id, cm->base_qindex);
+
+  if (aq_mode == NO_AQ || aq_mode == PSNR_AQ) {
+    if (cpi->sf.enable_tpl_model) x->rdmult = x->cb_rdmult;
+    return;
+  }
+
+  if (aq_mode == CYCLIC_REFRESH_AQ) {
+    // If segment is boosted, use rdmult for that segment.
+    if (cyclic_refresh_segment_id_boosted(
+            get_segment_id(cm, map, bsize, mi_row, mi_col)))
+      x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
+    return;
+  }
+
+  x->rdmult = vp9_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
 }
 
 static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
@@ -1970,23 +1989,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
   }
 
   set_segment_index(cpi, x, mi_row, mi_col, bsize, 0);
-
-  if (aq_mode == VARIANCE_AQ) {
-    x->rdmult = set_segment_rdmult(cpi, x, mi->segment_id);
-  } else if (aq_mode == EQUATOR360_AQ) {
-    x->rdmult = set_segment_rdmult(cpi, x, mi->segment_id);
-  } else if (aq_mode == COMPLEXITY_AQ) {
-    x->rdmult = set_segment_rdmult(cpi, x, mi->segment_id);
-  } else if (aq_mode == CYCLIC_REFRESH_AQ) {
-    const uint8_t *const map =
-        cm->seg.update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
-    // If segment is boosted, use rdmult for that segment.
-    if (cyclic_refresh_segment_id_boosted(
-            get_segment_id(cm, map, bsize, mi_row, mi_col)))
-      x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
-  } else {
-    if (cpi->sf.enable_tpl_model) x->rdmult = x->cb_rdmult;
-  }
+  set_segment_rdmult(cpi, x, mi_row, mi_col, bsize, aq_mode);
 
   // Find best coding mode & reconstruct the MB so it is available
   // as a predictor for MBs that follow in the SB
