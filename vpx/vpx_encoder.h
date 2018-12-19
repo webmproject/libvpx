@@ -39,14 +39,8 @@ extern "C" {
 /*! Temporal Scalability: Maximum number of coding layers */
 #define VPX_TS_MAX_LAYERS 5
 
-/*!\deprecated Use #VPX_TS_MAX_PERIODICITY instead. */
-#define MAX_PERIODICITY VPX_TS_MAX_PERIODICITY
-
 /*! Temporal+Spatial Scalability: Maximum number of coding layers */
 #define VPX_MAX_LAYERS 12  // 3 temporal + 4 spatial layers are allowed.
-
-/*!\deprecated Use #VPX_MAX_LAYERS instead. */
-#define MAX_LAYERS VPX_MAX_LAYERS  // 3 temporal + 4 spatial layers allowed.
 
 /*! Spatial Scalability: Maximum number of coding layers */
 #define VPX_SS_MAX_LAYERS 5
