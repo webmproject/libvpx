@@ -169,7 +169,10 @@ enum vp8e_enc_control_id {
    */
   VP8E_SET_NOISE_SENSITIVITY,
 
-  /*!\brief Codec control function to set sharpness.
+  /*!\brief Codec control function to set higher sharpness at the expense
+   * of a lower PSNR.
+   *
+   * \note Valid range: 0..7
    *
    * Supported in codecs: VP8, VP9
    */

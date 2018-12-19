@@ -342,7 +342,8 @@ static const arg_def_t *kf_args[] = { &kf_min_dist, &kf_max_dist, &kf_disabled,
 static const arg_def_t noise_sens =
     ARG_DEF(NULL, "noise-sensitivity", 1, "Noise sensitivity (frames to blur)");
 static const arg_def_t sharpness =
-    ARG_DEF(NULL, "sharpness", 1, "Loop filter sharpness (0..7)");
+    ARG_DEF(NULL, "sharpness", 1,
+            "Increase sharpness at the expense of lower PSNR. (0..7)");
 static const arg_def_t static_thresh =
     ARG_DEF(NULL, "static-thresh", 1, "Motion detection threshold");
 static const arg_def_t auto_altref =
