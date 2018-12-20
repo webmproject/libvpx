@@ -179,9 +179,7 @@ int vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
   uint32_t rdmult = q * q;
 
   if (cpi->common.frame_type != KEY_FRAME) {
-    if (qindex < 1)
-      rdmult = rdmult * 3 + (rdmult * 2 / 3);
-    else if (qindex < 128)
+    if (qindex < 128)
       rdmult = rdmult * 4;
     else if (qindex < 190)
       rdmult = rdmult * 4 + rdmult / 2;
