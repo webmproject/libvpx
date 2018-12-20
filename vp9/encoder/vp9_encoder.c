@@ -2987,7 +2987,7 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
   return force_recode;
 }
 
-void update_ref_frames(VP9_COMP *cpi) {
+static void update_ref_frames(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
   GF_GROUP *const gf_group = &cpi->twopass.gf_group;
@@ -5411,8 +5411,8 @@ typedef struct GF_PICTURE {
   FRAME_UPDATE_TYPE update_type;
 } GF_PICTURE;
 
-void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
-                     const GF_GROUP *gf_group, int *tpl_group_frames) {
+static void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
+                            const GF_GROUP *gf_group, int *tpl_group_frames) {
   VP9_COMMON *cm = &cpi->common;
   int frame_idx = 0;
   int i;
@@ -5544,7 +5544,7 @@ void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   }
 }
 
-void init_tpl_stats(VP9_COMP *cpi) {
+static void init_tpl_stats(VP9_COMP *cpi) {
   int frame_idx;
   for (frame_idx = 0; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
@@ -5563,18 +5563,17 @@ void init_tpl_stats(VP9_COMP *cpi) {
 }
 
 #if CONFIG_NON_GREEDY_MV
-uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
-                                       int frame_idx, uint8_t *cur_frame_buf,
-                                       uint8_t *ref_frame_buf, int stride,
-                                       BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                       MV *mv, int rf_idx, double *mv_dist,
-                                       double *mv_cost) {
+static uint32_t motion_compensated_prediction(
+    VP9_COMP *cpi, ThreadData *td, int frame_idx, uint8_t *cur_frame_buf,
+    uint8_t *ref_frame_buf, int stride, BLOCK_SIZE bsize, int mi_row,
+    int mi_col, MV *mv, int rf_idx, double *mv_dist, double *mv_cost) {
 #else   // CONFIG_NON_GREEDY_MV
-uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
-                                       int frame_idx, uint8_t *cur_frame_buf,
-                                       uint8_t *ref_frame_buf, int stride,
-                                       BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                       MV *mv) {
+static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
+                                              int frame_idx,
+                                              uint8_t *cur_frame_buf,
+                                              uint8_t *ref_frame_buf,
+                                              int stride, BLOCK_SIZE bsize,
+                                              int mi_row, int mi_col, MV *mv) {
 #endif  // CONFIG_NON_GREEDY_MV
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -5642,8 +5641,8 @@ uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   return bestsme;
 }
 
-int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
-                     int ref_pos_col, int block, BLOCK_SIZE bsize) {
+static int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
+                            int ref_pos_col, int block, BLOCK_SIZE bsize) {
   int width = 0, height = 0;
   int bw = 4 << b_width_log2_lookup[bsize];
   int bh = 4 << b_height_log2_lookup[bsize];
@@ -5671,7 +5670,7 @@ int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
   return width * height;
 }
 
-int round_floor(int ref_pos, int bsize_pix) {
+static int round_floor(int ref_pos, int bsize_pix) {
   int round;
   if (ref_pos < 0)
     round = -(1 + (-ref_pos - 1) / bsize_pix);
@@ -5681,8 +5680,8 @@ int round_floor(int ref_pos, int bsize_pix) {
   return round;
 }
 
-void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
-                     BLOCK_SIZE bsize, int stride) {
+static void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
+                            BLOCK_SIZE bsize, int stride) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const TplDepStats *src_stats = &tpl_stats[mi_row * stride + mi_col];
@@ -5701,8 +5700,8 @@ void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
   }
 }
 
-void tpl_model_update_b(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
-                        int mi_row, int mi_col, const BLOCK_SIZE bsize) {
+static void tpl_model_update_b(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
+                               int mi_row, int mi_col, const BLOCK_SIZE bsize) {
   TplDepFrame *ref_tpl_frame = &tpl_frame[tpl_stats->ref_frame_index];
   TplDepStats *ref_stats = ref_tpl_frame->tpl_stats_ptr;
   MV mv = tpl_stats->mv.as_mv;
@@ -5757,8 +5756,8 @@ void tpl_model_update_b(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
   }
 }
 
-void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
-                      int mi_row, int mi_col, const BLOCK_SIZE bsize) {
+static void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
+                             int mi_row, int mi_col, const BLOCK_SIZE bsize) {
   int idx, idy;
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
@@ -5773,9 +5772,10 @@ void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
   }
 }
 
-void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
-                        tran_low_t *qcoeff, tran_low_t *dqcoeff,
-                        TX_SIZE tx_size, int64_t *recon_error, int64_t *sse) {
+static void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
+                               tran_low_t *qcoeff, tran_low_t *dqcoeff,
+                               TX_SIZE tx_size, int64_t *recon_error,
+                               int64_t *sse) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -5808,8 +5808,8 @@ void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
-                         TX_SIZE tx_size) {
+static void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
+                                TX_SIZE tx_size) {
   // TODO(sdeng): Implement SIMD based high bit-depth Hadamard transforms.
   switch (tx_size) {
     case TX_8X8: vpx_highbd_hadamard_8x8(src_diff, bw, coeff); break;
@@ -5820,8 +5820,8 @@ void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
-                  TX_SIZE tx_size) {
+static void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
+                         TX_SIZE tx_size) {
   switch (tx_size) {
     case TX_8X8: vpx_hadamard_8x8(src_diff, bw, coeff); break;
     case TX_16X16: vpx_hadamard_16x16(src_diff, bw, coeff); break;
@@ -5865,13 +5865,14 @@ static void set_mv_limits(const VP9_COMMON *cm, MACROBLOCK *x, int mi_row,
       ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
 }
 
-void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
-                     struct scale_factors *sf, GF_PICTURE *gf_picture,
-                     int frame_idx, TplDepFrame *tpl_frame, int16_t *src_diff,
-                     tran_low_t *coeff, tran_low_t *qcoeff, tran_low_t *dqcoeff,
-                     int mi_row, int mi_col, BLOCK_SIZE bsize, TX_SIZE tx_size,
-                     YV12_BUFFER_CONFIG *ref_frame[], uint8_t *predictor,
-                     int64_t *recon_error, int64_t *sse) {
+static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
+                            struct scale_factors *sf, GF_PICTURE *gf_picture,
+                            int frame_idx, TplDepFrame *tpl_frame,
+                            int16_t *src_diff, tran_low_t *coeff,
+                            tran_low_t *qcoeff, tran_low_t *dqcoeff, int mi_row,
+                            int mi_col, BLOCK_SIZE bsize, TX_SIZE tx_size,
+                            YV12_BUFFER_CONFIG *ref_frame[], uint8_t *predictor,
+                            int64_t *recon_error, int64_t *sse) {
   VP9_COMMON *cm = &cpi->common;
   ThreadData *td = &cpi->td;
 
@@ -6222,8 +6223,8 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
 }
 #endif  // CONFIG_NON_GREEDY_MV
 
-void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture, int frame_idx,
-                       BLOCK_SIZE bsize) {
+static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
+                              int frame_idx, BLOCK_SIZE bsize) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
   YV12_BUFFER_CONFIG *ref_frame[3] = { NULL, NULL, NULL };
