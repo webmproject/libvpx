@@ -3586,8 +3586,8 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
 #undef FEATURES
 #undef LABELS
 
-int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row, int mi_col,
-                     int orig_rdmult) {
+static int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
+                            int mi_col, int orig_rdmult) {
   const int gf_group_index = cpi->twopass.gf_group.index;
   TplDepFrame *tpl_frame = &cpi->tpl_stats[gf_group_index];
   TplDepStats *tpl_stats = tpl_frame->tpl_stats_ptr;

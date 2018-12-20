@@ -440,7 +440,7 @@ void get_layer_resolution(const int width_org, const int height_org,
   *height_out = h;
 }
 
-void reset_fb_idx_unused(VP9_COMP *const cpi) {
+static void reset_fb_idx_unused(VP9_COMP *const cpi) {
   // If a reference frame is not referenced or refreshed, then set the
   // fb_idx for that reference to the first one used/referenced.
   // This is to avoid setting fb_idx for a reference to a slot that is not
