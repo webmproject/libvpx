@@ -12,20 +12,16 @@
 
 #include <string.h>
 
+#include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_dsp/x86/convolve.h"
-#include "vpx_dsp/x86/convolve_ssse3.h"
 #include "vpx_dsp/x86/convolve_sse2.h"
+#include "vpx_dsp/x86/convolve_ssse3.h"
 #include "vpx_dsp/x86/mem_sse2.h"
 #include "vpx_dsp/x86/transpose_sse2.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
-
-// These are reused by the avx2 intrinsics.
-// vpx_filter_block1d8_v8_intrin_ssse3()
-// vpx_filter_block1d8_h8_intrin_ssse3()
-// vpx_filter_block1d4_h8_intrin_ssse3()
 
 static INLINE __m128i shuffle_filter_convolve8_8_ssse3(
     const __m128i *const s, const int16_t *const filter) {
@@ -33,6 +29,22 @@ static INLINE __m128i shuffle_filter_convolve8_8_ssse3(
   shuffle_filter_ssse3(filter, f);
   return convolve8_8_ssse3(s, f);
 }
+
+// Used by the avx2 implementation.
+#if ARCH_X86_64
+// Use the intrinsics below
+filter8_1dfunction vpx_filter_block1d4_h8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d8_h8_intrin_ssse3;
+filter8_1dfunction vpx_filter_block1d8_v8_intrin_ssse3;
+#define vpx_filter_block1d4_h8_ssse3 vpx_filter_block1d4_h8_intrin_ssse3
+#define vpx_filter_block1d8_h8_ssse3 vpx_filter_block1d8_h8_intrin_ssse3
+#define vpx_filter_block1d8_v8_ssse3 vpx_filter_block1d8_v8_intrin_ssse3
+#else  // ARCH_X86
+// Use the assembly in vpx_dsp/x86/vpx_subpixel_8t_ssse3.asm.
+filter8_1dfunction vpx_filter_block1d4_h8_ssse3;
+filter8_1dfunction vpx_filter_block1d8_h8_ssse3;
+filter8_1dfunction vpx_filter_block1d8_v8_ssse3;
+#endif
 
 void vpx_filter_block1d4_h8_intrin_ssse3(
     const uint8_t *src_ptr, ptrdiff_t src_pitch, uint8_t *output_ptr,
@@ -186,9 +198,11 @@ void vpx_filter_block1d8_v8_intrin_ssse3(
   }
 }
 
-void vpx_filter_block1d16_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
-                                   uint8_t *dst_ptr, ptrdiff_t dst_stride,
-                                   uint32_t height, const int16_t *kernel) {
+static void vpx_filter_block1d16_h4_ssse3(const uint8_t *src_ptr,
+                                          ptrdiff_t src_stride,
+                                          uint8_t *dst_ptr,
+                                          ptrdiff_t dst_stride, uint32_t height,
+                                          const int16_t *kernel) {
   // We will cast the kernel from 16-bit words to 8-bit words, and then extract
   // the middle four elements of the kernel into two registers in the form
   // ... k[3] k[2] k[3] k[2]
@@ -258,9 +272,11 @@ void vpx_filter_block1d16_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
   }
 }
 
-void vpx_filter_block1d16_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
-                                   uint8_t *dst_ptr, ptrdiff_t dst_stride,
-                                   uint32_t height, const int16_t *kernel) {
+static void vpx_filter_block1d16_v4_ssse3(const uint8_t *src_ptr,
+                                          ptrdiff_t src_stride,
+                                          uint8_t *dst_ptr,
+                                          ptrdiff_t dst_stride, uint32_t height,
+                                          const int16_t *kernel) {
   // We will load two rows of pixels as 8-bit words, rearrange them into the
   // form
   // ... s[0,1] s[-1,1] s[0,0] s[-1,0]
@@ -372,9 +388,10 @@ void vpx_filter_block1d16_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
   }
 }
 
-void vpx_filter_block1d8_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
-                                  uint8_t *dst_ptr, ptrdiff_t dst_stride,
-                                  uint32_t height, const int16_t *kernel) {
+static void vpx_filter_block1d8_h4_ssse3(const uint8_t *src_ptr,
+                                         ptrdiff_t src_stride, uint8_t *dst_ptr,
+                                         ptrdiff_t dst_stride, uint32_t height,
+                                         const int16_t *kernel) {
   // We will cast the kernel from 16-bit words to 8-bit words, and then extract
   // the middle four elements of the kernel into two registers in the form
   // ... k[3] k[2] k[3] k[2]
@@ -432,9 +449,10 @@ void vpx_filter_block1d8_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
   }
 }
 
-void vpx_filter_block1d8_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
-                                  uint8_t *dst_ptr, ptrdiff_t dst_stride,
-                                  uint32_t height, const int16_t *kernel) {
+static void vpx_filter_block1d8_v4_ssse3(const uint8_t *src_ptr,
+                                         ptrdiff_t src_stride, uint8_t *dst_ptr,
+                                         ptrdiff_t dst_stride, uint32_t height,
+                                         const int16_t *kernel) {
   // We will load two rows of pixels as 8-bit words, rearrange them into the
   // form
   // ... s[0,1] s[-1,1] s[0,0] s[-1,0]
@@ -524,9 +542,10 @@ void vpx_filter_block1d8_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
   }
 }
 
-void vpx_filter_block1d4_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
-                                  uint8_t *dst_ptr, ptrdiff_t dst_stride,
-                                  uint32_t height, const int16_t *kernel) {
+static void vpx_filter_block1d4_h4_ssse3(const uint8_t *src_ptr,
+                                         ptrdiff_t src_stride, uint8_t *dst_ptr,
+                                         ptrdiff_t dst_stride, uint32_t height,
+                                         const int16_t *kernel) {
   // We will cast the kernel from 16-bit words to 8-bit words, and then extract
   // the middle four elements of the kernel into a single register in the form
   // k[5:2] k[5:2] k[5:2] k[5:2]
@@ -574,9 +593,10 @@ void vpx_filter_block1d4_h4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
   }
 }
 
-void vpx_filter_block1d4_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
-                                  uint8_t *dst_ptr, ptrdiff_t dst_stride,
-                                  uint32_t height, const int16_t *kernel) {
+static void vpx_filter_block1d4_v4_ssse3(const uint8_t *src_ptr,
+                                         ptrdiff_t src_stride, uint8_t *dst_ptr,
+                                         ptrdiff_t dst_stride, uint32_t height,
+                                         const int16_t *kernel) {
   // We will load two rows of pixels as 8-bit words, rearrange them into the
   // form
   // ... s[2,0] s[1,0] s[0,0] s[-1,0]
@@ -668,12 +688,10 @@ void vpx_filter_block1d4_v4_ssse3(const uint8_t *src_ptr, ptrdiff_t src_stride,
   }
 }
 
+// From vpx_dsp/x86/vpx_subpixel_8t_ssse3.asm
 filter8_1dfunction vpx_filter_block1d16_v8_ssse3;
 filter8_1dfunction vpx_filter_block1d16_h8_ssse3;
-filter8_1dfunction vpx_filter_block1d8_v8_ssse3;
-filter8_1dfunction vpx_filter_block1d8_h8_ssse3;
 filter8_1dfunction vpx_filter_block1d4_v8_ssse3;
-filter8_1dfunction vpx_filter_block1d4_h8_ssse3;
 filter8_1dfunction vpx_filter_block1d16_v8_avg_ssse3;
 filter8_1dfunction vpx_filter_block1d16_h8_avg_ssse3;
 filter8_1dfunction vpx_filter_block1d8_v8_avg_ssse3;
@@ -681,6 +699,7 @@ filter8_1dfunction vpx_filter_block1d8_h8_avg_ssse3;
 filter8_1dfunction vpx_filter_block1d4_v8_avg_ssse3;
 filter8_1dfunction vpx_filter_block1d4_h8_avg_ssse3;
 
+// Use the [vh]8 version because there is no [vh]4 implementation.
 #define vpx_filter_block1d16_v4_avg_ssse3 vpx_filter_block1d16_v8_avg_ssse3
 #define vpx_filter_block1d16_h4_avg_ssse3 vpx_filter_block1d16_h8_avg_ssse3
 #define vpx_filter_block1d8_v4_avg_ssse3 vpx_filter_block1d8_v8_avg_ssse3
@@ -688,6 +707,7 @@ filter8_1dfunction vpx_filter_block1d4_h8_avg_ssse3;
 #define vpx_filter_block1d4_v4_avg_ssse3 vpx_filter_block1d4_v8_avg_ssse3
 #define vpx_filter_block1d4_h4_avg_ssse3 vpx_filter_block1d4_h8_avg_ssse3
 
+// From vpx_dsp/x86/vpx_subpixel_bilinear_ssse3.asm
 filter8_1dfunction vpx_filter_block1d16_v2_ssse3;
 filter8_1dfunction vpx_filter_block1d16_h2_ssse3;
 filter8_1dfunction vpx_filter_block1d8_v2_ssse3;
@@ -1061,7 +1081,7 @@ void vpx_scaled_2d_ssse3(const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
   }
 }
 
-// void vp9_convolve8_ssse3(const uint8_t *src, ptrdiff_t src_stride,
+// void vpx_convolve8_ssse3(const uint8_t *src, ptrdiff_t src_stride,
 //                          uint8_t *dst, ptrdiff_t dst_stride,
 //                          const InterpKernel *filter, int x0_q4,
 //                          int32_t x_step_q4, int y0_q4, int y_step_q4,
