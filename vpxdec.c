@@ -175,7 +175,7 @@ static INLINE int libyuv_scale(vpx_image_t *src, vpx_image_t *dst,
                    dst->d_h, mode);
 }
 #endif
-void show_help(FILE *fout, int shorthelp) {
+static void show_help(FILE *fout, int shorthelp) {
   int i;
 
   fprintf(fout, "Usage: %s <options> filename\n\n", exec_name);
