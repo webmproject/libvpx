@@ -23,22 +23,7 @@
 #define VPX_INLINE inline
 #endif
 
-#if defined(VPX_EMULATE_INTTYPES)
-typedef signed char int8_t;
-typedef signed short int16_t;
-typedef signed int int32_t;
-
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int uint32_t;
-
-#ifndef _UINTPTR_T_DEFINED
-typedef size_t uintptr_t;
-#endif
-
-#else
-
-/* Most platforms have the C99 standard integer types. */
+/* Assume platforms have the C99 standard integer types. */
 
 #if defined(__cplusplus)
 #if !defined(__STDC_FORMAT_MACROS)
@@ -49,10 +34,7 @@ typedef size_t uintptr_t;
 #endif
 #endif  // __cplusplus
 
-#include <stdint.h>
-
-#endif  // defined(VPX_EMULATE_INTTYPES)
-
 #include <inttypes.h>
+#include <stdint.h>
 
 #endif  // VPX_VPX_VPX_INTEGER_H_
