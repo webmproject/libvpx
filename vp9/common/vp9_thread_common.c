@@ -159,7 +159,12 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame, VP9_COMMON *cm,
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
-  const int num_workers = VPXMIN(nworkers, sb_rows);
+  const int num_tile_cols = 1 << cm->log2_tile_cols;
+  // Limit the number of workers to prevent changes in frame dimensions from
+  // causing incorrect sync calculations when sb_rows < threads/tile_cols.
+  // Further restrict them by the number of tile columns should the user
+  // request more as this implementation doesn't scale well beyond that.
+  const int num_workers = VPXMIN(nworkers, VPXMIN(num_tile_cols, sb_rows));
   int i;
 
   if (!lf_sync->sync_range || sb_rows != lf_sync->rows ||
