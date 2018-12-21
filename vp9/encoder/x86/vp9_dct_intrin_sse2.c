@@ -14,6 +14,7 @@
 #include "./vp9_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/txfm_common.h"
+#include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
 #include "vpx_dsp/x86/fwd_txfm_sse2.h"
 #include "vpx_dsp/x86/transpose_sse2.h"
 #include "vpx_dsp/x86/txfm_common_sse2.h"
@@ -181,10 +182,10 @@ void vp9_fht4x4_sse2(const int16_t *input, tran_low_t *output, int stride,
 }
 
 void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
-                            int16_t *coeff_ptr, intptr_t n_coeffs,
+                            tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             int skip_block, const int16_t *round_ptr,
-                            const int16_t *quant_ptr, int16_t *qcoeff_ptr,
-                            int16_t *dqcoeff_ptr, const int16_t *dequant_ptr,
+                            const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
+                            tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
                             uint16_t *eob_ptr, const int16_t *scan,
                             const int16_t *iscan) {
   __m128i zero;
@@ -497,15 +498,15 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
         qcoeff0 = _mm_sub_epi16(qcoeff0, coeff0_sign);
         qcoeff1 = _mm_sub_epi16(qcoeff1, coeff1_sign);
 
-        _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs), qcoeff0);
-        _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs) + 1, qcoeff1);
+        store_tran_low(qcoeff0, qcoeff_ptr + n_coeffs);
+        store_tran_low(qcoeff0, qcoeff_ptr + n_coeffs + 8);
 
         coeff0 = _mm_mullo_epi16(qcoeff0, dequant);
         dequant = _mm_unpackhi_epi64(dequant, dequant);
         coeff1 = _mm_mullo_epi16(qcoeff1, dequant);
 
-        _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs), coeff0);
-        _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs) + 1, coeff1);
+        store_tran_low(coeff0, dqcoeff_ptr + n_coeffs);
+        store_tran_low(coeff0, dqcoeff_ptr + n_coeffs + 8);
       }
 
       {
@@ -562,14 +563,14 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
         qcoeff0 = _mm_sub_epi16(qcoeff0, coeff0_sign);
         qcoeff1 = _mm_sub_epi16(qcoeff1, coeff1_sign);
 
-        _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs), qcoeff0);
-        _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs) + 1, qcoeff1);
+        store_tran_low(qcoeff0, qcoeff_ptr + n_coeffs);
+        store_tran_low(qcoeff1, qcoeff_ptr + n_coeffs + 8);
 
         coeff0 = _mm_mullo_epi16(qcoeff0, dequant);
         coeff1 = _mm_mullo_epi16(qcoeff1, dequant);
 
-        _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs), coeff0);
-        _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs) + 1, coeff1);
+        store_tran_low(coeff0, dqcoeff_ptr + n_coeffs);
+        store_tran_low(coeff1, dqcoeff_ptr + n_coeffs + 8);
       }
 
       {
@@ -609,10 +610,10 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
     }
   } else {
     do {
-      _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs), zero);
-      _mm_store_si128((__m128i *)(dqcoeff_ptr + n_coeffs) + 1, zero);
-      _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs), zero);
-      _mm_store_si128((__m128i *)(qcoeff_ptr + n_coeffs) + 1, zero);
+      store_tran_low(zero, qcoeff_ptr + n_coeffs);
+      store_tran_low(zero, qcoeff_ptr + n_coeffs + 8);
+      store_tran_low(zero, dqcoeff_ptr + n_coeffs);
+      store_tran_low(zero, dqcoeff_ptr + n_coeffs + 8);
       n_coeffs += 8 * 2;
     } while (n_coeffs < 0);
     *eob_ptr = 0;
