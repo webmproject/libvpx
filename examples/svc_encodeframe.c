@@ -280,8 +280,8 @@ vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options) {
   return VPX_CODEC_OK;
 }
 
-vpx_codec_err_t assign_layer_bitrates(const SvcContext *svc_ctx,
-                                      vpx_codec_enc_cfg_t *const enc_cfg) {
+static vpx_codec_err_t assign_layer_bitrates(
+    const SvcContext *svc_ctx, vpx_codec_enc_cfg_t *const enc_cfg) {
   int i;
   const SvcInternal_t *const si = get_const_svc_internal(svc_ctx);
   int sl, tl, spatial_layer_target;
