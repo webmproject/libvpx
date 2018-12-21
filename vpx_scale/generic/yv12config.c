@@ -15,6 +15,9 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
+#if defined(VPX_MAX_ALLOCABLE_MEMORY)
+#include "vp9/common/vp9_onyxc_int.h"
+#endif  // VPX_MAX_ALLOCABLE_MEMORY
 /****************************************************************************
  *  Exports
  ****************************************************************************/
@@ -184,6 +187,13 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     uint8_t *buf = NULL;
+
+#if defined(VPX_MAX_ALLOCABLE_MEMORY)
+    // The decoder may allocate REF_FRAMES frame buffers in the frame buffer
+    // pool. Bound the total amount of allocated memory as if these REF_FRAMES
+    // frame buffers were allocated in a single allocation.
+    if (frame_size > VPX_MAX_ALLOCABLE_MEMORY / REF_FRAMES) return -1;
+#endif  // VPX_MAX_ALLOCABLE_MEMORY
 
     // frame_size is stored in buffer_alloc_sz, which is a size_t. If it won't
     // fit, fail early.
