@@ -560,7 +560,7 @@ static const int vp9_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
 
 static const arg_def_t *no_args[] = { NULL };
 
-void show_help(FILE *fout, int shorthelp) {
+static void show_help(FILE *fout, int shorthelp) {
   int i;
   const int num_encoder = get_vpx_encoder_count();
 
