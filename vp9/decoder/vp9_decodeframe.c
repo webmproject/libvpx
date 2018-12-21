@@ -1710,7 +1710,7 @@ static void vp9_tile_done(VP9Decoder *pbi) {
 #endif
 }
 
-void vp9_jobq_alloc(VP9Decoder *pbi) {
+static void vp9_jobq_alloc(VP9Decoder *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   RowMTWorkerData *const row_mt_worker_data = pbi->row_mt_worker_data;
   const int aligned_rows = mi_cols_aligned_to_sb(cm->mi_rows);
@@ -2251,8 +2251,9 @@ static INLINE void init_mt(VP9Decoder *pbi) {
   vp9_reset_lfm(cm);
 }
 
-const uint8_t *decode_tiles_row_wise_mt(VP9Decoder *pbi, const uint8_t *data,
-                                        const uint8_t *data_end) {
+static const uint8_t *decode_tiles_row_wise_mt(VP9Decoder *pbi,
+                                               const uint8_t *data,
+                                               const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
   RowMTWorkerData *const row_mt_worker_data = pbi->row_mt_worker_data;
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
