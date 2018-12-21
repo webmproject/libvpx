@@ -1010,10 +1010,9 @@ static void vpx_highbd_filter_block1d4_h4_avx2(
   }
 }
 
-void vpx_highbd_filter_block1d8_h4_avx2(const uint16_t *src_ptr,
-                                        ptrdiff_t src_stride, uint16_t *dst_ptr,
-                                        ptrdiff_t dst_stride, uint32_t height,
-                                        const int16_t *kernel, int bd) {
+static void vpx_highbd_filter_block1d8_h4_avx2(
+    const uint16_t *src_ptr, ptrdiff_t src_stride, uint16_t *dst_ptr,
+    ptrdiff_t dst_stride, uint32_t height, const int16_t *kernel, int bd) {
   // We will extract the middle four elements of the kernel into two registers
   // in the form
   // ... k[3] k[2] k[3] k[2]
@@ -1253,10 +1252,9 @@ static void vpx_highbd_filter_block1d8_v2_avg_avx2(
   } while (height > 0);
 }
 
-void vpx_highbd_filter_block1d4_v4_avx2(const uint16_t *src_ptr,
-                                        ptrdiff_t src_stride, uint16_t *dst_ptr,
-                                        ptrdiff_t dst_stride, uint32_t height,
-                                        const int16_t *kernel, int bd) {
+static void vpx_highbd_filter_block1d4_v4_avx2(
+    const uint16_t *src_ptr, ptrdiff_t src_stride, uint16_t *dst_ptr,
+    ptrdiff_t dst_stride, uint32_t height, const int16_t *kernel, int bd) {
   // We will load two rows of pixels and rearrange them into the form
   // ... s[1,0] s[0,0] s[0,0] s[-1,0]
   // so that we can call multiply and add with the kernel partial output. Then
@@ -1343,10 +1341,9 @@ void vpx_highbd_filter_block1d4_v4_avx2(const uint16_t *src_ptr,
   }
 }
 
-void vpx_highbd_filter_block1d8_v4_avx2(const uint16_t *src_ptr,
-                                        ptrdiff_t src_stride, uint16_t *dst_ptr,
-                                        ptrdiff_t dst_stride, uint32_t height,
-                                        const int16_t *kernel, int bd) {
+static void vpx_highbd_filter_block1d8_v4_avx2(
+    const uint16_t *src_ptr, ptrdiff_t src_stride, uint16_t *dst_ptr,
+    ptrdiff_t dst_stride, uint32_t height, const int16_t *kernel, int bd) {
   // We will load two rows of pixels and rearrange them into the form
   // ... s[1,0] s[0,0] s[0,0] s[-1,0]
   // so that we can call multiply and add with the kernel partial output. Then
@@ -1443,20 +1440,21 @@ void vpx_highbd_filter_block1d8_v4_avx2(const uint16_t *src_ptr,
   }
 }
 
-void vpx_highbd_filter_block1d16_v4_avx2(const uint16_t *src_ptr,
-                                         ptrdiff_t src_stride,
-                                         uint16_t *dst_ptr,
-                                         ptrdiff_t dst_stride, uint32_t height,
-                                         const int16_t *kernel, int bd) {
+static void vpx_highbd_filter_block1d16_v4_avx2(
+    const uint16_t *src_ptr, ptrdiff_t src_stride, uint16_t *dst_ptr,
+    ptrdiff_t dst_stride, uint32_t height, const int16_t *kernel, int bd) {
   vpx_highbd_filter_block1d8_v4_avx2(src_ptr, src_stride, dst_ptr, dst_stride,
                                      height, kernel, bd);
   vpx_highbd_filter_block1d8_v4_avx2(src_ptr + 8, src_stride, dst_ptr + 8,
                                      dst_stride, height, kernel, bd);
 }
 
+// From vpx_dsp/x86/vpx_high_subpixel_8t_sse2.asm.
 highbd_filter8_1dfunction vpx_highbd_filter_block1d4_h8_sse2;
-highbd_filter8_1dfunction vpx_highbd_filter_block1d4_h2_sse2;
 highbd_filter8_1dfunction vpx_highbd_filter_block1d4_v8_sse2;
+
+// From vpx_dsp/x86/vpx_high_subpixel_bilinear_sse2.asm.
+highbd_filter8_1dfunction vpx_highbd_filter_block1d4_h2_sse2;
 highbd_filter8_1dfunction vpx_highbd_filter_block1d4_v2_sse2;
 
 #define vpx_highbd_filter_block1d4_h8_avx2 vpx_highbd_filter_block1d4_h8_sse2
@@ -1464,6 +1462,7 @@ highbd_filter8_1dfunction vpx_highbd_filter_block1d4_v2_sse2;
 #define vpx_highbd_filter_block1d4_v8_avx2 vpx_highbd_filter_block1d4_v8_sse2
 #define vpx_highbd_filter_block1d4_v2_avx2 vpx_highbd_filter_block1d4_v2_sse2
 
+// Use the [vh]8 version because there is no [vh]4 implementation.
 #define vpx_highbd_filter_block1d16_v4_avg_avx2 \
   vpx_highbd_filter_block1d16_v8_avg_avx2
 #define vpx_highbd_filter_block1d16_h4_avg_avx2 \
@@ -1481,9 +1480,12 @@ HIGH_FUN_CONV_1D(horiz, x0_q4, x_step_q4, h, src, , avx2);
 HIGH_FUN_CONV_1D(vert, y0_q4, y_step_q4, v, src - src_stride * 3, , avx2);
 HIGH_FUN_CONV_2D(, avx2);
 
+// From vpx_dsp/x86/vpx_high_subpixel_8t_sse2.asm.
 highbd_filter8_1dfunction vpx_highbd_filter_block1d4_h8_avg_sse2;
-highbd_filter8_1dfunction vpx_highbd_filter_block1d4_h2_avg_sse2;
 highbd_filter8_1dfunction vpx_highbd_filter_block1d4_v8_avg_sse2;
+
+// From vpx_dsp/x86/vpx_high_subpixel_bilinear_sse2.asm.
+highbd_filter8_1dfunction vpx_highbd_filter_block1d4_h2_avg_sse2;
 highbd_filter8_1dfunction vpx_highbd_filter_block1d4_v2_avg_sse2;
 
 #define vpx_highbd_filter_block1d4_h8_avg_avx2 \
