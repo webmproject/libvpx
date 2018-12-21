@@ -13,6 +13,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_ethread.h"
 #include "vp9/encoder/vp9_multi_thread.h"
+#include "vp9/encoder/vp9_temporal_filter.h"
 
 void *vp9_enc_grp_get_next_job(MultiThreadHandle *multi_thread_ctxt,
                                int tile_id) {
@@ -73,7 +74,7 @@ void vp9_row_mt_mem_alloc(VP9_COMP *cpi) {
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   int jobs_per_tile_col, total_jobs;
 
-  jobs_per_tile_col = VPXMAX(cm->mb_rows, sb_rows);
+  jobs_per_tile_col = VPXMAX(((cm->mi_rows + TF_ROUND) >> TF_SHIFT), sb_rows);
   // Calculate the total number of jobs
   total_jobs = jobs_per_tile_col * tile_cols;
 
@@ -232,7 +233,9 @@ void vp9_prepare_job_queue(VP9_COMP *cpi, JOB_TYPE job_type) {
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   int tile_col, i;
 
-  jobs_per_tile_col = (job_type != ENCODE_JOB) ? cm->mb_rows : sb_rows;
+  jobs_per_tile_col = (job_type != ENCODE_JOB)
+                          ? ((cm->mi_rows + TF_ROUND) >> TF_SHIFT)
+                          : sb_rows;
   total_jobs = jobs_per_tile_col * tile_cols;
 
   multi_thread_ctxt->jobs_per_tile_col = jobs_per_tile_col;

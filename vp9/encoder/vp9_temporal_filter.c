@@ -45,7 +45,7 @@ static void temporal_filter_predictors_mb_c(
 
   enum mv_precision mv_precision_uv;
   int uv_stride;
-  if (uv_block_width == 8) {
+  if (uv_block_width == (BW >> 1)) {
     uv_stride = (stride + 1) >> 1;
     mv_precision_uv = MV_PRECISION_Q4;
   } else {
@@ -56,35 +56,35 @@ static void temporal_filter_predictors_mb_c(
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp9_highbd_build_inter_predictor(CONVERT_TO_SHORTPTR(y_mb_ptr), stride,
-                                     CONVERT_TO_SHORTPTR(&pred[0]), 16, &mv,
-                                     scale, 16, 16, which_mv, kernel,
+                                     CONVERT_TO_SHORTPTR(&pred[0]), BW, &mv,
+                                     scale, BW, BH, which_mv, kernel,
                                      MV_PRECISION_Q3, x, y, xd->bd);
 
     vp9_highbd_build_inter_predictor(CONVERT_TO_SHORTPTR(u_mb_ptr), uv_stride,
-                                     CONVERT_TO_SHORTPTR(&pred[256]),
+                                     CONVERT_TO_SHORTPTR(&pred[BLK_PELS]),
                                      uv_block_width, &mv, scale, uv_block_width,
                                      uv_block_height, which_mv, kernel,
                                      mv_precision_uv, x, y, xd->bd);
 
-    vp9_highbd_build_inter_predictor(CONVERT_TO_SHORTPTR(v_mb_ptr), uv_stride,
-                                     CONVERT_TO_SHORTPTR(&pred[512]),
-                                     uv_block_width, &mv, scale, uv_block_width,
-                                     uv_block_height, which_mv, kernel,
-                                     mv_precision_uv, x, y, xd->bd);
+    vp9_highbd_build_inter_predictor(
+        CONVERT_TO_SHORTPTR(v_mb_ptr), uv_stride,
+        CONVERT_TO_SHORTPTR(&pred[(BLK_PELS << 1)]), uv_block_width, &mv, scale,
+        uv_block_width, uv_block_height, which_mv, kernel, mv_precision_uv, x,
+        y, xd->bd);
     return;
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   (void)xd;
-  vp9_build_inter_predictor(y_mb_ptr, stride, &pred[0], 16, &mv, scale, 16, 16,
+  vp9_build_inter_predictor(y_mb_ptr, stride, &pred[0], BW, &mv, scale, BW, BH,
                             which_mv, kernel, MV_PRECISION_Q3, x, y);
 
-  vp9_build_inter_predictor(u_mb_ptr, uv_stride, &pred[256], uv_block_width,
-                            &mv, scale, uv_block_width, uv_block_height,
-                            which_mv, kernel, mv_precision_uv, x, y);
+  vp9_build_inter_predictor(
+      u_mb_ptr, uv_stride, &pred[BLK_PELS], uv_block_width, &mv, scale,
+      uv_block_width, uv_block_height, which_mv, kernel, mv_precision_uv, x, y);
 
-  vp9_build_inter_predictor(v_mb_ptr, uv_stride, &pred[512], uv_block_width,
-                            &mv, scale, uv_block_width, uv_block_height,
-                            which_mv, kernel, mv_precision_uv, x, y);
+  vp9_build_inter_predictor(
+      v_mb_ptr, uv_stride, &pred[(BLK_PELS << 1)], uv_block_width, &mv, scale,
+      uv_block_width, uv_block_height, which_mv, kernel, mv_precision_uv, x, y);
 }
 
 void vp9_temporal_filter_init(void) {
@@ -121,9 +121,9 @@ static void apply_temporal_filter(
   const int rounding = (1 << strength) >> 1;
   const unsigned int uv_block_width = block_width >> ss_x;
   const unsigned int uv_block_height = block_height >> ss_y;
-  DECLARE_ALIGNED(16, uint16_t, y_diff_sse[256]);
-  DECLARE_ALIGNED(16, uint16_t, u_diff_sse[256]);
-  DECLARE_ALIGNED(16, uint16_t, v_diff_sse[256]);
+  DECLARE_ALIGNED(16, uint16_t, y_diff_sse[BLK_PELS]);
+  DECLARE_ALIGNED(16, uint16_t, u_diff_sse[BLK_PELS]);
+  DECLARE_ALIGNED(16, uint16_t, v_diff_sse[BLK_PELS]);
 
   int idx = 0, idy;
 
@@ -133,9 +133,9 @@ static void apply_temporal_filter(
   assert(filter_weight >= 0);
   assert(filter_weight <= 2);
 
-  memset(y_diff_sse, 0, 256 * sizeof(uint16_t));
-  memset(u_diff_sse, 0, 256 * sizeof(uint16_t));
-  memset(v_diff_sse, 0, 256 * sizeof(uint16_t));
+  memset(y_diff_sse, 0, BLK_PELS * sizeof(uint16_t));
+  memset(u_diff_sse, 0, BLK_PELS * sizeof(uint16_t));
+  memset(v_diff_sse, 0, BLK_PELS * sizeof(uint16_t));
 
   // Calculate diff^2 for each pixel of the 16x16 block.
   // TODO(yunqing): the following code needs to be optimized.
@@ -329,7 +329,7 @@ void vp9_highbd_temporal_filter_apply_c(
   int modifier;
   const int rounding = strength > 0 ? 1 << (strength - 1) : 0;
 
-  int diff_sse[256] = { 0 };
+  int diff_sse[BLK_PELS] = { 0 };
   int this_idx = 0;
 
   for (i = 0; i < block_height; i++) {
@@ -416,7 +416,7 @@ static uint32_t temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 
   vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
 
-  vp9_full_pixel_search(cpi, x, BLOCK_16X16, &best_ref_mv1_full, step_param,
+  vp9_full_pixel_search(cpi, x, TF_BLOCK, &best_ref_mv1_full, step_param,
                         search_method, sadpb, cond_cost_list(cpi, cost_list),
                         &best_ref_mv1, ref_mv, 0, 0);
 
@@ -427,9 +427,9 @@ static uint32_t temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   // Ignore mv costing by sending NULL pointer instead of cost array
   bestsme = cpi->find_fractional_mv_step(
       x, ref_mv, &best_ref_mv1, cpi->common.allow_high_precision_mv,
-      x->errorperbit, &cpi->fn_ptr[BLOCK_16X16], 0, mv_sf->subpel_search_level,
-      cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, 16,
-      16, USE_8_TAPS_SHARP);
+      x->errorperbit, &cpi->fn_ptr[TF_BLOCK], 0, mv_sf->subpel_search_level,
+      cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, BW,
+      BH, USE_8_TAPS_SHARP);
 
   // Restore input state
   x->plane[0].src = src;
@@ -451,24 +451,24 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
   int frame;
   int mb_col;
   unsigned int filter_weight;
-  int mb_cols = (frames[alt_ref_index]->y_crop_width + 15) >> 4;
-  int mb_rows = (frames[alt_ref_index]->y_crop_height + 15) >> 4;
-  DECLARE_ALIGNED(16, uint32_t, accumulator[16 * 16 * 3]);
-  DECLARE_ALIGNED(16, uint16_t, count[16 * 16 * 3]);
+  int mb_cols = (frames[alt_ref_index]->y_crop_width + BW - 1) >> BW_LOG2;
+  int mb_rows = (frames[alt_ref_index]->y_crop_height + BH - 1) >> BH_LOG2;
+  DECLARE_ALIGNED(16, uint32_t, accumulator[BLK_PELS * 3]);
+  DECLARE_ALIGNED(16, uint16_t, count[BLK_PELS * 3]);
   MACROBLOCKD *mbd = &td->mb.e_mbd;
   YV12_BUFFER_CONFIG *f = frames[alt_ref_index];
   uint8_t *dst1, *dst2;
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, predictor16[16 * 16 * 3]);
-  DECLARE_ALIGNED(16, uint8_t, predictor8[16 * 16 * 3]);
+  DECLARE_ALIGNED(16, uint16_t, predictor16[BLK_PELS * 3]);
+  DECLARE_ALIGNED(16, uint8_t, predictor8[BLK_PELS * 3]);
   uint8_t *predictor;
 #else
-  DECLARE_ALIGNED(16, uint8_t, predictor[16 * 16 * 3]);
+  DECLARE_ALIGNED(16, uint8_t, predictor[BLK_PELS * 3]);
 #endif
-  const int mb_uv_height = 16 >> mbd->plane[1].subsampling_y;
-  const int mb_uv_width = 16 >> mbd->plane[1].subsampling_x;
+  const int mb_uv_height = BH >> mbd->plane[1].subsampling_y;
+  const int mb_uv_width = BW >> mbd->plane[1].subsampling_x;
   // Addition of the tile col level offsets
-  int mb_y_offset = mb_row * 16 * (f->y_stride) + 16 * mb_col_start;
+  int mb_y_offset = mb_row * BH * (f->y_stride) + BW * mb_col_start;
   int mb_uv_offset =
       mb_row * mb_uv_height * f->uv_stride + mb_uv_width * mb_col_start;
 
@@ -491,21 +491,21 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
   //  8 - VP9_INTERP_EXTEND.
   // To keep the mv in play for both Y and UV planes the max that it
   //  can be on a border is therefore 16 - (2*VP9_INTERP_EXTEND+1).
-  td->mb.mv_limits.row_min = -((mb_row * 16) + (17 - 2 * VP9_INTERP_EXTEND));
+  td->mb.mv_limits.row_min = -((mb_row * BH) + (17 - 2 * VP9_INTERP_EXTEND));
   td->mb.mv_limits.row_max =
-      ((mb_rows - 1 - mb_row) * 16) + (17 - 2 * VP9_INTERP_EXTEND);
+      ((mb_rows - 1 - mb_row) * BH) + (17 - 2 * VP9_INTERP_EXTEND);
 
   for (mb_col = mb_col_start; mb_col < mb_col_end; mb_col++) {
     int i, j, k;
     int stride;
     MV ref_mv;
 
-    vp9_zero_array(accumulator, 16 * 16 * 3);
-    vp9_zero_array(count, 16 * 16 * 3);
+    vp9_zero_array(accumulator, BLK_PELS * 3);
+    vp9_zero_array(count, BLK_PELS * 3);
 
-    td->mb.mv_limits.col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
+    td->mb.mv_limits.col_min = -((mb_col * BW) + (17 - 2 * VP9_INTERP_EXTEND));
     td->mb.mv_limits.col_max =
-        ((mb_cols - 1 - mb_col) * 16) + (17 - 2 * VP9_INTERP_EXTEND);
+        ((mb_cols - 1 - mb_col) * BW) + (17 - 2 * VP9_INTERP_EXTEND);
 
     if (cpi->oxcf.content == VP9E_CONTENT_FILM) {
       unsigned int src_variance;
@@ -517,12 +517,12 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
 #if CONFIG_VP9_HIGHBITDEPTH
       if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         src_variance =
-            vp9_high_get_sby_perpixel_variance(cpi, &src, BLOCK_16X16, mbd->bd);
+            vp9_high_get_sby_perpixel_variance(cpi, &src, TF_BLOCK, mbd->bd);
       } else {
-        src_variance = vp9_get_sby_perpixel_variance(cpi, &src, BLOCK_16X16);
+        src_variance = vp9_get_sby_perpixel_variance(cpi, &src, TF_BLOCK);
       }
 #else
-      src_variance = vp9_get_sby_perpixel_variance(cpi, &src, BLOCK_16X16);
+      src_variance = vp9_get_sby_perpixel_variance(cpi, &src, TF_BLOCK);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
       if (src_variance <= 2) strength = VPXMAX(0, (int)strength - 2);
@@ -566,42 +566,45 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
             frames[frame]->u_buffer + mb_uv_offset,
             frames[frame]->v_buffer + mb_uv_offset, frames[frame]->y_stride,
             mb_uv_width, mb_uv_height, ref_mv.row, ref_mv.col, predictor, scale,
-            mb_col * 16, mb_row * 16);
+            mb_col * BW, mb_row * BH);
 
 #if CONFIG_VP9_HIGHBITDEPTH
         if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           int adj_strength = strength + 2 * (mbd->bd - 8);
           // Apply the filter (YUV)
           vp9_highbd_temporal_filter_apply(
-              f->y_buffer + mb_y_offset, f->y_stride, predictor, 16, 16,
+              f->y_buffer + mb_y_offset, f->y_stride, predictor, BW, BH,
               adj_strength, filter_weight, accumulator, count);
           vp9_highbd_temporal_filter_apply(
-              f->u_buffer + mb_uv_offset, f->uv_stride, predictor + 256,
+              f->u_buffer + mb_uv_offset, f->uv_stride, predictor + BLK_PELS,
               mb_uv_width, mb_uv_height, adj_strength, filter_weight,
-              accumulator + 256, count + 256);
+              accumulator + BLK_PELS, count + BLK_PELS);
           vp9_highbd_temporal_filter_apply(
-              f->v_buffer + mb_uv_offset, f->uv_stride, predictor + 512,
-              mb_uv_width, mb_uv_height, adj_strength, filter_weight,
-              accumulator + 512, count + 512);
+              f->v_buffer + mb_uv_offset, f->uv_stride,
+              predictor + (BLK_PELS << 1), mb_uv_width, mb_uv_height,
+              adj_strength, filter_weight, accumulator + (BLK_PELS << 1),
+              count + (BLK_PELS << 1));
         } else {
           // Apply the filter (YUV)
           apply_temporal_filter(
-              f->y_buffer + mb_y_offset, f->y_stride, predictor, 16,
+              f->y_buffer + mb_y_offset, f->y_stride, predictor, BW,
               f->u_buffer + mb_uv_offset, f->v_buffer + mb_uv_offset,
-              f->uv_stride, predictor + 256, predictor + 512, mb_uv_width, 16,
-              16, mbd->plane[1].subsampling_x, mbd->plane[1].subsampling_y,
-              strength, filter_weight, accumulator, count, accumulator + 256,
-              count + 256, accumulator + 512, count + 512);
+              f->uv_stride, predictor + BLK_PELS, predictor + (BLK_PELS << 1),
+              mb_uv_width, BW, BH, mbd->plane[1].subsampling_x,
+              mbd->plane[1].subsampling_y, strength, filter_weight, accumulator,
+              count, accumulator + BLK_PELS, count + BLK_PELS,
+              accumulator + (BLK_PELS << 1), count + (BLK_PELS << 1));
         }
 #else
         // Apply the filter (YUV)
         apply_temporal_filter(
-            f->y_buffer + mb_y_offset, f->y_stride, predictor, 16,
+            f->y_buffer + mb_y_offset, f->y_stride, predictor, BW,
             f->u_buffer + mb_uv_offset, f->v_buffer + mb_uv_offset,
-            f->uv_stride, predictor + 256, predictor + 512, mb_uv_width, 16, 16,
-            mbd->plane[1].subsampling_x, mbd->plane[1].subsampling_y, strength,
-            filter_weight, accumulator, count, accumulator + 256, count + 256,
-            accumulator + 512, count + 512);
+            f->uv_stride, predictor + BLK_PELS, predictor + (BLK_PELS << 1),
+            mb_uv_width, BW, BH, mbd->plane[1].subsampling_x,
+            mbd->plane[1].subsampling_y, strength, filter_weight, accumulator,
+            count, accumulator + BLK_PELS, count + BLK_PELS,
+            accumulator + (BLK_PELS << 1), count + (BLK_PELS << 1));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       }
     }
@@ -615,8 +618,8 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
       dst1_16 = CONVERT_TO_SHORTPTR(dst1);
       stride = cpi->alt_ref_buffer.y_stride;
       byte = mb_y_offset;
-      for (i = 0, k = 0; i < 16; i++) {
-        for (j = 0; j < 16; j++, k++) {
+      for (i = 0, k = 0; i < BH; i++) {
+        for (j = 0; j < BW; j++, k++) {
           unsigned int pval = accumulator[k] + (count[k] >> 1);
           pval *= fixed_divide[count[k]];
           pval >>= 19;
@@ -627,7 +630,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
           byte++;
         }
 
-        byte += stride - 16;
+        byte += stride - BW;
       }
 
       dst1 = cpi->alt_ref_buffer.u_buffer;
@@ -636,9 +639,9 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
       dst2_16 = CONVERT_TO_SHORTPTR(dst2);
       stride = cpi->alt_ref_buffer.uv_stride;
       byte = mb_uv_offset;
-      for (i = 0, k = 256; i < mb_uv_height; i++) {
+      for (i = 0, k = BLK_PELS; i < mb_uv_height; i++) {
         for (j = 0; j < mb_uv_width; j++, k++) {
-          int m = k + 256;
+          int m = k + BLK_PELS;
 
           // U
           unsigned int pval = accumulator[k] + (count[k] >> 1);
@@ -663,8 +666,8 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
       dst1 = cpi->alt_ref_buffer.y_buffer;
       stride = cpi->alt_ref_buffer.y_stride;
       byte = mb_y_offset;
-      for (i = 0, k = 0; i < 16; i++) {
-        for (j = 0; j < 16; j++, k++) {
+      for (i = 0, k = 0; i < BH; i++) {
+        for (j = 0; j < BW; j++, k++) {
           unsigned int pval = accumulator[k] + (count[k] >> 1);
           pval *= fixed_divide[count[k]];
           pval >>= 19;
@@ -674,16 +677,16 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
           // move to next pixel
           byte++;
         }
-        byte += stride - 16;
+        byte += stride - BW;
       }
 
       dst1 = cpi->alt_ref_buffer.u_buffer;
       dst2 = cpi->alt_ref_buffer.v_buffer;
       stride = cpi->alt_ref_buffer.uv_stride;
       byte = mb_uv_offset;
-      for (i = 0, k = 256; i < mb_uv_height; i++) {
+      for (i = 0, k = BLK_PELS; i < mb_uv_height; i++) {
         for (j = 0; j < mb_uv_width; j++, k++) {
-          int m = k + 256;
+          int m = k + BLK_PELS;
 
           // U
           unsigned int pval = accumulator[k] + (count[k] >> 1);
@@ -708,8 +711,8 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
     dst1 = cpi->alt_ref_buffer.y_buffer;
     stride = cpi->alt_ref_buffer.y_stride;
     byte = mb_y_offset;
-    for (i = 0, k = 0; i < 16; i++) {
-      for (j = 0; j < 16; j++, k++) {
+    for (i = 0, k = 0; i < BH; i++) {
+      for (j = 0; j < BW; j++, k++) {
         unsigned int pval = accumulator[k] + (count[k] >> 1);
         pval *= fixed_divide[count[k]];
         pval >>= 19;
@@ -719,16 +722,16 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         // move to next pixel
         byte++;
       }
-      byte += stride - 16;
+      byte += stride - BW;
     }
 
     dst1 = cpi->alt_ref_buffer.u_buffer;
     dst2 = cpi->alt_ref_buffer.v_buffer;
     stride = cpi->alt_ref_buffer.uv_stride;
     byte = mb_uv_offset;
-    for (i = 0, k = 256; i < mb_uv_height; i++) {
+    for (i = 0, k = BLK_PELS; i < mb_uv_height; i++) {
       for (j = 0; j < mb_uv_width; j++, k++) {
-        int m = k + 256;
+        int m = k + BLK_PELS;
 
         // U
         unsigned int pval = accumulator[k] + (count[k] >> 1);
@@ -748,7 +751,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
       byte += stride - mb_uv_width;
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    mb_y_offset += 16;
+    mb_y_offset += BW;
     mb_uv_offset += mb_uv_width;
   }
 }
@@ -759,10 +762,10 @@ static void temporal_filter_iterate_tile_c(VP9_COMP *cpi, int tile_row,
   const int tile_cols = 1 << cm->log2_tile_cols;
   TileInfo *tile_info =
       &cpi->tile_data[tile_row * tile_cols + tile_col].tile_info;
-  const int mb_row_start = (tile_info->mi_row_start) >> 1;
-  const int mb_row_end = (tile_info->mi_row_end + 1) >> 1;
-  const int mb_col_start = (tile_info->mi_col_start) >> 1;
-  const int mb_col_end = (tile_info->mi_col_end + 1) >> 1;
+  const int mb_row_start = (tile_info->mi_row_start) >> TF_SHIFT;
+  const int mb_row_end = (tile_info->mi_row_end + TF_ROUND) >> TF_SHIFT;
+  const int mb_col_start = (tile_info->mi_col_start) >> TF_SHIFT;
+  const int mb_col_end = (tile_info->mi_col_end + TF_ROUND) >> TF_SHIFT;
   int mb_row;
 
   for (mb_row = mb_row_start; mb_row < mb_row_end; mb_row++) {

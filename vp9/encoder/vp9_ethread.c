@@ -510,8 +510,8 @@ static int temporal_filter_worker_hook(void *arg1, void *arg2) {
       tile_col = proc_job->tile_col_id;
       tile_row = proc_job->tile_row_id;
       this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
-      mb_col_start = (this_tile->tile_info.mi_col_start) >> 1;
-      mb_col_end = (this_tile->tile_info.mi_col_end + 1) >> 1;
+      mb_col_start = (this_tile->tile_info.mi_col_start) >> TF_SHIFT;
+      mb_col_end = (this_tile->tile_info.mi_col_end + TF_ROUND) >> TF_SHIFT;
       mb_row = proc_job->vert_unit_row_num;
 
       vp9_temporal_filter_iterate_row_c(cpi, thread_data->td, mb_row,
