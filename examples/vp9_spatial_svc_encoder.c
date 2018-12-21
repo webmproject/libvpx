@@ -539,8 +539,9 @@ static void printout_rate_control_summary(struct RateControlStats *rc,
          tot_num_frames);
 }
 
-vpx_codec_err_t parse_superframe_index(const uint8_t *data, size_t data_sz,
-                                       uint64_t sizes[8], int *count) {
+static vpx_codec_err_t parse_superframe_index(const uint8_t *data,
+                                              size_t data_sz, uint64_t sizes[8],
+                                              int *count) {
   // A chunk ending with a byte matching 0xc0 is an invalid chunk unless
   // it is a super frame index. If the last byte of real video compression
   // data is 0xc0 the encoder must add a 0 byte. If we have the marker but
