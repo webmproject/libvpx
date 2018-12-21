@@ -74,7 +74,9 @@ void vp9_row_mt_mem_alloc(VP9_COMP *cpi) {
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   int jobs_per_tile_col, total_jobs;
 
-  jobs_per_tile_col = VPXMAX(((cm->mi_rows + TF_ROUND) >> TF_SHIFT), sb_rows);
+  // Allocate memory that is large enough for all row_mt stages. First pass
+  // uses 16x16 block size.
+  jobs_per_tile_col = VPXMAX(cm->mb_rows, sb_rows);
   // Calculate the total number of jobs
   total_jobs = jobs_per_tile_col * tile_cols;
 
@@ -229,13 +231,19 @@ void vp9_prepare_job_queue(VP9_COMP *cpi, JOB_TYPE job_type) {
   MultiThreadHandle *multi_thread_ctxt = &cpi->multi_thread_ctxt;
   JobQueue *job_queue = multi_thread_ctxt->job_queue;
   const int tile_cols = 1 << cm->log2_tile_cols;
-  int job_row_num, jobs_per_tile, jobs_per_tile_col, total_jobs;
+  int job_row_num, jobs_per_tile, jobs_per_tile_col = 0, total_jobs;
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   int tile_col, i;
 
-  jobs_per_tile_col = (job_type != ENCODE_JOB)
-                          ? ((cm->mi_rows + TF_ROUND) >> TF_SHIFT)
-                          : sb_rows;
+  switch (job_type) {
+    case ENCODE_JOB: jobs_per_tile_col = sb_rows; break;
+    case FIRST_PASS_JOB: jobs_per_tile_col = cm->mb_rows; break;
+    case ARNR_JOB:
+      jobs_per_tile_col = ((cm->mi_rows + TF_ROUND) >> TF_SHIFT);
+      break;
+    default: assert(0);
+  }
+
   total_jobs = jobs_per_tile_col * tile_cols;
 
   multi_thread_ctxt->jobs_per_tile_col = jobs_per_tile_col;

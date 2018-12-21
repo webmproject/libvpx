@@ -16,19 +16,9 @@ extern "C" {
 #endif
 
 #define ARNR_FILT_QINDEX 128
+static const MV kZeroMv = { 0, 0 };
 
 // Block size used in temporal filtering
-#if 1
-#define TF_BLOCK BLOCK_16X16
-#define BH 16
-#define BH_LOG2 4
-#define BW 16
-#define BW_LOG2 4
-#define BLK_PELS 256  // Pixels in the block
-#define TF_SHIFT 1
-#define TF_ROUND 1
-#define THR_SHIFT 0
-#else
 #define TF_BLOCK BLOCK_32X32
 #define BH 32
 #define BH_LOG2 5
@@ -38,7 +28,9 @@ extern "C" {
 #define TF_SHIFT 2
 #define TF_ROUND 3
 #define THR_SHIFT 2
-#endif
+#define TF_SUB_BLOCK BLOCK_16X16
+#define SUB_BH 16
+#define SUB_BW 16
 
 void vp9_temporal_filter_init(void);
 void vp9_temporal_filter(VP9_COMP *cpi, int distance);
