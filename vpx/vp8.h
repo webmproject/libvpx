@@ -10,7 +10,7 @@
 
 /*!\defgroup vp8 VP8
  * \ingroup codecs
- * VP8 is vpx's newest video compression algorithm that uses motion
+ * VP8 is a video compression algorithm that uses motion
  * compensated prediction, Discrete Cosine Transform (DCT) coding of the
  * prediction error signal and context dependent entropy coding techniques
  * based on arithmetic principles. It features:
