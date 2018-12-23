@@ -342,6 +342,24 @@ static INLINE int get_square_block_idx(BLOCK_SIZE bsize) {
   return -1;
 }
 
+static INLINE BLOCK_SIZE square_block_idx_to_bsize(int square_block_idx) {
+  if (square_block_idx == 0) {
+    return BLOCK_4X4;
+  }
+  if (square_block_idx == 1) {
+    return BLOCK_8X8;
+  }
+  if (square_block_idx == 2) {
+    return BLOCK_16X16;
+  }
+  if (square_block_idx == 3) {
+    return BLOCK_32X32;
+  }
+  printf("ERROR: invalid square_block_idx\n");
+  assert(0);
+  return BLOCK_INVALID;
+}
+
 static INLINE int_mv *get_pyramid_mv(const TplDepFrame *tpl_frame, int rf_idx,
                                      BLOCK_SIZE bsize, int mi_row, int mi_col) {
   return &tpl_frame->pyramid_mv_arr[rf_idx][get_square_block_idx(bsize)]

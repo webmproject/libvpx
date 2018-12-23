@@ -6188,6 +6188,17 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   qsort(cpi->feature_score_loc_sort, fs_loc_sort_size,
         sizeof(*cpi->feature_score_loc_sort), compare_feature_score);
 
+  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+      int rf_idx;
+      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+        TplDepStats *tpl_stats =
+            &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+        tpl_stats->ready[rf_idx] = 0;
+      }
+    }
+  }
+
 #if CHANGE_MV_SEARCH_ORDER
 #if !USE_PQSORT
   for (i = 0; i < fs_loc_sort_size; ++i) {
@@ -6253,6 +6264,9 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int64_t recon_error, sse;
+#if CONFIG_NON_GREEDY_MV
+  int square_block_idx;
+#endif
 
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -6293,7 +6307,11 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   vp9_frame_init_quantizer(cpi);
 
 #if CONFIG_NON_GREEDY_MV
-  build_motion_field(cpi, xd, frame_idx, ref_frame, bsize);
+  for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
+       ++square_block_idx) {
+    BLOCK_SIZE square_bsize = square_block_idx_to_bsize(square_block_idx);
+    build_motion_field(cpi, xd, frame_idx, ref_frame, square_bsize);
+  }
 #endif
 
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
