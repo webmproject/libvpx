@@ -2279,10 +2279,13 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
   double thissme;
   double bestsme;
   const int further_steps = MAX_MVSEARCH_STEPS - 1 - step_param;
+  const MV center_mv = { 0, 0 };
   vpx_clear_system_state();
   bestsme = vp9_diamond_search_sad_new(
       x, &cpi->ss_cfg, mvp_full, best_mv, best_mv_dist, best_mv_cost,
       step_param, lambda, &n, fn_ptr, nb_full_mvs, full_mv_num);
+
+  bestsme = vp9_get_mvpred_var(x, best_mv, &center_mv, fn_ptr, 0);
 
   // If there won't be more n-step search, check to see if refining search is
   // needed.
@@ -2299,6 +2302,7 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
       thissme = vp9_diamond_search_sad_new(
           x, &cpi->ss_cfg, mvp_full, &temp_mv, &mv_dist, &mv_cost,
           step_param + n, lambda, &num00, fn_ptr, nb_full_mvs, full_mv_num);
+      thissme = vp9_get_mvpred_var(x, &temp_mv, &center_mv, fn_ptr, 0);
       // check to see if refining search is needed.
       if (num00 > further_steps - n) do_refine = 0;
 
@@ -2320,6 +2324,7 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
     thissme = vp9_refining_search_sad_new(x, &temp_mv, &mv_dist, &mv_cost,
                                           lambda, search_range, fn_ptr,
                                           nb_full_mvs, full_mv_num);
+    thissme = vp9_get_mvpred_var(x, &temp_mv, &center_mv, fn_ptr, 0);
     if (thissme < bestsme) {
       bestsme = thissme;
       *best_mv = temp_mv;
