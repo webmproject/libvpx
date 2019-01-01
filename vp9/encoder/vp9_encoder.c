@@ -6436,15 +6436,17 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
   // TODO(angiebird): This probably needs further modifications to support
   // frame scaling later on.
   if (cpi->feature_score_loc_alloc == 0) {
+    // The smallest block size of motion field is 4x4, but the mi_unit is 8x8,
+    // therefore the number of units is "mi_rows * mi_cols * 4" here.
     CHECK_MEM_ERROR(
         cm, cpi->feature_score_loc_arr,
-        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_arr)));
-    CHECK_MEM_ERROR(
-        cm, cpi->feature_score_loc_sort,
-        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_sort)));
-    CHECK_MEM_ERROR(
-        cm, cpi->feature_score_loc_heap,
-        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->feature_score_loc_heap)));
+        vpx_calloc(mi_rows * mi_cols * 4, sizeof(*cpi->feature_score_loc_arr)));
+    CHECK_MEM_ERROR(cm, cpi->feature_score_loc_sort,
+                    vpx_calloc(mi_rows * mi_cols * 4,
+                               sizeof(*cpi->feature_score_loc_sort)));
+    CHECK_MEM_ERROR(cm, cpi->feature_score_loc_heap,
+                    vpx_calloc(mi_rows * mi_cols * 4,
+                               sizeof(*cpi->feature_score_loc_heap)));
 
     cpi->feature_score_loc_alloc = 1;
   }
