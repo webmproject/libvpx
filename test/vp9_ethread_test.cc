@@ -387,7 +387,7 @@ TEST_P(VPxEncoderThreadTest, EncoderResultTest) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double multi_thr_psnr = GetAveragePsnr();
 
-  EXPECT_NEAR(single_thr_psnr, multi_thr_psnr, 0.1);
+  EXPECT_NEAR(single_thr_psnr, multi_thr_psnr, 0.2);
 }
 
 INSTANTIATE_TEST_CASE_P(
