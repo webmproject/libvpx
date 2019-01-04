@@ -1732,6 +1732,9 @@ static int exhuastive_mesh_search(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
   return best_sad;
 }
 
+#define MIN_RANGE 7
+#define MAX_RANGE 256
+#define MIN_INTERVAL 1
 #if CONFIG_NON_GREEDY_MV
 double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
                                 int mv_num) {
@@ -1755,6 +1758,152 @@ double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
     }
   }
   return best_cost;
+}
+
+static double exhuastive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
+                                         int range, int step,
+                                         const vp9_variance_fn_ptr_t *fn_ptr,
+                                         const MV *center_mv, double lambda,
+                                         const int_mv *nb_full_mvs,
+                                         int full_mv_num) {
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  const struct buf_2d *const what = &x->plane[0].src;
+  const struct buf_2d *const in_what = &xd->plane[0].pre[0];
+  MV fcenter_mv = { center_mv->row, center_mv->col };
+  double best_sad;
+  int r, c, i;
+  int start_col, end_col, start_row, end_row;
+  int col_step = (step > 1) ? step : 4;
+
+  assert(step >= 1);
+
+  clamp_mv(&fcenter_mv, x->mv_limits.col_min, x->mv_limits.col_max,
+           x->mv_limits.row_min, x->mv_limits.row_max);
+  *best_mv = fcenter_mv;
+  best_sad =
+      fn_ptr->sdf(what->buf, what->stride,
+                  get_buf_from_mv(in_what, &fcenter_mv), in_what->stride) +
+      lambda * vp9_nb_mvs_inconsistency(&fcenter_mv, nb_full_mvs, full_mv_num);
+  start_row = VPXMAX(-range, x->mv_limits.row_min - fcenter_mv.row);
+  start_col = VPXMAX(-range, x->mv_limits.col_min - fcenter_mv.col);
+  end_row = VPXMIN(range, x->mv_limits.row_max - fcenter_mv.row);
+  end_col = VPXMIN(range, x->mv_limits.col_max - fcenter_mv.col);
+
+  for (r = start_row; r <= end_row; r += step) {
+    for (c = start_col; c <= end_col; c += col_step) {
+      // Step > 1 means we are not checking every location in this pass.
+      if (step > 1) {
+        const MV mv = { fcenter_mv.row + r, fcenter_mv.col + c };
+        double sad =
+            fn_ptr->sdf(what->buf, what->stride, get_buf_from_mv(in_what, &mv),
+                        in_what->stride);
+        if (sad < best_sad) {
+          sad +=
+              lambda * vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
+          if (sad < best_sad) {
+            best_sad = sad;
+            *best_mv = mv;
+          }
+        }
+      } else {
+        // 4 sads in a single call if we are checking every location
+        if (c + 3 <= end_col) {
+          unsigned int sads[4];
+          const uint8_t *addrs[4];
+          for (i = 0; i < 4; ++i) {
+            const MV mv = { fcenter_mv.row + r, fcenter_mv.col + c + i };
+            addrs[i] = get_buf_from_mv(in_what, &mv);
+          }
+          fn_ptr->sdx4df(what->buf, what->stride, addrs, in_what->stride, sads);
+
+          for (i = 0; i < 4; ++i) {
+            if (sads[i] < best_sad) {
+              const MV mv = { fcenter_mv.row + r, fcenter_mv.col + c + i };
+              const double sad =
+                  sads[i] + lambda * vp9_nb_mvs_inconsistency(&mv, nb_full_mvs,
+                                                              full_mv_num);
+              if (sad < best_sad) {
+                best_sad = sad;
+                *best_mv = mv;
+              }
+            }
+          }
+        } else {
+          for (i = 0; i < end_col - c; ++i) {
+            const MV mv = { fcenter_mv.row + r, fcenter_mv.col + c + i };
+            double sad =
+                fn_ptr->sdf(what->buf, what->stride,
+                            get_buf_from_mv(in_what, &mv), in_what->stride);
+            if (sad < best_sad) {
+              sad += lambda *
+                     vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
+              if (sad < best_sad) {
+                best_sad = sad;
+                *best_mv = mv;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return best_sad;
+}
+
+static double full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
+                                        MV *centre_mv_full,
+                                        const vp9_variance_fn_ptr_t *fn_ptr,
+                                        MV *dst_mv, double lambda,
+                                        const int_mv *nb_full_mvs,
+                                        int full_mv_num) {
+  const SPEED_FEATURES *const sf = &cpi->sf;
+  MV temp_mv = { centre_mv_full->row, centre_mv_full->col };
+  double bestsme;
+  int i;
+  int interval = sf->mesh_patterns[0].interval;
+  int range = sf->mesh_patterns[0].range;
+  int baseline_interval_divisor;
+  const MV dummy_mv = { 0, 0 };
+
+  // Trap illegal values for interval and range for this function.
+  if ((range < MIN_RANGE) || (range > MAX_RANGE) || (interval < MIN_INTERVAL) ||
+      (interval > range)) {
+    printf("ERROR: invalid range\n");
+    assert(0);
+  }
+
+  baseline_interval_divisor = range / interval;
+
+  // Check size of proposed first range against magnitude of the centre
+  // value used as a starting point.
+  range = VPXMAX(range, (5 * VPXMAX(abs(temp_mv.row), abs(temp_mv.col))) / 4);
+  range = VPXMIN(range, MAX_RANGE);
+  interval = VPXMAX(interval, range / baseline_interval_divisor);
+
+  // initial search
+  bestsme =
+      exhuastive_mesh_search_new(x, &temp_mv, range, interval, fn_ptr, &temp_mv,
+                                 lambda, nb_full_mvs, full_mv_num);
+
+  if ((interval > MIN_INTERVAL) && (range > MIN_RANGE)) {
+    // Progressive searches with range and step size decreasing each time
+    // till we reach a step size of 1. Then break out.
+    for (i = 1; i < MAX_MESH_STEP; ++i) {
+      // First pass with coarser step and longer range
+      bestsme = exhuastive_mesh_search_new(
+          x, &temp_mv, sf->mesh_patterns[i].range,
+          sf->mesh_patterns[i].interval, fn_ptr, &temp_mv, lambda, nb_full_mvs,
+          full_mv_num);
+
+      if (sf->mesh_patterns[i].interval == 1) break;
+    }
+  }
+
+  bestsme = vp9_get_mvpred_var(x, &temp_mv, &dummy_mv, fn_ptr, 0);
+  *dst_mv = temp_mv;
+
+  return bestsme;
 }
 
 double vp9_diamond_search_sad_new(const MACROBLOCK *x,
@@ -2332,6 +2481,9 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
       *best_mv_cost = mv_cost;
     }
   }
+
+  bestsme = full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv, lambda,
+                                      nb_full_mvs, full_mv_num);
   return bestsme;
 }
 #endif  // CONFIG_NON_GREEDY_MV
@@ -2400,9 +2552,6 @@ static int full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x, MV *mvp_full,
   return bestsme;
 }
 
-#define MIN_RANGE 7
-#define MAX_RANGE 256
-#define MIN_INTERVAL 1
 // Runs an limited range exhaustive mesh search using a pattern set
 // according to the encode speed profile.
 static int full_pixel_exhaustive(VP9_COMP *cpi, MACROBLOCK *x,
