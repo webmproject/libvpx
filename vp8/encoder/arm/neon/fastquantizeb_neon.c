@@ -9,6 +9,8 @@
  */
 
 #include <arm_neon.h>
+
+#include "./vp8_rtcd.h"
 #include "vp8/encoder/block.h"
 
 static const uint16_t inv_zig_zag[16] = { 1, 2, 6,  7,  3,  5,  8,  13,
