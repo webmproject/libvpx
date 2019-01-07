@@ -76,7 +76,7 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
   }
 
   {
-    const int shift = vp8_norm[range];
+    const unsigned char shift = vp8_norm[(unsigned char)range];
     range <<= shift;
     value <<= shift;
     count -= shift;
