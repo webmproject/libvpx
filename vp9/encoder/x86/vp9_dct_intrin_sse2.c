@@ -499,14 +499,14 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
         qcoeff1 = _mm_sub_epi16(qcoeff1, coeff1_sign);
 
         store_tran_low(qcoeff0, qcoeff_ptr + n_coeffs);
-        store_tran_low(qcoeff0, qcoeff_ptr + n_coeffs + 8);
+        store_tran_low(qcoeff1, qcoeff_ptr + n_coeffs + 8);
 
         coeff0 = _mm_mullo_epi16(qcoeff0, dequant);
         dequant = _mm_unpackhi_epi64(dequant, dequant);
         coeff1 = _mm_mullo_epi16(qcoeff1, dequant);
 
         store_tran_low(coeff0, dqcoeff_ptr + n_coeffs);
-        store_tran_low(coeff0, dqcoeff_ptr + n_coeffs + 8);
+        store_tran_low(coeff1, dqcoeff_ptr + n_coeffs + 8);
       }
 
       {
