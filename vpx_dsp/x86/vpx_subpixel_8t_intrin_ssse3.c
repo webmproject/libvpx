@@ -46,6 +46,7 @@ filter8_1dfunction vpx_filter_block1d8_h8_ssse3;
 filter8_1dfunction vpx_filter_block1d8_v8_ssse3;
 #endif
 
+#if ARCH_X86_64
 void vpx_filter_block1d4_h8_intrin_ssse3(
     const uint8_t *src_ptr, ptrdiff_t src_pitch, uint8_t *output_ptr,
     ptrdiff_t output_pitch, uint32_t output_height, const int16_t *filter) {
@@ -197,6 +198,7 @@ void vpx_filter_block1d8_v8_intrin_ssse3(
     output_ptr += out_pitch;
   }
 }
+#endif  // ARCH_X86_64
 
 static void vpx_filter_block1d16_h4_ssse3(const uint8_t *src_ptr,
                                           ptrdiff_t src_stride,
