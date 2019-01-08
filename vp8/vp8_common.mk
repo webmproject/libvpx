@@ -126,6 +126,7 @@ endif
 
 # common (neon intrinsics)
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/loopfilter_arm.c
+VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/loopfilter_arm.h
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/bilinearpredict_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/copymem_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/dc_only_idct_add_neon.c
