@@ -43,6 +43,9 @@
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_bitstream.h"
+#if CONFIG_INTERNAL_STATS
+#include "vp9/encoder/vp9_blockiness.h"
+#endif
 #include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
@@ -5162,10 +5165,6 @@ static void check_src_altref(VP9_COMP *cpi,
 }
 
 #if CONFIG_INTERNAL_STATS
-extern double vp9_get_blockiness(const uint8_t *img1, int img1_pitch,
-                                 const uint8_t *img2, int img2_pitch, int width,
-                                 int height);
-
 static void adjust_image_stat(double y, double u, double v, double all,
                               ImageStat *s) {
   s->stat[Y] += y;

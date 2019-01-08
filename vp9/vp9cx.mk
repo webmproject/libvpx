@@ -75,6 +75,7 @@ VP9_CX_SRCS-yes += encoder/vp9_svc_layercontext.c
 VP9_CX_SRCS-yes += encoder/vp9_resize.c
 VP9_CX_SRCS-yes += encoder/vp9_resize.h
 VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/vp9_blockiness.c
+VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/vp9_blockiness.h
 
 VP9_CX_SRCS-yes += encoder/vp9_tokenize.c
 VP9_CX_SRCS-yes += encoder/vp9_treewriter.c

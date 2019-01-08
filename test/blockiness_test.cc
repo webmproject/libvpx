@@ -26,10 +26,7 @@
 #include "test/util.h"
 
 #include "vpx_mem/vpx_mem.h"
-
-extern "C" double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
-                                     const unsigned char *img2, int img2_pitch,
-                                     int width, int height);
+#include "vp9/encoder/vp9_blockiness.h"
 
 using libvpx_test::ACMRandom;
 
