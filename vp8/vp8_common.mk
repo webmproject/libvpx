@@ -15,7 +15,6 @@ VP8_COMMON_SRCS-yes += common/onyxd.h
 VP8_COMMON_SRCS-yes += common/alloccommon.c
 VP8_COMMON_SRCS-yes += common/blockd.c
 VP8_COMMON_SRCS-yes += common/coefupdateprobs.h
-VP8_COMMON_SRCS-yes += common/copy_c.c
 # VP8_COMMON_SRCS-yes += common/debugmodes.c
 VP8_COMMON_SRCS-yes += common/default_coef_probs.h
 VP8_COMMON_SRCS-yes += common/dequantize.c
@@ -80,7 +79,6 @@ VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/idct_blk_mmx.c
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/idctllm_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/recon_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/subpixel_mmx.asm
-VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/copy_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idct_blk_sse2.c
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idctllm_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/recon_sse2.asm
@@ -88,7 +86,6 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/bilinear_filter_sse2.c
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/subpixel_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/iwalsh_sse2.asm
-VP8_COMMON_SRCS-$(HAVE_SSE3) += common/x86/copy_sse3.asm
 VP8_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/subpixel_ssse3.asm
 
 ifeq ($(CONFIG_POSTPROC),yes)
