@@ -16,6 +16,7 @@
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/alloccommon.h"
+#include "vp8/common/common.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
@@ -428,7 +429,6 @@ int vp8dx_references_buffer(VP8_COMMON *oci, int ref_frame) {
 }
 
 int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf) {
-  if (fb->pbi[0]) remove_decompressor(fb->pbi[0]);
   /* decoder instance for single thread mode */
   fb->pbi[0] = create_decompressor(oxcf);
   if (!fb->pbi[0]) return VPX_CODEC_ERROR;
@@ -436,7 +436,7 @@ int vp8_create_decoder_instances(struct frame_buffers *fb, VP8D_CONFIG *oxcf) {
 #if CONFIG_MULTITHREAD
   if (setjmp(fb->pbi[0]->common.error.jmp)) {
     vp8_remove_decoder_instances(fb);
-    memset(fb->pbi, 0, sizeof(fb->pbi));
+    vp8_zero(fb->pbi);
     vpx_clear_system_state();
     return VPX_CODEC_ERROR;
   }

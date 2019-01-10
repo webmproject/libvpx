@@ -1222,6 +1222,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     unsigned int thread;
     if (vp8mt_decode_mb_rows(pbi, xd)) {
       vp8_decoder_remove_threads(pbi);
+      pbi->restart_threads = 1;
       vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME, NULL);
     }
     vp8_yv12_extend_frame_borders(yv12_fb_new);
