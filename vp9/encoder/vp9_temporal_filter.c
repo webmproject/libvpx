@@ -110,11 +110,16 @@ static void temporal_filter_predictors_mb_c(
             CONVERT_TO_SHORTPTR(y_mb_ptr + y_offset), stride,
             CONVERT_TO_SHORTPTR(&pred[p_offset]), BW, &mv, scale, xs, ys,
             which_mv, kernel, MV_PRECISION_Q3, x, y, xd->bd);
+      } else {
+        vp9_build_inter_predictor(y_mb_ptr + y_offset, stride, &pred[p_offset],
+                                  BW, &mv, scale, xs, ys, which_mv, kernel,
+                                  MV_PRECISION_Q3, x, y);
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#else
       vp9_build_inter_predictor(y_mb_ptr + y_offset, stride, &pred[p_offset],
                                 BW, &mv, scale, xs, ys, which_mv, kernel,
                                 MV_PRECISION_Q3, x, y);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       k++;
     }
   }
@@ -143,8 +148,18 @@ static void temporal_filter_predictors_mb_c(
             CONVERT_TO_SHORTPTR(&pred[(BLK_PELS << 1) + p_offset]),
             uv_block_width, &mv, scale, xs, ys, which_mv, kernel,
             mv_precision_uv, x, y, xd->bd);
+      } else {
+        vp9_build_inter_predictor(u_mb_ptr + uv_offset, uv_stride,
+                                  &pred[BLK_PELS + p_offset], uv_block_width,
+                                  &mv, scale, xs, ys, which_mv, kernel,
+                                  mv_precision_uv, x, y);
+
+        vp9_build_inter_predictor(v_mb_ptr + uv_offset, uv_stride,
+                                  &pred[(BLK_PELS << 1) + p_offset],
+                                  uv_block_width, &mv, scale, xs, ys, which_mv,
+                                  kernel, mv_precision_uv, x, y);
       }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#else
       vp9_build_inter_predictor(u_mb_ptr + uv_offset, uv_stride,
                                 &pred[BLK_PELS + p_offset], uv_block_width, &mv,
                                 scale, xs, ys, which_mv, kernel,
@@ -154,6 +169,7 @@ static void temporal_filter_predictors_mb_c(
                                 &pred[(BLK_PELS << 1) + p_offset],
                                 uv_block_width, &mv, scale, xs, ys, which_mv,
                                 kernel, mv_precision_uv, x, y);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       k++;
     }
   }
