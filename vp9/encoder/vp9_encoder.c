@@ -6165,11 +6165,13 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  const int pw = num_4x4_blocks_wide_lookup[bsize] << 2;
+  const int ph = num_4x4_blocks_high_lookup[bsize] << 2;
   int fs_loc_sort_size;
   int fs_loc_heap_size;
   int mi_row, mi_col;
 
-  tpl_frame->lambda = 250;
+  tpl_frame->lambda = (pw * ph) / 4;
 
   fs_loc_sort_size = 0;
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
