@@ -416,8 +416,14 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
     for (int i = 0; i < kOutputBufferSize; ++i) {
       if (IsIndexInBorder(i)) {
         output_[i] = 255;
+#if CONFIG_VP9_HIGHBITDEPTH
+        output16_[i] = mask_;
+#endif
       } else {
         output_[i] = 0;
+#if CONFIG_VP9_HIGHBITDEPTH
+        output16_[i] = 0;
+#endif
       }
     }
 
