@@ -1646,7 +1646,7 @@ static int fast_dia_search(const MACROBLOCK *x, MV *ref_mv, int search_param,
 
 // Exhuastive motion search around a given centre position with a given
 // step size.
-static int exhuastive_mesh_search(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
+static int exhaustive_mesh_search(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
                                   int range, int step, int sad_per_bit,
                                   const vp9_variance_fn_ptr_t *fn_ptr,
                                   const MV *center_mv) {
@@ -1760,7 +1760,7 @@ double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
   return best_cost;
 }
 
-static double exhuastive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
+static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
                                          int range, int step,
                                          const vp9_variance_fn_ptr_t *fn_ptr,
                                          const MV *center_mv, double lambda,
@@ -1883,7 +1883,7 @@ static double full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
 
   // initial search
   bestsme =
-      exhuastive_mesh_search_new(x, &temp_mv, range, interval, fn_ptr, &temp_mv,
+      exhaustive_mesh_search_new(x, &temp_mv, range, interval, fn_ptr, &temp_mv,
                                  lambda, nb_full_mvs, full_mv_num);
 
   if ((interval > MIN_INTERVAL) && (range > MIN_RANGE)) {
@@ -1891,7 +1891,7 @@ static double full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
     // till we reach a step size of 1. Then break out.
     for (i = 1; i < MAX_MESH_STEP; ++i) {
       // First pass with coarser step and longer range
-      bestsme = exhuastive_mesh_search_new(
+      bestsme = exhaustive_mesh_search_new(
           x, &temp_mv, sf->mesh_patterns[i].range,
           sf->mesh_patterns[i].interval, fn_ptr, &temp_mv, lambda, nb_full_mvs,
           full_mv_num);
@@ -2581,7 +2581,7 @@ static int full_pixel_exhaustive(VP9_COMP *cpi, MACROBLOCK *x,
   interval = VPXMAX(interval, range / baseline_interval_divisor);
 
   // initial search
-  bestsme = exhuastive_mesh_search(x, &f_ref_mv, &temp_mv, range, interval,
+  bestsme = exhaustive_mesh_search(x, &f_ref_mv, &temp_mv, range, interval,
                                    sadpb, fn_ptr, &temp_mv);
 
   if ((interval > MIN_INTERVAL) && (range > MIN_RANGE)) {
@@ -2589,7 +2589,7 @@ static int full_pixel_exhaustive(VP9_COMP *cpi, MACROBLOCK *x,
     // till we reach a step size of 1. Then break out.
     for (i = 1; i < MAX_MESH_STEP; ++i) {
       // First pass with coarser step and longer range
-      bestsme = exhuastive_mesh_search(
+      bestsme = exhaustive_mesh_search(
           x, &f_ref_mv, &temp_mv, sf->mesh_patterns[i].range,
           sf->mesh_patterns[i].interval, sadpb, fn_ptr, &temp_mv);
 
@@ -2868,10 +2868,10 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   if (method == NSTEP) {
     if (sf->exhaustive_searches_thresh < INT_MAX &&
         !cpi->rc.is_src_frame_alt_ref) {
-      const int64_t exhuastive_thr =
+      const int64_t exhaustive_thr =
           sf->exhaustive_searches_thresh >>
           (8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]));
-      if (var > exhuastive_thr) run_exhaustive_search = 1;
+      if (var > exhaustive_thr) run_exhaustive_search = 1;
     }
   } else if (method == MESH) {
     run_exhaustive_search = 1;
