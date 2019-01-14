@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd7b351f_3fba1314",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-14T17:25:27Z",
+      "side": 1,
+      "message": "Is this necessary? If num_taps is not used, maybe add a comment instead? Also, this name is similar to \"avg\" and could cause confusion.",
+      "range": {
+        "startLine": 27,
+        "startChar": 69,
+        "endLine": 27,
+        "endChar": 75
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca9dada8_85198af0",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-14T17:25:27Z",
+      "side": 1,
+      "message": "Want to confirm: in 2-tap case, src_start \u003d src.",
+      "range": {
+        "startLine": 76,
+        "startChar": 49,
+        "endLine": 76,
+        "endChar": 58
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6834cdbf_931b0019",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-14T17:25:27Z",
+      "side": 1,
+      "message": "Can we decide num_taps directly from filter_x[]? So \"is_avg\" is not needed?",
+      "range": {
+        "startLine": 116,
+        "startChar": 6,
+        "endLine": 116,
+        "endChar": 42
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3b15483_c9c5596a",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-14T17:25:27Z",
+      "side": 1,
+      "message": "67?",
+      "range": {
+        "startLine": 117,
+        "startChar": 47,
+        "endLine": 117,
+        "endChar": 49
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80e79ad0_a8e87250",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-14T17:25:27Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 144,
+        "startChar": 25,
+        "endLine": 144,
+        "endChar": 31
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c0ffc0ba_2cb698ec",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-14T17:25:27Z",
+      "side": 1,
+      "message": "same as above",
+      "range": {
+        "startLine": 251,
+        "startChar": 7,
+        "endLine": 252,
+        "endChar": 56
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
