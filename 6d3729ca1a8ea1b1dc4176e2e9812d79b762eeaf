@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b87c477_6a68ffb4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2019-01-14T22:57:24Z",
+      "side": 1,
+      "message": "I submitted this CL too fast, so the commit message has the typo. Sorry!",
+      "range": {
+        "startLine": 10,
+        "startChar": 3,
+        "endLine": 10,
+        "endChar": 25
+      },
+      "revId": "6d3729ca1a8ea1b1dc4176e2e9812d79b762eeaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
