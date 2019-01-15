@@ -337,8 +337,7 @@ static INLINE int get_square_block_idx(BLOCK_SIZE bsize) {
   if (bsize == BLOCK_32X32) {
     return 3;
   }
-  printf("ERROR: non-square block size\n");
-  assert(0);
+  assert(0 && "ERROR: non-square block size");
   return -1;
 }
 
@@ -355,8 +354,7 @@ static INLINE BLOCK_SIZE square_block_idx_to_bsize(int square_block_idx) {
   if (square_block_idx == 3) {
     return BLOCK_32X32;
   }
-  printf("ERROR: invalid square_block_idx\n");
-  assert(0);
+  assert(0 && "ERROR: invalid square_block_idx");
   return BLOCK_INVALID;
 }
 
