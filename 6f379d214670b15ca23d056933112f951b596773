@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "08c78bf8_0f00f895",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1306723
+      },
+      "writtenOn": "2019-01-15T19:28:41Z",
+      "side": 1,
+      "message": "Yeah, this is only here for the 4-tap avg_filter. I\u0027ll add a TODO now.",
+      "parentUuid": "cdb3d338_4a059b6b",
+      "range": {
+        "startLine": 27,
+        "startChar": 69,
+        "endLine": 27,
+        "endChar": 75
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ca9dada8_85198af0",
         "filename": "vpx_dsp/x86/convolve.h",
         "patchSetId": 8
