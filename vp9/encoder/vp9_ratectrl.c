@@ -247,6 +247,9 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
   return target;
 }
 
+// TODO(marpan/jianj): bits_off_target and buffer_level are used in the saame
+// way for CBR mode, for the buffering updates below. Look into removing one
+// of these (i.e., bits_off_target).
 // Update the buffer level before encoding with the per-frame-bandwidth,
 static void update_buffer_level_preencode(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1924,8 +1927,10 @@ void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
   // increasing buffer levels/overflow for certain layers even though whole
   // superframe is dropped, we cap buffer level if its already stable.
   if (cpi->use_svc && cpi->svc.framedrop_mode != LAYER_DROP &&
-      cpi->rc.buffer_level > cpi->rc.optimal_buffer_level)
+      cpi->rc.buffer_level > cpi->rc.optimal_buffer_level) {
     cpi->rc.buffer_level = cpi->rc.optimal_buffer_level;
+    cpi->rc.bits_off_target = cpi->rc.optimal_buffer_level;
+  }
 }
 
 static int calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
