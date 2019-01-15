@@ -24,7 +24,7 @@ namespace {
 const unsigned int kWidth = 160;
 const unsigned int kHeight = 90;
 const unsigned int kFramerate = 50;
-const unsigned int kFrames = 10;
+const unsigned int kFrames = 20;
 const int kBitrate = 500;
 // List of psnr thresholds for speed settings 0-7 and 5 encoding modes
 const double kPsnrThreshold[][5] = {
@@ -48,13 +48,13 @@ const TestVideoParam kTestVectors[] = {
   { "park_joy_90p_8_444.y4m", 8, VPX_IMG_FMT_I444, VPX_BITS_8, 1 },
   { "park_joy_90p_8_440.yuv", 8, VPX_IMG_FMT_I440, VPX_BITS_8, 1 },
 #if CONFIG_VP9_HIGHBITDEPTH
-  { "park_joy_90p_10_420.y4m", 10, VPX_IMG_FMT_I42016, VPX_BITS_10, 2 },
-  { "park_joy_90p_10_422.y4m", 10, VPX_IMG_FMT_I42216, VPX_BITS_10, 3 },
-  { "park_joy_90p_10_444.y4m", 10, VPX_IMG_FMT_I44416, VPX_BITS_10, 3 },
+  { "park_joy_90p_10_420_20f.y4m", 10, VPX_IMG_FMT_I42016, VPX_BITS_10, 2 },
+  { "park_joy_90p_10_422_20f.y4m", 10, VPX_IMG_FMT_I42216, VPX_BITS_10, 3 },
+  { "park_joy_90p_10_444_20f.y4m", 10, VPX_IMG_FMT_I44416, VPX_BITS_10, 3 },
   { "park_joy_90p_10_440.yuv", 10, VPX_IMG_FMT_I44016, VPX_BITS_10, 3 },
-  { "park_joy_90p_12_420.y4m", 12, VPX_IMG_FMT_I42016, VPX_BITS_12, 2 },
-  { "park_joy_90p_12_422.y4m", 12, VPX_IMG_FMT_I42216, VPX_BITS_12, 3 },
-  { "park_joy_90p_12_444.y4m", 12, VPX_IMG_FMT_I44416, VPX_BITS_12, 3 },
+  { "park_joy_90p_12_420_20f.y4m", 12, VPX_IMG_FMT_I42016, VPX_BITS_12, 2 },
+  { "park_joy_90p_12_422_20f.y4m", 12, VPX_IMG_FMT_I42216, VPX_BITS_12, 3 },
+  { "park_joy_90p_12_444_20f.y4m", 12, VPX_IMG_FMT_I44416, VPX_BITS_12, 3 },
   { "park_joy_90p_12_440.yuv", 12, VPX_IMG_FMT_I44016, VPX_BITS_12, 3 },
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 };
