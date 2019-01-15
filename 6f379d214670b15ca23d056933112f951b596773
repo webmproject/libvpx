@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "cdb3d338_4a059b6b",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-15T19:05:07Z",
+      "side": 1,
+      "message": "So, this will be gone once we have 4-tap vert avg filter? If so, may be more clear to add a TODO.",
+      "parentUuid": "50a974bb_f34d294a",
+      "range": {
+        "startLine": 27,
+        "startChar": 69,
+        "endLine": 27,
+        "endChar": 75
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ca9dada8_85198af0",
         "filename": "vpx_dsp/x86/convolve.h",
         "patchSetId": 8
@@ -143,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "7bdafbab_7bb988d2",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-15T19:05:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "cb1f9f1f_fcbbf659",
+      "range": {
+        "startLine": 116,
+        "startChar": 6,
+        "endLine": 116,
+        "endChar": 42
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3b15483_c9c5596a",
         "filename": "vpx_dsp/x86/convolve.h",
         "patchSetId": 8
@@ -178,6 +226,30 @@
       "side": 1,
       "message": "\u003e 67?\n\nSee the previous comment. We need 7 more rows to avoid accessing invalid memory for 4-tap avg filter.",
       "parentUuid": "a3b15483_c9c5596a",
+      "range": {
+        "startLine": 117,
+        "startChar": 47,
+        "endLine": 117,
+        "endChar": 49
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56731bb6_b83219b0",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2019-01-15T19:05:07Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "2d5f01e2_44ffc752",
       "range": {
         "startLine": 117,
         "startChar": 47,
