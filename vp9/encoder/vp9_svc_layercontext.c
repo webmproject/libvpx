@@ -1227,3 +1227,25 @@ void vp9_svc_adjust_frame_rate(VP9_COMP *const cpi) {
       cpi->svc.timebase_fac * cpi->svc.duration[cpi->svc.spatial_layer_id];
   vp9_new_framerate(cpi, 10000000.0 / this_duration);
 }
+
+void vp9_svc_adjust_avg_frame_qindex(VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  SVC *const svc = &cpi->svc;
+  RATE_CONTROL *const rc = &cpi->rc;
+  // On key frames in CBR mode: reset the avg_frame_index for base layer
+  // (to level closer to worst_quality) if the overshoot is significant.
+  // Reset it for all temporal layers on base spatial layer.
+  if (cm->frame_type == KEY_FRAME && cpi->oxcf.rc_mode == VPX_CBR &&
+      rc->projected_frame_size > 3 * rc->avg_frame_bandwidth) {
+    int tl;
+    rc->avg_frame_qindex[INTER_FRAME] =
+        VPXMAX(rc->avg_frame_qindex[INTER_FRAME],
+               (cm->base_qindex + rc->worst_quality) >> 1);
+    for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
+      const int layer = LAYER_IDS_TO_IDX(0, tl, svc->number_temporal_layers);
+      LAYER_CONTEXT *lc = &svc->layer_context[layer];
+      RATE_CONTROL *lrc = &lc->rc;
+      lrc->avg_frame_qindex[INTER_FRAME] = rc->avg_frame_qindex[INTER_FRAME];
+    }
+  }
+}
