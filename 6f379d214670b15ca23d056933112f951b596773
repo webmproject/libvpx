@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "50a974bb_f34d294a",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1306723
+      },
+      "writtenOn": "2019-01-15T18:42:45Z",
+      "side": 1,
+      "message": "is_avg is here to make sure that in the case of 4-tap vert avg filter, which uses the 8-tap implementation, starts the computation at the correct row.\n\nIt basically serves the same purpose as avg, but I didn\u0027t find a way to easily convert avg to a boolean 0/1, so I added an extra argument to the marcro here.\n\nnum_taps is used by passing in as part of the src_start argument in the case of vert filter, but it is not used in the case of horz filter. Hence the void casting to silence the compiler complaints. If you think this is not obvious, I can add some documentation on that.",
+      "parentUuid": "cd7b351f_3fba1314",
+      "range": {
+        "startLine": 27,
+        "startChar": 69,
+        "endLine": 27,
+        "endChar": 75
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ca9dada8_85198af0",
         "filename": "vpx_dsp/x86/convolve.h",
         "patchSetId": 8
@@ -45,6 +69,30 @@
       "revId": "6f379d214670b15ca23d056933112f951b596773",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82fbfdec_01489049",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1306723
+      },
+      "writtenOn": "2019-01-15T18:42:45Z",
+      "side": 1,
+      "message": "That is correct.",
+      "parentUuid": "ca9dada8_85198af0",
+      "range": {
+        "startLine": 76,
+        "startChar": 49,
+        "endLine": 76,
+        "endChar": 58
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "cb1f9f1f_fcbbf659",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1306723
+      },
+      "writtenOn": "2019-01-15T18:42:45Z",
+      "side": 1,
+      "message": "\u003e Can we decide num_taps directly from filter_x[]? So \"is_avg\" is not needed?\n\nI added is_avg here because our current implementation of 4tap average filter uses 8-tap implementation. So even if the filter is only 4 tap, we still need to allocate enough space otherwise we will fail unit tests with address sanitizer.\n\nIn practice, however, this should not impact the performance as 4-tap filter isn\u0027t used with avg.\n\nI added the is_avg flag simply because it is the easiest way I know to signal the macro that we are creating an avg_filter. I tried to look up other ways of detecting whether avg actually has an argument or not, but I didn\u0027t find any easy way of doing this. But feel free to let me know if you do know a way.",
+      "parentUuid": "6834cdbf_931b0019",
+      "range": {
+        "startLine": 116,
+        "startChar": 6,
+        "endLine": 116,
+        "endChar": 42
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a3b15483_c9c5596a",
         "filename": "vpx_dsp/x86/convolve.h",
         "patchSetId": 8
@@ -91,6 +163,30 @@
       "revId": "6f379d214670b15ca23d056933112f951b596773",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2d5f01e2_44ffc752",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1306723
+      },
+      "writtenOn": "2019-01-15T18:42:45Z",
+      "side": 1,
+      "message": "\u003e 67?\n\nSee the previous comment. We need 7 more rows to avoid accessing invalid memory for 4-tap avg filter.",
+      "parentUuid": "a3b15483_c9c5596a",
+      "range": {
+        "startLine": 117,
+        "startChar": 47,
+        "endLine": 117,
+        "endChar": 49
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "375cfc0f_046a3430",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1306723
+      },
+      "writtenOn": "2019-01-15T18:42:45Z",
+      "side": 1,
+      "message": "See comment on line 116.",
+      "parentUuid": "80e79ad0_a8e87250",
+      "range": {
+        "startLine": 144,
+        "startChar": 25,
+        "endLine": 144,
+        "endChar": 31
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c0ffc0ba_2cb698ec",
         "filename": "vpx_dsp/x86/convolve.h",
         "patchSetId": 8
@@ -137,6 +257,30 @@
       "revId": "6f379d214670b15ca23d056933112f951b596773",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "02d9fcc8_ad8bef24",
+        "filename": "vpx_dsp/x86/convolve.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1306723
+      },
+      "writtenOn": "2019-01-15T18:42:45Z",
+      "side": 1,
+      "message": "See comment on line 116.",
+      "parentUuid": "c0ffc0ba_2cb698ec",
+      "range": {
+        "startLine": 251,
+        "startChar": 7,
+        "endLine": 252,
+        "endChar": 56
+      },
+      "revId": "6f379d214670b15ca23d056933112f951b596773",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
