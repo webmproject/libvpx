@@ -1015,6 +1015,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_SVC_SPATIAL_LAYER_SYNC,
                   vpx_svc_spatial_layer_sync_t *)
 #define VPX_CTRL_VP9E_SET_SVC_SPATIAL_LAYER_SYNC
 
+VPX_CTRL_USE_TYPE(VP9E_SET_POSTENCODE_DROP, unsigned int)
+#define VPX_CTRL_VP9E_SET_POSTENCODE_DROP
+
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus
