@@ -474,6 +474,96 @@ TEST_P(YUVTemporalFilterTest, USE_16X16) {
   }
 }
 
+TEST_P(YUVTemporalFilterTest, DISABLED_Speed) {
+  const int width = 32, height = 32;
+  Buffer<uint8_t> y_src = Buffer<uint8_t>(width, height, 8);
+  Buffer<uint8_t> y_pre = Buffer<uint8_t>(width, height, 0);
+  Buffer<uint16_t> y_count = Buffer<uint16_t>(width, height, 0);
+  Buffer<uint32_t> y_accum = Buffer<uint32_t>(width, height, 0);
+  ASSERT_TRUE(y_src.Init());
+  ASSERT_TRUE(y_pre.Init());
+  ASSERT_TRUE(y_count.Init());
+  ASSERT_TRUE(y_accum.Init());
+
+  for (int use_32x32 = 0; use_32x32 <= 1; use_32x32++) {
+    const int num_filter_weights = use_32x32 ? 3 : 3 * 3 * 3 * 3;
+    for (int ss_x = 0; ss_x <= 1; ss_x++) {
+      for (int ss_y = 0; ss_y <= 1; ss_y++) {
+        for (int filter_idx = 0; filter_idx < num_filter_weights;
+             filter_idx++) {
+          // Set up the filter
+          int filter_weight[4];
+          int filter_idx_cp = filter_idx;
+          for (int idx = 0; idx < 4; idx++) {
+            filter_weight[idx] = filter_idx_cp % 3;
+            filter_idx_cp /= 3;
+          }
+
+          // Test each parameter
+          for (int filter_strength = 0; filter_strength <= 6;
+               filter_strength += 2) {
+            const int uv_width = width >> ss_x, uv_height = height >> ss_y;
+            Buffer<uint8_t> u_src = Buffer<uint8_t>(uv_width, uv_height, 8);
+            Buffer<uint8_t> u_pre = Buffer<uint8_t>(uv_width, uv_height, 0);
+            Buffer<uint16_t> u_count = Buffer<uint16_t>(uv_width, uv_height, 0);
+            Buffer<uint32_t> u_accum = Buffer<uint32_t>(uv_width, uv_height, 0);
+            ASSERT_TRUE(u_src.Init());
+            ASSERT_TRUE(u_pre.Init());
+            ASSERT_TRUE(u_count.Init());
+            ASSERT_TRUE(u_accum.Init());
+            Buffer<uint8_t> v_src = Buffer<uint8_t>(uv_width, uv_height, 8);
+            Buffer<uint8_t> v_pre = Buffer<uint8_t>(uv_width, uv_height, 0);
+            Buffer<uint16_t> v_count = Buffer<uint16_t>(uv_width, uv_height, 0);
+            Buffer<uint32_t> v_accum = Buffer<uint32_t>(uv_width, uv_height, 0);
+            ASSERT_TRUE(v_src.Init());
+            ASSERT_TRUE(v_pre.Init());
+            ASSERT_TRUE(v_count.Init());
+            ASSERT_TRUE(v_accum.Init());
+
+            y_src.Set(&rnd_, 0, 7);
+            y_pre.Set(&rnd_, 0, 7);
+            u_src.Set(&rnd_, 0, 7);
+            u_pre.Set(&rnd_, 0, 7);
+            v_src.Set(&rnd_, 0, 7);
+            v_pre.Set(&rnd_, 0, 7);
+
+            y_accum.Set(0);
+            y_count.Set(0);
+            u_accum.Set(0);
+            u_count.Set(0);
+            v_accum.Set(0);
+            v_count.Set(0);
+
+            vpx_usec_timer timer;
+            vpx_usec_timer_start(&timer);
+            for (int num_calls = 0; num_calls < 1000; num_calls++) {
+              filter_func_(
+                  y_src.TopLeftPixel(), y_src.stride(), y_pre.TopLeftPixel(),
+                  y_pre.stride(), u_src.TopLeftPixel(), v_src.TopLeftPixel(),
+                  u_src.stride(), u_pre.TopLeftPixel(), v_pre.TopLeftPixel(),
+                  u_pre.stride(), width, height, ss_x, ss_y, filter_strength,
+                  filter_weight, use_32x32, y_accum.TopLeftPixel(),
+                  y_count.TopLeftPixel(), u_accum.TopLeftPixel(),
+                  u_count.TopLeftPixel(), v_accum.TopLeftPixel(),
+                  v_count.TopLeftPixel());
+            }
+
+            vpx_usec_timer_mark(&timer);
+            const int elapsed_time =
+                static_cast<int>(vpx_usec_timer_elapsed(&timer));
+
+            printf(
+                "Use 32X32: %d, SS_X: %d, SS_Y: %d, Weight Idx: %d, Strength: "
+                "%d, Time: %5d\n",
+                use_32x32, ss_x, ss_y, filter_idx, filter_strength,
+                elapsed_time);
+          }
+        }
+      }
+    }
+  }
+}
+
 INSTANTIATE_TEST_CASE_P(C, YUVTemporalFilterTest,
                         ::testing::Values(&vp9_apply_temporal_filter));
 }  // namespace
