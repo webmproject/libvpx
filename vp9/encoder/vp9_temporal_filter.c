@@ -501,6 +501,7 @@ static uint32_t temporal_filter_find_matching_mb_c(
   MACROBLOCKD *const xd = &x->e_mbd;
   MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
   const SEARCH_METHODS search_method = MESH;
+  const SEARCH_METHODS search_method_16 = cpi->sf.temporal_filter_search_method;
   int step_param;
   int sadpb = x->sadperbit16;
   uint32_t bestsme = UINT_MAX;
@@ -563,7 +564,7 @@ static uint32_t temporal_filter_find_matching_mb_c(
 
       vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
       vp9_full_pixel_search(cpi, x, TF_SUB_BLOCK, &best_ref_mv1_full,
-                            step_param, search_method, sadpb,
+                            step_param, search_method_16, sadpb,
                             cond_cost_list(cpi, cost_list), &best_ref_mv1,
                             &blk_mvs[k], 0, 0);
       /* restore UMV window */

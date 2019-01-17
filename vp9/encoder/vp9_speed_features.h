@@ -595,6 +595,9 @@ typedef struct SPEED_FEATURES {
   // Allow sub-pixel search to use interpolation filters with different taps in
   // order to achieve accurate motion search result.
   SUBPEL_SEARCH_TYPE use_accurate_subpel_search;
+
+  // Search method used by temporal filtering in full_pixel_motion_search.
+  SEARCH_METHODS temporal_filter_search_method;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

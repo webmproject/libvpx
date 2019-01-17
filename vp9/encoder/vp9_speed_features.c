@@ -237,6 +237,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   }
 
   if (speed >= 1) {
+    sf->temporal_filter_search_method = NSTEP;
     sf->ml_var_partition_pruning = !boosted;
     sf->ml_prune_rect_partition_threhold[1] = 200;
     sf->ml_prune_rect_partition_threhold[2] = 200;
@@ -906,6 +907,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->allow_acl = 1;
   sf->enable_tpl_model = oxcf->enable_tpl_model;
   sf->prune_ref_frame_for_rect_partitions = 0;
+  sf->temporal_filter_search_method = MESH;
 
   for (i = 0; i < TX_SIZES; i++) {
     sf->intra_y_mode_mask[i] = INTRA_ALL;
