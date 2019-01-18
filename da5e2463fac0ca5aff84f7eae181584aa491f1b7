@@ -70,6 +70,155 @@
       "revId": "da5e2463fac0ca5aff84f7eae181584aa491f1b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce57f4a4_d0aa5aa5",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-18T00:53:06Z",
+      "side": 1,
+      "message": "static isn\u0027t necessary in an anonymous namespace; \u0027inline\u0027 is fine in c++.",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 6
+      },
+      "revId": "da5e2463fac0ca5aff84f7eae181584aa491f1b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ee9d583_ebbf2173",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-18T00:53:06Z",
+      "side": 1,
+      "message": "these should be named using upper camelcase in c++:\n\nhttps://google.github.io/styleguide/cppguide.html#Function_Names",
+      "range": {
+        "startLine": 46,
+        "startChar": 18,
+        "endLine": 46,
+        "endChar": 27
+      },
+      "revId": "da5e2463fac0ca5aff84f7eae181584aa491f1b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b210e5f5_3f07286e",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-18T00:53:06Z",
+      "side": 1,
+      "message": "...want to round?",
+      "range": {
+        "startLine": 83,
+        "startChar": 25,
+        "endLine": 83,
+        "endChar": 35
+      },
+      "revId": "da5e2463fac0ca5aff84f7eae181584aa491f1b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c943aaea_ba3750d4",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-18T00:53:06Z",
+      "side": 1,
+      "message": "prefer c++ style casts here (static_cast\u003c\u003e):\nhttps://google.github.io/styleguide/cppguide.html#Casting",
+      "range": {
+        "startLine": 103,
+        "startChar": 26,
+        "endLine": 103,
+        "endChar": 43
+      },
+      "revId": "da5e2463fac0ca5aff84f7eae181584aa491f1b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da748f36_348f2b3c",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-18T00:53:06Z",
+      "side": 1,
+      "message": "this can be const",
+      "range": {
+        "startLine": 105,
+        "startChar": 6,
+        "endLine": 105,
+        "endChar": 9
+      },
+      "revId": "da5e2463fac0ca5aff84f7eae181584aa491f1b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e9e4281_28f3dd9b",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-18T00:53:06Z",
+      "side": 1,
+      "message": "these 2 can be const",
+      "revId": "da5e2463fac0ca5aff84f7eae181584aa491f1b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cf1c1b96_3e7f3036",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-18T00:53:06Z",
+      "side": 1,
+      "message": "this can be ASSERT_GT",
+      "revId": "da5e2463fac0ca5aff84f7eae181584aa491f1b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
