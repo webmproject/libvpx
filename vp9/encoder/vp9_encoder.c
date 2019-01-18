@@ -2572,6 +2572,15 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   vpx_free(cpi->feature_score_loc_heap);
 #endif
   for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
+#if CONFIG_NON_GREEDY_MV
+    int rf_idx;
+    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+      int sqr_bsize;
+      for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
+        vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
+      }
+    }
+#endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
     cpi->tpl_stats[frame].is_valid = 0;
   }
@@ -6156,11 +6165,13 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  const int pw = num_4x4_blocks_wide_lookup[bsize] << 2;
+  const int ph = num_4x4_blocks_high_lookup[bsize] << 2;
   int fs_loc_sort_size;
   int fs_loc_heap_size;
   int mi_row, mi_col;
 
-  tpl_frame->lambda = 250;
+  tpl_frame->lambda = (pw * ph) / 4;
 
   fs_loc_sort_size = 0;
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
@@ -6459,13 +6470,13 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
       continue;
 
 #if CONFIG_NON_GREEDY_MV
-    vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr);
     for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
       for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
+        vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
         CHECK_MEM_ERROR(
             cm, cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize],
             vpx_calloc(
-                mi_rows * mi_cols,
+                mi_rows * mi_cols * 4,
                 sizeof(
                     *cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize])));
       }
