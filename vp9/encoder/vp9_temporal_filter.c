@@ -198,8 +198,8 @@ static INLINE int mod_index(int sum_dist, int index, int rounding, int strength,
 
 static INLINE int get_filter_weight(unsigned int i, unsigned int j,
                                     unsigned int block_height,
-                                    unsigned int block_width, int *blk_fw,
-                                    int use_32x32) {
+                                    unsigned int block_width,
+                                    const int *const blk_fw, int use_32x32) {
   int filter_weight = 0;
 
   if (use_32x32)
@@ -220,12 +220,12 @@ static INLINE int get_filter_weight(unsigned int i, unsigned int j,
   return filter_weight;
 }
 
-static void apply_temporal_filter(
+void vp9_apply_temporal_filter_c(
     const uint8_t *y_frame1, int y_stride, const uint8_t *y_pred,
     int y_buf_stride, const uint8_t *u_frame1, const uint8_t *v_frame1,
     int uv_stride, const uint8_t *u_pred, const uint8_t *v_pred,
     int uv_buf_stride, unsigned int block_width, unsigned int block_height,
-    int ss_x, int ss_y, int strength, int *blk_fw, int use_32x32,
+    int ss_x, int ss_y, int strength, const int *const blk_fw, int use_32x32,
     uint32_t *y_accumulator, uint16_t *y_count, uint32_t *u_accumulator,
     uint16_t *u_count, uint32_t *v_accumulator, uint16_t *v_count) {
   unsigned int i, j, k, m;
@@ -767,7 +767,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
               count + (BLK_PELS << 1));
         } else {
           // Apply the filter (YUV)
-          apply_temporal_filter(
+          vp9_apply_temporal_filter_c(
               f->y_buffer + mb_y_offset, f->y_stride, predictor, BW,
               f->u_buffer + mb_uv_offset, f->v_buffer + mb_uv_offset,
               f->uv_stride, predictor + BLK_PELS, predictor + (BLK_PELS << 1),
@@ -778,7 +778,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         }
 #else
         // Apply the filter (YUV)
-        apply_temporal_filter(
+        vp9_apply_temporal_filter_c(
             f->y_buffer + mb_y_offset, f->y_stride, predictor, BW,
             f->u_buffer + mb_uv_offset, f->v_buffer + mb_uv_offset,
             f->uv_stride, predictor + BLK_PELS, predictor + (BLK_PELS << 1),
