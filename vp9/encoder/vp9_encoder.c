@@ -3748,6 +3748,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
           : 0;
 
   if (cm->show_existing_frame) {
+    cpi->rc.this_frame_target = 0;
     if (is_psnr_calc_enabled(cpi)) set_raw_source_frame(cpi);
     return 1;
   }
@@ -4071,6 +4072,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 #endif
 
   if (cm->show_existing_frame) {
+    rc->this_frame_target = 0;
     if (is_psnr_calc_enabled(cpi)) set_raw_source_frame(cpi);
     return;
   }

@@ -1356,7 +1356,12 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   write_uncompressed_header(cpi, &wb);
 
   // Skip the rest coding process if use show existing frame.
-  if (cpi->common.show_existing_frame) return;
+  if (cpi->common.show_existing_frame) {
+    uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
+    data += uncompressed_hdr_size;
+    *size = data - dest;
+    return;
+  }
 
   saved_wb = wb;
   vpx_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
