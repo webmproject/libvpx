@@ -74,9 +74,11 @@ typedef struct RowMTWorkerData {
   JobQueueRowMt jobq;
   size_t jobq_size;
   int num_tiles_done;
+  int num_jobs;
 #if CONFIG_MULTITHREAD
-  pthread_mutex_t recon_mutex;
-  pthread_mutex_t map_mutex;
+  pthread_mutex_t recon_done_mutex;
+  pthread_mutex_t *recon_sync_mutex;
+  pthread_cond_t *recon_sync_cond;
 #endif
   ThreadData *thread_data;
 } RowMTWorkerData;
@@ -159,7 +161,8 @@ struct VP9Decoder *vp9_decoder_create(BufferPool *const pool);
 void vp9_decoder_remove(struct VP9Decoder *pbi);
 
 void vp9_dec_alloc_row_mt_mem(RowMTWorkerData *row_mt_worker_data,
-                              VP9_COMMON *cm, int num_sbs, int max_threads);
+                              VP9_COMMON *cm, int num_sbs, int max_threads,
+                              int num_jobs);
 void vp9_dec_free_row_mt_mem(RowMTWorkerData *row_mt_worker_data);
 
 static INLINE void decrease_ref_count(int idx, RefCntBuffer *const frame_bufs,

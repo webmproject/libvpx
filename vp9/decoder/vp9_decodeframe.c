@@ -1645,32 +1645,36 @@ static void get_tile_buffers(VP9Decoder *pbi, const uint8_t *data,
   }
 }
 
-static void map_write(RowMTWorkerData *row_mt_worker_data, int idx) {
+static void map_write(RowMTWorkerData *const row_mt_worker_data, int map_idx,
+                      int sync_idx) {
 #if CONFIG_MULTITHREAD
-  pthread_mutex_lock(&row_mt_worker_data->map_mutex);
-  row_mt_worker_data->recon_map[idx] = 1;
-  pthread_mutex_unlock(&row_mt_worker_data->map_mutex);
+  pthread_mutex_lock(&row_mt_worker_data->recon_sync_mutex[sync_idx]);
+  row_mt_worker_data->recon_map[map_idx] = 1;
+  pthread_cond_signal(&row_mt_worker_data->recon_sync_cond[sync_idx]);
+  pthread_mutex_unlock(&row_mt_worker_data->recon_sync_mutex[sync_idx]);
 #else
   (void)row_mt_worker_data;
-  (void)idx;
-#endif
+  (void)map_idx;
+  (void)sync_idx;
+#endif  // CONFIG_MULTITHREAD
 }
 
-static void map_read(RowMTWorkerData *row_mt_worker_data, int idx) {
+static void map_read(RowMTWorkerData *const row_mt_worker_data, int map_idx,
+                     int sync_idx) {
 #if CONFIG_MULTITHREAD
-  volatile int8_t *map = row_mt_worker_data->recon_map + idx;
-  pthread_mutex_lock(&row_mt_worker_data->map_mutex);
-  // TODO(ritu.baldwa): Replace this with a condition variable
-  while (!*map) {
-    pthread_mutex_unlock(&row_mt_worker_data->map_mutex);
-    sched_yield();
-    pthread_mutex_lock(&row_mt_worker_data->map_mutex);
+  volatile int8_t *map = row_mt_worker_data->recon_map + map_idx;
+  pthread_mutex_t *const mutex =
+      &row_mt_worker_data->recon_sync_mutex[sync_idx];
+  pthread_mutex_lock(mutex);
+  while (!(*map)) {
+    pthread_cond_wait(&row_mt_worker_data->recon_sync_cond[sync_idx], mutex);
   }
-  pthread_mutex_unlock(&row_mt_worker_data->map_mutex);
+  pthread_mutex_unlock(mutex);
 #else
   (void)row_mt_worker_data;
-  (void)idx;
-#endif
+  (void)map_idx;
+  (void)sync_idx;
+#endif  // CONFIG_MULTITHREAD
 }
 
 static int lpf_map_write_check(VP9LfSync *lf_sync, int row, int num_tile_cols) {
@@ -1699,10 +1703,10 @@ static void vp9_tile_done(VP9Decoder *pbi) {
   int terminate;
   RowMTWorkerData *const row_mt_worker_data = pbi->row_mt_worker_data;
   const int all_parse_done = 1 << pbi->common.log2_tile_cols;
-  pthread_mutex_lock(&row_mt_worker_data->recon_mutex);
+  pthread_mutex_lock(&row_mt_worker_data->recon_done_mutex);
   row_mt_worker_data->num_tiles_done++;
   terminate = all_parse_done == row_mt_worker_data->num_tiles_done;
-  pthread_mutex_unlock(&row_mt_worker_data->recon_mutex);
+  pthread_mutex_unlock(&row_mt_worker_data->recon_done_mutex);
   if (terminate) {
     vp9_jobq_terminate(&row_mt_worker_data->jobq);
   }
@@ -1729,7 +1733,8 @@ static void vp9_jobq_alloc(VP9Decoder *pbi) {
 }
 
 static void recon_tile_row(TileWorkerData *tile_data, VP9Decoder *pbi,
-                           int mi_row, int is_last_row, VP9LfSync *lf_sync) {
+                           int mi_row, int is_last_row, VP9LfSync *lf_sync,
+                           int cur_tile_col) {
   VP9_COMMON *const cm = &pbi->common;
   RowMTWorkerData *const row_mt_worker_data = pbi->row_mt_worker_data;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -1749,7 +1754,8 @@ static void recon_tile_row(TileWorkerData *tile_data, VP9Decoder *pbi,
 
     // Top Dependency
     if (cur_sb_row) {
-      map_read(row_mt_worker_data, ((cur_sb_row - 1) * sb_cols) + c);
+      map_read(row_mt_worker_data, ((cur_sb_row - 1) * sb_cols) + c,
+               ((cur_sb_row - 1) * tile_cols) + cur_tile_col);
     }
 
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
@@ -1786,7 +1792,8 @@ static void recon_tile_row(TileWorkerData *tile_data, VP9Decoder *pbi,
         }
       }
     }
-    map_write(row_mt_worker_data, (cur_sb_row * sb_cols) + c);
+    map_write(row_mt_worker_data, (cur_sb_row * sb_cols) + c,
+              (cur_sb_row * tile_cols) + cur_tile_col);
   }
 }
 
@@ -1840,6 +1847,7 @@ static int row_decode_worker_hook(ThreadData *const thread_data,
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int aligned_rows = mi_cols_aligned_to_sb(cm->mi_rows);
   const int sb_rows = aligned_rows >> MI_BLOCK_SIZE_LOG2;
+  const int tile_cols = 1 << cm->log2_tile_cols;
   Job job;
   LFWorkerData *lf_data = thread_data->lf_data;
   VP9LfSync *lf_sync = thread_data->lf_sync;
@@ -1877,7 +1885,8 @@ static int row_decode_worker_hook(ThreadData *const thread_data,
         for (mi_col = mi_col_start; mi_col < mi_col_end;
              mi_col += MI_BLOCK_SIZE) {
           const int c = mi_col >> MI_BLOCK_SIZE_LOG2;
-          map_write(row_mt_worker_data, (cur_sb_row * sb_cols) + c);
+          map_write(row_mt_worker_data, (cur_sb_row * sb_cols) + c,
+                    (cur_sb_row * tile_cols) + job.tile_col);
         }
         if (is_last_row) {
           vp9_tile_done(pbi);
@@ -1888,7 +1897,8 @@ static int row_decode_worker_hook(ThreadData *const thread_data,
       tile_data_recon->error_info.setjmp = 1;
       tile_data_recon->xd.error_info = &tile_data_recon->error_info;
 
-      recon_tile_row(tile_data_recon, pbi, mi_row, is_last_row, lf_sync);
+      recon_tile_row(tile_data_recon, pbi, mi_row, is_last_row, lf_sync,
+                     job.tile_col);
 
       if (corrupted)
         vpx_internal_error(&tile_data_recon->error_info,
@@ -2756,21 +2766,20 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   setup_tile_info(cm, rb);
   if (pbi->row_mt == 1) {
     int num_sbs = 1;
+    const int aligned_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+    const int sb_rows = aligned_rows >> MI_BLOCK_SIZE_LOG2;
 
     if (pbi->row_mt_worker_data == NULL) {
       CHECK_MEM_ERROR(cm, pbi->row_mt_worker_data,
                       vpx_calloc(1, sizeof(*pbi->row_mt_worker_data)));
 #if CONFIG_MULTITHREAD
-      pthread_mutex_init(&pbi->row_mt_worker_data->recon_mutex, NULL);
-      pthread_mutex_init(&pbi->row_mt_worker_data->map_mutex, NULL);
+      pthread_mutex_init(&pbi->row_mt_worker_data->recon_done_mutex, NULL);
 #endif
     }
 
     if (pbi->max_threads > 1) {
       const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
       const int sb_cols = aligned_cols >> MI_BLOCK_SIZE_LOG2;
-      const int aligned_rows = mi_cols_aligned_to_sb(cm->mi_rows);
-      const int sb_rows = aligned_rows >> MI_BLOCK_SIZE_LOG2;
 
       num_sbs = sb_cols * sb_rows;
     }
@@ -2778,7 +2787,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     if (num_sbs > pbi->row_mt_worker_data->num_sbs) {
       vp9_dec_free_row_mt_mem(pbi->row_mt_worker_data);
       vp9_dec_alloc_row_mt_mem(pbi->row_mt_worker_data, cm, num_sbs,
-                               pbi->max_threads);
+                               pbi->max_threads, sb_rows << cm->log2_tile_cols);
     }
     vp9_jobq_alloc(pbi);
   }
