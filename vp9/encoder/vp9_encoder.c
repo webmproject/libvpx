@@ -5838,31 +5838,6 @@ static void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
   }
 }
 
-#if CONFIG_NON_GREEDY_MV
-double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows, int cols) {
-  double IxIx = 0;
-  double IxIy = 0;
-  double IyIy = 0;
-  double score;
-  int r, c;
-  vpx_clear_system_state();
-  for (r = 0; r + 1 < rows; ++r) {
-    for (c = 0; c + 1 < cols; ++c) {
-      int diff_x = buf[r * stride + c] - buf[r * stride + c + 1];
-      int diff_y = buf[r * stride + c] - buf[(r + 1) * stride + c];
-      IxIx += diff_x * diff_x;
-      IxIy += diff_x * diff_y;
-      IyIy += diff_y * diff_y;
-    }
-  }
-  IxIx /= (rows - 1) * (cols - 1);
-  IxIy /= (rows - 1) * (cols - 1);
-  IyIy /= (rows - 1) * (cols - 1);
-  score = (IxIx * IyIy - IxIy * IxIy + 0.0001) / (IxIx + IyIy + 0.0001);
-  return score;
-}
-#endif
-
 static void set_mv_limits(const VP9_COMMON *cm, MACROBLOCK *x, int mi_row,
                           int mi_col) {
   x->mv_limits.row_min = -((mi_row * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND));
@@ -6035,6 +6010,30 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 }
 
 #if CONFIG_NON_GREEDY_MV
+static double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows,
+                                int cols) {
+  double IxIx = 0;
+  double IxIy = 0;
+  double IyIy = 0;
+  double score;
+  int r, c;
+  vpx_clear_system_state();
+  for (r = 0; r + 1 < rows; ++r) {
+    for (c = 0; c + 1 < cols; ++c) {
+      int diff_x = buf[r * stride + c] - buf[r * stride + c + 1];
+      int diff_y = buf[r * stride + c] - buf[(r + 1) * stride + c];
+      IxIx += diff_x * diff_x;
+      IxIy += diff_x * diff_y;
+      IyIy += diff_y * diff_y;
+    }
+  }
+  IxIx /= (rows - 1) * (cols - 1);
+  IxIy /= (rows - 1) * (cols - 1);
+  IyIy /= (rows - 1) * (cols - 1);
+  score = (IxIx * IyIy - IxIy * IxIy + 0.0001) / (IxIx + IyIy + 0.0001);
+  return score;
+}
+
 static int compare_feature_score(const void *a, const void *b) {
   const FEATURE_SCORE_LOC *aa = *(FEATURE_SCORE_LOC *const *)a;
   const FEATURE_SCORE_LOC *bb = *(FEATURE_SCORE_LOC *const *)b;
