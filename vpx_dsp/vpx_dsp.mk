@@ -218,7 +218,11 @@ DSP_SRCS-$(HAVE_NEON)   += arm/fdct_partial_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/fwd_txfm_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.h
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
+
+ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_dct32x32_msa.c
+endif  # !CONFIG_VP9_HIGHBITDEPTH
+
 DSP_SRCS-$(HAVE_VSX)    += ppc/fdct32x32_vsx.c
 endif  # CONFIG_VP9_ENCODER
 

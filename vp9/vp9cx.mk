@@ -137,10 +137,13 @@ VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_frame_scale_neon.c
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_quantize_neon.c
 
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_error_msa.c
+
+ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct4x4_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct8x8_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct16x16_msa.c
 VP9_CX_SRCS-$(HAVE_MSA) += encoder/mips/msa/vp9_fdct_msa.h
+endif  # !CONFIG_VP9_HIGHBITDEPTH
 
 VP9_CX_SRCS-$(HAVE_VSX) += encoder/ppc/vp9_quantize_vsx.c
 
