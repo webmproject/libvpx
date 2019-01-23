@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e7dae804_0a472d70",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-23T19:52:07Z",
+      "side": 1,
+      "message": "\u003e do we?\n\nmissed this one.",
+      "parentUuid": "b371df07_f2119239",
+      "range": {
+        "startLine": 80,
+        "startChar": 19,
+        "endLine": 80,
+        "endChar": 24
+      },
+      "revId": "2082077001e7f657d42de9fc734f8eb2ed5e6609",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b1c509ef_9d8eeb09",
         "filename": "test/yuv_temporal_filter_test.cc",
         "patchSetId": 4
@@ -60,6 +84,30 @@
       "side": 1,
       "message": "Just wondering, is there a guideline to test names?",
       "parentUuid": "b1c509ef_9d8eeb09",
+      "range": {
+        "startLine": 233,
+        "startChar": 30,
+        "endLine": 233,
+        "endChar": 39
+      },
+      "revId": "2082077001e7f657d42de9fc734f8eb2ed5e6609",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2277949_a1ee5f51",
+        "filename": "test/yuv_temporal_filter_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-01-23T19:52:07Z",
+      "side": 1,
+      "message": "\u003e Just wondering, is there a guideline to test names?\n\nYes, actually googletest recommends against \u0027_\u0027s in names [1], though the likelihood of conflict is low.\n\n[1] https://github.com/google/googletest/blob/master/googletest/docs/primer.md#simple-tests\n\nTEST() arguments go from general to specific. The first argument is the name of the test case, and the second argument is the test\u0027s name within the test case. Both names must be valid C++ identifiers, and they should not contain underscore (_). A test\u0027s full name consists of its containing test case and its individual name. Tests from different test cases can have the same individual name.\n...\nWhen naming your test cases and tests, you should follow the same convention as for naming functions and classes.",
+      "parentUuid": "3e297d38_454532e6",
       "range": {
         "startLine": 233,
         "startChar": 30,
