@@ -77,7 +77,7 @@ void ApplyReferenceFilter(
   u_dif.Set(0);
   v_dif.Set(0);
 
-  // How many bits to we want to round
+  // How many bits do we want to round
   ASSERT_GE(strength, 0);
   ASSERT_LE(strength, 6);
   int rounding = 0;
@@ -230,7 +230,7 @@ class YUVTemporalFilterTest
   ACMRandom rnd_;
 };
 
-TEST_P(YUVTemporalFilterTest, Use_32X32) {
+TEST_P(YUVTemporalFilterTest, Use32x32) {
   const int width = 32, height = 32;
   Buffer<uint8_t> y_src = Buffer<uint8_t>(width, height, 8);
   Buffer<uint8_t> y_pre = Buffer<uint8_t>(width, height, 0);
@@ -347,7 +347,7 @@ TEST_P(YUVTemporalFilterTest, Use_32X32) {
   }
 }
 
-TEST_P(YUVTemporalFilterTest, Use_16X16) {
+TEST_P(YUVTemporalFilterTest, Use16x16) {
   const int width = 32, height = 32;
   Buffer<uint8_t> y_src = Buffer<uint8_t>(width, height, 8);
   Buffer<uint8_t> y_pre = Buffer<uint8_t>(width, height, 0);
