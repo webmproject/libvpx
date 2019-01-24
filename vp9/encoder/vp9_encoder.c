@@ -6014,9 +6014,10 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 }
 
 #if CONFIG_NON_GREEDY_MV
-void set_block_src_pred_buf(MACROBLOCK *x, GF_PICTURE *gf_picture,
-                            int frame_idx, int rf_idx, int mi_row, int mi_col) {
-  MACROBLOCKD *xd = &x->e_mbd;
+static void get_block_src_pred_buf(MACROBLOCKD *xd, GF_PICTURE *gf_picture,
+                                   int frame_idx, int rf_idx, int mi_row,
+                                   int mi_col, struct buf_2d *src,
+                                   struct buf_2d *pre) {
   const int mb_y_offset =
       mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
   YV12_BUFFER_CONFIG *ref_frame = NULL;
@@ -6024,11 +6025,11 @@ void set_block_src_pred_buf(MACROBLOCK *x, GF_PICTURE *gf_picture,
   if (ref_frame_idx != -1) {
     ref_frame = gf_picture[ref_frame_idx].frame;
   }
-  x->plane[0].src.buf = xd->cur_buf->y_buffer + mb_y_offset;
-  x->plane[0].src.stride = xd->cur_buf->y_stride;
-  xd->plane[0].pre[0].buf = ref_frame->y_buffer + mb_y_offset;
-  xd->plane[0].pre[0].stride = ref_frame->y_stride;
-  assert(xd->cur_buf->y_stride == ref_frame->y_stride);
+  src->buf = xd->cur_buf->y_buffer + mb_y_offset;
+  src->stride = xd->cur_buf->y_stride;
+  pre->buf = ref_frame->y_buffer + mb_y_offset;
+  pre->stride = ref_frame->y_stride;
+  assert(src->stride == pre->stride);
 }
 
 #define MV_PRECHECK_SIZE 4
@@ -6120,6 +6121,25 @@ int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
       break;
   }
   return mv;
+}
+
+double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
+                   GF_PICTURE *gf_picture, int frame_idx,
+                   TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
+                   int mi_row, int mi_col) {
+  MV mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row,
+                              mi_col)
+              .as_mv;
+  MV full_mv = get_full_mv(&mv);
+  uint32_t sse;
+  struct buf_2d src;
+  struct buf_2d pre;
+  get_block_src_pred_buf(xd, gf_picture, frame_idx, rf_idx, mi_row, mi_col,
+                         &src, &pre);
+  // TODO(angiebird): Consider subpixel when computing the sse.
+  cpi->fn_ptr[bsize].vf(src.buf, src.stride, get_buf_from_mv(&pre, &full_mv),
+                        pre.stride, &sse);
+  return (double)sse;
 }
 
 static double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows,
