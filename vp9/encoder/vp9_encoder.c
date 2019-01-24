@@ -29,6 +29,9 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_idct.h"
+#if CONFIG_NON_GREEDY_MV
+#include "vp9/common/vp9_mvref_common.h"
+#endif
 #if CONFIG_VP9_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
@@ -2570,6 +2573,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   vpx_free(cpi->feature_score_loc_arr);
   vpx_free(cpi->feature_score_loc_sort);
   vpx_free(cpi->feature_score_loc_heap);
+  vpx_free(cpi->select_mv_arr);
 #endif
   for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
 #if CONFIG_NON_GREEDY_MV
@@ -6027,6 +6031,97 @@ void set_block_src_pred_buf(MACROBLOCK *x, GF_PICTURE *gf_picture,
   assert(xd->cur_buf->y_stride == ref_frame->y_stride);
 }
 
+#define MV_PRECHECK_SIZE 4
+#define ZERO_MV_MODE 0
+#define NEW_MV_MODE 1
+#define NEAREST_MV_MODE 2
+#define NEAR_MV_MODE 3
+#define MAX_MV_MODE 4
+
+#define MV_REF_POS_NUM 3
+POSITION mv_ref_pos[MV_REF_POS_NUM] = {
+  { -1, 0 },
+  { 0, -1 },
+  { -1, -1 },
+};
+
+static int_mv *get_select_mv(VP9_COMP *cpi, TplDepFrame *tpl_frame, int mi_row,
+                             int mi_col) {
+  return &cpi->select_mv_arr[mi_row * tpl_frame->stride + mi_col];
+}
+
+static int_mv find_ref_mv(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
+                          BLOCK_SIZE bsize, int mi_row, int mi_col) {
+  int i;
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  int_mv nearest_mv, near_mv, invalid_mv;
+  nearest_mv.as_int = INVALID_MV;
+  near_mv.as_int = INVALID_MV;
+  invalid_mv.as_int = INVALID_MV;
+  for (i = 0; i < MV_REF_POS_NUM; ++i) {
+    int nb_row = mi_row + mv_ref_pos[i].row * mi_height;
+    int nb_col = mi_col + mv_ref_pos[i].col * mi_width;
+    assert(mv_ref_pos[i].row <= 0);
+    assert(mv_ref_pos[i].col <= 0);
+    if (nb_row >= 0 && nb_col >= 0) {
+      if (nearest_mv.as_int == INVALID_MV) {
+        nearest_mv = *get_select_mv(cpi, tpl_frame, nb_row, nb_col);
+      } else {
+        int_mv mv = *get_select_mv(cpi, tpl_frame, nb_row, nb_col);
+        if (mv.as_int == nearest_mv.as_int) {
+          continue;
+        } else {
+          near_mv = mv;
+          break;
+        }
+      }
+    }
+  }
+  if (nearest_mv.as_int == INVALID_MV) {
+    nearest_mv.as_mv.row = 0;
+    nearest_mv.as_mv.col = 0;
+  }
+  if (near_mv.as_int == INVALID_MV) {
+    near_mv.as_mv.row = 0;
+    near_mv.as_mv.col = 0;
+  }
+  if (mv_mode == NEAREST_MV_MODE) {
+    return nearest_mv;
+  }
+  if (mv_mode == NEAR_MV_MODE) {
+    return near_mv;
+  }
+  assert(0);
+  return invalid_mv;
+}
+
+int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
+                           int rf_idx, BLOCK_SIZE bsize, int mi_row,
+                           int mi_col) {
+  int_mv mv;
+  switch (mv_mode) {
+    case ZERO_MV_MODE:
+      mv.as_mv.row = 0;
+      mv.as_mv.col = 0;
+      break;
+    case NEW_MV_MODE:
+      mv = *get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
+      break;
+    case NEAREST_MV_MODE:
+      mv = find_ref_mv(mv_mode, cpi, tpl_frame, bsize, mi_row, mi_col);
+      break;
+    case NEAR_MV_MODE:
+      mv = find_ref_mv(mv_mode, cpi, tpl_frame, bsize, mi_row, mi_col);
+      break;
+    default:
+      mv.as_int = INVALID_MV;
+      assert(0);
+      break;
+  }
+  return mv;
+}
+
 static double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows,
                                 int cols) {
   double IxIx = 0;
@@ -6476,6 +6571,10 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 
     cpi->feature_score_loc_alloc = 1;
   }
+  vpx_free(cpi->select_mv_arr);
+  CHECK_MEM_ERROR(
+      cm, cpi->select_mv_arr,
+      vpx_calloc(mi_rows * mi_cols * 4, sizeof(*cpi->select_mv_arr)));
 #endif
 
   // TODO(jingning): Reduce the actual memory use for tpl model build up.

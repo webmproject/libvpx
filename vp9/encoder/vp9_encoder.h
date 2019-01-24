@@ -590,6 +590,7 @@ typedef struct VP9_COMP {
   FEATURE_SCORE_LOC *feature_score_loc_arr;
   FEATURE_SCORE_LOC **feature_score_loc_sort;
   FEATURE_SCORE_LOC **feature_score_loc_heap;
+  int_mv *select_mv_arr;
 #endif
 
   TileDataEnc *tile_data;
