@@ -6010,6 +6010,23 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 }
 
 #if CONFIG_NON_GREEDY_MV
+void set_block_src_pred_buf(MACROBLOCK *x, GF_PICTURE *gf_picture,
+                            int frame_idx, int rf_idx, int mi_row, int mi_col) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  const int mb_y_offset =
+      mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
+  YV12_BUFFER_CONFIG *ref_frame = NULL;
+  int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
+  if (ref_frame_idx != -1) {
+    ref_frame = gf_picture[ref_frame_idx].frame;
+  }
+  x->plane[0].src.buf = xd->cur_buf->y_buffer + mb_y_offset;
+  x->plane[0].src.stride = xd->cur_buf->y_stride;
+  xd->plane[0].pre[0].buf = ref_frame->y_buffer + mb_y_offset;
+  xd->plane[0].pre[0].stride = ref_frame->y_stride;
+  assert(xd->cur_buf->y_stride == ref_frame->y_stride);
+}
+
 static double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows,
                                 int cols) {
   double IxIx = 0;
