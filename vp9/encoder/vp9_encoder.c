@@ -6097,9 +6097,9 @@ static int_mv find_ref_mv(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
   return invalid_mv;
 }
 
-int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
-                           int rf_idx, BLOCK_SIZE bsize, int mi_row,
-                           int mi_col) {
+static int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi,
+                                  TplDepFrame *tpl_frame, int rf_idx,
+                                  BLOCK_SIZE bsize, int mi_row, int mi_col) {
   int_mv mv;
   switch (mv_mode) {
     case ZERO_MV_MODE:
@@ -6123,23 +6123,75 @@ int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
   return mv;
 }
 
-double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
-                   GF_PICTURE *gf_picture, int frame_idx,
-                   TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
-                   int mi_row, int mi_col) {
-  MV mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row,
-                              mi_col)
-              .as_mv;
-  MV full_mv = get_full_mv(&mv);
+static double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
+                          GF_PICTURE *gf_picture, int frame_idx,
+                          TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
+                          int mi_row, int mi_col, int_mv *mv) {
   uint32_t sse;
   struct buf_2d src;
   struct buf_2d pre;
+  MV full_mv;
+  *mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row,
+                            mi_col);
+  full_mv = get_full_mv(&mv->as_mv);
   get_block_src_pred_buf(xd, gf_picture, frame_idx, rf_idx, mi_row, mi_col,
                          &src, &pre);
   // TODO(angiebird): Consider subpixel when computing the sse.
   cpi->fn_ptr[bsize].vf(src.buf, src.stride, get_buf_from_mv(&pre, &full_mv),
                         pre.stride, &sse);
   return (double)sse;
+}
+
+static double get_mv_cost(int mv_mode) {
+  // TODO(angiebird): Implement this function.
+  (void)mv_mode;
+  return 0;
+}
+
+static double rd_cost(int rdmult, int rddiv, double rate, double dist) {
+  return (rate * rdmult) / (1 << 9) + dist * (1 << rddiv);
+}
+
+static double eval_mv_mode(int mv_mode, VP9_COMP *cpi, MACROBLOCK *x,
+                           GF_PICTURE *gf_picture, int frame_idx,
+                           TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
+                           int mi_row, int mi_col, int_mv *mv) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  double mv_dist = get_mv_dist(mv_mode, cpi, xd, gf_picture, frame_idx,
+                               tpl_frame, rf_idx, bsize, mi_row, mi_col, mv);
+  double mv_cost = get_mv_cost(mv_mode);
+  return rd_cost(x->rdmult, x->rddiv, mv_cost, mv_dist);
+}
+
+int find_best_ref_mv_mode(VP9_COMP *cpi, MACROBLOCK *x, GF_PICTURE *gf_picture,
+                          int frame_idx, TplDepFrame *tpl_frame, int rf_idx,
+                          BLOCK_SIZE bsize, int mi_row, int mi_col, double *rd,
+                          int_mv *mv) {
+  int best_mv_mode = ZERO_MV_MODE;
+  int update = 0;
+  int mv_mode;
+  for (mv_mode = 0; mv_mode < MAX_MV_MODE; ++mv_mode) {
+    double this_rd;
+    int_mv this_mv;
+    if (mv_mode == NEW_MV_MODE) {
+      continue;
+    }
+    this_rd = eval_mv_mode(mv_mode, cpi, x, gf_picture, frame_idx, tpl_frame,
+                           rf_idx, bsize, mi_row, mi_col, &this_mv);
+    if (update == 0) {
+      *rd = this_rd;
+      *mv = this_mv;
+      best_mv_mode = mv_mode;
+      update = 1;
+    } else {
+      if (this_rd < *rd) {
+        *rd = this_rd;
+        *mv = this_mv;
+        best_mv_mode = mv_mode;
+      }
+    }
+  }
+  return best_mv_mode;
 }
 
 static double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows,
