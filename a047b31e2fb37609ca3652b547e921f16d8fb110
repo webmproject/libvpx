@@ -22,6 +22,30 @@
       "revId": "a047b31e2fb37609ca3652b547e921f16d8fb110",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec88d9a5_30ec5388",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 6013,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2019-01-25T02:06:59Z",
+      "side": 1,
+      "message": "Yep I will add the static decorator when the function is called.",
+      "parentUuid": "6065ec81_55ff192c",
+      "range": {
+        "startLine": 6013,
+        "startChar": 0,
+        "endLine": 6013,
+        "endChar": 66
+      },
+      "revId": "a047b31e2fb37609ca3652b547e921f16d8fb110",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
