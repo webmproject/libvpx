@@ -549,7 +549,7 @@ static int get_smooth_intra_threshold(VP9_COMMON *cm) {
 }
 
 #define FP_DN_THRESH 8
-#define FP_MAX_DN_THRESH 16
+#define FP_MAX_DN_THRESH 24
 #define KERNEL_SIZE 3
 
 // Baseline Kernal weights for first pass noise metric
@@ -843,6 +843,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
   double mb_intra_factor;
   double mb_brightness_factor;
   double mb_neutral_count;
+  int scaled_low_intra_thresh = scale_sse_threshold(cm, LOW_I_THRESH);
 
   // First pass code requires valid last and new frame buffers.
   assert(new_yv12 != NULL);
@@ -1254,7 +1255,6 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
             }
           }
 #endif
-
           // Does the row vector point inwards or outwards?
           if (mb_row < cm->mb_rows / 2) {
             if (mv.row > 0)
@@ -1280,14 +1280,13 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
             else if (mv.col < 0)
               --(fp_acc_data->sum_in_vectors);
           }
-          fp_acc_data->frame_noise_energy += (int64_t)SECTION_NOISE_DEF;
-        } else if (this_intra_error < scale_sse_threshold(cm, LOW_I_THRESH)) {
+        }
+        if (this_intra_error < scaled_low_intra_thresh) {
           fp_acc_data->frame_noise_energy += fp_estimate_block_noise(x, bsize);
-        } else {  // 0,0 mv but high error
+        } else {
           fp_acc_data->frame_noise_energy += (int64_t)SECTION_NOISE_DEF;
         }
       } else {  // Intra < inter error
-        int scaled_low_intra_thresh = scale_sse_threshold(cm, LOW_I_THRESH);
         if (this_intra_error < scaled_low_intra_thresh) {
           fp_acc_data->frame_noise_energy += fp_estimate_block_noise(x, bsize);
           if (this_motion_error < scaled_low_intra_thresh) {
@@ -2399,8 +2398,12 @@ static void adjust_group_arnr_filter(VP9_COMP *cpi, double section_noise,
 
   twopass->arnr_strength_adjustment = 0;
 
-  if ((section_zeromv < 0.10) || (section_noise <= (SECTION_NOISE_DEF * 0.75)))
+  if (section_noise < 150) {
     twopass->arnr_strength_adjustment -= 1;
+    if (section_noise < 75) twopass->arnr_strength_adjustment -= 1;
+  } else if (section_noise > 250)
+    twopass->arnr_strength_adjustment += 1;
+
   if (section_zeromv > 0.50) twopass->arnr_strength_adjustment += 1;
 }
 
