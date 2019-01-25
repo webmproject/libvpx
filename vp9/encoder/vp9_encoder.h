@@ -320,6 +320,7 @@ typedef struct TplDepFrame {
   double mv_dist_sum[3];
   double mv_cost_sum[3];
   int_mv *pyramid_mv_arr[3][SQUARE_BLOCK_SIZES];
+  int *mv_mode_arr[3];
 #endif
 } TplDepFrame;
 
@@ -590,6 +591,7 @@ typedef struct VP9_COMP {
   FEATURE_SCORE_LOC *feature_score_loc_arr;
   FEATURE_SCORE_LOC **feature_score_loc_sort;
   FEATURE_SCORE_LOC **feature_score_loc_heap;
+  int_mv *select_mv_arr;
 #endif
 
   TileDataEnc *tile_data;

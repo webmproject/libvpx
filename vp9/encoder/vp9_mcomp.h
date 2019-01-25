@@ -38,6 +38,11 @@ typedef struct search_site_config {
   int total_steps;
 } search_site_config;
 
+static INLINE const uint8_t *get_buf_from_mv(const struct buf_2d *buf,
+                                             const MV *mv) {
+  return &buf->buf[mv->row * buf->stride + mv->col];
+}
+
 void vp9_init_dsmotion_compensation(search_site_config *cfg, int stride);
 void vp9_init3smotion_compensation(search_site_config *cfg, int stride);
 
@@ -143,7 +148,6 @@ static INLINE MV get_full_mv(const MV *mv) {
   out_mv.col = mv->col >> 3;
   return out_mv;
 }
-
 struct TplDepFrame;
 void vp9_prepare_nb_full_mvs(const struct TplDepFrame *tpl_frame, int mi_row,
                              int mi_col, int rf_idx, BLOCK_SIZE bsize,

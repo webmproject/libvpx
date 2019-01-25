@@ -29,6 +29,9 @@
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_idct.h"
+#if CONFIG_NON_GREEDY_MV
+#include "vp9/common/vp9_mvref_common.h"
+#endif
 #if CONFIG_VP9_POSTPROC
 #include "vp9/common/vp9_postproc.h"
 #endif
@@ -2570,6 +2573,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   vpx_free(cpi->feature_score_loc_arr);
   vpx_free(cpi->feature_score_loc_sort);
   vpx_free(cpi->feature_score_loc_heap);
+  vpx_free(cpi->select_mv_arr);
 #endif
   for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
 #if CONFIG_NON_GREEDY_MV
@@ -6010,9 +6014,10 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 }
 
 #if CONFIG_NON_GREEDY_MV
-void set_block_src_pred_buf(MACROBLOCK *x, GF_PICTURE *gf_picture,
-                            int frame_idx, int rf_idx, int mi_row, int mi_col) {
-  MACROBLOCKD *xd = &x->e_mbd;
+static void get_block_src_pred_buf(MACROBLOCKD *xd, GF_PICTURE *gf_picture,
+                                   int frame_idx, int rf_idx, int mi_row,
+                                   int mi_col, struct buf_2d *src,
+                                   struct buf_2d *pre) {
   const int mb_y_offset =
       mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
   YV12_BUFFER_CONFIG *ref_frame = NULL;
@@ -6020,11 +6025,173 @@ void set_block_src_pred_buf(MACROBLOCK *x, GF_PICTURE *gf_picture,
   if (ref_frame_idx != -1) {
     ref_frame = gf_picture[ref_frame_idx].frame;
   }
-  x->plane[0].src.buf = xd->cur_buf->y_buffer + mb_y_offset;
-  x->plane[0].src.stride = xd->cur_buf->y_stride;
-  xd->plane[0].pre[0].buf = ref_frame->y_buffer + mb_y_offset;
-  xd->plane[0].pre[0].stride = ref_frame->y_stride;
-  assert(xd->cur_buf->y_stride == ref_frame->y_stride);
+  src->buf = xd->cur_buf->y_buffer + mb_y_offset;
+  src->stride = xd->cur_buf->y_stride;
+  pre->buf = ref_frame->y_buffer + mb_y_offset;
+  pre->stride = ref_frame->y_stride;
+  assert(src->stride == pre->stride);
+}
+
+#define MV_PRECHECK_SIZE 4
+#define ZERO_MV_MODE 0
+#define NEW_MV_MODE 1
+#define NEAREST_MV_MODE 2
+#define NEAR_MV_MODE 3
+#define MAX_MV_MODE 4
+
+#define MV_REF_POS_NUM 3
+POSITION mv_ref_pos[MV_REF_POS_NUM] = {
+  { -1, 0 },
+  { 0, -1 },
+  { -1, -1 },
+};
+
+static int_mv *get_select_mv(VP9_COMP *cpi, TplDepFrame *tpl_frame, int mi_row,
+                             int mi_col) {
+  return &cpi->select_mv_arr[mi_row * tpl_frame->stride + mi_col];
+}
+
+static int_mv find_ref_mv(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
+                          BLOCK_SIZE bsize, int mi_row, int mi_col) {
+  int i;
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  int_mv nearest_mv, near_mv, invalid_mv;
+  nearest_mv.as_int = INVALID_MV;
+  near_mv.as_int = INVALID_MV;
+  invalid_mv.as_int = INVALID_MV;
+  for (i = 0; i < MV_REF_POS_NUM; ++i) {
+    int nb_row = mi_row + mv_ref_pos[i].row * mi_height;
+    int nb_col = mi_col + mv_ref_pos[i].col * mi_width;
+    assert(mv_ref_pos[i].row <= 0);
+    assert(mv_ref_pos[i].col <= 0);
+    if (nb_row >= 0 && nb_col >= 0) {
+      if (nearest_mv.as_int == INVALID_MV) {
+        nearest_mv = *get_select_mv(cpi, tpl_frame, nb_row, nb_col);
+      } else {
+        int_mv mv = *get_select_mv(cpi, tpl_frame, nb_row, nb_col);
+        if (mv.as_int == nearest_mv.as_int) {
+          continue;
+        } else {
+          near_mv = mv;
+          break;
+        }
+      }
+    }
+  }
+  if (nearest_mv.as_int == INVALID_MV) {
+    nearest_mv.as_mv.row = 0;
+    nearest_mv.as_mv.col = 0;
+  }
+  if (near_mv.as_int == INVALID_MV) {
+    near_mv.as_mv.row = 0;
+    near_mv.as_mv.col = 0;
+  }
+  if (mv_mode == NEAREST_MV_MODE) {
+    return nearest_mv;
+  }
+  if (mv_mode == NEAR_MV_MODE) {
+    return near_mv;
+  }
+  assert(0);
+  return invalid_mv;
+}
+
+static int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi,
+                                  TplDepFrame *tpl_frame, int rf_idx,
+                                  BLOCK_SIZE bsize, int mi_row, int mi_col) {
+  int_mv mv;
+  switch (mv_mode) {
+    case ZERO_MV_MODE:
+      mv.as_mv.row = 0;
+      mv.as_mv.col = 0;
+      break;
+    case NEW_MV_MODE:
+      mv = *get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
+      break;
+    case NEAREST_MV_MODE:
+      mv = find_ref_mv(mv_mode, cpi, tpl_frame, bsize, mi_row, mi_col);
+      break;
+    case NEAR_MV_MODE:
+      mv = find_ref_mv(mv_mode, cpi, tpl_frame, bsize, mi_row, mi_col);
+      break;
+    default:
+      mv.as_int = INVALID_MV;
+      assert(0);
+      break;
+  }
+  return mv;
+}
+
+static double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
+                          GF_PICTURE *gf_picture, int frame_idx,
+                          TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
+                          int mi_row, int mi_col, int_mv *mv) {
+  uint32_t sse;
+  struct buf_2d src;
+  struct buf_2d pre;
+  MV full_mv;
+  *mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row,
+                            mi_col);
+  full_mv = get_full_mv(&mv->as_mv);
+  get_block_src_pred_buf(xd, gf_picture, frame_idx, rf_idx, mi_row, mi_col,
+                         &src, &pre);
+  // TODO(angiebird): Consider subpixel when computing the sse.
+  cpi->fn_ptr[bsize].vf(src.buf, src.stride, get_buf_from_mv(&pre, &full_mv),
+                        pre.stride, &sse);
+  return (double)sse;
+}
+
+static double get_mv_cost(int mv_mode) {
+  // TODO(angiebird): Implement this function.
+  (void)mv_mode;
+  return 0;
+}
+
+static double rd_cost(int rdmult, int rddiv, double rate, double dist) {
+  return (rate * rdmult) / (1 << 9) + dist * (1 << rddiv);
+}
+
+static double eval_mv_mode(int mv_mode, VP9_COMP *cpi, MACROBLOCK *x,
+                           GF_PICTURE *gf_picture, int frame_idx,
+                           TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
+                           int mi_row, int mi_col, int_mv *mv) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  double mv_dist = get_mv_dist(mv_mode, cpi, xd, gf_picture, frame_idx,
+                               tpl_frame, rf_idx, bsize, mi_row, mi_col, mv);
+  double mv_cost = get_mv_cost(mv_mode);
+  return rd_cost(x->rdmult, x->rddiv, mv_cost, mv_dist);
+}
+
+int find_best_ref_mv_mode(VP9_COMP *cpi, MACROBLOCK *x, GF_PICTURE *gf_picture,
+                          int frame_idx, TplDepFrame *tpl_frame, int rf_idx,
+                          BLOCK_SIZE bsize, int mi_row, int mi_col, double *rd,
+                          int_mv *mv) {
+  int best_mv_mode = ZERO_MV_MODE;
+  int update = 0;
+  int mv_mode;
+  for (mv_mode = 0; mv_mode < MAX_MV_MODE; ++mv_mode) {
+    double this_rd;
+    int_mv this_mv;
+    if (mv_mode == NEW_MV_MODE) {
+      continue;
+    }
+    this_rd = eval_mv_mode(mv_mode, cpi, x, gf_picture, frame_idx, tpl_frame,
+                           rf_idx, bsize, mi_row, mi_col, &this_mv);
+    if (update == 0) {
+      *rd = this_rd;
+      *mv = this_mv;
+      best_mv_mode = mv_mode;
+      update = 1;
+    } else {
+      if (this_rd < *rd) {
+        *rd = this_rd;
+        *mv = this_mv;
+        best_mv_mode = mv_mode;
+      }
+    }
+  }
+  return best_mv_mode;
 }
 
 static double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows,
@@ -6476,6 +6643,10 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 
     cpi->feature_score_loc_alloc = 1;
   }
+  vpx_free(cpi->select_mv_arr);
+  CHECK_MEM_ERROR(
+      cm, cpi->select_mv_arr,
+      vpx_calloc(mi_rows * mi_cols * 4, sizeof(*cpi->select_mv_arr)));
 #endif
 
   // TODO(jingning): Reduce the actual memory use for tpl model build up.
