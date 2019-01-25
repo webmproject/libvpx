@@ -680,7 +680,9 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
       src_variance = vp9_get_sby_perpixel_variance(cpi, &src, TF_BLOCK);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-      if (src_variance <= 2) strength = VPXMAX(0, (int)strength - 2);
+      if (src_variance <= 2) {
+        strength = VPXMAX(0, arnr_filter_data->strength - 2);
+      }
     }
 
     for (frame = 0; frame < frame_count; frame++) {

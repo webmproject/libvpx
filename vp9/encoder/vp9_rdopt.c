@@ -3034,7 +3034,7 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   if (content_type == VP9E_CONTENT_FILM) {
     if (src_rec_min <= VERY_LOW_VAR_THRESH) {
       if (ref_frame == INTRA_FRAME) *this_rd *= 2;
-      if (bsize > 6) *this_rd *= 2;
+      if (bsize > BLOCK_16X16) *this_rd *= 2;
     }
   }
 }
