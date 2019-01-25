@@ -34,6 +34,9 @@
 #include "vpx_scale/vpx_scale.h"
 
 static int fixed_divide[512];
+static unsigned int index_mult[14] = {
+  0, 0, 0, 0, 49152, 39322, 32768, 28087, 24576, 21846, 19661, 17874, 0, 15124
+};
 
 static void temporal_filter_predictors_mb_c(
     MACROBLOCKD *xd, uint8_t *y_mb_ptr, uint8_t *u_mb_ptr, uint8_t *v_mb_ptr,
@@ -184,7 +187,12 @@ void vp9_temporal_filter_init(void) {
 
 static INLINE int mod_index(int sum_dist, int index, int rounding, int strength,
                             int filter_weight) {
-  int mod = (sum_dist * 3) / index;
+  int mod;
+
+  assert(index >= 0 && index <= 13);
+  assert(index_mult[index] != 0);
+
+  mod = (clamp(sum_dist, 0, UINT16_MAX) * index_mult[index]) >> 16;
   mod += rounding;
   mod >>= strength;
 
