@@ -183,13 +183,21 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") ne "yes") {
 add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp9_diamond_search_sad avx/;
 
+#
+# Apply temporal filter
+#
 if (vpx_config("CONFIG_REALTIME_ONLY") ne "yes") {
 add_proto qw/void vp9_temporal_filter_apply/, "const uint8_t *frame1, unsigned int stride, const uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, uint32_t *accumulator, uint16_t *count";
 specialize qw/vp9_temporal_filter_apply sse4_1/;
 
 add_proto qw/void vp9_apply_temporal_filter/, "const uint8_t *y_src, int y_src_stride, const uint8_t *y_pre, int y_pre_stride, const uint8_t *u_src, const uint8_t *v_src, int uv_src_stride, const uint8_t *u_pre, const uint8_t *v_pre, int uv_pre_stride, unsigned int block_width, unsigned int block_height, int ss_x, int ss_y, int strength, const int *const blk_fw, int use_32x32, uint32_t *y_accumulator, uint16_t *y_count, uint32_t *u_accumulator, uint16_t *u_count, uint32_t *v_accumulator, uint16_t *v_count";
 specialize qw/vp9_apply_temporal_filter sse4_1/;
+
+  if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+    add_proto qw/void vp9_highbd_apply_temporal_filter/, "const uint16_t *y_src, int y_src_stride, const uint16_t *y_pre, int y_pre_stride, const uint16_t *u_src, const uint16_t *v_src, int uv_src_stride, const uint16_t *u_pre, const uint16_t *v_pre, int uv_pre_stride, unsigned int block_width, unsigned int block_height, int ss_x, int ss_y, int strength, const int *const blk_fw, int use_32x32, uint32_t *y_accum, uint16_t *y_count, uint32_t *u_accum, uint16_t *u_count, uint32_t *v_accum, uint16_t *v_count";
+  }
 }
+
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
