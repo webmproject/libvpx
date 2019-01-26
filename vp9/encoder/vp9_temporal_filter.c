@@ -778,7 +778,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
               count + (BLK_PELS << 1));
         } else {
           // Apply the filter (YUV)
-          vp9_apply_temporal_filter(
+          vp9_apply_temporal_filter_c(
               f->y_buffer + mb_y_offset, f->y_stride, predictor, BW,
               f->u_buffer + mb_uv_offset, f->v_buffer + mb_uv_offset,
               f->uv_stride, predictor + BLK_PELS, predictor + (BLK_PELS << 1),
@@ -789,7 +789,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         }
 #else
         // Apply the filter (YUV)
-        vp9_apply_temporal_filter(
+        vp9_apply_temporal_filter_c(
             f->y_buffer + mb_y_offset, f->y_stride, predictor, BW,
             f->u_buffer + mb_uv_offset, f->v_buffer + mb_uv_offset,
             f->uv_stride, predictor + BLK_PELS, predictor + (BLK_PELS << 1),
