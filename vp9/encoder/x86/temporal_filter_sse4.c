@@ -967,8 +967,8 @@ static void vp9_apply_temporal_filter_chroma_8(
   v_sum_row_2 = v_sum_row_3;
 
   // Add chroma values
-  u_sum_row = _mm_adds_epu8(u_sum_row_1, u_sum_row_2);
-  v_sum_row = _mm_adds_epu8(v_sum_row_1, v_sum_row_2);
+  u_sum_row = _mm_adds_epu16(u_sum_row_1, u_sum_row_2);
+  v_sum_row = _mm_adds_epu16(v_sum_row_1, v_sum_row_2);
 
   // Add luma values
   add_luma_dist_to_8_chroma_mod(y_dist, ss_x, ss_y, &u_sum_row, &v_sum_row);
