@@ -574,7 +574,7 @@ INSTANTIATE_TEST_CASE_P(C, YUVTemporalFilterTest,
                         ::testing::Values(&vp9_apply_temporal_filter_c));
 
 #if HAVE_SSE4_1
-INSTANTIATE_TEST_CASE_P(SSE4, YUVTemporalFilterTest,
+INSTANTIATE_TEST_CASE_P(SSE4_1, YUVTemporalFilterTest,
                         ::testing::Values(&vp9_apply_temporal_filter_sse4_1));
 #endif  // HAVE_SSE4_1
 }  // namespace
