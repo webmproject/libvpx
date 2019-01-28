@@ -6197,9 +6197,11 @@ static int find_best_ref_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return best_mv_mode;
 }
 
-void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x, GF_PICTURE *gf_picture,
-                     int frame_idx, TplDepFrame *tpl_frame, int rf_idx,
-                     BLOCK_SIZE bsize, int mi_row, int mi_col, double *rd) {
+static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
+                            GF_PICTURE *gf_picture, int frame_idx,
+                            TplDepFrame *tpl_frame, int rf_idx,
+                            BLOCK_SIZE bsize, int mi_row, int mi_col,
+                            double *rd) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int tmp_mv_mode_arr[kMvPreCheckSize];
@@ -6279,6 +6281,32 @@ void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x, GF_PICTURE *gf_picture,
     }
   } else {
     *rd = new_mv_rd;
+  }
+}
+
+void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x, GF_PICTURE *gf_picture,
+                         int frame_idx, TplDepFrame *tpl_frame, int rf_idx,
+                         BLOCK_SIZE bsize) {
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  const int unit_rows = tpl_frame->mi_rows / mi_height;
+  const int unit_cols = tpl_frame->mi_cols / mi_width;
+  const int max_diagonal_lines = unit_rows + unit_cols - 1;
+  int idx;
+  for (idx = 0; idx < max_diagonal_lines; ++idx) {
+    int r;
+    for (r = VPXMAX(idx - unit_cols + 1, 0); r <= VPXMIN(idx, unit_rows - 1);
+         ++r) {
+      double rd;  // TODO(angiebird): Use this information later.
+      int c = idx - r;
+      int mi_row = r * mi_height;
+      int mi_col = c * mi_width;
+      assert(c >= 0 && c < unit_cols);
+      assert(mi_row >= 0 && mi_row < tpl_frame->mi_rows);
+      assert(mi_col >= 0 && mi_col < tpl_frame->mi_cols);
+      predict_mv_mode(cpi, x, gf_picture, frame_idx, tpl_frame, rf_idx, bsize,
+                      mi_row, mi_col, &rd);
+    }
   }
 }
 
