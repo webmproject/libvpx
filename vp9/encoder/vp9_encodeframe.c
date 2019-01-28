@@ -3484,8 +3484,9 @@ static void simple_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 // input features.
 #define FEATURES 6
 static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
-                                          BLOCK_SIZE bsize, int mi_row,
-                                          int mi_col, int *none, int *split) {
+                                          PC_TREE *pc_tree, BLOCK_SIZE bsize,
+                                          int mi_row, int mi_col, int *none,
+                                          int *split) {
   VP9_COMMON *const cm = &cpi->common;
   const NN_CONFIG *nn_config = NULL;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -3530,10 +3531,17 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
   // Do a simple single motion search to find a prediction for current block.
   // The variance of the residue will be used as input features.
   {
-    const MV ref_mv = { 0, 0 };
+    MV ref_mv;
     const MV_REFERENCE_FRAME ref =
         cpi->rc.is_src_frame_alt_ref ? ALTREF_FRAME : LAST_FRAME;
+    // If bsize is 64x64, use zero MV as reference; otherwise, use MV result
+    // of previous(larger) block as reference.
+    if (bsize == BLOCK_64X64)
+      ref_mv.row = ref_mv.col = 0;
+    else
+      ref_mv = pc_tree->mv;
     simple_motion_search(cpi, x, bsize, mi_row, mi_col, ref_mv, ref, pred_buf);
+    pc_tree->mv = x->e_mbd.mi[0]->mv[0].as_mv;
   }
 
   vpx_clear_system_state();
@@ -3828,14 +3836,19 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   pc_tree->partitioning = PARTITION_NONE;
 
-  if (cpi->sf.ml_var_partition_pruning) {
+  if (cpi->sf.ml_var_partition_pruning && !frame_is_intra_only(cm)) {
     const int do_ml_var_partition_pruning =
-        !frame_is_intra_only(cm) && partition_none_allowed && do_split &&
+        partition_none_allowed && do_split &&
         mi_row + num_8x8_blocks_high_lookup[bsize] <= cm->mi_rows &&
         mi_col + num_8x8_blocks_wide_lookup[bsize] <= cm->mi_cols;
     if (do_ml_var_partition_pruning) {
-      ml_predict_var_rd_paritioning(cpi, x, bsize, mi_row, mi_col,
+      ml_predict_var_rd_paritioning(cpi, x, pc_tree, bsize, mi_row, mi_col,
                                     &partition_none_allowed, &do_split);
+    } else {
+      vp9_zero(pc_tree->mv);
+    }
+    if (bsize > BLOCK_8X8) {  // Store MV result as reference for subblocks.
+      for (i = 0; i < 4; ++i) pc_tree->split[i]->mv = pc_tree->mv;
     }
   }
 
