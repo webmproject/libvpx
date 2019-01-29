@@ -2583,6 +2583,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
       for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
         vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
       }
+      vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
     }
 #endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
@@ -6783,6 +6784,11 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
                 sizeof(
                     *cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize])));
       }
+      vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
+      CHECK_MEM_ERROR(
+          cm, cpi->tpl_stats[frame].mv_mode_arr[rf_idx],
+          vpx_calloc(mi_rows * mi_cols * 4,
+                     sizeof(*cpi->tpl_stats[frame].mv_mode_arr[rf_idx])));
     }
 #endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
