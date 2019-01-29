@@ -200,8 +200,6 @@ const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc) {
 
 #endif  // CONFIG_DECODERS
 
-// TODO(dkovalev): move this function to vpx_image.{c, h}, so it will be part
-// of vpx_image_t support
 int vpx_img_plane_width(const vpx_image_t *img, int plane) {
   if (plane > 0 && img->x_chroma_shift > 0)
     return (img->d_w + 1) >> img->x_chroma_shift;
