@@ -3440,6 +3440,45 @@ static void ml_prune_rect_partition(VP9_COMP *const cpi, MACROBLOCK *const x,
 #undef FEATURES
 #undef LABELS
 
+// Perform fast and coarse motion search for the given block. This is a
+// pre-processing step for the ML based partition search speedup.
+static void simple_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
+                                 int mi_row, int mi_col, MV ref_mv,
+                                 MV_REFERENCE_FRAME ref, uint8_t *pred_buf) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MODE_INFO *const mi = xd->mi[0];
+  const YV12_BUFFER_CONFIG *const yv12 = get_ref_frame_buffer(cpi, ref);
+  const int step_param = 1;
+  const MvLimits tmp_mv_limits = x->mv_limits;
+  const SEARCH_METHODS search_method = NSTEP;
+  const int sadpb = x->sadperbit16;
+  MV ref_mv_full = { ref_mv.row >> 3, ref_mv.col >> 3 };
+  MV best_mv = { 0, 0 };
+  int cost_list[5];
+
+  assert(yv12 != NULL);
+  if (!yv12) return;
+  vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
+                       &cm->frame_refs[ref - 1].sf);
+  mi->ref_frame[0] = ref;
+  mi->ref_frame[1] = NONE;
+  mi->sb_type = bsize;
+  vp9_set_mv_search_range(&x->mv_limits, &ref_mv);
+  vp9_full_pixel_search(cpi, x, bsize, &ref_mv_full, step_param, search_method,
+                        sadpb, cond_cost_list(cpi, cost_list), &ref_mv,
+                        &best_mv, 0, 0);
+  best_mv.row *= 8;
+  best_mv.col *= 8;
+  x->mv_limits = tmp_mv_limits;
+  mi->mv[0].as_mv = best_mv;
+
+  set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
+  xd->plane[0].dst.buf = pred_buf;
+  xd->plane[0].dst.stride = 64;
+  vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+}
+
 // Use a neural net model to prune partition-none and partition-split search.
 // The model uses prediction residue variance and quantization step size as
 // input features.
@@ -3448,10 +3487,9 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
                                           BLOCK_SIZE bsize, int mi_row,
                                           int mi_col, int *none, int *split) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *xd = &x->e_mbd;
-  MODE_INFO *mi = xd->mi[0];
   const NN_CONFIG *nn_config = NULL;
 #if CONFIG_VP9_HIGHBITDEPTH
+  MACROBLOCKD *xd = &x->e_mbd;
   DECLARE_ALIGNED(16, uint8_t, pred_buffer[64 * 64 * 2]);
   uint8_t *const pred_buf = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
                                 ? (CONVERT_TO_BYTEPTR(pred_buffer))
@@ -3489,41 +3527,13 @@ static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (!nn_config) return;
 
-  mi->ref_frame[1] = NONE;
-  mi->sb_type = bsize;
   // Do a simple single motion search to find a prediction for current block.
   // The variance of the residue will be used as input features.
   {
+    const MV ref_mv = { 0, 0 };
     const MV_REFERENCE_FRAME ref =
         cpi->rc.is_src_frame_alt_ref ? ALTREF_FRAME : LAST_FRAME;
-    YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref);
-    MV ref_mv = { 0, 0 };
-    MV ref_mv_full = { 0, 0 };
-    const int step_param = 1;
-    const MvLimits tmp_mv_limits = x->mv_limits;
-    const SEARCH_METHODS search_method = NSTEP;
-    const int sadpb = x->sadperbit16;
-    MV best_mv = { 0, 0 };
-    int cost_list[5];
-
-    assert(yv12 != NULL);
-    if (!yv12) return;
-    vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
-                         &cm->frame_refs[ref - 1].sf);
-    mi->ref_frame[0] = ref;
-    vp9_set_mv_search_range(&x->mv_limits, &ref_mv);
-    vp9_full_pixel_search(cpi, x, bsize, &ref_mv_full, step_param,
-                          search_method, sadpb, cond_cost_list(cpi, cost_list),
-                          &ref_mv, &best_mv, 0, 0);
-    best_mv.row *= 8;
-    best_mv.col *= 8;
-    x->mv_limits = tmp_mv_limits;
-    mi->mv[0].as_mv = best_mv;
-
-    set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
-    xd->plane[0].dst.buf = pred_buf;
-    xd->plane[0].dst.stride = 64;
-    vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+    simple_motion_search(cpi, x, bsize, mi_row, mi_col, ref_mv, ref, pred_buf);
   }
 
   vpx_clear_system_state();
