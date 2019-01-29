@@ -3442,10 +3442,11 @@ static void ml_prune_rect_partition(VP9_COMP *const cpi, MACROBLOCK *const x,
 
 // Perform fast and coarse motion search for the given block. This is a
 // pre-processing step for the ML based partition search speedup.
-static void simple_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
-                                 int mi_row, int mi_col, MV ref_mv,
-                                 MV_REFERENCE_FRAME ref, uint8_t *pred_buf) {
-  VP9_COMMON *const cm = &cpi->common;
+static void simple_motion_search(const VP9_COMP *const cpi, MACROBLOCK *const x,
+                                 BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                 MV ref_mv, MV_REFERENCE_FRAME ref,
+                                 uint8_t *const pred_buf) {
+  const VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mi = xd->mi[0];
   const YV12_BUFFER_CONFIG *const yv12 = get_ref_frame_buffer(cpi, ref);
@@ -3483,11 +3484,12 @@ static void simple_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 // The model uses prediction residue variance and quantization step size as
 // input features.
 #define FEATURES 6
-static void ml_predict_var_rd_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
-                                          PC_TREE *pc_tree, BLOCK_SIZE bsize,
-                                          int mi_row, int mi_col, int *none,
-                                          int *split) {
-  VP9_COMMON *const cm = &cpi->common;
+static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
+                                          MACROBLOCK *const x,
+                                          PC_TREE *const pc_tree,
+                                          BLOCK_SIZE bsize, int mi_row,
+                                          int mi_col, int *none, int *split) {
+  const VP9_COMMON *const cm = &cpi->common;
   const NN_CONFIG *nn_config = NULL;
 #if CONFIG_VP9_HIGHBITDEPTH
   MACROBLOCKD *xd = &x->e_mbd;

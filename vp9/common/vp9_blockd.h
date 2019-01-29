@@ -176,7 +176,7 @@ typedef struct macroblockd {
   FRAME_CONTEXT *fc;
 
   /* pointers to reference frames */
-  RefBuffer *block_refs[2];
+  const RefBuffer *block_refs[2];
 
   /* pointer to current frame */
   const YV12_BUFFER_CONFIG *cur_buf;
