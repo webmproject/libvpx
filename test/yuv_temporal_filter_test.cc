@@ -480,6 +480,123 @@ TEST_P(YUVTemporalFilterTest, Use16x16) {
   }
 }
 
+TEST_P(YUVTemporalFilterTest, SaturationTest) {
+  const int width = 32, height = 32;
+  const int use_32x32 = 1;
+
+  Buffer<uint8_t> y_src = Buffer<uint8_t>(width, height, 8);
+  Buffer<uint8_t> y_pre = Buffer<uint8_t>(width, height, 0);
+  Buffer<uint16_t> y_count_ref = Buffer<uint16_t>(width, height, 0);
+  Buffer<uint32_t> y_accum_ref = Buffer<uint32_t>(width, height, 0);
+  Buffer<uint16_t> y_count_tst = Buffer<uint16_t>(width, height, 0);
+  Buffer<uint32_t> y_accum_tst = Buffer<uint32_t>(width, height, 0);
+  ASSERT_TRUE(y_src.Init());
+  ASSERT_TRUE(y_pre.Init());
+  ASSERT_TRUE(y_count_ref.Init());
+  ASSERT_TRUE(y_accum_ref.Init());
+  ASSERT_TRUE(y_count_tst.Init());
+  ASSERT_TRUE(y_accum_tst.Init());
+
+  for (int ss_x = 0; ss_x <= 1; ss_x++) {
+    for (int ss_y = 0; ss_y <= 1; ss_y++) {
+      for (int filter_strength = 0; filter_strength <= 6;
+           filter_strength += 2) {
+        for (int filter_weight = 0; filter_weight <= 2; filter_weight++) {
+          const int uv_width = width >> ss_x, uv_height = height >> ss_y;
+          Buffer<uint8_t> u_src = Buffer<uint8_t>(uv_width, uv_height, 8);
+          Buffer<uint8_t> u_pre = Buffer<uint8_t>(uv_width, uv_height, 0);
+          Buffer<uint16_t> u_count_ref =
+              Buffer<uint16_t>(uv_width, uv_height, 0);
+          Buffer<uint32_t> u_accum_ref =
+              Buffer<uint32_t>(uv_width, uv_height, 0);
+          Buffer<uint16_t> u_count_tst =
+              Buffer<uint16_t>(uv_width, uv_height, 0);
+          Buffer<uint32_t> u_accum_tst =
+              Buffer<uint32_t>(uv_width, uv_height, 0);
+          ASSERT_TRUE(u_src.Init());
+          ASSERT_TRUE(u_pre.Init());
+          ASSERT_TRUE(u_count_ref.Init());
+          ASSERT_TRUE(u_accum_ref.Init());
+          ASSERT_TRUE(u_count_tst.Init());
+          ASSERT_TRUE(u_accum_tst.Init());
+          Buffer<uint8_t> v_src = Buffer<uint8_t>(uv_width, uv_height, 8);
+          Buffer<uint8_t> v_pre = Buffer<uint8_t>(uv_width, uv_height, 0);
+          Buffer<uint16_t> v_count_ref =
+              Buffer<uint16_t>(uv_width, uv_height, 0);
+          Buffer<uint32_t> v_accum_ref =
+              Buffer<uint32_t>(uv_width, uv_height, 0);
+          Buffer<uint16_t> v_count_tst =
+              Buffer<uint16_t>(uv_width, uv_height, 0);
+          Buffer<uint32_t> v_accum_tst =
+              Buffer<uint32_t>(uv_width, uv_height, 0);
+          ASSERT_TRUE(v_src.Init());
+          ASSERT_TRUE(v_pre.Init());
+          ASSERT_TRUE(v_count_ref.Init());
+          ASSERT_TRUE(v_accum_ref.Init());
+          ASSERT_TRUE(v_count_tst.Init());
+          ASSERT_TRUE(v_accum_tst.Init());
+
+          // The difference between the buffers must be small to pass the
+          // threshold to apply the filter.
+          y_src.Set(255);
+          y_pre.Set(0);
+          u_src.Set(255);
+          u_pre.Set(0);
+          v_src.Set(255);
+          v_pre.Set(0);
+
+          y_accum_ref.Set(rnd_.Rand8());
+          y_accum_tst.CopyFrom(y_accum_ref);
+          y_count_ref.Set(rnd_.Rand8());
+          y_count_tst.CopyFrom(y_count_ref);
+          u_accum_ref.Set(rnd_.Rand8());
+          u_accum_tst.CopyFrom(u_accum_ref);
+          u_count_ref.Set(rnd_.Rand8());
+          u_count_tst.CopyFrom(u_count_ref);
+          v_accum_ref.Set(rnd_.Rand8());
+          v_accum_tst.CopyFrom(v_accum_ref);
+          v_count_ref.Set(rnd_.Rand8());
+          v_count_tst.CopyFrom(v_count_ref);
+
+          ApplyReferenceFilter(y_src, y_pre, u_src, v_src, u_pre, v_pre, width,
+                               height, ss_x, ss_y, filter_strength,
+                               &filter_weight, use_32x32, &y_accum_ref,
+                               &y_count_ref, &u_accum_ref, &u_count_ref,
+                               &v_accum_ref, &v_count_ref);
+          ASM_REGISTER_STATE_CHECK(filter_func_(
+              y_src.TopLeftPixel(), y_src.stride(), y_pre.TopLeftPixel(),
+              y_pre.stride(), u_src.TopLeftPixel(), v_src.TopLeftPixel(),
+              u_src.stride(), u_pre.TopLeftPixel(), v_pre.TopLeftPixel(),
+              u_pre.stride(), width, height, ss_x, ss_y, filter_strength,
+              &filter_weight, use_32x32, y_accum_tst.TopLeftPixel(),
+              y_count_tst.TopLeftPixel(), u_accum_tst.TopLeftPixel(),
+              u_count_tst.TopLeftPixel(), v_accum_tst.TopLeftPixel(),
+              v_count_tst.TopLeftPixel()));
+
+          EXPECT_TRUE(y_accum_tst.CheckValues(y_accum_ref));
+          EXPECT_TRUE(y_count_tst.CheckValues(y_count_ref));
+          EXPECT_TRUE(u_accum_tst.CheckValues(u_accum_ref));
+          EXPECT_TRUE(u_count_tst.CheckValues(u_count_ref));
+          EXPECT_TRUE(v_accum_tst.CheckValues(v_accum_ref));
+          EXPECT_TRUE(v_count_tst.CheckValues(v_count_ref));
+
+          if (HasFailure()) {
+            printf("SS_X: %d, SS_Y: %d, Weight: %d, Strength: %d\n", ss_x, ss_y,
+                   filter_weight, filter_strength);
+            y_accum_tst.PrintDifference(y_accum_ref);
+            y_count_tst.PrintDifference(y_count_ref);
+            u_accum_tst.PrintDifference(u_accum_ref);
+            u_count_tst.PrintDifference(u_count_ref);
+            v_accum_tst.PrintDifference(v_accum_ref);
+            v_count_tst.PrintDifference(v_count_ref);
+            return;
+          }
+        }
+      }
+    }
+  }
+}
+
 TEST_P(YUVTemporalFilterTest, DISABLED_Speed) {
   const int width = 32, height = 32;
   Buffer<uint8_t> y_src = Buffer<uint8_t>(width, height, 8);

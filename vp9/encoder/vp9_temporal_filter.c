@@ -192,7 +192,8 @@ static INLINE int mod_index(int sum_dist, int index, int rounding, int strength,
   assert(index >= 0 && index <= 13);
   assert(index_mult[index] != 0);
 
-  mod = (clamp(sum_dist, 0, UINT16_MAX) * index_mult[index]) >> 16;
+  mod =
+      ((unsigned int)clamp(sum_dist, 0, UINT16_MAX) * index_mult[index]) >> 16;
   mod += rounding;
   mod >>= strength;
 
