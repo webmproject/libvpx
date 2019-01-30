@@ -6015,22 +6015,27 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 }
 
 #if CONFIG_NON_GREEDY_MV
-static void get_block_src_pred_buf(MACROBLOCKD *xd, GF_PICTURE *gf_picture,
-                                   int frame_idx, int rf_idx, int mi_row,
-                                   int mi_col, struct buf_2d *src,
-                                   struct buf_2d *pre) {
+static int get_block_src_pred_buf(MACROBLOCKD *xd, GF_PICTURE *gf_picture,
+                                  int frame_idx, int rf_idx, int mi_row,
+                                  int mi_col, struct buf_2d *src,
+                                  struct buf_2d *pre) {
   const int mb_y_offset =
       mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
   YV12_BUFFER_CONFIG *ref_frame = NULL;
   int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
   if (ref_frame_idx != -1) {
     ref_frame = gf_picture[ref_frame_idx].frame;
+    src->buf = xd->cur_buf->y_buffer + mb_y_offset;
+    src->stride = xd->cur_buf->y_stride;
+    pre->buf = ref_frame->y_buffer + mb_y_offset;
+    pre->stride = ref_frame->y_stride;
+    assert(src->stride == pre->stride);
+    return 1;
+  } else {
+    printf("invalid ref_frame_idx");
+    assert(ref_frame_idx != -1);
+    return 0;
   }
-  src->buf = xd->cur_buf->y_buffer + mb_y_offset;
-  src->stride = xd->cur_buf->y_stride;
-  pre->buf = ref_frame->y_buffer + mb_y_offset;
-  pre->stride = ref_frame->y_stride;
-  assert(src->stride == pre->stride);
 }
 
 #define kMvPreCheckLines 5
@@ -6136,12 +6141,16 @@ static double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
   *mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row,
                             mi_col);
   full_mv = get_full_mv(&mv->as_mv);
-  get_block_src_pred_buf(xd, gf_picture, frame_idx, rf_idx, mi_row, mi_col,
-                         &src, &pre);
-  // TODO(angiebird): Consider subpixel when computing the sse.
-  cpi->fn_ptr[bsize].vf(src.buf, src.stride, get_buf_from_mv(&pre, &full_mv),
-                        pre.stride, &sse);
-  return (double)sse;
+  if (get_block_src_pred_buf(xd, gf_picture, frame_idx, rf_idx, mi_row, mi_col,
+                             &src, &pre)) {
+    // TODO(angiebird): Consider subpixel when computing the sse.
+    cpi->fn_ptr[bsize].vf(src.buf, src.stride, get_buf_from_mv(&pre, &full_mv),
+                          pre.stride, &sse);
+    return (double)sse;
+  } else {
+    assert(0);
+    return 0;
+  }
 }
 
 static double get_mv_cost(int mv_mode) {
