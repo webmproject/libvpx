@@ -2340,7 +2340,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       switch (gf_group->update_type[idx]) {
         case ARF_UPDATE:
           gf_group->bit_allocation[idx] =
-              (int)((arf_depth_bits[gf_group->layer_depth[idx]] *
+              (int)(((int64_t)arf_depth_bits[gf_group->layer_depth[idx]] *
                      gf_group->gfu_boost[idx]) /
                     arf_depth_boost[gf_group->layer_depth[idx]]);
           break;
