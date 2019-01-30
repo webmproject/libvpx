@@ -211,6 +211,17 @@ static INLINE int pthread_cond_wait(pthread_cond_t *const condition,
 #endif
   return !ok;
 }
+
+static INLINE int sched_yield() {
+  int ok = 0;
+#if _WIN32_WINNT >= 0x0400  // Windows XP and above
+  SwitchToThread();
+#else
+  Sleep(0);
+#endif  // _WIN32_WINNT >= 0x0400
+  return ok;
+}
+
 #elif defined(__OS2__)
 #define INCL_DOS
 #include <os2.h>  // NOLINT
