@@ -152,6 +152,14 @@ int vpx_img_read(vpx_image_t *img, FILE *file);
 
 double sse_to_psnr(double samples, double peak, double mse);
 
+#if CONFIG_ENCODERS
+int read_frame(struct VpxInputContext *input_ctx, vpx_image_t *img);
+int file_is_y4m(const char detect[4]);
+int fourcc_is_ivf(const char detect[4]);
+void open_input_file(struct VpxInputContext *input);
+void close_input_file(struct VpxInputContext *input);
+#endif
+
 #if CONFIG_VP9_HIGHBITDEPTH
 void vpx_img_upshift(vpx_image_t *dst, vpx_image_t *src, int input_shift);
 void vpx_img_downshift(vpx_image_t *dst, vpx_image_t *src, int down_shift);

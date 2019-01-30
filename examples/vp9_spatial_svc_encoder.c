@@ -30,6 +30,8 @@
 #include "vpx/vpx_encoder.h"
 #include "../vpxstats.h"
 #include "vp9/encoder/vp9_encoder.h"
+#include "./y4minput.h"
+
 #define OUTPUT_RC_STATS 1
 
 static const arg_def_t skip_frames_arg =
@@ -161,7 +163,6 @@ static const int32_t default_speed = -1;    // -1 means use library default.
 static const uint32_t default_threads = 0;  // zero means use library default.
 
 typedef struct {
-  const char *input_filename;
   const char *output_filename;
   uint32_t frames_to_code;
   uint32_t frames_to_skip;
@@ -393,9 +394,15 @@ static void parse_command_line(int argc, const char **argv_,
   if (argv[0] == NULL || argv[1] == 0) {
     usage_exit();
   }
-  app_input->input_filename = argv[0];
+  app_input->input_ctx.filename = argv[0];
   app_input->output_filename = argv[1];
   free(argv);
+
+  open_input_file(&app_input->input_ctx);
+  if (app_input->input_ctx.file_type == FILE_TYPE_Y4M) {
+    enc_cfg->g_w = app_input->input_ctx.width;
+    enc_cfg->g_h = app_input->input_ctx.height;
+  }
 
   if (enc_cfg->g_w < 16 || enc_cfg->g_w % 2 || enc_cfg->g_h < 16 ||
       enc_cfg->g_h % 2)
@@ -752,7 +759,6 @@ int main(int argc, const char **argv) {
   vpx_codec_err_t res;
   int pts = 0;            /* PTS starts at 0 */
   int frame_duration = 1; /* 1 timebase tick per frame */
-  FILE *infile = NULL;
   int end_of_stream = 0;
   int frames_received = 0;
 #if OUTPUT_RC_STATS
@@ -773,6 +779,13 @@ int main(int argc, const char **argv) {
   memset(&layer_id, 0, sizeof(vpx_svc_layer_id_t));
   memset(&rc, 0, sizeof(struct RateControlStats));
   exec_name = argv[0];
+
+  /* Setup default input stream settings */
+  app_input.input_ctx.framerate.numerator = 30;
+  app_input.input_ctx.framerate.denominator = 1;
+  app_input.input_ctx.only_i420 = 1;
+  app_input.input_ctx.bit_depth = 0;
+
   parse_command_line(argc, argv, &app_input, &svc_ctx, &enc_cfg);
 
 // Allocate image buffer
@@ -788,9 +801,6 @@ int main(int argc, const char **argv) {
     die("Failed to allocate image %dx%d\n", enc_cfg.g_w, enc_cfg.g_h);
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-  if (!(infile = fopen(app_input.input_filename, "rb")))
-    die("Failed to open %s for reading\n", app_input.input_filename);
 
   // Initialize codec
   if (vpx_svc_init(&svc_ctx, &codec, vpx_codec_vp9_cx(), &enc_cfg) !=
@@ -835,7 +845,8 @@ int main(int argc, const char **argv) {
 #endif
 
   // skip initial frames
-  for (i = 0; i < app_input.frames_to_skip; ++i) vpx_img_read(&raw, infile);
+  for (i = 0; i < app_input.frames_to_skip; ++i)
+    read_frame(&app_input.input_ctx, &raw);
 
   if (svc_ctx.speed != -1)
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, svc_ctx.speed);
@@ -875,7 +886,8 @@ int main(int argc, const char **argv) {
     // layers, with SL0 only has TL0, and SL1 has both TL0 and TL1. This example
     // uses the extended API.
     int example_pattern = 0;
-    if (frame_cnt >= app_input.frames_to_code || !vpx_img_read(&raw, infile)) {
+    if (frame_cnt >= app_input.frames_to_code ||
+        !read_frame(&app_input.input_ctx, &raw)) {
       // We need one extra vpx_svc_encode call at end of stream to flush
       // encoder and get remaining data
       end_of_stream = 1;
@@ -1091,7 +1103,9 @@ int main(int argc, const char **argv) {
   }
 
   printf("Processed %d frames\n", frame_cnt);
-  fclose(infile);
+
+  close_input_file(&app_input.input_ctx);
+
 #if OUTPUT_RC_STATS
   if (svc_ctx.output_rc_stat) {
     printout_rate_control_summary(&rc, &enc_cfg, frame_cnt);

@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "./vpx_config.h"
+#include "./y4minput.h"
 #include "../vpx_ports/vpx_timer.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
@@ -594,7 +595,7 @@ int main(int argc, char **argv) {
 #endif
   vpx_svc_layer_id_t layer_id;
   const VpxInterface *encoder = NULL;
-  FILE *infile = NULL;
+  struct VpxInputContext input_ctx;
   struct RateControlMetrics rc;
   int64_t cx_time = 0;
   const int min_args_base = 13;
@@ -611,6 +612,13 @@ int main(int argc, char **argv) {
 
   zero(rc.layer_target_bitrate);
   memset(&layer_id, 0, sizeof(vpx_svc_layer_id_t));
+  memset(&input_ctx, 0, sizeof(input_ctx));
+  /* Setup default input stream settings */
+  input_ctx.framerate.numerator = 30;
+  input_ctx.framerate.denominator = 1;
+  input_ctx.only_i420 = 1;
+  input_ctx.bit_depth = 0;
+
   exec_name = argv[0];
   // Check usage and arguments.
   if (argc < min_args) {
@@ -754,9 +762,18 @@ int main(int argc, char **argv) {
   // Set to layer_target_bitrate for highest layer (total bitrate).
   cfg.rc_target_bitrate = rc.layer_target_bitrate[cfg.ts_number_layers - 1];
 
-  // Open input file.
-  if (!(infile = fopen(argv[1], "rb"))) {
-    die("Failed to open %s for reading", argv[1]);
+  input_ctx.filename = argv[1];
+  open_input_file(&input_ctx);
+
+  if (input_ctx.file_type == FILE_TYPE_Y4M) {
+    if (input_ctx.width != cfg.g_w || input_ctx.height != cfg.g_h) {
+      die("Incorrect width or height: %d x %d", cfg.g_w, cfg.g_h);
+    }
+    if (input_ctx.framerate.numerator != cfg.g_timebase.den ||
+        input_ctx.framerate.denominator != cfg.g_timebase.num) {
+      die("Incorrect framerate: numerator %d denominator %d",
+          cfg.g_timebase.num, cfg.g_timebase.den);
+    }
   }
 
   framerate = cfg.g_timebase.den / cfg.g_timebase.num;
@@ -865,7 +882,7 @@ int main(int argc, char **argv) {
     }
     flags = layer_flags[frame_cnt % flag_periodicity];
     if (layering_mode == 0) flags = 0;
-    frame_avail = vpx_img_read(&raw, infile);
+    frame_avail = read_frame(&input_ctx, &raw);
     if (frame_avail) ++rc.layer_input_frames[layer_id.temporal_layer_id];
     vpx_usec_timer_start(&timer);
     if (vpx_codec_encode(&codec, frame_avail ? &raw : NULL, pts, 1, flags,
@@ -933,7 +950,7 @@ int main(int argc, char **argv) {
     ++frame_cnt;
     pts += frame_duration;
   }
-  fclose(infile);
+  close_input_file(&input_ctx);
   printout_rate_control_summary(&rc, &cfg, frame_cnt);
   printf("\n");
   printf("Frame cnt and encoding time/FPS stats for encoding: %d %f %f \n",
