@@ -115,7 +115,8 @@ struct VP9_COMP;
 // "mvp_full" is the MV search starting point;
 // "ref_mv" is the context reference MV;
 // "tmp_mv" is the searched best MV.
-int vp9_full_pixel_search(struct VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
+int vp9_full_pixel_search(const struct VP9_COMP *const cpi,
+                          const MACROBLOCK *const x, BLOCK_SIZE bsize,
                           MV *mvp_full, int step_param, int search_method,
                           int error_per_bit, int *cost_list, const MV *ref_mv,
                           MV *tmp_mv, int var_max, int rd);

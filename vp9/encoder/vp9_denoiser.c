@@ -201,7 +201,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
   int i;
   struct buf_2d saved_dst[MAX_MB_PLANE];
   struct buf_2d saved_pre[MAX_MB_PLANE];
-  RefBuffer *saved_block_refs[2];
+  const RefBuffer *saved_block_refs[2];
   MV_REFERENCE_FRAME saved_frame;
 
   frame = ctx->best_reference_frame;
