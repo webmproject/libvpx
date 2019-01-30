@@ -1683,6 +1683,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   unsigned int sse_zeromv_normalized = UINT_MAX;
   unsigned int best_sse_sofar = UINT_MAX;
   int gf_temporal_ref = 0;
+  int force_test_gf_zeromv = 0;
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_PICKMODE_CTX_DEN ctx_den;
   int64_t zero_last_cost_orig = INT64_MAX;
@@ -1938,6 +1939,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     svc_mv_row = -4;
     flag_svc_subpel = 1;
   }
+
+  // For SVC with quality layers, when QP of lower layer is lower
+  // than current layer: force check of GF-ZEROMV before early exit
+  // due to skip flag.
+  if (svc->spatial_layer_id > 0 && usable_ref_frame == GOLDEN_FRAME &&
+      no_scaling && cm->base_qindex > svc->lower_layer_qindex + 10)
+    force_test_gf_zeromv = 1;
 
   for (idx = 0; idx < num_inter_modes + comp_modes; ++idx) {
     int rate_mv = 0;
@@ -2349,11 +2357,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       if (reuse_inter_pred) free_pred_buffer(this_mode_pred);
     }
 
-    if (x->skip) break;
+    if (x->skip &&
+        (!force_test_gf_zeromv || mode_checked[ZEROMV][GOLDEN_FRAME]))
+      break;
 
     // If early termination flag is 1 and at least 2 modes are checked,
     // the mode search is terminated.
-    if (best_early_term && idx > 0 && !scene_change_detected) {
+    if (best_early_term && idx > 0 && !scene_change_detected &&
+        (!force_test_gf_zeromv || mode_checked[ZEROMV][GOLDEN_FRAME])) {
       x->skip = 1;
       break;
     }
