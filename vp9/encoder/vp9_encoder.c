@@ -6219,7 +6219,7 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // no new mv
   // diagnal scan order
   tmp_idx = 0;
-  for (idx = 0; idx < kMvPreCheckSize; ++idx) {
+  for (idx = 0; idx < kMvPreCheckLines; ++idx) {
     int r;
     for (r = 0; r <= idx; ++r) {
       int c = idx - r;
@@ -6246,7 +6246,7 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                            &select_mv_arr[mi_row * stride + mi_col]);
   // We start from idx = 1 because idx = 0 is evaluated as NEW_MV_MODE
   // beforehand.
-  for (idx = 1; idx < kMvPreCheckSize; ++idx) {
+  for (idx = 1; idx < kMvPreCheckLines; ++idx) {
     int r;
     for (r = 0; r <= idx; ++r) {
       int c = idx - r;
@@ -6267,7 +6267,7 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   tmp_idx = 0;
   if (no_new_mv_rd < new_mv_rd) {
     *rd = no_new_mv_rd;
-    for (idx = 0; idx < kMvPreCheckSize; ++idx) {
+    for (idx = 0; idx < kMvPreCheckLines; ++idx) {
       int r;
       for (r = 0; r <= idx; ++r) {
         int c = idx - r;
