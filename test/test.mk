@@ -170,7 +170,6 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += hadamard_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += minmax_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_scale_test.cc
 ifneq ($(CONFIG_REALTIME_ONLY),yes)
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += temporal_filter_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += yuv_temporal_filter_test.cc
 endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
