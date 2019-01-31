@@ -6153,10 +6153,48 @@ static double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
   }
 }
 
-static double get_mv_cost(int mv_mode) {
-  // TODO(angiebird): Implement this function.
-  (void)mv_mode;
-  return 0;
+static int get_mv_mode_cost(int mv_mode) {
+  // TODO(angiebird): The probabilities are roughly inferred from
+  // default_inter_mode_probs. Check if there is a better way to set the
+  // probabilities.
+  const int zero_mv_prob = 9;
+  const int new_mv_prob = 77;
+  const int ref_mv_prob = 170;
+  assert(zero_mv_prob + new_mv_prob + ref_mv_prob == 256);
+  switch (mv_mode) {
+    case ZERO_MV_MODE: return vp9_prob_cost[zero_mv_prob]; break;
+    case NEW_MV_MODE: return vp9_prob_cost[new_mv_prob]; break;
+    case NEAREST_MV_MODE: return vp9_prob_cost[ref_mv_prob]; break;
+    case NEAR_MV_MODE: return vp9_prob_cost[ref_mv_prob]; break;
+    default: assert(0); return -1;
+  }
+}
+
+static INLINE double get_mv_diff_cost(MV *new_mv, MV *ref_mv) {
+  double mv_diff_cost = log2(1 + abs(new_mv->row - ref_mv->row)) +
+                        log2(1 + abs(new_mv->col - ref_mv->col));
+  mv_diff_cost *= (1 << VP9_PROB_COST_SHIFT);
+  return mv_diff_cost;
+}
+static double get_mv_cost(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
+                          int rf_idx, BLOCK_SIZE bsize, int mi_row,
+                          int mi_col) {
+  double mv_cost = get_mv_mode_cost(mv_mode);
+  if (mv_mode == NEW_MV_MODE) {
+    MV new_mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize,
+                                    mi_row, mi_col)
+                    .as_mv;
+    MV nearest_mv = get_mv_from_mv_mode(NEAREST_MV_MODE, cpi, tpl_frame, rf_idx,
+                                        bsize, mi_row, mi_col)
+                        .as_mv;
+    MV near_mv = get_mv_from_mv_mode(NEAR_MV_MODE, cpi, tpl_frame, rf_idx,
+                                     bsize, mi_row, mi_col)
+                     .as_mv;
+    double nearest_cost = get_mv_diff_cost(&new_mv, &nearest_mv);
+    double near_cost = get_mv_diff_cost(&new_mv, &near_mv);
+    mv_cost += nearest_cost < near_cost ? nearest_cost : near_cost;
+  }
+  return mv_cost;
 }
 
 static double rd_cost(int rdmult, int rddiv, double rate, double dist) {
@@ -6170,7 +6208,9 @@ static double eval_mv_mode(int mv_mode, VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   double mv_dist = get_mv_dist(mv_mode, cpi, xd, gf_picture, frame_idx,
                                tpl_frame, rf_idx, bsize, mi_row, mi_col, mv);
-  double mv_cost = get_mv_cost(mv_mode);
+  double mv_cost =
+      get_mv_cost(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row, mi_col);
+
   return rd_cost(x->rdmult, x->rddiv, mv_cost, mv_dist);
 }
 
