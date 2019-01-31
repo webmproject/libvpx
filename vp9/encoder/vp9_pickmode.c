@@ -2452,8 +2452,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       const PREDICTION_MODE this_mode = intra_mode_list[i];
       THR_MODES mode_index = mode_idx[INTRA_FRAME][mode_offset(this_mode)];
       int mode_rd_thresh = rd_threshes[mode_index];
+      // For spatially flat blocks, under short_circuit_flat_blocks flag:
+      // only check DC mode for stationary blocks, otherwise also check
+      // H and V mode.
       if (sf->short_circuit_flat_blocks && x->source_variance == 0 &&
-          this_mode != DC_PRED) {
+          ((x->zero_temp_sad_source && this_mode != DC_PRED) || i > 2)) {
         continue;
       }
 
