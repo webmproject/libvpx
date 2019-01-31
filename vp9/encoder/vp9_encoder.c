@@ -2583,6 +2583,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
       for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
         vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
       }
+      vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
     }
 #endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
@@ -6014,22 +6015,27 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 }
 
 #if CONFIG_NON_GREEDY_MV
-static void get_block_src_pred_buf(MACROBLOCKD *xd, GF_PICTURE *gf_picture,
-                                   int frame_idx, int rf_idx, int mi_row,
-                                   int mi_col, struct buf_2d *src,
-                                   struct buf_2d *pre) {
+static int get_block_src_pred_buf(MACROBLOCKD *xd, GF_PICTURE *gf_picture,
+                                  int frame_idx, int rf_idx, int mi_row,
+                                  int mi_col, struct buf_2d *src,
+                                  struct buf_2d *pre) {
   const int mb_y_offset =
       mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
   YV12_BUFFER_CONFIG *ref_frame = NULL;
   int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
   if (ref_frame_idx != -1) {
     ref_frame = gf_picture[ref_frame_idx].frame;
+    src->buf = xd->cur_buf->y_buffer + mb_y_offset;
+    src->stride = xd->cur_buf->y_stride;
+    pre->buf = ref_frame->y_buffer + mb_y_offset;
+    pre->stride = ref_frame->y_stride;
+    assert(src->stride == pre->stride);
+    return 1;
+  } else {
+    printf("invalid ref_frame_idx");
+    assert(ref_frame_idx != -1);
+    return 0;
   }
-  src->buf = xd->cur_buf->y_buffer + mb_y_offset;
-  src->stride = xd->cur_buf->y_stride;
-  pre->buf = ref_frame->y_buffer + mb_y_offset;
-  pre->stride = ref_frame->y_stride;
-  assert(src->stride == pre->stride);
 }
 
 #define kMvPreCheckLines 5
@@ -6135,18 +6141,60 @@ static double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
   *mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row,
                             mi_col);
   full_mv = get_full_mv(&mv->as_mv);
-  get_block_src_pred_buf(xd, gf_picture, frame_idx, rf_idx, mi_row, mi_col,
-                         &src, &pre);
-  // TODO(angiebird): Consider subpixel when computing the sse.
-  cpi->fn_ptr[bsize].vf(src.buf, src.stride, get_buf_from_mv(&pre, &full_mv),
-                        pre.stride, &sse);
-  return (double)sse;
+  if (get_block_src_pred_buf(xd, gf_picture, frame_idx, rf_idx, mi_row, mi_col,
+                             &src, &pre)) {
+    // TODO(angiebird): Consider subpixel when computing the sse.
+    cpi->fn_ptr[bsize].vf(src.buf, src.stride, get_buf_from_mv(&pre, &full_mv),
+                          pre.stride, &sse);
+    return (double)sse;
+  } else {
+    assert(0);
+    return 0;
+  }
 }
 
-static double get_mv_cost(int mv_mode) {
-  // TODO(angiebird): Implement this function.
-  (void)mv_mode;
-  return 0;
+static int get_mv_mode_cost(int mv_mode) {
+  // TODO(angiebird): The probabilities are roughly inferred from
+  // default_inter_mode_probs. Check if there is a better way to set the
+  // probabilities.
+  const int zero_mv_prob = 9;
+  const int new_mv_prob = 77;
+  const int ref_mv_prob = 170;
+  assert(zero_mv_prob + new_mv_prob + ref_mv_prob == 256);
+  switch (mv_mode) {
+    case ZERO_MV_MODE: return vp9_prob_cost[zero_mv_prob]; break;
+    case NEW_MV_MODE: return vp9_prob_cost[new_mv_prob]; break;
+    case NEAREST_MV_MODE: return vp9_prob_cost[ref_mv_prob]; break;
+    case NEAR_MV_MODE: return vp9_prob_cost[ref_mv_prob]; break;
+    default: assert(0); return -1;
+  }
+}
+
+static INLINE double get_mv_diff_cost(MV *new_mv, MV *ref_mv) {
+  double mv_diff_cost = log2(1 + abs(new_mv->row - ref_mv->row)) +
+                        log2(1 + abs(new_mv->col - ref_mv->col));
+  mv_diff_cost *= (1 << VP9_PROB_COST_SHIFT);
+  return mv_diff_cost;
+}
+static double get_mv_cost(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
+                          int rf_idx, BLOCK_SIZE bsize, int mi_row,
+                          int mi_col) {
+  double mv_cost = get_mv_mode_cost(mv_mode);
+  if (mv_mode == NEW_MV_MODE) {
+    MV new_mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize,
+                                    mi_row, mi_col)
+                    .as_mv;
+    MV nearest_mv = get_mv_from_mv_mode(NEAREST_MV_MODE, cpi, tpl_frame, rf_idx,
+                                        bsize, mi_row, mi_col)
+                        .as_mv;
+    MV near_mv = get_mv_from_mv_mode(NEAR_MV_MODE, cpi, tpl_frame, rf_idx,
+                                     bsize, mi_row, mi_col)
+                     .as_mv;
+    double nearest_cost = get_mv_diff_cost(&new_mv, &nearest_mv);
+    double near_cost = get_mv_diff_cost(&new_mv, &near_mv);
+    mv_cost += nearest_cost < near_cost ? nearest_cost : near_cost;
+  }
+  return mv_cost;
 }
 
 static double rd_cost(int rdmult, int rddiv, double rate, double dist) {
@@ -6160,7 +6208,9 @@ static double eval_mv_mode(int mv_mode, VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   double mv_dist = get_mv_dist(mv_mode, cpi, xd, gf_picture, frame_idx,
                                tpl_frame, rf_idx, bsize, mi_row, mi_col, mv);
-  double mv_cost = get_mv_cost(mv_mode);
+  double mv_cost =
+      get_mv_cost(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row, mi_col);
+
   return rd_cost(x->rdmult, x->rddiv, mv_cost, mv_dist);
 }
 
@@ -6218,7 +6268,7 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // no new mv
   // diagnal scan order
   tmp_idx = 0;
-  for (idx = 0; idx < kMvPreCheckSize; ++idx) {
+  for (idx = 0; idx < kMvPreCheckLines; ++idx) {
     int r;
     for (r = 0; r <= idx; ++r) {
       int c = idx - r;
@@ -6245,7 +6295,7 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                            &select_mv_arr[mi_row * stride + mi_col]);
   // We start from idx = 1 because idx = 0 is evaluated as NEW_MV_MODE
   // beforehand.
-  for (idx = 1; idx < kMvPreCheckSize; ++idx) {
+  for (idx = 1; idx < kMvPreCheckLines; ++idx) {
     int r;
     for (r = 0; r <= idx; ++r) {
       int c = idx - r;
@@ -6266,7 +6316,7 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   tmp_idx = 0;
   if (no_new_mv_rd < new_mv_rd) {
     *rd = no_new_mv_rd;
-    for (idx = 0; idx < kMvPreCheckSize; ++idx) {
+    for (idx = 0; idx < kMvPreCheckLines; ++idx) {
       int r;
       for (r = 0; r <= idx; ++r) {
         int c = idx - r;
@@ -6783,6 +6833,11 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
                 sizeof(
                     *cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize])));
       }
+      vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
+      CHECK_MEM_ERROR(
+          cm, cpi->tpl_stats[frame].mv_mode_arr[rf_idx],
+          vpx_calloc(mi_rows * mi_cols * 4,
+                     sizeof(*cpi->tpl_stats[frame].mv_mode_arr[rf_idx])));
     }
 #endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
