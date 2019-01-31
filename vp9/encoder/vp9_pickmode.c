@@ -1943,8 +1943,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // For SVC with quality layers, when QP of lower layer is lower
   // than current layer: force check of GF-ZEROMV before early exit
   // due to skip flag.
-  if (svc->spatial_layer_id > 0 && usable_ref_frame == GOLDEN_FRAME &&
-      no_scaling && cm->base_qindex > svc->lower_layer_qindex + 10)
+  if (svc->spatial_layer_id > 0 && no_scaling &&
+      (cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
+      cm->base_qindex > svc->lower_layer_qindex + 10)
     force_test_gf_zeromv = 1;
 
   for (idx = 0; idx < num_inter_modes + comp_modes; ++idx) {
@@ -2407,6 +2408,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
   if (best_rdc.rdcost == INT64_MAX ||
+      (cpi->oxcf.content == VP9E_CONTENT_SCREEN && x->source_variance == 0 &&
+       !x->zero_temp_sad_source) ||
       (scene_change_detected && perform_intra_pred) ||
       ((!force_skip_low_temp_var || bsize < BLOCK_32X32 ||
         x->content_state_sb == kVeryHighSad) &&
