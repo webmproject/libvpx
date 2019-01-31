@@ -42,6 +42,9 @@ extern "C" {
 #define RD_THRESH_MAX_FACT 64
 #define RD_THRESH_INC 1
 
+#define VP9_DIST_SCALE_LOG2 4
+#define VP9_DIST_SCALE (1 << VP9_DIST_SCALE_LOG2)
+
 // This enumerator type needs to be kept aligned with the mode order in
 // const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
 typedef enum {

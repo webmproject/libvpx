@@ -273,9 +273,9 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
   }
 
   *skip_txfm_sb = skip_flag;
-  *skip_sse_sb = total_sse << 4;
+  *skip_sse_sb = total_sse << VP9_DIST_SCALE_LOG2;
   *out_rate_sum = (int)rate_sum;
-  *out_dist_sum = dist_sum << 4;
+  *out_dist_sum = dist_sum << VP9_DIST_SCALE_LOG2;
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
