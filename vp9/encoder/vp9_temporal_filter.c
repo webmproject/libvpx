@@ -205,6 +205,22 @@ static INLINE int mod_index(int sum_dist, int index, int rounding, int strength,
   return mod;
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE int highbd_mod_index(int sum_dist, int index, int rounding,
+                                   int strength, int filter_weight) {
+  int mod = sum_dist * 3 / index;
+  mod += rounding;
+  mod >>= strength;
+
+  mod = VPXMIN(16, mod);
+
+  mod = 16 - mod;
+  mod *= filter_weight;
+
+  return mod;
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 static INLINE int get_filter_weight(unsigned int i, unsigned int j,
                                     unsigned int block_height,
                                     unsigned int block_width,
@@ -500,6 +516,155 @@ void vp9_highbd_temporal_filter_apply_c(
     }
   }
 }
+
+void vp9_highbd_apply_temporal_filter_c(
+    const uint16_t *y_src, int y_src_stride, const uint16_t *y_pre,
+    int y_pre_stride, const uint16_t *u_src, const uint16_t *v_src,
+    int uv_src_stride, const uint16_t *u_pre, const uint16_t *v_pre,
+    int uv_pre_stride, unsigned int block_width, unsigned int block_height,
+    int ss_x, int ss_y, int strength, const int *const blk_fw, int use_32x32,
+    uint32_t *y_accum, uint16_t *y_count, uint32_t *u_accum, uint16_t *u_count,
+    uint32_t *v_accum, uint16_t *v_count) {
+  const int uv_block_width = block_width >> ss_x;
+  const int uv_block_height = block_height >> ss_y;
+  const int y_diff_stride = BW;
+  const int uv_diff_stride = BW;
+
+  DECLARE_ALIGNED(16, uint32_t, y_diff_sse[BLK_PELS]);
+  DECLARE_ALIGNED(16, uint32_t, u_diff_sse[BLK_PELS]);
+  DECLARE_ALIGNED(16, uint32_t, v_diff_sse[BLK_PELS]);
+
+  const int rounding = (1 << strength) >> 1;
+
+  // Loop variables
+  int row, col;
+  int uv_row, uv_col;
+  int row_step, col_step;
+
+  memset(y_diff_sse, 0, BLK_PELS * sizeof(uint32_t));
+  memset(u_diff_sse, 0, BLK_PELS * sizeof(uint32_t));
+  memset(v_diff_sse, 0, BLK_PELS * sizeof(uint32_t));
+
+  // Get the square diffs
+  for (row = 0; row < (int)block_height; row++) {
+    for (col = 0; col < (int)block_width; col++) {
+      const int diff =
+          y_src[row * y_src_stride + col] - y_pre[row * y_pre_stride + col];
+      y_diff_sse[row * y_diff_stride + col] = diff * diff;
+    }
+  }
+
+  for (row = 0; row < (int)uv_block_height; row++) {
+    for (col = 0; col < (int)uv_block_width; col++) {
+      const int u_diff =
+          u_src[row * uv_src_stride + col] - u_pre[row * uv_pre_stride + col];
+      const int v_diff =
+          v_src[row * uv_src_stride + col] - v_pre[row * uv_pre_stride + col];
+      u_diff_sse[row * uv_diff_stride + col] = u_diff * u_diff;
+      v_diff_sse[row * uv_diff_stride + col] = v_diff * v_diff;
+    }
+  }
+
+  // Apply the filter to luma
+  for (row = 0; row < (int)block_height; row++) {
+    for (col = 0; col < (int)block_width; col++) {
+      const int uv_row = row >> ss_y;
+      const int uv_col = col >> ss_x;
+      const int filter_weight = get_filter_weight(
+          row, col, block_height, block_width, blk_fw, use_32x32);
+
+      // First we get the modifier for the current y pixel
+      const int y_pixel = y_pre[row * y_pre_stride + col];
+      int y_num_used = 0;
+      int y_mod = 0;
+
+      // Sum the neighboring 3x3 y pixels
+      for (row_step = -1; row_step <= 1; row_step++) {
+        for (col_step = -1; col_step <= 1; col_step++) {
+          const int sub_row = row + row_step;
+          const int sub_col = col + col_step;
+
+          if (sub_row >= 0 && sub_row < (int)block_height && sub_col >= 0 &&
+              sub_col < (int)block_width) {
+            y_mod += y_diff_sse[sub_row * y_diff_stride + sub_col];
+            y_num_used++;
+          }
+        }
+      }
+
+      // Sum the corresponding uv pixels to the current y modifier
+      // Note we are rounding down instead of rounding to the nearest pixel.
+      y_mod += u_diff_sse[uv_row * uv_diff_stride + uv_col];
+      y_mod += v_diff_sse[uv_row * uv_diff_stride + uv_col];
+
+      y_num_used += 2;
+
+      // Set the modifier
+      y_mod = highbd_mod_index(y_mod, y_num_used, rounding, strength,
+                               filter_weight);
+
+      // Accumulate the result
+      y_count[row * block_width + col] += y_mod;
+      y_accum[row * block_width + col] += y_mod * y_pixel;
+    }
+  }
+
+  // Apply the filter to chroma
+  for (uv_row = 0; uv_row < (int)uv_block_height; uv_row++) {
+    for (uv_col = 0; uv_col < (int)uv_block_width; uv_col++) {
+      const int y_row = uv_row << ss_y;
+      const int y_col = uv_col << ss_x;
+      const int filter_weight = get_filter_weight(
+          uv_row, uv_col, uv_block_height, uv_block_width, blk_fw, use_32x32);
+
+      const int u_pixel = u_pre[uv_row * uv_pre_stride + uv_col];
+      const int v_pixel = v_pre[uv_row * uv_pre_stride + uv_col];
+
+      int uv_num_used = 0;
+      int u_mod = 0, v_mod = 0;
+
+      // Sum the neighboring 3x3 chromal pixels to the chroma modifier
+      for (row_step = -1; row_step <= 1; row_step++) {
+        for (col_step = -1; col_step <= 1; col_step++) {
+          const int sub_row = uv_row + row_step;
+          const int sub_col = uv_col + col_step;
+
+          if (sub_row >= 0 && sub_row < uv_block_height && sub_col >= 0 &&
+              sub_col < uv_block_width) {
+            u_mod += u_diff_sse[sub_row * uv_diff_stride + sub_col];
+            v_mod += v_diff_sse[sub_row * uv_diff_stride + sub_col];
+            uv_num_used++;
+          }
+        }
+      }
+
+      // Sum all the luma pixels associated with the current luma pixel
+      for (row_step = 0; row_step < 1 + ss_y; row_step++) {
+        for (col_step = 0; col_step < 1 + ss_x; col_step++) {
+          const int sub_row = y_row + row_step;
+          const int sub_col = y_col + col_step;
+          const int y_diff = y_diff_sse[sub_row * y_diff_stride + sub_col];
+
+          u_mod += y_diff;
+          v_mod += y_diff;
+          uv_num_used++;
+        }
+      }
+
+      // Set the modifier
+      u_mod = highbd_mod_index(u_mod, uv_num_used, rounding, strength,
+                               filter_weight);
+      v_mod = highbd_mod_index(v_mod, uv_num_used, rounding, strength,
+                               filter_weight);
+
+      // Accumulate the result
+      u_count[uv_row * uv_block_width + uv_col] += u_mod;
+      u_accum[uv_row * uv_block_width + uv_col] += u_mod * u_pixel;
+      v_count[uv_row * uv_block_width + uv_col] += v_mod;
+      v_accum[uv_row * uv_block_width + uv_col] += v_mod * v_pixel;
+    }
+  }
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static uint32_t temporal_filter_find_matching_mb_c(
@@ -765,18 +930,17 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           int adj_strength = strength + 2 * (mbd->bd - 8);
           // Apply the filter (YUV)
-          vp9_highbd_temporal_filter_apply(
-              f->y_buffer + mb_y_offset, f->y_stride, predictor, BW, BH,
-              adj_strength, blk_fw, use_32x32, accumulator, count);
-          vp9_highbd_temporal_filter_apply(
-              f->u_buffer + mb_uv_offset, f->uv_stride, predictor + BLK_PELS,
-              mb_uv_width, mb_uv_height, adj_strength, blk_fw, use_32x32,
-              accumulator + BLK_PELS, count + BLK_PELS);
-          vp9_highbd_temporal_filter_apply(
-              f->v_buffer + mb_uv_offset, f->uv_stride,
-              predictor + (BLK_PELS << 1), mb_uv_width, mb_uv_height,
-              adj_strength, blk_fw, use_32x32, accumulator + (BLK_PELS << 1),
-              count + (BLK_PELS << 1));
+          vp9_highbd_apply_temporal_filter(
+              CONVERT_TO_SHORTPTR(f->y_buffer + mb_y_offset), f->y_stride,
+              CONVERT_TO_SHORTPTR(predictor), BW,
+              CONVERT_TO_SHORTPTR(f->u_buffer + mb_uv_offset),
+              CONVERT_TO_SHORTPTR(f->v_buffer + mb_uv_offset), f->uv_stride,
+              CONVERT_TO_SHORTPTR(predictor + BLK_PELS),
+              CONVERT_TO_SHORTPTR(predictor + (BLK_PELS << 1)), mb_uv_width, BW,
+              BH, mbd->plane[1].subsampling_x, mbd->plane[1].subsampling_y,
+              adj_strength, blk_fw, use_32x32, accumulator, count,
+              accumulator + BLK_PELS, count + BLK_PELS,
+              accumulator + (BLK_PELS << 1), count + (BLK_PELS << 1));
         } else {
           // Apply the filter (YUV)
           vp9_apply_temporal_filter(
