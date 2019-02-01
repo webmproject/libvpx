@@ -33,7 +33,8 @@
  * Out of memory errors when running generated fuzzer binary
    $../libvpx/configure --disable-unit-tests --size-limit=12288x12288 \
    --extra-cflags="-DVPX_MAX_ALLOCABLE_MEMORY=1073741824" \
-   --disable-webm-io --enable-debug
+   --disable-webm-io --enable-debug --disable-vp8-encoder \
+   --disable-vp9-encoder --disable-examples
 
  * Build libvpx
    $make -j32
@@ -42,7 +43,7 @@
    $ $CXX $CXXFLAGS -std=c++11 -DDECODER=vp9 \
    -fsanitize=fuzzer -I../libvpx -I. -Wl,--start-group \
    ../libvpx/examples/vpx_dec_fuzzer.cc -o ./vpx_dec_fuzzer_vp9 \
-   ./libvpx.a ./tools_common.c.o -Wl,--end-group
+   ./libvpx.a -Wl,--end-group
 
  * DECODER should be defined as vp9 or vp8 to enable vp9/vp8
  *
@@ -66,13 +67,15 @@
 #include <stdlib.h>
 #include <memory>
 
-#include "./tools_common.h"
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx_ports/mem_ops.h"
 
-#define VPX_TOSTRING(str) #str
-#define VPX_STRINGIFY(str) VPX_TOSTRING(str)
+#define IVF_FRAME_HDR_SZ (4 + 8) /* 4 byte size + 8 byte timestamp */
+#define IVF_FILE_HDR_SZ 32
+
+#define VPXD_INTERFACE(name) VPXD_INTERFACE_(name)
+#define VPXD_INTERFACE_(name) vpx_codec_##name##_dx()
 
 static void CloseFile(FILE *file) { fclose(file); }
 
@@ -131,16 +134,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   if (fread(header, 1, IVF_FILE_HDR_SZ, file.get()) != IVF_FILE_HDR_SZ) {
     return 0;
   }
-  const VpxInterface *decoder = get_vpx_decoder_by_name(VPX_STRINGIFY(DECODER));
-  if (decoder == nullptr) {
-    return 0;
-  }
 
   vpx_codec_ctx_t codec;
   // Set thread count in the range [1, 64].
   const unsigned int threads = (data[IVF_FILE_HDR_SZ] & 0x3f) + 1;
   vpx_codec_dec_cfg_t cfg = { threads, 0, 0 };
-  if (vpx_codec_dec_init(&codec, decoder->codec_interface(), &cfg, 0)) {
+  if (vpx_codec_dec_init(&codec, VPXD_INTERFACE(DECODER), &cfg, 0)) {
     return 0;
   }
 
