@@ -46,6 +46,30 @@
       "revId": "967ab8b5fce85afb5f14b7178d4295cc4cc0f36f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ac738629_c1f503a6",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 934,
+      "author": {
+        "id": 1306723
+      },
+      "writtenOn": "2019-02-01T00:14:28Z",
+      "side": 1,
+      "message": "I was following the convention used by vpx_highbd_convolve, which performs the conversion outside.",
+      "parentUuid": "08516204_e53ad680",
+      "range": {
+        "startLine": 934,
+        "startChar": 14,
+        "endLine": 934,
+        "endChar": 33
+      },
+      "revId": "967ab8b5fce85afb5f14b7178d4295cc4cc0f36f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
