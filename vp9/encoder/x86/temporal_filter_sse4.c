@@ -254,7 +254,7 @@ static INLINE void read_chroma_dist_row_16(int ss_x, const uint16_t *u_dist,
                                            __m128i *v_first,
                                            __m128i *v_second) {
   if (!ss_x) {
-    // If there is no chroma subsampling in the horizaontal direction, then we
+    // If there is no chroma subsampling in the horizontal direction, then we
     // need to load 16 entries from chroma.
     read_dist_16(u_dist, u_first, u_second);
     read_dist_16(v_dist, v_first, v_second);
@@ -274,8 +274,8 @@ static INLINE void read_chroma_dist_row_16(int ss_x, const uint16_t *u_dist,
   }
 }
 
-// Horizonta add unsigned 16-bit ints in src and store them as signed 32-bit int
-// in dst.
+// Horizontal add unsigned 16-bit ints in src and store them as signed 32-bit
+// int in dst.
 static INLINE void hadd_epu16(__m128i *src, __m128i *dst) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i shift_right = _mm_srli_si128(*src, 2);
@@ -323,7 +323,7 @@ static INLINE void add_luma_dist_to_8_chroma_mod(const uint16_t *y_dist,
 
 // Apply temporal filter to the luma components. This performs temporal
 // filtering on a luma block of 16 X block_height. Use blk_fw as an array of
-// size 4for the weights for each of the 4 subblocks if blk_fw is not NULL,
+// size 4 for the weights for each of the 4 subblocks if blk_fw is not NULL,
 // else use top_weight for top half, and bottom weight for bottom half.
 static void vp9_apply_temporal_filter_luma_16(
     const uint8_t *y_src, int y_src_stride, const uint8_t *y_pre,
