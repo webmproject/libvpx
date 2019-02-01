@@ -917,7 +917,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         }
       }
 
-      if (blk_fw[0] || blk_fw[1] || blk_fw[2] || blk_fw[3]) {
+      if (blk_fw[0] | blk_fw[1] | blk_fw[2] | blk_fw[3]) {
         // Construct the predictors
         temporal_filter_predictors_mb_c(
             mbd, frames[frame]->y_buffer + mb_y_offset,
