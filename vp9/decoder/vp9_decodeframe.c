@@ -2768,6 +2768,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     int num_sbs = 1;
     const int aligned_rows = mi_cols_aligned_to_sb(cm->mi_rows);
     const int sb_rows = aligned_rows >> MI_BLOCK_SIZE_LOG2;
+    const int num_jobs = sb_rows << cm->log2_tile_cols;
 
     if (pbi->row_mt_worker_data == NULL) {
       CHECK_MEM_ERROR(cm, pbi->row_mt_worker_data,
@@ -2784,10 +2785,11 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       num_sbs = sb_cols * sb_rows;
     }
 
-    if (num_sbs > pbi->row_mt_worker_data->num_sbs) {
+    if (num_sbs > pbi->row_mt_worker_data->num_sbs ||
+        num_jobs > pbi->row_mt_worker_data->num_jobs) {
       vp9_dec_free_row_mt_mem(pbi->row_mt_worker_data);
       vp9_dec_alloc_row_mt_mem(pbi->row_mt_worker_data, cm, num_sbs,
-                               pbi->max_threads, sb_rows << cm->log2_tile_cols);
+                               pbi->max_threads, num_jobs);
     }
     vp9_jobq_alloc(pbi);
   }
