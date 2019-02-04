@@ -788,19 +788,22 @@ int main(int argc, const char **argv) {
 
   parse_command_line(argc, argv, &app_input, &svc_ctx, &enc_cfg);
 
+  // Y4M reader handles its own allocation.
+  if (app_input.input_ctx.file_type != FILE_TYPE_Y4M) {
 // Allocate image buffer
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (!vpx_img_alloc(&raw,
-                     enc_cfg.g_input_bit_depth == 8 ? VPX_IMG_FMT_I420
-                                                    : VPX_IMG_FMT_I42016,
-                     enc_cfg.g_w, enc_cfg.g_h, 32)) {
-    die("Failed to allocate image %dx%d\n", enc_cfg.g_w, enc_cfg.g_h);
-  }
+    if (!vpx_img_alloc(&raw,
+                       enc_cfg.g_input_bit_depth == 8 ? VPX_IMG_FMT_I420
+                                                      : VPX_IMG_FMT_I42016,
+                       enc_cfg.g_w, enc_cfg.g_h, 32)) {
+      die("Failed to allocate image %dx%d\n", enc_cfg.g_w, enc_cfg.g_h);
+    }
 #else
-  if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, enc_cfg.g_w, enc_cfg.g_h, 32)) {
-    die("Failed to allocate image %dx%d\n", enc_cfg.g_w, enc_cfg.g_h);
-  }
+    if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, enc_cfg.g_w, enc_cfg.g_h, 32)) {
+      die("Failed to allocate image %dx%d\n", enc_cfg.g_w, enc_cfg.g_h);
+    }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
 
   // Initialize codec
   if (vpx_svc_init(&svc_ctx, &codec, vpx_codec_vp9_cx(), &enc_cfg) !=
@@ -1127,7 +1130,9 @@ int main(int argc, const char **argv) {
   printf("Frame cnt and encoding time/FPS stats for encoding: %d %f %f \n",
          frame_cnt, 1000 * (float)cx_time / (double)(frame_cnt * 1000000),
          1000000 * (double)frame_cnt / (double)cx_time);
-  vpx_img_free(&raw);
+  if (app_input.input_ctx.file_type != FILE_TYPE_Y4M) {
+    vpx_img_free(&raw);
+  }
   // display average size, psnr
   vpx_svc_dump_statistics(&svc_ctx);
   vpx_svc_release(&svc_ctx);
