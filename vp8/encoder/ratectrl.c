@@ -1484,7 +1484,8 @@ int vp8_drop_encodedframe_overshoot(VP8_COMP *cpi, int Q) {
     if (cpi->drop_frames_allowed && pred_err_mb > (thresh_pred_err_mb << 4))
       thresh_rate = thresh_rate >> 3;
     if ((Q < thresh_qp && cpi->projected_frame_size > thresh_rate &&
-         pred_err_mb > thresh_pred_err_mb) ||
+         pred_err_mb > thresh_pred_err_mb &&
+         pred_err_mb > 2 * cpi->last_pred_err_mb) ||
         force_drop_overshoot) {
       unsigned int i;
       double new_correction_factor;
