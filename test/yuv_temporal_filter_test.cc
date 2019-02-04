@@ -38,6 +38,10 @@ struct TemporalFilterWithBd {
   int bd;
 };
 
+std::ostream &operator<<(std::ostream &os, const TemporalFilterWithBd &tf) {
+  return os << "Bitdepth: " << tf.bd;
+}
+
 int GetFilterWeight(unsigned int row, unsigned int col,
                     unsigned int block_height, unsigned int block_width,
                     const int *const blk_fw, int use_32x32) {
