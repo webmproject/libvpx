@@ -227,10 +227,11 @@ static void fdct32_vsx(const int16x8_t *in, int16x8_t *out, int pass) {
   int16x8_t temp0[32];  // Hold stages: 1, 4, 7
   int16x8_t temp1[32];  // Hold stages: 2, 5
   int16x8_t temp2[32];  // Hold stages: 3, 6
+  int i;
 
   // Stage 1
   // Unrolling this loops actually slows down Power9 benchmarks
-  for (int i = 0; i < 16; i++) {
+  for (i = 0; i < 16; i++) {
     temp0[i] = vec_add(in[i], in[31 - i]);
     // pass through to stage 3.
     temp1[i + 16] = vec_sub(in[15 - i], in[i + 16]);
@@ -238,7 +239,7 @@ static void fdct32_vsx(const int16x8_t *in, int16x8_t *out, int pass) {
 
   // Stage 2
   // Unrolling this loops actually slows down Power9 benchmarks
-  for (int i = 0; i < 8; i++) {
+  for (i = 0; i < 8; i++) {
     temp1[i] = vec_add(temp0[i], temp0[15 - i]);
     temp1[i + 8] = vec_sub(temp0[7 - i], temp0[i + 8]);
   }
@@ -461,7 +462,7 @@ static void fdct32_vsx(const int16x8_t *in, int16x8_t *out, int pass) {
                    &out[3]);
 
   if (pass == 0) {
-    for (int i = 0; i < 32; i++) {
+    for (i = 0; i < 32; i++) {
       out[i] = sub_round_shift(out[i]);
     }
   }
