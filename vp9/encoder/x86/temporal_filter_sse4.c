@@ -350,6 +350,9 @@ static void vp9_apply_temporal_filter_luma_16(
   __m128i sum_row_first;
   __m128i sum_row_second;
 
+  // Loop variables
+  unsigned int h;
+
   assert(strength >= 0);
   assert(strength <= 6);
 
@@ -408,7 +411,7 @@ static void vp9_apply_temporal_filter_luma_16(
   mul_first = _mm_loadu_si128((const __m128i *)neighbors_first[1]);
   mul_second = _mm_loadu_si128((const __m128i *)neighbors_second[1]);
 
-  for (unsigned int h = 1; h < block_height - 1; ++h) {
+  for (h = 1; h < block_height - 1; ++h) {
     // Move the weight to bottom half
     if (!use_whole_blk && h == block_height / 2) {
       if (blk_fw) {
@@ -640,6 +643,9 @@ static void vp9_apply_temporal_filter_chroma_8(
 
   __m128i u_sum_row, v_sum_row;
 
+  // Loop variable
+  unsigned int h;
+
   (void)uv_block_width;
 
   // First row
@@ -690,7 +696,7 @@ static void vp9_apply_temporal_filter_chroma_8(
   // Then all the rows except the last one
   mul = _mm_loadu_si128((const __m128i *)neighbors[1]);
 
-  for (unsigned int h = 1; h < uv_block_height - 1; ++h) {
+  for (h = 1; h < uv_block_height - 1; ++h) {
     // Move the weight pointer to the bottom half of the blocks
     if (h == uv_block_height / 2) {
       if (blk_fw) {
@@ -936,6 +942,9 @@ void vp9_apply_temporal_filter_sse4_1(
   const uint8_t *y_src_ptr = y_src, *u_src_ptr = u_src, *v_src_ptr = v_src;
   const uint8_t *y_pre_ptr = y_pre, *u_pre_ptr = u_pre, *v_pre_ptr = v_pre;
 
+  // Loop variables
+  unsigned int row, blk_col;
+
   assert(block_width <= BW && "block width too large");
   assert(block_height <= BH && "block height too large");
   assert(block_width % 16 == 0 && "block width must be multiple of 16");
@@ -953,8 +962,8 @@ void vp9_apply_temporal_filter_sse4_1(
       "subblock filter weight must be less than 2");
 
   // Precompute the difference sqaured
-  for (unsigned int row = 0; row < block_height; row++) {
-    for (unsigned int blk_col = 0; blk_col < block_width; blk_col += 16) {
+  for (row = 0; row < block_height; row++) {
+    for (blk_col = 0; blk_col < block_width; blk_col += 16) {
       store_dist_16(y_src_ptr + blk_col, y_pre_ptr + blk_col,
                     y_dist_ptr + blk_col);
     }
@@ -963,8 +972,8 @@ void vp9_apply_temporal_filter_sse4_1(
     y_dist_ptr += DIST_STRIDE;
   }
 
-  for (unsigned int row = 0; row < chroma_height; row++) {
-    for (unsigned int blk_col = 0; blk_col < chroma_width; blk_col += 8) {
+  for (row = 0; row < chroma_height; row++) {
+    for (blk_col = 0; blk_col < chroma_width; blk_col += 8) {
       store_dist_8(u_src_ptr + blk_col, u_pre_ptr + blk_col,
                    u_dist_ptr + blk_col);
       store_dist_8(v_src_ptr + blk_col, v_pre_ptr + blk_col,
