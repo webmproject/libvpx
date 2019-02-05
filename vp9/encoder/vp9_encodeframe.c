@@ -3481,9 +3481,9 @@ static void simple_motion_search(const VP9_COMP *const cpi, MACROBLOCK *const x,
 }
 
 // Use a neural net model to prune partition-none and partition-split search.
-// The model uses prediction residue variance and quantization step size as
-// input features.
-#define FEATURES 6
+// Features used: QP; spatial block size contexts; variance of prediction
+// residue after simple_motion_search.
+#define FEATURES 12
 static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
                                           MACROBLOCK *const x,
                                           PC_TREE *const pc_tree,
@@ -3502,28 +3502,27 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
   uint8_t *const pred_buf = pred_buffer;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   const int speed = cpi->oxcf.speed;
-  int i;
   float thresh = 0.0f;
 
   switch (bsize) {
     case BLOCK_64X64:
-      nn_config = &vp9_var_rd_part_nnconfig_64;
-      thresh = speed > 0 ? 3.5f : 3.0f;
+      nn_config = &vp9_part_split_nnconfig_64;
+      thresh = speed > 0 ? 2.8f : 3.0f;
       break;
     case BLOCK_32X32:
-      nn_config = &vp9_var_rd_part_nnconfig_32;
+      nn_config = &vp9_part_split_nnconfig_32;
       thresh = speed > 0 ? 3.5f : 3.0f;
       break;
     case BLOCK_16X16:
-      nn_config = &vp9_var_rd_part_nnconfig_16;
-      thresh = speed > 0 ? 3.5f : 4.0f;
+      nn_config = &vp9_part_split_nnconfig_16;
+      thresh = speed > 0 ? 3.8f : 4.0f;
       break;
     case BLOCK_8X8:
-      nn_config = &vp9_var_rd_part_nnconfig_8;
+      nn_config = &vp9_part_split_nnconfig_8;
       if (cm->width >= 720 && cm->height >= 720)
         thresh = speed > 0 ? 2.5f : 2.0f;
       else
-        thresh = speed > 0 ? 3.5f : 2.0f;
+        thresh = speed > 0 ? 3.8f : 2.0f;
       break;
     default: assert(0 && "Unexpected block size."); return;
   }
@@ -3542,6 +3541,7 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
       ref_mv.row = ref_mv.col = 0;
     else
       ref_mv = pc_tree->mv;
+    vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
     simple_motion_search(cpi, x, bsize, mi_row, mi_col, ref_mv, ref, pred_buf);
     pc_tree->mv = x->e_mbd.mi[0]->mv[0].as_mv;
   }
@@ -3560,8 +3560,8 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
     float score;
 
     // Generate model input features.
-    features[feature_idx++] = logf((float)(dc_q * dc_q) / 256.0f + 1.0f);
-    vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
+    features[feature_idx++] = logf((float)dc_q + 1.0f);
+
     // Get the variance of the residue as input features.
     {
       const int bs = 4 * num_4x4_blocks_wide_lookup[bsize];
@@ -3575,7 +3575,19 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
       const unsigned int var =
           cpi->fn_ptr[bsize].vf(src, src_stride, pred, pred_stride, &sse);
       const float factor = (var == 0) ? 1.0f : (1.0f / (float)var);
+      const MACROBLOCKD *const xd = &x->e_mbd;
+      const int has_above = !!xd->above_mi;
+      const int has_left = !!xd->left_mi;
+      const BLOCK_SIZE above_bsize = has_above ? xd->above_mi->sb_type : bsize;
+      const BLOCK_SIZE left_bsize = has_left ? xd->left_mi->sb_type : bsize;
+      int i;
 
+      features[feature_idx++] = (float)has_above;
+      features[feature_idx++] = (float)b_width_log2_lookup[above_bsize];
+      features[feature_idx++] = (float)b_height_log2_lookup[above_bsize];
+      features[feature_idx++] = (float)has_left;
+      features[feature_idx++] = (float)b_width_log2_lookup[left_bsize];
+      features[feature_idx++] = (float)b_height_log2_lookup[left_bsize];
       features[feature_idx++] = logf((float)var + 1.0f);
       for (i = 0; i < 4; ++i) {
         const int x_idx = (i & 1) * bs / 2;
@@ -3604,7 +3616,6 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
   }
 }
 #undef FEATURES
-#undef LABELS
 
 static int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
                             int mi_col, int orig_rdmult) {
