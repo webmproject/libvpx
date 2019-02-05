@@ -6146,7 +6146,7 @@ static double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
     // TODO(angiebird): Consider subpixel when computing the sse.
     cpi->fn_ptr[bsize].vf(src.buf, src.stride, get_buf_from_mv(&pre, &full_mv),
                           pre.stride, &sse);
-    return (double)sse;
+    return (double)(sse << VP9_DIST_SCALE_LOG2);
   } else {
     assert(0);
     return 0;
