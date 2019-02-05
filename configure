@@ -625,6 +625,9 @@ process_toolchain() {
         if enabled mips || [ -z "${INLINE}" ]; then
           enabled extra_warnings || check_add_cflags -Wno-unused-function
         fi
+        # Enforce c89 for c files. Don't be too strict about it though. Allow
+        # gnu extensions like "//" for comments.
+        check_cflags -std=gnu89 && add_cflags_only -std=gnu89
         # Avoid this warning for third_party C++ sources. Some reorganization
         # would be needed to apply this only to test/*.cc.
         check_cflags -Wshorten-64-to-32 && add_cflags_only -Wshorten-64-to-32
