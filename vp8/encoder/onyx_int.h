@@ -257,6 +257,7 @@ typedef struct {
 
   int count_mb_ref_frame_usage[MAX_REF_FRAMES];
 
+  int last_q[2];
 } LAYER_CONTEXT;
 
 typedef struct VP8_COMP {

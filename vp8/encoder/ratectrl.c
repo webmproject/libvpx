@@ -1125,6 +1125,14 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
   }
 }
 
+static int limit_q_cbr_inter(int last_q, int current_q) {
+  int limit_down = 12;
+  if (last_q - current_q > limit_down)
+    return (last_q - limit_down);
+  else
+    return current_q;
+}
+
 int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame) {
   int Q = cpi->active_worst_quality;
 
@@ -1263,6 +1271,12 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame) {
       }
     }
   }
+
+  // Limit decrease in Q for 1 pass CBR screen content mode.
+  if (cpi->common.frame_type != KEY_FRAME && cpi->pass == 0 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER &&
+      cpi->oxcf.screen_content_mode)
+    Q = limit_q_cbr_inter(cpi->last_q[1], Q);
 
   return Q;
 }

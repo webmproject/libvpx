@@ -218,6 +218,8 @@ static void save_layer_context(VP8_COMP *cpi) {
   lc->frames_since_last_drop_overshoot = cpi->frames_since_last_drop_overshoot;
   lc->force_maxqp = cpi->force_maxqp;
   lc->last_frame_percent_intra = cpi->last_frame_percent_intra;
+  lc->last_q[0] = cpi->last_q[0];
+  lc->last_q[1] = cpi->last_q[1];
 
   memcpy(lc->count_mb_ref_frame_usage, cpi->mb.count_mb_ref_frame_usage,
          sizeof(cpi->mb.count_mb_ref_frame_usage));
@@ -255,6 +257,8 @@ static void restore_layer_context(VP8_COMP *cpi, const int layer) {
   cpi->frames_since_last_drop_overshoot = lc->frames_since_last_drop_overshoot;
   cpi->force_maxqp = lc->force_maxqp;
   cpi->last_frame_percent_intra = lc->last_frame_percent_intra;
+  cpi->last_q[0] = lc->last_q[0];
+  cpi->last_q[1] = lc->last_q[1];
 
   memcpy(cpi->mb.count_mb_ref_frame_usage, lc->count_mb_ref_frame_usage,
          sizeof(cpi->mb.count_mb_ref_frame_usage));
