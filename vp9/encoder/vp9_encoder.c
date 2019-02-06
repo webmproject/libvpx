@@ -6870,7 +6870,7 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
   int tpl_group_frames = 0;
   int frame_idx;
-  const BLOCK_SIZE bsize = BLOCK_32X32;
+  cpi->tpl_bsize = BLOCK_32X32;
 
   init_gop_frames(cpi, gf_picture, gf_group, &tpl_group_frames);
 
@@ -6879,11 +6879,11 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
   // Backward propagation from tpl_group_frames to 1.
   for (frame_idx = tpl_group_frames - 1; frame_idx > 0; --frame_idx) {
     if (gf_picture[frame_idx].update_type == USE_BUF_FRAME) continue;
-    mc_flow_dispenser(cpi, gf_picture, frame_idx, bsize);
+    mc_flow_dispenser(cpi, gf_picture, frame_idx, cpi->tpl_bsize);
   }
 #if CONFIG_NON_GREEDY_MV
 #if DUMP_TPL_STATS
-  dump_tpl_stats(cpi, tpl_group_frames, gf_picture, bsize);
+  dump_tpl_stats(cpi, tpl_group_frames, gf_picture, cpi->tpl_bsize);
 #endif  // DUMP_TPL_STATS
 #endif  // CONFIG_NON_GREEDY_MV
 }
