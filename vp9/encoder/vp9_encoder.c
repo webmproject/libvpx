@@ -6040,11 +6040,6 @@ static int get_block_src_pred_buf(MACROBLOCKD *xd, GF_PICTURE *gf_picture,
 
 #define kMvPreCheckLines 5
 #define kMvPreCheckSize 15
-#define ZERO_MV_MODE 0
-#define NEW_MV_MODE 1
-#define NEAREST_MV_MODE 2
-#define NEAR_MV_MODE 3
-#define MAX_MV_MODE 4
 
 #define MV_REF_POS_NUM 3
 POSITION mv_ref_pos[MV_REF_POS_NUM] = {
@@ -6631,6 +6626,7 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   int64_t recon_error, sse;
 #if CONFIG_NON_GREEDY_MV
   int square_block_idx;
+  int rf_idx;
 #endif
 
   // Setup scaling factor
@@ -6676,6 +6672,13 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
        ++square_block_idx) {
     BLOCK_SIZE square_bsize = square_block_idx_to_bsize(square_block_idx);
     build_motion_field(cpi, xd, frame_idx, ref_frame, square_bsize);
+  }
+  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
+    if (ref_frame_idx != -1) {
+      predict_mv_mode_arr(cpi, x, gf_picture, frame_idx, tpl_frame, rf_idx,
+                          bsize);
+    }
   }
 #endif
 

@@ -2538,14 +2538,42 @@ static INLINE void restore_dst_buf(MACROBLOCKD *xd,
 // visual quality.
 static int discount_newmv_test(const VP9_COMP *cpi, int this_mode,
                                int_mv this_mv,
-                               int_mv (*mode_mv)[MAX_REF_FRAMES],
-                               int ref_frame) {
+                               int_mv (*mode_mv)[MAX_REF_FRAMES], int ref_frame,
+                               int mi_row, int mi_col, BLOCK_SIZE bsize) {
+#if CONFIG_NON_GREEDY_MV
+  (void)mode_mv;
+  (void)this_mv;
+  if (this_mode == NEWMV && bsize >= BLOCK_8X8) {
+    const int gf_group_idx = cpi->twopass.gf_group.index;
+    const int gf_rf_idx = ref_frame_to_gf_rf_idx(ref_frame);
+    const TplDepFrame tpl_frame = cpi->tpl_stats[gf_group_idx];
+    const int tpl_block_mi_h = num_8x8_blocks_high_lookup[cpi->tpl_bsize];
+    const int tpl_block_mi_w = num_8x8_blocks_wide_lookup[cpi->tpl_bsize];
+    const int tpl_mi_row = mi_row - (mi_row % tpl_block_mi_h);
+    const int tpl_mi_col = mi_col - (mi_col % tpl_block_mi_w);
+    const int mv_mode =
+        tpl_frame
+            .mv_mode_arr[gf_rf_idx][tpl_mi_row * tpl_frame.stride + tpl_mi_col];
+    if (mv_mode == NEW_MV_MODE) {
+      // TODO(angiebird): Compare this_mv with the motion field.
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+#else
+  (void)mi_row;
+  (void)mi_col;
+  (void)bsize;
   return (!cpi->rc.is_src_frame_alt_ref && (this_mode == NEWMV) &&
           (this_mv.as_int != 0) &&
           ((mode_mv[NEARESTMV][ref_frame].as_int == 0) ||
            (mode_mv[NEARESTMV][ref_frame].as_int == INVALID_MV)) &&
           ((mode_mv[NEARMV][ref_frame].as_int == 0) ||
            (mode_mv[NEARMV][ref_frame].as_int == INVALID_MV)));
+#endif
 }
 
 static int64_t handle_inter_mode(
@@ -2658,7 +2686,8 @@ static int64_t handle_inter_mode(
       // under certain circumstances where we want to help initiate a weak
       // motion field, where the distortion gain for a single block may not
       // be enough to overcome the cost of a new mv.
-      if (discount_newmv_test(cpi, this_mode, tmp_mv, mode_mv, refs[0])) {
+      if (discount_newmv_test(cpi, this_mode, tmp_mv, mode_mv, refs[0], mi_row,
+                              mi_col, bsize)) {
         *rate2 += VPXMAX((rate_mv / NEW_MV_DISCOUNT_FACTOR), 1);
       } else {
         *rate2 += rate_mv;
@@ -2691,8 +2720,8 @@ static int64_t handle_inter_mode(
   //
   // Under some circumstances we discount the cost of new mv mode to encourage
   // initiation of a motion field.
-  if (discount_newmv_test(cpi, this_mode, frame_mv[refs[0]], mode_mv,
-                          refs[0])) {
+  if (discount_newmv_test(cpi, this_mode, frame_mv[refs[0]], mode_mv, refs[0],
+                          mi_row, mi_col, bsize)) {
     *rate2 +=
         VPXMIN(cost_mv_ref(cpi, this_mode, mbmi_ext->mode_context[refs[0]]),
                cost_mv_ref(cpi, NEARESTMV, mbmi_ext->mode_context[refs[0]]));

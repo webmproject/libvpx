@@ -304,6 +304,12 @@ typedef struct TplDepStats {
 
 #if CONFIG_NON_GREEDY_MV
 #define SQUARE_BLOCK_SIZES 4
+
+#define ZERO_MV_MODE 0
+#define NEW_MV_MODE 1
+#define NEAREST_MV_MODE 2
+#define NEAR_MV_MODE 3
+#define MAX_MV_MODE 4
 #endif
 
 typedef struct TplDepFrame {
