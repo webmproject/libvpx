@@ -3292,19 +3292,20 @@ static int ml_predict_breakout(VP9_COMP *const cpi, BLOCK_SIZE bsize,
 }
 #undef FEATURES
 
-#define FEATURES 17
+#define FEATURES 8
 #define LABELS 4
 static void ml_prune_rect_partition(VP9_COMP *const cpi, MACROBLOCK *const x,
                                     BLOCK_SIZE bsize,
                                     const PC_TREE *const pc_tree,
                                     int *allow_horz, int *allow_vert,
-                                    int64_t ref_rd, int mi_row, int mi_col) {
+                                    int64_t ref_rd) {
   const NN_CONFIG *nn_config = NULL;
   float score[LABELS] = {
     0.0f,
   };
   int thresh = -1;
   int i;
+  (void)x;
 
   if (ref_rd <= 0 || ref_rd > 1000000000) return;
 
@@ -3328,7 +3329,6 @@ static void ml_prune_rect_partition(VP9_COMP *const cpi, MACROBLOCK *const x,
 
   // Feature extraction and model score calculation.
   {
-    const int64_t none_rdcost = pc_tree->none.rdcost;
     const VP9_COMMON *const cm = &cpi->common;
 #if CONFIG_VP9_HIGHBITDEPTH
     const int dc_q =
@@ -3336,83 +3336,32 @@ static void ml_prune_rect_partition(VP9_COMP *const cpi, MACROBLOCK *const x,
 #else
     const int dc_q = vp9_dc_quant(cm->base_qindex, 0, cm->bit_depth);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+    const int bs = 4 * num_4x4_blocks_wide_lookup[bsize];
     int feature_index = 0;
-    unsigned int block_var = 0;
-    unsigned int sub_block_var[4] = { 0 };
     float features[FEATURES];
 
+    features[feature_index++] = logf((float)dc_q + 1.0f);
     features[feature_index++] =
         (float)(pc_tree->partitioning == PARTITION_NONE);
-    features[feature_index++] = logf((float)(dc_q * dc_q) / 256.0f + 1.0f);
-
-    // Calculate source pixel variance.
-    {
-      struct buf_2d buf;
-      const BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_SPLIT);
-      const int bs = 4 * num_4x4_blocks_wide_lookup[bsize];
-      const MACROBLOCKD *const xd = &x->e_mbd;
-      vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
-
-      (void)xd;
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        block_var = vp9_high_get_sby_perpixel_variance(cpi, &x->plane[0].src,
-                                                       bsize, xd->bd);
-      } else {
-        block_var = vp9_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
-      }
-#else
-      block_var = vp9_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-      buf.stride = x->plane[0].src.stride;
-      for (i = 0; i < 4; ++i) {
-        const int x_idx = (i & 1) * bs / 2;
-        const int y_idx = (i >> 1) * bs / 2;
-        buf.buf = x->plane[0].src.buf + x_idx + y_idx * buf.stride;
-#if CONFIG_VP9_HIGHBITDEPTH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-          sub_block_var[i] =
-              vp9_high_get_sby_perpixel_variance(cpi, &buf, subsize, xd->bd);
-        } else {
-          sub_block_var[i] = vp9_get_sby_perpixel_variance(cpi, &buf, subsize);
-        }
-#else
-        sub_block_var[i] = vp9_get_sby_perpixel_variance(cpi, &buf, subsize);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-      }
-    }
-
-    features[feature_index++] = logf((float)block_var + 1.0f);
-    features[feature_index++] = logf((float)ref_rd + 1.0f);
-    features[feature_index++] = (none_rdcost > 0 && none_rdcost < 1000000000)
-                                    ? (float)pc_tree->none.skippable
-                                    : 0.0f;
-
-    for (i = 0; i < 4; ++i) {
-      const int64_t this_rd = pc_tree->split[i]->none.rdcost;
-      const int rd_valid = this_rd > 0 && this_rd < 1000000000;
-      // Ratio between sub-block RD and whole block RD.
-      features[feature_index++] =
-          rd_valid ? ((float)this_rd / (float)ref_rd) : 1.0f;
-      // Sub-block skippable.
-      features[feature_index++] =
-          rd_valid ? ((float)pc_tree->split[i]->none.skippable) : 0.0f;
-    }
+    features[feature_index++] = logf((float)ref_rd / bs / bs + 1.0f);
 
     {
-      const float denom = (float)(block_var + 1);
-      const float low_b = 0.1f;
-      const float high_b = 10.0f;
+      const float norm_factor = 1.0f / ((float)ref_rd + 1.0f);
+      const int64_t none_rdcost = pc_tree->none.rdcost;
+      float rd_ratio = 2.0f;
+      if (none_rdcost > 0 && none_rdcost < 1000000000)
+        rd_ratio = (float)none_rdcost * norm_factor;
+      features[feature_index++] = VPXMIN(rd_ratio, 2.0f);
+
       for (i = 0; i < 4; ++i) {
-        // Ratio between the quarter sub-block variance and the
-        // whole-block variance.
-        float var_ratio = (float)(sub_block_var[i] + 1) / denom;
-        if (var_ratio < low_b) var_ratio = low_b;
-        if (var_ratio > high_b) var_ratio = high_b;
-        features[feature_index++] = var_ratio;
+        const int64_t this_rd = pc_tree->split[i]->none.rdcost;
+        const int rd_valid = this_rd > 0 && this_rd < 1000000000;
+        // Ratio between sub-block RD and whole block RD.
+        features[feature_index++] =
+            rd_valid ? (float)this_rd * norm_factor : 1.0f;
       }
     }
+
     assert(feature_index == FEATURES);
     nn_predict(features, nn_config, score);
   }
@@ -4112,8 +4061,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         (partition_horz_allowed || partition_vert_allowed) && bsize > BLOCK_8X8;
     if (do_ml_rect_partition_pruning) {
       ml_prune_rect_partition(cpi, x, bsize, pc_tree, &partition_horz_allowed,
-                              &partition_vert_allowed, best_rdc.rdcost, mi_row,
-                              mi_col);
+                              &partition_vert_allowed, best_rdc.rdcost);
     }
   }
 
