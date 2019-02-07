@@ -2555,8 +2555,15 @@ static int discount_newmv_test(const VP9_COMP *cpi, int this_mode,
         tpl_frame
             .mv_mode_arr[gf_rf_idx][tpl_mi_row * tpl_frame.stride + tpl_mi_col];
     if (mv_mode == NEW_MV_MODE) {
-      // TODO(angiebird): Compare this_mv with the motion field.
-      return 1;
+      int_mv tpl_new_mv = *get_pyramid_mv(&tpl_frame, gf_rf_idx, cpi->tpl_bsize,
+                                          tpl_mi_row, tpl_mi_col);
+      int row_diff = abs(tpl_new_mv.as_mv.row - this_mv.as_mv.row);
+      int col_diff = abs(tpl_new_mv.as_mv.col - this_mv.as_mv.col);
+      if (VPXMAX(row_diff, col_diff) <= 8) {
+        return 1;
+      } else {
+        return 0;
+      }
     } else {
       return 0;
     }
