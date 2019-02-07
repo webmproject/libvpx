@@ -239,9 +239,9 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   if (speed >= 1) {
     sf->temporal_filter_search_method = NSTEP;
     sf->ml_var_partition_pruning = !boosted;
-    sf->ml_prune_rect_partition_threhold[1] = 200;
-    sf->ml_prune_rect_partition_threhold[2] = 200;
-    sf->ml_prune_rect_partition_threhold[3] = 200;
+    sf->ml_prune_rect_partition_threhold[1] = 225;
+    sf->ml_prune_rect_partition_threhold[2] = 225;
+    sf->ml_prune_rect_partition_threhold[3] = 225;
 
     if (oxcf->pass == 2) {
       TWO_PASS *const twopass = &cpi->twopass;
