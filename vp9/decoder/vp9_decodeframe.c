@@ -2327,8 +2327,7 @@ static const uint8_t *decode_tiles_row_wise_mt(VP9Decoder *pbi,
   // Initialize thread frame counts.
   if (!cm->frame_parallel_decoding_mode) {
     for (col = 0; col < tile_cols; ++col) {
-      TileWorkerData *const tile_data =
-          (TileWorkerData *)&pbi->tile_worker_data[col];
+      TileWorkerData *const tile_data = &pbi->tile_worker_data[col];
       vp9_zero(tile_data->counts);
     }
   }
@@ -2372,8 +2371,7 @@ static const uint8_t *decode_tiles_row_wise_mt(VP9Decoder *pbi,
   // Accumulate thread frame counts.
   if (!cm->frame_parallel_decoding_mode) {
     for (i = 0; i < tile_cols; ++i) {
-      TileWorkerData *const tile_data =
-          (TileWorkerData *)&pbi->tile_worker_data[i];
+      TileWorkerData *const tile_data = &pbi->tile_worker_data[i];
       vp9_accumulate_frame_counts(&cm->counts, &tile_data->counts, 1);
     }
   }

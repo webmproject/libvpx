@@ -144,16 +144,16 @@ void ApplyReferenceFilter(
   const int rounding = (1 << strength) >> 1;
 
   // Get the square diffs
-  for (int row = 0; row < (int)block_height; row++) {
-    for (int col = 0; col < (int)block_width; col++) {
+  for (int row = 0; row < static_cast<int>(block_height); row++) {
+    for (int col = 0; col < static_cast<int>(block_width); col++) {
       const int diff = y_src_ptr[row * y_src_stride + col] -
                        y_pre_ptr[row * y_pre_stride + col];
       y_diff_ptr[row * y_diff_stride + col] = diff * diff;
     }
   }
 
-  for (int row = 0; row < (int)uv_block_height; row++) {
-    for (int col = 0; col < (int)uv_block_width; col++) {
+  for (int row = 0; row < uv_block_height; row++) {
+    for (int col = 0; col < uv_block_width; col++) {
       const int u_diff = u_src_ptr[row * uv_src_stride + col] -
                          u_pre_ptr[row * uv_pre_stride + col];
       const int v_diff = v_src_ptr[row * uv_src_stride + col] -
@@ -164,8 +164,8 @@ void ApplyReferenceFilter(
   }
 
   // Apply the filter to luma
-  for (int row = 0; row < (int)block_height; row++) {
-    for (int col = 0; col < (int)block_width; col++) {
+  for (int row = 0; row < static_cast<int>(block_height); row++) {
+    for (int col = 0; col < static_cast<int>(block_width); col++) {
       const int uv_row = row >> ss_y;
       const int uv_col = col >> ss_x;
       const int filter_weight = GetFilterWeight(row, col, block_height,
@@ -182,8 +182,8 @@ void ApplyReferenceFilter(
           const int sub_row = row + row_step;
           const int sub_col = col + col_step;
 
-          if (sub_row >= 0 && sub_row < (int)block_height && sub_col >= 0 &&
-              sub_col < (int)block_width) {
+          if (sub_row >= 0 && sub_row < static_cast<int>(block_height) &&
+              sub_col >= 0 && sub_col < static_cast<int>(block_width)) {
             y_mod += y_diff_ptr[sub_row * y_diff_stride + sub_col];
             y_num_used++;
           }
@@ -208,8 +208,8 @@ void ApplyReferenceFilter(
   }
 
   // Apply the filter to chroma
-  for (int uv_row = 0; uv_row < (int)uv_block_height; uv_row++) {
-    for (int uv_col = 0; uv_col < (int)uv_block_width; uv_col++) {
+  for (int uv_row = 0; uv_row < uv_block_height; uv_row++) {
+    for (int uv_col = 0; uv_col < uv_block_width; uv_col++) {
       const int y_row = uv_row << ss_y;
       const int y_col = uv_col << ss_x;
       const int filter_weight = GetFilterWeight(
