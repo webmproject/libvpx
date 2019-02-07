@@ -819,6 +819,8 @@ int main(int argc, const char **argv) {
 #endif
 
   info.codec_fourcc = VP9_FOURCC;
+  info.frame_width = enc_cfg.g_w;
+  info.frame_height = enc_cfg.g_h;
   info.time_base.numerator = enc_cfg.g_timebase.num;
   info.time_base.denominator = enc_cfg.g_timebase.den;
 
