@@ -749,6 +749,96 @@ static void set_frame_flags_bypass_mode_ex1(
   }
 }
 
+#if OUTPUT_RC_STATS
+static void svc_output_rc_stats(
+    vpx_codec_ctx_t *codec, vpx_codec_enc_cfg_t *enc_cfg,
+    vpx_svc_layer_id_t *layer_id, const vpx_codec_cx_pkt_t *cx_pkt,
+    struct RateControlStats *rc, VpxVideoWriter **outfile,
+    const uint32_t frame_cnt, const double framerate) {
+  int num_layers_encoded = 0;
+  unsigned int sl, tl;
+  uint64_t sizes[8];
+  uint64_t sizes_parsed[8];
+  int count = 0;
+  double sum_bitrate = 0.0;
+  double sum_bitrate2 = 0.0;
+  vp9_zero(sizes);
+  vp9_zero(sizes_parsed);
+  vpx_codec_control(codec, VP9E_GET_SVC_LAYER_ID, layer_id);
+  parse_superframe_index(cx_pkt->data.frame.buf, cx_pkt->data.frame.sz,
+                         sizes_parsed, &count);
+  if (enc_cfg->ss_number_layers == 1) sizes[0] = cx_pkt->data.frame.sz;
+  for (sl = 0; sl < enc_cfg->ss_number_layers; ++sl) {
+    sizes[sl] = 0;
+    if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
+      sizes[sl] = sizes_parsed[num_layers_encoded];
+      num_layers_encoded++;
+    }
+  }
+  for (sl = 0; sl < enc_cfg->ss_number_layers; ++sl) {
+    unsigned int sl2;
+    uint64_t tot_size = 0;
+    for (sl2 = 0; sl2 <= sl; ++sl2) {
+      if (cx_pkt->data.frame.spatial_layer_encoded[sl2]) tot_size += sizes[sl2];
+    }
+    if (tot_size > 0)
+      vpx_video_writer_write_frame(outfile[sl], cx_pkt->data.frame.buf,
+                                   (size_t)(tot_size), cx_pkt->data.frame.pts);
+  }
+  for (sl = 0; sl < enc_cfg->ss_number_layers; ++sl) {
+    if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
+      for (tl = layer_id->temporal_layer_id; tl < enc_cfg->ts_number_layers;
+           ++tl) {
+        const int layer = sl * enc_cfg->ts_number_layers + tl;
+        ++rc->layer_tot_enc_frames[layer];
+        rc->layer_encoding_bitrate[layer] += 8.0 * sizes[sl];
+        // Keep count of rate control stats per layer, for non-key
+        // frames.
+        if (tl == (unsigned int)layer_id->temporal_layer_id &&
+            !(cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY)) {
+          rc->layer_avg_frame_size[layer] += 8.0 * sizes[sl];
+          rc->layer_avg_rate_mismatch[layer] +=
+              fabs(8.0 * sizes[sl] - rc->layer_pfb[layer]) /
+              rc->layer_pfb[layer];
+          ++rc->layer_enc_frames[layer];
+        }
+      }
+    }
+  }
+
+  // Update for short-time encoding bitrate states, for moving
+  // window of size rc->window, shifted by rc->window / 2.
+  // Ignore first window segment, due to key frame.
+  if (frame_cnt > (unsigned int)rc->window_size) {
+    for (sl = 0; sl < enc_cfg->ss_number_layers; ++sl) {
+      if (cx_pkt->data.frame.spatial_layer_encoded[sl])
+        sum_bitrate += 0.001 * 8.0 * sizes[sl] * framerate;
+    }
+    if (frame_cnt % rc->window_size == 0) {
+      rc->window_count += 1;
+      rc->avg_st_encoding_bitrate += sum_bitrate / rc->window_size;
+      rc->variance_st_encoding_bitrate +=
+          (sum_bitrate / rc->window_size) * (sum_bitrate / rc->window_size);
+    }
+  }
+
+  // Second shifted window.
+  if (frame_cnt > (unsigned int)(rc->window_size + rc->window_size / 2)) {
+    for (sl = 0; sl < enc_cfg->ss_number_layers; ++sl) {
+      sum_bitrate2 += 0.001 * 8.0 * sizes[sl] * framerate;
+    }
+
+    if (frame_cnt > (unsigned int)(2 * rc->window_size) &&
+        frame_cnt % rc->window_size == 0) {
+      rc->window_count += 1;
+      rc->avg_st_encoding_bitrate += sum_bitrate2 / rc->window_size;
+      rc->variance_st_encoding_bitrate +=
+          (sum_bitrate2 / rc->window_size) * (sum_bitrate2 / rc->window_size);
+    }
+  }
+}
+#endif
+
 int main(int argc, const char **argv) {
   AppInput app_input;
   VpxVideoWriter *writer = NULL;
@@ -770,9 +860,7 @@ int main(int argc, const char **argv) {
   struct RateControlStats rc;
   vpx_svc_layer_id_t layer_id;
   vpx_svc_ref_frame_config_t ref_frame_config;
-  unsigned int sl, tl;
-  double sum_bitrate = 0.0;
-  double sum_bitrate2 = 0.0;
+  unsigned int sl;
   double framerate = 30.0;
 #endif
   struct vpx_usec_timer timer;
@@ -988,101 +1076,13 @@ int main(int argc, const char **argv) {
         case VPX_CODEC_CX_FRAME_PKT: {
           SvcInternal_t *const si = (SvcInternal_t *)svc_ctx.internal;
           if (cx_pkt->data.frame.sz > 0) {
-#if OUTPUT_RC_STATS
-            uint64_t sizes[8];
-            uint64_t sizes_parsed[8];
-            int count = 0;
-            vp9_zero(sizes);
-            vp9_zero(sizes_parsed);
-#endif
             vpx_video_writer_write_frame(writer, cx_pkt->data.frame.buf,
                                          cx_pkt->data.frame.sz,
                                          cx_pkt->data.frame.pts);
 #if OUTPUT_RC_STATS
-            // TODO(marpan): Put this (to line728) in separate function.
             if (svc_ctx.output_rc_stat) {
-              int num_layers_encoded = 0;
-              vpx_codec_control(&codec, VP9E_GET_SVC_LAYER_ID, &layer_id);
-              parse_superframe_index(cx_pkt->data.frame.buf,
-                                     cx_pkt->data.frame.sz, sizes_parsed,
-                                     &count);
-              if (enc_cfg.ss_number_layers == 1)
-                sizes[0] = cx_pkt->data.frame.sz;
-              for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                sizes[sl] = 0;
-                if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
-                  sizes[sl] = sizes_parsed[num_layers_encoded];
-                  num_layers_encoded++;
-                }
-              }
-              for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                unsigned int sl2;
-                uint64_t tot_size = 0;
-                for (sl2 = 0; sl2 <= sl; ++sl2) {
-                  if (cx_pkt->data.frame.spatial_layer_encoded[sl2])
-                    tot_size += sizes[sl2];
-                }
-                if (tot_size > 0)
-                  vpx_video_writer_write_frame(
-                      outfile[sl], cx_pkt->data.frame.buf, (size_t)(tot_size),
-                      cx_pkt->data.frame.pts);
-              }
-              for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
-                  for (tl = layer_id.temporal_layer_id;
-                       tl < enc_cfg.ts_number_layers; ++tl) {
-                    const int layer = sl * enc_cfg.ts_number_layers + tl;
-                    ++rc.layer_tot_enc_frames[layer];
-                    rc.layer_encoding_bitrate[layer] += 8.0 * sizes[sl];
-                    // Keep count of rate control stats per layer, for non-key
-                    // frames.
-                    if (tl == (unsigned int)layer_id.temporal_layer_id &&
-                        !(cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY)) {
-                      rc.layer_avg_frame_size[layer] += 8.0 * sizes[sl];
-                      rc.layer_avg_rate_mismatch[layer] +=
-                          fabs(8.0 * sizes[sl] - rc.layer_pfb[layer]) /
-                          rc.layer_pfb[layer];
-                      ++rc.layer_enc_frames[layer];
-                    }
-                  }
-                }
-              }
-
-              // Update for short-time encoding bitrate states, for moving
-              // window of size rc->window, shifted by rc->window / 2.
-              // Ignore first window segment, due to key frame.
-              if (frame_cnt > (unsigned int)rc.window_size) {
-                for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                  if (cx_pkt->data.frame.spatial_layer_encoded[sl])
-                    sum_bitrate += 0.001 * 8.0 * sizes[sl] * framerate;
-                }
-                if (frame_cnt % rc.window_size == 0) {
-                  rc.window_count += 1;
-                  rc.avg_st_encoding_bitrate += sum_bitrate / rc.window_size;
-                  rc.variance_st_encoding_bitrate +=
-                      (sum_bitrate / rc.window_size) *
-                      (sum_bitrate / rc.window_size);
-                  sum_bitrate = 0.0;
-                }
-              }
-
-              // Second shifted window.
-              if (frame_cnt >
-                  (unsigned int)(rc.window_size + rc.window_size / 2)) {
-                for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
-                  sum_bitrate2 += 0.001 * 8.0 * sizes[sl] * framerate;
-                }
-
-                if (frame_cnt > (unsigned int)(2 * rc.window_size) &&
-                    frame_cnt % rc.window_size == 0) {
-                  rc.window_count += 1;
-                  rc.avg_st_encoding_bitrate += sum_bitrate2 / rc.window_size;
-                  rc.variance_st_encoding_bitrate +=
-                      (sum_bitrate2 / rc.window_size) *
-                      (sum_bitrate2 / rc.window_size);
-                  sum_bitrate2 = 0.0;
-                }
-              }
+              svc_output_rc_stats(&codec, &enc_cfg, &layer_id, cx_pkt, &rc,
+                                  outfile, frame_cnt, framerate);
             }
 #endif
           }
