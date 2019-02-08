@@ -272,7 +272,6 @@ EXPERIMENT_LIST="
     fp_mb_stats
     emulate_hardware
     non_greedy_mv
-    ml_var_partition
 "
 CONFIG_LIST="
     dependency_tracking

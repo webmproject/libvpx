@@ -607,7 +607,6 @@ static const NN_CONFIG vp9_partition_nnconfig_16x16 = {
 };
 #undef FEATURES
 
-#if CONFIG_ML_VAR_PARTITION
 #define FEATURES 6
 static const float vp9_var_part_nn_weights_64_layer0[FEATURES * 8] = {
   -0.249572f, 0.205532f,  -2.175608f, 1.094836f,  -2.986370f, 0.193160f,
@@ -735,7 +734,6 @@ static const NN_CONFIG vp9_var_part_nnconfig_16 = {
   },
 };
 #undef FEATURES
-#endif  // CONFIG_ML_VAR_PARTITION
 
 #define FEATURES 12
 #define LABELS 1
