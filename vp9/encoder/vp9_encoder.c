@@ -6477,6 +6477,7 @@ static void max_heap_push(FEATURE_SCORE_LOC **heap, int *size,
                           FEATURE_SCORE_LOC *input) {
   int c, p;
   FEATURE_SCORE_LOC *tmp;
+  input->visited = 1;
   heap[*size] = input;
   ++*size;
   c = *size - 1;
@@ -6580,8 +6581,6 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   while (fs_loc_heap_size > 0) {
     FEATURE_SCORE_LOC *fs_loc;
     max_heap_pop(cpi->feature_score_loc_heap, &fs_loc_heap_size, &fs_loc);
-
-    fs_loc->visited = 1;
 
     do_motion_search(cpi, td, frame_idx, ref_frame, bsize, fs_loc->mi_row,
                      fs_loc->mi_col);
