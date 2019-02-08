@@ -34,6 +34,8 @@
 
 #define OUTPUT_RC_STATS 1
 
+static const arg_def_t outputfile =
+    ARG_DEF("o", "output", 1, "Output filename");
 static const arg_def_t skip_frames_arg =
     ARG_DEF("s", "skip-frames", 1, "input frames to skip");
 static const arg_def_t frames_arg =
@@ -112,6 +114,7 @@ static const arg_def_t bitdepth_arg = ARG_DEF_ENUM(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static const arg_def_t *svc_args[] = { &frames_arg,
+                                       &outputfile,
                                        &width_arg,
                                        &height_arg,
                                        &timebase_arg,
@@ -177,7 +180,7 @@ typedef struct {
 static const char *exec_name;
 
 void usage_exit(void) {
-  fprintf(stderr, "Usage: %s <options> input_filename output_filename\n",
+  fprintf(stderr, "Usage: %s <options> input_filename -o output_filename\n",
           exec_name);
   fprintf(stderr, "Options:\n");
   arg_show_usage(stderr, svc_args);
@@ -236,6 +239,8 @@ static void parse_command_line(int argc, const char **argv_,
 
     if (arg_match(&arg, &frames_arg, argi)) {
       app_input->frames_to_code = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &outputfile, argi)) {
+      app_input->output_filename = arg.val;
     } else if (arg_match(&arg, &width_arg, argi)) {
       enc_cfg->g_w = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &height_arg, argi)) {
@@ -391,11 +396,10 @@ static void parse_command_line(int argc, const char **argv_,
     if (argi[0][0] == '-' && strlen(argi[0]) > 1)
       die("Error: Unrecognized option %s\n", *argi);
 
-  if (argv[0] == NULL || argv[1] == 0) {
+  if (argv[0] == NULL) {
     usage_exit();
   }
   app_input->input_ctx.filename = argv[0];
-  app_input->output_filename = argv[1];
   free(argv);
 
   open_input_file(&app_input->input_ctx);
