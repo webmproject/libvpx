@@ -166,6 +166,15 @@ void vpx_img_downshift(vpx_image_t *dst, vpx_image_t *src, int down_shift);
 void vpx_img_truncate_16_to_8(vpx_image_t *dst, vpx_image_t *src);
 #endif
 
+int compare_img(const vpx_image_t *const img1, const vpx_image_t *const img2);
+#if CONFIG_VP9_HIGHBITDEPTH
+void find_mismatch_high(const vpx_image_t *const img1,
+                        const vpx_image_t *const img2, int yloc[4], int uloc[4],
+                        int vloc[4]);
+#endif
+void find_mismatch(const vpx_image_t *const img1, const vpx_image_t *const img2,
+                   int yloc[4], int uloc[4], int vloc[4]);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

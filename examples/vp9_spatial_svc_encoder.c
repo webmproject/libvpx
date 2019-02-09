@@ -749,6 +749,62 @@ static void set_frame_flags_bypass_mode_ex1(
   }
 }
 
+#if CONFIG_DECODERS
+static void test_decode(vpx_codec_ctx_t *encoder, vpx_codec_ctx_t *decoder,
+                        const int frames_out, int *mismatch_seen) {
+  vpx_image_t enc_img, dec_img;
+  struct vp9_ref_frame ref_enc, ref_dec;
+  if (*mismatch_seen) return;
+  /* Get the internal reference frame */
+  ref_enc.idx = 0;
+  ref_dec.idx = 0;
+  vpx_codec_control(encoder, VP9_GET_REFERENCE, &ref_enc);
+  enc_img = ref_enc.img;
+  vpx_codec_control(decoder, VP9_GET_REFERENCE, &ref_dec);
+  dec_img = ref_dec.img;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if ((enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) !=
+      (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
+    if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+      vpx_img_alloc(&enc_img, enc_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+                    enc_img.d_w, enc_img.d_h, 16);
+      vpx_img_truncate_16_to_8(&enc_img, &ref_enc.img);
+    }
+    if (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+      vpx_img_alloc(&dec_img, dec_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+                    dec_img.d_w, dec_img.d_h, 16);
+      vpx_img_truncate_16_to_8(&dec_img, &ref_dec.img);
+    }
+  }
+#endif
+
+  if (!compare_img(&enc_img, &dec_img)) {
+    int y[4], u[4], v[4];
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+      find_mismatch_high(&enc_img, &dec_img, y, u, v);
+    } else {
+      find_mismatch(&enc_img, &dec_img, y, u, v);
+    }
+#else
+    find_mismatch(&enc_img, &dec_img, y, u, v);
+#endif
+    decoder->err = 1;
+    printf(
+        "Encode/decode mismatch on frame %d at"
+        " Y[%d, %d] {%d/%d},"
+        " U[%d, %d] {%d/%d},"
+        " V[%d, %d] {%d/%d}\n",
+        frames_out, y[0], y[1], y[2], y[3], u[0], u[1], u[2], u[3], v[0], v[1],
+        v[2], v[3]);
+    *mismatch_seen = frames_out;
+  }
+
+  vpx_img_free(&enc_img);
+  vpx_img_free(&dec_img);
+}
+#endif
+
 #if OUTPUT_RC_STATS
 static void svc_output_rc_stats(
     vpx_codec_ctx_t *codec, vpx_codec_enc_cfg_t *enc_cfg,
@@ -843,7 +899,7 @@ int main(int argc, const char **argv) {
   AppInput app_input;
   VpxVideoWriter *writer = NULL;
   VpxVideoInfo info;
-  vpx_codec_ctx_t codec;
+  vpx_codec_ctx_t encoder;
   vpx_codec_enc_cfg_t enc_cfg;
   SvcContext svc_ctx;
   vpx_svc_frame_drop_t svc_drop_frame;
@@ -865,6 +921,13 @@ int main(int argc, const char **argv) {
 #endif
   struct vpx_usec_timer timer;
   int64_t cx_time = 0;
+#if CONFIG_INTERNAL_STATS
+  FILE *f = fopen("opsnr.stt", "a");
+#endif
+#if CONFIG_DECODERS
+  int mismatch_seen = 0;
+  vpx_codec_ctx_t decoder;
+#endif
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   memset(&app_input, 0, sizeof(AppInput));
   memset(&info, 0, sizeof(VpxVideoInfo));
@@ -898,9 +961,14 @@ int main(int argc, const char **argv) {
   }
 
   // Initialize codec
-  if (vpx_svc_init(&svc_ctx, &codec, vpx_codec_vp9_cx(), &enc_cfg) !=
+  if (vpx_svc_init(&svc_ctx, &encoder, vpx_codec_vp9_cx(), &enc_cfg) !=
       VPX_CODEC_OK)
     die("Failed to initialize encoder\n");
+#if CONFIG_DECODERS
+  if (vpx_codec_dec_init(
+          &decoder, get_vpx_decoder_by_name("vp9")->codec_interface(), NULL, 0))
+    die("Failed to initialize decoder\n");
+#endif
 
 #if OUTPUT_RC_STATS
   rc.window_count = 1;
@@ -946,32 +1014,33 @@ int main(int argc, const char **argv) {
     read_frame(&app_input.input_ctx, &raw);
 
   if (svc_ctx.speed != -1)
-    vpx_codec_control(&codec, VP8E_SET_CPUUSED, svc_ctx.speed);
+    vpx_codec_control(&encoder, VP8E_SET_CPUUSED, svc_ctx.speed);
   if (svc_ctx.threads) {
-    vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, get_msb(svc_ctx.threads));
+    vpx_codec_control(&encoder, VP9E_SET_TILE_COLUMNS,
+                      get_msb(svc_ctx.threads));
     if (svc_ctx.threads > 1)
-      vpx_codec_control(&codec, VP9E_SET_ROW_MT, 1);
+      vpx_codec_control(&encoder, VP9E_SET_ROW_MT, 1);
     else
-      vpx_codec_control(&codec, VP9E_SET_ROW_MT, 0);
+      vpx_codec_control(&encoder, VP9E_SET_ROW_MT, 0);
   }
   if (svc_ctx.speed >= 5 && svc_ctx.aqmode == 1)
-    vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
+    vpx_codec_control(&encoder, VP9E_SET_AQ_MODE, 3);
   if (svc_ctx.speed >= 5)
-    vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
-  vpx_codec_control(&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT, 900);
+    vpx_codec_control(&encoder, VP8E_SET_STATIC_THRESHOLD, 1);
+  vpx_codec_control(&encoder, VP8E_SET_MAX_INTRA_BITRATE_PCT, 900);
 
-  vpx_codec_control(&codec, VP9E_SET_SVC_INTER_LAYER_PRED,
+  vpx_codec_control(&encoder, VP9E_SET_SVC_INTER_LAYER_PRED,
                     app_input.inter_layer_pred);
 
-  vpx_codec_control(&codec, VP9E_SET_NOISE_SENSITIVITY, 0);
+  vpx_codec_control(&encoder, VP9E_SET_NOISE_SENSITIVITY, 0);
 
-  vpx_codec_control(&codec, VP9E_SET_TUNE_CONTENT, app_input.tune_content);
+  vpx_codec_control(&encoder, VP9E_SET_TUNE_CONTENT, app_input.tune_content);
 
   svc_drop_frame.framedrop_mode = FULL_SUPERFRAME_DROP;
   for (sl = 0; sl < (unsigned int)svc_ctx.spatial_layers; ++sl)
     svc_drop_frame.framedrop_thresh[sl] = enc_cfg.rc_dropframe_thresh;
   svc_drop_frame.max_consec_drop = INT_MAX;
-  vpx_codec_control(&codec, VP9E_SET_SVC_FRAME_DROP_LAYER, &svc_drop_frame);
+  vpx_codec_control(&encoder, VP9E_SET_SVC_FRAME_DROP_LAYER, &svc_drop_frame);
 
   // Encode frames
   while (!end_of_stream) {
@@ -1023,7 +1092,7 @@ int main(int argc, const char **argv) {
           layer_id.spatial_layer_id = 1;
         }
       }
-      vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id);
+      vpx_codec_control(&encoder, VP9E_SET_SVC_LAYER_ID, &layer_id);
       // TODO(jianj): Fix the parameter passing for "is_key_frame" in
       // set_frame_flags_bypass_model() for case of periodic key frames.
       if (example_pattern == 0) {
@@ -1038,7 +1107,7 @@ int main(int argc, const char **argv) {
       ref_frame_config.duration[0] = frame_duration * 1;
       ref_frame_config.duration[1] = frame_duration * 1;
 
-      vpx_codec_control(&codec, VP9E_SET_SVC_REF_FRAME_CONFIG,
+      vpx_codec_control(&encoder, VP9E_SET_SVC_REF_FRAME_CONFIG,
                         &ref_frame_config);
       // Keep track of input frames, to account for frame drops in rate control
       // stats/metrics.
@@ -1061,17 +1130,17 @@ int main(int argc, const char **argv) {
 
     vpx_usec_timer_start(&timer);
     res = vpx_svc_encode(
-        &svc_ctx, &codec, (end_of_stream ? NULL : &raw), pts, frame_duration,
+        &svc_ctx, &encoder, (end_of_stream ? NULL : &raw), pts, frame_duration,
         svc_ctx.speed >= 5 ? VPX_DL_REALTIME : VPX_DL_GOOD_QUALITY);
     vpx_usec_timer_mark(&timer);
     cx_time += vpx_usec_timer_elapsed(&timer);
 
     fflush(stdout);
     if (res != VPX_CODEC_OK) {
-      die_codec(&codec, "Failed to encode frame");
+      die_codec(&encoder, "Failed to encode frame");
     }
 
-    while ((cx_pkt = vpx_codec_get_cx_data(&codec, &iter)) != NULL) {
+    while ((cx_pkt = vpx_codec_get_cx_data(&encoder, &iter)) != NULL) {
       switch (cx_pkt->kind) {
         case VPX_CODEC_CX_FRAME_PKT: {
           SvcInternal_t *const si = (SvcInternal_t *)svc_ctx.internal;
@@ -1081,7 +1150,7 @@ int main(int argc, const char **argv) {
                                          cx_pkt->data.frame.pts);
 #if OUTPUT_RC_STATS
             if (svc_ctx.output_rc_stat) {
-              svc_output_rc_stats(&codec, &enc_cfg, &layer_id, cx_pkt, &rc,
+              svc_output_rc_stats(&encoder, &enc_cfg, &layer_id, cx_pkt, &rc,
                                   outfile, frame_cnt, framerate);
             }
 #endif
@@ -1094,6 +1163,11 @@ int main(int argc, const char **argv) {
           if (enc_cfg.ss_number_layers == 1 && enc_cfg.ts_number_layers == 1)
             si->bytes_sum[0] += (int)cx_pkt->data.frame.sz;
           ++frames_received;
+#if CONFIG_DECODERS
+          if (vpx_codec_decode(&decoder, cx_pkt->data.frame.buf,
+                               (unsigned int)cx_pkt->data.frame.sz, NULL, 0))
+            die_codec(&decoder, "Failed to decode frame.");
+#endif
           break;
         }
         case VPX_CODEC_STATS_PKT: {
@@ -1103,6 +1177,18 @@ int main(int argc, const char **argv) {
         }
         default: { break; }
       }
+
+#if CONFIG_DECODERS
+      vpx_codec_control(&encoder, VP9E_GET_SVC_LAYER_ID, &layer_id);
+      // Don't look for mismatch on top spatial and top temporal layers as they
+      // are non reference frames.
+      if (!(layer_id.temporal_layer_id > 0 &&
+            layer_id.temporal_layer_id == (int)enc_cfg.ts_number_layers - 1 &&
+            cx_pkt->data.frame
+                .spatial_layer_encoded[enc_cfg.ss_number_layers - 1])) {
+        test_decode(&encoder, &decoder, frame_cnt, &mismatch_seen);
+      }
+#endif
     }
 
     if (!end_of_stream) {
@@ -1121,7 +1207,8 @@ int main(int argc, const char **argv) {
     printf("\n");
   }
 #endif
-  if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec");
+  if (vpx_codec_destroy(&encoder))
+    die_codec(&encoder, "Failed to destroy codec");
   if (app_input.passes == 2) stats_close(&app_input.rc_stats, 1);
   if (writer) {
     vpx_video_writer_close(writer);
@@ -1132,6 +1219,14 @@ int main(int argc, const char **argv) {
       vpx_video_writer_close(outfile[sl]);
     }
   }
+#endif
+#if CONFIG_INTERNAL_STATS
+  if (mismatch_seen) {
+    fprintf(f, "First mismatch occurred in frame %d\n", mismatch_seen);
+  } else {
+    fprintf(f, "No mismatch detected in recon buffers\n");
+  }
+  fclose(f);
 #endif
   printf("Frame cnt and encoding time/FPS stats for encoding: %d %f %f \n",
          frame_cnt, 1000 * (float)cx_time / (double)(frame_cnt * 1000000),
