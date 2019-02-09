@@ -1901,13 +1901,12 @@ static double full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
   return bestsme;
 }
 
-double vp9_diamond_search_sad_new(const MACROBLOCK *x,
-                                  const search_site_config *cfg,
-                                  const MV *init_full_mv, MV *best_full_mv,
-                                  double *best_mv_dist, double *best_mv_cost,
-                                  int search_param, double lambda, int *num00,
-                                  const vp9_variance_fn_ptr_t *fn_ptr,
-                                  const int_mv *nb_full_mvs, int full_mv_num) {
+static double diamond_search_sad_new(
+    const MACROBLOCK *x, const search_site_config *cfg, const MV *init_full_mv,
+    MV *best_full_mv, double *best_mv_dist, double *best_mv_cost,
+    int search_param, double lambda, int *num00,
+    const vp9_variance_fn_ptr_t *fn_ptr, const int_mv *nb_full_mvs,
+    int full_mv_num) {
   int i, j, step;
 
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -2425,7 +2424,7 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
   const int further_steps = MAX_MVSEARCH_STEPS - 1 - step_param;
   const MV center_mv = { 0, 0 };
   vpx_clear_system_state();
-  bestsme = vp9_diamond_search_sad_new(
+  bestsme = diamond_search_sad_new(
       x, &cpi->ss_cfg, mvp_full, best_mv, best_mv_dist, best_mv_cost,
       step_param, lambda, &n, fn_ptr, nb_full_mvs, full_mv_num);
 
@@ -2443,7 +2442,7 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
       MV temp_mv;
       double mv_dist;
       double mv_cost;
-      thissme = vp9_diamond_search_sad_new(
+      thissme = diamond_search_sad_new(
           x, &cpi->ss_cfg, mvp_full, &temp_mv, &mv_dist, &mv_cost,
           step_param + n, lambda, &num00, fn_ptr, nb_full_mvs, full_mv_num);
       thissme = vp9_get_mvpred_var(x, &temp_mv, &center_mv, fn_ptr, 0);

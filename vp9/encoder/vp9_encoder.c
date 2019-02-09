@@ -6337,9 +6337,10 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x, GF_PICTURE *gf_picture,
-                         int frame_idx, TplDepFrame *tpl_frame, int rf_idx,
-                         BLOCK_SIZE bsize) {
+static void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x,
+                                GF_PICTURE *gf_picture, int frame_idx,
+                                TplDepFrame *tpl_frame, int rf_idx,
+                                BLOCK_SIZE bsize) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int unit_rows = tpl_frame->mi_rows / mi_height;
