@@ -6251,7 +6251,7 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             GF_PICTURE *gf_picture, int frame_idx,
                             TplDepFrame *tpl_frame, int rf_idx,
                             BLOCK_SIZE bsize, int mi_row, int mi_col,
-                            double *rd) {
+                            double *future_rd_diff) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int tmp_mv_mode_arr[kMvPreCheckSize];
@@ -6261,6 +6261,8 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int stride = tpl_frame->stride;
   double new_mv_rd = 0;
   double no_new_mv_rd = 0;
+  double this_new_mv_rd = 0;
+  double this_no_new_mv_rd = 0;
   int idx;
   int tmp_idx;
   assert(kMvPreCheckSize == (kMvPreCheckLines * (kMvPreCheckLines + 1)) >> 1);
@@ -6280,6 +6282,9 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mv_mode_arr[nb_row * stride + nb_col] =
             find_best_ref_mv_mode(cpi, x, gf_picture, frame_idx, tpl_frame,
                                   rf_idx, bsize, nb_row, nb_col, &this_rd, mv);
+        if (r == 0 && c == 0) {
+          this_no_new_mv_rd = this_rd;
+        }
         no_new_mv_rd += this_rd;
         tmp_mv_mode_arr[tmp_idx] = mv_mode_arr[nb_row * stride + nb_col];
         tmp_select_mv_arr[tmp_idx] = select_mv_arr[nb_row * stride + nb_col];
@@ -6290,9 +6295,10 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // new mv
   mv_mode_arr[mi_row * stride + mi_col] = NEW_MV_MODE;
-  new_mv_rd = eval_mv_mode(NEW_MV_MODE, cpi, x, gf_picture, frame_idx,
-                           tpl_frame, rf_idx, bsize, mi_row, mi_col,
-                           &select_mv_arr[mi_row * stride + mi_col]);
+  this_new_mv_rd = eval_mv_mode(NEW_MV_MODE, cpi, x, gf_picture, frame_idx,
+                                tpl_frame, rf_idx, bsize, mi_row, mi_col,
+                                &select_mv_arr[mi_row * stride + mi_col]);
+  new_mv_rd = this_new_mv_rd;
   // We start from idx = 1 because idx = 0 is evaluated as NEW_MV_MODE
   // beforehand.
   for (idx = 1; idx < kMvPreCheckLines; ++idx) {
@@ -6315,7 +6321,6 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // update best_mv_mode
   tmp_idx = 0;
   if (no_new_mv_rd < new_mv_rd) {
-    *rd = no_new_mv_rd;
     for (idx = 0; idx < kMvPreCheckLines; ++idx) {
       int r;
       for (r = 0; r <= idx; ++r) {
@@ -6329,8 +6334,10 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
         }
       }
     }
+    *future_rd_diff = 0;
   } else {
-    *rd = new_mv_rd;
+    *future_rd_diff =
+        (no_new_mv_rd - this_no_new_mv_rd) - (new_mv_rd - this_new_mv_rd);
   }
 }
 
@@ -6347,7 +6354,7 @@ void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x, GF_PICTURE *gf_picture,
     int r;
     for (r = VPXMAX(idx - unit_cols + 1, 0); r <= VPXMIN(idx, unit_rows - 1);
          ++r) {
-      double rd;  // TODO(angiebird): Use this information later.
+      double future_rd_diff;  // TODO(angiebird): Use this information later.
       int c = idx - r;
       int mi_row = r * mi_height;
       int mi_col = c * mi_width;
@@ -6355,7 +6362,7 @@ void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x, GF_PICTURE *gf_picture,
       assert(mi_row >= 0 && mi_row < tpl_frame->mi_rows);
       assert(mi_col >= 0 && mi_col < tpl_frame->mi_cols);
       predict_mv_mode(cpi, x, gf_picture, frame_idx, tpl_frame, rf_idx, bsize,
-                      mi_row, mi_col, &rd);
+                      mi_row, mi_col, &future_rd_diff);
     }
   }
 }
@@ -6863,7 +6870,7 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
   int tpl_group_frames = 0;
   int frame_idx;
-  const BLOCK_SIZE bsize = BLOCK_32X32;
+  cpi->tpl_bsize = BLOCK_32X32;
 
   init_gop_frames(cpi, gf_picture, gf_group, &tpl_group_frames);
 
@@ -6872,11 +6879,11 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
   // Backward propagation from tpl_group_frames to 1.
   for (frame_idx = tpl_group_frames - 1; frame_idx > 0; --frame_idx) {
     if (gf_picture[frame_idx].update_type == USE_BUF_FRAME) continue;
-    mc_flow_dispenser(cpi, gf_picture, frame_idx, bsize);
+    mc_flow_dispenser(cpi, gf_picture, frame_idx, cpi->tpl_bsize);
   }
 #if CONFIG_NON_GREEDY_MV
 #if DUMP_TPL_STATS
-  dump_tpl_stats(cpi, tpl_group_frames, gf_picture, bsize);
+  dump_tpl_stats(cpi, tpl_group_frames, gf_picture, cpi->tpl_bsize);
 #endif  // DUMP_TPL_STATS
 #endif  // CONFIG_NON_GREEDY_MV
 }
