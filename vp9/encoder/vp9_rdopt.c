@@ -2543,7 +2543,7 @@ static int discount_newmv_test(const VP9_COMP *cpi, int this_mode,
 #if CONFIG_NON_GREEDY_MV
   (void)mode_mv;
   (void)this_mv;
-  if (this_mode == NEWMV && bsize >= BLOCK_8X8) {
+  if (this_mode == NEWMV && bsize >= BLOCK_8X8 && cpi->tpl_ready) {
     const int gf_group_idx = cpi->twopass.gf_group.index;
     const int gf_rf_idx = ref_frame_to_gf_rf_idx(ref_frame);
     const TplDepFrame tpl_frame = cpi->tpl_stats[gf_group_idx];

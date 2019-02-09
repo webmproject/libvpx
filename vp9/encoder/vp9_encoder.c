@@ -2369,6 +2369,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
 #if CONFIG_NON_GREEDY_MV
   cpi->feature_score_loc_alloc = 0;
+  cpi->tpl_ready = 0;
 #endif  // CONFIG_NON_GREEDY_MV
   for (i = 0; i < MAX_ARF_GOP_SIZE; ++i) cpi->tpl_stats[i].tpl_stats_ptr = NULL;
 
@@ -6884,6 +6885,7 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
     mc_flow_dispenser(cpi, gf_picture, frame_idx, cpi->tpl_bsize);
   }
 #if CONFIG_NON_GREEDY_MV
+  cpi->tpl_ready = 1;
 #if DUMP_TPL_STATS
   dump_tpl_stats(cpi, tpl_group_frames, gf_picture, cpi->tpl_bsize);
 #endif  // DUMP_TPL_STATS
