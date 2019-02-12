@@ -3288,7 +3288,7 @@ static int ml_predict_breakout(VP9_COMP *const cpi, BLOCK_SIZE bsize,
       linear_score += linear_weights[i] * features[i];
   }
 
-  return linear_score >= cpi->sf.ml_partition_search_breakout_thresh[q_ctx];
+  return linear_score >= cpi->sf.rd_ml_partition.search_breakout_thresh[q_ctx];
 }
 #undef FEATURES
 
@@ -3313,15 +3313,15 @@ static void ml_prune_rect_partition(VP9_COMP *const cpi, MACROBLOCK *const x,
     case BLOCK_8X8: break;
     case BLOCK_16X16:
       nn_config = &vp9_rect_part_nnconfig_16;
-      thresh = cpi->sf.ml_prune_rect_partition_threhold[1];
+      thresh = cpi->sf.rd_ml_partition.prune_rect_thresh[1];
       break;
     case BLOCK_32X32:
       nn_config = &vp9_rect_part_nnconfig_32;
-      thresh = cpi->sf.ml_prune_rect_partition_threhold[2];
+      thresh = cpi->sf.rd_ml_partition.prune_rect_thresh[2];
       break;
     case BLOCK_64X64:
       nn_config = &vp9_rect_part_nnconfig_64;
-      thresh = cpi->sf.ml_prune_rect_partition_threhold[3];
+      thresh = cpi->sf.rd_ml_partition.prune_rect_thresh[3];
       break;
     default: assert(0 && "Unexpected block size."); return;
   }
@@ -3798,12 +3798,12 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   pc_tree->partitioning = PARTITION_NONE;
 
-  if (cpi->sf.ml_var_partition_pruning && !frame_is_intra_only(cm)) {
-    const int do_ml_var_partition_pruning =
+  if (cpi->sf.rd_ml_partition.var_pruning && !frame_is_intra_only(cm)) {
+    const int do_rd_ml_partition_var_pruning =
         partition_none_allowed && do_split &&
         mi_row + num_8x8_blocks_high_lookup[bsize] <= cm->mi_rows &&
         mi_col + num_8x8_blocks_wide_lookup[bsize] <= cm->mi_cols;
-    if (do_ml_var_partition_pruning) {
+    if (do_rd_ml_partition_var_pruning) {
       ml_predict_var_rd_paritioning(cpi, x, pc_tree, bsize, mi_row, mi_col,
                                     &partition_none_allowed, &do_split);
     } else {
@@ -3840,7 +3840,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         best_rdc = this_rdc;
         if (bsize >= BLOCK_8X8) pc_tree->partitioning = PARTITION_NONE;
 
-        if (cpi->sf.ml_partition_search_early_termination) {
+        if (cpi->sf.rd_ml_partition.search_early_termination) {
           // Currently, the machine-learning based partition search early
           // termination is only used while bsize is 16x16, 32x32 or 64x64,
           // VPXMIN(cm->width, cm->height) >= 480, and speed = 0.
@@ -3856,15 +3856,14 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
         if ((do_split || do_rect) && !x->e_mbd.lossless && ctx->skippable) {
           const int use_ml_based_breakout =
-              cpi->sf.use_ml_partition_search_breakout &&
-              cm->base_qindex >= 100;
+              cpi->sf.rd_ml_partition.search_breakout && cm->base_qindex >= 100;
           if (use_ml_based_breakout) {
             if (ml_predict_breakout(cpi, bsize, x, &this_rdc)) {
               do_split = 0;
               do_rect = 0;
             }
           } else {
-            if (!cpi->sf.ml_partition_search_early_termination) {
+            if (!cpi->sf.rd_ml_partition.search_early_termination) {
               if ((best_rdc.dist < (dist_breakout_thr >> 2)) ||
                   (best_rdc.dist < dist_breakout_thr &&
                    best_rdc.rate < rate_breakout_thr)) {
@@ -4020,7 +4019,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         pc_tree->partitioning = PARTITION_SPLIT;
 
         // Rate and distortion based partition search termination clause.
-        if (!cpi->sf.ml_partition_search_early_termination &&
+        if (!cpi->sf.rd_ml_partition.search_early_termination &&
             !x->e_mbd.lossless &&
             ((best_rdc.dist < (dist_breakout_thr >> 2)) ||
              (best_rdc.dist < dist_breakout_thr &&
@@ -4532,7 +4531,6 @@ static void pred_pixel_ready_reset(PC_TREE *pc_tree, BLOCK_SIZE bsize) {
   }
 }
 
-#if CONFIG_ML_VAR_PARTITION
 #define FEATURES 6
 #define LABELS 2
 static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
@@ -4602,7 +4600,6 @@ static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
 }
 #undef FEATURES
 #undef LABELS
-#endif  // CONFIG_ML_VAR_PARTITION
 
 static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                                  TileDataEnc *tile_data, TOKENEXTRA **tp,
@@ -4633,10 +4630,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       !force_vert_split && yss <= xss && bsize >= BLOCK_8X8;
   int partition_vert_allowed =
       !force_horz_split && xss <= yss && bsize >= BLOCK_8X8;
-#if CONFIG_ML_VAR_PARTITION
   const int use_ml_based_partitioning =
       sf->partition_search_type == ML_BASED_PARTITION;
-#endif  // CONFIG_ML_VAR_PARTITION
 
   (void)*tp_orig;
 
@@ -4668,7 +4663,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     partition_vert_allowed &= force_vert_split;
   }
 
-#if CONFIG_ML_VAR_PARTITION
   if (use_ml_based_partitioning) {
     if (partition_none_allowed || do_split) do_rect = 0;
     if (partition_none_allowed && do_split) {
@@ -4678,7 +4672,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       if (ml_predicted_partition == PARTITION_SPLIT) partition_none_allowed = 0;
     }
   }
-#endif  // CONFIG_ML_VAR_PARTITION
 
   if (!partition_none_allowed && !do_split) do_rect = 1;
 
@@ -4703,10 +4696,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         best_rdc = this_rdc;
         if (bsize >= BLOCK_8X8) pc_tree->partitioning = PARTITION_NONE;
 
-#if CONFIG_ML_VAR_PARTITION
-        if (!use_ml_based_partitioning)
-#endif  // CONFIG_ML_VAR_PARTITION
-        {
+        if (!use_ml_based_partitioning) {
           int64_t dist_breakout_thr = sf->partition_search_breakout_thr.dist;
           int64_t rate_breakout_thr = sf->partition_search_breakout_thr.rate;
           dist_breakout_thr >>=
@@ -5115,30 +5105,25 @@ static void nonrd_use_partition(VP9_COMP *cpi, ThreadData *td,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
-#if CONFIG_ML_VAR_PARTITION
 // Get a prediction(stored in x->est_pred) for the whole 64x64 superblock.
 static void get_estimated_pred(VP9_COMP *cpi, const TileInfo *const tile,
                                MACROBLOCK *x, int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   const int is_key_frame = frame_is_intra_only(cm);
+  MACROBLOCKD *xd = &x->e_mbd;
 
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
 
   if (!is_key_frame) {
-    MACROBLOCKD *xd = &x->e_mbd;
     MODE_INFO *mi = xd->mi[0];
     YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
     const YV12_BUFFER_CONFIG *yv12_g = NULL;
     const BLOCK_SIZE bsize = BLOCK_32X32 + (mi_col + 4 < cm->mi_cols) * 2 +
                              (mi_row + 4 < cm->mi_rows);
-    int pixels_wide = 64, pixels_high = 64;
     unsigned int y_sad_g, y_sad_thr;
     unsigned int y_sad = UINT_MAX;
 
     assert(yv12 != NULL);
-
-    if (xd->mb_to_right_edge < 0) pixels_wide += (xd->mb_to_right_edge >> 3);
-    if (xd->mb_to_bottom_edge < 0) pixels_high += (xd->mb_to_bottom_edge >> 3);
 
     if (!(is_one_pass_cbr_svc(cpi) && cpi->svc.spatial_layer_id) ||
         cpi->svc.use_gf_temporal_ref_current_layer) {
@@ -5193,7 +5178,6 @@ static void get_estimated_pred(VP9_COMP *cpi, const TileInfo *const tile,
                            &cm->frame_refs[GOLDEN_FRAME - 1].sf);
       mi->ref_frame[0] = GOLDEN_FRAME;
       mi->mv[0].as_int = 0;
-      y_sad = y_sad_g;
     } else {
       x->pred_mv[LAST_FRAME] = mi->mv[0].as_mv;
     }
@@ -5218,7 +5202,6 @@ static void get_estimated_pred(VP9_COMP *cpi, const TileInfo *const tile,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 }
-#endif  // CONFIG_ML_VAR_PARTITION
 
 static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
                                 TileDataEnc *tile_data, int mi_row,
@@ -5311,7 +5294,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
                             BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
         break;
-#if CONFIG_ML_VAR_PARTITION
       case ML_BASED_PARTITION:
         get_estimated_pred(cpi, tile_info, x, mi_row, mi_col);
         x->max_partition_size = BLOCK_64X64;
@@ -5321,7 +5303,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
                              BLOCK_64X64, &dummy_rdc, 1, INT64_MAX,
                              td->pc_root);
         break;
-#endif  // CONFIG_ML_VAR_PARTITION
       case SOURCE_VAR_BASED_PARTITION:
         set_source_var_based_partition(cpi, tile_info, x, mi, mi_row, mi_col);
         nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
