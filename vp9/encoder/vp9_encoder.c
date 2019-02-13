@@ -2585,6 +2585,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
         vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
       }
       vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
+      vpx_free(cpi->tpl_stats[frame].rd_diff_arr[rf_idx]);
     }
 #endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
@@ -6246,12 +6247,12 @@ static int find_best_ref_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             GF_PICTURE *gf_picture, int frame_idx,
                             TplDepFrame *tpl_frame, int rf_idx,
-                            BLOCK_SIZE bsize, int mi_row, int mi_col,
-                            double *future_rd_diff) {
+                            BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int tmp_mv_mode_arr[kMvPreCheckSize];
   int *mv_mode_arr = tpl_frame->mv_mode_arr[rf_idx];
+  double *rd_diff_arr = tpl_frame->rd_diff_arr[rf_idx];
   int_mv *select_mv_arr = cpi->select_mv_arr;
   int_mv tmp_select_mv_arr[kMvPreCheckSize];
   int stride = tpl_frame->stride;
@@ -6330,9 +6331,9 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
         }
       }
     }
-    *future_rd_diff = 0;
+    rd_diff_arr[mi_row * stride + mi_col] = 0;
   } else {
-    *future_rd_diff =
+    rd_diff_arr[mi_row * stride + mi_col] =
         (no_new_mv_rd - this_no_new_mv_rd) - (new_mv_rd - this_new_mv_rd);
   }
 }
@@ -6351,7 +6352,6 @@ static void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x,
     int r;
     for (r = VPXMAX(idx - unit_cols + 1, 0); r <= VPXMIN(idx, unit_rows - 1);
          ++r) {
-      double future_rd_diff;  // TODO(angiebird): Use this information later.
       int c = idx - r;
       int mi_row = r * mi_height;
       int mi_col = c * mi_width;
@@ -6359,7 +6359,7 @@ static void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x,
       assert(mi_row >= 0 && mi_row < tpl_frame->mi_rows);
       assert(mi_col >= 0 && mi_col < tpl_frame->mi_cols);
       predict_mv_mode(cpi, x, gf_picture, frame_idx, tpl_frame, rf_idx, bsize,
-                      mi_row, mi_col, &future_rd_diff);
+                      mi_row, mi_col);
     }
   }
 }
@@ -6848,6 +6848,11 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
           cm, cpi->tpl_stats[frame].mv_mode_arr[rf_idx],
           vpx_calloc(mi_rows * mi_cols * 4,
                      sizeof(*cpi->tpl_stats[frame].mv_mode_arr[rf_idx])));
+      vpx_free(cpi->tpl_stats[frame].rd_diff_arr[rf_idx]);
+      CHECK_MEM_ERROR(
+          cm, cpi->tpl_stats[frame].rd_diff_arr[rf_idx],
+          vpx_calloc(mi_rows * mi_cols * 4,
+                     sizeof(*cpi->tpl_stats[frame].rd_diff_arr[rf_idx])));
     }
 #endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);

@@ -327,6 +327,7 @@ typedef struct TplDepFrame {
   double mv_cost_sum[3];
   int_mv *pyramid_mv_arr[3][SQUARE_BLOCK_SIZES];
   int *mv_mode_arr[3];
+  double *rd_diff_arr[3];
 #endif
 } TplDepFrame;
 
