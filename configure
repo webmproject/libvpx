@@ -419,6 +419,12 @@ process_cmdline() {
 }
 
 post_process_cmdline() {
+    if enabled coefficient_range_checking; then
+      echo "coefficient-range-checking is for decoders only, disabling encoders:"
+      soft_disable vp8_encoder
+      soft_disable vp9_encoder
+    fi
+
     c=""
 
     # Enable all detected codecs, if they haven't been disabled
