@@ -564,14 +564,6 @@ static void set_rt_speed_feature_framesize_independent(
         (frames_since_key % (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = is_keyframe ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
-    if (sf->nonrd_use_ml_partition) {
-      if (!frame_is_intra_only(cm) && cm->width >= 360 && cm->height >= 360)
-        sf->partition_search_type = ML_BASED_PARTITION;
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH)
-        sf->partition_search_type = REFERENCE_PARTITION;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    }
     if (cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0 &&
         cpi->rc.is_src_frame_alt_ref) {
       sf->partition_search_type = VAR_BASED_PARTITION;
@@ -632,10 +624,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->use_altref_onepass = 1;
       sf->use_compound_nonrd_pickmode = 1;
     }
-
-    if (!sf->nonrd_use_ml_partition)
-      sf->partition_search_type = VAR_BASED_PARTITION;
-
+    sf->partition_search_type = VAR_BASED_PARTITION;
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
     sf->skip_encode_sb = 0;
@@ -722,7 +711,10 @@ static void set_rt_speed_feature_framesize_independent(
     if (!cpi->use_svc) cpi->max_copied_frame = 4;
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
       sf->adaptive_rd_thresh_row_mt = 1;
-
+    // Enable ML based partition for low res.
+    if (!frame_is_intra_only(cm) && cm->width * cm->height <= 352 * 288) {
+      sf->nonrd_use_ml_partition = 1;
+    }
     if (content == VP9E_CONTENT_SCREEN) sf->mv.subpel_force_stop = FULL_PEL;
     if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     // Only keep INTRA_DC mode for speed 8.
@@ -768,6 +760,9 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->oxcf.rc_mode == VPX_CBR) sf->disable_golden_ref = 1;
     if (cpi->rc.avg_frame_low_motion < 65) sf->default_interp_filter = BILINEAR;
   }
+
+  if (sf->nonrd_use_ml_partition)
+    sf->partition_search_type = ML_BASED_PARTITION;
 
   if (sf->use_altref_onepass) {
     if (cpi->rc.is_src_frame_alt_ref && cm->frame_type != KEY_FRAME) {
