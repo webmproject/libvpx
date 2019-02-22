@@ -125,7 +125,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     // Tune these thresholds for different resolutions when denoising is
     // enabled.
     if (cm->width > 640 && cm->width < 1920) {
-      thresh_consec_zeromv = 4;
+      thresh_consec_zeromv = 2;
       thresh_sum_diff = 200;
       thresh_sum_spatial = (120 * 120) << 8;
       thresh_spatial_var = (48 * 48) << 8;
@@ -151,7 +151,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   } else if (frame_counter > 60 && cpi->svc.num_encoded_top_layer > 1 &&
              cpi->rc.frames_since_key > cpi->svc.number_spatial_layers &&
              cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1 &&
-             cpi->rc.avg_frame_low_motion < (low_res ? 70 : 50)) {
+             cpi->rc.avg_frame_low_motion < (low_res ? 60 : 40)) {
     // Force noise estimation to 0 and denoiser off if content has high motion.
     ne->level = kLowLow;
     ne->count = 0;
