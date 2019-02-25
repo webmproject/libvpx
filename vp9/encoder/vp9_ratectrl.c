@@ -668,7 +668,7 @@ static int adjust_q_cbr(const VP9_COMP *cpi, int q) {
   }
   if (cpi->oxcf.content == VP9E_CONTENT_SCREEN)
     vp9_cyclic_refresh_limit_q(cpi, &q);
-  return q;
+  return VPXMAX(VPXMIN(q, cpi->rc.worst_quality), cpi->rc.best_quality);
 }
 
 static double get_rate_correction_factor(const VP9_COMP *cpi) {
@@ -1076,6 +1076,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
         q = *top_index;
     }
   }
+
   assert(*top_index <= rc->worst_quality && *top_index >= rc->best_quality);
   assert(*bottom_index <= rc->worst_quality &&
          *bottom_index >= rc->best_quality);
