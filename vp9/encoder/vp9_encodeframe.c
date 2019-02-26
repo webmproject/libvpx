@@ -235,6 +235,10 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
       break;
   }
 
+  // Set segment index from ROI map if it's enabled.
+  if (cpi->roi.enabled)
+    mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+
   vp9_init_plane_quantizers(cpi, x);
 }
 
@@ -2440,17 +2444,15 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
   *(xd->mi[0]) = ctx->mic;
   *(x->mbmi_ext) = ctx->mbmi_ext;
 
-  if (seg->enabled && cpi->oxcf.aq_mode != NO_AQ) {
-    // For in frame complexity AQ or variance AQ, copy segment_id from
-    // segmentation_map.
-    if (cpi->oxcf.aq_mode != CYCLIC_REFRESH_AQ) {
+  if (seg->enabled && (cpi->oxcf.aq_mode != NO_AQ || cpi->roi.enabled)) {
+    // Setting segmentation map for cyclic_refresh.
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+      vp9_cyclic_refresh_update_segment(cpi, mi, mi_row, mi_col, bsize,
+                                        ctx->rate, ctx->dist, x->skip, p);
+    } else {
       const uint8_t *const map =
           seg->update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
       mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
-    } else {
-      // Setting segmentation map for cyclic_refresh.
-      vp9_cyclic_refresh_update_segment(cpi, mi, mi_row, mi_col, bsize,
-                                        ctx->rate, ctx->dist, x->skip, p);
     }
     vp9_init_plane_quantizers(cpi, x);
   }
