@@ -1894,15 +1894,12 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
 static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
                                int mi_row, int mi_col, BLOCK_SIZE bsize,
                                AQ_MODE aq_mode) {
-  int segment_qindex;
   VP9_COMMON *const cm = &cpi->common;
   const uint8_t *const map =
       cm->seg.update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
 
   vp9_init_plane_quantizers(cpi, x);
   vpx_clear_system_state();
-  segment_qindex =
-      vp9_get_qindex(&cm->seg, x->e_mbd.mi[0]->segment_id, cm->base_qindex);
 
   if (aq_mode == NO_AQ || aq_mode == PSNR_AQ) {
     if (cpi->sf.enable_tpl_model) x->rdmult = x->cb_rdmult;
@@ -1917,7 +1914,7 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
     return;
   }
 
-  x->rdmult = vp9_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
+  x->rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
 }
 
 static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
