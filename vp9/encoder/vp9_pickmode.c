@@ -1813,7 +1813,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       x->source_variance =
           vp9_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
 
-    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && mi->segment_id > 0 &&
+    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
+        cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && mi->segment_id > 0 &&
         x->zero_temp_sad_source && x->source_variance == 0) {
       mi->segment_id = 0;
       vp9_init_plane_quantizers(cpi, x);
