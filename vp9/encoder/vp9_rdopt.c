@@ -3124,16 +3124,14 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
 
 // This function is designed to apply a bias or adjustment to an rd value based
 // on the relative variance of the source and reconstruction.
-#define VERY_LOW_VAR_THRESH 2
-#define LOW_VAR_THRESH 5
+#define LOW_VAR_THRESH 250
 #define VAR_MULT 250
 static unsigned int max_var_adjust[VP9E_CONTENT_INVALID] = { 16, 16, 250 };
 
 static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
                                    BLOCK_SIZE bsize, int64_t *this_rd,
                                    struct buf_2d *recon,
-                                   MV_REFERENCE_FRAME ref_frame,
-                                   unsigned int source_variance) {
+                                   MV_REFERENCE_FRAME ref_frame) {
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int rec_variance;
   unsigned int src_variance;
@@ -3168,7 +3166,7 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   // Lower of source (raw per pixel value) and recon variance. Note that
   // if the source per pixel is 0 then the recon value here will not be per
   // pixel (see above) so will likely be much larger.
-  src_rec_min = VPXMIN(source_variance, rec_variance);
+  src_rec_min = VPXMIN(src_variance, rec_variance);
 
   if (src_rec_min > LOW_VAR_THRESH) return;
 
@@ -3184,7 +3182,7 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   *this_rd += (*this_rd * var_factor) / 100;
 
   if (content_type == VP9E_CONTENT_FILM) {
-    if (src_rec_min <= VERY_LOW_VAR_THRESH) {
+    if (src_rec_min <= LOW_VAR_THRESH / 2) {
       if (ref_frame == INTRA_FRAME) *this_rd *= 2;
       if (bsize > BLOCK_16X16) *this_rd *= 2;
     }
@@ -3728,8 +3726,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
     // Apply an adjustment to the rd value based on the similarity of the
     // source variance and reconstructed variance.
     if (recon) {
-      rd_variance_adjustment(cpi, x, bsize, &this_rd, recon, ref_frame,
-                             x->source_variance);
+      rd_variance_adjustment(cpi, x, bsize, &this_rd, recon, ref_frame);
     }
 
     if (ref_frame == INTRA_FRAME) {
