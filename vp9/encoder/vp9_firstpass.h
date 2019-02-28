@@ -44,6 +44,7 @@ typedef struct {
 #define INVALID_ROW -1
 
 #define MAX_ARF_LAYERS 6
+#define SECTION_NOISE_DEF 250.0
 
 typedef struct {
   double frame_mb_intra_factor;
@@ -142,6 +143,7 @@ typedef struct {
   int gf_group_size;
   int max_layer_depth;
   int allowed_max_layer_depth;
+  int group_noise_energy;
 } GF_GROUP;
 
 typedef struct {
