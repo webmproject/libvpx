@@ -265,14 +265,16 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->mv.auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
     sf->mv.subpel_search_level = 1;
-    sf->mode_skip_start = 10;
+    if (cpi->oxcf.content != VP9E_CONTENT_FILM) sf->mode_skip_start = 10;
     sf->adaptive_pred_interp_filter = 1;
     sf->allow_acl = 0;
 
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
-    sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
-    sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
+    if (cpi->oxcf.content != VP9E_CONTENT_FILM) {
+      sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
+      sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
+    }
 
     sf->recode_tolerance_low = 15;
     sf->recode_tolerance_high = 30;
