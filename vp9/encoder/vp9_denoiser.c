@@ -689,8 +689,8 @@ int vp9_denoiser_alloc(VP9_COMMON *cm, struct SVC *svc, VP9_DENOISER *denoiser,
   make_grayscale(&denoiser->running_avg_y[i]);
 #endif
   denoiser->frame_buffer_initialized = 1;
-  denoiser->denoising_level = kDenLow;
-  denoiser->prev_denoising_level = kDenLow;
+  denoiser->denoising_level = kDenMedium;
+  denoiser->prev_denoising_level = kDenMedium;
   denoiser->reset = 0;
   denoiser->current_denoiser_frame = 0;
   return 0;
