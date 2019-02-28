@@ -3019,34 +3019,17 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    if (source_variance > 100) {
-      rec_variance = vp9_high_get_sby_perpixel_variance(cpi, &xd->plane[0].dst,
-                                                        bsize, xd->bd);
-      src_variance = source_variance;
-    } else {
-      rec_variance =
-          vp9_high_get_sby_variance(cpi, &xd->plane[0].dst, bsize, xd->bd);
-      src_variance =
-          vp9_high_get_sby_variance(cpi, &x->plane[0].src, bsize, xd->bd);
-    }
-  } else {
-    if (source_variance > 100) {
-      rec_variance =
-          vp9_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
-      src_variance = source_variance;
-    } else {
-      rec_variance = vp9_get_sby_variance(cpi, &xd->plane[0].dst, bsize);
-      src_variance = vp9_get_sby_variance(cpi, &x->plane[0].src, bsize);
-    }
-  }
-#else
-  if (source_variance > 100) {
-    rec_variance = vp9_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
-    src_variance = source_variance;
+    rec_variance =
+        vp9_high_get_sby_variance(cpi, &xd->plane[0].dst, bsize, xd->bd);
+    src_variance =
+        vp9_high_get_sby_variance(cpi, &x->plane[0].src, bsize, xd->bd);
   } else {
     rec_variance = vp9_get_sby_variance(cpi, &xd->plane[0].dst, bsize);
     src_variance = vp9_get_sby_variance(cpi, &x->plane[0].src, bsize);
   }
+#else
+  rec_variance = vp9_get_sby_variance(cpi, &xd->plane[0].dst, bsize);
+  src_variance = vp9_get_sby_variance(cpi, &x->plane[0].src, bsize);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Lower of source (raw per pixel value) and recon variance. Note that
