@@ -3013,6 +3013,8 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int absvar_diff = 0;
   unsigned int var_factor = 0;
   unsigned int adj_max;
+  const int bw = num_8x8_blocks_wide_lookup[bsize];
+  const int bh = num_8x8_blocks_high_lookup[bsize];
   vp9e_tune_content content_type = cpi->oxcf.content;
 
   if (*this_rd == INT64_MAX) return;
@@ -3031,6 +3033,10 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   rec_variance = vp9_get_sby_variance(cpi, &xd->plane[0].dst, bsize);
   src_variance = vp9_get_sby_variance(cpi, &x->plane[0].src, bsize);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  // Scale based on area in 8x8 blocks
+  rec_variance /= (bw * bh);
+  src_variance /= (bw * bh);
 
   // Lower of source (raw per pixel value) and recon variance. Note that
   // if the source per pixel is 0 then the recon value here will not be per
