@@ -2932,7 +2932,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
         } else {
           rc->avg_source_sad[lagframe_idx] = avg_sad;
         }
-        if (num_zero_temp_sad < (num_samples >> 1))
+        if (num_zero_temp_sad < (3 * num_samples >> 2))
           rc->high_num_blocks_with_motion = 1;
       }
     }
