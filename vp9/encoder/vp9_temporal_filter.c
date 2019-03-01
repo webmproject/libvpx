@@ -37,6 +37,13 @@ static int fixed_divide[512];
 static unsigned int index_mult[14] = {
   0, 0, 0, 0, 49152, 39322, 32768, 28087, 24576, 21846, 19661, 17874, 0, 15124
 };
+#if CONFIG_VP9_HIGHBITDEPTH
+static int64_t highbd_index_mult[14] = { 0U,          0U,          0U,
+                                         0U,          3221225472U, 2576980378U,
+                                         2147483648U, 1840700270U, 1610612736U,
+                                         1431655766U, 1288490189U, 1171354718U,
+                                         0U,          991146300U };
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static void temporal_filter_predictors_mb_c(
     MACROBLOCKD *xd, uint8_t *y_mb_ptr, uint8_t *u_mb_ptr, uint8_t *v_mb_ptr,
@@ -208,7 +215,12 @@ static INLINE int mod_index(int sum_dist, int index, int rounding, int strength,
 #if CONFIG_VP9_HIGHBITDEPTH
 static INLINE int highbd_mod_index(int sum_dist, int index, int rounding,
                                    int strength, int filter_weight) {
-  int mod = sum_dist * 3 / index;
+  int mod;
+
+  assert(index >= 0 && index <= 13);
+  assert(highbd_index_mult[index] != 0);
+
+  mod = (int)((clamp(sum_dist, 0, INT32_MAX) * highbd_index_mult[index]) >> 32);
   mod += rounding;
   mod >>= strength;
 
