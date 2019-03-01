@@ -483,6 +483,9 @@ static vpx_codec_err_t update_extracfg(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t set_cpu_used(vpx_codec_alg_priv_t *ctx, va_list args) {
   struct vp8_extracfg extra_cfg = ctx->vp8_cfg;
   extra_cfg.cpu_used = CAST(VP8E_SET_CPUUSED, args);
+  // Use fastest speed setting (speed 16 or -16) if it's set beyond the range.
+  extra_cfg.cpu_used = VPXMIN(16, extra_cfg.cpu_used);
+  extra_cfg.cpu_used = VPXMAX(-16, extra_cfg.cpu_used);
   return update_extracfg(ctx, &extra_cfg);
 }
 

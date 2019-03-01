@@ -261,6 +261,9 @@ static void parse_command_line(int argc, const char **argv_,
 #endif
     } else if (arg_match(&arg, &speed_arg, argi)) {
       svc_ctx->speed = arg_parse_uint(&arg);
+      if (svc_ctx->speed > 9) {
+        warn("Mapping speed %d to speed 9.\n", svc_ctx->speed);
+      }
     } else if (arg_match(&arg, &aqmode_arg, argi)) {
       svc_ctx->aqmode = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &threads_arg, argi)) {

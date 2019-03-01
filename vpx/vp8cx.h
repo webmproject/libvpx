@@ -148,7 +148,7 @@ enum vp8e_enc_control_id {
    * speed at the expense of quality.
    *
    * \note Valid range for VP8: -16..16
-   * \note Valid range for VP9: -8..8
+   * \note Valid range for VP9: -9..9
    *
    * Supported in codecs: VP8, VP9
    */

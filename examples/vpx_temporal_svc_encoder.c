@@ -726,6 +726,9 @@ int main(int argc, char **argv) {
   if (speed < 0) {
     die("Invalid speed setting: must be positive");
   }
+  if (strncmp(encoder->name, "vp9", 3) == 0 && speed > 9) {
+    warn("Mapping speed %d to speed 9.\n", speed);
+  }
 
   for (i = min_args_base;
        (int)i < min_args_base + mode_to_num_layers[layering_mode]; ++i) {
