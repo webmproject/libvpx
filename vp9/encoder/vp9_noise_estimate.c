@@ -32,7 +32,7 @@ static INLINE int noise_est_svc(const struct VP9_COMP *const cpi) {
 
 void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne, int width, int height) {
   ne->enabled = 0;
-  ne->level = kLow;
+  ne->level = (width * height < 1280 * 720) ? kLowLow : kLow;
   ne->value = 0;
   ne->count = 0;
   ne->thresh = 90;
