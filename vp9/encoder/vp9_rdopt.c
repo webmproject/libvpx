@@ -3131,7 +3131,8 @@ static unsigned int max_var_adjust[VP9E_CONTENT_INVALID] = { 16, 16, 250 };
 static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
                                    BLOCK_SIZE bsize, int64_t *this_rd,
                                    struct buf_2d *recon,
-                                   MV_REFERENCE_FRAME ref_frame) {
+                                   MV_REFERENCE_FRAME ref_frame,
+                                   PREDICTION_MODE this_mode) {
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int rec_variance;
   unsigned int src_variance;
@@ -3183,8 +3184,12 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (content_type == VP9E_CONTENT_FILM) {
     if (src_rec_min <= LOW_VAR_THRESH / 2) {
-      if (ref_frame == INTRA_FRAME) *this_rd *= 2;
-      if (bsize > BLOCK_16X16) *this_rd *= 2;
+      if (ref_frame == INTRA_FRAME) {
+        if (this_mode == DC_PRED)
+          *this_rd *= 2;
+        else
+          *this_rd += (*this_rd / 4);
+      }
     }
   }
 
@@ -3726,7 +3731,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
     // Apply an adjustment to the rd value based on the similarity of the
     // source variance and reconstructed variance.
     if (recon) {
-      rd_variance_adjustment(cpi, x, bsize, &this_rd, recon, ref_frame);
+      rd_variance_adjustment(cpi, x, bsize, &this_rd, recon, ref_frame,
+                             this_mode);
     }
 
     if (ref_frame == INTRA_FRAME) {
