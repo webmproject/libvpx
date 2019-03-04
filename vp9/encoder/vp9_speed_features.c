@@ -748,9 +748,7 @@ static void set_rt_speed_feature_framesize_independent(
 
   if (speed >= 9) {
     sf->mv.enable_adaptive_subpel_force_stop = 1;
-    sf->mv.adapt_subpel_force_stop.mv_thresh = 2;
-    if (cpi->rc.avg_frame_low_motion < 40)
-      sf->mv.adapt_subpel_force_stop.mv_thresh = 1;
+    sf->mv.adapt_subpel_force_stop.mv_thresh = 1;
     sf->mv.adapt_subpel_force_stop.force_stop_below = QUARTER_PEL;
     sf->mv.adapt_subpel_force_stop.force_stop_above = HALF_PEL;
     // Disable partition blocks below 16x16, except for low-resolutions.
@@ -758,7 +756,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->disable_16x16part_nonkey = 1;
     // Allow for disabling GOLDEN reference, for CBR mode.
     if (cpi->oxcf.rc_mode == VPX_CBR) sf->disable_golden_ref = 1;
-    if (cpi->rc.avg_frame_low_motion < 65) sf->default_interp_filter = BILINEAR;
+    sf->default_interp_filter = BILINEAR;
   }
 
   if (sf->nonrd_use_ml_partition)
