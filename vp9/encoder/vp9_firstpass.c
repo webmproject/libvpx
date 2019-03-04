@@ -3216,6 +3216,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   if (gf_group->update_type[gf_group->index] == ARF_UPDATE) {
     int target_rate;
 
+    vp9_zero(this_frame);
+    this_frame =
+        cpi->twopass.stats_in_start[cm->current_video_frame +
+                                    gf_group->arf_src_offset[gf_group->index]];
+
     vp9_configure_buffer_updates(cpi, gf_group->index);
 
     target_rate = gf_group->bit_allocation[gf_group->index];
@@ -3230,6 +3235,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
         !cpi->use_svc) {
       cpi->partition_search_skippable_frame = is_skippable_frame(cpi);
     }
+
+    // The multiplication by 256 reverses a scaling factor of (>> 8)
+    // applied when combining MB error values for the frame.
+    twopass->mb_av_energy = log((this_frame.intra_error * 256.0) + 1.0);
+    twopass->mb_smooth_pct = this_frame.intra_smooth_pct;
 
     return;
   }
