@@ -749,7 +749,7 @@ static void set_frame_flags_bypass_mode_ex1(
   }
 }
 
-#if CONFIG_DECODERS
+#if CONFIG_VP9_DECODER
 static void test_decode(vpx_codec_ctx_t *encoder, vpx_codec_ctx_t *decoder,
                         const int frames_out, int *mismatch_seen) {
   vpx_image_t enc_img, dec_img;
@@ -924,7 +924,7 @@ int main(int argc, const char **argv) {
 #if CONFIG_INTERNAL_STATS
   FILE *f = fopen("opsnr.stt", "a");
 #endif
-#if CONFIG_DECODERS
+#if CONFIG_VP9_DECODER
   int mismatch_seen = 0;
   vpx_codec_ctx_t decoder;
 #endif
@@ -964,7 +964,7 @@ int main(int argc, const char **argv) {
   if (vpx_svc_init(&svc_ctx, &encoder, vpx_codec_vp9_cx(), &enc_cfg) !=
       VPX_CODEC_OK)
     die("Failed to initialize encoder\n");
-#if CONFIG_DECODERS
+#if CONFIG_VP9_DECODER
   if (vpx_codec_dec_init(
           &decoder, get_vpx_decoder_by_name("vp9")->codec_interface(), NULL, 0))
     die("Failed to initialize decoder\n");
@@ -1163,7 +1163,7 @@ int main(int argc, const char **argv) {
           if (enc_cfg.ss_number_layers == 1 && enc_cfg.ts_number_layers == 1)
             si->bytes_sum[0] += (int)cx_pkt->data.frame.sz;
           ++frames_received;
-#if CONFIG_DECODERS
+#if CONFIG_VP9_DECODER
           if (vpx_codec_decode(&decoder, cx_pkt->data.frame.buf,
                                (unsigned int)cx_pkt->data.frame.sz, NULL, 0))
             die_codec(&decoder, "Failed to decode frame.");
@@ -1178,7 +1178,7 @@ int main(int argc, const char **argv) {
         default: { break; }
       }
 
-#if CONFIG_DECODERS
+#if CONFIG_VP9_DECODER
       vpx_codec_control(&encoder, VP9E_GET_SVC_LAYER_ID, &layer_id);
       // Don't look for mismatch on top spatial and top temporal layers as they
       // are non reference frames.
