@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c7516f1_899352c7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2019-03-05T19:04:33Z",
+      "side": 1,
+      "message": "Force all upper spatial layers to be key frame if the base layer is key.\n\nMode only works for inter-layer pred\u003doff and non-flexible mode.",
+      "revId": "759bed4692cd7f0f8b54b495d2b8f0f75dd4bb92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a131d84d_f454edb8",
+        "filename": "test/svc_datarate_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 992,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2019-03-05T19:04:33Z",
+      "side": 1,
+      "message": "may want to add comment here:",
+      "revId": "759bed4692cd7f0f8b54b495d2b8f0f75dd4bb92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "77367678_9c68ed77",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3105,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2019-03-05T19:04:33Z",
+      "side": 1,
+      "message": "remove the \"cpi-\u003ecommon.frame_type !\u003d KEY_FRAME\" here",
+      "revId": "759bed4692cd7f0f8b54b495d2b8f0f75dd4bb92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32487e87_e2a6183a",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2019-03-05T19:04:33Z",
+      "side": 1,
+      "message": "put this in a separate function, since its called 3 times",
+      "revId": "759bed4692cd7f0f8b54b495d2b8f0f75dd4bb92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "932d41a7_a11d31ab",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2019-03-05T19:04:33Z",
+      "side": 1,
+      "message": "to be safe:\nelse\n svc-\u003esimulcast_mode \u003d 0;",
+      "revId": "759bed4692cd7f0f8b54b495d2b8f0f75dd4bb92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55d7beed_1523b98c",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1228,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2019-03-05T19:04:33Z",
+      "side": 1,
+      "message": "don\u0027t need \"if (cpi-\u003esvc.simulcast_mode)\" here",
+      "revId": "759bed4692cd7f0f8b54b495d2b8f0f75dd4bb92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
