@@ -87,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "85dfd563_ed045c13",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1305,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2019-03-05T20:21:50Z",
+      "side": 1,
+      "message": "add the condition: ..\u0026\u0026 !svc-\u003esimulcast_mode\n\nthis change was assuming only base is key",
+      "revId": "2fab2872162afc926dd6e47289ba7a9b7e66cf0e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1b5be4fd_60acfb41",
         "filename": "vp9/encoder/vp9_svc_layercontext.h",
         "patchSetId": 6
