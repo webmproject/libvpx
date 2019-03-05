@@ -6726,9 +6726,10 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 #define DUMP_TPL_STATS 0
 #if DUMP_TPL_STATS
 static void dump_buf(uint8_t *buf, int stride, int row, int col, int h, int w) {
+  int i, j;
   printf("%d %d\n", h, w);
-  for (int i = 0; i < h; ++i) {
-    for (int j = 0; j < w; ++j) {
+  for (i = 0; i < h; ++i) {
+    for (j = 0; j < w; ++j) {
       printf("%d ", buf[(row + i) * stride + col + j]);
     }
   }
@@ -6761,8 +6762,6 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
     for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
       for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
         if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
-          const TplDepStats *tpl_ptr =
-              &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
           int_mv mv = *get_pyramid_mv(tpl_frame, idx, bsize, mi_row, mi_col);
           printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row, mv.as_mv.col);
         }
