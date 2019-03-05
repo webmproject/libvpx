@@ -116,6 +116,13 @@ static int is_spatial_denoise_enabled(VP9_COMP *cpi) {
 }
 #endif
 
+#if CONFIG_VP9_HIGHBITDEPTH
+void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
+                         TX_SIZE tx_size);
+#endif
+void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
+                  TX_SIZE tx_size);
+
 // compute adaptive threshold for skip recoding
 static int compute_context_model_thresh(const VP9_COMP *const cpi) {
   const VP9_COMMON *const cm = &cpi->common;
@@ -976,6 +983,12 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vpx_free(cpi->consec_zero_mv);
   cpi->consec_zero_mv = NULL;
+
+  vpx_free(cpi->stack_rank_buffer);
+  cpi->stack_rank_buffer = NULL;
+
+  vpx_free(cpi->mb_wiener_variance);
+  cpi->mb_wiener_variance = NULL;
 
   vp9_free_ref_frame_buffers(cm->buffer_pool);
 #if CONFIG_VP9_POSTPROC
@@ -2366,6 +2379,14 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   vp9_set_speed_features_framesize_independent(cpi);
   vp9_set_speed_features_framesize_dependent(cpi);
+
+  if (cpi->sf.enable_wiener_variance) {
+    CHECK_MEM_ERROR(cm, cpi->stack_rank_buffer,
+                    vpx_calloc(UINT16_MAX, sizeof(*cpi->stack_rank_buffer)));
+    CHECK_MEM_ERROR(cm, cpi->mb_wiener_variance,
+                    vpx_calloc(cm->mb_rows * cm->mb_cols,
+                               sizeof(*cpi->mb_wiener_variance)));
+  }
 
 #if CONFIG_NON_GREEDY_MV
   cpi->feature_score_loc_alloc = 0;
@@ -4691,6 +4712,97 @@ static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
   }
 }
 
+// Process the wiener variance in 16x16 block basis.
+static void set_mb_wiener_variance(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  uint8_t *buffer = cpi->Source->y_buffer;
+  int buf_stride = cpi->Source->y_stride;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  ThreadData *td = &cpi->td;
+  MACROBLOCK *x = &td->mb;
+  MACROBLOCKD *xd = &x->e_mbd;
+  DECLARE_ALIGNED(16, uint16_t, zero_pred16[32 * 32]);
+  DECLARE_ALIGNED(16, uint8_t, zero_pred8[32 * 32]);
+  uint8_t *zero_pred;
+#else
+  DECLARE_ALIGNED(16, uint8_t, zero_pred[32 * 32]);
+#endif
+
+  DECLARE_ALIGNED(16, int16_t, src_diff[32 * 32]);
+  DECLARE_ALIGNED(16, tran_low_t, coeff[32 * 32]);
+
+  int mb_row, mb_col;
+  // Hard coded operating block size
+  const int block_size = 16;
+  const int coeff_count = block_size * block_size;
+  const TX_SIZE tx_size = TX_16X16;
+
+  if (cpi->sf.enable_wiener_variance == 0) return;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+    zero_pred = CONVERT_TO_BYTEPTR(zero_pred16);
+  else
+    zero_pred = zero_pred8;
+#endif
+
+  memset(zero_pred, 0, sizeof(*zero_pred) * coeff_count);
+
+  for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
+    for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
+      int idx, hist_count = 0;
+      int16_t median_val = 0;
+      uint8_t *mb_buffer =
+          buffer + mb_row * block_size * buf_stride + mb_col * block_size;
+      int64_t wiener_variance = 0;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        vpx_highbd_subtract_block(block_size, block_size, src_diff, block_size,
+                                  mb_buffer, buf_stride, zero_pred, block_size,
+                                  xd->bd);
+        highbd_wht_fwd_txfm(src_diff, block_size, coeff, tx_size);
+      } else {
+        vpx_subtract_block(block_size, block_size, src_diff, block_size,
+                           mb_buffer, buf_stride, zero_pred, block_size);
+        wht_fwd_txfm(src_diff, block_size, coeff, tx_size);
+      }
+#else
+      vpx_subtract_block(block_size, block_size, src_diff, block_size,
+                         mb_buffer, buf_stride, zero_pred, block_size);
+      wht_fwd_txfm(src_diff, block_size, coeff, tx_size);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+      for (idx = 0; idx < UINT16_MAX; ++idx) cpi->stack_rank_buffer[idx] = 0;
+
+      for (idx = 0; idx < coeff_count; ++idx)
+        ++cpi->stack_rank_buffer[abs(coeff[idx])];
+
+      for (idx = 0; idx < UINT16_MAX; ++idx) {
+        hist_count += cpi->stack_rank_buffer[idx];
+        if (hist_count >= coeff_count / 2) break;
+      }
+
+      // Noise level estimation
+      median_val = idx;
+
+      // Wiener filter
+      for (idx = 1; idx < coeff_count; ++idx) {
+        int sign = coeff[idx] < 0;
+        int64_t sqr_coeff = (int64_t)coeff[idx] * coeff[idx];
+        coeff[idx] = (int16_t)((sqr_coeff * coeff[idx]) /
+                               (sqr_coeff + (int64_t)median_val * median_val));
+        if (sign) coeff[idx] = -coeff[idx];
+
+        wiener_variance += (int64_t)coeff[idx] * coeff[idx];
+      }
+      cpi->mb_wiener_variance[mb_row * cm->mb_cols + mb_col] =
+          wiener_variance / coeff_count;
+    }
+  }
+}
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
                                       uint8_t *dest,
                                       unsigned int *frame_flags) {
@@ -4776,6 +4888,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
       cm->reset_frame_context = 2;
     }
   }
+
+  set_mb_wiener_variance(cpi);
 
   vpx_clear_system_state();
 
@@ -5827,8 +5941,8 @@ static void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
-                                TX_SIZE tx_size) {
+void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
+                         TX_SIZE tx_size) {
   // TODO(sdeng): Implement SIMD based high bit-depth Hadamard transforms.
   switch (tx_size) {
     case TX_8X8: vpx_highbd_hadamard_8x8(src_diff, bw, coeff); break;
@@ -5839,8 +5953,8 @@ static void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
-                         TX_SIZE tx_size) {
+void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
+                  TX_SIZE tx_size) {
   switch (tx_size) {
     case TX_8X8: vpx_hadamard_8x8(src_diff, bw, coeff); break;
     case TX_16X16: vpx_hadamard_16x16(src_diff, bw, coeff); break;
