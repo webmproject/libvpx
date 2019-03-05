@@ -6749,43 +6749,46 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
                            const GF_PICTURE *gf_picture, BLOCK_SIZE bsize) {
   int frame_idx;
   const VP9_COMMON *cm = &cpi->common;
+  int rf_idx;
   for (frame_idx = 1; frame_idx < tpl_group_frames; ++frame_idx) {
-    const TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-    int idx = 0;
-    int mi_row, mi_col;
-    int rf_idx;
-    const int mi_height = num_8x8_blocks_high_lookup[bsize];
-    const int mi_width = num_8x8_blocks_wide_lookup[bsize];
-    printf("=\n");
-    printf("frame_idx %d mi_rows %d mi_cols %d bsize %d\n", frame_idx,
-           cm->mi_rows, cm->mi_cols, mi_width * MI_SIZE);
-    for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
-      for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
-        if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
-          int_mv mv = *get_pyramid_mv(tpl_frame, idx, bsize, mi_row, mi_col);
-          printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row, mv.as_mv.col);
+    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+      const TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+      int mi_row, mi_col;
+      int ref_frame_idx;
+      const int mi_height = num_8x8_blocks_high_lookup[bsize];
+      const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+      ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
+      if (ref_frame_idx != -1) {
+        YV12_BUFFER_CONFIG *ref_frame_buf = gf_picture[ref_frame_idx].frame;
+        printf("=\n");
+        printf("frame_idx %d mi_rows %d mi_cols %d bsize %d ref_frame_idx %d\n",
+               frame_idx, cm->mi_rows, cm->mi_cols, mi_width * MI_SIZE,
+               ref_frame_idx);
+        for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
+          for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
+            if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
+              int_mv mv =
+                  *get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
+              printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row,
+                     mv.as_mv.col);
+            }
+          }
         }
-      }
-    }
-
-    dump_frame_buf(gf_picture[frame_idx].frame);
-
-    for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
-      for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
-        if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
-          const TplDepStats *tpl_ptr =
-              &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-          printf("%f ", tpl_ptr->feature_score);
+        for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
+          for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
+            if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
+              const TplDepStats *tpl_ptr =
+                  &tpl_frame
+                       ->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
+              printf("%f ", tpl_ptr->feature_score);
+            }
+          }
         }
-      }
-    }
-    printf("\n");
+        printf("\n");
 
-    rf_idx = gf_picture[frame_idx].ref_frame[idx];
-    printf("has_ref %d\n", rf_idx != -1);
-    if (rf_idx != -1) {
-      YV12_BUFFER_CONFIG *ref_frame_buf = gf_picture[rf_idx].frame;
-      dump_frame_buf(ref_frame_buf);
+        dump_frame_buf(gf_picture[frame_idx].frame);
+        dump_frame_buf(ref_frame_buf);
+      }
     }
   }
 }

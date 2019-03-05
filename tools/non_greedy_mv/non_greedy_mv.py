@@ -99,6 +99,7 @@ def read_frame_dpl_stats(fp):
   mi_rows = int(word_ls[3])
   mi_cols = int(word_ls[5])
   bs = int(word_ls[7])
+  ref_frame_idx = int(word_ls[9])
   mi_size = bs / 8
   mv_ls = []
   mv_rows = int((math.ceil(mi_rows * 1. / mi_size)))
@@ -112,14 +113,10 @@ def read_frame_dpl_stats(fp):
     mv_col = int(word_ls[3]) / 8.
     mv_ls.append([col, row, mv_col, mv_row])
   mv_ls = np.array(mv_ls)
-  img = yuv_to_rgb(read_frame(fp))
   feature_score = read_feature_score(fp, mv_rows, mv_cols)
-  ref = None
-  line = fp.readline()
-  word_ls = line.split()
-  if int(word_ls[1]):
-    ref = yuv_to_rgb(read_frame(fp))
-  return frame_idx, mv_ls, img, ref, bs, feature_score
+  img = yuv_to_rgb(read_frame(fp))
+  ref = yuv_to_rgb(read_frame(fp))
+  return frame_idx, ref_frame_idx, mv_ls, img, ref, bs, feature_score
 
 
 def read_dpl_stats_file(filename, frame_num=0):
@@ -140,7 +137,7 @@ def read_dpl_stats_file(filename, frame_num=0):
 if __name__ == '__main__':
   filename = sys.argv[1]
   data_ls = read_dpl_stats_file(filename, frame_num=5)
-  for frame_idx, mv_ls, img, ref, bs, feature_score in data_ls:
+  for frame_idx, ref_frame_idx, mv_ls, img, ref, bs, feature_score in data_ls:
     fig, axes = plt.subplots(2, 2)
 
     axes[0][0].imshow(img)
@@ -166,5 +163,5 @@ if __name__ == '__main__':
     feature_score_bins = np.arange(feature_score_min, feature_score_max, step)
     axes[1][1].hist(feature_score_arr, bins=feature_score_bins)
 
+    print frame_idx, ref_frame_idx, len(mv_ls)
     plt.show()
-    print frame_idx, len(mv_ls)
