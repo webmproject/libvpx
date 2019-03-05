@@ -6746,6 +6746,7 @@ static void dump_frame_buf(const YV12_BUFFER_CONFIG *frame_buf) {
 }
 
 static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
+                           const GF_GROUP *gf_group,
                            const GF_PICTURE *gf_picture, BLOCK_SIZE bsize) {
   int frame_idx;
   const VP9_COMMON *cm = &cpi->common;
@@ -6760,10 +6761,15 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
       ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
       if (ref_frame_idx != -1) {
         YV12_BUFFER_CONFIG *ref_frame_buf = gf_picture[ref_frame_idx].frame;
+        const int gf_frame_offset = gf_group->frame_gop_index[frame_idx];
+        const int ref_gf_frame_offset =
+            gf_group->frame_gop_index[ref_frame_idx];
         printf("=\n");
-        printf("frame_idx %d mi_rows %d mi_cols %d bsize %d ref_frame_idx %d\n",
-               frame_idx, cm->mi_rows, cm->mi_cols, mi_width * MI_SIZE,
-               ref_frame_idx);
+        printf(
+            "frame_idx %d mi_rows %d mi_cols %d bsize %d ref_frame_idx %d "
+            "rf_idx %d gf_frame_offset %d ref_gf_frame_offset %d\n",
+            frame_idx, cm->mi_rows, cm->mi_cols, mi_width * MI_SIZE,
+            ref_frame_idx, rf_idx, gf_frame_offset, ref_gf_frame_offset);
         for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
           for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
             if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
@@ -6890,7 +6896,7 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
 #if CONFIG_NON_GREEDY_MV
   cpi->tpl_ready = 1;
 #if DUMP_TPL_STATS
-  dump_tpl_stats(cpi, tpl_group_frames, gf_picture, cpi->tpl_bsize);
+  dump_tpl_stats(cpi, tpl_group_frames, gf_group, gf_picture, cpi->tpl_bsize);
 #endif  // DUMP_TPL_STATS
 #endif  // CONFIG_NON_GREEDY_MV
 }
