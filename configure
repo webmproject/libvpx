@@ -627,6 +627,8 @@ process_toolchain() {
           add_cflags_only -Wframe-larger-than=52000
         check_cflags -Wmissing-declarations && \
           add_cflags_only -Wmissing-declarations
+        check_cflags -Wmissing-prototypes && \
+          add_cflags_only -Wmissing-prototypes
         if enabled mips || [ -z "${INLINE}" ]; then
           enabled extra_warnings || check_add_cflags -Wno-unused-function
         fi
