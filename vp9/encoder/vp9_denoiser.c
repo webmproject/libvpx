@@ -219,9 +219,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
 
   // If the best reference frame uses inter-prediction and there is enough of a
   // difference in sum-squared-error, use it.
-  if (frame != INTRA_FRAME && frame != ALTREF_FRAME &&
-      (frame != GOLDEN_FRAME || num_spatial_layers == 1 ||
-       use_gf_temporal_ref) &&
+  if (frame != INTRA_FRAME && frame != ALTREF_FRAME && frame != GOLDEN_FRAME &&
       sse_diff > sse_diff_thresh(bs, increase_denoising, motion_magnitude)) {
     mi->ref_frame[0] = ctx->best_reference_frame;
     mi->mode = ctx->best_sse_inter_mode;
@@ -233,6 +231,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
     // Bias to last reference.
     if ((num_spatial_layers > 1 && !use_gf_temporal_ref) ||
         frame == ALTREF_FRAME ||
+        (frame == GOLDEN_FRAME && use_gf_temporal_ref) ||
         (frame != LAST_FRAME &&
          ((ctx->zeromv_lastref_sse<(5 * ctx->zeromv_sse)>> 2) ||
           denoiser->denoising_level >= kDenHigh))) {
