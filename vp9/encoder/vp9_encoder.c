@@ -4741,6 +4741,7 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
   if (cpi->sf.enable_wiener_variance == 0) return;
 
 #if CONFIG_VP9_HIGHBITDEPTH
+  xd->cur_buf = cpi->Source;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
     zero_pred = CONVERT_TO_BYTEPTR(zero_pred16);
   else
@@ -4778,7 +4779,7 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
 
       for (idx = 0; idx < UINT16_MAX; ++idx) cpi->stack_rank_buffer[idx] = 0;
 
-      for (idx = 0; idx < coeff_count; ++idx)
+      for (idx = 1; idx < coeff_count; ++idx)
         ++cpi->stack_rank_buffer[abs(coeff[idx])];
 
       for (idx = 0; idx < UINT16_MAX; ++idx) {

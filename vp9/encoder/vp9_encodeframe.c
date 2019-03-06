@@ -1910,7 +1910,8 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
   vpx_clear_system_state();
 
   if (aq_mode == NO_AQ || aq_mode == PSNR_AQ) {
-    if (cpi->sf.enable_tpl_model) x->rdmult = x->cb_rdmult;
+    if (cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance)
+      x->rdmult = x->cb_rdmult;
     return;
   }
 
@@ -2159,7 +2160,8 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile, ThreadData *td,
   MACROBLOCK *const x = &td->mb;
   set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
 
-  if (cpi->sf.enable_tpl_model && cpi->oxcf.aq_mode == NO_AQ)
+  if ((cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance) &&
+      cpi->oxcf.aq_mode == NO_AQ)
     x->rdmult = x->cb_rdmult;
 
   update_state(cpi, td, ctx, mi_row, mi_col, bsize, output_enabled);
@@ -3569,6 +3571,37 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
 }
 #undef FEATURES
 
+static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
+                             int mi_col, int orig_rdmult) {
+  VP9_COMMON *cm = &cpi->common;
+  int mb_row_start = mi_row >> 1;
+  int mb_col_start = mi_col >> 1;
+  int mb_row_end =
+      VPXMIN((mi_row + num_8x8_blocks_high_lookup[bsize]) >> 1, cm->mb_rows);
+  int mb_col_end =
+      VPXMIN((mi_col + num_8x8_blocks_wide_lookup[bsize]) >> 1, cm->mb_cols);
+  int row, col;
+  int64_t rdmult;
+  int64_t wiener_variance = 0;
+
+  assert(cpi->norm_wiener_variance > 0);
+
+  for (row = mb_row_start; row < mb_row_end; ++row)
+    for (col = mb_col_start; col < mb_col_end; ++col)
+      wiener_variance += cpi->mb_wiener_variance[row * cm->mb_cols + col];
+
+  if (wiener_variance)
+    wiener_variance /=
+        (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);
+
+  rdmult = (orig_rdmult * wiener_variance) / cpi->norm_wiener_variance;
+
+  rdmult = VPXMIN(rdmult, orig_rdmult * 3);
+  rdmult = VPXMAX(rdmult, orig_rdmult / 4);
+
+  return (int)rdmult;
+}
+
 static int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
                             int mi_col, int orig_rdmult) {
   const int gf_group_index = cpi->twopass.gf_group.index;
@@ -3667,9 +3700,11 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   int64_t dist_breakout_thr = cpi->sf.partition_search_breakout_thr.dist;
   int rate_breakout_thr = cpi->sf.partition_search_breakout_thr.rate;
   int must_split = 0;
-  int partition_mul = cpi->sf.enable_tpl_model && cpi->oxcf.aq_mode == NO_AQ
-                          ? x->cb_rdmult
-                          : cpi->rd.RDMULT;
+  int partition_mul =
+      (cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance) &&
+              cpi->oxcf.aq_mode == NO_AQ
+          ? x->cb_rdmult
+          : cpi->rd.RDMULT;
   // Ref frames picked in the [i_th] quarter subblock during square partition
   // RD search. It may be used to prune ref frame selection of rect partitions.
   uint8_t ref_frames_used[4] = { 0, 0, 0, 0 };
@@ -4214,6 +4249,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
     RD_COST dummy_rdc;
     int i;
     int seg_skip = 0;
+    int orig_rdmult = cpi->rd.RDMULT;
 
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO **mi = cm->mi_grid_visible + idx_str;
@@ -4246,6 +4282,9 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
     }
 
     x->source_variance = UINT_MAX;
+
+    x->cb_rdmult = orig_rdmult;
+
     if (sf->partition_search_type == FIXED_PARTITION || seg_skip) {
       const BLOCK_SIZE bsize =
           seg_skip ? BLOCK_64X64 : sf->always_this_block_size;
@@ -4266,13 +4305,15 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
       rd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col, BLOCK_64X64,
                        &dummy_rate, &dummy_dist, 1, td->pc_root);
     } else {
-      int orig_rdmult = cpi->rd.RDMULT;
-      x->cb_rdmult = orig_rdmult;
       if (cpi->twopass.gf_group.index > 0 && cpi->sf.enable_tpl_model) {
         int dr =
             get_rdmult_delta(cpi, BLOCK_64X64, mi_row, mi_col, orig_rdmult);
         x->cb_rdmult = dr;
       }
+
+      if (cpi->sf.enable_wiener_variance && cm->show_frame)
+        x->cb_rdmult =
+            wiener_var_rdmult(cpi, BLOCK_64X64, mi_row, mi_col, orig_rdmult);
 
       // If required set upper and lower partition size limits
       if (sf->auto_min_max_partition_size) {
