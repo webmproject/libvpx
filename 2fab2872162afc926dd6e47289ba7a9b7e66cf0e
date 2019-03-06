@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6215461d_edbb019f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2019-03-06T01:15:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d409e613_a3130ac4",
+      "revId": "2fab2872162afc926dd6e47289ba7a9b7e66cf0e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "58deb14f_7daaef0a",
         "filename": "test/svc_datarate_test.cc",
         "patchSetId": 6
