@@ -6792,6 +6792,16 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
         }
         printf("\n");
 
+        for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+          for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+            const int mv_mode =
+                tpl_frame
+                    ->mv_mode_arr[rf_idx][mi_row * tpl_frame->stride + mi_col];
+            printf("%d ", mv_mode);
+          }
+        }
+        printf("\n");
+
         dump_frame_buf(gf_picture[frame_idx].frame);
         dump_frame_buf(ref_frame_buf);
       }

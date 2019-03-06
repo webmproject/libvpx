@@ -91,6 +91,13 @@ def read_feature_score(fp, mv_rows, mv_cols):
   feature_score = feature_score.reshape(mv_rows, mv_cols)
   return feature_score
 
+def read_mv_mode_arr(fp, mv_rows, mv_cols):
+  line = fp.readline()
+  word_ls = line.split()
+  mv_mode_arr = np.array([int(v) for v in word_ls])
+  mv_mode_arr = mv_mode_arr.reshape(mv_rows, mv_cols)
+  return mv_mode_arr
+
 
 def read_frame_dpl_stats(fp):
   line = fp.readline()
@@ -117,9 +124,10 @@ def read_frame_dpl_stats(fp):
     mv_ls.append([col, row, mv_col, mv_row])
   mv_ls = np.array(mv_ls)
   feature_score = read_feature_score(fp, mv_rows, mv_cols)
+  mv_mode_arr = read_mv_mode_arr(fp, mv_rows, mv_cols)
   img = yuv_to_rgb(read_frame(fp))
   ref = yuv_to_rgb(read_frame(fp))
-  return rf_idx, frame_idx, ref_frame_idx, gf_frame_offset, ref_gf_frame_offset, mv_ls, img, ref, bs, feature_score
+  return rf_idx, frame_idx, ref_frame_idx, gf_frame_offset, ref_gf_frame_offset, mv_ls, img, ref, bs, feature_score, mv_mode_arr
 
 
 def read_dpl_stats_file(filename, frame_num=0):
@@ -140,7 +148,7 @@ def read_dpl_stats_file(filename, frame_num=0):
 if __name__ == '__main__':
   filename = sys.argv[1]
   data_ls = read_dpl_stats_file(filename, frame_num=5)
-  for rf_idx, frame_idx, ref_frame_idx, gf_frame_offset, ref_gf_frame_offset, mv_ls, img, ref, bs, feature_score in data_ls:
+  for rf_idx, frame_idx, ref_frame_idx, gf_frame_offset, ref_gf_frame_offset, mv_ls, img, ref, bs, feature_score, mv_mode_arr in data_ls:
     fig, axes = plt.subplots(2, 2)
 
     axes[0][0].imshow(img)
@@ -159,12 +167,14 @@ if __name__ == '__main__':
       axes[0][1].set_xlim(0, ref.shape[1])
 
     axes[1][0].imshow(feature_score)
-    feature_score_arr = feature_score.flatten()
-    feature_score_max = feature_score_arr.max()
-    feature_score_min = feature_score_arr.min()
-    step = (feature_score_max - feature_score_min) / 20.
-    feature_score_bins = np.arange(feature_score_min, feature_score_max, step)
-    axes[1][1].hist(feature_score_arr, bins=feature_score_bins)
+    #feature_score_arr = feature_score.flatten()
+    #feature_score_max = feature_score_arr.max()
+    #feature_score_min = feature_score_arr.min()
+    #step = (feature_score_max - feature_score_min) / 20.
+    #feature_score_bins = np.arange(feature_score_min, feature_score_max, step)
+    #axes[1][1].hist(feature_score_arr, bins=feature_score_bins)
+    im = axes[1][1].imshow(mv_mode_arr)
+    #axes[1][1].figure.colorbar(im, ax=axes[1][1])
 
     print rf_idx, frame_idx, ref_frame_idx, gf_frame_offset, ref_gf_frame_offset, len(mv_ls)
     plt.show()
