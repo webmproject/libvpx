@@ -2029,9 +2029,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
     if (!(cpi->ref_frame_flags & flag_list[ref_frame])) continue;
 
-    if (sf->short_circuit_flat_blocks && x->source_variance == 0 &&
-        (frame_mv[this_mode][ref_frame].as_int != 0 ||
-         (cpi->oxcf.content == VP9E_CONTENT_SCREEN && !svc->spatial_layer_id &&
+    // For screen content on flat blocks: skip non-zero motion check for
+    // stationary blocks, only skip zero motion check for non-stationary blocks.
+    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
+        sf->short_circuit_flat_blocks && x->source_variance == 0 &&
+        ((frame_mv[this_mode][ref_frame].as_int != 0 &&
+          x->zero_temp_sad_source) ||
+         (frame_mv[this_mode][ref_frame].as_int == 0 &&
           !x->zero_temp_sad_source))) {
       continue;
     }
@@ -2411,8 +2415,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
   if (best_rdc.rdcost == INT64_MAX ||
-      (cpi->oxcf.content == VP9E_CONTENT_SCREEN && x->source_variance == 0 &&
-       !x->zero_temp_sad_source) ||
+      (cpi->oxcf.content == VP9E_CONTENT_SCREEN && x->source_variance == 0) ||
       (scene_change_detected && perform_intra_pred) ||
       ((!force_skip_low_temp_var || bsize < BLOCK_32X32 ||
         x->content_state_sb == kVeryHighSad) &&
