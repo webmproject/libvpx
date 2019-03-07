@@ -73,9 +73,9 @@ static INLINE void read_dist_16(const uint16_t *dist, __m128i *reg_first,
 //
 // Add in the rounding factor and shift, clamp to 16, invert and shift. Multiply
 // by weight.
-static __m128i average_8(__m128i sum, const __m128i *mul_constants,
-                         const int strength, const int rounding,
-                         const int weight) {
+static INLINE __m128i average_8(__m128i sum, const __m128i *mul_constants,
+                                const int strength, const int rounding,
+                                const int weight) {
   // _mm_srl_epi16 uses the lower 64 bit value for the shift.
   const __m128i strength_u128 = _mm_set_epi32(0, 0, 0, strength);
   const __m128i rounding_u16 = _mm_set1_epi16(rounding);
