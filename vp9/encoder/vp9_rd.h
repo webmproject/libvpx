@@ -217,6 +217,8 @@ unsigned int vp9_high_get_sby_perpixel_variance(struct VP9_COMP *cpi,
                                                 BLOCK_SIZE bs, int bd);
 #endif
 
+void vp9_build_inter_mode_cost(struct VP9_COMP *cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
