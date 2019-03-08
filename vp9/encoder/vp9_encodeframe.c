@@ -1265,10 +1265,11 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   int pixels_wide = 64, pixels_high = 64;
   int64_t thresholds[4] = { cpi->vbp_thresholds[0], cpi->vbp_thresholds[1],
                             cpi->vbp_thresholds[2], cpi->vbp_thresholds[3] };
-  int force_64_split =
-      cpi->rc.high_source_sad ||
-      (cpi->use_svc && cpi->svc.high_source_sad_superframe) ||
-      (cpi->oxcf.content == VP9E_CONTENT_SCREEN && !x->zero_temp_sad_source);
+  int force_64_split = cpi->rc.high_source_sad ||
+                       (cpi->use_svc && cpi->svc.high_source_sad_superframe) ||
+                       (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
+                        cpi->compute_source_sad_onepass &&
+                        cpi->sf.use_source_sad && !x->zero_temp_sad_source);
 
   // For the variance computation under SVC mode, we treat the frame as key if
   // the reference (base layer frame) is key frame (i.e., is_key_frame == 1).

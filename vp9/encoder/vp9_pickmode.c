@@ -2033,6 +2033,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
     // stationary blocks, only skip zero motion check for non-stationary blocks.
     if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
         sf->short_circuit_flat_blocks && x->source_variance == 0 &&
+        cpi->compute_source_sad_onepass && cpi->sf.use_source_sad &&
         ((frame_mv[this_mode][ref_frame].as_int != 0 &&
           x->zero_temp_sad_source) ||
          (frame_mv[this_mode][ref_frame].as_int == 0 &&
