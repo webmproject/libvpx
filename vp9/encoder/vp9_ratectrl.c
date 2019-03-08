@@ -2209,6 +2209,13 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     }
   }
 
+  if (svc->simulcast_mode && svc->spatial_layer_id > 0 &&
+      svc->layer_context[layer].is_key_frame == 1) {
+    cm->frame_type = KEY_FRAME;
+    cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
+    target = calc_iframe_target_size_one_pass_cbr(cpi);
+  }
+
   // Check if superframe contains a sync layer request.
   vp9_svc_check_spatial_layer_sync(cpi);
 
