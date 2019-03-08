@@ -3137,7 +3137,7 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int rec_variance;
   unsigned int src_variance;
   unsigned int src_rec_min;
-  unsigned int absvar_diff = 0;
+  unsigned int var_diff = 0;
   unsigned int var_factor = 0;
   unsigned int adj_max;
   unsigned int low_var_thresh = LOW_VAR_THRESH;
@@ -3183,13 +3183,15 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (src_rec_min > low_var_thresh) return;
 
-  absvar_diff = (src_variance > rec_variance) ? (src_variance - rec_variance)
-                                              : (rec_variance - src_variance);
+  // We care more when the reconstruction has lower variance so give this case
+  // a stronger weighting.
+  var_diff = (src_variance > rec_variance) ? (src_variance - rec_variance) * 2
+                                           : (rec_variance - src_variance) / 2;
 
   adj_max = max_var_adjust[content_type];
 
   var_factor =
-      (unsigned int)((int64_t)VAR_MULT * absvar_diff) / VPXMAX(1, src_variance);
+      (unsigned int)((int64_t)VAR_MULT * var_diff) / VPXMAX(1, src_variance);
   var_factor = VPXMIN(adj_max, var_factor);
 
   *this_rd += (*this_rd * var_factor) / 100;
