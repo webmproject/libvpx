@@ -373,7 +373,7 @@ static const int vp8_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
 
 #if CONFIG_VP9_ENCODER
 static const arg_def_t cpu_used_vp9 =
-    ARG_DEF(NULL, "cpu-used", 1, "CPU Used (-8..8)");
+    ARG_DEF(NULL, "cpu-used", 1, "CPU Used (-9..9)");
 static const arg_def_t tile_cols =
     ARG_DEF(NULL, "tile-columns", 1, "Number of tile columns to use, log2");
 static const arg_def_t tile_rows =
