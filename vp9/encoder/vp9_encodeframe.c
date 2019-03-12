@@ -5673,6 +5673,97 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 }
 #endif
 
+#define MAX_KMEANS_GROUPS 8
+
+typedef struct KMEANS_DATA {
+  int64_t value;
+  int pos;
+  int group_idx;
+} KMEANS_DATA;
+
+static int compare_kmeans_data(const void *a, const void *b) {
+  if (((const KMEANS_DATA *)a)->value > ((const KMEANS_DATA *)b)->value) {
+    return 1;
+  } else if (((const KMEANS_DATA *)a)->value <
+             ((const KMEANS_DATA *)b)->value) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+void vp9_kmeans(double *ctr_ls, int k, KMEANS_DATA *arr, int size) {
+  int64_t min, max;
+  double step;
+  int i, j;
+  int itr;
+  double boundary_ls[MAX_KMEANS_GROUPS] = { 0 };
+  int group_idx;
+  double sum;
+  int count;
+
+  vpx_clear_system_state();
+
+  assert(k >= 2 && k <= MAX_KMEANS_GROUPS);
+
+  qsort(arr, size, sizeof(*arr), compare_kmeans_data);
+
+  min = arr[0].value;
+  max = arr[size - 1].value;
+
+  // initialize the center points
+  step = (max - min) * 1. / k;
+  for (j = 0; j < k; ++j) {
+    ctr_ls[j] = min + j * step + step / 2;
+  }
+
+  for (itr = 0; itr < 10; ++itr) {
+    for (j = 0; j < k - 1; ++j) {
+      boundary_ls[j] = (ctr_ls[j] + ctr_ls[j + 1]) / 2.;
+    }
+    boundary_ls[k - 1] = max + 1;
+
+    group_idx = 0;
+    count = 0;
+    sum = 0;
+    for (i = 0; i < size; ++i) {
+      while (arr[i].value >= boundary_ls[group_idx]) {
+        ++group_idx;
+        if (group_idx == k - 1) {
+          break;
+        }
+      }
+
+      sum += arr[i].value;
+      ++count;
+
+      if (i + 1 == size || arr[i + 1].value >= boundary_ls[group_idx]) {
+        if (count > 0) {
+          ctr_ls[group_idx] = sum / count;
+        }
+        count = 0;
+        sum = 0;
+      }
+    }
+  }
+
+  // compute group_idx
+  for (j = 0; j < k - 1; ++j) {
+    boundary_ls[j] = (ctr_ls[j] + ctr_ls[j + 1]) / 2.;
+  }
+  boundary_ls[k - 1] = max + 1;
+  group_idx = 0;
+  for (i = 0; i < size; ++i) {
+    while (arr[i].value >= boundary_ls[group_idx]) {
+      ++group_idx;
+      if (group_idx == k - 1) {
+        break;
+      }
+    }
+    arr[i].group_idx = group_idx;
+  }
+}
+
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   ThreadData *const td = &cpi->td;
