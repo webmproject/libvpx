@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94551c1b_623f9cb7",
+        "filename": "vp9/vp9cx.mk",
+        "patchSetId": 16
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2019-03-12T00:25:33Z",
+      "side": 1,
+      "message": "Just want to double check - is it intentional that this is guarded with CONFIG_REALTIME_ONLY\u003dno?\n\nThis could be excluded from those builds:\n../libvpx/configure --enable-vp9-high-bitdepth --enable-realtime-only\nmake\n\u003c...\u003e\n../libvpx/vp9/encoder/x86/highbd_temporal_filter_sse4.c:861:6: warning: no previous prototype for ‘vp9_highbd_apply_temporal_filter_sse4_1’ [-Wmissing-prototypes]\n void vp9_highbd_apply_temporal_filter_sse4_1(\n      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+      "range": {
+        "startLine": 113,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 71
+      },
+      "revId": "50f0dd8ee96458c34401a63d5d843b12be47557f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
