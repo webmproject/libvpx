@@ -3583,6 +3583,8 @@ static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
   int row, col;
   int64_t rdmult;
   int64_t wiener_variance = 0;
+  KMEANS_DATA *kmeans_data;
+  vpx_clear_system_state();
 
   assert(cpi->norm_wiener_variance > 0);
 
@@ -3590,10 +3592,12 @@ static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
     for (col = mb_col_start; col < mb_col_end; ++col)
       wiener_variance += cpi->mb_wiener_variance[row * cm->mb_cols + col];
 
+  kmeans_data = &cpi->kmeans_data_arr[cpi->kmeans_data_size++];
+  kmeans_data->value = log(1 + wiener_variance);
+  kmeans_data->pos = mi_row * cpi->kmeans_data_stride + mi_col;
   if (wiener_variance)
     wiener_variance /=
         (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);
-
   rdmult = (orig_rdmult * wiener_variance) / cpi->norm_wiener_variance;
 
   rdmult = VPXMIN(rdmult, orig_rdmult * 3);
@@ -5673,14 +5677,6 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 }
 #endif
 
-#define MAX_KMEANS_GROUPS 8
-
-typedef struct KMEANS_DATA {
-  int64_t value;
-  int pos;
-  int group_idx;
-} KMEANS_DATA;
-
 static int compare_kmeans_data(const void *a, const void *b) {
   if (((const KMEANS_DATA *)a)->value > ((const KMEANS_DATA *)b)->value) {
     return 1;
@@ -5693,7 +5689,7 @@ static int compare_kmeans_data(const void *a, const void *b) {
 }
 
 void vp9_kmeans(double *ctr_ls, int k, KMEANS_DATA *arr, int size) {
-  int64_t min, max;
+  double min, max;
   double step;
   int i, j;
   int itr;
@@ -5873,6 +5869,11 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     }
 #endif
 
+    if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+      cpi->kmeans_data_size = 0;
+      cpi->kmeans_ctr_num = 5;
+    }
+
     if (!cpi->row_mt) {
       cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read_dummy;
       cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write_dummy;
@@ -5886,6 +5887,11 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read;
       cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write;
       vp9_encode_tiles_row_mt(cpi);
+    }
+
+    if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+      vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_ctr_num, cpi->kmeans_data_arr,
+                 cpi->kmeans_data_size);
     }
 
     vpx_usec_timer_mark(&emr_timer);
