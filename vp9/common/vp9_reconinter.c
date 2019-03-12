@@ -178,7 +178,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       xs = sf->x_step_q4;
       ys = sf->y_step_q4;
     } else {
-      pre = pre_buf->buf + (y * pre_buf->stride + x);
+      pre = pre_buf->buf + ((int64_t)y * pre_buf->stride + x);
       scaled_mv.row = mv_q4.row;
       scaled_mv.col = mv_q4.col;
       xs = ys = 16;
