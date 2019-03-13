@@ -628,6 +628,7 @@ typedef struct VP9_COMP {
   int ext_refresh_frame_context_pending;
   int ext_refresh_frame_context;
 
+  int64_t norm_wiener_variance;
   int64_t *mb_wiener_variance;
   int *stack_rank_buffer;
 
