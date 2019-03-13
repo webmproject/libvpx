@@ -791,7 +791,7 @@ static void set_rt_speed_feature_framesize_independent(
   }
 }
 
-void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
+void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi, int speed) {
   SPEED_FEATURES *const sf = &cpi->sf;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RD_OPT *const rd = &cpi->rd;
@@ -805,9 +805,9 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
   sf->rd_ml_partition.search_breakout = 0;
 
   if (oxcf->mode == REALTIME) {
-    set_rt_speed_feature_framesize_dependent(cpi, sf, oxcf->speed);
+    set_rt_speed_feature_framesize_dependent(cpi, sf, speed);
   } else if (oxcf->mode == GOOD) {
-    set_good_speed_feature_framesize_dependent(cpi, sf, oxcf->speed);
+    set_good_speed_feature_framesize_dependent(cpi, sf, speed);
   }
 
   if (sf->disable_split_mask == DISABLE_ALL_SPLIT) {
@@ -836,7 +836,7 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
     sf->adaptive_rd_thresh = 0;
 }
 
-void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
+void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi, int speed) {
   SPEED_FEATURES *const sf = &cpi->sf;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->td.mb;
@@ -954,10 +954,9 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   }
 
   if (oxcf->mode == REALTIME)
-    set_rt_speed_feature_framesize_independent(cpi, sf, oxcf->speed,
-                                               oxcf->content);
+    set_rt_speed_feature_framesize_independent(cpi, sf, speed, oxcf->content);
   else if (oxcf->mode == GOOD)
-    set_good_speed_feature_framesize_independent(cpi, cm, sf, oxcf->speed);
+    set_good_speed_feature_framesize_independent(cpi, cm, sf, speed);
 
   cpi->diamond_search_sad = vp9_diamond_search_sad;
 
