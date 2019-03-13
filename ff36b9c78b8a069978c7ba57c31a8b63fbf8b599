@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42ab145b_3bfbebc9",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 4796,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2019-03-13T17:28:21Z",
+      "side": 1,
+      "message": "Note: since coeff[] is local and not used afterward, you don\u0027t need to store the filtered value back to coeff[].",
+      "range": {
+        "startLine": 4796,
+        "startChar": 8,
+        "endLine": 4796,
+        "endChar": 10
+      },
+      "revId": "ff36b9c78b8a069978c7ba57c31a8b63fbf8b599",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
