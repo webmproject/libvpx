@@ -939,6 +939,10 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->tx_size_search_breakout = 1;
   sf->tx_size_search_depth = 2;
 
+  // Manually turn this on during experimentation. Off by default to disable its
+  // effect on the baseline encoder.
+  sf->enable_wiener_variance = 0;
+
   sf->exhaustive_searches_thresh =
       (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) ? (1 << 20)
                                                               : INT_MAX;

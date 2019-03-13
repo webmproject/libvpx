@@ -628,6 +628,9 @@ typedef struct VP9_COMP {
   int ext_refresh_frame_context_pending;
   int ext_refresh_frame_context;
 
+  int64_t *mb_wiener_variance;
+  int *stack_rank_buffer;
+
   YV12_BUFFER_CONFIG last_frame_uf;
 
   TOKENEXTRA *tile_tok[4][1 << 6];
