@@ -22,6 +22,30 @@
       "revId": "6db96a7f9ca9e569b87720af1c97a231049b2d11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4229ed5f_8f0ff34c",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 4795,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2019-03-13T19:13:54Z",
+      "side": 1,
+      "message": "Good idea.\n\nChanged in this CL\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/1521039",
+      "parentUuid": "c6b24753_1b5fe27c",
+      "range": {
+        "startLine": 4795,
+        "startChar": 8,
+        "endLine": 4795,
+        "endChar": 13
+      },
+      "revId": "6db96a7f9ca9e569b87720af1c97a231049b2d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
