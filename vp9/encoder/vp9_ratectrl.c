@@ -2209,11 +2209,47 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     }
   }
 
-  if (svc->simulcast_mode && svc->spatial_layer_id > 0 &&
-      svc->layer_context[layer].is_key_frame == 1) {
-    cm->frame_type = KEY_FRAME;
-    cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
-    target = calc_iframe_target_size_one_pass_cbr(cpi);
+  if (svc->simulcast_mode) {
+    if (svc->spatial_layer_id > 0 &&
+        svc->layer_context[layer].is_key_frame == 1) {
+      cm->frame_type = KEY_FRAME;
+      cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
+      target = calc_iframe_target_size_one_pass_cbr(cpi);
+    }
+    // Set the buffer idx and refresh flags for key frames in simulcast mode.
+    // Note the buffer slot for long-term reference is set below (line 2255),
+    // and alt_ref is used for that on key frame. So use last and golden for
+    // the other two normal slots.
+    if (cm->frame_type == KEY_FRAME) {
+      if (svc->number_spatial_layers == 2) {
+        if (svc->spatial_layer_id == 0) {
+          cpi->lst_fb_idx = 0;
+          cpi->gld_fb_idx = 2;
+          cpi->alt_fb_idx = 6;
+        } else if (svc->spatial_layer_id == 1) {
+          cpi->lst_fb_idx = 1;
+          cpi->gld_fb_idx = 3;
+          cpi->alt_fb_idx = 6;
+        }
+      } else if (svc->number_spatial_layers == 3) {
+        if (svc->spatial_layer_id == 0) {
+          cpi->lst_fb_idx = 0;
+          cpi->gld_fb_idx = 3;
+          cpi->alt_fb_idx = 6;
+        } else if (svc->spatial_layer_id == 1) {
+          cpi->lst_fb_idx = 1;
+          cpi->gld_fb_idx = 4;
+          cpi->alt_fb_idx = 6;
+        } else if (svc->spatial_layer_id == 2) {
+          cpi->lst_fb_idx = 2;
+          cpi->gld_fb_idx = 5;
+          cpi->alt_fb_idx = 7;
+        }
+      }
+      cpi->ext_refresh_last_frame = 1;
+      cpi->ext_refresh_golden_frame = 1;
+      cpi->ext_refresh_alt_ref_frame = 1;
+    }
   }
 
   // Check if superframe contains a sync layer request.
