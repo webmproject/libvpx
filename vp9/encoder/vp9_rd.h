@@ -27,7 +27,7 @@ extern "C" {
 #define RD_EPB_SHIFT 6
 
 #define RDCOST(RM, DM, R, D) \
-  (ROUND_POWER_OF_TWO(((int64_t)R) * (RM), VP9_PROB_COST_SHIFT) + (D << DM))
+  ROUND_POWER_OF_TWO(((int64_t)(R)) * (RM), VP9_PROB_COST_SHIFT) + ((D) << (DM))
 #define QIDX_SKIP_THRESH 115
 
 #define MV_COST_WEIGHT 108
@@ -101,8 +101,8 @@ typedef enum {
 typedef struct RD_OPT {
   // Thresh_mult is used to set a threshold for the rd score. A higher value
   // means that we will accept the best mode so far more often. This number
-  // is used in combination with the current block size, and thresh_freq_fact
-  // to pick a threshold.
+  // is used in combination with the current block size, and thresh_freq_fact to
+  // pick a threshold.
   int thresh_mult[MAX_MODES];
   int thresh_mult_sub8x8[MAX_REFS];
 

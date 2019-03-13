@@ -20,7 +20,7 @@
 #include "vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
 
-#define SAVE_STATUS(ctx, var) (ctx ? (ctx->err = var) : var)
+#define SAVE_STATUS(ctx, var) ((ctx) ? ((ctx)->err = (var)) : (var))
 
 static vpx_codec_alg_priv_t *get_alg_priv(vpx_codec_ctx_t *ctx) {
   return (vpx_codec_alg_priv_t *)ctx->priv;

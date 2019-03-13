@@ -56,7 +56,7 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
 
 // 'num' can be negative, but 'shift' must be non-negative.
 #define RIGHT_SHIFT_POSSIBLY_NEGATIVE(num, shift) \
-  ((num) >= 0) ? (num) >> (shift) : -((-(num)) >> (shift))
+  (((num) >= 0) ? (num) >> (shift) : -((-(num)) >> (shift)))
 
 int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
                    int ctx) {

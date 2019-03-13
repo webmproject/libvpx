@@ -687,8 +687,8 @@ static void set_default_lf_deltas(VP8_COMP *cpi) {
 /* Convenience macros for mapping speed and mode into a continuous
  * range
  */
-#define GOOD(x) (x + 1)
-#define RT(x) (x + 7)
+#define GOOD(x) ((x) + 1)
+#define RT(x) ((x) + 7)
 
 static int speed_map(int speed, const int *map) {
   int res;
