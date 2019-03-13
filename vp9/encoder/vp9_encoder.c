@@ -4793,9 +4793,12 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
       // Wiener filter
       for (idx = 1; idx < coeff_count; ++idx) {
         int64_t sqr_coeff = (int64_t)coeff[idx] * coeff[idx];
-        coeff[idx] = (int16_t)((sqr_coeff * coeff[idx]) /
-                               (sqr_coeff + (int64_t)median_val * median_val));
-        wiener_variance += (int64_t)coeff[idx] * coeff[idx];
+        int64_t tmp_coeff = (int64_t)coeff[idx];
+        if (median_val) {
+          tmp_coeff = (sqr_coeff * coeff[idx]) /
+                      (sqr_coeff + (int64_t)median_val * median_val);
+        }
+        wiener_variance += tmp_coeff * tmp_coeff;
       }
       cpi->mb_wiener_variance[mb_row * cm->mb_cols + mb_col] =
           wiener_variance / coeff_count;
