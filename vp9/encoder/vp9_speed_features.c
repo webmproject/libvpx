@@ -588,7 +588,10 @@ static void set_rt_speed_feature_framesize_independent(
       int i;
       if (content == VP9E_CONTENT_SCREEN) {
         for (i = 0; i < BLOCK_SIZES; ++i)
-          sf->intra_y_mode_bsize_mask[i] = INTRA_DC_TM_H_V;
+          if (i >= BLOCK_32X32)
+            sf->intra_y_mode_bsize_mask[i] = INTRA_DC_H_V;
+          else
+            sf->intra_y_mode_bsize_mask[i] = INTRA_DC_TM_H_V;
       } else {
         for (i = 0; i < BLOCK_SIZES; ++i)
           if (i > BLOCK_16X16)
