@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c6b24753_1b5fe27c",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 4795,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2019-03-13T19:00:05Z",
+      "side": 1,
+      "message": "you don\u0027t need to store it back in the coeff[] array: just a tmp variable would be fine and probably easier for the compiler",
+      "range": {
+        "startLine": 4795,
+        "startChar": 8,
+        "endLine": 4795,
+        "endChar": 13
+      },
+      "revId": "6db96a7f9ca9e569b87720af1c97a231049b2d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
