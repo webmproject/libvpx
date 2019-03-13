@@ -732,6 +732,27 @@ void vp9_copy_flags_ref_update_idx(VP9_COMP *const cpi) {
         svc->update_buffer_slot[sl] |= (1 << ref);
     }
   }
+
+  if (svc->simulcast_mode && cpi->common.frame_type == KEY_FRAME) {
+    const int index = svc->number_spatial_layers == 3 ? sl - 1 : sl;
+    const int ltf = svc->buffer_gf_temporal_ref[index].idx;
+    if (svc->number_spatial_layers == 2) {
+      if (sl == 0)
+        svc->update_buffer_slot[sl] = 1 + 4;  // 0, 2
+      else if (sl == 1)
+        svc->update_buffer_slot[sl] = 2 + 8;  // 1, 3
+    } else if (svc->number_spatial_layers == 3) {
+      if (sl == 0)
+        svc->update_buffer_slot[sl] = 1 + 8;  // 0, 3
+      else if (sl == 1)
+        svc->update_buffer_slot[sl] = 2 + 16;  // 1, 4
+      else if (sl == 2)
+        svc->update_buffer_slot[sl] = 4 + 32;  // 2, 5
+    }
+    if (svc->use_gf_temporal_ref_current_layer)
+      svc->update_buffer_slot[sl] += (1 << ltf);
+  }
+
   // TODO(jianj): Remove these 3, deprecated.
   svc->update_last[sl] = (uint8_t)cpi->refresh_last_frame;
   svc->update_golden[sl] = (uint8_t)cpi->refresh_golden_frame;
@@ -752,7 +773,8 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   svc->skip_enhancement_layer = 0;
 
   if (svc->disable_inter_layer_pred == INTER_LAYER_PRED_OFF &&
-      svc->number_spatial_layers <= 3 && svc->number_temporal_layers <= 3 &&
+      svc->number_spatial_layers > 1 && svc->number_spatial_layers <= 3 &&
+      svc->number_temporal_layers <= 3 &&
       !(svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
         svc->use_set_ref_frame_config))
     svc->simulcast_mode = 1;
