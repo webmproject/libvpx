@@ -567,6 +567,14 @@ typedef struct FEATURE_SCORE_LOC {
 } FEATURE_SCORE_LOC;
 #endif
 
+#define MAX_KMEANS_GROUPS 8
+
+typedef struct KMEANS_DATA {
+  double value;
+  int pos;
+  int group_idx;
+} KMEANS_DATA;
+
 typedef struct VP9_COMP {
   QUANTS quants;
   ThreadData td;
@@ -594,6 +602,12 @@ typedef struct VP9_COMP {
   TplDepFrame tpl_stats[MAX_ARF_GOP_SIZE];
   YV12_BUFFER_CONFIG *tpl_recon_frames[REF_FRAMES];
   EncFrameBuf enc_frame_buf[REF_FRAMES];
+  int kmeans_data_arr_alloc;
+  KMEANS_DATA *kmeans_data_arr;
+  int kmeans_data_size;
+  int kmeans_data_stride;
+  double kmeans_ctr_ls[MAX_KMEANS_GROUPS];
+  int kmeans_ctr_num;
 #if CONFIG_NON_GREEDY_MV
   int tpl_ready;
   int feature_score_loc_alloc;

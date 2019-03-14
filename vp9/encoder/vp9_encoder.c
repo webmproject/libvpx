@@ -2388,6 +2388,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
                                sizeof(*cpi->mb_wiener_variance)));
   }
 
+  cpi->kmeans_data_arr_alloc = 0;
 #if CONFIG_NON_GREEDY_MV
   cpi->feature_score_loc_alloc = 0;
   cpi->tpl_ready = 0;
@@ -2590,6 +2591,10 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #if CONFIG_VP9_TEMPORAL_DENOISING
   vp9_denoiser_free(&(cpi->denoiser));
 #endif
+
+  if (cpi->kmeans_data_arr_alloc) {
+    vpx_free(cpi->kmeans_data_arr);
+  }
 
 #if CONFIG_NON_GREEDY_MV
   vpx_free(cpi->feature_score_loc_arr);
@@ -7248,6 +7253,16 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   if (cpi->oxcf.pass != 0 || cpi->use_svc || frame_is_intra_only(cm) == 1) {
     for (i = 0; i < REFS_PER_FRAME; ++i) cpi->scaled_ref_idx[i] = INVALID_IDX;
+  }
+
+  if (cpi->kmeans_data_arr_alloc == 0) {
+    const int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
+    const int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+    CHECK_MEM_ERROR(
+        cm, cpi->kmeans_data_arr,
+        vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->kmeans_data_arr)));
+    cpi->kmeans_data_stride = mi_cols;
+    cpi->kmeans_data_arr_alloc = 1;
   }
 
   if (gf_group_index == 1 &&

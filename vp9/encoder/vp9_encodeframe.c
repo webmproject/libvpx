@@ -3583,6 +3583,8 @@ static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
   int row, col;
   int64_t rdmult;
   int64_t wiener_variance = 0;
+  KMEANS_DATA *kmeans_data;
+  vpx_clear_system_state();
 
   assert(cpi->norm_wiener_variance > 0);
 
@@ -3590,10 +3592,12 @@ static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
     for (col = mb_col_start; col < mb_col_end; ++col)
       wiener_variance += cpi->mb_wiener_variance[row * cm->mb_cols + col];
 
+  kmeans_data = &cpi->kmeans_data_arr[cpi->kmeans_data_size++];
+  kmeans_data->value = log(1 + wiener_variance);
+  kmeans_data->pos = mi_row * cpi->kmeans_data_stride + mi_col;
   if (wiener_variance)
     wiener_variance /=
         (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);
-
   rdmult = (orig_rdmult * wiener_variance) / cpi->norm_wiener_variance;
 
   rdmult = VPXMIN(rdmult, orig_rdmult * 3);
@@ -5673,6 +5677,89 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 }
 #endif
 
+static int compare_kmeans_data(const void *a, const void *b) {
+  if (((const KMEANS_DATA *)a)->value > ((const KMEANS_DATA *)b)->value) {
+    return 1;
+  } else if (((const KMEANS_DATA *)a)->value <
+             ((const KMEANS_DATA *)b)->value) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+void vp9_kmeans(double *ctr_ls, int k, KMEANS_DATA *arr, int size) {
+  double min, max;
+  double step;
+  int i, j;
+  int itr;
+  double boundary_ls[MAX_KMEANS_GROUPS] = { 0 };
+  int group_idx;
+  double sum;
+  int count;
+
+  vpx_clear_system_state();
+
+  assert(k >= 2 && k <= MAX_KMEANS_GROUPS);
+
+  qsort(arr, size, sizeof(*arr), compare_kmeans_data);
+
+  min = arr[0].value;
+  max = arr[size - 1].value;
+
+  // initialize the center points
+  step = (max - min) * 1. / k;
+  for (j = 0; j < k; ++j) {
+    ctr_ls[j] = min + j * step + step / 2;
+  }
+
+  for (itr = 0; itr < 10; ++itr) {
+    for (j = 0; j < k - 1; ++j) {
+      boundary_ls[j] = (ctr_ls[j] + ctr_ls[j + 1]) / 2.;
+    }
+    boundary_ls[k - 1] = max + 1;
+
+    group_idx = 0;
+    count = 0;
+    sum = 0;
+    for (i = 0; i < size; ++i) {
+      while (arr[i].value >= boundary_ls[group_idx]) {
+        ++group_idx;
+        if (group_idx == k - 1) {
+          break;
+        }
+      }
+
+      sum += arr[i].value;
+      ++count;
+
+      if (i + 1 == size || arr[i + 1].value >= boundary_ls[group_idx]) {
+        if (count > 0) {
+          ctr_ls[group_idx] = sum / count;
+        }
+        count = 0;
+        sum = 0;
+      }
+    }
+  }
+
+  // compute group_idx
+  for (j = 0; j < k - 1; ++j) {
+    boundary_ls[j] = (ctr_ls[j] + ctr_ls[j + 1]) / 2.;
+  }
+  boundary_ls[k - 1] = max + 1;
+  group_idx = 0;
+  for (i = 0; i < size; ++i) {
+    while (arr[i].value >= boundary_ls[group_idx]) {
+      ++group_idx;
+      if (group_idx == k - 1) {
+        break;
+      }
+    }
+    arr[i].group_idx = group_idx;
+  }
+}
+
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   ThreadData *const td = &cpi->td;
@@ -5782,6 +5869,11 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     }
 #endif
 
+    if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+      cpi->kmeans_data_size = 0;
+      cpi->kmeans_ctr_num = 5;
+    }
+
     if (!cpi->row_mt) {
       cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read_dummy;
       cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write_dummy;
@@ -5795,6 +5887,11 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read;
       cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write;
       vp9_encode_tiles_row_mt(cpi);
+    }
+
+    if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+      vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_ctr_num, cpi->kmeans_data_arr,
+                 cpi->kmeans_data_size);
     }
 
     vpx_usec_timer_mark(&emr_timer);

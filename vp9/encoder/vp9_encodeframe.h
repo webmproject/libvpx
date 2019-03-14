@@ -45,6 +45,9 @@ void vp9_encode_sb_row(struct VP9_COMP *cpi, struct ThreadData *td,
 void vp9_set_variance_partition_thresholds(struct VP9_COMP *cpi, int q,
                                            int content_state);
 
+struct KMEANS_DATA;
+void vp9_kmeans(double *ctr_ls, int k, struct KMEANS_DATA *arr, int size);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
