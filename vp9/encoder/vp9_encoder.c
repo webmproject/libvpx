@@ -3114,11 +3114,7 @@ static void update_ref_frames(VP9_COMP *cpi) {
 }
 
 void vp9_update_reference_frames(VP9_COMP *cpi) {
-  if (cpi->svc.simulcast_mode && is_one_pass_cbr_svc(cpi) &&
-      cpi->common.frame_type == KEY_FRAME)
-    vp9_svc_update_ref_frame_key_simulcast(cpi);
-  else
-    update_ref_frames(cpi);
+  update_ref_frames(cpi);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   vp9_denoiser_update_ref_frame(cpi);

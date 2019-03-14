@@ -733,26 +733,6 @@ void vp9_copy_flags_ref_update_idx(VP9_COMP *const cpi) {
     }
   }
 
-  if (svc->simulcast_mode && cpi->common.frame_type == KEY_FRAME) {
-    const int index = svc->number_spatial_layers == 3 ? sl - 1 : sl;
-    const int ltf = svc->buffer_gf_temporal_ref[index].idx;
-    if (svc->number_spatial_layers == 2) {
-      if (sl == 0)
-        svc->update_buffer_slot[sl] = 1 + 4;  // 0, 2
-      else if (sl == 1)
-        svc->update_buffer_slot[sl] = 2 + 8;  // 1, 3
-    } else if (svc->number_spatial_layers == 3) {
-      if (sl == 0)
-        svc->update_buffer_slot[sl] = 1 + 8;  // 0, 3
-      else if (sl == 1)
-        svc->update_buffer_slot[sl] = 2 + 16;  // 1, 4
-      else if (sl == 2)
-        svc->update_buffer_slot[sl] = 4 + 32;  // 2, 5
-    }
-    if (svc->use_gf_temporal_ref_current_layer)
-      svc->update_buffer_slot[sl] += (1 << ltf);
-  }
-
   // TODO(jianj): Remove these 3, deprecated.
   svc->update_last[sl] = (uint8_t)cpi->refresh_last_frame;
   svc->update_golden[sl] = (uint8_t)cpi->refresh_golden_frame;
@@ -1233,44 +1213,6 @@ static void vp9_svc_update_ref_frame_bypass_mode(VP9_COMP *const cpi) {
   }
 }
 
-void vp9_svc_update_ref_frame_key_simulcast(VP9_COMP *const cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  SVC *const svc = &cpi->svc;
-  BufferPool *const pool = cm->buffer_pool;
-  const int sl_id = svc->spatial_layer_id;
-  const int tl_id = svc->temporal_layer_id;
-  const int num_sl = svc->number_spatial_layers;
-  // SL0:
-  // 3 spatial layers: update slot 0 and 3
-  // 2 spatial layers: update slot 0 and 2
-  // 1 spatial layer:  update slot 0 and 1
-  // SL1:
-  // 3 spatial layers: update slot 1, 4, and 6
-  // 2 spatial layers: update slot 1, 3, and 6
-  // slot 6 is for golden frame long temporal prediction.
-  // SL2: update slot 2, 5 and 7
-  // slot 7 is for golden frame long temporal prediction.
-  ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[sl_id], cm->new_fb_idx);
-  ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[num_sl + sl_id],
-             cm->new_fb_idx);
-  svc->fb_idx_spatial_layer_id[sl_id] = sl_id;
-  svc->fb_idx_temporal_layer_id[sl_id] = tl_id;
-  svc->fb_idx_spatial_layer_id[num_sl + sl_id] = sl_id;
-  svc->fb_idx_temporal_layer_id[num_sl + sl_id] = tl_id;
-  // Update slots for golden frame long temporal prediction.
-  if (svc->use_gf_temporal_ref_current_layer) {
-    const int index = num_sl == 3 ? sl_id - 1 : sl_id;
-    const int lt_buffer_index = svc->buffer_gf_temporal_ref[index].idx;
-    ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[lt_buffer_index],
-               cm->new_fb_idx);
-    svc->fb_idx_spatial_layer_id[lt_buffer_index] = sl_id;
-    svc->fb_idx_temporal_layer_id[lt_buffer_index] = tl_id;
-  }
-
-  vp9_copy_flags_ref_update_idx(cpi);
-  vp9_svc_update_ref_frame_buffer_idx(cpi);
-}
-
 void vp9_svc_update_ref_frame(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
   SVC *const svc = &cpi->svc;
@@ -1290,7 +1232,7 @@ void vp9_svc_update_ref_frame(VP9_COMP *const cpi) {
       if (i != cpi->lst_fb_idx && i != cpi->gld_fb_idx && i != cpi->alt_fb_idx)
         ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[i], cm->new_fb_idx);
     }
-  } else if (cm->frame_type != KEY_FRAME) {
+  } else {
     if (cpi->refresh_last_frame) {
       svc->fb_idx_spatial_layer_id[cpi->lst_fb_idx] = svc->spatial_layer_id;
       svc->fb_idx_temporal_layer_id[cpi->lst_fb_idx] = svc->temporal_layer_id;
