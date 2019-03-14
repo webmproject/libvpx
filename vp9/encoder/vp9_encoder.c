@@ -2377,8 +2377,8 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   }
 #endif  // !CONFIG_REALTIME_ONLY
 
-  vp9_set_speed_features_framesize_independent(cpi);
-  vp9_set_speed_features_framesize_dependent(cpi);
+  vp9_set_speed_features_framesize_independent(cpi, oxcf->speed);
+  vp9_set_speed_features_framesize_dependent(cpi, oxcf->speed);
 
   if (cpi->sf.enable_wiener_variance) {
     CHECK_MEM_ERROR(cm, cpi->stack_rank_buffer,
@@ -3491,7 +3491,7 @@ static void set_mv_search_params(VP9_COMP *cpi) {
 }
 
 static void set_size_independent_vars(VP9_COMP *cpi) {
-  vp9_set_speed_features_framesize_independent(cpi);
+  vp9_set_speed_features_framesize_independent(cpi, cpi->oxcf.speed);
   vp9_set_rd_speed_thresholds(cpi);
   vp9_set_rd_speed_thresholds_sub8x8(cpi);
   cpi->common.interp_filter = cpi->sf.default_interp_filter;
@@ -3502,7 +3502,7 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q, int *bottom_index,
   VP9_COMMON *const cm = &cpi->common;
 
   // Setup variables that depend on the dimensions of the frame.
-  vp9_set_speed_features_framesize_dependent(cpi);
+  vp9_set_speed_features_framesize_dependent(cpi, cpi->oxcf.speed);
 
   // Decide q and q bounds.
   *q = vp9_rc_pick_q_and_bounds(cpi, bottom_index, top_index);
