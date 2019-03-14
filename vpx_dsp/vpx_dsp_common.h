@@ -25,8 +25,8 @@ extern "C" {
 #define VPX_SWAP(type, a, b) \
   do {                       \
     type c = (b);            \
-    b = a;                   \
-    a = c;                   \
+    (b) = a;                 \
+    (a) = c;                 \
   } while (0)
 
 #if CONFIG_VP9_HIGHBITDEPTH

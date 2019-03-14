@@ -41,7 +41,7 @@ typedef struct {
 } FIRSTPASS_MB_STATS;
 #endif
 
-#define INVALID_ROW -1
+#define INVALID_ROW (-1)
 
 #define MAX_ARF_LAYERS 6
 
