@@ -46,7 +46,9 @@ void vp9_set_variance_partition_thresholds(struct VP9_COMP *cpi, int q,
                                            int content_state);
 
 struct KMEANS_DATA;
-void vp9_kmeans(double *ctr_ls, int k, struct KMEANS_DATA *arr, int size);
+void vp9_kmeans(double *ctr_ls, double *boundary_ls, int k,
+                struct KMEANS_DATA *arr, int size);
+int vp9_get_group_idx(double value, double *boundary_ls, int k);
 
 #ifdef __cplusplus
 }  // extern "C"

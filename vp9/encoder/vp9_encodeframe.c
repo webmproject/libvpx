@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <float.h>
 #include <limits.h>
 #include <math.h>
 #include <stdio.h>
@@ -5688,12 +5689,33 @@ static int compare_kmeans_data(const void *a, const void *b) {
   }
 }
 
-void vp9_kmeans(double *ctr_ls, int k, KMEANS_DATA *arr, int size) {
+static void compute_boundary_ls(const double *ctr_ls, int k,
+                                double *boundary_ls) {
+  // boundary_ls[j] is the upper bound of data centered at ctr_ls[j]
+  int j;
+  for (j = 0; j < k - 1; ++j) {
+    boundary_ls[j] = (ctr_ls[j] + ctr_ls[j + 1]) / 2.;
+  }
+  boundary_ls[k - 1] = DBL_MAX;
+}
+
+int vp9_get_group_idx(double value, double *boundary_ls, int k) {
+  int group_idx = 0;
+  while (value >= boundary_ls[group_idx]) {
+    ++group_idx;
+    if (group_idx == k - 1) {
+      break;
+    }
+  }
+  return group_idx;
+}
+
+void vp9_kmeans(double *ctr_ls, double *boundary_ls, int k, KMEANS_DATA *arr,
+                int size) {
   double min, max;
   double step;
   int i, j;
   int itr;
-  double boundary_ls[MAX_KMEANS_GROUPS] = { 0 };
   int group_idx;
   double sum;
   int count;
@@ -5714,11 +5736,7 @@ void vp9_kmeans(double *ctr_ls, int k, KMEANS_DATA *arr, int size) {
   }
 
   for (itr = 0; itr < 10; ++itr) {
-    for (j = 0; j < k - 1; ++j) {
-      boundary_ls[j] = (ctr_ls[j] + ctr_ls[j + 1]) / 2.;
-    }
-    boundary_ls[k - 1] = max + 1;
-
+    compute_boundary_ls(ctr_ls, k, boundary_ls);
     group_idx = 0;
     count = 0;
     sum = 0;
@@ -5744,10 +5762,7 @@ void vp9_kmeans(double *ctr_ls, int k, KMEANS_DATA *arr, int size) {
   }
 
   // compute group_idx
-  for (j = 0; j < k - 1; ++j) {
-    boundary_ls[j] = (ctr_ls[j] + ctr_ls[j + 1]) / 2.;
-  }
-  boundary_ls[k - 1] = max + 1;
+  compute_boundary_ls(ctr_ls, k, boundary_ls);
   group_idx = 0;
   for (i = 0; i < size; ++i) {
     while (arr[i].value >= boundary_ls[group_idx]) {
@@ -5890,7 +5905,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     }
 
     if (cpi->sf.enable_wiener_variance && cm->show_frame) {
-      vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_ctr_num, cpi->kmeans_data_arr,
+      vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_boundary_ls,
+                 cpi->kmeans_ctr_num, cpi->kmeans_data_arr,
                  cpi->kmeans_data_size);
     }
 
