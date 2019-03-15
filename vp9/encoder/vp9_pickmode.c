@@ -1442,7 +1442,7 @@ static void search_filter_ref(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
                               int mi_row, int mi_col, PRED_BUFFER *tmp,
                               BLOCK_SIZE bsize, int reuse_inter_pred,
                               PRED_BUFFER **this_mode_pred, unsigned int *var_y,
-                              unsigned int *sse_y) {
+                              unsigned int *sse_y, int force_smooth_filter) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mi = xd->mi[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
@@ -1458,8 +1458,8 @@ static void search_filter_ref(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
   INTERP_FILTER best_filter = SWITCHABLE, filter;
   PRED_BUFFER *current_pred = *this_mode_pred;
   uint8_t skip_txfm = SKIP_TXFM_NONE;
-
-  for (filter = EIGHTTAP; filter <= EIGHTTAP_SMOOTH; ++filter) {
+  INTERP_FILTER filter_start = force_smooth_filter ? EIGHTTAP_SMOOTH : EIGHTTAP;
+  for (filter = filter_start; filter <= EIGHTTAP_SMOOTH; ++filter) {
     int64_t cost;
     mi->interp_filter = filter;
     vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
@@ -1700,6 +1700,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int no_scaling = 0;
   unsigned int thresh_svc_skip_golden = 500;
   unsigned int thresh_skip_golden = 500;
+  int force_smooth_filter =
+      (cpi->oxcf.speed >= 8 && cm->width * cm->height <= 320 * 240 &&
+       cm->base_qindex >= 200)
+          ? 1
+          : 0;
   int scene_change_detected =
       cpi->rc.high_source_sad ||
       (cpi->use_svc && cpi->svc.high_source_sad_superframe);
@@ -2225,7 +2230,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         (((mi->mv[0].as_mv.row | mi->mv[0].as_mv.col) & 0x07) != 0)) {
       rd_computed = 1;
       search_filter_ref(cpi, x, &this_rdc, mi_row, mi_col, tmp, bsize,
-                        reuse_inter_pred, &this_mode_pred, &var_y, &sse_y);
+                        reuse_inter_pred, &this_mode_pred, &var_y, &sse_y,
+                        force_smooth_filter);
     } else {
       // For low motion content use x->sb_is_skin in addition to VeryHighSad
       // for setting large_block.
