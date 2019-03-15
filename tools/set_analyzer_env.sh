@@ -30,7 +30,7 @@ case "${sanitizer}" in
   *)
     echo "Usage: source set_analyzer_env.sh [<sanitizer>|clear]"
     echo "  Supported sanitizers:"
-    echo "    address integer memory thread undefined"
+    echo "    address cfi integer memory thread undefined"
     return 1
     ;;
 esac
@@ -77,8 +77,8 @@ cflags="${cflags} -fno-optimize-sibling-calls"
 
 if [ "${sanitizer}" = "cfi" ]; then
   # https://clang.llvm.org/docs/ControlFlowIntegrity.html
-  cflags="${cflags} -flto -fvisibility=hidden"
-  ldflags="${ldflags} -flto -fuse-ld=gold"
+  cflags="${cflags} -fno-sanitize-trap=cfi -flto -fvisibility=hidden"
+  ldflags="${ldflags} -fno-sanitize-trap=cfi -flto -fuse-ld=gold"
   export AR="llvm-ar"
 fi
 
