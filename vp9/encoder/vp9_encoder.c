@@ -6020,6 +6020,8 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   xd->mb_to_right_edge = ((cm->mi_cols - 1 - mi_col) * MI_SIZE) * 8;
   xd->above_mi = (mi_row > 0) ? &mi_above : NULL;
   xd->left_mi = (mi_col > 0) ? &mi_left : NULL;
+  xd->mi_row = mi_row;
+  xd->mi_col = mi_col;
 
   // Intra prediction search
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
@@ -6786,6 +6788,9 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
   xd->cur_buf = this_frame;
+
+  xd->tile.mi_row_start = 0;
+  xd->tile.mi_col_start = 0;
 
   // Get rd multiplier set up.
   rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, tpl_frame->base_qindex);
