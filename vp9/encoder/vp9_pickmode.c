@@ -2337,7 +2337,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
 
     // Skipping checking: test to see if this block can be reconstructed by
     // prediction only.
-    if (cpi->allow_encode_breakout && !xd->lossless && !scene_change_detected) {
+    if (cpi->allow_encode_breakout && !xd->lossless && !scene_change_detected &&
+        !svc->high_num_blocks_with_motion) {
       encode_breakout_test(cpi, x, bsize, mi_row, mi_col, ref_frame, this_mode,
                            var_y, sse_y, yv12_mb, &this_rdc.rate,
                            &this_rdc.dist, flag_preduv_computed);
@@ -2346,6 +2347,15 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
         this_rdc.rdcost =
             RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
       }
+    }
+
+    // On spatially flat blocks for screne content: bias against zero-last
+    // if the sse_y is non-zero. Only on scene change or high motion frames.
+    if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
+        (scene_change_detected || svc->high_num_blocks_with_motion) &&
+        ref_frame == LAST_FRAME && frame_mv[this_mode][ref_frame].as_int == 0 &&
+        svc->spatial_layer_id == 0 && x->source_variance == 0 && sse_y > 0) {
+      this_rdc.rdcost = this_rdc.rdcost << 2;
     }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
@@ -2489,8 +2499,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                                       &rd_thresh_freq_fact[mode_index])) ||
           (!cpi->sf.adaptive_rd_thresh_row_mt &&
            rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
-                               &rd_thresh_freq_fact[mode_index])))
-        continue;
+                               &rd_thresh_freq_fact[mode_index]))) {
+        // Avoid this early exit for screen on base layer, for scene
+        // changes or high motion frames.
+        if (cpi->oxcf.content != VP9E_CONTENT_SCREEN ||
+            svc->spatial_layer_id > 0 ||
+            (!scene_change_detected && !svc->high_num_blocks_with_motion))
+          continue;
+      }
 
       mi->mode = this_mode;
       mi->ref_frame[0] = INTRA_FRAME;
