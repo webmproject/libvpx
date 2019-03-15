@@ -179,6 +179,7 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR &&
         cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
+        (cm->base_qindex < 200 || cm->width * cm->height > 320 * 240) &&
         cpi->oxcf.content != VP9E_CONTENT_SCREEN && cm->frame_type != KEY_FRAME)
       filt_guess = 5 * filt_guess >> 3;
 

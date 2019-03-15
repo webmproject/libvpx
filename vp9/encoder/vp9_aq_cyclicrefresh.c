@@ -478,7 +478,7 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
   int target_refresh = 0;
   double weight_segment_target = 0;
   double weight_segment = 0;
-  int thresh_low_motion = (cm->width < 720) ? 55 : 20;
+  int thresh_low_motion = 20;
   int qp_thresh = VPXMIN((cpi->oxcf.content == VP9E_CONTENT_SCREEN) ? 35 : 20,
                          rc->best_quality << 1);
   cr->apply_cyclic_refresh = 1;
