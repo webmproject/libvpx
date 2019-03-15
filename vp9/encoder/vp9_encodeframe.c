@@ -5873,6 +5873,20 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       cpi->rd.r0 = (double)intra_cost_base / mc_dep_cost_base;
   }
 
+  // Frame segmentation
+  if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+    int mi_row, mi_col;
+    cpi->kmeans_data_size = 0;
+    cpi->kmeans_ctr_num = 5;
+
+    for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE)
+      for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE)
+        wiener_var_rdmult(cpi, BLOCK_64X64, mi_row, mi_col, cpi->rd.RDMULT);
+
+    vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_boundary_ls, cpi->kmeans_ctr_num,
+               cpi->kmeans_data_arr, cpi->kmeans_data_size);
+  }
+
   {
     struct vpx_usec_timer emr_timer;
     vpx_usec_timer_start(&emr_timer);
@@ -5883,11 +5897,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
                        &cpi->twopass.this_frame_mb_stats);
     }
 #endif
-
-    if (cpi->sf.enable_wiener_variance && cm->show_frame) {
-      cpi->kmeans_data_size = 0;
-      cpi->kmeans_ctr_num = 5;
-    }
 
     if (!cpi->row_mt) {
       cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read_dummy;
@@ -5902,12 +5911,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       cpi->row_mt_sync_read_ptr = vp9_row_mt_sync_read;
       cpi->row_mt_sync_write_ptr = vp9_row_mt_sync_write;
       vp9_encode_tiles_row_mt(cpi);
-    }
-
-    if (cpi->sf.enable_wiener_variance && cm->show_frame) {
-      vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_boundary_ls,
-                 cpi->kmeans_ctr_num, cpi->kmeans_data_arr,
-                 cpi->kmeans_data_size);
     }
 
     vpx_usec_timer_mark(&emr_timer);
