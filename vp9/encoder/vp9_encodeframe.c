@@ -3705,11 +3705,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   int64_t dist_breakout_thr = cpi->sf.partition_search_breakout_thr.dist;
   int rate_breakout_thr = cpi->sf.partition_search_breakout_thr.rate;
   int must_split = 0;
-  int partition_mul =
-      (cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance) &&
-              cpi->oxcf.aq_mode == NO_AQ
-          ? x->cb_rdmult
-          : cpi->rd.RDMULT;
+  int partition_mul = x->cb_rdmult;
   // Ref frames picked in the [i_th] quarter subblock during square partition
   // RD search. It may be used to prune ref frame selection of rect partitions.
   uint8_t ref_frames_used[4] = { 0, 0, 0, 0 };
