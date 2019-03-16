@@ -611,6 +611,7 @@ typedef struct VP9_COMP {
   int kmeans_data_stride;
   double kmeans_ctr_ls[MAX_KMEANS_GROUPS];
   double kmeans_boundary_ls[MAX_KMEANS_GROUPS];
+  int kmeans_count_ls[MAX_KMEANS_GROUPS];
   int kmeans_ctr_num;
 #if CONFIG_NON_GREEDY_MV
   int tpl_ready;
