@@ -1927,6 +1927,13 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
   }
 
   x->rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
+
+  if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+    if (cm->seg.enabled)
+      x->rdmult = vp9_compute_rd_mult(
+          cpi, vp9_get_qindex(&cm->seg, x->e_mbd.mi[0]->segment_id,
+                              cm->base_qindex));
+  }
 }
 
 static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
