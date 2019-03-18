@@ -93,6 +93,7 @@ struct macroblock {
   int rddiv;
   int rdmult;
   int cb_rdmult;
+  int segment_id;
   int mb_energy;
 
   // These are set to their default values at the beginning, and then adjusted

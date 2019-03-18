@@ -240,6 +240,8 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
   if (cpi->roi.enabled)
     mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
 
+  if (cpi->sf.enable_wiener_variance) mi->segment_id = x->segment_id;
+
   vp9_init_plane_quantizers(cpi, x);
 }
 
@@ -3581,8 +3583,8 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
 }
 #undef FEATURES
 
-static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
-                             int mi_col, int orig_rdmult) {
+static int wiener_var_segment(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
+                              int mi_col) {
   VP9_COMMON *cm = &cpi->common;
   int mb_row_start = mi_row >> 1;
   int mb_col_start = mi_col >> 1;
@@ -3591,8 +3593,8 @@ static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
   int mb_col_end =
       VPXMIN((mi_col + num_8x8_blocks_wide_lookup[bsize]) >> 1, cm->mb_cols);
   int row, col;
-  int64_t rdmult;
   int64_t wiener_variance = 0;
+  int segment_id;
   KMEANS_DATA *kmeans_data;
   vpx_clear_system_state();
 
@@ -3611,15 +3613,11 @@ static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
 #if CONFIG_MULTITHREAD
   pthread_mutex_unlock(&cpi->kmeans_mutex);
 #endif  // CONFIG_MULTITHREAD
-  if (wiener_variance)
-    wiener_variance /=
-        (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);
-  rdmult = (orig_rdmult * wiener_variance) / cpi->norm_wiener_variance;
 
-  rdmult = VPXMIN(rdmult, orig_rdmult * 3);
-  rdmult = VPXMAX(rdmult, orig_rdmult / 4);
+  segment_id = vp9_get_group_idx(kmeans_data->value, cpi->kmeans_boundary_ls,
+                                 cpi->kmeans_ctr_num);
 
-  return (int)rdmult;
+  return segment_id;
 }
 
 static int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
@@ -4327,9 +4325,11 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
         x->cb_rdmult = dr;
       }
 
-      if (cpi->sf.enable_wiener_variance && cm->show_frame)
-        x->cb_rdmult =
-            wiener_var_rdmult(cpi, BLOCK_64X64, mi_row, mi_col, orig_rdmult);
+      if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+        x->segment_id = wiener_var_segment(cpi, BLOCK_64X64, mi_row, mi_col);
+        x->cb_rdmult = vp9_compute_rd_mult(
+            cpi, vp9_get_qindex(&cm->seg, x->segment_id, cm->base_qindex));
+      }
 
       // If required set upper and lower partition size limits
       if (sf->auto_min_max_partition_size) {
@@ -5894,7 +5894,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
       for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE)
         for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE)
-          wiener_var_rdmult(cpi, BLOCK_64X64, mi_row, mi_col, cpi->rd.RDMULT);
+          wiener_var_segment(cpi, BLOCK_64X64, mi_row, mi_col);
 
       vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_boundary_ls,
                  cpi->kmeans_ctr_num, cpi->kmeans_data_arr,
