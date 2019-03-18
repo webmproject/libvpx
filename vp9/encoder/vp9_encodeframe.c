@@ -3595,9 +3595,15 @@ static int wiener_var_rdmult(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
     for (col = mb_col_start; col < mb_col_end; ++col)
       wiener_variance += cpi->mb_wiener_variance[row * cm->mb_cols + col];
 
+#if CONFIG_MULTITHREAD
+  pthread_mutex_lock(&cpi->kmeans_mutex);
+#endif  // CONFIG_MULTITHREAD
   kmeans_data = &cpi->kmeans_data_arr[cpi->kmeans_data_size++];
   kmeans_data->value = log(1.0 + wiener_variance) / log(2.0);
   kmeans_data->pos = mi_row * cpi->kmeans_data_stride + mi_col;
+#if CONFIG_MULTITHREAD
+  pthread_mutex_unlock(&cpi->kmeans_mutex);
+#endif  // CONFIG_MULTITHREAD
   if (wiener_variance)
     wiener_variance /=
         (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);

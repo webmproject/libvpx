@@ -602,6 +602,9 @@ typedef struct VP9_COMP {
   TplDepFrame tpl_stats[MAX_ARF_GOP_SIZE];
   YV12_BUFFER_CONFIG *tpl_recon_frames[REF_FRAMES];
   EncFrameBuf enc_frame_buf[REF_FRAMES];
+#if CONFIG_MULTITHREAD
+  pthread_mutex_t kmeans_mutex;
+#endif
   int kmeans_data_arr_alloc;
   KMEANS_DATA *kmeans_data_arr;
   int kmeans_data_size;

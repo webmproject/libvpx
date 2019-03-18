@@ -2593,6 +2593,9 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
 
   if (cpi->kmeans_data_arr_alloc) {
+#if CONFIG_MULTITHREAD
+    pthread_mutex_destroy(&cpi->kmeans_mutex);
+#endif
     vpx_free(cpi->kmeans_data_arr);
   }
 
@@ -7263,6 +7266,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (cpi->kmeans_data_arr_alloc == 0) {
     const int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
     const int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+#if CONFIG_MULTITHREAD
+    pthread_mutex_init(&cpi->kmeans_mutex, NULL);
+#endif
     CHECK_MEM_ERROR(
         cm, cpi->kmeans_data_arr,
         vpx_calloc(mi_rows * mi_cols, sizeof(*cpi->kmeans_data_arr)));
