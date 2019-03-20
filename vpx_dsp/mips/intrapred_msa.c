@@ -12,10 +12,10 @@
 #include "vpx_dsp/mips/macros_msa.h"
 
 #define IPRED_SUBS_UH2_UH(in0, in1, out0, out1) \
-  {                                             \
+  do {                                          \
     out0 = __msa_subs_u_h(out0, in0);           \
     out1 = __msa_subs_u_h(out1, in1);           \
-  }
+  } while (0)
 
 static void intra_predict_vert_4x4_msa(const uint8_t *src, uint8_t *dst,
                                        int32_t dst_stride) {

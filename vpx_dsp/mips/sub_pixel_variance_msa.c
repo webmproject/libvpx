@@ -19,7 +19,7 @@ static const uint8_t bilinear_filters_msa[8][2] = {
 };
 
 #define CALC_MSE_AVG_B(src, ref, var, sub)                          \
-  {                                                                 \
+  do {                                                              \
     v16u8 src_l0_m, src_l1_m;                                       \
     v8i16 res_l0_m, res_l1_m;                                       \
                                                                     \
@@ -28,7 +28,7 @@ static const uint8_t bilinear_filters_msa[8][2] = {
     DPADD_SH2_SW(res_l0_m, res_l1_m, res_l0_m, res_l1_m, var, var); \
                                                                     \
     (sub) += res_l0_m + res_l1_m;                                   \
-  }
+  } while (0)
 
 #define VARIANCE_WxH(sse, diff, shift) \
   (sse) - (((uint32_t)(diff) * (diff)) >> (shift))

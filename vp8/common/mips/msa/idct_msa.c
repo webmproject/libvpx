@@ -16,14 +16,14 @@ static const int32_t cospi8sqrt2minus1 = 20091;
 static const int32_t sinpi8sqrt2 = 35468;
 
 #define TRANSPOSE_TWO_4x4_H(in0, in1, in2, in3, out0, out1, out2, out3) \
-  {                                                                     \
+  do {                                                                  \
     v8i16 s4_m, s5_m, s6_m, s7_m;                                       \
                                                                         \
     TRANSPOSE8X4_SH_SH(in0, in1, in2, in3, s4_m, s5_m, s6_m, s7_m);     \
     ILVR_D2_SH(s6_m, s4_m, s7_m, s5_m, out0, out2);                     \
     out1 = (v8i16)__msa_ilvl_d((v2i64)s6_m, (v2i64)s4_m);               \
     out3 = (v8i16)__msa_ilvl_d((v2i64)s7_m, (v2i64)s5_m);               \
-  }
+  } while (0)
 
 #define EXPAND_TO_H_MULTIPLY_SINPI8SQRT2_PCK_TO_W(in)    \
   ({                                                     \
@@ -43,7 +43,7 @@ static const int32_t sinpi8sqrt2 = 35468;
   })
 
 #define VP8_IDCT_1D_H(in0, in1, in2, in3, out0, out1, out2, out3) \
-  {                                                               \
+  do {                                                            \
     v8i16 a1_m, b1_m, c1_m, d1_m;                                 \
     v8i16 c_tmp1_m, c_tmp2_m, d_tmp1_m, d_tmp2_m;                 \
     v8i16 const_cospi8sqrt2minus1_m;                              \
@@ -62,10 +62,10 @@ static const int32_t sinpi8sqrt2 = 35468;
     d_tmp2_m = EXPAND_TO_H_MULTIPLY_SINPI8SQRT2_PCK_TO_W(in3);    \
     d1_m = d_tmp1_m + d_tmp2_m;                                   \
     BUTTERFLY_4(a1_m, b1_m, c1_m, d1_m, out0, out1, out2, out3);  \
-  }
+  } while (0)
 
 #define VP8_IDCT_1D_W(in0, in1, in2, in3, out0, out1, out2, out3) \
-  {                                                               \
+  do {                                                            \
     v4i32 a1_m, b1_m, c1_m, d1_m;                                 \
     v4i32 c_tmp1_m, c_tmp2_m, d_tmp1_m, d_tmp2_m;                 \
     v4i32 const_cospi8sqrt2minus1_m, sinpi8_sqrt2_m;              \
@@ -81,7 +81,7 @@ static const int32_t sinpi8sqrt2 = 35468;
     d_tmp2_m = (in3 * sinpi8_sqrt2_m) >> 16;                      \
     d1_m = d_tmp1_m + d_tmp2_m;                                   \
     BUTTERFLY_4(a1_m, b1_m, c1_m, d1_m, out0, out1, out2, out3);  \
-  }
+  } while (0)
 
 static void idct4x4_addblk_msa(int16_t *input, uint8_t *pred,
                                int32_t pred_stride, uint8_t *dest,

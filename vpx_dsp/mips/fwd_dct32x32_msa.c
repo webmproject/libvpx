@@ -448,7 +448,7 @@ static void fdct8x32_1d_row_even(int16_t *temp, int16_t *out) {
 
   SUB2(in9, vec2, in14, vec5, vec2, vec5);
   DOTP_CONST_PAIR((-vec2), vec5, cospi_24_64, cospi_8_64, in2, in1);
-  SUB4(in8, vec3, in15, vec4, in3, in2, in0, in1, in3, in0, vec2, vec5)
+  SUB4(in8, vec3, in15, vec4, in3, in2, in0, in1, in3, in0, vec2, vec5);
   DOTP_CONST_PAIR(vec5, vec2, cospi_22_64, cospi_10_64, temp1, temp0);
   FDCT_POSTPROC_2V_NEG_H(temp0, temp1);
   ST_SH(temp0, out + 80);

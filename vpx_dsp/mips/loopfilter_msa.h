@@ -15,7 +15,7 @@
 
 #define VP9_LPF_FILTER4_4W(p1_in, p0_in, q0_in, q1_in, mask, hev, p1_out, \
                            p0_out, q0_out, q1_out)                        \
-  {                                                                       \
+  do {                                                                    \
     v16i8 p1_m, p0_m, q0_m, q1_m, filt, q0_sub_p0, t1, t2;                \
     const v16i8 cnst4b = __msa_ldi_b(4);                                  \
     const v16i8 cnst3b = __msa_ldi_b(3);                                  \
@@ -47,10 +47,10 @@
     q1_out = __msa_xori_b((v16u8)q1_m, 0x80);                             \
     p1_m = __msa_adds_s_b(p1_m, filt);                                    \
     p1_out = __msa_xori_b((v16u8)p1_m, 0x80);                             \
-  }
+  } while (0)
 
 #define VP9_FLAT4(p3_in, p2_in, p0_in, q0_in, q2_in, q3_in, flat_out)    \
-  {                                                                      \
+  do {                                                                   \
     v16u8 tmp_flat4, p2_a_sub_p0, q2_a_sub_q0, p3_a_sub_p0, q3_a_sub_q0; \
     v16u8 zero_in = { 0 };                                               \
                                                                          \
@@ -68,11 +68,11 @@
     flat_out = (tmp_flat4 < (v16u8)flat_out);                            \
     flat_out = __msa_xori_b(flat_out, 0xff);                             \
     flat_out = flat_out & (mask);                                        \
-  }
+  } while (0)
 
 #define VP9_FLAT5(p7_in, p6_in, p5_in, p4_in, p0_in, q0_in, q4_in, q5_in, \
                   q6_in, q7_in, flat_in, flat2_out)                       \
-  {                                                                       \
+  do {                                                                    \
     v16u8 tmp_flat5, zero_in = { 0 };                                     \
     v16u8 p4_a_sub_p0, q4_a_sub_q0, p5_a_sub_p0, q5_a_sub_q0;             \
     v16u8 p6_a_sub_p0, q6_a_sub_q0, p7_a_sub_p0, q7_a_sub_q0;             \
@@ -98,12 +98,12 @@
     flat2_out = (tmp_flat5 < (v16u8)flat2_out);                           \
     flat2_out = __msa_xori_b(flat2_out, 0xff);                            \
     flat2_out = flat2_out & flat_in;                                      \
-  }
+  } while (0)
 
 #define VP9_FILTER8(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \
                     p2_filt8_out, p1_filt8_out, p0_filt8_out, q0_filt8_out, \
                     q1_filt8_out, q2_filt8_out)                             \
-  {                                                                         \
+  do {                                                                      \
     v8u16 tmp_filt8_0, tmp_filt8_1, tmp_filt8_2;                            \
                                                                             \
     tmp_filt8_2 = p2_in + p1_in + p0_in;                                    \
@@ -136,12 +136,12 @@
     tmp_filt8_0 = q1_in + q3_in;                                            \
     tmp_filt8_1 = tmp_filt8_0 + tmp_filt8_1;                                \
     q1_filt8_out = (v8i16)__msa_srari_h((v8i16)tmp_filt8_1, 3);             \
-  }
+  } while (0)
 
 #define LPF_MASK_HEV(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \
                      limit_in, b_limit_in, thresh_in, hev_out, mask_out,     \
                      flat_out)                                               \
-  {                                                                          \
+  do {                                                                       \
     v16u8 p3_asub_p2_m, p2_asub_p1_m, p1_asub_p0_m, q1_asub_q0_m;            \
     v16u8 p1_asub_q1_m, p0_asub_q0_m, q3_asub_q2_m, q2_asub_q1_m;            \
                                                                              \
@@ -173,5 +173,5 @@
                                                                              \
     mask_out = limit_in < (v16u8)mask_out;                                   \
     mask_out = __msa_xori_b(mask_out, 0xff);                                 \
-  }
+  } while (0)
 #endif  // VPX_VPX_DSP_MIPS_LOOPFILTER_MSA_H_
