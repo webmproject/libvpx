@@ -50,7 +50,7 @@ extern const uint8_t mc_filt_mask_arr[16 * 3];
 #define HORIZ_8TAP_4WID_4VECS_FILT(src0, src1, src2, src3, mask0, mask1,     \
                                    mask2, mask3, filt0, filt1, filt2, filt3, \
                                    out0, out1)                               \
-  {                                                                          \
+  do {                                                                       \
     v16i8 vec0_m, vec1_m, vec2_m, vec3_m, vec4_m, vec5_m, vec6_m, vec7_m;    \
     v8i16 res0_m, res1_m, res2_m, res3_m;                                    \
                                                                              \
@@ -63,12 +63,12 @@ extern const uint8_t mc_filt_mask_arr[16 * 3];
     VSHF_B2_SB(src0, src1, src2, src3, mask3, mask3, vec6_m, vec7_m);        \
     DPADD_SB2_SH(vec6_m, vec7_m, filt3, filt3, res2_m, res3_m);              \
     ADDS_SH2_SH(res0_m, res2_m, res1_m, res3_m, out0, out1);                 \
-  }
+  } while (0)
 
 #define HORIZ_8TAP_8WID_4VECS_FILT(src0, src1, src2, src3, mask0, mask1,     \
                                    mask2, mask3, filt0, filt1, filt2, filt3, \
                                    out0, out1, out2, out3)                   \
-  {                                                                          \
+  do {                                                                       \
     v16i8 vec0_m, vec1_m, vec2_m, vec3_m, vec4_m, vec5_m, vec6_m, vec7_m;    \
     v8i16 res0_m, res1_m, res2_m, res3_m, res4_m, res5_m, res6_m, res7_m;    \
                                                                              \
@@ -90,33 +90,33 @@ extern const uint8_t mc_filt_mask_arr[16 * 3];
                  res4_m, res5_m, res6_m, res7_m);                            \
     ADDS_SH4_SH(res0_m, res4_m, res1_m, res5_m, res2_m, res6_m, res3_m,      \
                 res7_m, out0, out1, out2, out3);                             \
-  }
+  } while (0)
 
 #define PCKEV_XORI128_AVG_ST_UB(in0, in1, dst, pdst) \
-  {                                                  \
+  do {                                               \
     v16u8 tmp_m;                                     \
                                                      \
     tmp_m = PCKEV_XORI128_UB(in1, in0);              \
     tmp_m = __msa_aver_u_b(tmp_m, (v16u8)dst);       \
     ST_UB(tmp_m, (pdst));                            \
-  }
+  } while (0)
 
 #define PCKEV_AVG_ST_UB(in0, in1, dst, pdst)              \
-  {                                                       \
+  do {                                                    \
     v16u8 tmp_m;                                          \
                                                           \
     tmp_m = (v16u8)__msa_pckev_b((v16i8)in0, (v16i8)in1); \
     tmp_m = __msa_aver_u_b(tmp_m, (v16u8)dst);            \
     ST_UB(tmp_m, (pdst));                                 \
-  }
+  } while (0)
 
 #define PCKEV_AVG_ST8x4_UB(in0, in1, in2, in3, dst0, dst1, pdst, stride) \
-  {                                                                      \
+  do {                                                                   \
     v16u8 tmp0_m, tmp1_m;                                                \
     uint8_t *pdst_m = (uint8_t *)(pdst);                                 \
                                                                          \
     PCKEV_B2_UB(in1, in0, in3, in2, tmp0_m, tmp1_m);                     \
     AVER_UB2_UB(tmp0_m, dst0, tmp1_m, dst1, tmp0_m, tmp1_m);             \
     ST8x4_UB(tmp0_m, tmp1_m, pdst_m, stride);                            \
-  }
+  } while (0)
 #endif  // VPX_VPX_DSP_MIPS_VPX_CONVOLVE_MSA_H_

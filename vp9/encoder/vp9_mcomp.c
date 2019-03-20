@@ -211,7 +211,7 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
 
 #endif
 #define FIRST_LEVEL_CHECKS                                       \
-  {                                                              \
+  do {                                                           \
     unsigned int left, right, up, down, diag;                    \
     CHECK_BETTER(left, tr, tc - hstep);                          \
     CHECK_BETTER(right, tr, tc + hstep);                         \
@@ -224,10 +224,10 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
       case 2: CHECK_BETTER(diag, tr + hstep, tc - hstep); break; \
       case 3: CHECK_BETTER(diag, tr + hstep, tc + hstep); break; \
     }                                                            \
-  }
+  } while (0)
 
 #define SECOND_LEVEL_CHECKS                                       \
-  {                                                               \
+  do {                                                            \
     int kr, kc;                                                   \
     unsigned int second;                                          \
     if (tr != br && tc != bc) {                                   \
@@ -256,7 +256,7 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
         case 3: CHECK_BETTER(second, tr + kr, tc - hstep); break; \
       }                                                           \
     }                                                             \
-  }
+  } while (0)
 
 #define SETUP_SUBPEL_SEARCH                                                 \
   const uint8_t *const z = x->plane[0].src.buf;                             \
@@ -946,7 +946,7 @@ static INLINE int is_mv_in(const MvLimits *mv_limits, const MV *mv) {
 }
 
 #define CHECK_BETTER                                                      \
-  {                                                                       \
+  do {                                                                    \
     if (thissad < bestsad) {                                              \
       if (use_mvcost)                                                     \
         thissad += mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit); \
@@ -955,7 +955,7 @@ static INLINE int is_mv_in(const MvLimits *mv_limits, const MV *mv) {
         best_site = i;                                                    \
       }                                                                   \
     }                                                                     \
-  }
+  } while (0)
 
 #define MAX_PATTERN_SCALES 11
 #define MAX_PATTERN_CANDIDATES 8  // max number of canddiates per scale
@@ -1056,7 +1056,7 @@ static int vp9_pattern_search(
           thissad =
               vfp->sdf(what->buf, what->stride,
                        get_buf_from_mv(in_what, &this_mv), in_what->stride);
-          CHECK_BETTER
+          CHECK_BETTER;
         }
       } else {
         for (i = 0; i < num_candidates[t]; i++) {
@@ -1066,7 +1066,7 @@ static int vp9_pattern_search(
           thissad =
               vfp->sdf(what->buf, what->stride,
                        get_buf_from_mv(in_what, &this_mv), in_what->stride);
-          CHECK_BETTER
+          CHECK_BETTER;
         }
       }
       if (best_site == -1) {
@@ -1098,7 +1098,7 @@ static int vp9_pattern_search(
             thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         } else {
           for (i = 0; i < num_candidates[s]; i++) {
@@ -1108,7 +1108,7 @@ static int vp9_pattern_search(
             thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         }
 
@@ -1137,7 +1137,7 @@ static int vp9_pattern_search(
             thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         } else {
           for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
@@ -1149,7 +1149,7 @@ static int vp9_pattern_search(
             thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         }
 
@@ -1230,7 +1230,7 @@ static int vp9_pattern_search_sad(
           thissad =
               vfp->sdf(what->buf, what->stride,
                        get_buf_from_mv(in_what, &this_mv), in_what->stride);
-          CHECK_BETTER
+          CHECK_BETTER;
         }
       } else {
         for (i = 0; i < num_candidates[t]; i++) {
@@ -1240,7 +1240,7 @@ static int vp9_pattern_search_sad(
           thissad =
               vfp->sdf(what->buf, what->stride,
                        get_buf_from_mv(in_what, &this_mv), in_what->stride);
-          CHECK_BETTER
+          CHECK_BETTER;
         }
       }
       if (best_site == -1) {
@@ -1272,7 +1272,7 @@ static int vp9_pattern_search_sad(
             thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         } else {
           for (i = 0; i < num_candidates[s]; i++) {
@@ -1282,7 +1282,7 @@ static int vp9_pattern_search_sad(
             thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         }
 
@@ -1311,7 +1311,7 @@ static int vp9_pattern_search_sad(
             thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         } else {
           for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
@@ -1323,7 +1323,7 @@ static int vp9_pattern_search_sad(
             thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         }
 
@@ -1346,7 +1346,7 @@ static int vp9_pattern_search_sad(
             cost_list[i + 1] = thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         } else {
           for (i = 0; i < num_candidates[s]; i++) {
@@ -1356,7 +1356,7 @@ static int vp9_pattern_search_sad(
             cost_list[i + 1] = thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         }
 
@@ -1385,7 +1385,7 @@ static int vp9_pattern_search_sad(
             cost_list[next_chkpts_indices[i] + 1] = thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         } else {
           for (i = 0; i < PATTERN_CANDIDATES_REF; i++) {
@@ -1400,7 +1400,7 @@ static int vp9_pattern_search_sad(
             cost_list[next_chkpts_indices[i] + 1] = thissad =
                 vfp->sdf(what->buf, what->stride,
                          get_buf_from_mv(in_what, &this_mv), in_what->stride);
-            CHECK_BETTER
+            CHECK_BETTER;
           }
         }
 
