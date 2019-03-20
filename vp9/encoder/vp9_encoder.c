@@ -4746,13 +4746,16 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
 
 #if CONFIG_VP9_HIGHBITDEPTH
   xd->cur_buf = cpi->Source;
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     zero_pred = CONVERT_TO_BYTEPTR(zero_pred16);
-  else
+    memset(zero_pred16, 0, sizeof(*zero_pred16) * coeff_count);
+  } else {
     zero_pred = zero_pred8;
-#endif
-
+    memset(zero_pred8, 0, sizeof(*zero_pred8) * coeff_count);
+  }
+#else
   memset(zero_pred, 0, sizeof(*zero_pred) * coeff_count);
+#endif
 
   cpi->norm_wiener_variance = 0;
 
