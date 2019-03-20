@@ -67,7 +67,7 @@ void vp9_perceptual_aq_mode_setup(struct VP9_COMP *cpi,
   const int base_qindex = cm->base_qindex;
   const double base_qstep = vp9_convert_qindex_to_q(base_qindex, cm->bit_depth);
   const double mid_ctr = cpi->kmeans_ctr_ls[seg_counts / 2];
-  const double var_diff_scale = 8.0;
+  const double var_diff_scale = 4.0;
   int i;
 
   assert(seg_counts <= MAX_SEGMENTS);
