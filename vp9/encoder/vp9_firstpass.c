@@ -49,7 +49,6 @@
 #define MIN_DECAY_FACTOR 0.01
 #define NEW_MV_MODE_PENALTY 32
 #define DARK_THRESH 64
-#define SECTION_NOISE_DEF 250.0
 #define LOW_I_THRESH 24000
 
 #define NCOUNT_INTRA_THRESH 8192
@@ -2658,6 +2657,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Calculate the bits to be allocated to the gf/arf group as a whole
   gf_group_bits = calculate_total_gf_group_bits(cpi, gf_group_err);
+
+  // Store the average moise level measured for the group
+  twopass->gf_group.group_noise_energy =
+      (int)(gf_group_noise / rc->baseline_gf_interval);
 
   // Calculate an estimate of the maxq needed for the group.
   // We are more aggressive about correcting for sections
