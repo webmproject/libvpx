@@ -5896,7 +5896,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     if (cm->show_frame) {
       int mi_row, mi_col;
       cpi->kmeans_data_size = 0;
-      cpi->kmeans_ctr_num = 5;
+      cpi->kmeans_ctr_num = 8;
 
       for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE)
         for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE)
