@@ -3588,6 +3588,10 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
 }
 #undef FEATURES
 
+static double log_wiener_var(int64_t wiener_variance) {
+  return log(1.0 + wiener_variance) / log(2.0);
+}
+
 static void build_kmeans_segmentation(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   BLOCK_SIZE bsize = BLOCK_64X64;
@@ -3622,7 +3626,7 @@ static void build_kmeans_segmentation(VP9_COMP *cpi) {
 #endif  // CONFIG_MULTITHREAD
 
         kmeans_data = &cpi->kmeans_data_arr[cpi->kmeans_data_size++];
-        kmeans_data->value = log(1.0 + wiener_variance) / log(2.0);
+        kmeans_data->value = log_wiener_var(wiener_variance);
         kmeans_data->pos = mi_row * cpi->kmeans_data_stride + mi_col;
 #if CONFIG_MULTITHREAD
         pthread_mutex_unlock(&cpi->kmeans_mutex);
@@ -3661,7 +3665,7 @@ static int wiener_var_segment(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
 
   wiener_variance /= (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);
 
-  segment_id = vp9_get_group_idx(log(1.0 + wiener_variance) / log(2.0),
+  segment_id = vp9_get_group_idx(log_wiener_var(wiener_variance),
                                  cpi->kmeans_boundary_ls, cpi->kmeans_ctr_num);
 
   return segment_id;
