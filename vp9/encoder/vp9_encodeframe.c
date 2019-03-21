@@ -3651,22 +3651,35 @@ static int wiener_var_segment(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
       VPXMIN((mi_row + num_8x8_blocks_high_lookup[bsize]) >> 1, cm->mb_rows);
   int mb_col_end =
       VPXMIN((mi_col + num_8x8_blocks_wide_lookup[bsize]) >> 1, cm->mb_cols);
-  int row, col;
+  int row, col, idx;
   int64_t wiener_variance = 0;
   int segment_id;
+  int8_t seg_hist[MAX_SEGMENTS] = { 0 };
+  int8_t max_count = 0, max_index = -1;
 
   vpx_clear_system_state();
 
   assert(cpi->norm_wiener_variance > 0);
 
-  for (row = mb_row_start; row < mb_row_end; ++row)
-    for (col = mb_col_start; col < mb_col_end; ++col)
-      wiener_variance += cpi->mb_wiener_variance[row * cm->mb_cols + col];
+  for (row = mb_row_start; row < mb_row_end; ++row) {
+    for (col = mb_col_start; col < mb_col_end; ++col) {
+      wiener_variance = cpi->mb_wiener_variance[row * cm->mb_cols + col];
+      segment_id =
+          vp9_get_group_idx(log_wiener_var(wiener_variance),
+                            cpi->kmeans_boundary_ls, cpi->kmeans_ctr_num);
+      ++seg_hist[segment_id];
+    }
+  }
 
-  wiener_variance /= (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);
+  for (idx = 0; idx < cpi->kmeans_ctr_num; ++idx) {
+    if (seg_hist[idx] > max_count) {
+      max_count = seg_hist[idx];
+      max_index = idx;
+    }
+  }
 
-  segment_id = vp9_get_group_idx(log_wiener_var(wiener_variance),
-                                 cpi->kmeans_boundary_ls, cpi->kmeans_ctr_num);
+  assert(max_index >= 0);
+  segment_id = max_index;
 
   return segment_id;
 }
