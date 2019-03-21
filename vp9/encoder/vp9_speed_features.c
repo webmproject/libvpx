@@ -720,8 +720,7 @@ static void set_rt_speed_feature_framesize_independent(
     if (!frame_is_intra_only(cm) && cm->width * cm->height <= 352 * 288) {
       sf->nonrd_use_ml_partition = 1;
     }
-    if (content == VP9E_CONTENT_SCREEN) sf->mv.subpel_force_stop = FULL_PEL;
-    if (content == VP9E_CONTENT_SCREEN) sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
+    if (content == VP9E_CONTENT_SCREEN) sf->mv.subpel_force_stop = HALF_PEL;
     // Only keep INTRA_DC mode for speed 8.
     if (!is_keyframe) {
       int i = 0;
