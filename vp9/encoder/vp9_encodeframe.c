@@ -3588,6 +3588,56 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
 }
 #undef FEATURES
 
+static void build_kmeans_segmentation(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+  BLOCK_SIZE bsize = BLOCK_64X64;
+  KMEANS_DATA *kmeans_data;
+
+  vp9_disable_segmentation(&cm->seg);
+  if (cm->show_frame) {
+    int mi_row, mi_col;
+    cpi->kmeans_data_size = 0;
+    cpi->kmeans_ctr_num = 8;
+
+    for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE) {
+      for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
+        int mb_row_start = mi_row >> 1;
+        int mb_col_start = mi_col >> 1;
+        int mb_row_end = VPXMIN(
+            (mi_row + num_8x8_blocks_high_lookup[bsize]) >> 1, cm->mb_rows);
+        int mb_col_end = VPXMIN(
+            (mi_col + num_8x8_blocks_wide_lookup[bsize]) >> 1, cm->mb_cols);
+        int row, col;
+        int64_t wiener_variance = 0;
+
+        for (row = mb_row_start; row < mb_row_end; ++row)
+          for (col = mb_col_start; col < mb_col_end; ++col)
+            wiener_variance += cpi->mb_wiener_variance[row * cm->mb_cols + col];
+
+        wiener_variance /=
+            (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);
+
+#if CONFIG_MULTITHREAD
+        pthread_mutex_lock(&cpi->kmeans_mutex);
+#endif  // CONFIG_MULTITHREAD
+
+        kmeans_data = &cpi->kmeans_data_arr[cpi->kmeans_data_size++];
+        kmeans_data->value = log(1.0 + wiener_variance) / log(2.0);
+        kmeans_data->pos = mi_row * cpi->kmeans_data_stride + mi_col;
+#if CONFIG_MULTITHREAD
+        pthread_mutex_unlock(&cpi->kmeans_mutex);
+#endif  // CONFIG_MULTITHREAD
+      }
+    }
+
+    vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_boundary_ls,
+               cpi->kmeans_count_ls, cpi->kmeans_ctr_num, cpi->kmeans_data_arr,
+               cpi->kmeans_data_size);
+
+    vp9_perceptual_aq_mode_setup(cpi, &cm->seg);
+  }
+}
+
 static int wiener_var_segment(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
                               int mi_col) {
   VP9_COMMON *cm = &cpi->common;
@@ -3600,7 +3650,7 @@ static int wiener_var_segment(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
   int row, col;
   int64_t wiener_variance = 0;
   int segment_id;
-  KMEANS_DATA *kmeans_data;
+
   vpx_clear_system_state();
 
   assert(cpi->norm_wiener_variance > 0);
@@ -3610,19 +3660,9 @@ static int wiener_var_segment(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
       wiener_variance += cpi->mb_wiener_variance[row * cm->mb_cols + col];
 
   wiener_variance /= (mb_row_end - mb_row_start) * (mb_col_end - mb_col_start);
-#if CONFIG_MULTITHREAD
-  pthread_mutex_lock(&cpi->kmeans_mutex);
-#endif  // CONFIG_MULTITHREAD
 
-  kmeans_data = &cpi->kmeans_data_arr[cpi->kmeans_data_size++];
-  kmeans_data->value = log(1.0 + wiener_variance) / log(2.0);
-  kmeans_data->pos = mi_row * cpi->kmeans_data_stride + mi_col;
-#if CONFIG_MULTITHREAD
-  pthread_mutex_unlock(&cpi->kmeans_mutex);
-#endif  // CONFIG_MULTITHREAD
-
-  segment_id = vp9_get_group_idx(kmeans_data->value, cpi->kmeans_boundary_ls,
-                                 cpi->kmeans_ctr_num);
+  segment_id = vp9_get_group_idx(log(1.0 + wiener_variance) / log(2.0),
+                                 cpi->kmeans_boundary_ls, cpi->kmeans_ctr_num);
 
   return segment_id;
 }
@@ -5896,24 +5936,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   }
 
   // Frame segmentation
-  if (cpi->sf.enable_wiener_variance) {
-    vp9_disable_segmentation(&cm->seg);
-    if (cm->show_frame) {
-      int mi_row, mi_col;
-      cpi->kmeans_data_size = 0;
-      cpi->kmeans_ctr_num = 8;
-
-      for (mi_row = 0; mi_row < cm->mi_rows; mi_row += MI_BLOCK_SIZE)
-        for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE)
-          wiener_var_segment(cpi, BLOCK_64X64, mi_row, mi_col);
-
-      vp9_kmeans(cpi->kmeans_ctr_ls, cpi->kmeans_boundary_ls,
-                 cpi->kmeans_count_ls, cpi->kmeans_ctr_num,
-                 cpi->kmeans_data_arr, cpi->kmeans_data_size);
-
-      vp9_perceptual_aq_mode_setup(cpi, &cm->seg);
-    }
-  }
+  if (cpi->sf.enable_wiener_variance) build_kmeans_segmentation(cpi);
 
   {
     struct vpx_usec_timer emr_timer;
