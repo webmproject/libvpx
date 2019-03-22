@@ -1125,7 +1125,7 @@ int main(int argc, const char **argv) {
                         &ref_frame_config);
       // Keep track of input frames, to account for frame drops in rate control
       // stats/metrics.
-      for (sl = 0; sl < (unsigned int)enc_cfg.ss_number_layers; ++sl) {
+      for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
         ++rc.layer_input_frames[sl * enc_cfg.ts_number_layers +
                                 layer_id.temporal_layer_id];
       }
