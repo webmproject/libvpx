@@ -404,9 +404,11 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
                       scan_order->iscan);
       break;
     case TX_8X8:
-      vp9_fdct8x8_quant(src_diff, diff_stride, coeff, 64, x->skip_block,
-                        p->round_fp, p->quant_fp, qcoeff, dqcoeff, pd->dequant,
-                        eob, scan_order->scan, scan_order->iscan);
+      vpx_fdct8x8(src_diff, coeff, diff_stride);
+      vp9_quantize_fp(coeff, 64, x->skip_block, p->round_fp, p->quant_fp,
+                      qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
+                      scan_order->iscan);
+
       break;
     default:
       assert(tx_size == TX_4X4);
