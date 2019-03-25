@@ -121,7 +121,6 @@ VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_quantize_ssse3_x86_64.asm
 endif
 
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_dct_intrin_sse2.c
-VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_dct_ssse3.c
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_frame_scale_ssse3.c
 
 ifeq ($(CONFIG_VP9_TEMPORAL_DENOISING),yes)
@@ -134,7 +133,6 @@ VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_error_avx2.c
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_error_neon.c
 endif
-VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_dct_neon.c
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_frame_scale_neon.c
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_quantize_neon.c
 
