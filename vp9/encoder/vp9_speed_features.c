@@ -793,6 +793,10 @@ static void set_rt_speed_feature_framesize_independent(
     // small step_param for all spatial layers.
     sf->mv.fullpel_search_step_param = 2;
   }
+  // TODO(marpan): There is regression for aq-mode=3 speed <= 4, force it
+  // off for now.
+  if (speed <= 4 && cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+    cpi->oxcf.aq_mode = 0;
 }
 
 void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi, int speed) {
