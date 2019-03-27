@@ -124,7 +124,7 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     last_source = &cpi->denoiser.last_source;
     // Tune these thresholds for different resolutions when denoising is
     // enabled.
-    if (cm->width > 640 && cm->width < 1920) {
+    if (cm->width > 640 && cm->width <= 1920) {
       thresh_consec_zeromv = 2;
       thresh_sum_diff = 200;
       thresh_sum_spatial = (120 * 120) << 8;
