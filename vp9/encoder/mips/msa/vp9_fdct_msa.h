@@ -17,7 +17,7 @@
 
 #define VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2,  \
                   out3, out4, out5, out6, out7)                              \
-  do {                                                                       \
+  {                                                                          \
     v8i16 cnst0_m, cnst1_m, cnst2_m, cnst3_m, cnst4_m;                       \
     v8i16 vec0_m, vec1_m, vec2_m, vec3_m, s0_m, s1_m;                        \
     v8i16 coeff0_m = { cospi_2_64,  cospi_6_64,  cospi_10_64, cospi_14_64,   \
@@ -77,10 +77,10 @@
     out1 = -out1;                                                            \
     out3 = -out3;                                                            \
     out5 = -out5;                                                            \
-  } while (0)
+  }
 
 #define VP9_FADST4(in0, in1, in2, in3, out0, out1, out2, out3)              \
-  do {                                                                      \
+  {                                                                         \
     v4i32 s0_m, s1_m, s2_m, s3_m, constant_m;                               \
     v4i32 in0_r_m, in1_r_m, in2_r_m, in3_r_m;                               \
                                                                             \
@@ -112,5 +112,5 @@
     SRARI_W4_SW(in0_r_m, in1_r_m, s2_m, s3_m, DCT_CONST_BITS);              \
     PCKEV_H4_SH(in0_r_m, in0_r_m, in1_r_m, in1_r_m, s2_m, s2_m, s3_m, s3_m, \
                 out0, out1, out2, out3);                                    \
-  } while (0)
+  }
 #endif  // VPX_VP9_ENCODER_MIPS_MSA_VP9_FDCT_MSA_H_

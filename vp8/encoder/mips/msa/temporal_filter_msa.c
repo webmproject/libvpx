@@ -62,7 +62,7 @@ static void temporal_filter_apply_16size_msa(
     mod3_w = diff1_l & mod3_w;
     MUL4(mod0_w, filter_wt, mod1_w, filter_wt, mod2_w, filter_wt, mod3_w,
          filter_wt, mod0_w, mod1_w, mod2_w, mod3_w);
-    PCKEV_H2_SH(mod1_w, mod0_w, mod3_w, mod2_w, mod0_h, mod1_h);
+    PCKEV_H2_SH(mod1_w, mod0_w, mod3_w, mod2_w, mod0_h, mod1_h)
     ADD2(mod0_h, cnt0, mod1_h, cnt1, mod0_h, mod1_h);
     ST_SH2(mod0_h, mod1_h, cnt, 8);
     cnt += 16;

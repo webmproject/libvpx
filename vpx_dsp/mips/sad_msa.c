@@ -12,12 +12,12 @@
 #include "vpx_dsp/mips/macros_msa.h"
 
 #define SAD_INSVE_W4(RTYPE, in0, in1, in2, in3, out)       \
-  do {                                                     \
+  {                                                        \
     out = (RTYPE)__msa_insve_w((v4i32)out, 0, (v4i32)in0); \
     out = (RTYPE)__msa_insve_w((v4i32)out, 1, (v4i32)in1); \
     out = (RTYPE)__msa_insve_w((v4i32)out, 2, (v4i32)in2); \
     out = (RTYPE)__msa_insve_w((v4i32)out, 3, (v4i32)in3); \
-  } while (0)
+  }
 #define SAD_INSVE_W4_UB(...) SAD_INSVE_W4(v16u8, __VA_ARGS__)
 
 static uint32_t sad_4width_msa(const uint8_t *src_ptr, int32_t src_stride,

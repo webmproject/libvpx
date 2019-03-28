@@ -12,7 +12,7 @@
 #include "vp8/common/mips/msa/vp8_macros_msa.h"
 
 #define TRANSPOSE4x4_H(in0, in1, in2, in3, out0, out1, out2, out3) \
-  do {                                                             \
+  {                                                                \
     v8i16 s0_m, s1_m, tp0_m, tp1_m, tp2_m, tp3_m;                  \
                                                                    \
     ILVR_H2_SH(in2, in0, in3, in1, s0_m, s1_m);                    \
@@ -21,15 +21,15 @@
     ILVRL_H2_SH(s1_m, s0_m, tp2_m, tp3_m);                         \
     PCKEV_D2_SH(tp2_m, tp0_m, tp3_m, tp1_m, out0, out2);           \
     PCKOD_D2_SH(tp2_m, tp0_m, tp3_m, tp1_m, out1, out3);           \
-  } while (0)
+  }
 
 #define SET_DOTP_VALUES(coeff, val0, val1, val2, const1, const2)   \
-  do {                                                             \
+  {                                                                \
     v8i16 tmp0_m;                                                  \
                                                                    \
     SPLATI_H3_SH(coeff, val0, val1, val2, tmp0_m, const1, const2); \
     ILVEV_H2_SH(tmp0_m, const1, const2, tmp0_m, const1, const2);   \
-  } while (0)
+  }
 
 #define RET_1_IF_NZERO_H(in0)      \
   ({                               \
