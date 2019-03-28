@@ -12,17 +12,17 @@
 #include "vpx_dsp/mips/macros_msa.h"
 
 #define CALC_MSE_B(src, ref, var)                                   \
-  do {                                                              \
+  {                                                                 \
     v16u8 src_l0_m, src_l1_m;                                       \
     v8i16 res_l0_m, res_l1_m;                                       \
                                                                     \
     ILVRL_B2_UB(src, ref, src_l0_m, src_l1_m);                      \
     HSUB_UB2_SH(src_l0_m, src_l1_m, res_l0_m, res_l1_m);            \
     DPADD_SH2_SW(res_l0_m, res_l1_m, res_l0_m, res_l1_m, var, var); \
-  } while (0)
+  }
 
 #define CALC_MSE_AVG_B(src, ref, var, sub)                          \
-  do {                                                              \
+  {                                                                 \
     v16u8 src_l0_m, src_l1_m;                                       \
     v8i16 res_l0_m, res_l1_m;                                       \
                                                                     \
@@ -31,7 +31,7 @@
     DPADD_SH2_SW(res_l0_m, res_l1_m, res_l0_m, res_l1_m, var, var); \
                                                                     \
     sub += res_l0_m + res_l1_m;                                     \
-  } while (0)
+  }
 
 #define VARIANCE_WxH(sse, diff, shift) \
   (sse) - (((uint32_t)(diff) * (diff)) >> (shift))

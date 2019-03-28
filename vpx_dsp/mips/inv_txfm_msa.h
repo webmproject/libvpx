@@ -17,7 +17,7 @@
 
 #define VP9_ADST8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2,  \
                   out3, out4, out5, out6, out7)                              \
-  do {                                                                       \
+  {                                                                          \
     v8i16 cnst0_m, cnst1_m, cnst2_m, cnst3_m, cnst4_m;                       \
     v8i16 vec0_m, vec1_m, vec2_m, vec3_m, s0_m, s1_m;                        \
     v8i16 coeff0_m = { cospi_2_64,  cospi_6_64,  cospi_10_64, cospi_14_64,   \
@@ -77,7 +77,7 @@
     out1 = -out1;                                                            \
     out3 = -out3;                                                            \
     out5 = -out5;                                                            \
-  } while (0)
+  }
 
 #define VP9_SET_COSPI_PAIR(c0_h, c1_h)  \
   ({                                    \
@@ -91,7 +91,7 @@
   })
 
 #define VP9_ADDBLK_ST8x4_UB(dst, dst_stride, in0, in1, in2, in3)               \
-  do {                                                                         \
+  {                                                                            \
     uint8_t *dst_m = (uint8_t *)(dst);                                         \
     v16u8 dst0_m, dst1_m, dst2_m, dst3_m;                                      \
     v16i8 tmp0_m, tmp1_m;                                                      \
@@ -106,10 +106,10 @@
     CLIP_SH4_0_255(res0_m, res1_m, res2_m, res3_m);                            \
     PCKEV_B2_SB(res1_m, res0_m, res3_m, res2_m, tmp0_m, tmp1_m);               \
     ST8x4_UB(tmp0_m, tmp1_m, dst_m, dst_stride);                               \
-  } while (0)
+  }
 
 #define VP9_IDCT4x4(in0, in1, in2, in3, out0, out1, out2, out3)             \
-  do {                                                                      \
+  {                                                                         \
     v8i16 c0_m, c1_m, c2_m, c3_m;                                           \
     v8i16 step0_m, step1_m;                                                 \
     v4i32 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                   \
@@ -129,10 +129,10 @@
     SLDI_B2_0_SW(tmp0_m, tmp2_m, tmp1_m, tmp3_m, 8);                        \
     BUTTERFLY_4((v8i16)tmp0_m, (v8i16)tmp1_m, (v8i16)tmp2_m, (v8i16)tmp3_m, \
                 out0, out1, out2, out3);                                    \
-  } while (0)
+  }
 
 #define VP9_IADST4x4(in0, in1, in2, in3, out0, out1, out2, out3)       \
-  do {                                                                 \
+  {                                                                    \
     v8i16 res0_m, res1_m, c0_m, c1_m;                                  \
     v8i16 k1_m, k2_m, k3_m, k4_m;                                      \
     v8i16 zero_m = { 0 };                                              \
@@ -179,7 +179,7 @@
     SRARI_W4_SW(int0_m, int1_m, int2_m, int3_m, DCT_CONST_BITS);       \
     PCKEV_H2_SH(int0_m, int0_m, int1_m, int1_m, out0, out1);           \
     PCKEV_H2_SH(int2_m, int2_m, int3_m, int3_m, out2, out3);           \
-  } while (0)
+  }
 
 #define VP9_SET_CONST_PAIR(mask_h, idx1_h, idx2_h)    \
   ({                                                  \
@@ -194,7 +194,7 @@
 /* multiply and add macro */
 #define VP9_MADD(inp0, inp1, inp2, inp3, cst0, cst1, cst2, cst3, out0, out1,  \
                  out2, out3)                                                  \
-  do {                                                                        \
+  {                                                                           \
     v8i16 madd_s0_m, madd_s1_m, madd_s2_m, madd_s3_m;                         \
     v4i32 tmp0_madd, tmp1_madd, tmp2_madd, tmp3_madd;                         \
                                                                               \
@@ -208,12 +208,12 @@
                 cst3, tmp0_madd, tmp1_madd, tmp2_madd, tmp3_madd);            \
     SRARI_W4_SW(tmp0_madd, tmp1_madd, tmp2_madd, tmp3_madd, DCT_CONST_BITS);  \
     PCKEV_H2_SH(tmp1_madd, tmp0_madd, tmp3_madd, tmp2_madd, out2, out3);      \
-  } while (0)
+  }
 
 /* idct 8x8 macro */
 #define VP9_IDCT8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1,    \
                        out2, out3, out4, out5, out6, out7)                    \
-  do {                                                                        \
+  {                                                                           \
     v8i16 tp0_m, tp1_m, tp2_m, tp3_m, tp4_m, tp5_m, tp6_m, tp7_m;             \
     v8i16 k0_m, k1_m, k2_m, k3_m, res0_m, res1_m, res2_m, res3_m;             \
     v4i32 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                     \
@@ -242,11 +242,11 @@
     BUTTERFLY_4(in0, in4, in2, in6, tp0_m, tp1_m, tp2_m, tp3_m);              \
     BUTTERFLY_8(tp0_m, tp1_m, tp2_m, tp3_m, tp4_m, tp5_m, tp6_m, tp7_m, out0, \
                 out1, out2, out3, out4, out5, out6, out7);                    \
-  } while (0)
+  }
 
 #define VP9_IADST8x8_1D(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1,   \
                         out2, out3, out4, out5, out6, out7)                   \
-  do {                                                                        \
+  {                                                                           \
     v4i32 r0_m, r1_m, r2_m, r3_m, r4_m, r5_m, r6_m, r7_m;                     \
     v4i32 m0_m, m1_m, m2_m, m3_m, t0_m, t1_m;                                 \
     v8i16 res0_m, res1_m, res2_m, res3_m, k0_m, k1_m, in_s0, in_s1;           \
@@ -329,13 +329,13 @@
     out3 = -in3;                                                              \
     out5 = -in5;                                                              \
     out7 = -in7;                                                              \
-  } while (0)
+  }
 
 #define VP9_IADST8x16_1D(r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11,     \
                          r12, r13, r14, r15, out0, out1, out2, out3, out4,     \
                          out5, out6, out7, out8, out9, out10, out11, out12,    \
                          out13, out14, out15)                                  \
-  do {                                                                         \
+  {                                                                            \
     v8i16 g0_m, g1_m, g2_m, g3_m, g4_m, g5_m, g6_m, g7_m;                      \
     v8i16 g8_m, g9_m, g10_m, g11_m, g12_m, g13_m, g14_m, g15_m;                \
     v8i16 h0_m, h1_m, h2_m, h3_m, h4_m, h5_m, h6_m, h7_m;                      \
@@ -400,7 +400,7 @@
     MADD_SHORT(out6, out7, k0_m, k3_m, out6, out7);                            \
     MADD_SHORT(out10, out11, k0_m, k3_m, out10, out11);                        \
     MADD_SHORT(out14, out15, k1_m, k2_m, out14, out15);                        \
-  } while (0)
+  }
 
 void vpx_idct16_1d_columns_addblk_msa(int16_t *input, uint8_t *dst,
                                       int32_t dst_stride);

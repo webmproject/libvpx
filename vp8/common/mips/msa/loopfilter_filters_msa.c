@@ -13,7 +13,7 @@
 #include "vp8/common/mips/msa/vp8_macros_msa.h"
 
 #define VP8_SIMPLE_MASK(p1, p0, q0, q1, b_limit, mask)        \
-  do {                                                        \
+  {                                                           \
     v16u8 p1_a_sub_q1, p0_a_sub_q0;                           \
                                                               \
     p0_a_sub_q0 = __msa_asub_u_b(p0, q0);                     \
@@ -22,10 +22,10 @@
     p0_a_sub_q0 = __msa_adds_u_b(p0_a_sub_q0, p0_a_sub_q0);   \
     mask = __msa_adds_u_b(p0_a_sub_q0, p1_a_sub_q1);          \
     mask = ((v16u8)mask <= b_limit);                          \
-  } while (0)
+  }
 
 #define VP8_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev)      \
-  do {                                                     \
+  {                                                        \
     v16i8 p1_m, p0_m, q0_m, q1_m, filt, q0_sub_p0, t1, t2; \
     const v16i8 cnst4b = __msa_ldi_b(4);                   \
     const v16i8 cnst3b = __msa_ldi_b(3);                   \
@@ -57,10 +57,10 @@
     q1 = __msa_xori_b((v16u8)q1_m, 0x80);                  \
     p1_m = __msa_adds_s_b(p1_m, filt);                     \
     p1 = __msa_xori_b((v16u8)p1_m, 0x80);                  \
-  } while (0)
+  }
 
 #define VP8_SIMPLE_FILT(p1_in, p0_in, q0_in, q1_in, mask) \
-  do {                                                    \
+  {                                                       \
     v16i8 p1_m, p0_m, q0_m, q1_m, filt, filt1, filt2;     \
     v16i8 q0_sub_p0;                                      \
     const v16i8 cnst4b = __msa_ldi_b(4);                  \
@@ -85,10 +85,10 @@
     p0_m = __msa_adds_s_b(p0_m, filt2);                   \
     q0_in = __msa_xori_b((v16u8)q0_m, 0x80);              \
     p0_in = __msa_xori_b((v16u8)p0_m, 0x80);              \
-  } while (0)
+  }
 
 #define VP8_MBFILTER(p2, p1, p0, q0, q1, q2, mask, hev) \
-  do {                                                  \
+  {                                                     \
     v16i8 p2_m, p1_m, p0_m, q2_m, q1_m, q0_m;           \
     v16i8 u, filt, t1, t2, filt_sign, q0_sub_p0;        \
     v8i16 filt_r, filt_l, u_r, u_l;                     \
@@ -163,12 +163,12 @@
     p0_m = __msa_adds_s_b(p0_m, u);                     \
     q0 = __msa_xori_b((v16u8)q0_m, 0x80);               \
     p0 = __msa_xori_b((v16u8)p0_m, 0x80);               \
-  } while (0)
+  }
 
 #define LPF_MASK_HEV(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \
                      limit_in, b_limit_in, thresh_in, hev_out, mask_out,     \
                      flat_out)                                               \
-  do {                                                                       \
+  {                                                                          \
     v16u8 p3_asub_p2_m, p2_asub_p1_m, p1_asub_p0_m, q1_asub_q0_m;            \
     v16u8 p1_asub_q1_m, p0_asub_q0_m, q3_asub_q2_m, q2_asub_q1_m;            \
                                                                              \
@@ -193,10 +193,10 @@
     mask_out = __msa_max_u_b(q2_asub_q1_m, mask_out);                        \
     mask_out = (limit_in) < (v16u8)mask_out;                                 \
     mask_out = __msa_xori_b(mask_out, 0xff);                                 \
-  } while (0)
+  }
 
 #define VP8_ST6x1_UB(in0, in0_idx, in1, in1_idx, pdst, stride) \
-  do {                                                         \
+  {                                                            \
     uint16_t tmp0_h;                                           \
     uint32_t tmp0_w;                                           \
                                                                \
@@ -204,7 +204,7 @@
     tmp0_h = __msa_copy_u_h((v8i16)in1, in1_idx);              \
     SW(tmp0_w, pdst);                                          \
     SH(tmp0_h, pdst + stride);                                 \
-  } while (0)
+  }
 
 static void loop_filter_horizontal_4_dual_msa(uint8_t *src, int32_t pitch,
                                               const uint8_t *b_limit0_ptr,

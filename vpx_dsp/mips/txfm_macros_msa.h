@@ -14,7 +14,7 @@
 #include "vpx_dsp/mips/macros_msa.h"
 
 #define DOTP_CONST_PAIR(reg0, reg1, cnst0, cnst1, out0, out1) \
-  do {                                                        \
+  {                                                           \
     v4i32 s0_m, s1_m, s2_m, s3_m, s4_m, s5_m;                 \
     v8i16 k0_m, k1_m, k2_m, zero = { 0 };                     \
                                                               \
@@ -35,11 +35,11 @@
     DOTP_SH2_SW(s3_m, s2_m, k2_m, k2_m, s1_m, s0_m);          \
     SRARI_W2_SW(s1_m, s0_m, DCT_CONST_BITS);                  \
     out1 = __msa_pckev_h((v8i16)s0_m, (v8i16)s1_m);           \
-  } while (0)
+  }
 
 #define DOT_ADD_SUB_SRARI_PCK(in0, in1, in2, in3, in4, in5, in6, in7, dst0,   \
                               dst1, dst2, dst3)                               \
-  do {                                                                        \
+  {                                                                           \
     v4i32 tp0_m, tp1_m, tp2_m, tp3_m, tp4_m;                                  \
     v4i32 tp5_m, tp6_m, tp7_m, tp8_m, tp9_m;                                  \
                                                                               \
@@ -53,7 +53,7 @@
     SRARI_W4_SW(tp3_m, tp0_m, tp4_m, tp2_m, DCT_CONST_BITS);                  \
     PCKEV_H4_SH(tp1_m, tp3_m, tp9_m, tp0_m, tp7_m, tp4_m, tp5_m, tp2_m, dst0, \
                 dst1, dst2, dst3);                                            \
-  } while (0)
+  }
 
 #define DOT_SHIFT_RIGHT_PCK_H(in0, in1, in2)           \
   ({                                                   \
@@ -68,7 +68,7 @@
   })
 
 #define MADD_SHORT(m0, m1, c0, c1, res0, res1)                              \
-  do {                                                                      \
+  {                                                                         \
     v4i32 madd0_m, madd1_m, madd2_m, madd3_m;                               \
     v8i16 madd_s0_m, madd_s1_m;                                             \
                                                                             \
@@ -77,11 +77,11 @@
                 madd0_m, madd1_m, madd2_m, madd3_m);                        \
     SRARI_W4_SW(madd0_m, madd1_m, madd2_m, madd3_m, DCT_CONST_BITS);        \
     PCKEV_H2_SH(madd1_m, madd0_m, madd3_m, madd2_m, res0, res1);            \
-  } while (0)
+  }
 
 #define MADD_BF(inp0, inp1, inp2, inp3, cst0, cst1, cst2, cst3, out0, out1,   \
                 out2, out3)                                                   \
-  do {                                                                        \
+  {                                                                           \
     v8i16 madd_s0_m, madd_s1_m, madd_s2_m, madd_s3_m;                         \
     v4i32 tmp0_m, tmp1_m, tmp2_m, tmp3_m, m4_m, m5_m;                         \
                                                                               \
@@ -97,5 +97,5 @@
     BUTTERFLY_4(tmp0_m, tmp1_m, tmp3_m, tmp2_m, m4_m, m5_m, tmp3_m, tmp2_m);  \
     SRARI_W4_SW(m4_m, m5_m, tmp2_m, tmp3_m, DCT_CONST_BITS);                  \
     PCKEV_H2_SH(m5_m, m4_m, tmp3_m, tmp2_m, out2, out3);                      \
-  } while (0)
+  }
 #endif  // VPX_VPX_DSP_MIPS_TXFM_MACROS_MSA_H_

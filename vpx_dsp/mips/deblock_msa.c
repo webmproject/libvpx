@@ -18,7 +18,7 @@ extern const int16_t vpx_rv[];
 #define VPX_TRANSPOSE8x16_UB_UB(                                            \
     in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2, out3, out4,   \
     out5, out6, out7, out8, out9, out10, out11, out12, out13, out14, out15) \
-  do {                                                                      \
+  {                                                                         \
     v8i16 temp0, temp1, temp2, temp3, temp4;                                \
     v8i16 temp5, temp6, temp7, temp8, temp9;                                \
                                                                             \
@@ -46,11 +46,11 @@ extern const int16_t vpx_rv[];
     out3 = (v16u8)__msa_ilvl_d((v2i64)out2, (v2i64)out2);                   \
     out5 = (v16u8)__msa_ilvl_d((v2i64)out4, (v2i64)out4);                   \
     out7 = (v16u8)__msa_ilvl_d((v2i64)out6, (v2i64)out6);                   \
-  } while (0)
+  }
 
 #define VPX_AVER_IF_RETAIN(above2_in, above1_in, src_in, below1_in, below2_in, \
                            ref, out)                                           \
-  do {                                                                         \
+  {                                                                            \
     v16u8 temp0, temp1;                                                        \
                                                                                \
     temp1 = __msa_aver_u_b(above2_in, above1_in);                              \
@@ -69,11 +69,11 @@ extern const int16_t vpx_rv[];
     temp1 = (temp1 < ref);                                                     \
     temp0 = temp0 & temp1;                                                     \
     out = __msa_bmz_v(out, src_in, temp0);                                     \
-  } while (0)
+  }
 
 #define TRANSPOSE12x16_B(in0, in1, in2, in3, in4, in5, in6, in7, in8, in9,    \
                          in10, in11, in12, in13, in14, in15)                  \
-  do {                                                                        \
+  {                                                                           \
     v8i16 temp0, temp1, temp2, temp3, temp4;                                  \
     v8i16 temp5, temp6, temp7, temp8, temp9;                                  \
                                                                               \
@@ -108,11 +108,11 @@ extern const int16_t vpx_rv[];
     ILVL_W2_SH(temp7, temp6, temp9, temp8, temp2, temp3);                     \
     in10 = (v16u8)__msa_ilvr_d((v2i64)temp3, (v2i64)temp2);                   \
     in11 = (v16u8)__msa_ilvl_d((v2i64)temp3, (v2i64)temp2);                   \
-  } while (0)
+  }
 
 #define VPX_TRANSPOSE12x8_UB_UB(in0, in1, in2, in3, in4, in5, in6, in7, in8, \
                                 in9, in10, in11)                             \
-  do {                                                                       \
+  {                                                                          \
     v8i16 temp0, temp1, temp2, temp3;                                        \
     v8i16 temp4, temp5, temp6, temp7;                                        \
                                                                              \
@@ -139,7 +139,7 @@ extern const int16_t vpx_rv[];
     in7 = (v16u8)__msa_ilvl_d((v2i64)temp3, (v2i64)temp3);                   \
     in9 = (v16u8)__msa_ilvl_d((v2i64)temp6, (v2i64)temp6);                   \
     in11 = (v16u8)__msa_ilvl_d((v2i64)temp7, (v2i64)temp7);                  \
-  } while (0)
+  }
 
 static void postproc_down_across_chroma_msa(uint8_t *src_ptr, uint8_t *dst_ptr,
                                             int32_t src_stride,
