@@ -3459,7 +3459,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
         // Disable intra modes other than DC_PRED for blocks with low variance
         // Threshold for intra skipping based on source variance
         // TODO(debargha): Specialize the threshold for super block sizes
-        const unsigned int skip_intra_var_thresh = 64;
+        const unsigned int skip_intra_var_thresh =
+            (cpi->oxcf.content == VP9E_CONTENT_FILM) ? 0 : 64;
         if ((mode_search_skip_flags & FLAG_SKIP_INTRA_LOWVAR) &&
             x->source_variance < skip_intra_var_thresh)
           continue;
