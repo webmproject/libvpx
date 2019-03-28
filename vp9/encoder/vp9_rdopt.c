@@ -3140,6 +3140,7 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int absvar_diff = 0;
   unsigned int var_factor = 0;
   unsigned int adj_max;
+  unsigned int low_var_thresh = LOW_VAR_THRESH;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
   const int bh = num_8x8_blocks_high_lookup[bsize];
   vp9e_tune_content content_type = cpi->oxcf.content;
@@ -3164,12 +3165,23 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   rec_variance /= (bw * bh);
   src_variance /= (bw * bh);
 
+  if (content_type == VP9E_CONTENT_FILM) {
+    if (cpi->oxcf.pass == 2) {
+      // Adjust low variance threshold based on estimated group noise enegry.
+      double noise_factor =
+          (double)cpi->twopass.gf_group.group_noise_energy / SECTION_NOISE_DEF;
+      low_var_thresh = (unsigned int)(low_var_thresh * noise_factor);
+    }
+  } else {
+    low_var_thresh = LOW_VAR_THRESH / 2;
+  }
+
   // Lower of source (raw per pixel value) and recon variance. Note that
   // if the source per pixel is 0 then the recon value here will not be per
   // pixel (see above) so will likely be much larger.
   src_rec_min = VPXMIN(src_variance, rec_variance);
 
-  if (src_rec_min > LOW_VAR_THRESH) return;
+  if (src_rec_min > low_var_thresh) return;
 
   absvar_diff = (src_variance > rec_variance) ? (src_variance - rec_variance)
                                               : (rec_variance - src_variance);
@@ -3183,7 +3195,7 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
   *this_rd += (*this_rd * var_factor) / 100;
 
   if (content_type == VP9E_CONTENT_FILM) {
-    if (src_rec_min <= LOW_VAR_THRESH / 2) {
+    if (src_rec_min <= low_var_thresh / 2) {
       if (ref_frame == INTRA_FRAME) {
         if (this_mode == DC_PRED)
           *this_rd *= 2;
