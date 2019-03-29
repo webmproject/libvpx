@@ -990,6 +990,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->mb_wiener_variance);
   cpi->mb_wiener_variance = NULL;
 
+  vpx_free(cpi->mi_ssim_rdmult_scaling_factors);
+  cpi->mi_ssim_rdmult_scaling_factors = NULL;
+
   vp9_free_ref_frame_buffers(cm->buffer_pool);
 #if CONFIG_VP9_POSTPROC
   vp9_free_postproc_buffers(cm);
@@ -2386,6 +2389,17 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
     CHECK_MEM_ERROR(cm, cpi->mb_wiener_variance,
                     vpx_calloc(cm->mb_rows * cm->mb_cols,
                                sizeof(*cpi->mb_wiener_variance)));
+  }
+
+  {
+    const int bsize = BLOCK_64X64;
+    const int w = num_8x8_blocks_wide_lookup[bsize];
+    const int h = num_8x8_blocks_high_lookup[bsize];
+    const int num_cols = (cm->mi_cols + w - 1) / w;
+    const int num_rows = (cm->mi_rows + h - 1) / h;
+    CHECK_MEM_ERROR(cm, cpi->mi_ssim_rdmult_scaling_factors,
+                    vpx_calloc(num_rows * num_cols,
+                               sizeof(*cpi->mi_ssim_rdmult_scaling_factors)));
   }
 
   cpi->kmeans_data_arr_alloc = 0;
@@ -4717,6 +4731,72 @@ static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
   }
 }
 
+// Implementation and modifications of C. Yeo, H. L. Tan, and Y. H. Tan, "On
+// rate distortion optimization using SSIM," Circuits and Systems for Video
+// Technology, IEEE Transactions on, vol. 23, no. 7, pp. 1170-1181, 2013.
+// SSIM_VAR_SCALE defines the strength of the bias towards SSIM in RDO.
+// Some sample values are:
+// SSIM_VAR_SCALE  avg_psnr   ssim   ms_ssim  (for midres test set)
+//     16.0          2.312   -3.062  -3.882
+//     32.0          0.852   -2.260  -2.821
+//     64.0          0.294   -1.606  -1.925
+#define SSIM_VAR_SCALE 16.0
+static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
+  const double c2 = 0.03 * 0.03 * 255 * 255;
+  VP9_COMMON *cm = &cpi->common;
+  ThreadData *td = &cpi->td;
+  MACROBLOCK *x = &td->mb;
+  MACROBLOCKD *xd = &x->e_mbd;
+  uint8_t *y_buffer = cpi->Source->y_buffer;
+  const int y_stride = cpi->Source->y_stride;
+  const int block_size = BLOCK_64X64;
+
+  const int num_8x8_w = num_8x8_blocks_wide_lookup[block_size];
+  const int num_8x8_h = num_8x8_blocks_high_lookup[block_size];
+  const int num_cols = (cm->mi_cols + num_8x8_w - 1) / num_8x8_w;
+  const int num_rows = (cm->mi_rows + num_8x8_h - 1) / num_8x8_h;
+  double log_sum = 0.0;
+  int row, col;
+
+  // Loop through each 64x64 block.
+  for (row = 0; row < num_rows; ++row) {
+    for (col = 0; col < num_cols; ++col) {
+      int mi_row, mi_col;
+      double var = 0.0, num_of_var = 0.0;
+      const int index = row * num_cols + col;
+
+      for (mi_row = row * num_8x8_h;
+           mi_row < cm->mi_rows && mi_row < (row + 1) * num_8x8_h; ++mi_row) {
+        for (mi_col = col * num_8x8_w;
+             mi_col < cm->mi_cols && mi_col < (col + 1) * num_8x8_w; ++mi_col) {
+          struct buf_2d buf;
+          const int row_offset_y = mi_row << 3;
+          const int col_offset_y = mi_col << 3;
+
+          buf.buf = y_buffer + row_offset_y * y_stride + col_offset_y;
+          buf.stride = y_stride;
+          var += vp9_get_sby_variance(cpi, &buf, BLOCK_8X8) / 64.0;
+          num_of_var += 1.0;
+        }
+      }
+      var = var / num_of_var / SSIM_VAR_SCALE;
+      var = 2.0 * var + c2;
+      cpi->mi_ssim_rdmult_scaling_factors[index] = var;
+      log_sum += log(var);
+    }
+  }
+  log_sum = exp(log_sum / (double)(num_rows * num_cols));
+
+  for (row = 0; row < num_rows; ++row) {
+    for (col = 0; col < num_cols; ++col) {
+      const int index = row * num_cols + col;
+      cpi->mi_ssim_rdmult_scaling_factors[index] /= log_sum;
+    }
+  }
+
+  (void)xd;
+}
+
 // Process the wiener variance in 16x16 block basis.
 static void set_mb_wiener_variance(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
@@ -4905,6 +4985,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
       cm->reset_frame_context = 2;
     }
   }
+
+  if (oxcf->tuning == VP8_TUNE_SSIM) set_mb_ssim_rdmult_scaling(cpi);
 
   set_mb_wiener_variance(cpi);
 
