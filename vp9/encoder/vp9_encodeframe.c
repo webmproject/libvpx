@@ -966,12 +966,12 @@ static int scale_partitioning_svc(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   const int has_rows = (mi_row_high + bs_high) < cm->mi_rows;
   const int has_cols = (mi_col_high + bs_high) < cm->mi_cols;
 
-  const int row_boundary_block_scale_factor[BLOCK_SIZES] = {
-    13, 13, 13, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0
-  };
-  const int col_boundary_block_scale_factor[BLOCK_SIZES] = {
-    13, 13, 13, 2, 2, 0, 2, 2, 0, 2, 2, 0, 0
-  };
+  const int row_boundary_block_scale_factor[BLOCK_SIZES] = { 13, 13, 13, 1, 0,
+                                                             1,  1,  0,  1, 1,
+                                                             0,  1,  0 };
+  const int col_boundary_block_scale_factor[BLOCK_SIZES] = { 13, 13, 13, 2, 2,
+                                                             0,  2,  2,  0, 2,
+                                                             2,  0,  0 };
   int start_pos;
   BLOCK_SIZE bsize_low;
   PARTITION_TYPE partition_high;
@@ -3048,15 +3048,15 @@ const int num_16x16_blocks_wide_lookup[BLOCK_SIZES] = { 1, 1, 1, 1, 1, 1, 1,
                                                         1, 2, 2, 2, 4, 4 };
 const int num_16x16_blocks_high_lookup[BLOCK_SIZES] = { 1, 1, 1, 1, 1, 1, 1,
                                                         2, 1, 2, 4, 2, 4 };
-const int qindex_skip_threshold_lookup[BLOCK_SIZES] = {
-  0, 10, 10, 30, 40, 40, 60, 80, 80, 90, 100, 100, 120
-};
-const int qindex_split_threshold_lookup[BLOCK_SIZES] = {
-  0, 3, 3, 7, 15, 15, 30, 40, 40, 60, 80, 80, 120
-};
-const int complexity_16x16_blocks_threshold[BLOCK_SIZES] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 6
-};
+const int qindex_skip_threshold_lookup[BLOCK_SIZES] = { 0,   10,  10, 30, 40,
+                                                        40,  60,  80, 80, 90,
+                                                        100, 100, 120 };
+const int qindex_split_threshold_lookup[BLOCK_SIZES] = { 0,  3,  3,  7,  15,
+                                                         15, 30, 40, 40, 60,
+                                                         80, 80, 120 };
+const int complexity_16x16_blocks_threshold[BLOCK_SIZES] = { 1, 1, 1, 1, 1,
+                                                             1, 1, 1, 1, 1,
+                                                             4, 4, 6 };
 
 typedef enum {
   MV_ZERO = 0,
