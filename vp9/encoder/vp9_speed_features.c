@@ -451,6 +451,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->enhanced_full_pixel_motion_search = 0;
   sf->use_accurate_subpel_search = USE_2_TAPS;
   sf->nonrd_use_ml_partition = 0;
+  sf->variance_part_thresh_mult = 1;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -760,7 +761,8 @@ static void set_rt_speed_feature_framesize_independent(
       sf->disable_16x16part_nonkey = 1;
     // Allow for disabling GOLDEN reference, for CBR mode.
     if (cpi->oxcf.rc_mode == VPX_CBR) sf->disable_golden_ref = 1;
-    sf->default_interp_filter = BILINEAR;
+    if (cpi->rc.avg_frame_low_motion < 70) sf->default_interp_filter = BILINEAR;
+    if (cm->width * cm->height >= 640 * 360) sf->variance_part_thresh_mult = 2;
   }
 
   if (sf->nonrd_use_ml_partition)

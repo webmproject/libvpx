@@ -555,7 +555,8 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q,
                                int content_state) {
   VP9_COMMON *const cm = &cpi->common;
   const int is_key_frame = frame_is_intra_only(cm);
-  const int threshold_multiplier = is_key_frame ? 20 : 1;
+  const int threshold_multiplier =
+      is_key_frame ? 20 : cpi->sf.variance_part_thresh_mult;
   int64_t threshold_base =
       (int64_t)(threshold_multiplier * cpi->y_dequant[q][1]);
 

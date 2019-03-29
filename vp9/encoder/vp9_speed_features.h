@@ -605,6 +605,9 @@ typedef struct SPEED_FEATURES {
 
   // Use machine learning based partition search.
   int nonrd_use_ml_partition;
+
+  // Multiplier for base thresold for variance partitioning.
+  int variance_part_thresh_mult;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
