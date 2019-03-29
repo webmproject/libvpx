@@ -1483,9 +1483,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   if (cpi->use_svc) vp9_inc_frame_in_layer(cpi);
 }
 
-static const double q_pow_term[(QINDEX_RANGE >> 5) + 1] = {
-  0.65, 0.70, 0.75, 0.85, 0.90, 0.90, 0.90, 1.00, 1.25
-};
+static const double q_pow_term[(QINDEX_RANGE >> 5) + 1] = { 0.65, 0.70, 0.75,
+                                                            0.85, 0.90, 0.90,
+                                                            0.90, 1.00, 1.25 };
 
 static double calc_correction_factor(double err_per_mb, double err_divisor,
                                      int q) {

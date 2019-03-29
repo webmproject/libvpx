@@ -292,9 +292,9 @@ static const arg_def_t maxsection_pct =
     ARG_DEF(NULL, "maxsection-pct", 1, "GOP max bitrate (% of target)");
 static const arg_def_t corpus_complexity =
     ARG_DEF(NULL, "corpus-complexity", 1, "corpus vbr complexity midpoint");
-static const arg_def_t *rc_twopass_args[] = {
-  &bias_pct, &minsection_pct, &maxsection_pct, &corpus_complexity, NULL
-};
+static const arg_def_t *rc_twopass_args[] = { &bias_pct, &minsection_pct,
+                                              &maxsection_pct,
+                                              &corpus_complexity, NULL };
 
 static const arg_def_t kf_min_dist =
     ARG_DEF(NULL, "kf-min-dist", 1, "Minimum keyframe interval (frames)");
@@ -320,9 +320,9 @@ static const arg_def_t arnr_strength =
     ARG_DEF(NULL, "arnr-strength", 1, "AltRef filter strength (0..6)");
 static const arg_def_t arnr_type =
     ARG_DEF(NULL, "arnr-type", 1, "AltRef filter type (1..3)");
-static const struct arg_enum_list tuning_enum[] = {
-  { "psnr", VP8_TUNE_PSNR }, { "ssim", VP8_TUNE_SSIM }, { NULL, 0 }
-};
+static const struct arg_enum_list tuning_enum[] = { { "psnr", VP8_TUNE_PSNR },
+                                                    { "ssim", VP8_TUNE_SSIM },
+                                                    { NULL, 0 } };
 static const arg_def_t tune_ssim =
     ARG_DEF_ENUM(NULL, "tune", 1, "Material to favor", tuning_enum);
 static const arg_def_t cq_level =

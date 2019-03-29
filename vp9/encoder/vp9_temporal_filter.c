@@ -34,9 +34,9 @@
 #include "vpx_scale/vpx_scale.h"
 
 static int fixed_divide[512];
-static unsigned int index_mult[14] = {
-  0, 0, 0, 0, 49152, 39322, 32768, 28087, 24576, 21846, 19661, 17874, 0, 15124
-};
+static unsigned int index_mult[14] = { 0,     0,     0,     0,     49152,
+                                       39322, 32768, 28087, 24576, 21846,
+                                       19661, 17874, 0,     15124 };
 #if CONFIG_VP9_HIGHBITDEPTH
 static int64_t highbd_index_mult[14] = { 0U,          0U,          0U,
                                          0U,          3221225472U, 2576980378U,

@@ -741,9 +741,9 @@ static const int mode_check_freq_map_zn2[] = {
   0, RT(10), 1 << 1, RT(11), 1 << 2, RT(12), 1 << 3, INT_MAX
 };
 
-static const int mode_check_freq_map_vhbpred[] = {
-  0, GOOD(5), 2, RT(0), 0, RT(3), 2, RT(5), 4, INT_MAX
-};
+static const int mode_check_freq_map_vhbpred[] = { 0, GOOD(5), 2, RT(0),
+                                                   0, RT(3),   2, RT(5),
+                                                   4, INT_MAX };
 
 static const int mode_check_freq_map_near2[] = {
   0,      GOOD(5), 2,      RT(0),  0,      RT(3),  2,
@@ -759,13 +759,13 @@ static const int mode_check_freq_map_new2[] = { 0,      GOOD(5), 4,      RT(0),
                                                 1 << 3, RT(11),  1 << 4, RT(12),
                                                 1 << 5, INT_MAX };
 
-static const int mode_check_freq_map_split1[] = {
-  0, GOOD(2), 2, GOOD(3), 7, RT(1), 2, RT(2), 7, INT_MAX
-};
+static const int mode_check_freq_map_split1[] = { 0, GOOD(2), 2, GOOD(3),
+                                                  7, RT(1),   2, RT(2),
+                                                  7, INT_MAX };
 
-static const int mode_check_freq_map_split2[] = {
-  0, GOOD(1), 2, GOOD(2), 4, GOOD(3), 15, RT(1), 4, RT(2), 15, INT_MAX
-};
+static const int mode_check_freq_map_split2[] = { 0, GOOD(1), 2,  GOOD(2),
+                                                  4, GOOD(3), 15, RT(1),
+                                                  4, RT(2),   15, INT_MAX };
 
 void vp8_set_speed_features(VP8_COMP *cpi) {
   SPEED_FEATURES *sf = &cpi->sf;
