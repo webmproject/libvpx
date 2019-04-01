@@ -1944,6 +1944,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         rd.distortion2 += distortion;
 
         if (tmp_rd < best_mode.yrd) {
+          assert(uv_intra_done);
           rd.rate2 += uv_intra_rate;
           rd.rate_uv = uv_intra_rate_tokenonly;
           rd.distortion2 += uv_intra_distortion;
@@ -2004,6 +2005,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         rd.distortion2 += distortion;
         rd.rate2 += x->mbmode_cost[x->e_mbd.frame_type]
                                   [x->e_mbd.mode_info_context->mbmi.mode];
+        assert(uv_intra_done);
         rd.rate2 += uv_intra_rate;
         rd.rate_uv = uv_intra_rate_tokenonly;
         rd.distortion2 += uv_intra_distortion;
