@@ -3171,6 +3171,11 @@ static void rd_variance_adjustment(VP9_COMP *cpi, MACROBLOCK *x,
       double noise_factor =
           (double)cpi->twopass.gf_group.group_noise_energy / SECTION_NOISE_DEF;
       low_var_thresh = (unsigned int)(low_var_thresh * noise_factor);
+
+      if (ref_frame == INTRA_FRAME) {
+        low_var_thresh *= 2;
+        if (this_mode == DC_PRED) low_var_thresh *= 5;
+      }
     }
   } else {
     low_var_thresh = LOW_VAR_THRESH / 2;
