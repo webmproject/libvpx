@@ -209,8 +209,11 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
           // Only consider blocks that are likely steady background. i.e, have
           // been encoded as zero/low motion x (= thresh_consec_zeromv) frames
           // in a row. consec_zero_mv[] defined for 8x8 blocks, so consider all
-          // 4 sub-blocks for 16x16 block. Also, avoid skin blocks.
-          if (frame_low_motion && consec_zeromv > thresh_consec_zeromv) {
+          // 4 sub-blocks for 16x16 block. And exclude this frame if
+          // high_source_sad is true (i.e., scene/content change).
+          if (frame_low_motion && consec_zeromv > thresh_consec_zeromv &&
+              !cpi->rc.high_source_sad &&
+              !cpi->svc.high_source_sad_superframe) {
             int is_skin = 0;
             if (cpi->use_skin_detection) {
               is_skin =

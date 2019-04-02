@@ -3839,7 +3839,6 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   if (cpi->oxcf.noise_sensitivity > 0 && cpi->use_svc)
     vp9_denoiser_reset_on_first_frame(cpi);
 #endif
-  vp9_update_noise_estimate(cpi);
 
   // Scene detection is always used for VBR mode or screen-content case.
   // For other cases (e.g., CBR mode) use it for 5 <= speed < 8 for now
@@ -3870,6 +3869,8 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
       cpi->rc.high_source_sad = tmp_high_source_sad;
     }
   }
+
+  vp9_update_noise_estimate(cpi);
 
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame, if base layer is key for svc,
