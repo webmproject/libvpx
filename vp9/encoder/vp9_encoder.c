@@ -6291,9 +6291,9 @@ static int get_mv_mode_cost(int mv_mode) {
   // TODO(angiebird): The probabilities are roughly inferred from
   // default_inter_mode_probs. Check if there is a better way to set the
   // probabilities.
-  const int zero_mv_prob = 9;
-  const int new_mv_prob = 77;
-  const int ref_mv_prob = 170;
+  const int zero_mv_prob = 16;
+  const int new_mv_prob = 24 * 1;
+  const int ref_mv_prob = 256 - zero_mv_prob - new_mv_prob;
   assert(zero_mv_prob + new_mv_prob + ref_mv_prob == 256);
   switch (mv_mode) {
     case ZERO_MV_MODE: return vp9_prob_cost[zero_mv_prob]; break;
