@@ -136,7 +136,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
-    uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
+    uint8_t *const dst = dst_buf->buf + (int64_t)dst_buf->stride * y + x;
     const MV mv = mi->sb_type < BLOCK_8X8
                       ? average_split_mvs(pd, mi, ref, block)
                       : mi->mv[ref].as_mv;
