@@ -3718,7 +3718,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
 
         // Cost the skip mb case
         rate2 += skip_cost1;
-      } else if (ref_frame != INTRA_FRAME && !xd->lossless) {
+      } else if (ref_frame != INTRA_FRAME && !xd->lossless &&
+                 !cpi->oxcf.sharpness) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv + skip_cost0,
                    distortion2) <
             RDCOST(x->rdmult, x->rddiv, skip_cost1, total_sse)) {
