@@ -112,10 +112,6 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
   // Estimate of noise level every frame_period frames.
   int frame_period = 8;
   int thresh_consec_zeromv = 6;
-  unsigned int thresh_sum_diff = 100;
-  unsigned int thresh_sum_spatial = (200 * 200) << 8;
-  unsigned int thresh_spatial_var = (32 * 32) << 8;
-  int min_blocks_estimate = cm->mi_rows * cm->mi_cols >> 7;
   int frame_counter = cm->current_video_frame;
   // Estimate is between current source and last source.
   YV12_BUFFER_CONFIG *last_source = cpi->Last_Source;
@@ -126,9 +122,6 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     // enabled.
     if (cm->width > 640 && cm->width <= 1920) {
       thresh_consec_zeromv = 2;
-      thresh_sum_diff = 200;
-      thresh_sum_spatial = (120 * 120) << 8;
-      thresh_spatial_var = (48 * 48) << 8;
     }
   }
 #endif
@@ -165,11 +158,13 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
 #endif
     return;
   } else {
-    int num_samples = 0;
-    uint64_t avg_est = 0;
+    unsigned int bin_size = 100;
+    unsigned int hist[MAX_VAR_HIST_BINS] = { 0 };
+    unsigned int hist_avg[MAX_VAR_HIST_BINS];
+    unsigned int max_bin = 0;
+    unsigned int max_bin_count = 0;
+    unsigned int bin_cnt;
     int bsize = BLOCK_16X16;
-    static const unsigned char const_source[16] = { 0, 0, 0, 0, 0, 0, 0, 0,
-                                                    0, 0, 0, 0, 0, 0, 0, 0 };
     // Loop over sub-sample of 16x16 blocks of frame, and for blocks that have
     // been encoded as zero/small mv at least x consecutive frames, compute
     // the variance to update estimate of noise in the source.
@@ -222,25 +217,15 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
             }
             if (!is_skin) {
               unsigned int sse;
-              // Compute variance.
+              // Compute variance between co-located blocks from current and
+              // last input frames.
               unsigned int variance = cpi->fn_ptr[bsize].vf(
                   src_y, src_ystride, last_src_y, last_src_ystride, &sse);
-              // Only consider this block as valid for noise measurement if the
-              // average term (sse - variance = N * avg^{2}, N = 16X16) of the
-              // temporal residual is small (avoid effects from lighting
-              // change).
-              if ((sse - variance) < thresh_sum_diff) {
-                unsigned int sse2;
-                const unsigned int spatial_variance = cpi->fn_ptr[bsize].vf(
-                    src_y, src_ystride, const_source, 0, &sse2);
-                // Avoid blocks with high brightness and high spatial variance.
-                if ((sse2 - spatial_variance) < thresh_sum_spatial &&
-                    spatial_variance < thresh_spatial_var) {
-                  avg_est += low_res ? variance >> 4
-                                     : variance / ((spatial_variance >> 9) + 1);
-                  num_samples++;
-                }
-              }
+              unsigned int hist_index = variance / bin_size;
+              if (hist_index < MAX_VAR_HIST_BINS)
+                hist[hist_index]++;
+              else if (hist_index < 3 * (MAX_VAR_HIST_BINS >> 1))
+                hist[MAX_VAR_HIST_BINS - 1]++;  // Account for the tail
             }
           }
         }
@@ -256,25 +241,52 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
     }
     ne->last_w = cm->width;
     ne->last_h = cm->height;
-    // Update noise estimate if we have at a minimum number of block samples,
-    // and avg_est > 0 (avg_est == 0 can happen if the application inputs
-    // duplicate frames).
-    if (num_samples > min_blocks_estimate && avg_est > 0) {
-      // Normalize.
-      avg_est = avg_est / num_samples;
-      // Update noise estimate.
-      ne->value = (int)((3 * ne->value + avg_est) >> 2);
-      ne->count++;
-      if (ne->count == ne->num_frames_estimate) {
-        // Reset counter and check noise level condition.
-        ne->num_frames_estimate = 30;
-        ne->count = 0;
-        ne->level = vp9_noise_estimate_extract_level(ne);
-#if CONFIG_VP9_TEMPORAL_DENOISING
-        if (cpi->oxcf.noise_sensitivity > 0 && noise_est_svc(cpi))
-          vp9_denoiser_set_noise_level(cpi, ne->level);
-#endif
+    // Adjust histogram to account for effect that histogram flattens
+    // and shifts to zero as scene darkens.
+    if (hist[0] > 10 && (hist[MAX_VAR_HIST_BINS - 1] > hist[0] >> 2)) {
+      hist[0] = 0;
+      hist[1] >>= 2;
+      hist[2] >>= 2;
+      hist[3] >>= 2;
+      hist[4] >>= 1;
+      hist[5] >>= 1;
+      hist[6] = 3 * hist[6] >> 1;
+      hist[MAX_VAR_HIST_BINS - 1] >>= 1;
+    }
+
+    // Average hist[] and find largest bin
+    for (bin_cnt = 0; bin_cnt < MAX_VAR_HIST_BINS; bin_cnt++) {
+      if (bin_cnt == 0)
+        hist_avg[bin_cnt] = (hist[0] + hist[1] + hist[2]) / 3;
+      else if (bin_cnt == MAX_VAR_HIST_BINS - 1)
+        hist_avg[bin_cnt] = hist[MAX_VAR_HIST_BINS - 1] >> 2;
+      else if (bin_cnt == MAX_VAR_HIST_BINS - 2)
+        hist_avg[bin_cnt] = (hist[bin_cnt - 1] + 2 * hist[bin_cnt] +
+                             (hist[bin_cnt + 1] >> 1) + 2) >>
+                            2;
+      else
+        hist_avg[bin_cnt] =
+            (hist[bin_cnt - 1] + 2 * hist[bin_cnt] + hist[bin_cnt + 1] + 2) >>
+            2;
+
+      if (hist_avg[bin_cnt] > max_bin_count) {
+        max_bin_count = hist_avg[bin_cnt];
+        max_bin = bin_cnt;
       }
+    }
+
+    // Scale by 40 to work with existing thresholds
+    ne->value = (int)((3 * ne->value + max_bin * 40) >> 2);
+    ne->count++;
+    if (ne->count == ne->num_frames_estimate) {
+      // Reset counter and check noise level condition.
+      ne->num_frames_estimate = 30;
+      ne->count = 0;
+      ne->level = vp9_noise_estimate_extract_level(ne);
+#if CONFIG_VP9_TEMPORAL_DENOISING
+      if (cpi->oxcf.noise_sensitivity > 0 && noise_est_svc(cpi))
+        vp9_denoiser_set_noise_level(cpi, ne->level);
+#endif
     }
   }
 #if CONFIG_VP9_TEMPORAL_DENOISING

@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#define MAX_VAR_HIST_BINS 20
+
 typedef enum noise_level { kLowLow, kLow, kMedium, kHigh } NOISE_LEVEL;
 
 typedef struct noise_estimate {
