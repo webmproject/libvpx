@@ -177,4 +177,10 @@ if __name__ == '__main__':
     #axes[1][1].figure.colorbar(im, ax=axes[1][1])
 
     print rf_idx, frame_idx, ref_frame_idx, gf_frame_offset, ref_gf_frame_offset, len(mv_ls)
+
+    flatten_mv_mode = mv_mode_arr.flatten()
+    zero_mv_count = sum(flatten_mv_mode == 0);
+    new_mv_count = sum(flatten_mv_mode == 1);
+    ref_mv_count = sum(flatten_mv_mode == 2) + sum(flatten_mv_mode == 3);
+    print zero_mv_count, new_mv_count, ref_mv_count
     plt.show()
