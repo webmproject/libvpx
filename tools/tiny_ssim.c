@@ -107,7 +107,6 @@ typedef struct input_file {
 static int open_input_file(const char *file_name, input_file_t *input, int w,
                            int h, int bit_depth) {
   char y4m_buf[4];
-  size_t r1;
   input->w = w;
   input->h = h;
   input->bit_depth = bit_depth;
@@ -115,31 +114,29 @@ static int open_input_file(const char *file_name, input_file_t *input, int w,
   input->buf = NULL;
   input->file = strcmp(file_name, "-") ? fopen(file_name, "rb") : stdin;
   if (input->file == NULL) return -1;
-  r1 = fread(y4m_buf, 1, 4, input->file);
-  if (r1 == 4) {
-    if (memcmp(y4m_buf, "YUV4", 4) == 0) input->type = Y4M;
-    switch (input->type) {
-      case Y4M:
-        y4m_input_open(&input->y4m, input->file, y4m_buf, 4, 0);
-        input->w = input->y4m.pic_w;
-        input->h = input->y4m.pic_h;
-        input->bit_depth = input->y4m.bit_depth;
-        // Y4M alloc's its own buf. Init this to avoid problems if we never
-        // read frames.
-        memset(&input->img, 0, sizeof(input->img));
-        break;
-      case RAW_YUV:
-        fseek(input->file, 0, SEEK_SET);
-        input->w = w;
-        input->h = h;
-        // handle odd frame sizes
-        input->frame_size = w * h + ((w + 1) / 2) * ((h + 1) / 2) * 2;
-        if (bit_depth > 8) {
-          input->frame_size *= 2;
-        }
-        input->buf = malloc(input->frame_size);
-        break;
-    }
+  if (fread(y4m_buf, 1, 4, input->file) != 4) return -1;
+  if (memcmp(y4m_buf, "YUV4", 4) == 0) input->type = Y4M;
+  switch (input->type) {
+    case Y4M:
+      y4m_input_open(&input->y4m, input->file, y4m_buf, 4, 0);
+      input->w = input->y4m.pic_w;
+      input->h = input->y4m.pic_h;
+      input->bit_depth = input->y4m.bit_depth;
+      // Y4M alloc's its own buf. Init this to avoid problems if we never
+      // read frames.
+      memset(&input->img, 0, sizeof(input->img));
+      break;
+    case RAW_YUV:
+      fseek(input->file, 0, SEEK_SET);
+      input->w = w;
+      input->h = h;
+      // handle odd frame sizes
+      input->frame_size = w * h + ((w + 1) / 2) * ((h + 1) / 2) * 2;
+      if (bit_depth > 8) {
+        input->frame_size *= 2;
+      }
+      input->buf = malloc(input->frame_size);
+      break;
   }
   return 0;
 }
