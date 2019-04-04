@@ -1018,6 +1018,7 @@ void vp9_svc_check_reset_layer_rc_flag(VP9_COMP *const cpi) {
 void vp9_svc_constrain_inter_layer_pred(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
   SVC *const svc = &cpi->svc;
+  const int sl = svc->spatial_layer_id;
   // Check for disabling inter-layer (spatial) prediction, if
   // svc.disable_inter_layer_pred is set. If the previous spatial layer was
   // dropped then disable the prediction from this (scaled) reference.
@@ -1027,7 +1028,7 @@ void vp9_svc_constrain_inter_layer_pred(VP9_COMP *const cpi) {
        !svc->layer_context[svc->temporal_layer_id].is_key_frame &&
        !svc->superframe_has_layer_sync) ||
       svc->disable_inter_layer_pred == INTER_LAYER_PRED_OFF ||
-      svc->drop_spatial_layer[svc->spatial_layer_id - 1]) {
+      svc->drop_spatial_layer[sl - 1]) {
     MV_REFERENCE_FRAME ref_frame;
     static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                       VP9_ALT_FLAG };
@@ -1036,8 +1037,16 @@ void vp9_svc_constrain_inter_layer_pred(VP9_COMP *const cpi) {
       if (yv12 != NULL && (cpi->ref_frame_flags & flag_list[ref_frame])) {
         const struct scale_factors *const scale_fac =
             &cm->frame_refs[ref_frame - 1].sf;
-        if (vp9_is_scaled(scale_fac))
+        if (vp9_is_scaled(scale_fac)) {
           cpi->ref_frame_flags &= (~flag_list[ref_frame]);
+          // Point golden/altref frame buffer index to last.
+          if (!svc->simulcast_mode) {
+            if (ref_frame == GOLDEN_FRAME)
+              cpi->gld_fb_idx = cpi->lst_fb_idx;
+            else if (ref_frame == ALTREF_FRAME)
+              cpi->alt_fb_idx = cpi->lst_fb_idx;
+          }
+        }
       }
     }
   }
@@ -1065,7 +1074,6 @@ void vp9_svc_constrain_inter_layer_pred(VP9_COMP *const cpi) {
         int fb_idx =
             ref_frame == LAST_FRAME ? cpi->lst_fb_idx : cpi->gld_fb_idx;
         int ref_flag = ref_frame == LAST_FRAME ? VP9_LAST_FLAG : VP9_GOLD_FLAG;
-        int sl = svc->spatial_layer_id;
         int disable = 1;
         if (fb_idx < 0) continue;
         if ((fb_idx == svc->lst_fb_idx[sl - 1] &&
