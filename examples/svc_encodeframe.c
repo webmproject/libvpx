@@ -155,6 +155,7 @@ static vpx_codec_err_t parse_layer_options_from_string(SvcContext *svc_ctx,
     return VPX_CODEC_INVALID_PARAM;
 
   input_string = strdup(input);
+  if (input_string == NULL) return VPX_CODEC_MEM_ERROR;
   token = strtok_r(input_string, delim, &save_ptr);
   for (i = 0; i < num_layers; ++i) {
     if (token != NULL) {
@@ -194,6 +195,7 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
 
   if (options == NULL) return VPX_CODEC_OK;
   input_string = strdup(options);
+  if (input_string == NULL) return VPX_CODEC_MEM_ERROR;
 
   // parse option name
   option_name = strtok_r(input_string, "=", &input_ptr);
