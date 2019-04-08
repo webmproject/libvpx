@@ -1637,7 +1637,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       (cpi->sf.adaptive_rd_thresh_row_mt)
           ? &(tile_data->row_base_thresh_freq_fact[thresh_freq_fact_idx])
           : tile_data->thresh_freq_fact[bsize];
-
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  // TODO(marpan/jianj): Re-enable this feature (re-evaluate ZEROMV mode
+  // on denoised signal) when mismatch issue is resolved.
+  const int denoise_recheck_zeromv = 0;
+#endif
   INTERP_FILTER filter_ref;
   const int bsl = mi_width_log2_lookup[bsize];
   const int pred_filter_search =
@@ -2284,9 +2288,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           this_rdc.rate += vp9_get_switchable_rate(cpi, xd);
       }
     } else {
-      this_rdc.rate += cm->interp_filter == SWITCHABLE
-                           ? vp9_get_switchable_rate(cpi, xd)
-                           : 0;
+      if (cm->interp_filter == SWITCHABLE) {
+        if ((mi->mv[0].as_mv.row | mi->mv[0].as_mv.col) & 0x07)
+          this_rdc.rate += vp9_get_switchable_rate(cpi, xd);
+      }
       this_rdc.rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
     }
 
@@ -2595,8 +2600,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                                 frame_mv, reuse_inter_pred, &best_pickmode);
     vp9_denoiser_denoise(cpi, x, mi_row, mi_col, bsize, ctx, &decision,
                          gf_temporal_ref);
-    recheck_zeromv_after_denoising(cpi, mi, x, xd, decision, &ctx_den, yv12_mb,
-                                   &best_rdc, bsize, mi_row, mi_col);
+    if (denoise_recheck_zeromv)
+      recheck_zeromv_after_denoising(cpi, mi, x, xd, decision, &ctx_den,
+                                     yv12_mb, &best_rdc, bsize, mi_row, mi_col);
     best_pickmode.best_ref_frame = ctx_den.best_ref_frame;
   }
 #endif
