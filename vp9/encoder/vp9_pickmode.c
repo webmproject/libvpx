@@ -1643,13 +1643,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   const int denoise_recheck_zeromv = 0;
 #endif
   INTERP_FILTER filter_ref;
-  const int bsl = mi_width_log2_lookup[bsize];
-  const int pred_filter_search =
-      cm->interp_filter == SWITCHABLE
-          ? (((mi_row + mi_col) >> bsl) +
-             get_chessboard_index(cm->current_video_frame)) &
-                0x1
-          : 0;
+  int pred_filter_search = cm->interp_filter == SWITCHABLE;
   int const_motion[MAX_REF_FRAMES] = { 0 };
   const int bh = num_4x4_blocks_high_lookup[bsize] << 2;
   const int bw = num_4x4_blocks_wide_lookup[bsize] << 2;
@@ -1780,6 +1774,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   x->skip = 0;
 
+  if (cpi->sf.cb_pred_filter_search) {
+    const int bsl = mi_width_log2_lookup[bsize];
+    pred_filter_search = cm->interp_filter == SWITCHABLE
+                             ? (((mi_row + mi_col) >> bsl) +
+                                get_chessboard_index(cm->current_video_frame)) &
+                                   0x1
+                             : 0;
+  }
   // Instead of using vp9_get_pred_context_switchable_interp(xd) to assign
   // filter_ref, we use a less strict condition on assigning filter_ref.
   // This is to reduce the probabily of entering the flow of not assigning

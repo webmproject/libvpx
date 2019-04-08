@@ -452,6 +452,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->use_accurate_subpel_search = USE_2_TAPS;
   sf->nonrd_use_ml_partition = 0;
   sf->variance_part_thresh_mult = 1;
+  sf->cb_pred_filter_search = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -749,9 +750,11 @@ static void set_rt_speed_feature_framesize_independent(
     }
     sf->limit_newmv_early_exit = 0;
     sf->use_simple_block_yrd = 1;
+    if (cm->width * cm->height > 352 * 288) sf->cb_pred_filter_search = 1;
   }
 
   if (speed >= 9) {
+    sf->cb_pred_filter_search = 1;
     sf->mv.enable_adaptive_subpel_force_stop = 1;
     sf->mv.adapt_subpel_force_stop.mv_thresh = 1;
     sf->mv.adapt_subpel_force_stop.force_stop_below = QUARTER_PEL;
