@@ -436,6 +436,10 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->use_post_encode_drop = 0;
   rc->ext_use_post_encode_drop = 0;
   rc->arf_active_best_quality_adjustment_factor = 1.0;
+
+  rc->preserve_arf_as_gld = 0;
+  rc->preserve_next_arf_as_gld = 0;
+  rc->show_arf_as_gld = 0;
 }
 
 static int check_buffer_above_thresh(VP9_COMP *cpi, int drop_mark) {
@@ -1574,6 +1578,7 @@ void vp9_configure_buffer_updates(VP9_COMP *cpi, int gf_group_index) {
 
   cpi->rc.is_src_frame_alt_ref = 0;
   cm->show_existing_frame = 0;
+  cpi->rc.show_arf_as_gld = 0;
   switch (twopass->gf_group.update_type[gf_group_index]) {
     case KF_UPDATE:
       cpi->refresh_last_frame = 1;
@@ -1595,6 +1600,12 @@ void vp9_configure_buffer_updates(VP9_COMP *cpi, int gf_group_index) {
       cpi->refresh_golden_frame = 1;
       cpi->refresh_alt_ref_frame = 0;
       cpi->rc.is_src_frame_alt_ref = 1;
+      if (cpi->rc.preserve_arf_as_gld) {
+        cpi->rc.show_arf_as_gld = 1;
+        cpi->refresh_golden_frame = 0;
+        cm->show_existing_frame = 1;
+        cm->refresh_frame_context = 0;
+      }
       break;
     case MID_OVERLAY_UPDATE:
       cpi->refresh_last_frame = 1;
@@ -1716,6 +1727,15 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
     if (rc->frames_till_gf_update_due > 0) rc->frames_till_gf_update_due--;
 
     rc->frames_since_golden++;
+
+    if (rc->show_arf_as_gld) {
+      rc->frames_since_golden = 0;
+      // If we are not using alt ref in the up and coming group clear the arf
+      // active flag. In multi arf group case, if the index is not 0 then
+      // we are overlaying a mid group arf so should not reset the flag.
+      if (!rc->source_alt_ref_pending && (cpi->twopass.gf_group.index == 0))
+        rc->source_alt_ref_active = 0;
+    }
   }
 }
 
