@@ -32,6 +32,7 @@ typedef struct noise_estimate {
   NOISE_LEVEL level;
   int value;
   int thresh;
+  int adapt_thresh;
   int count;
   int last_w;
   int last_h;

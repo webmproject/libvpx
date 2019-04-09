@@ -46,6 +46,7 @@ void vp9_noise_estimate_init(NOISE_ESTIMATE *const ne, int width, int height) {
     ne->thresh = 115;
   }
   ne->num_frames_estimate = 15;
+  ne->adapt_thresh = (3 * ne->thresh) >> 1;
 }
 
 static int enable_noise_estimation(VP9_COMP *const cpi) {
@@ -277,7 +278,12 @@ void vp9_update_noise_estimate(VP9_COMP *const cpi) {
 
     // Scale by 40 to work with existing thresholds
     ne->value = (int)((3 * ne->value + max_bin * 40) >> 2);
-    ne->count++;
+    // Quickly increase VNR strength when the noise level increases suddenly.
+    if (ne->level < kMedium && ne->value > ne->adapt_thresh) {
+      ne->count = ne->num_frames_estimate;
+    } else {
+      ne->count++;
+    }
     if (ne->count == ne->num_frames_estimate) {
       // Reset counter and check noise level condition.
       ne->num_frames_estimate = 30;
