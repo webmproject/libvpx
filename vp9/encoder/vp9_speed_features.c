@@ -624,6 +624,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->use_altref_onepass = 1;
       sf->use_compound_nonrd_pickmode = 1;
     }
+    if (cm->width * cm->height > 1280 * 720) sf->cb_pred_filter_search = 1;
   }
 
   if (speed >= 6) {
@@ -709,6 +710,7 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->use_svc && svc->use_gf_temporal_ref_current_layer &&
         svc->temporal_layer_id > 0)
       cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
+    if (cm->width * cm->height > 640 * 480) sf->cb_pred_filter_search = 1;
   }
 
   if (speed >= 8) {
