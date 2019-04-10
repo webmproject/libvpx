@@ -1196,8 +1196,7 @@ int main(int argc, const char **argv) {
       vpx_codec_control(&encoder, VP9E_GET_SVC_LAYER_ID, &layer_id);
       // Don't look for mismatch on top spatial and top temporal layers as they
       // are non reference frames.
-      // TODO(jianj): Investigate mismatch on 3SL when denoiser is on.
-      if (enc_cfg.ss_number_layers == 1 &&
+      if ((enc_cfg.ss_number_layers > 1 || enc_cfg.ts_number_layers > 1) &&
           !(layer_id.temporal_layer_id > 0 &&
             layer_id.temporal_layer_id == (int)enc_cfg.ts_number_layers - 1 &&
             cx_pkt->data.frame
