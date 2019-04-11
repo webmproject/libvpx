@@ -1334,6 +1334,7 @@ static void recheck_zeromv_after_denoising(
         cpi->svc.number_spatial_layers == 1 &&
         decision == FILTER_ZEROMV_BLOCK))) {
     // Check if we should pick ZEROMV on denoised signal.
+    VP9_COMMON *const cm = &cpi->common;
     int rate = 0;
     int64_t dist = 0;
     uint32_t var_y = UINT_MAX;
@@ -1342,6 +1343,7 @@ static void recheck_zeromv_after_denoising(
     mi->mode = ZEROMV;
     mi->ref_frame[0] = LAST_FRAME;
     mi->ref_frame[1] = NONE;
+    set_ref_ptrs(cm, xd, mi->ref_frame[0], NONE);
     mi->mv[0].as_int = 0;
     mi->interp_filter = EIGHTTAP;
     if (cpi->sf.default_interp_filter == BILINEAR) mi->interp_filter = BILINEAR;
@@ -1359,6 +1361,7 @@ static void recheck_zeromv_after_denoising(
       this_rdc = *best_rdc;
       mi->mode = ctx_den->best_mode;
       mi->ref_frame[0] = ctx_den->best_ref_frame;
+      set_ref_ptrs(cm, xd, mi->ref_frame[0], NONE);
       mi->interp_filter = ctx_den->best_pred_filter;
       if (ctx_den->best_ref_frame == INTRA_FRAME) {
         mi->mv[0].as_int = INVALID_MV;
@@ -1638,9 +1641,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           ? &(tile_data->row_base_thresh_freq_fact[thresh_freq_fact_idx])
           : tile_data->thresh_freq_fact[bsize];
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  // TODO(marpan/jianj): Re-enable this feature (re-evaluate ZEROMV mode
-  // on denoised signal) when mismatch issue is resolved.
-  const int denoise_recheck_zeromv = 0;
+  const int denoise_recheck_zeromv = 1;
 #endif
   INTERP_FILTER filter_ref;
   int pred_filter_search = cm->interp_filter == SWITCHABLE;
