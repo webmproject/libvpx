@@ -6331,10 +6331,6 @@ static double get_mv_cost(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
   return mv_cost;
 }
 
-static double rd_cost(int rdmult, int rddiv, double rate, double dist) {
-  return (rate * rdmult) / (1 << 9) + dist * (1 << rddiv);
-}
-
 static double eval_mv_mode(int mv_mode, VP9_COMP *cpi, MACROBLOCK *x,
                            GF_PICTURE *gf_picture, int frame_idx,
                            TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
@@ -6344,8 +6340,9 @@ static double eval_mv_mode(int mv_mode, VP9_COMP *cpi, MACROBLOCK *x,
                                tpl_frame, rf_idx, bsize, mi_row, mi_col, mv);
   double mv_cost =
       get_mv_cost(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row, mi_col);
+  double mult = 180;
 
-  return rd_cost(x->rdmult, x->rddiv, mv_cost, mv_dist);
+  return mv_cost + mult * log2f(1 + mv_dist);
 }
 
 static int find_best_ref_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
