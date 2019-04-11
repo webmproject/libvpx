@@ -326,6 +326,8 @@ int main(int argc, char *argv[]) {
   input_file_t in[2];
   double peak = 255.0;
 
+  memset(in, 0, sizeof(in));
+
   if (argc < 2) {
     fprintf(stderr,
             "Usage: %s file1.{yuv|y4m} file2.{yuv|y4m}"
