@@ -4737,13 +4737,19 @@ static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
 // Technology, IEEE Transactions on, vol. 23, no. 7, pp. 1170-1181, 2013.
 // SSIM_VAR_SCALE defines the strength of the bias towards SSIM in RDO.
 // Some sample values are:
-// SSIM_VAR_SCALE  avg_psnr   ssim   ms_ssim  (for midres test set)
+// (for midres test set)
+// SSIM_VAR_SCALE  avg_psnr   ssim   ms_ssim
 //     16.0          2.312   -3.062  -3.882
 //     32.0          0.852   -2.260  -2.821
 //     64.0          0.294   -1.606  -1.925
+// (for midres_10bd test set)
+// SSIM_VAR_SCALE  avg_psnr   ssim   ms_ssim
+//      8.0          6.782   -3.872  -5.464
+//     16.0          3.189   -4.083  -5.258
+//     32.0          1.113   -3.423  -4.309
+//     64.0          0.241   -2.515  -3.074
 #define SSIM_VAR_SCALE 16.0
 static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
-  const double c2 = 0.03 * 0.03 * 255 * 255;
   VP9_COMMON *cm = &cpi->common;
   ThreadData *td = &cpi->td;
   MACROBLOCK *x = &td->mb;
@@ -4758,6 +4764,19 @@ static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
   const int num_rows = (cm->mi_rows + num_8x8_h - 1) / num_8x8_h;
   double log_sum = 0.0;
   int row, col;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  double c2;
+  if (xd->bd == 10) {
+    c2 = 941.8761;  // (.03*1023)^2
+  } else if (xd->bd == 12) {
+    c2 = 15092.1225;  // (.03*4095)^2
+  } else {
+    c2 = 58.5225;  // (.03*255)^2
+  }
+#else
+  const double c2 = 58.5225;  // (.03*255)^2
+#endif
 
   // Loop through each 64x64 block.
   for (row = 0; row < num_rows; ++row) {
@@ -4776,7 +4795,18 @@ static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
 
           buf.buf = y_buffer + row_offset_y * y_stride + col_offset_y;
           buf.stride = y_stride;
-          var += vp9_get_sby_variance(cpi, &buf, BLOCK_8X8) / 64.0;
+
+          // In order to make SSIM_VAR_SCALE in a same scale for both 8 bit
+          // and high bit videos, the variance needs to be divided by 2.0 or
+          // 64.0 separately.
+#if CONFIG_VP9_HIGHBITDEPTH
+          if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH)
+            var +=
+                vp9_high_get_sby_variance(cpi, &buf, BLOCK_8X8, xd->bd) / 2.0;
+          else
+#endif
+            var += vp9_get_sby_variance(cpi, &buf, BLOCK_8X8) / 64.0;
+
           num_of_var += 1.0;
         }
       }
