@@ -1063,10 +1063,11 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL3TLDynamicBitrateChange) {
 }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-// Params: speed setting, noise sensitivity and index for bitrate array.
+// Params: speed setting, noise sensitivity, index for bitrate array and inter
+// layer pred mode.
 class DatarateOnePassCbrSvcDenoiser
     : public DatarateOnePassCbrSvc,
-      public ::libvpx_test::CodecTestWith3Params<int, int, int> {
+      public ::libvpx_test::CodecTestWith4Params<int, int, int, int> {
  public:
   DatarateOnePassCbrSvcDenoiser() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
     memset(&svc_params_, 0, sizeof(svc_params_));
@@ -1078,6 +1079,7 @@ class DatarateOnePassCbrSvcDenoiser
     InitializeConfig();
     SetMode(::libvpx_test::kRealTime);
     speed_setting_ = GET_PARAM(1);
+    inter_layer_pred_mode_ = GET_PARAM(3);
     ResetModel();
   }
 };
@@ -1417,7 +1419,7 @@ VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcFrameDropMultiBR,
 #if CONFIG_VP9_TEMPORAL_DENOISING
 VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcDenoiser,
                           ::testing::Range(5, 10), ::testing::Range(1, 3),
-                          ::testing::Range(0, 3));
+                          ::testing::Range(0, 3), ::testing::Range(0, 4));
 #endif
 
 VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcSmallKF, ::testing::Range(5, 10),
