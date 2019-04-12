@@ -5788,13 +5788,11 @@ int vp9_get_group_idx(double value, double *boundary_ls, int k) {
 
 void vp9_kmeans(double *ctr_ls, double *boundary_ls, int *count_ls, int k,
                 KMEANS_DATA *arr, int size) {
-  double min, max;
-  double step;
   int i, j;
   int itr;
   int group_idx;
-  double sum;
-  int count;
+  double sum[MAX_KMEANS_GROUPS];
+  int count[MAX_KMEANS_GROUPS];
 
   vpx_clear_system_state();
 
@@ -5802,38 +5800,37 @@ void vp9_kmeans(double *ctr_ls, double *boundary_ls, int *count_ls, int k,
 
   qsort(arr, size, sizeof(*arr), compare_kmeans_data);
 
-  min = arr[0].value;
-  max = arr[size - 1].value;
-
   // initialize the center points
-  step = (max - min) * 1. / k;
   for (j = 0; j < k; ++j) {
-    ctr_ls[j] = min + j * step + step / 2;
+    ctr_ls[j] = arr[(size * j) / k].value;
   }
 
   for (itr = 0; itr < 10; ++itr) {
     compute_boundary_ls(ctr_ls, k, boundary_ls);
-    group_idx = 0;
-    count = 0;
-    sum = 0;
+    for (i = 0; i < MAX_KMEANS_GROUPS; ++i) {
+      sum[i] = 0;
+      count[i] = 0;
+    }
+
     for (i = 0; i < size; ++i) {
+      // place samples into clusters
+      group_idx = 0;
       while (arr[i].value >= boundary_ls[group_idx]) {
         ++group_idx;
         if (group_idx == k - 1) {
           break;
         }
       }
+      sum[group_idx] += arr[i].value;
+      ++count[group_idx];
+    }
 
-      sum += arr[i].value;
-      ++count;
+    for (group_idx = 0; group_idx < k; ++group_idx) {
+      if (count[group_idx] > 0)
+        ctr_ls[group_idx] = sum[group_idx] / count[group_idx];
 
-      if (i + 1 == size || arr[i + 1].value >= boundary_ls[group_idx]) {
-        if (count > 0) {
-          ctr_ls[group_idx] = sum / count;
-        }
-        count = 0;
-        sum = 0;
-      }
+      sum[group_idx] = 0;
+      count[group_idx] = 0;
     }
   }
 
