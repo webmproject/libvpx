@@ -8,9 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
-#include <limits.h>
+#include <stdlib.h>
 
 #include "./vp9_rtcd.h"
 #include "./vpx_config.h"
@@ -4718,6 +4719,14 @@ static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
 }
 
 // Process the wiener variance in 16x16 block basis.
+static int qsort_comp(const void *elem1, const void *elem2) {
+  int a = *((const int *)elem1);
+  int b = *((const int *)elem2);
+  if (a > b) return 1;
+  if (a < b) return -1;
+  return 0;
+}
+
 static void set_mb_wiener_variance(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   uint8_t *buffer = cpi->Source->y_buffer;
@@ -4762,7 +4771,7 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
 
   for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
     for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
-      int idx, hist_count = 0;
+      int idx;
       int16_t median_val = 0;
       uint8_t *mb_buffer =
           buffer + mb_row * block_size * buf_stride + mb_col * block_size;
@@ -4785,18 +4794,13 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
       wht_fwd_txfm(src_diff, block_size, coeff, tx_size);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-      for (idx = 0; idx < UINT16_MAX; ++idx) cpi->stack_rank_buffer[idx] = 0;
+      coeff[0] = 0;
+      for (idx = 1; idx < coeff_count; ++idx) coeff[idx] = abs(coeff[idx]);
 
-      for (idx = 1; idx < coeff_count; ++idx)
-        ++cpi->stack_rank_buffer[abs(coeff[idx])];
-
-      for (idx = 0; idx < UINT16_MAX; ++idx) {
-        hist_count += cpi->stack_rank_buffer[idx];
-        if (hist_count >= coeff_count / 2) break;
-      }
+      qsort(coeff, coeff_count, sizeof(*coeff), qsort_comp);
 
       // Noise level estimation
-      median_val = idx;
+      median_val = coeff[coeff_count / 2];
 
       // Wiener filter
       for (idx = 1; idx < coeff_count; ++idx) {
