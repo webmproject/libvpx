@@ -782,12 +782,12 @@ typedef enum {
   VP9E_CONTENT_INVALID
 } vp9e_tune_content;
 
-/*!\brief VP8 model tuning parameters
+/*!\brief VPX model tuning parameters
  *
  * Changes the encoder to tune for certain types of input material.
  *
  */
-typedef enum { VP8_TUNE_PSNR, VP8_TUNE_SSIM } vp8e_tuning;
+typedef enum { VPX_TUNE_PSNR, VPX_TUNE_SSIM } vpx_tuning;
 
 /*!\brief  vp9 svc layer parameters
  *
@@ -911,7 +911,7 @@ VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_STRENGTH, unsigned int)
 #define VPX_CTRL_VP8E_SET_ARNR_STRENGTH
 VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_SET_ARNR_TYPE, unsigned int)
 #define VPX_CTRL_VP8E_SET_ARNR_TYPE
-VPX_CTRL_USE_TYPE(VP8E_SET_TUNING, int) /* vp8e_tuning */
+VPX_CTRL_USE_TYPE(VP8E_SET_TUNING, int) /* vpx_tuning */
 #define VPX_CTRL_VP8E_SET_TUNING
 VPX_CTRL_USE_TYPE(VP8E_SET_CQ_LEVEL, unsigned int)
 #define VPX_CTRL_VP8E_SET_CQ_LEVEL
