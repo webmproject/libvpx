@@ -75,6 +75,8 @@ class TimestampTest
   }
 };
 
+class TimestampTestVp9Only : public TimestampTest {};
+
 // Tests encoding in millisecond timebase.
 TEST_P(TimestampTest, EncodeFrames) {
   DummyTimebaseVideoSource video(1, 1000);
@@ -90,13 +92,9 @@ TEST_P(TimestampTest, DISABLED_TestMicrosecondTimebase) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-// TODO(fgalligan): Enable test when
-// https://bugs.chromium.org/p/webm/issues/detail?id=701 is fixed. Tests
-// rollover of int64_t value in libvpx encoder interface. The rollover happens
-// in the algorithm "(pts + duration) * 10000000 * ctx->cfg.g_timebase.num". In
-// this test the second frame will rollover an int64_t and the resulting
-// timestamp will become negative.
-TEST_P(TimestampTest, DISABLED_TestVpxRollover) {
+// TODO(webm:701): Enable VP8 test when the overflow issue in
+// TestVpxRollover is fixed.
+TEST_P(TimestampTestVp9Only, TestVpxRollover) {
   DummyTimebaseVideoSource video(1, 1000);
   video.set_starting_pts(922337170351ll);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
@@ -106,5 +104,6 @@ VP8_INSTANTIATE_TEST_CASE(TimestampTest,
                           ::testing::Values(::libvpx_test::kTwoPassGood));
 VP9_INSTANTIATE_TEST_CASE(TimestampTest,
                           ::testing::Values(::libvpx_test::kTwoPassGood));
-
+VP9_INSTANTIATE_TEST_CASE(TimestampTestVp9Only,
+                          ::testing::Values(::libvpx_test::kTwoPassGood));
 }  // namespace
