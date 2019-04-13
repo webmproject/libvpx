@@ -259,6 +259,24 @@ static INLINE void set_mode_info_offsets(VP9_COMMON *const cm,
   x->mbmi_ext = x->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
 }
 
+static double get_ssim_rdmult_scaling_factor(VP9_COMP *const cpi, int mi_row,
+                                             int mi_col) {
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  if (oxcf->tuning == VP8_TUNE_SSIM) {
+    const VP9_COMMON *const cm = &cpi->common;
+    // SSIM rdmult scaling factors are currently 64x64 based.
+    const int num_8x8_w = 8;
+    const int num_8x8_h = 8;
+    const int num_cols = (cm->mi_cols + num_8x8_w - 1) / num_8x8_w;
+    const int row = mi_row / num_8x8_h;
+    const int col = mi_col / num_8x8_w;
+    const int index = row * num_cols + col;
+
+    return cpi->mi_ssim_rdmult_scaling_factors[index];
+  }
+  return 1.0;
+}
+
 static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
                         MACROBLOCK *const x, int mi_row, int mi_col,
                         BLOCK_SIZE bsize) {
@@ -267,6 +285,8 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   MvLimits *const mv_limits = &x->mv_limits;
+  const double ssim_factor =
+      get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
 
   set_skip_context(xd, mi_row, mi_col);
 
@@ -293,6 +313,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   // R/D setup.
   x->rddiv = cpi->rd.RDDIV;
   x->rdmult = cpi->rd.RDMULT;
+  x->rdmult = (int)(ssim_factor * x->rdmult);
 
   // required by vp9_append_sub8x8_mvs_for_idx() and vp9_find_best_ref_mvs()
   xd->tile = *tile;
@@ -1916,6 +1937,8 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
   VP9_COMMON *const cm = &cpi->common;
   const uint8_t *const map =
       cm->seg.update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
+  const double ssim_factor =
+      get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
 
   vp9_init_plane_quantizers(cpi, x);
   vpx_clear_system_state();
@@ -1923,25 +1946,22 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
   if (aq_mode == NO_AQ || aq_mode == PSNR_AQ) {
     if (cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance)
       x->rdmult = x->cb_rdmult;
-    return;
-  }
-
-  if (aq_mode == CYCLIC_REFRESH_AQ) {
+  } else if (aq_mode == CYCLIC_REFRESH_AQ) {
     // If segment is boosted, use rdmult for that segment.
     if (cyclic_refresh_segment_id_boosted(
             get_segment_id(cm, map, bsize, mi_row, mi_col)))
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
-    return;
+  } else {
+    x->rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
+    if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+      if (cm->seg.enabled)
+        x->rdmult = vp9_compute_rd_mult(
+            cpi, vp9_get_qindex(&cm->seg, x->e_mbd.mi[0]->segment_id,
+                                cm->base_qindex));
+    }
   }
 
-  x->rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
-
-  if (cpi->sf.enable_wiener_variance && cm->show_frame) {
-    if (cm->seg.enabled)
-      x->rdmult = vp9_compute_rd_mult(
-          cpi, vp9_get_qindex(&cm->seg, x->e_mbd.mi[0]->segment_id,
-                              cm->base_qindex));
-  }
+  x->rdmult = (int)(ssim_factor * x->rdmult);
 }
 
 static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
@@ -2179,8 +2199,12 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile, ThreadData *td,
   set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
 
   if ((cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance) &&
-      cpi->oxcf.aq_mode == NO_AQ)
+      cpi->oxcf.aq_mode == NO_AQ) {
+    const double ssim_factor =
+        get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
     x->rdmult = x->cb_rdmult;
+    x->rdmult = (int)(ssim_factor * x->rdmult);
+  }
 
   update_state(cpi, td, ctx, mi_row, mi_col, bsize, output_enabled);
   encode_superblock(cpi, td, tp, output_enabled, mi_row, mi_col, bsize, ctx);
@@ -3783,10 +3807,15 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   int64_t dist_breakout_thr = cpi->sf.partition_search_breakout_thr.dist;
   int rate_breakout_thr = cpi->sf.partition_search_breakout_thr.rate;
   int must_split = 0;
-  int partition_mul = x->cb_rdmult;
+
   // Ref frames picked in the [i_th] quarter subblock during square partition
   // RD search. It may be used to prune ref frame selection of rect partitions.
   uint8_t ref_frames_used[4] = { 0, 0, 0, 0 };
+
+  int partition_mul = x->cb_rdmult;
+  const double ssim_factor =
+      get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
+  partition_mul = (int)(ssim_factor * partition_mul);
 
   (void)*tp_orig;
 

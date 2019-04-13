@@ -263,9 +263,11 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, content, VP9E_CONTENT_DEFAULT,
               VP9E_CONTENT_INVALID - 1);
 
-  // TODO(yaowu): remove this when ssim tuning is implemented for vp9
+  // TODO(sdeng): remove this when ssim tuning is implemented for highbd
+#if CONFIG_VP9_HIGHBITDEPTH
   if (extra_cfg->tuning == VP8_TUNE_SSIM)
-    ERROR("Option --tune=ssim is not currently supported in VP9.");
+    ERROR("Option --tune=ssim is not currently supported in highbd VP9.");
+#endif
 
 #if !CONFIG_REALTIME_ONLY
   if (cfg->g_pass == VPX_RC_LAST_PASS) {
