@@ -193,6 +193,50 @@ class EndToEndTestLarge
   libvpx_test::TestMode encoding_mode_;
 };
 
+#if CONFIG_VP9_DECODER
+// The test parameters control VP9D_SET_LOOP_FILTER_OPT and the number of
+// decoder threads.
+class EndToEndTestLoopFilterThreading
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWith2Params<bool, int> {
+ protected:
+  EndToEndTestLoopFilterThreading()
+      : EncoderTest(GET_PARAM(0)), use_loop_filter_opt_(GET_PARAM(1)) {}
+
+  virtual ~EndToEndTestLoopFilterThreading() {}
+
+  virtual void SetUp() {
+    InitializeConfig();
+    SetMode(::libvpx_test::kRealTime);
+    cfg_.g_threads = 2;
+    cfg_.g_lag_in_frames = 0;
+    cfg_.rc_target_bitrate = 500;
+    cfg_.rc_end_usage = VPX_CBR;
+    cfg_.kf_min_dist = 1;
+    cfg_.kf_max_dist = 1;
+    dec_cfg_.threads = GET_PARAM(2);
+  }
+
+  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                                  ::libvpx_test::Encoder *encoder) {
+    if (video->frame() == 0) {
+      encoder->Control(VP8E_SET_CPUUSED, 8);
+    }
+    encoder->Control(VP9E_SET_TILE_COLUMNS, 4 - video->frame() % 5);
+  }
+
+  virtual void PreDecodeFrameHook(::libvpx_test::VideoSource *video,
+                                  ::libvpx_test::Decoder *decoder) {
+    if (video->frame() == 0) {
+      decoder->Control(VP9D_SET_LOOP_FILTER_OPT, use_loop_filter_opt_ ? 1 : 0);
+    }
+  }
+
+ private:
+  const bool use_loop_filter_opt_;
+};
+#endif  // CONFIG_VP9_DECODER
+
 TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
   cfg_.rc_target_bitrate = kBitrate;
   cfg_.g_error_resilient = 0;
@@ -255,6 +299,16 @@ TEST_P(EndToEndTestAdaptiveRDThresh, EndtoEndAdaptiveRDThreshRowMT) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
+#if CONFIG_VP9_DECODER
+TEST_P(EndToEndTestLoopFilterThreading, TileCountChange) {
+  ::libvpx_test::RandomVideoSource video;
+  video.SetSize(4096, 2160);
+  video.set_limit(10);
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+}
+#endif  // CONFIG_VP9_DECODER
+
 VP9_INSTANTIATE_TEST_CASE(EndToEndTestLarge,
                           ::testing::ValuesIn(kEncodingModeVectors),
                           ::testing::ValuesIn(kTestVectors),
@@ -262,4 +316,9 @@ VP9_INSTANTIATE_TEST_CASE(EndToEndTestLarge,
 
 VP9_INSTANTIATE_TEST_CASE(EndToEndTestAdaptiveRDThresh,
                           ::testing::Values(5, 6, 7), ::testing::Values(8, 9));
+
+#if CONFIG_VP9_DECODER
+VP9_INSTANTIATE_TEST_CASE(EndToEndTestLoopFilterThreading, ::testing::Bool(),
+                          ::testing::Range(2, 6));
+#endif  // CONFIG_VP9_DECODER
 }  // namespace
