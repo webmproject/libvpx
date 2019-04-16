@@ -1697,6 +1697,18 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int scene_change_detected =
       cpi->rc.high_source_sad ||
       (cpi->use_svc && cpi->svc.high_source_sad_superframe);
+  // For low motion content use x->sb_is_skin in addition to VeryHighSad
+  // for setting large_block.
+  const int large_block =
+      (x->content_state_sb == kVeryHighSad ||
+       (x->sb_is_skin && cpi->rc.avg_frame_low_motion > 70) ||
+       cpi->oxcf.speed < 7)
+          ? bsize > BLOCK_32X32
+          : bsize >= BLOCK_32X32;
+  const int use_model_yrd_large =
+      cpi->oxcf.rc_mode == VPX_CBR && large_block &&
+      !cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id) &&
+      cm->base_qindex;
 
   init_best_pickmode(&best_pickmode);
 
@@ -2230,14 +2242,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
                         reuse_inter_pred, &this_mode_pred, &var_y, &sse_y,
                         force_smooth_filter);
     } else {
-      // For low motion content use x->sb_is_skin in addition to VeryHighSad
-      // for setting large_block.
-      const int large_block =
-          (x->content_state_sb == kVeryHighSad ||
-           (x->sb_is_skin && cpi->rc.avg_frame_low_motion > 70) ||
-           cpi->oxcf.speed < 7)
-              ? bsize > BLOCK_32X32
-              : bsize >= BLOCK_32X32;
       mi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP : filter_ref;
 
       if (cpi->use_svc && ref_frame == GOLDEN_FRAME &&
@@ -2247,9 +2251,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
 
       // For large partition blocks, extra testing is done.
-      if (cpi->oxcf.rc_mode == VPX_CBR && large_block &&
-          !cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id) &&
-          cm->base_qindex) {
+      if (use_model_yrd_large) {
+        rd_computed = 1;
         model_rd_for_sb_y_large(cpi, bsize, x, xd, &this_rdc.rate,
                                 &this_rdc.dist, &var_y, &sse_y, mi_row, mi_col,
                                 &this_early_term, flag_preduv_computed);
