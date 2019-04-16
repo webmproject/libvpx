@@ -1690,10 +1690,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int no_scaling = 0;
   unsigned int thresh_svc_skip_golden = 500;
   unsigned int thresh_skip_golden = 500;
-  // TODO(marpan/jianj): forcing smooth_interpol is visually better for noisy
-  // content, at low resolns. Look into adding this conditon. For now keep
-  // it off.
-  int force_smooth_filter = 0;
+  int force_smooth_filter = cpi->sf.force_smooth_interpol;
   int scene_change_detected =
       cpi->rc.high_source_sad ||
       (cpi->use_svc && cpi->svc.high_source_sad_superframe);
