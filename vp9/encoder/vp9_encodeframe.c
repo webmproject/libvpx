@@ -254,8 +254,6 @@ static INLINE void set_mode_info_offsets(VP9_COMMON *const cm,
   const int idx_str = xd->mi_stride * mi_row + mi_col;
   xd->mi = cm->mi_grid_visible + idx_str;
   xd->mi[0] = cm->mi + idx_str;
-  xd->mi_row = mi_row;
-  xd->mi_col = mi_col;
   x->mbmi_ext = x->mbmi_ext_base + (mi_row * cm->mi_cols + mi_col);
 }
 

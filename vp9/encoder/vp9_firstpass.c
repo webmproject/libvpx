@@ -850,7 +850,6 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
 
   xd->mi = cm->mi_grid_visible + xd->mi_stride * (mb_row << 1) + mb_col_start;
   xd->mi[0] = cm->mi + xd->mi_stride * (mb_row << 1) + mb_col_start;
-  xd->tile = tile;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][1];
@@ -915,8 +914,6 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
     // are available.  Required by vp9_predict_intra_block().
     xd->above_mi = (mb_row != 0) ? &mi_above : NULL;
     xd->left_mi = ((mb_col << 1) > tile.mi_col_start) ? &mi_left : NULL;
-    xd->mi_row = mb_row << 1;
-    xd->mi_col = mb_col << 1;
 
     // Do intra 16x16 prediction.
     x->skip_encode = 0;
