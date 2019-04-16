@@ -261,32 +261,29 @@ static INLINE void set_mode_info_offsets(VP9_COMMON *const cm,
 
 static double get_ssim_rdmult_scaling_factor(VP9_COMP *const cpi, int mi_row,
                                              int mi_col) {
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  if (oxcf->tuning == VP8_TUNE_SSIM) {
-    const VP9_COMMON *const cm = &cpi->common;
-    // SSIM rdmult scaling factors are currently 64x64 based.
-    const int num_8x8_w = 8;
-    const int num_8x8_h = 8;
-    const int num_cols = (cm->mi_cols + num_8x8_w - 1) / num_8x8_w;
-    const int row = mi_row / num_8x8_h;
-    const int col = mi_col / num_8x8_w;
-    const int index = row * num_cols + col;
+  const VP9_COMMON *const cm = &cpi->common;
 
-    return cpi->mi_ssim_rdmult_scaling_factors[index];
-  }
-  return 1.0;
+  // SSIM rdmult scaling factors are currently 64x64 based.
+  const int num_8x8_w = 8;
+  const int num_8x8_h = 8;
+  const int num_cols = (cm->mi_cols + num_8x8_w - 1) / num_8x8_w;
+  const int row = mi_row / num_8x8_h;
+  const int col = mi_col / num_8x8_w;
+  const int index = row * num_cols + col;
+
+  assert(cpi->oxcf.tuning == VP8_TUNE_SSIM);
+  return cpi->mi_ssim_rdmult_scaling_factors[index];
 }
 
 static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
                         MACROBLOCK *const x, int mi_row, int mi_col,
                         BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   MvLimits *const mv_limits = &x->mv_limits;
-  const double ssim_factor =
-      get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
 
   set_skip_context(xd, mi_row, mi_col);
 
@@ -313,7 +310,11 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   // R/D setup.
   x->rddiv = cpi->rd.RDDIV;
   x->rdmult = cpi->rd.RDMULT;
-  x->rdmult = (int)(ssim_factor * x->rdmult);
+  if (oxcf->tuning == VP8_TUNE_SSIM) {
+    const double ssim_factor =
+        get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
+    x->rdmult = (int)(ssim_factor * x->rdmult);
+  }
 
   // required by vp9_append_sub8x8_mvs_for_idx() and vp9_find_best_ref_mvs()
   xd->tile = *tile;
@@ -1935,10 +1936,9 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
                                int mi_row, int mi_col, BLOCK_SIZE bsize,
                                AQ_MODE aq_mode) {
   VP9_COMMON *const cm = &cpi->common;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const uint8_t *const map =
       cm->seg.update_map ? cpi->segmentation_map : cm->last_frame_seg_map;
-  const double ssim_factor =
-      get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
 
   vp9_init_plane_quantizers(cpi, x);
   vpx_clear_system_state();
@@ -1961,7 +1961,11 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
     }
   }
 
-  x->rdmult = (int)(ssim_factor * x->rdmult);
+  if (oxcf->tuning == VP8_TUNE_SSIM) {
+    const double ssim_factor =
+        get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
+    x->rdmult = (int)(ssim_factor * x->rdmult);
+  }
 }
 
 static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
@@ -2200,10 +2204,13 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile, ThreadData *td,
 
   if ((cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance) &&
       cpi->oxcf.aq_mode == NO_AQ) {
-    const double ssim_factor =
-        get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
+    const VP9EncoderConfig *const oxcf = &cpi->oxcf;
     x->rdmult = x->cb_rdmult;
-    x->rdmult = (int)(ssim_factor * x->rdmult);
+    if (oxcf->tuning == VP8_TUNE_SSIM) {
+      const double ssim_factor =
+          get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
+      x->rdmult = (int)(ssim_factor * x->rdmult);
+    }
   }
 
   update_state(cpi, td, ctx, mi_row, mi_col, bsize, output_enabled);
@@ -3768,6 +3775,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                               RD_COST *rd_cost, int64_t best_rd,
                               PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   TileInfo *const tile_info = &tile_data->tile_info;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -3813,9 +3821,11 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   uint8_t ref_frames_used[4] = { 0, 0, 0, 0 };
 
   int partition_mul = x->cb_rdmult;
-  const double ssim_factor =
-      get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
-  partition_mul = (int)(ssim_factor * partition_mul);
+  if (oxcf->tuning == VP8_TUNE_SSIM) {
+    const double ssim_factor =
+        get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
+    partition_mul = (int)(ssim_factor * partition_mul);
+  }
 
   (void)*tp_orig;
 
