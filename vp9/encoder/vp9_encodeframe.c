@@ -5841,7 +5841,7 @@ void vp9_kmeans(double *ctr_ls, double *boundary_ls, int *count_ls, int k,
 
   // initialize the center points
   for (j = 0; j < k; ++j) {
-    ctr_ls[j] = arr[(size * j) / k].value;
+    ctr_ls[j] = arr[(size * (2 * j + 1)) / (2 * k)].value;
   }
 
   for (itr = 0; itr < 10; ++itr) {
@@ -5851,10 +5851,13 @@ void vp9_kmeans(double *ctr_ls, double *boundary_ls, int *count_ls, int k,
       count[i] = 0;
     }
 
+    // Both the data and centers are sorted in ascending order.
+    // As each data point is processed in order, its corresponding group index
+    // can only increase. So we only need to reset the group index to zero here.
+    group_idx = 0;
     for (i = 0; i < size; ++i) {
-      // place samples into clusters
-      group_idx = 0;
       while (arr[i].value >= boundary_ls[group_idx]) {
+        // place samples into clusters
         ++group_idx;
         if (group_idx == k - 1) {
           break;
