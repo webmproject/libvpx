@@ -408,8 +408,8 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, TX_SIZE tx_size,
                              int aoff, int loff, int plane) {
   const int bw = (1 << bwl_in);
   const int txw = (1 << tx_size);
-  const int have_top = loff || xd->mi_row > 0;
-  const int have_left = aoff || xd->mi_col > xd->tile.mi_col_start;
+  const int have_top = loff || (xd->above_mi != NULL);
+  const int have_left = aoff || (xd->left_mi != NULL);
   const int have_right = (aoff + txw) < bw;
   const int x = aoff * 4;
   const int y = loff * 4;

@@ -815,8 +815,6 @@ static MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   // TODO(slavarnway): Generate sb_type based on bwl and bhl, instead of
   // passing bsize from decode_partition().
   xd->mi[0]->sb_type = bsize;
-  xd->mi_row = mi_row;
-  xd->mi_col = mi_col;
   for (y = 0; y < y_mis; ++y)
     for (x = !y; x < x_mis; ++x) {
       xd->mi[y * cm->mi_stride + x] = xd->mi[0];
