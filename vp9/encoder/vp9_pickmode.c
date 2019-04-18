@@ -995,8 +995,8 @@ static void estimate_block_intra(int plane, int block, int row, int col,
   VP9_COMP *const cpi = args->cpi;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  struct macroblock_plane *const p = &x->plane[0];
-  struct macroblockd_plane *const pd = &xd->plane[0];
+  struct macroblock_plane *const p = &x->plane[plane];
+  struct macroblockd_plane *const pd = &xd->plane[plane];
   const BLOCK_SIZE bsize_tx = txsize_to_bsize[tx_size];
   uint8_t *const src_buf_base = p->src.buf;
   uint8_t *const dst_buf_base = pd->dst.buf;
