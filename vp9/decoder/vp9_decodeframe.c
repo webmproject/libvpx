@@ -1839,8 +1839,9 @@ static void parse_tile_row(TileWorkerData *tile_data, VP9Decoder *pbi,
   }
 }
 
-static int row_decode_worker_hook(ThreadData *const thread_data,
-                                  uint8_t **data_end) {
+static int row_decode_worker_hook(void *arg1, void *arg2) {
+  ThreadData *const thread_data = (ThreadData *)arg1;
+  uint8_t **data_end = (uint8_t **)arg2;
   VP9Decoder *const pbi = thread_data->pbi;
   VP9_COMMON *const cm = &pbi->common;
   RowMTWorkerData *const row_mt_worker_data = pbi->row_mt_worker_data;
@@ -2303,7 +2304,7 @@ static const uint8_t *decode_tiles_row_wise_mt(VP9Decoder *pbi,
 
     thread_data->pbi = pbi;
 
-    worker->hook = (VPxWorkerHook)row_decode_worker_hook;
+    worker->hook = row_decode_worker_hook;
     worker->data1 = thread_data;
     worker->data2 = (void *)&row_mt_worker_data->data_end;
   }
