@@ -1688,24 +1688,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   int svc_mv_col = 0;
   int svc_mv_row = 0;
   int no_scaling = 0;
+  int large_block = 0;
+  int use_model_yrd_large = 0;
   unsigned int thresh_svc_skip_golden = 500;
   unsigned int thresh_skip_golden = 500;
   int force_smooth_filter = cpi->sf.force_smooth_interpol;
   int scene_change_detected =
       cpi->rc.high_source_sad ||
       (cpi->use_svc && cpi->svc.high_source_sad_superframe);
-  // For low motion content use x->sb_is_skin in addition to VeryHighSad
-  // for setting large_block.
-  const int large_block =
-      (x->content_state_sb == kVeryHighSad ||
-       (x->sb_is_skin && cpi->rc.avg_frame_low_motion > 70) ||
-       cpi->oxcf.speed < 7)
-          ? bsize > BLOCK_32X32
-          : bsize >= BLOCK_32X32;
-  const int use_model_yrd_large =
-      cpi->oxcf.rc_mode == VPX_CBR && large_block &&
-      !cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id) &&
-      cm->base_qindex;
 
   init_best_pickmode(&best_pickmode);
 
@@ -1960,6 +1950,18 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       (cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
       cm->base_qindex > svc->lower_layer_qindex + 10)
     force_test_gf_zeromv = 1;
+
+  // For low motion content use x->sb_is_skin in addition to VeryHighSad
+  // for setting large_block.
+  large_block = (x->content_state_sb == kVeryHighSad ||
+                 (x->sb_is_skin && cpi->rc.avg_frame_low_motion > 70) ||
+                 cpi->oxcf.speed < 7)
+                    ? bsize > BLOCK_32X32
+                    : bsize >= BLOCK_32X32;
+  use_model_yrd_large =
+      cpi->oxcf.rc_mode == VPX_CBR && large_block &&
+      !cyclic_refresh_segment_id_boosted(xd->mi[0]->segment_id) &&
+      cm->base_qindex;
 
   for (idx = 0; idx < num_inter_modes + comp_modes; ++idx) {
     int rate_mv = 0;
