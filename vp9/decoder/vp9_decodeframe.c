@@ -1056,10 +1056,28 @@ static void parse_block(TileWorkerData *twd, VP9Decoder *const pbi, int mi_row,
     predict_recon_intra(xd, mi, twd, parse_intra_block_row_mt);
   } else {
     if (!mi->skip) {
-      const int eobtotal =
-          predict_recon_inter(xd, mi, twd, parse_inter_block_row_mt);
+      tran_low_t *dqcoeff[MAX_MB_PLANE];
+      int *eob[MAX_MB_PLANE];
+      int plane;
+      int eobtotal;
+      // Based on eobtotal and bsize, this may be mi->skip may be set to true
+      // In that case dqcoeff and eob need to be backed up and restored as
+      // recon_block will not increment these pointers for skip cases
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+        const struct macroblockd_plane *const pd = &xd->plane[plane];
+        dqcoeff[plane] = pd->dqcoeff;
+        eob[plane] = pd->eob;
+      }
+      eobtotal = predict_recon_inter(xd, mi, twd, parse_inter_block_row_mt);
 
-      if (bsize >= BLOCK_8X8 && eobtotal == 0) mi->skip = 1;  // skip loopfilter
+      if (bsize >= BLOCK_8X8 && eobtotal == 0) {
+        mi->skip = 1;  // skip loopfilter
+        for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+          struct macroblockd_plane *pd = &xd->plane[plane];
+          pd->dqcoeff = dqcoeff[plane];
+          pd->eob = eob[plane];
+        }
+      }
     }
   }
 
