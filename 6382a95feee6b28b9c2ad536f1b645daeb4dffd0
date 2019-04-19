@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88caee00_5c0b8eee",
+        "filename": "vpx_dsp/psnrhvs.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2019-04-19T11:19:07Z",
+      "side": 1,
+      "message": "passing comment: (i \u0026 4) and (j \u0026 4) would be enough here (instead of \"\u002612\").",
+      "range": {
+        "startLine": 182,
+        "startChar": 42,
+        "endLine": 182,
+        "endChar": 43
+      },
+      "revId": "6382a95feee6b28b9c2ad536f1b645daeb4dffd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
