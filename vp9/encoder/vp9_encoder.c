@@ -5814,13 +5814,6 @@ static void init_tpl_stats(VP9_COMP *cpi) {
   int frame_idx;
   for (frame_idx = 0; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-#if CONFIG_NON_GREEDY_MV
-    int rf_idx;
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-      tpl_frame->mv_dist_sum[rf_idx] = 0;
-      tpl_frame->mv_cost_sum[rf_idx] = 0;
-    }
-#endif
     memset(tpl_frame->tpl_stats_ptr, 0,
            tpl_frame->height * tpl_frame->width *
                sizeof(*tpl_frame->tpl_stats_ptr));
@@ -6961,8 +6954,6 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
           this_tpl_stats->mv_cost[rf_idx] =
               vp9_nb_mvs_inconsistency(&full_mv, nb_full_mvs, NB_MVS_NUM);
 #endif  // RE_COMPUTE_MV_INCONSISTENCY
-          tpl_frame->mv_dist_sum[rf_idx] += this_tpl_stats->mv_dist[rf_idx];
-          tpl_frame->mv_cost_sum[rf_idx] += this_tpl_stats->mv_cost[rf_idx];
         }
       }
 #endif  // CONFIG_NON_GREEDY_MV
