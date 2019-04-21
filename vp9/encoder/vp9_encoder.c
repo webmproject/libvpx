@@ -5825,7 +5825,7 @@ static void init_tpl_stats(VP9_COMP *cpi) {
 static uint32_t motion_compensated_prediction(
     VP9_COMP *cpi, ThreadData *td, int frame_idx, uint8_t *cur_frame_buf,
     uint8_t *ref_frame_buf, int stride, BLOCK_SIZE bsize, int mi_row,
-    int mi_col, MV *mv, int rf_idx, double *mv_dist, double *mv_cost) {
+    int mi_col, MV *mv, int rf_idx) {
 #else   // CONFIG_NON_GREEDY_MV
 static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
                                               int frame_idx,
@@ -5850,6 +5850,8 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   // TODO(angiebird): Figure out lambda's proper value.
   double lambda = cpi->tpl_stats[frame_idx].lambda;
   int_mv nb_full_mvs[NB_MVS_NUM];
+  double mv_dist;
+  double mv_cost;
 #endif
 
   MV best_ref_mv1 = { 0, 0 };
@@ -5876,7 +5878,7 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
                           bsize, nb_full_mvs);
   vp9_full_pixel_diamond_new(cpi, x, &best_ref_mv1_full, step_param, lambda, 1,
                              &cpi->fn_ptr[bsize], nb_full_mvs, NB_MVS_NUM, mv,
-                             mv_dist, mv_cost);
+                             &mv_dist, &mv_cost);
 #else
   (void)frame_idx;
   (void)mi_row;
@@ -6655,8 +6657,7 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
     motion_compensated_prediction(
         cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
         ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
-        mi_row, mi_col, &mv->as_mv, rf_idx, &tpl_stats->mv_dist[rf_idx],
-        &tpl_stats->mv_cost[rf_idx]);
+        mi_row, mi_col, &mv->as_mv, rf_idx);
   }
 }
 

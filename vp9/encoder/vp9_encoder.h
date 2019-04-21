@@ -293,8 +293,6 @@ typedef struct TplDepStats {
 
 #if CONFIG_NON_GREEDY_MV
   int ready[3];
-  double mv_dist[3];
-  double mv_cost[3];
   int64_t sse_arr[3];
   double feature_score;
 #endif
