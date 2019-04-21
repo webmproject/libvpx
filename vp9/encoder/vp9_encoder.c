@@ -6230,24 +6230,12 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
     inter_cost = vpx_satd(coeff, pix_num);
 #endif
 
-#if CONFIG_NON_GREEDY_MV
-    tpl_stats->inter_cost_arr[rf_idx] = inter_cost;
-    get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size,
-                       &tpl_stats->recon_error_arr[rf_idx],
-                       &tpl_stats->sse_arr[rf_idx]);
-#endif
-
     if (inter_cost < best_inter_cost) {
       best_rf_idx = rf_idx;
       best_inter_cost = inter_cost;
       best_mv.as_int = mv.as_int;
-#if CONFIG_NON_GREEDY_MV
-      *recon_error = tpl_stats->recon_error_arr[rf_idx];
-      *sse = tpl_stats->sse_arr[rf_idx];
-#else
       get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size, recon_error,
                          sse);
-#endif
     }
   }
   best_intra_cost = VPXMAX(best_intra_cost, 1);
