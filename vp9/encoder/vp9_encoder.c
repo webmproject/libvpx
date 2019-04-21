@@ -6674,7 +6674,6 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
 
 #define CHANGE_MV_SEARCH_ORDER 1
 #define USE_PQSORT 1
-#define RE_COMPUTE_MV_INCONSISTENCY 1
 
 #if CHANGE_MV_SEARCH_ORDER
 #if USE_PQSORT
@@ -6936,27 +6935,6 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
-#if CONFIG_NON_GREEDY_MV
-      {
-        int rf_idx;
-        TplDepStats *this_tpl_stats =
-            &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-        for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-#if RE_COMPUTE_MV_INCONSISTENCY
-          MV this_mv =
-              get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col)->as_mv;
-          MV full_mv;
-          int_mv nb_full_mvs[NB_MVS_NUM];
-          vp9_prepare_nb_full_mvs(tpl_frame, mi_row, mi_col, rf_idx, bsize,
-                                  nb_full_mvs);
-          full_mv.row = this_mv.row >> 3;
-          full_mv.col = this_mv.col >> 3;
-          this_tpl_stats->mv_cost[rf_idx] =
-              vp9_nb_mvs_inconsistency(&full_mv, nb_full_mvs, NB_MVS_NUM);
-#endif  // RE_COMPUTE_MV_INCONSISTENCY
-        }
-      }
-#endif  // CONFIG_NON_GREEDY_MV
     }
   }
 }
