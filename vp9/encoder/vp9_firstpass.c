@@ -2887,7 +2887,9 @@ static int test_candidate_kf(TWO_PASS *twopass,
 
 #define FRAMES_TO_CHECK_DECAY 8
 #define MIN_KF_TOT_BOOST 300
-#define KF_BOOST_SCAN_MAX_FRAMES 32
+#define DEFAULT_SCAN_FRAMES_FOR_KF_BOOST 32
+#define MAX_SCAN_FRAMES_FOR_KF_BOOST 48
+#define MIN_SCAN_FRAMES_FOR_KF_BOOST 32
 #define KF_ABS_ZOOM_THRESH 6.0
 
 #ifdef AGGRESSIVE_VBR
@@ -2911,6 +2913,12 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int kf_bits = 0;
   double decay_accumulator = 1.0;
   double zero_motion_accumulator = 1.0;
+  double zero_motion_sum = 0.0;
+  double zero_motion_avg;
+  double motion_compensable_sum = 0.0;
+  double motion_compensable_avg;
+  int num_frames = 0;
+  int kf_boost_scan_frames = DEFAULT_SCAN_FRAMES_FOR_KF_BOOST;
   double boost_score = 0.0;
   double kf_mod_err = 0.0;
   double kf_raw_err = 0.0;
@@ -3063,13 +3071,34 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // how many bits to spend on it.
   boost_score = 0.0;
 
+  for (i = 0; i < VPXMIN(MAX_SCAN_FRAMES_FOR_KF_BOOST, (rc->frames_to_key - 1));
+       ++i) {
+    if (EOF == input_stats(twopass, &next_frame)) break;
+
+    zero_motion_sum += next_frame.pcnt_inter - next_frame.pcnt_motion;
+    motion_compensable_sum +=
+        1 - (double)next_frame.coded_error / next_frame.intra_error;
+    num_frames++;
+  }
+
+  if (num_frames >= MIN_SCAN_FRAMES_FOR_KF_BOOST) {
+    zero_motion_avg = zero_motion_sum / num_frames;
+    motion_compensable_avg = motion_compensable_sum / num_frames;
+    kf_boost_scan_frames = (int)(VPXMAX(64 * zero_motion_avg - 16,
+                                        160 * motion_compensable_avg - 112));
+    kf_boost_scan_frames =
+        VPXMAX(VPXMIN(kf_boost_scan_frames, MAX_SCAN_FRAMES_FOR_KF_BOOST),
+               MIN_SCAN_FRAMES_FOR_KF_BOOST);
+  }
+  reset_fpf_position(twopass, start_position);
+
   for (i = 0; i < (rc->frames_to_key - 1); ++i) {
     if (EOF == input_stats(twopass, &next_frame)) break;
 
     // The zero motion test here insures that if we mark a kf group as static
     // it is static throughout not just the first KF_BOOST_SCAN_MAX_FRAMES.
     // It also allows for a larger boost on long static groups.
-    if ((i <= KF_BOOST_SCAN_MAX_FRAMES) || (zero_motion_accumulator >= 0.99)) {
+    if ((i <= kf_boost_scan_frames) || (zero_motion_accumulator >= 0.99)) {
       double frame_boost;
       double zm_factor;
 
