@@ -270,6 +270,7 @@ static double get_ssim_rdmult_scaling_factor(VP9_COMP *const cpi, int mi_row,
   const int index = row * num_cols + col;
 
   assert(cpi->oxcf.tuning == VP8_TUNE_SSIM);
+  vpx_clear_system_state();
   return cpi->mi_ssim_rdmult_scaling_factors[index];
 }
 
@@ -312,6 +313,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
     const double ssim_factor =
         get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
     x->rdmult = (int)(ssim_factor * x->rdmult);
+    vpx_clear_system_state();
   }
 
   // required by vp9_append_sub8x8_mvs_for_idx() and vp9_find_best_ref_mvs()
@@ -1963,6 +1965,7 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
     const double ssim_factor =
         get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
     x->rdmult = (int)(ssim_factor * x->rdmult);
+    vpx_clear_system_state();
   }
 }
 
@@ -2208,6 +2211,7 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile, ThreadData *td,
       const double ssim_factor =
           get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
       x->rdmult = (int)(ssim_factor * x->rdmult);
+      vpx_clear_system_state();
     }
   }
 
@@ -3823,6 +3827,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     const double ssim_factor =
         get_ssim_rdmult_scaling_factor(cpi, mi_row, mi_col);
     partition_mul = (int)(ssim_factor * partition_mul);
+    vpx_clear_system_state();
   }
 
   (void)*tp_orig;
