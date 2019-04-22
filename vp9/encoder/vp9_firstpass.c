@@ -2642,6 +2642,17 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->source_alt_ref_pending = 0;
   }
 
+#define LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR 0.2
+  rc->arf_active_best_quality_adjustment_factor = 1.0;
+  if (rc->source_alt_ref_pending && !is_lossless_requested(&cpi->oxcf) &&
+      rc->frames_to_key <= rc->arf_active_best_quality_adjustment_window) {
+    rc->arf_active_best_quality_adjustment_factor =
+        LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR +
+        (1.0 - LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR) *
+            (rc->frames_to_key - i) /
+            VPXMAX(1, (rc->arf_active_best_quality_adjustment_window - i));
+  }
+
 #ifdef AGGRESSIVE_VBR
   // Limit maximum boost based on interval length.
   rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 140);
@@ -3190,6 +3201,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Default to normal-sized frame on keyframes.
     cpi->rc.next_frame_size_selector = UNSCALED;
   }
+#define ARF_ACTIVE_BEST_QUALITY_ADJUSTMENT_WINDOW_SIZE 64
+  // TODO(ravi.chaudhary@ittiam.com): Experiment without the below min
+  // condition. This might be helpful for small key frame intervals.
+  rc->arf_active_best_quality_adjustment_window =
+      VPXMIN(ARF_ACTIVE_BEST_QUALITY_ADJUSTMENT_WINDOW_SIZE, rc->frames_to_key);
 }
 
 static int is_skippable_frame(const VP9_COMP *cpi) {
