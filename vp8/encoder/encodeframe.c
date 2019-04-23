@@ -426,7 +426,7 @@ static void encode_mb_row(VP8_COMP *cpi, VP8_COMMON *cm, int mb_row,
     }
 #endif
 
-    if (cpi->oxcf.tuning == VP8_TUNE_SSIM) vp8_activity_masking(cpi, x);
+    if (cpi->oxcf.tuning == VPX_TUNE_SSIM) vp8_activity_masking(cpi, x);
 
     /* Is segmentation enabled */
     /* MB level adjustment to quantizer */
@@ -720,7 +720,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 
   vp8cx_initialize_me_consts(cpi, cm->base_qindex);
 
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
+  if (cpi->oxcf.tuning == VPX_TUNE_SSIM) {
     /* Initialize encode frame context. */
     init_encode_frame_mb_context(cpi);
 
@@ -1086,7 +1086,7 @@ int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
     vp8_pick_intra_mode(x, &rate);
   }
 
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
+  if (cpi->oxcf.tuning == VPX_TUNE_SSIM) {
     adjust_act_zbin(cpi, x);
     vp8_update_zbin_extra(cpi, x);
   }
@@ -1172,7 +1172,7 @@ int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
   x->prediction_error += distortion;
   x->intra_error += intra_error;
 
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
+  if (cpi->oxcf.tuning == VPX_TUNE_SSIM) {
     /* Adjust the zbin based on this MB rate. */
     adjust_act_zbin(cpi, x);
   }

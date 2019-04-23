@@ -38,7 +38,7 @@ struct vp8_extracfg {
   unsigned int arnr_max_frames; /* alt_ref Noise Reduction Max Frame Count */
   unsigned int arnr_strength;   /* alt_ref Noise Reduction Strength */
   unsigned int arnr_type;       /* alt_ref filter type */
-  vp8e_tuning tuning;
+  vpx_tuning tuning;
   unsigned int cq_level; /* constrained quality level */
   unsigned int rc_max_intra_bitrate_pct;
   unsigned int gf_cbr_boost_pct;
