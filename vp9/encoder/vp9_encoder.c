@@ -5816,13 +5816,6 @@ static void init_tpl_stats(VP9_COMP *cpi) {
   int frame_idx;
   for (frame_idx = 0; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-#if CONFIG_NON_GREEDY_MV
-    int rf_idx;
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-      tpl_frame->mv_dist_sum[rf_idx] = 0;
-      tpl_frame->mv_cost_sum[rf_idx] = 0;
-    }
-#endif
     memset(tpl_frame->tpl_stats_ptr, 0,
            tpl_frame->height * tpl_frame->width *
                sizeof(*tpl_frame->tpl_stats_ptr));
@@ -5834,7 +5827,7 @@ static void init_tpl_stats(VP9_COMP *cpi) {
 static uint32_t motion_compensated_prediction(
     VP9_COMP *cpi, ThreadData *td, int frame_idx, uint8_t *cur_frame_buf,
     uint8_t *ref_frame_buf, int stride, BLOCK_SIZE bsize, int mi_row,
-    int mi_col, MV *mv, int rf_idx, double *mv_dist, double *mv_cost) {
+    int mi_col, MV *mv, int rf_idx) {
 #else   // CONFIG_NON_GREEDY_MV
 static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
                                               int frame_idx,
@@ -5859,6 +5852,8 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   // TODO(angiebird): Figure out lambda's proper value.
   double lambda = cpi->tpl_stats[frame_idx].lambda;
   int_mv nb_full_mvs[NB_MVS_NUM];
+  double mv_dist;
+  double mv_cost;
 #endif
 
   MV best_ref_mv1 = { 0, 0 };
@@ -5885,7 +5880,7 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
                           bsize, nb_full_mvs);
   vp9_full_pixel_diamond_new(cpi, x, &best_ref_mv1_full, step_param, lambda, 1,
                              &cpi->fn_ptr[bsize], nb_full_mvs, NB_MVS_NUM, mv,
-                             mv_dist, mv_cost);
+                             &mv_dist, &mv_cost);
 #else
   (void)frame_idx;
   (void)mi_row;
@@ -6239,24 +6234,12 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
     inter_cost = vpx_satd(coeff, pix_num);
 #endif
 
-#if CONFIG_NON_GREEDY_MV
-    tpl_stats->inter_cost_arr[rf_idx] = inter_cost;
-    get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size,
-                       &tpl_stats->recon_error_arr[rf_idx],
-                       &tpl_stats->sse_arr[rf_idx]);
-#endif
-
     if (inter_cost < best_inter_cost) {
       best_rf_idx = rf_idx;
       best_inter_cost = inter_cost;
       best_mv.as_int = mv.as_int;
-#if CONFIG_NON_GREEDY_MV
-      *recon_error = tpl_stats->recon_error_arr[rf_idx];
-      *sse = tpl_stats->sse_arr[rf_idx];
-#else
       get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size, recon_error,
                          sse);
-#endif
     }
   }
   best_intra_cost = VPXMAX(best_intra_cost, 1);
@@ -6676,14 +6659,12 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
     motion_compensated_prediction(
         cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
         ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
-        mi_row, mi_col, &mv->as_mv, rf_idx, &tpl_stats->mv_dist[rf_idx],
-        &tpl_stats->mv_cost[rf_idx]);
+        mi_row, mi_col, &mv->as_mv, rf_idx);
   }
 }
 
 #define CHANGE_MV_SEARCH_ORDER 1
 #define USE_PQSORT 1
-#define RE_COMPUTE_MV_INCONSISTENCY 1
 
 #if CHANGE_MV_SEARCH_ORDER
 #if USE_PQSORT
@@ -6945,29 +6926,6 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
-#if CONFIG_NON_GREEDY_MV
-      {
-        int rf_idx;
-        TplDepStats *this_tpl_stats =
-            &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-        for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-#if RE_COMPUTE_MV_INCONSISTENCY
-          MV this_mv =
-              get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col)->as_mv;
-          MV full_mv;
-          int_mv nb_full_mvs[NB_MVS_NUM];
-          vp9_prepare_nb_full_mvs(tpl_frame, mi_row, mi_col, rf_idx, bsize,
-                                  nb_full_mvs);
-          full_mv.row = this_mv.row >> 3;
-          full_mv.col = this_mv.col >> 3;
-          this_tpl_stats->mv_cost[rf_idx] =
-              vp9_nb_mvs_inconsistency(&full_mv, nb_full_mvs, NB_MVS_NUM);
-#endif  // RE_COMPUTE_MV_INCONSISTENCY
-          tpl_frame->mv_dist_sum[rf_idx] += this_tpl_stats->mv_dist[rf_idx];
-          tpl_frame->mv_cost_sum[rf_idx] += this_tpl_stats->mv_cost[rf_idx];
-        }
-      }
-#endif  // CONFIG_NON_GREEDY_MV
     }
   }
 }

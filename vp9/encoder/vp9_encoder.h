@@ -293,10 +293,6 @@ typedef struct TplDepStats {
 
 #if CONFIG_NON_GREEDY_MV
   int ready[3];
-  double mv_dist[3];
-  double mv_cost[3];
-  int64_t inter_cost_arr[3];
-  int64_t recon_error_arr[3];
   int64_t sse_arr[3];
   double feature_score;
 #endif
@@ -323,8 +319,6 @@ typedef struct TplDepFrame {
   int base_qindex;
 #if CONFIG_NON_GREEDY_MV
   double lambda;
-  double mv_dist_sum[3];
-  double mv_cost_sum[3];
   int_mv *pyramid_mv_arr[3][SQUARE_BLOCK_SIZES];
   int *mv_mode_arr[3];
   double *rd_diff_arr[3];
