@@ -35,7 +35,7 @@ struct vp9_extracfg {
   unsigned int arnr_strength;
   unsigned int min_gf_interval;
   unsigned int max_gf_interval;
-  vpx_tuning tuning;
+  vp8e_tuning tuning;
   unsigned int cq_level;  // constrained quality level
   unsigned int rc_max_intra_bitrate_pct;
   unsigned int rc_max_inter_bitrate_pct;
@@ -69,7 +69,7 @@ static struct vp9_extracfg default_extra_cfg = {
   5,                     // arnr_strength
   0,                     // min_gf_interval; 0 -> default decision
   0,                     // max_gf_interval; 0 -> default decision
-  VPX_TUNE_PSNR,         // tuning
+  VP8_TUNE_PSNR,         // tuning
   10,                    // cq_level
   0,                     // rc_max_intra_bitrate_pct
   0,                     // rc_max_inter_bitrate_pct

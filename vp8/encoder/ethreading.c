@@ -149,7 +149,7 @@ static THREAD_FUNCTION thread_encoding_proc(void *p_data) {
           /* Copy current mb to a buffer */
           vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
-          if (cpi->oxcf.tuning == VPX_TUNE_SSIM) vp8_activity_masking(cpi, x);
+          if (cpi->oxcf.tuning == VP8_TUNE_SSIM) vp8_activity_masking(cpi, x);
 
           /* Is segmentation enabled */
           /* MB level adjustment to quantizer */
