@@ -262,7 +262,7 @@ typedef struct VP9EncoderConfig {
   vpx_fixed_buf_t firstpass_mb_stats_in;
 #endif
 
-  vpx_tuning tuning;
+  vp8e_tuning tuning;
   vp9e_tune_content content;
 #if CONFIG_VP9_HIGHBITDEPTH
   int use_highbitdepth;

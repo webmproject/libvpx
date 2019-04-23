@@ -217,7 +217,7 @@ typedef struct {
   vpx_fixed_buf_t two_pass_stats_in;
   struct vpx_codec_pkt_list *output_pkt_list;
 
-  vpx_tuning tuning;
+  vp8e_tuning tuning;
 
   /* Temporal scaling parameters */
   unsigned int number_of_layers;

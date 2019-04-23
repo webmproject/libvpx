@@ -5022,7 +5022,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     }
   }
 
-  if (oxcf->tuning == VPX_TUNE_SSIM) set_mb_ssim_rdmult_scaling(cpi);
+  if (oxcf->tuning == VP8_TUNE_SSIM) set_mb_ssim_rdmult_scaling(cpi);
 
   set_mb_wiener_variance(cpi);
 
