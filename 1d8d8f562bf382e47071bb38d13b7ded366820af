@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "028fbb75_8506eeaa",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-04-23T22:57:35Z",
+      "side": 1,
+      "message": "This is an api change and will break existing code. For renames, the old names are typically left for compatibility.",
+      "revId": "1d8d8f562bf382e47071bb38d13b7ded366820af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
