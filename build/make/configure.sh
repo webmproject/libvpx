@@ -1016,9 +1016,6 @@ EOF
               EXE_SFX=.exe
               enable_feature thumb
               ;;
-            *)
-              check_add_asflags --defsym ARCHITECTURE=${arch_int}
-              ;;
           esac
 
           if enabled thumb; then
@@ -1090,7 +1087,6 @@ EOF
           fi
           arch_int=${tgt_isa##armv}
           arch_int=${arch_int%%te}
-          check_add_asflags --pd "\"ARCHITECTURE SETA ${arch_int}\""
           enabled debug && add_asflags -g
           add_cflags --gnu
           add_cflags --enum_is_int

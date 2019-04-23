@@ -21,7 +21,6 @@
 print "@ This file was created from a .asm file\n";
 print "@  using the ads2gas_apple.pl script.\n\n";
 print "\t.set WIDE_REFERENCE, 0\n";
-print "\t.set ARCHITECTURE, 5\n";
 print "\t.syntax unified\n";
 
 my %register_aliases;
