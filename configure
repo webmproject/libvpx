@@ -328,6 +328,7 @@ CONFIG_LIST="
     experimental
     size_limit
     always_adjust_bpm
+    bitstream_debug
     ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
@@ -389,6 +390,7 @@ CMDLINE_SELECT="
     vp9_highbitdepth
     experimental
     always_adjust_bpm
+    bitstream_debug
 "
 
 process_cmdline() {

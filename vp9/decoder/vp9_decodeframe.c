@@ -23,6 +23,9 @@
 #include "vpx_ports/mem_ops.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vpx_util/vpx_thread.h"
+#if CONFIG_BITSTREAM_DEBUG
+#include "vpx_util/vpx_debug_util.h"
+#endif  // CONFIG_BITSTREAM_DEBUG
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_common.h"
@@ -2920,6 +2923,10 @@ void vp9_decode_frame(VP9Decoder *pbi, const uint8_t *data,
   const int tile_rows = 1 << cm->log2_tile_rows;
   const int tile_cols = 1 << cm->log2_tile_cols;
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
+#if CONFIG_BITSTREAM_DEBUG
+  bitstream_queue_set_frame_read(cm->current_video_frame * 2 + cm->show_frame);
+#endif
+
   xd->cur_buf = new_fb;
 
   if (!first_partition_size) {
