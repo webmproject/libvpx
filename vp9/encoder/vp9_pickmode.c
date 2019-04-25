@@ -352,7 +352,7 @@ static TX_SIZE calculate_tx_size(VP9_COMP *const cpi, BLOCK_SIZE bsize,
                                  unsigned int source_variance, int is_intra) {
   // TODO(marpan): Tune selection for intra-modes, screen content, etc.
   TX_SIZE tx_size;
-  unsigned int var_thresh = (is_intra) ? ac_thr : 1;
+  unsigned int var_thresh = is_intra ? (unsigned int)ac_thr : 1;
   int limit_tx = 1;
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
       (source_variance == 0 || var < var_thresh))
