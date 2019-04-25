@@ -370,7 +370,7 @@ static TX_SIZE calculate_tx_size(VP9_COMP *const cpi, BLOCK_SIZE bsize,
       tx_size = TX_16X16;
     // For screen-content force 4X4 tx_size over 8X8, for large variance.
     if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && tx_size == TX_8X8 &&
-        bsize <= BLOCK_16X16 && var > (ac_thr << 6))
+        bsize <= BLOCK_16X16 && ((var >> 5) > (unsigned int)ac_thr))
       tx_size = TX_4X4;
   } else {
     tx_size = VPXMIN(max_txsize_lookup[bsize],
