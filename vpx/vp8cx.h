@@ -156,6 +156,9 @@ enum vp8e_enc_control_id {
 
   /*!\brief Codec control function to enable automatic use of arf frames.
    *
+   * \note Valid range for VP8: 0..1
+   * \note Valid range for VP9: 0..6
+   *
    * Supported in codecs: VP8, VP9
    */
   VP8E_SET_ENABLEAUTOALTREF,
