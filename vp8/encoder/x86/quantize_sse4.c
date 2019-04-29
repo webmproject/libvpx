@@ -14,17 +14,19 @@
 #include "vp8/common/entropy.h" /* vp8_default_inv_zig_zag */
 #include "vp8/encoder/block.h"
 
-#define SELECT_EOB(i, z, x, y, q)         \
-  do {                                    \
-    short boost = *zbin_boost_ptr;        \
-    short x_z = _mm_extract_epi16(x, z);  \
-    short y_z = _mm_extract_epi16(y, z);  \
-    int cmp = (x_z < boost) | (y_z == 0); \
-    zbin_boost_ptr++;                     \
-    if (cmp) break;                       \
-    q = _mm_insert_epi16(q, y_z, z);      \
-    eob = i;                              \
-    zbin_boost_ptr = b->zrun_zbin_boost;  \
+#define SELECT_EOB(i, z, x, y, q)                         \
+  do {                                                    \
+    short boost = *zbin_boost_ptr;                        \
+    /* Technically _mm_extract_epi16() returns an int: */ \
+    /* https://bugs.llvm.org/show_bug.cgi?id=41657 */     \
+    short x_z = (short)_mm_extract_epi16(x, z);           \
+    short y_z = (short)_mm_extract_epi16(y, z);           \
+    int cmp = (x_z < boost) | (y_z == 0);                 \
+    zbin_boost_ptr++;                                     \
+    if (cmp) break;                                       \
+    q = _mm_insert_epi16(q, y_z, z);                      \
+    eob = i;                                              \
+    zbin_boost_ptr = b->zrun_zbin_boost;                  \
   } while (0)
 
 void vp8_regular_quantize_b_sse4_1(BLOCK *b, BLOCKD *d) {
