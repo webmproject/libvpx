@@ -15,3 +15,5 @@ UTIL_SRCS-yes += vpx_thread.h
 UTIL_SRCS-yes += endian_inl.h
 UTIL_SRCS-yes += vpx_write_yuv_frame.h
 UTIL_SRCS-yes += vpx_write_yuv_frame.c
+UTIL_SRCS-yes += vpx_debug_util.h
+UTIL_SRCS-yes += vpx_debug_util.c
