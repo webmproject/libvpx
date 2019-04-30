@@ -645,7 +645,6 @@ typedef struct VP9_COMP {
   int64_t norm_wiener_variance;
   int64_t *mb_wiener_variance;
   double *mi_ssim_rdmult_scaling_factors;
-  int *stack_rank_buffer;
 
   YV12_BUFFER_CONFIG last_frame_uf;
 

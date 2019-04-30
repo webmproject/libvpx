@@ -988,9 +988,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->consec_zero_mv);
   cpi->consec_zero_mv = NULL;
 
-  vpx_free(cpi->stack_rank_buffer);
-  cpi->stack_rank_buffer = NULL;
-
   vpx_free(cpi->mb_wiener_variance);
   cpi->mb_wiener_variance = NULL;
 
@@ -2388,8 +2385,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   vp9_set_speed_features_framesize_dependent(cpi, oxcf->speed);
 
   // TODO(jingning): The buffer allocation will be refactored next.
-  CHECK_MEM_ERROR(cm, cpi->stack_rank_buffer,
-                  vpx_calloc(UINT16_MAX, sizeof(*cpi->stack_rank_buffer)));
   CHECK_MEM_ERROR(
       cm, cpi->mb_wiener_variance,
       vpx_calloc(cm->mb_rows * cm->mb_cols, sizeof(*cpi->mb_wiener_variance)));
