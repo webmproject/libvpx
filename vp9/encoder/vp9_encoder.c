@@ -2387,13 +2387,12 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   vp9_set_speed_features_framesize_independent(cpi, oxcf->speed);
   vp9_set_speed_features_framesize_dependent(cpi, oxcf->speed);
 
-  if (cpi->sf.enable_wiener_variance) {
-    CHECK_MEM_ERROR(cm, cpi->stack_rank_buffer,
-                    vpx_calloc(UINT16_MAX, sizeof(*cpi->stack_rank_buffer)));
-    CHECK_MEM_ERROR(cm, cpi->mb_wiener_variance,
-                    vpx_calloc(cm->mb_rows * cm->mb_cols,
-                               sizeof(*cpi->mb_wiener_variance)));
-  }
+  // TODO(jingning): The buffer allocation will be refactored next.
+  CHECK_MEM_ERROR(cm, cpi->stack_rank_buffer,
+                  vpx_calloc(UINT16_MAX, sizeof(*cpi->stack_rank_buffer)));
+  CHECK_MEM_ERROR(
+      cm, cpi->mb_wiener_variance,
+      vpx_calloc(cm->mb_rows * cm->mb_cols, sizeof(*cpi->mb_wiener_variance)));
 
   {
     const int bsize = BLOCK_64X64;
@@ -4867,8 +4866,6 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
   const int coeff_count = block_size * block_size;
   const TX_SIZE tx_size = TX_16X16;
 
-  if (cpi->sf.enable_wiener_variance == 0) return;
-
 #if CONFIG_VP9_HIGHBITDEPTH
   xd->cur_buf = cpi->Source;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -5027,7 +5024,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
   if (oxcf->tuning == VP8_TUNE_SSIM) set_mb_ssim_rdmult_scaling(cpi);
 
-  set_mb_wiener_variance(cpi);
+  if (oxcf->aq_mode == PERCEPTUAL_AQ) set_mb_wiener_variance(cpi);
 
   vpx_clear_system_state();
 

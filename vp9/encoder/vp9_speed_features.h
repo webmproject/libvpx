@@ -288,9 +288,6 @@ typedef struct SPEED_FEATURES {
   // level within a frame.
   int allow_skip_recode;
 
-  // Enable Wiener filter based block complexity analysis.
-  int enable_wiener_variance;
-
   // Coefficient probability model approximation step size
   int coeff_prob_appx_step;
 

@@ -3379,7 +3379,8 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
 
     // Extend min or Max Q range to account for imbalance from the base
     // value when using AQ.
-    if (cpi->oxcf.aq_mode != NO_AQ) {
+    if (cpi->oxcf.aq_mode != NO_AQ && cpi->oxcf.aq_mode != PSNR_AQ &&
+        cpi->oxcf.aq_mode != PERCEPTUAL_AQ) {
       if (cm->seg.aq_av_offset < 0) {
         // The balance of the AQ map tends towarda lowering the average Q.
         aq_extend_min = 0;

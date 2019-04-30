@@ -231,6 +231,7 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
         mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
       break;
     case PSNR_AQ: mi->segment_id = segment_index; break;
+    case PERCEPTUAL_AQ: mi->segment_id = x->segment_id; break;
     default:
       // NO_AQ or PSNR_AQ
       break;
@@ -239,8 +240,6 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
   // Set segment index from ROI map if it's enabled.
   if (cpi->roi.enabled)
     mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
-
-  if (cpi->sf.enable_wiener_variance) mi->segment_id = x->segment_id;
 
   vp9_init_plane_quantizers(cpi, x);
 }
@@ -1944,8 +1943,9 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
   vpx_clear_system_state();
 
   if (aq_mode == NO_AQ || aq_mode == PSNR_AQ) {
-    if (cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance)
-      x->rdmult = x->cb_rdmult;
+    if (cpi->sf.enable_tpl_model) x->rdmult = x->cb_rdmult;
+  } else if (aq_mode == PERCEPTUAL_AQ) {
+    x->rdmult = x->cb_rdmult;
   } else if (aq_mode == CYCLIC_REFRESH_AQ) {
     // If segment is boosted, use rdmult for that segment.
     if (cyclic_refresh_segment_id_boosted(
@@ -1953,12 +1953,6 @@ static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
   } else {
     x->rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
-    if (cpi->sf.enable_wiener_variance && cm->show_frame) {
-      if (cm->seg.enabled)
-        x->rdmult = vp9_compute_rd_mult(
-            cpi, vp9_get_qindex(&cm->seg, x->e_mbd.mi[0]->segment_id,
-                                cm->base_qindex));
-    }
   }
 
   if (oxcf->tuning == VP8_TUNE_SSIM) {
@@ -2200,8 +2194,8 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile, ThreadData *td,
   MACROBLOCK *const x = &td->mb;
   set_offsets(cpi, tile, x, mi_row, mi_col, bsize);
 
-  if ((cpi->sf.enable_tpl_model || cpi->sf.enable_wiener_variance) &&
-      cpi->oxcf.aq_mode == NO_AQ) {
+  if (cpi->sf.enable_tpl_model &&
+      (cpi->oxcf.aq_mode == NO_AQ || cpi->oxcf.aq_mode == PERCEPTUAL_AQ)) {
     const VP9EncoderConfig *const oxcf = &cpi->oxcf;
     x->rdmult = x->cb_rdmult;
     if (oxcf->tuning == VP8_TUNE_SSIM) {
@@ -4423,7 +4417,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
         x->cb_rdmult = dr;
       }
 
-      if (cpi->sf.enable_wiener_variance && cm->show_frame) {
+      if (cpi->oxcf.aq_mode == PERCEPTUAL_AQ && cm->show_frame) {
         x->segment_id = wiener_var_segment(cpi, BLOCK_64X64, mi_row, mi_col);
         x->cb_rdmult = vp9_compute_rd_mult(
             cpi, vp9_get_qindex(&cm->seg, x->segment_id, cm->base_qindex));
@@ -5987,7 +5981,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   }
 
   // Frame segmentation
-  if (cpi->sf.enable_wiener_variance) build_kmeans_segmentation(cpi);
+  if (cpi->oxcf.aq_mode == PERCEPTUAL_AQ) build_kmeans_segmentation(cpi);
 
   {
     struct vpx_usec_timer emr_timer;
