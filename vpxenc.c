@@ -312,8 +312,6 @@ static const arg_def_t sharpness =
             "Increase sharpness at the expense of lower PSNR. (0..7)");
 static const arg_def_t static_thresh =
     ARG_DEF(NULL, "static-thresh", 1, "Motion detection threshold");
-static const arg_def_t auto_altref =
-    ARG_DEF(NULL, "auto-alt-ref", 1, "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes =
     ARG_DEF(NULL, "arnr-maxframes", 1, "AltRef max frames (0..15)");
 static const arg_def_t arnr_strength =
@@ -335,12 +333,14 @@ static const arg_def_t gf_cbr_boost_pct = ARG_DEF(
 #if CONFIG_VP8_ENCODER
 static const arg_def_t cpu_used_vp8 =
     ARG_DEF(NULL, "cpu-used", 1, "CPU Used (-16..16)");
+static const arg_def_t auto_altref_vp8 = ARG_DEF(
+    NULL, "auto-alt-ref", 1, "Enable automatic alt reference frames. (0..1)");
 static const arg_def_t token_parts =
     ARG_DEF(NULL, "token-parts", 1, "Number of token partitions to use, log2");
 static const arg_def_t screen_content_mode =
     ARG_DEF(NULL, "screen-content-mode", 1, "Screen content mode");
 static const arg_def_t *vp8_args[] = { &cpu_used_vp8,
-                                       &auto_altref,
+                                       &auto_altref_vp8,
                                        &noise_sens,
                                        &sharpness,
                                        &static_thresh,
@@ -374,6 +374,9 @@ static const int vp8_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
 #if CONFIG_VP9_ENCODER
 static const arg_def_t cpu_used_vp9 =
     ARG_DEF(NULL, "cpu-used", 1, "CPU Used (-9..9)");
+static const arg_def_t auto_altref_vp9 = ARG_DEF(
+    NULL, "auto-alt-ref", 1,
+    "Enable automatic alt reference frames, 2+ enables multi-layer. (0..6)");
 static const arg_def_t tile_cols =
     ARG_DEF(NULL, "tile-columns", 1, "Number of tile columns to use, log2");
 static const arg_def_t tile_rows =
@@ -463,7 +466,7 @@ static const arg_def_t row_mt =
 
 #if CONFIG_VP9_ENCODER
 static const arg_def_t *vp9_args[] = { &cpu_used_vp9,
-                                       &auto_altref,
+                                       &auto_altref_vp9,
                                        &sharpness,
                                        &static_thresh,
                                        &tile_cols,
