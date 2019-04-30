@@ -2381,13 +2381,12 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   }
 #endif  // !CONFIG_REALTIME_ONLY
 
+  cpi->mb_wiener_var_cols = 0;
+  cpi->mb_wiener_var_rows = 0;
+  cpi->mb_wiener_variance = NULL;
+
   vp9_set_speed_features_framesize_independent(cpi, oxcf->speed);
   vp9_set_speed_features_framesize_dependent(cpi, oxcf->speed);
-
-  // TODO(jingning): The buffer allocation will be refactored next.
-  CHECK_MEM_ERROR(
-      cm, cpi->mb_wiener_variance,
-      vpx_calloc(cm->mb_rows * cm->mb_cols, sizeof(*cpi->mb_wiener_variance)));
 
   {
     const int bsize = BLOCK_64X64;
@@ -4836,6 +4835,23 @@ static int qsort_comp(const void *elem1, const void *elem2) {
   return 0;
 }
 
+static void init_mb_wiener_var_buffer(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+
+  if (cpi->mb_wiener_variance && cpi->mb_wiener_var_rows >= cm->mb_rows &&
+      cpi->mb_wiener_var_cols >= cm->mb_cols)
+    return;
+
+  vpx_free(cpi->mb_wiener_variance);
+  cpi->mb_wiener_variance = NULL;
+
+  CHECK_MEM_ERROR(
+      cm, cpi->mb_wiener_variance,
+      vpx_calloc(cm->mb_rows * cm->mb_cols, sizeof(*cpi->mb_wiener_variance)));
+  cpi->mb_wiener_var_rows = cm->mb_rows;
+  cpi->mb_wiener_var_cols = cm->mb_cols;
+}
+
 static void set_mb_wiener_variance(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   uint8_t *buffer = cpi->Source->y_buffer;
@@ -5019,7 +5035,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
 
   if (oxcf->tuning == VP8_TUNE_SSIM) set_mb_ssim_rdmult_scaling(cpi);
 
-  if (oxcf->aq_mode == PERCEPTUAL_AQ) set_mb_wiener_variance(cpi);
+  if (oxcf->aq_mode == PERCEPTUAL_AQ) {
+    init_mb_wiener_var_buffer(cpi);
+    set_mb_wiener_variance(cpi);
+  }
 
   vpx_clear_system_state();
 
