@@ -751,8 +751,14 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   if (args->exit_early) return;
 
   if (!is_inter_block(mi)) {
+#if CONFIG_MISMATCH_DEBUG
+    struct encode_b_args intra_arg = {
+      x, x->block_qcoeff_opt, args->t_above, args->t_left, &mi->skip, 0, 0, 0
+    };
+#else
     struct encode_b_args intra_arg = { x, x->block_qcoeff_opt, args->t_above,
                                        args->t_left, &mi->skip };
+#endif
     vp9_encode_block_intra(plane, block, blk_row, blk_col, plane_bsize, tx_size,
                            &intra_arg);
     if (recon) {

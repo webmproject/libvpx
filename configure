@@ -328,6 +328,7 @@ CONFIG_LIST="
     size_limit
     always_adjust_bpm
     bitstream_debug
+    mismatch_debug
     ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
@@ -390,6 +391,7 @@ CMDLINE_SELECT="
     experimental
     always_adjust_bpm
     bitstream_debug
+    mismatch_debug
 "
 
 process_cmdline() {

@@ -23,9 +23,9 @@
 #include "vpx_ports/mem_ops.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vpx_util/vpx_thread.h"
-#if CONFIG_BITSTREAM_DEBUG
+#if CONFIG_BITSTREAM_DEBUG || CONFIG_MISMATCH_DEBUG
 #include "vpx_util/vpx_debug_util.h"
-#endif  // CONFIG_BITSTREAM_DEBUG
+#endif  // CONFIG_BITSTREAM_DEBUG || CONFIG_MISMATCH_DEBUG
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_common.h"
@@ -389,19 +389,32 @@ static void predict_and_reconstruct_intra_block_row_mt(TileWorkerData *twd,
 }
 
 static int reconstruct_inter_block(TileWorkerData *twd, MODE_INFO *const mi,
-                                   int plane, int row, int col,
-                                   TX_SIZE tx_size) {
+                                   int plane, int row, int col, TX_SIZE tx_size,
+                                   int mi_row, int mi_col) {
   MACROBLOCKD *const xd = &twd->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const scan_order *sc = &vp9_default_scan_orders[tx_size];
   const int eob = vp9_decode_block_tokens(twd, plane, sc, col, row, tx_size,
                                           mi->segment_id);
+  uint8_t *dst = &pd->dst.buf[4 * row * pd->dst.stride + 4 * col];
 
   if (eob > 0) {
-    inverse_transform_block_inter(
-        xd, plane, tx_size, &pd->dst.buf[4 * row * pd->dst.stride + 4 * col],
-        pd->dst.stride, eob);
+    inverse_transform_block_inter(xd, plane, tx_size, dst, pd->dst.stride, eob);
   }
+#if CONFIG_MISMATCH_DEBUG
+  {
+    int pixel_c, pixel_r;
+    int blk_w = 1 << (tx_size + TX_UNIT_SIZE_LOG2);
+    int blk_h = 1 << (tx_size + TX_UNIT_SIZE_LOG2);
+    mi_to_pixel_loc(&pixel_c, &pixel_r, mi_col, mi_row, col, row,
+                    pd->subsampling_x, pd->subsampling_y);
+    mismatch_check_block_tx(dst, pd->dst.stride, plane, pixel_c, pixel_r, blk_w,
+                            blk_h, xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH);
+  }
+#else
+  (void)mi_row;
+  (void)mi_col;
+#endif
   return eob;
 }
 
@@ -952,6 +965,24 @@ static void decode_block(TileWorkerData *twd, VP9Decoder *const pbi, int mi_row,
   } else {
     // Prediction
     dec_build_inter_predictors_sb(pbi, xd, mi_row, mi_col);
+#if CONFIG_MISMATCH_DEBUG
+    {
+      int plane;
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+        const struct macroblockd_plane *pd = &xd->plane[plane];
+        int pixel_c, pixel_r;
+        const BLOCK_SIZE plane_bsize =
+            get_plane_block_size(VPXMAX(bsize, BLOCK_8X8), &xd->plane[plane]);
+        const int bw = get_block_width(plane_bsize);
+        const int bh = get_block_height(plane_bsize);
+        mi_to_pixel_loc(&pixel_c, &pixel_r, mi_col, mi_row, 0, 0,
+                        pd->subsampling_x, pd->subsampling_y);
+        mismatch_check_block_pre(pd->dst.buf, pd->dst.stride, plane, pixel_c,
+                                 pixel_r, bw, bh,
+                                 xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH);
+      }
+    }
+#endif
 
     // Reconstruction
     if (!mi->skip) {
@@ -980,8 +1011,8 @@ static void decode_block(TileWorkerData *twd, VP9Decoder *const pbi, int mi_row,
 
         for (row = 0; row < max_blocks_high; row += step)
           for (col = 0; col < max_blocks_wide; col += step)
-            eobtotal +=
-                reconstruct_inter_block(twd, mi, plane, row, col, tx_size);
+            eobtotal += reconstruct_inter_block(twd, mi, plane, row, col,
+                                                tx_size, mi_row, mi_col);
       }
 
       if (!less8x8 && eobtotal == 0) mi->skip = 1;  // skip loopfilter
@@ -2923,10 +2954,12 @@ void vp9_decode_frame(VP9Decoder *pbi, const uint8_t *data,
   const int tile_rows = 1 << cm->log2_tile_rows;
   const int tile_cols = 1 << cm->log2_tile_cols;
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
-#if CONFIG_BITSTREAM_DEBUG
+#if CONFIG_BITSTREAM_DEBUG || CONFIG_MISMATCH_DEBUG
   bitstream_queue_set_frame_read(cm->current_video_frame * 2 + cm->show_frame);
 #endif
-
+#if CONFIG_MISMATCH_DEBUG
+  mismatch_move_frame_idx_r();
+#endif
   xd->cur_buf = new_fb;
 
   if (!first_partition_size) {

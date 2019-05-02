@@ -22,6 +22,10 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_ports/system_state.h"
 
+#if CONFIG_MISMATCH_DEBUG
+#include "vpx_util/vpx_debug_util.h"
+#endif  // CONFIG_MISMATCH_DEBUG
+
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
@@ -6105,6 +6109,10 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   restore_encode_params(cpi);
 #endif
 
+#if CONFIG_MISMATCH_DEBUG
+  mismatch_reset_frame(MAX_MB_PLANE);
+#endif
+
   // In the longer term the encoder should be generalized to match the
   // decoder such that we allow compound where one of the 3 buffers has a
   // different sign bias and that buffer is then the fixed ref. However, this
@@ -6348,7 +6356,27 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col,
                                     VPXMAX(bsize, BLOCK_8X8));
 
-    vp9_encode_sb(x, VPXMAX(bsize, BLOCK_8X8));
+#if CONFIG_MISMATCH_DEBUG
+    if (output_enabled) {
+      int plane;
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+        const struct macroblockd_plane *pd = &xd->plane[plane];
+        int pixel_c, pixel_r;
+        const BLOCK_SIZE plane_bsize =
+            get_plane_block_size(VPXMAX(bsize, BLOCK_8X8), &xd->plane[plane]);
+        const int bw = get_block_width(plane_bsize);
+        const int bh = get_block_height(plane_bsize);
+        mi_to_pixel_loc(&pixel_c, &pixel_r, mi_col, mi_row, 0, 0,
+                        pd->subsampling_x, pd->subsampling_y);
+
+        mismatch_record_block_pre(pd->dst.buf, pd->dst.stride, plane, pixel_c,
+                                  pixel_r, bw, bh,
+                                  xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH);
+      }
+    }
+#endif
+
+    vp9_encode_sb(x, VPXMAX(bsize, BLOCK_8X8), mi_row, mi_col, output_enabled);
     vp9_tokenize_sb(cpi, td, t, !output_enabled, seg_skip,
                     VPXMAX(bsize, BLOCK_8X8));
   }
