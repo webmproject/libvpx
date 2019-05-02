@@ -4920,7 +4920,7 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
       coeff[0] = 0;
       for (idx = 1; idx < coeff_count; ++idx) coeff[idx] = abs(coeff[idx]);
 
-      qsort(coeff, coeff_count, sizeof(*coeff), qsort_comp);
+      qsort(coeff, coeff_count - 1, sizeof(*coeff), qsort_comp);
 
       // Noise level estimation
       median_val = coeff[coeff_count / 2];
