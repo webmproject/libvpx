@@ -376,50 +376,8 @@ static TX_SIZE calculate_tx_size(VP9_COMP *const cpi, BLOCK_SIZE bsize,
     tx_size = VPXMIN(max_txsize_lookup[bsize],
                      tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
   }
+
   return tx_size;
-}
-
-static void compute_intra_yprediction(PREDICTION_MODE mode, BLOCK_SIZE bsize,
-                                      MACROBLOCK *x, MACROBLOCKD *xd) {
-  struct macroblockd_plane *const pd = &xd->plane[0];
-  struct macroblock_plane *const p = &x->plane[0];
-  uint8_t *const src_buf_base = p->src.buf;
-  uint8_t *const dst_buf_base = pd->dst.buf;
-  const int src_stride = p->src.stride;
-  const int dst_stride = pd->dst.stride;
-  // block and transform sizes, in number of 4x4 blocks log 2 ("*_b")
-  // 4x4=0, 8x8=2, 16x16=4, 32x32=6, 64x64=8
-  const TX_SIZE tx_size = max_txsize_lookup[bsize];
-  const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
-  const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
-  int row, col;
-  // If mb_to_right_edge is < 0 we are in a situation in which
-  // the current block size extends into the UMV and we won't
-  // visit the sub blocks that are wholly within the UMV.
-  const int max_blocks_wide =
-      num_4x4_w + (xd->mb_to_right_edge >= 0
-                       ? 0
-                       : xd->mb_to_right_edge >> (5 + pd->subsampling_x));
-  const int max_blocks_high =
-      num_4x4_h + (xd->mb_to_bottom_edge >= 0
-                       ? 0
-                       : xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
-
-  // Keep track of the row and column of the blocks we use so that we know
-  // if we are in the unrestricted motion border.
-  for (row = 0; row < max_blocks_high; row += (1 << tx_size)) {
-    // Skip visiting the sub blocks that are wholly within the UMV.
-    for (col = 0; col < max_blocks_wide; col += (1 << tx_size)) {
-      p->src.buf = &src_buf_base[4 * (row * src_stride + col)];
-      pd->dst.buf = &dst_buf_base[4 * (row * dst_stride + col)];
-      vp9_predict_intra_block(xd, b_width_log2_lookup[bsize], tx_size, mode,
-                              x->skip_encode ? p->src.buf : pd->dst.buf,
-                              x->skip_encode ? src_stride : dst_stride,
-                              pd->dst.buf, dst_stride, col, row, 0);
-    }
-  }
-  p->src.buf = src_buf_base;
-  pd->dst.buf = dst_buf_base;
 }
 
 static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
@@ -1065,6 +1023,7 @@ static void estimate_block_intra(int plane, int block, int row, int col,
 
   if (plane == 0) {
     int64_t this_sse = INT64_MAX;
+    // TODO(jingning): This needs further refactoring.
     block_yrd(cpi, x, &this_rdc, &args->skippable, &this_sse, bsize_tx,
               VPXMIN(tx_size, TX_16X16), 0, 1);
   } else {
@@ -2513,12 +2472,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
        bsize <= cpi->sf.max_intra_bsize && !x->skip_low_source_sad &&
        !x->lowvar_highsumdiff)) {
     struct estimate_block_intra_args args = { cpi, x, DC_PRED, 1, 0 };
-    int64_t this_sse = INT64_MAX;
     int i;
     PRED_BUFFER *const best_pred = best_pickmode.best_pred;
     TX_SIZE intra_tx_size =
         VPXMIN(max_txsize_lookup[bsize],
                tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+    if (cpi->oxcf.content != VP9E_CONTENT_SCREEN && intra_tx_size > TX_16X16)
+      intra_tx_size = TX_16X16;
 
     if (reuse_inter_pred && best_pred != NULL) {
       if (best_pred->data == orig_dst.buf) {
@@ -2579,13 +2539,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       args.skippable = 1;
       args.rdc = &this_rdc;
       mi->tx_size = intra_tx_size;
-
-      compute_intra_yprediction(this_mode, bsize, x, xd);
-      model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc.rate, &this_rdc.dist,
-                        &var_y, &sse_y, 1);
-      block_yrd(cpi, x, &this_rdc, &args.skippable, &this_sse, bsize,
-                VPXMIN(mi->tx_size, TX_16X16), 1, 1);
-
+      vp9_foreach_transformed_block_in_plane(xd, bsize, 0, estimate_block_intra,
+                                             &args);
       // Check skip cost here since skippable is not set for for uv, this
       // mirrors the behavior used by inter
       if (args.skippable) {
