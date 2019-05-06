@@ -29,13 +29,15 @@
 # include $(CLEAR_VARS)
 # include jni/libvpx/build/make/Android.mk
 #
-# By default libvpx will detect at runtime the existance of NEON extension.
-# For this we import the 'cpufeatures' module from the NDK sources.
-# libvpx can also be configured without this runtime detection method.
-# Configuring with --disable-runtime-cpu-detect will assume presence of NEON.
-# Configuring with --disable-runtime-cpu-detect --disable-neon \
-#     --disable-neon-asm
-# will remove any NEON dependency.
+# By default libvpx will use the 'cpufeatures' module from the NDK. This allows
+# the library to be built with all available optimizations (SSE2->AVX512 for
+# x86, NEON for arm, DSPr2 for mips). This can be disabled with
+#   --disable-runtime-cpu-detect
+# but the resulting library *must* be run on devices supporting all of the
+# enabled extensions. They can be disabled individually with
+#   --disable-{sse2, sse3, ssse3, sse4_1, avx, avx2, avx512}
+#   --disable-neon[-asm]
+#   --disable-{dspr2, msa}
 
 #
 # Running ndk-build will build libvpx and include it in your project.
