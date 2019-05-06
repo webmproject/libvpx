@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa635946_9e1acdb6",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2019-05-06T22:29:17Z",
+      "side": 1,
+      "message": "The CONFIG_VP9 guard could go around this whole block (line 116 through 141",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 4
+      },
+      "revId": "7ef71a46f9655d62383619ecb473419a90bacd2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d7fe90d_25204892",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2019-05-06T22:29:17Z",
+      "side": 1,
+      "message": "I think aarch64 will still have the linking problem",
+      "range": {
+        "startLine": 134,
+        "startChar": 8,
+        "endLine": 134,
+        "endChar": 17
+      },
+      "revId": "7ef71a46f9655d62383619ecb473419a90bacd2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
