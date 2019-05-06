@@ -31,7 +31,6 @@ Advanced options:
   --libc=PATH                     path to alternate libc
   --size-limit=WxH                max size to allow in the decoder
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
-  --sdk-path=PATH                 path to root of sdk (android builds only)
   ${toggle_codec_srcs}            in/exclude codec library source code
   ${toggle_debug_libs}            in/exclude debug version of libraries
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)

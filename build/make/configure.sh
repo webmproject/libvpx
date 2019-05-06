@@ -646,11 +646,7 @@ process_common_cmdline() {
       --libdir=*)
         libdir="${optval}"
         ;;
-      --sdk-path=*)
-        [ -d "${optval}" ] || die "Not a directory: ${optval}"
-        sdk_path="${optval}"
-        ;;
-      --libc|--as|--prefix|--libdir|--sdk-path)
+      --libc|--as|--prefix|--libdir)
         die "Option ${opt} requires argument"
         ;;
       --help|-h)
@@ -1101,51 +1097,10 @@ EOF
           ;;
 
         android*)
-          if [ -n "${sdk_path}" ]; then
-            SDK_PATH=${sdk_path}
-            COMPILER_LOCATION=`find "${SDK_PATH}" \
-              -name "arm-linux-androideabi-gcc*" -print -quit`
-            TOOLCHAIN_PATH=${COMPILER_LOCATION%/*}/arm-linux-androideabi-
-            CC=${TOOLCHAIN_PATH}gcc
-            CXX=${TOOLCHAIN_PATH}g++
-            AR=${TOOLCHAIN_PATH}ar
-            LD=${TOOLCHAIN_PATH}gcc
-            AS=${TOOLCHAIN_PATH}as
-            STRIP=${TOOLCHAIN_PATH}strip
-            NM=${TOOLCHAIN_PATH}nm
-
-            if [ -z "${alt_libc}" ]; then
-              alt_libc=`find "${SDK_PATH}" -name arch-arm -print | \
-                awk '{n = split($0,a,"/"); \
-                split(a[n-1],b,"-"); \
-                print $0 " " b[2]}' | \
-                sort -g -k 2 | \
-                awk '{ print $1 }' | tail -1`
-            fi
-
-            if [ -d "${alt_libc}" ]; then
-              add_cflags "--sysroot=${alt_libc}"
-              add_ldflags "--sysroot=${alt_libc}"
-            fi
-
-            # linker flag that routes around a CPU bug in some
-            # Cortex-A8 implementations (NDK Dev Guide)
-            add_ldflags "-Wl,--fix-cortex-a8"
-
-            enable_feature pic
-            soft_enable realtime_only
-            if [ ${tgt_isa} = "armv7" ]; then
-              soft_enable runtime_cpu_detect
-            fi
-            if enabled runtime_cpu_detect; then
-              add_cflags "-I${SDK_PATH}/sources/android/cpufeatures"
-            fi
-          else
-            echo "Assuming standalone build with NDK toolchain."
-            echo "See build/make/Android.mk for details."
-            check_add_ldflags -static
-            soft_enable unit_tests
-          fi
+          echo "Assuming standalone build with NDK toolchain."
+          echo "See build/make/Android.mk for details."
+          check_add_ldflags -static
+          soft_enable unit_tests
           ;;
 
         darwin*)

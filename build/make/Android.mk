@@ -14,7 +14,7 @@
 # Run the configure script from the jni directory.  Base libvpx
 # encoder/decoder configuration will look similar to:
 # ./libvpx/configure --target=armv7-android-gcc --disable-examples \
-#                    --sdk-path=/opt/android-ndk-r6b/
+#                    --enable-external-build
 #
 # When targeting Android, realtime-only is enabled by default.  This can
 # be overridden by adding the command line flag:
@@ -40,25 +40,6 @@
 #
 # Running ndk-build will build libvpx and include it in your project.
 #
-
-# Alternatively, building the examples and unit tests can be accomplished in the
-# following way:
-#
-# Create a standalone toolchain from the NDK:
-# https://developer.android.com/ndk/guides/standalone_toolchain.html
-#
-# For example - to test on arm64 devices with clang:
-# $NDK/build/tools/make_standalone_toolchain.py \
-#   --arch arm64 --install-dir=/tmp/my-android-toolchain
-# export PATH=/tmp/my-android-toolchain/bin:$PATH
-# CROSS=aarch64-linux-android- CC=clang CXX=clang++ /path/to/libvpx/configure \
-#   --target=arm64-android-gcc
-#
-# Push the resulting binaries to a device and run them:
-# adb push test_libvpx /data/tmp/test_libvpx
-# adb shell /data/tmp/test_libvpx --gtest_filter=\*Sixtap\*
-#
-# Make sure to push the test data as well and set LIBVPX_TEST_DATA
 
 CONFIG_DIR := $(LOCAL_PATH)/
 LIBVPX_PATH := $(LOCAL_PATH)/libvpx
