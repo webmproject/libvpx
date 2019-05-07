@@ -2647,6 +2647,13 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   rc->gfu_boost = VPXMIN((int)rc->gfu_boost, i * 200);
 #endif
 
+  // Cap the ARF boost when perceptual quality AQ mode is enabled. This is
+  // designed to improve the perceptual quality of high value content and to
+  // make consistent quality across consecutive frames. It will hurt objective
+  // quality.
+  if (oxcf->aq_mode == PERCEPTUAL_AQ)
+    rc->gfu_boost = VPXMIN(rc->gfu_boost, MIN_ARF_GF_BOOST);
+
   rc->baseline_gf_interval = i - rc->source_alt_ref_pending;
 
   // Reset the file position.
