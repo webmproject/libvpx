@@ -45,6 +45,30 @@
       "revId": "7ef71a46f9655d62383619ecb473419a90bacd2d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23d2d1be_cd095096",
+        "filename": "vpx_dsp/vpx_dsp.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-05-07T02:48:51Z",
+      "side": 1,
+      "message": "\u003e I think aarch64 will still have the linking problem\n\nLDFLAGS\u003d-Wl,-z,defs CROSS\u003daarch64-linux-gnu- ../configure --target\u003darm64-linux-gcc --enable-ccache --enable-shared --disable-vp9\n\nworks with and without this change. I think that\u0027s because only vpx_dsp/arm/vpx_convolve8_neon_asm.c references the table. Otherwise it\u0027s a good point, these are being built unnecessarily.",
+      "parentUuid": "8d7fe90d_25204892",
+      "range": {
+        "startLine": 134,
+        "startChar": 8,
+        "endLine": 134,
+        "endChar": 17
+      },
+      "revId": "7ef71a46f9655d62383619ecb473419a90bacd2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
