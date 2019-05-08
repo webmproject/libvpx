@@ -2525,6 +2525,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         (active_max_gf_interval >= (rc->frames_to_key - rc->min_gf_interval)))
       active_max_gf_interval = rc->frames_to_key / 2;
   }
+  active_max_gf_interval =
+      VPXMAX(active_max_gf_interval, active_min_gf_interval);
 
   if (cpi->multi_layer_arf) {
     int layers = 0;
