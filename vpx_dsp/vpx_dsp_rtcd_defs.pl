@@ -356,6 +356,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_dc_128_predictor_32x32 neon sse2/;
 }  # CONFIG_VP9_HIGHBITDEPTH
 
+if (vpx_config("CONFIG_VP9") eq "yes") {
 #
 # Sub Pixel Filters
 #
@@ -395,6 +396,7 @@ add_proto qw/void vpx_scaled_avg_2d/, "const uint8_t *src, ptrdiff_t src_stride,
 add_proto qw/void vpx_scaled_avg_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
 
 add_proto qw/void vpx_scaled_avg_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
+} #CONFIG_VP9
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   #
@@ -425,6 +427,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_convolve8_avg_vert avx2 neon/, "$sse2_x86_64";
 }  # CONFIG_VP9_HIGHBITDEPTH
 
+if (vpx_config("CONFIG_VP9") eq "yes") {
 #
 # Loopfilter
 #
@@ -463,6 +466,7 @@ specialize qw/vpx_lpf_horizontal_4 sse2 neon dspr2 msa/;
 
 add_proto qw/void vpx_lpf_horizontal_4_dual/, "uint8_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1";
 specialize qw/vpx_lpf_horizontal_4_dual sse2 neon dspr2 msa/;
+} #CONFIG_VP9
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vpx_highbd_lpf_vertical_16/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int bd";
