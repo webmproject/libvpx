@@ -410,8 +410,8 @@ static void compute_intra_yprediction(PREDICTION_MODE mode, BLOCK_SIZE bsize,
   for (row = 0; row < max_blocks_high; row += (1 << tx_size)) {
     // Skip visiting the sub blocks that are wholly within the UMV.
     for (col = 0; col < max_blocks_wide; col += (1 << tx_size)) {
-      p->src.buf = &src_buf_base[4 * (row * src_stride + col)];
-      pd->dst.buf = &dst_buf_base[4 * (row * dst_stride + col)];
+      p->src.buf = &src_buf_base[4 * (row * (int64_t)src_stride + col)];
+      pd->dst.buf = &dst_buf_base[4 * (row * (int64_t)dst_stride + col)];
       vp9_predict_intra_block(xd, b_width_log2_lookup[bsize], tx_size, mode,
                               x->skip_encode ? p->src.buf : pd->dst.buf,
                               x->skip_encode ? src_stride : dst_stride,
@@ -1055,8 +1055,8 @@ static void estimate_block_intra(int plane, int block, int row, int col,
 
   (void)block;
 
-  p->src.buf = &src_buf_base[4 * (row * src_stride + col)];
-  pd->dst.buf = &dst_buf_base[4 * (row * dst_stride + col)];
+  p->src.buf = &src_buf_base[4 * (row * (int64_t)src_stride + col)];
+  pd->dst.buf = &dst_buf_base[4 * (row * (int64_t)dst_stride + col)];
   // Use source buffer as an approximation for the fully reconstructed buffer.
   vp9_predict_intra_block(xd, b_width_log2_lookup[plane_bsize], tx_size,
                           args->mode, x->skip_encode ? p->src.buf : pd->dst.buf,
