@@ -1029,7 +1029,7 @@ static void estimate_block_intra(int plane, int block, int row, int col,
   } else {
     unsigned int var = 0;
     unsigned int sse = 0;
-    model_rd_for_sb_uv(cpi, plane_bsize, x, xd, &this_rdc, &var, &sse, plane,
+    model_rd_for_sb_uv(cpi, bsize_tx, x, xd, &this_rdc, &var, &sse, plane,
                        plane);
   }
 
