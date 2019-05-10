@@ -119,8 +119,8 @@ typedef enum {
   COMPLEXITY_AQ = 2,
   CYCLIC_REFRESH_AQ = 3,
   EQUATOR360_AQ = 4,
-  PSNR_AQ = 5,
-  PERCEPTUAL_AQ = 6,
+  PERCEPTUAL_AQ = 5,
+  PSNR_AQ = 6,
   // AQ based on lookahead temporal
   // variance (only valid for altref frames)
   LOOKAHEAD_AQ = 7,
