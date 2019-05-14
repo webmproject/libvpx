@@ -148,6 +148,7 @@ typedef struct {
 
 typedef struct {
   unsigned int section_intra_rating;
+  unsigned int key_frame_section_intra_rating;
   FIRSTPASS_STATS total_stats;
   FIRSTPASS_STATS this_frame_stats;
   const FIRSTPASS_STATS *stats_in;

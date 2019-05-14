@@ -2722,10 +2722,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   reset_fpf_position(twopass, start_pos);
 
   // Calculate a section intra ratio used in setting max loop filter.
-  if (cpi->common.frame_type != KEY_FRAME) {
-    twopass->section_intra_rating = calculate_section_intra_ratio(
-        start_pos, twopass->stats_in_end, rc->baseline_gf_interval);
-  }
+  twopass->section_intra_rating = calculate_section_intra_ratio(
+      start_pos, twopass->stats_in_end, rc->baseline_gf_interval);
 
   if (oxcf->resize_mode == RESIZE_DYNAMIC) {
     // Default to starting GF groups at normal frame size.
@@ -3153,7 +3151,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
 
   // Calculate a section intra ratio used in setting max loop filter.
-  twopass->section_intra_rating = calculate_section_intra_ratio(
+  twopass->key_frame_section_intra_rating = calculate_section_intra_ratio(
       start_position, twopass->stats_in_end, rc->frames_to_key);
 
   // Special case for static / slide show content but dont apply
