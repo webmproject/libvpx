@@ -697,6 +697,8 @@ typedef struct VP8_COMP {
 
   // Use the static threshold from ROI settings.
   int use_roi_static_threshold;
+
+  int ext_refresh_frame_flags_pending;
 } VP8_COMP;
 
 void vp8_initialize_enc(void);

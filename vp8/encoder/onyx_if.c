@@ -1532,6 +1532,8 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
     }
   }
 
+  cpi->ext_refresh_frame_flags_pending = 0;
+
   cpi->baseline_gf_interval =
       cpi->oxcf.alt_freq ? cpi->oxcf.alt_freq : DEFAULT_GF_INTERVAL;
 
@@ -2414,6 +2416,7 @@ int vp8_update_reference(VP8_COMP *cpi, int ref_frame_flags) {
 
   if (ref_frame_flags & VP8_ALTR_FRAME) cpi->common.refresh_alt_ref_frame = 1;
 
+  cpi->ext_refresh_frame_flags_pending = 1;
   return 0;
 }
 
@@ -3512,6 +3515,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 
       cm->current_video_frame++;
       cpi->frames_since_key++;
+      cpi->ext_refresh_frame_flags_pending = 0;
       // We advance the temporal pattern for dropped frames.
       cpi->temporal_pattern_counter++;
 
@@ -3553,6 +3557,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
 #endif
     cm->current_video_frame++;
     cpi->frames_since_key++;
+    cpi->ext_refresh_frame_flags_pending = 0;
     // We advance the temporal pattern for dropped frames.
     cpi->temporal_pattern_counter++;
     return;
@@ -4239,6 +4244,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     cpi->common.current_video_frame++;
     cpi->frames_since_key++;
     cpi->drop_frame_count++;
+    cpi->ext_refresh_frame_flags_pending = 0;
     // We advance the temporal pattern for dropped frames.
     cpi->temporal_pattern_counter++;
     return;
@@ -4347,8 +4353,10 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   /* For inter frames the current default behavior is that when
    * cm->refresh_golden_frame is set we copy the old GF over to the ARF buffer
    * This is purely an encoder decision at present.
+   * Avoid this behavior when refresh flags are set by the user.
    */
-  if (!cpi->oxcf.error_resilient_mode && cm->refresh_golden_frame) {
+  if (!cpi->oxcf.error_resilient_mode && cm->refresh_golden_frame &&
+      !cpi->ext_refresh_frame_flags_pending) {
     cm->copy_buffer_to_arf = 2;
   } else {
     cm->copy_buffer_to_arf = 0;
@@ -4654,6 +4662,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     }
 
 #endif
+
+  cpi->ext_refresh_frame_flags_pending = 0;
 
   if (cm->refresh_golden_frame == 1) {
     cm->frame_flags = cm->frame_flags | FRAMEFLAGS_GOLDEN;
