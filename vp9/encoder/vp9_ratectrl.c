@@ -1441,14 +1441,9 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
     // For constrained quality dont allow Q less than the cq level
     if (oxcf->rc_mode == VPX_CQ) {
       if (q < cq_level) q = cq_level;
-
-      active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
-
-      // Constrained quality use slightly lower active best.
-      active_best_quality = active_best_quality * 15 / 16;
-    } else {
-      active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
     }
+    active_best_quality = get_gf_active_quality(cpi, q, cm->bit_depth);
+
     // Modify best quality for second level arfs. For mode VPX_Q this
     // becomes the baseline frame q.
     if (gf_group->rf_level[gf_group_index] == GF_ARF_LOW) {
