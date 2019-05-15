@@ -194,10 +194,9 @@ INSTANTIATE_TEST_CASE_P(
             static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
         ::testing::Combine(
             ::testing::Range(2, 9),  // With 2 ~ 8 threads.
-            ::testing::Range(0, 2),  // With multi threads modes 0 ~ 2
+            ::testing::Range(0, 3),  // With multi threads modes 0 ~ 2
                                      // 0: LPF opt and Row MT disabled
                                      // 1: LPF opt enabled
-                                     // TODO(webm:1626) re-enable Row MT test.
                                      // 2: Row MT enabled
             ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
                                 libvpx_test::kVP9TestVectors +
