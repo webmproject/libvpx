@@ -3044,7 +3044,7 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
   // Lower thresh_qp for video (more overshoot at lower Q) to be
   // more conservative for video.
   if (cpi->oxcf.content != VP9E_CONTENT_SCREEN)
-    thresh_qp = rc->worst_quality >> 1;
+    thresh_qp = 3 * (rc->worst_quality >> 2);
   // If this decision is not based on an encoded frame size but just on
   // scene/slide change detection (i.e., re_encode_overshoot_cbr_rt ==
   // FAST_DETECTION_MAXQ), for now skip the (frame_size > thresh_rate)
