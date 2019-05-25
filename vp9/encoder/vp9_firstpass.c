@@ -2048,15 +2048,10 @@ static int calculate_section_intra_ratio(const FIRSTPASS_STATS *begin,
 // Calculate the total bits to allocate in this GF/ARF group.
 static int64_t calculate_total_gf_group_bits(VP9_COMP *cpi,
                                              double gf_group_err) {
-  VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const TWO_PASS *const twopass = &cpi->twopass;
   const int max_bits = frame_max_bits(rc, &cpi->oxcf);
   int64_t total_group_bits;
-  const int is_key_frame = frame_is_intra_only(cm);
-  const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
-  int gop_frames =
-      rc->baseline_gf_interval + rc->source_alt_ref_pending - arf_active_or_kf;
 
   // Calculate the bits to be allocated to the group as a whole.
   if ((twopass->kf_group_bits > 0) && (twopass->kf_group_error_left > 0.0)) {
@@ -2074,8 +2069,8 @@ static int64_t calculate_total_gf_group_bits(VP9_COMP *cpi,
                                : total_group_bits;
 
   // Clip based on user supplied data rate variability limit.
-  if (total_group_bits > (int64_t)max_bits * gop_frames)
-    total_group_bits = (int64_t)max_bits * gop_frames;
+  if (total_group_bits > (int64_t)max_bits * rc->baseline_gf_interval)
+    total_group_bits = (int64_t)max_bits * rc->baseline_gf_interval;
 
   return total_group_bits;
 }
@@ -2295,7 +2290,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   // Define middle frame
   mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
 
-  normal_frames = (rc->baseline_gf_interval - 1);
+  normal_frames = (rc->baseline_gf_interval - rc->source_alt_ref_pending);
   if (normal_frames > 1)
     normal_frame_bits = (int)(total_group_bits / normal_frames);
   else
@@ -2457,7 +2452,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
 
   double gop_intra_factor = 1.0;
-  int gop_frames;
 
   // Reset the GF group data structures unless this is a key
   // frame in which case it will already have been done.
@@ -2670,11 +2664,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Calculate the bits to be allocated to the gf/arf group as a whole
   gf_group_bits = calculate_total_gf_group_bits(cpi, gf_group_err);
 
-  gop_frames =
-      rc->baseline_gf_interval + rc->source_alt_ref_pending - arf_active_or_kf;
-
   // Store the average moise level measured for the group
-  twopass->gf_group.group_noise_energy = (int)(gf_group_noise / gop_frames);
+  twopass->gf_group.group_noise_energy =
+      (int)(gf_group_noise / rc->baseline_gf_interval);
 
   // Calculate an estimate of the maxq needed for the group.
   // We are more aggressive about correcting for sections
@@ -2682,12 +2674,15 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // sections where we do not wish to risk creating an overshoot
   // of the allocated bit budget.
   if ((cpi->oxcf.rc_mode != VPX_Q) && (rc->baseline_gf_interval > 1)) {
-    const int vbr_group_bits_per_frame = (int)(gf_group_bits / gop_frames);
-    const double group_av_err = gf_group_raw_error / gop_frames;
-    const double group_av_noise = gf_group_noise / gop_frames;
-    const double group_av_skip_pct = gf_group_skip_pct / gop_frames;
-    const double group_av_inactive_zone = ((gf_group_inactive_zone_rows * 2) /
-                                           (gop_frames * (double)cm->mb_rows));
+    const int vbr_group_bits_per_frame =
+        (int)(gf_group_bits / rc->baseline_gf_interval);
+    const double group_av_err = gf_group_raw_error / rc->baseline_gf_interval;
+    const double group_av_noise = gf_group_noise / rc->baseline_gf_interval;
+    const double group_av_skip_pct =
+        gf_group_skip_pct / rc->baseline_gf_interval;
+    const double group_av_inactive_zone =
+        ((gf_group_inactive_zone_rows * 2) /
+         (rc->baseline_gf_interval * (double)cm->mb_rows));
     int tmp_q = get_twopass_worst_quality(
         cpi, group_av_err, (group_av_skip_pct + group_av_inactive_zone),
         group_av_noise, vbr_group_bits_per_frame);
@@ -2703,9 +2698,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Context Adjustment of ARNR filter strength
   if (rc->baseline_gf_interval > 1) {
-    adjust_group_arnr_filter(cpi, (gf_group_noise / gop_frames),
-                             (gf_group_inter / gop_frames),
-                             (gf_group_motion / gop_frames));
+    adjust_group_arnr_filter(cpi, (gf_group_noise / rc->baseline_gf_interval),
+                             (gf_group_inter / rc->baseline_gf_interval),
+                             (gf_group_motion / rc->baseline_gf_interval));
   } else {
     twopass->arnr_strength_adjustment = 0;
   }
