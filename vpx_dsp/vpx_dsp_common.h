@@ -57,6 +57,10 @@ static INLINE double fclamp(double value, double low, double high) {
   return value < low ? low : (value > high ? high : value);
 }
 
+static INLINE int64_t lclamp(int64_t value, int64_t low, int64_t high) {
+  return value < low ? low : (value > high ? high : value);
+}
+
 static INLINE uint16_t clip_pixel_highbd(int val, int bd) {
   switch (bd) {
     case 8:

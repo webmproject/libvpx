@@ -2929,6 +2929,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   FIRSTPASS_STATS next_frame;
   FIRSTPASS_STATS last_frame;
   int kf_bits = 0;
+  int64_t max_kf_bits;
   double decay_accumulator = 1.0;
   double zero_motion_accumulator = 1.0;
   double zero_motion_sum = 0.0;
@@ -3179,6 +3180,13 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Work out how many bits to allocate for the key frame itself.
   kf_bits = calculate_boost_bits((rc->frames_to_key - 1), rc->kf_boost,
                                  twopass->kf_group_bits);
+  // Based on the spatial complexity, increase the bits allocated to key frame.
+  kf_bits +=
+      (int)((twopass->kf_group_bits - kf_bits) * (kf_mod_err / kf_group_err));
+  max_kf_bits =
+      twopass->kf_group_bits - (rc->frames_to_key - 1) * FRAME_OVERHEAD_BITS;
+  max_kf_bits = lclamp(max_kf_bits, 0, INT_MAX);
+  kf_bits = VPXMIN(kf_bits, (int)max_kf_bits);
 
   twopass->kf_group_bits -= kf_bits;
 
