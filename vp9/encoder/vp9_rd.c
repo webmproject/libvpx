@@ -69,6 +69,14 @@ int64_t vp9_calculate_rd_cost(int mult, int div, int rate, int64_t dist) {
   }
   return -RDCOST(mult, div, -rate, -dist);
 }
+void vp9_rd_cost_update(int mult, int div, RD_COST *rd_cost) {
+  if (rd_cost->rate < INT_MAX && rd_cost->dist < INT64_MAX) {
+    rd_cost->rdcost =
+        vp9_calculate_rd_cost(mult, div, rd_cost->rate, rd_cost->dist);
+  } else {
+    vp9_rd_cost_reset(rd_cost);
+  }
+}
 
 // The baseline rd thresholds for breaking out of the rd loop for
 // certain modes are assumed to be based on 8x8 blocks.

@@ -3822,10 +3822,12 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   // RD search. It may be used to prune ref frame selection of rect partitions.
   uint8_t ref_frames_used[4] = { 0, 0, 0, 0 };
 
+  const int rd_div = x->rddiv;
   int partition_mul = x->cb_rdmult;
   if (oxcf->tuning == VP8_TUNE_SSIM) {
     set_ssim_rdmult(cpi, x, mi_row, mi_col, &partition_mul);
   }
+  vp9_rd_cost_update(partition_mul, rd_div, &best_rdc);
 
   (void)*tp_orig;
 
@@ -3983,9 +3985,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         }
       }
       if (bsize >= BLOCK_8X8) {
-        this_rdc.rdcost += RDCOST(partition_mul, x->rddiv,
-                                  cpi->partition_cost[pl][PARTITION_NONE], 0);
         this_rdc.rate += cpi->partition_cost[pl][PARTITION_NONE];
+        vp9_rd_cost_update(partition_mul, rd_div, &this_rdc);
       }
 
       if (this_rdc.rdcost < best_rdc.rdcost) {
@@ -4155,7 +4156,9 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                           mi_col + x_idx, subsize, &this_rdc, best_rdc_split,
                           pc_tree->split[i]);
 
-        if (this_rdc.rdcost == best_rdc_split.rdcost) {
+        if (this_rdc.dist == INT64_MAX || this_rdc.rate == INT_MAX ||
+            (this_rdc.dist == best_rdc_split.dist &&
+             this_rdc.rate == best_rdc_split.rate)) {
           sum_rdc.rdcost = INT64_MAX;
           break;
         } else {
@@ -4168,15 +4171,14 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
           }
           sum_rdc.rate += this_rdc.rate;
           sum_rdc.dist += this_rdc.dist;
-          sum_rdc.rdcost += this_rdc.rdcost;
+          vp9_rd_cost_update(partition_mul, rd_div, &sum_rdc);
         }
       }
     }
 
     if (((sum_rdc.rdcost < best_rdc.rdcost) || must_split) && i == 4) {
-      sum_rdc.rdcost += RDCOST(partition_mul, x->rddiv,
-                               cpi->partition_cost[pl][PARTITION_SPLIT], 0);
       sum_rdc.rate += cpi->partition_cost[pl][PARTITION_SPLIT];
+      vp9_rd_cost_update(partition_mul, rd_div, &sum_rdc);
 
       if ((sum_rdc.rdcost < best_rdc.rdcost) ||
           (must_split && (sum_rdc.dist < best_rdc.dist))) {
@@ -4234,8 +4236,6 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   if (partition_horz_allowed &&
       (do_rect || vp9_active_h_edge(cpi, mi_row, mi_step))) {
     const int part_mode_rate = cpi->partition_cost[pl][PARTITION_HORZ];
-    const int64_t part_mode_rdcost =
-        RDCOST(partition_mul, x->rddiv, part_mode_rate, 0);
     subsize = get_subsize(bsize, PARTITION_HORZ);
     load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
@@ -4245,8 +4245,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                      &pc_tree->horizontal[0], best_rdc.rate - part_mode_rate,
                      best_rdc.dist);
     if (sum_rdc.rdcost < INT64_MAX) {
-      sum_rdc.rdcost += part_mode_rdcost;
       sum_rdc.rate += part_mode_rate;
+      vp9_rd_cost_update(partition_mul, rd_div, &sum_rdc);
     }
 
     if (sum_rdc.rdcost < best_rdc.rdcost && mi_row + mi_step < cm->mi_rows &&
@@ -4266,7 +4266,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       } else {
         sum_rdc.rate += this_rdc.rate;
         sum_rdc.dist += this_rdc.dist;
-        sum_rdc.rdcost += this_rdc.rdcost;
+        vp9_rd_cost_update(partition_mul, rd_div, &sum_rdc);
       }
     }
 
@@ -4286,8 +4286,6 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   if (partition_vert_allowed &&
       (do_rect || vp9_active_v_edge(cpi, mi_col, mi_step))) {
     const int part_mode_rate = cpi->partition_cost[pl][PARTITION_VERT];
-    const int64_t part_mode_rdcost =
-        RDCOST(partition_mul, x->rddiv, part_mode_rate, 0);
     subsize = get_subsize(bsize, PARTITION_VERT);
     load_pred_mv(x, ctx);
     if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
@@ -4297,8 +4295,8 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                      &pc_tree->vertical[0], best_rdc.rate - part_mode_rate,
                      best_rdc.dist);
     if (sum_rdc.rdcost < INT64_MAX) {
-      sum_rdc.rdcost += part_mode_rdcost;
       sum_rdc.rate += part_mode_rate;
+      vp9_rd_cost_update(partition_mul, rd_div, &sum_rdc);
     }
 
     if (sum_rdc.rdcost < best_rdc.rdcost && mi_col + mi_step < cm->mi_cols &&
@@ -4318,7 +4316,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       } else {
         sum_rdc.rate += this_rdc.rate;
         sum_rdc.dist += this_rdc.dist;
-        sum_rdc.rdcost += this_rdc.rdcost;
+        vp9_rd_cost_update(partition_mul, rd_div, &sum_rdc);
       }
     }
 
