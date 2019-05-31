@@ -3766,7 +3766,7 @@ static int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
 static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                               TileDataEnc *tile_data, TOKENEXTRA **tp,
                               int mi_row, int mi_col, BLOCK_SIZE bsize,
-                              RD_COST *rd_cost, int64_t best_rd,
+                              RD_COST *rd_cost, RD_COST best_rdc,
                               PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -3781,7 +3781,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   int i;
   const int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
   BLOCK_SIZE subsize;
-  RD_COST this_rdc, sum_rdc, best_rdc;
+  RD_COST this_rdc, sum_rdc;
   int do_split = bsize >= BLOCK_8X8;
   int do_rect = 1;
   INTERP_FILTER pred_interp_filter;
@@ -3809,6 +3809,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   int64_t dist_breakout_thr = cpi->sf.partition_search_breakout_thr.dist;
   int rate_breakout_thr = cpi->sf.partition_search_breakout_thr.rate;
   int must_split = 0;
+  int should_encode_sb = 0;
 
   // Ref frames picked in the [i_th] quarter subblock during square partition
   // RD search. It may be used to prune ref frame selection of rect partitions.
@@ -3831,8 +3832,6 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   vp9_rd_cost_init(&this_rdc);
   vp9_rd_cost_init(&sum_rdc);
-  vp9_rd_cost_reset(&best_rdc);
-  best_rdc.rdcost = best_rd;
 
   set_offsets(cpi, tile_info, x, mi_row, mi_col, bsize);
 
@@ -3986,6 +3985,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         MODE_INFO *mi = xd->mi[0];
 
         best_rdc = this_rdc;
+        should_encode_sb = 1;
         if (bsize >= BLOCK_8X8) pc_tree->partitioning = PARTITION_NONE;
 
         if (cpi->sf.rd_ml_partition.search_early_termination) {
@@ -4120,6 +4120,23 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
            ++i) {
         const int x_idx = (i & 1) * mi_step;
         const int y_idx = (i >> 1) * mi_step;
+        RD_COST best_rdc_split;
+        if (best_rdc.rate == INT_MAX || best_rdc.dist == INT64_MAX) {
+          best_rdc_split.rate = INT_MAX;
+          best_rdc_split.dist = INT64_MAX;
+        } else {
+          best_rdc_split.rate = best_rdc.rate - sum_rdc.rate;
+          best_rdc_split.dist = best_rdc.dist - sum_rdc.dist;
+        }
+
+        // A must split test here increases the number of sub
+        // partitions but hurts metrics results quite a bit,
+        // so this extra test is commented out pending
+        // further tests on whether it adds much in terms of
+        // visual quality.
+        // (must_split) ? best_rdc.rdcost
+        //              : best_rdc.rdcost - sum_rdc.rdcost,
+        best_rdc_split.rdcost = best_rdc.rdcost - sum_rdc.rdcost;
 
         if (mi_row + y_idx >= cm->mi_rows || mi_col + x_idx >= cm->mi_cols)
           continue;
@@ -4128,17 +4145,10 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         if (cpi->sf.prune_ref_frame_for_rect_partitions)
           pc_tree->split[i]->none.rate = INT_MAX;
         rd_pick_partition(cpi, td, tile_data, tp, mi_row + y_idx,
-                          mi_col + x_idx, subsize, &this_rdc,
-                          // A must split test here increases the number of sub
-                          // partitions but hurts metrics results quite a bit,
-                          // so this extra test is commented out pending
-                          // further tests on whether it adds much in terms of
-                          // visual quality.
-                          // (must_split) ? best_rdc.rdcost
-                          //              : best_rdc.rdcost - sum_rdc.rdcost,
-                          best_rdc.rdcost - sum_rdc.rdcost, pc_tree->split[i]);
+                          mi_col + x_idx, subsize, &this_rdc, best_rdc_split,
+                          pc_tree->split[i]);
 
-        if (this_rdc.rate == INT_MAX) {
+        if (this_rdc.rdcost == best_rdc_split.rdcost) {
           sum_rdc.rdcost = INT64_MAX;
           break;
         } else {
@@ -4164,6 +4174,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
       if ((sum_rdc.rdcost < best_rdc.rdcost) ||
           (must_split && (sum_rdc.dist < best_rdc.dist))) {
         best_rdc = sum_rdc;
+        should_encode_sb = 1;
         pc_tree->partitioning = PARTITION_SPLIT;
 
         // Rate and distortion based partition search termination clause.
@@ -4253,6 +4264,7 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
     if (sum_rdc.rdcost < best_rdc.rdcost) {
       best_rdc = sum_rdc;
+      should_encode_sb = 1;
       pc_tree->partitioning = PARTITION_HORZ;
 
       if (cpi->sf.less_rectangular_check &&
@@ -4302,20 +4314,15 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
     if (sum_rdc.rdcost < best_rdc.rdcost) {
       best_rdc = sum_rdc;
+      should_encode_sb = 1;
       pc_tree->partitioning = PARTITION_VERT;
     }
     restore_context(x, mi_row, mi_col, a, l, sa, sl, bsize);
   }
 
-  // TODO(jbb): This code added so that we avoid static analysis
-  // warning related to the fact that best_rd isn't used after this
-  // point.  This code should be refactored so that the duplicate
-  // checks occur in some sub function and thus are used...
-  (void)best_rd;
   *rd_cost = best_rdc;
 
-  if (best_rdc.rate < INT_MAX && best_rdc.dist < INT64_MAX &&
-      pc_tree->index != 3) {
+  if (should_encode_sb && pc_tree->index != 3) {
     int output_enabled = (bsize == BLOCK_64X64);
     encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
               pc_tree);
@@ -4364,6 +4371,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO **mi = cm->mi_grid_visible + idx_str;
 
+    vp9_rd_cost_reset(&dummy_rdc);
     (*(cpi->row_mt_sync_read_ptr))(&tile_data->row_mt_sync, sb_row,
                                    sb_col_in_tile);
 
@@ -4435,7 +4443,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
       }
       td->pc_root->none.rdcost = 0;
       rd_pick_partition(cpi, td, tile_data, tp, mi_row, mi_col, BLOCK_64X64,
-                        &dummy_rdc, INT64_MAX, td->pc_root);
+                        &dummy_rdc, dummy_rdc, td->pc_root);
     }
     (*(cpi->row_mt_sync_write_ptr))(&tile_data->row_mt_sync, sb_row,
                                     sb_col_in_tile, num_sb_cols);
