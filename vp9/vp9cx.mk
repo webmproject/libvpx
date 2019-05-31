@@ -154,5 +154,13 @@ VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_temporal_filter.c
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/x86/temporal_filter_sse4.c
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/x86/temporal_filter_constants.h
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/x86/highbd_temporal_filter_sse4.c
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_alt_ref_aq.h
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_alt_ref_aq.c
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_aq_variance.c
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_aq_variance.h
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_aq_360.c
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_aq_360.h
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_aq_complexity.c
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_aq_complexity.h
 
 VP9_CX_SRCS-yes := $(filter-out $(VP9_CX_SRCS_REMOVE-yes),$(VP9_CX_SRCS-yes))

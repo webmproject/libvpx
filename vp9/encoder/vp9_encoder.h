@@ -29,7 +29,9 @@
 #include "vp9/common/vp9_thread_common.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
+#if !CONFIG_REALTIME_ONLY
 #include "vp9/encoder/vp9_alt_ref_aq.h"
+#endif
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodemb.h"
