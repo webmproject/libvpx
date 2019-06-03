@@ -1764,6 +1764,7 @@ typedef struct {
   int mvthresh;
 } BEST_SEG_INFO;
 
+#if !CONFIG_REALTIME_ONLY
 static INLINE int mv_check_bounds(const MvLimits *mv_limits, const MV *mv) {
   return (mv->row >> 3) < mv_limits->row_min ||
          (mv->row >> 3) > mv_limits->row_max ||
@@ -1799,7 +1800,6 @@ static INLINE int mv_has_subpel(const MV *mv) {
   return (mv->row & 0x0F) || (mv->col & 0x0F);
 }
 
-#if !CONFIG_REALTIME_ONLY
 // Check if NEARESTMV/NEARMV/ZEROMV is the cheapest way encode zero motion.
 // TODO(aconverse): Find out if this is still productive then clean up or remove
 static int check_best_zero_mv(const VP9_COMP *cpi,
@@ -2661,7 +2661,6 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     for (i = 0; i < MAX_MB_PLANE; i++) xd->plane[i].pre[0] = backup_yv12[i];
   }
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 static INLINE void restore_dst_buf(MACROBLOCKD *xd,
                                    uint8_t *orig_dst[MAX_MB_PLANE],
@@ -2673,7 +2672,6 @@ static INLINE void restore_dst_buf(MACROBLOCKD *xd,
   }
 }
 
-#if !CONFIG_REALTIME_ONLY
 // In some situations we want to discount tha pparent cost of a new motion
 // vector. Where there is a subtle motion field and especially where there is
 // low spatial complexity then it can be hard to cover the cost of a new motion
