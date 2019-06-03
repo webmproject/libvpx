@@ -28,6 +28,11 @@ extern "C" {
 
 #define RDCOST(RM, DM, R, D) \
   ROUND_POWER_OF_TWO(((int64_t)(R)) * (RM), VP9_PROB_COST_SHIFT) + ((D) << (DM))
+#define RDCOST_NEG_R(RM, DM, R, D) \
+  ((D) << (DM)) - ROUND_POWER_OF_TWO(((int64_t)(R)) * (RM), VP9_PROB_COST_SHIFT)
+#define RDCOST_NEG_D(RM, DM, R, D) \
+  ROUND_POWER_OF_TWO(((int64_t)(R)) * (RM), VP9_PROB_COST_SHIFT) - ((D) << (DM))
+
 #define QIDX_SKIP_THRESH 115
 
 #define MV_COST_WEIGHT 108
@@ -131,6 +136,10 @@ typedef struct RD_COST {
 void vp9_rd_cost_reset(RD_COST *rd_cost);
 // Initialize the rate distortion cost values to zero.
 void vp9_rd_cost_init(RD_COST *rd_cost);
+// It supports negative rate and dist, which is different from RDCOST().
+int64_t vp9_calculate_rd_cost(int mult, int div, int rate, int64_t dist);
+// Update the cost value based on its rate and distortion.
+void vp9_rd_cost_update(int mult, int div, RD_COST *rd_cost);
 
 struct TileInfo;
 struct TileDataEnc;
