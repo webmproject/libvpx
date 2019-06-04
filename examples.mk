@@ -77,9 +77,7 @@ vpxdec.SRCS                 += tools_common.c tools_common.h
 vpxdec.SRCS                 += y4menc.c y4menc.h
 ifeq ($(CONFIG_LIBYUV),yes)
   vpxdec.SRCS                 += $(LIBYUV_SRCS)
-  $(BUILD_PFX)third_party/libyuv/%.cc.o: CXXFLAGS += -Wno-unused-parameter
-  $(BUILD_PFX)third_party/libyuv/%.cc.o: CXXFLAGS += -Wno-missing-declarations
-  $(BUILD_PFX)third_party/libyuv/%.cc.o: CXXFLAGS += -Wno-missing-prototypes
+  $(BUILD_PFX)third_party/libyuv/%.cc.o: CXXFLAGS += ${LIBYUV_CXXFLAGS}
 endif
 ifeq ($(CONFIG_WEBM_IO),yes)
   vpxdec.SRCS                 += $(LIBWEBM_COMMON_SRCS)

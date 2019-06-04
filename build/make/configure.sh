@@ -507,6 +507,7 @@ AS_SFX    = ${AS_SFX:-.asm}
 EXE_SFX   = ${EXE_SFX}
 VCPROJ_SFX = ${VCPROJ_SFX}
 RTCD_OPTIONS = ${RTCD_OPTIONS}
+LIBYUV_CXXFLAGS = ${LIBYUV_CXXFLAGS}
 EOF
 
   if enabled rvct; then cat >> $1 << EOF

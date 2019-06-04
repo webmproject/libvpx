@@ -645,6 +645,14 @@ process_toolchain() {
         if enabled arm; then
           check_add_cxxflags -Wno-psabi
         fi
+
+        # disable some warnings specific to libyuv.
+        check_cxxflags -Wno-missing-declarations \
+          && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-missing-declarations"
+        check_cxxflags -Wno-missing-prototypes \
+          && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-missing-prototypes"
+        check_cxxflags -Wno-unused-parameter \
+          && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-unused-parameter"
     fi
 
     if enabled icc; then
