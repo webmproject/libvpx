@@ -892,7 +892,7 @@ VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeVBR, ::testing::Range(5, 9),
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTime, ::testing::Range(5, 10));
 
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9PostEncodeDrop,
-                          ::testing::Range(4, 5));
+                          ::testing::Range(5, 6));
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTimeDenoiser,

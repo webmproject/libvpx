@@ -1404,7 +1404,7 @@ VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcSingleBR,
                           ::testing::Range(5, 10));
 
 VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcPostencodeDrop,
-                          ::testing::Range(4, 5));
+                          ::testing::Range(5, 6));
 
 VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcInterLayerPredSingleBR,
                           ::testing::Range(5, 10), ::testing::Range(0, 3));
