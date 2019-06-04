@@ -2397,7 +2397,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   vp9_set_speed_features_framesize_dependent(cpi, oxcf->speed);
 
   {
-    const int bsize = BLOCK_64X64;
+    const int bsize = BLOCK_16X16;
     const int w = num_8x8_blocks_wide_lookup[bsize];
     const int h = num_8x8_blocks_high_lookup[bsize];
     const int num_cols = (cm->mi_cols + w - 1) / w;
@@ -4759,15 +4759,9 @@ static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
 // Some sample values are:
 // (for midres test set)
 // SSIM_VAR_SCALE  avg_psnr   ssim   ms_ssim
-//     16.0          2.312   -3.062  -3.882
-//     32.0          0.852   -2.260  -2.821
-//     64.0          0.294   -1.606  -1.925
-// (for midres_10bd test set)
-// SSIM_VAR_SCALE  avg_psnr   ssim   ms_ssim
-//      8.0          6.782   -3.872  -5.464
-//     16.0          3.189   -4.083  -5.258
-//     32.0          1.113   -3.423  -4.309
-//     64.0          0.241   -2.515  -3.074
+//      8.0          8.980   -5.767  -7.069
+//     16.0          4.315   -5.610  -6.411
+//     32.0          1.559   -4.541  -4.980
 #define SSIM_VAR_SCALE 16.0
 static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
@@ -4776,7 +4770,7 @@ static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
   MACROBLOCKD *xd = &x->e_mbd;
   uint8_t *y_buffer = cpi->Source->y_buffer;
   const int y_stride = cpi->Source->y_stride;
-  const int block_size = BLOCK_64X64;
+  const int block_size = BLOCK_16X16;
 
   const int num_8x8_w = num_8x8_blocks_wide_lookup[block_size];
   const int num_8x8_h = num_8x8_blocks_high_lookup[block_size];
