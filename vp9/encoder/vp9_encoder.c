@@ -4759,9 +4759,9 @@ static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
 // Some sample values are:
 // (for midres test set)
 // SSIM_VAR_SCALE  avg_psnr   ssim   ms_ssim
-//      8.0          8.980   -5.767  -7.069
-//     16.0          4.315   -5.610  -6.411
-//     32.0          1.559   -4.541  -4.980
+//      8.0          9.421   -5.537  -6.898
+//     16.0          4.703   -5.378  -6.238
+//     32.0          1.929   -4.308  -4.807
 #define SSIM_VAR_SCALE 16.0
 static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
