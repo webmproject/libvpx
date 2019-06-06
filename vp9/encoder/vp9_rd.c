@@ -58,6 +58,8 @@ void vp9_rd_cost_init(RD_COST *rd_cost) {
 }
 
 int64_t vp9_calculate_rd_cost(int mult, int div, int rate, int64_t dist) {
+  assert(mult >= 0);
+  assert(div > 0);
   if (rate >= 0 && dist >= 0) {
     return RDCOST(mult, div, rate, dist);
   }
@@ -69,6 +71,7 @@ int64_t vp9_calculate_rd_cost(int mult, int div, int rate, int64_t dist) {
   }
   return -RDCOST(mult, div, -rate, -dist);
 }
+
 void vp9_rd_cost_update(int mult, int div, RD_COST *rd_cost) {
   if (rd_cost->rate < INT_MAX && rd_cost->dist < INT64_MAX) {
     rd_cost->rdcost =
