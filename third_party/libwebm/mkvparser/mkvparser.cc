@@ -4230,6 +4230,7 @@ long ContentEncoding::ParseContentEncodingEntry(long long start, long long size,
         new (std::nothrow) ContentEncryption*[encryption_count];
     if (!encryption_entries_) {
       delete[] compression_entries_;
+      compression_entries_ = NULL;
       return -1;
     }
     encryption_entries_end_ = encryption_entries_;
@@ -4261,6 +4262,7 @@ long ContentEncoding::ParseContentEncodingEntry(long long start, long long size,
         delete compression;
         return status;
       }
+      assert(compression_count > 0);
       *compression_entries_end_++ = compression;
     } else if (id == libwebm::kMkvContentEncryption) {
       ContentEncryption* const encryption =
@@ -4273,6 +4275,7 @@ long ContentEncoding::ParseContentEncodingEntry(long long start, long long size,
         delete encryption;
         return status;
       }
+      assert(encryption_count > 0);
       *encryption_entries_end_++ = encryption;
     }
 
@@ -4323,6 +4326,12 @@ long ContentEncoding::ParseCompressionEntry(long long start, long long size,
       if (read_status) {
         delete[] buf;
         return status;
+      }
+
+      // There should be only one settings element per content compression.
+      if (compression->settings != NULL) {
+        delete[] buf;
+        return E_FILE_FORMAT_INVALID;
       }
 
       compression->settings = buf;
