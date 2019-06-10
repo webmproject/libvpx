@@ -47,13 +47,11 @@ endif
 # intra predictions
 DSP_SRCS-yes += intrapred.c
 
-DSP_SRCS-$(HAVE_SSE) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSSE3) += x86/intrapred_ssse3.asm
 DSP_SRCS-$(HAVE_VSX) += ppc/intrapred_vsx.c
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
-DSP_SRCS-$(HAVE_SSE)  += x86/highbd_intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_intrapred_intrin_sse2.c
 DSP_SRCS-$(HAVE_SSSE3) += x86/highbd_intrapred_intrin_ssse3.c
@@ -167,8 +165,8 @@ DSP_SRCS-$(HAVE_VSX)  += ppc/vpx_convolve_vsx.c
 # loop filters
 DSP_SRCS-yes += loopfilter.c
 
-DSP_SRCS-$(ARCH_X86)$(ARCH_X86_64)   += x86/loopfilter_sse2.c
-DSP_SRCS-$(HAVE_AVX2)                += x86/loopfilter_avx2.c
+DSP_SRCS-$(HAVE_SSE2)  += x86/loopfilter_sse2.c
+DSP_SRCS-$(HAVE_AVX2)  += x86/loopfilter_avx2.c
 
 ifeq ($(HAVE_NEON_ASM),yes)
 DSP_SRCS-yes  += arm/loopfilter_16_neon$(ASM)
@@ -354,8 +352,6 @@ DSP_SRCS-$(HAVE_AVX2)   += x86/sad4d_avx2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/sad_avx2.c
 DSP_SRCS-$(HAVE_AVX512) += x86/sad4d_avx512.c
 
-DSP_SRCS-$(HAVE_SSE)    += x86/sad4d_sse2.asm
-DSP_SRCS-$(HAVE_SSE)    += x86/sad_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/sad4d_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/sad_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/subtract_sse2.asm
@@ -383,7 +379,6 @@ DSP_SRCS-$(HAVE_MSA)    += mips/sub_pixel_variance_msa.c
 
 DSP_SRCS-$(HAVE_MMI)    += mips/variance_mmi.c
 
-DSP_SRCS-$(HAVE_SSE)    += x86/variance_sse2.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/avg_pred_sse2.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_avx2.c
@@ -393,7 +388,6 @@ ifeq ($(ARCH_X86_64),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/ssim_opt_x86_64.asm
 endif  # ARCH_X86_64
 
-DSP_SRCS-$(HAVE_SSE)    += x86/subpel_variance_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/subpel_variance_sse2.asm  # Contains SSE2 and SSSE3
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
