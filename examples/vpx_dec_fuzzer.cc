@@ -32,7 +32,8 @@
  * Note --size-limit and VPX_MAX_ALLOCABLE_MEMORY are defined to avoid
  * Out of memory errors when running generated fuzzer binary
    $../libvpx/configure --disable-unit-tests --size-limit=12288x12288 \
-   --extra-cflags="-DVPX_MAX_ALLOCABLE_MEMORY=1073741824" \
+   --extra-cflags="-fsanitize=fuzzer-no-link \
+   -DVPX_MAX_ALLOCABLE_MEMORY=1073741824" \
    --disable-webm-io --enable-debug --disable-vp8-encoder \
    --disable-vp9-encoder --disable-examples
 
