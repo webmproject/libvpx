@@ -1239,7 +1239,10 @@ EOF
     ppc64le*)
       link_with_cc=gcc
       setup_gnu_toolchain
-      check_gcc_machine_option "vsx"
+      # Only enable vsx optimizations when vp9_highbitdepth is not enabled.
+      # https://bugs.chromium.org/p/webm/issues/detail?id=1538
+      enabled vp9_highbitdepth || check_gcc_machine_option "vsx"
+      enabled vsx || RTCD_OPTIONS="${RTCD_OPTIONS}--disable-vsx "
       if [ -n "${tune_cpu}" ]; then
         case ${tune_cpu} in
           power?)
