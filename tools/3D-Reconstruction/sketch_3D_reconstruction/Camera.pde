@@ -19,6 +19,14 @@ class Camera {
     init_axis = axis.copy();
   }
 
+  PVector project(PVector pos) {
+    PVector proj = MatxVec3(getCameraMat(), PVector.sub(pos, this.pos));
+    proj.x = (float)height / 2.0 * proj.x / proj.z / tan(fov / 2.0f);
+    proj.y = (float)height / 2.0 * proj.y / proj.z / tan(fov / 2.0f);
+    proj.z = proj.z;
+    return proj;
+  }
+
   float[] getCameraMat() {
     float[] mat = new float[9];
     PVector dir = PVector.sub(center, pos);
@@ -112,8 +120,14 @@ class Camera {
           }
       }
     }
-    perspective(fov, float(width) / float(height), 1e-6, 1e5);
+  }
+  void open() {
+    perspective(fov, float(width) / height, 1e-6, 1e5);
     camera(pos.x, pos.y, pos.z, center.x, center.y, center.z, axis.x, axis.y,
            axis.z);
+  }
+  void close() {
+    ortho(-width, 0, -height, 0);
+    camera(0, 0, 0, 0, 0, 1, 0, 1, 0);
   }
 }
