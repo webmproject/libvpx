@@ -1884,12 +1884,15 @@ static const double log2_table[LOG2_TABLE_SIZE] = {
   9.998590,
 };
 
-static double log2_fast(int v) {
+static double log2_approximation(int v) {
   assert(v > 0);
   if (v < LOG2_TABLE_SIZE) {
     return log2_table[v];
   } else {
-    return log2(v);
+    // use linear approximation when v >= 2^10
+    const double slope = 0.001409;  // slope = 1 / (log(2) * 1024)
+    assert(LOG2_TABLE_SIZE == 1 << 10);
+    return slope * (v - LOG2_TABLE_SIZE) + 10;
   }
 }
 double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
@@ -1903,7 +1906,8 @@ double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
       MV nb_mv = nb_mvs[i].as_mv;
       const int row_diff = abs(mv->row - nb_mv.row);
       const int col_diff = abs(mv->col - nb_mv.col);
-      double cost = log2_fast(1 + row_diff * row_diff + col_diff * col_diff);
+      double cost =
+          log2_approximation(1 + row_diff * row_diff + col_diff * col_diff);
       if (update == 0) {
         best_cost = cost;
         update = 1;
