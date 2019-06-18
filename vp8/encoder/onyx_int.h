@@ -57,6 +57,9 @@ extern "C" {
 
 #define VP8_TEMPORAL_ALT_REF !CONFIG_REALTIME_ONLY
 
+/* vp8 uses 10,000,000 ticks/second as time stamp */
+#define TICKS_PER_SEC 10000000
+
 typedef struct {
   int kf_indicated;
   unsigned int frames_since_key;
