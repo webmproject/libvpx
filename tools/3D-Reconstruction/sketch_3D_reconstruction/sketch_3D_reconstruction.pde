@@ -8,10 +8,9 @@ Scene scene;
 void setup() {
   size(640, 480, P3D);
   // default settings
-  float focal = 525.0f;        // focal distance of camera
-  int frame_no = 118;          // frame number
+  int frame_no = 0;            // frame number
   float fov = PI / 3;          // field of view
-  int block_size = 8;          // block size
+  int block_size = 32;         // block size
   float normalizer = 5000.0f;  // normalizer
   // initialize
   PointCloud point_cloud = new PointCloud();
@@ -29,8 +28,8 @@ void setup() {
         qw = float(info[13]);  // quaternion
 
   // build transformer
-  Transform trans = new Transform(tx, ty, tz, qx, qy, qz, qw, focal, width,
-                                  height, normalizer);
+  Transform trans =
+      new Transform(tx, ty, tz, qx, qy, qz, qw, fov, width, height, normalizer);
   PImage rgb = loadImage(rgb_path);
   PImage depth = loadImage(depth_path);
   // generate point cloud
@@ -64,4 +63,5 @@ void draw() {
   }
   scene.render(
       true);  // true: turn on motion field; false: turn off motion field
+  showGrids(scene.motion_field.block_size);
 }

@@ -19,6 +19,11 @@ class Camera {
     init_axis = axis.copy();
   }
 
+  Camera copy() {
+    Camera cam = new Camera(fov, pos.copy(), center.copy(), axis.copy());
+    return cam;
+  }
+
   PVector project(PVector pos) {
     PVector proj = MatxVec3(getCameraMat(), PVector.sub(pos, this.pos));
     proj.x = (float)height / 2.0 * proj.x / proj.z / tan(fov / 2.0f);
@@ -31,12 +36,12 @@ class Camera {
     float[] mat = new float[9];
     PVector dir = PVector.sub(center, pos);
     dir.normalize();
-    PVector left = axis.cross(dir);
+    PVector left = dir.cross(axis);
     left.normalize();
-
-    mat[0] = left.x;
-    mat[1] = left.y;
-    mat[2] = left.z;
+    // processing camera system does not follow right hand rule
+    mat[0] = -left.x;
+    mat[1] = -left.y;
+    mat[2] = -left.z;
     mat[3] = axis.x;
     mat[4] = axis.y;
     mat[5] = axis.z;

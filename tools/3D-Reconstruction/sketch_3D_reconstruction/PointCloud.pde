@@ -29,7 +29,9 @@ class PointCloud {
         // get depth value (red channel)
         color depth_px = depth_img.get(u, v);
         depth[v * width + u] = depth_px & 0x0000FFFF;
-        if (int(depth[v * width + u]) != 0) real[v * width + u] = true;
+        if (int(depth[v * width + u]) != 0) {
+          real[v * width + u] = true;
+        }
         point_colors.append(rgb_img.get(u, v));
       }
     for (int v = 0; v < height; v++)
@@ -58,8 +60,9 @@ class PointCloud {
   // interpolate
   void interpolateDepth(int row, int col) {
     if (row < 0 || row >= height || col < 0 || col >= width ||
-        int(depth[row * width + col]) != 0)
+        int(depth[row * width + col]) != 0) {
       return;
+    }
     ArrayList<Node> queue = new ArrayList<Node>();
     queue.add(new Node(row, col, null));
     boolean[] visited = new boolean[width * height];
@@ -109,7 +112,9 @@ class PointCloud {
   }
   // get cloud center
   PVector getCloudCenter() {
-    if (points.size() > 0) return PVector.div(cloud_mass, points.size());
+    if (points.size() > 0) {
+      return PVector.div(cloud_mass, points.size());
+    }
     return new PVector(0, 0, 0);
   }
   // merge two clouds

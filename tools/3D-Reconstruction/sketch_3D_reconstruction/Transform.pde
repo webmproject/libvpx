@@ -5,13 +5,13 @@ class Transform {
   int w, h;         // the width and height of the frame
   float normalier;  // nomalization factor of depth
   Transform(float tx, float ty, float tz, float qx, float qy, float qz,
-            float qw, float focal, int w, int h, float normalier) {
+            float qw, float fov, int w, int h, float normalier) {
     // currently, we did not use the info of real camera's position and
     // quaternion maybe we will use it in the future when combine all frames
     float[] rot = quaternion2Mat3x3(qx, qy, qz, qw);
     inv_rot = transpose3x3(rot);
     inv_mov = new PVector(-tx, -ty, -tz);
-    this.focal = focal;
+    this.focal = 0.5f * h / tan(fov / 2.0);
     this.w = w;
     this.h = h;
     this.normalier = normalier;
