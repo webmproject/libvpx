@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ef8ec0ee_787ce675",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1891,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-06-19T19:21:58Z",
+      "side": 1,
+      "message": "an else after another branch returns isn\u0027t necessary and generally avoided for readability:\n\nhttp://clang.llvm.org/extra/clang-tidy/checks/readability-else-after-return.html",
+      "revId": "7fb0c5cce9c91d7391a33580126a204f8ce43ce5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
