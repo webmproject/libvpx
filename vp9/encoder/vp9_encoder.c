@@ -5893,7 +5893,7 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 #if CONFIG_NON_GREEDY_MV
   // lambda is used to adjust the importance of motion vector consitency.
   // TODO(angiebird): Figure out lambda's proper value.
-  double lambda = cpi->tpl_stats[frame_idx].lambda;
+  const int lambda = cpi->tpl_stats[frame_idx].lambda;
   int_mv nb_full_mvs[NB_MVS_NUM];
   double mv_dist;
   double mv_cost;
@@ -6799,7 +6799,8 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   int fs_loc_heap_size;
   int mi_row, mi_col;
 
-  tpl_frame->lambda = (pw * ph) / 4;
+  tpl_frame->lambda = (pw * ph) >> 2;
+  assert(pw * ph == tpl_frame->lambda << 2);
 
   fs_loc_sort_size = 0;
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {

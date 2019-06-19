@@ -1926,7 +1926,7 @@ double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
 static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
                                          int range, int step,
                                          const vp9_variance_fn_ptr_t *fn_ptr,
-                                         const MV *center_mv, double lambda,
+                                         const MV *center_mv, int lambda,
                                          const int_mv *nb_full_mvs,
                                          int full_mv_num) {
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -2017,7 +2017,7 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
 static double full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
                                         MV *centre_mv_full,
                                         const vp9_variance_fn_ptr_t *fn_ptr,
-                                        MV *dst_mv, double lambda,
+                                        MV *dst_mv, int lambda,
                                         const int_mv *nb_full_mvs,
                                         int full_mv_num) {
   const SPEED_FEATURES *const sf = &cpi->sf;
@@ -2069,12 +2069,14 @@ static double full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
   return bestsme;
 }
 
-static double diamond_search_sad_new(
-    const MACROBLOCK *x, const search_site_config *cfg, const MV *init_full_mv,
-    MV *best_full_mv, double *best_mv_dist, double *best_mv_cost,
-    int search_param, double lambda, int *num00,
-    const vp9_variance_fn_ptr_t *fn_ptr, const int_mv *nb_full_mvs,
-    int full_mv_num) {
+static double diamond_search_sad_new(const MACROBLOCK *x,
+                                     const search_site_config *cfg,
+                                     const MV *init_full_mv, MV *best_full_mv,
+                                     double *best_mv_dist, double *best_mv_cost,
+                                     int search_param, int lambda, int *num00,
+                                     const vp9_variance_fn_ptr_t *fn_ptr,
+                                     const int_mv *nb_full_mvs,
+                                     int full_mv_num) {
   int i, j, step;
 
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -2580,7 +2582,7 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
               point as the best match, we will do a final 1-away diamond
               refining search  */
 double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
-                                  MV *mvp_full, int step_param, double lambda,
+                                  MV *mvp_full, int step_param, int lambda,
                                   int do_refine,
                                   const vp9_variance_fn_ptr_t *fn_ptr,
                                   const int_mv *nb_full_mvs, int full_mv_num,
@@ -2775,7 +2777,7 @@ static int full_pixel_exhaustive(const VP9_COMP *const cpi,
 #if CONFIG_NON_GREEDY_MV
 double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
                                    double *best_mv_dist, double *best_mv_cost,
-                                   double lambda, int search_range,
+                                   int lambda, int search_range,
                                    const vp9_variance_fn_ptr_t *fn_ptr,
                                    const int_mv *nb_full_mvs, int full_mv_num) {
   const MACROBLOCKD *const xd = &x->e_mbd;
