@@ -1899,8 +1899,8 @@ static int64_t log2_approximation(int64_t v) {
   }
 }
 
-double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
-                                int mv_num) {
+int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
+                                 int mv_num) {
   int i;
   int update = 0;
   int64_t best_cost = 0;
@@ -1920,7 +1920,7 @@ double vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
       }
     }
   }
-  return best_cost * 1. / (1 << LOG2_PRECISION);
+  return best_cost;
 }
 
 static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
@@ -1946,7 +1946,8 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
   best_sad =
       fn_ptr->sdf(what->buf, what->stride,
                   get_buf_from_mv(in_what, &fcenter_mv), in_what->stride) +
-      lambda * vp9_nb_mvs_inconsistency(&fcenter_mv, nb_full_mvs, full_mv_num);
+      lambda * vp9_nb_mvs_inconsistency(&fcenter_mv, nb_full_mvs, full_mv_num) /
+          (double)(1 << LOG2_PRECISION);
   start_row = VPXMAX(-range, x->mv_limits.row_min - fcenter_mv.row);
   start_col = VPXMAX(-range, x->mv_limits.col_min - fcenter_mv.col);
   end_row = VPXMIN(range, x->mv_limits.row_max - fcenter_mv.row);
@@ -1961,8 +1962,9 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
             fn_ptr->sdf(what->buf, what->stride, get_buf_from_mv(in_what, &mv),
                         in_what->stride);
         if (sad < best_sad) {
-          sad +=
-              lambda * vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
+          sad += lambda *
+                 vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
+                 (double)(1 << LOG2_PRECISION);
           if (sad < best_sad) {
             best_sad = sad;
             *best_mv = mv;
@@ -1983,8 +1985,10 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
             if (sads[i] < best_sad) {
               const MV mv = { fcenter_mv.row + r, fcenter_mv.col + c + i };
               const double sad =
-                  sads[i] + lambda * vp9_nb_mvs_inconsistency(&mv, nb_full_mvs,
-                                                              full_mv_num);
+                  sads[i] +
+                  lambda *
+                      vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
+                      (double)(1 << LOG2_PRECISION);
               if (sad < best_sad) {
                 best_sad = sad;
                 *best_mv = mv;
@@ -1999,7 +2003,8 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
                             get_buf_from_mv(in_what, &mv), in_what->stride);
             if (sad < best_sad) {
               sad += lambda *
-                     vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
+                     vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
+                     (double)(1 << LOG2_PRECISION);
               if (sad < best_sad) {
                 best_sad = sad;
                 *best_mv = mv;
@@ -2114,7 +2119,8 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
   // Check the starting position
   *best_mv_dist = fn_ptr->sdf(what, what_stride, in_what, in_what_stride);
   *best_mv_cost =
-      vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num);
+      vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
+      (double)(1 << LOG2_PRECISION);
   bestsad = (*best_mv_dist) + lambda * (*best_mv_cost);
 
   i = 0;
@@ -2148,7 +2154,8 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
                                best_full_mv->col + ss_mv[i].col };
           const double mv_dist = sad_array[t];
           const double mv_cost =
-              vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num);
+              vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
+              (double)(1 << LOG2_PRECISION);
           double thissad = mv_dist + lambda * mv_cost;
           if (thissad < bestsad) {
             bestsad = thissad;
@@ -2169,7 +2176,8 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
           const double mv_dist =
               fn_ptr->sdf(what, what_stride, check_here, in_what_stride);
           const double mv_cost =
-              vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num);
+              vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
+              (double)(1 << LOG2_PRECISION);
           double thissad = mv_dist + lambda * mv_cost;
           if (thissad < bestsad) {
             bestsad = thissad;
@@ -2791,7 +2799,8 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
   *best_mv_dist =
       fn_ptr->sdf(what->buf, what->stride, best_address, in_what->stride);
   *best_mv_cost =
-      vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num);
+      vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
+      (double)(1 << LOG2_PRECISION);
   best_sad = (*best_mv_dist) + lambda * (*best_mv_cost);
 
   for (i = 0; i < search_range; i++) {
@@ -2814,7 +2823,8 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
                         best_full_mv->col + neighbors[j].col };
         const double mv_dist = sads[j];
         const double mv_cost =
-            vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
+            vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
+            (double)(1 << LOG2_PRECISION);
         const double thissad = mv_dist + lambda * mv_cost;
         if (thissad < best_sad) {
           best_sad = thissad;
@@ -2833,7 +2843,8 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
               fn_ptr->sdf(what->buf, what->stride,
                           get_buf_from_mv(in_what, &mv), in_what->stride);
           const double mv_cost =
-              vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
+              vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
+              (double)(1 << LOG2_PRECISION);
           const double thissad = mv_dist + lambda * mv_cost;
           if (thissad < best_sad) {
             best_sad = thissad;
