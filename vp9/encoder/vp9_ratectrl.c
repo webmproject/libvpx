@@ -1525,6 +1525,8 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
     } else {
       q = rc->last_boosted_qindex;
     }
+  } else if (frame_is_intra_only(cm) && !rc->this_key_frame_forced) {
+    q = active_best_quality;
   } else {
     q = vp9_rc_regulate_q(cpi, rc->this_frame_target, active_best_quality,
                           active_worst_quality);
