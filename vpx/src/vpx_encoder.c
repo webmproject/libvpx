@@ -104,12 +104,6 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(
           mr_cfg.mr_down_sampling_factor.num = dsf->num;
           mr_cfg.mr_down_sampling_factor.den = dsf->den;
 
-          /* Force Key-frame synchronization. Namely, encoder at higher
-           * resolution always use the same frame_type chosen by the
-           * lowest-resolution encoder.
-           */
-          if (mr_cfg.mr_encoder_id) cfg->kf_mode = VPX_KF_DISABLED;
-
           ctx->iface = iface;
           ctx->name = iface->name;
           ctx->priv = NULL;
