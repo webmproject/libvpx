@@ -10,7 +10,7 @@ void setup() {
   // default settings
   int frame_no = 0;            // frame number
   float fov = PI / 3;          // field of view
-  int block_size = 32;         // block size
+  int block_size = 8;          // block size
   float normalizer = 5000.0f;  // normalizer
   // initialize
   PointCloud point_cloud = new PointCloud();
@@ -62,6 +62,13 @@ void draw() {
     inter = true;
   }
   scene.render(
-      true);  // true: turn on motion field; false: turn off motion field
+      false);  // true: turn on motion field; false: turn off motion field
+  // save frame with no motion field
+  scene.save("../data/frame/raw");
+  background(0);
+  scene.render(true);
   showGrids(scene.motion_field.block_size);
+  // save frame with motion field
+  scene.save("../data/frame/raw_mv");
+  scene.saveMotionField("../data/frame/mv");
 }

@@ -76,4 +76,19 @@ class MotionField {
         line(ox, oy, ox + mv.x, oy + mv.y);
       }
   }
+
+  void save(String path) {
+    int r_num = height / block_size;
+    int c_num = width / block_size;
+    String[] mvs = new String[r_num];
+    for (int i = 0; i < r_num; i++) {
+      mvs[i] = "";
+      for (int j = 0; j < c_num; j++) {
+        PVector mv = motion_field.get(i * c_num + j);
+        mvs[i] += str(mv.x) + "," + str(mv.y);
+        if (j != c_num - 1) mvs[i] += ";";
+      }
+    }
+    saveStrings(path, mvs);
+  }
 }

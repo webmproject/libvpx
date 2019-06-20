@@ -5,6 +5,7 @@ class Scene {
   MotionField motion_field;
   Camera last_cam;
   Camera current_cam;
+  int frame_count;
 
   Scene(Camera camera, PointCloud point_cloud, MotionField motion_field) {
     this.point_cloud = point_cloud;
@@ -26,12 +27,14 @@ class Scene {
     bvh = new BVH(mesh);
     last_cam = camera.copy();
     current_cam = camera;
+    frame_count = 0;
   }
 
   void run() {
     last_cam = current_cam.copy();
     current_cam.run();
     motion_field.update(last_cam, current_cam, point_cloud, bvh);
+    frame_count += 1;
   }
 
   void render(boolean show_motion_field) {
@@ -46,5 +49,11 @@ class Scene {
       current_cam.close();
       motion_field.render();
     }
+  }
+
+  void save(String path) { saveFrame(path + "_" + str(frame_count) + ".png"); }
+
+  void saveMotionField(String path) {
+    motion_field.save(path + "_" + str(frame_count) + ".txt");
   }
 }
