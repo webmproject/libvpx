@@ -1923,17 +1923,17 @@ int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
   return best_cost;
 }
 
-static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
-                                         int range, int step,
-                                         const vp9_variance_fn_ptr_t *fn_ptr,
-                                         const MV *center_mv, int lambda,
-                                         const int_mv *nb_full_mvs,
-                                         int full_mv_num) {
+static int64_t exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
+                                          int range, int step,
+                                          const vp9_variance_fn_ptr_t *fn_ptr,
+                                          const MV *center_mv, int lambda,
+                                          const int_mv *nb_full_mvs,
+                                          int full_mv_num) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
   MV fcenter_mv = { center_mv->row, center_mv->col };
-  double best_sad;
+  int64_t best_sad;
   int r, c, i;
   int start_col, end_col, start_row, end_row;
   int col_step = (step > 1) ? step : 4;
@@ -1944,10 +1944,11 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
            x->mv_limits.row_min, x->mv_limits.row_max);
   *best_mv = fcenter_mv;
   best_sad =
-      fn_ptr->sdf(what->buf, what->stride,
-                  get_buf_from_mv(in_what, &fcenter_mv), in_what->stride) +
-      lambda * vp9_nb_mvs_inconsistency(&fcenter_mv, nb_full_mvs, full_mv_num) /
-          (double)(1 << LOG2_PRECISION);
+      ((int64_t)fn_ptr->sdf(what->buf, what->stride,
+                            get_buf_from_mv(in_what, &fcenter_mv),
+                            in_what->stride)
+       << LOG2_PRECISION) +
+      lambda * vp9_nb_mvs_inconsistency(&fcenter_mv, nb_full_mvs, full_mv_num);
   start_row = VPXMAX(-range, x->mv_limits.row_min - fcenter_mv.row);
   start_col = VPXMAX(-range, x->mv_limits.col_min - fcenter_mv.col);
   end_row = VPXMIN(range, x->mv_limits.row_max - fcenter_mv.row);
@@ -1958,13 +1959,13 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
       // Step > 1 means we are not checking every location in this pass.
       if (step > 1) {
         const MV mv = { fcenter_mv.row + r, fcenter_mv.col + c };
-        double sad =
-            fn_ptr->sdf(what->buf, what->stride, get_buf_from_mv(in_what, &mv),
-                        in_what->stride);
+        int64_t sad =
+            (int64_t)fn_ptr->sdf(what->buf, what->stride,
+                                 get_buf_from_mv(in_what, &mv), in_what->stride)
+            << LOG2_PRECISION;
         if (sad < best_sad) {
-          sad += lambda *
-                 vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
-                 (double)(1 << LOG2_PRECISION);
+          sad +=
+              lambda * vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
           if (sad < best_sad) {
             best_sad = sad;
             *best_mv = mv;
@@ -1982,13 +1983,11 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
           fn_ptr->sdx4df(what->buf, what->stride, addrs, in_what->stride, sads);
 
           for (i = 0; i < 4; ++i) {
-            if (sads[i] < best_sad) {
+            int64_t sad = (int64_t)sads[i] << LOG2_PRECISION;
+            if (sad < best_sad) {
               const MV mv = { fcenter_mv.row + r, fcenter_mv.col + c + i };
-              const double sad =
-                  sads[i] +
-                  lambda *
-                      vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
-                      (double)(1 << LOG2_PRECISION);
+              sad += lambda *
+                     vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
               if (sad < best_sad) {
                 best_sad = sad;
                 *best_mv = mv;
@@ -1998,13 +1997,13 @@ static double exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
         } else {
           for (i = 0; i < end_col - c; ++i) {
             const MV mv = { fcenter_mv.row + r, fcenter_mv.col + c + i };
-            double sad =
-                fn_ptr->sdf(what->buf, what->stride,
-                            get_buf_from_mv(in_what, &mv), in_what->stride);
+            int64_t sad = (int64_t)fn_ptr->sdf(what->buf, what->stride,
+                                               get_buf_from_mv(in_what, &mv),
+                                               in_what->stride)
+                          << LOG2_PRECISION;
             if (sad < best_sad) {
               sad += lambda *
-                     vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
-                     (double)(1 << LOG2_PRECISION);
+                     vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
               if (sad < best_sad) {
                 best_sad = sad;
                 *best_mv = mv;
