@@ -129,7 +129,6 @@ void vp9_set_subpel_mv_search_range(MvLimits *subpel_mv_limits,
 #define NB_MVS_NUM 4
 struct TplDepStats;
 double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
-                                   double *best_mv_dist, double *best_mv_cost,
                                    int lambda, int search_range,
                                    const vp9_variance_fn_ptr_t *fn_ptr,
                                    const int_mv *nb_full_mvs, int full_mv_num);
@@ -139,8 +138,7 @@ double vp9_full_pixel_diamond_new(const struct VP9_COMP *cpi, MACROBLOCK *x,
                                   int do_refine,
                                   const vp9_variance_fn_ptr_t *fn_ptr,
                                   const int_mv *nb_full_mvs, int full_mv_num,
-                                  MV *best_mv, double *best_mv_dist,
-                                  double *best_mv_cost);
+                                  MV *best_mv);
 
 int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
                                  int mv_num);

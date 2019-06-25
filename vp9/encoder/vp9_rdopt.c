@@ -2495,8 +2495,6 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   MV pred_mv[3];
 
 #if CONFIG_NON_GREEDY_MV
-  double mv_dist = 0;
-  double mv_cost = 0;
   double bestsme;
   int_mv nb_full_mvs[NB_MVS_NUM];
   const int nb_full_mv_num = NB_MVS_NUM;
@@ -2582,9 +2580,9 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   mvp_full.row >>= 3;
 
 #if CONFIG_NON_GREEDY_MV
-  bestsme = vp9_full_pixel_diamond_new(
-      cpi, x, &mvp_full, step_param, lambda, 1, &cpi->fn_ptr[bsize],
-      nb_full_mvs, nb_full_mv_num, &tmp_mv->as_mv, &mv_dist, &mv_cost);
+  bestsme = vp9_full_pixel_diamond_new(cpi, x, &mvp_full, step_param, lambda, 1,
+                                       &cpi->fn_ptr[bsize], nb_full_mvs,
+                                       nb_full_mv_num, &tmp_mv->as_mv);
 #else   // CONFIG_NON_GREEDY_MV
   bestsme = vp9_full_pixel_search(
       cpi, x, bsize, &mvp_full, step_param, cpi->sf.mv.search_method, sadpb,
@@ -2625,8 +2623,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 #if CONFIG_NON_GREEDY_MV
       this_me = vp9_full_pixel_diamond_new(
           cpi, x, &mvp_full, VPXMAX(step_param, MAX_MVSEARCH_STEPS - step),
-          lambda, 1, &cpi->fn_ptr[bsize], nb_full_mvs, nb_full_mv_num, &this_mv,
-          &mv_dist, &mv_cost);
+          lambda, 1, &cpi->fn_ptr[bsize], nb_full_mvs, nb_full_mv_num,
+          &this_mv);
 #else   // CONFIG_NON_GREEDY_MV
       this_me = vp9_full_pixel_search(
           cpi, x, bsize, &mvp_full,

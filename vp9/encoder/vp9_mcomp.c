@@ -2076,7 +2076,6 @@ static int64_t full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
 static double diamond_search_sad_new(const MACROBLOCK *x,
                                      const search_site_config *cfg,
                                      const MV *init_full_mv, MV *best_full_mv,
-                                     double *best_mv_dist, double *best_mv_cost,
                                      int search_param, int lambda, int *num00,
                                      const vp9_variance_fn_ptr_t *fn_ptr,
                                      const int_mv *nb_full_mvs,
@@ -2116,11 +2115,14 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
   best_address = in_what;
 
   // Check the starting position
-  *best_mv_dist = fn_ptr->sdf(what, what_stride, in_what, in_what_stride);
-  *best_mv_cost =
-      vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
-      (double)(1 << LOG2_PRECISION);
-  bestsad = (*best_mv_dist) + lambda * (*best_mv_cost);
+  {
+    const double mv_dist =
+        fn_ptr->sdf(what, what_stride, in_what, in_what_stride);
+    const double mv_cost =
+        vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
+        (double)(1 << LOG2_PRECISION);
+    bestsad = mv_dist + lambda * mv_cost;
+  }
 
   i = 0;
 
@@ -2159,8 +2161,6 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
             double thissad = mv_dist + lambda * mv_cost;
             if (thissad < bestsad) {
               bestsad = thissad;
-              *best_mv_dist = mv_dist;
-              *best_mv_cost = mv_cost;
               best_site = i;
             }
           }
@@ -2183,8 +2183,6 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
             double thissad = mv_dist + lambda * mv_cost;
             if (thissad < bestsad) {
               bestsad = thissad;
-              *best_mv_dist = mv_dist;
-              *best_mv_cost = mv_cost;
               best_site = i;
             }
           }
@@ -2597,17 +2595,16 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
                                   int do_refine,
                                   const vp9_variance_fn_ptr_t *fn_ptr,
                                   const int_mv *nb_full_mvs, int full_mv_num,
-                                  MV *best_mv, double *best_mv_dist,
-                                  double *best_mv_cost) {
+                                  MV *best_mv) {
   int n, num00 = 0;
   double thissme;
   double bestsme;
   const int further_steps = MAX_MVSEARCH_STEPS - 1 - step_param;
   const MV center_mv = { 0, 0 };
   vpx_clear_system_state();
-  bestsme = diamond_search_sad_new(
-      x, &cpi->ss_cfg, mvp_full, best_mv, best_mv_dist, best_mv_cost,
-      step_param, lambda, &n, fn_ptr, nb_full_mvs, full_mv_num);
+  bestsme =
+      diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, best_mv, step_param,
+                             lambda, &n, fn_ptr, nb_full_mvs, full_mv_num);
 
   bestsme = vp9_get_mvpred_var(x, best_mv, &center_mv, fn_ptr, 0);
 
@@ -2621,11 +2618,9 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
       num00--;
     } else {
       MV temp_mv;
-      double mv_dist;
-      double mv_cost;
-      thissme = diamond_search_sad_new(
-          x, &cpi->ss_cfg, mvp_full, &temp_mv, &mv_dist, &mv_cost,
-          step_param + n, lambda, &num00, fn_ptr, nb_full_mvs, full_mv_num);
+      thissme = diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, &temp_mv,
+                                       step_param + n, lambda, &num00, fn_ptr,
+                                       nb_full_mvs, full_mv_num);
       thissme = vp9_get_mvpred_var(x, &temp_mv, &center_mv, fn_ptr, 0);
       // check to see if refining search is needed.
       if (num00 > further_steps - n) do_refine = 0;
@@ -2633,8 +2628,6 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
       if (thissme < bestsme) {
         bestsme = thissme;
         *best_mv = temp_mv;
-        *best_mv_dist = mv_dist;
-        *best_mv_cost = mv_cost;
       }
     }
   }
@@ -2643,17 +2636,12 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
   if (do_refine) {
     const int search_range = 8;
     MV temp_mv = *best_mv;
-    double mv_dist;
-    double mv_cost;
-    thissme = vp9_refining_search_sad_new(x, &temp_mv, &mv_dist, &mv_cost,
-                                          lambda, search_range, fn_ptr,
-                                          nb_full_mvs, full_mv_num);
+    thissme = vp9_refining_search_sad_new(x, &temp_mv, lambda, search_range,
+                                          fn_ptr, nb_full_mvs, full_mv_num);
     thissme = vp9_get_mvpred_var(x, &temp_mv, &center_mv, fn_ptr, 0);
     if (thissme < bestsme) {
       bestsme = thissme;
       *best_mv = temp_mv;
-      *best_mv_dist = mv_dist;
-      *best_mv_cost = mv_cost;
     }
   }
 
@@ -2787,7 +2775,6 @@ static int full_pixel_exhaustive(const VP9_COMP *const cpi,
 
 #if CONFIG_NON_GREEDY_MV
 double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
-                                   double *best_mv_dist, double *best_mv_cost,
                                    int lambda, int search_range,
                                    const vp9_variance_fn_ptr_t *fn_ptr,
                                    const int_mv *nb_full_mvs, int full_mv_num) {
@@ -2799,12 +2786,14 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
   double best_sad;
   int i, j;
   vpx_clear_system_state();
-  *best_mv_dist =
-      fn_ptr->sdf(what->buf, what->stride, best_address, in_what->stride);
-  *best_mv_cost =
-      vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
-      (double)(1 << LOG2_PRECISION);
-  best_sad = (*best_mv_dist) + lambda * (*best_mv_cost);
+  {
+    const double mv_dist =
+        fn_ptr->sdf(what->buf, what->stride, best_address, in_what->stride);
+    const double mv_cost =
+        vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
+        (double)(1 << LOG2_PRECISION);
+    best_sad = mv_dist + lambda * mv_cost;
+  }
 
   for (i = 0; i < search_range; i++) {
     int best_site = -1;
@@ -2831,8 +2820,6 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
         const double thissad = mv_dist + lambda * mv_cost;
         if (thissad < best_sad) {
           best_sad = thissad;
-          *best_mv_dist = mv_dist;
-          *best_mv_cost = mv_cost;
           best_site = j;
         }
       }
@@ -2851,8 +2838,6 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
           const double thissad = mv_dist + lambda * mv_cost;
           if (thissad < best_sad) {
             best_sad = thissad;
-            *best_mv_dist = mv_dist;
-            *best_mv_cost = mv_cost;
             best_site = j;
           }
         }
