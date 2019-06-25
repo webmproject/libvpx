@@ -2149,18 +2149,20 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
                        sad_array);
 
         for (t = 0; t < 4; t++, i++) {
-          const MV this_mv = { best_full_mv->row + ss_mv[i].row,
-                               best_full_mv->col + ss_mv[i].col };
-          const double mv_dist = sad_array[t];
-          const double mv_cost =
-              vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
-              (double)(1 << LOG2_PRECISION);
-          double thissad = mv_dist + lambda * mv_cost;
-          if (thissad < bestsad) {
-            bestsad = thissad;
-            *best_mv_dist = mv_dist;
-            *best_mv_cost = mv_cost;
-            best_site = i;
+          if (sad_array[t] < bestsad) {
+            const MV this_mv = { best_full_mv->row + ss_mv[i].row,
+                                 best_full_mv->col + ss_mv[i].col };
+            const double mv_dist = sad_array[t];
+            const double mv_cost =
+                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
+                (double)(1 << LOG2_PRECISION);
+            double thissad = mv_dist + lambda * mv_cost;
+            if (thissad < bestsad) {
+              bestsad = thissad;
+              *best_mv_dist = mv_dist;
+              *best_mv_cost = mv_cost;
+              best_site = i;
+            }
           }
         }
       }
@@ -2174,15 +2176,17 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
           const uint8_t *const check_here = ss_os[i] + best_address;
           const double mv_dist =
               fn_ptr->sdf(what, what_stride, check_here, in_what_stride);
-          const double mv_cost =
-              vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
-              (double)(1 << LOG2_PRECISION);
-          double thissad = mv_dist + lambda * mv_cost;
-          if (thissad < bestsad) {
-            bestsad = thissad;
-            *best_mv_dist = mv_dist;
-            *best_mv_cost = mv_cost;
-            best_site = i;
+          if (mv_dist < bestsad) {
+            const double mv_cost =
+                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
+                (double)(1 << LOG2_PRECISION);
+            double thissad = mv_dist + lambda * mv_cost;
+            if (thissad < bestsad) {
+              bestsad = thissad;
+              *best_mv_dist = mv_dist;
+              *best_mv_cost = mv_cost;
+              best_site = i;
+            }
           }
         }
         i++;
