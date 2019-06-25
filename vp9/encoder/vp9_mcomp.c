@@ -2018,15 +2018,15 @@ static int64_t exhaustive_mesh_search_new(const MACROBLOCK *x, MV *best_mv,
   return best_sad;
 }
 
-static double full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
-                                        MV *centre_mv_full,
-                                        const vp9_variance_fn_ptr_t *fn_ptr,
-                                        MV *dst_mv, int lambda,
-                                        const int_mv *nb_full_mvs,
-                                        int full_mv_num) {
+static int64_t full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
+                                         MV *centre_mv_full,
+                                         const vp9_variance_fn_ptr_t *fn_ptr,
+                                         MV *dst_mv, int lambda,
+                                         const int_mv *nb_full_mvs,
+                                         int full_mv_num) {
   const SPEED_FEATURES *const sf = &cpi->sf;
   MV temp_mv = { centre_mv_full->row, centre_mv_full->col };
-  double bestsme;
+  int64_t bestsme;
   int i;
   int interval = sf->mesh_patterns[0].interval;
   int range = sf->mesh_patterns[0].range;
@@ -2653,8 +2653,8 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  bestsme = full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv, lambda,
-                                      nb_full_mvs, full_mv_num);
+  bestsme = (double)full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv,
+                                              lambda, nb_full_mvs, full_mv_num);
   return bestsme;
 }
 #endif  // CONFIG_NON_GREEDY_MV
