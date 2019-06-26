@@ -2494,8 +2494,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   const int ph = num_4x4_blocks_high_lookup[bsize] << 2;
   MV pred_mv[3];
 
+  int bestsme = INT_MAX;
 #if CONFIG_NON_GREEDY_MV
-  double bestsme;
   int_mv nb_full_mvs[NB_MVS_NUM];
   const int nb_full_mv_num = NB_MVS_NUM;
   int gf_group_idx = cpi->twopass.gf_group.index;
@@ -2506,7 +2506,6 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   vp9_prepare_nb_full_mvs(&cpi->tpl_stats[gf_group_idx], mi_row, mi_col,
                           gf_rf_idx, square_bsize, nb_full_mvs);
 #else   // CONFIG_NON_GREEDY_MV
-  int bestsme = INT_MAX;
   int sadpb = x->sadperbit16;
 #endif  // CONFIG_NON_GREEDY_MV
 
@@ -2592,11 +2591,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   if (cpi->sf.enhanced_full_pixel_motion_search) {
     int i;
     for (i = 0; i < 3; ++i) {
-#if CONFIG_NON_GREEDY_MV
-      double this_me;
-#else   // CONFIG_NON_GREEDY_MV
       int this_me;
-#endif  // CONFIG_NON_GREEDY_MV
       MV this_mv;
       int diff_row;
       int diff_col;

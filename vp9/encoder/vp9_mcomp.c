@@ -2031,7 +2031,6 @@ static int64_t full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
   int interval = sf->mesh_patterns[0].interval;
   int range = sf->mesh_patterns[0].range;
   int baseline_interval_divisor;
-  const MV dummy_mv = { 0, 0 };
 
   // Trap illegal values for interval and range for this function.
   if ((range < MIN_RANGE) || (range > MAX_RANGE) || (interval < MIN_INTERVAL) ||
@@ -2067,7 +2066,6 @@ static int64_t full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  bestsme = vp9_get_mvpred_var(x, &temp_mv, &dummy_mv, fn_ptr, 0);
   *dst_mv = temp_mv;
 
   return bestsme;
@@ -2590,15 +2588,14 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
-                                  MV *mvp_full, int step_param, int lambda,
-                                  int do_refine,
-                                  const vp9_variance_fn_ptr_t *fn_ptr,
-                                  const int_mv *nb_full_mvs, int full_mv_num,
-                                  MV *best_mv) {
+int vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x, MV *mvp_full,
+                               int step_param, int lambda, int do_refine,
+                               const vp9_variance_fn_ptr_t *fn_ptr,
+                               const int_mv *nb_full_mvs, int full_mv_num,
+                               MV *best_mv) {
   int n, num00 = 0;
-  double thissme;
-  double bestsme;
+  int thissme;
+  int bestsme;
   const int further_steps = MAX_MVSEARCH_STEPS - 1 - step_param;
   const MV center_mv = { 0, 0 };
   vpx_clear_system_state();
@@ -2644,8 +2641,9 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  bestsme = (double)full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv,
-                                              lambda, nb_full_mvs, full_mv_num);
+  full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv, lambda,
+                            nb_full_mvs, full_mv_num);
+  bestsme = vp9_get_mvpred_var(x, best_mv, &center_mv, fn_ptr, 0);
   return bestsme;
 }
 #endif  // CONFIG_NON_GREEDY_MV
