@@ -2073,13 +2073,13 @@ static int64_t full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
   return bestsme;
 }
 
-static double diamond_search_sad_new(const MACROBLOCK *x,
-                                     const search_site_config *cfg,
-                                     const MV *init_full_mv, MV *best_full_mv,
-                                     int search_param, int lambda, int *num00,
-                                     const vp9_variance_fn_ptr_t *fn_ptr,
-                                     const int_mv *nb_full_mvs,
-                                     int full_mv_num) {
+static int64_t diamond_search_sad_new(const MACROBLOCK *x,
+                                      const search_site_config *cfg,
+                                      const MV *init_full_mv, MV *best_full_mv,
+                                      int search_param, int lambda, int *num00,
+                                      const vp9_variance_fn_ptr_t *fn_ptr,
+                                      const int_mv *nb_full_mvs,
+                                      int full_mv_num) {
   int i, j, step;
 
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -2089,7 +2089,7 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
   const int in_what_stride = xd->plane[0].pre[0].stride;
   const uint8_t *best_address;
 
-  double bestsad;
+  int64_t bestsad;
   int best_site = -1;
   int last_site = -1;
 
@@ -2116,11 +2116,11 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
 
   // Check the starting position
   {
-    const double mv_dist =
-        fn_ptr->sdf(what, what_stride, in_what, in_what_stride);
-    const double mv_cost =
-        vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
-        (double)(1 << LOG2_PRECISION);
+    const int64_t mv_dist =
+        (int64_t)fn_ptr->sdf(what, what_stride, in_what, in_what_stride)
+        << LOG2_PRECISION;
+    const int64_t mv_cost =
+        vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num);
     bestsad = mv_dist + lambda * mv_cost;
   }
 
@@ -2151,14 +2151,13 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
                        sad_array);
 
         for (t = 0; t < 4; t++, i++) {
-          if (sad_array[t] < bestsad) {
+          const int64_t mv_dist = (int64_t)sad_array[t] << LOG2_PRECISION;
+          if (mv_dist < bestsad) {
             const MV this_mv = { best_full_mv->row + ss_mv[i].row,
                                  best_full_mv->col + ss_mv[i].col };
-            const double mv_dist = sad_array[t];
-            const double mv_cost =
-                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
-                (double)(1 << LOG2_PRECISION);
-            double thissad = mv_dist + lambda * mv_cost;
+            const int64_t mv_cost =
+                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num);
+            const int64_t thissad = mv_dist + lambda * mv_cost;
             if (thissad < bestsad) {
               bestsad = thissad;
               best_site = i;
@@ -2174,13 +2173,14 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
 
         if (is_mv_in(&x->mv_limits, &this_mv)) {
           const uint8_t *const check_here = ss_os[i] + best_address;
-          const double mv_dist =
-              fn_ptr->sdf(what, what_stride, check_here, in_what_stride);
+          const int64_t mv_dist =
+              (int64_t)fn_ptr->sdf(what, what_stride, check_here,
+                                   in_what_stride)
+              << LOG2_PRECISION;
           if (mv_dist < bestsad) {
-            const double mv_cost =
-                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
-                (double)(1 << LOG2_PRECISION);
-            double thissad = mv_dist + lambda * mv_cost;
+            const int64_t mv_cost =
+                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num);
+            const int64_t thissad = mv_dist + lambda * mv_cost;
             if (thissad < bestsad) {
               bestsad = thissad;
               best_site = i;
