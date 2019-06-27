@@ -4783,18 +4783,7 @@ static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
   double log_sum = 0.0;
   int row, col;
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  double c2;
-  if (xd->bd == 10) {
-    c2 = 941.8761;  // (.03*1023)^2
-  } else if (xd->bd == 12) {
-    c2 = 15092.1225;  // (.03*4095)^2
-  } else {
-    c2 = 58.5225;  // (.03*255)^2
-  }
-#else
-  const double c2 = 58.5225;  // (.03*255)^2
-#endif
+  const double c2 = 58.5225 * SSIM_VAR_SCALE;  // 58.5225 = (.03*255)^2
 
   // Loop through each 64x64 block.
   for (row = 0; row < num_rows; ++row) {
@@ -4817,18 +4806,18 @@ static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
           // In order to make SSIM_VAR_SCALE in a same scale for both 8 bit
           // and high bit videos, the variance needs to be divided by 2.0 or
           // 64.0 separately.
+          // TODO(sdeng): need to tune for 12bit videos.
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cpi->Source->flags & YV12_FLAG_HIGHBITDEPTH)
-            var +=
-                vp9_high_get_sby_variance(cpi, &buf, BLOCK_8X8, xd->bd) / 2.0;
+            var += vp9_high_get_sby_variance(cpi, &buf, BLOCK_8X8, xd->bd);
           else
 #endif
-            var += vp9_get_sby_variance(cpi, &buf, BLOCK_8X8) / 64.0;
+            var += vp9_get_sby_variance(cpi, &buf, BLOCK_8X8);
 
           num_of_var += 1.0;
         }
       }
-      var = var / num_of_var / SSIM_VAR_SCALE;
+      var = var / num_of_var / 64.0;
       var = 2.0 * var + c2;
       cpi->mi_ssim_rdmult_scaling_factors[index] = var;
       log_sum += log(var);
