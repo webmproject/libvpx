@@ -83,9 +83,7 @@ TEST_P(TimestampTest, EncodeFrames) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-// TODO(fgalligan): Enable test when
-// https://bugs.chromium.org/p/webm/issues/detail?id=1614 is fixed.
-TEST_P(TimestampTest, DISABLED_TestMicrosecondTimebase) {
+TEST_P(TimestampTest, TestMicrosecondTimebase) {
   // Set the timebase to microseconds.
   DummyTimebaseVideoSource video(1, 1000000);
   video.set_limit(1);
