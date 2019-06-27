@@ -4248,13 +4248,21 @@ static int rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   if (cpi->sf.prune_ref_frame_for_rect_partitions) {
     uint8_t used_frames;
     used_frames = ref_frames_used[0] | ref_frames_used[1];
-    if (used_frames) pc_tree->horizontal[0].skip_ref_frame_mask = ~used_frames;
+    if (used_frames) {
+      pc_tree->horizontal[0].skip_ref_frame_mask = ~used_frames & 0xff;
+    }
     used_frames = ref_frames_used[2] | ref_frames_used[3];
-    if (used_frames) pc_tree->horizontal[1].skip_ref_frame_mask = ~used_frames;
+    if (used_frames) {
+      pc_tree->horizontal[1].skip_ref_frame_mask = ~used_frames & 0xff;
+    }
     used_frames = ref_frames_used[0] | ref_frames_used[2];
-    if (used_frames) pc_tree->vertical[0].skip_ref_frame_mask = ~used_frames;
+    if (used_frames) {
+      pc_tree->vertical[0].skip_ref_frame_mask = ~used_frames & 0xff;
+    }
     used_frames = ref_frames_used[1] | ref_frames_used[3];
-    if (used_frames) pc_tree->vertical[1].skip_ref_frame_mask = ~used_frames;
+    if (used_frames) {
+      pc_tree->vertical[1].skip_ref_frame_mask = ~used_frames & 0xff;
+    }
   }
 
   {
