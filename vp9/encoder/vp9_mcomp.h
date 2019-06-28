@@ -128,17 +128,17 @@ void vp9_set_subpel_mv_search_range(MvLimits *subpel_mv_limits,
 #if CONFIG_NON_GREEDY_MV
 #define NB_MVS_NUM 4
 struct TplDepStats;
-double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
-                                   int lambda, int search_range,
-                                   const vp9_variance_fn_ptr_t *fn_ptr,
-                                   const int_mv *nb_full_mvs, int full_mv_num);
+int64_t vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
+                                    int lambda, int search_range,
+                                    const vp9_variance_fn_ptr_t *fn_ptr,
+                                    const int_mv *nb_full_mvs, int full_mv_num);
 
-double vp9_full_pixel_diamond_new(const struct VP9_COMP *cpi, MACROBLOCK *x,
-                                  MV *mvp_full, int step_param, int lambda,
-                                  int do_refine,
-                                  const vp9_variance_fn_ptr_t *fn_ptr,
-                                  const int_mv *nb_full_mvs, int full_mv_num,
-                                  MV *best_mv);
+int vp9_full_pixel_diamond_new(const struct VP9_COMP *cpi, MACROBLOCK *x,
+                               MV *mvp_full, int step_param, int lambda,
+                               int do_refine,
+                               const vp9_variance_fn_ptr_t *fn_ptr,
+                               const int_mv *nb_full_mvs, int full_mv_num,
+                               MV *best_mv);
 
 int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
                                  int mv_num);

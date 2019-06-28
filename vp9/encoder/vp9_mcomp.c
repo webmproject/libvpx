@@ -2031,7 +2031,6 @@ static int64_t full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
   int interval = sf->mesh_patterns[0].interval;
   int range = sf->mesh_patterns[0].range;
   int baseline_interval_divisor;
-  const MV dummy_mv = { 0, 0 };
 
   // Trap illegal values for interval and range for this function.
   if ((range < MIN_RANGE) || (range > MAX_RANGE) || (interval < MIN_INTERVAL) ||
@@ -2067,19 +2066,18 @@ static int64_t full_pixel_exhaustive_new(const VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  bestsme = vp9_get_mvpred_var(x, &temp_mv, &dummy_mv, fn_ptr, 0);
   *dst_mv = temp_mv;
 
   return bestsme;
 }
 
-static double diamond_search_sad_new(const MACROBLOCK *x,
-                                     const search_site_config *cfg,
-                                     const MV *init_full_mv, MV *best_full_mv,
-                                     int search_param, int lambda, int *num00,
-                                     const vp9_variance_fn_ptr_t *fn_ptr,
-                                     const int_mv *nb_full_mvs,
-                                     int full_mv_num) {
+static int64_t diamond_search_sad_new(const MACROBLOCK *x,
+                                      const search_site_config *cfg,
+                                      const MV *init_full_mv, MV *best_full_mv,
+                                      int search_param, int lambda, int *num00,
+                                      const vp9_variance_fn_ptr_t *fn_ptr,
+                                      const int_mv *nb_full_mvs,
+                                      int full_mv_num) {
   int i, j, step;
 
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -2089,7 +2087,7 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
   const int in_what_stride = xd->plane[0].pre[0].stride;
   const uint8_t *best_address;
 
-  double bestsad;
+  int64_t bestsad;
   int best_site = -1;
   int last_site = -1;
 
@@ -2116,11 +2114,11 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
 
   // Check the starting position
   {
-    const double mv_dist =
-        fn_ptr->sdf(what, what_stride, in_what, in_what_stride);
-    const double mv_cost =
-        vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
-        (double)(1 << LOG2_PRECISION);
+    const int64_t mv_dist =
+        (int64_t)fn_ptr->sdf(what, what_stride, in_what, in_what_stride)
+        << LOG2_PRECISION;
+    const int64_t mv_cost =
+        vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num);
     bestsad = mv_dist + lambda * mv_cost;
   }
 
@@ -2151,14 +2149,13 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
                        sad_array);
 
         for (t = 0; t < 4; t++, i++) {
-          if (sad_array[t] < bestsad) {
+          const int64_t mv_dist = (int64_t)sad_array[t] << LOG2_PRECISION;
+          if (mv_dist < bestsad) {
             const MV this_mv = { best_full_mv->row + ss_mv[i].row,
                                  best_full_mv->col + ss_mv[i].col };
-            const double mv_dist = sad_array[t];
-            const double mv_cost =
-                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
-                (double)(1 << LOG2_PRECISION);
-            double thissad = mv_dist + lambda * mv_cost;
+            const int64_t mv_cost =
+                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num);
+            const int64_t thissad = mv_dist + lambda * mv_cost;
             if (thissad < bestsad) {
               bestsad = thissad;
               best_site = i;
@@ -2174,13 +2171,14 @@ static double diamond_search_sad_new(const MACROBLOCK *x,
 
         if (is_mv_in(&x->mv_limits, &this_mv)) {
           const uint8_t *const check_here = ss_os[i] + best_address;
-          const double mv_dist =
-              fn_ptr->sdf(what, what_stride, check_here, in_what_stride);
+          const int64_t mv_dist =
+              (int64_t)fn_ptr->sdf(what, what_stride, check_here,
+                                   in_what_stride)
+              << LOG2_PRECISION;
           if (mv_dist < bestsad) {
-            const double mv_cost =
-                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num) /
-                (double)(1 << LOG2_PRECISION);
-            double thissad = mv_dist + lambda * mv_cost;
+            const int64_t mv_cost =
+                vp9_nb_mvs_inconsistency(&this_mv, nb_full_mvs, full_mv_num);
+            const int64_t thissad = mv_dist + lambda * mv_cost;
             if (thissad < bestsad) {
               bestsad = thissad;
               best_site = i;
@@ -2590,21 +2588,19 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
-                                  MV *mvp_full, int step_param, int lambda,
-                                  int do_refine,
-                                  const vp9_variance_fn_ptr_t *fn_ptr,
-                                  const int_mv *nb_full_mvs, int full_mv_num,
-                                  MV *best_mv) {
+int vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x, MV *mvp_full,
+                               int step_param, int lambda, int do_refine,
+                               const vp9_variance_fn_ptr_t *fn_ptr,
+                               const int_mv *nb_full_mvs, int full_mv_num,
+                               MV *best_mv) {
   int n, num00 = 0;
-  double thissme;
-  double bestsme;
+  int thissme;
+  int bestsme;
   const int further_steps = MAX_MVSEARCH_STEPS - 1 - step_param;
   const MV center_mv = { 0, 0 };
   vpx_clear_system_state();
-  bestsme =
-      diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, best_mv, step_param,
-                             lambda, &n, fn_ptr, nb_full_mvs, full_mv_num);
+  diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, best_mv, step_param, lambda,
+                         &n, fn_ptr, nb_full_mvs, full_mv_num);
 
   bestsme = vp9_get_mvpred_var(x, best_mv, &center_mv, fn_ptr, 0);
 
@@ -2618,9 +2614,9 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
       num00--;
     } else {
       MV temp_mv;
-      thissme = diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, &temp_mv,
-                                       step_param + n, lambda, &num00, fn_ptr,
-                                       nb_full_mvs, full_mv_num);
+      diamond_search_sad_new(x, &cpi->ss_cfg, mvp_full, &temp_mv,
+                             step_param + n, lambda, &num00, fn_ptr,
+                             nb_full_mvs, full_mv_num);
       thissme = vp9_get_mvpred_var(x, &temp_mv, &center_mv, fn_ptr, 0);
       // check to see if refining search is needed.
       if (num00 > further_steps - n) do_refine = 0;
@@ -2636,8 +2632,8 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
   if (do_refine) {
     const int search_range = 8;
     MV temp_mv = *best_mv;
-    thissme = vp9_refining_search_sad_new(x, &temp_mv, lambda, search_range,
-                                          fn_ptr, nb_full_mvs, full_mv_num);
+    vp9_refining_search_sad_new(x, &temp_mv, lambda, search_range, fn_ptr,
+                                nb_full_mvs, full_mv_num);
     thissme = vp9_get_mvpred_var(x, &temp_mv, &center_mv, fn_ptr, 0);
     if (thissme < bestsme) {
       bestsme = thissme;
@@ -2645,8 +2641,9 @@ double vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  bestsme = (double)full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv,
-                                              lambda, nb_full_mvs, full_mv_num);
+  full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv, lambda,
+                            nb_full_mvs, full_mv_num);
+  bestsme = vp9_get_mvpred_var(x, best_mv, &center_mv, fn_ptr, 0);
   return bestsme;
 }
 #endif  // CONFIG_NON_GREEDY_MV
@@ -2774,24 +2771,25 @@ static int full_pixel_exhaustive(const VP9_COMP *const cpi,
 }
 
 #if CONFIG_NON_GREEDY_MV
-double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
-                                   int lambda, int search_range,
-                                   const vp9_variance_fn_ptr_t *fn_ptr,
-                                   const int_mv *nb_full_mvs, int full_mv_num) {
+int64_t vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
+                                    int lambda, int search_range,
+                                    const vp9_variance_fn_ptr_t *fn_ptr,
+                                    const int_mv *nb_full_mvs,
+                                    int full_mv_num) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const MV neighbors[4] = { { -1, 0 }, { 0, -1 }, { 0, 1 }, { 1, 0 } };
   const struct buf_2d *const what = &x->plane[0].src;
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
   const uint8_t *best_address = get_buf_from_mv(in_what, best_full_mv);
-  double best_sad;
+  int64_t best_sad;
   int i, j;
   vpx_clear_system_state();
   {
-    const double mv_dist =
-        fn_ptr->sdf(what->buf, what->stride, best_address, in_what->stride);
-    const double mv_cost =
-        vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num) /
-        (double)(1 << LOG2_PRECISION);
+    const int64_t mv_dist = (int64_t)fn_ptr->sdf(what->buf, what->stride,
+                                                 best_address, in_what->stride)
+                            << LOG2_PRECISION;
+    const int64_t mv_cost =
+        vp9_nb_mvs_inconsistency(best_full_mv, nb_full_mvs, full_mv_num);
     best_sad = mv_dist + lambda * mv_cost;
   }
 
@@ -2813,11 +2811,10 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
       for (j = 0; j < 4; ++j) {
         const MV mv = { best_full_mv->row + neighbors[j].row,
                         best_full_mv->col + neighbors[j].col };
-        const double mv_dist = sads[j];
-        const double mv_cost =
-            vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
-            (double)(1 << LOG2_PRECISION);
-        const double thissad = mv_dist + lambda * mv_cost;
+        const int64_t mv_dist = (int64_t)sads[j] << LOG2_PRECISION;
+        const int64_t mv_cost =
+            vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
+        const int64_t thissad = mv_dist + lambda * mv_cost;
         if (thissad < best_sad) {
           best_sad = thissad;
           best_site = j;
@@ -2829,13 +2826,14 @@ double vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
                         best_full_mv->col + neighbors[j].col };
 
         if (is_mv_in(&x->mv_limits, &mv)) {
-          const double mv_dist =
-              fn_ptr->sdf(what->buf, what->stride,
-                          get_buf_from_mv(in_what, &mv), in_what->stride);
-          const double mv_cost =
-              vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num) /
-              (double)(1 << LOG2_PRECISION);
-          const double thissad = mv_dist + lambda * mv_cost;
+          const int64_t mv_dist =
+              (int64_t)fn_ptr->sdf(what->buf, what->stride,
+                                   get_buf_from_mv(in_what, &mv),
+                                   in_what->stride)
+              << LOG2_PRECISION;
+          const int64_t mv_cost =
+              vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
+          const int64_t thissad = mv_dist + lambda * mv_cost;
           if (thissad < best_sad) {
             best_sad = thissad;
             best_site = j;
