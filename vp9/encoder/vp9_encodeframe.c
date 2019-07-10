@@ -1214,8 +1214,8 @@ static void chroma_check(VP9_COMP *cpi, MACROBLOCK *x, int bsize,
 
   if (is_key_frame) return;
 
-  // For speed >= 8, avoid the chroma check if y_sad is above threshold.
-  if (cpi->oxcf.speed >= 8) {
+  // For speed > 8, avoid the chroma check if y_sad is above threshold.
+  if (cpi->oxcf.speed > 8) {
     if (y_sad > cpi->vbp_thresholds[1] &&
         (!cpi->noise_estimate.enabled ||
          vp9_noise_estimate_extract_level(&cpi->noise_estimate) < kMedium))
