@@ -822,8 +822,28 @@ static void setup_frame(VP9_COMP *cpi) {
   // layer ARF case as well.
   if (cpi->multi_layer_arf && !cpi->use_svc) {
     GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-    cm->frame_context_idx = clamp(gf_group->layer_depth[gf_group->index] - 1, 0,
-                                  FRAME_CONTEXTS - 1);
+    const int gf_group_index = gf_group->index;
+    const int boost_frame =
+        !cpi->rc.is_src_frame_alt_ref &&
+        (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame);
+
+    // frame_context_idx           Frame Type
+    //        0              Intra only frame, base layer ARF
+    //        1              ARFs with layer depth = 2,3
+    //        2              ARFs with layer depth > 3
+    //        3              Non-boosted frames
+    if (frame_is_intra_only(cm)) {
+      cm->frame_context_idx = 0;
+    } else if (boost_frame) {
+      if (gf_group->rf_level[gf_group_index] == GF_ARF_STD)
+        cm->frame_context_idx = 0;
+      else if (gf_group->layer_depth[gf_group_index] <= 3)
+        cm->frame_context_idx = 1;
+      else
+        cm->frame_context_idx = 2;
+    } else {
+      cm->frame_context_idx = 3;
+    }
   }
 
   if (cm->frame_type == KEY_FRAME) {
