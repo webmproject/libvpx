@@ -2003,7 +2003,7 @@ static int64_t exhaustive_mesh_search_single_step(
           }
         }
       } else {
-        for (i = 0; i < end_col - c; ++i) {
+        for (i = 0; i <= end_col - c; ++i) {
           const MV mv = { r, c + i };
           int64_t sad =
               (int64_t)fn_ptr->sdf(src->buf, src->stride,
