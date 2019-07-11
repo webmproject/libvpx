@@ -2060,8 +2060,19 @@ static int64_t calculate_total_gf_group_bits(VP9_COMP *cpi,
 
   // Calculate the bits to be allocated to the group as a whole.
   if ((twopass->kf_group_bits > 0) && (twopass->kf_group_error_left > 0.0)) {
+    int key_frame_interval = rc->frames_since_key + rc->frames_to_key;
+    int distance_from_next_key_frame =
+        rc->frames_to_key -
+        (rc->baseline_gf_interval + rc->source_alt_ref_pending);
+    int max_gf_bits_bias = rc->avg_frame_bandwidth;
+    double gf_interval_bias_bits_normalize_factor =
+        (double)rc->baseline_gf_interval / 16;
     total_group_bits = (int64_t)(twopass->kf_group_bits *
                                  (gf_group_err / twopass->kf_group_error_left));
+    // TODO(ravi): Experiment with different values of max_gf_bits_bias
+    total_group_bits +=
+        (int64_t)((double)distance_from_next_key_frame / key_frame_interval *
+                  max_gf_bits_bias * gf_interval_bias_bits_normalize_factor);
   } else {
     total_group_bits = 0;
   }
@@ -2651,13 +2662,27 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
 #define LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR 0.2
   rc->arf_active_best_quality_adjustment_factor = 1.0;
-  if (rc->source_alt_ref_pending && !is_lossless_requested(&cpi->oxcf) &&
-      rc->frames_to_key <= rc->arf_active_best_quality_adjustment_window) {
-    rc->arf_active_best_quality_adjustment_factor =
-        LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR +
-        (1.0 - LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR) *
-            (rc->frames_to_key - i) /
-            VPXMAX(1, (rc->arf_active_best_quality_adjustment_window - i));
+  rc->arf_increase_active_best_quality = 0;
+
+  if (!is_lossless_requested(&cpi->oxcf)) {
+    if (rc->frames_since_key >= rc->frames_to_key) {
+      // Increase the active best quality in the second half of key frame
+      // interval.
+      rc->arf_active_best_quality_adjustment_factor =
+          LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR +
+          (1.0 - LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR) *
+              (rc->frames_to_key - i) /
+              (VPXMAX(1, ((rc->frames_to_key + rc->frames_since_key) / 2 - i)));
+      rc->arf_increase_active_best_quality = 1;
+    } else if ((rc->frames_to_key - i) > 0) {
+      // Reduce the active best quality in the first half of key frame interval.
+      rc->arf_active_best_quality_adjustment_factor =
+          LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR +
+          (1.0 - LAST_ALR_ACTIVE_BEST_QUALITY_ADJUSTMENT_FACTOR) *
+              (rc->frames_since_key + i) /
+              (VPXMAX(1, (rc->frames_to_key + rc->frames_since_key) / 2 + i));
+      rc->arf_increase_active_best_quality = -1;
+    }
   }
 
 #ifdef AGGRESSIVE_VBR
@@ -3227,11 +3252,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Default to normal-sized frame on keyframes.
     cpi->rc.next_frame_size_selector = UNSCALED;
   }
-#define ARF_ACTIVE_BEST_QUALITY_ADJUSTMENT_WINDOW_SIZE 64
-  // TODO(ravi.chaudhary@ittiam.com): Experiment without the below min
-  // condition. This might be helpful for small key frame intervals.
-  rc->arf_active_best_quality_adjustment_window =
-      VPXMIN(ARF_ACTIVE_BEST_QUALITY_ADJUSTMENT_WINDOW_SIZE, rc->frames_to_key);
 }
 
 static int is_skippable_frame(const VP9_COMP *cpi) {
