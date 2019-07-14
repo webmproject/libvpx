@@ -2468,7 +2468,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   BFP(BLOCK_32X32, vpx_sad32x32, vpx_sad32x32_avg, vpx_variance32x32,
       vpx_sub_pixel_variance32x32, vpx_sub_pixel_avg_variance32x32,
-      vpx_sad32x32x4d, NULL)
+      vpx_sad32x32x4d, vpx_sad32x32x8)
 
   BFP(BLOCK_64X64, vpx_sad64x64, vpx_sad64x64_avg, vpx_variance64x64,
       vpx_sub_pixel_variance64x64, vpx_sub_pixel_avg_variance64x64,

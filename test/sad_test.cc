@@ -745,7 +745,7 @@ const SadMxNx8Param x8_c_tests[] = {
   // SadMxNx8Param(64, 64, &vpx_sad64x64x8_c),
   // SadMxNx8Param(64, 32, &vpx_sad64x32x8_c),
   // SadMxNx8Param(32, 64, &vpx_sad32x64x8_c),
-  // SadMxNx8Param(32, 32, &vpx_sad32x32x8_c),
+  SadMxNx8Param(32, 32, &vpx_sad32x32x8_c),
   // SadMxNx8Param(32, 16, &vpx_sad32x16x8_c),
   // SadMxNx8Param(16, 32, &vpx_sad16x32x8_c),
   SadMxNx8Param(16, 16, &vpx_sad16x16x8_c),
@@ -1021,6 +1021,12 @@ const SadMxNx4Param x4d_avx2_tests[] = {
   SadMxNx4Param(32, 32, &vpx_sad32x32x4d_avx2),
 };
 INSTANTIATE_TEST_CASE_P(AVX2, SADx4Test, ::testing::ValuesIn(x4d_avx2_tests));
+
+const SadMxNx8Param x8_avx2_tests[] = {
+  // SadMxNx8Param(64, 64, &vpx_sad64x64x8_c),
+  SadMxNx8Param(32, 32, &vpx_sad32x32x8_avx2),
+};
+INSTANTIATE_TEST_CASE_P(AVX2, SADx8Test, ::testing::ValuesIn(x8_avx2_tests));
 #endif  // HAVE_AVX2
 
 #if HAVE_AVX512
