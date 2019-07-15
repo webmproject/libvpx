@@ -814,17 +814,7 @@ static void setup_frame(VP9_COMP *cpi) {
   if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
     vp9_setup_past_independence(cm);
   } else {
-    if (!cpi->use_svc) {
-      const int boost_frame =
-          !cpi->rc.is_src_frame_alt_ref &&
-          (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame);
-      if (boost_frame)
-        cm->frame_context_idx = 1;
-      else if (cpi->rc.is_src_frame_alt_ref)
-        cm->frame_context_idx = 2;
-      else
-        cm->frame_context_idx = 3;
-    }
+    if (!cpi->use_svc) cm->frame_context_idx = cpi->refresh_alt_ref_frame;
   }
 
   // TODO(jingning): Overwrite the frame_context_idx index in multi-layer ARF
