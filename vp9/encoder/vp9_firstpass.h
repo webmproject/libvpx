@@ -192,6 +192,7 @@ typedef struct {
   int extend_maxq;
   int extend_minq_fast;
   int arnr_strength_adjustment;
+  int last_qindex_of_arf_layer[MAX_ARF_LAYERS];
 
   GF_GROUP gf_group;
 } TWO_PASS;

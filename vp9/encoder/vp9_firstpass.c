@@ -3239,6 +3239,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   gf_group->bit_allocation[0] = kf_bits;
   gf_group->update_type[0] = KF_UPDATE;
   gf_group->rf_level[0] = KF_STD;
+  gf_group->layer_depth[0] = 0;
 
   // Note the total error score of the kf group minus the key frame itself.
   twopass->kf_group_error_left = (kf_group_err - kf_mod_err);

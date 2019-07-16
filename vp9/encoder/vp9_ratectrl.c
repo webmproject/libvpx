@@ -1486,17 +1486,30 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
   // Extension to max or min Q if undershoot or overshoot is outside
   // the permitted range.
   if (frame_is_intra_only(cm) || boost_frame) {
+    const int layer_depth = gf_group->layer_depth[gf_group_index];
     active_best_quality -=
         (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast);
     active_worst_quality += (cpi->twopass.extend_maxq / 2);
+
+    if (gf_group->rf_level[gf_group_index] == GF_ARF_LOW) {
+      assert(layer_depth > 1);
+      active_best_quality =
+          VPXMAX(active_best_quality,
+                 cpi->twopass.last_qindex_of_arf_layer[layer_depth - 1]);
+    }
   } else {
+    const int max_layer_depth = gf_group->max_layer_depth;
+    assert(max_layer_depth > 0);
+
     active_best_quality -=
         (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast) / 2;
     active_worst_quality += cpi->twopass.extend_maxq;
 
     // For normal frames do not allow an active minq lower than the q used for
     // the last boosted frame.
-    active_best_quality = VPXMAX(active_best_quality, rc->last_boosted_qindex);
+    active_best_quality =
+        VPXMAX(active_best_quality,
+               cpi->twopass.last_qindex_of_arf_layer[max_layer_depth - 1]);
   }
 
 #if LIMIT_QRANGE_FOR_ALTREF_AND_KEY
@@ -1795,6 +1808,9 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   RATE_CONTROL *const rc = &cpi->rc;
   SVC *const svc = &cpi->svc;
   const int qindex = cm->base_qindex;
+  const GF_GROUP *gf_group = &cpi->twopass.gf_group;
+  const int gf_group_index = cpi->twopass.gf_group.index;
+  const int layer_depth = gf_group->layer_depth[gf_group_index];
 
   // Update rate control heuristics
   rc->projected_frame_size = (int)(bytes_used << 3);
@@ -1849,6 +1865,15 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
         (cpi->refresh_golden_frame && !rc->is_src_frame_alt_ref)))) {
     rc->last_boosted_qindex = qindex;
   }
+
+  if ((qindex < cpi->twopass.last_qindex_of_arf_layer[layer_depth]) ||
+      (cm->frame_type == KEY_FRAME) ||
+      (!rc->constrained_gf_group &&
+       (cpi->refresh_alt_ref_frame ||
+        (cpi->refresh_golden_frame && !rc->is_src_frame_alt_ref)))) {
+    cpi->twopass.last_qindex_of_arf_layer[layer_depth] = qindex;
+  }
+
   if (frame_is_intra_only(cm)) rc->last_kf_qindex = qindex;
 
   update_buffer_level_postencode(cpi, rc->projected_frame_size);
