@@ -1899,7 +1899,7 @@ static int64_t log2_approximation(int64_t v) {
   }
 }
 
-int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
+int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_full_mvs,
                                  int mv_num) {
   // The bahavior of this function is to compute log2 of mv difference,
   // i.e. min log2(1 + row_diff * row_diff + col_diff * col_diff)
@@ -1910,15 +1910,15 @@ int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
   int i;
   int64_t min_abs_diff = INT64_MAX;
   int cnt = 0;
+  assert(mv_num <= NB_MVS_NUM);
   for (i = 0; i < mv_num; ++i) {
-    if (nb_mvs[i].as_int != INVALID_MV) {
-      MV nb_mv = nb_mvs[i].as_mv;
-      const int64_t row_diff = abs(mv->row - nb_mv.row);
-      const int64_t col_diff = abs(mv->col - nb_mv.col);
-      const int64_t abs_diff = row_diff * row_diff + col_diff * col_diff;
-      min_abs_diff = VPXMIN(abs_diff, min_abs_diff);
-      ++cnt;
-    }
+    MV nb_mv = nb_full_mvs[i].as_mv;
+    const int64_t row_diff = abs(mv->row - nb_mv.row);
+    const int64_t col_diff = abs(mv->col - nb_mv.col);
+    const int64_t abs_diff = row_diff * row_diff + col_diff * col_diff;
+    assert(nb_full_mvs[i].as_int != INVALID_MV);
+    min_abs_diff = VPXMIN(abs_diff, min_abs_diff);
+    ++cnt;
   }
   if (cnt) {
     return log2_approximation(1 + min_abs_diff);
@@ -2251,12 +2251,13 @@ static int64_t diamond_search_sad_new(const MACROBLOCK *x,
   return bestsad;
 }
 
-void vp9_prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
-                             int mi_col, int rf_idx, BLOCK_SIZE bsize,
-                             int_mv *nb_full_mvs) {
+int vp9_prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
+                            int mi_col, int rf_idx, BLOCK_SIZE bsize,
+                            int_mv *nb_full_mvs) {
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+  int nb_full_mv_num = 0;
   int i;
   for (i = 0; i < NB_MVS_NUM; ++i) {
     int r = dirs[i][0] * mi_height;
@@ -2266,17 +2267,15 @@ void vp9_prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
       const TplDepStats *tpl_ptr =
           &tpl_frame
                ->tpl_stats_ptr[(mi_row + r) * tpl_frame->stride + mi_col + c];
-      int_mv *mv =
-          get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row + r, mi_col + c);
       if (tpl_ptr->ready[rf_idx]) {
-        nb_full_mvs[i].as_mv = get_full_mv(&mv->as_mv);
-      } else {
-        nb_full_mvs[i].as_int = INVALID_MV;
+        int_mv *mv =
+            get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row + r, mi_col + c);
+        nb_full_mvs[nb_full_mv_num].as_mv = get_full_mv(&mv->as_mv);
+        ++nb_full_mv_num;
       }
-    } else {
-      nb_full_mvs[i].as_int = INVALID_MV;
     }
   }
+  return nb_full_mv_num;
 }
 #endif  // CONFIG_NON_GREEDY_MV
 
