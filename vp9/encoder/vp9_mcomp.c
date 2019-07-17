@@ -1901,26 +1901,30 @@ static int64_t log2_approximation(int64_t v) {
 
 int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
                                  int mv_num) {
+  // The bahavior of this function is to compute log2 of mv difference,
+  // i.e. min log2(1 + row_diff * row_diff + col_diff * col_diff)
+  // against available neghbor mvs.
+  // Since the log2 is monotonic increasing, we can compute
+  // min row_diff * row_diff + col_diff * col_diff first
+  // then apply log2 in the end
   int i;
-  int update = 0;
-  int64_t best_cost = 0;
-  vpx_clear_system_state();
+  int64_t min_abs_diff = INT64_MAX;
+  int cnt = 0;
   for (i = 0; i < mv_num; ++i) {
     if (nb_mvs[i].as_int != INVALID_MV) {
       MV nb_mv = nb_mvs[i].as_mv;
       const int64_t row_diff = abs(mv->row - nb_mv.row);
       const int64_t col_diff = abs(mv->col - nb_mv.col);
-      const int64_t cost =
-          log2_approximation(1 + row_diff * row_diff + col_diff * col_diff);
-      if (update == 0) {
-        best_cost = cost;
-        update = 1;
-      } else {
-        best_cost = cost < best_cost ? cost : best_cost;
-      }
+      const int64_t abs_diff = row_diff * row_diff + col_diff * col_diff;
+      min_abs_diff = VPXMIN(abs_diff, min_abs_diff);
+      ++cnt;
     }
   }
-  return best_cost;
+  if (cnt) {
+    return log2_approximation(1 + min_abs_diff);
+  } else {
+    return 0;
+  }
 }
 
 static int64_t exhaustive_mesh_search_multi_step(
