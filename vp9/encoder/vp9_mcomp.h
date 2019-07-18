@@ -149,9 +149,9 @@ static INLINE MV get_full_mv(const MV *mv) {
   return out_mv;
 }
 struct TplDepFrame;
-void vp9_prepare_nb_full_mvs(const struct TplDepFrame *tpl_frame, int mi_row,
-                             int mi_col, int rf_idx, BLOCK_SIZE bsize,
-                             int_mv *nb_full_mvs);
+int vp9_prepare_nb_full_mvs(const struct TplDepFrame *tpl_frame, int mi_row,
+                            int mi_col, int rf_idx, BLOCK_SIZE bsize,
+                            int_mv *nb_full_mvs);
 
 static INLINE BLOCK_SIZE get_square_block_size(BLOCK_SIZE bsize) {
   BLOCK_SIZE square_bsize;

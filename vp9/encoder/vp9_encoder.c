@@ -5912,6 +5912,7 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   // TODO(angiebird): Figure out lambda's proper value.
   const int lambda = cpi->tpl_stats[frame_idx].lambda;
   int_mv nb_full_mvs[NB_MVS_NUM];
+  int nb_full_mv_num;
 #endif
 
   MV best_ref_mv1 = { 0, 0 };
@@ -5934,10 +5935,11 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 #if CONFIG_NON_GREEDY_MV
   (void)search_method;
   (void)sadpb;
-  vp9_prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row, mi_col, rf_idx,
-                          bsize, nb_full_mvs);
+  nb_full_mv_num = vp9_prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row,
+                                           mi_col, rf_idx, bsize, nb_full_mvs);
   vp9_full_pixel_diamond_new(cpi, x, &best_ref_mv1_full, step_param, lambda, 1,
-                             &cpi->fn_ptr[bsize], nb_full_mvs, NB_MVS_NUM, mv);
+                             &cpi->fn_ptr[bsize], nb_full_mvs, nb_full_mv_num,
+                             mv);
 #else
   (void)frame_idx;
   (void)mi_row;

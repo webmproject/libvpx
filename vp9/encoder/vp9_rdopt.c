@@ -2496,15 +2496,15 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 
   int bestsme = INT_MAX;
 #if CONFIG_NON_GREEDY_MV
-  int_mv nb_full_mvs[NB_MVS_NUM];
-  const int nb_full_mv_num = NB_MVS_NUM;
   int gf_group_idx = cpi->twopass.gf_group.index;
   int gf_rf_idx = ref_frame_to_gf_rf_idx(ref);
   BLOCK_SIZE square_bsize = get_square_block_size(bsize);
+  int_mv nb_full_mvs[NB_MVS_NUM];
+  const int nb_full_mv_num =
+      vp9_prepare_nb_full_mvs(&cpi->tpl_stats[gf_group_idx], mi_row, mi_col,
+                              gf_rf_idx, square_bsize, nb_full_mvs);
   const int lambda = (pw * ph) / 4;
   assert(pw * ph == lambda << 2);
-  vp9_prepare_nb_full_mvs(&cpi->tpl_stats[gf_group_idx], mi_row, mi_col,
-                          gf_rf_idx, square_bsize, nb_full_mvs);
 #else   // CONFIG_NON_GREEDY_MV
   int sadpb = x->sadperbit16;
 #endif  // CONFIG_NON_GREEDY_MV
