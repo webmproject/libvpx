@@ -244,14 +244,6 @@ typedef struct VP9Common {
   int byte_alignment;
   int skip_loop_filter;
 
-  // Private data associated with the frame buffer callbacks.
-  void *cb_priv;
-  vpx_get_frame_buffer_cb_fn_t get_fb_cb;
-  vpx_release_frame_buffer_cb_fn_t release_fb_cb;
-
-  // Handles memory for the codec.
-  InternalFrameBufferList int_frame_buffers;
-
   // External BufferPool passed from outside.
   BufferPool *buffer_pool;
 
