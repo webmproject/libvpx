@@ -2437,16 +2437,24 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
   return best_sad;
 }
 
+static int get_exhaustive_threshold(int exhaustive_searches_thresh,
+                                    BLOCK_SIZE bsize) {
+  return exhaustive_searches_thresh >>
+         (8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]));
+}
+
 #if CONFIG_NON_GREEDY_MV
 // Runs sequence of diamond searches in smaller steps for RD.
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-int vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x, MV *mvp_full,
-                               int step_param, int lambda, int do_refine,
-                               const vp9_variance_fn_ptr_t *fn_ptr,
+int vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x,
+                               BLOCK_SIZE bsize, MV *mvp_full, int step_param,
+                               int lambda, int do_refine,
                                const int_mv *nb_full_mvs, int full_mv_num,
                                MV *best_mv) {
+  const vp9_variance_fn_ptr_t *fn_ptr = &cpi->fn_ptr[bsize];
+  const SPEED_FEATURES *const sf = &cpi->sf;
   int n, num00 = 0;
   int thissme;
   int bestsme;
@@ -2495,9 +2503,16 @@ int vp9_full_pixel_diamond_new(const VP9_COMP *cpi, MACROBLOCK *x, MV *mvp_full,
     }
   }
 
-  full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv, lambda,
-                            nb_full_mvs, full_mv_num);
-  bestsme = vp9_get_mvpred_var(x, best_mv, &center_mv, fn_ptr, 0);
+  if (sf->exhaustive_searches_thresh < INT_MAX &&
+      !cpi->rc.is_src_frame_alt_ref) {
+    const int64_t exhaustive_thr =
+        get_exhaustive_threshold(sf->exhaustive_searches_thresh, bsize);
+    if (bestsme > exhaustive_thr) {
+      full_pixel_exhaustive_new(cpi, x, best_mv, fn_ptr, best_mv, lambda,
+                                nb_full_mvs, full_mv_num);
+      bestsme = vp9_get_mvpred_var(x, best_mv, &center_mv, fn_ptr, 0);
+    }
+  }
   return bestsme;
 }
 #endif  // CONFIG_NON_GREEDY_MV
@@ -2886,9 +2901,10 @@ int vp9_full_pixel_search(const VP9_COMP *const cpi, const MACROBLOCK *const x,
     if (sf->exhaustive_searches_thresh < INT_MAX &&
         !cpi->rc.is_src_frame_alt_ref) {
       const int64_t exhaustive_thr =
-          sf->exhaustive_searches_thresh >>
-          (8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]));
-      if (var > exhaustive_thr) run_exhaustive_search = 1;
+          get_exhaustive_threshold(sf->exhaustive_searches_thresh, bsize);
+      if (var > exhaustive_thr) {
+        run_exhaustive_search = 1;
+      }
     }
   } else if (method == MESH) {
     run_exhaustive_search = 1;

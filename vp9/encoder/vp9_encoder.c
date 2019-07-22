@@ -5937,9 +5937,8 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   (void)sadpb;
   nb_full_mv_num = vp9_prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row,
                                            mi_col, rf_idx, bsize, nb_full_mvs);
-  vp9_full_pixel_diamond_new(cpi, x, &best_ref_mv1_full, step_param, lambda, 1,
-                             &cpi->fn_ptr[bsize], nb_full_mvs, nb_full_mv_num,
-                             mv);
+  vp9_full_pixel_diamond_new(cpi, x, bsize, &best_ref_mv1_full, step_param,
+                             lambda, 1, nb_full_mvs, nb_full_mv_num, mv);
 #else
   (void)frame_idx;
   (void)mi_row;

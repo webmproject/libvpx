@@ -136,9 +136,8 @@ int64_t vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
                                     const int_mv *nb_full_mvs, int full_mv_num);
 
 int vp9_full_pixel_diamond_new(const struct VP9_COMP *cpi, MACROBLOCK *x,
-                               MV *mvp_full, int step_param, int lambda,
-                               int do_refine,
-                               const vp9_variance_fn_ptr_t *fn_ptr,
+                               BLOCK_SIZE bsize, MV *mvp_full, int step_param,
+                               int lambda, int do_refine,
                                const int_mv *nb_full_mvs, int full_mv_num,
                                MV *best_mv);
 
