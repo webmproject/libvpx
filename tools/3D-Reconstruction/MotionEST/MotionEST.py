@@ -53,24 +53,28 @@ class MotionEST(object):
     h = min(self.blk_sz, self.height - cur_y)
     w = min(self.blk_sz, self.width - cur_x)
     cur_blk = self.cur_yuv[cur_y:cur_y + h, cur_x:cur_x + w, :]
-    ref_x = cur_x + mv[1]
-    ref_y = cur_y + mv[0]
-    if 0 <= ref_x < self.width and 0 <= ref_y < self.height:
+    ref_x = int(cur_x + mv[1])
+    ref_y = int(cur_y + mv[0])
+    if 0 <= ref_x < self.width - w and 0 <= ref_y < self.height - h:
       ref_blk = self.ref_yuv[ref_y:ref_y + h, ref_x:ref_x + w, :]
     else:
       ref_blk = np.zeros((h, w, 3))
-    return self.metric(cur_blk, ref_blk)
+    return metric(cur_blk, ref_blk)
 
   """
     distortion of motion field
     """
 
-  def distortion(self, metric=MSE):
+  def distortion(self, mask=None, metric=MSE):
     loss = 0
+    count = 0
     for i in xrange(self.num_row):
       for j in xrange(self.num_col):
+        if not mask is None and mask[i, j]:
+          continue
         loss += self.dist(i, j, self.mf[i, j], metric)
-    return loss / self.num_row / self.num_col
+        count += 1
+    return loss / count
 
   """
     evaluation
