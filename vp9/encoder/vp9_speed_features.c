@@ -456,6 +456,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->variance_part_thresh_mult = 1;
   sf->cb_pred_filter_search = 0;
   sf->force_smooth_interpol = 0;
+  sf->rt_intra_dc_only_low_content = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
@@ -740,12 +741,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->nonrd_use_ml_partition = 0;
 #endif
     if (content == VP9E_CONTENT_SCREEN) sf->mv.subpel_force_stop = HALF_PEL;
-    // Only keep INTRA_DC mode for speed 8.
-    if (!is_keyframe) {
-      int i = 0;
-      for (i = 0; i < BLOCK_SIZES; ++i)
-        sf->intra_y_mode_bsize_mask[i] = INTRA_DC;
-    }
+    sf->rt_intra_dc_only_low_content = 1;
     if (!cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR &&
         content != VP9E_CONTENT_SCREEN) {
       // More aggressive short circuit for speed 8.
@@ -771,6 +767,12 @@ static void set_rt_speed_feature_framesize_independent(
   }
 
   if (speed >= 9) {
+    // Only keep INTRA_DC mode for speed 9.
+    if (!is_keyframe) {
+      int i = 0;
+      for (i = 0; i < BLOCK_SIZES; ++i)
+        sf->intra_y_mode_bsize_mask[i] = INTRA_DC;
+    }
     sf->cb_pred_filter_search = 1;
     sf->mv.enable_adaptive_subpel_force_stop = 1;
     sf->mv.adapt_subpel_force_stop.mv_thresh = 1;

@@ -2554,6 +2554,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
       if (!((1 << this_mode) & cpi->sf.intra_y_mode_bsize_mask[bsize]))
         continue;
 
+      if (cpi->sf.rt_intra_dc_only_low_content && this_mode != DC_PRED &&
+          x->content_state_sb != kVeryHighSad)
+        continue;
+
       if ((cpi->sf.adaptive_rd_thresh_row_mt &&
            rd_less_than_thresh_row_mt(best_rdc.rdcost, mode_rd_thresh,
                                       &rd_thresh_freq_fact[mode_index])) ||
