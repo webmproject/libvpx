@@ -32,6 +32,8 @@ def drawMF(img, blk_sz, mf):
   for i in xrange(num_row):
     for j in xrange(num_col):
       center = (j * blk_sz + 0.5 * blk_sz, i * blk_sz + 0.5 * blk_sz)
+      """mf[i,j][0] is the row shift and mf[i,j][1] is the column shift In PIL coordinates, head[0] is x (column shift) and head[1] is y (row shift).
+      """
       head = (center[0] + mf[i, j][1], center[1] + mf[i, j][0])
       draw.line([center, head], fill=(255, 0, 0, 255))
   return Image.alpha_composite(img_rgba, mf_layer)

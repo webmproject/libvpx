@@ -120,7 +120,7 @@ class HornSchunck(MotionEST):
             avg[i, j] += self.mf[i + r, j + c] / 12.0
     return avg
 
-  def est(self):
+  def motion_field_estimation(self):
     count = 0
     """
         u_{n+1} = ~u_n - Ix(Ix.~u_n+Iy.~v+It)/(IxIx+IyIy+alpha^2)
@@ -136,7 +136,7 @@ class HornSchunck(MotionEST):
       count += 1
     self.mf *= self.blk_sz
 
-  def est_mat(self):
+  def motion_field_estimation_mat(self):
     row_idx = []
     col_idx = []
     data = []
@@ -145,8 +145,7 @@ class HornSchunck(MotionEST):
     b = np.zeros((N, 1))
     for i in xrange(self.num_row):
       for j in xrange(self.num_col):
-        """(IxIx+alpha^2)u+IxIy.v-alpha^2~u IxIy.u+(IyIy+alpha^2)v-alpha^2~v
-        """
+        """(IxIx+alpha^2)u+IxIy.v-alpha^2~u IxIy.u+(IyIy+alpha^2)v-alpha^2~v"""
         u_idx = i * 2 * self.num_col + 2 * j
         v_idx = u_idx + 1
         b[u_idx, 0] = -self.Ix[i, j] * self.It[i, j]
