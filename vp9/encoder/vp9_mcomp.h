@@ -12,6 +12,9 @@
 #define VPX_VP9_ENCODER_VP9_MCOMP_H_
 
 #include "vp9/encoder/vp9_block.h"
+#if CONFIG_NON_GREEDY_MV
+#include "vp9/encoder/vp9_non_greedy_mv.h"
+#endif  // CONFIG_NON_GREEDY_MV
 #include "vpx_dsp/variance.h"
 
 #ifdef __cplusplus
@@ -126,7 +129,6 @@ void vp9_set_subpel_mv_search_range(MvLimits *subpel_mv_limits,
                                     const MV *ref_mv);
 
 #if CONFIG_NON_GREEDY_MV
-#define NB_MVS_NUM 4
 struct TplDepStats;
 int64_t vp9_refining_search_sad_new(const MACROBLOCK *x, MV *best_full_mv,
                                     int lambda, int search_range,
@@ -140,8 +142,6 @@ int vp9_full_pixel_diamond_new(const struct VP9_COMP *cpi, MACROBLOCK *x,
                                const int_mv *nb_full_mvs, int full_mv_num,
                                MV *best_mv);
 
-int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_mvs,
-                                 int mv_num);
 static INLINE MV get_full_mv(const MV *mv) {
   MV out_mv;
   out_mv.row = mv->row >> 3;
