@@ -275,7 +275,8 @@ class SADx8Test : public SADTestBase<SadMxNx8Param> {
   }
 
   void CheckSADs() const {
-    uint32_t reference_sad, exp_sad[8];
+    uint32_t reference_sad;
+    DECLARE_ALIGNED(kDataAlignment, uint32_t, exp_sad[8]);
 
     SADs(exp_sad);
     for (int offset = 0; offset < 8; ++offset) {
@@ -299,7 +300,8 @@ class SADx4Test : public SADTestBase<SadMxNx4Param> {
   }
 
   void CheckSADs() const {
-    uint32_t reference_sad, exp_sad[4];
+    uint32_t reference_sad;
+    DECLARE_ALIGNED(kDataAlignment, uint32_t, exp_sad[4]);
 
     SADs(exp_sad);
     for (int block = 0; block < 4; ++block) {
@@ -534,7 +536,8 @@ TEST_P(SADx4Test, DISABLED_Speed) {
   FillRandom(GetReference(2), reference_stride_);
   FillRandom(GetReference(3), reference_stride_);
   const int kCountSpeedTestBlock = 500000000 / (params_.width * params_.height);
-  uint32_t reference_sad[4], exp_sad[4];
+  uint32_t reference_sad[4];
+  DECLARE_ALIGNED(kDataAlignment, uint32_t, exp_sad[4]);
   vpx_usec_timer timer;
 
   memset(reference_sad, 0, sizeof(reference_sad));
