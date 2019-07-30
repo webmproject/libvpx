@@ -57,8 +57,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->simulcast_mode = 0;
 
   for (i = 0; i < REF_FRAMES; ++i) {
-    svc->fb_idx_spatial_layer_id[i] = -1;
-    svc->fb_idx_temporal_layer_id[i] = -1;
+    svc->fb_idx_spatial_layer_id[i] = 0xff;
+    svc->fb_idx_temporal_layer_id[i] = 0xff;
     svc->fb_idx_base[i] = 0;
   }
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
