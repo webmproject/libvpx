@@ -180,12 +180,12 @@ static int64_t log2_approximation(int64_t v) {
 
 int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_full_mvs,
                                  int mv_num) {
-  // The bahavior of this function is to compute log2 of mv difference,
+  // The behavior of this function is to compute log2 of mv difference,
   // i.e. min log2(1 + row_diff * row_diff + col_diff * col_diff)
-  // against available neghbor mvs.
-  // Since the log2 is monotonic increasing, we can compute
+  // against available neighbor mvs.
+  // Since the log2 is monotonically increasing, we can compute
   // min row_diff * row_diff + col_diff * col_diff first
-  // then apply log2 in the end
+  // then apply log2 in the end.
   int i;
   int64_t min_abs_diff = INT64_MAX;
   int cnt = 0;
@@ -201,7 +201,6 @@ int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_full_mvs,
   }
   if (cnt) {
     return log2_approximation(1 + min_abs_diff);
-  } else {
-    return 0;
   }
+  return 0;
 }
