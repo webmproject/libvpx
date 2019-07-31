@@ -30,7 +30,7 @@ class Exhaust(MotionEST):
     """
 
   def search(self, cur_r, cur_c):
-    min_loss = self.dist(cur_r, cur_c, [0, 0], self.metric)
+    min_loss = self.block_dist(cur_r, cur_c, [0, 0], self.metric)
     cur_x = cur_c * self.blk_sz
     cur_y = cur_r * self.blk_sz
     ref_x = cur_x
@@ -39,14 +39,15 @@ class Exhaust(MotionEST):
     for y in xrange(cur_y - self.wnd_sz, cur_y + self.wnd_sz):
       for x in xrange(cur_x - self.wnd_sz, cur_x + self.wnd_sz):
         if 0 <= x < self.width - self.blk_sz and 0 <= y < self.height - self.blk_sz:
-          loss = self.dist(cur_r, cur_c, [y - cur_y, x - cur_x], self.metric)
+          loss = self.block_dist(cur_r, cur_c, [y - cur_y, x - cur_x],
+                                 self.metric)
           if loss < min_loss:
             min_loss = loss
             ref_x = x
             ref_y = y
     return ref_x, ref_y
 
-  def est(self):
+  def motion_field_estimation(self):
     for i in xrange(self.num_row):
       for j in xrange(self.num_col):
         ref_x, ref_y = self.search(i, j)
@@ -101,7 +102,7 @@ class ExhaustNeighbor(MotionEST):
     """
 
   def search(self, cur_r, cur_c):
-    dist_loss = self.dist(cur_r, cur_c, [0, 0], self.metric)
+    dist_loss = self.block_dist(cur_r, cur_c, [0, 0], self.metric)
     nb_loss = self.neighborLoss(cur_r, cur_c, np.array([0, 0]))
     min_loss = dist_loss + self.beta * nb_loss
     cur_x = cur_c * self.blk_sz
@@ -113,8 +114,8 @@ class ExhaustNeighbor(MotionEST):
     for y in xrange(cur_y - self.wnd_sz, cur_y + self.wnd_sz):
       for x in xrange(cur_x - self.wnd_sz, cur_x + self.wnd_sz):
         if 0 <= x < self.width - self.blk_sz and 0 <= y < self.height - self.blk_sz:
-          dist_loss = self.dist(cur_r, cur_c, [y - cur_y, x - cur_x],
-                                self.metric)
+          dist_loss = self.block_dist(cur_r, cur_c, [y - cur_y, x - cur_x],
+                                      self.metric)
           nb_loss = self.neighborLoss(cur_r, cur_c, [y - cur_y, x - cur_x])
           loss = dist_loss + self.beta * nb_loss
           if loss < min_loss:
@@ -123,7 +124,7 @@ class ExhaustNeighbor(MotionEST):
             ref_y = y
     return ref_x, ref_y
 
-  def est(self):
+  def motion_field_estimation(self):
     for i in xrange(self.num_row):
       for j in xrange(self.num_col):
         ref_x, ref_y = self.search(i, j)
