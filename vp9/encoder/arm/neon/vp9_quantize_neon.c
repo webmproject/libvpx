@@ -55,7 +55,8 @@ void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
     const int16x8_t v_iscan = vld1q_s16(&iscan[0]);
     const int16x8_t v_coeff = load_tran_low_to_s16q(coeff_ptr);
     const int16x8_t v_coeff_sign = vshrq_n_s16(v_coeff, 15);
-    const int16x8_t v_tmp = vabaq_s16(v_round, v_coeff, v_zero);
+    const int16x8_t v_abs = vabsq_s16(v_coeff);
+    const int16x8_t v_tmp = vqaddq_s16(v_abs, v_round);
     const int32x4_t v_tmp_lo =
         vmull_s16(vget_low_s16(v_tmp), vget_low_s16(v_quant));
     const int32x4_t v_tmp_hi =
@@ -80,7 +81,8 @@ void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
     const int16x8_t v_iscan = vld1q_s16(&iscan[i]);
     const int16x8_t v_coeff = load_tran_low_to_s16q(coeff_ptr + i);
     const int16x8_t v_coeff_sign = vshrq_n_s16(v_coeff, 15);
-    const int16x8_t v_tmp = vabaq_s16(v_round, v_coeff, v_zero);
+    const int16x8_t v_abs = vabsq_s16(v_coeff);
+    const int16x8_t v_tmp = vqaddq_s16(v_abs, v_round);
     const int32x4_t v_tmp_lo =
         vmull_s16(vget_low_s16(v_tmp), vget_low_s16(v_quant));
     const int32x4_t v_tmp_hi =
@@ -146,7 +148,7 @@ void vp9_quantize_fp_32x32_neon(const tran_low_t *coeff_ptr, intptr_t count,
   const int16x8_t dequant_mask =
       vreinterpretq_s16_u16(vcgeq_s16(coeff_abs, dequant_thresh));
 
-  int16x8_t qcoeff = vaddq_s16(coeff_abs, round);
+  int16x8_t qcoeff = vqaddq_s16(coeff_abs, round);
   int32x4_t dqcoeff_0, dqcoeff_1;
   int16x8_t dqcoeff;
   uint16x8_t eob_max;
@@ -200,7 +202,7 @@ void vp9_quantize_fp_32x32_neon(const tran_low_t *coeff_ptr, intptr_t count,
       const int16x8_t dequant_mask =
           vreinterpretq_s16_u16(vcgeq_s16(coeff_abs, dequant_thresh));
 
-      int16x8_t qcoeff = vaddq_s16(coeff_abs, round);
+      int16x8_t qcoeff = vqaddq_s16(coeff_abs, round);
       int32x4_t dqcoeff_0, dqcoeff_1;
       int16x8_t dqcoeff;
 
