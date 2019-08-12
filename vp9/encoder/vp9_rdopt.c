@@ -3450,7 +3450,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
   if (cpi->rc.is_src_frame_alt_ref) {
     if (sf->alt_ref_search_fp) {
       mode_skip_mask[ALTREF_FRAME] = 0;
-      ref_frame_skip_mask[0] = ~(1 << ALTREF_FRAME);
+      ref_frame_skip_mask[0] = ~(1 << ALTREF_FRAME) & 0xff;
       ref_frame_skip_mask[1] = SECOND_REF_FRAME_MASK;
     }
   }
