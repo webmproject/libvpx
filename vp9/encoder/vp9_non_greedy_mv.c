@@ -295,3 +295,53 @@ void vp9_get_smooth_motion_field(const MV *scaled_search_mf, const int (*M)[4],
   free(input);
   free(output);
 }
+
+void vp9_get_local_structure(const YV12_BUFFER_CONFIG *ref_frame,
+                             const vp9_variance_fn_ptr_t *fn_ptr, int mi_rows,
+                             int mi_cols, BLOCK_SIZE bsize, int (*M)[4]) {
+  int stride = ref_frame->y_stride;
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  int cols = mi_cols / mi_width;
+  int mi_row, mi_col;
+  for (mi_row = 0; mi_row < mi_rows; mi_row += mi_height) {
+    for (mi_col = 0; mi_col < mi_cols; mi_col += mi_width) {
+      const int mb_y_offset = mi_row * MI_SIZE * stride + mi_col * MI_SIZE;
+      int row = mi_row / mi_height;
+      int col = mi_col / mi_width;
+      uint8_t *center = ref_frame->y_buffer + mb_y_offset;
+      uint8_t *nb;
+      int I_row = 0, I_col = 0;
+      // up
+      if (mi_row > 0) {
+        nb = center - MI_SIZE * stride * mi_height;
+        I_row += fn_ptr->sdf(center, stride, nb, stride);
+      }
+      // down
+      if (mi_row < mi_rows - 1) {
+        nb = center + MI_SIZE * stride * mi_height;
+        I_row += fn_ptr->sdf(center, stride, nb, stride);
+      }
+      if (mi_row > 0 && mi_row < mi_rows - 1) {
+        I_row /= 2;
+      }
+      // left
+      if (mi_col > 0) {
+        nb = center - MI_SIZE * mi_width;
+        I_col += fn_ptr->sdf(center, stride, nb, stride);
+      }
+      // right
+      if (mi_col < mi_cols - 1) {
+        nb = center + MI_SIZE * mi_width;
+        I_col += fn_ptr->sdf(center, stride, nb, stride);
+      }
+      if (mi_col > 0 && mi_col < mi_cols - 1) {
+        I_col /= 2;
+      }
+      M[row * cols + col][0] = I_row * I_row;
+      M[row * cols + col][1] = I_row * I_col;
+      M[row * cols + col][2] = I_col * I_row;
+      M[row * cols + col][3] = I_col * I_col;
+    }
+  }
+}
