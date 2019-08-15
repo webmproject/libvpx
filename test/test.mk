@@ -183,6 +183,10 @@ LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += blockiness_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_INTERNAL_STATS) += consistency_test.cc
 endif
 
+ifeq ($(CONFIG_VP9_ENCODER),yes)
+LIBVPX_TEST_SRCS-$(CONFIG_NON_GREEDY_MV) += non_greedy_mv_test.cc
+endif
+
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_TEMPORAL_DENOISING),yesyes)
 LIBVPX_TEST_SRCS-yes += vp9_denoiser_test.cc
 endif
