@@ -164,6 +164,72 @@ static const int log2_table[LOG2_TABLE_SIZE] = {
   10484282,
 };
 
+static int mi_size_to_block_size(int mi_bsize, int mi_num) {
+  return (mi_num % mi_bsize) ? mi_num / mi_bsize + 1 : mi_num / mi_bsize;
+}
+
+void vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
+                                 int frame_num, int mi_rows, int mi_cols) {
+  int frame_idx, rf_idx, square_block_idx;
+  motion_field_info->frame_num = frame_num;
+  motion_field_info->motion_field_array =
+      vpx_calloc(frame_num, sizeof(*motion_field_info->motion_field_array));
+  for (frame_idx = 0; frame_idx < frame_num; ++frame_idx) {
+    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+      for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
+           ++square_block_idx) {
+        BLOCK_SIZE bsize = square_block_idx_to_bsize(square_block_idx);
+        const int mi_height = num_8x8_blocks_high_lookup[bsize];
+        const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+        const int block_rows = mi_size_to_block_size(mi_height, mi_rows);
+        const int block_cols = mi_size_to_block_size(mi_width, mi_cols);
+        MotionField *motion_field =
+            &motion_field_info
+                 ->motion_field_array[frame_idx][rf_idx][square_block_idx];
+        vp9_alloc_motion_field(motion_field, bsize, block_rows, block_cols);
+      }
+    }
+  }
+}
+
+void vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
+                            int block_rows, int block_cols) {
+  motion_field->ready = 0;
+  motion_field->bsize = bsize;
+  motion_field->block_rows = block_rows;
+  motion_field->block_cols = block_cols;
+  motion_field->mf =
+      vpx_calloc(block_rows * block_cols, sizeof(*motion_field->mf));
+  assert(motion_field->mf != NULL);
+  motion_field->local_structure = vpx_calloc(
+      block_rows * block_cols, sizeof(*motion_field->local_structure));
+  assert(motion_field->local_structure != NULL);
+}
+
+void vp9_free_motion_field(MotionField *motion_field) {
+  vpx_free(motion_field->mf);
+  vpx_free(motion_field->local_structure);
+  vp9_zero(*motion_field);
+}
+
+void vp9_free_motion_field_info(MotionFieldInfo *motion_field_info) {
+  int frame_idx, rf_idx, square_block_idx;
+  for (frame_idx = 0; frame_idx < motion_field_info->frame_num; ++frame_idx) {
+    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+      for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
+           ++square_block_idx) {
+        MotionField *motion_field =
+            &motion_field_info
+                 ->motion_field_array[frame_idx][rf_idx][square_block_idx];
+        vp9_free_motion_field(motion_field);
+      }
+    }
+  }
+  vpx_free(motion_field_info->motion_field_array);
+  motion_field_info->motion_field_array = NULL;
+  motion_field_info->frame_num = 0;
+}
+
 static int64_t log2_approximation(int64_t v) {
   assert(v > 0);
   if (v < LOG2_TABLE_SIZE) {
@@ -206,8 +272,9 @@ int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_full_mvs,
 }
 
 static MV get_smooth_motion_vector(const MV search_mv, const MV *tmp_mf,
-                                   const int (*M)[4], int rows, int cols,
-                                   int row, int col, float alpha) {
+                                   const int (*M)[MF_LOCAL_STRUCTURE_SIZE],
+                                   int rows, int cols, int row, int col,
+                                   float alpha) {
   const MV tmp_mv = tmp_mf[row * cols + col];
   int idx_row, idx_col;
   float avg_nb_mv[2] = { 0.0f, 0.0f };
@@ -260,7 +327,8 @@ static MV get_smooth_motion_vector(const MV search_mv, const MV *tmp_mf,
   return mv;
 }
 
-void vp9_get_smooth_motion_field(const MV *scaled_search_mf, const int (*M)[4],
+void vp9_get_smooth_motion_field(const MV *scaled_search_mf,
+                                 const int (*M)[MF_LOCAL_STRUCTURE_SIZE],
                                  int rows, int cols, float alpha, int num_iters,
                                  MV *smooth_mf) {
   // note: the scaled_search_mf and smooth_mf are all scaled by macroblock size
@@ -298,11 +366,12 @@ void vp9_get_smooth_motion_field(const MV *scaled_search_mf, const int (*M)[4],
 
 void vp9_get_local_structure(const YV12_BUFFER_CONFIG *ref_frame,
                              const vp9_variance_fn_ptr_t *fn_ptr, int mi_rows,
-                             int mi_cols, BLOCK_SIZE bsize, int (*M)[4]) {
+                             int mi_cols, BLOCK_SIZE bsize,
+                             int (*M)[MF_LOCAL_STRUCTURE_SIZE]) {
   int stride = ref_frame->y_stride;
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
-  int cols = mi_cols / mi_width;
+  int cols = mi_size_to_block_size(mi_width, mi_cols);
   int mi_row, mi_col;
   for (mi_row = 0; mi_row < mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < mi_cols; mi_col += mi_width) {

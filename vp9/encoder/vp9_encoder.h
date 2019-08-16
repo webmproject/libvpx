@@ -302,7 +302,6 @@ typedef struct TplDepStats {
 } TplDepStats;
 
 #if CONFIG_NON_GREEDY_MV
-#define SQUARE_BLOCK_SIZES 4
 
 #define ZERO_MV_MODE 0
 #define NEW_MV_MODE 1
@@ -329,40 +328,6 @@ typedef struct TplDepFrame {
 } TplDepFrame;
 
 #if CONFIG_NON_GREEDY_MV
-static INLINE int get_square_block_idx(BLOCK_SIZE bsize) {
-  if (bsize == BLOCK_4X4) {
-    return 0;
-  }
-  if (bsize == BLOCK_8X8) {
-    return 1;
-  }
-  if (bsize == BLOCK_16X16) {
-    return 2;
-  }
-  if (bsize == BLOCK_32X32) {
-    return 3;
-  }
-  assert(0 && "ERROR: non-square block size");
-  return -1;
-}
-
-static INLINE BLOCK_SIZE square_block_idx_to_bsize(int square_block_idx) {
-  if (square_block_idx == 0) {
-    return BLOCK_4X4;
-  }
-  if (square_block_idx == 1) {
-    return BLOCK_8X8;
-  }
-  if (square_block_idx == 2) {
-    return BLOCK_16X16;
-  }
-  if (square_block_idx == 3) {
-    return BLOCK_32X32;
-  }
-  assert(0 && "ERROR: invalid square_block_idx");
-  return BLOCK_INVALID;
-}
-
 static INLINE int_mv *get_pyramid_mv(const TplDepFrame *tpl_frame, int rf_idx,
                                      BLOCK_SIZE bsize, int mi_row, int mi_col) {
   return &tpl_frame->pyramid_mv_arr[rf_idx][get_square_block_idx(bsize)]

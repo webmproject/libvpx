@@ -21,17 +21,80 @@ extern "C" {
 #endif
 #define NB_MVS_NUM 4
 #define LOG2_PRECISION 20
+#define MF_LOCAL_STRUCTURE_SIZE 4
+#define SQUARE_BLOCK_SIZES 4
+
+typedef struct MotionField {
+  int ready;
+  BLOCK_SIZE bsize;
+  int block_rows;
+  int block_cols;
+  int (*local_structure)[MF_LOCAL_STRUCTURE_SIZE];
+  MV *mf;
+  int mv_log_scale;
+} MotionField;
+
+typedef struct MotionFieldInfo {
+  int frame_num;
+  MotionField (*motion_field_array)[3][SQUARE_BLOCK_SIZES];
+} MotionFieldInfo;
+
+static INLINE int get_square_block_idx(BLOCK_SIZE bsize) {
+  if (bsize == BLOCK_4X4) {
+    return 0;
+  }
+  if (bsize == BLOCK_8X8) {
+    return 1;
+  }
+  if (bsize == BLOCK_16X16) {
+    return 2;
+  }
+  if (bsize == BLOCK_32X32) {
+    return 3;
+  }
+  assert(0 && "ERROR: non-square block size");
+  return -1;
+}
+
+static INLINE BLOCK_SIZE square_block_idx_to_bsize(int square_block_idx) {
+  if (square_block_idx == 0) {
+    return BLOCK_4X4;
+  }
+  if (square_block_idx == 1) {
+    return BLOCK_8X8;
+  }
+  if (square_block_idx == 2) {
+    return BLOCK_16X16;
+  }
+  if (square_block_idx == 3) {
+    return BLOCK_32X32;
+  }
+  assert(0 && "ERROR: invalid square_block_idx");
+  return BLOCK_INVALID;
+}
+
+void vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
+                                 int gop_size, int block_rows, int block_cols);
+
+void vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
+                            int block_rows, int block_cols);
+
+void vp9_free_motion_field(MotionField *motion_field);
+
+void vp9_free_motion_field_info(MotionFieldInfo *motion_field_info);
 
 int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_full_mvs,
                                  int mv_num);
 
-void vp9_get_smooth_motion_field(const MV *search_mf, const int (*M)[4],
+void vp9_get_smooth_motion_field(const MV *search_mf,
+                                 const int (*M)[MF_LOCAL_STRUCTURE_SIZE],
                                  int rows, int cols, float alpha, int num_iters,
                                  MV *smooth_mf);
 
 void vp9_get_local_structure(const YV12_BUFFER_CONFIG *ref_frame,
                              const vp9_variance_fn_ptr_t *fn_ptr, int mi_rows,
-                             int mi_cols, BLOCK_SIZE bsize, int (*M)[4]);
+                             int mi_cols, BLOCK_SIZE bsize,
+                             int (*M)[MF_LOCAL_STRUCTURE_SIZE]);
 
 #ifdef __cplusplus
 }  // extern "C"
