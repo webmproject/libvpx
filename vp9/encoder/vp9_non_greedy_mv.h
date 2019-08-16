@@ -14,12 +14,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 #define NB_MVS_NUM 4
 #define LOG2_PRECISION 20
 
 int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_full_mvs,
                                  int mv_num);
+
+void vp9_get_smooth_motion_field(const MV *search_mf, const int (*M)[4],
+                                 int rows, int cols, float alpha, int num_iters,
+                                 MV *smooth_mf);
 
 #ifdef __cplusplus
 }  // extern "C"
