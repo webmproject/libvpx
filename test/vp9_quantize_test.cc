@@ -214,12 +214,15 @@ inline void quant_fp_nz(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
         tmp = clamp(abs_coeff[y] + _round, INT16_MIN, INT16_MAX);
         tmp = (tmp * quant_ptr[rc != 0]) >> (16 - is_32x32);
         qcoeff_ptr[rc] = (tmp ^ coeff_sign[y]) - coeff_sign[y];
-        dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
+        dqcoeff_ptr[rc] =
+            static_cast<tran_low_t>(qcoeff_ptr[rc] * dequant_ptr[rc != 0]);
 
         if (is_32x32) {
-          dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2;
+          dqcoeff_ptr[rc] = static_cast<tran_low_t>(qcoeff_ptr[rc] *
+                                                    dequant_ptr[rc != 0] / 2);
         } else {
-          dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
+          dqcoeff_ptr[rc] =
+              static_cast<tran_low_t>(qcoeff_ptr[rc] * dequant_ptr[rc != 0]);
         }
       } else {
         qcoeff_ptr[rc] = 0;
