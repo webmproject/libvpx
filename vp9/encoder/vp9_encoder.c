@@ -5884,18 +5884,10 @@ static void init_tpl_stats(VP9_COMP *cpi) {
 }
 
 #if CONFIG_NON_GREEDY_MV
-static uint32_t motion_compensated_prediction(
+static uint32_t motion_compensated_prediction_new(
     VP9_COMP *cpi, ThreadData *td, int frame_idx, uint8_t *cur_frame_buf,
     uint8_t *ref_frame_buf, int stride, BLOCK_SIZE bsize, int mi_row,
     int mi_col, MV *mv, int rf_idx) {
-#else   // CONFIG_NON_GREEDY_MV
-static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
-                                              int frame_idx,
-                                              uint8_t *cur_frame_buf,
-                                              uint8_t *ref_frame_buf,
-                                              int stride, BLOCK_SIZE bsize,
-                                              int mi_row, int mi_col, MV *mv) {
-#endif  // CONFIG_NON_GREEDY_MV
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
@@ -5907,13 +5899,11 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
   uint32_t sse;
   int cost_list[5];
   const MvLimits tmp_mv_limits = x->mv_limits;
-#if CONFIG_NON_GREEDY_MV
   // lambda is used to adjust the importance of motion vector consitency.
   // TODO(angiebird): Figure out lambda's proper value.
   const int lambda = cpi->tpl_stats[frame_idx].lambda;
   int_mv nb_full_mvs[NB_MVS_NUM];
   int nb_full_mv_num;
-#endif
 
   MV best_ref_mv1 = { 0, 0 };
   MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
@@ -5932,21 +5922,12 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 
   vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
 
-#if CONFIG_NON_GREEDY_MV
   (void)search_method;
   (void)sadpb;
   nb_full_mv_num = vp9_prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row,
                                            mi_col, rf_idx, bsize, nb_full_mvs);
   vp9_full_pixel_diamond_new(cpi, x, bsize, &best_ref_mv1_full, step_param,
                              lambda, 1, nb_full_mvs, nb_full_mv_num, mv);
-#else
-  (void)frame_idx;
-  (void)mi_row;
-  (void)mi_col;
-  vp9_full_pixel_search(cpi, x, bsize, &best_ref_mv1_full, step_param,
-                        search_method, sadpb, cond_cost_list(cpi, cost_list),
-                        &best_ref_mv1, mv, 0, 0);
-#endif
 
   /* restore UMV window */
   x->mv_limits = tmp_mv_limits;
@@ -5961,6 +5942,59 @@ static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
 
   return bestsme;
 }
+#else  // CONFIG_NON_GREEDY_MV
+static uint32_t motion_compensated_prediction(VP9_COMP *cpi, ThreadData *td,
+                                              uint8_t *cur_frame_buf,
+                                              uint8_t *ref_frame_buf,
+                                              int stride, BLOCK_SIZE bsize,
+                                              MV *mv) {
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
+  const SEARCH_METHODS search_method = NSTEP;
+  int step_param;
+  int sadpb = x->sadperbit16;
+  uint32_t bestsme = UINT_MAX;
+  uint32_t distortion;
+  uint32_t sse;
+  int cost_list[5];
+  const MvLimits tmp_mv_limits = x->mv_limits;
+
+  MV best_ref_mv1 = { 0, 0 };
+  MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
+
+  best_ref_mv1_full.col = best_ref_mv1.col >> 3;
+  best_ref_mv1_full.row = best_ref_mv1.row >> 3;
+
+  // Setup frame pointers
+  x->plane[0].src.buf = cur_frame_buf;
+  x->plane[0].src.stride = stride;
+  xd->plane[0].pre[0].buf = ref_frame_buf;
+  xd->plane[0].pre[0].stride = stride;
+
+  step_param = mv_sf->reduce_first_step_size;
+  step_param = VPXMIN(step_param, MAX_MVSEARCH_STEPS - 2);
+
+  vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
+
+  vp9_full_pixel_search(cpi, x, bsize, &best_ref_mv1_full, step_param,
+                        search_method, sadpb, cond_cost_list(cpi, cost_list),
+                        &best_ref_mv1, mv, 0, 0);
+
+  /* restore UMV window */
+  x->mv_limits = tmp_mv_limits;
+
+  // TODO(yunqing): may use higher tap interp filter than 2 taps.
+  // Ignore mv costing by sending NULL pointer instead of cost array
+  bestsme = cpi->find_fractional_mv_step(
+      x, mv, &best_ref_mv1, cpi->common.allow_high_precision_mv, x->errorperbit,
+      &cpi->fn_ptr[bsize], 0, mv_sf->subpel_search_level,
+      cond_cost_list(cpi, cost_list), NULL, NULL, &distortion, &sse, NULL, 0, 0,
+      USE_2_TAPS);
+
+  return bestsme;
+}
+#endif
 
 static int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
                             int ref_pos_col, int block, BLOCK_SIZE bsize) {
@@ -6251,10 +6285,9 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
     mv.as_int =
         get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col)->as_int;
 #else
-    motion_compensated_prediction(
-        cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
-        ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
-        mi_row, mi_col, &mv.as_mv);
+    motion_compensated_prediction(cpi, td, xd->cur_buf->y_buffer + mb_y_offset,
+                                  ref_frame[rf_idx]->y_buffer + mb_y_offset,
+                                  xd->cur_buf->y_stride, bsize, &mv.as_mv);
 #endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -6714,7 +6747,7 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
     } else {
       tpl_stats->ready[rf_idx] = 1;
     }
-    motion_compensated_prediction(
+    motion_compensated_prediction_new(
         cpi, td, frame_idx, xd->cur_buf->y_buffer + mb_y_offset,
         ref_frame[rf_idx]->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bsize,
         mi_row, mi_col, &mv->as_mv, rf_idx);
