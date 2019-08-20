@@ -6743,8 +6743,8 @@ static int compare_feature_score(const void *a, const void *b) {
 }
 
 static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
-                             YV12_BUFFER_CONFIG **ref_frame, BLOCK_SIZE bsize,
-                             int mi_row, int mi_col) {
+                             YV12_BUFFER_CONFIG *ref_frame, BLOCK_SIZE bsize,
+                             int mi_row, int mi_col, int rf_idx) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCK *x = &td->mb;
   MACROBLOCKD *xd = &x->e_mbd;
@@ -6753,27 +6753,18 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
       &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
   const int mb_y_offset =
       mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
-  int rf_idx;
-
+  assert(ref_frame != NULL);
   set_mv_limits(cm, x, mi_row, mi_col);
-
-  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-    if (ref_frame[rf_idx] == NULL) {
-      tpl_stats->ready[rf_idx] = 0;
-      continue;
-    }
-    tpl_stats->ready[rf_idx] = 1;
-    {
-      int_mv *mv = get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
-      uint8_t *cur_frame_buf = xd->cur_buf->y_buffer + mb_y_offset;
-      uint8_t *ref_frame_buf = ref_frame[rf_idx]->y_buffer + mb_y_offset;
-      const int stride = xd->cur_buf->y_stride;
-      full_pixel_motion_search(cpi, td, frame_idx, cur_frame_buf, ref_frame_buf,
-                               stride, bsize, mi_row, mi_col, &mv->as_mv,
-                               rf_idx);
-      sub_pixel_motion_search(cpi, td, cur_frame_buf, ref_frame_buf, stride,
-                              bsize, &mv->as_mv);
-    }
+  tpl_stats->ready[rf_idx] = 1;
+  {
+    int_mv *mv = get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
+    uint8_t *cur_frame_buf = xd->cur_buf->y_buffer + mb_y_offset;
+    uint8_t *ref_frame_buf = ref_frame->y_buffer + mb_y_offset;
+    const int stride = xd->cur_buf->y_stride;
+    full_pixel_motion_search(cpi, td, frame_idx, cur_frame_buf, ref_frame_buf,
+                             stride, bsize, mi_row, mi_col, &mv->as_mv, rf_idx);
+    sub_pixel_motion_search(cpi, td, cur_frame_buf, ref_frame_buf, stride,
+                            bsize, &mv->as_mv);
   }
 }
 
@@ -6869,6 +6860,7 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   int fs_loc_sort_size;
   int fs_loc_heap_size;
   int mi_row, mi_col;
+  int rf_idx;
 
   tpl_frame->lambda = (pw * ph) >> 2;
   assert(pw * ph == tpl_frame->lambda << 2);
@@ -6898,10 +6890,9 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   qsort(cpi->feature_score_loc_sort, fs_loc_sort_size,
         sizeof(*cpi->feature_score_loc_sort), compare_feature_score);
 
-  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-      int rf_idx;
-      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+      for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
         TplDepStats *tpl_stats =
             &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
         tpl_stats->ready[rf_idx] = 0;
@@ -6909,36 +6900,48 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
     }
   }
 
+  // TODO(angiebird): Clean up this part.
+  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    int i;
+    if (ref_frame[rf_idx] == NULL) {
+      continue;
+    }
 #if CHANGE_MV_SEARCH_ORDER
 #if !USE_PQSORT
-  for (i = 0; i < fs_loc_sort_size; ++i) {
-    FEATURE_SCORE_LOC *fs_loc = cpi->feature_score_loc_sort[i];
-    do_motion_search(cpi, td, frame_idx, ref_frame, bsize, fs_loc->mi_row,
-                     fs_loc->mi_col);
-  }
+    for (i = 0; i < fs_loc_sort_size; ++i) {
+      FEATURE_SCORE_LOC *fs_loc = cpi->feature_score_loc_sort[i];
+      do_motion_search(cpi, td, frame_idx, ref_frame[rf_idx], bsize,
+                       fs_loc->mi_row, fs_loc->mi_col, rf_idx);
+    }
 #else   // !USE_PQSORT
-  fs_loc_heap_size = 0;
-  max_heap_push(cpi->feature_score_loc_heap, &fs_loc_heap_size,
-                cpi->feature_score_loc_sort[0]);
+    fs_loc_heap_size = 0;
+    max_heap_push(cpi->feature_score_loc_heap, &fs_loc_heap_size,
+                  cpi->feature_score_loc_sort[0]);
 
-  while (fs_loc_heap_size > 0) {
-    FEATURE_SCORE_LOC *fs_loc;
-    max_heap_pop(cpi->feature_score_loc_heap, &fs_loc_heap_size, &fs_loc);
+    for (i = 0; i < fs_loc_sort_size; ++i) {
+      cpi->feature_score_loc_sort[i]->visited = 0;
+    }
 
-    do_motion_search(cpi, td, frame_idx, ref_frame, bsize, fs_loc->mi_row,
-                     fs_loc->mi_col);
+    while (fs_loc_heap_size > 0) {
+      FEATURE_SCORE_LOC *fs_loc;
+      max_heap_pop(cpi->feature_score_loc_heap, &fs_loc_heap_size, &fs_loc);
 
-    add_nb_blocks_to_heap(cpi, tpl_frame, bsize, fs_loc->mi_row, fs_loc->mi_col,
-                          &fs_loc_heap_size);
-  }
+      do_motion_search(cpi, td, frame_idx, ref_frame[rf_idx], bsize,
+                       fs_loc->mi_row, fs_loc->mi_col, rf_idx);
+
+      add_nb_blocks_to_heap(cpi, tpl_frame, bsize, fs_loc->mi_row,
+                            fs_loc->mi_col, &fs_loc_heap_size);
+    }
 #endif  // !USE_PQSORT
 #else   // CHANGE_MV_SEARCH_ORDER
-  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-      do_motion_search(cpi, td, frame_idx, ref_frame, bsize, mi_row, mi_col);
+    for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+      for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+        do_motion_search(cpi, td, frame_idx, ref_frame[rf_idx], bsize, mi_row,
+                         mi_col, rf_idx);
+      }
     }
-  }
 #endif  // CHANGE_MV_SEARCH_ORDER
+  }
 }
 #endif  // CONFIG_NON_GREEDY_MV
 
