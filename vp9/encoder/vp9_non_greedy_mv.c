@@ -179,7 +179,7 @@ Status vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
   motion_field_info->motion_field_array =
       vpx_calloc(frame_num, sizeof(*motion_field_info->motion_field_array));
   for (frame_idx = 0; frame_idx < frame_num; ++frame_idx) {
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
       for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
            ++square_block_idx) {
         BLOCK_SIZE bsize = square_block_idx_to_bsize(square_block_idx);
@@ -235,7 +235,7 @@ void vp9_free_motion_field_info(MotionFieldInfo *motion_field_info) {
   if (motion_field_info->allocated) {
     int frame_idx, rf_idx, square_block_idx;
     for (frame_idx = 0; frame_idx < motion_field_info->frame_num; ++frame_idx) {
-      for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+      for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
         for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
              ++square_block_idx) {
           MotionField *motion_field =
