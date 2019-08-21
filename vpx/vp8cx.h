@@ -231,10 +231,10 @@ enum vp8e_enc_control_id {
    */
   VP8E_SET_TUNING,
 
-  /*!\brief Codec control function to set constrained quality level.
+  /*!\brief Codec control function to set constrained / constant quality level.
    *
    * \attention For this value to be used vpx_codec_enc_cfg_t::rc_end_usage must
-   *            be set to #VPX_CQ
+   *            be set to #VPX_CQ or #VPX_Q
    * \note Valid range: 0..63
    *
    * Supported in codecs: VP8, VP9
