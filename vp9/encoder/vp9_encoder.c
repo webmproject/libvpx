@@ -2538,9 +2538,11 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 #endif  // CONFIG_INTERNAL_STATS
 
+static void free_tpl_buffer(VP9_COMP *cpi);
+
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *cm;
-  unsigned int i, frame;
+  unsigned int i;
   int t;
 
   if (!cpi) return;
@@ -2652,27 +2654,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
     vpx_free(cpi->kmeans_data_arr);
   }
 
-#if CONFIG_NON_GREEDY_MV
-  vpx_free(cpi->feature_score_loc_arr);
-  vpx_free(cpi->feature_score_loc_sort);
-  vpx_free(cpi->feature_score_loc_heap);
-  vpx_free(cpi->select_mv_arr);
-#endif
-  for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
-#if CONFIG_NON_GREEDY_MV
-    int rf_idx;
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-      int sqr_bsize;
-      for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
-        vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
-      }
-      vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
-      vpx_free(cpi->tpl_stats[frame].rd_diff_arr[rf_idx]);
-    }
-#endif
-    vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
-    cpi->tpl_stats[frame].is_valid = 0;
-  }
+  free_tpl_buffer(cpi);
 
   for (t = 0; t < cpi->num_workers; ++t) {
     VPxWorker *const worker = &cpi->workers[t];
@@ -7222,6 +7204,31 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
   for (frame = 0; frame < REF_FRAMES; ++frame) {
     cpi->enc_frame_buf[frame].mem_valid = 0;
     cpi->enc_frame_buf[frame].released = 1;
+  }
+}
+
+static void free_tpl_buffer(VP9_COMP *cpi) {
+  int frame;
+#if CONFIG_NON_GREEDY_MV
+  vpx_free(cpi->feature_score_loc_arr);
+  vpx_free(cpi->feature_score_loc_sort);
+  vpx_free(cpi->feature_score_loc_heap);
+  vpx_free(cpi->select_mv_arr);
+#endif
+  for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
+#if CONFIG_NON_GREEDY_MV
+    int rf_idx;
+    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+      int sqr_bsize;
+      for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
+        vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
+      }
+      vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
+      vpx_free(cpi->tpl_stats[frame].rd_diff_arr[rf_idx]);
+    }
+#endif
+    vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
+    cpi->tpl_stats[frame].is_valid = 0;
   }
 }
 
