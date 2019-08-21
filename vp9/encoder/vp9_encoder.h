@@ -576,6 +576,7 @@ typedef struct VP9_COMP {
   int kmeans_count_ls[MAX_KMEANS_GROUPS];
   int kmeans_ctr_num;
 #if CONFIG_NON_GREEDY_MV
+  MotionFieldInfo motion_field_info;
   int tpl_ready;
   int feature_score_loc_alloc;
   FEATURE_SCORE_LOC *feature_score_loc_arr;

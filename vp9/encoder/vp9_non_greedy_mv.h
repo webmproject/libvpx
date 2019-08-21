@@ -24,6 +24,8 @@ extern "C" {
 #define MF_LOCAL_STRUCTURE_SIZE 4
 #define SQUARE_BLOCK_SIZES 4
 
+typedef enum Status { STATUS_OK = 0, STATUS_FAILED = 1 } Status;
+
 typedef struct MotionField {
   int ready;
   BLOCK_SIZE bsize;
@@ -36,6 +38,7 @@ typedef struct MotionField {
 
 typedef struct MotionFieldInfo {
   int frame_num;
+  int allocated;
   MotionField (*motion_field_array)[3][SQUARE_BLOCK_SIZES];
 } MotionFieldInfo;
 
@@ -77,11 +80,11 @@ static INLINE BLOCK_SIZE square_block_idx_to_bsize(int square_block_idx) {
   return BLOCK_INVALID;
 }
 
-void vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
-                                 int frame_num, int mi_rows, int mi_cols);
+Status vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
+                                   int frame_num, int mi_rows, int mi_cols);
 
-void vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
-                            int block_rows, int block_cols);
+Status vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
+                              int block_rows, int block_cols);
 
 void vp9_free_motion_field(MotionField *motion_field);
 

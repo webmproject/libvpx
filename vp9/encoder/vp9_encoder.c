@@ -7138,6 +7138,8 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 
   // TODO(angiebird): This probably needs further modifications to support
   // frame scaling later on.
+  vp9_alloc_motion_field_info(&cpi->motion_field_info, MAX_ARF_GOP_SIZE,
+                              mi_rows, mi_cols);
   if (cpi->feature_score_loc_alloc == 0) {
     // The smallest block size of motion field is 4x4, but the mi_unit is 8x8,
     // therefore the number of units is "mi_rows * mi_cols * 4" here.
@@ -7210,6 +7212,7 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 static void free_tpl_buffer(VP9_COMP *cpi) {
   int frame;
 #if CONFIG_NON_GREEDY_MV
+  vp9_free_motion_field_info(&cpi->motion_field_info);
   vpx_free(cpi->feature_score_loc_arr);
   vpx_free(cpi->feature_score_loc_sort);
   vpx_free(cpi->feature_score_loc_heap);
