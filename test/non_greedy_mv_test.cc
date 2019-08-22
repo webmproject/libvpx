@@ -11,6 +11,7 @@
 #include <math.h>
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vp9/encoder/vp9_non_greedy_mv.h"
+#include "./vpx_dsp_rtcd.h"
 
 namespace {
 
@@ -82,7 +83,46 @@ static void compare_mf(const MV *mf1, const MV *mf2, int rows, int cols,
   free(diffs);
 }
 
-TEST(non_greedy_mv, smooth_mf) {
+static void load_frame_info(const char *filename,
+                            YV12_BUFFER_CONFIG *ref_frame_ptr) {
+  FILE *input = fopen(filename, "rb");
+  int idx;
+  uint8_t data_type;
+
+  ASSERT_NE(input, nullptr) << "Cannot open file: " << filename << std::endl;
+
+  fscanf(input, "%d,%d\n", &(ref_frame_ptr->y_height),
+         &(ref_frame_ptr->y_width));
+
+  ref_frame_ptr->y_buffer = (uint8_t *)malloc(
+      (ref_frame_ptr->y_width) * (ref_frame_ptr->y_height) * sizeof(data_type));
+
+  for (idx = 0; idx < (ref_frame_ptr->y_width) * (ref_frame_ptr->y_height);
+       ++idx) {
+    int value;
+    fscanf(input, "%d,", &value);
+    ref_frame_ptr->y_buffer[idx] = (uint8_t)value;
+  }
+
+  ref_frame_ptr->y_stride = ref_frame_ptr->y_width;
+  fclose(input);
+}
+
+static int compare_local_var(const int (*local_var1)[MF_LOCAL_STRUCTURE_SIZE],
+                             const int (*local_var2)[MF_LOCAL_STRUCTURE_SIZE],
+                             int rows, int cols) {
+  int diff = 0;
+  int outter_idx, inner_idx;
+  for (outter_idx = 0; outter_idx < rows * cols; ++outter_idx) {
+    for (inner_idx = 0; inner_idx < MF_LOCAL_STRUCTURE_SIZE; ++inner_idx) {
+      diff += abs(local_var1[outter_idx][inner_idx] -
+                  local_var2[outter_idx][inner_idx]);
+    }
+  }
+  return diff / rows / cols;
+}
+
+TEST(non_greedy_mv, DISABLED_smooth_mf) {
   const char *search_mf_file = "non_greedy_mv_test_files/exhaust_32x32.txt";
   const char *local_var_file = "non_greedy_mv_test_files/localVar_32x32.txt";
   const char *estimation_file = "non_greedy_mv_test_files/estimation_32x32.txt";
@@ -121,5 +161,40 @@ TEST(non_greedy_mv, smooth_mf) {
   free(estimation);
   free(ground_truth);
   free(smooth_mf);
+}
+
+TEST(non_greedy_mv, DISABLED_local_var) {
+  const char *ref_frame_file = "non_greedy_mv_test_files/ref_frame_32x32.txt";
+  const char *cur_frame_file = "non_greedy_mv_test_files/cur_frame_32x32.txt";
+  const char *gt_local_var_file = "non_greedy_mv_test_files/localVar_32x32.txt";
+  const char *search_mf_file = "non_greedy_mv_test_files/exhaust_32x32.txt";
+  BLOCK_SIZE bsize = BLOCK_32X32;
+  int(*gt_local_var)[MF_LOCAL_STRUCTURE_SIZE] = NULL;
+  int(*est_local_var)[MF_LOCAL_STRUCTURE_SIZE] = NULL;
+  YV12_BUFFER_CONFIG ref_frame, cur_frame;
+  int rows, cols;
+  MV *search_mf;
+  int int_type;
+  int local_var_diff;
+  vp9_variance_fn_ptr_t fn;
+
+  load_frame_info(ref_frame_file, &ref_frame);
+  load_frame_info(cur_frame_file, &cur_frame);
+  read_in_mf(search_mf_file, &rows, &cols, &search_mf);
+
+  fn.sdf = vpx_sad32x32;
+  est_local_var = (int(*)[MF_LOCAL_STRUCTURE_SIZE])malloc(
+      rows * cols * MF_LOCAL_STRUCTURE_SIZE * sizeof(int_type));
+  vp9_get_local_structure(&cur_frame, &ref_frame, search_mf, &fn, rows, cols,
+                          bsize, est_local_var);
+  read_in_local_var(gt_local_var_file, &rows, &cols, &gt_local_var);
+
+  local_var_diff = compare_local_var(est_local_var, gt_local_var, rows, cols);
+
+  EXPECT_LE(local_var_diff, 1);
+
+  free(gt_local_var);
+  free(est_local_var);
+  free(ref_frame.y_buffer);
 }
 }  // namespace
