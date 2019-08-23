@@ -171,7 +171,7 @@ static int mi_size_to_block_size(int mi_bsize, int mi_num) {
 Status vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
                                    int frame_num, int mi_rows, int mi_cols) {
   int frame_idx, rf_idx, square_block_idx;
-  if (motion_field_info->allocated == 1) {
+  if (motion_field_info->allocated) {
     // TODO(angiebird): Avoid re-allocate buffer if possible
     vp9_free_motion_field_info(motion_field_info);
   }
@@ -210,14 +210,21 @@ Status vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
   motion_field->bsize = bsize;
   motion_field->block_rows = block_rows;
   motion_field->block_cols = block_cols;
+  motion_field->block_num = block_rows * block_cols;
   motion_field->mf =
-      vpx_calloc(block_rows * block_cols, sizeof(*motion_field->mf));
+      vpx_calloc(motion_field->block_num, sizeof(*motion_field->mf));
   if (motion_field->mf == NULL) {
     assert(0);
     status = STATUS_FAILED;
   }
+  motion_field->set_mv =
+      vpx_calloc(motion_field->block_num, sizeof(*motion_field->set_mv));
+  if (motion_field->set_mv == NULL) {
+    assert(0);
+    status = STATUS_FAILED;
+  }
   motion_field->local_structure = vpx_calloc(
-      block_rows * block_cols, sizeof(*motion_field->local_structure));
+      motion_field->block_num, sizeof(*motion_field->local_structure));
   if (motion_field->local_structure == NULL) {
     assert(0);
     status = STATUS_FAILED;
@@ -250,6 +257,60 @@ void vp9_free_motion_field_info(MotionFieldInfo *motion_field_info) {
     motion_field_info->frame_num = 0;
     motion_field_info->allocated = 0;
   }
+}
+
+MotionField *vp9_motion_field_info_get_motion_field(
+    MotionFieldInfo *motion_field_info, int frame_idx, int rf_idx,
+    BLOCK_SIZE bsize) {
+  int square_block_idx = get_square_block_idx(bsize);
+  assert(frame_idx < motion_field_info->frame_num);
+  assert(motion_field_info->allocated == 1);
+  return &motion_field_info
+              ->motion_field_array[frame_idx][rf_idx][square_block_idx];
+}
+
+int vp9_motion_field_is_mv_set(const MotionField *motion_field, int brow,
+                               int bcol) {
+  assert(brow >= 0 && brow < motion_field->block_rows);
+  assert(bcol >= 0 && bcol < motion_field->block_cols);
+  return motion_field->set_mv[brow * motion_field->block_cols + bcol];
+}
+
+int_mv vp9_motion_field_get_mv(const MotionField *motion_field, int brow,
+                               int bcol) {
+  assert(brow >= 0 && brow < motion_field->block_rows);
+  assert(bcol >= 0 && bcol < motion_field->block_cols);
+  return motion_field->mf[brow * motion_field->block_cols + bcol];
+}
+
+int_mv vp9_motion_field_mi_get_mv(const MotionField *motion_field, int mi_row,
+                                  int mi_col) {
+  const int mi_height = num_8x8_blocks_high_lookup[motion_field->bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[motion_field->bsize];
+  const int brow = mi_row / mi_height;
+  const int bcol = mi_col / mi_width;
+  assert(mi_row % mi_height == 0);
+  assert(mi_col % mi_width == 0);
+  return vp9_motion_field_get_mv(motion_field, brow, bcol);
+}
+
+void vp9_motion_field_mi_set_mv(MotionField *motion_field, int mi_row,
+                                int mi_col, int_mv mv) {
+  const int mi_height = num_8x8_blocks_high_lookup[motion_field->bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[motion_field->bsize];
+  const int brow = mi_row / mi_height;
+  const int bcol = mi_col / mi_width;
+  assert(mi_row % mi_height == 0);
+  assert(mi_col % mi_width == 0);
+  assert(brow >= 0 && brow < motion_field->block_rows);
+  assert(bcol >= 0 && bcol < motion_field->block_cols);
+  motion_field->mf[brow * motion_field->block_cols + bcol] = mv;
+  motion_field->set_mv[brow * motion_field->block_cols + bcol] = 1;
+}
+
+void vp9_motion_field_reset_mvs(MotionField *motion_field) {
+  memset(motion_field->set_mv, 0,
+         motion_field->block_num * sizeof(*motion_field->set_mv));
 }
 
 static int64_t log2_approximation(int64_t v) {

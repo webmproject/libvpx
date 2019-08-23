@@ -31,8 +31,10 @@ typedef struct MotionField {
   BLOCK_SIZE bsize;
   int block_rows;
   int block_cols;
+  int block_num;  // block_num == block_rows * block_cols
   int (*local_structure)[MF_LOCAL_STRUCTURE_SIZE];
-  MV *mf;
+  int_mv *mf;
+  int *set_mv;
   int mv_log_scale;
 } MotionField;
 
@@ -104,6 +106,23 @@ void vp9_get_local_structure(const YV12_BUFFER_CONFIG *cur_frame,
                              const vp9_variance_fn_ptr_t *fn_ptr, int rows,
                              int cols, BLOCK_SIZE bsize,
                              int (*M)[MF_LOCAL_STRUCTURE_SIZE]);
+
+MotionField *vp9_motion_field_info_get_motion_field(
+    MotionFieldInfo *motion_field_info, int frame_idx, int rf_idx,
+    BLOCK_SIZE bsize);
+
+void vp9_motion_field_mi_set_mv(MotionField *motion_field, int mi_row,
+                                int mi_col, int_mv mv);
+
+void vp9_motion_field_reset_mvs(MotionField *motion_field);
+
+int_mv vp9_motion_field_get_mv(const MotionField *motion_field, int brow,
+                               int bcol);
+int_mv vp9_motion_field_mi_get_mv(const MotionField *motion_field, int mi_row,
+                                  int mi_col);
+int vp9_motion_field_is_mv_set(const MotionField *motion_field, int brow,
+                               int bcol);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

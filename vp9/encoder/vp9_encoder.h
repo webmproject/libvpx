@@ -293,12 +293,6 @@ typedef struct TplDepStats {
 
   int ref_frame_index;
   int_mv mv;
-
-#if CONFIG_NON_GREEDY_MV
-  int ready[3];
-  int64_t sse_arr[3];
-  double feature_score;
-#endif
 } TplDepStats;
 
 #if CONFIG_NON_GREEDY_MV
@@ -321,19 +315,10 @@ typedef struct TplDepFrame {
   int base_qindex;
 #if CONFIG_NON_GREEDY_MV
   int lambda;
-  int_mv *pyramid_mv_arr[3][SQUARE_BLOCK_SIZES];
   int *mv_mode_arr[3];
   double *rd_diff_arr[3];
 #endif
 } TplDepFrame;
-
-#if CONFIG_NON_GREEDY_MV
-static INLINE int_mv *get_pyramid_mv(const TplDepFrame *tpl_frame, int rf_idx,
-                                     BLOCK_SIZE bsize, int mi_row, int mi_col) {
-  return &tpl_frame->pyramid_mv_arr[rf_idx][get_square_block_idx(bsize)]
-                                   [mi_row * tpl_frame->stride + mi_col];
-}
-#endif
 
 #define TPL_DEP_COST_SCALE_LOG2 4
 
