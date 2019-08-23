@@ -271,41 +271,38 @@ int64_t vp9_nb_mvs_inconsistency(const MV *mv, const int_mv *nb_full_mvs,
   return 0;
 }
 
-static MV get_smooth_motion_vector(const MV search_mv, const MV *tmp_mf,
-                                   const int (*M)[MF_LOCAL_STRUCTURE_SIZE],
-                                   int rows, int cols, int row, int col,
-                                   float alpha) {
-  const MV tmp_mv = tmp_mf[row * cols + col];
+static FloatMV get_smooth_motion_vector(const FloatMV scaled_search_mv,
+                                        const FloatMV *tmp_mf,
+                                        const int (*M)[MF_LOCAL_STRUCTURE_SIZE],
+                                        int rows, int cols, int row, int col,
+                                        float alpha) {
+  const FloatMV tmp_mv = tmp_mf[row * cols + col];
   int idx_row, idx_col;
-  float avg_nb_mv[2] = { 0.0f, 0.0f };
-  MV mv = { 0, 0 };
+  FloatMV avg_nb_mv = { 0.0f, 0.0f };
+  FloatMV mv = { 0.0f, 0.0f };
   float filter[3][3] = { { 1.0f / 12.0f, 1.0f / 6.0f, 1.0f / 12.0f },
                          { 1.0f / 6.0f, 0.0f, 1.0f / 6.0f },
                          { 1.0f / 12.0f, 1.0f / 6.0f, 1.0f / 12.0f } };
-  int ref_row = row + search_mv.row;
-  int ref_col = col + search_mv.col;
-  ref_row = ref_row < 0 ? 0 : (ref_row >= rows ? rows - 1 : ref_row);
-  ref_col = ref_col < 0 ? 0 : (ref_col >= cols ? cols - 1 : ref_col);
   for (idx_row = 0; idx_row < 3; ++idx_row) {
     int nb_row = row + idx_row - 1;
     for (idx_col = 0; idx_col < 3; ++idx_col) {
       int nb_col = col + idx_col - 1;
       if (nb_row < 0 || nb_col < 0 || nb_row >= rows || nb_col >= cols) {
-        avg_nb_mv[0] += (tmp_mv.row) * filter[idx_row][idx_col];
-        avg_nb_mv[1] += (tmp_mv.col) * filter[idx_row][idx_col];
+        avg_nb_mv.row += (tmp_mv.row) * filter[idx_row][idx_col];
+        avg_nb_mv.col += (tmp_mv.col) * filter[idx_row][idx_col];
       } else {
-        const MV nb_mv = tmp_mf[nb_row * cols + nb_col];
-        avg_nb_mv[0] += (nb_mv.row) * filter[idx_row][idx_col];
-        avg_nb_mv[1] += (nb_mv.col) * filter[idx_row][idx_col];
+        const FloatMV nb_mv = tmp_mf[nb_row * cols + nb_col];
+        avg_nb_mv.row += (nb_mv.row) * filter[idx_row][idx_col];
+        avg_nb_mv.col += (nb_mv.col) * filter[idx_row][idx_col];
       }
     }
   }
   {
     // M is the local variance of reference frame
-    float M00 = M[ref_row * cols + ref_col][0];
-    float M01 = M[ref_row * cols + ref_col][1];
-    float M10 = M[ref_row * cols + ref_col][2];
-    float M11 = M[ref_row * cols + ref_col][3];
+    float M00 = M[row * cols + col][0];
+    float M01 = M[row * cols + col][1];
+    float M10 = M[row * cols + col][2];
+    float M11 = M[row * cols + col][3];
 
     float det = (M00 + alpha) * (M11 + alpha) - M01 * M10;
 
@@ -319,36 +316,42 @@ static MV get_smooth_motion_vector(const MV search_mv, const MV *tmp_mf,
     float inv_MM10 = inv_M10 * M00 + inv_M11 * M10;
     float inv_MM11 = inv_M10 * M01 + inv_M11 * M11;
 
-    mv.row = (int)(inv_M00 * avg_nb_mv[0] + inv_M01 * avg_nb_mv[1] +
-                   inv_MM00 * search_mv.row + inv_MM01 * search_mv.col);
-    mv.col = (int)(inv_M10 * avg_nb_mv[0] + inv_M11 * avg_nb_mv[1] +
-                   inv_MM10 * search_mv.row + inv_MM11 * search_mv.col);
+    mv.row = inv_M00 * avg_nb_mv.row * alpha + inv_M01 * avg_nb_mv.col * alpha +
+             inv_MM00 * scaled_search_mv.row + inv_MM01 * scaled_search_mv.col;
+    mv.col = inv_M10 * avg_nb_mv.row * alpha + inv_M11 * avg_nb_mv.col * alpha +
+             inv_MM10 * scaled_search_mv.row + inv_MM11 * scaled_search_mv.col;
   }
   return mv;
 }
 
-void vp9_get_smooth_motion_field(const MV *scaled_search_mf,
+void vp9_get_smooth_motion_field(const MV *search_mf,
                                  const int (*M)[MF_LOCAL_STRUCTURE_SIZE],
-                                 int rows, int cols, float alpha, int num_iters,
-                                 MV *smooth_mf) {
-  // note: the scaled_search_mf and smooth_mf are all scaled by macroblock size
+                                 int rows, int cols, BLOCK_SIZE bsize,
+                                 float alpha, int num_iters, MV *smooth_mf) {
   // M is the local variation of reference frame
   // build two buffers
-  MV *input = (MV *)malloc(rows * cols * sizeof(MV));
-  MV *output = (MV *)malloc(rows * cols * sizeof(MV));
+  FloatMV *input = (FloatMV *)malloc(rows * cols * sizeof(FloatMV));
+  FloatMV *output = (FloatMV *)malloc(rows * cols * sizeof(FloatMV));
   int idx;
   int row, col;
+  int bw = 4 << b_width_log2_lookup[bsize];
+  int bh = 4 << b_height_log2_lookup[bsize];
   // copy search results to input buffer
   for (idx = 0; idx < rows * cols; ++idx) {
-    input[idx] = scaled_search_mf[idx];
+    input[idx].row = (float)search_mf[idx].row / bh;
+    input[idx].col = (float)search_mf[idx].col / bw;
   }
   for (idx = 0; idx < num_iters; ++idx) {
-    MV *tmp;
+    FloatMV *tmp;
     for (row = 0; row < rows; ++row) {
       for (col = 0; col < cols; ++col) {
-        output[row * cols + col] =
-            get_smooth_motion_vector(scaled_search_mf[row * cols + col], input,
-                                     M, rows, cols, row, col, alpha);
+        // note: the scaled_search_mf and smooth_mf are all scaled by macroblock
+        // size
+        const MV search_mv = search_mf[row * cols + col];
+        FloatMV scaled_search_mv = { (float)search_mv.row / bh,
+                                     (float)search_mv.col / bw };
+        output[row * cols + col] = get_smooth_motion_vector(
+            scaled_search_mv, input, M, rows, cols, row, col, alpha);
       }
     }
     // swap buffers
@@ -358,55 +361,83 @@ void vp9_get_smooth_motion_field(const MV *scaled_search_mf,
   }
   // copy smoothed results to output
   for (idx = 0; idx < rows * cols; ++idx) {
-    smooth_mf[idx] = input[idx];
+    smooth_mf[idx].row = (int)(input[idx].row * bh);
+    smooth_mf[idx].col = (int)(input[idx].col * bw);
   }
   free(input);
   free(output);
 }
 
-void vp9_get_local_structure(const YV12_BUFFER_CONFIG *ref_frame,
-                             const vp9_variance_fn_ptr_t *fn_ptr, int mi_rows,
-                             int mi_cols, BLOCK_SIZE bsize,
+void vp9_get_local_structure(const YV12_BUFFER_CONFIG *cur_frame,
+                             const YV12_BUFFER_CONFIG *ref_frame,
+                             const MV *search_mf,
+                             const vp9_variance_fn_ptr_t *fn_ptr, int rows,
+                             int cols, BLOCK_SIZE bsize,
                              int (*M)[MF_LOCAL_STRUCTURE_SIZE]) {
-  int stride = ref_frame->y_stride;
-  const int mi_height = num_8x8_blocks_high_lookup[bsize];
-  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
-  int cols = mi_size_to_block_size(mi_width, mi_cols);
-  int mi_row, mi_col;
-  for (mi_row = 0; mi_row < mi_rows; mi_row += mi_height) {
-    for (mi_col = 0; mi_col < mi_cols; mi_col += mi_width) {
-      const int mb_y_offset = mi_row * MI_SIZE * stride + mi_col * MI_SIZE;
-      int row = mi_row / mi_height;
-      int col = mi_col / mi_width;
-      uint8_t *center = ref_frame->y_buffer + mb_y_offset;
+  const int bw = 4 << b_width_log2_lookup[bsize];
+  const int bh = 4 << b_height_log2_lookup[bsize];
+  const int cur_stride = cur_frame->y_stride;
+  const int ref_stride = ref_frame->y_stride;
+  const int width = ref_frame->y_width;
+  const int height = ref_frame->y_height;
+  int row, col;
+  for (row = 0; row < rows; ++row) {
+    for (col = 0; col < cols; ++col) {
+      int cur_offset = row * bh * cur_stride + col * bw;
+      uint8_t *center = cur_frame->y_buffer + cur_offset;
+      int ref_h = row * bh + search_mf[row * cols + col].row;
+      int ref_w = col * bw + search_mf[row * cols + col].col;
+      int ref_offset;
+      uint8_t *target;
       uint8_t *nb;
+      int search_dist;
+      int nb_dist;
       int I_row = 0, I_col = 0;
+      // TODO(Dan): handle the case that when reference frame block beyond the
+      // boundary
+      ref_h = ref_h < 0 ? 0 : (ref_h >= height - bh ? height - bh - 1 : ref_h);
+      ref_w = ref_w < 0 ? 0 : (ref_w >= width - bw ? width - bw - 1 : ref_w);
+      // compute search results distortion
+      // TODO(Dan): maybe need to use vp9 function to find the reference block,
+      // to compare with the results of my python code, I first use my way to
+      // compute the reference block
+      ref_offset = ref_h * ref_stride + ref_w;
+      target = ref_frame->y_buffer + ref_offset;
+      search_dist = fn_ptr->sdf(center, cur_stride, target, ref_stride);
+      // compute target's neighbors' distortions
+      // TODO(Dan): if using padding, the boundary condition may vary
       // up
-      if (mi_row > 0) {
-        nb = center - MI_SIZE * stride * mi_height;
-        I_row += fn_ptr->sdf(center, stride, nb, stride);
+      if (ref_h - bh >= 0) {
+        nb = target - ref_stride * bh;
+        nb_dist = fn_ptr->sdf(center, cur_stride, nb, ref_stride);
+        I_row += nb_dist - search_dist;
       }
       // down
-      if (mi_row < mi_rows - 1) {
-        nb = center + MI_SIZE * stride * mi_height;
-        I_row += fn_ptr->sdf(center, stride, nb, stride);
+      if (ref_h + bh < height - bh) {
+        nb = target + ref_stride * bh;
+        nb_dist = fn_ptr->sdf(center, cur_stride, nb, ref_stride);
+        I_row += nb_dist - search_dist;
       }
-      if (mi_row > 0 && mi_row < mi_rows - 1) {
+      if (ref_h - bh >= 0 && ref_h + bh < height - bh) {
         I_row /= 2;
       }
+      I_row /= (bw * bh);
       // left
-      if (mi_col > 0) {
-        nb = center - MI_SIZE * mi_width;
-        I_col += fn_ptr->sdf(center, stride, nb, stride);
+      if (ref_w - bw >= 0) {
+        nb = target - bw;
+        nb_dist = fn_ptr->sdf(center, cur_stride, nb, ref_stride);
+        I_col += nb_dist - search_dist;
       }
-      // right
-      if (mi_col < mi_cols - 1) {
-        nb = center + MI_SIZE * mi_width;
-        I_col += fn_ptr->sdf(center, stride, nb, stride);
+      // down
+      if (ref_w + bw < width - bw) {
+        nb = target + bw;
+        nb_dist = fn_ptr->sdf(center, cur_stride, nb, ref_stride);
+        I_col += nb_dist - search_dist;
       }
-      if (mi_col > 0 && mi_col < mi_cols - 1) {
+      if (ref_w - bw >= 0 && ref_w + bw < width - bw) {
         I_col /= 2;
       }
+      I_col /= (bw * bh);
       M[row * cols + col][0] = I_row * I_row;
       M[row * cols + col][1] = I_row * I_col;
       M[row * cols + col][2] = I_col * I_row;
