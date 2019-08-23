@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
+#!/ usr / bin / env python
+#coding : utf - 8
 import numpy as np
 import numpy.linalg as LA
 import matplotlib.pyplot as plt
@@ -20,8 +20,8 @@ class MotionEST(object):
     self.ref_f = ref_f
     self.blk_sz = blk_sz
     #convert RGB to YUV
-    self.cur_yuv = np.array(self.cur_f.convert('YCbCr'))
-    self.ref_yuv = np.array(self.ref_f.convert('YCbCr'))
+    self.cur_yuv = np.array(self.cur_f.convert('YCbCr'), dtype=np.int)
+    self.ref_yuv = np.array(self.ref_f.convert('YCbCr'), dtype=np.int)
     #frame size
     self.width = self.cur_f.size[0]
     self.height = self.cur_f.size[1]
@@ -31,21 +31,18 @@ class MotionEST(object):
     #initialize motion field
     self.mf = np.zeros((self.num_row, self.num_col, 2))
 
-  """
-    estimation function
-        Override by child classes
-    """
+  """estimation function Override by child classes"""
 
   def motion_field_estimation(self):
     pass
 
   """
     distortion of a block:
-        cur_r: current row
-        cur_c: current column
-        mv: motion vector
-        metric: distortion metric
-    """
+      cur_r: current row
+      cur_c: current column
+      mv: motion vector
+      metric: distortion metric
+  """
 
   def block_dist(self, cur_r, cur_c, mv, metric=MSE):
     cur_x = cur_c * self.blk_sz
@@ -63,7 +60,7 @@ class MotionEST(object):
 
   """
     distortion of motion field
-    """
+  """
 
   def distortion(self, mask=None, metric=MSE):
     loss = 0
@@ -72,14 +69,11 @@ class MotionEST(object):
       for j in xrange(self.num_col):
         if not mask is None and mask[i, j]:
           continue
-        loss += self.dist(i, j, self.mf[i, j], metric)
+        loss += self.block_dist(i, j, self.mf[i, j], metric)
         count += 1
     return loss / count
 
-  """
-    evaluation
-        compare the difference with ground truth
-    """
+  """evaluation compare the difference with ground truth"""
 
   def motion_field_evaluation(self, ground_truth):
     loss = 0
@@ -94,18 +88,16 @@ class MotionEST(object):
         count += 1
     return loss / count
 
-  """
-    render the motion field
-    """
+  """render the motion field"""
 
-  def show(self, ground_truth=None):
+  def show(self, ground_truth=None, size=10):
     cur_mf = drawMF(self.cur_f, self.blk_sz, self.mf)
     if ground_truth is None:
       n_row = 1
     else:
       gt_mf = drawMF(self.cur_f, self.blk_sz, ground_truth)
       n_row = 2
-    plt.figure(figsize=(n_row * 10, 10))
+    plt.figure(figsize=(n_row * size, size * self.height / self.width))
     plt.subplot(1, n_row, 1)
     plt.imshow(cur_mf)
     plt.title('Estimated Motion Field')
