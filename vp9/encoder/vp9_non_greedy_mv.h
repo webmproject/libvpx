@@ -78,7 +78,7 @@ static INLINE BLOCK_SIZE square_block_idx_to_bsize(int square_block_idx) {
 }
 
 void vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
-                                 int gop_size, int block_rows, int block_cols);
+                                 int frame_num, int mi_rows, int mi_cols);
 
 void vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
                             int block_rows, int block_cols);
