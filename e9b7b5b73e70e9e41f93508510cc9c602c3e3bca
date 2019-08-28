@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9f001caf_54da1a62",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-08-28T18:24:50Z",
+      "side": 1,
+      "message": "You\u0027ll want a blank line after the subject line, otherwise git will merge them all into one (you can see that in the title of the gerrit change). We try to follow the guidelines here:\nhttps://git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines\n\nThe first line could be something like:\n\nvp9_mvref_common.h: move arrays from header to .c\n\nwith the rest of the text in the body of the message.",
+      "revId": "e9b7b5b73e70e9e41f93508510cc9c602c3e3bca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
