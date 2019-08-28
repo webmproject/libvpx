@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "828149b3_b92a76fc",
+        "filename": "vpx_dsp/x86/highbd_idct4x4_add_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-08-28T18:36:09Z",
+      "side": 1,
+      "message": "since these are only used in tests you can just update the declarations to be int",
+      "revId": "4973c57fe1379665e14246b295d61359ee4931ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
