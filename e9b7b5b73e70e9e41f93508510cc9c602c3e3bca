@@ -16,6 +16,23 @@
       "revId": "e9b7b5b73e70e9e41f93508510cc9c602c3e3bca",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58ae0077_02f6da09",
+        "filename": "vp9/common/vp9_mvref_common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-08-28T18:26:42Z",
+      "side": 1,
+      "message": "vp9 (and av1) will have other instances like this. This is the correct thing to do, but there may be a slight performance loss if immediates are being used with the lookups as now the values aren\u0027t visible in the translation unit. In those cases we usually embed the data into a .inc file and include it directly in the .c to avoid an ODR issue.",
+      "revId": "e9b7b5b73e70e9e41f93508510cc9c602c3e3bca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
