@@ -168,14 +168,18 @@ static int mi_size_to_block_size(int mi_bsize, int mi_num) {
   return (mi_num % mi_bsize) ? mi_num / mi_bsize + 1 : mi_num / mi_bsize;
 }
 
-void vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
-                                 int frame_num, int mi_rows, int mi_cols) {
+Status vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
+                                   int frame_num, int mi_rows, int mi_cols) {
   int frame_idx, rf_idx, square_block_idx;
+  if (motion_field_info->allocated == 1) {
+    // TODO(angiebird): Avoid re-allocate buffer if possible
+    vp9_free_motion_field_info(motion_field_info);
+  }
   motion_field_info->frame_num = frame_num;
   motion_field_info->motion_field_array =
       vpx_calloc(frame_num, sizeof(*motion_field_info->motion_field_array));
   for (frame_idx = 0; frame_idx < frame_num; ++frame_idx) {
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
       for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
            ++square_block_idx) {
         BLOCK_SIZE bsize = square_block_idx_to_bsize(square_block_idx);
@@ -186,24 +190,39 @@ void vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
         MotionField *motion_field =
             &motion_field_info
                  ->motion_field_array[frame_idx][rf_idx][square_block_idx];
-        vp9_alloc_motion_field(motion_field, bsize, block_rows, block_cols);
+        Status status =
+            vp9_alloc_motion_field(motion_field, bsize, block_rows, block_cols);
+        if (status == STATUS_FAILED) {
+          assert(0);
+          return STATUS_FAILED;
+        }
       }
     }
   }
+  motion_field_info->allocated = 1;
+  return STATUS_OK;
 }
 
-void vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
-                            int block_rows, int block_cols) {
+Status vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
+                              int block_rows, int block_cols) {
+  Status status = STATUS_OK;
   motion_field->ready = 0;
   motion_field->bsize = bsize;
   motion_field->block_rows = block_rows;
   motion_field->block_cols = block_cols;
   motion_field->mf =
       vpx_calloc(block_rows * block_cols, sizeof(*motion_field->mf));
-  assert(motion_field->mf != NULL);
+  if (motion_field->mf == NULL) {
+    assert(0);
+    status = STATUS_FAILED;
+  }
   motion_field->local_structure = vpx_calloc(
       block_rows * block_cols, sizeof(*motion_field->local_structure));
-  assert(motion_field->local_structure != NULL);
+  if (motion_field->local_structure == NULL) {
+    assert(0);
+    status = STATUS_FAILED;
+  }
+  return status;
 }
 
 void vp9_free_motion_field(MotionField *motion_field) {
@@ -213,21 +232,24 @@ void vp9_free_motion_field(MotionField *motion_field) {
 }
 
 void vp9_free_motion_field_info(MotionFieldInfo *motion_field_info) {
-  int frame_idx, rf_idx, square_block_idx;
-  for (frame_idx = 0; frame_idx < motion_field_info->frame_num; ++frame_idx) {
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-      for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
-           ++square_block_idx) {
-        MotionField *motion_field =
-            &motion_field_info
-                 ->motion_field_array[frame_idx][rf_idx][square_block_idx];
-        vp9_free_motion_field(motion_field);
+  if (motion_field_info->allocated) {
+    int frame_idx, rf_idx, square_block_idx;
+    for (frame_idx = 0; frame_idx < motion_field_info->frame_num; ++frame_idx) {
+      for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
+        for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
+             ++square_block_idx) {
+          MotionField *motion_field =
+              &motion_field_info
+                   ->motion_field_array[frame_idx][rf_idx][square_block_idx];
+          vp9_free_motion_field(motion_field);
+        }
       }
     }
+    vpx_free(motion_field_info->motion_field_array);
+    motion_field_info->motion_field_array = NULL;
+    motion_field_info->frame_num = 0;
+    motion_field_info->allocated = 0;
   }
-  vpx_free(motion_field_info->motion_field_array);
-  motion_field_info->motion_field_array = NULL;
-  motion_field_info->frame_num = 0;
 }
 
 static int64_t log2_approximation(int64_t v) {

@@ -2538,9 +2538,11 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 #endif  // CONFIG_INTERNAL_STATS
 
+static void free_tpl_buffer(VP9_COMP *cpi);
+
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *cm;
-  unsigned int i, frame;
+  unsigned int i;
   int t;
 
   if (!cpi) return;
@@ -2652,27 +2654,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
     vpx_free(cpi->kmeans_data_arr);
   }
 
-#if CONFIG_NON_GREEDY_MV
-  vpx_free(cpi->feature_score_loc_arr);
-  vpx_free(cpi->feature_score_loc_sort);
-  vpx_free(cpi->feature_score_loc_heap);
-  vpx_free(cpi->select_mv_arr);
-#endif
-  for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
-#if CONFIG_NON_GREEDY_MV
-    int rf_idx;
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
-      int sqr_bsize;
-      for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
-        vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
-      }
-      vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
-      vpx_free(cpi->tpl_stats[frame].rd_diff_arr[rf_idx]);
-    }
-#endif
-    vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
-    cpi->tpl_stats[frame].is_valid = 0;
-  }
+  free_tpl_buffer(cpi);
 
   for (t = 0; t < cpi->num_workers; ++t) {
     VPxWorker *const worker = &cpi->workers[t];
@@ -6301,7 +6283,7 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
   set_mv_limits(cm, x, mi_row, mi_col);
 
-  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+  for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     int_mv mv;
     if (ref_frame[rf_idx] == NULL) continue;
 
@@ -6854,9 +6836,9 @@ static void add_nb_blocks_to_heap(VP9_COMP *cpi, const TplDepFrame *tpl_frame,
 #endif  // USE_PQSORT
 #endif  // CHANGE_MV_SEARCH_ORDER
 
-static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
-                               YV12_BUFFER_CONFIG *ref_frame[3],
-                               BLOCK_SIZE bsize) {
+static void build_motion_field(
+    VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
+    YV12_BUFFER_CONFIG *ref_frame[MAX_INTER_REF_FRAMES], BLOCK_SIZE bsize) {
   VP9_COMMON *cm = &cpi->common;
   ThreadData *td = &cpi->td;
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
@@ -6897,7 +6879,7 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   qsort(cpi->feature_score_loc_sort, fs_loc_sort_size,
         sizeof(*cpi->feature_score_loc_sort), compare_feature_score);
 
-  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+  for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
         TplDepStats *tpl_stats =
@@ -6908,7 +6890,7 @@ static void build_motion_field(VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
   }
 
   // TODO(angiebird): Clean up this part.
-  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+  for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     int i;
     if (ref_frame[rf_idx] == NULL) {
       continue;
@@ -6956,7 +6938,7 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
                               int frame_idx, BLOCK_SIZE bsize) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
-  YV12_BUFFER_CONFIG *ref_frame[3] = { NULL, NULL, NULL };
+  YV12_BUFFER_CONFIG *ref_frame[MAX_INTER_REF_FRAMES] = { NULL, NULL, NULL };
 
   VP9_COMMON *cm = &cpi->common;
   struct scale_factors sf;
@@ -7006,7 +6988,7 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
   // Prepare reference frame pointers. If any reference frame slot is
   // unavailable, the pointer will be set to Null.
-  for (idx = 0; idx < 3; ++idx) {
+  for (idx = 0; idx < MAX_INTER_REF_FRAMES; ++idx) {
     int rf_idx = gf_picture[frame_idx].ref_frame[idx];
     if (rf_idx != -1) ref_frame[idx] = gf_picture[rf_idx].frame;
   }
@@ -7031,7 +7013,7 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
     BLOCK_SIZE square_bsize = square_block_idx_to_bsize(square_block_idx);
     build_motion_field(cpi, xd, frame_idx, ref_frame, square_bsize);
   }
-  for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+  for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
     if (ref_frame_idx != -1) {
       predict_mv_mode_arr(cpi, x, gf_picture, frame_idx, tpl_frame, rf_idx,
@@ -7085,7 +7067,7 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
   const VP9_COMMON *cm = &cpi->common;
   int rf_idx;
   for (frame_idx = 1; frame_idx < tpl_group_frames; ++frame_idx) {
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
       const TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
       int mi_row, mi_col;
       int ref_frame_idx;
@@ -7156,6 +7138,8 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 
   // TODO(angiebird): This probably needs further modifications to support
   // frame scaling later on.
+  vp9_alloc_motion_field_info(&cpi->motion_field_info, MAX_ARF_GOP_SIZE,
+                              mi_rows, mi_cols);
   if (cpi->feature_score_loc_alloc == 0) {
     // The smallest block size of motion field is 4x4, but the mi_unit is 8x8,
     // therefore the number of units is "mi_rows * mi_cols * 4" here.
@@ -7185,7 +7169,7 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
       continue;
 
 #if CONFIG_NON_GREEDY_MV
-    for (rf_idx = 0; rf_idx < 3; ++rf_idx) {
+    for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
       for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
         vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
         CHECK_MEM_ERROR(
@@ -7222,6 +7206,32 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
   for (frame = 0; frame < REF_FRAMES; ++frame) {
     cpi->enc_frame_buf[frame].mem_valid = 0;
     cpi->enc_frame_buf[frame].released = 1;
+  }
+}
+
+static void free_tpl_buffer(VP9_COMP *cpi) {
+  int frame;
+#if CONFIG_NON_GREEDY_MV
+  vp9_free_motion_field_info(&cpi->motion_field_info);
+  vpx_free(cpi->feature_score_loc_arr);
+  vpx_free(cpi->feature_score_loc_sort);
+  vpx_free(cpi->feature_score_loc_heap);
+  vpx_free(cpi->select_mv_arr);
+#endif
+  for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
+#if CONFIG_NON_GREEDY_MV
+    int rf_idx;
+    for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
+      int sqr_bsize;
+      for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
+        vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
+      }
+      vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
+      vpx_free(cpi->tpl_stats[frame].rd_diff_arr[rf_idx]);
+    }
+#endif
+    vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
+    cpi->tpl_stats[frame].is_valid = 0;
   }
 }
 
