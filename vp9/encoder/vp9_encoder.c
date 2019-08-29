@@ -5874,10 +5874,11 @@ static void init_tpl_stats(VP9_COMP *cpi) {
 
 #if CONFIG_NON_GREEDY_MV
 static uint32_t full_pixel_motion_search(VP9_COMP *cpi, ThreadData *td,
+                                         MotionField *motion_field,
                                          int frame_idx, uint8_t *cur_frame_buf,
                                          uint8_t *ref_frame_buf, int stride,
                                          BLOCK_SIZE bsize, int mi_row,
-                                         int mi_col, MV *mv, int rf_idx) {
+                                         int mi_col, MV *mv) {
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
@@ -5907,8 +5908,8 @@ static uint32_t full_pixel_motion_search(VP9_COMP *cpi, ThreadData *td,
 
   vp9_set_mv_search_range(&x->mv_limits, &best_ref_mv1);
 
-  nb_full_mv_num = vp9_prepare_nb_full_mvs(&cpi->tpl_stats[frame_idx], mi_row,
-                                           mi_col, rf_idx, bsize, nb_full_mvs);
+  nb_full_mv_num =
+      vp9_prepare_nb_full_mvs(motion_field, mi_row, mi_col, nb_full_mvs);
   vp9_full_pixel_diamond_new(cpi, x, bsize, &best_ref_mv1_full, step_param,
                              lambda, 1, nb_full_mvs, nb_full_mv_num, mv);
 
@@ -6285,12 +6286,16 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
   for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     int_mv mv;
+#if CONFIG_NON_GREEDY_MV
+    MotionField *motion_field;
+#endif
     if (ref_frame[rf_idx] == NULL) continue;
 
 #if CONFIG_NON_GREEDY_MV
     (void)td;
-    mv.as_int =
-        get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col)->as_int;
+    motion_field = vp9_motion_field_info_get_motion_field(
+        &cpi->motion_field_info, frame_idx, rf_idx, bsize);
+    mv = vp9_motion_field_mi_get_mv(motion_field, mi_row, mi_col);
 #else
     motion_compensated_prediction(cpi, td, xd->cur_buf->y_buffer + mb_y_offset,
                                   ref_frame[rf_idx]->y_buffer + mb_y_offset,
@@ -6436,8 +6441,9 @@ static int_mv find_ref_mv(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
 }
 
 static int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi,
-                                  TplDepFrame *tpl_frame, int rf_idx,
-                                  BLOCK_SIZE bsize, int mi_row, int mi_col) {
+                                  MotionField *motion_field,
+                                  TplDepFrame *tpl_frame, BLOCK_SIZE bsize,
+                                  int mi_row, int mi_col) {
   int_mv mv;
   switch (mv_mode) {
     case ZERO_MV_MODE:
@@ -6445,7 +6451,7 @@ static int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi,
       mv.as_mv.col = 0;
       break;
     case NEW_MV_MODE:
-      mv = *get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
+      mv = vp9_motion_field_mi_get_mv(motion_field, mi_row, mi_col);
       break;
     case NEAREST_MV_MODE:
       mv = find_ref_mv(mv_mode, cpi, tpl_frame, bsize, mi_row, mi_col);
@@ -6462,15 +6468,16 @@ static int_mv get_mv_from_mv_mode(int mv_mode, VP9_COMP *cpi,
 }
 
 static double get_mv_dist(int mv_mode, VP9_COMP *cpi, MACROBLOCKD *xd,
-                          GF_PICTURE *gf_picture, int frame_idx,
-                          TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
-                          int mi_row, int mi_col, int_mv *mv) {
+                          GF_PICTURE *gf_picture, MotionField *motion_field,
+                          int frame_idx, TplDepFrame *tpl_frame, int rf_idx,
+                          BLOCK_SIZE bsize, int mi_row, int mi_col,
+                          int_mv *mv) {
   uint32_t sse;
   struct buf_2d src;
   struct buf_2d pre;
   MV full_mv;
-  *mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row,
-                            mi_col);
+  *mv = get_mv_from_mv_mode(mv_mode, cpi, motion_field, tpl_frame, bsize,
+                            mi_row, mi_col);
   full_mv = get_full_mv(&mv->as_mv);
   if (get_block_src_pred_buf(xd, gf_picture, frame_idx, rf_idx, mi_row, mi_col,
                              &src, &pre)) {
@@ -6507,18 +6514,18 @@ static INLINE double get_mv_diff_cost(MV *new_mv, MV *ref_mv) {
   mv_diff_cost *= (1 << VP9_PROB_COST_SHIFT);
   return mv_diff_cost;
 }
-static double get_mv_cost(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
-                          int rf_idx, BLOCK_SIZE bsize, int mi_row,
+static double get_mv_cost(int mv_mode, VP9_COMP *cpi, MotionField *motion_field,
+                          TplDepFrame *tpl_frame, BLOCK_SIZE bsize, int mi_row,
                           int mi_col) {
   double mv_cost = get_mv_mode_cost(mv_mode);
   if (mv_mode == NEW_MV_MODE) {
-    MV new_mv = get_mv_from_mv_mode(mv_mode, cpi, tpl_frame, rf_idx, bsize,
-                                    mi_row, mi_col)
+    MV new_mv = get_mv_from_mv_mode(mv_mode, cpi, motion_field, tpl_frame,
+                                    bsize, mi_row, mi_col)
                     .as_mv;
-    MV nearest_mv = get_mv_from_mv_mode(NEAREST_MV_MODE, cpi, tpl_frame, rf_idx,
-                                        bsize, mi_row, mi_col)
+    MV nearest_mv = get_mv_from_mv_mode(NEAREST_MV_MODE, cpi, motion_field,
+                                        tpl_frame, bsize, mi_row, mi_col)
                         .as_mv;
-    MV near_mv = get_mv_from_mv_mode(NEAR_MV_MODE, cpi, tpl_frame, rf_idx,
+    MV near_mv = get_mv_from_mv_mode(NEAR_MV_MODE, cpi, motion_field, tpl_frame,
                                      bsize, mi_row, mi_col)
                      .as_mv;
     double nearest_cost = get_mv_diff_cost(&new_mv, &nearest_mv);
@@ -6529,21 +6536,24 @@ static double get_mv_cost(int mv_mode, VP9_COMP *cpi, TplDepFrame *tpl_frame,
 }
 
 static double eval_mv_mode(int mv_mode, VP9_COMP *cpi, MACROBLOCK *x,
-                           GF_PICTURE *gf_picture, int frame_idx,
-                           TplDepFrame *tpl_frame, int rf_idx, BLOCK_SIZE bsize,
-                           int mi_row, int mi_col, int_mv *mv) {
+                           GF_PICTURE *gf_picture, MotionField *motion_field,
+                           int frame_idx, TplDepFrame *tpl_frame, int rf_idx,
+                           BLOCK_SIZE bsize, int mi_row, int mi_col,
+                           int_mv *mv) {
   MACROBLOCKD *xd = &x->e_mbd;
-  double mv_dist = get_mv_dist(mv_mode, cpi, xd, gf_picture, frame_idx,
-                               tpl_frame, rf_idx, bsize, mi_row, mi_col, mv);
+  double mv_dist =
+      get_mv_dist(mv_mode, cpi, xd, gf_picture, motion_field, frame_idx,
+                  tpl_frame, rf_idx, bsize, mi_row, mi_col, mv);
   double mv_cost =
-      get_mv_cost(mv_mode, cpi, tpl_frame, rf_idx, bsize, mi_row, mi_col);
+      get_mv_cost(mv_mode, cpi, motion_field, tpl_frame, bsize, mi_row, mi_col);
   double mult = 180;
 
   return mv_cost + mult * log2f(1 + mv_dist);
 }
 
 static int find_best_ref_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                                 GF_PICTURE *gf_picture, int frame_idx,
+                                 GF_PICTURE *gf_picture,
+                                 MotionField *motion_field, int frame_idx,
                                  TplDepFrame *tpl_frame, int rf_idx,
                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
                                  double *rd, int_mv *mv) {
@@ -6557,8 +6567,8 @@ static int find_best_ref_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (mv_mode == NEW_MV_MODE) {
       continue;
     }
-    this_rd = eval_mv_mode(mv_mode, cpi, x, gf_picture, frame_idx, tpl_frame,
-                           rf_idx, bsize, mi_row, mi_col, &this_mv);
+    this_rd = eval_mv_mode(mv_mode, cpi, x, gf_picture, motion_field, frame_idx,
+                           tpl_frame, rf_idx, bsize, mi_row, mi_col, &this_mv);
     if (update == 0) {
       *rd = this_rd;
       *mv = this_mv;
@@ -6576,8 +6586,8 @@ static int find_best_ref_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                            GF_PICTURE *gf_picture, int frame_idx,
-                            TplDepFrame *tpl_frame, int rf_idx,
+                            GF_PICTURE *gf_picture, MotionField *motion_field,
+                            int frame_idx, TplDepFrame *tpl_frame, int rf_idx,
                             BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
@@ -6607,9 +6617,9 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (nb_row < tpl_frame->mi_rows && nb_col < tpl_frame->mi_cols) {
         double this_rd;
         int_mv *mv = &select_mv_arr[nb_row * stride + nb_col];
-        mv_mode_arr[nb_row * stride + nb_col] =
-            find_best_ref_mv_mode(cpi, x, gf_picture, frame_idx, tpl_frame,
-                                  rf_idx, bsize, nb_row, nb_col, &this_rd, mv);
+        mv_mode_arr[nb_row * stride + nb_col] = find_best_ref_mv_mode(
+            cpi, x, gf_picture, motion_field, frame_idx, tpl_frame, rf_idx,
+            bsize, nb_row, nb_col, &this_rd, mv);
         if (r == 0 && c == 0) {
           this_no_new_mv_rd = this_rd;
         }
@@ -6623,9 +6633,9 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // new mv
   mv_mode_arr[mi_row * stride + mi_col] = NEW_MV_MODE;
-  this_new_mv_rd = eval_mv_mode(NEW_MV_MODE, cpi, x, gf_picture, frame_idx,
-                                tpl_frame, rf_idx, bsize, mi_row, mi_col,
-                                &select_mv_arr[mi_row * stride + mi_col]);
+  this_new_mv_rd = eval_mv_mode(
+      NEW_MV_MODE, cpi, x, gf_picture, motion_field, frame_idx, tpl_frame,
+      rf_idx, bsize, mi_row, mi_col, &select_mv_arr[mi_row * stride + mi_col]);
   new_mv_rd = this_new_mv_rd;
   // We start from idx = 1 because idx = 0 is evaluated as NEW_MV_MODE
   // beforehand.
@@ -6638,9 +6648,9 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (nb_row < tpl_frame->mi_rows && nb_col < tpl_frame->mi_cols) {
         double this_rd;
         int_mv *mv = &select_mv_arr[nb_row * stride + nb_col];
-        mv_mode_arr[nb_row * stride + nb_col] =
-            find_best_ref_mv_mode(cpi, x, gf_picture, frame_idx, tpl_frame,
-                                  rf_idx, bsize, nb_row, nb_col, &this_rd, mv);
+        mv_mode_arr[nb_row * stride + nb_col] = find_best_ref_mv_mode(
+            cpi, x, gf_picture, motion_field, frame_idx, tpl_frame, rf_idx,
+            bsize, nb_row, nb_col, &this_rd, mv);
         new_mv_rd += this_rd;
       }
     }
@@ -6670,7 +6680,8 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x,
-                                GF_PICTURE *gf_picture, int frame_idx,
+                                GF_PICTURE *gf_picture,
+                                MotionField *motion_field, int frame_idx,
                                 TplDepFrame *tpl_frame, int rf_idx,
                                 BLOCK_SIZE bsize) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
@@ -6689,8 +6700,8 @@ static void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x,
       assert(c >= 0 && c < unit_cols);
       assert(mi_row >= 0 && mi_row < tpl_frame->mi_rows);
       assert(mi_col >= 0 && mi_col < tpl_frame->mi_cols);
-      predict_mv_mode(cpi, x, gf_picture, frame_idx, tpl_frame, rf_idx, bsize,
-                      mi_row, mi_col);
+      predict_mv_mode(cpi, x, gf_picture, motion_field, frame_idx, tpl_frame,
+                      rf_idx, bsize, mi_row, mi_col);
     }
   }
 }
@@ -6731,29 +6742,28 @@ static int compare_feature_score(const void *a, const void *b) {
   }
 }
 
-static void do_motion_search(VP9_COMP *cpi, ThreadData *td, int frame_idx,
+static void do_motion_search(VP9_COMP *cpi, ThreadData *td,
+                             MotionField *motion_field, int frame_idx,
                              YV12_BUFFER_CONFIG *ref_frame, BLOCK_SIZE bsize,
-                             int mi_row, int mi_col, int rf_idx) {
+                             int mi_row, int mi_col) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCK *x = &td->mb;
   MACROBLOCKD *xd = &x->e_mbd;
-  TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-  TplDepStats *tpl_stats =
-      &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
   const int mb_y_offset =
       mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
   assert(ref_frame != NULL);
   set_mv_limits(cm, x, mi_row, mi_col);
-  tpl_stats->ready[rf_idx] = 1;
   {
-    int_mv *mv = get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
+    int_mv mv = vp9_motion_field_mi_get_mv(motion_field, mi_row, mi_col);
     uint8_t *cur_frame_buf = xd->cur_buf->y_buffer + mb_y_offset;
     uint8_t *ref_frame_buf = ref_frame->y_buffer + mb_y_offset;
     const int stride = xd->cur_buf->y_stride;
-    full_pixel_motion_search(cpi, td, frame_idx, cur_frame_buf, ref_frame_buf,
-                             stride, bsize, mi_row, mi_col, &mv->as_mv, rf_idx);
+    full_pixel_motion_search(cpi, td, motion_field, frame_idx, cur_frame_buf,
+                             ref_frame_buf, stride, bsize, mi_row, mi_col,
+                             &mv.as_mv);
     sub_pixel_motion_search(cpi, td, cur_frame_buf, ref_frame_buf, stride,
-                            bsize, &mv->as_mv);
+                            bsize, &mv.as_mv);
+    vp9_motion_field_mi_set_mv(motion_field, mi_row, mi_col, mv);
   }
 }
 
@@ -6861,14 +6871,11 @@ static void build_motion_field(
           mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
       const int bw = 4 << b_width_log2_lookup[bsize];
       const int bh = 4 << b_height_log2_lookup[bsize];
-      TplDepStats *tpl_stats =
-          &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
       FEATURE_SCORE_LOC *fs_loc =
           &cpi->feature_score_loc_arr[mi_row * tpl_frame->stride + mi_col];
-      tpl_stats->feature_score = get_feature_score(
+      fs_loc->feature_score = get_feature_score(
           xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
       fs_loc->visited = 0;
-      fs_loc->feature_score = tpl_stats->feature_score;
       fs_loc->mi_row = mi_row;
       fs_loc->mi_col = mi_col;
       cpi->feature_score_loc_sort[fs_loc_sort_size] = fs_loc;
@@ -6879,28 +6886,21 @@ static void build_motion_field(
   qsort(cpi->feature_score_loc_sort, fs_loc_sort_size,
         sizeof(*cpi->feature_score_loc_sort), compare_feature_score);
 
-  for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
-    for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
-      for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-        TplDepStats *tpl_stats =
-            &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-        tpl_stats->ready[rf_idx] = 0;
-      }
-    }
-  }
-
   // TODO(angiebird): Clean up this part.
   for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     int i;
+    MotionField *motion_field = vp9_motion_field_info_get_motion_field(
+        &cpi->motion_field_info, frame_idx, rf_idx, bsize);
     if (ref_frame[rf_idx] == NULL) {
       continue;
     }
+    vp9_motion_field_reset_mvs(motion_field);
 #if CHANGE_MV_SEARCH_ORDER
 #if !USE_PQSORT
     for (i = 0; i < fs_loc_sort_size; ++i) {
       FEATURE_SCORE_LOC *fs_loc = cpi->feature_score_loc_sort[i];
-      do_motion_search(cpi, td, frame_idx, ref_frame[rf_idx], bsize,
-                       fs_loc->mi_row, fs_loc->mi_col, rf_idx);
+      do_motion_search(cpi, td, motion_field, frame_idx, ref_frame[rf_idx],
+                       bsize, fs_loc->mi_row, fs_loc->mi_col);
     }
 #else   // !USE_PQSORT
     fs_loc_heap_size = 0;
@@ -6915,8 +6915,8 @@ static void build_motion_field(
       FEATURE_SCORE_LOC *fs_loc;
       max_heap_pop(cpi->feature_score_loc_heap, &fs_loc_heap_size, &fs_loc);
 
-      do_motion_search(cpi, td, frame_idx, ref_frame[rf_idx], bsize,
-                       fs_loc->mi_row, fs_loc->mi_col, rf_idx);
+      do_motion_search(cpi, td, motion_field, frame_idx, ref_frame[rf_idx],
+                       bsize, fs_loc->mi_row, fs_loc->mi_col);
 
       add_nb_blocks_to_heap(cpi, tpl_frame, bsize, fs_loc->mi_row,
                             fs_loc->mi_col, &fs_loc_heap_size);
@@ -6925,8 +6925,8 @@ static void build_motion_field(
 #else   // CHANGE_MV_SEARCH_ORDER
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-        do_motion_search(cpi, td, frame_idx, ref_frame[rf_idx], bsize, mi_row,
-                         mi_col, rf_idx);
+        do_motion_search(cpi, td, motion_field, frame_idx, ref_frame[rf_idx],
+                         bsize, mi_row, mi_col);
       }
     }
 #endif  // CHANGE_MV_SEARCH_ORDER
@@ -7016,8 +7016,10 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
     if (ref_frame_idx != -1) {
-      predict_mv_mode_arr(cpi, x, gf_picture, frame_idx, tpl_frame, rf_idx,
-                          bsize);
+      MotionField *motion_field = vp9_motion_field_info_get_motion_field(
+          &cpi->motion_field_info, frame_idx, rf_idx, bsize);
+      predict_mv_mode_arr(cpi, x, gf_picture, motion_field, frame_idx,
+                          tpl_frame, rf_idx, bsize);
     }
   }
 #endif
@@ -7088,8 +7090,9 @@ static void dump_tpl_stats(const VP9_COMP *cpi, int tpl_group_frames,
         for (mi_row = 0; mi_row < cm->mi_rows; ++mi_row) {
           for (mi_col = 0; mi_col < cm->mi_cols; ++mi_col) {
             if ((mi_row % mi_height) == 0 && (mi_col % mi_width) == 0) {
-              int_mv mv =
-                  *get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row, mi_col);
+              int_mv mv = vp9_motion_field_info_get_mv(&cpi->motion_field_info,
+                                                       frame_idx, rf_idx, bsize,
+                                                       mi_row, mi_col);
               printf("%d %d %d %d\n", mi_row, mi_col, mv.as_mv.row,
                      mv.as_mv.col);
             }
@@ -7133,7 +7136,6 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
   const int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
 #if CONFIG_NON_GREEDY_MV
-  int sqr_bsize;
   int rf_idx;
 
   // TODO(angiebird): This probably needs further modifications to support
@@ -7170,15 +7172,6 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 
 #if CONFIG_NON_GREEDY_MV
     for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
-      for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
-        vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
-        CHECK_MEM_ERROR(
-            cm, cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize],
-            vpx_calloc(
-                mi_rows * mi_cols * 4,
-                sizeof(
-                    *cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize])));
-      }
       vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
       CHECK_MEM_ERROR(
           cm, cpi->tpl_stats[frame].mv_mode_arr[rf_idx],
@@ -7222,10 +7215,6 @@ static void free_tpl_buffer(VP9_COMP *cpi) {
 #if CONFIG_NON_GREEDY_MV
     int rf_idx;
     for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
-      int sqr_bsize;
-      for (sqr_bsize = 0; sqr_bsize < SQUARE_BLOCK_SIZES; ++sqr_bsize) {
-        vpx_free(cpi->tpl_stats[frame].pyramid_mv_arr[rf_idx][sqr_bsize]);
-      }
       vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
       vpx_free(cpi->tpl_stats[frame].rd_diff_arr[rf_idx]);
     }

@@ -2055,26 +2055,25 @@ static int64_t diamond_search_sad_new(const MACROBLOCK *x,
   return bestsad;
 }
 
-int vp9_prepare_nb_full_mvs(const TplDepFrame *tpl_frame, int mi_row,
-                            int mi_col, int rf_idx, BLOCK_SIZE bsize,
-                            int_mv *nb_full_mvs) {
-  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
-  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+int vp9_prepare_nb_full_mvs(const MotionField *motion_field, int mi_row,
+                            int mi_col, int_mv *nb_full_mvs) {
+  const int mi_width = num_8x8_blocks_wide_lookup[motion_field->bsize];
+  const int mi_height = num_8x8_blocks_high_lookup[motion_field->bsize];
   const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
   int nb_full_mv_num = 0;
   int i;
+  assert(mi_row % mi_height == 0);
+  assert(mi_col % mi_width == 0);
   for (i = 0; i < NB_MVS_NUM; ++i) {
-    int r = dirs[i][0] * mi_height;
-    int c = dirs[i][1] * mi_width;
-    if (mi_row + r >= 0 && mi_row + r < tpl_frame->mi_rows && mi_col + c >= 0 &&
-        mi_col + c < tpl_frame->mi_cols) {
-      const TplDepStats *tpl_ptr =
-          &tpl_frame
-               ->tpl_stats_ptr[(mi_row + r) * tpl_frame->stride + mi_col + c];
-      if (tpl_ptr->ready[rf_idx]) {
-        int_mv *mv =
-            get_pyramid_mv(tpl_frame, rf_idx, bsize, mi_row + r, mi_col + c);
-        nb_full_mvs[nb_full_mv_num].as_mv = get_full_mv(&mv->as_mv);
+    int r = dirs[i][0];
+    int c = dirs[i][1];
+    int brow = mi_row / mi_height + r;
+    int bcol = mi_col / mi_width + c;
+    if (brow >= 0 && brow < motion_field->block_rows && bcol >= 0 &&
+        bcol < motion_field->block_cols) {
+      if (vp9_motion_field_is_mv_set(motion_field, brow, bcol)) {
+        int_mv mv = vp9_motion_field_get_mv(motion_field, brow, bcol);
+        nb_full_mvs[nb_full_mv_num].as_mv = get_full_mv(&mv.as_mv);
         ++nb_full_mv_num;
       }
     }
