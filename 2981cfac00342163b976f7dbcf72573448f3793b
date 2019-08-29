@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ccf426af_1bdce532",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 7142,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2019-08-29T19:29:00Z",
+      "side": 1,
+      "message": "We need to check the return value of this vp9_alloc_motion_field_info() call. If it is not STATUS_OK, we need to call vpx_internal_error().",
+      "revId": "2981cfac00342163b976f7dbcf72573448f3793b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee90f8f8_0c20d1d2",
+        "filename": "vp9/encoder/vp9_non_greedy_mv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2019-08-29T19:29:00Z",
+      "side": 1,
+      "message": "Assertions are usually used to detect programming errors. Since out-of-memory conditions are not programming errors, this assertion doesn\u0027t seem appropriate. I think it should be removed.",
+      "revId": "2981cfac00342163b976f7dbcf72573448f3793b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8a90b5f_b712f623",
+        "filename": "vp9/encoder/vp9_non_greedy_mv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2019-08-29T19:29:00Z",
+      "side": 1,
+      "message": "Ideally we should free the previously-allocated MotionField objects before returning STATUS_FAILED here, otherwise they will be leaked. I don\u0027t know if libvpx tries to avoid memory leaks on error paths.",
+      "revId": "2981cfac00342163b976f7dbcf72573448f3793b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "84e2d15e_ce70b033",
+        "filename": "vp9/encoder/vp9_non_greedy_mv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2019-08-29T19:29:00Z",
+      "side": 1,
+      "message": "Similarly, I think the two assert(0)\u0027s in this function should be removed.",
+      "revId": "2981cfac00342163b976f7dbcf72573448f3793b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4372cccf_f9d68728",
+        "filename": "vp9/encoder/vp9_non_greedy_mv.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2019-08-29T19:29:00Z",
+      "side": 1,
+      "message": "We should free motion_field-\u003emf here:\n\n  vpx_free(motion_field-\u003emf);\n  motion_field-\u003emf \u003d NULL;\n  status \u003d STATUS_FAILED;",
+      "revId": "2981cfac00342163b976f7dbcf72573448f3793b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
