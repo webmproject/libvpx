@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7d04075_9f24e138",
+        "filename": "vp9/encoder/vp9_non_greedy_mv.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2019-08-29T19:40:49Z",
+      "side": 1,
+      "message": "In another CL I suggested freeing previously-allocated fields when an allocation fails. Now that we also allocate motion_field-\u003eset_mv, it will be more complicated to do that. I don\u0027t know libvpx\u0027s policy is on memory leaks on error paths (especially after an out-of-memory error), so I leave this decision to you and James.",
+      "revId": "f6251cc7a8dbbd01d918d3d9fac04276905fab42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d6243915_53220710",
+        "filename": "vp9/encoder/vp9_non_greedy_mv.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2019-08-29T19:40:49Z",
+      "side": 1,
+      "message": "vp9_free_motion_field() needs to free motion_field-\u003eset_mv now. We need to fix this memory leak.",
+      "revId": "f6251cc7a8dbbd01d918d3d9fac04276905fab42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
