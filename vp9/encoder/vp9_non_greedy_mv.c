@@ -193,7 +193,6 @@ Status vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
         Status status =
             vp9_alloc_motion_field(motion_field, bsize, block_rows, block_cols);
         if (status == STATUS_FAILED) {
-          assert(0);
           return STATUS_FAILED;
         }
       }
@@ -214,19 +213,22 @@ Status vp9_alloc_motion_field(MotionField *motion_field, BLOCK_SIZE bsize,
   motion_field->mf =
       vpx_calloc(motion_field->block_num, sizeof(*motion_field->mf));
   if (motion_field->mf == NULL) {
-    assert(0);
     status = STATUS_FAILED;
   }
   motion_field->set_mv =
       vpx_calloc(motion_field->block_num, sizeof(*motion_field->set_mv));
   if (motion_field->set_mv == NULL) {
-    assert(0);
+    vpx_free(motion_field->mf);
+    motion_field->mf = NULL;
     status = STATUS_FAILED;
   }
   motion_field->local_structure = vpx_calloc(
       motion_field->block_num, sizeof(*motion_field->local_structure));
   if (motion_field->local_structure == NULL) {
-    assert(0);
+    vpx_free(motion_field->mf);
+    motion_field->mf = NULL;
+    vpx_free(motion_field->set_mv);
+    motion_field->set_mv = NULL;
     status = STATUS_FAILED;
   }
   return status;

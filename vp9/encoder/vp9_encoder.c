@@ -7140,8 +7140,13 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 
   // TODO(angiebird): This probably needs further modifications to support
   // frame scaling later on.
-  vp9_alloc_motion_field_info(&cpi->motion_field_info, MAX_ARF_GOP_SIZE,
-                              mi_rows, mi_cols);
+  Status status = vp9_alloc_motion_field_info(
+      &cpi->motion_field_info, MAX_ARF_GOP_SIZE, mi_rows, mi_cols);
+  if (status == STATUS_FAILED) {
+    vpx_internal_error(&(cm)->error, VPX_CODEC_MEM_ERROR,
+                       "vp9_alloc_motion_field_info failed");
+  }
+
   if (cpi->feature_score_loc_alloc == 0) {
     // The smallest block size of motion field is 4x4, but the mi_unit is 8x8,
     // therefore the number of units is "mi_rows * mi_cols * 4" here.
