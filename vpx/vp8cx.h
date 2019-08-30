@@ -839,6 +839,8 @@ typedef enum {
   /**< Upper layers are constrained to drop if current layer drops. */
   LAYER_DROP,           /**< Any spatial layer can drop. */
   FULL_SUPERFRAME_DROP, /**< Only full superframe can drop. */
+  CONSTRAINED_FROM_ABOVE_DROP,
+  /**< Lower layers are constrained to drop if current layer drops. */
 } SVC_LAYER_DROP_MODE;
 
 /*!\brief vp9 svc frame dropping parameters.
