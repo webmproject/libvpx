@@ -267,6 +267,8 @@ void vp9_rc_update_rate_correction_factors(struct VP9_COMP *cpi);
 // Post encode drop for CBR mode.
 int post_encode_drop_cbr(struct VP9_COMP *cpi, size_t *size);
 
+int vp9_test_drop(struct VP9_COMP *cpi);
+
 // Decide if we should drop this frame: For 1-pass CBR.
 // Changes only the decimation count in the rate control structure
 int vp9_rc_drop_frame(struct VP9_COMP *cpi);

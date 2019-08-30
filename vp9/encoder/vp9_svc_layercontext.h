@@ -138,6 +138,7 @@ typedef struct SVC {
   int drop_spatial_layer[VPX_MAX_LAYERS];
   int framedrop_thresh[VPX_MAX_LAYERS];
   int drop_count[VPX_MAX_LAYERS];
+  int force_drop_constrained_from_above[VPX_MAX_LAYERS];
   int max_consec_drop;
   SVC_LAYER_DROP_MODE framedrop_mode;
 
