@@ -122,12 +122,12 @@ static int compare_local_var(const int (*local_var1)[MF_LOCAL_STRUCTURE_SIZE],
   return diff / rows / cols;
 }
 
-TEST(non_greedy_mv, DISABLED_smooth_mf) {
-  const char *search_mf_file = "non_greedy_mv_test_files/exhaust_32x32.txt";
-  const char *local_var_file = "non_greedy_mv_test_files/localVar_32x32.txt";
-  const char *estimation_file = "non_greedy_mv_test_files/estimation_32x32.txt";
+TEST(non_greedy_mv, smooth_mf) {
+  const char *search_mf_file = "non_greedy_mv_test_files/exhaust_16x16.txt";
+  const char *local_var_file = "non_greedy_mv_test_files/localVar_16x16.txt";
+  const char *estimation_file = "non_greedy_mv_test_files/estimation_16x16.txt";
   const char *ground_truth_file =
-      "non_greedy_mv_test_files/ground_truth_32x32.txt";
+      "non_greedy_mv_test_files/ground_truth_16x16.txt";
   BLOCK_SIZE bsize = BLOCK_32X32;
   MV *search_mf = NULL;
   MV *smooth_mf = NULL;
@@ -163,12 +163,12 @@ TEST(non_greedy_mv, DISABLED_smooth_mf) {
   free(smooth_mf);
 }
 
-TEST(non_greedy_mv, DISABLED_local_var) {
-  const char *ref_frame_file = "non_greedy_mv_test_files/ref_frame_32x32.txt";
-  const char *cur_frame_file = "non_greedy_mv_test_files/cur_frame_32x32.txt";
-  const char *gt_local_var_file = "non_greedy_mv_test_files/localVar_32x32.txt";
-  const char *search_mf_file = "non_greedy_mv_test_files/exhaust_32x32.txt";
-  BLOCK_SIZE bsize = BLOCK_32X32;
+TEST(non_greedy_mv, local_var) {
+  const char *ref_frame_file = "non_greedy_mv_test_files/ref_frame_16x16.txt";
+  const char *cur_frame_file = "non_greedy_mv_test_files/cur_frame_16x16.txt";
+  const char *gt_local_var_file = "non_greedy_mv_test_files/localVar_16x16.txt";
+  const char *search_mf_file = "non_greedy_mv_test_files/exhaust_16x16.txt";
+  BLOCK_SIZE bsize = BLOCK_16X16;
   int(*gt_local_var)[MF_LOCAL_STRUCTURE_SIZE] = NULL;
   int(*est_local_var)[MF_LOCAL_STRUCTURE_SIZE] = NULL;
   YV12_BUFFER_CONFIG ref_frame, cur_frame;
@@ -182,7 +182,7 @@ TEST(non_greedy_mv, DISABLED_local_var) {
   load_frame_info(cur_frame_file, &cur_frame);
   read_in_mf(search_mf_file, &rows, &cols, &search_mf);
 
-  fn.sdf = vpx_sad32x32;
+  fn.sdf = vpx_sad16x16;
   est_local_var = (int(*)[MF_LOCAL_STRUCTURE_SIZE])malloc(
       rows * cols * MF_LOCAL_STRUCTURE_SIZE * sizeof(int_type));
   vp9_get_local_structure(&cur_frame, &ref_frame, search_mf, &fn, rows, cols,
