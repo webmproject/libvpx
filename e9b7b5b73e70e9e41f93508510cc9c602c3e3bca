@@ -69,6 +69,24 @@
       "revId": "e9b7b5b73e70e9e41f93508510cc9c602c3e3bca",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "54516c07_8a6ce938",
+        "filename": "vp9/common/vp9_mvref_common.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1336424
+      },
+      "writtenOn": "2019-09-05T19:52:42Z",
+      "side": 1,
+      "message": "I\u0027ve looked at the asm generated and it\u0027s not using intermediates. I don\u0027t think we need to use the .inc file.\n\n  214 00007ffd`c07b4784 488d2da5661800  lea     rbp,[blink_modules!mode_2_counter (00007ffd`c093ae30)]\n  214 00007ffd`c07b478b 03748500        add     esi,dword ptr [rbp+rax*4]\n  214 00007ffd`c07b478f 8a442407        mov     al,byte ptr [rsp+7]\n  217 00007ffd`c07b4793 384308          cmp     byte ptr [rbx+8],al\n  217 00007ffd`c07b4796 8974240c        mov     dword ptr [rsp+0Ch],esi\n  217 00007ffd`c07b479a 0f85b3040000    jne     blink_modules!find_mv_refs_idx+0x693 (00007ffd`c07b4c53)",
+      "parentUuid": "924ab1c6_d245a6ed",
+      "revId": "e9b7b5b73e70e9e41f93508510cc9c602c3e3bca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }

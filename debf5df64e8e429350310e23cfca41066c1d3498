@@ -16,6 +16,24 @@
       "revId": "debf5df64e8e429350310e23cfca41066c1d3498",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "37630e53_918148e1",
+        "filename": "vp9/common/vp9_mvref_common.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1336424
+      },
+      "writtenOn": "2019-09-05T19:52:42Z",
+      "side": 1,
+      "message": "I agree that this is only used in the header today. However, to ensure we only have 1 copy in the face of future chnages I think the best thing is to keep the instance in the .cc file.",
+      "parentUuid": "8fc61635_34c72344",
+      "revId": "debf5df64e8e429350310e23cfca41066c1d3498",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
