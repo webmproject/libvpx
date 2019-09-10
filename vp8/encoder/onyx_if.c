@@ -3958,7 +3958,10 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     vp8_encode_frame(cpi);
 
     if (cpi->pass == 0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-      if (vp8_drop_encodedframe_overshoot(cpi, Q)) return;
+      if (vp8_drop_encodedframe_overshoot(cpi, Q)) {
+        vpx_clear_system_state();
+        return;
+      }
       if (cm->frame_type != KEY_FRAME)
         cpi->last_pred_err_mb =
             (int)(cpi->mb.prediction_error / cpi->common.MBs);
