@@ -22,6 +22,30 @@
       "revId": "76567d84cef1bd8a8dd734a70f554d80208a66fd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "470a6443_a8ab1d4d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2019-09-10T01:27:43Z",
+      "side": 1,
+      "message": "We can safely assume that these counts can\u0027t exceed int 32 max, since they are counts of a video frame. The max must be smaller than number of pixels, which is much smaller than int 32 max.",
+      "parentUuid": "c319c6eb_aa93677c",
+      "range": {
+        "startLine": 209,
+        "startChar": 14,
+        "endLine": 209,
+        "endChar": 44
+      },
+      "revId": "76567d84cef1bd8a8dd734a70f554d80208a66fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
