@@ -1109,6 +1109,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *const cpi = ctx->cpi;
   const vpx_rational64_t *const timestamp_ratio = &ctx->timestamp_ratio;
   size_t data_sz;
+  vpx_codec_cx_pkt_t pkt;
+  memset(&pkt, 0, sizeof(pkt));
 
   if (cpi == NULL) return VPX_CODEC_INVALID_PARAM;
 
@@ -1228,8 +1230,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
                                          &dst_time_stamp, &dst_end_time_stamp,
                                          !img)) {
       if (size || (cpi->use_svc && cpi->svc.skip_enhancement_layer)) {
-        vpx_codec_cx_pkt_t pkt;
-
         // Pack invisible frames with the next visible frame
         if (!cpi->common.show_frame ||
             (cpi->use_svc &&
