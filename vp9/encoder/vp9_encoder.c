@@ -7138,9 +7138,6 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 #if CONFIG_NON_GREEDY_MV
   int rf_idx;
 
-  // TODO(angiebird): This probably needs further modifications to support
-  // frame scaling later on.
-
   if (cpi->feature_score_loc_alloc == 0) {
     // The smallest block size of motion field is 4x4, but the mi_unit is 8x8,
     // therefore the number of units is "mi_rows * mi_cols * 4" here.
