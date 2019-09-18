@@ -2499,7 +2499,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   int gf_group_idx = cpi->twopass.gf_group.index;
   int gf_rf_idx = ref_frame_to_gf_rf_idx(ref);
   BLOCK_SIZE square_bsize = get_square_block_size(bsize);
-  int_mv nb_full_mvs[NB_MVS_NUM];
+  int_mv nb_full_mvs[NB_MVS_NUM] = { 0 };
   MotionField *motion_field = vp9_motion_field_info_get_motion_field(
       &cpi->motion_field_info, gf_group_idx, gf_rf_idx, square_bsize);
   const int nb_full_mv_num =
