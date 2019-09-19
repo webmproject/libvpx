@@ -505,15 +505,6 @@ typedef struct EncFrameBuf {
 
 // Maximum operating frame buffer size needed for a GOP using ARF reference.
 #define MAX_ARF_GOP_SIZE (2 * MAX_LAG_BUFFERS)
-#if CONFIG_NON_GREEDY_MV
-typedef struct FEATURE_SCORE_LOC {
-  int visited;
-  double feature_score;
-  int mi_row;
-  int mi_col;
-} FEATURE_SCORE_LOC;
-#endif
-
 #define MAX_KMEANS_GROUPS 8
 
 typedef struct KMEANS_DATA {
@@ -563,10 +554,6 @@ typedef struct VP9_COMP {
 #if CONFIG_NON_GREEDY_MV
   MotionFieldInfo motion_field_info;
   int tpl_ready;
-  int feature_score_loc_alloc;
-  FEATURE_SCORE_LOC *feature_score_loc_arr;
-  FEATURE_SCORE_LOC **feature_score_loc_sort;
-  FEATURE_SCORE_LOC **feature_score_loc_heap;
   int_mv *select_mv_arr;
 #endif
 

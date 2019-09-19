@@ -2431,7 +2431,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   cpi->kmeans_data_arr_alloc = 0;
 #if CONFIG_NON_GREEDY_MV
-  cpi->feature_score_loc_alloc = 0;
   cpi->tpl_ready = 0;
 #endif  // CONFIG_NON_GREEDY_MV
   for (i = 0; i < MAX_ARF_GOP_SIZE; ++i) cpi->tpl_stats[i].tpl_stats_ptr = NULL;
@@ -6699,42 +6698,6 @@ static void predict_mv_mode_arr(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-static double get_feature_score(uint8_t *buf, ptrdiff_t stride, int rows,
-                                int cols) {
-  double IxIx = 0;
-  double IxIy = 0;
-  double IyIy = 0;
-  double score;
-  int r, c;
-  vpx_clear_system_state();
-  for (r = 0; r + 1 < rows; ++r) {
-    for (c = 0; c + 1 < cols; ++c) {
-      int diff_x = buf[r * stride + c] - buf[r * stride + c + 1];
-      int diff_y = buf[r * stride + c] - buf[(r + 1) * stride + c];
-      IxIx += diff_x * diff_x;
-      IxIy += diff_x * diff_y;
-      IyIy += diff_y * diff_y;
-    }
-  }
-  IxIx /= (rows - 1) * (cols - 1);
-  IxIy /= (rows - 1) * (cols - 1);
-  IyIy /= (rows - 1) * (cols - 1);
-  score = (IxIx * IyIy - IxIy * IxIy + 0.0001) / (IxIx + IyIy + 0.0001);
-  return score;
-}
-
-static int compare_feature_score(const void *a, const void *b) {
-  const FEATURE_SCORE_LOC *aa = *(FEATURE_SCORE_LOC *const *)a;
-  const FEATURE_SCORE_LOC *bb = *(FEATURE_SCORE_LOC *const *)b;
-  if (aa->feature_score < bb->feature_score) {
-    return 1;
-  } else if (aa->feature_score > bb->feature_score) {
-    return -1;
-  } else {
-    return 0;
-  }
-}
-
 static void do_motion_search(VP9_COMP *cpi, ThreadData *td,
                              MotionField *motion_field, int frame_idx,
                              YV12_BUFFER_CONFIG *ref_frame, BLOCK_SIZE bsize,
@@ -6760,87 +6723,8 @@ static void do_motion_search(VP9_COMP *cpi, ThreadData *td,
   }
 }
 
-#define CHANGE_MV_SEARCH_ORDER 1
-#define USE_PQSORT 1
-
-#if CHANGE_MV_SEARCH_ORDER
-#if USE_PQSORT
-static void max_heap_pop(FEATURE_SCORE_LOC **heap, int *size,
-                         FEATURE_SCORE_LOC **output) {
-  if (*size > 0) {
-    *output = heap[0];
-    --*size;
-    if (*size > 0) {
-      int p, l, r;
-      heap[0] = heap[*size];
-      p = 0;
-      l = 2 * p + 1;
-      r = 2 * p + 2;
-      while (l < *size) {
-        FEATURE_SCORE_LOC *tmp;
-        int c = l;
-        if (r < *size && heap[r]->feature_score > heap[l]->feature_score) {
-          c = r;
-        }
-        if (heap[p]->feature_score >= heap[c]->feature_score) {
-          break;
-        }
-        tmp = heap[p];
-        heap[p] = heap[c];
-        heap[c] = tmp;
-        p = c;
-        l = 2 * p + 1;
-        r = 2 * p + 2;
-      }
-    }
-  } else {
-    assert(0);
-  }
-}
-
-static void max_heap_push(FEATURE_SCORE_LOC **heap, int *size,
-                          FEATURE_SCORE_LOC *input) {
-  int c, p;
-  FEATURE_SCORE_LOC *tmp;
-  input->visited = 1;
-  heap[*size] = input;
-  ++*size;
-  c = *size - 1;
-  p = c >> 1;
-  while (c > 0 && heap[c]->feature_score > heap[p]->feature_score) {
-    tmp = heap[p];
-    heap[p] = heap[c];
-    heap[c] = tmp;
-    c = p;
-    p >>= 1;
-  }
-}
-
-static void add_nb_blocks_to_heap(VP9_COMP *cpi, const TplDepFrame *tpl_frame,
-                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                  int *heap_size) {
-  const int mi_unit = num_8x8_blocks_wide_lookup[bsize];
-  const int dirs[NB_MVS_NUM][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
-  int i;
-  for (i = 0; i < NB_MVS_NUM; ++i) {
-    int r = dirs[i][0] * mi_unit;
-    int c = dirs[i][1] * mi_unit;
-    if (mi_row + r >= 0 && mi_row + r < tpl_frame->mi_rows && mi_col + c >= 0 &&
-        mi_col + c < tpl_frame->mi_cols) {
-      FEATURE_SCORE_LOC *fs_loc =
-          &cpi->feature_score_loc_arr[(mi_row + r) * tpl_frame->stride +
-                                      (mi_col + c)];
-      if (fs_loc->visited == 0) {
-        max_heap_push(cpi->feature_score_loc_heap, heap_size, fs_loc);
-      }
-    }
-  }
-}
-#endif  // USE_PQSORT
-#endif  // CHANGE_MV_SEARCH_ORDER
-
 static void build_motion_field(
-    VP9_COMP *cpi, MACROBLOCKD *xd, int frame_idx,
+    VP9_COMP *cpi, int frame_idx,
     YV12_BUFFER_CONFIG *ref_frame[MAX_INTER_REF_FRAMES], BLOCK_SIZE bsize) {
   VP9_COMMON *cm = &cpi->common;
   ThreadData *td = &cpi->td;
@@ -6849,80 +6733,25 @@ static void build_motion_field(
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int pw = num_4x4_blocks_wide_lookup[bsize] << 2;
   const int ph = num_4x4_blocks_high_lookup[bsize] << 2;
-  int fs_loc_sort_size;
-  int fs_loc_heap_size;
   int mi_row, mi_col;
   int rf_idx;
 
   tpl_frame->lambda = (pw * ph) >> 2;
   assert(pw * ph == tpl_frame->lambda << 2);
 
-  fs_loc_sort_size = 0;
-  for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-      const int mb_y_offset =
-          mi_row * MI_SIZE * xd->cur_buf->y_stride + mi_col * MI_SIZE;
-      const int bw = 4 << b_width_log2_lookup[bsize];
-      const int bh = 4 << b_height_log2_lookup[bsize];
-      FEATURE_SCORE_LOC *fs_loc =
-          &cpi->feature_score_loc_arr[mi_row * tpl_frame->stride + mi_col];
-      fs_loc->feature_score = get_feature_score(
-          xd->cur_buf->y_buffer + mb_y_offset, xd->cur_buf->y_stride, bw, bh);
-      fs_loc->visited = 0;
-      fs_loc->mi_row = mi_row;
-      fs_loc->mi_col = mi_col;
-      cpi->feature_score_loc_sort[fs_loc_sort_size] = fs_loc;
-      ++fs_loc_sort_size;
-    }
-  }
-
-  qsort(cpi->feature_score_loc_sort, fs_loc_sort_size,
-        sizeof(*cpi->feature_score_loc_sort), compare_feature_score);
-
-  // TODO(angiebird): Clean up this part.
   for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
-    int i;
     MotionField *motion_field = vp9_motion_field_info_get_motion_field(
         &cpi->motion_field_info, frame_idx, rf_idx, bsize);
     if (ref_frame[rf_idx] == NULL) {
       continue;
     }
     vp9_motion_field_reset_mvs(motion_field);
-#if CHANGE_MV_SEARCH_ORDER
-#if !USE_PQSORT
-    for (i = 0; i < fs_loc_sort_size; ++i) {
-      FEATURE_SCORE_LOC *fs_loc = cpi->feature_score_loc_sort[i];
-      do_motion_search(cpi, td, motion_field, frame_idx, ref_frame[rf_idx],
-                       bsize, fs_loc->mi_row, fs_loc->mi_col);
-    }
-#else   // !USE_PQSORT
-    fs_loc_heap_size = 0;
-    max_heap_push(cpi->feature_score_loc_heap, &fs_loc_heap_size,
-                  cpi->feature_score_loc_sort[0]);
-
-    for (i = 0; i < fs_loc_sort_size; ++i) {
-      cpi->feature_score_loc_sort[i]->visited = 0;
-    }
-
-    while (fs_loc_heap_size > 0) {
-      FEATURE_SCORE_LOC *fs_loc;
-      max_heap_pop(cpi->feature_score_loc_heap, &fs_loc_heap_size, &fs_loc);
-
-      do_motion_search(cpi, td, motion_field, frame_idx, ref_frame[rf_idx],
-                       bsize, fs_loc->mi_row, fs_loc->mi_col);
-
-      add_nb_blocks_to_heap(cpi, tpl_frame, bsize, fs_loc->mi_row,
-                            fs_loc->mi_col, &fs_loc_heap_size);
-    }
-#endif  // !USE_PQSORT
-#else   // CHANGE_MV_SEARCH_ORDER
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
         do_motion_search(cpi, td, motion_field, frame_idx, ref_frame[rf_idx],
                          bsize, mi_row, mi_col);
       }
     }
-#endif  // CHANGE_MV_SEARCH_ORDER
   }
 }
 #endif  // CONFIG_NON_GREEDY_MV
@@ -7004,7 +6833,7 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
        ++square_block_idx) {
     BLOCK_SIZE square_bsize = square_block_idx_to_bsize(square_block_idx);
-    build_motion_field(cpi, xd, frame_idx, ref_frame, square_bsize);
+    build_motion_field(cpi, frame_idx, ref_frame, square_bsize);
   }
   for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
@@ -7131,21 +6960,6 @@ static void init_tpl_buffer(VP9_COMP *cpi) {
 #if CONFIG_NON_GREEDY_MV
   int rf_idx;
 
-  if (cpi->feature_score_loc_alloc == 0) {
-    // The smallest block size of motion field is 4x4, but the mi_unit is 8x8,
-    // therefore the number of units is "mi_rows * mi_cols * 4" here.
-    CHECK_MEM_ERROR(
-        cm, cpi->feature_score_loc_arr,
-        vpx_calloc(mi_rows * mi_cols * 4, sizeof(*cpi->feature_score_loc_arr)));
-    CHECK_MEM_ERROR(cm, cpi->feature_score_loc_sort,
-                    vpx_calloc(mi_rows * mi_cols * 4,
-                               sizeof(*cpi->feature_score_loc_sort)));
-    CHECK_MEM_ERROR(cm, cpi->feature_score_loc_heap,
-                    vpx_calloc(mi_rows * mi_cols * 4,
-                               sizeof(*cpi->feature_score_loc_heap)));
-
-    cpi->feature_score_loc_alloc = 1;
-  }
   vpx_free(cpi->select_mv_arr);
   CHECK_MEM_ERROR(
       cm, cpi->select_mv_arr,
@@ -7195,9 +7009,6 @@ static void free_tpl_buffer(VP9_COMP *cpi) {
   int frame;
 #if CONFIG_NON_GREEDY_MV
   vp9_free_motion_field_info(&cpi->motion_field_info);
-  vpx_free(cpi->feature_score_loc_arr);
-  vpx_free(cpi->feature_score_loc_sort);
-  vpx_free(cpi->feature_score_loc_heap);
   vpx_free(cpi->select_mv_arr);
 #endif
   for (frame = 0; frame < MAX_ARF_GOP_SIZE; ++frame) {
