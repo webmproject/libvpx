@@ -7361,10 +7361,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     if (source != NULL) {
       cm->show_frame = 1;
       cm->intra_only = 0;
-      // if the flags indicate intra frame, but if the current picture is for
-      // non-zero spatial layer, it should not be an intra picture.
+      // If the flags indicate intra frame, but if the current picture is for
+      // spatial layer above first_spatial_layer_to_encode, it should not be an
+      // intra picture.
       if ((source->flags & VPX_EFLAG_FORCE_KF) && cpi->use_svc &&
-          cpi->svc.spatial_layer_id > 0) {
+          cpi->svc.spatial_layer_id > cpi->svc.first_spatial_layer_to_encode) {
         source->flags &= ~(unsigned int)(VPX_EFLAG_FORCE_KF);
       }
 
