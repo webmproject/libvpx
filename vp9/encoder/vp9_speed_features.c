@@ -536,13 +536,6 @@ static void set_rt_speed_feature_framesize_independent(
     int i;
     if (cpi->oxcf.rc_mode == VPX_VBR && cpi->oxcf.lag_in_frames > 0)
       sf->use_altref_onepass = 1;
-    sf->last_partitioning_redo_frequency = 4;
-    sf->adaptive_rd_thresh = 5;
-    sf->use_fast_coef_costing = 0;
-    sf->auto_min_max_partition_size = STRICT_NEIGHBORING_MIN_MAX;
-    sf->adjust_partitioning_from_last_frame =
-        cm->last_frame_type != cm->frame_type ||
-        (0 == (frames_since_key + 1) % sf->last_partitioning_redo_frequency);
     sf->mv.subpel_force_stop = QUARTER_PEL;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
@@ -551,13 +544,19 @@ static void set_rt_speed_feature_framesize_independent(
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
     sf->frame_parameter_update = 0;
     sf->mv.search_method = FAST_HEX;
-
-    sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEAR_NEW;
-    sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST;
-    sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST;
-    sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST;
+    sf->allow_skip_recode = 0;
     sf->max_intra_bsize = BLOCK_32X32;
-    sf->allow_skip_recode = 1;
+    sf->use_fast_coef_costing = 0;
+    sf->use_quant_fp = !is_keyframe;
+    sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEW_ZERO;
+    sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST_NEW_ZERO;
+    sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST_NEW_ZERO;
+    sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST_NEW_ZERO;
+    sf->adaptive_rd_thresh = 2;
+    sf->use_fast_coef_updates = is_keyframe ? TWO_LOOP : ONE_LOOP_REDUCED;
+    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH;
+    sf->tx_size_search_method = is_keyframe ? USE_LARGESTALL : USE_TX_8X8;
+    sf->partition_search_type = VAR_BASED_PARTITION;
   }
 
   if (speed >= 5) {
@@ -819,7 +818,7 @@ static void set_rt_speed_feature_framesize_independent(
   }
   // TODO(marpan): There is regression for aq-mode=3 speed <= 4, force it
   // off for now.
-  if (speed <= 4 && cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+  if (speed <= 3 && cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
     cpi->oxcf.aq_mode = 0;
 }
 
