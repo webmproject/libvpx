@@ -10,11 +10,11 @@
 
 #include "vpx_config.h"
 #include "vp8_rtcd.h"
-#if ARCH_ARM
+#if VPX_ARCH_ARM
 #include "vpx_ports/arm.h"
-#elif ARCH_X86 || ARCH_X86_64
+#elif VPX_ARCH_X86 || VPX_ARCH_X86_64
 #include "vpx_ports/x86.h"
-#elif ARCH_PPC
+#elif VPX_ARCH_PPC
 #include "vpx_ports/ppc.h"
 #endif
 #include "vp8/common/onyxc_int.h"
@@ -92,11 +92,11 @@ void vp8_machine_specific_config(VP8_COMMON *ctx) {
   (void)ctx;
 #endif /* CONFIG_MULTITHREAD */
 
-#if ARCH_ARM
+#if VPX_ARCH_ARM
   ctx->cpu_caps = arm_cpu_caps();
-#elif ARCH_X86 || ARCH_X86_64
+#elif VPX_ARCH_X86 || VPX_ARCH_X86_64
   ctx->cpu_caps = x86_simd_caps();
-#elif ARCH_PPC
+#elif VPX_ARCH_PPC
   ctx->cpu_caps = ppc_simd_caps();
 #endif
 }

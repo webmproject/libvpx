@@ -38,7 +38,7 @@
 #include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_util/vpx_write_yuv_frame.h"
-#if ARCH_ARM
+#if VPX_ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
 #if CONFIG_MULTI_RES_ENCODING
@@ -2043,7 +2043,7 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   cpi->fn_ptr[BLOCK_4X4].sdx8f = vpx_sad4x4x8;
   cpi->fn_ptr[BLOCK_4X4].sdx4df = vpx_sad4x4x4d;
 
-#if ARCH_X86 || ARCH_X86_64
+#if VPX_ARCH_X86 || VPX_ARCH_X86_64
   cpi->fn_ptr[BLOCK_16X16].copymem = vp8_copy32xn;
   cpi->fn_ptr[BLOCK_16X8].copymem = vp8_copy32xn;
   cpi->fn_ptr[BLOCK_8X16].copymem = vp8_copy32xn;

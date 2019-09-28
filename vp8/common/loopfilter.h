@@ -26,7 +26,7 @@ extern "C" {
 
 typedef enum { NORMAL_LOOPFILTER = 0, SIMPLE_LOOPFILTER = 1 } LOOPFILTERTYPE;
 
-#if ARCH_ARM
+#if VPX_ARCH_ARM
 #define SIMD_WIDTH 1
 #else
 #define SIMD_WIDTH 16

@@ -505,7 +505,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
-#if ARCH_X86_64
+#if VPX_ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(
     SSSE3, VP9QuantizeTest,
     ::testing::Values(make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c,
@@ -528,7 +528,7 @@ INSTANTIATE_TEST_CASE_P(
                                  &vpx_quantize_b_32x32_c, VPX_BITS_8, 32,
                                  false)));
 
-#endif  // ARCH_X86_64
+#endif  // VPX_ARCH_X86_64
 #endif  // HAVE_SSSE3
 
 #if HAVE_AVX
@@ -541,7 +541,7 @@ INSTANTIATE_TEST_CASE_P(AVX, VP9QuantizeTest,
                                                      VPX_BITS_8, 32, false)));
 #endif  // HAVE_AVX
 
-#if ARCH_X86_64 && HAVE_AVX2
+#if VPX_ARCH_X86_64 && HAVE_AVX2
 INSTANTIATE_TEST_CASE_P(
     AVX2, VP9QuantizeTest,
     ::testing::Values(make_tuple(&QuantFPWrapper<vp9_quantize_fp_avx2>,

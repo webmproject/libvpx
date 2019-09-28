@@ -251,7 +251,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int pre_stride = x->e_mbd.pre.y_stride;
   unsigned char *base_pre = x->e_mbd.pre.y_buffer;
 
-#if ARCH_X86 || ARCH_X86_64
+#if VPX_ARCH_X86 || VPX_ARCH_X86_64
   MACROBLOCKD *xd = &x->e_mbd;
   unsigned char *y_0 = base_pre + d->offset + (bestmv->as_mv.row) * pre_stride +
                        bestmv->as_mv.col;
@@ -380,7 +380,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int pre_stride = x->e_mbd.pre.y_stride;
   unsigned char *base_pre = x->e_mbd.pre.y_buffer;
 
-#if ARCH_X86 || ARCH_X86_64
+#if VPX_ARCH_X86 || VPX_ARCH_X86_64
   MACROBLOCKD *xd = &x->e_mbd;
   unsigned char *y_0 = base_pre + d->offset + (bestmv->as_mv.row) * pre_stride +
                        bestmv->as_mv.col;
@@ -676,7 +676,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int pre_stride = x->e_mbd.pre.y_stride;
   unsigned char *base_pre = x->e_mbd.pre.y_buffer;
 
-#if ARCH_X86 || ARCH_X86_64
+#if VPX_ARCH_X86 || VPX_ARCH_X86_64
   MACROBLOCKD *xd = &x->e_mbd;
   unsigned char *y_0 = base_pre + d->offset + (bestmv->as_mv.row) * pre_stride +
                        bestmv->as_mv.col;
