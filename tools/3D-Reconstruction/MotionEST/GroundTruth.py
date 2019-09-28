@@ -22,7 +22,7 @@ class GroundTruth(MotionEST):
     self.name = 'ground truth'
     super(GroundTruth, self).__init__(cur_f, ref_f, blk_sz)
     self.mask = np.zeros((self.num_row, self.num_col), dtype=np.bool)
-    if not gt_path is None:
+    if gt_path:
       with open(gt_path) as gt_file:
         lines = gt_file.readlines()
         for i in xrange(len(lines)):

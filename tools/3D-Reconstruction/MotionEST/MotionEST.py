@@ -67,7 +67,7 @@ class MotionEST(object):
     count = 0
     for i in xrange(self.num_row):
       for j in xrange(self.num_col):
-        if not mask is None and mask[i, j]:
+        if mask is not None and mask[i, j]:
           continue
         loss += self.block_dist(i, j, self.mf[i, j], metric)
         count += 1
@@ -82,7 +82,7 @@ class MotionEST(object):
     mask = ground_truth.mask
     for i in xrange(self.num_row):
       for j in xrange(self.num_col):
-        if not mask is None and mask[i][j]:
+        if mask is not None and mask[i][j]:
           continue
         loss += LA.norm(gt[i, j] - self.mf[i, j])
         count += 1
@@ -101,7 +101,7 @@ class MotionEST(object):
     plt.subplot(1, n_row, 1)
     plt.imshow(cur_mf)
     plt.title('Estimated Motion Field')
-    if not ground_truth is None:
+    if ground_truth is not None:
       plt.subplot(1, n_row, 2)
       plt.imshow(gt_mf)
       plt.title('Ground Truth')
