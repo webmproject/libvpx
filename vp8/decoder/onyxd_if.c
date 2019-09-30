@@ -37,7 +37,7 @@
 #if CONFIG_ERROR_CONCEALMENT
 #include "error_concealment.h"
 #endif
-#if ARCH_ARM
+#if VPX_ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
 

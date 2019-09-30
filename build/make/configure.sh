@@ -518,10 +518,10 @@ fmt_deps = sed -e 's;^\([a-zA-Z0-9_]*\)\.o;\${@:.d=.o} \$@;'
 EOF
   fi
 
-  print_config_mk ARCH   "${1}" ${ARCH_LIST}
-  print_config_mk HAVE   "${1}" ${HAVE_LIST}
-  print_config_mk CONFIG "${1}" ${CONFIG_LIST}
-  print_config_mk HAVE   "${1}" gnu_strip
+  print_config_mk VPX_ARCH "${1}" ${ARCH_LIST}
+  print_config_mk HAVE     "${1}" ${HAVE_LIST}
+  print_config_mk CONFIG   "${1}" ${CONFIG_LIST}
+  print_config_mk HAVE     "${1}" gnu_strip
 
   enabled msvs && echo "CONFIG_VS_VERSION=${vs_version}" >> "${1}"
 
@@ -538,10 +538,10 @@ write_common_target_config_h() {
 #define RESTRICT    ${RESTRICT}
 #define INLINE      ${INLINE}
 EOF
-  print_config_h ARCH   "${TMP_H}" ${ARCH_LIST}
-  print_config_h HAVE   "${TMP_H}" ${HAVE_LIST}
-  print_config_h CONFIG "${TMP_H}" ${CONFIG_LIST}
-  print_config_vars_h   "${TMP_H}" ${VAR_LIST}
+  print_config_h VPX_ARCH "${TMP_H}" ${ARCH_LIST}
+  print_config_h HAVE     "${TMP_H}" ${HAVE_LIST}
+  print_config_h CONFIG   "${TMP_H}" ${CONFIG_LIST}
+  print_config_vars_h     "${TMP_H}" ${VAR_LIST}
   echo "#endif /* VPX_CONFIG_H */" >> ${TMP_H}
   mkdir -p `dirname "$1"`
   cmp "$1" ${TMP_H} >/dev/null 2>&1 || mv ${TMP_H} "$1"
