@@ -156,7 +156,7 @@ void vpx_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
              quant_shift_ptr[rc != 0]) >>
             16;  // quantization
       qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
-      dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
+      dqcoeff_ptr[rc] = (tran_low_t)(qcoeff_ptr[rc] * dequant_ptr[rc != 0]);
 
       if (tmp) eob = i;
     }
