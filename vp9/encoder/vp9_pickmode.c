@@ -1501,7 +1501,8 @@ static void search_filter_ref(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
   int best_early_term = 0;
   int best_flag_preduv_computed[2] = { 0 };
   INTERP_FILTER filter_start = force_smooth_filter ? EIGHTTAP_SMOOTH : EIGHTTAP;
-  for (filter = filter_start; filter <= EIGHTTAP_SMOOTH; ++filter) {
+  INTERP_FILTER filter_end = EIGHTTAP_SMOOTH;
+  for (filter = filter_start; filter <= filter_end; ++filter) {
     int64_t cost;
     mi->interp_filter = filter;
     vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
@@ -1531,9 +1532,11 @@ static void search_filter_ref(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
           free_pred_buffer(*this_mode_pred);
           *this_mode_pred = current_pred;
         }
-        current_pred = &tmp[get_pred_buffer(tmp, 3)];
-        pd->dst.buf = current_pred->data;
-        pd->dst.stride = bw;
+        if (filter != filter_end) {
+          current_pred = &tmp[get_pred_buffer(tmp, 3)];
+          pd->dst.buf = current_pred->data;
+          pd->dst.stride = bw;
+        }
       }
     }
   }
@@ -1554,6 +1557,9 @@ static void search_filter_ref(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
   if (reuse_inter_pred) {
     pd->dst.buf = (*this_mode_pred)->data;
     pd->dst.stride = (*this_mode_pred)->stride;
+  } else if (best_filter < filter_end) {
+    mi->interp_filter = best_filter;
+    vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
   }
 }
 
