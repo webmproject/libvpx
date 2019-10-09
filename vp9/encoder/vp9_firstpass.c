@@ -1786,11 +1786,11 @@ static double get_zero_motion_factor(const VP9_COMP *cpi,
 
 #define ZM_POWER_FACTOR 0.75
 
-static double get_prediction_decay_rate(const VP9_COMP *cpi,
-                                        const FIRSTPASS_STATS *next_frame) {
-  const double sr_decay_rate = get_sr_decay_rate(&cpi->frame_info, next_frame);
+static double get_prediction_decay_rate(const FRAME_INFO *frame_info,
+                                        const FIRSTPASS_STATS *frame_stats) {
+  const double sr_decay_rate = get_sr_decay_rate(frame_info, frame_stats);
   const double zero_motion_factor =
-      (0.95 * pow((next_frame->pcnt_inter - next_frame->pcnt_motion),
+      (0.95 * pow((frame_stats->pcnt_inter - frame_stats->pcnt_motion),
                   ZM_POWER_FACTOR));
 
   return VPXMAX(zero_motion_factor,
@@ -1985,7 +1985,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
 
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(cpi, this_frame);
+      decay_accumulator *= get_prediction_decay_rate(frame_info, this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR
                               : decay_accumulator;
@@ -2021,7 +2021,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
 
     // Cumulative effect of prediction quality decay.
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(cpi, this_frame);
+      decay_accumulator *= get_prediction_decay_rate(frame_info, this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR
                               : decay_accumulator;
@@ -2607,7 +2607,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
       last_loop_decay_rate = loop_decay_rate;
-      loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
+      loop_decay_rate =
+          get_prediction_decay_rate(&cpi->frame_info, &next_frame);
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -3058,7 +3059,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         break;
 
       // How fast is the prediction quality decaying?
-      loop_decay_rate = get_prediction_decay_rate(cpi, twopass->stats_in);
+      loop_decay_rate =
+          get_prediction_decay_rate(&cpi->frame_info, twopass->stats_in);
 
       // We want to know something about the recent past... rather than
       // as used elsewhere where we are concerned with decay in prediction
