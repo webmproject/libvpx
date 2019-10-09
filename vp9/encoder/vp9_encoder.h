@@ -514,6 +514,7 @@ typedef struct KMEANS_DATA {
 } KMEANS_DATA;
 
 typedef struct VP9_COMP {
+  FRAME_INFO frame_info;
   QUANTS quants;
   ThreadData td;
   MB_MODE_INFO_EXT *mbmi_ext_base;

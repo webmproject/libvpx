@@ -2196,6 +2196,8 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->force_update_segmentation = 0;
 
   init_config(cpi, oxcf);
+  init_frame_info(&cpi->frame_info, cm);
+
   vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
 
   cm->current_video_frame = 0;
