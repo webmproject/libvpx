@@ -1747,15 +1747,16 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 #define LOW_CODED_ERR_PER_MB 10.0
 #define NCOUNT_FRAME_II_THRESH 6.0
 
-static double get_sr_decay_rate(const VP9_COMP *cpi,
+static double get_sr_decay_rate(const FRAME_INFO *frame_info,
                                 const FIRSTPASS_STATS *frame) {
   double sr_diff = (frame->sr_coded_error - frame->coded_error);
   double sr_decay = 1.0;
   double modified_pct_inter;
   double modified_pcnt_intra;
   const double motion_amplitude_part =
-      frame->pcnt_motion * ((frame->mvc_abs + frame->mvr_abs) /
-                            (cpi->initial_height + cpi->initial_width));
+      frame->pcnt_motion *
+      ((frame->mvc_abs + frame->mvr_abs) /
+       (frame_info->frame_height + frame_info->frame_width));
 
   modified_pct_inter = frame->pcnt_inter;
   if ((frame->coded_error > LOW_CODED_ERR_PER_MB) &&
@@ -1779,7 +1780,7 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
 static double get_zero_motion_factor(const VP9_COMP *cpi,
                                      const FIRSTPASS_STATS *frame) {
   const double zero_motion_pct = frame->pcnt_inter - frame->pcnt_motion;
-  double sr_decay = get_sr_decay_rate(cpi, frame);
+  double sr_decay = get_sr_decay_rate(&cpi->frame_info, frame);
   return VPXMIN(sr_decay, zero_motion_pct);
 }
 
@@ -1787,7 +1788,7 @@ static double get_zero_motion_factor(const VP9_COMP *cpi,
 
 static double get_prediction_decay_rate(const VP9_COMP *cpi,
                                         const FIRSTPASS_STATS *next_frame) {
-  const double sr_decay_rate = get_sr_decay_rate(cpi, next_frame);
+  const double sr_decay_rate = get_sr_decay_rate(&cpi->frame_info, next_frame);
   const double zero_motion_factor =
       (0.95 * pow((next_frame->pcnt_inter - next_frame->pcnt_motion),
                   ZM_POWER_FACTOR));
