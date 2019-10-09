@@ -1831,19 +1831,24 @@ static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this.
-static int detect_flash(const TWO_PASS *twopass, int offset) {
-  const FIRSTPASS_STATS *const next_frame = read_frame_stats(twopass, offset);
-
+static int detect_flash_from_frame_stats(const FIRSTPASS_STATS *frame_stats) {
   // What we are looking for here is a situation where there is a
   // brief break in prediction (such as a flash) but subsequent frames
   // are reasonably well predicted by an earlier (pre flash) frame.
   // The recovery after a flash is indicated by a high pcnt_second_ref
   // useage or a second ref coded error notabley lower than the last
   // frame coded error.
-  return next_frame != NULL &&
-         ((next_frame->sr_coded_error < next_frame->coded_error) ||
-          ((next_frame->pcnt_second_ref > next_frame->pcnt_inter) &&
-           (next_frame->pcnt_second_ref >= 0.5)));
+  if (frame_stats == 0) {
+    return 0;
+  }
+  return (frame_stats->sr_coded_error < frame_stats->coded_error) ||
+         ((frame_stats->pcnt_second_ref > frame_stats->pcnt_inter) &&
+          (frame_stats->pcnt_second_ref >= 0.5));
+}
+
+static int detect_flash(const TWO_PASS *twopass, int offset) {
+  const FIRSTPASS_STATS *const next_frame = read_frame_stats(twopass, offset);
+  return detect_flash_from_frame_stats(next_frame);
 }
 
 // Update the motion related elements to the GF arf boost calculation.
@@ -2559,6 +2564,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   i = 0;
   while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
+    const FIRSTPASS_STATS *next_next_frame;
     ++i;
 
     // Accumulate error score of frames in this gf group.
@@ -2576,7 +2582,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Test for the case where there is a brief flash but the prediction
     // quality back to an earlier frame is then restored.
-    flash_detected = detect_flash(twopass, 0);
+    next_next_frame = read_frame_stats(twopass, 0);
+    flash_detected = detect_flash_from_frame_stats(next_next_frame);
 
     // Update the motion related elements to the boost calculation.
     accumulate_frame_motion_stats(
