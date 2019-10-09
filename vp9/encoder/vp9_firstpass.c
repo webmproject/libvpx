@@ -220,14 +220,14 @@ static void subtract_stats(FIRSTPASS_STATS *section,
 // bars and partially discounts other 0 energy areas.
 #define MIN_ACTIVE_AREA 0.5
 #define MAX_ACTIVE_AREA 1.0
-static double calculate_active_area(const VP9_COMP *cpi,
+static double calculate_active_area(const FRAME_INFO *frame_info,
                                     const FIRSTPASS_STATS *this_frame) {
   double active_pct;
 
   active_pct =
       1.0 -
       ((this_frame->intra_skip_pct / 2) +
-       ((this_frame->inactive_zone_rows * 2) / (double)cpi->common.mb_rows));
+       ((this_frame->inactive_zone_rows * 2) / (double)frame_info->mb_rows));
   return fclamp(active_pct, MIN_ACTIVE_AREA, MAX_ACTIVE_AREA);
 }
 
@@ -260,8 +260,8 @@ static double calculate_mod_frame_score(const VP9_COMP *cpi,
   // remaining active MBs. The correction here assumes that coding
   // 0.5N blocks of complexity 2X is a little easier than coding N
   // blocks of complexity X.
-  modified_score *=
-      pow(calculate_active_area(cpi, this_frame), ACT_AREA_CORRECTION);
+  modified_score *= pow(calculate_active_area(&cpi->frame_info, this_frame),
+                        ACT_AREA_CORRECTION);
 
   return modified_score;
 }
@@ -284,8 +284,8 @@ static double calculate_norm_frame_score(const VP9_COMP *cpi,
   // remaining active MBs. The correction here assumes that coding
   // 0.5N blocks of complexity 2X is a little easier than coding N
   // blocks of complexity X.
-  modified_score *=
-      pow(calculate_active_area(cpi, this_frame), ACT_AREA_CORRECTION);
+  modified_score *= pow(calculate_active_area(&cpi->frame_info, this_frame),
+                        ACT_AREA_CORRECTION);
 
   // Normalize to a midpoint score.
   modified_score /= DOUBLE_DIVIDE_CHECK(twopass->mean_mod_score);
@@ -1887,7 +1887,8 @@ static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
   const double lq = vp9_convert_qindex_to_q(
       cpi->rc.avg_frame_qindex[INTER_FRAME], cpi->common.bit_depth);
   const double boost_q_correction = VPXMIN((0.5 + (lq * 0.015)), 1.5);
-  const double active_area = calculate_active_area(cpi, this_frame);
+  const double active_area =
+      calculate_active_area(&cpi->frame_info, this_frame);
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * active_area) /
@@ -1926,7 +1927,8 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
   const double lq = vp9_convert_qindex_to_q(
       cpi->rc.avg_frame_qindex[INTER_FRAME], cpi->common.bit_depth);
   const double boost_q_correction = VPXMIN((0.50 + (lq * 0.015)), 2.00);
-  const double active_area = calculate_active_area(cpi, this_frame);
+  const double active_area =
+      calculate_active_area(&cpi->frame_info, this_frame);
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (kf_err_per_mb(cpi) * active_area) /
