@@ -1881,14 +1881,15 @@ static void accumulate_frame_motion_stats(const FIRSTPASS_STATS *stats,
 
 #define BASELINE_ERR_PER_MB 12500.0
 #define GF_MAX_BOOST 96.0
-static double calc_frame_boost(VP9_COMP *cpi, const FIRSTPASS_STATS *this_frame,
+static double calc_frame_boost(const FRAME_INFO *frame_info,
+                               const FIRSTPASS_STATS *this_frame,
+                               int avg_frame_qindex,
                                double this_frame_mv_in_out) {
   double frame_boost;
-  const double lq = vp9_convert_qindex_to_q(
-      cpi->rc.avg_frame_qindex[INTER_FRAME], cpi->common.bit_depth);
+  const double lq =
+      vp9_convert_qindex_to_q(avg_frame_qindex, frame_info->bit_depth);
   const double boost_q_correction = VPXMIN((0.5 + (lq * 0.015)), 1.5);
-  const double active_area =
-      calculate_active_area(&cpi->frame_info, this_frame);
+  const double active_area = calculate_active_area(frame_info, this_frame);
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * active_area) /
@@ -1954,7 +1955,9 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
 }
 
 static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
+  const FRAME_INFO *frame_info = &cpi->frame_info;
   TWO_PASS *const twopass = &cpi->twopass;
+  const int avg_inter_frame_qindex = cpi->rc.avg_frame_qindex[INTER_FRAME];
   int i;
   double boost_score = 0.0;
   double mv_ratio_accumulator = 0.0;
@@ -1986,8 +1989,9 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
                               ? MIN_DECAY_FACTOR
                               : decay_accumulator;
     }
-    boost_score += decay_accumulator *
-                   calc_frame_boost(cpi, this_frame, this_frame_mv_in_out);
+    boost_score += decay_accumulator * calc_frame_boost(frame_info, this_frame,
+                                                        avg_inter_frame_qindex,
+                                                        this_frame_mv_in_out);
   }
 
   arf_boost = (int)boost_score;
@@ -2021,8 +2025,9 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
                               ? MIN_DECAY_FACTOR
                               : decay_accumulator;
     }
-    boost_score += decay_accumulator *
-                   calc_frame_boost(cpi, this_frame, this_frame_mv_in_out);
+    boost_score += decay_accumulator * calc_frame_boost(frame_info, this_frame,
+                                                        avg_inter_frame_qindex,
+                                                        this_frame_mv_in_out);
   }
   arf_boost += (int)boost_score;
 
