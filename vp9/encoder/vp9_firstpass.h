@@ -147,6 +147,18 @@ typedef struct {
 } GF_GROUP;
 
 typedef struct {
+  const FIRSTPASS_STATS *stats;
+  int num_frames;
+} FIRST_PASS_INFO;
+
+static INLINE void fps_init_first_pass_info(FIRST_PASS_INFO *first_pass_info,
+                                            const FIRSTPASS_STATS *stats,
+                                            int num_frames) {
+  first_pass_info->stats = stats;
+  first_pass_info->num_frames = num_frames;
+}
+
+typedef struct {
   unsigned int section_intra_rating;
   unsigned int key_frame_section_intra_rating;
   FIRSTPASS_STATS total_stats;
@@ -154,6 +166,7 @@ typedef struct {
   const FIRSTPASS_STATS *stats_in;
   const FIRSTPASS_STATS *stats_in_start;
   const FIRSTPASS_STATS *stats_in_end;
+  FIRST_PASS_INFO first_pass_info;
   FIRSTPASS_STATS total_left_stats;
   int first_pass_done;
   int64_t bits_left;

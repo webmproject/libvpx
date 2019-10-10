@@ -2376,6 +2376,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
           lc->twopass.stats_in = lc->twopass.stats_in_start;
           lc->twopass.stats_in_end =
               lc->twopass.stats_in_start + packets_in_layer - 1;
+          fps_init_first_pass_info(&lc->twopass.first_pass_info,
+                                   lc->rc_twopass_stats_in.buf,
+                                   packets_in_layer);
           stats_copy[layer_id] = lc->rc_twopass_stats_in.buf;
         }
       }
@@ -2407,6 +2410,8 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
       cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
       cpi->twopass.stats_in = cpi->twopass.stats_in_start;
       cpi->twopass.stats_in_end = &cpi->twopass.stats_in[packets - 1];
+      fps_init_first_pass_info(&cpi->twopass.first_pass_info,
+                               oxcf->two_pass_stats_in.buf, packets);
 
       vp9_init_second_pass(cpi);
     }
