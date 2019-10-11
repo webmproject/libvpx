@@ -266,11 +266,10 @@ static double calculate_mod_frame_score(const VP9_COMP *cpi,
   return modified_score;
 }
 
-static double calculate_norm_frame_score(const VP9_COMP *cpi,
-                                         const TWO_PASS *twopass,
-                                         const VP9EncoderConfig *oxcf,
-                                         const FIRSTPASS_STATS *this_frame,
-                                         const double av_err) {
+static double calc_norm_frame_score(const VP9EncoderConfig *oxcf,
+                                    const FRAME_INFO *frame_info,
+                                    const FIRSTPASS_STATS *this_frame,
+                                    double mean_mod_score, double av_err) {
   double modified_score =
       av_err * pow(this_frame->coded_error * this_frame->weight /
                        DOUBLE_DIVIDE_CHECK(av_err),
@@ -284,13 +283,21 @@ static double calculate_norm_frame_score(const VP9_COMP *cpi,
   // remaining active MBs. The correction here assumes that coding
   // 0.5N blocks of complexity 2X is a little easier than coding N
   // blocks of complexity X.
-  modified_score *= pow(calculate_active_area(&cpi->frame_info, this_frame),
-                        ACT_AREA_CORRECTION);
+  modified_score *=
+      pow(calculate_active_area(frame_info, this_frame), ACT_AREA_CORRECTION);
 
   // Normalize to a midpoint score.
-  modified_score /= DOUBLE_DIVIDE_CHECK(twopass->mean_mod_score);
-
+  modified_score /= DOUBLE_DIVIDE_CHECK(mean_mod_score);
   return fclamp(modified_score, min_score, max_score);
+}
+
+static double calculate_norm_frame_score(const VP9_COMP *cpi,
+                                         const TWO_PASS *twopass,
+                                         const VP9EncoderConfig *oxcf,
+                                         const FIRSTPASS_STATS *this_frame,
+                                         const double av_err) {
+  return calc_norm_frame_score(oxcf, &cpi->frame_info, this_frame,
+                               twopass->mean_mod_score, av_err);
 }
 
 // This function returns the maximum target rate per frame.
@@ -2448,6 +2455,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   RATE_CONTROL *const rc = &cpi->rc;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
   TWO_PASS *const twopass = &cpi->twopass;
+  const FRAME_INFO *frame_info = &cpi->frame_info;
   FIRSTPASS_STATS next_frame;
   const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
   int i;
@@ -2472,6 +2480,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double abs_mv_in_out_thresh;
   double sr_accumulator = 0.0;
   const double av_err = get_distribution_av_err(cpi, twopass);
+  const double mean_mod_score = twopass->mean_mod_score;
   unsigned int allow_alt_ref = is_altref_enabled(cpi);
 
   int flash_detected;
@@ -2498,8 +2507,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // If this is a key frame or the overlay from a previous arf then
   // the error score / cost of this frame has already been accounted for.
   if (arf_active_or_kf) {
-    double gf_first_frame_err =
-        calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
+    double gf_first_frame_err = calc_norm_frame_score(
+        oxcf, frame_info, this_frame, mean_mod_score, av_err);
     gf_group_err -= gf_first_frame_err;
     gf_group_raw_error -= this_frame->coded_error;
     gf_group_noise -= this_frame->frame_noise_energy;
@@ -2572,8 +2581,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     ++i;
 
     // Accumulate error score of frames in this gf group.
-    gf_group_err +=
-        calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
+    gf_group_err += calc_norm_frame_score(oxcf, frame_info, this_frame,
+                                          mean_mod_score, av_err);
     gf_group_raw_error += this_frame->coded_error;
     gf_group_noise += this_frame->frame_noise_energy;
     gf_group_skip_pct += this_frame->intra_skip_pct;
