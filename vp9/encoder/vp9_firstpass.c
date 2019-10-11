@@ -2459,8 +2459,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double gf_group_inactive_zone_rows = 0.0;
   double gf_group_inter = 0.0;
   double gf_group_motion = 0.0;
-  double gf_first_frame_err = 0.0;
-  double mod_frame_err = 0.0;
 
   double mv_ratio_accumulator = 0.0;
   double zero_motion_accumulator = 1.0;
@@ -2497,17 +2495,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vpx_clear_system_state();
   vp9_zero(next_frame);
 
-  // Load stats for the current frame.
-  mod_frame_err =
-      calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
-
-  // Note the error of the frame at the start of the group. This will be
-  // the GF frame error if we code a normal gf.
-  gf_first_frame_err = mod_frame_err;
-
   // If this is a key frame or the overlay from a previous arf then
   // the error score / cost of this frame has already been accounted for.
   if (arf_active_or_kf) {
+    double gf_first_frame_err =
+        calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
     gf_group_err -= gf_first_frame_err;
     gf_group_raw_error -= this_frame->coded_error;
     gf_group_noise -= this_frame->frame_noise_energy;
@@ -2580,9 +2572,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     ++i;
 
     // Accumulate error score of frames in this gf group.
-    mod_frame_err =
+    gf_group_err +=
         calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
-    gf_group_err += mod_frame_err;
     gf_group_raw_error += this_frame->coded_error;
     gf_group_noise += this_frame->frame_noise_energy;
     gf_group_skip_pct += this_frame->intra_skip_pct;
