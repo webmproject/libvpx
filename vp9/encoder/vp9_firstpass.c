@@ -2643,17 +2643,19 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // such as a fade, the arf group spanning the transition may not be coded
     // at a very high quality and hence this frame (with its overlay) is a
     // poor golden frame to use for an extended group.
-    if (((i >= active_max_gf_interval) &&
-         ((zero_motion_accumulator < 0.995) || (rc->source_alt_ref_active))) ||
-        (
-            // Don't break out with a very short interval.
-            (i >= active_min_gf_interval) &&
-            // If possible dont break very close to a kf
-            ((rc->frames_to_key - i) >= rc->min_gf_interval) && (i & 0x01) &&
-            (!flash_detected) &&
-            ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
-             (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
-             (sr_accumulator > gop_intra_factor * next_frame.intra_error)))) {
+    if ((i >= active_max_gf_interval) &&
+        ((zero_motion_accumulator < 0.995) || (rc->source_alt_ref_active))) {
+      break;
+    }
+    if (
+        // Don't break out with a very short interval.
+        (i >= active_min_gf_interval) &&
+        // If possible dont break very close to a kf
+        ((rc->frames_to_key - i) >= rc->min_gf_interval) && (i & 0x01) &&
+        (!flash_detected) &&
+        ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
+         (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
+         (sr_accumulator > gop_intra_factor * next_frame.intra_error))) {
       break;
     }
 
