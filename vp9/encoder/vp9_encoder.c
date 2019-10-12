@@ -2365,6 +2365,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
         const int layer_id = (int)last_packet_for_layer->spatial_layer_id;
         const int packets_in_layer = (int)last_packet_for_layer->count + 1;
         if (layer_id >= 0 && layer_id < oxcf->ss_number_layers) {
+          int num_frames;
           LAYER_CONTEXT *const lc = &cpi->svc.layer_context[layer_id];
 
           vpx_free(lc->rc_twopass_stats_in.buf);
@@ -2376,9 +2377,11 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
           lc->twopass.stats_in = lc->twopass.stats_in_start;
           lc->twopass.stats_in_end =
               lc->twopass.stats_in_start + packets_in_layer - 1;
+          // Note the last packet is cumulative first pass stats.
+          // So the number of frames is packet number minus one
+          num_frames = packets_in_layer - 1;
           fps_init_first_pass_info(&lc->twopass.first_pass_info,
-                                   lc->rc_twopass_stats_in.buf,
-                                   packets_in_layer);
+                                   lc->rc_twopass_stats_in.buf, num_frames);
           stats_copy[layer_id] = lc->rc_twopass_stats_in.buf;
         }
       }
@@ -2394,6 +2397,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
       vp9_init_second_pass_spatial_svc(cpi);
     } else {
+      int num_frames;
 #if CONFIG_FP_MB_STATS
       if (cpi->use_fp_mb_stats) {
         const size_t psz = cpi->common.MBs * sizeof(uint8_t);
@@ -2410,8 +2414,11 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
       cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
       cpi->twopass.stats_in = cpi->twopass.stats_in_start;
       cpi->twopass.stats_in_end = &cpi->twopass.stats_in[packets - 1];
+      // Note the last packet is cumulative first pass stats.
+      // So the number of frames is packet number minus one
+      num_frames = packets - 1;
       fps_init_first_pass_info(&cpi->twopass.first_pass_info,
-                               oxcf->two_pass_stats_in.buf, packets);
+                               oxcf->two_pass_stats_in.buf, num_frames);
 
       vp9_init_second_pass(cpi);
     }
