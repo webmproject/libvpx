@@ -2450,15 +2450,18 @@ static void adjust_group_arnr_filter(VP9_COMP *cpi, double section_noise,
 #define ARF_ABS_ZOOM_THRESH 4.0
 
 #define MAX_GF_BOOST 5400
-static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void define_gf_group(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
   TWO_PASS *const twopass = &cpi->twopass;
   const FRAME_INFO *frame_info = &cpi->frame_info;
+  const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   FIRSTPASS_STATS next_frame;
   const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
+  const int gf_start_show_idx = cm->current_video_frame;
   int i;
+  int j;
 
   double gf_group_err = 0.0;
   double gf_group_raw_error = 0.0;
@@ -2489,6 +2492,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int64_t gf_group_bits;
   int gf_arf_bits;
   const int is_key_frame = frame_is_intra_only(cm);
+  // If this is a key frame or the overlay from a previous arf then
+  // the error score / cost of this frame has already been accounted for.
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
   int is_alt_ref_flash = 0;
 
@@ -2503,20 +2508,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   vpx_clear_system_state();
   vp9_zero(next_frame);
-
-  // If this is a key frame or the overlay from a previous arf then
-  // the error score / cost of this frame has already been accounted for.
-  if (arf_active_or_kf) {
-    double gf_first_frame_err = calc_norm_frame_score(
-        oxcf, frame_info, this_frame, mean_mod_score, av_err);
-    gf_group_err -= gf_first_frame_err;
-    gf_group_raw_error -= this_frame->coded_error;
-    gf_group_noise -= this_frame->frame_noise_energy;
-    gf_group_skip_pct -= this_frame->intra_skip_pct;
-    gf_group_inactive_zone_rows -= this_frame->inactive_zone_rows;
-    gf_group_inter -= this_frame->pcnt_inter;
-    gf_group_motion -= this_frame->pcnt_motion;
-  }
 
   // Motion breakout threshold for loop below depends on image size.
   mv_ratio_accumulator_thresh =
@@ -2579,16 +2570,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
     const FIRSTPASS_STATS *next_next_frame;
     ++i;
-
-    // Accumulate error score of frames in this gf group.
-    gf_group_err += calc_norm_frame_score(oxcf, frame_info, this_frame,
-                                          mean_mod_score, av_err);
-    gf_group_raw_error += this_frame->coded_error;
-    gf_group_noise += this_frame->frame_noise_energy;
-    gf_group_skip_pct += this_frame->intra_skip_pct;
-    gf_group_inactive_zone_rows += this_frame->inactive_zone_rows;
-    gf_group_inter += this_frame->pcnt_inter;
-    gf_group_motion += this_frame->pcnt_motion;
 
     if (EOF == input_stats(twopass, &next_frame)) break;
 
@@ -2658,8 +2639,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
          (sr_accumulator > gop_intra_factor * next_frame.intra_error))) {
       break;
     }
-
-    *this_frame = next_frame;
   }
 
   // Was the group length constrained by the requirement for a new KF?
@@ -2728,6 +2707,27 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   if (rc->source_alt_ref_pending)
     is_alt_ref_flash = detect_flash(twopass, rc->baseline_gf_interval);
+
+  {
+    // If the first frame is a key frame or the overlay from a previous arf then
+    // the error score / cost of this frame has already been accounted for.
+    int start_idx = arf_active_or_kf ? 1 : 0;
+    int num_show_frames = i;
+    for (j = start_idx; j < num_show_frames; ++j) {
+      int show_idx = gf_start_show_idx + j;
+      const FIRSTPASS_STATS *frame_stats =
+          fps_get_frame_stats(first_pass_info, show_idx);
+      // Accumulate error score of frames in this gf group.
+      gf_group_err += calc_norm_frame_score(oxcf, frame_info, frame_stats,
+                                            mean_mod_score, av_err);
+      gf_group_raw_error += frame_stats->coded_error;
+      gf_group_noise += frame_stats->frame_noise_energy;
+      gf_group_skip_pct += frame_stats->intra_skip_pct;
+      gf_group_inactive_zone_rows += frame_stats->inactive_zone_rows;
+      gf_group_inter += frame_stats->pcnt_inter;
+      gf_group_motion += frame_stats->pcnt_motion;
+    }
+  }
 
   // Calculate the bits to be allocated to the gf/arf group as a whole
   gf_group_bits = calculate_total_gf_group_bits(cpi, gf_group_err);
@@ -3396,7 +3396,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Define a new GF/ARF group. (Should always enter here for key frames).
   if (rc->frames_till_gf_update_due == 0) {
-    define_gf_group(cpi, &this_frame);
+    define_gf_group(cpi);
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
 

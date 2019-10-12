@@ -158,6 +158,14 @@ static INLINE void fps_init_first_pass_info(FIRST_PASS_INFO *first_pass_info,
   first_pass_info->num_frames = num_frames;
 }
 
+static INLINE const FIRSTPASS_STATS *fps_get_frame_stats(
+    const FIRST_PASS_INFO *first_pass_info, int show_idx) {
+  if (show_idx >= first_pass_info->num_frames) {
+    return NULL;
+  }
+  return &first_pass_info->stats[show_idx];
+}
+
 typedef struct {
   unsigned int section_intra_rating;
   unsigned int key_frame_section_intra_rating;
