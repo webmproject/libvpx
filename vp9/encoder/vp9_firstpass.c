@@ -1804,33 +1804,46 @@ static double get_prediction_decay_rate(const FRAME_INFO *frame_info,
                 (sr_decay_rate + ((1.0 - sr_decay_rate) * zero_motion_factor)));
 }
 
+static int get_show_idx(const TWO_PASS *twopass) {
+  return (int)(twopass->stats_in - twopass->stats_in_start);
+}
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
+static int check_transition_to_still(const FIRST_PASS_INFO *first_pass_info,
+                                     int show_idx, int still_interval) {
+  int j;
+  int num_frames = fps_get_num_frames(first_pass_info);
+  if (show_idx + still_interval > num_frames) {
+    return 0;
+  }
+
+  // Look ahead a few frames to see if static condition persists...
+  for (j = 0; j < still_interval; ++j) {
+    const FIRSTPASS_STATS *stats =
+        fps_get_frame_stats(first_pass_info, show_idx + j);
+    if (stats->pcnt_inter - stats->pcnt_motion < 0.999) break;
+  }
+
+  // Only if it does do we signal a transition to still.
+  return j == still_interval;
+}
+
 static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
                                       int still_interval,
                                       double loop_decay_rate,
                                       double last_decay_rate) {
-  TWO_PASS *const twopass = &cpi->twopass;
+  const TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
+  int show_idx = get_show_idx(twopass);
 
   // Break clause to detect very still sections after motion
   // For example a static image after a fade or other transition
   // instead of a clean scene cut.
   if (frame_interval > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
       last_decay_rate < 0.9) {
-    int j;
-
-    // Look ahead a few frames to see if static condition persists...
-    for (j = 0; j < still_interval; ++j) {
-      const FIRSTPASS_STATS *stats = &twopass->stats_in[j];
-      if (stats >= twopass->stats_in_end) break;
-
-      if (stats->pcnt_inter - stats->pcnt_motion < 0.999) break;
-    }
-
-    // Only if it does do we signal a transition to still.
-    return j == still_interval;
+    return check_transition_to_still(&twopass->first_pass_info, show_idx,
+                                     still_interval);
   }
 
   return 0;
@@ -2058,7 +2071,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
   const FRAME_INFO *frame_info = &cpi->frame_info;
   TWO_PASS *const twopass = &cpi->twopass;
   const int avg_inter_frame_qindex = cpi->rc.avg_frame_qindex[INTER_FRAME];
-  int arf_show_idx = (int)(twopass->stats_in - twopass->stats_in_start);
+  int arf_show_idx = get_show_idx(twopass);
   return compute_arf_boost(frame_info, &twopass->first_pass_info, arf_show_idx,
                            f_frames, b_frames, avg_inter_frame_qindex);
 }
@@ -2608,10 +2621,14 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
-      if (detect_transition_to_still(cpi, i, 5, loop_decay_rate,
-                                     last_loop_decay_rate)) {
-        allow_alt_ref = 0;
-        break;
+      if (i > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
+          last_loop_decay_rate < 0.9) {
+        int still_interval = 5;
+        if (check_transition_to_still(first_pass_info, gf_start_show_idx + i,
+                                      still_interval)) {
+          allow_alt_ref = 0;
+          break;
+        }
       }
 
       // Update the accumulator for second ref error difference.
@@ -2666,7 +2683,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     const int avg_inter_frame_qindex = rc->avg_frame_qindex[INTER_FRAME];
     // TODO(angiebird): figure out why arf's location is assigned this way
     const int arf_show_idx =
-        VPXMIN(gf_start_show_idx + i + 1, first_pass_info->num_frames);
+        VPXMIN(gf_start_show_idx + i + 1, fps_get_num_frames(first_pass_info));
 
     // Calculate the boost for alt ref.
     rc->gfu_boost =
