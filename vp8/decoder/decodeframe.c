@@ -211,7 +211,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
           vp8_short_inv_walsh4x4(&b->dqcoeff[0], xd->qcoeff);
           memset(b->qcoeff, 0, 16 * sizeof(b->qcoeff[0]));
         } else {
-          b->dqcoeff[0] = b->qcoeff[0] * xd->dequant_y2[0];
+          b->dqcoeff[0] = (short)(b->qcoeff[0] * xd->dequant_y2[0]);
           vp8_short_inv_walsh4x4_1(&b->dqcoeff[0], xd->qcoeff);
           memset(b->qcoeff, 0, 2 * sizeof(b->qcoeff[0]));
         }
