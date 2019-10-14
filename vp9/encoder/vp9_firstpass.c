@@ -2499,7 +2499,6 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   double mv_ratio_accumulator = 0.0;
   double zero_motion_accumulator = 1.0;
   double loop_decay_rate = 1.00;
-  double last_loop_decay_rate = 1.00;
 
   double this_frame_mv_in_out = 0.0;
   double mv_in_out_accumulator = 0.0;
@@ -2621,7 +2620,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
 
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
-      last_loop_decay_rate = loop_decay_rate;
+      double last_loop_decay_rate = loop_decay_rate;
       loop_decay_rate = get_prediction_decay_rate(frame_info, next_frame);
 
       // Break clause to detect very still sections after motion. For example,
