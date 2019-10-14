@@ -2498,8 +2498,6 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
 
   double zero_motion_accumulator = 1.0;
 
-  const double av_err = get_distribution_av_err(cpi, twopass);
-  const double mean_mod_score = twopass->mean_mod_score;
   unsigned int allow_alt_ref = is_altref_enabled(cpi);
 
   int active_max_gf_interval;
@@ -2749,6 +2747,8 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     is_alt_ref_flash = detect_flash(twopass, rc->baseline_gf_interval);
 
   {
+    const double av_err = get_distribution_av_err(cpi, twopass);
+    const double mean_mod_score = twopass->mean_mod_score;
     // If the first frame is a key frame or the overlay from a previous arf then
     // the error score / cost of this frame has already been accounted for.
     int start_idx = arf_active_or_kf ? 1 : 0;
