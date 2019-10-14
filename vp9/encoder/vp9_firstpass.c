@@ -1962,10 +1962,10 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
   return VPXMIN(frame_boost, max_boost * boost_q_correction);
 }
 
-static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
-  const FRAME_INFO *frame_info = &cpi->frame_info;
-  TWO_PASS *const twopass = &cpi->twopass;
-  const int avg_inter_frame_qindex = cpi->rc.avg_frame_qindex[INTER_FRAME];
+static int compute_arf_boost(const FRAME_INFO *frame_info,
+                             const FIRST_PASS_INFO *first_pass_info,
+                             int arf_show_idx, int f_frames, int b_frames,
+                             int avg_frame_qindex) {
   int i;
   double boost_score = 0.0;
   double mv_ratio_accumulator = 0.0;
@@ -1978,8 +1978,10 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
 
   // Search forward from the proposed arf/next gf position.
   for (i = 0; i < f_frames; ++i) {
-    const FIRSTPASS_STATS *this_frame = read_frame_stats(twopass, i);
-    const FIRSTPASS_STATS *next_frame = read_frame_stats(twopass, i + 1);
+    const FIRSTPASS_STATS *this_frame =
+        fps_get_frame_stats(first_pass_info, arf_show_idx + i);
+    const FIRSTPASS_STATS *next_frame =
+        fps_get_frame_stats(first_pass_info, arf_show_idx + i + 1);
     if (this_frame == NULL) break;
 
     // Update the motion related elements to the boost calculation.
@@ -2000,7 +2002,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
                               : decay_accumulator;
     }
     boost_score += decay_accumulator * calc_frame_boost(frame_info, this_frame,
-                                                        avg_inter_frame_qindex,
+                                                        avg_frame_qindex,
                                                         this_frame_mv_in_out);
   }
 
@@ -2016,8 +2018,10 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
 
   // Search backward towards last gf position.
   for (i = -1; i >= -b_frames; --i) {
-    const FIRSTPASS_STATS *this_frame = read_frame_stats(twopass, i);
-    const FIRSTPASS_STATS *next_frame = read_frame_stats(twopass, i + 1);
+    const FIRSTPASS_STATS *this_frame =
+        fps_get_frame_stats(first_pass_info, arf_show_idx + i);
+    const FIRSTPASS_STATS *next_frame =
+        fps_get_frame_stats(first_pass_info, arf_show_idx + i + 1);
     if (this_frame == NULL) break;
 
     // Update the motion related elements to the boost calculation.
@@ -2038,7 +2042,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
                               : decay_accumulator;
     }
     boost_score += decay_accumulator * calc_frame_boost(frame_info, this_frame,
-                                                        avg_inter_frame_qindex,
+                                                        avg_frame_qindex,
                                                         this_frame_mv_in_out);
   }
   arf_boost += (int)boost_score;
@@ -2048,6 +2052,15 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
   arf_boost = VPXMAX(arf_boost, MIN_ARF_GF_BOOST);
 
   return arf_boost;
+}
+
+static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
+  const FRAME_INFO *frame_info = &cpi->frame_info;
+  TWO_PASS *const twopass = &cpi->twopass;
+  const int avg_inter_frame_qindex = cpi->rc.avg_frame_qindex[INTER_FRAME];
+  int arf_show_idx = (int)(twopass->stats_in - twopass->stats_in_start);
+  return compute_arf_boost(frame_info, &twopass->first_pass_info, arf_show_idx,
+                           f_frames, b_frames, avg_inter_frame_qindex);
 }
 
 // Calculate a section intra ratio used in setting max loop filter.
@@ -2450,7 +2463,7 @@ static void adjust_group_arnr_filter(VP9_COMP *cpi, double section_noise,
 #define ARF_ABS_ZOOM_THRESH 4.0
 
 #define MAX_GF_BOOST 5400
-static void define_gf_group(VP9_COMP *cpi) {
+static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -2459,7 +2472,6 @@ static void define_gf_group(VP9_COMP *cpi) {
   const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   FIRSTPASS_STATS next_frame;
   const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
-  const int gf_start_show_idx = cm->current_video_frame;
   int i;
   int j;
 
@@ -2592,8 +2604,7 @@ static void define_gf_group(VP9_COMP *cpi) {
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
       last_loop_decay_rate = loop_decay_rate;
-      loop_decay_rate =
-          get_prediction_decay_rate(&cpi->frame_info, &next_frame);
+      loop_decay_rate = get_prediction_decay_rate(frame_info, &next_frame);
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -2648,12 +2659,19 @@ static void define_gf_group(VP9_COMP *cpi) {
   if ((zero_motion_accumulator < 0.995) && allow_alt_ref &&
       (twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH) &&
       (i < cpi->oxcf.lag_in_frames) && (i >= rc->min_gf_interval)) {
-    const int forward_frames = (rc->frames_to_key - i >= i - 1)
-                                   ? i - 1
-                                   : VPXMAX(0, rc->frames_to_key - i);
+    const int f_frames = (rc->frames_to_key - i >= i - 1)
+                             ? i - 1
+                             : VPXMAX(0, rc->frames_to_key - i);
+    const int b_frames = i - 1;
+    const int avg_inter_frame_qindex = rc->avg_frame_qindex[INTER_FRAME];
+    // TODO(angiebird): figure out why arf's location is assigned this way
+    const int arf_show_idx =
+        VPXMIN(gf_start_show_idx + i + 1, first_pass_info->num_frames);
 
     // Calculate the boost for alt ref.
-    rc->gfu_boost = calc_arf_boost(cpi, forward_frames, (i - 1));
+    rc->gfu_boost =
+        compute_arf_boost(frame_info, first_pass_info, arf_show_idx, f_frames,
+                          b_frames, avg_inter_frame_qindex);
     rc->source_alt_ref_pending = 1;
   } else {
     reset_fpf_position(twopass, start_pos);
@@ -3396,7 +3414,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Define a new GF/ARF group. (Should always enter here for key frames).
   if (rc->frames_till_gf_update_due == 0) {
-    define_gf_group(cpi);
+    const int gf_start_show_idx = cm->current_video_frame;
+    define_gf_group(cpi, gf_start_show_idx);
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
 
