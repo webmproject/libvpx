@@ -2496,21 +2496,12 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   double gf_group_inter = 0.0;
   double gf_group_motion = 0.0;
 
-  double mv_ratio_accumulator = 0.0;
   double zero_motion_accumulator = 1.0;
-  double loop_decay_rate = 1.00;
 
-  double this_frame_mv_in_out = 0.0;
-  double mv_in_out_accumulator = 0.0;
-  double abs_mv_in_out_accumulator = 0.0;
-  double mv_ratio_accumulator_thresh;
-  double abs_mv_in_out_thresh;
-  double sr_accumulator = 0.0;
   const double av_err = get_distribution_av_err(cpi, twopass);
   const double mean_mod_score = twopass->mean_mod_score;
   unsigned int allow_alt_ref = is_altref_enabled(cpi);
 
-  int flash_detected;
   int active_max_gf_interval;
   int active_min_gf_interval;
   int64_t gf_group_bits;
@@ -2531,11 +2522,6 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   }
 
   vpx_clear_system_state();
-
-  // Motion breakout threshold for loop below depends on image size.
-  mv_ratio_accumulator_thresh =
-      (cpi->initial_height + cpi->initial_width) / 4.0;
-  abs_mv_in_out_thresh = ARF_ABS_ZOOM_THRESH;
 
   // Set a maximum and minimum interval for the GF group.
   // If the image appears almost completely static we can extend beyond this.
@@ -2590,87 +2576,101 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   }
 
   i = 0;
-  while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
-    const FIRSTPASS_STATS *next_next_frame;
-    const FIRSTPASS_STATS *next_frame;
-    ++i;
+  {
+    double loop_decay_rate = 1.00;
+    double mv_ratio_accumulator = 0.0;
+    double this_frame_mv_in_out = 0.0;
+    double mv_in_out_accumulator = 0.0;
+    double abs_mv_in_out_accumulator = 0.0;
+    double sr_accumulator = 0.0;
+    // Motion breakout threshold for loop below depends on image size.
+    double mv_ratio_accumulator_thresh =
+        (cpi->initial_height + cpi->initial_width) / 4.0;
 
-    next_frame = fps_get_frame_stats(first_pass_info, gf_start_show_idx + i);
-    if (next_frame == NULL) {
-      break;
-    }
+    while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
+      const FIRSTPASS_STATS *next_next_frame;
+      const FIRSTPASS_STATS *next_frame;
+      int flash_detected;
+      ++i;
 
-    // Test for the case where there is a brief flash but the prediction
-    // quality back to an earlier frame is then restored.
-    next_next_frame =
-        fps_get_frame_stats(first_pass_info, gf_start_show_idx + i + 1);
-    flash_detected = detect_flash_from_frame_stats(next_next_frame);
+      next_frame = fps_get_frame_stats(first_pass_info, gf_start_show_idx + i);
+      if (next_frame == NULL) {
+        break;
+      }
 
-    // Update the motion related elements to the boost calculation.
-    accumulate_frame_motion_stats(
-        next_frame, &this_frame_mv_in_out, &mv_in_out_accumulator,
-        &abs_mv_in_out_accumulator, &mv_ratio_accumulator);
+      // Test for the case where there is a brief flash but the prediction
+      // quality back to an earlier frame is then restored.
+      next_next_frame =
+          fps_get_frame_stats(first_pass_info, gf_start_show_idx + i + 1);
+      flash_detected = detect_flash_from_frame_stats(next_next_frame);
 
-    // Monitor for static sections.
-    if ((rc->frames_since_key + i - 1) > 1) {
-      zero_motion_accumulator =
-          VPXMIN(zero_motion_accumulator,
-                 get_zero_motion_factor(frame_info, next_frame));
-    }
+      // Update the motion related elements to the boost calculation.
+      accumulate_frame_motion_stats(
+          next_frame, &this_frame_mv_in_out, &mv_in_out_accumulator,
+          &abs_mv_in_out_accumulator, &mv_ratio_accumulator);
 
-    // Accumulate the effect of prediction quality decay.
-    if (!flash_detected) {
-      double last_loop_decay_rate = loop_decay_rate;
-      loop_decay_rate = get_prediction_decay_rate(frame_info, next_frame);
+      // Monitor for static sections.
+      if ((rc->frames_since_key + i - 1) > 1) {
+        zero_motion_accumulator =
+            VPXMIN(zero_motion_accumulator,
+                   get_zero_motion_factor(frame_info, next_frame));
+      }
 
-      // Break clause to detect very still sections after motion. For example,
-      // a static image after a fade or other transition.
-      if (i > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
-          last_loop_decay_rate < 0.9) {
-        int still_interval = 5;
-        if (check_transition_to_still(first_pass_info, gf_start_show_idx + i,
-                                      still_interval)) {
-          allow_alt_ref = 0;
-          break;
+      // Accumulate the effect of prediction quality decay.
+      if (!flash_detected) {
+        double last_loop_decay_rate = loop_decay_rate;
+        loop_decay_rate = get_prediction_decay_rate(frame_info, next_frame);
+
+        // Break clause to detect very still sections after motion. For example,
+        // a static image after a fade or other transition.
+        if (i > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
+            last_loop_decay_rate < 0.9) {
+          int still_interval = 5;
+          if (check_transition_to_still(first_pass_info, gf_start_show_idx + i,
+                                        still_interval)) {
+            allow_alt_ref = 0;
+            break;
+          }
+        }
+
+        // Update the accumulator for second ref error difference.
+        // This is intended to give an indication of how much the coded error is
+        // increasing over time.
+        if (i == 1) {
+          sr_accumulator += next_frame->coded_error;
+        } else {
+          sr_accumulator +=
+              (next_frame->sr_coded_error - next_frame->coded_error);
         }
       }
 
-      // Update the accumulator for second ref error difference.
-      // This is intended to give an indication of how much the coded error is
-      // increasing over time.
-      if (i == 1) {
-        sr_accumulator += next_frame->coded_error;
-      } else {
-        sr_accumulator +=
-            (next_frame->sr_coded_error - next_frame->coded_error);
+      // Break out conditions.
+      // Break at maximum of active_max_gf_interval unless almost totally
+      // static.
+      //
+      // Note that the addition of a test of rc->source_alt_ref_active is
+      // deliberate. The effect of this is that after a normal altref group even
+      // if the material is static there will be one normal length GF group
+      // before allowing longer GF groups. The reason for this is that in cases
+      // such as slide shows where slides are separated by a complex transition
+      // such as a fade, the arf group spanning the transition may not be coded
+      // at a very high quality and hence this frame (with its overlay) is a
+      // poor golden frame to use for an extended group.
+      if ((i >= active_max_gf_interval) &&
+          ((zero_motion_accumulator < 0.995) || (rc->source_alt_ref_active))) {
+        break;
       }
-    }
-
-    // Break out conditions.
-    // Break at maximum of active_max_gf_interval unless almost totally static.
-    //
-    // Note that the addition of a test of rc->source_alt_ref_active is
-    // deliberate. The effect of this is that after a normal altref group even
-    // if the material is static there will be one normal length GF group
-    // before allowing longer GF groups. The reason for this is that in cases
-    // such as slide shows where slides are separated by a complex transition
-    // such as a fade, the arf group spanning the transition may not be coded
-    // at a very high quality and hence this frame (with its overlay) is a
-    // poor golden frame to use for an extended group.
-    if ((i >= active_max_gf_interval) &&
-        ((zero_motion_accumulator < 0.995) || (rc->source_alt_ref_active))) {
-      break;
-    }
-    if (
-        // Don't break out with a very short interval.
-        (i >= active_min_gf_interval) &&
-        // If possible dont break very close to a kf
-        ((rc->frames_to_key - i) >= rc->min_gf_interval) && (i & 0x01) &&
-        (!flash_detected) &&
-        ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
-         (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
-         (sr_accumulator > gop_intra_factor * next_frame->intra_error))) {
-      break;
+      if (
+          // Don't break out with a very short interval.
+          (i >= active_min_gf_interval) &&
+          // If possible dont break very close to a kf
+          ((rc->frames_to_key - i) >= rc->min_gf_interval) && (i & 0x01) &&
+          (!flash_detected) &&
+          ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
+           (abs_mv_in_out_accumulator > ARF_ABS_ZOOM_THRESH) ||
+           (sr_accumulator > gop_intra_factor * next_frame->intra_error))) {
+        break;
+      }
     }
   }
 
