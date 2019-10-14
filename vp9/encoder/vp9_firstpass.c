@@ -1784,10 +1784,11 @@ static double get_sr_decay_rate(const FRAME_INFO *frame_info,
 
 // This function gives an estimate of how badly we believe the prediction
 // quality is decaying from frame to frame.
-static double get_zero_motion_factor(const VP9_COMP *cpi,
-                                     const FIRSTPASS_STATS *frame) {
-  const double zero_motion_pct = frame->pcnt_inter - frame->pcnt_motion;
-  double sr_decay = get_sr_decay_rate(&cpi->frame_info, frame);
+static double get_zero_motion_factor(const FRAME_INFO *frame_info,
+                                     const FIRSTPASS_STATS *frame_stats) {
+  const double zero_motion_pct =
+      frame_stats->pcnt_inter - frame_stats->pcnt_motion;
+  double sr_decay = get_sr_decay_rate(frame_info, frame_stats);
   return VPXMIN(sr_decay, zero_motion_pct);
 }
 
@@ -2483,7 +2484,6 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   TWO_PASS *const twopass = &cpi->twopass;
   const FRAME_INFO *frame_info = &cpi->frame_info;
   const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
-  FIRSTPASS_STATS next_frame;
   const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
   int i;
   int j;
@@ -2532,7 +2532,6 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   }
 
   vpx_clear_system_state();
-  vp9_zero(next_frame);
 
   // Motion breakout threshold for loop below depends on image size.
   mv_ratio_accumulator_thresh =
@@ -2594,30 +2593,36 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   i = 0;
   while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
     const FIRSTPASS_STATS *next_next_frame;
+    const FIRSTPASS_STATS *next_frame;
     ++i;
 
-    if (EOF == input_stats(twopass, &next_frame)) break;
+    next_frame = fps_get_frame_stats(first_pass_info, gf_start_show_idx + i);
+    if (next_frame == NULL) {
+      break;
+    }
 
     // Test for the case where there is a brief flash but the prediction
     // quality back to an earlier frame is then restored.
-    next_next_frame = read_frame_stats(twopass, 0);
+    next_next_frame =
+        fps_get_frame_stats(first_pass_info, gf_start_show_idx + i + 1);
     flash_detected = detect_flash_from_frame_stats(next_next_frame);
 
     // Update the motion related elements to the boost calculation.
     accumulate_frame_motion_stats(
-        &next_frame, &this_frame_mv_in_out, &mv_in_out_accumulator,
+        next_frame, &this_frame_mv_in_out, &mv_in_out_accumulator,
         &abs_mv_in_out_accumulator, &mv_ratio_accumulator);
 
     // Monitor for static sections.
     if ((rc->frames_since_key + i - 1) > 1) {
-      zero_motion_accumulator = VPXMIN(
-          zero_motion_accumulator, get_zero_motion_factor(cpi, &next_frame));
+      zero_motion_accumulator =
+          VPXMIN(zero_motion_accumulator,
+                 get_zero_motion_factor(frame_info, next_frame));
     }
 
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
       last_loop_decay_rate = loop_decay_rate;
-      loop_decay_rate = get_prediction_decay_rate(frame_info, &next_frame);
+      loop_decay_rate = get_prediction_decay_rate(frame_info, next_frame);
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -2635,9 +2640,10 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
       // This is intended to give an indication of how much the coded error is
       // increasing over time.
       if (i == 1) {
-        sr_accumulator += next_frame.coded_error;
+        sr_accumulator += next_frame->coded_error;
       } else {
-        sr_accumulator += (next_frame.sr_coded_error - next_frame.coded_error);
+        sr_accumulator +=
+            (next_frame->sr_coded_error - next_frame->coded_error);
       }
     }
 
@@ -2664,7 +2670,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
         (!flash_detected) &&
         ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
          (abs_mv_in_out_accumulator > abs_mv_in_out_thresh) ||
-         (sr_accumulator > gop_intra_factor * next_frame.intra_error))) {
+         (sr_accumulator > gop_intra_factor * next_frame->intra_error))) {
       break;
     }
   }
@@ -3227,8 +3233,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // Monitor for static sections.
       // First frame in kf group the second ref indicator is invalid.
       if (i > 0) {
-        zero_motion_accumulator = VPXMIN(
-            zero_motion_accumulator, get_zero_motion_factor(cpi, &next_frame));
+        zero_motion_accumulator =
+            VPXMIN(zero_motion_accumulator,
+                   get_zero_motion_factor(&cpi->frame_info, &next_frame));
       } else {
         zero_motion_accumulator =
             next_frame.pcnt_inter - next_frame.pcnt_motion;
