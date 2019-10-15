@@ -2757,8 +2757,8 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     // If the first frame is a key frame or the overlay from a previous arf then
     // the error score / cost of this frame has already been accounted for.
     int start_idx = arf_active_or_kf ? 1 : 0;
-    int num_show_frames = i;
-    for (j = start_idx; j < num_show_frames; ++j) {
+    int num_coding_frames = i;
+    for (j = start_idx; j < num_coding_frames; ++j) {
       int show_idx = gf_start_show_idx + j;
       const FIRSTPASS_STATS *frame_stats =
           fps_get_frame_stats(first_pass_info, show_idx);
