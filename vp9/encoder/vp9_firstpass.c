@@ -2694,8 +2694,16 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
                           b_frames, avg_inter_frame_qindex);
     rc->source_alt_ref_pending = 1;
   } else {
-    reset_fpf_position(twopass, start_pos);
-    rc->gfu_boost = VPXMIN(MAX_GF_BOOST, calc_arf_boost(cpi, (i - 1), 0));
+    const int f_frames = i - 1;
+    const int b_frames = 0;
+    const int avg_inter_frame_qindex = rc->avg_frame_qindex[INTER_FRAME];
+    // TODO(angiebird): figure out why arf's location is assigned this way
+    const int gld_show_idx =
+        VPXMIN(gf_start_show_idx + 1, fps_get_num_frames(first_pass_info));
+    const int arf_boost =
+        compute_arf_boost(frame_info, first_pass_info, gld_show_idx, f_frames,
+                          b_frames, avg_inter_frame_qindex);
+    rc->gfu_boost = VPXMIN(MAX_GF_BOOST, arf_boost);
     rc->source_alt_ref_pending = 0;
   }
 
@@ -2739,9 +2747,6 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     rc->gfu_boost = VPXMIN(rc->gfu_boost, MIN_ARF_GF_BOOST);
 
   rc->baseline_gf_interval = i - rc->source_alt_ref_pending;
-
-  // Reset the file position.
-  reset_fpf_position(twopass, start_pos);
 
   if (rc->source_alt_ref_pending)
     is_alt_ref_flash = detect_flash(twopass, rc->baseline_gf_interval);
