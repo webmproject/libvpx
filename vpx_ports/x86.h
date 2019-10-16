@@ -202,6 +202,7 @@ static INLINE int x86_simd_caps(void) {
 
   // bits 27 (OSXSAVE) & 28 (256-bit AVX)
   if ((reg_ecx & (BIT(27) | BIT(28))) == (BIT(27) | BIT(28))) {
+    // Check for OS-support of YMM state. Necessary for AVX and AVX2.
     if ((xgetbv() & 0x6) == 0x6) {
       flags |= HAS_AVX;
 
@@ -214,8 +215,10 @@ static INLINE int x86_simd_caps(void) {
         // bits 16 (AVX-512F) & 17 (AVX-512DQ) & 28 (AVX-512CD) &
         // 30 (AVX-512BW) & 32 (AVX-512VL)
         if ((reg_ebx & (BIT(16) | BIT(17) | BIT(28) | BIT(30) | BIT(31))) ==
-            (BIT(16) | BIT(17) | BIT(28) | BIT(30) | BIT(31)))
-          flags |= HAS_AVX512;
+            (BIT(16) | BIT(17) | BIT(28) | BIT(30) | BIT(31))) {
+          // Check for OS-support of ZMM and YMM state. Necessary for AVX-512.
+          if ((xgetbv() & 0xe6) == 0xe6) flags |= HAS_AVX512;
+        }
       }
     }
   }
