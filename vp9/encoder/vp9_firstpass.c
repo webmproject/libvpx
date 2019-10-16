@@ -2496,8 +2496,6 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   double gf_group_inter = 0.0;
   double gf_group_motion = 0.0;
 
-  double zero_motion_accumulator = 1.0;
-
   unsigned int allow_alt_ref = is_altref_enabled(cpi);
 
   int active_max_gf_interval;
@@ -2584,6 +2582,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     // Motion breakout threshold for loop below depends on image size.
     double mv_ratio_accumulator_thresh =
         (cpi->initial_height + cpi->initial_width) / 4.0;
+    double zero_motion_accumulator = 1.0;
 
     while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
       const FIRSTPASS_STATS *next_next_frame;
@@ -2670,14 +2669,14 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
         break;
       }
     }
+    allow_alt_ref &= zero_motion_accumulator < 0.995;
   }
 
   // Was the group length constrained by the requirement for a new KF?
   rc->constrained_gf_group = (i >= rc->frames_to_key) ? 1 : 0;
 
   // Should we use the alternate reference frame.
-  if ((zero_motion_accumulator < 0.995) && allow_alt_ref &&
-      (twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH) &&
+  if (allow_alt_ref && (twopass->kf_zeromotion_pct < STATIC_KF_GROUP_THRESH) &&
       (i < cpi->oxcf.lag_in_frames) && (i >= rc->min_gf_interval)) {
     const int f_frames = (rc->frames_to_key - i >= i - 1)
                              ? i - 1
