@@ -3061,7 +3061,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  const FIRSTPASS_STATS first_frame = *this_frame;
   const FIRSTPASS_STATS *const start_position = twopass->stats_in;
   FIRSTPASS_STATS next_frame;
   FIRSTPASS_STATS last_frame;
@@ -3153,14 +3152,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         break;
 
       // Step on to the next frame.
-      ++rc->frames_to_key;
-
-      // If we don't have a real key frame within the next two
-      // key_freq intervals then break out of the loop.
-      if (rc->frames_to_key >= 2 * cpi->oxcf.key_freq) break;
-    } else {
-      ++rc->frames_to_key;
     }
+    ++rc->frames_to_key;
     ++i;
   }
 
@@ -3168,25 +3161,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // We already breakout of the loop above at 2x max.
   // This code centers the extra kf if the actual natural interval
   // is between 1x and 2x.
-  if (cpi->oxcf.auto_key && rc->frames_to_key > cpi->oxcf.key_freq) {
-    FIRSTPASS_STATS tmp_frame = first_frame;
-
-    rc->frames_to_key /= 2;
-
-    // Reset to the start of the group.
-    reset_fpf_position(twopass, start_position);
-
-    kf_group_err = 0.0;
-
-    // Rescan to get the correct error data for the forced kf group.
-    for (i = 0; i < rc->frames_to_key; ++i) {
-      kf_group_err +=
-          calculate_norm_frame_score(cpi, twopass, oxcf, &tmp_frame, av_err);
-      input_stats(twopass, &tmp_frame);
-    }
-    rc->next_key_frame_forced = 1;
-  } else if (twopass->stats_in == twopass->stats_in_end ||
-             rc->frames_to_key >= cpi->oxcf.key_freq) {
+  if (twopass->stats_in == twopass->stats_in_end ||
+      rc->frames_to_key >= cpi->oxcf.key_freq) {
     rc->next_key_frame_forced = 1;
   } else {
     rc->next_key_frame_forced = 0;
