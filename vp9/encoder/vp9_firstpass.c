@@ -3055,8 +3055,7 @@ static int test_candidate_kf(TWO_PASS *twopass,
 #define MAX_KF_TOT_BOOST 5400
 #endif
 
-static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
-                                int kf_show_idx) {
+static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   int i, j;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
@@ -3065,8 +3064,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
   const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   const FRAME_INFO *frame_info = &cpi->frame_info;
   const FIRSTPASS_STATS *const start_position = twopass->stats_in;
+  const FIRSTPASS_STATS *keyframe_stats =
+      fps_get_frame_stats(first_pass_info, kf_show_idx);
   FIRSTPASS_STATS next_frame;
-  FIRSTPASS_STATS last_frame;
   int kf_bits = 0;
   int64_t max_kf_bits;
   double decay_accumulator = 1.0;
@@ -3109,9 +3109,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
   twopass->kf_group_bits = 0;          // Total bits available to kf group
   twopass->kf_group_error_left = 0.0;  // Group modified error score.
 
-  kf_raw_err = this_frame->intra_error;
-  kf_mod_err =
-      calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
+  kf_raw_err = keyframe_stats->intra_error;
+  kf_mod_err = calc_norm_frame_score(oxcf, frame_info, keyframe_stats,
+                                     mean_mod_score, av_err);
 
   // Initialize the decay rates for the recent frames to check
   for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j) recent_loop_decay[j] = 1.0;
@@ -3121,15 +3121,17 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
   while (twopass->stats_in < twopass->stats_in_end &&
          rc->frames_to_key < cpi->oxcf.key_freq) {
     // Load the next frame's stats.
-    last_frame = *this_frame;
-    input_stats(twopass, this_frame);
+    const FIRSTPASS_STATS *last_frame =
+        fps_get_frame_stats(first_pass_info, kf_show_idx + i);
+    FIRSTPASS_STATS this_frame;
+    input_stats(twopass, &this_frame);
 
     // Provided that we are not at the end of the file...
     if (cpi->oxcf.auto_key && twopass->stats_in < twopass->stats_in_end) {
       double loop_decay_rate;
 
       // Check for a scene cut.
-      if (test_candidate_kf(twopass, &last_frame, this_frame,
+      if (test_candidate_kf(twopass, last_frame, &this_frame,
                             twopass->stats_in))
         break;
 
@@ -3434,11 +3436,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Keyframe and section processing.
   if (rc->frames_to_key == 0 || (cpi->frame_flags & FRAMEFLAGS_KEY)) {
-    FIRSTPASS_STATS this_frame_copy;
-    this_frame_copy = this_frame;
     // Define next KF group and assign bits to it.
-    find_next_key_frame(cpi, &this_frame, show_idx);
-    this_frame = this_frame_copy;
+    find_next_key_frame(cpi, show_idx);
   } else {
     cm->frame_type = INTER_FRAME;
   }
