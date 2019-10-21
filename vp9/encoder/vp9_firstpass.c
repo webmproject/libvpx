@@ -3055,12 +3055,15 @@ static int test_candidate_kf(TWO_PASS *twopass,
 #define MAX_KF_TOT_BOOST 5400
 #endif
 
-static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
+static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
+                                int kf_show_idx) {
   int i, j;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
+  const FRAME_INFO *frame_info = &cpi->frame_info;
   const FIRSTPASS_STATS *const start_position = twopass->stats_in;
   FIRSTPASS_STATS next_frame;
   FIRSTPASS_STATS last_frame;
@@ -3082,6 +3085,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double sr_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   const double av_err = get_distribution_av_err(cpi, twopass);
+  const double mean_mod_score = twopass->mean_mod_score;
   vp9_zero(next_frame);
 
   cpi->common.frame_type = KEY_FRAME;
@@ -3116,10 +3120,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   i = 0;
   while (twopass->stats_in < twopass->stats_in_end &&
          rc->frames_to_key < cpi->oxcf.key_freq) {
-    // Accumulate kf group error.
-    kf_group_err +=
-        calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
-
     // Load the next frame's stats.
     last_frame = *this_frame;
     input_stats(twopass, this_frame);
@@ -3168,11 +3168,12 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     rc->next_key_frame_forced = 0;
   }
 
-  // Special case for the last key frame of the file.
-  if (twopass->stats_in >= twopass->stats_in_end) {
+  for (i = 0; i < rc->frames_to_key; ++i) {
+    const FIRSTPASS_STATS *frame_stats =
+        fps_get_frame_stats(first_pass_info, kf_show_idx + i);
     // Accumulate kf group error.
-    kf_group_err +=
-        calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
+    kf_group_err += calc_norm_frame_score(oxcf, frame_info, frame_stats,
+                                          mean_mod_score, av_err);
   }
 
   // Calculate the number of bits that should be assigned to the kf group.
@@ -3350,6 +3351,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
   FIRSTPASS_STATS this_frame;
+  const int show_idx = cm->current_video_frame;
 
   if (!twopass->stats_in) return;
 
@@ -3435,7 +3437,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     FIRSTPASS_STATS this_frame_copy;
     this_frame_copy = this_frame;
     // Define next KF group and assign bits to it.
-    find_next_key_frame(cpi, &this_frame);
+    find_next_key_frame(cpi, &this_frame, show_idx);
     this_frame = this_frame_copy;
   } else {
     cm->frame_type = INTER_FRAME;
@@ -3443,8 +3445,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Define a new GF/ARF group. (Should always enter here for key frames).
   if (rc->frames_till_gf_update_due == 0) {
-    const int gf_start_show_idx = cm->current_video_frame;
-    define_gf_group(cpi, gf_start_show_idx);
+    define_gf_group(cpi, show_idx);
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
 
