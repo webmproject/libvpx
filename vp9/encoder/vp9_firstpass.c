@@ -1830,26 +1830,6 @@ static int check_transition_to_still(const FIRST_PASS_INFO *first_pass_info,
   return j == still_interval;
 }
 
-static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
-                                      int still_interval,
-                                      double loop_decay_rate,
-                                      double last_decay_rate) {
-  const TWO_PASS *const twopass = &cpi->twopass;
-  RATE_CONTROL *const rc = &cpi->rc;
-  int show_idx = get_show_idx(twopass);
-
-  // Break clause to detect very still sections after motion
-  // For example a static image after a fade or other transition
-  // instead of a clean scene cut.
-  if (frame_interval > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
-      last_decay_rate < 0.9) {
-    return check_transition_to_still(&twopass->first_pass_info, show_idx,
-                                     still_interval);
-  }
-
-  return 0;
-}
-
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this.
@@ -3149,11 +3129,16 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
 
       // Special check for transition or high motion followed by a
       // static scene.
-      if (detect_transition_to_still(cpi, i, cpi->oxcf.key_freq - i,
-                                     loop_decay_rate, decay_accumulator))
-        break;
-
-      // Step on to the next frame.
+      if (i > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
+          decay_accumulator < 0.9) {
+        int still_interval = oxcf->key_freq - i;
+        // TODO(angiebird): Figure out why we use "+1" here
+        int show_idx = kf_show_idx + i + 1;
+        if (check_transition_to_still(first_pass_info, show_idx,
+                                      still_interval)) {
+          break;
+        }
+      }
     }
     ++rc->frames_to_key;
     ++i;
