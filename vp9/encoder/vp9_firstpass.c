@@ -2954,7 +2954,9 @@ static int test_candidate_kf(TWO_PASS *twopass,
   // Does the frame satisfy the primary criteria of a key frame?
   // See above for an explanation of the test criteria.
   // If so, then examine how well it predicts subsequent frames.
-  if (!detect_flash(twopass, -1) && !detect_flash(twopass, 0) &&
+  detect_flash_from_frame_stats(next_frame);
+  if (!detect_flash_from_frame_stats(this_frame) &&
+      !detect_flash_from_frame_stats(next_frame) &&
       (this_frame->pcnt_second_ref < SECOND_REF_USEAGE_THRESH) &&
       ((this_frame->pcnt_inter < VERY_LOW_INTER_THRESH) ||
        (slide_transition(this_frame, last_frame, next_frame)) ||
