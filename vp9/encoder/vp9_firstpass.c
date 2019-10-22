@@ -3098,51 +3098,56 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   // Initialize the decay rates for the recent frames to check
   for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j) recent_loop_decay[j] = 1.0;
 
-  // Find the next keyframe.
-  if (!oxcf->auto_key) {
-    rc->frames_to_key = first_pass_info->num_frames - kf_show_idx;
-    rc->frames_to_key = VPXMIN(oxcf->key_freq, rc->frames_to_key);
-  } else {
-    int i = 0;
-    while (kf_show_idx + i + 1 < first_pass_info->num_frames &&
-           rc->frames_to_key < cpi->oxcf.key_freq) {
-      // Provided that we are not at the end of the file...
-      if (kf_show_idx + i + 2 < first_pass_info->num_frames) {
-        double loop_decay_rate;
-        const FIRSTPASS_STATS *next_frame =
-            fps_get_frame_stats(first_pass_info, kf_show_idx + i + 2);
+  {
+    int frames_to_key;
+    int max_frames_to_key = first_pass_info->num_frames - kf_show_idx;
+    max_frames_to_key = VPXMIN(max_frames_to_key, oxcf->key_freq);
+    // Find the next keyframe.
+    if (!oxcf->auto_key) {
+      frames_to_key = max_frames_to_key;
+    } else {
+      frames_to_key = 1;
+      while (frames_to_key < max_frames_to_key) {
+        // Provided that we are not at the end of the file...
+        if (kf_show_idx + frames_to_key + 1 < first_pass_info->num_frames) {
+          double loop_decay_rate;
+          const FIRSTPASS_STATS *next_frame = fps_get_frame_stats(
+              first_pass_info, kf_show_idx + frames_to_key + 1);
 
-        // Check for a scene cut.
-        if (test_candidate_kf(first_pass_info, kf_show_idx + i + 1)) break;
-
-        // How fast is the prediction quality decaying?
-        loop_decay_rate =
-            get_prediction_decay_rate(&cpi->frame_info, next_frame);
-
-        // We want to know something about the recent past... rather than
-        // as used elsewhere where we are concerned with decay in prediction
-        // quality since the last GF or KF.
-        recent_loop_decay[i % FRAMES_TO_CHECK_DECAY] = loop_decay_rate;
-        decay_accumulator = 1.0;
-        for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j)
-          decay_accumulator *= recent_loop_decay[j];
-
-        // Special check for transition or high motion followed by a
-        // static scene.
-        if (i > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
-            decay_accumulator < 0.9) {
-          int still_interval = oxcf->key_freq - i;
-          // TODO(angiebird): Figure out why we use "+1" here
-          int show_idx = kf_show_idx + i + 1;
-          if (check_transition_to_still(first_pass_info, show_idx,
-                                        still_interval)) {
+          // Check for a scene cut.
+          if (test_candidate_kf(first_pass_info, kf_show_idx + frames_to_key))
             break;
+
+          // How fast is the prediction quality decaying?
+          loop_decay_rate =
+              get_prediction_decay_rate(&cpi->frame_info, next_frame);
+
+          // We want to know something about the recent past... rather than
+          // as used elsewhere where we are concerned with decay in prediction
+          // quality since the last GF or KF.
+          recent_loop_decay[(frames_to_key - 1) % FRAMES_TO_CHECK_DECAY] =
+              loop_decay_rate;
+          decay_accumulator = 1.0;
+          for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j)
+            decay_accumulator *= recent_loop_decay[j];
+
+          // Special check for transition or high motion followed by a
+          // static scene.
+          if ((frames_to_key - 1) > rc->min_gf_interval &&
+              loop_decay_rate >= 0.999 && decay_accumulator < 0.9) {
+            int still_interval = oxcf->key_freq - (frames_to_key - 1);
+            // TODO(angiebird): Figure out why we use "+1" here
+            int show_idx = kf_show_idx + frames_to_key;
+            if (check_transition_to_still(first_pass_info, show_idx,
+                                          still_interval)) {
+              break;
+            }
           }
         }
+        ++frames_to_key;
       }
-      ++rc->frames_to_key;
-      ++i;
     }
+    rc->frames_to_key = frames_to_key;
   }
 
   // If there is a max kf interval set by the user we must obey it.
