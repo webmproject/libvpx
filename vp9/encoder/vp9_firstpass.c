@@ -3104,21 +3104,20 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
     rc->frames_to_key = VPXMIN(oxcf->key_freq, rc->frames_to_key);
   } else {
     int i = 0;
-    while (twopass->stats_in < twopass->stats_in_end &&
+    while (kf_show_idx + i + 1 < first_pass_info->num_frames &&
            rc->frames_to_key < cpi->oxcf.key_freq) {
-      FIRSTPASS_STATS this_frame;
-      input_stats(twopass, &this_frame);
-
       // Provided that we are not at the end of the file...
-      if (twopass->stats_in < twopass->stats_in_end) {
+      if (kf_show_idx + i + 2 < first_pass_info->num_frames) {
         double loop_decay_rate;
+        const FIRSTPASS_STATS *next_frame =
+            fps_get_frame_stats(first_pass_info, kf_show_idx + i + 2);
 
         // Check for a scene cut.
         if (test_candidate_kf(first_pass_info, kf_show_idx + i + 1)) break;
 
         // How fast is the prediction quality decaying?
         loop_decay_rate =
-            get_prediction_decay_rate(&cpi->frame_info, twopass->stats_in);
+            get_prediction_decay_rate(&cpi->frame_info, next_frame);
 
         // We want to know something about the recent past... rather than
         // as used elsewhere where we are concerned with decay in prediction
@@ -3150,8 +3149,7 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   // We already breakout of the loop above at 2x max.
   // This code centers the extra kf if the actual natural interval
   // is between 1x and 2x.
-  if (twopass->stats_in == twopass->stats_in_end ||
-      rc->frames_to_key >= cpi->oxcf.key_freq) {
+  if (rc->frames_to_key >= cpi->oxcf.key_freq) {
     rc->next_key_frame_forced = 1;
   } else {
     rc->next_key_frame_forced = 0;
@@ -3186,9 +3184,6 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
     twopass->kf_group_bits = 0;
   }
   twopass->kf_group_bits = VPXMAX(0, twopass->kf_group_bits);
-
-  // Reset the first pass file position.
-  reset_fpf_position(twopass, start_position);
 
   // Scan through the kf group collating various stats used to determine
   // how many bits to spend on it.
