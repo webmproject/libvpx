@@ -2462,8 +2462,7 @@ static int get_gop_coding_frame_num(
     int *use_alt_ref, const FRAME_INFO *frame_info,
     const FIRST_PASS_INFO *first_pass_info, const RATE_CONTROL *rc,
     int gf_start_show_idx, int active_min_gf_interval,
-    int active_max_gf_interval, double gop_intra_factor, int kf_zeromotion_pct,
-    int lag_in_frames) {
+    int active_max_gf_interval, double gop_intra_factor, int lag_in_frames) {
   double loop_decay_rate = 1.00;
   double mv_ratio_accumulator = 0.0;
   double this_frame_mv_in_out = 0.0;
@@ -2567,7 +2566,6 @@ static int get_gop_coding_frame_num(
     }
   }
   *use_alt_ref &= zero_motion_accumulator < 0.995;
-  *use_alt_ref &= kf_zeromotion_pct < STATIC_KF_GROUP_THRESH;
   *use_alt_ref &= gop_coding_frames < lag_in_frames;
   *use_alt_ref &= gop_coding_frames >= rc->min_gf_interval;
   return gop_coding_frames;
@@ -2672,7 +2670,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     gop_coding_frames = get_gop_coding_frame_num(
         &use_alt_ref, frame_info, first_pass_info, rc, gf_start_show_idx,
         active_min_gf_interval, active_max_gf_interval, gop_intra_factor,
-        twopass->kf_zeromotion_pct, cpi->oxcf.lag_in_frames);
+        cpi->oxcf.lag_in_frames);
     use_alt_ref &= allow_alt_ref;
   }
 
