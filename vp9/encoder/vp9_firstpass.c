@@ -2944,8 +2944,7 @@ static int intra_step_transition(const FIRSTPASS_STATS *this_frame,
 // Test for very low intra complexity which could cause false key frames
 #define V_LOW_INTRA 0.5
 
-static int test_candidate_kf(TWO_PASS *twopass,
-                             const FIRST_PASS_INFO *first_pass_info,
+static int test_candidate_kf(const FIRST_PASS_INFO *first_pass_info,
                              int show_idx) {
   const FIRSTPASS_STATS *last_frame =
       fps_get_frame_stats(first_pass_info, show_idx - 1);
@@ -2974,42 +2973,41 @@ static int test_candidate_kf(TWO_PASS *twopass,
           DOUBLE_DIVIDE_CHECK(this_frame->coded_error)) <
          KF_II_ERR_THRESHOLD)))) {
     int i;
-    const FIRSTPASS_STATS *start_pos = twopass->stats_in;
-    FIRSTPASS_STATS local_next_frame = *next_frame;
     double boost_score = 0.0;
     double old_boost_score = 0.0;
     double decay_accumulator = 1.0;
 
     // Examine how well the key frame predicts subsequent frames.
     for (i = 0; i < 16; ++i) {
-      double next_iiratio = (II_FACTOR * local_next_frame.intra_error /
-                             DOUBLE_DIVIDE_CHECK(local_next_frame.coded_error));
+      const FIRSTPASS_STATS *frame_stats =
+          fps_get_frame_stats(first_pass_info, show_idx + 1 + i);
+      double next_iiratio = (II_FACTOR * frame_stats->intra_error /
+                             DOUBLE_DIVIDE_CHECK(frame_stats->coded_error));
 
       if (next_iiratio > KF_II_MAX) next_iiratio = KF_II_MAX;
 
       // Cumulative effect of decay in prediction quality.
-      if (local_next_frame.pcnt_inter > 0.85)
-        decay_accumulator *= local_next_frame.pcnt_inter;
+      if (frame_stats->pcnt_inter > 0.85)
+        decay_accumulator *= frame_stats->pcnt_inter;
       else
-        decay_accumulator *= (0.85 + local_next_frame.pcnt_inter) / 2.0;
+        decay_accumulator *= (0.85 + frame_stats->pcnt_inter) / 2.0;
 
       // Keep a running total.
       boost_score += (decay_accumulator * next_iiratio);
 
       // Test various breakout clauses.
-      if ((local_next_frame.pcnt_inter < 0.05) || (next_iiratio < 1.5) ||
-          (((local_next_frame.pcnt_inter - local_next_frame.pcnt_neutral) <
-            0.20) &&
+      if ((frame_stats->pcnt_inter < 0.05) || (next_iiratio < 1.5) ||
+          (((frame_stats->pcnt_inter - frame_stats->pcnt_neutral) < 0.20) &&
            (next_iiratio < 3.0)) ||
           ((boost_score - old_boost_score) < 3.0) ||
-          (local_next_frame.intra_error < V_LOW_INTRA)) {
+          (frame_stats->intra_error < V_LOW_INTRA)) {
         break;
       }
 
       old_boost_score = boost_score;
 
       // Get the next frame details
-      if (EOF == input_stats(twopass, &local_next_frame)) break;
+      if (show_idx + 1 + i == fps_get_num_frames(first_pass_info) - 1) break;
     }
 
     // If there is tolerable prediction for at least the next 3 frames then
@@ -3017,9 +3015,6 @@ static int test_candidate_kf(TWO_PASS *twopass,
     if (boost_score > 30.0 && (i > 3)) {
       is_viable_kf = 1;
     } else {
-      // Reset the file position
-      reset_fpf_position(twopass, start_pos);
-
       is_viable_kf = 0;
     }
   }
@@ -3119,8 +3114,7 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
         double loop_decay_rate;
 
         // Check for a scene cut.
-        if (test_candidate_kf(twopass, first_pass_info, kf_show_idx + i + 1))
-          break;
+        if (test_candidate_kf(first_pass_info, kf_show_idx + i + 1)) break;
 
         // How fast is the prediction quality decaying?
         loop_decay_rate =
