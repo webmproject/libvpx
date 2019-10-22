@@ -2945,9 +2945,14 @@ static int intra_step_transition(const FIRSTPASS_STATS *this_frame,
 #define V_LOW_INTRA 0.5
 
 static int test_candidate_kf(TWO_PASS *twopass,
-                             const FIRSTPASS_STATS *last_frame,
-                             const FIRSTPASS_STATS *this_frame,
-                             const FIRSTPASS_STATS *next_frame) {
+                             const FIRST_PASS_INFO *first_pass_info,
+                             int show_idx) {
+  const FIRSTPASS_STATS *last_frame =
+      fps_get_frame_stats(first_pass_info, show_idx - 1);
+  const FIRSTPASS_STATS *this_frame =
+      fps_get_frame_stats(first_pass_info, show_idx);
+  const FIRSTPASS_STATS *next_frame =
+      fps_get_frame_stats(first_pass_info, show_idx + 1);
   int is_viable_kf = 0;
   double pcnt_intra = 1.0 - this_frame->pcnt_inter;
 
@@ -3106,9 +3111,6 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
     int i = 0;
     while (twopass->stats_in < twopass->stats_in_end &&
            rc->frames_to_key < cpi->oxcf.key_freq) {
-      // Load the next frame's stats.
-      const FIRSTPASS_STATS *last_frame =
-          fps_get_frame_stats(first_pass_info, kf_show_idx + i);
       FIRSTPASS_STATS this_frame;
       input_stats(twopass, &this_frame);
 
@@ -3117,8 +3119,7 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
         double loop_decay_rate;
 
         // Check for a scene cut.
-        if (test_candidate_kf(twopass, last_frame, &this_frame,
-                              twopass->stats_in))
+        if (test_candidate_kf(twopass, first_pass_info, kf_show_idx + i + 1))
           break;
 
         // How fast is the prediction quality decaying?
