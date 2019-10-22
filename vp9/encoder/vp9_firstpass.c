@@ -3097,51 +3097,56 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j) recent_loop_decay[j] = 1.0;
 
   // Find the next keyframe.
-  i = 0;
-  while (twopass->stats_in < twopass->stats_in_end &&
-         rc->frames_to_key < cpi->oxcf.key_freq) {
-    // Load the next frame's stats.
-    const FIRSTPASS_STATS *last_frame =
-        fps_get_frame_stats(first_pass_info, kf_show_idx + i);
-    FIRSTPASS_STATS this_frame;
-    input_stats(twopass, &this_frame);
+  if (!oxcf->auto_key) {
+    rc->frames_to_key = first_pass_info->num_frames - kf_show_idx;
+    rc->frames_to_key = VPXMIN(oxcf->key_freq, rc->frames_to_key);
+  } else {
+    int i = 0;
+    while (twopass->stats_in < twopass->stats_in_end &&
+           rc->frames_to_key < cpi->oxcf.key_freq) {
+      // Load the next frame's stats.
+      const FIRSTPASS_STATS *last_frame =
+          fps_get_frame_stats(first_pass_info, kf_show_idx + i);
+      FIRSTPASS_STATS this_frame;
+      input_stats(twopass, &this_frame);
 
-    // Provided that we are not at the end of the file...
-    if (cpi->oxcf.auto_key && twopass->stats_in < twopass->stats_in_end) {
-      double loop_decay_rate;
+      // Provided that we are not at the end of the file...
+      if (twopass->stats_in < twopass->stats_in_end) {
+        double loop_decay_rate;
 
-      // Check for a scene cut.
-      if (test_candidate_kf(twopass, last_frame, &this_frame,
-                            twopass->stats_in))
-        break;
-
-      // How fast is the prediction quality decaying?
-      loop_decay_rate =
-          get_prediction_decay_rate(&cpi->frame_info, twopass->stats_in);
-
-      // We want to know something about the recent past... rather than
-      // as used elsewhere where we are concerned with decay in prediction
-      // quality since the last GF or KF.
-      recent_loop_decay[i % FRAMES_TO_CHECK_DECAY] = loop_decay_rate;
-      decay_accumulator = 1.0;
-      for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j)
-        decay_accumulator *= recent_loop_decay[j];
-
-      // Special check for transition or high motion followed by a
-      // static scene.
-      if (i > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
-          decay_accumulator < 0.9) {
-        int still_interval = oxcf->key_freq - i;
-        // TODO(angiebird): Figure out why we use "+1" here
-        int show_idx = kf_show_idx + i + 1;
-        if (check_transition_to_still(first_pass_info, show_idx,
-                                      still_interval)) {
+        // Check for a scene cut.
+        if (test_candidate_kf(twopass, last_frame, &this_frame,
+                              twopass->stats_in))
           break;
+
+        // How fast is the prediction quality decaying?
+        loop_decay_rate =
+            get_prediction_decay_rate(&cpi->frame_info, twopass->stats_in);
+
+        // We want to know something about the recent past... rather than
+        // as used elsewhere where we are concerned with decay in prediction
+        // quality since the last GF or KF.
+        recent_loop_decay[i % FRAMES_TO_CHECK_DECAY] = loop_decay_rate;
+        decay_accumulator = 1.0;
+        for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j)
+          decay_accumulator *= recent_loop_decay[j];
+
+        // Special check for transition or high motion followed by a
+        // static scene.
+        if (i > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
+            decay_accumulator < 0.9) {
+          int still_interval = oxcf->key_freq - i;
+          // TODO(angiebird): Figure out why we use "+1" here
+          int show_idx = kf_show_idx + i + 1;
+          if (check_transition_to_still(first_pass_info, show_idx,
+                                        still_interval)) {
+            break;
+          }
         }
       }
+      ++rc->frames_to_key;
+      ++i;
     }
-    ++rc->frames_to_key;
-    ++i;
   }
 
   // If there is a max kf interval set by the user we must obey it.
