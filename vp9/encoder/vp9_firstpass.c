@@ -2466,8 +2466,8 @@ typedef struct RANGE {
 static int get_gop_coding_frame_num(
     int *use_alt_ref, const FRAME_INFO *frame_info,
     const FIRST_PASS_INFO *first_pass_info, const RATE_CONTROL *rc,
-    int gf_start_show_idx, int active_min_gf_interval,
-    int active_max_gf_interval, double gop_intra_factor, int lag_in_frames) {
+    int gf_start_show_idx, const RANGE *active_gf_interval,
+    double gop_intra_factor, int lag_in_frames) {
   double loop_decay_rate = 1.00;
   double mv_ratio_accumulator = 0.0;
   double this_frame_mv_in_out = 0.0;
@@ -2543,7 +2543,7 @@ static int get_gop_coding_frame_num(
     }
 
     // Break out conditions.
-    // Break at maximum of active_max_gf_interval unless almost totally
+    // Break at maximum of active_gf_interval->max unless almost totally
     // static.
     //
     // Note that the addition of a test of rc->source_alt_ref_active is
@@ -2554,13 +2554,13 @@ static int get_gop_coding_frame_num(
     // such as a fade, the arf group spanning the transition may not be coded
     // at a very high quality and hence this frame (with its overlay) is a
     // poor golden frame to use for an extended group.
-    if ((gop_coding_frames >= active_max_gf_interval) &&
+    if ((gop_coding_frames >= active_gf_interval->max) &&
         ((zero_motion_accumulator < 0.995) || (rc->source_alt_ref_active))) {
       break;
     }
     if (
         // Don't break out with a very short interval.
-        (gop_coding_frames >= active_min_gf_interval) &&
+        (gop_coding_frames >= active_gf_interval->min) &&
         // If possible dont break very close to a kf
         ((rc->frames_to_key - gop_coding_frames) >= rc->min_gf_interval) &&
         (gop_coding_frames & 0x01) && (!flash_detected) &&
@@ -2679,8 +2679,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   {
     gop_coding_frames = get_gop_coding_frame_num(
         &use_alt_ref, frame_info, first_pass_info, rc, gf_start_show_idx,
-        active_gf_interval.min, active_gf_interval.max, gop_intra_factor,
-        cpi->oxcf.lag_in_frames);
+        &active_gf_interval, gop_intra_factor, cpi->oxcf.lag_in_frames);
     use_alt_ref &= allow_alt_ref;
   }
 
