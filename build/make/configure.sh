@@ -799,6 +799,10 @@ process_common_toolchain() {
         tgt_isa=x86_64
         tgt_os=darwin17
         ;;
+      *darwin18*)
+        tgt_isa=x86_64
+        tgt_os=darwin18
+        ;;
       x86_64*mingw32*)
         tgt_os=win64
         ;;
@@ -930,6 +934,10 @@ process_common_toolchain() {
     *-darwin17-*)
       add_cflags  "-mmacosx-version-min=10.13"
       add_ldflags "-mmacosx-version-min=10.13"
+      ;;
+    *-darwin18-*)
+      add_cflags  "-mmacosx-version-min=10.14"
+      add_ldflags "-mmacosx-version-min=10.14"
       ;;
     *-iphonesimulator-*)
       add_cflags  "-miphoneos-version-min=${IOS_VERSION_MIN}"

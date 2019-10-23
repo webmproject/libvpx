@@ -110,6 +110,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86_64-darwin15-gcc
     x86_64-darwin16-gcc
     x86_64-darwin17-gcc
+    x86_64-darwin18-gcc
     x86_64-iphonesimulator-gcc
     x86_64-linux-gcc
     x86_64-linux-icc
