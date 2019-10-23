@@ -116,7 +116,10 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
 
  protected:
   // Handle blocks up to 4 blocks 64x64 with stride up to 128
-  static const int kDataAlignment = 32;
+  // crbug.com/webm/1660
+  // const[expr] should be sufficient for DECLARE_ALIGNED but early
+  // implementations of c++11 appear to have some issues with it.
+  enum { kDataAlignment = 32 };
   static const int kDataBlockSize = 64 * 128;
   static const int kDataBufferSize = 4 * kDataBlockSize;
 
