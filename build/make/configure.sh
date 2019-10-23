@@ -767,41 +767,9 @@ process_common_toolchain() {
 
     # detect tgt_os
     case "$gcctarget" in
-      *darwin10*)
+      *darwin1[0-8]*)
         tgt_isa=x86_64
-        tgt_os=darwin10
-        ;;
-      *darwin11*)
-        tgt_isa=x86_64
-        tgt_os=darwin11
-        ;;
-      *darwin12*)
-        tgt_isa=x86_64
-        tgt_os=darwin12
-        ;;
-      *darwin13*)
-        tgt_isa=x86_64
-        tgt_os=darwin13
-        ;;
-      *darwin14*)
-        tgt_isa=x86_64
-        tgt_os=darwin14
-        ;;
-      *darwin15*)
-        tgt_isa=x86_64
-        tgt_os=darwin15
-        ;;
-      *darwin16*)
-        tgt_isa=x86_64
-        tgt_os=darwin16
-        ;;
-      *darwin17*)
-        tgt_isa=x86_64
-        tgt_os=darwin17
-        ;;
-      *darwin18*)
-        tgt_isa=x86_64
-        tgt_os=darwin18
+        tgt_os=`echo $gcctarget | sed 's/.*\(darwin1[0-8]\).*/\1/'`
         ;;
       x86_64*mingw32*)
         tgt_os=win64
