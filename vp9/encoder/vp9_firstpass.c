@@ -2580,6 +2580,21 @@ static RANGE get_active_gf_inverval_range(
     const FRAME_INFO *frame_info, const RATE_CONTROL *rc, int arf_active_or_kf,
     int gf_start_show_idx, int active_worst_quality, int last_boosted_qindex) {
   RANGE active_gf_interval;
+#if CONFIG_RATE_CTRL
+  (void)frame_info;
+  (void)gf_start_show_idx;
+  (void)active_worst_quality;
+  (void)last_boosted_qindex;
+  active_gf_interval.min = rc->min_gf_interval + arf_active_or_kf + 2;
+
+  active_gf_interval.max = 16 + arf_active_or_kf;
+
+  if ((active_gf_interval.max <= rc->frames_to_key) &&
+      (active_gf_interval.max >= (rc->frames_to_key - rc->min_gf_interval))) {
+    active_gf_interval.min = rc->frames_to_key / 2;
+    active_gf_interval.max = rc->frames_to_key / 2;
+  }
+#else
   int int_max_q = (int)(vp9_convert_qindex_to_q(active_worst_quality,
                                                 frame_info->bit_depth));
   int q_term = (gf_start_show_idx == 0)
@@ -2617,6 +2632,7 @@ static RANGE get_active_gf_inverval_range(
   }
   active_gf_interval.max =
       VPXMAX(active_gf_interval.max, active_gf_interval.min);
+#endif
   return active_gf_interval;
 }
 
