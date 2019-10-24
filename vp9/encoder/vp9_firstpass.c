@@ -2620,6 +2620,22 @@ static RANGE get_active_gf_inverval_range(
   return active_gf_interval;
 }
 
+static int get_arf_layers(int multi_layer_arf, int max_layers,
+                          int coding_frame_num) {
+  assert(max_layers <= MAX_ARF_LAYERS);
+  if (multi_layer_arf) {
+    int layers = 0;
+    int i;
+    for (i = coding_frame_num; i > 0; i >>= 1) {
+      ++layers;
+    }
+    layers = VPXMIN(max_layers, layers);
+    return layers;
+  } else {
+    return 1;
+  }
+}
+
 static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2649,7 +2665,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
   int is_alt_ref_flash = 0;
 
-  double gop_intra_factor = 1.0;
+  double gop_intra_factor;
   int gop_frames;
   RANGE active_gf_interval;
 
@@ -2664,16 +2680,13 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   active_gf_interval = get_active_gf_inverval_range(
       frame_info, rc, arf_active_or_kf, gf_start_show_idx,
       twopass->active_worst_quality, rc->last_boosted_qindex);
+
   if (cpi->multi_layer_arf) {
-    int layers = 0;
-    int max_layers = VPXMIN(MAX_ARF_LAYERS, cpi->oxcf.enable_auto_arf);
-    int i;
-
-    // Adapt the intra_error factor to active_max_gf_interval limit.
-    for (i = active_gf_interval.max; i > 0; i >>= 1) ++layers;
-
-    layers = VPXMIN(max_layers, layers);
-    gop_intra_factor += (layers * 0.25);
+    int arf_layers = get_arf_layers(cpi->multi_layer_arf, oxcf->enable_auto_arf,
+                                    active_gf_interval.max);
+    gop_intra_factor = 1.0 + 0.25 * arf_layers;
+  } else {
+    gop_intra_factor = 1.0;
   }
 
   {
