@@ -164,7 +164,7 @@ static INLINE int fps_get_num_frames(const FIRST_PASS_INFO *first_pass_info) {
 
 static INLINE const FIRSTPASS_STATS *fps_get_frame_stats(
     const FIRST_PASS_INFO *first_pass_info, int show_idx) {
-  if (show_idx >= first_pass_info->num_frames) {
+  if (show_idx < 0 || show_idx >= first_pass_info->num_frames) {
     return NULL;
   }
   return &first_pass_info->stats[show_idx];

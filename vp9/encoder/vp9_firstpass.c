@@ -1830,26 +1830,6 @@ static int check_transition_to_still(const FIRST_PASS_INFO *first_pass_info,
   return j == still_interval;
 }
 
-static int detect_transition_to_still(VP9_COMP *cpi, int frame_interval,
-                                      int still_interval,
-                                      double loop_decay_rate,
-                                      double last_decay_rate) {
-  const TWO_PASS *const twopass = &cpi->twopass;
-  RATE_CONTROL *const rc = &cpi->rc;
-  int show_idx = get_show_idx(twopass);
-
-  // Break clause to detect very still sections after motion
-  // For example a static image after a fade or other transition
-  // instead of a clean scene cut.
-  if (frame_interval > rc->min_gf_interval && loop_decay_rate >= 0.999 &&
-      last_decay_rate < 0.9) {
-    return check_transition_to_still(&twopass->first_pass_info, show_idx,
-                                     still_interval);
-  }
-
-  return 0;
-}
-
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this.
@@ -2482,8 +2462,7 @@ static int get_gop_coding_frame_num(
     int *use_alt_ref, const FRAME_INFO *frame_info,
     const FIRST_PASS_INFO *first_pass_info, const RATE_CONTROL *rc,
     int gf_start_show_idx, int active_min_gf_interval,
-    int active_max_gf_interval, double gop_intra_factor, int kf_zeromotion_pct,
-    int lag_in_frames) {
+    int active_max_gf_interval, double gop_intra_factor, int lag_in_frames) {
   double loop_decay_rate = 1.00;
   double mv_ratio_accumulator = 0.0;
   double this_frame_mv_in_out = 0.0;
@@ -2587,7 +2566,6 @@ static int get_gop_coding_frame_num(
     }
   }
   *use_alt_ref &= zero_motion_accumulator < 0.995;
-  *use_alt_ref &= kf_zeromotion_pct < STATIC_KF_GROUP_THRESH;
   *use_alt_ref &= gop_coding_frames < lag_in_frames;
   *use_alt_ref &= gop_coding_frames >= rc->min_gf_interval;
   return gop_coding_frames;
@@ -2692,7 +2670,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     gop_coding_frames = get_gop_coding_frame_num(
         &use_alt_ref, frame_info, first_pass_info, rc, gf_start_show_idx,
         active_min_gf_interval, active_max_gf_interval, gop_intra_factor,
-        twopass->kf_zeromotion_pct, cpi->oxcf.lag_in_frames);
+        cpi->oxcf.lag_in_frames);
     use_alt_ref &= allow_alt_ref;
   }
 
@@ -2964,17 +2942,23 @@ static int intra_step_transition(const FIRSTPASS_STATS *this_frame,
 // Test for very low intra complexity which could cause false key frames
 #define V_LOW_INTRA 0.5
 
-static int test_candidate_kf(TWO_PASS *twopass,
-                             const FIRSTPASS_STATS *last_frame,
-                             const FIRSTPASS_STATS *this_frame,
-                             const FIRSTPASS_STATS *next_frame) {
+static int test_candidate_kf(const FIRST_PASS_INFO *first_pass_info,
+                             int show_idx) {
+  const FIRSTPASS_STATS *last_frame =
+      fps_get_frame_stats(first_pass_info, show_idx - 1);
+  const FIRSTPASS_STATS *this_frame =
+      fps_get_frame_stats(first_pass_info, show_idx);
+  const FIRSTPASS_STATS *next_frame =
+      fps_get_frame_stats(first_pass_info, show_idx + 1);
   int is_viable_kf = 0;
   double pcnt_intra = 1.0 - this_frame->pcnt_inter;
 
   // Does the frame satisfy the primary criteria of a key frame?
   // See above for an explanation of the test criteria.
   // If so, then examine how well it predicts subsequent frames.
-  if (!detect_flash(twopass, -1) && !detect_flash(twopass, 0) &&
+  detect_flash_from_frame_stats(next_frame);
+  if (!detect_flash_from_frame_stats(this_frame) &&
+      !detect_flash_from_frame_stats(next_frame) &&
       (this_frame->pcnt_second_ref < SECOND_REF_USEAGE_THRESH) &&
       ((this_frame->pcnt_inter < VERY_LOW_INTER_THRESH) ||
        (slide_transition(this_frame, last_frame, next_frame)) ||
@@ -2987,42 +2971,41 @@ static int test_candidate_kf(TWO_PASS *twopass,
           DOUBLE_DIVIDE_CHECK(this_frame->coded_error)) <
          KF_II_ERR_THRESHOLD)))) {
     int i;
-    const FIRSTPASS_STATS *start_pos = twopass->stats_in;
-    FIRSTPASS_STATS local_next_frame = *next_frame;
     double boost_score = 0.0;
     double old_boost_score = 0.0;
     double decay_accumulator = 1.0;
 
     // Examine how well the key frame predicts subsequent frames.
     for (i = 0; i < 16; ++i) {
-      double next_iiratio = (II_FACTOR * local_next_frame.intra_error /
-                             DOUBLE_DIVIDE_CHECK(local_next_frame.coded_error));
+      const FIRSTPASS_STATS *frame_stats =
+          fps_get_frame_stats(first_pass_info, show_idx + 1 + i);
+      double next_iiratio = (II_FACTOR * frame_stats->intra_error /
+                             DOUBLE_DIVIDE_CHECK(frame_stats->coded_error));
 
       if (next_iiratio > KF_II_MAX) next_iiratio = KF_II_MAX;
 
       // Cumulative effect of decay in prediction quality.
-      if (local_next_frame.pcnt_inter > 0.85)
-        decay_accumulator *= local_next_frame.pcnt_inter;
+      if (frame_stats->pcnt_inter > 0.85)
+        decay_accumulator *= frame_stats->pcnt_inter;
       else
-        decay_accumulator *= (0.85 + local_next_frame.pcnt_inter) / 2.0;
+        decay_accumulator *= (0.85 + frame_stats->pcnt_inter) / 2.0;
 
       // Keep a running total.
       boost_score += (decay_accumulator * next_iiratio);
 
       // Test various breakout clauses.
-      if ((local_next_frame.pcnt_inter < 0.05) || (next_iiratio < 1.5) ||
-          (((local_next_frame.pcnt_inter - local_next_frame.pcnt_neutral) <
-            0.20) &&
+      if ((frame_stats->pcnt_inter < 0.05) || (next_iiratio < 1.5) ||
+          (((frame_stats->pcnt_inter - frame_stats->pcnt_neutral) < 0.20) &&
            (next_iiratio < 3.0)) ||
           ((boost_score - old_boost_score) < 3.0) ||
-          (local_next_frame.intra_error < V_LOW_INTRA)) {
+          (frame_stats->intra_error < V_LOW_INTRA)) {
         break;
       }
 
       old_boost_score = boost_score;
 
       // Get the next frame details
-      if (EOF == input_stats(twopass, &local_next_frame)) break;
+      if (show_idx + 1 + i == fps_get_num_frames(first_pass_info) - 1) break;
     }
 
     // If there is tolerable prediction for at least the next 3 frames then
@@ -3030,9 +3013,6 @@ static int test_candidate_kf(TWO_PASS *twopass,
     if (boost_score > 30.0 && (i > 3)) {
       is_viable_kf = 1;
     } else {
-      // Reset the file position
-      reset_fpf_position(twopass, start_pos);
-
       is_viable_kf = 0;
     }
   }
@@ -3055,9 +3035,68 @@ static int test_candidate_kf(TWO_PASS *twopass,
 #define MAX_KF_TOT_BOOST 5400
 #endif
 
-static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
-                                int kf_show_idx) {
-  int i, j;
+static int get_frames_to_next_key(const VP9EncoderConfig *oxcf,
+                                  const FRAME_INFO *frame_info,
+                                  const FIRST_PASS_INFO *first_pass_info,
+                                  int kf_show_idx, int min_gf_interval) {
+  double recent_loop_decay[FRAMES_TO_CHECK_DECAY];
+  int j;
+  int frames_to_key;
+  int max_frames_to_key = first_pass_info->num_frames - kf_show_idx;
+  max_frames_to_key = VPXMIN(max_frames_to_key, oxcf->key_freq);
+
+  // Initialize the decay rates for the recent frames to check
+  for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j) recent_loop_decay[j] = 1.0;
+  // Find the next keyframe.
+  if (!oxcf->auto_key) {
+    frames_to_key = max_frames_to_key;
+  } else {
+    frames_to_key = 1;
+    while (frames_to_key < max_frames_to_key) {
+      // Provided that we are not at the end of the file...
+      if (kf_show_idx + frames_to_key + 1 < first_pass_info->num_frames) {
+        double loop_decay_rate;
+        double decay_accumulator;
+        const FIRSTPASS_STATS *next_frame = fps_get_frame_stats(
+            first_pass_info, kf_show_idx + frames_to_key + 1);
+
+        // Check for a scene cut.
+        if (test_candidate_kf(first_pass_info, kf_show_idx + frames_to_key))
+          break;
+
+        // How fast is the prediction quality decaying?
+        loop_decay_rate = get_prediction_decay_rate(frame_info, next_frame);
+
+        // We want to know something about the recent past... rather than
+        // as used elsewhere where we are concerned with decay in prediction
+        // quality since the last GF or KF.
+        recent_loop_decay[(frames_to_key - 1) % FRAMES_TO_CHECK_DECAY] =
+            loop_decay_rate;
+        decay_accumulator = 1.0;
+        for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j)
+          decay_accumulator *= recent_loop_decay[j];
+
+        // Special check for transition or high motion followed by a
+        // static scene.
+        if ((frames_to_key - 1) > min_gf_interval && loop_decay_rate >= 0.999 &&
+            decay_accumulator < 0.9) {
+          int still_interval = oxcf->key_freq - (frames_to_key - 1);
+          // TODO(angiebird): Figure out why we use "+1" here
+          int show_idx = kf_show_idx + frames_to_key;
+          if (check_transition_to_still(first_pass_info, show_idx,
+                                        still_interval)) {
+            break;
+          }
+        }
+      }
+      ++frames_to_key;
+    }
+  }
+  return frames_to_key;
+}
+
+static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
+  int i;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   GF_GROUP *const gf_group = &twopass->gf_group;
@@ -3065,11 +3104,11 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
   const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   const FRAME_INFO *frame_info = &cpi->frame_info;
   const FIRSTPASS_STATS *const start_position = twopass->stats_in;
+  const FIRSTPASS_STATS *keyframe_stats =
+      fps_get_frame_stats(first_pass_info, kf_show_idx);
   FIRSTPASS_STATS next_frame;
-  FIRSTPASS_STATS last_frame;
   int kf_bits = 0;
   int64_t max_kf_bits;
-  double decay_accumulator = 1.0;
   double zero_motion_accumulator = 1.0;
   double zero_motion_sum = 0.0;
   double zero_motion_avg;
@@ -3081,7 +3120,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
   double kf_mod_err = 0.0;
   double kf_raw_err = 0.0;
   double kf_group_err = 0.0;
-  double recent_loop_decay[FRAMES_TO_CHECK_DECAY];
   double sr_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   const double av_err = get_distribution_av_err(cpi, twopass);
@@ -3109,60 +3147,18 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
   twopass->kf_group_bits = 0;          // Total bits available to kf group
   twopass->kf_group_error_left = 0.0;  // Group modified error score.
 
-  kf_raw_err = this_frame->intra_error;
-  kf_mod_err =
-      calculate_norm_frame_score(cpi, twopass, oxcf, this_frame, av_err);
+  kf_raw_err = keyframe_stats->intra_error;
+  kf_mod_err = calc_norm_frame_score(oxcf, frame_info, keyframe_stats,
+                                     mean_mod_score, av_err);
 
-  // Initialize the decay rates for the recent frames to check
-  for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j) recent_loop_decay[j] = 1.0;
-
-  // Find the next keyframe.
-  i = 0;
-  while (twopass->stats_in < twopass->stats_in_end &&
-         rc->frames_to_key < cpi->oxcf.key_freq) {
-    // Load the next frame's stats.
-    last_frame = *this_frame;
-    input_stats(twopass, this_frame);
-
-    // Provided that we are not at the end of the file...
-    if (cpi->oxcf.auto_key && twopass->stats_in < twopass->stats_in_end) {
-      double loop_decay_rate;
-
-      // Check for a scene cut.
-      if (test_candidate_kf(twopass, &last_frame, this_frame,
-                            twopass->stats_in))
-        break;
-
-      // How fast is the prediction quality decaying?
-      loop_decay_rate =
-          get_prediction_decay_rate(&cpi->frame_info, twopass->stats_in);
-
-      // We want to know something about the recent past... rather than
-      // as used elsewhere where we are concerned with decay in prediction
-      // quality since the last GF or KF.
-      recent_loop_decay[i % FRAMES_TO_CHECK_DECAY] = loop_decay_rate;
-      decay_accumulator = 1.0;
-      for (j = 0; j < FRAMES_TO_CHECK_DECAY; ++j)
-        decay_accumulator *= recent_loop_decay[j];
-
-      // Special check for transition or high motion followed by a
-      // static scene.
-      if (detect_transition_to_still(cpi, i, cpi->oxcf.key_freq - i,
-                                     loop_decay_rate, decay_accumulator))
-        break;
-
-      // Step on to the next frame.
-    }
-    ++rc->frames_to_key;
-    ++i;
-  }
+  rc->frames_to_key = get_frames_to_next_key(oxcf, frame_info, first_pass_info,
+                                             kf_show_idx, rc->min_gf_interval);
 
   // If there is a max kf interval set by the user we must obey it.
   // We already breakout of the loop above at 2x max.
   // This code centers the extra kf if the actual natural interval
   // is between 1x and 2x.
-  if (twopass->stats_in == twopass->stats_in_end ||
-      rc->frames_to_key >= cpi->oxcf.key_freq) {
+  if (rc->frames_to_key >= cpi->oxcf.key_freq) {
     rc->next_key_frame_forced = 1;
   } else {
     rc->next_key_frame_forced = 0;
@@ -3197,9 +3193,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
     twopass->kf_group_bits = 0;
   }
   twopass->kf_group_bits = VPXMAX(0, twopass->kf_group_bits);
-
-  // Reset the first pass file position.
-  reset_fpf_position(twopass, start_position);
 
   // Scan through the kf group collating various stats used to determine
   // how many bits to spend on it.
@@ -3434,11 +3427,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Keyframe and section processing.
   if (rc->frames_to_key == 0 || (cpi->frame_flags & FRAMEFLAGS_KEY)) {
-    FIRSTPASS_STATS this_frame_copy;
-    this_frame_copy = this_frame;
     // Define next KF group and assign bits to it.
-    find_next_key_frame(cpi, &this_frame, show_idx);
-    this_frame = this_frame_copy;
+    find_next_key_frame(cpi, show_idx);
   } else {
     cm->frame_type = INTER_FRAME;
   }
