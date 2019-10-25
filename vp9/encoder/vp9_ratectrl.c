@@ -2477,12 +2477,23 @@ void vp9_rc_set_gf_interval_range(const VP9_COMP *const cpi,
     // Set Maximum gf/arf interval
     rc->max_gf_interval = oxcf->max_gf_interval;
     rc->min_gf_interval = oxcf->min_gf_interval;
+#if CONFIG_RATE_CTRL
+    if (rc->min_gf_interval == 0) {
+      rc->min_gf_interval = vp9_rc_get_default_min_gf_interval(
+          oxcf->width, oxcf->height, oxcf->init_framerate);
+    }
+    if (rc->max_gf_interval == 0) {
+      rc->max_gf_interval = vp9_rc_get_default_max_gf_interval(
+          oxcf->init_framerate, rc->min_gf_interval);
+    }
+#else
     if (rc->min_gf_interval == 0)
       rc->min_gf_interval = vp9_rc_get_default_min_gf_interval(
           oxcf->width, oxcf->height, cpi->framerate);
     if (rc->max_gf_interval == 0)
       rc->max_gf_interval = vp9_rc_get_default_max_gf_interval(
           cpi->framerate, rc->min_gf_interval);
+#endif
 
     // Extended max interval for genuinely static scenes like slide shows.
     rc->static_scene_max_gf_interval = MAX_STATIC_GF_GROUP_LENGTH;
