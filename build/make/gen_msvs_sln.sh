@@ -25,7 +25,7 @@ files.
 Options:
     --help                      Print this message
     --out=outfile               Redirect output to a file
-    --ver=version               Version (14,15) of visual studio to generate for
+    --ver=version               Version (14-16) of visual studio to generate for
     --target=isa-os-cc          Target specifier
 EOF
     exit 1
@@ -218,6 +218,7 @@ for opt in "$@"; do
       case $optval in
         14) vs_year=2015 ;;
         15) vs_year=2017 ;;
+        16) vs_year=2019 ;;
         *) die Unrecognized Visual Studio Version in $opt ;;
       esac
     ;;
@@ -231,7 +232,7 @@ done
 outfile=${outfile:-/dev/stdout}
 mkoutfile=${mkoutfile:-/dev/stdout}
 case "${vs_ver}" in
-    1[4-5])
+    1[4-6])
       # VS has used Format Version 12.00 continuously since vs11.
       sln_vers="12.00"
       sln_vers_str="Visual Studio ${vs_year}"
