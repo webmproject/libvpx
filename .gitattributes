@@ -1,13 +1,3 @@
-*.[chs]      filter=fixtabswsp
-*.[ch]pp     filter=fixtabswsp
-*.[ch]xx     filter=fixtabswsp
-*.asm        filter=fixtabswsp
-*.php        filter=fixtabswsp
-*.pl         filter=fixtabswsp
-*.sh         filter=fixtabswsp
-*.txt	     filter=fixwsp
-[Mm]akefile  filter=fixwsp
-*.mk         filter=fixwsp
 *.rc         -crlf
 *.ds[pw]     -crlf
 *.bat        -crlf
