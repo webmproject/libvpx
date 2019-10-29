@@ -20,10 +20,12 @@
 #include "./vpx_version.h"
 #include "vp9/encoder/vp9_encoder.h"
 #include "vpx/vp8cx.h"
+#include "vp9/common/vp9_alloccommon.h"
 #include "vp9/encoder/vp9_firstpass.h"
+#include "vp9/vp9_cx_iface.h"
 #include "vp9/vp9_iface_common.h"
 
-struct vp9_extracfg {
+typedef struct vp9_extracfg {
   int cpu_used;  // available cpu percentage in 1/16
   unsigned int enable_auto_alt_ref;
   unsigned int noise_sensitivity;
@@ -55,7 +57,7 @@ struct vp9_extracfg {
   int render_height;
   unsigned int row_mt;
   unsigned int motion_vector_unit_test;
-};
+} vp9_extracfg;
 
 static struct vp9_extracfg default_extra_cfg = {
   0,                     // cpu_used
@@ -1765,7 +1767,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
         VPX_VBR,      // rc_end_usage
         { NULL, 0 },  // rc_twopass_stats_in
         { NULL, 0 },  // rc_firstpass_mb_stats_in
-        256,          // rc_target_bandwidth
+        256,          // rc_target_bitrate
         0,            // rc_min_quantizer
         63,           // rc_max_quantizer
         25,           // rc_undershoot_pct
@@ -1831,3 +1833,54 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
       NULL                    // vpx_codec_enc_mr_get_mem_loc_fn_t
   }
 };
+
+static vpx_codec_enc_cfg_t get_enc_cfg(int frame_width, int frame_height,
+                                       int target_bitrate,
+                                       vpx_enc_pass enc_pass) {
+  vpx_codec_enc_cfg_t enc_cfg = encoder_usage_cfg_map[0].cfg;
+  enc_cfg.g_w = frame_width;
+  enc_cfg.g_h = frame_height;
+  enc_cfg.rc_target_bitrate = target_bitrate;
+  enc_cfg.g_pass = enc_pass;
+  // Use the same default setting as the one used in vpxenc.c
+  // The default unit time for the encoder is 1/1000 s.
+  enc_cfg.g_timebase.num = 1;
+  enc_cfg.g_timebase.den = 1000;
+  return enc_cfg;
+}
+
+static vp9_extracfg get_extra_cfg() {
+  vp9_extracfg extra_cfg = default_extra_cfg;
+  // TODO(angiebird) figure out whether we can modify default_extra_cfg
+  // directly.
+  extra_cfg.tile_columns = 0;
+  extra_cfg.frame_parallel_decoding_mode = 0;
+  return extra_cfg;
+}
+
+VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
+                                        int target_bitrate,
+                                        vpx_enc_pass enc_pass) {
+  VP9EncoderConfig oxcf;
+  vp9_extracfg extra_cfg = get_extra_cfg();
+  vpx_codec_enc_cfg_t enc_cfg =
+      get_enc_cfg(frame_width, frame_height, target_bitrate, enc_pass);
+  set_encoder_config(&oxcf, &enc_cfg, &extra_cfg);
+  return oxcf;
+}
+
+FRAME_INFO vp9_get_frame_info(const VP9EncoderConfig *oxcf) {
+  FRAME_INFO frame_info;
+  int dummy;
+  frame_info.frame_width = oxcf->width;
+  frame_info.frame_height = oxcf->height;
+  frame_info.render_frame_width = oxcf->width;
+  frame_info.render_frame_height = oxcf->height;
+  frame_info.bit_depth = oxcf->bit_depth;
+  vp9_set_mi_size(&frame_info.mi_rows, &frame_info.mi_cols, &dummy,
+                  frame_info.frame_width, frame_info.frame_height);
+  vp9_set_mb_size(&frame_info.mb_rows, &frame_info.mb_cols, &frame_info.num_mbs,
+                  frame_info.mi_rows, frame_info.mi_cols);
+  // TODO(angiebird): Figure out how to get subsampling_x/y here
+  return frame_info;
+}

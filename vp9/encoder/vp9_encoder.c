@@ -80,6 +80,7 @@
 #include "vp9/encoder/vp9_speed_features.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_temporal_filter.h"
+#include "vp9/vp9_cx_iface.h"
 
 #define AM_SEGMENT_ID_INACTIVE 7
 #define AM_SEGMENT_ID_ACTIVE 0
@@ -2196,7 +2197,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->force_update_segmentation = 0;
 
   init_config(cpi, oxcf);
-  init_frame_info(&cpi->frame_info, cm);
+  cpi->frame_info = vp9_get_frame_info(oxcf);
 
   vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
 
