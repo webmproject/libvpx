@@ -1,8 +1,0 @@
-*.rc         -crlf
-*.ds[pw]     -crlf
-*.bat        -crlf
-*.mmp        -crlf
-*.dpj        -crlf
-*.pjt        -crlf
-*.vcp        -crlf
-*.inf        -crlf
