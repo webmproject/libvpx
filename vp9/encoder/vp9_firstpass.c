@@ -2458,11 +2458,16 @@ static void adjust_group_arnr_filter(VP9_COMP *cpi, double section_noise,
 
 #define MAX_GF_BOOST 5400
 
+typedef struct RANGE {
+  int min;
+  int max;
+} RANGE;
+
 static int get_gop_coding_frame_num(
     int *use_alt_ref, const FRAME_INFO *frame_info,
     const FIRST_PASS_INFO *first_pass_info, const RATE_CONTROL *rc,
-    int gf_start_show_idx, int active_min_gf_interval,
-    int active_max_gf_interval, double gop_intra_factor, int lag_in_frames) {
+    int gf_start_show_idx, const RANGE *active_gf_interval,
+    double gop_intra_factor, int lag_in_frames) {
   double loop_decay_rate = 1.00;
   double mv_ratio_accumulator = 0.0;
   double this_frame_mv_in_out = 0.0;
@@ -2538,7 +2543,7 @@ static int get_gop_coding_frame_num(
     }
 
     // Break out conditions.
-    // Break at maximum of active_max_gf_interval unless almost totally
+    // Break at maximum of active_gf_interval->max unless almost totally
     // static.
     //
     // Note that the addition of a test of rc->source_alt_ref_active is
@@ -2549,13 +2554,13 @@ static int get_gop_coding_frame_num(
     // such as a fade, the arf group spanning the transition may not be coded
     // at a very high quality and hence this frame (with its overlay) is a
     // poor golden frame to use for an extended group.
-    if ((gop_coding_frames >= active_max_gf_interval) &&
+    if ((gop_coding_frames >= active_gf_interval->max) &&
         ((zero_motion_accumulator < 0.995) || (rc->source_alt_ref_active))) {
       break;
     }
     if (
         // Don't break out with a very short interval.
-        (gop_coding_frames >= active_min_gf_interval) &&
+        (gop_coding_frames >= active_gf_interval->min) &&
         // If possible dont break very close to a kf
         ((rc->frames_to_key - gop_coding_frames) >= rc->min_gf_interval) &&
         (gop_coding_frames & 0x01) && (!flash_detected) &&
@@ -2569,6 +2574,66 @@ static int get_gop_coding_frame_num(
   *use_alt_ref &= gop_coding_frames < lag_in_frames;
   *use_alt_ref &= gop_coding_frames >= rc->min_gf_interval;
   return gop_coding_frames;
+}
+
+static RANGE get_active_gf_inverval_range(
+    const FRAME_INFO *frame_info, const RATE_CONTROL *rc, int arf_active_or_kf,
+    int gf_start_show_idx, int active_worst_quality, int last_boosted_qindex) {
+  RANGE active_gf_interval;
+  int int_max_q = (int)(vp9_convert_qindex_to_q(active_worst_quality,
+                                                frame_info->bit_depth));
+  int q_term = (gf_start_show_idx == 0)
+                   ? int_max_q / 32
+                   : (int)(vp9_convert_qindex_to_q(last_boosted_qindex,
+                                                   frame_info->bit_depth) /
+                           6);
+  active_gf_interval.min =
+      rc->min_gf_interval + arf_active_or_kf + VPXMIN(2, int_max_q / 200);
+  active_gf_interval.min =
+      VPXMIN(active_gf_interval.min, rc->max_gf_interval + arf_active_or_kf);
+
+  // The value chosen depends on the active Q range. At low Q we have
+  // bits to spare and are better with a smaller interval and smaller boost.
+  // At high Q when there are few bits to spare we are better with a longer
+  // interval to spread the cost of the GF.
+  active_gf_interval.max = 11 + arf_active_or_kf + VPXMIN(5, q_term);
+
+  // Force max GF interval to be odd.
+  active_gf_interval.max = active_gf_interval.max | 0x01;
+
+  // We have: active_gf_interval.min <=
+  // rc->max_gf_interval + arf_active_or_kf.
+  if (active_gf_interval.max < active_gf_interval.min) {
+    active_gf_interval.max = active_gf_interval.min;
+  } else {
+    active_gf_interval.max =
+        VPXMIN(active_gf_interval.max, rc->max_gf_interval + arf_active_or_kf);
+  }
+
+  // Would the active max drop us out just before the near the next kf?
+  if ((active_gf_interval.max <= rc->frames_to_key) &&
+      (active_gf_interval.max >= (rc->frames_to_key - rc->min_gf_interval))) {
+    active_gf_interval.max = rc->frames_to_key / 2;
+  }
+  active_gf_interval.max =
+      VPXMAX(active_gf_interval.max, active_gf_interval.min);
+  return active_gf_interval;
+}
+
+static int get_arf_layers(int multi_layer_arf, int max_layers,
+                          int coding_frame_num) {
+  assert(max_layers <= MAX_ARF_LAYERS);
+  if (multi_layer_arf) {
+    int layers = 0;
+    int i;
+    for (i = coding_frame_num; i > 0; i >>= 1) {
+      ++layers;
+    }
+    layers = VPXMIN(max_layers, layers);
+    return layers;
+  } else {
+    return 1;
+  }
 }
 
 static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
@@ -2592,8 +2657,6 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   int allow_alt_ref = is_altref_enabled(cpi);
   int use_alt_ref;
 
-  int active_max_gf_interval;
-  int active_min_gf_interval;
   int64_t gf_group_bits;
   int gf_arf_bits;
   const int is_key_frame = frame_is_intra_only(cm);
@@ -2602,8 +2665,9 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   const int arf_active_or_kf = is_key_frame || rc->source_alt_ref_active;
   int is_alt_ref_flash = 0;
 
-  double gop_intra_factor = 1.0;
+  double gop_intra_factor;
   int gop_frames;
+  RANGE active_gf_interval;
 
   // Reset the GF group data structures unless this is a key
   // frame in which case it will already have been done.
@@ -2613,64 +2677,22 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
 
   vpx_clear_system_state();
 
-  // Set a maximum and minimum interval for the GF group.
-  // If the image appears almost completely static we can extend beyond this.
-  {
-    int int_max_q = (int)(vp9_convert_qindex_to_q(twopass->active_worst_quality,
-                                                  cpi->common.bit_depth));
-    int q_term = (cm->current_video_frame == 0)
-                     ? int_max_q / 32
-                     : (int)(vp9_convert_qindex_to_q(rc->last_boosted_qindex,
-                                                     cpi->common.bit_depth) /
-                             6);
-    active_min_gf_interval =
-        rc->min_gf_interval + arf_active_or_kf + VPXMIN(2, int_max_q / 200);
-    active_min_gf_interval =
-        VPXMIN(active_min_gf_interval, rc->max_gf_interval + arf_active_or_kf);
-
-    // The value chosen depends on the active Q range. At low Q we have
-    // bits to spare and are better with a smaller interval and smaller boost.
-    // At high Q when there are few bits to spare we are better with a longer
-    // interval to spread the cost of the GF.
-    active_max_gf_interval = 11 + arf_active_or_kf + VPXMIN(5, q_term);
-
-    // Force max GF interval to be odd.
-    active_max_gf_interval = active_max_gf_interval | 0x01;
-
-    // We have: active_min_gf_interval <=
-    // rc->max_gf_interval + arf_active_or_kf.
-    if (active_max_gf_interval < active_min_gf_interval) {
-      active_max_gf_interval = active_min_gf_interval;
-    } else {
-      active_max_gf_interval = VPXMIN(active_max_gf_interval,
-                                      rc->max_gf_interval + arf_active_or_kf);
-    }
-
-    // Would the active max drop us out just before the near the next kf?
-    if ((active_max_gf_interval <= rc->frames_to_key) &&
-        (active_max_gf_interval >= (rc->frames_to_key - rc->min_gf_interval)))
-      active_max_gf_interval = rc->frames_to_key / 2;
-  }
-  active_max_gf_interval =
-      VPXMAX(active_max_gf_interval, active_min_gf_interval);
+  active_gf_interval = get_active_gf_inverval_range(
+      frame_info, rc, arf_active_or_kf, gf_start_show_idx,
+      twopass->active_worst_quality, rc->last_boosted_qindex);
 
   if (cpi->multi_layer_arf) {
-    int layers = 0;
-    int max_layers = VPXMIN(MAX_ARF_LAYERS, cpi->oxcf.enable_auto_arf);
-    int i;
-
-    // Adapt the intra_error factor to active_max_gf_interval limit.
-    for (i = active_max_gf_interval; i > 0; i >>= 1) ++layers;
-
-    layers = VPXMIN(max_layers, layers);
-    gop_intra_factor += (layers * 0.25);
+    int arf_layers = get_arf_layers(cpi->multi_layer_arf, oxcf->enable_auto_arf,
+                                    active_gf_interval.max);
+    gop_intra_factor = 1.0 + 0.25 * arf_layers;
+  } else {
+    gop_intra_factor = 1.0;
   }
 
   {
     gop_coding_frames = get_gop_coding_frame_num(
         &use_alt_ref, frame_info, first_pass_info, rc, gf_start_show_idx,
-        active_min_gf_interval, active_max_gf_interval, gop_intra_factor,
-        cpi->oxcf.lag_in_frames);
+        &active_gf_interval, gop_intra_factor, cpi->oxcf.lag_in_frames);
     use_alt_ref &= allow_alt_ref;
   }
 
