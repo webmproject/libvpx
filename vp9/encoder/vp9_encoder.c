@@ -5335,9 +5335,6 @@ static void check_initial_width(VP9_COMP *cpi,
 #endif
 
     alloc_raw_frame_buffers(cpi);
-    alloc_util_frame_buffers(cpi);
-
-    init_motion_estimation(cpi);  // TODO(agrange) This can be removed.
 
     cpi->initial_width = cm->width;
     cpi->initial_height = cm->height;
