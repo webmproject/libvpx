@@ -541,7 +541,13 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->speed = abs(extra_cfg->cpu_used);
   oxcf->encode_breakout = extra_cfg->static_thresh;
   oxcf->enable_auto_arf = extra_cfg->enable_auto_alt_ref;
-  oxcf->noise_sensitivity = extra_cfg->noise_sensitivity;
+  if (oxcf->bit_depth == VPX_BITS_8) {
+    oxcf->noise_sensitivity = extra_cfg->noise_sensitivity;
+  } else {
+    // Disable denoiser for high bitdepth since vp9_denoiser_filter only works
+    // for 8 bits.
+    oxcf->noise_sensitivity = 0;
+  }
   oxcf->sharpness = extra_cfg->sharpness;
 
   oxcf->two_pass_stats_in = cfg->rc_twopass_stats_in;
