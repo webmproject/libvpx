@@ -5315,12 +5315,13 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
 }
 #endif  // !CONFIG_REALTIME_ONLY
 
-static void check_initial_width(VP9_COMP *cpi,
-#if CONFIG_VP9_HIGHBITDEPTH
-                                int use_highbitdepth,
-#endif
-                                int subsampling_x, int subsampling_y) {
+static void update_initial_width(VP9_COMP *cpi, int use_highbitdepth,
+                                 int subsampling_x, int subsampling_y) {
   VP9_COMMON *const cm = &cpi->common;
+#if !CONFIG_VP9_HIGHBITDEPTH
+  (void)use_highbitdepth;
+  assert(use_highbitdepth == 0);
+#endif
 
   if (!cpi->initial_width ||
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -5333,8 +5334,6 @@ static void check_initial_width(VP9_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
     cm->use_highbitdepth = use_highbitdepth;
 #endif
-
-    alloc_raw_frame_buffers(cpi);
 
     cpi->initial_width = cm->width;
     cpi->initial_height = cm->height;
@@ -5352,17 +5351,17 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
   const int subsampling_y = sd->subsampling_y;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int use_highbitdepth = (sd->flags & YV12_FLAG_HIGHBITDEPTH) != 0;
+#else
+  const int use_highbitdepth = 0;
 #endif
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  check_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
-#else
-  check_initial_width(cpi, subsampling_x, subsampling_y);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
+  update_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
 #if CONFIG_VP9_TEMPORAL_DENOISING
   setup_denoiser_buffer(cpi);
 #endif
+
+  alloc_raw_frame_buffers(cpi);
+
   vpx_usec_timer_start(&timer);
 
   if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
@@ -7605,15 +7604,15 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
                          unsigned int height) {
   VP9_COMMON *cm = &cpi->common;
 #if CONFIG_VP9_HIGHBITDEPTH
-  check_initial_width(cpi, cm->use_highbitdepth, 1, 1);
+  update_initial_width(cpi, cm->use_highbitdepth, 1, 1);
 #else
-  check_initial_width(cpi, 1, 1);
+  update_initial_width(cpi, 0, 1, 1);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   setup_denoiser_buffer(cpi);
 #endif
-
+  alloc_raw_frame_buffers(cpi);
   if (width) {
     cm->width = width;
     if (cm->width > cpi->initial_width) {
