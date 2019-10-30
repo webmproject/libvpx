@@ -2159,6 +2159,18 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
   } while (++i <= MV_MAX);
 }
 
+static void init_ref_frame_bufs(VP9_COMMON *cm) {
+  int i;
+  BufferPool *const pool = cm->buffer_pool;
+  cm->new_fb_idx = INVALID_IDX;
+  for (i = 0; i < REF_FRAMES; ++i) {
+    cm->ref_frame_map[i] = INVALID_IDX;
+  }
+  for (i = 0; i < FRAME_BUFFERS; ++i) {
+    pool->frame_bufs[i].ref_count = 0;
+  }
+}
+
 VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
   unsigned int i;
@@ -2192,6 +2204,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->resize_buffer_underflow = 0;
   cpi->use_skin_detection = 0;
   cpi->common.buffer_pool = pool;
+  init_ref_frame_bufs(cm);
 
   cpi->force_update_segmentation = 0;
 
@@ -5302,18 +5315,6 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
 }
 #endif  // !CONFIG_REALTIME_ONLY
 
-static void init_ref_frame_bufs(VP9_COMMON *cm) {
-  int i;
-  BufferPool *const pool = cm->buffer_pool;
-  cm->new_fb_idx = INVALID_IDX;
-  for (i = 0; i < REF_FRAMES; ++i) {
-    cm->ref_frame_map[i] = INVALID_IDX;
-  }
-  for (i = 0; i < FRAME_BUFFERS; ++i) {
-    pool->frame_bufs[i].ref_count = 0;
-  }
-}
-
 static void check_initial_width(VP9_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
                                 int use_highbitdepth,
@@ -5334,7 +5335,6 @@ static void check_initial_width(VP9_COMP *cpi,
 #endif
 
     alloc_raw_frame_buffers(cpi);
-    init_ref_frame_bufs(cm);
     alloc_util_frame_buffers(cpi);
 
     init_motion_estimation(cpi);  // TODO(agrange) This can be removed.
