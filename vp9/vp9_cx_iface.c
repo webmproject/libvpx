@@ -1116,16 +1116,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
   if (cpi == NULL) return VPX_CODEC_INVALID_PARAM;
 
-  if (cpi->oxcf.pass == 2 && cpi->level_constraint.level_index >= 0 &&
-      !cpi->level_constraint.rc_config_updated) {
-    const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-    TWO_PASS *const twopass = &cpi->twopass;
-    FIRSTPASS_STATS *stats = &twopass->total_stats;
-    twopass->bits_left =
-        (int64_t)(stats->duration * oxcf->target_bandwidth / 10000000.0);
-    cpi->level_constraint.rc_config_updated = 1;
-  }
-
   if (img != NULL) {
     res = validate_img(ctx, img);
     if (res == VPX_CODEC_OK) {

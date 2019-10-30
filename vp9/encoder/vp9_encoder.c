@@ -1457,7 +1457,6 @@ static void init_level_constraint(LevelConstraint *lc) {
   lc->level_index = -1;
   lc->max_cpb_size = INT_MAX;
   lc->max_frame_size = INT_MAX;
-  lc->rc_config_updated = 0;
   lc->fail_flag = 0;
 }
 
