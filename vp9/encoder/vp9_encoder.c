@@ -5365,10 +5365,7 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
   vpx_usec_timer_start(&timer);
 
   if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
-#if CONFIG_VP9_HIGHBITDEPTH
-                         use_highbitdepth,
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-                         frame_flags))
+                         use_highbitdepth, frame_flags))
     res = -1;
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);

@@ -83,10 +83,7 @@ bail:
 #define USE_PARTIAL_COPY 0
 
 int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
-                       int64_t ts_start, int64_t ts_end,
-#if CONFIG_VP9_HIGHBITDEPTH
-                       int use_highbitdepth,
-#endif
+                       int64_t ts_start, int64_t ts_end, int use_highbitdepth,
                        vpx_enc_frame_flags_t flags) {
   struct lookahead_entry *buf;
 #if USE_PARTIAL_COPY
@@ -101,6 +98,10 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
   int subsampling_x = src->subsampling_x;
   int subsampling_y = src->subsampling_y;
   int larger_dimensions, new_dimensions;
+#if !CONFIG_VP9_HIGHBITDEPTH
+  (void)use_highbitdepth;
+  assert(use_highbitdepth == 0);
+#endif
 
   if (ctx->sz + 1 + MAX_PRE_FRAMES > ctx->max_sz) return 1;
   ctx->sz++;
