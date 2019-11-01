@@ -1081,7 +1081,7 @@ EOF
           ;;
 
         darwin*)
-          if disabled external_build; then
+          if ! enabled external_build; then
             XCRUN_FIND="xcrun --sdk iphoneos --find"
             CXX="$(${XCRUN_FIND} clang++)"
             CC="$(${XCRUN_FIND} clang)"
