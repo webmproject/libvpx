@@ -22,6 +22,30 @@
       "revId": "70d8d72ffee5c510a90d55940f995ce48a91dcbe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "407068dc_f3b3b153",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-11-01T07:06:48Z",
+      "side": 1,
+      "message": "\u003e disabled() only works with something explicitly disabled, otherwise the value will be empty rather than \u0027no\u0027\n\n-\u003e https://chromium-review.googlesource.com/c/webm/libvpx/+/1895045",
+      "parentUuid": "fc348ec4_b3a43acc",
+      "range": {
+        "startLine": 1084,
+        "startChar": 13,
+        "endLine": 1084,
+        "endChar": 37
+      },
+      "revId": "70d8d72ffee5c510a90d55940f995ce48a91dcbe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
