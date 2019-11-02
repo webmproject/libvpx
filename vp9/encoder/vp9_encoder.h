@@ -20,6 +20,7 @@
 #include "vpx_dsp/ssim.h"
 #endif
 #include "vpx_dsp/variance.h"
+#include "vpx_dsp/psnr.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_util/vpx_thread.h"
 #include "vpx_util/vpx_timestamp.h"
@@ -1062,6 +1063,8 @@ int vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
 void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 
 void vp9_set_row_mt(VP9_COMP *cpi);
+
+int vp9_get_psnr(const VP9_COMP *cpi, PSNR_STATS *psnr);
 
 #define LAYER_IDS_TO_IDX(sl, tl, num_tl) ((sl) * (num_tl) + (tl))
 

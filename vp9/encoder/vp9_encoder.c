@@ -460,8 +460,8 @@ static int compute_context_model_diff(const VP9_COMMON *const cm) {
 #endif  // !CONFIG_REALTIME_ONLY
 
 // Test for whether to calculate metrics for the frame.
-static int is_psnr_calc_enabled(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+static int is_psnr_calc_enabled(const VP9_COMP *cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
 
   return cpi->b_calculate_psnr && (oxcf->pass != 1) && cm->show_frame;
@@ -2761,25 +2761,18 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
 }
 
-static void generate_psnr_packet(VP9_COMP *cpi) {
-  struct vpx_codec_cx_pkt pkt;
-  int i;
-  PSNR_STATS psnr;
+int vp9_get_psnr(const VP9_COMP *cpi, PSNR_STATS *psnr) {
+  if (is_psnr_calc_enabled(cpi)) {
 #if CONFIG_VP9_HIGHBITDEPTH
-  vpx_calc_highbd_psnr(cpi->raw_source_frame, cpi->common.frame_to_show, &psnr,
-                       cpi->td.mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
+    vpx_calc_highbd_psnr(cpi->raw_source_frame, cpi->common.frame_to_show, psnr,
+                         cpi->td.mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
 #else
-  vpx_calc_psnr(cpi->raw_source_frame, cpi->common.frame_to_show, &psnr);
+    vpx_calc_psnr(cpi->raw_source_frame, cpi->common.frame_to_show, psnr);
 #endif
-
-  for (i = 0; i < 4; ++i) {
-    pkt.data.psnr.samples[i] = psnr.samples[i];
-    pkt.data.psnr.sse[i] = psnr.sse[i];
-    pkt.data.psnr.psnr[i] = psnr.psnr[i];
-  }
-  pkt.kind = VPX_CODEC_PSNR_PKT;
-  if (!cpi->use_svc) {
-    vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
+    return 1;
+  } else {
+    vp9_zero(*psnr);
+    return 0;
   }
 }
 
@@ -7357,9 +7350,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   vpx_usec_timer_mark(&cmptimer);
   cpi->time_compress_data += vpx_usec_timer_elapsed(&cmptimer);
-
-  // Should we calculate metrics for the frame.
-  if (is_psnr_calc_enabled(cpi)) generate_psnr_packet(cpi);
 
   if (cpi->keep_level_stats && oxcf->pass != 1)
     update_level_info(cpi, size, arf_src_index);
