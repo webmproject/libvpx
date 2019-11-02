@@ -58,7 +58,6 @@ typedef struct {
   int gold_ref_idx;
   int has_alt_frame;
   size_t layer_size;
-  struct vpx_psnr_pkt psnr_pkt;
   // Cyclic refresh parameters (aq-mode=3), that need to be updated per-frame.
   // TODO(jianj/marpan): Is it better to use the full cyclic refresh struct.
   int sb_index;
