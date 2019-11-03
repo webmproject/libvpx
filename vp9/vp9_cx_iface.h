@@ -18,6 +18,7 @@ extern "C" {
 #endif
 
 VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
+                                        vpx_rational_t frame_rate,
                                         int target_bitrate,
                                         vpx_enc_pass enc_pass);
 FRAME_INFO vp9_get_frame_info(const VP9EncoderConfig *oxcf);

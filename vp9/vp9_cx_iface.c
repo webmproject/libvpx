@@ -1831,6 +1831,7 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
 };
 
 static vpx_codec_enc_cfg_t get_enc_cfg(int frame_width, int frame_height,
+                                       vpx_rational_t frame_rate,
                                        int target_bitrate,
                                        vpx_enc_pass enc_pass) {
   vpx_codec_enc_cfg_t enc_cfg = encoder_usage_cfg_map[0].cfg;
@@ -1838,10 +1839,9 @@ static vpx_codec_enc_cfg_t get_enc_cfg(int frame_width, int frame_height,
   enc_cfg.g_h = frame_height;
   enc_cfg.rc_target_bitrate = target_bitrate;
   enc_cfg.g_pass = enc_pass;
-  // Use the same default setting as the one used in vpxenc.c
-  // The default unit time for the encoder is 1/1000 s.
-  enc_cfg.g_timebase.num = 1;
-  enc_cfg.g_timebase.den = 1000;
+  // g_timebase is the inverse of frame_rate
+  enc_cfg.g_timebase.num = frame_rate.den;
+  enc_cfg.g_timebase.den = frame_rate.num;
   return enc_cfg;
 }
 
@@ -1855,12 +1855,13 @@ static vp9_extracfg get_extra_cfg() {
 }
 
 VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
+                                        vpx_rational_t frame_rate,
                                         int target_bitrate,
                                         vpx_enc_pass enc_pass) {
   VP9EncoderConfig oxcf;
   vp9_extracfg extra_cfg = get_extra_cfg();
-  vpx_codec_enc_cfg_t enc_cfg =
-      get_enc_cfg(frame_width, frame_height, target_bitrate, enc_pass);
+  vpx_codec_enc_cfg_t enc_cfg = get_enc_cfg(
+      frame_width, frame_height, frame_rate, target_bitrate, enc_pass);
   set_encoder_config(&oxcf, &enc_cfg, &extra_cfg);
   return oxcf;
 }
