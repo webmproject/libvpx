@@ -7187,12 +7187,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     *frame_flags = (source->flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
   } else {
     *size = 0;
-#if !CONFIG_REALTIME_ONLY
-    if (flush && oxcf->pass == 1 && !cpi->twopass.first_pass_done) {
-      vp9_end_first_pass(cpi); /* get last stats packet */
-      cpi->twopass.first_pass_done = 1;
-    }
-#endif  // !CONFIG_REALTIME_ONLY
     return -1;
   }
 

@@ -84,14 +84,8 @@ static int input_stats(TWO_PASS *p, FIRSTPASS_STATS *fps) {
   return 1;
 }
 
-static void output_stats(FIRSTPASS_STATS *stats,
-                         struct vpx_codec_pkt_list *pktlist) {
-  struct vpx_codec_cx_pkt pkt;
-  pkt.kind = VPX_CODEC_STATS_PKT;
-  pkt.data.twopass_stats.buf = stats;
-  pkt.data.twopass_stats.sz = sizeof(FIRSTPASS_STATS);
-  vpx_codec_pkt_list_add(pktlist, &pkt);
-
+static void output_stats(FIRSTPASS_STATS *stats) {
+  (void)stats;
 // TEMP debug code
 #if OUTPUT_FPF
   {
@@ -319,7 +313,8 @@ void vp9_init_first_pass(VP9_COMP *cpi) {
 }
 
 void vp9_end_first_pass(VP9_COMP *cpi) {
-  output_stats(&cpi->twopass.total_stats, cpi->output_pkt_list);
+  output_stats(&cpi->twopass.total_stats);
+  cpi->twopass.first_pass_done = 1;
   vpx_free(cpi->twopass.fp_mb_float_stats);
   cpi->twopass.fp_mb_float_stats = NULL;
 }
@@ -1428,7 +1423,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
     // Don't want to do output stats with a stack variable!
     twopass->this_frame_stats = fps;
-    output_stats(&twopass->this_frame_stats, cpi->output_pkt_list);
+    output_stats(&twopass->this_frame_stats);
     accumulate_stats(&twopass->total_stats, &fps);
 
 #if CONFIG_FP_MB_STATS

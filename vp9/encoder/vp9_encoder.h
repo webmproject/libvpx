@@ -264,7 +264,6 @@ typedef struct VP9EncoderConfig {
   unsigned int target_level;
 
   vpx_fixed_buf_t two_pass_stats_in;
-  struct vpx_codec_pkt_list *output_pkt_list;
 
 #if CONFIG_FP_MB_STATS
   vpx_fixed_buf_t firstpass_mb_stats_in;

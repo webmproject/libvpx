@@ -968,10 +968,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
           (ctx->init_flags & VPX_CODEC_USE_HIGHBITDEPTH) ? 1 : 0;
 #endif
       priv->cpi = vp9_create_compressor(&priv->oxcf, priv->buffer_pool);
-      if (priv->cpi == NULL)
-        res = VPX_CODEC_MEM_ERROR;
-      else
-        priv->cpi->output_pkt_list = &priv->pkt_list.head;
+      if (priv->cpi == NULL) res = VPX_CODEC_MEM_ERROR;
     }
   }
 
@@ -1124,6 +1121,17 @@ static INLINE vpx_codec_cx_pkt_t get_psnr_pkt(const PSNR_STATS *psnr) {
   pkt.data.psnr = *psnr;
   return pkt;
 }
+static INLINE vpx_codec_cx_pkt_t
+get_first_pass_stats_pkt(FIRSTPASS_STATS *stats) {
+  // WARNNING: This function assumes that stats will
+  // exist and not be changed until the packet is processed
+  // TODO(angiebird): Refactor the code to avoid using the assumption.
+  vpx_codec_cx_pkt_t pkt;
+  pkt.kind = VPX_CODEC_STATS_PKT;
+  pkt.data.twopass_stats.buf = stats;
+  pkt.data.twopass_stats.sz = sizeof(*stats);
+  return pkt;
+}
 
 const size_t kMinCompressedSize = 8192;
 static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
@@ -1244,101 +1252,133 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       }
     }
 
-    while (cx_data_sz >= ctx->cx_data_sz / 2 &&
-           -1 != vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
-                                         &dst_time_stamp, &dst_end_time_stamp,
-                                         !img)) {
-      // Pack psnr pkt
-      if (size > 0 && !cpi->use_svc) {
-        // TODO(angiebird): Figure out why we don't need psnr pkt when use_svc
-        // is on
-        PSNR_STATS psnr;
-        if (vp9_get_psnr(cpi, &psnr)) {
-          vpx_codec_cx_pkt_t psnr_pkt = get_psnr_pkt(&psnr);
-          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &psnr_pkt);
+    if (cpi->oxcf.pass == 1 && !cpi->use_svc) {
+#if !CONFIG_REALTIME_ONLY
+      // compute first pass stats
+      if (img) {
+        int ret;
+        vpx_codec_cx_pkt_t fps_pkt;
+        // TODO(angiebird): Call vp9_first_pass directly
+        ret =
+            vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
+                                    &dst_time_stamp, &dst_end_time_stamp, !img);
+        assert(size == 0);  // There is no compressed data in the first pass
+        (void)ret;
+        assert(ret == 0);
+        fps_pkt = get_first_pass_stats_pkt(&cpi->twopass.this_frame_stats);
+        vpx_codec_pkt_list_add(&ctx->pkt_list.head, &fps_pkt);
+      } else {
+        if (!cpi->twopass.first_pass_done) {
+          vpx_codec_cx_pkt_t fps_pkt;
+          vp9_end_first_pass(cpi);
+          fps_pkt = get_first_pass_stats_pkt(&cpi->twopass.total_stats);
+          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &fps_pkt);
         }
       }
+#else   // !CONFIG_REALTIME_ONLY
+      assert(0);
+#endif  // !CONFIG_REALTIME_ONLY
+    } else {
+      while (cx_data_sz >= ctx->cx_data_sz / 2 &&
+             -1 != vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
+                                           &dst_time_stamp, &dst_end_time_stamp,
+                                           !img)) {
+        // Pack psnr pkt
+        if (size > 0 && !cpi->use_svc) {
+          // TODO(angiebird): Figure out while we don't need psnr pkt when
+          // use_svc is on
+          PSNR_STATS psnr;
+          if (vp9_get_psnr(cpi, &psnr)) {
+            vpx_codec_cx_pkt_t psnr_pkt = get_psnr_pkt(&psnr);
+            vpx_codec_pkt_list_add(&ctx->pkt_list.head, &psnr_pkt);
+          }
+        }
 
-      if (size || (cpi->use_svc && cpi->svc.skip_enhancement_layer)) {
-        // Pack invisible frames with the next visible frame
-        if (!cpi->common.show_frame ||
-            (cpi->use_svc &&
-             cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)) {
-          if (ctx->pending_cx_data == 0) ctx->pending_cx_data = cx_data;
-          ctx->pending_cx_data_sz += size;
-          if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
-          ctx->pending_frame_magnitude |= size;
-          cx_data += size;
-          cx_data_sz -= size;
+        if (size || (cpi->use_svc && cpi->svc.skip_enhancement_layer)) {
+          // Pack invisible frames with the next visible frame
+          if (!cpi->common.show_frame ||
+              (cpi->use_svc && cpi->svc.spatial_layer_id <
+                                   cpi->svc.number_spatial_layers - 1)) {
+            if (ctx->pending_cx_data == 0) ctx->pending_cx_data = cx_data;
+            ctx->pending_cx_data_sz += size;
+            if (size)
+              ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+            ctx->pending_frame_magnitude |= size;
+            cx_data += size;
+            cx_data_sz -= size;
+            pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
+            pkt.data.frame.height[cpi->svc.spatial_layer_id] =
+                cpi->common.height;
+            pkt.data.frame.spatial_layer_encoded[cpi->svc.spatial_layer_id] =
+                1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
+
+            if (ctx->output_cx_pkt_cb.output_cx_pkt) {
+              pkt.kind = VPX_CODEC_CX_FRAME_PKT;
+              pkt.data.frame.pts =
+                  ticks_to_timebase_units(timestamp_ratio, dst_time_stamp) +
+                  ctx->pts_offset;
+              pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
+                  timestamp_ratio, dst_end_time_stamp - dst_time_stamp);
+              pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
+              pkt.data.frame.buf = ctx->pending_cx_data;
+              pkt.data.frame.sz = size;
+              ctx->pending_cx_data = NULL;
+              ctx->pending_cx_data_sz = 0;
+              ctx->pending_frame_count = 0;
+              ctx->pending_frame_magnitude = 0;
+              ctx->output_cx_pkt_cb.output_cx_pkt(
+                  &pkt, ctx->output_cx_pkt_cb.user_priv);
+            }
+            continue;
+          }
+
+          // Add the frame packet to the list of returned packets.
+          pkt.kind = VPX_CODEC_CX_FRAME_PKT;
+          pkt.data.frame.pts =
+              ticks_to_timebase_units(timestamp_ratio, dst_time_stamp) +
+              ctx->pts_offset;
+          pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
+              timestamp_ratio, dst_end_time_stamp - dst_time_stamp);
+          pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
           pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
           pkt.data.frame.height[cpi->svc.spatial_layer_id] = cpi->common.height;
           pkt.data.frame.spatial_layer_encoded[cpi->svc.spatial_layer_id] =
               1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
 
-          if (ctx->output_cx_pkt_cb.output_cx_pkt) {
-            pkt.kind = VPX_CODEC_CX_FRAME_PKT;
-            pkt.data.frame.pts =
-                ticks_to_timebase_units(timestamp_ratio, dst_time_stamp) +
-                ctx->pts_offset;
-            pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
-                timestamp_ratio, dst_end_time_stamp - dst_time_stamp);
-            pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
+          if (ctx->pending_cx_data) {
+            if (size)
+              ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+            ctx->pending_frame_magnitude |= size;
+            ctx->pending_cx_data_sz += size;
+            // write the superframe only for the case when
+            if (!ctx->output_cx_pkt_cb.output_cx_pkt)
+              size += write_superframe_index(ctx);
             pkt.data.frame.buf = ctx->pending_cx_data;
-            pkt.data.frame.sz = size;
+            pkt.data.frame.sz = ctx->pending_cx_data_sz;
             ctx->pending_cx_data = NULL;
             ctx->pending_cx_data_sz = 0;
             ctx->pending_frame_count = 0;
             ctx->pending_frame_magnitude = 0;
+          } else {
+            pkt.data.frame.buf = cx_data;
+            pkt.data.frame.sz = size;
+          }
+          pkt.data.frame.partition_id = -1;
+
+          if (ctx->output_cx_pkt_cb.output_cx_pkt)
             ctx->output_cx_pkt_cb.output_cx_pkt(
                 &pkt, ctx->output_cx_pkt_cb.user_priv);
+          else
+            vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+
+          cx_data += size;
+          cx_data_sz -= size;
+          if (is_one_pass_cbr_svc(cpi) &&
+              (cpi->svc.spatial_layer_id ==
+               cpi->svc.number_spatial_layers - 1)) {
+            // Encoded all spatial layers; exit loop.
+            break;
           }
-          continue;
-        }
-
-        // Add the frame packet to the list of returned packets.
-        pkt.kind = VPX_CODEC_CX_FRAME_PKT;
-        pkt.data.frame.pts =
-            ticks_to_timebase_units(timestamp_ratio, dst_time_stamp) +
-            ctx->pts_offset;
-        pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
-            timestamp_ratio, dst_end_time_stamp - dst_time_stamp);
-        pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
-        pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
-        pkt.data.frame.height[cpi->svc.spatial_layer_id] = cpi->common.height;
-        pkt.data.frame.spatial_layer_encoded[cpi->svc.spatial_layer_id] =
-            1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
-
-        if (ctx->pending_cx_data) {
-          if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
-          ctx->pending_frame_magnitude |= size;
-          ctx->pending_cx_data_sz += size;
-          // write the superframe only for the case when
-          if (!ctx->output_cx_pkt_cb.output_cx_pkt)
-            size += write_superframe_index(ctx);
-          pkt.data.frame.buf = ctx->pending_cx_data;
-          pkt.data.frame.sz = ctx->pending_cx_data_sz;
-          ctx->pending_cx_data = NULL;
-          ctx->pending_cx_data_sz = 0;
-          ctx->pending_frame_count = 0;
-          ctx->pending_frame_magnitude = 0;
-        } else {
-          pkt.data.frame.buf = cx_data;
-          pkt.data.frame.sz = size;
-        }
-        pkt.data.frame.partition_id = -1;
-
-        if (ctx->output_cx_pkt_cb.output_cx_pkt)
-          ctx->output_cx_pkt_cb.output_cx_pkt(&pkt,
-                                              ctx->output_cx_pkt_cb.user_priv);
-        else
-          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
-
-        cx_data += size;
-        cx_data_sz -= size;
-        if (is_one_pass_cbr_svc(cpi) &&
-            (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
-          // Encoded all spatial layers; exit loop.
-          break;
         }
       }
     }
