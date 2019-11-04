@@ -2769,13 +2769,8 @@ static int decide_key_frame(VP8_COMP *cpi) {
   return code_key_frame;
 }
 
-static void Pass1Encode(VP8_COMP *cpi, size_t *size, unsigned char *dest,
-                        unsigned int *frame_flags) {
-  (void)size;
-  (void)dest;
-  (void)frame_flags;
+static void Pass1Encode(VP8_COMP *cpi) {
   vp8_set_quantizer(cpi, 26);
-
   vp8_first_pass(cpi);
 }
 #endif
@@ -5066,7 +5061,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
   }
   switch (cpi->pass) {
 #if !CONFIG_REALTIME_ONLY
-    case 1: Pass1Encode(cpi, size, dest, frame_flags); break;
+    case 1: Pass1Encode(cpi); break;
     case 2: Pass2Encode(cpi, size, dest, dest_end, frame_flags); break;
 #endif  // !CONFIG_REALTIME_ONLY
     default:
