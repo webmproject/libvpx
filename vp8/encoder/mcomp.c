@@ -837,7 +837,7 @@ static const MV next_chkpts[6][3] = {
 int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                    int_mv *best_mv, int search_param, int sad_per_bit,
                    const vp8_variance_fn_ptr_t *vfp, int *mvsadcost[2],
-                   int *mvcost[2], int_mv *center_mv) {
+                   int_mv *center_mv) {
   MV hex[6] = {
     { -1, -2 }, { 1, -2 }, { 2, 0 }, { 1, 2 }, { -1, 2 }, { -2, 0 }
   };
@@ -865,8 +865,6 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int_mv fcenter_mv;
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
-
-  (void)mvcost;
 
   /* adjust ref_mv to make sure it is within MV range */
   vp8_clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min,
