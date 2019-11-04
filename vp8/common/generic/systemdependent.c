@@ -88,8 +88,6 @@ static int get_cpu_count() {
 void vp8_machine_specific_config(VP8_COMMON *ctx) {
 #if CONFIG_MULTITHREAD
   ctx->processor_core_count = get_cpu_count();
-#else
-  (void)ctx;
 #endif /* CONFIG_MULTITHREAD */
 
 #if VPX_ARCH_ARM
@@ -98,5 +96,8 @@ void vp8_machine_specific_config(VP8_COMMON *ctx) {
   ctx->cpu_caps = x86_simd_caps();
 #elif VPX_ARCH_PPC
   ctx->cpu_caps = ppc_simd_caps();
+#else
+  // generic-gnu targets.
+  ctx->cpu_caps = 0;
 #endif
 }
