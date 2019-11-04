@@ -610,8 +610,7 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
                                      lf_dst[2]);
         } else {
           vp8_loop_filter_row_simple(pc, lf_mic, mb_row - 1, recon_y_stride,
-                                     recon_uv_stride, lf_dst[0], lf_dst[1],
-                                     lf_dst[2]);
+                                     lf_dst[0]);
         }
         if (mb_row > 1) {
           yv12_extend_frame_left_right_c(yv12_fb_new, eb_dst[0], eb_dst[1],
@@ -647,8 +646,7 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
                                  lf_dst[2]);
     } else {
       vp8_loop_filter_row_simple(pc, lf_mic, mb_row - 1, recon_y_stride,
-                                 recon_uv_stride, lf_dst[0], lf_dst[1],
-                                 lf_dst[2]);
+                                 lf_dst[0]);
     }
 
     yv12_extend_frame_left_right_c(yv12_fb_new, eb_dst[0], eb_dst[1],
