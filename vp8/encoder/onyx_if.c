@@ -62,9 +62,6 @@
 extern int vp8_update_coef_context(VP8_COMP *cpi);
 #endif
 
-extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source,
-                              YV12_BUFFER_CONFIG *post, int filt_lvl,
-                              int low_var_thresh, int flag);
 extern unsigned int vp8_get_processor_freq();
 
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
@@ -3791,8 +3788,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   // (temporal denoising) mode.
   if (cpi->oxcf.noise_sensitivity >= 3) {
     if (cpi->denoiser.denoise_pars.spatial_blur != 0) {
-      vp8_de_noise(cm, cpi->Source, cpi->Source,
-                   cpi->denoiser.denoise_pars.spatial_blur, 1, 0, 0);
+      vp8_de_noise(cm, cpi->Source, cpi->denoiser.denoise_pars.spatial_blur, 1);
     }
   }
 #endif
@@ -3813,9 +3809,9 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     }
 
     if (cm->frame_type == KEY_FRAME) {
-      vp8_de_noise(cm, cpi->Source, cpi->Source, l, 1, 0, 1);
+      vp8_de_noise(cm, cpi->Source, l, 1);
     } else {
-      vp8_de_noise(cm, cpi->Source, cpi->Source, l, 1, 0, 1);
+      vp8_de_noise(cm, cpi->Source, l, 1);
 
       src = cpi->Source->y_buffer;
 
@@ -5189,7 +5185,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
           double weight = 0;
 
           vp8_deblock(cm, cm->frame_to_show, &cm->post_proc_buffer,
-                      cm->filter_level * 10 / 6, 1, 0);
+                      cm->filter_level * 10 / 6);
           vpx_clear_system_state();
 
           ye = calc_plane_error(orig->y_buffer, orig->y_stride, pp->y_buffer,
