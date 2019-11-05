@@ -22,6 +22,7 @@
 #include "vpx_dsp/variance.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_util/vpx_thread.h"
+#include "vpx_util/vpx_timestamp.h"
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_ppflags.h"
@@ -152,7 +153,10 @@ typedef struct VP9EncoderConfig {
   int height;                    // height of data passed to the compressor
   unsigned int input_bit_depth;  // Input bit depth.
   double init_framerate;         // set to passed in framerate
-  int64_t target_bandwidth;      // bandwidth to be used in bits per second
+  vpx_rational_t g_timebase;  // equivalent to g_timebase in vpx_codec_enc_cfg_t
+  vpx_rational64_t g_timebase_in_ts;  // g_timebase * TICKS_PER_SEC
+
+  int64_t target_bandwidth;  // bandwidth to be used in bits per second
 
   int noise_sensitivity;  // pre processing blur: recommendation 0
   int sharpness;          // sharpening output: recommendation 0:

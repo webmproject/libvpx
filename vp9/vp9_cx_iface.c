@@ -22,6 +22,7 @@
 #include "vpx/vp8cx.h"
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/encoder/vp9_firstpass.h"
+#include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/vp9_cx_iface.h"
 #include "vp9/vp9_iface_common.h"
 
@@ -468,6 +469,15 @@ static void config_target_level(VP9EncoderConfig *oxcf) {
   }
 }
 
+static vpx_rational64_t get_g_timebase_in_ts(vpx_rational_t g_timebase) {
+  vpx_rational64_t g_timebase_in_ts;
+  g_timebase_in_ts.den = g_timebase.den;
+  g_timebase_in_ts.num = g_timebase.num;
+  g_timebase_in_ts.num *= TICKS_PER_SEC;
+  reduce_ratio(&g_timebase_in_ts);
+  return g_timebase_in_ts;
+}
+
 static vpx_codec_err_t set_encoder_config(
     VP9EncoderConfig *oxcf, const vpx_codec_enc_cfg_t *cfg,
     const struct vp9_extracfg *extra_cfg) {
@@ -479,9 +489,13 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->height = cfg->g_h;
   oxcf->bit_depth = cfg->g_bit_depth;
   oxcf->input_bit_depth = cfg->g_input_bit_depth;
+  // TODO(angiebird): Figure out if we can just use g_timebase to indicate the
+  // inverse of framerate
   // guess a frame rate if out of whack, use 30
   oxcf->init_framerate = (double)cfg->g_timebase.den / cfg->g_timebase.num;
   if (oxcf->init_framerate > 180) oxcf->init_framerate = 30;
+  oxcf->g_timebase = cfg->g_timebase;
+  oxcf->g_timebase_in_ts = get_g_timebase_in_ts(oxcf->g_timebase);
 
   oxcf->mode = GOOD;
 
@@ -943,10 +957,9 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 
     if (res == VPX_CODEC_OK) {
       priv->pts_offset_initialized = 0;
-      priv->timestamp_ratio.den = priv->cfg.g_timebase.den;
-      priv->timestamp_ratio.num = (int64_t)priv->cfg.g_timebase.num;
-      priv->timestamp_ratio.num *= TICKS_PER_SEC;
-      reduce_ratio(&priv->timestamp_ratio);
+      // TODO(angiebird): Replace priv->timestamp_ratio by
+      // oxcf->g_timebase_in_ts
+      priv->timestamp_ratio = get_g_timebase_in_ts(priv->cfg.g_timebase);
 
       set_encoder_config(&priv->oxcf, &priv->cfg, &priv->extra_cfg);
 #if CONFIG_VP9_HIGHBITDEPTH
