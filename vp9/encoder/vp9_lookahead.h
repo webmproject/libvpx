@@ -25,6 +25,7 @@ struct lookahead_entry {
   YV12_BUFFER_CONFIG img;
   int64_t ts_start;
   int64_t ts_end;
+  int show_idx; /*The show_idx of this frame*/
   vpx_enc_frame_flags_t flags;
 };
 
@@ -32,10 +33,12 @@ struct lookahead_entry {
 #define MAX_PRE_FRAMES 1
 
 struct lookahead_ctx {
-  int max_sz;                  /* Absolute size of the queue */
-  int sz;                      /* Number of buffers currently in the queue */
-  int read_idx;                /* Read index */
-  int write_idx;               /* Write index */
+  int max_sz;        /* Absolute size of the queue */
+  int sz;            /* Number of buffers currently in the queue */
+  int read_idx;      /* Read index */
+  int write_idx;     /* Write index */
+  int next_show_idx; /* The show_idx that will be assigned to the next frame
+                        being pushed in the queue*/
   struct lookahead_entry *buf; /* Buffer list */
 };
 
@@ -56,6 +59,23 @@ struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
 /**\brief Destroys the lookahead stage
  */
 void vp9_lookahead_destroy(struct lookahead_ctx *ctx);
+
+/**\brief Check if lookahead is full
+ *
+ * \param[in] ctx         Pointer to the lookahead context
+ *
+ * Return 1 if lookahead is full, otherwise return 0.
+ */
+int vp9_lookahead_full(const struct lookahead_ctx *ctx);
+
+/**\brief Return the next_show_idx
+ *
+ * \param[in] ctx         Pointer to the lookahead context
+ *
+ * Return the show_idx that will be assigned to the next
+ * frame pushed by vp9_lookahead_push()
+ */
+int vp9_lookahead_next_show_idx(const struct lookahead_ctx *ctx);
 
 /**\brief Enqueue a source buffer
  *
