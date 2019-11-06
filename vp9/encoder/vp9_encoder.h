@@ -483,7 +483,6 @@ typedef enum {
 
 typedef struct {
   int8_t level_index;
-  uint8_t rc_config_updated;
   uint8_t fail_flag;
   int max_frame_size;   // in bits
   double max_cpb_size;  // in bits

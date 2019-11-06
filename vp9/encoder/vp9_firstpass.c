@@ -2580,6 +2580,21 @@ static RANGE get_active_gf_inverval_range(
     const FRAME_INFO *frame_info, const RATE_CONTROL *rc, int arf_active_or_kf,
     int gf_start_show_idx, int active_worst_quality, int last_boosted_qindex) {
   RANGE active_gf_interval;
+#if CONFIG_RATE_CTRL
+  (void)frame_info;
+  (void)gf_start_show_idx;
+  (void)active_worst_quality;
+  (void)last_boosted_qindex;
+  active_gf_interval.min = rc->min_gf_interval + arf_active_or_kf + 2;
+
+  active_gf_interval.max = 16 + arf_active_or_kf;
+
+  if ((active_gf_interval.max <= rc->frames_to_key) &&
+      (active_gf_interval.max >= (rc->frames_to_key - rc->min_gf_interval))) {
+    active_gf_interval.min = rc->frames_to_key / 2;
+    active_gf_interval.max = rc->frames_to_key / 2;
+  }
+#else
   int int_max_q = (int)(vp9_convert_qindex_to_q(active_worst_quality,
                                                 frame_info->bit_depth));
   int q_term = (gf_start_show_idx == 0)
@@ -2617,6 +2632,7 @@ static RANGE get_active_gf_inverval_range(
   }
   active_gf_interval.max =
       VPXMAX(active_gf_interval.max, active_gf_interval.min);
+#endif
   return active_gf_interval;
 }
 
@@ -3614,3 +3630,63 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
     }
   }
 }
+
+#if CONFIG_RATE_CTRL
+// Under CONFIG_RATE_CTRL, once the first_pass_info is ready, the number of
+// coding frames (including show frame and alt ref) can be determined.
+int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
+                             const FRAME_INFO *frame_info,
+                             const FIRST_PASS_INFO *first_pass_info,
+                             int multi_layer_arf, int allow_alt_ref) {
+  int coding_frame_num = 0;
+  RATE_CONTROL rc;
+  RANGE active_gf_interval;
+  int arf_layers;
+  double gop_intra_factor;
+  int use_alt_ref;
+  int gop_coding_frames;
+  int gop_show_frames;
+  int show_idx = 0;
+  int arf_active_or_kf = 1;
+  rc.static_scene_max_gf_interval = 250;
+  vp9_rc_init(oxcf, 1, &rc);
+
+  while (show_idx < first_pass_info->num_frames) {
+    if (rc.frames_to_key == 0) {
+      rc.frames_to_key = get_frames_to_next_key(
+          oxcf, frame_info, first_pass_info, show_idx, rc.min_gf_interval);
+      arf_active_or_kf = 1;
+    } else {
+    }
+
+    {
+      int dummy = 0;
+      active_gf_interval = get_active_gf_inverval_range(
+          frame_info, &rc, arf_active_or_kf, show_idx, dummy, dummy);
+    }
+
+    arf_layers = get_arf_layers(multi_layer_arf, oxcf->enable_auto_arf,
+                                active_gf_interval.max);
+    if (multi_layer_arf) {
+      gop_intra_factor = 1.0 + 0.25 * arf_layers;
+    } else {
+      gop_intra_factor = 1.0;
+    }
+
+    gop_coding_frames = get_gop_coding_frame_num(
+        &use_alt_ref, frame_info, first_pass_info, &rc, show_idx,
+        &active_gf_interval, gop_intra_factor, oxcf->lag_in_frames);
+
+    use_alt_ref &= allow_alt_ref;
+
+    rc.source_alt_ref_active = use_alt_ref;
+    arf_active_or_kf = use_alt_ref;
+    gop_show_frames = gop_coding_frames - use_alt_ref;
+    rc.frames_to_key -= gop_show_frames;
+    rc.frames_since_key += gop_show_frames;
+    show_idx += gop_show_frames;
+    coding_frame_num += gop_show_frames + use_alt_ref;
+  }
+  return coding_frame_num;
+}
+#endif

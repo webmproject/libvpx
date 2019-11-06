@@ -16,6 +16,7 @@ VP9_CX_SRCS_REMOVE-yes += $(VP9_COMMON_SRCS_REMOVE-yes)
 VP9_CX_SRCS_REMOVE-no  += $(VP9_COMMON_SRCS_REMOVE-no)
 
 VP9_CX_SRCS-yes += vp9_cx_iface.c
+VP9_CX_SRCS-yes += vp9_cx_iface.h
 
 VP9_CX_SRCS-yes += encoder/vp9_bitstream.c
 VP9_CX_SRCS-yes += encoder/vp9_context_tree.c
