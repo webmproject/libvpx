@@ -2171,6 +2171,99 @@ static void init_ref_frame_bufs(VP9_COMMON *cm) {
   }
 }
 
+static void update_initial_width(VP9_COMP *cpi, int use_highbitdepth,
+                                 int subsampling_x, int subsampling_y) {
+  VP9_COMMON *const cm = &cpi->common;
+#if !CONFIG_VP9_HIGHBITDEPTH
+  (void)use_highbitdepth;
+  assert(use_highbitdepth == 0);
+#endif
+
+  if (!cpi->initial_width ||
+#if CONFIG_VP9_HIGHBITDEPTH
+      cm->use_highbitdepth != use_highbitdepth ||
+#endif
+      cm->subsampling_x != subsampling_x ||
+      cm->subsampling_y != subsampling_y) {
+    cm->subsampling_x = subsampling_x;
+    cm->subsampling_y = subsampling_y;
+#if CONFIG_VP9_HIGHBITDEPTH
+    cm->use_highbitdepth = use_highbitdepth;
+#endif
+
+    cpi->initial_width = cm->width;
+    cpi->initial_height = cm->height;
+    cpi->initial_mbs = cm->MBs;
+  }
+}
+
+// TODO(angiebird): Check whether we can move this function to vpx_image.c
+static INLINE void vpx_img_chroma_subsampling(vpx_img_fmt_t fmt,
+                                              unsigned int *subsampling_x,
+                                              unsigned int *subsampling_y) {
+  switch (fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_YV12:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216: *subsampling_x = 1; break;
+    default: *subsampling_x = 0; break;
+  }
+
+  switch (fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I440:
+    case VPX_IMG_FMT_YV12:
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I44016: *subsampling_y = 1; break;
+    default: *subsampling_y = 0; break;
+  }
+}
+
+// TODO(angiebird): Check whether we can move this function to vpx_image.c
+static INLINE int vpx_img_use_highbitdepth(vpx_img_fmt_t fmt) {
+  return fmt & VPX_IMG_FMT_HIGHBITDEPTH;
+}
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+static void setup_denoiser_buffer(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if (cpi->oxcf.noise_sensitivity > 0 &&
+      !cpi->denoiser.frame_buffer_initialized) {
+    if (vp9_denoiser_alloc(cm, &cpi->svc, &cpi->denoiser, cpi->use_svc,
+                           cpi->oxcf.noise_sensitivity, cm->width, cm->height,
+                           cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                           cm->use_highbitdepth,
+#endif
+                           VP9_ENC_BORDER_IN_PIXELS))
+      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                         "Failed to allocate denoiser");
+  }
+}
+#endif
+
+void vp9_update_compressor_with_img_fmt(VP9_COMP *cpi, vpx_img_fmt_t img_fmt) {
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+  unsigned int subsampling_x, subsampling_y;
+  const int use_highbitdepth = vpx_img_use_highbitdepth(img_fmt);
+  vpx_img_chroma_subsampling(img_fmt, &subsampling_x, &subsampling_y);
+
+  update_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  setup_denoiser_buffer(cpi);
+#endif
+
+  assert(cpi->lookahead == NULL);
+  cpi->lookahead = vp9_lookahead_init(oxcf->width, oxcf->height, subsampling_x,
+                                      subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                      use_highbitdepth,
+#endif
+                                      oxcf->lag_in_frames);
+  alloc_raw_frame_buffers(cpi);
+}
+
 VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
   unsigned int i;
@@ -3608,24 +3701,6 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q, int *bottom_index,
   }
 #endif  // CONFIG_VP9_POSTPROC
 }
-
-#if CONFIG_VP9_TEMPORAL_DENOISING
-static void setup_denoiser_buffer(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if (cpi->oxcf.noise_sensitivity > 0 &&
-      !cpi->denoiser.frame_buffer_initialized) {
-    if (vp9_denoiser_alloc(cm, &cpi->svc, &cpi->denoiser, cpi->use_svc,
-                           cpi->oxcf.noise_sensitivity, cm->width, cm->height,
-                           cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                           cm->use_highbitdepth,
-#endif
-                           VP9_ENC_BORDER_IN_PIXELS))
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                         "Failed to allocate denoiser");
-  }
-}
-#endif
 
 static void init_motion_estimation(VP9_COMP *cpi) {
   int y_stride = cpi->scaled_source.y_stride;
@@ -5303,32 +5378,6 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   vp9_twopass_postencode_update(cpi);
 }
 #endif  // !CONFIG_REALTIME_ONLY
-
-static void update_initial_width(VP9_COMP *cpi, int use_highbitdepth,
-                                 int subsampling_x, int subsampling_y) {
-  VP9_COMMON *const cm = &cpi->common;
-#if !CONFIG_VP9_HIGHBITDEPTH
-  (void)use_highbitdepth;
-  assert(use_highbitdepth == 0);
-#endif
-
-  if (!cpi->initial_width ||
-#if CONFIG_VP9_HIGHBITDEPTH
-      cm->use_highbitdepth != use_highbitdepth ||
-#endif
-      cm->subsampling_x != subsampling_x ||
-      cm->subsampling_y != subsampling_y) {
-    cm->subsampling_x = subsampling_x;
-    cm->subsampling_y = subsampling_y;
-#if CONFIG_VP9_HIGHBITDEPTH
-    cm->use_highbitdepth = use_highbitdepth;
-#endif
-
-    cpi->initial_width = cm->width;
-    cpi->initial_height = cm->height;
-    cpi->initial_mbs = cm->MBs;
-  }
-}
 
 int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,

@@ -824,6 +824,7 @@ typedef struct VP9_COMP {
 
 void vp9_initialize_enc(void);
 
+void vp9_update_compressor_with_img_fmt(VP9_COMP *cpi, vpx_img_fmt_t img_fmt);
 struct VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
                                        BufferPool *const pool);
 void vp9_remove_compressor(VP9_COMP *cpi);
