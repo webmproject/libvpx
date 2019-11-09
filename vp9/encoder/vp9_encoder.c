@@ -1468,7 +1468,7 @@ static void set_level_constraint(LevelConstraint *ls, int8_t level_index) {
   }
 }
 
-static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
+static void init_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
 
   cpi->oxcf = *oxcf;
@@ -2264,7 +2264,7 @@ void vp9_update_compressor_with_img_fmt(VP9_COMP *cpi, vpx_img_fmt_t img_fmt) {
   alloc_raw_frame_buffers(cpi);
 }
 
-VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
+VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
   unsigned int i;
   VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP9_COMP));
