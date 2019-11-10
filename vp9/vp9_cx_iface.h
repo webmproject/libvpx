@@ -23,6 +23,18 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
                                         vpx_enc_pass enc_pass);
 FRAME_INFO vp9_get_frame_info(const VP9EncoderConfig *oxcf);
 
+static INLINE int64_t
+timebase_units_to_ticks(const vpx_rational64_t *timestamp_ratio, int64_t n) {
+  return n * timestamp_ratio->num / timestamp_ratio->den;
+}
+
+static INLINE int64_t
+ticks_to_timebase_units(const vpx_rational64_t *timestamp_ratio, int64_t n) {
+  int64_t round = timestamp_ratio->num / 2;
+  if (round > 0) --round;
+  return (n * timestamp_ratio->den + round) / timestamp_ratio->num;
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

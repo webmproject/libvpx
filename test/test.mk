@@ -58,6 +58,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += svc_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += svc_test.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += svc_end_to_end_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += timestamp_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_RATE_CTRL)   += simple_encode_test.cc
 
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.h

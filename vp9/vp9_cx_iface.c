@@ -22,6 +22,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vpx/vp8cx.h"
 #include "vp9/common/vp9_alloccommon.h"
+#include "vp9/vp9_cx_iface.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/vp9_cx_iface.h"
@@ -1084,18 +1085,6 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
 #endif
   }
   return index_sz;
-}
-
-static int64_t timebase_units_to_ticks(const vpx_rational64_t *timestamp_ratio,
-                                       int64_t n) {
-  return n * timestamp_ratio->num / timestamp_ratio->den;
-}
-
-static int64_t ticks_to_timebase_units(const vpx_rational64_t *timestamp_ratio,
-                                       int64_t n) {
-  int64_t round = timestamp_ratio->num / 2;
-  if (round > 0) --round;
-  return (n * timestamp_ratio->den + round) / timestamp_ratio->num;
 }
 
 static vpx_codec_frame_flags_t get_frame_pkt_flags(const VP9_COMP *cpi,

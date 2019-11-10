@@ -3685,3 +3685,10 @@ int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
   return coding_frame_num;
 }
 #endif
+
+FIRSTPASS_STATS vp9_get_frame_stats(const TWO_PASS *twopass) {
+  return twopass->this_frame_stats;
+}
+FIRSTPASS_STATS vp9_get_total_stats(const TWO_PASS *twopass) {
+  return twopass->total_stats;
+}
