@@ -223,4 +223,20 @@ void SimpleEncode::EncodeFrame(char *cx_data, size_t *size, size_t max_size) {
   }
 }
 
+int SimpleEncode::GetCodingFrameNum() {
+  assert(pimpl->frame_stats.size() - 1 > 0);
+  // These are the default settings for now.
+  const int multi_layer_arf = 0;
+  const int allow_alt_ref = 1;
+  vpx_rational_t frame_rate = make_vpx_rational(frame_rate_num, frame_rate_den);
+  const VP9EncoderConfig oxcf = vp9_get_encoder_config(
+      frame_width, frame_height, frame_rate, target_bitrate, VPX_RC_LAST_PASS);
+  FRAME_INFO frame_info = vp9_get_frame_info(&oxcf);
+  FIRST_PASS_INFO first_pass_info;
+  fps_init_first_pass_info(&first_pass_info, pimpl->frame_stats.data(),
+                           num_frames);
+  return vp9_get_coding_frame_num(&oxcf, &frame_info, &first_pass_info,
+                                  multi_layer_arf, allow_alt_ref);
+}
+
 SimpleEncode::~SimpleEncode() {}

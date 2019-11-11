@@ -33,4 +33,45 @@ TEST(SimpleEncode, ComputeFirstPassStats) {
   }
 }
 
+TEST(SimpleEncode, GetCodingFrameNum) {
+  int w = 352;
+  int h = 288;
+  int frame_rate_num = 30;
+  int frame_rate_den = 1;
+  int target_bitrate = 200;
+  int num_frames = 17;
+  // TODO(angiebird): Figure out how to upload test video to our codebase
+  FILE *file = fopen("bus_352x288_420_f20_b8.yuv", "r");
+  SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                             target_bitrate, num_frames, file);
+  simple_encode.ComputeFirstPassStats();
+  int num_coding_frames = simple_encode.GetCodingFrameNum();
+  EXPECT_EQ(num_coding_frames, 19);
+}
+
+TEST(SimpleEncode, EncodeFrame) {
+  int w = 352;
+  int h = 288;
+  int frame_rate_num = 30;
+  int frame_rate_den = 1;
+  int target_bitrate = 200;
+  int num_frames = 17;
+  // TODO(angiebird): Figure out how to upload test video to our codebase
+  FILE *file = fopen("bus_352x288_420_f20_b8.yuv", "r");
+  SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                             target_bitrate, num_frames, file);
+  char cx_data[352 * 288 * 3];
+  size_t max_size = 352 * 288 * 3;
+  size_t frame_size;
+  simple_encode.ComputeFirstPassStats();
+  int num_coding_frames = simple_encode.GetCodingFrameNum();
+  simple_encode.StartEncode();
+  for (int i = 0; i < num_coding_frames; ++i) {
+    simple_encode.EncodeFrame(cx_data, &frame_size, max_size);
+    // TODO(angiebird): For now, this test just check whether EncodeFrame can be
+    // run proprly. Add extra check later.
+  }
+  simple_encode.EndEncode();
+}
+
 }  // namespace
