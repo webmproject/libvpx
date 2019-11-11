@@ -1249,11 +1249,12 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       // compute first pass stats
       if (img) {
         int ret;
+        ENCODE_FRAME_RESULT encode_frame_result;
         vpx_codec_cx_pkt_t fps_pkt;
         // TODO(angiebird): Call vp9_first_pass directly
-        ret =
-            vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
-                                    &dst_time_stamp, &dst_end_time_stamp, !img);
+        ret = vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
+                                      &dst_time_stamp, &dst_end_time_stamp,
+                                      !img, &encode_frame_result);
         assert(size == 0);  // There is no compressed data in the first pass
         (void)ret;
         assert(ret == 0);
@@ -1271,10 +1272,11 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       assert(0);
 #endif  // !CONFIG_REALTIME_ONLY
     } else {
+      ENCODE_FRAME_RESULT encode_frame_result;
       while (cx_data_sz >= ctx->cx_data_sz / 2 &&
              -1 != vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
                                            &dst_time_stamp, &dst_end_time_stamp,
-                                           !img)) {
+                                           !img, &encode_frame_result)) {
         // Pack psnr pkt
         if (size > 0 && !cpi->use_svc) {
           // TODO(angiebird): Figure out while we don't need psnr pkt when

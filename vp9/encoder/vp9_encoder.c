@@ -7087,9 +7087,21 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
 #endif  // CONFIG_NON_GREEDY_MV
 }
 
+static void init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result) {
+  encode_frame_result->show_idx = -1;  // Actual encoding deosn't happen.
+}
+
+static void update_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result,
+                                       int show_idx,
+                                       FRAME_UPDATE_TYPE update_type) {
+  encode_frame_result->show_idx = show_idx;
+  encode_frame_result->update_type = update_type;
+}
+
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest, int64_t *time_stamp,
-                            int64_t *time_end, int flush) {
+                            int64_t *time_end, int flush,
+                            ENCODE_FRAME_RESULT *encode_frame_result) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   VP9_COMMON *const cm = &cpi->common;
   BufferPool *const pool = cm->buffer_pool;
@@ -7101,6 +7113,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   int arf_src_index;
   const int gf_group_index = cpi->twopass.gf_group.index;
   int i;
+  init_encode_frame_result(encode_frame_result);
 
   if (is_one_pass_cbr_svc(cpi)) {
     vp9_one_pass_cbr_svc_start_layer(cpi);
@@ -7335,6 +7348,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_BITSTREAM_DEBUG || CONFIG_MISMATCH_DEBUG
   bitstream_queue_set_frame_write(cm->current_video_frame * 2 + cm->show_frame);
 #endif
+
+  if (oxcf->pass != 1) {
+    update_encode_frame_result(
+        encode_frame_result, source->show_idx,
+        cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index]);
+  }
 
   cpi->td.mb.fp_src_pred = 0;
 #if CONFIG_REALTIME_ONLY

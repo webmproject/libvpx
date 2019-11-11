@@ -73,6 +73,25 @@ static INLINE vpx_rational_t make_vpx_rational(int num, int den) {
   return v;
 }
 
+static INLINE FrameType
+get_frame_type_from_update_type(FRAME_UPDATE_TYPE update_type) {
+  // TODO(angiebird): Figure out if we need frame type other than key frame,
+  // alternate reference and inter frame
+  switch (update_type) {
+    case KF_UPDATE: return kKeyFrame; break;
+    case ARF_UPDATE: return kAlternateReference; break;
+    default: return kInterFrame; break;
+  }
+}
+
+static void update_encode_frame_result(
+    EncodeFrameResult *encode_frame_result,
+    const ENCODE_FRAME_RESULT *encode_frame_info) {
+  encode_frame_result->show_idx = encode_frame_info->show_idx;
+  encode_frame_result->frame_type =
+      get_frame_type_from_update_type(encode_frame_info->update_type);
+}
+
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,
                            int frame_rate_num, int frame_rate_den,
                            int target_bitrate, int num_frames, FILE *file)
@@ -120,9 +139,10 @@ void SimpleEncode::ComputeFirstPassStats() {
         int flush = 1;  // Make vp9_get_compressed_data process a frame
         size_t size;
         unsigned int frame_flags = 0;
+        ENCODE_FRAME_RESULT encode_frame_info;
         // TODO(angiebird): Call vp9_first_pass directly
         vp9_get_compressed_data(cpi, &frame_flags, &size, NULL, &time_stamp,
-                                &time_end, flush);
+                                &time_end, flush, &encode_frame_info);
         // vp9_get_compressed_data only generates first pass stats not
         // compresses data
         assert(size == 0);
@@ -218,13 +238,17 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   int64_t time_end;
   int flush = 1;  // Make vp9_get_compressed_data encode a frame
   unsigned int frame_flags = 0;
-  vp9_get_compressed_data(
-      cpi, &frame_flags, &encode_frame_result->coding_data_size,
-      encode_frame_result->coding_data.get(), &time_stamp, &time_end, flush);
+  ENCODE_FRAME_RESULT encode_frame_info;
+  vp9_get_compressed_data(cpi, &frame_flags,
+                          &encode_frame_result->coding_data_size,
+                          encode_frame_result->coding_data.get(), &time_stamp,
+                          &time_end, flush, &encode_frame_info);
   // vp9_get_compressed_data is expected to encode a frame every time, so the
   // data size should be greater than zero.
   assert(encode_frame_result->coding_data_size > 0);
   assert(encode_frame_result->coding_data_size < max_coding_data_size);
+
+  update_encode_frame_result(encode_frame_result, &encode_frame_info);
 }
 
 int SimpleEncode::GetCodingFrameNum() {

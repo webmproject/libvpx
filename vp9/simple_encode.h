@@ -8,8 +8,8 @@ enum FrameType {
 };
 
 struct EncodeFrameResult {
-  // TODO(angiebird): int show_index;
-  // TODO(angiebird): FrameType frame_type;
+  int show_idx;
+  FrameType frame_type;
   size_t coding_data_size;
   // The EncodeFrame will allocate a buffer, write the coding data into the
   // buffer and give the ownership of the buffer to coding_data

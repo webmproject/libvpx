@@ -822,6 +822,11 @@ typedef struct VP9_COMP {
   vpx_roi_map_t roi;
 } VP9_COMP;
 
+typedef struct ENCODE_FRAME_RESULT {
+  int show_idx;
+  FRAME_UPDATE_TYPE update_type;
+} ENCODE_FRAME_RESULT;
+
 void vp9_initialize_enc(void);
 
 void vp9_update_compressor_with_img_fmt(VP9_COMP *cpi, vpx_img_fmt_t img_fmt);
@@ -839,7 +844,8 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
 
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest, int64_t *time_stamp,
-                            int64_t *time_end, int flush);
+                            int64_t *time_end, int flush,
+                            ENCODE_FRAME_RESULT *encode_frame_result);
 
 int vp9_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
                               vp9_ppflags_t *flags);
