@@ -182,7 +182,7 @@ void SimpleEncode::EndEncode() {
   rewind(file);
 }
 
-void SimpleEncode::EncodeFrame(char *cx_data, size_t *size, size_t max_size) {
+void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   VP9_COMP *cpi = pimpl->cpi;
   struct lookahead_ctx *lookahead = cpi->lookahead;
   int use_highbitdepth = 0;
@@ -210,19 +210,21 @@ void SimpleEncode::EncodeFrame(char *cx_data, size_t *size, size_t max_size) {
       break;
     }
   }
+  assert(encode_frame_result->coding_data.get() == nullptr);
+  const size_t max_coding_data_size = frame_width * frame_height * 3;
+  encode_frame_result->coding_data =
+      std::move(std::unique_ptr<uint8_t[]>(new uint8_t[max_coding_data_size]));
   int64_t time_stamp;
   int64_t time_end;
   int flush = 1;  // Make vp9_get_compressed_data encode a frame
   unsigned int frame_flags = 0;
-  vp9_get_compressed_data(cpi, &frame_flags, size,
-                          reinterpret_cast<uint8_t *>(cx_data), &time_stamp,
-                          &time_end, flush);
+  vp9_get_compressed_data(
+      cpi, &frame_flags, &encode_frame_result->coding_data_size,
+      encode_frame_result->coding_data.get(), &time_stamp, &time_end, flush);
   // vp9_get_compressed_data is expected to encode a frame every time, so the
   // data size should be greater than zero.
-  assert(*size > 0);
-  if (*size >= max_size) {
-    assert(0);
-  }
+  assert(encode_frame_result->coding_data_size > 0);
+  assert(encode_frame_result->coding_data_size < max_coding_data_size);
 }
 
 int SimpleEncode::GetCodingFrameNum() {

@@ -1,5 +1,23 @@
 #include <memory>
 #include <vector>
+
+enum FrameType {
+  kKeyFrame = 0,
+  kInterFrame,
+  kAlternateReference,
+};
+
+struct EncodeFrameResult {
+  // TODO(angiebird): int show_index;
+  // TODO(angiebird): FrameType frame_type;
+  size_t coding_data_size;
+  // The EncodeFrame will allocate a buffer, write the coding data into the
+  // buffer and give the ownership of the buffer to coding_data
+  std::unique_ptr<unsigned char[]> coding_data;
+  // TODO(angiebird): double psnr;
+  // TODO(angiebird): int quantize_index ;
+};
+
 class SimpleEncode {
  public:
   SimpleEncode(int frame_width, int frame_height, int frame_rate_num,
@@ -26,7 +44,7 @@ class SimpleEncode {
 
   // Encode a frame
   // This funtion should be called after StartEncode() before EndEncode()
-  void EncodeFrame(char *cx_data, size_t *size, size_t max_size);
+  void EncodeFrame(EncodeFrameResult *encode_frame_result);
 
   // Get the number of coding frames for the video. The coding frames include
   // show frame and no show frame.

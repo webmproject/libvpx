@@ -60,14 +60,12 @@ TEST(SimpleEncode, EncodeFrame) {
   FILE *file = fopen("bus_352x288_420_f20_b8.yuv", "r");
   SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
                              target_bitrate, num_frames, file);
-  char cx_data[352 * 288 * 3];
-  size_t max_size = 352 * 288 * 3;
-  size_t frame_size;
   simple_encode.ComputeFirstPassStats();
   int num_coding_frames = simple_encode.GetCodingFrameNum();
   simple_encode.StartEncode();
   for (int i = 0; i < num_coding_frames; ++i) {
-    simple_encode.EncodeFrame(cx_data, &frame_size, max_size);
+    EncodeFrameResult encode_frame_result;
+    simple_encode.EncodeFrame(&encode_frame_result);
     // TODO(angiebird): For now, this test just check whether EncodeFrame can be
     // run proprly. Add extra check later.
   }
