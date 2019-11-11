@@ -566,7 +566,7 @@ static vpx_codec_err_t set_encoder_config(
   }
   oxcf->sharpness = extra_cfg->sharpness;
 
-  oxcf->two_pass_stats_in = cfg->rc_twopass_stats_in;
+  vp9_set_first_pass_stats(oxcf, &cfg->rc_twopass_stats_in);
 
 #if CONFIG_FP_MB_STATS
   oxcf->firstpass_mb_stats_in = cfg->rc_firstpass_mb_stats_in;
@@ -1944,4 +1944,9 @@ FRAME_INFO vp9_get_frame_info(const VP9EncoderConfig *oxcf) {
                   frame_info.mi_rows, frame_info.mi_cols);
   // TODO(angiebird): Figure out how to get subsampling_x/y here
   return frame_info;
+}
+
+void vp9_set_first_pass_stats(VP9EncoderConfig *oxcf,
+                              const vpx_fixed_buf_t *stats) {
+  oxcf->two_pass_stats_in = *stats;
 }

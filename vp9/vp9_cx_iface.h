@@ -35,6 +35,9 @@ ticks_to_timebase_units(const vpx_rational64_t *timestamp_ratio, int64_t n) {
   return (n * timestamp_ratio->den + round) / timestamp_ratio->num;
 }
 
+void vp9_set_first_pass_stats(VP9EncoderConfig *oxcf,
+                              const vpx_fixed_buf_t *stats);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

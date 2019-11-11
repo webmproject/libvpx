@@ -46,6 +46,8 @@ static int img_read(vpx_image_t *img, FILE *file) {
 class SimpleEncode::impl {
  public:
   VP9_COMP *cpi;
+  vpx_img_fmt_t img_fmt;
+  vpx_image_t tmp_img;
   std::vector<FIRSTPASS_STATS> frame_stats;
 };
 
@@ -83,14 +85,14 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   this->num_frames = num_frames;
   this->file = file;
   pimpl->cpi = NULL;
+  pimpl->img_fmt = VPX_IMG_FMT_I420;
 }
 
 void SimpleEncode::ComputeFirstPassStats() {
-  const vpx_img_fmt_t img_fmt = VPX_IMG_FMT_I420;
   vpx_rational_t frame_rate = make_vpx_rational(frame_rate_num, frame_rate_den);
   const VP9EncoderConfig oxcf = vp9_get_encoder_config(
       frame_width, frame_height, frame_rate, target_bitrate, VPX_RC_FIRST_PASS);
-  VP9_COMP *cpi = init_encoder(&oxcf, img_fmt);
+  VP9_COMP *cpi = init_encoder(&oxcf, pimpl->img_fmt);
   struct lookahead_ctx *lookahead = cpi->lookahead;
   int i;
   int use_highbitdepth = 0;
@@ -98,7 +100,7 @@ void SimpleEncode::ComputeFirstPassStats() {
   use_highbitdepth = cpi->common.use_highbitdepth;
 #endif
   vpx_image_t img;
-  vpx_img_alloc(&img, img_fmt, frame_width, frame_height, 1);
+  vpx_img_alloc(&img, pimpl->img_fmt, frame_width, frame_height, 1);
   rewind(file);
   pimpl->frame_stats.clear();
   for (i = 0; i < num_frames; ++i) {
@@ -156,18 +158,69 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
 }
 
 void SimpleEncode::StartEncode() {
+  assert(pimpl->frame_stats.size() > 0);
   vpx_rational_t frame_rate = make_vpx_rational(frame_rate_num, frame_rate_den);
   VP9EncoderConfig oxcf = vp9_get_encoder_config(
       frame_width, frame_height, frame_rate, target_bitrate, VPX_RC_LAST_PASS);
+  vpx_fixed_buf_t stats;
+  stats.buf = pimpl->frame_stats.data();
+  stats.sz = sizeof(pimpl->frame_stats[0]) * pimpl->frame_stats.size();
+
+  vp9_set_first_pass_stats(&oxcf, &stats);
   assert(pimpl->cpi == NULL);
-  pimpl->cpi = init_encoder(&oxcf, VPX_IMG_FMT_I420);
+  pimpl->cpi = init_encoder(&oxcf, pimpl->img_fmt);
+  vpx_img_alloc(&pimpl->tmp_img, pimpl->img_fmt, frame_width, frame_height, 1);
   rewind(file);
 }
 
 void SimpleEncode::EndEncode() {
   free_encoder(pimpl->cpi);
   pimpl->cpi = nullptr;
+  vpx_img_free(&pimpl->tmp_img);
   rewind(file);
+}
+
+void SimpleEncode::EncodeFrame(char *cx_data, size_t *size, size_t max_size) {
+  VP9_COMP *cpi = pimpl->cpi;
+  struct lookahead_ctx *lookahead = cpi->lookahead;
+  int use_highbitdepth = 0;
+#if CONFIG_VP9_HIGHBITDEPTH
+  use_highbitdepth = cpi->common.use_highbitdepth;
+#endif
+  // The lookahead's size is set to oxcf->lag_in_frames.
+  // We want to fill lookahead to it's max capacity if possible so that the
+  // encoder can construct alt ref frame in time.
+  // In the other words, we hope vp9_get_compressed_data to encode a frame
+  // every time in the function
+  while (!vp9_lookahead_full(lookahead)) {
+    // TODO(angiebird): Check whether we can move this file read logics to
+    // lookahead
+    if (img_read(&pimpl->tmp_img, file)) {
+      int next_show_idx = vp9_lookahead_next_show_idx(lookahead);
+      int64_t ts_start =
+          timebase_units_to_ticks(&cpi->oxcf.g_timebase_in_ts, next_show_idx);
+      int64_t ts_end = timebase_units_to_ticks(&cpi->oxcf.g_timebase_in_ts,
+                                               next_show_idx + 1);
+      YV12_BUFFER_CONFIG sd;
+      image2yuvconfig(&pimpl->tmp_img, &sd);
+      vp9_lookahead_push(lookahead, &sd, ts_start, ts_end, use_highbitdepth, 0);
+    } else {
+      break;
+    }
+  }
+  int64_t time_stamp;
+  int64_t time_end;
+  int flush = 1;  // Make vp9_get_compressed_data encode a frame
+  unsigned int frame_flags = 0;
+  vp9_get_compressed_data(cpi, &frame_flags, size,
+                          reinterpret_cast<uint8_t *>(cx_data), &time_stamp,
+                          &time_end, flush);
+  // vp9_get_compressed_data is expected to encode a frame every time, so the
+  // data size should be greater than zero.
+  assert(*size > 0);
+  if (*size >= max_size) {
+    assert(0);
+  }
 }
 
 SimpleEncode::~SimpleEncode() {}
