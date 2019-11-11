@@ -48,7 +48,7 @@ class SimpleEncode::impl {
   VP9_COMP *cpi;
   vpx_img_fmt_t img_fmt;
   vpx_image_t tmp_img;
-  std::vector<FIRSTPASS_STATS> frame_stats;
+  std::vector<FIRSTPASS_STATS> first_pass_stats;
 };
 
 static VP9_COMP *init_encoder(const VP9EncoderConfig *oxcf,
@@ -102,7 +102,7 @@ void SimpleEncode::ComputeFirstPassStats() {
   vpx_image_t img;
   vpx_img_alloc(&img, pimpl->img_fmt, frame_width, frame_height, 1);
   rewind(file);
-  pimpl->frame_stats.clear();
+  pimpl->first_pass_stats.clear();
   for (i = 0; i < num_frames; ++i) {
     assert(!vp9_lookahead_full(lookahead));
     if (img_read(&img, file)) {
@@ -127,12 +127,12 @@ void SimpleEncode::ComputeFirstPassStats() {
         // compresses data
         assert(size == 0);
       }
-      pimpl->frame_stats.push_back(vp9_get_frame_stats(&cpi->twopass));
+      pimpl->first_pass_stats.push_back(vp9_get_frame_stats(&cpi->twopass));
     }
   }
   vp9_end_first_pass(cpi);
-  // TODO(angiebird): Store the total_stats apart form frame_stats
-  pimpl->frame_stats.push_back(vp9_get_total_stats(&cpi->twopass));
+  // TODO(angiebird): Store the total_stats apart form first_pass_stats
+  pimpl->first_pass_stats.push_back(vp9_get_total_stats(&cpi->twopass));
   free_encoder(cpi);
   rewind(file);
   vpx_img_free(&img);
@@ -142,15 +142,16 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
   std::vector<std::vector<double>> output_stats;
   // TODO(angiebird): This function make several assumptions of
   // FIRSTPASS_STATS. 1) All elements in FIRSTPASS_STATS are double except the
-  // last one. 2) The last entry of frame_stats is the total_stats.
+  // last one. 2) The last entry of first_pass_stats is the total_stats.
   // Change the code structure, so that we don't have to make these assumptions
 
-  // Note the last entry of frame_stats is the total_stats, we don't need it.
-  for (size_t i = 0; i < pimpl->frame_stats.size() - 1; ++i) {
-    double *buf_start = reinterpret_cast<double *>(&pimpl->frame_stats[i]);
+  // Note the last entry of first_pass_stats is the total_stats, we don't need
+  // it.
+  for (size_t i = 0; i < pimpl->first_pass_stats.size() - 1; ++i) {
+    double *buf_start = reinterpret_cast<double *>(&pimpl->first_pass_stats[i]);
     // We use - 1 here because the last member in FIRSTPASS_STATS is not double
     double *buf_end =
-        buf_start + sizeof(pimpl->frame_stats[i]) / sizeof(*buf_end) - 1;
+        buf_start + sizeof(pimpl->first_pass_stats[i]) / sizeof(*buf_end) - 1;
     std::vector<double> this_stats(buf_start, buf_end);
     output_stats.push_back(this_stats);
   }
@@ -158,13 +159,14 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
 }
 
 void SimpleEncode::StartEncode() {
-  assert(pimpl->frame_stats.size() > 0);
+  assert(pimpl->first_pass_stats.size() > 0);
   vpx_rational_t frame_rate = make_vpx_rational(frame_rate_num, frame_rate_den);
   VP9EncoderConfig oxcf = vp9_get_encoder_config(
       frame_width, frame_height, frame_rate, target_bitrate, VPX_RC_LAST_PASS);
   vpx_fixed_buf_t stats;
-  stats.buf = pimpl->frame_stats.data();
-  stats.sz = sizeof(pimpl->frame_stats[0]) * pimpl->frame_stats.size();
+  stats.buf = pimpl->first_pass_stats.data();
+  stats.sz =
+      sizeof(pimpl->first_pass_stats[0]) * pimpl->first_pass_stats.size();
 
   vp9_set_first_pass_stats(&oxcf, &stats);
   assert(pimpl->cpi == NULL);
@@ -224,7 +226,7 @@ void SimpleEncode::EncodeFrame(char *cx_data, size_t *size, size_t max_size) {
 }
 
 int SimpleEncode::GetCodingFrameNum() {
-  assert(pimpl->frame_stats.size() - 1 > 0);
+  assert(pimpl->first_pass_stats.size() - 1 > 0);
   // These are the default settings for now.
   const int multi_layer_arf = 0;
   const int allow_alt_ref = 1;
@@ -233,7 +235,7 @@ int SimpleEncode::GetCodingFrameNum() {
       frame_width, frame_height, frame_rate, target_bitrate, VPX_RC_LAST_PASS);
   FRAME_INFO frame_info = vp9_get_frame_info(&oxcf);
   FIRST_PASS_INFO first_pass_info;
-  fps_init_first_pass_info(&first_pass_info, pimpl->frame_stats.data(),
+  fps_init_first_pass_info(&first_pass_info, pimpl->first_pass_stats.data(),
                            num_frames);
   return vp9_get_coding_frame_num(&oxcf, &frame_info, &first_pass_info,
                                   multi_layer_arf, allow_alt_ref);
