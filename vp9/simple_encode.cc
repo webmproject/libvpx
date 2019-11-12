@@ -254,6 +254,14 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   update_encode_frame_result(encode_frame_result, &encode_frame_info);
 }
 
+void SimpleEncode::EncodeFrameWithQuantizeIndex(
+    EncodeFrameResult *encode_frame_result, int quantize_index) {
+  encode_command_set_external_quantize_index(&pimpl->cpi->encode_command,
+                                             quantize_index);
+  EncodeFrame(encode_frame_result);
+  encode_command_reset_external_quantize_index(&pimpl->cpi->encode_command);
+}
+
 int SimpleEncode::GetCodingFrameNum() {
   assert(pimpl->first_pass_stats.size() - 1 > 0);
   // These are the default settings for now.

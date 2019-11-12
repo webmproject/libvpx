@@ -516,6 +516,31 @@ typedef struct KMEANS_DATA {
   int group_idx;
 } KMEANS_DATA;
 
+#if CONFIG_RATE_CTRL
+typedef struct ENCODE_COMMAND {
+  int use_external_quantize_index;
+  int external_quantize_index;
+} ENCODE_COMMAND;
+
+static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {
+  vp9_zero(*encode_command);
+  encode_command->use_external_quantize_index = 0;
+  encode_command->external_quantize_index = -1;
+}
+
+static INLINE void encode_command_set_external_quantize_index(
+    ENCODE_COMMAND *encode_command, int quantize_index) {
+  encode_command->use_external_quantize_index = 1;
+  encode_command->external_quantize_index = quantize_index;
+}
+
+static INLINE void encode_command_reset_external_quantize_index(
+    ENCODE_COMMAND *encode_command) {
+  encode_command->use_external_quantize_index = 0;
+  encode_command->external_quantize_index = -1;
+}
+#endif
+
 typedef struct VP9_COMP {
   FRAME_INFO frame_info;
   QUANTS quants;
@@ -820,6 +845,9 @@ typedef struct VP9_COMP {
 
   int multi_layer_arf;
   vpx_roi_map_t roi;
+#if CONFIG_RATE_CTRL
+  ENCODE_COMMAND encode_command;
+#endif
 } VP9_COMP;
 
 typedef struct ENCODE_FRAME_RESULT {

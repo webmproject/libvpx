@@ -93,4 +93,28 @@ TEST(SimpleEncode, EncodeFrame) {
   simple_encode.EndEncode();
 }
 
+TEST(SimpleEncode, EncodeFrameWithQuantizeIndex) {
+  int w = 352;
+  int h = 288;
+  int frame_rate_num = 30;
+  int frame_rate_den = 1;
+  int target_bitrate = 1000;
+  int num_frames = 17;
+  // TODO(angiebird): Figure out how to upload test video to our codebase
+  FILE *file = fopen("bus_352x288_420_f20_b8.yuv", "r");
+  SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                             target_bitrate, num_frames, file);
+  simple_encode.ComputeFirstPassStats();
+  int num_coding_frames = simple_encode.GetCodingFrameNum();
+  simple_encode.StartEncode();
+  for (int i = 0; i < num_coding_frames; ++i) {
+    int assigned_quantize_index = 100 + i;
+    EncodeFrameResult encode_frame_result;
+    simple_encode.EncodeFrameWithQuantizeIndex(&encode_frame_result,
+                                               assigned_quantize_index);
+    EXPECT_EQ(encode_frame_result.quantize_index, assigned_quantize_index);
+  }
+  simple_encode.EndEncode();
+}
+
 }  // namespace

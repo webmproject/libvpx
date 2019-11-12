@@ -47,6 +47,11 @@ class SimpleEncode {
   // This funtion should be called after StartEncode() before EndEncode()
   void EncodeFrame(EncodeFrameResult *encode_frame_result);
 
+  // Encode a frame with a specific quantize index
+  // This funtion should be called after StartEncode() before EndEncode()
+  void EncodeFrameWithQuantizeIndex(EncodeFrameResult *encode_frame_result,
+                                    int quantize_index);
+
   // Get the number of coding frames for the video. The coding frames include
   // show frame and no show frame.
   // This funtion should be called after ComputeFirstPassStats()
