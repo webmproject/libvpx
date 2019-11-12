@@ -827,6 +827,7 @@ typedef struct ENCODE_FRAME_RESULT {
   FRAME_UPDATE_TYPE update_type;
   double psnr;
   uint64_t sse;
+  int quantize_index;
 } ENCODE_FRAME_RESULT;
 
 void vp9_initialize_enc(void);
@@ -899,7 +900,7 @@ static INLINE void stack_init(int *stack, int length) {
   for (idx = 0; idx < length; ++idx) stack[idx] = -1;
 }
 
-int vp9_get_quantizer(struct VP9_COMP *cpi);
+int vp9_get_quantizer(const VP9_COMP *cpi);
 
 static INLINE int frame_is_kf_gf_arf(const VP9_COMP *cpi) {
   return frame_is_intra_only(&cpi->common) || cpi->refresh_alt_ref_frame ||

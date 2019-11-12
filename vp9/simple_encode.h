@@ -16,7 +16,7 @@ struct EncodeFrameResult {
   std::unique_ptr<unsigned char[]> coding_data;
   double psnr;
   uint64_t sse;
-  // TODO(angiebird): int quantize_index ;
+  int quantize_index;
 };
 
 class SimpleEncode {

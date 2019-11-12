@@ -7095,7 +7095,7 @@ static void update_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result,
                                        FRAME_UPDATE_TYPE update_type,
                                        const YV12_BUFFER_CONFIG *source_frame,
                                        const YV12_BUFFER_CONFIG *coded_frame,
-                                       uint32_t bit_depth,
+                                       int quantize_index, uint32_t bit_depth,
                                        uint32_t input_bit_depth) {
   PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -7110,6 +7110,7 @@ static void update_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result,
   encode_frame_result->sse = psnr.sse[0];
   encode_frame_result->show_idx = show_idx;
   encode_frame_result->update_type = update_type;
+  encode_frame_result->quantize_index = quantize_index;
 }
 #endif  // !CONFIG_REALTIME_ONLY
 
@@ -7406,8 +7407,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     update_encode_frame_result(
         encode_frame_result, source->show_idx,
         cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index],
-        cpi->Source, get_frame_new_buffer(cm), cpi->oxcf.input_bit_depth,
-        cm->bit_depth);
+        cpi->Source, get_frame_new_buffer(cm), vp9_get_quantizer(cpi),
+        cpi->oxcf.input_bit_depth, cm->bit_depth);
     vp9_twopass_postencode_update(cpi);
   } else if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
@@ -7714,7 +7715,7 @@ void vp9_set_svc(VP9_COMP *cpi, int use_svc) {
   return;
 }
 
-int vp9_get_quantizer(VP9_COMP *cpi) { return cpi->common.base_qindex; }
+int vp9_get_quantizer(const VP9_COMP *cpi) { return cpi->common.base_qindex; }
 
 void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags) {
   if (flags &
