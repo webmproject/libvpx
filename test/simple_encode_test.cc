@@ -54,7 +54,7 @@ TEST(SimpleEncode, EncodeFrame) {
   int h = 288;
   int frame_rate_num = 30;
   int frame_rate_den = 1;
-  int target_bitrate = 200;
+  int target_bitrate = 1000;
   int num_frames = 17;
   // TODO(angiebird): Figure out how to upload test video to our codebase
   FILE *file = fopen("bus_352x288_420_f20_b8.yuv", "r");
@@ -83,8 +83,11 @@ TEST(SimpleEncode, EncodeFrame) {
     EXPECT_LT(encode_frame_result.show_idx, num_frames);
     if (i == num_coding_frames - 1) {
       EXPECT_EQ(encode_frame_result.show_idx, num_frames - 1)
-          << "The last coding frame should should be the last display order";
+          << "The last coding frame should be the last display order";
     }
+    EXPECT_GE(encode_frame_result.psnr, 34)
+        << "The psnr is supposed to be greater than 34 given the "
+           "target_bitrate 1000 kbps";
   }
   EXPECT_EQ(num_alternate_refereces, ref_num_alternate_refereces);
   simple_encode.EndEncode();

@@ -825,6 +825,8 @@ typedef struct VP9_COMP {
 typedef struct ENCODE_FRAME_RESULT {
   int show_idx;
   FRAME_UPDATE_TYPE update_type;
+  double psnr;
+  uint64_t sse;
 } ENCODE_FRAME_RESULT;
 
 void vp9_initialize_enc(void);

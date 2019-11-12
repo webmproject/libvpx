@@ -14,7 +14,8 @@ struct EncodeFrameResult {
   // The EncodeFrame will allocate a buffer, write the coding data into the
   // buffer and give the ownership of the buffer to coding_data
   std::unique_ptr<unsigned char[]> coding_data;
-  // TODO(angiebird): double psnr;
+  double psnr;
+  uint64_t sse;
   // TODO(angiebird): int quantize_index ;
 };
 

@@ -90,6 +90,8 @@ static void update_encode_frame_result(
   encode_frame_result->show_idx = encode_frame_info->show_idx;
   encode_frame_result->frame_type =
       get_frame_type_from_update_type(encode_frame_info->update_type);
+  encode_frame_result->psnr = encode_frame_info->psnr;
+  encode_frame_result->sse = encode_frame_info->sse;
 }
 
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,

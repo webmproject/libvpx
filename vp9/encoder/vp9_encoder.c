@@ -5374,8 +5374,6 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   mismatch_move_frame_idx_w();
 #endif
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-
-  vp9_twopass_postencode_update(cpi);
 }
 #endif  // !CONFIG_REALTIME_ONLY
 
@@ -7091,12 +7089,29 @@ static void init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result) {
   encode_frame_result->show_idx = -1;  // Actual encoding deosn't happen.
 }
 
+#if !CONFIG_REALTIME_ONLY
 static void update_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result,
                                        int show_idx,
-                                       FRAME_UPDATE_TYPE update_type) {
+                                       FRAME_UPDATE_TYPE update_type,
+                                       const YV12_BUFFER_CONFIG *source_frame,
+                                       const YV12_BUFFER_CONFIG *coded_frame,
+                                       uint32_t bit_depth,
+                                       uint32_t input_bit_depth) {
+  PSNR_STATS psnr;
+#if CONFIG_VP9_HIGHBITDEPTH
+  vpx_calc_highbd_psnr(source_frame, coded_frame, &psnr, bit_depth,
+                       input_bit_depth);
+#else
+  (void)bit_depth;
+  (void)input_bit_depth;
+  vpx_calc_psnr(source_frame, coded_frame, &psnr);
+#endif
+  encode_frame_result->psnr = psnr.psnr[0];
+  encode_frame_result->sse = psnr.sse[0];
   encode_frame_result->show_idx = show_idx;
   encode_frame_result->update_type = update_type;
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest, int64_t *time_stamp,
@@ -7349,12 +7364,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   bitstream_queue_set_frame_write(cm->current_video_frame * 2 + cm->show_frame);
 #endif
 
-  if (oxcf->pass != 1) {
-    update_encode_frame_result(
-        encode_frame_result, source->show_idx,
-        cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index]);
-  }
-
   cpi->td.mb.fp_src_pred = 0;
 #if CONFIG_REALTIME_ONLY
   if (cpi->use_svc) {
@@ -7381,6 +7390,25 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     vp9_first_pass(cpi, source);
   } else if (oxcf->pass == 2 && !cpi->use_svc) {
     Pass2Encode(cpi, size, dest, frame_flags);
+    // update_encode_frame_result() depends on twopass.gf_group.index and
+    // cm->new_fb_idx and cpi->Source are updated for current properly and have
+    // not been updated for the next frame yet.
+    // The update locations are as follows.
+    // 1) twopass.gf_group.index is initialized at define_gf_group by vp9_zero()
+    // for the first frame in the gf_group and is updated for the next frame at
+    // vp9_twopass_postencode_update().
+    // 2) cpi->Source is updated at the beginging of this function, i.e.
+    // vp9_get_compressed_data()
+    // 3) cm->new_fb_idx is updated at the beginging of this function by
+    // get_free_fb(cm)
+    // TODO(angiebird): Improve the codebase to make the update of frame
+    // dependent variables more robust.
+    update_encode_frame_result(
+        encode_frame_result, source->show_idx,
+        cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index],
+        cpi->Source, get_frame_new_buffer(cm), cpi->oxcf.input_bit_depth,
+        cm->bit_depth);
+    vp9_twopass_postencode_update(cpi);
   } else if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
   } else {
