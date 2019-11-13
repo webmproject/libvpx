@@ -87,6 +87,8 @@ get_frame_type_from_update_type(FRAME_UPDATE_TYPE update_type) {
 static void update_encode_frame_result(
     EncodeFrameResult *encode_frame_result,
     const ENCODE_FRAME_RESULT *encode_frame_info) {
+  encode_frame_result->coding_data_bit_size =
+      encode_frame_result->coding_data_byte_size * 8;
   encode_frame_result->show_idx = encode_frame_info->show_idx;
   encode_frame_result->frame_type =
       get_frame_type_from_update_type(encode_frame_info->update_type);
@@ -236,22 +238,23 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
     }
   }
   assert(encode_frame_result->coding_data.get() == nullptr);
-  const size_t max_coding_data_size = frame_width * frame_height * 3;
-  encode_frame_result->coding_data =
-      std::move(std::unique_ptr<uint8_t[]>(new uint8_t[max_coding_data_size]));
+  const size_t max_coding_data_byte_size = frame_width * frame_height * 3;
+  encode_frame_result->coding_data = std::move(
+      std::unique_ptr<uint8_t[]>(new uint8_t[max_coding_data_byte_size]));
   int64_t time_stamp;
   int64_t time_end;
   int flush = 1;  // Make vp9_get_compressed_data encode a frame
   unsigned int frame_flags = 0;
   ENCODE_FRAME_RESULT encode_frame_info;
   vp9_get_compressed_data(cpi, &frame_flags,
-                          &encode_frame_result->coding_data_size,
+                          &encode_frame_result->coding_data_byte_size,
                           encode_frame_result->coding_data.get(), &time_stamp,
                           &time_end, flush, &encode_frame_info);
   // vp9_get_compressed_data is expected to encode a frame every time, so the
   // data size should be greater than zero.
-  assert(encode_frame_result->coding_data_size > 0);
-  assert(encode_frame_result->coding_data_size < max_coding_data_size);
+  assert(encode_frame_result->coding_data_byte_size > 0);
+  assert(encode_frame_result->coding_data_byte_size <
+         max_coding_data_byte_size);
 
   update_encode_frame_result(encode_frame_result, &encode_frame_info);
 }
