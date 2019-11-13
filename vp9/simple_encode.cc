@@ -97,7 +97,8 @@ static void update_encode_frame_result(
 
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,
                            int frame_rate_num, int frame_rate_den,
-                           int target_bitrate, int num_frames, FILE *file)
+                           int target_bitrate, int num_frames,
+                           const char *infile_path)
     : pimpl{ std::unique_ptr<impl>(new impl()) } {
   this->frame_width = frame_width;
   this->frame_height = frame_height;
@@ -105,7 +106,8 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   this->frame_rate_den = frame_rate_den;
   this->target_bitrate = target_bitrate;
   this->num_frames = num_frames;
-  this->file = file;
+  // TODO(angirbid): Should we keep a file pointer here or keep the file_path?
+  this->file = fopen(infile_path, "r");
   pimpl->cpi = NULL;
   pimpl->img_fmt = VPX_IMG_FMT_I420;
 }
