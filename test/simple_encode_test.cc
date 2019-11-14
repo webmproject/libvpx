@@ -4,7 +4,8 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vp9/simple_encode.h"
 
-namespace {
+namespace vp9 {
+
 const int w = 352;
 const int h = 288;
 const int frame_rate_num = 30;
@@ -105,4 +106,4 @@ TEST(SimpleEncode, EncodeFrameWithQuantizeIndex) {
   simple_encode.EndEncode();
 }
 
-}  // namespace
+}  // namespace vp9
