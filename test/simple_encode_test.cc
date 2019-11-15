@@ -6,13 +6,13 @@
 
 namespace vp9 {
 
+// TODO(angirbid): Find a better way to construct encode info
 const int w = 352;
 const int h = 288;
 const int frame_rate_num = 30;
 const int frame_rate_den = 1;
 const int target_bitrate = 1000;
 const int num_frames = 17;
-// TODO(angiebird): Figure out how to upload test video to our codebase
 const char infile_path[] = "bus_352x288_420_f20_b8.yuv";
 
 static double get_bit_rate_in_kpbs(size_t bit_size, int num_frames,
@@ -63,12 +63,12 @@ TEST(SimpleEncode, EncodeFrame) {
   size_t total_data_bit_size = 0;
   for (int i = 0; i < num_coding_frames; ++i) {
     EncodeFrameResult encode_frame_result;
+    simple_encode.EncodeFrame(&encode_frame_result);
     if (i == 0) {
       EXPECT_EQ(encode_frame_result.show_idx, 0);
       EXPECT_EQ(encode_frame_result.frame_type, kKeyFrame)
           << "The first coding frame should be key frame";
     }
-    simple_encode.EncodeFrame(&encode_frame_result);
     if (encode_frame_result.frame_type == kAlternateReference) {
       ++num_alternate_refereces;
     }
