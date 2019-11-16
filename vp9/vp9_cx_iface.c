@@ -1121,6 +1121,8 @@ static INLINE vpx_codec_cx_pkt_t get_psnr_pkt(const PSNR_STATS *psnr) {
   pkt.data.psnr = *psnr;
   return pkt;
 }
+
+#if !CONFIG_REALTIME_ONLY
 static INLINE vpx_codec_cx_pkt_t
 get_first_pass_stats_pkt(FIRSTPASS_STATS *stats) {
   // WARNNING: This function assumes that stats will
@@ -1132,6 +1134,7 @@ get_first_pass_stats_pkt(FIRSTPASS_STATS *stats) {
   pkt.data.twopass_stats.sz = sizeof(*stats);
   return pkt;
 }
+#endif
 
 const size_t kMinCompressedSize = 8192;
 static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
