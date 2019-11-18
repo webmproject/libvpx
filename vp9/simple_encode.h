@@ -81,7 +81,7 @@ class SimpleEncode {
   int target_bitrate;
   int num_frames;
   FILE *file;
-  std::unique_ptr<impl> pimpl;
+  std::unique_ptr<impl> impl_ptr;
 };
 
 }  // namespace vp9
