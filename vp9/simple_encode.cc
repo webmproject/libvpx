@@ -145,7 +145,7 @@ void SimpleEncode::ComputeFirstPassStats() {
       {
         int64_t time_stamp;
         int64_t time_end;
-        int flush = 1;  // Make vp9_get_compressed_data process a frame
+        int flush = 1;  // Makes vp9_get_compressed_data process a frame
         size_t size;
         unsigned int frame_flags = 0;
         ENCODE_FRAME_RESULT encode_frame_info;
