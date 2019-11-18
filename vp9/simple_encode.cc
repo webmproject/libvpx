@@ -102,8 +102,8 @@ static void update_encode_frame_result(
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,
                            int frame_rate_num, int frame_rate_den,
                            int target_bitrate, int num_frames,
-                           const char *infile_path)
-    : pimpl{ std::unique_ptr<impl>(new impl()) } {
+                           const char *infile_path) {
+  this->pimpl = std::unique_ptr<impl>(new impl());
   this->frame_width = frame_width;
   this->frame_height = frame_height;
   this->frame_rate_num = frame_rate_num;
