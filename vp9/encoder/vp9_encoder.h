@@ -539,7 +539,7 @@ static INLINE void encode_command_reset_external_quantize_index(
   encode_command->use_external_quantize_index = 0;
   encode_command->external_quantize_index = -1;
 }
-#endif
+#endif  // CONFIG_RATE_CTRL
 
 typedef struct VP9_COMP {
   FRAME_INFO frame_info;

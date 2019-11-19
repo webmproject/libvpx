@@ -5,6 +5,7 @@
 #include "vp9/simple_encode.h"
 
 namespace vp9 {
+namespace {
 
 // TODO(angirbid): Find a better way to construct encode info
 const int w = 352;
@@ -15,8 +16,8 @@ const int target_bitrate = 1000;
 const int num_frames = 17;
 const char infile_path[] = "bus_352x288_420_f20_b8.yuv";
 
-static double get_bit_rate_in_kpbs(size_t bit_size, int num_frames,
-                                   int frame_rate_num, int frame_rate_den) {
+double GetBitrateInKbps(size_t bit_size, int num_frames, int frame_rate_num,
+                        int frame_rate_den) {
   return static_cast<double>(bit_size) / num_frames * frame_rate_num /
          frame_rate_den / 1000.;
 }
@@ -84,9 +85,10 @@ TEST(SimpleEncode, EncodeFrame) {
     total_data_bit_size += encode_frame_result.coding_data_bit_size;
   }
   EXPECT_EQ(num_alternate_refereces, ref_num_alternate_refereces);
-  double bitrate = get_bit_rate_in_kpbs(total_data_bit_size, num_frames,
-                                        frame_rate_num, frame_rate_den);
-  EXPECT_LE(fabs(target_bitrate - bitrate), 150);
+  const double bitrate = GetBitrateInKbps(total_data_bit_size, num_frames,
+                                          frame_rate_num, frame_rate_den);
+  const double off_target_threshold = 150;
+  EXPECT_LE(fabs(target_bitrate - bitrate), off_target_threshold);
   simple_encode.EndEncode();
 }
 
@@ -97,7 +99,7 @@ TEST(SimpleEncode, EncodeFrameWithQuantizeIndex) {
   int num_coding_frames = simple_encode.GetCodingFrameNum();
   simple_encode.StartEncode();
   for (int i = 0; i < num_coding_frames; ++i) {
-    int assigned_quantize_index = 100 + i;
+    const int assigned_quantize_index = 100 + i;
     EncodeFrameResult encode_frame_result;
     simple_encode.EncodeFrameWithQuantizeIndex(&encode_frame_result,
                                                assigned_quantize_index);
@@ -105,5 +107,6 @@ TEST(SimpleEncode, EncodeFrameWithQuantizeIndex) {
   }
   simple_encode.EndEncode();
 }
+}  // namespace
 
 }  // namespace vp9
