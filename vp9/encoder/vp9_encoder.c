@@ -4319,13 +4319,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     // update_base_skip_probs(cpi);
 
     vpx_clear_system_state();
-#if CONFIG_RATE_CTRL
-    // TODO(angiebird): This is a hack for making sure the encoder use the
-    // external_quantize_index exactly. Avoid this kind of hack later.
-    if (cpi->encode_command.use_external_quantize_index) {
-      break;
-    }
-#endif
 
     // Dummy pack of the bitstream using up to date stats to get an
     // accurate estimate of output frame size to determine if we need
@@ -4338,6 +4331,16 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 
       if (frame_over_shoot_limit == 0) frame_over_shoot_limit = 1;
     }
+
+#if CONFIG_RATE_CTRL
+    // This part needs to be after save_coding_context() because
+    // restore_coding_context may be called in the end of this function.
+    // TODO(angiebird): This is a hack for making sure the encoder use the
+    // external_quantize_index exactly. Avoid this kind of hack later.
+    if (cpi->encode_command.use_external_quantize_index) {
+      break;
+    }
+#endif
 
     if (oxcf->rc_mode == VPX_Q) {
       loop = 0;
