@@ -64,8 +64,11 @@ static VP9_COMP *init_encoder(const VP9EncoderConfig *oxcf,
 }
 
 static void free_encoder(VP9_COMP *cpi) {
-  vpx_free(cpi->common.buffer_pool);
+  BufferPool *buffer_pool = cpi->common.buffer_pool;
   vp9_remove_compressor(cpi);
+  // buffer_pool needs to be free after cpi because buffer_pool contains
+  // allocated buffers that will be free in vp9_remove_compressor()
+  vpx_free(buffer_pool);
 }
 
 static INLINE vpx_rational_t make_vpx_rational(int num, int den) {
