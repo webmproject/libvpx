@@ -106,24 +106,26 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
                            int frame_rate_num, int frame_rate_den,
                            int target_bitrate, int num_frames,
                            const char *infile_path) {
-  this->impl_ptr = std::unique_ptr<EncodeImpl>(new EncodeImpl());
-  this->frame_width = frame_width;
-  this->frame_height = frame_height;
-  this->frame_rate_num = frame_rate_num;
-  this->frame_rate_den = frame_rate_den;
-  this->target_bitrate = target_bitrate;
-  this->num_frames = num_frames;
+  impl_ptr_ = std::unique_ptr<EncodeImpl>(new EncodeImpl());
+  frame_width_ = frame_width;
+  frame_height_ = frame_height;
+  frame_rate_num_ = frame_rate_num;
+  frame_rate_den_ = frame_rate_den;
+  target_bitrate_ = target_bitrate;
+  num_frames_ = num_frames;
   // TODO(angirbid): Should we keep a file pointer here or keep the file_path?
-  this->file = fopen(infile_path, "r");
-  impl_ptr->cpi = NULL;
-  impl_ptr->img_fmt = VPX_IMG_FMT_I420;
+  file_ = fopen(infile_path, "r");
+  impl_ptr_->cpi = NULL;
+  impl_ptr_->img_fmt = VPX_IMG_FMT_I420;
 }
 
 void SimpleEncode::ComputeFirstPassStats() {
-  vpx_rational_t frame_rate = make_vpx_rational(frame_rate_num, frame_rate_den);
-  const VP9EncoderConfig oxcf = vp9_get_encoder_config(
-      frame_width, frame_height, frame_rate, target_bitrate, VPX_RC_FIRST_PASS);
-  VP9_COMP *cpi = init_encoder(&oxcf, impl_ptr->img_fmt);
+  vpx_rational_t frame_rate =
+      make_vpx_rational(frame_rate_num_, frame_rate_den_);
+  const VP9EncoderConfig oxcf =
+      vp9_get_encoder_config(frame_width_, frame_height_, frame_rate,
+                             target_bitrate_, VPX_RC_FIRST_PASS);
+  VP9_COMP *cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
   struct lookahead_ctx *lookahead = cpi->lookahead;
   int i;
   int use_highbitdepth = 0;
@@ -131,12 +133,12 @@ void SimpleEncode::ComputeFirstPassStats() {
   use_highbitdepth = cpi->common.use_highbitdepth;
 #endif
   vpx_image_t img;
-  vpx_img_alloc(&img, impl_ptr->img_fmt, frame_width, frame_height, 1);
-  rewind(file);
-  impl_ptr->first_pass_stats.clear();
-  for (i = 0; i < num_frames; ++i) {
+  vpx_img_alloc(&img, impl_ptr_->img_fmt, frame_width_, frame_height_, 1);
+  rewind(file_);
+  impl_ptr_->first_pass_stats.clear();
+  for (i = 0; i < num_frames_; ++i) {
     assert(!vp9_lookahead_full(lookahead));
-    if (img_read(&img, file)) {
+    if (img_read(&img, file_)) {
       int next_show_idx = vp9_lookahead_next_show_idx(lookahead);
       int64_t ts_start =
           timebase_units_to_ticks(&oxcf.g_timebase_in_ts, next_show_idx);
@@ -159,14 +161,14 @@ void SimpleEncode::ComputeFirstPassStats() {
         // compresses data
         assert(size == 0);
       }
-      impl_ptr->first_pass_stats.push_back(vp9_get_frame_stats(&cpi->twopass));
+      impl_ptr_->first_pass_stats.push_back(vp9_get_frame_stats(&cpi->twopass));
     }
   }
   vp9_end_first_pass(cpi);
   // TODO(angiebird): Store the total_stats apart form first_pass_stats
-  impl_ptr->first_pass_stats.push_back(vp9_get_total_stats(&cpi->twopass));
+  impl_ptr_->first_pass_stats.push_back(vp9_get_total_stats(&cpi->twopass));
   free_encoder(cpi);
-  rewind(file);
+  rewind(file_);
   vpx_img_free(&img);
 }
 
@@ -179,13 +181,13 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
 
   // Note the last entry of first_pass_stats is the total_stats, we don't need
   // it.
-  for (size_t i = 0; i < impl_ptr->first_pass_stats.size() - 1; ++i) {
+  for (size_t i = 0; i < impl_ptr_->first_pass_stats.size() - 1; ++i) {
     double *buf_start =
-        reinterpret_cast<double *>(&impl_ptr->first_pass_stats[i]);
+        reinterpret_cast<double *>(&impl_ptr_->first_pass_stats[i]);
     // We use - 1 here because the last member in FIRSTPASS_STATS is not double
-    double *buf_end = buf_start +
-                      sizeof(impl_ptr->first_pass_stats[i]) / sizeof(*buf_end) -
-                      1;
+    double *buf_end =
+        buf_start + sizeof(impl_ptr_->first_pass_stats[i]) / sizeof(*buf_end) -
+        1;
     std::vector<double> this_stats(buf_start, buf_end);
     output_stats.push_back(this_stats);
   }
@@ -193,32 +195,34 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
 }
 
 void SimpleEncode::StartEncode() {
-  assert(impl_ptr->first_pass_stats.size() > 0);
-  vpx_rational_t frame_rate = make_vpx_rational(frame_rate_num, frame_rate_den);
-  VP9EncoderConfig oxcf = vp9_get_encoder_config(
-      frame_width, frame_height, frame_rate, target_bitrate, VPX_RC_LAST_PASS);
+  assert(impl_ptr_->first_pass_stats.size() > 0);
+  vpx_rational_t frame_rate =
+      make_vpx_rational(frame_rate_num_, frame_rate_den_);
+  VP9EncoderConfig oxcf =
+      vp9_get_encoder_config(frame_width_, frame_height_, frame_rate,
+                             target_bitrate_, VPX_RC_LAST_PASS);
   vpx_fixed_buf_t stats;
-  stats.buf = impl_ptr->first_pass_stats.data();
-  stats.sz =
-      sizeof(impl_ptr->first_pass_stats[0]) * impl_ptr->first_pass_stats.size();
+  stats.buf = impl_ptr_->first_pass_stats.data();
+  stats.sz = sizeof(impl_ptr_->first_pass_stats[0]) *
+             impl_ptr_->first_pass_stats.size();
 
   vp9_set_first_pass_stats(&oxcf, &stats);
-  assert(impl_ptr->cpi == NULL);
-  impl_ptr->cpi = init_encoder(&oxcf, impl_ptr->img_fmt);
-  vpx_img_alloc(&impl_ptr->tmp_img, impl_ptr->img_fmt, frame_width,
-                frame_height, 1);
-  rewind(file);
+  assert(impl_ptr_->cpi == NULL);
+  impl_ptr_->cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
+  vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
+                frame_height_, 1);
+  rewind(file_);
 }
 
 void SimpleEncode::EndEncode() {
-  free_encoder(impl_ptr->cpi);
-  impl_ptr->cpi = nullptr;
-  vpx_img_free(&impl_ptr->tmp_img);
-  rewind(file);
+  free_encoder(impl_ptr_->cpi);
+  impl_ptr_->cpi = nullptr;
+  vpx_img_free(&impl_ptr_->tmp_img);
+  rewind(file_);
 }
 
 void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
-  VP9_COMP *cpi = impl_ptr->cpi;
+  VP9_COMP *cpi = impl_ptr_->cpi;
   struct lookahead_ctx *lookahead = cpi->lookahead;
   int use_highbitdepth = 0;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -232,21 +236,21 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   while (!vp9_lookahead_full(lookahead)) {
     // TODO(angiebird): Check whether we can move this file read logics to
     // lookahead
-    if (img_read(&impl_ptr->tmp_img, file)) {
+    if (img_read(&impl_ptr_->tmp_img, file_)) {
       int next_show_idx = vp9_lookahead_next_show_idx(lookahead);
       int64_t ts_start =
           timebase_units_to_ticks(&cpi->oxcf.g_timebase_in_ts, next_show_idx);
       int64_t ts_end = timebase_units_to_ticks(&cpi->oxcf.g_timebase_in_ts,
                                                next_show_idx + 1);
       YV12_BUFFER_CONFIG sd;
-      image2yuvconfig(&impl_ptr->tmp_img, &sd);
+      image2yuvconfig(&impl_ptr_->tmp_img, &sd);
       vp9_lookahead_push(lookahead, &sd, ts_start, ts_end, use_highbitdepth, 0);
     } else {
       break;
     }
   }
   assert(encode_frame_result->coding_data.get() == nullptr);
-  const size_t max_coding_data_byte_size = frame_width * frame_height * 3;
+  const size_t max_coding_data_byte_size = frame_width_ * frame_height_ * 3;
   encode_frame_result->coding_data = std::move(
       std::unique_ptr<uint8_t[]>(new uint8_t[max_coding_data_byte_size]));
   int64_t time_stamp;
@@ -269,31 +273,33 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
 
 void SimpleEncode::EncodeFrameWithQuantizeIndex(
     EncodeFrameResult *encode_frame_result, int quantize_index) {
-  encode_command_set_external_quantize_index(&impl_ptr->cpi->encode_command,
+  encode_command_set_external_quantize_index(&impl_ptr_->cpi->encode_command,
                                              quantize_index);
   EncodeFrame(encode_frame_result);
-  encode_command_reset_external_quantize_index(&impl_ptr->cpi->encode_command);
+  encode_command_reset_external_quantize_index(&impl_ptr_->cpi->encode_command);
 }
 
 int SimpleEncode::GetCodingFrameNum() {
-  assert(impl_ptr->first_pass_stats.size() - 1 > 0);
+  assert(impl_ptr_->first_pass_stats.size() - 1 > 0);
   // These are the default settings for now.
   const int multi_layer_arf = 0;
   const int allow_alt_ref = 1;
-  vpx_rational_t frame_rate = make_vpx_rational(frame_rate_num, frame_rate_den);
-  const VP9EncoderConfig oxcf = vp9_get_encoder_config(
-      frame_width, frame_height, frame_rate, target_bitrate, VPX_RC_LAST_PASS);
+  vpx_rational_t frame_rate =
+      make_vpx_rational(frame_rate_num_, frame_rate_den_);
+  const VP9EncoderConfig oxcf =
+      vp9_get_encoder_config(frame_width_, frame_height_, frame_rate,
+                             target_bitrate_, VPX_RC_LAST_PASS);
   FRAME_INFO frame_info = vp9_get_frame_info(&oxcf);
   FIRST_PASS_INFO first_pass_info;
-  fps_init_first_pass_info(&first_pass_info, impl_ptr->first_pass_stats.data(),
-                           num_frames);
+  fps_init_first_pass_info(&first_pass_info, impl_ptr_->first_pass_stats.data(),
+                           num_frames_);
   return vp9_get_coding_frame_num(&oxcf, &frame_info, &first_pass_info,
                                   multi_layer_arf, allow_alt_ref);
 }
 
 SimpleEncode::~SimpleEncode() {
-  if (this->file != NULL) {
-    fclose(this->file);
+  if (this->file_ != NULL) {
+    fclose(this->file_);
   }
 }
 

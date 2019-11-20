@@ -76,14 +76,14 @@ class SimpleEncode {
 
  private:
   class EncodeImpl;
-  int frame_width;
-  int frame_height;
-  int frame_rate_num;
-  int frame_rate_den;
-  int target_bitrate;
-  int num_frames;
-  std::FILE *file;
-  std::unique_ptr<EncodeImpl> impl_ptr;
+  int frame_width_;
+  int frame_height_;
+  int frame_rate_num_;
+  int frame_rate_den_;
+  int target_bitrate_;
+  int num_frames_;
+  std::FILE *file_;
+  std::unique_ptr<EncodeImpl> impl_ptr_;
 };
 
 }  // namespace vp9
