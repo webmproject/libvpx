@@ -635,40 +635,7 @@ static vpx_codec_err_t set_encoder_config(
   }
 
   if (get_level_index(oxcf->target_level) >= 0) config_target_level(oxcf);
-  /*
-  printf("Current VP9 Settings: \n");
-  printf("target_bandwidth: %d\n", oxcf->target_bandwidth);
-  printf("target_level: %d\n", oxcf->target_level);
-  printf("noise_sensitivity: %d\n", oxcf->noise_sensitivity);
-  printf("sharpness: %d\n",    oxcf->sharpness);
-  printf("cpu_used: %d\n",  oxcf->cpu_used);
-  printf("Mode: %d\n",     oxcf->mode);
-  printf("auto_key: %d\n",  oxcf->auto_key);
-  printf("key_freq: %d\n", oxcf->key_freq);
-  printf("end_usage: %d\n", oxcf->end_usage);
-  printf("under_shoot_pct: %d\n", oxcf->under_shoot_pct);
-  printf("over_shoot_pct: %d\n", oxcf->over_shoot_pct);
-  printf("starting_buffer_level: %d\n", oxcf->starting_buffer_level);
-  printf("optimal_buffer_level: %d\n",  oxcf->optimal_buffer_level);
-  printf("maximum_buffer_size: %d\n", oxcf->maximum_buffer_size);
-  printf("fixed_q: %d\n",  oxcf->fixed_q);
-  printf("worst_allowed_q: %d\n", oxcf->worst_allowed_q);
-  printf("best_allowed_q: %d\n", oxcf->best_allowed_q);
-  printf("allow_spatial_resampling: %d\n", oxcf->allow_spatial_resampling);
-  printf("scaled_frame_width: %d\n", oxcf->scaled_frame_width);
-  printf("scaled_frame_height: %d\n", oxcf->scaled_frame_height);
-  printf("two_pass_vbrbias: %d\n",  oxcf->two_pass_vbrbias);
-  printf("two_pass_vbrmin_section: %d\n", oxcf->two_pass_vbrmin_section);
-  printf("two_pass_vbrmax_section: %d\n", oxcf->two_pass_vbrmax_section);
-  printf("vbr_corpus_complexity: %d\n",  oxcf->vbr_corpus_complexity);
-  printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
-  printf("enable_auto_arf: %d\n", oxcf->enable_auto_arf);
-  printf("Version: %d\n", oxcf->Version);
-  printf("encode_breakout: %d\n", oxcf->encode_breakout);
-  printf("error resilient: %d\n", oxcf->error_resilient_mode);
-  printf("frame parallel detokenization: %d\n",
-         oxcf->frame_parallel_decoding_mode);
-  */
+  // vp9_dump_encoder_config(oxcf);
   return VPX_CODEC_OK;
 }
 
@@ -1913,10 +1880,6 @@ static vpx_codec_enc_cfg_t get_enc_cfg(int frame_width, int frame_height,
 
 static vp9_extracfg get_extra_cfg() {
   vp9_extracfg extra_cfg = default_extra_cfg;
-  // TODO(angiebird) figure out whether we can modify default_extra_cfg
-  // directly.
-  extra_cfg.tile_columns = 0;
-  extra_cfg.frame_parallel_decoding_mode = 0;
   return extra_cfg;
 }
 
@@ -1924,12 +1887,178 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
                                         vpx_rational_t frame_rate,
                                         int target_bitrate,
                                         vpx_enc_pass enc_pass) {
+  /* This function will generate the same VP9EncoderConfig used by the
+   * vpxenc command given below.
+   * The configs in the vpxenc command corresponds to parameters of
+   * vp9_get_encoder_config() as follows.
+   *
+   * WIDTH:   frame_width
+   * HEIGHT:  frame_height
+   * FPS:     frame_rate
+   * BITRATE: target_bitrate
+   *
+   * INPUT, OUTPUT, LIMIT will not affect VP9EncoderConfig
+   *
+   * vpxenc command:
+   * INPUT=bus_cif.y4m
+   * OUTPUT=output.webm
+   * WIDTH=352
+   * HEIGHT=288
+   * BITRATE=600
+   * FPS=30/1
+   * LIMIT=150
+   * ./vpxenc --limit=$LIMIT --width=$WIDTH --height=$HEIGHT --fps=$FPS
+   * --lag-in-frames=25 \
+   *  --codec=vp9 --good --cpu-used=0 --threads=0 --profile=0 \
+   *  --min-q=0 --max-q=63 --auto-alt-ref=1 --passes=2 --kf-max-dist=150 \
+   *  --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 \
+   *  --minsection-pct=0 --maxsection-pct=150 --arnr-maxframes=7 --psnr \
+   *  --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 \
+   *  --frame-parallel=0 --tile-columns=0 --cpu-used=0 --end-usage=vbr \
+   *  --target-bitrate=$BITRATE -o $OUTPUT $INPUT
+   */
+
   VP9EncoderConfig oxcf;
   vp9_extracfg extra_cfg = get_extra_cfg();
   vpx_codec_enc_cfg_t enc_cfg = get_enc_cfg(
       frame_width, frame_height, frame_rate, target_bitrate, enc_pass);
   set_encoder_config(&oxcf, &enc_cfg, &extra_cfg);
+
+  // These settings are made to match the settings of the vpxenc command.
+  oxcf.key_freq = 150;
+  oxcf.under_shoot_pct = 100;
+  oxcf.over_shoot_pct = 100;
+  oxcf.max_threads = 0;
+  oxcf.tile_columns = 0;
+  oxcf.frame_parallel_decoding_mode = 0;
+  oxcf.two_pass_vbrmax_section = 150;
   return oxcf;
+}
+
+#define DUMP_STRUCT_VALUE(struct, value) \
+  printf(#value " %" PRId64 "\n", (int64_t)(struct)->value)
+
+void vp9_dump_encoder_config(const VP9EncoderConfig *oxcf) {
+  DUMP_STRUCT_VALUE(oxcf, profile);
+  DUMP_STRUCT_VALUE(oxcf, bit_depth);
+  DUMP_STRUCT_VALUE(oxcf, width);
+  DUMP_STRUCT_VALUE(oxcf, height);
+  DUMP_STRUCT_VALUE(oxcf, input_bit_depth);
+  DUMP_STRUCT_VALUE(oxcf, init_framerate);
+  // TODO(angiebird): dump g_timebase
+  // TODO(angiebird): dump g_timebase_in_ts
+
+  DUMP_STRUCT_VALUE(oxcf, target_bandwidth);
+
+  DUMP_STRUCT_VALUE(oxcf, noise_sensitivity);
+  DUMP_STRUCT_VALUE(oxcf, sharpness);
+  DUMP_STRUCT_VALUE(oxcf, speed);
+  DUMP_STRUCT_VALUE(oxcf, rc_max_intra_bitrate_pct);
+  DUMP_STRUCT_VALUE(oxcf, rc_max_inter_bitrate_pct);
+  DUMP_STRUCT_VALUE(oxcf, gf_cbr_boost_pct);
+
+  DUMP_STRUCT_VALUE(oxcf, mode);
+  DUMP_STRUCT_VALUE(oxcf, pass);
+
+  // Key Framing Operations
+  DUMP_STRUCT_VALUE(oxcf, auto_key);
+  DUMP_STRUCT_VALUE(oxcf, key_freq);
+
+  DUMP_STRUCT_VALUE(oxcf, lag_in_frames);
+
+  // ----------------------------------------------------------------
+  // DATARATE CONTROL OPTIONS
+
+  // vbr, cbr, constrained quality or constant quality
+  DUMP_STRUCT_VALUE(oxcf, rc_mode);
+
+  // buffer targeting aggressiveness
+  DUMP_STRUCT_VALUE(oxcf, under_shoot_pct);
+  DUMP_STRUCT_VALUE(oxcf, over_shoot_pct);
+
+  // buffering parameters
+  // TODO(angiebird): dump tarting_buffer_level_ms
+  // TODO(angiebird): dump ptimal_buffer_level_ms
+  // TODO(angiebird): dump maximum_buffer_size_ms
+
+  // Frame drop threshold.
+  DUMP_STRUCT_VALUE(oxcf, drop_frames_water_mark);
+
+  // controlling quality
+  DUMP_STRUCT_VALUE(oxcf, fixed_q);
+  DUMP_STRUCT_VALUE(oxcf, worst_allowed_q);
+  DUMP_STRUCT_VALUE(oxcf, best_allowed_q);
+  DUMP_STRUCT_VALUE(oxcf, cq_level);
+  DUMP_STRUCT_VALUE(oxcf, aq_mode);
+
+  // Special handling of Adaptive Quantization for AltRef frames
+  DUMP_STRUCT_VALUE(oxcf, alt_ref_aq);
+
+  // Internal frame size scaling.
+  DUMP_STRUCT_VALUE(oxcf, resize_mode);
+  DUMP_STRUCT_VALUE(oxcf, scaled_frame_width);
+  DUMP_STRUCT_VALUE(oxcf, scaled_frame_height);
+
+  // Enable feature to reduce the frame quantization every x frames.
+  DUMP_STRUCT_VALUE(oxcf, frame_periodic_boost);
+
+  // two pass datarate control
+  DUMP_STRUCT_VALUE(oxcf, two_pass_vbrbias);
+  DUMP_STRUCT_VALUE(oxcf, two_pass_vbrmin_section);
+  DUMP_STRUCT_VALUE(oxcf, two_pass_vbrmax_section);
+  DUMP_STRUCT_VALUE(oxcf, vbr_corpus_complexity);
+  // END DATARATE CONTROL OPTIONS
+  // ----------------------------------------------------------------
+
+  // Spatial and temporal scalability.
+  DUMP_STRUCT_VALUE(oxcf, ss_number_layers);
+  DUMP_STRUCT_VALUE(oxcf, ts_number_layers);
+
+  // Bitrate allocation for spatial layers.
+  // TODO(angiebird): dump layer_target_bitrate[VPX_MAX_LAYERS]
+  // TODO(angiebird): dump ss_target_bitrate[VPX_SS_MAX_LAYERS]
+  // TODO(angiebird): dump ss_enable_auto_arf[VPX_SS_MAX_LAYERS]
+  // TODO(angiebird): dump ts_rate_decimator[VPX_TS_MAX_LAYERS]
+
+  DUMP_STRUCT_VALUE(oxcf, enable_auto_arf);
+  DUMP_STRUCT_VALUE(oxcf, encode_breakout);
+  DUMP_STRUCT_VALUE(oxcf, error_resilient_mode);
+  DUMP_STRUCT_VALUE(oxcf, frame_parallel_decoding_mode);
+
+  DUMP_STRUCT_VALUE(oxcf, arnr_max_frames);
+  DUMP_STRUCT_VALUE(oxcf, arnr_strength);
+
+  DUMP_STRUCT_VALUE(oxcf, min_gf_interval);
+  DUMP_STRUCT_VALUE(oxcf, max_gf_interval);
+
+  DUMP_STRUCT_VALUE(oxcf, tile_columns);
+  DUMP_STRUCT_VALUE(oxcf, tile_rows);
+
+  DUMP_STRUCT_VALUE(oxcf, enable_tpl_model);
+
+  DUMP_STRUCT_VALUE(oxcf, max_threads);
+
+  DUMP_STRUCT_VALUE(oxcf, target_level);
+
+  // TODO(angiebird): dump two_pass_stats_in
+
+#if CONFIG_FP_MB_STATS
+  // TODO(angiebird): dump firstpass_mb_stats_in
+#endif
+
+  DUMP_STRUCT_VALUE(oxcf, tuning);
+  DUMP_STRUCT_VALUE(oxcf, content);
+#if CONFIG_VP9_HIGHBITDEPTH
+  DUMP_STRUCT_VALUE(oxcf, use_highbitdepth);
+#endif
+  DUMP_STRUCT_VALUE(oxcf, color_space);
+  DUMP_STRUCT_VALUE(oxcf, color_range);
+  DUMP_STRUCT_VALUE(oxcf, render_width);
+  DUMP_STRUCT_VALUE(oxcf, render_height);
+  DUMP_STRUCT_VALUE(oxcf, temporal_layering_mode);
+
+  DUMP_STRUCT_VALUE(oxcf, row_mt);
+  DUMP_STRUCT_VALUE(oxcf, motion_vector_unit_test);
 }
 
 FRAME_INFO vp9_get_frame_info(const VP9EncoderConfig *oxcf) {
