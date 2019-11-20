@@ -75,7 +75,7 @@ class SimpleEncode {
   int GetCodingFrameNum();
 
  private:
-  class impl;
+  class EncodeImpl;
   int frame_width;
   int frame_height;
   int frame_rate_num;
@@ -83,7 +83,7 @@ class SimpleEncode {
   int target_bitrate;
   int num_frames;
   std::FILE *file;
-  std::unique_ptr<impl> impl_ptr;
+  std::unique_ptr<EncodeImpl> impl_ptr;
 };
 
 }  // namespace vp9

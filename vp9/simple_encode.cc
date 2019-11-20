@@ -45,7 +45,7 @@ static int img_read(vpx_image_t *img, FILE *file) {
   return 1;
 }
 
-class SimpleEncode::impl {
+class SimpleEncode::EncodeImpl {
  public:
   VP9_COMP *cpi;
   vpx_img_fmt_t img_fmt;
@@ -106,7 +106,7 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
                            int frame_rate_num, int frame_rate_den,
                            int target_bitrate, int num_frames,
                            const char *infile_path) {
-  this->impl_ptr = std::unique_ptr<impl>(new impl());
+  this->impl_ptr = std::unique_ptr<EncodeImpl>(new EncodeImpl());
   this->frame_width = frame_width;
   this->frame_height = frame_height;
   this->frame_rate_num = frame_rate_num;
