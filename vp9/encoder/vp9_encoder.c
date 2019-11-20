@@ -2647,6 +2647,10 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
 
   cm->error.setjmp = 0;
 
+#if CONFIG_RATE_CTRL
+  encode_command_init(&cpi->encode_command);
+#endif
+
   return cpi;
 }
 
@@ -4282,6 +4286,14 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
       vp9_scale_references(cpi);
     }
 
+#if CONFIG_RATE_CTRL
+    // TODO(angiebird): This is a hack for making sure the encoder use the
+    // external_quantize_index exactly. Avoid this kind of hack later.
+    if (cpi->encode_command.use_external_quantize_index) {
+      q = cpi->encode_command.external_quantize_index;
+    }
+#endif
+
     vp9_set_quantizer(cm, q);
 
     if (loop_count == 0) setup_frame(cpi);
@@ -4307,6 +4319,13 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     // update_base_skip_probs(cpi);
 
     vpx_clear_system_state();
+#if CONFIG_RATE_CTRL
+    // TODO(angiebird): This is a hack for making sure the encoder use the
+    // external_quantize_index exactly. Avoid this kind of hack later.
+    if (cpi->encode_command.use_external_quantize_index) {
+      break;
+    }
+#endif
 
     // Dummy pack of the bitstream using up to date stats to get an
     // accurate estimate of output frame size to determine if we need
