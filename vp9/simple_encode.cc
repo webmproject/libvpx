@@ -283,4 +283,8 @@ int SimpleEncode::GetCodingFrameNum() {
                                   multi_layer_arf, allow_alt_ref);
 }
 
-SimpleEncode::~SimpleEncode() {}
+SimpleEncode::~SimpleEncode() {
+  if (this->file != NULL) {
+    fclose(this->file);
+  }
+}
