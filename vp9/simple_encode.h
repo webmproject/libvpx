@@ -53,25 +53,25 @@ class SimpleEncode {
   std::vector<std::vector<double>> ObserveFirstPassStats();
 
   // Initializes the encoder for actual encoding.
-  // This funtion should be called after ComputeFirstPassStats().
+  // This function should be called after ComputeFirstPassStats().
   void StartEncode();
 
   // Frees the encoder.
-  // This funtion should be called after StartEncode() or EncodeFrame().
+  // This function should be called after StartEncode() or EncodeFrame().
   void EndEncode();
 
   // Encodes a frame
-  // This funtion should be called after StartEncode() and before EndEncode().
+  // This function should be called after StartEncode() and before EndEncode().
   void EncodeFrame(EncodeFrameResult *encode_frame_result);
 
   // Encodes a frame with a specific quantize index.
-  // This funtion should be called after StartEncode() and before EndEncode().
+  // This function should be called after StartEncode() and before EndEncode().
   void EncodeFrameWithQuantizeIndex(EncodeFrameResult *encode_frame_result,
                                     int quantize_index);
 
   // Gets the number of coding frames for the video. The coding frames include
   // show frame and no show frame.
-  // This funtion should be called after ComputeFirstPassStats().
+  // This function should be called after ComputeFirstPassStats().
   int GetCodingFrameNum();
 
  private:
