@@ -11,6 +11,8 @@
 #ifndef VPX_VP9_SIMPLE_ENCODE_H_
 #define VPX_VP9_SIMPLE_ENCODE_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <memory>
 #include <vector>
@@ -76,6 +78,7 @@ class SimpleEncode {
 
  private:
   class EncodeImpl;
+
   int frame_width_;
   int frame_height_;
   int frame_rate_num_;
