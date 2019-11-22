@@ -279,7 +279,7 @@ void SimpleEncode::EncodeFrameWithQuantizeIndex(
   encode_command_reset_external_quantize_index(&impl_ptr_->cpi->encode_command);
 }
 
-int SimpleEncode::GetCodingFrameNum() {
+int SimpleEncode::GetCodingFrameNum() const {
   assert(impl_ptr_->first_pass_stats.size() - 1 > 0);
   // These are the default settings for now.
   const int multi_layer_arf = 0;

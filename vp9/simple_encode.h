@@ -74,7 +74,7 @@ class SimpleEncode {
   // Gets the number of coding frames for the video. The coding frames include
   // show frame and no show frame.
   // This function should be called after ComputeFirstPassStats().
-  int GetCodingFrameNum();
+  int GetCodingFrameNum() const;
 
  private:
   class EncodeImpl;
