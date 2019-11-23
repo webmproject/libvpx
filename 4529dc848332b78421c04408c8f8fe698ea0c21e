@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b6039b3_adf2fa0c",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-11-23T07:31:25Z",
+      "side": 1,
+      "message": "I don\u0027t think there\u0027s a fallback for this like there is for __has_feature, this will likely break visual studio builds",
+      "revId": "4529dc848332b78421c04408c8f8fe698ea0c21e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef243b53_227dbb67",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-11-23T07:31:25Z",
+      "side": 1,
+      "message": "...the compiler",
+      "range": {
+        "startLine": 58,
+        "startChar": 53,
+        "endLine": 58,
+        "endChar": 69
+      },
+      "revId": "4529dc848332b78421c04408c8f8fe698ea0c21e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbb7353a_ff7b3bb5",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-11-23T07:31:25Z",
+      "side": 1,
+      "message": "eliminating",
+      "range": {
+        "startLine": 59,
+        "startChar": 13,
+        "endLine": 59,
+        "endChar": 24
+      },
+      "revId": "4529dc848332b78421c04408c8f8fe698ea0c21e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
