@@ -221,6 +221,13 @@ void SimpleEncode::EndEncode() {
   rewind(file_);
 }
 
+int SimpleEncode::GetKeyFrameGroupSize(int key_frame_index) const {
+  const VP9_COMP *cpi = impl_ptr_->cpi;
+  return vp9_get_frames_to_next_key(&cpi->oxcf, &cpi->frame_info,
+                                    &cpi->twopass.first_pass_info,
+                                    key_frame_index, cpi->rc.min_gf_interval);
+}
+
 void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   VP9_COMP *cpi = impl_ptr_->cpi;
   struct lookahead_ctx *lookahead = cpi->lookahead;

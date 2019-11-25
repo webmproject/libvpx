@@ -13,9 +13,7 @@
 
 #include <assert.h>
 
-#if CONFIG_RATE_CTRL
 #include "vp9/common/vp9_onyxc_int.h"
-#endif
 #include "vp9/encoder/vp9_lookahead.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 
@@ -248,8 +246,12 @@ void vp9_twopass_postencode_update(struct VP9_COMP *cpi);
 void calculate_coded_size(struct VP9_COMP *cpi, int *scaled_frame_width,
                           int *scaled_frame_height);
 
-#if CONFIG_RATE_CTRL
 struct VP9EncoderConfig;
+int vp9_get_frames_to_next_key(const struct VP9EncoderConfig *oxcf,
+                               const FRAME_INFO *frame_info,
+                               const FIRST_PASS_INFO *first_pass_info,
+                               int kf_show_idx, int min_gf_interval);
+#if CONFIG_RATE_CTRL
 int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
                              const FRAME_INFO *frame_info,
                              const FIRST_PASS_INFO *first_pass_info,

@@ -3068,10 +3068,10 @@ static int test_candidate_kf(const FIRST_PASS_INFO *first_pass_info,
 #define MAX_KF_TOT_BOOST 5400
 #endif
 
-static int get_frames_to_next_key(const VP9EncoderConfig *oxcf,
-                                  const FRAME_INFO *frame_info,
-                                  const FIRST_PASS_INFO *first_pass_info,
-                                  int kf_show_idx, int min_gf_interval) {
+int vp9_get_frames_to_next_key(const VP9EncoderConfig *oxcf,
+                               const FRAME_INFO *frame_info,
+                               const FIRST_PASS_INFO *first_pass_info,
+                               int kf_show_idx, int min_gf_interval) {
   double recent_loop_decay[FRAMES_TO_CHECK_DECAY];
   int j;
   int frames_to_key;
@@ -3184,8 +3184,8 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   kf_mod_err = calc_norm_frame_score(oxcf, frame_info, keyframe_stats,
                                      mean_mod_score, av_err);
 
-  rc->frames_to_key = get_frames_to_next_key(oxcf, frame_info, first_pass_info,
-                                             kf_show_idx, rc->min_gf_interval);
+  rc->frames_to_key = vp9_get_frames_to_next_key(
+      oxcf, frame_info, first_pass_info, kf_show_idx, rc->min_gf_interval);
 
   // If there is a max kf interval set by the user we must obey it.
   // We already breakout of the loop above at 2x max.
@@ -3648,7 +3648,7 @@ int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
 
   while (show_idx < first_pass_info->num_frames) {
     if (rc.frames_to_key == 0) {
-      rc.frames_to_key = get_frames_to_next_key(
+      rc.frames_to_key = vp9_get_frames_to_next_key(
           oxcf, frame_info, first_pass_info, show_idx, rc.min_gf_interval);
       arf_active_or_kf = 1;
     } else {

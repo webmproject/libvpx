@@ -65,6 +65,13 @@ class SimpleEncode {
   // This function should be called after StartEncode() or EncodeFrame().
   void EndEncode();
 
+  // Given a key_frame_index, computes this key frame group's size.
+  // The key frame group size includes one key frame plus the number of
+  // following inter frames. Note that the key frame group size only counts the
+  // show frames. The number of no show frames like alternate refereces are not
+  // counted.
+  int GetKeyFrameGroupSize(int key_frame_index) const;
+
   // Encodes a frame
   // This function should be called after StartEncode() and before EndEncode().
   void EncodeFrame(EncodeFrameResult *encode_frame_result);
