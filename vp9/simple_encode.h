@@ -51,7 +51,10 @@ class SimpleEncode {
   // future encode.
   void ComputeFirstPassStats();
 
-  // Outputs the first pass stats.
+  // Outputs the first pass stats represented by a 2-D vector.
+  // One can use the frame index at first dimension to retrieve the stats for
+  // each video frame. The stats of each video frame is a vector of 25 double
+  // values. For details, please check FIRSTPASS_STATS in vp9_firstpass.h
   std::vector<std::vector<double>> ObserveFirstPassStats();
 
   // Initializes the encoder for actual encoding.
