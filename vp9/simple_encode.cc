@@ -102,6 +102,65 @@ static void update_encode_frame_result(
   encode_frame_result->quantize_index = encode_frame_info->quantize_index;
 }
 
+static void IncreaseGroupOfPictureIndex(GroupOfPicture *group_of_picture) {
+  ++group_of_picture->encode_frame_index;
+}
+
+static int IsGroupOfPictureFinished(const GroupOfPicture &group_of_picture) {
+  return static_cast<size_t>(group_of_picture.encode_frame_index) ==
+         group_of_picture.encode_frame_list.size();
+}
+
+static void SetGroupOfPicture(GroupOfPicture *group_of_picture,
+                              int first_is_key_frame, int use_alt_ref,
+                              int coding_frame_count, int first_show_idx) {
+  // Clean up the state of previous group of picture.
+  group_of_picture->encode_frame_list.clear();
+  group_of_picture->encode_frame_index = 0;
+  {
+    // First frame in the group of pictures. It's either key frame or show inter
+    // frame.
+    EncodeFrameInfo encode_frame_info;
+    if (first_is_key_frame) {
+      encode_frame_info.frame_type = kKeyFrame;
+    } else {
+      encode_frame_info.frame_type = kInterFrame;
+    }
+    encode_frame_info.show_idx = first_show_idx;
+    group_of_picture->encode_frame_list.push_back(encode_frame_info);
+  }
+
+  const int show_frame_count = coding_frame_count - use_alt_ref;
+  if (use_alt_ref) {
+    // If there is alternate reference, it is always coded at the second place.
+    // Its show index (or timestamp) is at the last of this group
+    EncodeFrameInfo encode_frame_info;
+    encode_frame_info.frame_type = kAlternateReference;
+    encode_frame_info.show_idx = first_show_idx + show_frame_count;
+    group_of_picture->encode_frame_list.push_back(encode_frame_info);
+  }
+
+  // Encode the rest show inter frames.
+  for (int i = 1; i < show_frame_count; ++i) {
+    EncodeFrameInfo encode_frame_info;
+    encode_frame_info.frame_type = kInterFrame;
+    encode_frame_info.show_idx = first_show_idx + i;
+    group_of_picture->encode_frame_list.push_back(encode_frame_info);
+  }
+}
+
+static void UpdateGroupOfPicture(GroupOfPicture *group_of_picture,
+                                 const VP9_COMP *cpi) {
+  int first_is_key_frame;
+  int use_alt_ref;
+  int coding_frame_count;
+  int first_show_idx;
+  vp9_get_next_group_of_picture(&first_is_key_frame, &use_alt_ref,
+                                &coding_frame_count, &first_show_idx, cpi);
+  SetGroupOfPicture(group_of_picture, first_is_key_frame, use_alt_ref,
+                    coding_frame_count, first_show_idx);
+}
+
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,
                            int frame_rate_num, int frame_rate_den,
                            int target_bitrate, int num_frames,
@@ -211,6 +270,7 @@ void SimpleEncode::StartEncode() {
   impl_ptr_->cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
   vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
                 frame_height_, 1);
+  UpdateGroupOfPicture(&group_of_picture_, impl_ptr_->cpi);
   rewind(file_);
 }
 
@@ -226,6 +286,15 @@ int SimpleEncode::GetKeyFrameGroupSize(int key_frame_index) const {
   return vp9_get_frames_to_next_key(&cpi->oxcf, &cpi->frame_info,
                                     &cpi->twopass.first_pass_info,
                                     key_frame_index, cpi->rc.min_gf_interval);
+}
+
+GroupOfPicture SimpleEncode::ObserveGroupOfPicture() const {
+  return group_of_picture_;
+}
+
+EncodeFrameInfo SimpleEncode::GetNextEncodeFrameInfo() const {
+  return group_of_picture_
+      .encode_frame_list[group_of_picture_.encode_frame_index];
 }
 
 void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
@@ -276,6 +345,10 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
          max_coding_data_byte_size);
 
   update_encode_frame_result(encode_frame_result, &encode_frame_info);
+  IncreaseGroupOfPictureIndex(&group_of_picture_);
+  if (IsGroupOfPictureFinished(group_of_picture_)) {
+    UpdateGroupOfPicture(&group_of_picture_, impl_ptr_->cpi);
+  }
 }
 
 void SimpleEncode::EncodeFrameWithQuantizeIndex(

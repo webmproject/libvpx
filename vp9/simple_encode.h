@@ -25,6 +25,11 @@ enum FrameType {
   kAlternateReference,
 };
 
+struct EncodeFrameInfo {
+  int show_idx;
+  FrameType frame_type;
+};
+
 struct EncodeFrameResult {
   int show_idx;
   FrameType frame_type;
@@ -36,6 +41,11 @@ struct EncodeFrameResult {
   double psnr;
   uint64_t sse;
   int quantize_index;
+};
+
+struct GroupOfPicture {
+  std::vector<EncodeFrameInfo> encode_frame_list;
+  int encode_frame_index;
 };
 
 class SimpleEncode {
@@ -72,6 +82,14 @@ class SimpleEncode {
   // counted.
   int GetKeyFrameGroupSize(int key_frame_index) const;
 
+  // Provides the group of pictures that the next coding frame is in.
+  // Only call this function between StartEncode() and EndEncode()
+  GroupOfPicture ObserveGroupOfPicture() const;
+
+  // Gets encode_frame_info for the next coding frame.
+  // Only call this function between StartEncode() and EndEncode()
+  EncodeFrameInfo GetNextEncodeFrameInfo() const;
+
   // Encodes a frame
   // This function should be called after StartEncode() and before EndEncode().
   void EncodeFrame(EncodeFrameResult *encode_frame_result);
@@ -97,6 +115,8 @@ class SimpleEncode {
   int num_frames_;
   std::FILE *file_;
   std::unique_ptr<EncodeImpl> impl_ptr_;
+
+  GroupOfPicture group_of_picture_;
 };
 
 }  // namespace vp9
