@@ -1733,9 +1733,9 @@ static int lpf_map_write_check(VP9LfSync *lf_sync, int row, int num_tile_cols) {
   int return_val = 0;
 #if CONFIG_MULTITHREAD
   int corrupted;
-  pthread_mutex_lock(&lf_sync->lf_mutex);
+  pthread_mutex_lock(lf_sync->lf_mutex);
   corrupted = lf_sync->corrupted;
-  pthread_mutex_unlock(&lf_sync->lf_mutex);
+  pthread_mutex_unlock(lf_sync->lf_mutex);
   if (!corrupted) {
     pthread_mutex_lock(&lf_sync->recon_done_mutex[row]);
     lf_sync->num_tiles_done[row] += 1;
