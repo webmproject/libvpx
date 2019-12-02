@@ -2072,9 +2072,10 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
      * score, otherwise it may be worse off than an "un-boosted" frame
      */
     else {
+      // Avoid division by 0 by clamping cpi->twopass.kf_group_error_left to 1
       int alt_gf_bits =
           (int)((double)cpi->twopass.kf_group_bits * mod_frame_err /
-                DOUBLE_DIVIDE_CHECK((double)cpi->twopass.kf_group_error_left));
+                (double)VPXMAX(cpi->twopass.kf_group_error_left, 1));
 
       if (alt_gf_bits > gf_bits) {
         gf_bits = alt_gf_bits;
