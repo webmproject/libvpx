@@ -4334,7 +4334,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 
 #if CONFIG_RATE_CTRL
     // This part needs to be after save_coding_context() because
-    // restore_coding_context may be called in the end of this function.
+    // restore_coding_context will be called in the end of this function.
     // TODO(angiebird): This is a hack for making sure the encoder use the
     // external_quantize_index exactly. Avoid this kind of hack later.
     if (cpi->encode_command.use_external_quantize_index) {
@@ -4518,7 +4518,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     }
 
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF)
-      if (loop || !enable_acl) restore_coding_context(cpi);
+      if (loop) restore_coding_context(cpi);
   } while (loop);
 
 #ifdef AGGRESSIVE_VBR
@@ -4544,13 +4544,11 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     // Skip recoding, if model diff is below threshold
     const int thresh = compute_context_model_thresh(cpi);
     const int diff = compute_context_model_diff(cm);
-    if (diff < thresh) {
-      vpx_clear_system_state();
-      restore_coding_context(cpi);
-      return;
+    if (diff >= thresh) {
+      vp9_encode_frame(cpi);
     }
-
-    vp9_encode_frame(cpi);
+  }
+  if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) {
     vpx_clear_system_state();
     restore_coding_context(cpi);
   }

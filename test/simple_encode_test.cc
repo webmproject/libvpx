@@ -107,6 +107,48 @@ TEST(SimpleEncode, EncodeFrameWithQuantizeIndex) {
   }
   simple_encode.EndEncode();
 }
+
+TEST(SimpleEncode, EncodeConsistencyTest) {
+  std::vector<int> quantize_index_list;
+  std::vector<uint64_t> ref_sse_list;
+  std::vector<double> ref_psnr_list;
+  std::vector<size_t> ref_bit_size_list;
+  {
+    SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                               target_bitrate, num_frames, infile_path);
+    simple_encode.ComputeFirstPassStats();
+    const int num_coding_frames = simple_encode.GetCodingFrameNum();
+    simple_encode.StartEncode();
+    for (int i = 0; i < num_coding_frames; ++i) {
+      EncodeFrameResult encode_frame_result;
+      simple_encode.EncodeFrame(&encode_frame_result);
+      quantize_index_list.push_back(encode_frame_result.quantize_index);
+      ref_sse_list.push_back(encode_frame_result.sse);
+      ref_psnr_list.push_back(encode_frame_result.psnr);
+      ref_bit_size_list.push_back(encode_frame_result.coding_data_bit_size);
+    }
+    simple_encode.EndEncode();
+  }
+  {
+    SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                               target_bitrate, num_frames, infile_path);
+    simple_encode.ComputeFirstPassStats();
+    const int num_coding_frames = simple_encode.GetCodingFrameNum();
+    EXPECT_EQ(static_cast<size_t>(num_coding_frames),
+              quantize_index_list.size());
+    simple_encode.StartEncode();
+    for (int i = 0; i < num_coding_frames; ++i) {
+      EncodeFrameResult encode_frame_result;
+      simple_encode.EncodeFrameWithQuantizeIndex(&encode_frame_result,
+                                                 quantize_index_list[i]);
+      EXPECT_EQ(encode_frame_result.quantize_index, quantize_index_list[i]);
+      EXPECT_EQ(encode_frame_result.sse, ref_sse_list[i]);
+      EXPECT_DOUBLE_EQ(encode_frame_result.psnr, ref_psnr_list[i]);
+      EXPECT_EQ(encode_frame_result.coding_data_bit_size, ref_bit_size_list[i]);
+    }
+    simple_encode.EndEncode();
+  }
+}
 }  // namespace
 
 }  // namespace vp9
