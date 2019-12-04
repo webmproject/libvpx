@@ -2171,8 +2171,6 @@ static void init_ref_frame_bufs(VP9_COMMON *cm) {
   }
 }
 
-static void init_motion_estimation(VP9_COMP *cpi);
-
 static void update_initial_width(VP9_COMP *cpi, int use_highbitdepth,
                                  int subsampling_x, int subsampling_y) {
   VP9_COMMON *const cm = &cpi->common;
@@ -2193,7 +2191,6 @@ static void update_initial_width(VP9_COMP *cpi, int use_highbitdepth,
     cm->use_highbitdepth = use_highbitdepth;
 #endif
     alloc_util_frame_buffers(cpi);
-    init_motion_estimation(cpi);
     cpi->initial_width = cm->width;
     cpi->initial_height = cm->height;
     cpi->initial_mbs = cm->MBs;
