@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a2eca5d_9a0be659",
+        "filename": "test/simple_encode_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2019-12-04T20:33:05Z",
+      "side": 1,
+      "message": "unrelated to this change, but you should have a newline after this one and drop the blank line between closing the two namespaces (line 153)",
+      "revId": "42916ce60416d00f1188afd09c6a088ae9c91de9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
