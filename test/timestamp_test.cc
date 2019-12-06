@@ -100,6 +100,8 @@ TEST_P(TimestampTestVp9Only, TestVpxRollover) {
 
 VP8_INSTANTIATE_TEST_CASE(TimestampTest,
                           ::testing::Values(::libvpx_test::kTwoPassGood));
+VP8_INSTANTIATE_TEST_CASE(TimestampTestVp9Only,
+                          ::testing::Values(::libvpx_test::kTwoPassGood));
 VP9_INSTANTIATE_TEST_CASE(TimestampTest,
                           ::testing::Values(::libvpx_test::kTwoPassGood));
 VP9_INSTANTIATE_TEST_CASE(TimestampTestVp9Only,
