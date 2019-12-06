@@ -1130,14 +1130,14 @@ EOF
                 ;;
             esac
 
-            asm_conversion_cmd="${source_path}/build/make/ads2gas_apple.pl"
-
             if [ "$(show_darwin_sdk_major_version iphoneos)" -gt 8 ]; then
               check_add_cflags -fembed-bitcode
               check_add_asflags -fembed-bitcode
               check_add_ldflags -fembed-bitcode
             fi
           fi
+
+          asm_conversion_cmd="${source_path}/build/make/ads2gas_apple.pl"
           ;;
 
         linux*)
