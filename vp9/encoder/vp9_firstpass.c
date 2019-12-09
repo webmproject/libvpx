@@ -2458,6 +2458,22 @@ typedef struct RANGE {
   int max;
 } RANGE;
 
+/* get_gop_coding_frame_num() depends on several fields in RATE_CONTROL *rc as
+ * follows.
+ * Static fields:
+ * (The following fields will remain unchanged after initialization of encoder.)
+ *   rc->static_scene_max_gf_interval
+ *   rc->min_gf_interval
+ *
+ * Dynamic fields:
+ * (The following fields will be updated before or after coding each frame.)
+ *   rc->frames_to_key
+ *   rc->frames_since_key
+ *   rc->source_alt_ref_active
+ *
+ * TODO(angiebird): Separate the dynamic fields and static fields into two
+ * structs.
+ */
 static int get_gop_coding_frame_num(
     int *use_alt_ref, const FRAME_INFO *frame_info,
     const FIRST_PASS_INFO *first_pass_info, const RATE_CONTROL *rc,
@@ -3675,6 +3691,7 @@ int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
     if (rc.frames_to_key == 0) {
       rc.frames_to_key = vp9_get_frames_to_next_key(
           oxcf, frame_info, first_pass_info, show_idx, rc.min_gf_interval);
+      rc.frames_since_key = 0;
       first_is_key_frame = 1;
     }
 
