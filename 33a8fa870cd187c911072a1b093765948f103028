@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dfae676d_ef07e468",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2019-12-09T23:00:27Z",
+      "side": 1,
+      "message": "Whoops, it looks like this was missed. We have an extra in .mailmap to account for vitlaybuka/vitalybuka. Not a problem, just a heads up.",
+      "range": {
+        "startLine": 2,
+        "startChar": 24,
+        "endLine": 2,
+        "endChar": 49
+      },
+      "revId": "33a8fa870cd187c911072a1b093765948f103028",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
