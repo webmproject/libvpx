@@ -111,9 +111,9 @@ static int IsGroupOfPictureFinished(const GroupOfPicture &group_of_picture) {
          group_of_picture.encode_frame_list.size();
 }
 
-static void SetGroupOfPicture(GroupOfPicture *group_of_picture,
-                              int first_is_key_frame, int use_alt_ref,
-                              int coding_frame_count, int first_show_idx) {
+static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
+                              int coding_frame_count, int first_show_idx,
+                              GroupOfPicture *group_of_picture) {
   // Clean up the state of previous group of picture.
   group_of_picture->encode_frame_list.clear();
   group_of_picture->encode_frame_index = 0;
@@ -149,16 +149,16 @@ static void SetGroupOfPicture(GroupOfPicture *group_of_picture,
   }
 }
 
-static void UpdateGroupOfPicture(GroupOfPicture *group_of_picture,
-                                 const VP9_COMP *cpi) {
+static void UpdateGroupOfPicture(const VP9_COMP *cpi,
+                                 GroupOfPicture *group_of_picture) {
   int first_is_key_frame;
   int use_alt_ref;
   int coding_frame_count;
   int first_show_idx;
-  vp9_get_next_group_of_picture(&first_is_key_frame, &use_alt_ref,
-                                &coding_frame_count, &first_show_idx, cpi);
-  SetGroupOfPicture(group_of_picture, first_is_key_frame, use_alt_ref,
-                    coding_frame_count, first_show_idx);
+  vp9_get_next_group_of_picture(cpi, &first_is_key_frame, &use_alt_ref,
+                                &coding_frame_count, &first_show_idx);
+  SetGroupOfPicture(first_is_key_frame, use_alt_ref, coding_frame_count,
+                    first_show_idx, group_of_picture);
 }
 
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,
@@ -270,7 +270,7 @@ void SimpleEncode::StartEncode() {
   impl_ptr_->cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
   vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
                 frame_height_, 1);
-  UpdateGroupOfPicture(&group_of_picture_, impl_ptr_->cpi);
+  UpdateGroupOfPicture(impl_ptr_->cpi, &group_of_picture_);
   rewind(file_);
 }
 
@@ -347,7 +347,7 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   update_encode_frame_result(encode_frame_result, &encode_frame_info);
   IncreaseGroupOfPictureIndex(&group_of_picture_);
   if (IsGroupOfPictureFinished(group_of_picture_)) {
-    UpdateGroupOfPicture(&group_of_picture_, impl_ptr_->cpi);
+    UpdateGroupOfPicture(impl_ptr_->cpi, &group_of_picture_);
   }
 }
 

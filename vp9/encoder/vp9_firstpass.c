@@ -3643,9 +3643,9 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
 }
 
 #if CONFIG_RATE_CTRL
-void vp9_get_next_group_of_picture(int *first_is_key_frame, int *use_alt_ref,
-                                   int *coding_frame_count, int *first_show_idx,
-                                   const VP9_COMP *cpi) {
+void vp9_get_next_group_of_picture(const VP9_COMP *cpi, int *first_is_key_frame,
+                                   int *use_alt_ref, int *coding_frame_count,
+                                   int *first_show_idx) {
   // We make a copy of rc here because we want to get information from the
   // encoder without changing its state.
   // TODO(angiebird): Avoid copying rc here.

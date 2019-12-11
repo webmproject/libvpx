@@ -258,9 +258,10 @@ int vp9_get_frames_to_next_key(const struct VP9EncoderConfig *oxcf,
  * starts or after vp9_get_compressed_data() when the encoding process of
  * the last group of pictures is just finished.
  */
-void vp9_get_next_group_of_picture(int *first_is_key_frame, int *use_alt_ref,
-                                   int *coding_frame_count, int *first_show_idx,
-                                   const struct VP9_COMP *cpi);
+void vp9_get_next_group_of_picture(const struct VP9_COMP *cpi,
+                                   int *first_is_key_frame, int *use_alt_ref,
+                                   int *coding_frame_count,
+                                   int *first_show_idx);
 
 /*!\brief Call this function before coding a new group of pictures to get
  * information about it.
