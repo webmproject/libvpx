@@ -149,6 +149,24 @@ TEST(SimpleEncode, EncodeConsistencyTest) {
     simple_encode.EndEncode();
   }
 }
-}  // namespace
 
+TEST(SimpleEncode, GetEncodeFrameInfo) {
+  // Makes sure that the encode_frame_info obtained from GetEncodeFrameInfo()
+  // matches the counterpart in encode_frame_result obtained from EncodeFrame()
+  SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                             target_bitrate, num_frames, infile_path);
+  simple_encode.ComputeFirstPassStats();
+  const int num_coding_frames = simple_encode.GetCodingFrameNum();
+  simple_encode.StartEncode();
+  for (int i = 0; i < num_coding_frames; ++i) {
+    EncodeFrameInfo encode_frame_info = simple_encode.GetNextEncodeFrameInfo();
+    EncodeFrameResult encode_frame_result;
+    simple_encode.EncodeFrame(&encode_frame_result);
+    EXPECT_EQ(encode_frame_info.show_idx, encode_frame_result.show_idx);
+    EXPECT_EQ(encode_frame_info.frame_type, encode_frame_result.frame_type);
+  }
+  simple_encode.EndEncode();
+}
+
+}  // namespace
 }  // namespace vp9

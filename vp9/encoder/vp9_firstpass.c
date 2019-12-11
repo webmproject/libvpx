@@ -3643,6 +3643,37 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
 }
 
 #if CONFIG_RATE_CTRL
+void vp9_get_next_group_of_picture(int *first_is_key_frame, int *use_alt_ref,
+                                   int *coding_frame_count, int *first_show_idx,
+                                   const VP9_COMP *cpi) {
+  // We make a copy of rc here because we want to get information from the
+  // encoder without changing its state.
+  // TODO(angiebird): Avoid copying rc here.
+  RATE_CONTROL rc = cpi->rc;
+  const int last_gop_use_alt_ref = rc.source_alt_ref_active;
+  const int multi_layer_arf = 0;
+  const int allow_alt_ref = 1;
+  // We assume that current_video_frame is updated to the show index of the
+  // frame we are about to called. Note that current_video_frame is updated at
+  // the end of encode_frame_to_data_rate().
+  // TODO(angiebird): Avoid this kind of fragile style.
+  *first_show_idx = cpi->common.current_video_frame;
+
+  *first_is_key_frame = 0;
+  if (rc.frames_to_key == 0) {
+    rc.frames_to_key = vp9_get_frames_to_next_key(
+        &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info,
+        *first_show_idx, rc.min_gf_interval);
+    rc.frames_since_key = 0;
+    *first_is_key_frame = 1;
+  }
+
+  *coding_frame_count = vp9_get_gop_coding_frame_count(
+      use_alt_ref, &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info,
+      &rc, *first_show_idx, multi_layer_arf, allow_alt_ref, *first_is_key_frame,
+      last_gop_use_alt_ref);
+}
+
 int vp9_get_gop_coding_frame_count(
     int *use_alt_ref, const VP9EncoderConfig *oxcf,
     const FRAME_INFO *frame_info, const FIRST_PASS_INFO *first_pass_info,

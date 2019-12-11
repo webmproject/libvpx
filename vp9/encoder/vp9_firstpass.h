@@ -252,6 +252,16 @@ int vp9_get_frames_to_next_key(const struct VP9EncoderConfig *oxcf,
                                const FIRST_PASS_INFO *first_pass_info,
                                int kf_show_idx, int min_gf_interval);
 #if CONFIG_RATE_CTRL
+
+/* Call this function to get info about the next group of pictures.
+ * This function should be called after vp9_create_compressor() when encoding
+ * starts or after vp9_get_compressed_data() when the encoding process of
+ * the last group of pictures is just finished.
+ */
+void vp9_get_next_group_of_picture(int *first_is_key_frame, int *use_alt_ref,
+                                   int *coding_frame_count, int *first_show_idx,
+                                   const struct VP9_COMP *cpi);
+
 /*!\brief Call this function before coding a new group of pictures to get
  * information about it.
  * \param[in] oxcf                 Encoder config
@@ -280,8 +290,8 @@ int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
                              int multi_layer_arf, int allow_alt_ref);
 #endif
 
-FIRSTPASS_STATS vp9_get_frame_stats(const TWO_PASS *two_pass);
-FIRSTPASS_STATS vp9_get_total_stats(const TWO_PASS *two_pass);
+FIRSTPASS_STATS vp9_get_frame_stats(const TWO_PASS *twopass);
+FIRSTPASS_STATS vp9_get_total_stats(const TWO_PASS *twopass);
 
 #ifdef __cplusplus
 }  // extern "C"
