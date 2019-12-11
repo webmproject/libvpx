@@ -377,6 +377,22 @@ int SimpleEncode::GetCodingFrameNum() const {
                                   multi_layer_arf, allow_alt_ref);
 }
 
+uint64_t SimpleEncode::GetFramePixelCount() const {
+  assert(frame_width_ % 2 == 0);
+  assert(frame_heigh_ % 2 == 0);
+  switch (impl_ptr_->img_fmt) {
+    case VPX_IMG_FMT_I420: return frame_width_ * frame_height_ * 3 / 2;
+    case VPX_IMG_FMT_I422: return frame_width_ * frame_height_ * 2;
+    case VPX_IMG_FMT_I444: return frame_width_ * frame_height_ * 3;
+    case VPX_IMG_FMT_I440: return frame_width_ * frame_height_ * 2;
+    case VPX_IMG_FMT_I42016: return frame_width_ * frame_height_ * 3 / 2;
+    case VPX_IMG_FMT_I42216: return frame_width_ * frame_height_ * 2;
+    case VPX_IMG_FMT_I44416: return frame_width_ * frame_height_ * 3;
+    case VPX_IMG_FMT_I44016: return frame_width_ * frame_height_ * 2;
+    default: return 0;
+  }
+}
+
 SimpleEncode::~SimpleEncode() {
   if (this->file_ != NULL) {
     fclose(this->file_);

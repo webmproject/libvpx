@@ -168,5 +168,12 @@ TEST(SimpleEncode, GetEncodeFrameInfo) {
   simple_encode.EndEncode();
 }
 
+TEST(SimpleEncode, GetFramePixelCount) {
+  SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                             target_bitrate, num_frames, infile_path);
+  EXPECT_EQ(simple_encode.GetFramePixelCount(),
+            static_cast<uint64_t>(w * h * 3 / 2));
+}
+
 }  // namespace
 }  // namespace vp9

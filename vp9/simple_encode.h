@@ -104,6 +104,9 @@ class SimpleEncode {
   // This function should be called after ComputeFirstPassStats().
   int GetCodingFrameNum() const;
 
+  // Gets the total number of pixels of YUV planes per frame.
+  uint64_t GetFramePixelCount() const;
+
  private:
   class EncodeImpl;
 
