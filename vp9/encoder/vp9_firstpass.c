@@ -3669,16 +3669,18 @@ void vp9_get_next_group_of_picture(const VP9_COMP *cpi, int *first_is_key_frame,
   }
 
   *coding_frame_count = vp9_get_gop_coding_frame_count(
-      use_alt_ref, &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info,
-      &rc, *first_show_idx, multi_layer_arf, allow_alt_ref, *first_is_key_frame,
-      last_gop_use_alt_ref);
+      &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info, &rc,
+      *first_show_idx, multi_layer_arf, allow_alt_ref, *first_is_key_frame,
+      last_gop_use_alt_ref, use_alt_ref);
 }
 
-int vp9_get_gop_coding_frame_count(
-    int *use_alt_ref, const VP9EncoderConfig *oxcf,
-    const FRAME_INFO *frame_info, const FIRST_PASS_INFO *first_pass_info,
-    const RATE_CONTROL *rc, int show_idx, int multi_layer_arf,
-    int allow_alt_ref, int first_is_key_frame, int last_gop_use_alt_ref) {
+int vp9_get_gop_coding_frame_count(const VP9EncoderConfig *oxcf,
+                                   const FRAME_INFO *frame_info,
+                                   const FIRST_PASS_INFO *first_pass_info,
+                                   const RATE_CONTROL *rc, int show_idx,
+                                   int multi_layer_arf, int allow_alt_ref,
+                                   int first_is_key_frame,
+                                   int last_gop_use_alt_ref, int *use_alt_ref) {
   int frame_count;
   double gop_intra_factor;
   const int arf_active_or_kf = last_gop_use_alt_ref || first_is_key_frame;
@@ -3727,9 +3729,8 @@ int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
     }
 
     gop_coding_frame_count = vp9_get_gop_coding_frame_count(
-        &use_alt_ref, oxcf, frame_info, first_pass_info, &rc, show_idx,
-        multi_layer_arf, allow_alt_ref, first_is_key_frame,
-        last_gop_use_alt_ref);
+        oxcf, frame_info, first_pass_info, &rc, show_idx, multi_layer_arf,
+        allow_alt_ref, first_is_key_frame, last_gop_use_alt_ref, &use_alt_ref);
 
     rc.source_alt_ref_active = use_alt_ref;
     last_gop_use_alt_ref = use_alt_ref;

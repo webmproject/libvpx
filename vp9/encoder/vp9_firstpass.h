@@ -279,11 +279,13 @@ void vp9_get_next_group_of_picture(const struct VP9_COMP *cpi,
  *
  * \return Returns coding frame count
  */
-int vp9_get_gop_coding_frame_count(
-    int *use_alt_ref, const struct VP9EncoderConfig *oxcf,
-    const FRAME_INFO *frame_info, const FIRST_PASS_INFO *first_pass_info,
-    const RATE_CONTROL *rc, int show_idx, int multi_layer_arf,
-    int allow_alt_ref, int first_is_key_frame, int last_gop_use_alt_ref);
+int vp9_get_gop_coding_frame_count(const struct VP9EncoderConfig *oxcf,
+                                   const FRAME_INFO *frame_info,
+                                   const FIRST_PASS_INFO *first_pass_info,
+                                   const RATE_CONTROL *rc, int show_idx,
+                                   int multi_layer_arf, int allow_alt_ref,
+                                   int first_is_key_frame,
+                                   int last_gop_use_alt_ref, int *use_alt_ref);
 
 int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
                              const FRAME_INFO *frame_info,
