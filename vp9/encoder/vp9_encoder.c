@@ -7107,17 +7107,24 @@ static void update_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result,
                                        const YV12_BUFFER_CONFIG *coded_frame,
                                        int quantize_index, uint32_t bit_depth,
                                        uint32_t input_bit_depth) {
+#if CONFIG_RATE_CTRL
   PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
   vpx_calc_highbd_psnr(source_frame, coded_frame, &psnr, bit_depth,
                        input_bit_depth);
-#else
+#else   // CONFIG_VP9_HIGHBITDEPTH
   (void)bit_depth;
   (void)input_bit_depth;
   vpx_calc_psnr(source_frame, coded_frame, &psnr);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   encode_frame_result->psnr = psnr.psnr[0];
   encode_frame_result->sse = psnr.sse[0];
+#else   // CONFIG_RATE_CTRL
+  (void)bit_depth;
+  (void)input_bit_depth;
+  (void)source_frame;
+  (void)coded_frame;
+#endif  // CONFIG_RATE_CTRL
   encode_frame_result->show_idx = show_idx;
   encode_frame_result->update_type = update_type;
   encode_frame_result->quantize_index = quantize_index;

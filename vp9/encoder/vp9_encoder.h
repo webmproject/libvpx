@@ -853,8 +853,10 @@ typedef struct VP9_COMP {
 typedef struct ENCODE_FRAME_RESULT {
   int show_idx;
   FRAME_UPDATE_TYPE update_type;
+#if CONFIG_RATE_CTRL
   double psnr;
   uint64_t sse;
+#endif  // CONFIG_RATE_CTRL
   int quantize_index;
 } ENCODE_FRAME_RESULT;
 
