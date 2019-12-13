@@ -7100,13 +7100,12 @@ static void init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result) {
 }
 
 #if !CONFIG_REALTIME_ONLY
-static void update_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result,
-                                       int show_idx,
-                                       FRAME_UPDATE_TYPE update_type,
-                                       const YV12_BUFFER_CONFIG *source_frame,
-                                       const YV12_BUFFER_CONFIG *coded_frame,
-                                       int quantize_index, uint32_t bit_depth,
-                                       uint32_t input_bit_depth) {
+static void update_encode_frame_result(
+    int show_idx, FRAME_UPDATE_TYPE update_type,
+    const YV12_BUFFER_CONFIG *source_frame,
+    const YV12_BUFFER_CONFIG *coded_frame, int quantize_index,
+    uint32_t bit_depth, uint32_t input_bit_depth,
+    ENCODE_FRAME_RESULT *encode_frame_result) {
 #if CONFIG_RATE_CTRL
   PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -7422,10 +7421,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     // TODO(angiebird): Improve the codebase to make the update of frame
     // dependent variables more robust.
     update_encode_frame_result(
-        encode_frame_result, source->show_idx,
+        source->show_idx,
         cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index],
         cpi->Source, get_frame_new_buffer(cm), vp9_get_quantizer(cpi),
-        cpi->oxcf.input_bit_depth, cm->bit_depth);
+        cpi->oxcf.input_bit_depth, cm->bit_depth, encode_frame_result);
     vp9_twopass_postencode_update(cpi);
   } else if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
