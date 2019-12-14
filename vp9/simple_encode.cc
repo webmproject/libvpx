@@ -117,6 +117,8 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
   // Clean up the state of previous group of picture.
   group_of_picture->encode_frame_list.clear();
   group_of_picture->encode_frame_index = 0;
+  group_of_picture->show_frame_count = coding_frame_count - use_alt_ref;
+  group_of_picture->start_show_index = first_show_idx;
   {
     // First frame in the group of pictures. It's either key frame or show inter
     // frame.

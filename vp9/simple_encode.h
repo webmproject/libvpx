@@ -57,6 +57,11 @@ struct GroupOfPicture {
   // the group of pictures is coded. Otherwise, encode_frame_index will be
   // increased after each EncodeFrame()/EncodeFrameWithQuantizeIndex() call.
   int encode_frame_index;
+  // Number of show frames in this group of pictures.
+  int show_frame_count;
+  // The show index/timestamp of the earliest show frame in the group of
+  // pictures.
+  int start_show_index;
 };
 
 class SimpleEncode {
