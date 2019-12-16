@@ -52,11 +52,12 @@ struct GroupOfPicture {
   std::vector<EncodeFrameInfo> encode_frame_list;
   // Indicates the index of the next coding frame in encode_frame_list.
   // In other words, EncodeFrameInfo of the next coding frame can be
-  // obtained with encode_frame_list[encode_frame_index].
-  // Internally, encode_frame_index will be set to zero after the last frame of
-  // the group of pictures is coded. Otherwise, encode_frame_index will be
-  // increased after each EncodeFrame()/EncodeFrameWithQuantizeIndex() call.
-  int encode_frame_index;
+  // obtained with encode_frame_list[next_encode_frame_index].
+  // Internally, next_encode_frame_index will be set to zero after the last
+  // frame of the group of pictures is coded. Otherwise, next_encode_frame_index
+  // will be increased after each EncodeFrame()/EncodeFrameWithQuantizeIndex()
+  // call.
+  int next_encode_frame_index;
   // Number of show frames in this group of pictures.
   int show_frame_count;
   // The show index/timestamp of the earliest show frame in the group of

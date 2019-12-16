@@ -103,11 +103,11 @@ static void update_encode_frame_result(
 }
 
 static void IncreaseGroupOfPictureIndex(GroupOfPicture *group_of_picture) {
-  ++group_of_picture->encode_frame_index;
+  ++group_of_picture->next_encode_frame_index;
 }
 
 static int IsGroupOfPictureFinished(const GroupOfPicture &group_of_picture) {
-  return static_cast<size_t>(group_of_picture.encode_frame_index) ==
+  return static_cast<size_t>(group_of_picture.next_encode_frame_index) ==
          group_of_picture.encode_frame_list.size();
 }
 
@@ -116,7 +116,7 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
                               GroupOfPicture *group_of_picture) {
   // Clean up the state of previous group of picture.
   group_of_picture->encode_frame_list.clear();
-  group_of_picture->encode_frame_index = 0;
+  group_of_picture->next_encode_frame_index = 0;
   group_of_picture->show_frame_count = coding_frame_count - use_alt_ref;
   group_of_picture->start_show_index = first_show_idx;
   {
@@ -296,7 +296,7 @@ GroupOfPicture SimpleEncode::ObserveGroupOfPicture() const {
 
 EncodeFrameInfo SimpleEncode::GetNextEncodeFrameInfo() const {
   return group_of_picture_
-      .encode_frame_list[group_of_picture_.encode_frame_index];
+      .encode_frame_list[group_of_picture_.next_encode_frame_index];
 }
 
 void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
