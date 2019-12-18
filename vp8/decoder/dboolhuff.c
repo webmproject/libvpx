@@ -15,6 +15,8 @@
 int vp8dx_start_decode(BOOL_DECODER *br, const unsigned char *source,
                        unsigned int source_sz, vpx_decrypt_cb decrypt_cb,
                        void *decrypt_state) {
+  if (source_sz && !source) return 1;
+
   // To simplify calling code this fuction can be called with |source| == null
   // and |source_sz| == 0. This and vp8dx_bool_decoder_fill() are essentially
   // no-ops in this case.
@@ -26,8 +28,6 @@ int vp8dx_start_decode(BOOL_DECODER *br, const unsigned char *source,
   br->range = 255;
   br->decrypt_cb = decrypt_cb;
   br->decrypt_state = decrypt_state;
-
-  if (source_sz && !source) return 1;
 
   /* Populate the buffer */
   vp8dx_bool_decoder_fill(br);
