@@ -633,7 +633,7 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Target bitrate for each spatial layer.
    *
    * These values specify the target coding bitrate to be used for each
-   * spatial layer.
+   * spatial layer. (in kbps)
    */
   unsigned int ss_target_bitrate[VPX_SS_MAX_LAYERS];
 
@@ -646,7 +646,7 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Target bitrate for each temporal layer.
    *
    * These values specify the target coding bitrate to be used for each
-   * temporal layer.
+   * temporal layer. (in kbps)
    */
   unsigned int ts_target_bitrate[VPX_TS_MAX_LAYERS];
 
@@ -678,7 +678,7 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Target bitrate for each spatial/temporal layer.
    *
    * These values specify the target coding bitrate to be used for each
-   * spatial/temporal layer.
+   * spatial/temporal layer. (in kbps)
    *
    */
   unsigned int layer_target_bitrate[VPX_MAX_LAYERS];
