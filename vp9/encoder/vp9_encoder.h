@@ -856,6 +856,7 @@ typedef struct ENCODE_FRAME_RESULT {
 #if CONFIG_RATE_CTRL
   double psnr;
   uint64_t sse;
+  FRAME_COUNTS frame_counts;
 #endif  // CONFIG_RATE_CTRL
   int quantize_index;
 } ENCODE_FRAME_RESULT;

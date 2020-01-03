@@ -30,6 +30,53 @@ struct EncodeFrameInfo {
   FrameType frame_type;
 };
 
+// This structure is a copy of vp9 |nmv_component_counts|.
+struct NewMotionvectorComponentCounts {
+  std::vector<unsigned int> sign;
+  std::vector<unsigned int> classes;
+  std::vector<unsigned int> class0;
+  std::vector<std::vector<unsigned int>> bits;
+  std::vector<std::vector<unsigned int>> class0_fp;
+  std::vector<unsigned int> fp;
+  std::vector<unsigned int> class0_hp;
+  std::vector<unsigned int> hp;
+};
+
+// This structure is a copy of vp9 |nmv_context_counts|.
+struct NewMotionVectorContextCounts {
+  std::vector<unsigned int> joints;
+  std::vector<NewMotionvectorComponentCounts> comps;
+};
+
+// This structure is a copy of vp9 |tx_counts|.
+struct TransformSizeCounts {
+  std::vector<std::vector<unsigned int>> p32x32;
+  std::vector<std::vector<unsigned int>> p16x16;
+  std::vector<std::vector<unsigned int>> p8x8;
+  std::vector<unsigned int> tx_totals;
+};
+
+// This structure is a copy of vp9 |FRAME_COUNTS|.
+struct FrameCounts {
+  std::vector<std::vector<unsigned int>> y_mode;
+  std::vector<std::vector<unsigned int>> uv_mode;
+  std::vector<std::vector<unsigned int>> partition;
+  std::vector<std::vector<
+      std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>>
+      coef;
+  std::vector<std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>
+      eob_branch;
+  std::vector<std::vector<unsigned int>> switchable_interp;
+  std::vector<std::vector<unsigned int>> inter_mode;
+  std::vector<std::vector<unsigned int>> intra_inter;
+  std::vector<std::vector<unsigned int>> comp_inter;
+  std::vector<std::vector<std::vector<unsigned int>>> single_ref;
+  std::vector<std::vector<unsigned int>> comp_ref;
+  std::vector<std::vector<unsigned int>> skip;
+  TransformSizeCounts tx;
+  NewMotionVectorContextCounts mv;
+};
+
 struct EncodeFrameResult {
   int show_idx;
   FrameType frame_type;
@@ -41,6 +88,7 @@ struct EncodeFrameResult {
   double psnr;
   uint64_t sse;
   int quantize_index;
+  FrameCounts frame_counts;
 };
 
 struct GroupOfPicture {

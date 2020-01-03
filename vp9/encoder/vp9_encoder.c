@@ -7100,11 +7100,130 @@ static void init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result) {
 }
 
 #if !CONFIG_REALTIME_ONLY
+#if CONFIG_RATE_CTRL
+static void copy_frame_counts(const FRAME_COUNTS *input_counts,
+                              FRAME_COUNTS *output_counts) {
+  int i, j, k, l, m, n;
+  for (i = 0; i < BLOCK_SIZE_GROUPS; ++i) {
+    for (j = 0; j < INTRA_MODES; ++j) {
+      output_counts->y_mode[i][j] = input_counts->y_mode[i][j];
+    }
+  }
+  for (i = 0; i < INTRA_MODES; ++i) {
+    for (j = 0; j < INTRA_MODES; ++j) {
+      output_counts->uv_mode[i][j] = input_counts->uv_mode[i][j];
+    }
+  }
+  for (i = 0; i < PARTITION_CONTEXTS; ++i) {
+    for (j = 0; j < PARTITION_TYPES; ++j) {
+      output_counts->partition[i][j] = input_counts->partition[i][j];
+    }
+  }
+  for (i = 0; i < TX_SIZES; ++i) {
+    for (j = 0; j < PLANE_TYPES; ++j) {
+      for (k = 0; k < REF_TYPES; ++k) {
+        for (l = 0; l < COEF_BANDS; ++l) {
+          for (m = 0; m < COEFF_CONTEXTS; ++m) {
+            output_counts->eob_branch[i][j][k][l][m] =
+                input_counts->eob_branch[i][j][k][l][m];
+            for (n = 0; n < UNCONSTRAINED_NODES + 1; ++n) {
+              output_counts->coef[i][j][k][l][m][n] =
+                  input_counts->coef[i][j][k][l][m][n];
+            }
+          }
+        }
+      }
+    }
+  }
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i) {
+    for (j = 0; j < SWITCHABLE_FILTERS; ++j) {
+      output_counts->switchable_interp[i][j] =
+          input_counts->switchable_interp[i][j];
+    }
+  }
+  for (i = 0; i < INTER_MODE_CONTEXTS; ++i) {
+    for (j = 0; j < INTER_MODES; ++j) {
+      output_counts->inter_mode[i][j] = input_counts->inter_mode[i][j];
+    }
+  }
+  for (i = 0; i < INTRA_INTER_CONTEXTS; ++i) {
+    for (j = 0; j < 2; ++j) {
+      output_counts->intra_inter[i][j] = input_counts->intra_inter[i][j];
+    }
+  }
+  for (i = 0; i < COMP_INTER_CONTEXTS; ++i) {
+    for (j = 0; j < 2; ++j) {
+      output_counts->comp_inter[i][j] = input_counts->comp_inter[i][j];
+    }
+  }
+  for (i = 0; i < REF_CONTEXTS; ++i) {
+    for (j = 0; j < 2; ++j) {
+      for (k = 0; k < 2; ++k) {
+        output_counts->single_ref[i][j][k] = input_counts->single_ref[i][j][k];
+      }
+    }
+  }
+  for (i = 0; i < REF_CONTEXTS; ++i) {
+    for (j = 0; j < 2; ++j) {
+      output_counts->comp_ref[i][j] = input_counts->comp_ref[i][j];
+    }
+  }
+  for (i = 0; i < SKIP_CONTEXTS; ++i) {
+    for (j = 0; j < 2; ++j) {
+      output_counts->skip[i][j] = input_counts->skip[i][j];
+    }
+  }
+  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
+    for (j = 0; j < TX_SIZES; j++) {
+      output_counts->tx.p32x32[i][j] = input_counts->tx.p32x32[i][j];
+    }
+    for (j = 0; j < TX_SIZES - 1; j++) {
+      output_counts->tx.p16x16[i][j] = input_counts->tx.p16x16[i][j];
+    }
+    for (j = 0; j < TX_SIZES - 2; j++) {
+      output_counts->tx.p8x8[i][j] = input_counts->tx.p8x8[i][j];
+    }
+  }
+  for (i = 0; i < TX_SIZES; i++) {
+    output_counts->tx.tx_totals[i] = input_counts->tx.tx_totals[i];
+  }
+  for (i = 0; i < MV_JOINTS; i++) {
+    output_counts->mv.joints[i] = input_counts->mv.joints[i];
+  }
+  for (k = 0; k < 2; k++) {
+    nmv_component_counts *const comps = &output_counts->mv.comps[k];
+    const nmv_component_counts *const comps_t = &input_counts->mv.comps[k];
+    for (i = 0; i < 2; i++) {
+      comps->sign[i] = comps_t->sign[i];
+      comps->class0_hp[i] = comps_t->class0_hp[i];
+      comps->hp[i] = comps_t->hp[i];
+    }
+    for (i = 0; i < MV_CLASSES; i++) {
+      comps->classes[i] = comps_t->classes[i];
+    }
+    for (i = 0; i < CLASS0_SIZE; i++) {
+      comps->class0[i] = comps_t->class0[i];
+      for (j = 0; j < MV_FP_SIZE; j++) {
+        comps->class0_fp[i][j] = comps_t->class0_fp[i][j];
+      }
+    }
+    for (i = 0; i < MV_OFFSET_BITS; i++) {
+      for (j = 0; j < 2; j++) {
+        comps->bits[i][j] = comps_t->bits[i][j];
+      }
+    }
+    for (i = 0; i < MV_FP_SIZE; i++) {
+      comps->fp[i] = comps_t->fp[i];
+    }
+  }
+}
+#endif  // CONFIG_RATE_CTRL
+
 static void update_encode_frame_result(
     int show_idx, FRAME_UPDATE_TYPE update_type,
     const YV12_BUFFER_CONFIG *source_frame,
     const YV12_BUFFER_CONFIG *coded_frame, int quantize_index,
-    uint32_t bit_depth, uint32_t input_bit_depth,
+    uint32_t bit_depth, uint32_t input_bit_depth, const FRAME_COUNTS *counts,
     ENCODE_FRAME_RESULT *encode_frame_result) {
 #if CONFIG_RATE_CTRL
   PSNR_STATS psnr;
@@ -7118,11 +7237,13 @@ static void update_encode_frame_result(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   encode_frame_result->psnr = psnr.psnr[0];
   encode_frame_result->sse = psnr.sse[0];
+  copy_frame_counts(counts, &encode_frame_result->frame_counts);
 #else   // CONFIG_RATE_CTRL
   (void)bit_depth;
   (void)input_bit_depth;
   (void)source_frame;
   (void)coded_frame;
+  (void)counts;
 #endif  // CONFIG_RATE_CTRL
   encode_frame_result->show_idx = show_idx;
   encode_frame_result->update_type = update_type;
@@ -7424,7 +7545,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         source->show_idx,
         cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index],
         cpi->Source, get_frame_new_buffer(cm), vp9_get_quantizer(cpi),
-        cpi->oxcf.input_bit_depth, cm->bit_depth, encode_frame_result);
+        cpi->oxcf.input_bit_depth, cm->bit_depth, cpi->td.counts,
+        encode_frame_result);
     vp9_twopass_postencode_update(cpi);
   } else if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
