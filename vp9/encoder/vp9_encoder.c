@@ -7096,7 +7096,7 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
 }
 
 static void init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result) {
-  encode_frame_result->show_idx = -1;  // Actual encoding deosn't happen.
+  encode_frame_result->show_idx = -1;  // Actual encoding doesn't happen.
 }
 
 #if !CONFIG_REALTIME_ONLY

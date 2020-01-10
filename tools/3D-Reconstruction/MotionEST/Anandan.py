@@ -122,7 +122,7 @@ class Anandan(MotionEST):
           for i, j in {(r, c), (r, c + 1), (r + 1, c), (r + 1, c + 1)}:
             if 0 <= i < last_mvs.shape[0] and 0 <= j < last_mvs.shape[1]:
               init_mvs.append(last_mvs[i, j])
-        #use last matching results as the start postion as current level
+        #use last matching results as the start position as current level
         min_ssd = None
         min_mv = None
         for init_mv in init_mvs:
