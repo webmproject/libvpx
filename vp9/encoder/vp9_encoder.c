@@ -728,7 +728,7 @@ int vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
   }
   CHECK_MEM_ERROR(cm, roi->roi_map, vpx_malloc(rows * cols));
 
-  // Copy to ROI sturcture in the compressor.
+  // Copy to ROI structure in the compressor.
   memcpy(roi->roi_map, map, rows * cols);
   memcpy(&roi->delta_q, delta_q, MAX_SEGMENTS * sizeof(delta_q[0]));
   memcpy(&roi->delta_lf, delta_lf, MAX_SEGMENTS * sizeof(delta_lf[0]));
@@ -4479,7 +4479,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
             // Special case reset for qlow for constrained quality.
             // This should only trigger where there is very substantial
             // undershoot on a frame and the auto cq level is above
-            // the user passsed in value.
+            // the user passed in value.
             if (oxcf->rc_mode == VPX_CQ && q < q_low) {
               q_low = q;
             }
@@ -4692,7 +4692,7 @@ static int setup_interp_filter_search_mask(VP9_COMP *cpi) {
 }
 
 #ifdef ENABLE_KF_DENOISE
-// Baseline Kernal weights for denoise
+// Baseline kernel weights for denoise
 static uint8_t dn_kernal_3[9] = { 1, 2, 1, 2, 4, 2, 1, 2, 1 };
 static uint8_t dn_kernal_5[25] = { 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 4,
                                    2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1 };
@@ -4727,7 +4727,7 @@ static void spatial_denoise_point(uint8_t *src_ptr, const int stride,
     tmp_ptr += stride;
   }
 
-  // Select the kernal size.
+  // Select the kernel size.
   if (max_diff > (strength + (strength >> 1))) {
     kernal_size = 3;
     half_k_size = 1;
@@ -4735,7 +4735,7 @@ static void spatial_denoise_point(uint8_t *src_ptr, const int stride,
   }
   kernal_ptr = (kernal_size == 3) ? dn_kernal_3 : dn_kernal_5;
 
-  // Apply the kernal
+  // Apply the kernel
   tmp_ptr = src_ptr - (stride * half_k_size) - half_k_size;
   for (i = 0; i < kernal_size; ++i) {
     for (j = 0; j < kernal_size; ++j) {
@@ -4772,7 +4772,7 @@ static void highbd_spatial_denoise_point(uint16_t *src_ptr, const int stride,
     tmp_ptr += stride;
   }
 
-  // Select the kernal size.
+  // Select the kernel size.
   if (max_diff > (strength + (strength >> 1))) {
     kernal_size = 3;
     half_k_size = 1;
@@ -4780,7 +4780,7 @@ static void highbd_spatial_denoise_point(uint16_t *src_ptr, const int stride,
   }
   kernal_ptr = (kernal_size == 3) ? dn_kernal_3 : dn_kernal_5;
 
-  // Apply the kernal
+  // Apply the kernel
   tmp_ptr = src_ptr - (stride * half_k_size) - half_k_size;
   for (i = 0; i < kernal_size; ++i) {
     for (j = 0; j < kernal_size; ++j) {
@@ -4796,7 +4796,7 @@ static void highbd_spatial_denoise_point(uint16_t *src_ptr, const int stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-// Apply thresholded spatial noise supression to a given buffer.
+// Apply thresholded spatial noise suppression to a given buffer.
 static void spatial_denoise_buffer(VP9_COMP *cpi, uint8_t *buffer,
                                    const int stride, const int width,
                                    const int height, const int strength) {
@@ -4821,7 +4821,7 @@ static void spatial_denoise_buffer(VP9_COMP *cpi, uint8_t *buffer,
   }
 }
 
-// Apply thresholded spatial noise supression to source.
+// Apply thresholded spatial noise suppression to source.
 static void spatial_denoise_frame(VP9_COMP *cpi) {
   YV12_BUFFER_CONFIG *src = cpi->Source;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -5924,7 +5924,7 @@ static uint32_t full_pixel_motion_search(VP9_COMP *cpi, ThreadData *td,
   int step_param;
   uint32_t bestsme = UINT_MAX;
   const MvLimits tmp_mv_limits = x->mv_limits;
-  // lambda is used to adjust the importance of motion vector consitency.
+  // lambda is used to adjust the importance of motion vector consistency.
   // TODO(angiebird): Figure out lambda's proper value.
   const int lambda = cpi->tpl_stats[frame_idx].lambda;
   int_mv nb_full_mvs[NB_MVS_NUM];
@@ -6645,7 +6645,7 @@ static void predict_mv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   assert(kMvPreCheckSize == (kMvPreCheckLines * (kMvPreCheckLines + 1)) >> 1);
 
   // no new mv
-  // diagnal scan order
+  // diagonal scan order
   tmp_idx = 0;
   for (idx = 0; idx < kMvPreCheckLines; ++idx) {
     int r;
@@ -7414,9 +7414,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     // 1) twopass.gf_group.index is initialized at define_gf_group by vp9_zero()
     // for the first frame in the gf_group and is updated for the next frame at
     // vp9_twopass_postencode_update().
-    // 2) cpi->Source is updated at the beginging of this function, i.e.
+    // 2) cpi->Source is updated at the beginning of this function, i.e.
     // vp9_get_compressed_data()
-    // 3) cm->new_fb_idx is updated at the beginging of this function by
+    // 3) cm->new_fb_idx is updated at the beginning of this function by
     // get_free_fb(cm)
     // TODO(angiebird): Improve the codebase to make the update of frame
     // dependent variables more robust.
