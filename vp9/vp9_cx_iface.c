@@ -581,6 +581,8 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->min_gf_interval = extra_cfg->min_gf_interval;
   oxcf->max_gf_interval = extra_cfg->max_gf_interval;
 
+  oxcf->delta_q_uv = 0;
+
   oxcf->tuning = extra_cfg->tuning;
   oxcf->content = extra_cfg->content;
 
@@ -1655,6 +1657,15 @@ static vpx_codec_err_t ctrl_set_svc_spatial_layer_sync(
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_delta_q_uv(vpx_codec_alg_priv_t *ctx,
+                                           va_list args) {
+  int data = va_arg(args, int);
+  VP9_COMP *const cpi = ctx->cpi;
+  data = VPXMIN(VPXMAX(data, -20), 20);
+  cpi->oxcf.delta_q_uv = data;
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t ctrl_register_cx_callback(vpx_codec_alg_priv_t *ctx,
                                                  va_list args) {
   vpx_codec_priv_output_cx_pkt_cb_pair_t *cbp =
@@ -1752,6 +1763,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_SVC_FRAME_DROP_LAYER, ctrl_set_svc_frame_drop_layer },
   { VP9E_SET_SVC_GF_TEMPORAL_REF, ctrl_set_svc_gf_temporal_ref },
   { VP9E_SET_SVC_SPATIAL_LAYER_SYNC, ctrl_set_svc_spatial_layer_sync },
+  { VP9E_SET_DELTA_Q_UV, ctrl_set_delta_q_uv },
 
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },

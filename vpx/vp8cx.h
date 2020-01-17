@@ -676,6 +676,14 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_POSTENCODE_DROP,
+
+  /*!\brief Codec control function to set delta q for uv.
+   *
+   * Cap it at +/-20 for now.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_DELTA_Q_UV,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -1022,6 +1030,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_SVC_SPATIAL_LAYER_SYNC,
 
 VPX_CTRL_USE_TYPE(VP9E_SET_POSTENCODE_DROP, unsigned int)
 #define VPX_CTRL_VP9E_SET_POSTENCODE_DROP
+
+VPX_CTRL_USE_TYPE(VP9E_SET_DELTA_Q_UV, int)
+#define VPX_CTRL_VP9E_SET_DELTA_Q_UV
 
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */

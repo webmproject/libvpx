@@ -4065,7 +4065,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                  cpi->oxcf.rc_mode == VPX_CBR &&
                                  cm->frame_type != KEY_FRAME;
 
-  vp9_set_quantizer(cm, q);
+  vp9_set_quantizer(cpi, q);
   vp9_set_variance_partition_thresholds(cpi, q, 0);
 
   setup_frame(cpi);
@@ -4094,7 +4094,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
       (cpi->rc.high_source_sad ||
        (cpi->use_svc && svc->high_source_sad_superframe))) {
     if (vp9_encodedframe_overshoot(cpi, -1, &q)) {
-      vp9_set_quantizer(cm, q);
+      vp9_set_quantizer(cpi, q);
       vp9_set_variance_partition_thresholds(cpi, q, 0);
     }
   }
@@ -4144,7 +4144,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     // adjust some rate control parameters, and return to re-encode the frame.
     if (vp9_encodedframe_overshoot(cpi, frame_size, &q)) {
       vpx_clear_system_state();
-      vp9_set_quantizer(cm, q);
+      vp9_set_quantizer(cpi, q);
       vp9_set_variance_partition_thresholds(cpi, q, 0);
       suppress_active_map(cpi);
       // Turn-off cyclic refresh for re-encoded frame.
@@ -4294,7 +4294,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     }
 #endif
 
-    vp9_set_quantizer(cm, q);
+    vp9_set_quantizer(cpi, q);
 
     if (loop_count == 0) setup_frame(cpi);
 

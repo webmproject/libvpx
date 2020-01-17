@@ -1366,7 +1366,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 #endif
 
   set_first_pass_params(cpi);
-  vp9_set_quantizer(cm, find_fp_qindex(cm->bit_depth));
+  vp9_set_quantizer(cpi, find_fp_qindex(cm->bit_depth));
 
   vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
