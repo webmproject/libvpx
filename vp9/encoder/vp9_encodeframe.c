@@ -3810,6 +3810,60 @@ static int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
 }
 #endif  // !CONFIG_REALTIME_ONLY
 
+#if CONFIG_RATE_CTRL
+static void store_superblock_partition_info(
+    const PC_TREE *const pc_tree, PARTITION_INFO *partition_info,
+    const int square_size_4x4, const int num_unit_rows, const int num_unit_cols,
+    const int row_start_4x4, const int col_start_4x4) {
+  const int subblock_square_size_4x4 = square_size_4x4 >> 1;
+  if (row_start_4x4 >= num_unit_rows || col_start_4x4 >= num_unit_cols) return;
+  assert(pc_tree->partitioning != PARTITION_INVALID);
+  // End node, no split.
+  if (pc_tree->partitioning == PARTITION_NONE ||
+      pc_tree->partitioning == PARTITION_HORZ ||
+      pc_tree->partitioning == PARTITION_VERT || square_size_4x4 == 1) {
+    const int block_width_4x4 = (pc_tree->partitioning == PARTITION_VERT)
+                                    ? square_size_4x4 >> 1
+                                    : square_size_4x4;
+    const int block_height_4x4 = (pc_tree->partitioning == PARTITION_HORZ)
+                                     ? square_size_4x4 >> 1
+                                     : square_size_4x4;
+    int i, j;
+    for (i = 0; i < block_height_4x4; ++i) {
+      for (j = 0; j < block_width_4x4; ++j) {
+        const int row_4x4 = row_start_4x4 + i;
+        const int col_4x4 = col_start_4x4 + j;
+        const int unit_index = row_4x4 * num_unit_cols + col_4x4;
+        partition_info[unit_index].row = row_4x4 << 2;
+        partition_info[unit_index].column = col_4x4 << 2;
+        partition_info[unit_index].row_start = row_start_4x4 << 2;
+        partition_info[unit_index].column_start = col_start_4x4 << 2;
+        partition_info[unit_index].width = block_width_4x4 << 2;
+        partition_info[unit_index].height = block_height_4x4 << 2;
+      }
+    }
+    return;
+  }
+  // recursively traverse partition tree when partition is split.
+  assert(pc_tree->partitioning == PARTITION_SPLIT);
+  store_superblock_partition_info(pc_tree->split[0], partition_info,
+                                  subblock_square_size_4x4, num_unit_rows,
+                                  num_unit_cols, row_start_4x4, col_start_4x4);
+  store_superblock_partition_info(pc_tree->split[1], partition_info,
+                                  subblock_square_size_4x4, num_unit_rows,
+                                  num_unit_cols, row_start_4x4,
+                                  col_start_4x4 + subblock_square_size_4x4);
+  store_superblock_partition_info(
+      pc_tree->split[2], partition_info, subblock_square_size_4x4,
+      num_unit_rows, num_unit_cols, row_start_4x4 + subblock_square_size_4x4,
+      col_start_4x4);
+  store_superblock_partition_info(
+      pc_tree->split[3], partition_info, subblock_square_size_4x4,
+      num_unit_rows, num_unit_cols, row_start_4x4 + subblock_square_size_4x4,
+      col_start_4x4 + subblock_square_size_4x4);
+}
+#endif  // CONFIG_RATE_CTRL
+
 #if !CONFIG_REALTIME_ONLY
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
@@ -4384,6 +4438,16 @@ static int rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     int output_enabled = (bsize == BLOCK_64X64);
     encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
               pc_tree);
+#if CONFIG_RATE_CTRL
+    // Store partition info.
+    if (output_enabled) {
+      const int num_unit_rows = get_num_unit_4x4(cpi->frame_info.frame_height);
+      const int num_unit_cols = get_num_unit_4x4(cpi->frame_info.frame_width);
+      store_superblock_partition_info(
+          pc_tree, cpi->partition_info, num_4x4_blocks_wide_lookup[BLOCK_64X64],
+          num_unit_rows, num_unit_cols, mi_row << 1, mi_col << 1);
+    }
+#endif  // CONFIG_RATE_CTRL
   }
 
   if (bsize == BLOCK_64X64) {

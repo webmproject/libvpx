@@ -616,7 +616,7 @@ int SimpleEncode::GetCodingFrameNum() const {
 
 uint64_t SimpleEncode::GetFramePixelCount() const {
   assert(frame_width_ % 2 == 0);
-  assert(frame_heigh_ % 2 == 0);
+  assert(frame_height_ % 2 == 0);
   switch (impl_ptr_->img_fmt) {
     case VPX_IMG_FMT_I420: return frame_width_ * frame_height_ * 3 / 2;
     case VPX_IMG_FMT_I422: return frame_width_ * frame_height_ * 2;

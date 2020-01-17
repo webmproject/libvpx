@@ -523,6 +523,15 @@ typedef struct ENCODE_COMMAND {
   int external_quantize_index;
 } ENCODE_COMMAND;
 
+typedef struct PARTITION_INFO {
+  int row;           // row pixel offset of current 4x4 block
+  int column;        // column pixel offset of current 4x4 block
+  int row_start;     // row pixel offset of the start of the prediction block
+  int column_start;  // column pixel offset of the start of the prediction block
+  int width;         // prediction block width
+  int height;        // prediction block height
+} PARTITION_INFO;
+
 static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {
   vp9_zero(*encode_command);
   encode_command->use_external_quantize_index = 0;
@@ -540,6 +549,10 @@ static INLINE void encode_command_reset_external_quantize_index(
   encode_command->use_external_quantize_index = 0;
   encode_command->external_quantize_index = -1;
 }
+
+// Returns number of units in size of 4, if not multiple not a multiple of 4,
+// round it up. For example, size is 7, return 3.
+static INLINE int get_num_unit_4x4(int size) { return (size + 3) >> 2; }
 #endif  // CONFIG_RATE_CTRL
 
 typedef struct VP9_COMP {
@@ -848,8 +861,32 @@ typedef struct VP9_COMP {
   vpx_roi_map_t roi;
 #if CONFIG_RATE_CTRL
   ENCODE_COMMAND encode_command;
+  PARTITION_INFO *partition_info;
 #endif
 } VP9_COMP;
+
+#if CONFIG_RATE_CTRL
+// Allocates memory for the partition information.
+// The unit size is each 4x4 block.
+// Only called once in vp9_create_compressor().
+static INLINE void partition_info_init(struct VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int unit_width = get_num_unit_4x4(cpi->frame_info.frame_width);
+  const int unit_height = get_num_unit_4x4(cpi->frame_info.frame_height);
+  CHECK_MEM_ERROR(cm, cpi->partition_info,
+                  (PARTITION_INFO *)vpx_calloc(unit_width * unit_height,
+                                               sizeof(PARTITION_INFO)));
+  memset(cpi->partition_info, 0,
+         unit_width * unit_height * sizeof(PARTITION_INFO));
+}
+
+// Frees memory of the partition information.
+// Only called once in dealloc_compressor_data().
+static INLINE void free_partition_info(struct VP9_COMP *cpi) {
+  vpx_free(cpi->partition_info);
+  cpi->partition_info = NULL;
+}
+#endif  // CONFIG_RATE_CTRL
 
 typedef struct ENCODE_FRAME_RESULT {
   int show_idx;
