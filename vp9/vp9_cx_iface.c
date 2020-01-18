@@ -15,6 +15,7 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx_dsp/psnr.h"
 #include "vpx_ports/vpx_once.h"
+#include "vpx_ports/static_assert.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_util/vpx_timestamp.h"
 #include "vpx/internal/vpx_codec_internal.h"
@@ -159,22 +160,6 @@ static vpx_codec_err_t update_error_state(
   do {                                                                \
     if (!!((p)->memb) != (p)->memb) ERROR(#memb " expected boolean"); \
   } while (0)
-
-#if defined(_MSC_VER)
-#define COMPILE_TIME_ASSERT(boolexp)              \
-  do {                                            \
-    char compile_time_assert[(boolexp) ? 1 : -1]; \
-    (void)compile_time_assert;                    \
-  } while (0)
-#else  // !_MSC_VER
-#define COMPILE_TIME_ASSERT(boolexp)                         \
-  do {                                                       \
-    struct {                                                 \
-      unsigned int compile_time_assert : (boolexp) ? 1 : -1; \
-    } compile_time_assert;                                   \
-    (void)compile_time_assert;                               \
-  } while (0)
-#endif  // _MSC_VER
 
 static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
                                        const vpx_codec_enc_cfg_t *cfg,
@@ -968,8 +953,8 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
         // Convert duration parameter from stream timebase to microseconds.
         uint64_t duration_us;
 
-        COMPILE_TIME_ASSERT(TICKS_PER_SEC > 1000000 &&
-                            (TICKS_PER_SEC % 1000000) == 0);
+        VPX_STATIC_ASSERT(TICKS_PER_SEC > 1000000 &&
+                          (TICKS_PER_SEC % 1000000) == 0);
 
         duration_us = duration * (uint64_t)ctx->timestamp_ratio.num /
                       (ctx->timestamp_ratio.den * (TICKS_PER_SEC / 1000000));
