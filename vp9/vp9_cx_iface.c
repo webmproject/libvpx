@@ -581,8 +581,6 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->min_gf_interval = extra_cfg->min_gf_interval;
   oxcf->max_gf_interval = extra_cfg->max_gf_interval;
 
-  oxcf->delta_q_uv = 0;
-
   oxcf->tuning = extra_cfg->tuning;
   oxcf->content = extra_cfg->content;
 
@@ -1663,6 +1661,7 @@ static vpx_codec_err_t ctrl_set_delta_q_uv(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *const cpi = ctx->cpi;
   data = VPXMIN(VPXMAX(data, -20), 20);
   cpi->oxcf.delta_q_uv = data;
+  ctx->oxcf.delta_q_uv = data;
   return VPX_CODEC_OK;
 }
 
