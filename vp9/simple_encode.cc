@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <memory>
 #include <vector>
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_enums.h"
@@ -98,6 +99,22 @@ get_frame_type_from_update_type(FRAME_UPDATE_TYPE update_type) {
     case KF_UPDATE: return kKeyFrame; break;
     case ARF_UPDATE: return kAlternateReference; break;
     default: return kInterFrame; break;
+  }
+}
+
+static void update_partition_info(const PARTITION_INFO *input_partition_info,
+                                  const int num_rows_4x4,
+                                  const int num_cols_4x4,
+                                  PartitionInfo *output_partition_info) {
+  const int num_units_4x4 = num_rows_4x4 * num_cols_4x4;
+  for (int i = 0; i < num_units_4x4; ++i) {
+    output_partition_info[i].row = input_partition_info[i].row;
+    output_partition_info[i].column = input_partition_info[i].column;
+    output_partition_info[i].row_start = input_partition_info[i].row_start;
+    output_partition_info[i].column_start =
+        input_partition_info[i].column_start;
+    output_partition_info[i].width = input_partition_info[i].width;
+    output_partition_info[i].height = input_partition_info[i].height;
   }
 }
 
@@ -333,6 +350,10 @@ static void update_encode_frame_result(
   encode_frame_result->psnr = encode_frame_info->psnr;
   encode_frame_result->sse = encode_frame_info->sse;
   encode_frame_result->quantize_index = encode_frame_info->quantize_index;
+  update_partition_info(encode_frame_info->partition_info,
+                        encode_frame_result->num_rows_4x4,
+                        encode_frame_result->num_cols_4x4,
+                        encode_frame_result->partition_info.get());
   update_frame_counts(&encode_frame_info->frame_counts,
                       &encode_frame_result->frame_counts);
 }
@@ -405,6 +426,8 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   impl_ptr_ = std::unique_ptr<EncodeImpl>(new EncodeImpl());
   frame_width_ = frame_width;
   frame_height_ = frame_height;
+  num_rows_4x4_ = get_num_unit_4x4(frame_width);
+  num_cols_4x4_ = get_num_unit_4x4(frame_height);
   frame_rate_num_ = frame_rate_num;
   frame_rate_den_ = frame_rate_den;
   target_bitrate_ = target_bitrate;
@@ -566,6 +589,11 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   const size_t max_coding_data_byte_size = frame_width_ * frame_height_ * 3;
   encode_frame_result->coding_data = std::move(
       std::unique_ptr<uint8_t[]>(new uint8_t[max_coding_data_byte_size]));
+  encode_frame_result->num_rows_4x4 = num_rows_4x4_;
+  encode_frame_result->num_cols_4x4 = num_cols_4x4_;
+  encode_frame_result->partition_info =
+      std::move(std::unique_ptr<PartitionInfo[]>(
+          new PartitionInfo[num_rows_4x4_ * num_cols_4x4_]));
   int64_t time_stamp;
   int64_t time_end;
   int flush = 1;  // Make vp9_get_compressed_data encode a frame
