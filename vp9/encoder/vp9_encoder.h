@@ -551,7 +551,7 @@ static INLINE void encode_command_reset_external_quantize_index(
 }
 
 // Returns number of units in size of 4, if not multiple not a multiple of 4,
-// round it up. For example, size is 7, return 3.
+// round it up. For example, size is 7, return 2.
 static INLINE int get_num_unit_4x4(int size) { return (size + 3) >> 2; }
 #endif  // CONFIG_RATE_CTRL
 
