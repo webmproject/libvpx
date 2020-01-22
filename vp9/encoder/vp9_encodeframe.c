@@ -1208,9 +1208,11 @@ static void update_prev_partition(VP9_COMP *cpi, MACROBLOCK *x, int segment_id,
 }
 
 static void chroma_check(VP9_COMP *cpi, MACROBLOCK *x, int bsize,
-                         unsigned int y_sad, int is_key_frame) {
+                         unsigned int y_sad, int is_key_frame,
+                         int scene_change_detected) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
+  int shift = 2;
 
   if (is_key_frame) return;
 
@@ -1221,6 +1223,9 @@ static void chroma_check(VP9_COMP *cpi, MACROBLOCK *x, int bsize,
          vp9_noise_estimate_extract_level(&cpi->noise_estimate) < kMedium))
       return;
   }
+
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN && scene_change_detected)
+    shift = 5;
 
   for (i = 1; i <= 2; ++i) {
     unsigned int uv_sad = UINT_MAX;
@@ -1234,7 +1239,7 @@ static void chroma_check(VP9_COMP *cpi, MACROBLOCK *x, int bsize,
 
     // TODO(marpan): Investigate if we should lower this threshold if
     // superblock is detected as skin.
-    x->color_sensitivity[i - 1] = uv_sad > (y_sad >> 2);
+    x->color_sensitivity[i - 1] = uv_sad > (y_sad >> shift);
   }
 }
 
@@ -1320,8 +1325,10 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   int pixels_wide = 64, pixels_high = 64;
   int64_t thresholds[4] = { cpi->vbp_thresholds[0], cpi->vbp_thresholds[1],
                             cpi->vbp_thresholds[2], cpi->vbp_thresholds[3] };
-  int force_64_split = cpi->rc.high_source_sad ||
-                       (cpi->use_svc && cpi->svc.high_source_sad_superframe) ||
+  int scene_change_detected =
+      cpi->rc.high_source_sad ||
+      (cpi->use_svc && cpi->svc.high_source_sad_superframe);
+  int force_64_split = scene_change_detected ||
                        (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
                         cpi->compute_source_sad_onepass &&
                         cpi->sf.use_source_sad && !x->zero_temp_sad_source);
@@ -1538,7 +1545,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
           mi_row + block_height / 2 < cm->mi_rows) {
         set_block_size(cpi, x, xd, mi_row, mi_col, BLOCK_64X64);
         x->variance_low[0] = 1;
-        chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+        chroma_check(cpi, x, bsize, y_sad, is_key_frame, scene_change_detected);
         if (cpi->sf.svc_use_lowres_part &&
             cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2)
           update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
@@ -1555,7 +1562,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     // TODO(jianj) : tune the threshold.
     if (cpi->sf.copy_partition_flag && y_sad_last < cpi->vbp_threshold_copy &&
         copy_partitioning(cpi, x, xd, mi_row, mi_col, segment_id, sb_offset)) {
-      chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+      chroma_check(cpi, x, bsize, y_sad, is_key_frame, scene_change_detected);
       if (cpi->sf.svc_use_lowres_part &&
           cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 2)
         update_partition_svc(cpi, BLOCK_64X64, mi_row, mi_col);
@@ -1784,7 +1791,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
                           mi_col, mi_row);
   }
 
-  chroma_check(cpi, x, bsize, y_sad, is_key_frame);
+  chroma_check(cpi, x, bsize, y_sad, is_key_frame, scene_change_detected);
   if (vt2) vpx_free(vt2);
   return 0;
 }
