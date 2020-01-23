@@ -913,6 +913,14 @@ static INLINE void free_motion_vector_info(struct VP9_COMP *cpi) {
   vpx_free(cpi->motion_vector_info);
   cpi->motion_vector_info = NULL;
 }
+
+// This is the c-version counter part of ImageBuffer
+typedef struct IMAGE_BUFFER {
+  int allocated;
+  int plane_width[3];
+  int plane_height[3];
+  uint8_t *plane_buffer[3];
+} IMAGE_BUFFER;
 #endif  // CONFIG_RATE_CTRL
 
 typedef struct ENCODE_FRAME_RESULT {
@@ -924,9 +932,12 @@ typedef struct ENCODE_FRAME_RESULT {
   FRAME_COUNTS frame_counts;
   const PARTITION_INFO *partition_info;
   const MOTION_VECTOR_INFO *motion_vector_info;
+  IMAGE_BUFFER coded_frame;
 #endif  // CONFIG_RATE_CTRL
   int quantize_index;
 } ENCODE_FRAME_RESULT;
+
+void vp9_init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result);
 
 void vp9_initialize_enc(void);
 

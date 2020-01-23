@@ -7102,10 +7102,6 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
 #endif  // CONFIG_NON_GREEDY_MV
 }
 
-static void init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result) {
-  encode_frame_result->show_idx = -1;  // Actual encoding doesn't happen.
-}
-
 #if !CONFIG_REALTIME_ONLY
 #if CONFIG_RATE_CTRL
 static void copy_frame_counts(const FRAME_COUNTS *input_counts,
@@ -7224,6 +7220,34 @@ static void copy_frame_counts(const FRAME_COUNTS *input_counts,
     }
   }
 }
+
+static void yv12_buffer_to_image_buffer(const YV12_BUFFER_CONFIG *yv12_buffer,
+                                        IMAGE_BUFFER *image_buffer) {
+  const uint8_t *src_buf_ls[3] = { yv12_buffer->y_buffer, yv12_buffer->u_buffer,
+                                   yv12_buffer->v_buffer };
+  const int src_stride_ls[3] = { yv12_buffer->y_stride, yv12_buffer->uv_stride,
+                                 yv12_buffer->uv_stride };
+  const int w_ls[3] = { yv12_buffer->y_crop_width, yv12_buffer->uv_crop_width,
+                        yv12_buffer->uv_crop_width };
+  const int h_ls[3] = { yv12_buffer->y_crop_height, yv12_buffer->uv_crop_height,
+                        yv12_buffer->uv_crop_height };
+  int plane;
+  for (plane = 0; plane < 3; ++plane) {
+    const int src_stride = src_stride_ls[plane];
+    const int w = w_ls[plane];
+    const int h = h_ls[plane];
+    const uint8_t *src_buf = src_buf_ls[plane];
+    uint8_t *dst_buf = image_buffer->plane_buffer[plane];
+    int r;
+    assert(image_buffer->plane_width[plane] == w);
+    assert(image_buffer->plane_height[plane] == h);
+    for (r = 0; r < h; ++r) {
+      memcpy(dst_buf, src_buf, sizeof(*src_buf) * w);
+      src_buf += src_stride;
+      dst_buf += w;
+    }
+  }
+}
 #endif  // CONFIG_RATE_CTRL
 
 static void update_encode_frame_result(
@@ -7249,6 +7273,9 @@ static void update_encode_frame_result(
   encode_frame_result->sse = psnr.sse[0];
   copy_frame_counts(counts, &encode_frame_result->frame_counts);
   encode_frame_result->partition_info = partition_info;
+  if (encode_frame_result->coded_frame.allocated) {
+    yv12_buffer_to_image_buffer(coded_frame, &encode_frame_result->coded_frame);
+  }
 #else   // CONFIG_RATE_CTRL
   (void)bit_depth;
   (void)input_bit_depth;
@@ -7261,6 +7288,14 @@ static void update_encode_frame_result(
   encode_frame_result->quantize_index = quantize_index;
 }
 #endif  // !CONFIG_REALTIME_ONLY
+
+void vp9_init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result) {
+  encode_frame_result->show_idx = -1;  // Actual encoding doesn't happen.
+#if CONFIG_RATE_CTRL
+  vp9_zero(encode_frame_result->coded_frame);
+  encode_frame_result->coded_frame.allocated = 0;
+#endif  // CONFIG_RATE_CTRL
+}
 
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest, int64_t *time_stamp,
@@ -7277,7 +7312,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   int arf_src_index;
   const int gf_group_index = cpi->twopass.gf_group.index;
   int i;
-  init_encode_frame_result(encode_frame_result);
 
   if (is_one_pass_cbr_svc(cpi)) {
     vp9_one_pass_cbr_svc_start_layer(cpi);
@@ -7515,6 +7549,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   cpi->td.mb.fp_src_pred = 0;
 #if CONFIG_REALTIME_ONLY
+  (void)encode_frame_result;
   if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
   } else {

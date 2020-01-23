@@ -130,6 +130,17 @@ struct FrameCounts {
   NewMotionVectorContextCounts mv;
 };
 
+struct ImageBuffer {
+  // The image data is stored in raster order,
+  // i.e. image[plane][r][c] =
+  // plane_buffer[plane][r * plane_width[plane] + plane_height[plane]].
+  std::unique_ptr<unsigned char[]> plane_buffer[3];
+  int plane_width[3];
+  int plane_height[3];
+};
+
+void output_image_buffer(const ImageBuffer &image_buffer, std::FILE *out_file);
+
 struct EncodeFrameResult {
   int show_idx;
   FrameType frame_type;
@@ -164,6 +175,7 @@ struct EncodeFrameResult {
   // Horizontal next: |column_start| + |width|,
   // Vertical next: |row_start| + |height|.
   std::vector<PartitionInfo> partition_info;
+  ImageBuffer coded_frame;
 };
 
 struct GroupOfPicture {
@@ -252,8 +264,6 @@ class SimpleEncode {
 
   int frame_width_;   // frame width in pixels.
   int frame_height_;  // frame height in pixels.
-  int num_rows_4x4_;  // number of row units, in size of 4.
-  int num_cols_4x4_;  // number of column units, in size of 4.
   int frame_rate_num_;
   int frame_rate_den_;
   int target_bitrate_;
