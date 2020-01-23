@@ -48,20 +48,28 @@ struct NewMotionVectorContextCounts {
   std::vector<NewMotionvectorComponentCounts> comps;
 };
 
+#define UintArray2D std::vector<std::vector<unsigned int>>
+#define UintArray3D std::vector<std::vector<std::vector<unsigned int>>>
+#define UintArray5D \
+  std::vector<std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>
+#define UintArray6D        \
+  std::vector<std::vector< \
+      std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>>
+
 // This structure is a copy of vp9 |tx_counts|.
 struct TransformSizeCounts {
   // Transform size found in blocks of partition size 32x32.
   // First dimension: transform size contexts (2).
   // Second dimension: transform size type (3: 32x32, 16x16, 8x8)
-  std::vector<std::vector<unsigned int>> p32x32;
+  UintArray2D p32x32;
   // Transform size found in blocks of partition size 16x16.
   // First dimension: transform size contexts (2).
   // Second dimension: transform size type (2: 16x16, 8x8)
-  std::vector<std::vector<unsigned int>> p16x16;
+  UintArray2D p16x16;
   // Transform size found in blocks of partition size 8x8.
   // First dimension: transform size contexts (2).
   // Second dimension: transform size type (1: 8x8)
-  std::vector<std::vector<unsigned int>> p8x8;
+  UintArray2D p8x8;
   // Overall transform size count.
   std::vector<unsigned int> tx_totals;
 };
@@ -70,44 +78,41 @@ struct TransformSizeCounts {
 struct FrameCounts {
   // Intra prediction mode for luma plane. First dimension: block size (4).
   // Second dimension: intra prediction mode (10).
-  std::vector<std::vector<unsigned int>> y_mode;
+  UintArray2D y_mode;
   // Intra prediction mode for chroma plane. First and second dimension:
   // intra prediction mode (10).
-  std::vector<std::vector<unsigned int>> uv_mode;
+  UintArray2D uv_mode;
   // Partition type. First dimension: partition contexts (16).
   // Second dimension: partition type (4).
-  std::vector<std::vector<unsigned int>> partition;
+  UintArray2D partition;
   // Transform coefficient.
-  std::vector<std::vector<
-      std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>>
-      coef;
+  UintArray6D coef;
   // End of block (the position of the last non-zero transform coefficient)
-  std::vector<std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>
-      eob_branch;
+  UintArray5D eob_branch;
   // Interpolation filter type. First dimension: switchable filter contexts (4).
   // Second dimension: filter types (3).
-  std::vector<std::vector<unsigned int>> switchable_interp;
+  UintArray2D switchable_interp;
   // Inter prediction mode (the motion vector type).
   // First dimension: inter mode contexts (7).
   // Second dimension: mode type (4).
-  std::vector<std::vector<unsigned int>> inter_mode;
+  UintArray2D inter_mode;
   // Block is intra or inter predicted. First dimension: contexts (4).
   // Second dimension: type (0 for intra, 1 for inter).
-  std::vector<std::vector<unsigned int>> intra_inter;
+  UintArray2D intra_inter;
   // Block is compound predicted (predicted from average of two blocks).
   // First dimension: contexts (5).
   // Second dimension: type (0 for single, 1 for compound prediction).
-  std::vector<std::vector<unsigned int>> comp_inter;
+  UintArray2D comp_inter;
   // Type of the reference frame. Only one reference frame.
   // First dimension: context (5). Second dimension: context (2).
   // Third dimension: count (2).
-  std::vector<std::vector<std::vector<unsigned int>>> single_ref;
+  UintArray3D single_ref;
   // Type of the two reference frames.
   // First dimension: context (5). Second dimension: count (2).
-  std::vector<std::vector<unsigned int>> comp_ref;
+  UintArray2D comp_ref;
   // Block skips transform and quantization, uses prediction as reconstruction.
   // First dimension: contexts (3). Second dimension: type (0 not skip, 1 skip).
-  std::vector<std::vector<unsigned int>> skip;
+  UintArray2D skip;
   // Transform size.
   TransformSizeCounts tx;
   // New motion vector.
