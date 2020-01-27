@@ -32,6 +32,10 @@ double GetBitrateInKbps(size_t bit_size, int num_frames, int frame_rate_num,
          frame_rate_den / 1000.0;
 }
 
+// Returns the number of unit in size of 4.
+// For example, if size is 7, return 2.
+int GetNumUnit4x4(int size) { return (size + 3) >> 2; }
+
 TEST(SimpleEncode, ComputeFirstPassStats) {
   SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
                              target_bitrate, num_frames, infile_path);
@@ -124,6 +128,7 @@ TEST(SimpleEncode, EncodeConsistencyTest) {
   std::vector<double> ref_psnr_list;
   std::vector<size_t> ref_bit_size_list;
   {
+    // The first encode.
     SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
                                target_bitrate, num_frames, infile_path);
     simple_encode.ComputeFirstPassStats();
@@ -140,6 +145,7 @@ TEST(SimpleEncode, EncodeConsistencyTest) {
     simple_encode.EndEncode();
   }
   {
+    // The second encode with quantize index got from the first encode.
     SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
                                target_bitrate, num_frames, infile_path);
     simple_encode.ComputeFirstPassStats();
@@ -158,6 +164,55 @@ TEST(SimpleEncode, EncodeConsistencyTest) {
     }
     simple_encode.EndEncode();
   }
+}
+
+// Test the information stored in encoder is the same between two encode runs.
+TEST(SimpleEncode, EncodeConsistencyTest2) {
+  const int num_rows_4x4 = GetNumUnit4x4(w);
+  const int num_cols_4x4 = GetNumUnit4x4(h);
+  const int num_units_4x4 = num_rows_4x4 * num_cols_4x4;
+  // The first encode.
+  SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                             target_bitrate, num_frames, infile_path);
+  simple_encode.ComputeFirstPassStats();
+  const int num_coding_frames = simple_encode.GetCodingFrameNum();
+  std::vector<PartitionInfo> partition_info_list(num_units_4x4 *
+                                                 num_coding_frames);
+  simple_encode.StartEncode();
+  for (int i = 0; i < num_coding_frames; ++i) {
+    EncodeFrameResult encode_frame_result;
+    simple_encode.EncodeFrame(&encode_frame_result);
+    for (int j = 0; j < num_rows_4x4 * num_cols_4x4; ++j) {
+      partition_info_list[i * num_units_4x4 + j] =
+          encode_frame_result.partition_info[j];
+    }
+  }
+  simple_encode.EndEncode();
+  // The second encode.
+  SimpleEncode simple_encode_2(w, h, frame_rate_num, frame_rate_den,
+                               target_bitrate, num_frames, infile_path);
+  simple_encode_2.ComputeFirstPassStats();
+  const int num_coding_frames_2 = simple_encode_2.GetCodingFrameNum();
+  simple_encode_2.StartEncode();
+  for (int i = 0; i < num_coding_frames_2; ++i) {
+    EncodeFrameResult encode_frame_result;
+    simple_encode_2.EncodeFrame(&encode_frame_result);
+    for (int j = 0; j < num_rows_4x4 * num_cols_4x4; ++j) {
+      EXPECT_EQ(encode_frame_result.partition_info[j].row,
+                partition_info_list[i * num_units_4x4 + j].row);
+      EXPECT_EQ(encode_frame_result.partition_info[j].column,
+                partition_info_list[i * num_units_4x4 + j].column);
+      EXPECT_EQ(encode_frame_result.partition_info[j].row_start,
+                partition_info_list[i * num_units_4x4 + j].row_start);
+      EXPECT_EQ(encode_frame_result.partition_info[j].column_start,
+                partition_info_list[i * num_units_4x4 + j].column_start);
+      EXPECT_EQ(encode_frame_result.partition_info[j].width,
+                partition_info_list[i * num_units_4x4 + j].width);
+      EXPECT_EQ(encode_frame_result.partition_info[j].height,
+                partition_info_list[i * num_units_4x4 + j].height);
+    }
+  }
+  simple_encode_2.EndEncode();
 }
 
 TEST(SimpleEncode, GetEncodeFrameInfo) {
