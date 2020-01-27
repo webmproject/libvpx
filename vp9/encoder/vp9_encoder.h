@@ -895,6 +895,7 @@ typedef struct ENCODE_FRAME_RESULT {
   double psnr;
   uint64_t sse;
   FRAME_COUNTS frame_counts;
+  const PARTITION_INFO *partition_info;
 #endif  // CONFIG_RATE_CTRL
   int quantize_index;
 } ENCODE_FRAME_RESULT;
