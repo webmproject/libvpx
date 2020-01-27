@@ -532,6 +532,11 @@ typedef struct PARTITION_INFO {
   int height;        // prediction block height
 } PARTITION_INFO;
 
+typedef struct MOTION_VECTOR_INFO {
+  MV_REFERENCE_FRAME ref_frame[2];
+  int_mv mv[2];
+} MOTION_VECTOR_INFO;
+
 static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {
   vp9_zero(*encode_command);
   encode_command->use_external_quantize_index = 0;
@@ -862,6 +867,7 @@ typedef struct VP9_COMP {
 #if CONFIG_RATE_CTRL
   ENCODE_COMMAND encode_command;
   PARTITION_INFO *partition_info;
+  MOTION_VECTOR_INFO *motion_vector_info;
 #endif
 } VP9_COMP;
 
@@ -886,6 +892,27 @@ static INLINE void free_partition_info(struct VP9_COMP *cpi) {
   vpx_free(cpi->partition_info);
   cpi->partition_info = NULL;
 }
+
+// Allocates memory for the motion vector information.
+// The unit size is each 4x4 block.
+// Only called once in vp9_create_compressor().
+static INLINE void motion_vector_info_init(struct VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int unit_width = get_num_unit_4x4(cpi->frame_info.frame_width);
+  const int unit_height = get_num_unit_4x4(cpi->frame_info.frame_height);
+  CHECK_MEM_ERROR(cm, cpi->motion_vector_info,
+                  (MOTION_VECTOR_INFO *)vpx_calloc(unit_width * unit_height,
+                                                   sizeof(MOTION_VECTOR_INFO)));
+  memset(cpi->motion_vector_info, 0,
+         unit_width * unit_height * sizeof(MOTION_VECTOR_INFO));
+}
+
+// Frees memory of the motion vector information.
+// Only called once in dealloc_compressor_data().
+static INLINE void free_motion_vector_info(struct VP9_COMP *cpi) {
+  vpx_free(cpi->motion_vector_info);
+  cpi->motion_vector_info = NULL;
+}
 #endif  // CONFIG_RATE_CTRL
 
 typedef struct ENCODE_FRAME_RESULT {
@@ -896,6 +923,7 @@ typedef struct ENCODE_FRAME_RESULT {
   uint64_t sse;
   FRAME_COUNTS frame_counts;
   const PARTITION_INFO *partition_info;
+  const MOTION_VECTOR_INFO *motion_vector_info;
 #endif  // CONFIG_RATE_CTRL
   int quantize_index;
 } ENCODE_FRAME_RESULT;

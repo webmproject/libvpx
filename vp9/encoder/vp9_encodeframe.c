@@ -3831,10 +3831,37 @@ static void assign_partition_info(
     }
   }
 }
-static void store_superblock_partition_info(
-    const PC_TREE *const pc_tree, PARTITION_INFO *partition_info,
-    const int square_size_4x4, const int num_unit_rows, const int num_unit_cols,
-    const int row_start_4x4, const int col_start_4x4) {
+
+static void assign_motion_vector_info(const int block_width_4x4,
+                                      const int block_height_4x4,
+                                      const int row_start_4x4,
+                                      const int col_start_4x4,
+                                      const int num_unit_rows,
+                                      const int num_unit_cols, MV *source_mv[2],
+                                      MV_REFERENCE_FRAME source_ref_frame[2],
+                                      MOTION_VECTOR_INFO *motion_vector_info) {
+  int i, j;
+  for (i = 0; i < block_height_4x4; ++i) {
+    for (j = 0; j < block_width_4x4; ++j) {
+      const int row_4x4 = row_start_4x4 + i;
+      const int col_4x4 = col_start_4x4 + j;
+      const int unit_index = row_4x4 * num_unit_cols + col_4x4;
+      if (row_4x4 >= num_unit_rows || col_4x4 >= num_unit_cols) continue;
+      motion_vector_info[unit_index].ref_frame[0] = source_ref_frame[0];
+      motion_vector_info[unit_index].ref_frame[1] = source_ref_frame[1];
+      motion_vector_info[unit_index].mv[0].as_mv.row = source_mv[0]->row;
+      motion_vector_info[unit_index].mv[0].as_mv.col = source_mv[0]->col;
+      motion_vector_info[unit_index].mv[1].as_mv.row = source_mv[1]->row;
+      motion_vector_info[unit_index].mv[1].as_mv.col = source_mv[1]->col;
+    }
+  }
+}
+
+static void store_superblock_info(
+    const PC_TREE *const pc_tree, MODE_INFO **mi_grid_visible,
+    const int mi_stride, const int square_size_4x4, const int num_unit_rows,
+    const int num_unit_cols, const int row_start_4x4, const int col_start_4x4,
+    PARTITION_INFO *partition_info, MOTION_VECTOR_INFO *motion_vector_info) {
   const int subblock_square_size_4x4 = square_size_4x4 >> 1;
   if (row_start_4x4 >= num_unit_rows || col_start_4x4 >= num_unit_cols) return;
   assert(pc_tree->partitioning != PARTITION_INVALID);
@@ -3842,6 +3869,14 @@ static void store_superblock_partition_info(
   if (pc_tree->partitioning == PARTITION_NONE ||
       pc_tree->partitioning == PARTITION_HORZ ||
       pc_tree->partitioning == PARTITION_VERT || square_size_4x4 == 1) {
+    const int mi_row = row_start_4x4 >> 1;
+    const int mi_col = col_start_4x4 >> 1;
+    const int mi_idx = mi_stride * mi_row + mi_col;
+    MODE_INFO **mi = mi_grid_visible + mi_idx;
+    MV *source_mv[2];
+    MV_REFERENCE_FRAME source_ref_frame[2];
+
+    // partition info
     const int block_width_4x4 = (pc_tree->partitioning == PARTITION_VERT)
                                     ? square_size_4x4 >> 1
                                     : square_size_4x4;
@@ -3861,25 +3896,124 @@ static void store_superblock_partition_info(
                             num_unit_cols, partition_info);
     }
 
+    // motion vector info
+    if (pc_tree->partitioning == PARTITION_HORZ) {
+      int is_valid_second_rectangle = 0;
+      assert(square_size_4x4 > 1);
+      // First rectangle.
+      source_ref_frame[0] = mi[0]->ref_frame[0];
+      source_ref_frame[1] = mi[0]->ref_frame[1];
+      source_mv[0] = &mi[0]->mv[0].as_mv;
+      source_mv[1] = &mi[0]->mv[1].as_mv;
+      assign_motion_vector_info(block_width_4x4, block_height_4x4,
+                                row_start_4x4, col_start_4x4, num_unit_rows,
+                                num_unit_cols, source_mv, source_ref_frame,
+                                motion_vector_info);
+      // Second rectangle.
+      if (square_size_4x4 == 2) {
+        is_valid_second_rectangle = 1;
+        source_ref_frame[0] = mi[0]->ref_frame[0];
+        source_ref_frame[1] = mi[0]->ref_frame[1];
+        source_mv[0] = &mi[0]->bmi[2].as_mv[0].as_mv;
+        source_mv[1] = &mi[0]->bmi[2].as_mv[1].as_mv;
+      } else {
+        const int mi_row_2 = mi_row + (block_height_4x4 >> 1);
+        const int mi_col_2 = mi_col;
+        if (mi_row_2 * 2 < num_unit_rows && mi_col_2 * 2 < num_unit_cols) {
+          const int mi_idx_2 = mi_stride * mi_row_2 + mi_col_2;
+          is_valid_second_rectangle = 1;
+          mi = mi_grid_visible + mi_idx_2;
+          source_ref_frame[0] = mi[0]->ref_frame[0];
+          source_ref_frame[1] = mi[0]->ref_frame[1];
+          source_mv[0] = &mi[0]->mv[0].as_mv;
+          source_mv[1] = &mi[0]->mv[1].as_mv;
+        }
+      }
+      if (is_valid_second_rectangle) {
+        assign_motion_vector_info(
+            block_width_4x4, block_height_4x4, row_start_4x4 + block_height_4x4,
+            col_start_4x4, num_unit_rows, num_unit_cols, source_mv,
+            source_ref_frame, motion_vector_info);
+      }
+    } else if (pc_tree->partitioning == PARTITION_VERT) {
+      int is_valid_second_rectangle = 0;
+      assert(square_size_4x4 > 1);
+      // First rectangle.
+      source_ref_frame[0] = mi[0]->ref_frame[0];
+      source_ref_frame[1] = mi[0]->ref_frame[1];
+      source_mv[0] = &mi[0]->mv[0].as_mv;
+      source_mv[1] = &mi[0]->mv[1].as_mv;
+      assign_motion_vector_info(block_width_4x4, block_height_4x4,
+                                row_start_4x4, col_start_4x4, num_unit_rows,
+                                num_unit_cols, source_mv, source_ref_frame,
+                                motion_vector_info);
+      // Second rectangle.
+      if (square_size_4x4 == 2) {
+        is_valid_second_rectangle = 1;
+        source_ref_frame[0] = mi[0]->ref_frame[0];
+        source_ref_frame[1] = mi[0]->ref_frame[1];
+        source_mv[0] = &mi[0]->bmi[1].as_mv[0].as_mv;
+        source_mv[1] = &mi[0]->bmi[1].as_mv[1].as_mv;
+      } else {
+        const int mi_row_2 = mi_row;
+        const int mi_col_2 = mi_col + (block_width_4x4 >> 1);
+        if (mi_row_2 * 2 < num_unit_rows && mi_col_2 * 2 < num_unit_cols) {
+          const int mi_idx_2 = mi_stride * mi_row_2 + mi_col_2;
+          is_valid_second_rectangle = 1;
+          mi = mi_grid_visible + mi_idx_2;
+          source_ref_frame[0] = mi[0]->ref_frame[0];
+          source_ref_frame[1] = mi[0]->ref_frame[1];
+          source_mv[0] = &mi[0]->mv[0].as_mv;
+          source_mv[1] = &mi[0]->mv[1].as_mv;
+        }
+      }
+      if (is_valid_second_rectangle) {
+        assign_motion_vector_info(
+            block_width_4x4, block_height_4x4, row_start_4x4,
+            col_start_4x4 + block_width_4x4, num_unit_rows, num_unit_cols,
+            source_mv, source_ref_frame, motion_vector_info);
+      }
+    } else {
+      assert(pc_tree->partitioning == PARTITION_NONE || square_size_4x4 == 1);
+      source_ref_frame[0] = mi[0]->ref_frame[0];
+      source_ref_frame[1] = mi[0]->ref_frame[1];
+      if (square_size_4x4 == 1) {
+        const int sub8x8_row = row_start_4x4 % 2;
+        const int sub8x8_col = col_start_4x4 % 2;
+        const int sub8x8_idx = sub8x8_row * 2 + sub8x8_col;
+        source_mv[0] = &mi[0]->bmi[sub8x8_idx].as_mv[0].as_mv;
+        source_mv[1] = &mi[0]->bmi[sub8x8_idx].as_mv[1].as_mv;
+      } else {
+        source_mv[0] = &mi[0]->mv[0].as_mv;
+        source_mv[1] = &mi[0]->mv[1].as_mv;
+      }
+      assign_motion_vector_info(block_width_4x4, block_height_4x4,
+                                row_start_4x4, col_start_4x4, num_unit_rows,
+                                num_unit_cols, source_mv, source_ref_frame,
+                                motion_vector_info);
+    }
+
     return;
   }
   // recursively traverse partition tree when partition is split.
   assert(pc_tree->partitioning == PARTITION_SPLIT);
-  store_superblock_partition_info(pc_tree->split[0], partition_info,
-                                  subblock_square_size_4x4, num_unit_rows,
-                                  num_unit_cols, row_start_4x4, col_start_4x4);
-  store_superblock_partition_info(pc_tree->split[1], partition_info,
-                                  subblock_square_size_4x4, num_unit_rows,
-                                  num_unit_cols, row_start_4x4,
-                                  col_start_4x4 + subblock_square_size_4x4);
-  store_superblock_partition_info(
-      pc_tree->split[2], partition_info, subblock_square_size_4x4,
-      num_unit_rows, num_unit_cols, row_start_4x4 + subblock_square_size_4x4,
-      col_start_4x4);
-  store_superblock_partition_info(
-      pc_tree->split[3], partition_info, subblock_square_size_4x4,
-      num_unit_rows, num_unit_cols, row_start_4x4 + subblock_square_size_4x4,
-      col_start_4x4 + subblock_square_size_4x4);
+  store_superblock_info(pc_tree->split[0], mi_grid_visible, mi_stride,
+                        subblock_square_size_4x4, num_unit_rows, num_unit_cols,
+                        row_start_4x4, col_start_4x4, partition_info,
+                        motion_vector_info);
+  store_superblock_info(pc_tree->split[1], mi_grid_visible, mi_stride,
+                        subblock_square_size_4x4, num_unit_rows, num_unit_cols,
+                        row_start_4x4, col_start_4x4 + subblock_square_size_4x4,
+                        partition_info, motion_vector_info);
+  store_superblock_info(pc_tree->split[2], mi_grid_visible, mi_stride,
+                        subblock_square_size_4x4, num_unit_rows, num_unit_cols,
+                        row_start_4x4 + subblock_square_size_4x4, col_start_4x4,
+                        partition_info, motion_vector_info);
+  store_superblock_info(pc_tree->split[3], mi_grid_visible, mi_stride,
+                        subblock_square_size_4x4, num_unit_rows, num_unit_cols,
+                        row_start_4x4 + subblock_square_size_4x4,
+                        col_start_4x4 + subblock_square_size_4x4,
+                        partition_info, motion_vector_info);
 }
 #endif  // CONFIG_RATE_CTRL
 
@@ -4458,13 +4592,15 @@ static int rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
               pc_tree);
 #if CONFIG_RATE_CTRL
-    // Store partition info.
+    // Store partition, motion vector of the superblock.
     if (output_enabled) {
       const int num_unit_rows = get_num_unit_4x4(cpi->frame_info.frame_height);
       const int num_unit_cols = get_num_unit_4x4(cpi->frame_info.frame_width);
-      store_superblock_partition_info(
-          pc_tree, cpi->partition_info, num_4x4_blocks_wide_lookup[BLOCK_64X64],
-          num_unit_rows, num_unit_cols, mi_row << 1, mi_col << 1);
+      store_superblock_info(pc_tree, cm->mi_grid_visible, cm->mi_stride,
+                            num_4x4_blocks_wide_lookup[BLOCK_64X64],
+                            num_unit_rows, num_unit_cols, mi_row << 1,
+                            mi_col << 1, cpi->partition_info,
+                            cpi->motion_vector_info);
     }
 #endif  // CONFIG_RATE_CTRL
   }
