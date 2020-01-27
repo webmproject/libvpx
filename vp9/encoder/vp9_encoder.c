@@ -2060,7 +2060,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   // configuration change has a large change in avg_frame_bandwidth.
   // For SVC check for resetting based on spatial layer average bandwidth.
   // Also reset buffer level to optimal level.
-  if (cm->current_video_frame > 0) {
+  if (cm->current_video_frame > (unsigned int)cpi->svc.number_spatial_layers) {
     if (cpi->use_svc) {
       vp9_svc_check_reset_layer_rc_flag(cpi);
     } else {
