@@ -353,7 +353,7 @@ static void update_encode_frame_result(
   update_partition_info(encode_frame_info->partition_info,
                         encode_frame_result->num_rows_4x4,
                         encode_frame_result->num_cols_4x4,
-                        encode_frame_result->partition_info.get());
+                        &encode_frame_result->partition_info[0]);
   update_frame_counts(&encode_frame_info->frame_counts,
                       &encode_frame_result->frame_counts);
 }
@@ -591,9 +591,7 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
       std::unique_ptr<uint8_t[]>(new uint8_t[max_coding_data_byte_size]));
   encode_frame_result->num_rows_4x4 = num_rows_4x4_;
   encode_frame_result->num_cols_4x4 = num_cols_4x4_;
-  encode_frame_result->partition_info =
-      std::move(std::unique_ptr<PartitionInfo[]>(
-          new PartitionInfo[num_rows_4x4_ * num_cols_4x4_]));
+  encode_frame_result->partition_info.resize(num_rows_4x4_ * num_cols_4x4_);
   int64_t time_stamp;
   int64_t time_end;
   int flush = 1;  // Make vp9_get_compressed_data encode a frame

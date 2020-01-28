@@ -144,12 +144,16 @@ struct EncodeFrameResult {
   FrameCounts frame_counts;
   int num_rows_4x4;  // number of row units, in size of 4.
   int num_cols_4x4;  // number of column units, in size of 4.
-  // The pointer to the partition information of the frame.
+  // A vector of the partition information of the frame.
+  // The number of elements is |num_rows_4x4| * |num_cols_4x4|.
   // The frame is divided 4x4 blocks of |num_rows_4x4| rows and
   // |num_cols_4x4| columns.
   // Each 4x4 block contains the current pixel position (|row|, |column|),
   // the start pixel position of the partition (|row_start|, |column_start|),
   // and the |width|, |height| of the partition.
+  // The current pixel position can be the same as the start pixel position
+  // if the 4x4 block is the top-left block in the partition. Otherwise, they
+  // are different.
   // Within the same partition, all 4x4 blocks have the same |row_start|,
   // |column_start|, |width| and |height|.
   // For example, if the frame is partitioned to a 32x32 block,
@@ -159,7 +163,7 @@ struct EncodeFrameResult {
   // the start of the next partition block.
   // Horizontal next: |column_start| + |width|,
   // Vertical next: |row_start| + |height|.
-  std::unique_ptr<PartitionInfo[]> partition_info;
+  std::vector<PartitionInfo> partition_info;
 };
 
 struct GroupOfPicture {
