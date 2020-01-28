@@ -3811,6 +3811,26 @@ static int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
 #endif  // !CONFIG_REALTIME_ONLY
 
 #if CONFIG_RATE_CTRL
+static void assign_partition_info(
+    const int row_start_4x4, const int col_start_4x4, const int block_width_4x4,
+    const int block_height_4x4, const int num_unit_rows,
+    const int num_unit_cols, PARTITION_INFO *partition_info) {
+  int i, j;
+  for (i = 0; i < block_height_4x4; ++i) {
+    for (j = 0; j < block_width_4x4; ++j) {
+      const int row_4x4 = row_start_4x4 + i;
+      const int col_4x4 = col_start_4x4 + j;
+      const int unit_index = row_4x4 * num_unit_cols + col_4x4;
+      if (row_4x4 >= num_unit_rows || col_4x4 >= num_unit_cols) continue;
+      partition_info[unit_index].row = row_4x4 << 2;
+      partition_info[unit_index].column = col_4x4 << 2;
+      partition_info[unit_index].row_start = row_start_4x4 << 2;
+      partition_info[unit_index].column_start = col_start_4x4 << 2;
+      partition_info[unit_index].width = block_width_4x4 << 2;
+      partition_info[unit_index].height = block_height_4x4 << 2;
+    }
+  }
+}
 static void store_superblock_partition_info(
     const PC_TREE *const pc_tree, PARTITION_INFO *partition_info,
     const int square_size_4x4, const int num_unit_rows, const int num_unit_cols,
@@ -3828,20 +3848,19 @@ static void store_superblock_partition_info(
     const int block_height_4x4 = (pc_tree->partitioning == PARTITION_HORZ)
                                      ? square_size_4x4 >> 1
                                      : square_size_4x4;
-    int i, j;
-    for (i = 0; i < block_height_4x4; ++i) {
-      for (j = 0; j < block_width_4x4; ++j) {
-        const int row_4x4 = row_start_4x4 + i;
-        const int col_4x4 = col_start_4x4 + j;
-        const int unit_index = row_4x4 * num_unit_cols + col_4x4;
-        partition_info[unit_index].row = row_4x4 << 2;
-        partition_info[unit_index].column = col_4x4 << 2;
-        partition_info[unit_index].row_start = row_start_4x4 << 2;
-        partition_info[unit_index].column_start = col_start_4x4 << 2;
-        partition_info[unit_index].width = block_width_4x4 << 2;
-        partition_info[unit_index].height = block_height_4x4 << 2;
-      }
+    assign_partition_info(row_start_4x4, col_start_4x4, block_width_4x4,
+                          block_height_4x4, num_unit_rows, num_unit_cols,
+                          partition_info);
+    if (pc_tree->partitioning == PARTITION_VERT) {
+      assign_partition_info(row_start_4x4, col_start_4x4 + block_width_4x4,
+                            block_width_4x4, block_height_4x4, num_unit_rows,
+                            num_unit_cols, partition_info);
+    } else if (pc_tree->partitioning == PARTITION_HORZ) {
+      assign_partition_info(row_start_4x4 + block_height_4x4, col_start_4x4,
+                            block_width_4x4, block_height_4x4, num_unit_rows,
+                            num_unit_cols, partition_info);
     }
+
     return;
   }
   // recursively traverse partition tree when partition is split.
