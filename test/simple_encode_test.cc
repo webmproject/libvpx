@@ -166,7 +166,8 @@ TEST(SimpleEncode, EncodeConsistencyTest) {
   }
 }
 
-// Test the information stored in encoder is the same between two encode runs.
+// Test the information (partition info and motion vector info) stored in
+// encoder is the same between two encode runs.
 TEST(SimpleEncode, EncodeConsistencyTest2) {
   const int num_rows_4x4 = GetNumUnit4x4(w);
   const int num_cols_4x4 = GetNumUnit4x4(h);
@@ -178,6 +179,8 @@ TEST(SimpleEncode, EncodeConsistencyTest2) {
   const int num_coding_frames = simple_encode.GetCodingFrameNum();
   std::vector<PartitionInfo> partition_info_list(num_units_4x4 *
                                                  num_coding_frames);
+  std::vector<MotionVectorInfo> motion_vector_info_list(num_units_4x4 *
+                                                        num_coding_frames);
   simple_encode.StartEncode();
   for (int i = 0; i < num_coding_frames; ++i) {
     EncodeFrameResult encode_frame_result;
@@ -185,6 +188,8 @@ TEST(SimpleEncode, EncodeConsistencyTest2) {
     for (int j = 0; j < num_rows_4x4 * num_cols_4x4; ++j) {
       partition_info_list[i * num_units_4x4 + j] =
           encode_frame_result.partition_info[j];
+      motion_vector_info_list[i * num_units_4x4 + j] =
+          encode_frame_result.motion_vector_info[j];
     }
   }
   simple_encode.EndEncode();
@@ -210,6 +215,21 @@ TEST(SimpleEncode, EncodeConsistencyTest2) {
                 partition_info_list[i * num_units_4x4 + j].width);
       EXPECT_EQ(encode_frame_result.partition_info[j].height,
                 partition_info_list[i * num_units_4x4 + j].height);
+
+      EXPECT_EQ(encode_frame_result.motion_vector_info[j].mv_count,
+                motion_vector_info_list[i * num_units_4x4 + j].mv_count);
+      EXPECT_EQ(encode_frame_result.motion_vector_info[j].ref_frame[0],
+                motion_vector_info_list[i * num_units_4x4 + j].ref_frame[0]);
+      EXPECT_EQ(encode_frame_result.motion_vector_info[j].ref_frame[1],
+                motion_vector_info_list[i * num_units_4x4 + j].ref_frame[1]);
+      EXPECT_EQ(encode_frame_result.motion_vector_info[j].mv_row[0],
+                motion_vector_info_list[i * num_units_4x4 + j].mv_row[0]);
+      EXPECT_EQ(encode_frame_result.motion_vector_info[j].mv_column[0],
+                motion_vector_info_list[i * num_units_4x4 + j].mv_column[0]);
+      EXPECT_EQ(encode_frame_result.motion_vector_info[j].mv_row[1],
+                motion_vector_info_list[i * num_units_4x4 + j].mv_row[1]);
+      EXPECT_EQ(encode_frame_result.motion_vector_info[j].mv_column[1],
+                motion_vector_info_list[i * num_units_4x4 + j].mv_column[1]);
     }
   }
   simple_encode_2.EndEncode();
