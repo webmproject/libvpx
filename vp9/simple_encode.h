@@ -25,6 +25,15 @@ enum FrameType {
   kAlternateReference,
 };
 
+// The enum type is similar to vp9: |MV_REFERENCE_FRAME|.
+enum RefFrameType {
+  kIntraFrame = 0,
+  kLastFrame = 1,
+  kGoldenFrame = 2,
+  kAltRefFrame = 3,
+  kNoneRefFrame = -1,
+};
+
 // The frame is split to 4x4 blocks.
 // This structure contains the information of each 4x4 block.
 struct PartitionInfo {
@@ -34,6 +43,25 @@ struct PartitionInfo {
   int column_start;  // column pixel offset of the start of the prediction block
   int width;         // prediction block width
   int height;        // prediction block height
+};
+
+constexpr int kMotionVectorPrecision = 8;
+
+// The frame is split to 4x4 blocks.
+// This structure contains the information of each 4x4 block.
+struct MotionVectorInfo {
+  // Number of valid motion vectors, always 0 if this block is in the key frame.
+  // For inter frames, it could be 1 or 2.
+  int mv_count;
+  // The reference frame for motion vectors. If the second motion vector does
+  // not exist (mv_count = 1), the reference frame is kNoneRefFrame.
+  // Otherwise, the reference frame is either kLastFrame, or kGoldenFrame,
+  // or kAltRefFrame.
+  RefFrameType ref_frame[2];
+  // The row offset of motion vectors in the unit of pixel.
+  double mv_row[2];
+  // The column offset of motion vectors in the unit of pixel.
+  double mv_column[2];
 };
 
 struct EncodeFrameInfo {
@@ -175,6 +203,16 @@ struct EncodeFrameResult {
   // Horizontal next: |column_start| + |width|,
   // Vertical next: |row_start| + |height|.
   std::vector<PartitionInfo> partition_info;
+  // A vector of the motion vector information of the frame.
+  // The number of elements is |num_rows_4x4| * |num_cols_4x4|.
+  // The frame is divided 4x4 blocks of |num_rows_4x4| rows and
+  // |num_cols_4x4| columns.
+  // Each 4x4 block contains 0 motion vector if this is an intra predicted
+  // frame (for example, the key frame). If the frame is inter predicted,
+  // each 4x4 block contains either 1 or 2 motion vectors.
+  // Similar to partition info, all 4x4 blocks inside the same partition block
+  // share the same motion vector information.
+  std::vector<MotionVectorInfo> motion_vector_info;
   ImageBuffer coded_frame;
 };
 

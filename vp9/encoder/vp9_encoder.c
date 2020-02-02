@@ -7257,6 +7257,7 @@ static void update_encode_frame_result(
     uint32_t bit_depth, uint32_t input_bit_depth, const FRAME_COUNTS *counts,
 #if CONFIG_RATE_CTRL
     const PARTITION_INFO *partition_info,
+    const MOTION_VECTOR_INFO *motion_vector_info,
 #endif  // CONFIG_RATE_CTRL
     ENCODE_FRAME_RESULT *encode_frame_result) {
 #if CONFIG_RATE_CTRL
@@ -7273,6 +7274,7 @@ static void update_encode_frame_result(
   encode_frame_result->sse = psnr.sse[0];
   copy_frame_counts(counts, &encode_frame_result->frame_counts);
   encode_frame_result->partition_info = partition_info;
+  encode_frame_result->motion_vector_info = motion_vector_info;
   if (encode_frame_result->coded_frame.allocated) {
     yv12_buffer_to_image_buffer(coded_frame, &encode_frame_result->coded_frame);
   }
@@ -7593,7 +7595,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         cpi->Source, get_frame_new_buffer(cm), vp9_get_quantizer(cpi),
         cpi->oxcf.input_bit_depth, cm->bit_depth, cpi->td.counts,
 #if CONFIG_RATE_CTRL
-        cpi->partition_info,
+        cpi->partition_info, cpi->motion_vector_info,
 #endif  // CONFIG_RATE_CTRL
         encode_frame_result);
     vp9_twopass_postencode_update(cpi);

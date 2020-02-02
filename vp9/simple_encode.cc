@@ -157,6 +157,35 @@ static void update_partition_info(const PARTITION_INFO *input_partition_info,
   }
 }
 
+static void update_motion_vector_info(
+    const MOTION_VECTOR_INFO *input_motion_vector_info,
+    const FrameType frame_type, const int num_rows_4x4, const int num_cols_4x4,
+    MotionVectorInfo *output_motion_vector_info) {
+  const int num_units_4x4 = num_rows_4x4 * num_cols_4x4;
+  for (int i = 0; i < num_units_4x4; ++i) {
+    output_motion_vector_info[i].mv_count =
+        (frame_type == kKeyFrame)
+            ? 0
+            : ((input_motion_vector_info[i].ref_frame[1] == -1) ? 1 : 2);
+    output_motion_vector_info[i].ref_frame[0] =
+        static_cast<RefFrameType>(input_motion_vector_info[i].ref_frame[0]);
+    output_motion_vector_info[i].ref_frame[1] =
+        static_cast<RefFrameType>(input_motion_vector_info[i].ref_frame[1]);
+    output_motion_vector_info[i].mv_row[0] =
+        (double)input_motion_vector_info[i].mv[0].as_mv.row /
+        kMotionVectorPrecision;
+    output_motion_vector_info[i].mv_column[0] =
+        (double)input_motion_vector_info[i].mv[0].as_mv.col /
+        kMotionVectorPrecision;
+    output_motion_vector_info[i].mv_row[1] =
+        (double)input_motion_vector_info[i].mv[1].as_mv.row /
+        kMotionVectorPrecision;
+    output_motion_vector_info[i].mv_column[1] =
+        (double)input_motion_vector_info[i].mv[1].as_mv.col /
+        kMotionVectorPrecision;
+  }
+}
+
 static void update_frame_counts(const FRAME_COUNTS *input_counts,
                                 FrameCounts *output_counts) {
   // Init array sizes.
@@ -434,6 +463,8 @@ static bool init_encode_frame_result(EncodeFrameResult *encode_frame_result,
   encode_frame_result->num_cols_4x4 = get_num_unit_4x4(frame_height);
   encode_frame_result->partition_info.resize(encode_frame_result->num_rows_4x4 *
                                              encode_frame_result->num_cols_4x4);
+  encode_frame_result->motion_vector_info.resize(
+      encode_frame_result->num_rows_4x4 * encode_frame_result->num_cols_4x4);
 
   if (encode_frame_result->coding_data.get() == nullptr) {
     return false;
@@ -457,6 +488,10 @@ static void update_encode_frame_result(
                         encode_frame_result->num_rows_4x4,
                         encode_frame_result->num_cols_4x4,
                         &encode_frame_result->partition_info[0]);
+  update_motion_vector_info(
+      encode_frame_info->motion_vector_info, encode_frame_result->frame_type,
+      encode_frame_result->num_rows_4x4, encode_frame_result->num_cols_4x4,
+      &encode_frame_result->motion_vector_info[0]);
   update_frame_counts(&encode_frame_info->frame_counts,
                       &encode_frame_result->frame_counts);
 }
