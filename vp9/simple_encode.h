@@ -202,9 +202,11 @@ struct GroupOfPicture {
 
 class SimpleEncode {
  public:
+  // When outfile_path is set, the encoder will output the bitstream in ivf
+  // format.
   SimpleEncode(int frame_width, int frame_height, int frame_rate_num,
                int frame_rate_den, int target_bitrate, int num_frames,
-               const char *infile_path);
+               const char *infile_path, const char *outfile_path = NULL);
   ~SimpleEncode();
   SimpleEncode(SimpleEncode &) = delete;
   SimpleEncode &operator=(const SimpleEncode &) = delete;
@@ -268,7 +270,8 @@ class SimpleEncode {
   int frame_rate_den_;
   int target_bitrate_;
   int num_frames_;
-  std::FILE *file_;
+  std::FILE *in_file_;
+  std::FILE *out_file_;
   std::unique_ptr<EncodeImpl> impl_ptr_;
 
   GroupOfPicture group_of_picture_;

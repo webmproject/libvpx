@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <vector>
+#include "./ivfenc.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_enums.h"
 #include "vp9/common/vp9_onyxc_int.h"
@@ -120,6 +121,13 @@ static INLINE vpx_rational_t make_vpx_rational(int num, int den) {
   v.num = num;
   v.den = den;
   return v;
+}
+
+static INLINE vpx_rational_t inverse_vpx_rational(vpx_rational_t v) {
+  vpx_rational_t inverse_v;
+  inverse_v.num = v.den;
+  inverse_v.den = v.num;
+  return inverse_v;
 }
 
 static INLINE FrameType
@@ -517,7 +525,7 @@ static void UpdateGroupOfPicture(const VP9_COMP *cpi,
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,
                            int frame_rate_num, int frame_rate_den,
                            int target_bitrate, int num_frames,
-                           const char *infile_path) {
+                           const char *infile_path, const char *outfile_path) {
   impl_ptr_ = std::unique_ptr<EncodeImpl>(new EncodeImpl());
   frame_width_ = frame_width;
   frame_height_ = frame_height;
@@ -526,7 +534,12 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   target_bitrate_ = target_bitrate;
   num_frames_ = num_frames;
   // TODO(angirbid): Should we keep a file pointer here or keep the file_path?
-  file_ = fopen(infile_path, "r");
+  in_file_ = fopen(infile_path, "r");
+  if (outfile_path != NULL) {
+    out_file_ = fopen(outfile_path, "w");
+  } else {
+    out_file_ = NULL;
+  }
   impl_ptr_->cpi = NULL;
   impl_ptr_->img_fmt = VPX_IMG_FMT_I420;
 }
@@ -546,11 +559,11 @@ void SimpleEncode::ComputeFirstPassStats() {
 #endif
   vpx_image_t img;
   vpx_img_alloc(&img, impl_ptr_->img_fmt, frame_width_, frame_height_, 1);
-  rewind(file_);
+  rewind(in_file_);
   impl_ptr_->first_pass_stats.clear();
   for (i = 0; i < num_frames_; ++i) {
     assert(!vp9_lookahead_full(lookahead));
-    if (img_read(&img, file_)) {
+    if (img_read(&img, in_file_)) {
       int next_show_idx = vp9_lookahead_next_show_idx(lookahead);
       int64_t ts_start =
           timebase_units_to_ticks(&oxcf.g_timebase_in_ts, next_show_idx);
@@ -581,7 +594,7 @@ void SimpleEncode::ComputeFirstPassStats() {
   // TODO(angiebird): Store the total_stats apart form first_pass_stats
   impl_ptr_->first_pass_stats.push_back(vp9_get_total_stats(&cpi->twopass));
   free_encoder(cpi);
-  rewind(file_);
+  rewind(in_file_);
   vpx_img_free(&img);
 }
 
@@ -625,14 +638,22 @@ void SimpleEncode::StartEncode() {
   vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
                 frame_height_, 1);
   UpdateGroupOfPicture(impl_ptr_->cpi, &group_of_picture_);
-  rewind(file_);
+  rewind(in_file_);
+
+  if (out_file_ != NULL) {
+    const char *fourcc = "VP90";
+    vpx_rational_t time_base = inverse_vpx_rational(frame_rate);
+    ivf_write_file_header_with_video_info(out_file_, *(const uint32_t *)fourcc,
+                                          num_frames_, frame_width_,
+                                          frame_height_, time_base);
+  }
 }
 
 void SimpleEncode::EndEncode() {
   free_encoder(impl_ptr_->cpi);
   impl_ptr_->cpi = nullptr;
   vpx_img_free(&impl_ptr_->tmp_img);
-  rewind(file_);
+  rewind(in_file_);
 }
 
 int SimpleEncode::GetKeyFrameGroupSize(int key_frame_index) const {
@@ -666,7 +687,7 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   while (!vp9_lookahead_full(lookahead)) {
     // TODO(angiebird): Check whether we can move this file read logics to
     // lookahead
-    if (img_read(&impl_ptr_->tmp_img, file_)) {
+    if (img_read(&impl_ptr_->tmp_img, in_file_)) {
       int next_show_idx = vp9_lookahead_next_show_idx(lookahead);
       int64_t ts_start =
           timebase_units_to_ticks(&cpi->oxcf.g_timebase_in_ts, next_show_idx);
@@ -694,6 +715,13 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
                             &encode_frame_result->coding_data_byte_size,
                             encode_frame_result->coding_data.get(), &time_stamp,
                             &time_end, flush, &encode_frame_info);
+    if (out_file_ != NULL) {
+      ivf_write_frame_header(out_file_, time_stamp,
+                             encode_frame_result->coding_data_byte_size);
+      fwrite(encode_frame_result->coding_data.get(), 1,
+             encode_frame_result->coding_data_byte_size, out_file_);
+    }
+
     // vp9_get_compressed_data is expected to encode a frame every time, so the
     // data size should be greater than zero.
     if (encode_frame_result->coding_data_byte_size <= 0) {
@@ -763,8 +791,11 @@ uint64_t SimpleEncode::GetFramePixelCount() const {
 }
 
 SimpleEncode::~SimpleEncode() {
-  if (this->file_ != NULL) {
-    fclose(this->file_);
+  if (in_file_ != NULL) {
+    fclose(in_file_);
+  }
+  if (out_file_ != NULL) {
+    fclose(out_file_);
   }
 }
 
