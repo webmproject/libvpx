@@ -123,7 +123,7 @@ static INLINE vpx_rational_t make_vpx_rational(int num, int den) {
   return v;
 }
 
-static INLINE vpx_rational_t inverse_vpx_rational(vpx_rational_t v) {
+static INLINE vpx_rational_t invert_vpx_rational(vpx_rational_t v) {
   vpx_rational_t inverse_v;
   inverse_v.num = v.den;
   inverse_v.den = v.num;
@@ -677,7 +677,7 @@ void SimpleEncode::StartEncode() {
 
   if (out_file_ != NULL) {
     const char *fourcc = "VP90";
-    vpx_rational_t time_base = inverse_vpx_rational(frame_rate);
+    vpx_rational_t time_base = invert_vpx_rational(frame_rate);
     ivf_write_file_header_with_video_info(out_file_, *(const uint32_t *)fourcc,
                                           num_frames_, frame_width_,
                                           frame_height_, time_base);
