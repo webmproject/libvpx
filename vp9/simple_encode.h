@@ -87,13 +87,12 @@ struct NewMotionVectorContextCounts {
   std::vector<NewMotionvectorComponentCounts> comps;
 };
 
-#define UintArray2D std::vector<std::vector<unsigned int>>
-#define UintArray3D std::vector<std::vector<std::vector<unsigned int>>>
-#define UintArray5D \
-  std::vector<std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>
-#define UintArray6D        \
-  std::vector<std::vector< \
-      std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>>
+using UintArray2D = std::vector<std::vector<unsigned int>>;
+using UintArray3D = std::vector<std::vector<std::vector<unsigned int>>>;
+using UintArray5D = std::vector<
+    std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>;
+using UintArray6D = std::vector<std::vector<
+    std::vector<std::vector<std::vector<std::vector<unsigned int>>>>>>;
 
 // This structure is a copy of vp9 |tx_counts|.
 struct TransformSizeCounts {
