@@ -570,12 +570,12 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   num_frames_ = num_frames;
   // TODO(angirbid): Should we keep a file pointer here or keep the file_path?
   in_file_ = fopen(infile_path, "r");
-  if (outfile_path != NULL) {
+  if (outfile_path != nullptr) {
     out_file_ = fopen(outfile_path, "w");
   } else {
-    out_file_ = NULL;
+    out_file_ = nullptr;
   }
-  impl_ptr_->cpi = NULL;
+  impl_ptr_->cpi = nullptr;
   impl_ptr_->img_fmt = VPX_IMG_FMT_I420;
 }
 
@@ -616,7 +616,7 @@ void SimpleEncode::ComputeFirstPassStats() {
         ENCODE_FRAME_RESULT encode_frame_info;
         vp9_init_encode_frame_result(&encode_frame_info);
         // TODO(angiebird): Call vp9_first_pass directly
-        vp9_get_compressed_data(cpi, &frame_flags, &size, NULL, &time_stamp,
+        vp9_get_compressed_data(cpi, &frame_flags, &size, nullptr, &time_stamp,
                                 &time_end, flush, &encode_frame_info);
         // vp9_get_compressed_data only generates first pass stats not
         // compresses data
@@ -668,14 +668,14 @@ void SimpleEncode::StartEncode() {
              impl_ptr_->first_pass_stats.size();
 
   vp9_set_first_pass_stats(&oxcf, &stats);
-  assert(impl_ptr_->cpi == NULL);
+  assert(impl_ptr_->cpi == nullptr);
   impl_ptr_->cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
   vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
                 frame_height_, 1);
   UpdateGroupOfPicture(impl_ptr_->cpi, &group_of_picture_);
   rewind(in_file_);
 
-  if (out_file_ != NULL) {
+  if (out_file_ != nullptr) {
     const char *fourcc = "VP90";
     vpx_rational_t time_base = invert_vpx_rational(frame_rate);
     ivf_write_file_header_with_video_info(out_file_, *(const uint32_t *)fourcc,
@@ -750,7 +750,7 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
                             &encode_frame_result->coding_data_byte_size,
                             encode_frame_result->coding_data.get(), &time_stamp,
                             &time_end, flush, &encode_frame_info);
-    if (out_file_ != NULL) {
+    if (out_file_ != nullptr) {
       ivf_write_frame_header(out_file_, time_stamp,
                              encode_frame_result->coding_data_byte_size);
       fwrite(encode_frame_result->coding_data.get(), 1,
@@ -826,10 +826,10 @@ uint64_t SimpleEncode::GetFramePixelCount() const {
 }
 
 SimpleEncode::~SimpleEncode() {
-  if (in_file_ != NULL) {
+  if (in_file_ != nullptr) {
     fclose(in_file_);
   }
-  if (out_file_ != NULL) {
+  if (out_file_ != nullptr) {
     fclose(out_file_);
   }
 }

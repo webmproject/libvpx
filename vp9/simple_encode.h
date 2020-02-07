@@ -243,7 +243,7 @@ class SimpleEncode {
   // format.
   SimpleEncode(int frame_width, int frame_height, int frame_rate_num,
                int frame_rate_den, int target_bitrate, int num_frames,
-               const char *infile_path, const char *outfile_path = NULL);
+               const char *infile_path, const char *outfile_path = nullptr);
   ~SimpleEncode();
   SimpleEncode(SimpleEncode &) = delete;
   SimpleEncode &operator=(const SimpleEncode &) = delete;
