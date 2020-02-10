@@ -331,9 +331,9 @@ typedef struct TplDepFrame {
 typedef struct TileDataEnc {
   TileInfo tile_info;
   int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
-#if CONFIG_CONSISTENT_RECODE
+#if CONFIG_CONSISTENT_RECODE || CONFIG_RATE_CTRL
   int thresh_freq_fact_prev[BLOCK_SIZES][MAX_MODES];
-#endif
+#endif  // CONFIG_CONSISTENT_RECODE || CONFIG_RATE_CTRL
   int8_t mode_map[BLOCK_SIZES][MAX_MODES];
   FIRSTPASS_DATA fp_data;
   VP9RowMTSync row_mt_sync;
