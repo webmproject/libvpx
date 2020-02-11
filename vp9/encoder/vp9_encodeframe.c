@@ -3847,6 +3847,9 @@ static void assign_motion_vector_info(const int block_width_4x4,
       const int col_4x4 = col_start_4x4 + j;
       const int unit_index = row_4x4 * num_unit_cols + col_4x4;
       if (row_4x4 >= num_unit_rows || col_4x4 >= num_unit_cols) continue;
+      if (source_ref_frame[1] == NONE) {
+        assert(source_mv[1]->row == 0 && source_mv[1]->col == 0);
+      }
       motion_vector_info[unit_index].ref_frame[0] = source_ref_frame[0];
       motion_vector_info[unit_index].ref_frame[1] = source_ref_frame[1];
       motion_vector_info[unit_index].mv[0].as_mv.row = source_mv[0]->row;
