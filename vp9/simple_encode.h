@@ -59,8 +59,10 @@ struct MotionVectorInfo {
   // or kAltRefFrame.
   RefFrameType ref_frame[2];
   // The row offset of motion vectors in the unit of pixel.
+  // If the second motion vector does not exist, the value is 0.
   double mv_row[2];
   // The column offset of motion vectors in the unit of pixel.
+  // If the second motion vector does not exist, the value is 0.
   double mv_column[2];
 };
 
