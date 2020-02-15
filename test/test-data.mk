@@ -737,6 +737,8 @@ endif  # CONFIG_VP9_HIGHBITDEPTH
 # Invalid files for testing libvpx error checking.
 LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += invalid-bug-1443.ivf
 LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += invalid-bug-1443.ivf.res
+LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += invalid-bug-148271109.ivf
+LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += invalid-bug-148271109.ivf.res
 LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += invalid-token-partition.ivf
 LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += invalid-token-partition.ivf.res
 LIBVPX_TEST_DATA-$(CONFIG_VP8_DECODER) += invalid-vp80-00-comprehensive-018.ivf.2kf_0x6.ivf

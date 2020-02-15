@@ -456,6 +456,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
     }
 
     if (setjmp(pbi->common.error.jmp)) {
+      vpx_clear_system_state();
       /* We do not know if the missing frame(s) was supposed to update
        * any of the reference buffers, but we act conservative and
        * mark only the last buffer as corrupted.
