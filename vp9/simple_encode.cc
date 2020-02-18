@@ -851,7 +851,8 @@ int SimpleEncode::GetCodingFrameNum() const {
   FIRST_PASS_INFO first_pass_info;
   fps_init_first_pass_info(&first_pass_info, impl_ptr_->first_pass_stats.data(),
                            num_frames_);
-  return vp9_get_coding_frame_num(&oxcf, &frame_info, &first_pass_info,
+  return vp9_get_coding_frame_num(/*encode_command=*/nullptr, &oxcf,
+                                  &frame_info, &first_pass_info,
                                   multi_layer_arf, allow_alt_ref);
 }
 
