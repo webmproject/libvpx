@@ -1650,7 +1650,7 @@ static vpx_codec_err_t ctrl_set_delta_q_uv(vpx_codec_alg_priv_t *ctx,
                                            va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   int data = va_arg(args, int);
-  data = VPXMIN(VPXMAX(data, -20), 20);
+  data = VPXMIN(VPXMAX(data, -15), 15);
   extra_cfg.delta_q_uv = data;
   return update_extra_cfg(ctx, &extra_cfg);
 }
