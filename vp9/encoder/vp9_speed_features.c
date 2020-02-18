@@ -457,6 +457,7 @@ static void set_rt_speed_feature_framesize_independent(
   sf->cb_pred_filter_search = 0;
   sf->force_smooth_interpol = 0;
   sf->rt_intra_dc_only_low_content = 0;
+  sf->mv.enable_adaptive_subpel_force_stop = 0;
 
   if (speed >= 1) {
     sf->allow_txfm_domain_distortion = 1;
