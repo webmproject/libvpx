@@ -532,10 +532,24 @@ typedef struct MOTION_VECTOR_INFO {
   int_mv mv[2];
 } MOTION_VECTOR_INFO;
 
+typedef struct ENCODE_COMMAND {
+  int use_external_quantize_index;
+  int external_quantize_index;
+  // A list of binary flags set from the external controller.
+  // Each binary flag indicates whether the frame is an arf or not.
+  const int *external_arf_indexes;
+} ENCODE_COMMAND;
+
 static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {
   vp9_zero(*encode_command);
   encode_command->use_external_quantize_index = 0;
   encode_command->external_quantize_index = -1;
+  encode_command->external_arf_indexes = NULL;
+}
+
+static INLINE void encode_command_set_external_arf_indexes(
+    ENCODE_COMMAND *encode_command, const int *external_arf_indexes) {
+  encode_command->external_arf_indexes = external_arf_indexes;
 }
 
 static INLINE void encode_command_set_external_quantize_index(

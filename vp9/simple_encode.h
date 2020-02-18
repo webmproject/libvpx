@@ -276,9 +276,9 @@ class SimpleEncode {
   // The arf index determines whether a frame is arf or not.
   // Therefore it also determines the group of picture size.
   // If set, VP9 will use the external arf index to make decision.
-  // This function is called only once before StartEncde().
-  void SetExternalGroupOfPicture(bool use_external_arf,
-                                 const int *external_arf_indexes);
+  // This function should be called only once after ComputeFirstPassStats(),
+  // before StartEncde().
+  void SetExternalGroupOfPicture(std::vector<int> external_arf_indexes);
 
   // Initializes the encoder for actual encoding.
   // This function should be called after ComputeFirstPassStats().
@@ -334,6 +334,7 @@ class SimpleEncode {
   std::FILE *out_file_;
   std::unique_ptr<EncodeImpl> impl_ptr_;
 
+  std::vector<int> external_arf_indexes_;
   GroupOfPicture group_of_picture_;
 
   // Each show or no show frame is assigned with a coding index based on its

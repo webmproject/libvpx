@@ -252,15 +252,6 @@ int vp9_get_frames_to_next_key(const struct VP9EncoderConfig *oxcf,
                                const FIRST_PASS_INFO *first_pass_info,
                                int kf_show_idx, int min_gf_interval);
 #if CONFIG_RATE_CTRL
-typedef struct ENCODE_COMMAND {
-  int use_external_quantize_index;
-  int external_quantize_index;
-  int use_external_arf;
-  // A list of binary flags set from the external controller.
-  // Each binary flag indicates whether the frame is an arf or not.
-  const int *external_arf_indexes;
-} ENCODE_COMMAND;
-
 /* Call this function to get info about the next group of pictures.
  * This function should be called after vp9_create_compressor() when encoding
  * starts or after vp9_get_compressed_data() when the encoding process of
@@ -273,7 +264,7 @@ void vp9_get_next_group_of_picture(const struct VP9_COMP *cpi,
 
 /*!\brief Call this function before coding a new group of pictures to get
  * information about it.
- * \param[in] encode_command       Encode command
+ * \param[in] external_arf_indexes External arf indexs passed in
  * \param[in] oxcf                 Encoder config
  * \param[in] frame_info           Frame info
  * \param[in] first_pass_info      First pass stats
@@ -288,7 +279,7 @@ void vp9_get_next_group_of_picture(const struct VP9_COMP *cpi,
  *
  * \return Returns coding frame count
  */
-int vp9_get_gop_coding_frame_count(const ENCODE_COMMAND *encode_command,
+int vp9_get_gop_coding_frame_count(const int *external_arf_indexes,
                                    const struct VP9EncoderConfig *oxcf,
                                    const FRAME_INFO *frame_info,
                                    const FIRST_PASS_INFO *first_pass_info,
@@ -297,7 +288,7 @@ int vp9_get_gop_coding_frame_count(const ENCODE_COMMAND *encode_command,
                                    int first_is_key_frame,
                                    int last_gop_use_alt_ref, int *use_alt_ref);
 
-int vp9_get_coding_frame_num(const ENCODE_COMMAND *encode_command,
+int vp9_get_coding_frame_num(const int *external_arf_indexes,
                              const struct VP9EncoderConfig *oxcf,
                              const FRAME_INFO *frame_info,
                              const FIRST_PASS_INFO *first_pass_info,

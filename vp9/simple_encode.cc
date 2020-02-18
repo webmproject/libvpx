@@ -691,10 +691,9 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
   return output_stats;
 }
 
-void SimpleEncode::SetExternalGroupOfPicture(const bool use_external_arf,
-                                             const int *external_arf_indexes) {
-  impl_ptr_->cpi->encode_command.use_external_arf = use_external_arf;
-  impl_ptr_->cpi->encode_command.external_arf_indexes = external_arf_indexes;
+void SimpleEncode::SetExternalGroupOfPicture(
+    std::vector<int> external_arf_indexes) {
+  external_arf_indexes_ = external_arf_indexes;
 }
 
 void SimpleEncode::StartEncode() {
@@ -715,6 +714,8 @@ void SimpleEncode::StartEncode() {
   vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
                 frame_height_, 1);
   frame_coding_index_ = 0;
+  encode_command_set_external_arf_indexes(&impl_ptr_->cpi->encode_command,
+                                          external_arf_indexes_.data());
   UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, &group_of_picture_);
   rewind(in_file_);
 
@@ -851,7 +852,7 @@ int SimpleEncode::GetCodingFrameNum() const {
   FIRST_PASS_INFO first_pass_info;
   fps_init_first_pass_info(&first_pass_info, impl_ptr_->first_pass_stats.data(),
                            num_frames_);
-  return vp9_get_coding_frame_num(/*encode_command=*/nullptr, &oxcf,
+  return vp9_get_coding_frame_num(external_arf_indexes_.data(), &oxcf,
                                   &frame_info, &first_pass_info,
                                   multi_layer_arf, allow_alt_ref);
 }
