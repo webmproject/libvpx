@@ -649,6 +649,10 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q,
       thresholds[0] = threshold_base >> 3;
       thresholds[1] = threshold_base >> 1;
       thresholds[2] = threshold_base << 3;
+      if (cpi->rc.avg_frame_qindex[INTER_FRAME] > 220)
+        thresholds[2] = thresholds[2] << 2;
+      else if (cpi->rc.avg_frame_qindex[INTER_FRAME] > 200)
+        thresholds[2] = thresholds[2] << 1;
     } else if (cm->width < 1280 && cm->height < 720) {
       thresholds[1] = (5 * threshold_base) >> 2;
     } else if (cm->width < 1920 && cm->height < 1080) {
