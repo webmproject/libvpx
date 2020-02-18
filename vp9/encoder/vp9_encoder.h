@@ -521,6 +521,10 @@ typedef struct KMEANS_DATA {
 typedef struct ENCODE_COMMAND {
   int use_external_quantize_index;
   int external_quantize_index;
+  int use_external_arf;
+  // A list of binary flags set from the external controller.
+  // Each binary flag indicates whether the frame is an arf or not.
+  const int *external_arf_indexes;
 } ENCODE_COMMAND;
 
 typedef struct PARTITION_INFO {

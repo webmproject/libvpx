@@ -573,6 +573,9 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
   }
 }
 
+// Gets group of picture information from VP9's decision, and update
+// |group_of_picture| accordingly.
+// This is called at the starting of encoding of each group of picture.
 static void UpdateGroupOfPicture(const VP9_COMP *cpi, int start_coding_index,
                                  GroupOfPicture *group_of_picture) {
   int first_is_key_frame;
@@ -601,6 +604,7 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   num_frames_ = num_frames;
   frame_coding_index_ = 0;
   // TODO(angirbid): Should we keep a file pointer here or keep the file_path?
+  assert(infile_path != nullptr);
   in_file_ = fopen(infile_path, "r");
   if (outfile_path != nullptr) {
     out_file_ = fopen(outfile_path, "w");
@@ -685,6 +689,12 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
     output_stats.push_back(this_stats);
   }
   return output_stats;
+}
+
+void SimpleEncode::SetExternalGroupOfPicture(const bool use_external_arf,
+                                             const int *external_arf_indexes) {
+  impl_ptr_->cpi->encode_command.use_external_arf = use_external_arf;
+  impl_ptr_->cpi->encode_command.external_arf_indexes = external_arf_indexes;
 }
 
 void SimpleEncode::StartEncode() {
