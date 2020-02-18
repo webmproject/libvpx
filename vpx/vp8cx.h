@@ -679,7 +679,7 @@ enum vp8e_enc_control_id {
 
   /*!\brief Codec control function to set delta q for uv.
    *
-   * Cap it at +/-20 for now.
+   * Cap it at +/-15.
    *
    * Supported in codecs: VP9
    */
