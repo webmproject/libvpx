@@ -260,8 +260,8 @@ int vp9_get_frames_to_next_key(const struct VP9EncoderConfig *oxcf,
  */
 void vp9_get_next_group_of_picture(const struct VP9_COMP *cpi,
                                    int *first_is_key_frame, int *use_alt_ref,
-                                   int *coding_frame_count,
-                                   int *first_show_idx);
+                                   int *coding_frame_count, int *first_show_idx,
+                                   int *last_gop_use_alt_ref);
 
 /*!\brief Call this function before coding a new group of pictures to get
  * information about it.

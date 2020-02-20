@@ -132,12 +132,16 @@ static INLINE vpx_rational_t invert_vpx_rational(vpx_rational_t v) {
 
 static INLINE FrameType
 get_frame_type_from_update_type(FRAME_UPDATE_TYPE update_type) {
-  // TODO(angiebird): Figure out if we need frame type other than key frame,
-  // alternate reference and inter frame
   switch (update_type) {
-    case KF_UPDATE: return kKeyFrame; break;
-    case ARF_UPDATE: return kAlternateReference; break;
-    default: return kInterFrame; break;
+    case KF_UPDATE: return kKeyFrame;
+    case ARF_UPDATE: return kAlternateReference;
+    case GF_UPDATE: return kGoldenFrame;
+    case OVERLAY_UPDATE: return kOverlayFrame;
+    case LF_UPDATE: return kInterFrame;
+    default:
+      fprintf(stderr, "Unsupported update_type %d\n", update_type);
+      abort();
+      return kInterFrame;
   }
 }
 
@@ -507,12 +511,14 @@ static int IsGroupOfPictureFinished(const GroupOfPicture &group_of_picture) {
 
 static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
                               int coding_frame_count, int first_show_idx,
+                              int last_gop_use_alt_ref, int start_coding_index,
                               GroupOfPicture *group_of_picture) {
   // Clean up the state of previous group of picture.
   group_of_picture->encode_frame_list.clear();
   group_of_picture->next_encode_frame_index = 0;
   group_of_picture->show_frame_count = coding_frame_count - use_alt_ref;
   group_of_picture->start_show_index = first_show_idx;
+  group_of_picture->start_coding_index = start_coding_index;
   {
     // First frame in the group of pictures. It's either key frame or show inter
     // frame.
@@ -520,9 +526,14 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
     if (first_is_key_frame) {
       encode_frame_info.frame_type = kKeyFrame;
     } else {
-      encode_frame_info.frame_type = kInterFrame;
+      if (last_gop_use_alt_ref) {
+        encode_frame_info.frame_type = kOverlayFrame;
+      } else {
+        encode_frame_info.frame_type = kGoldenFrame;
+      }
     }
     encode_frame_info.show_idx = first_show_idx;
+    encode_frame_info.coding_index = start_coding_index;
     group_of_picture->encode_frame_list.push_back(encode_frame_info);
   }
 
@@ -533,6 +544,7 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
     EncodeFrameInfo encode_frame_info;
     encode_frame_info.frame_type = kAlternateReference;
     encode_frame_info.show_idx = first_show_idx + show_frame_count;
+    encode_frame_info.coding_index = start_coding_index + 1;
     group_of_picture->encode_frame_list.push_back(encode_frame_info);
   }
 
@@ -541,20 +553,24 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
     EncodeFrameInfo encode_frame_info;
     encode_frame_info.frame_type = kInterFrame;
     encode_frame_info.show_idx = first_show_idx + i;
+    encode_frame_info.coding_index = start_coding_index + use_alt_ref + i;
     group_of_picture->encode_frame_list.push_back(encode_frame_info);
   }
 }
 
-static void UpdateGroupOfPicture(const VP9_COMP *cpi,
+static void UpdateGroupOfPicture(const VP9_COMP *cpi, int start_coding_index,
                                  GroupOfPicture *group_of_picture) {
   int first_is_key_frame;
   int use_alt_ref;
   int coding_frame_count;
   int first_show_idx;
+  int last_gop_use_alt_ref;
   vp9_get_next_group_of_picture(cpi, &first_is_key_frame, &use_alt_ref,
-                                &coding_frame_count, &first_show_idx);
+                                &coding_frame_count, &first_show_idx,
+                                &last_gop_use_alt_ref);
   SetGroupOfPicture(first_is_key_frame, use_alt_ref, coding_frame_count,
-                    first_show_idx, group_of_picture);
+                    first_show_idx, last_gop_use_alt_ref, start_coding_index,
+                    group_of_picture);
 }
 
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,
@@ -568,6 +584,7 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   frame_rate_den_ = frame_rate_den;
   target_bitrate_ = target_bitrate;
   num_frames_ = num_frames;
+  frame_coding_index_ = 0;
   // TODO(angirbid): Should we keep a file pointer here or keep the file_path?
   in_file_ = fopen(infile_path, "r");
   if (outfile_path != nullptr) {
@@ -672,7 +689,8 @@ void SimpleEncode::StartEncode() {
   impl_ptr_->cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
   vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
                 frame_height_, 1);
-  UpdateGroupOfPicture(impl_ptr_->cpi, &group_of_picture_);
+  frame_coding_index_ = 0;
+  UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, &group_of_picture_);
   rewind(in_file_);
 
   if (out_file_ != nullptr) {
@@ -771,10 +789,13 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
       abort();
     }
 
+    // TODO(angiebird): Add a function to update internal state of SimpleEncode
     update_encode_frame_result(encode_frame_result, &encode_frame_info);
+    ++frame_coding_index_;
     IncreaseGroupOfPictureIndex(&group_of_picture_);
     if (IsGroupOfPictureFinished(group_of_picture_)) {
-      UpdateGroupOfPicture(impl_ptr_->cpi, &group_of_picture_);
+      UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_,
+                           &group_of_picture_);
     }
   } else {
     // TODO(angiebird): Clean up encode_frame_result.

@@ -23,15 +23,18 @@ enum FrameType {
   kKeyFrame = 0,
   kInterFrame,
   kAlternateReference,
+  kOverlayFrame,
+  kGoldenFrame,
 };
 
 // The enum type is similar to vp9: |MV_REFERENCE_FRAME|.
+// TODO(angiebird): Clarify the difference between FrameType and RefFrameType.
 enum RefFrameType {
-  kIntraFrame = 0,
-  kLastFrame = 1,
-  kGoldenFrame = 2,
+  kIntraRefFrame = 0,
+  kLastRefFrame = 1,
+  kGoldenRefFrame = 2,
   kAltRefFrame = 3,
-  kNoneRefFrame = -1,
+  kNoneRefRefFrame = -1,
 };
 
 // The frame is split to 4x4 blocks.
@@ -68,6 +71,11 @@ struct MotionVectorInfo {
 
 struct EncodeFrameInfo {
   int show_idx;
+
+  // Each show or no show frame is assigned with a coding index based on its
+  // coding order (starting from zero) in the coding process of the entire
+  // video. The coding index for each frame is unique.
+  int coding_index;
   FrameType frame_type;
 };
 
@@ -237,6 +245,8 @@ struct GroupOfPicture {
   // The show index/timestamp of the earliest show frame in the group of
   // pictures.
   int start_show_index;
+  // The coding index of the first coding frame in the group of picture.
+  int start_coding_index;
 };
 
 class SimpleEncode {
@@ -309,11 +319,17 @@ class SimpleEncode {
   int frame_rate_den_;
   int target_bitrate_;
   int num_frames_;
+
   std::FILE *in_file_;
   std::FILE *out_file_;
   std::unique_ptr<EncodeImpl> impl_ptr_;
 
   GroupOfPicture group_of_picture_;
+
+  // Each show or no show frame is assigned with a coding index based on its
+  // coding order (starting from zero) in the coding process of the entire
+  // video. The coding index of to-be-coded frame.
+  int frame_coding_index_;
 };
 
 }  // namespace vp9
