@@ -70,35 +70,31 @@ TEST(SimpleEncode, EncodeFrame) {
   simple_encode.ComputeFirstPassStats();
   int num_coding_frames = simple_encode.GetCodingFrameNum();
   EXPECT_GE(num_coding_frames, num_frames);
-  // The coding frames include actual show frames and alternate reference
-  // frames, i.e. no show frame.
-  int ref_num_alternate_refereces = num_coding_frames - num_frames;
-  int num_alternate_refereces = 0;
   simple_encode.StartEncode();
   size_t total_data_bit_size = 0;
-  for (int i = 0; i < num_coding_frames; ++i) {
-    EncodeFrameResult encode_frame_result;
-    simple_encode.EncodeFrame(&encode_frame_result);
-    if (i == 0) {
-      EXPECT_EQ(encode_frame_result.show_idx, 0);
-      EXPECT_EQ(encode_frame_result.frame_type, kKeyFrame)
-          << "The first coding frame should be key frame";
+  int coded_show_frame_count = 0;
+  int coded_frame_index = 0;
+  while (coded_show_frame_count < num_frames) {
+    const GroupOfPicture group_of_picture =
+        simple_encode.ObserveGroupOfPicture();
+    for (size_t i = 0; i < group_of_picture.encode_frame_list.size(); ++i) {
+      EncodeFrameResult encode_frame_result;
+      simple_encode.EncodeFrame(&encode_frame_result);
+      if (coded_frame_index == 0) {
+        EXPECT_EQ(encode_frame_result.show_idx, 0);
+        EXPECT_EQ(encode_frame_result.frame_type, kKeyFrame)
+            << "The first coding frame should be a key frame";
+      }
+      EXPECT_GE(encode_frame_result.show_idx, 0);
+      EXPECT_LT(encode_frame_result.show_idx, num_frames);
+      EXPECT_GE(encode_frame_result.psnr, 34)
+          << "The psnr is supposed to be greater than 34 given the "
+             "target_bitrate 1000 kbps";
+      total_data_bit_size += encode_frame_result.coding_data_bit_size;
+      ++coded_frame_index;
     }
-    if (encode_frame_result.frame_type == kAlternateReference) {
-      ++num_alternate_refereces;
-    }
-    EXPECT_GE(encode_frame_result.show_idx, 0);
-    EXPECT_LT(encode_frame_result.show_idx, num_frames);
-    if (i == num_coding_frames - 1) {
-      EXPECT_EQ(encode_frame_result.show_idx, num_frames - 1)
-          << "The last coding frame should be the last display order";
-    }
-    EXPECT_GE(encode_frame_result.psnr, 34)
-        << "The psnr is supposed to be greater than 34 given the "
-           "target_bitrate 1000 kbps";
-    total_data_bit_size += encode_frame_result.coding_data_bit_size;
+    coded_show_frame_count += group_of_picture.show_frame_count;
   }
-  EXPECT_EQ(num_alternate_refereces, ref_num_alternate_refereces);
   const double bitrate = GetBitrateInKbps(total_data_bit_size, num_frames,
                                           frame_rate_num, frame_rate_den);
   const double off_target_threshold = 150;
