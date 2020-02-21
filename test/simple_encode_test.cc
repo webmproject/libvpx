@@ -73,25 +73,27 @@ TEST(SimpleEncode, EncodeFrame) {
   simple_encode.StartEncode();
   size_t total_data_bit_size = 0;
   int coded_show_frame_count = 0;
-  int coded_frame_index = 0;
+  int frame_coding_index = 0;
   while (coded_show_frame_count < num_frames) {
     const GroupOfPicture group_of_picture =
         simple_encode.ObserveGroupOfPicture();
-    for (size_t i = 0; i < group_of_picture.encode_frame_list.size(); ++i) {
+    const std::vector<EncodeFrameInfo> &encode_frame_list =
+        group_of_picture.encode_frame_list;
+    for (size_t group_index = 0; group_index < encode_frame_list.size();
+         ++group_index) {
       EncodeFrameResult encode_frame_result;
       simple_encode.EncodeFrame(&encode_frame_result);
-      if (coded_frame_index == 0) {
-        EXPECT_EQ(encode_frame_result.show_idx, 0);
-        EXPECT_EQ(encode_frame_result.frame_type, kKeyFrame)
-            << "The first coding frame should be a key frame";
-      }
-      EXPECT_GE(encode_frame_result.show_idx, 0);
-      EXPECT_LT(encode_frame_result.show_idx, num_frames);
+      EXPECT_EQ(encode_frame_result.show_idx,
+                encode_frame_list[group_index].show_idx);
+      EXPECT_EQ(encode_frame_result.frame_type,
+                encode_frame_list[group_index].frame_type);
+      EXPECT_EQ(encode_frame_list[group_index].coding_index,
+                frame_coding_index);
       EXPECT_GE(encode_frame_result.psnr, 34)
           << "The psnr is supposed to be greater than 34 given the "
              "target_bitrate 1000 kbps";
       total_data_bit_size += encode_frame_result.coding_data_bit_size;
-      ++coded_frame_index;
+      ++frame_coding_index;
     }
     coded_show_frame_count += group_of_picture.show_frame_count;
   }
