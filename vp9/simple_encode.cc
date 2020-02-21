@@ -133,15 +133,15 @@ static INLINE vpx_rational_t invert_vpx_rational(vpx_rational_t v) {
 static INLINE FrameType
 get_frame_type_from_update_type(FRAME_UPDATE_TYPE update_type) {
   switch (update_type) {
-    case KF_UPDATE: return kKeyFrame;
-    case ARF_UPDATE: return kAlternateReference;
-    case GF_UPDATE: return kGoldenFrame;
-    case OVERLAY_UPDATE: return kOverlayFrame;
-    case LF_UPDATE: return kInterFrame;
+    case KF_UPDATE: return kFrameTypeKey;
+    case ARF_UPDATE: return kFrameTypeAltRef;
+    case GF_UPDATE: return kFrameTypeGolden;
+    case OVERLAY_UPDATE: return kFrameTypeOverlay;
+    case LF_UPDATE: return kFrameTypeInter;
     default:
       fprintf(stderr, "Unsupported update_type %d\n", update_type);
       abort();
-      return kInterFrame;
+      return kFrameTypeInter;
   }
 }
 
@@ -161,19 +161,35 @@ static void update_partition_info(const PARTITION_INFO *input_partition_info,
   }
 }
 
+// translate MV_REFERENCE_FRAME to RefFrameType
+static RefFrameType mv_ref_frame_to_ref_frame_type(
+    MV_REFERENCE_FRAME mv_ref_frame) {
+  switch (mv_ref_frame) {
+    case LAST_FRAME: return kRefFrameTypeLast;
+    case GOLDEN_FRAME: return kRefFrameTypePast;
+    case ALTREF_FRAME: return kRefFrameTypeFuture;
+    default: return kRefFrameTypeNone;
+  }
+}
+
 static void update_motion_vector_info(
     const MOTION_VECTOR_INFO *input_motion_vector_info, const int num_rows_4x4,
     const int num_cols_4x4, MotionVectorInfo *output_motion_vector_info) {
   const int num_units_4x4 = num_rows_4x4 * num_cols_4x4;
   for (int i = 0; i < num_units_4x4; ++i) {
+    const MV_REFERENCE_FRAME *in_ref_frame =
+        input_motion_vector_info[i].ref_frame;
     output_motion_vector_info[i].mv_count =
-        (input_motion_vector_info[i].ref_frame[0] == INTRA_FRAME)
-            ? 0
-            : ((input_motion_vector_info[i].ref_frame[1] == -1) ? 1 : 2);
+        (in_ref_frame[0] == INTRA_FRAME) ? 0
+                                         : ((in_ref_frame[1] == NONE) ? 1 : 2);
+    if (in_ref_frame[0] == NONE) {
+      fprintf(stderr, "in_ref_frame[0] shouldn't be NONE\n");
+      abort();
+    }
     output_motion_vector_info[i].ref_frame[0] =
-        static_cast<RefFrameType>(input_motion_vector_info[i].ref_frame[0]);
+        mv_ref_frame_to_ref_frame_type(in_ref_frame[0]);
     output_motion_vector_info[i].ref_frame[1] =
-        static_cast<RefFrameType>(input_motion_vector_info[i].ref_frame[1]);
+        mv_ref_frame_to_ref_frame_type(in_ref_frame[1]);
     output_motion_vector_info[i].mv_row[0] =
         (double)input_motion_vector_info[i].mv[0].as_mv.row /
         kMotionVectorPrecision;
@@ -523,12 +539,12 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
     // frame.
     EncodeFrameInfo encode_frame_info;
     if (first_is_key_frame) {
-      encode_frame_info.frame_type = kKeyFrame;
+      encode_frame_info.frame_type = kFrameTypeKey;
     } else {
       if (last_gop_use_alt_ref) {
-        encode_frame_info.frame_type = kOverlayFrame;
+        encode_frame_info.frame_type = kFrameTypeOverlay;
       } else {
-        encode_frame_info.frame_type = kGoldenFrame;
+        encode_frame_info.frame_type = kFrameTypeGolden;
       }
     }
     encode_frame_info.show_idx = first_show_idx;
@@ -541,7 +557,7 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
     // If there is alternate reference, it is always coded at the second place.
     // Its show index (or timestamp) is at the last of this group
     EncodeFrameInfo encode_frame_info;
-    encode_frame_info.frame_type = kAlternateReference;
+    encode_frame_info.frame_type = kFrameTypeAltRef;
     encode_frame_info.show_idx = first_show_idx + show_frame_count;
     encode_frame_info.coding_index = start_coding_index + 1;
     group_of_picture->encode_frame_list.push_back(encode_frame_info);
@@ -550,7 +566,7 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
   // Encode the rest show inter frames.
   for (int i = 1; i < show_frame_count; ++i) {
     EncodeFrameInfo encode_frame_info;
-    encode_frame_info.frame_type = kInterFrame;
+    encode_frame_info.frame_type = kFrameTypeInter;
     encode_frame_info.show_idx = first_show_idx + i;
     encode_frame_info.coding_index = start_coding_index + use_alt_ref + i;
     group_of_picture->encode_frame_list.push_back(encode_frame_info);

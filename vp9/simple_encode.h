@@ -19,22 +19,24 @@
 
 namespace vp9 {
 
+// TODO(angiebird): Add description for each frame type.
 enum FrameType {
-  kKeyFrame = 0,
-  kInterFrame,
-  kAlternateReference,
-  kOverlayFrame,
-  kGoldenFrame,
+  kFrameTypeKey = 0,
+  kFrameTypeInter,
+  kFrameTypeAltRef,
+  kFrameTypeOverlay,
+  kFrameTypeGolden,
 };
 
-// The enum type is similar to vp9: |MV_REFERENCE_FRAME|.
-// TODO(angiebird): Clarify the difference between FrameType and RefFrameType.
+// TODO(angiebird): Add description for each reference frame type.
+// This enum numbers have to be contiguous and start from zero except
+// kNoneRefFrame.
 enum RefFrameType {
-  kIntraRefFrame = 0,
-  kLastRefFrame = 1,
-  kGoldenRefFrame = 2,
-  kAltRefFrame = 3,
-  kNoneRefRefFrame = -1,
+  kRefFrameTypeLast = 0,
+  kRefFrameTypePast = 1,
+  kRefFrameTypeFuture = 2,
+  kRefFrameTypeMax = 3,
+  kRefFrameTypeNone = -1,
 };
 
 // The frame is split to 4x4 blocks.
