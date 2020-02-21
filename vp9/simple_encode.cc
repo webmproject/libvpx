@@ -162,13 +162,12 @@ static void update_partition_info(const PARTITION_INFO *input_partition_info,
 }
 
 static void update_motion_vector_info(
-    const MOTION_VECTOR_INFO *input_motion_vector_info,
-    const FrameType frame_type, const int num_rows_4x4, const int num_cols_4x4,
-    MotionVectorInfo *output_motion_vector_info) {
+    const MOTION_VECTOR_INFO *input_motion_vector_info, const int num_rows_4x4,
+    const int num_cols_4x4, MotionVectorInfo *output_motion_vector_info) {
   const int num_units_4x4 = num_rows_4x4 * num_cols_4x4;
   for (int i = 0; i < num_units_4x4; ++i) {
     output_motion_vector_info[i].mv_count =
-        (frame_type == kKeyFrame)
+        (input_motion_vector_info[i].ref_frame[0] == INTRA_FRAME)
             ? 0
             : ((input_motion_vector_info[i].ref_frame[1] == -1) ? 1 : 2);
     output_motion_vector_info[i].ref_frame[0] =
@@ -492,10 +491,10 @@ static void update_encode_frame_result(
                         encode_frame_result->num_rows_4x4,
                         encode_frame_result->num_cols_4x4,
                         &encode_frame_result->partition_info[0]);
-  update_motion_vector_info(
-      encode_frame_info->motion_vector_info, encode_frame_result->frame_type,
-      encode_frame_result->num_rows_4x4, encode_frame_result->num_cols_4x4,
-      &encode_frame_result->motion_vector_info[0]);
+  update_motion_vector_info(encode_frame_info->motion_vector_info,
+                            encode_frame_result->num_rows_4x4,
+                            encode_frame_result->num_cols_4x4,
+                            &encode_frame_result->motion_vector_info[0]);
   update_frame_counts(&encode_frame_info->frame_counts,
                       &encode_frame_result->frame_counts);
 }
