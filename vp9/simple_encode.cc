@@ -524,6 +524,64 @@ static int IsGroupOfPictureFinished(const GroupOfPicture &group_of_picture) {
          group_of_picture.encode_frame_list.size();
 }
 
+static void UpdateRefFrameCodingIndexes(FrameType frame_type,
+                                        int frame_coding_index,
+                                        int *ref_frame_coding_indexes,
+                                        int *ref_frame_valid_list) {
+  // This part is written based on the logics in vp9_configure_buffer_updates()
+  // and update_ref_frames()
+  switch (frame_type) {
+    case kFrameTypeKey:
+      ref_frame_coding_indexes[kRefFrameTypeLast] = frame_coding_index;
+      ref_frame_coding_indexes[kRefFrameTypePast] = frame_coding_index;
+      ref_frame_coding_indexes[kRefFrameTypeFuture] = frame_coding_index;
+      break;
+    case kFrameTypeInter:
+      ref_frame_coding_indexes[kRefFrameTypeLast] = frame_coding_index;
+      break;
+    case kFrameTypeAltRef:
+      ref_frame_coding_indexes[kRefFrameTypeFuture] = frame_coding_index;
+      break;
+    case kFrameTypeOverlay:
+      // Reserve the past coding_index in the future slot. This logic is from
+      // update_ref_frames() with condition vp9_preserve_existing_gf() == 1
+      // TODO(angiebird): Invetegate why we need this.
+      ref_frame_coding_indexes[kRefFrameTypeFuture] =
+          ref_frame_coding_indexes[kRefFrameTypePast];
+      ref_frame_coding_indexes[kRefFrameTypePast] = frame_coding_index;
+      break;
+    case kFrameTypeGolden:
+      ref_frame_coding_indexes[kRefFrameTypePast] = frame_coding_index;
+      ref_frame_coding_indexes[kRefFrameTypeLast] = frame_coding_index;
+      break;
+  }
+
+  //  This part is written based on the logics in get_ref_frame_flags() but we
+  //  rename the flags alt, golden to future, past respectively. Mark
+  //  non-duplicated reference frames as valid. The priorities are
+  //  kRefFrameTypeLast > kRefFrameTypePast > kRefFrameTypeFuture.
+  const int last_index = ref_frame_coding_indexes[kRefFrameTypeLast];
+  const int past_index = ref_frame_coding_indexes[kRefFrameTypePast];
+  const int future_index = ref_frame_coding_indexes[kRefFrameTypeFuture];
+
+  for (int ref_frame_idx = 0; ref_frame_idx < kRefFrameTypeMax;
+       ++ref_frame_idx) {
+    ref_frame_valid_list[ref_frame_idx] = 1;
+  }
+
+  if (past_index == last_index) {
+    ref_frame_valid_list[kRefFrameTypeLast] = 0;
+  }
+
+  if (future_index == last_index) {
+    ref_frame_valid_list[kRefFrameTypeFuture] = 0;
+  }
+
+  if (future_index == past_index) {
+    ref_frame_valid_list[kRefFrameTypeFuture] = 0;
+  }
+}
+
 static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
                               int coding_frame_count, int first_show_idx,
                               int last_gop_use_alt_ref, int start_coding_index,
@@ -613,6 +671,11 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   }
   impl_ptr_->cpi = nullptr;
   impl_ptr_->img_fmt = VPX_IMG_FMT_I420;
+
+  for (int i = 0; i < kRefFrameTypeMax; ++i) {
+    ref_frame_coding_indexes_[i] = 0;
+    ref_frame_valid_list_[i] = 0;
+  }
 }
 
 void SimpleEncode::ComputeFirstPassStats() {
@@ -751,6 +814,21 @@ EncodeFrameInfo SimpleEncode::GetNextEncodeFrameInfo() const {
       .encode_frame_list[group_of_picture_.next_encode_frame_index];
 }
 
+void SimpleEncode::PostUpdateState(
+    const EncodeFrameResult &encode_frame_result) {
+  // This function needs to be called before the increament of
+  // frame_coding_index_
+  UpdateRefFrameCodingIndexes(encode_frame_result.frame_type,
+                              frame_coding_index_, ref_frame_coding_indexes_,
+                              ref_frame_valid_list_);
+  ++frame_coding_index_;
+  IncreaseGroupOfPictureIndex(&group_of_picture_);
+  if (IsGroupOfPictureFinished(group_of_picture_)) {
+    UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_,
+                         &group_of_picture_);
+  }
+}
+
 void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
   VP9_COMP *cpi = impl_ptr_->cpi;
   struct lookahead_ctx *lookahead = cpi->lookahead;
@@ -815,14 +893,8 @@ void SimpleEncode::EncodeFrame(EncodeFrameResult *encode_frame_result) {
       abort();
     }
 
-    // TODO(angiebird): Add a function to update internal state of SimpleEncode
     update_encode_frame_result(encode_frame_result, &encode_frame_info);
-    ++frame_coding_index_;
-    IncreaseGroupOfPictureIndex(&group_of_picture_);
-    if (IsGroupOfPictureFinished(group_of_picture_)) {
-      UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_,
-                           &group_of_picture_);
-    }
+    PostUpdateState(*encode_frame_result);
   } else {
     // TODO(angiebird): Clean up encode_frame_result.
     fprintf(stderr, "init_encode_frame_result() failed.\n");
