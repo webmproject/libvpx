@@ -71,6 +71,21 @@ struct MotionVectorInfo {
   double mv_column[2];
 };
 
+struct RefFrameInfo {
+  int coding_indexes[kRefFrameTypeMax];
+
+  // Indicate whether the reference frames are available or not.
+  // When the reference frame type is not valid, it means either the to-be-coded
+  // frame is a key frame or the reference frame already appears in other
+  // reference frame type. vp9 always keeps three types of reference frame
+  // available.  However, the duplicated reference frames will not be
+  // chosen by the encoder. The priorities of choosing reference frames are
+  // kRefFrameTypeLast > kRefFrameTypePast > kRefFrameTypeFuture.
+  // For example, if kRefFrameTypeLast and kRefFrameTypePast both point to the
+  // same frame, kRefFrameTypePast will be set to invalid.
+  int valid_list[kRefFrameTypeMax];
+};
+
 struct EncodeFrameInfo {
   int show_idx;
 
@@ -78,6 +93,7 @@ struct EncodeFrameInfo {
   // coding order (starting from zero) in the coding process of the entire
   // video. The coding index for each frame is unique.
   int coding_index;
+  RefFrameInfo ref_frame_info;
   FrameType frame_type;
 };
 
@@ -342,23 +358,10 @@ class SimpleEncode {
   // video. The coding index of the to-be-coded frame.
   int frame_coding_index_;
 
-  // Coding indexes of reference frames of to-be-coded-frame.
-  int ref_frame_coding_indexes_[kRefFrameTypeMax];
-
-  // Indicate whether the reference frames are available or not.
-  // When the reference frame type is not valid, it means either the to-be-coded
-  // frame is a key frame or the reference frame already appears in other
-  // reference frame type. vp9 always keeps three types of reference frame
-  // available.  However, the duplicated reference frames will not be
-  // chosen by the encoder. The priorities of choosing reference frames are
-  // kRefFrameTypeLast > kRefFrameTypePast > kRefFrameTypeFuture.
-  // For example, if kRefFrameTypeLast and kRefFrameTypePast both point to the
-  // same frame, kRefFrameTypePast will be set to invalid.
-
-  // TODO(angiebird): Do we need to reset ref_frame_valid_list_ and
-  // ref_frame_valid_list_ when nex key frame appears?
-
-  int ref_frame_valid_list_[kRefFrameTypeMax];
+  // TODO(angiebird): Do we need to reset ref_frames_info_ when the next key
+  // frame appears?
+  // Reference frames info of the to-be-coded frame.
+  RefFrameInfo ref_frame_info_;
 
   void PostUpdateState(const EncodeFrameResult &encode_frame_result);
 };

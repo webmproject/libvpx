@@ -524,12 +524,20 @@ static int IsGroupOfPictureFinished(const GroupOfPicture &group_of_picture) {
          group_of_picture.encode_frame_list.size();
 }
 
-static void UpdateRefFrameCodingIndexes(FrameType frame_type,
-                                        int frame_coding_index,
-                                        int *ref_frame_coding_indexes,
-                                        int *ref_frame_valid_list) {
+static void InitRefFrameInfo(RefFrameInfo *ref_frame_info) {
+  for (int i = 0; i < kRefFrameTypeMax; ++i) {
+    ref_frame_info->coding_indexes[i] = 0;
+    ref_frame_info->valid_list[i] = 0;
+  }
+}
+
+// After finishing coding a frame, this function will update the coded frame
+// into the ref_frame_info based on the frame_type and the coding_index.
+static void PostUpdateRefFrameInfo(FrameType frame_type, int frame_coding_index,
+                                   RefFrameInfo *ref_frame_info) {
   // This part is written based on the logics in vp9_configure_buffer_updates()
   // and update_ref_frames()
+  int *ref_frame_coding_indexes = ref_frame_info->coding_indexes;
   switch (frame_type) {
     case kFrameTypeKey:
       ref_frame_coding_indexes[kRefFrameTypeLast] = frame_coding_index;
@@ -564,6 +572,7 @@ static void UpdateRefFrameCodingIndexes(FrameType frame_type,
   const int past_index = ref_frame_coding_indexes[kRefFrameTypePast];
   const int future_index = ref_frame_coding_indexes[kRefFrameTypeFuture];
 
+  int *ref_frame_valid_list = ref_frame_info->valid_list;
   for (int ref_frame_idx = 0; ref_frame_idx < kRefFrameTypeMax;
        ++ref_frame_idx) {
     ref_frame_valid_list[ref_frame_idx] = 1;
@@ -585,6 +594,7 @@ static void UpdateRefFrameCodingIndexes(FrameType frame_type,
 static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
                               int coding_frame_count, int first_show_idx,
                               int last_gop_use_alt_ref, int start_coding_index,
+                              const RefFrameInfo &start_ref_frame_info,
                               GroupOfPicture *group_of_picture) {
   // Clean up the state of previous group of picture.
   group_of_picture->encode_frame_list.clear();
@@ -592,10 +602,16 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
   group_of_picture->show_frame_count = coding_frame_count - use_alt_ref;
   group_of_picture->start_show_index = first_show_idx;
   group_of_picture->start_coding_index = start_coding_index;
+
+  // We need to make a copy of start reference frame info because we
+  // use it to simulate the ref frame update.
+  RefFrameInfo ref_frame_info = start_ref_frame_info;
+
   {
     // First frame in the group of pictures. It's either key frame or show inter
     // frame.
     EncodeFrameInfo encode_frame_info;
+    // Set frame_type
     if (first_is_key_frame) {
       encode_frame_info.frame_type = kFrameTypeKey;
     } else {
@@ -605,8 +621,14 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
         encode_frame_info.frame_type = kFrameTypeGolden;
       }
     }
+
     encode_frame_info.show_idx = first_show_idx;
     encode_frame_info.coding_index = start_coding_index;
+
+    encode_frame_info.ref_frame_info = ref_frame_info;
+    PostUpdateRefFrameInfo(encode_frame_info.frame_type,
+                           encode_frame_info.coding_index, &ref_frame_info);
+
     group_of_picture->encode_frame_list.push_back(encode_frame_info);
   }
 
@@ -618,6 +640,11 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
     encode_frame_info.frame_type = kFrameTypeAltRef;
     encode_frame_info.show_idx = first_show_idx + show_frame_count;
     encode_frame_info.coding_index = start_coding_index + 1;
+
+    encode_frame_info.ref_frame_info = ref_frame_info;
+    PostUpdateRefFrameInfo(encode_frame_info.frame_type,
+                           encode_frame_info.coding_index, &ref_frame_info);
+
     group_of_picture->encode_frame_list.push_back(encode_frame_info);
   }
 
@@ -627,6 +654,11 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
     encode_frame_info.frame_type = kFrameTypeInter;
     encode_frame_info.show_idx = first_show_idx + i;
     encode_frame_info.coding_index = start_coding_index + use_alt_ref + i;
+
+    encode_frame_info.ref_frame_info = ref_frame_info;
+    PostUpdateRefFrameInfo(encode_frame_info.frame_type,
+                           encode_frame_info.coding_index, &ref_frame_info);
+
     group_of_picture->encode_frame_list.push_back(encode_frame_info);
   }
 }
@@ -635,6 +667,7 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
 // |group_of_picture| accordingly.
 // This is called at the starting of encoding of each group of picture.
 static void UpdateGroupOfPicture(const VP9_COMP *cpi, int start_coding_index,
+                                 const RefFrameInfo &start_ref_frame_info,
                                  GroupOfPicture *group_of_picture) {
   int first_is_key_frame;
   int use_alt_ref;
@@ -646,7 +679,7 @@ static void UpdateGroupOfPicture(const VP9_COMP *cpi, int start_coding_index,
                                 &last_gop_use_alt_ref);
   SetGroupOfPicture(first_is_key_frame, use_alt_ref, coding_frame_count,
                     first_show_idx, last_gop_use_alt_ref, start_coding_index,
-                    group_of_picture);
+                    start_ref_frame_info, group_of_picture);
 }
 
 SimpleEncode::SimpleEncode(int frame_width, int frame_height,
@@ -672,10 +705,7 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   impl_ptr_->cpi = nullptr;
   impl_ptr_->img_fmt = VPX_IMG_FMT_I420;
 
-  for (int i = 0; i < kRefFrameTypeMax; ++i) {
-    ref_frame_coding_indexes_[i] = 0;
-    ref_frame_valid_list_[i] = 0;
-  }
+  InitRefFrameInfo(&ref_frame_info_);
 }
 
 void SimpleEncode::ComputeFirstPassStats() {
@@ -779,7 +809,8 @@ void SimpleEncode::StartEncode() {
   frame_coding_index_ = 0;
   encode_command_set_external_arf_indexes(&impl_ptr_->cpi->encode_command,
                                           external_arf_indexes_.data());
-  UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, &group_of_picture_);
+  UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
+                       &group_of_picture_);
   rewind(in_file_);
 
   if (out_file_ != nullptr) {
@@ -818,13 +849,12 @@ void SimpleEncode::PostUpdateState(
     const EncodeFrameResult &encode_frame_result) {
   // This function needs to be called before the increament of
   // frame_coding_index_
-  UpdateRefFrameCodingIndexes(encode_frame_result.frame_type,
-                              frame_coding_index_, ref_frame_coding_indexes_,
-                              ref_frame_valid_list_);
+  PostUpdateRefFrameInfo(encode_frame_result.frame_type, frame_coding_index_,
+                         &ref_frame_info_);
   ++frame_coding_index_;
   IncreaseGroupOfPictureIndex(&group_of_picture_);
   if (IsGroupOfPictureFinished(group_of_picture_)) {
-    UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_,
+    UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
                          &group_of_picture_);
   }
 }
