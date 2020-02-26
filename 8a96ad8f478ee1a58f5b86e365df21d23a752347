@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d1f510e_38b12ec1",
+        "filename": "test/simple_encode_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-02-26T22:52:29Z",
+      "side": 1,
+      "message": "is this necessary? anything | 0 will be the original value. did you mean to toggle the value with e.g., ^ 1?",
+      "revId": "8a96ad8f478ee1a58f5b86e365df21d23a752347",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53b82b63_43f601d8",
+        "filename": "test/simple_encode_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-02-26T22:52:29Z",
+      "side": 1,
+      "message": "gotten",
+      "range": {
+        "startLine": 325,
+        "startChar": 45,
+        "endLine": 325,
+        "endChar": 49
+      },
+      "revId": "8a96ad8f478ee1a58f5b86e365df21d23a752347",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00259911_8f0a4a21",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-02-26T22:52:29Z",
+      "side": 1,
+      "message": "indexes / indices",
+      "range": {
+        "startLine": 267,
+        "startChar": 48,
+        "endLine": 267,
+        "endChar": 54
+      },
+      "revId": "8a96ad8f478ee1a58f5b86e365df21d23a752347",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
+    }
+  ]
+}
