@@ -2311,7 +2311,7 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
 
   vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
 
-  cm->current_video_frame = 0;
+  init_frame_indexes(cm);
   cpi->partition_search_skippable_frame = 0;
   cpi->tile_data = NULL;
 
@@ -5342,7 +5342,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi, size_t *size,
     vp9_swap_mi_and_prev_mi(cm);
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
-    ++cm->current_video_frame;
+    update_frame_indexes(cm, cm->show_frame);
     if (cpi->use_svc) vp9_inc_frame_in_layer(cpi);
   }
 

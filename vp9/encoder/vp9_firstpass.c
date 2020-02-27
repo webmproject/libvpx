@@ -1478,7 +1478,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     fclose(recon_file);
   }
 
-  ++cm->current_video_frame;
+  // In the first pass, every frame is considered as a show frame.
+  update_frame_indexes(cm, /*show_frame=*/1);
   if (cpi->use_svc) vp9_inc_frame_in_layer(cpi);
 }
 

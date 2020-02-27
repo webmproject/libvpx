@@ -226,7 +226,16 @@ typedef struct VP9Common {
   unsigned int frame_context_idx; /* Context to use/update */
   FRAME_COUNTS counts;
 
+  // TODO(angiebird): current_video_frame/current_frame_coding_index into a
+  // structure
   unsigned int current_video_frame;
+#if CONFIG_RATE_CTRL
+  // Each show or no show frame is assigned with a coding index based on its
+  // coding order (starting from zero).
+
+  // Current frame's coding index.
+  int current_frame_coding_index;
+#endif
   BITSTREAM_PROFILE profile;
 
   // VPX_BITS_8 in profile 0 or 1, VPX_BITS_10 or VPX_BITS_12 in profile 2 or 3.
@@ -253,6 +262,22 @@ typedef struct VP9Common {
 
   int lf_row;
 } VP9_COMMON;
+
+static INLINE void init_frame_indexes(VP9_COMMON *cm) {
+  cm->current_video_frame = 0;
+#if CONFIG_RATE_CTRL
+  cm->current_frame_coding_index = 0;
+#endif  // CONFIG_RATE_CTRL
+}
+
+static INLINE void update_frame_indexes(VP9_COMMON *cm, int show_frame) {
+  if (show_frame) {
+    ++cm->current_video_frame;
+  }
+#if CONFIG_RATE_CTRL
+  ++cm->current_frame_coding_index;
+#endif  // CONFIG_RATE_CTRL
+}
 
 typedef struct {
   int frame_width;
