@@ -69,7 +69,18 @@ typedef struct {
   int mi_rows;
   int mi_cols;
   uint8_t released;
-  int frame_index;
+
+  // Note that frame_index/frame_coding_index are only set by set_frame_index()
+  // on the encoder side.
+
+  // TODO(angiebird): Set frame_index/frame_coding_index on the decoder side
+  // properly.
+  int frame_index;  // Display order in the video, it's equivalent to the
+                    // show_idx defined in EncodeFrameInfo.
+#if CONFIG_RATE_CTRL
+  int frame_coding_index;  // The coding order (starting from zero) of this
+                           // frame.
+#endif                     // CONFIG_RATE_CTRL
   vpx_codec_frame_buffer_t raw_frame_buffer;
   YV12_BUFFER_CONFIG buf;
 } RefCntBuffer;

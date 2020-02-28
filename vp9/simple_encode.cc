@@ -498,6 +498,14 @@ static void update_encode_frame_result(
   encode_frame_result->coding_data_bit_size =
       encode_frame_result->coding_data_byte_size * 8;
   encode_frame_result->show_idx = encode_frame_info->show_idx;
+  encode_frame_result->coding_idx = encode_frame_info->frame_coding_index;
+  for (int i = 0; i < kRefFrameTypeMax; ++i) {
+    assert(kRefFrameTypeMax == MAX_INTER_REF_FRAMES);
+    encode_frame_result->ref_frame_info.coding_indexes[i] =
+        encode_frame_info->ref_frame_coding_indexes[i];
+    encode_frame_result->ref_frame_info.valid_list[i] =
+        encode_frame_info->ref_frame_valid_list[i];
+  }
   encode_frame_result->frame_type =
       get_frame_type_from_update_type(encode_frame_info->update_type);
   encode_frame_result->psnr = encode_frame_info->psnr;

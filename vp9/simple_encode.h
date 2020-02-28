@@ -199,6 +199,8 @@ void output_image_buffer(const ImageBuffer &image_buffer, std::FILE *out_file);
 struct EncodeFrameResult {
   int show_idx;
   FrameType frame_type;
+  int coding_idx;
+  RefFrameInfo ref_frame_info;
   size_t coding_data_bit_size;
   size_t coding_data_byte_size;
   // The EncodeFrame will allocate a buffer, write the coding data into the
