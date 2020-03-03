@@ -701,7 +701,13 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   frame_rate_den_ = frame_rate_den;
   target_bitrate_ = target_bitrate;
   num_frames_ = num_frames;
+
   frame_coding_index_ = 0;
+  show_frame_count_ = 0;
+
+  key_frame_group_index_ = 0;
+  key_frame_group_size_ = 0;
+
   // TODO(angirbid): Should we keep a file pointer here or keep the file_path?
   assert(infile_path != nullptr);
   in_file_ = fopen(infile_path, "r");
@@ -822,9 +828,15 @@ void SimpleEncode::StartEncode() {
   impl_ptr_->cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
   vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
                 frame_height_, 1);
+
   frame_coding_index_ = 0;
+  show_frame_count_ = 0;
+
   encode_command_set_external_arf_indexes(&impl_ptr_->cpi->encode_command,
                                           GetVectorData(external_arf_indexes_));
+
+  UpdateKeyFrameGroup(show_frame_count_);
+
   UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
                        &group_of_picture_);
   rewind(in_file_);
@@ -845,12 +857,23 @@ void SimpleEncode::EndEncode() {
   rewind(in_file_);
 }
 
-int SimpleEncode::GetKeyFrameGroupSize(int key_frame_index) const {
+void SimpleEncode::UpdateKeyFrameGroup(int key_frame_show_index) {
   const VP9_COMP *cpi = impl_ptr_->cpi;
-  return vp9_get_frames_to_next_key(&cpi->oxcf, &cpi->frame_info,
-                                    &cpi->twopass.first_pass_info,
-                                    key_frame_index, cpi->rc.min_gf_interval);
+  key_frame_group_index_ = 0;
+  key_frame_group_size_ = vp9_get_frames_to_next_key(
+      &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info,
+      key_frame_show_index, cpi->rc.min_gf_interval);
+  assert(key_frame_group_size_ > 0);
 }
+
+void SimpleEncode::PostUpdateKeyFrameGroupIndex(FrameType frame_type) {
+  if (frame_type != kFrameTypeAltRef) {
+    // key_frame_group_index_ only counts show frames
+    ++key_frame_group_index_;
+  }
+}
+
+int SimpleEncode::GetKeyFrameGroupSize() const { return key_frame_group_size_; }
 
 GroupOfPicture SimpleEncode::ObserveGroupOfPicture() const {
   return group_of_picture_;
@@ -868,10 +891,19 @@ void SimpleEncode::PostUpdateState(
   PostUpdateRefFrameInfo(encode_frame_result.frame_type, frame_coding_index_,
                          &ref_frame_info_);
   ++frame_coding_index_;
+  if (encode_frame_result.frame_type != kFrameTypeAltRef) {
+    // Only kFrameTypeAltRef is not a show frame
+    ++show_frame_count_;
+  }
   IncreaseGroupOfPictureIndex(&group_of_picture_);
   if (IsGroupOfPictureFinished(group_of_picture_)) {
     UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
                          &group_of_picture_);
+  }
+
+  PostUpdateKeyFrameGroupIndex(encode_frame_result.frame_type);
+  if (key_frame_group_index_ == key_frame_group_size_) {
+    UpdateKeyFrameGroup(show_frame_count_);
   }
 }
 
