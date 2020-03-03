@@ -2369,6 +2369,35 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
 
   vp9_rc_set_frame_target(cpi, target);
   if (cm->show_frame) update_buffer_level_svc_preencode(cpi);
+
+  if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC && svc->single_layer_svc == 1 &&
+      svc->spatial_layer_id == svc->first_spatial_layer_to_encode) {
+    LAYER_CONTEXT *lc = NULL;
+    cpi->resize_pending = vp9_resize_one_pass_cbr(cpi);
+    if (cpi->resize_pending) {
+      int tl, width, height;
+      // Apply the same scale to all temporal layers.
+      for (tl = 0; tl < svc->number_temporal_layers; tl++) {
+        lc = &svc->layer_context[svc->spatial_layer_id *
+                                     svc->number_temporal_layers +
+                                 tl];
+        lc->scaling_factor_num_resize =
+            cpi->resize_scale_num * lc->scaling_factor_num;
+        lc->scaling_factor_den_resize =
+            cpi->resize_scale_den * lc->scaling_factor_den;
+      }
+      // Set the size for this current temporal layer.
+      lc = &svc->layer_context[svc->spatial_layer_id *
+                                   svc->number_temporal_layers +
+                               svc->temporal_layer_id];
+      get_layer_resolution(cpi->oxcf.width, cpi->oxcf.height,
+                           lc->scaling_factor_num_resize,
+                           lc->scaling_factor_den_resize, &width, &height);
+      vp9_set_size_literal(cpi, width, height);
+    }
+  } else {
+    cpi->resize_pending = 0;
+  }
 }
 
 void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
@@ -2625,7 +2654,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   int avg_qp_thr1 = 70;
   int avg_qp_thr2 = 50;
   int min_width = 180;
-  int min_height = 180;
+  int min_height = 90;
   int down_size_on = 1;
   cpi->resize_scale_num = 1;
   cpi->resize_scale_den = 1;
@@ -2635,6 +2664,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
     cpi->resize_count = 0;
     return 0;
   }
+
   // Check current frame reslution to avoid generating frames smaller than
   // the minimum resolution.
   if (ONEHALFONLY_RESIZE) {
@@ -2645,8 +2675,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
         (cm->width * 3 / 4 < min_width || cm->height * 3 / 4 < min_height))
       return 0;
     else if (cpi->resize_state == THREE_QUARTER &&
-             ((cpi->oxcf.width >> 1) < min_width ||
-              (cpi->oxcf.height >> 1) < min_height))
+             (cm->width * 3 / 4 < min_width || cm->height * 3 / 4 < min_height))
       down_size_on = 0;
   }
 

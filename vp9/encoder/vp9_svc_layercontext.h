@@ -47,6 +47,9 @@ typedef struct {
   int min_q;
   int scaling_factor_num;
   int scaling_factor_den;
+  // Scaling factors used for internal resize scaling for single layer SVC.
+  int scaling_factor_num_resize;
+  int scaling_factor_den_resize;
   TWO_PASS twopass;
   vpx_fixed_buf_t rc_twopass_stats_in;
   unsigned int current_video_frame_in_layer;
@@ -192,6 +195,9 @@ typedef struct SVC {
 
   // Every spatial layer on a superframe whose base is key is key too.
   int simulcast_mode;
+
+  // Flag to indicate SVC is dynamically switched to a single layer.
+  int single_layer_svc;
 } SVC;
 
 struct VP9_COMP;

@@ -60,6 +60,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     memset(bits_total_, 0, sizeof(bits_total_));
     memset(layer_target_avg_bandwidth_, 0, sizeof(layer_target_avg_bandwidth_));
     dynamic_drop_layer_ = false;
+    single_layer_resize_ = false;
     change_bitrate_ = false;
     last_pts_ref_ = 0;
     middle_bitrate_ = 0;
@@ -285,7 +286,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
       encoder->Config(&cfg_);
     }
 
-    if (dynamic_drop_layer_) {
+    if (dynamic_drop_layer_ && !single_layer_resize_) {
       // TODO(jian): Disable AQ Mode for this test for now.
       encoder->Control(VP9E_SET_AQ_MODE, 0);
       if (video->frame() == 0) {
@@ -329,8 +330,27 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
         cfg_.rc_target_bitrate += cfg_.layer_target_bitrate[2];
         encoder->Config(&cfg_);
       }
+    } else if (dynamic_drop_layer_ && single_layer_resize_) {
+      // Change layer bitrates to set top layers to 0. This will trigger skip
+      // encoding/dropping of top spatial layers.
+      if (video->frame() == 10) {
+        cfg_.rc_target_bitrate -=
+            (cfg_.layer_target_bitrate[1] + cfg_.layer_target_bitrate[2]);
+        middle_bitrate_ = cfg_.layer_target_bitrate[1];
+        top_bitrate_ = cfg_.layer_target_bitrate[2];
+        cfg_.layer_target_bitrate[1] = 0;
+        cfg_.layer_target_bitrate[2] = 0;
+        // Set spatial layer 0 to a very low bitrate to trigger resize.
+        cfg_.layer_target_bitrate[0] = 30;
+        cfg_.rc_target_bitrate = cfg_.layer_target_bitrate[0];
+        encoder->Config(&cfg_);
+      } else if (video->frame() == 300) {
+        // Set base spatial layer to very high to go back up to original size.
+        cfg_.layer_target_bitrate[0] = 300;
+        cfg_.rc_target_bitrate = cfg_.layer_target_bitrate[0];
+        encoder->Config(&cfg_);
+      }
     }
-
     if (force_key_test_ && force_key_) frame_flags_ = VPX_EFLAG_FORCE_KF;
 
     if (insert_layer_sync_) {
@@ -483,13 +503,15 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
         }
       }
 
-      ASSERT_EQ(pkt->data.frame.width[sl],
-                top_sl_width_ * svc_params_.scaling_factor_num[sl] /
-                    svc_params_.scaling_factor_den[sl]);
+      if (!single_layer_resize_) {
+        ASSERT_EQ(pkt->data.frame.width[sl],
+                  top_sl_width_ * svc_params_.scaling_factor_num[sl] /
+                      svc_params_.scaling_factor_den[sl]);
 
-      ASSERT_EQ(pkt->data.frame.height[sl],
-                top_sl_height_ * svc_params_.scaling_factor_num[sl] /
-                    svc_params_.scaling_factor_den[sl]);
+        ASSERT_EQ(pkt->data.frame.height[sl],
+                  top_sl_height_ * svc_params_.scaling_factor_num[sl] /
+                      svc_params_.scaling_factor_den[sl]);
+      }
     }
   }
 
@@ -525,6 +547,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
   int tune_content_;
   int spatial_layer_id_;
   bool dynamic_drop_layer_;
+  bool single_layer_resize_;
   unsigned int top_sl_width_;
   unsigned int top_sl_height_;
   vpx_svc_ref_frame_config_t ref_frame_config;
@@ -781,6 +804,43 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL_DisableEnableLayers) {
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   dynamic_drop_layer_ = true;
+  AssignLayerBitrates();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  // Don't check rate targeting on two top spatial layer since they will be
+  // skipped for part of the sequence.
+  CheckLayerRateTargeting(number_spatial_layers_ - 2, number_temporal_layers_,
+                          0.78, 1.15);
+#if CONFIG_VP9_DECODER
+  // The non-reference frames are expected to be mismatched frames as the
+  // encoder will avoid loopfilter on these frames.
+  EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
+#endif
+}
+
+// Check basic rate targeting for 1 pass CBR SVC with 2 spatial layers and on
+// the fly switching to 1 spatial layer with dynamic resize enabled.
+// The resizer will resize the single layer down and back up again, as the
+// bitrate goes back up.
+TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL_SingleLayerResize) {
+  SetSvcConfig(2, 1);
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.g_threads = 1;
+  cfg_.temporal_layering_mode = 0;
+  cfg_.rc_dropframe_thresh = 30;
+  cfg_.kf_max_dist = 9999;
+  cfg_.rc_resize_allowed = 1;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  top_sl_width_ = 640;
+  top_sl_height_ = 480;
+  cfg_.rc_target_bitrate = 800;
+  ResetModel();
+  dynamic_drop_layer_ = true;
+  single_layer_resize_ = true;
   AssignLayerBitrates();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   // Don't check rate targeting on two top spatial layer since they will be

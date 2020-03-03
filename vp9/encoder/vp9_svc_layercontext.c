@@ -55,6 +55,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->use_set_ref_frame_config = 0;
   svc->num_encoded_top_layer = 0;
   svc->simulcast_mode = 0;
+  svc->single_layer_svc = 0;
 
   for (i = 0; i < REF_FRAMES; ++i) {
     svc->fb_idx_spatial_layer_id[i] = 0xff;
@@ -193,6 +194,7 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
   const RATE_CONTROL *const rc = &cpi->rc;
   int sl, tl, layer = 0, spatial_layer_target;
   float bitrate_alloc = 1.0;
+  int num_spatial_layers_nonzero_rate = 0;
 
   cpi->svc.temporal_layering_mode = oxcf->temporal_layering_mode;
 
@@ -273,6 +275,17 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
       lrc->best_quality = rc->best_quality;
     }
   }
+  for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
+    // Check bitrate of spatia layer.
+    layer = LAYER_IDS_TO_IDX(sl, oxcf->ts_number_layers - 1,
+                             oxcf->ts_number_layers);
+    if (oxcf->layer_target_bitrate[layer] > 0)
+      num_spatial_layers_nonzero_rate += 1;
+  }
+  if (num_spatial_layers_nonzero_rate == 1)
+    svc->single_layer_svc = 1;
+  else
+    svc->single_layer_svc = 0;
 }
 
 static LAYER_CONTEXT *get_layer_context(VP9_COMP *const cpi) {
@@ -751,6 +764,8 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   SVC *const svc = &cpi->svc;
   LAYER_CONTEXT *lc = NULL;
+  int scaling_factor_num = 1;
+  int scaling_factor_den = 1;
   svc->skip_enhancement_layer = 0;
 
   if (svc->disable_inter_layer_pred == INTER_LAYER_PRED_OFF &&
@@ -888,18 +903,25 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
     lrc->best_quality = vp9_quantizer_to_qindex(lc->min_q);
   }
 
-  get_layer_resolution(cpi->oxcf.width, cpi->oxcf.height,
-                       lc->scaling_factor_num, lc->scaling_factor_den, &width,
-                       &height);
+  if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC && svc->single_layer_svc == 1 &&
+      svc->spatial_layer_id == svc->first_spatial_layer_to_encode &&
+      cpi->resize_state != ORIG) {
+    scaling_factor_num = lc->scaling_factor_num_resize;
+    scaling_factor_den = lc->scaling_factor_den_resize;
+  } else {
+    scaling_factor_num = lc->scaling_factor_num;
+    scaling_factor_den = lc->scaling_factor_den;
+  }
+
+  get_layer_resolution(cpi->oxcf.width, cpi->oxcf.height, scaling_factor_num,
+                       scaling_factor_den, &width, &height);
 
   // Use Eightap_smooth for low resolutions.
   if (width * height <= 320 * 240)
     svc->downsample_filter_type[svc->spatial_layer_id] = EIGHTTAP_SMOOTH;
   // For scale factors > 0.75, set the phase to 0 (aligns decimated pixel
   // to source pixel).
-  lc = &svc->layer_context[svc->spatial_layer_id * svc->number_temporal_layers +
-                           svc->temporal_layer_id];
-  if (lc->scaling_factor_num > (3 * lc->scaling_factor_den) >> 2)
+  if (scaling_factor_num > (3 * scaling_factor_den) >> 2)
     svc->downsample_filter_phase[svc->spatial_layer_id] = 0;
 
   // The usage of use_base_mv or partition_reuse assumes down-scale of 2x2.
