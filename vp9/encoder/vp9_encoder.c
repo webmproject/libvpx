@@ -5394,11 +5394,9 @@ static void encode_frame_to_data_rate(
 
   if (cm->show_frame) {
     vp9_swap_mi_and_prev_mi(cm);
-    // Don't increment frame counters if this was an altref buffer
-    // update not a real frame
-    update_frame_indexes(cm, cm->show_frame);
     if (cpi->use_svc) vp9_inc_frame_in_layer(cpi);
   }
+  update_frame_indexes(cm, cm->show_frame);
 
   if (cpi->use_svc) {
     cpi->svc
@@ -7338,7 +7336,7 @@ static void update_encode_frame_result(
       encode_frame_result->ref_frame_coding_indexes[i] =
           ref_frame_bufs[i]->frame_coding_index;
       encode_frame_result->ref_frame_valid_list[i] =
-          !(ref_frame_flags & inter_ref_flags[i]);
+          (ref_frame_flags & inter_ref_flags[i]) != 0;
     }
   } else {
     // No reference frame is available when this is a key frame.

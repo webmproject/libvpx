@@ -86,6 +86,8 @@ struct RefFrameInfo {
   int valid_list[kRefFrameTypeMax];
 };
 
+bool operator==(const RefFrameInfo &a, const RefFrameInfo &b);
+
 struct EncodeFrameInfo {
   int show_idx;
 
@@ -363,7 +365,8 @@ class SimpleEncode {
   // The index for the to-be-coded show frame in the key frame group.
   int key_frame_group_index_;
 
-  // Update key_frame_group_size_ and reset key_frame_group_index_.
+  // Update key_frame_group_size_, reset key_frame_group_index_ and init
+  // ref_frame_info_.
   void UpdateKeyFrameGroup(int key_frame_show_index);
 
   // Update key_frame_group_index_.

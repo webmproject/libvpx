@@ -283,6 +283,8 @@ static INLINE void init_frame_indexes(VP9_COMMON *cm) {
 
 static INLINE void update_frame_indexes(VP9_COMMON *cm, int show_frame) {
   if (show_frame) {
+    // Don't increment frame counters if this was an altref buffer
+    // update not a real frame
     ++cm->current_video_frame;
   }
 #if CONFIG_RATE_CTRL

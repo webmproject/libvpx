@@ -92,6 +92,8 @@ TEST(SimpleEncode, EncodeFrame) {
       EXPECT_GE(encode_frame_result.psnr, 34)
           << "The psnr is supposed to be greater than 34 given the "
              "target_bitrate 1000 kbps";
+      EXPECT_EQ(encode_frame_result.ref_frame_info,
+                encode_frame_list[group_index].ref_frame_info);
       total_data_bit_size += encode_frame_result.coding_data_bit_size;
       ++frame_coding_index;
     }

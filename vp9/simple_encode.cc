@@ -499,8 +499,8 @@ static void update_encode_frame_result(
       encode_frame_result->coding_data_byte_size * 8;
   encode_frame_result->show_idx = encode_frame_info->show_idx;
   encode_frame_result->coding_idx = encode_frame_info->frame_coding_index;
+  assert(kRefFrameTypeMax == MAX_INTER_REF_FRAMES);
   for (int i = 0; i < kRefFrameTypeMax; ++i) {
-    assert(kRefFrameTypeMax == MAX_INTER_REF_FRAMES);
     encode_frame_result->ref_frame_info.coding_indexes[i] =
         encode_frame_info->ref_frame_coding_indexes[i];
     encode_frame_result->ref_frame_info.valid_list[i] =
@@ -532,9 +532,18 @@ static int IsGroupOfPictureFinished(const GroupOfPicture &group_of_picture) {
          group_of_picture.encode_frame_list.size();
 }
 
+bool operator==(const RefFrameInfo &a, const RefFrameInfo &b) {
+  bool match = true;
+  for (int i = 0; i < kRefFrameTypeMax; ++i) {
+    match &= a.coding_indexes[i] == b.coding_indexes[i];
+    match &= a.valid_list[i] == b.valid_list[i];
+  }
+  return match;
+}
+
 static void InitRefFrameInfo(RefFrameInfo *ref_frame_info) {
   for (int i = 0; i < kRefFrameTypeMax; ++i) {
-    ref_frame_info->coding_indexes[i] = 0;
+    ref_frame_info->coding_indexes[i] = -1;
     ref_frame_info->valid_list[i] = 0;
   }
 }
@@ -587,7 +596,7 @@ static void PostUpdateRefFrameInfo(FrameType frame_type, int frame_coding_index,
   }
 
   if (past_index == last_index) {
-    ref_frame_valid_list[kRefFrameTypeLast] = 0;
+    ref_frame_valid_list[kRefFrameTypePast] = 0;
   }
 
   if (future_index == last_index) {
@@ -864,6 +873,8 @@ void SimpleEncode::UpdateKeyFrameGroup(int key_frame_show_index) {
       &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info,
       key_frame_show_index, cpi->rc.min_gf_interval);
   assert(key_frame_group_size_ > 0);
+  // Init the reference frame info when a new key frame group appears.
+  InitRefFrameInfo(&ref_frame_info_);
 }
 
 void SimpleEncode::PostUpdateKeyFrameGroupIndex(FrameType frame_type) {
@@ -895,15 +906,18 @@ void SimpleEncode::PostUpdateState(
     // Only kFrameTypeAltRef is not a show frame
     ++show_frame_count_;
   }
-  IncreaseGroupOfPictureIndex(&group_of_picture_);
-  if (IsGroupOfPictureFinished(group_of_picture_)) {
-    UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
-                         &group_of_picture_);
-  }
 
   PostUpdateKeyFrameGroupIndex(encode_frame_result.frame_type);
   if (key_frame_group_index_ == key_frame_group_size_) {
     UpdateKeyFrameGroup(show_frame_count_);
+  }
+
+  IncreaseGroupOfPictureIndex(&group_of_picture_);
+  if (IsGroupOfPictureFinished(group_of_picture_)) {
+    // This function needs to be called after ref_frame_info_ is updated
+    // properly in PostUpdateRefFrameInfo() and UpdateKeyFrameGroup().
+    UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
+                         &group_of_picture_);
   }
 }
 
