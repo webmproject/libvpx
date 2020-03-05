@@ -78,6 +78,12 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     use_post_encode_drop_ = 0;
     denoiser_off_on_ = false;
     denoiser_enable_layers_ = false;
+    num_resize_down_ = 0;
+    num_resize_up_ = 0;
+    for (int i = 0; i < VPX_MAX_LAYERS; i++) {
+      prev_frame_width[i] = 320;
+      prev_frame_height[i] = 240;
+    }
   }
   virtual void BeginPassHook(unsigned int /*pass*/) {}
 
@@ -287,8 +293,6 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     }
 
     if (dynamic_drop_layer_ && !single_layer_resize_) {
-      // TODO(jian): Disable AQ Mode for this test for now.
-      encoder->Control(VP9E_SET_AQ_MODE, 0);
       if (video->frame() == 0) {
         // Change layer bitrates to set top layers to 0. This will trigger skip
         // encoding/dropping of top two spatial layers.
@@ -511,7 +515,16 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
         ASSERT_EQ(pkt->data.frame.height[sl],
                   top_sl_height_ * svc_params_.scaling_factor_num[sl] /
                       svc_params_.scaling_factor_den[sl]);
+      } else if (superframe_count_ > 0) {
+        if (pkt->data.frame.width[sl] < prev_frame_width[sl] &&
+            pkt->data.frame.height[sl] < prev_frame_height[sl])
+          num_resize_down_ += 1;
+        if (pkt->data.frame.width[sl] > prev_frame_width[sl] &&
+            pkt->data.frame.height[sl] > prev_frame_height[sl])
+          num_resize_up_ += 1;
       }
+      prev_frame_width[sl] = pkt->data.frame.width[sl];
+      prev_frame_height[sl] = pkt->data.frame.height[sl];
     }
   }
 
@@ -571,6 +584,10 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
   bool denoiser_off_on_;
   // Top layer enabled on the fly.
   bool denoiser_enable_layers_;
+  int num_resize_up_;
+  int num_resize_down_;
+  unsigned int prev_frame_width[VPX_MAX_LAYERS];
+  unsigned int prev_frame_height[VPX_MAX_LAYERS];
 
  private:
   virtual void SetConfig(const int num_temporal_layer) {
@@ -841,8 +858,12 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL_SingleLayerResize) {
   ResetModel();
   dynamic_drop_layer_ = true;
   single_layer_resize_ = true;
+  base_speed_setting_ = speed_setting_;
   AssignLayerBitrates();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  // Expect at least one resize down and at least one resize back up.
+  EXPECT_GE(num_resize_down_, 1);
+  EXPECT_GE(num_resize_up_, 1);
   // Don't check rate targeting on two top spatial layer since they will be
   // skipped for part of the sequence.
   CheckLayerRateTargeting(number_spatial_layers_ - 2, number_temporal_layers_,
