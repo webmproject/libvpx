@@ -936,6 +936,9 @@ typedef struct ENCODE_FRAME_RESULT {
   int show_idx;
   FRAME_UPDATE_TYPE update_type;
 #if CONFIG_RATE_CTRL
+  int frame_coding_index;
+  int ref_frame_coding_indexes[MAX_INTER_REF_FRAMES];
+  int ref_frame_valid_list[MAX_INTER_REF_FRAMES];
   double psnr;
   uint64_t sse;
   FRAME_COUNTS frame_counts;
@@ -1043,8 +1046,20 @@ static INLINE int get_ref_frame_buf_idx(const VP9_COMP *const cpi,
   return (map_idx != INVALID_IDX) ? cm->ref_frame_map[map_idx] : INVALID_IDX;
 }
 
-static INLINE RefCntBuffer *get_ref_cnt_buffer(VP9_COMMON *cm, int fb_idx) {
+static INLINE RefCntBuffer *get_ref_cnt_buffer(const VP9_COMMON *cm,
+                                               int fb_idx) {
   return fb_idx != INVALID_IDX ? &cm->buffer_pool->frame_bufs[fb_idx] : NULL;
+}
+
+static INLINE void get_ref_frame_bufs(
+    const VP9_COMP *cpi, RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES]) {
+  const VP9_COMMON *const cm = &cpi->common;
+  MV_REFERENCE_FRAME ref_frame;
+  for (ref_frame = LAST_FRAME; ref_frame < MAX_REF_FRAMES; ++ref_frame) {
+    int ref_frame_buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+    int inter_ref_idx = mv_ref_frame_to_inter_ref_idx(ref_frame);
+    ref_frame_bufs[inter_ref_idx] = get_ref_cnt_buffer(cm, ref_frame_buf_idx);
+  }
 }
 
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(

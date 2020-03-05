@@ -86,6 +86,8 @@ struct RefFrameInfo {
   int valid_list[kRefFrameTypeMax];
 };
 
+bool operator==(const RefFrameInfo &a, const RefFrameInfo &b);
+
 struct EncodeFrameInfo {
   int show_idx;
 
@@ -199,6 +201,8 @@ void output_image_buffer(const ImageBuffer &image_buffer, std::FILE *out_file);
 struct EncodeFrameResult {
   int show_idx;
   FrameType frame_type;
+  int coding_idx;
+  RefFrameInfo ref_frame_info;
   size_t coding_data_bit_size;
   size_t coding_data_byte_size;
   // The EncodeFrame will allocate a buffer, write the coding data into the
@@ -304,12 +308,11 @@ class SimpleEncode {
   // This function should be called after StartEncode() or EncodeFrame().
   void EndEncode();
 
-  // Given a key_frame_index, computes this key frame group's size.
   // The key frame group size includes one key frame plus the number of
   // following inter frames. Note that the key frame group size only counts the
   // show frames. The number of no show frames like alternate refereces are not
   // counted.
-  int GetKeyFrameGroupSize(int key_frame_index) const;
+  int GetKeyFrameGroupSize() const;
 
   // Provides the group of pictures that the next coding frame is in.
   // Only call this function between StartEncode() and EndEncode()
@@ -353,10 +356,29 @@ class SimpleEncode {
   std::vector<int> external_arf_indexes_;
   GroupOfPicture group_of_picture_;
 
+  // The key frame group size includes one key frame plus the number of
+  // following inter frames. Note that the key frame group size only counts the
+  // show frames. The number of no show frames like alternate refereces are not
+  // counted.
+  int key_frame_group_size_;
+
+  // The index for the to-be-coded show frame in the key frame group.
+  int key_frame_group_index_;
+
+  // Update key_frame_group_size_, reset key_frame_group_index_ and init
+  // ref_frame_info_.
+  void UpdateKeyFrameGroup(int key_frame_show_index);
+
+  // Update key_frame_group_index_.
+  void PostUpdateKeyFrameGroupIndex(FrameType frame_type);
+
   // Each show or no show frame is assigned with a coding index based on its
   // coding order (starting from zero) in the coding process of the entire
   // video. The coding index of the to-be-coded frame.
   int frame_coding_index_;
+
+  // Number of show frames we have coded so far.
+  int show_frame_count_;
 
   // TODO(angiebird): Do we need to reset ref_frames_info_ when the next key
   // frame appears?

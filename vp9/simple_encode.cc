@@ -498,6 +498,14 @@ static void update_encode_frame_result(
   encode_frame_result->coding_data_bit_size =
       encode_frame_result->coding_data_byte_size * 8;
   encode_frame_result->show_idx = encode_frame_info->show_idx;
+  encode_frame_result->coding_idx = encode_frame_info->frame_coding_index;
+  assert(kRefFrameTypeMax == MAX_INTER_REF_FRAMES);
+  for (int i = 0; i < kRefFrameTypeMax; ++i) {
+    encode_frame_result->ref_frame_info.coding_indexes[i] =
+        encode_frame_info->ref_frame_coding_indexes[i];
+    encode_frame_result->ref_frame_info.valid_list[i] =
+        encode_frame_info->ref_frame_valid_list[i];
+  }
   encode_frame_result->frame_type =
       get_frame_type_from_update_type(encode_frame_info->update_type);
   encode_frame_result->psnr = encode_frame_info->psnr;
@@ -524,9 +532,18 @@ static int IsGroupOfPictureFinished(const GroupOfPicture &group_of_picture) {
          group_of_picture.encode_frame_list.size();
 }
 
+bool operator==(const RefFrameInfo &a, const RefFrameInfo &b) {
+  bool match = true;
+  for (int i = 0; i < kRefFrameTypeMax; ++i) {
+    match &= a.coding_indexes[i] == b.coding_indexes[i];
+    match &= a.valid_list[i] == b.valid_list[i];
+  }
+  return match;
+}
+
 static void InitRefFrameInfo(RefFrameInfo *ref_frame_info) {
   for (int i = 0; i < kRefFrameTypeMax; ++i) {
-    ref_frame_info->coding_indexes[i] = 0;
+    ref_frame_info->coding_indexes[i] = -1;
     ref_frame_info->valid_list[i] = 0;
   }
 }
@@ -579,7 +596,7 @@ static void PostUpdateRefFrameInfo(FrameType frame_type, int frame_coding_index,
   }
 
   if (past_index == last_index) {
-    ref_frame_valid_list[kRefFrameTypeLast] = 0;
+    ref_frame_valid_list[kRefFrameTypePast] = 0;
   }
 
   if (future_index == last_index) {
@@ -693,7 +710,13 @@ SimpleEncode::SimpleEncode(int frame_width, int frame_height,
   frame_rate_den_ = frame_rate_den;
   target_bitrate_ = target_bitrate;
   num_frames_ = num_frames;
+
   frame_coding_index_ = 0;
+  show_frame_count_ = 0;
+
+  key_frame_group_index_ = 0;
+  key_frame_group_size_ = 0;
+
   // TODO(angirbid): Should we keep a file pointer here or keep the file_path?
   assert(infile_path != nullptr);
   in_file_ = fopen(infile_path, "r");
@@ -789,6 +812,14 @@ void SimpleEncode::SetExternalGroupOfPicture(
   external_arf_indexes_ = external_arf_indexes;
 }
 
+template <typename T>
+T *GetVectorData(const std::vector<T> &v) {
+  if (v.empty()) {
+    return nullptr;
+  }
+  return const_cast<T *>(v.data());
+}
+
 void SimpleEncode::StartEncode() {
   assert(impl_ptr_->first_pass_stats.size() > 0);
   vpx_rational_t frame_rate =
@@ -797,7 +828,7 @@ void SimpleEncode::StartEncode() {
       vp9_get_encoder_config(frame_width_, frame_height_, frame_rate,
                              target_bitrate_, VPX_RC_LAST_PASS);
   vpx_fixed_buf_t stats;
-  stats.buf = impl_ptr_->first_pass_stats.data();
+  stats.buf = GetVectorData(impl_ptr_->first_pass_stats);
   stats.sz = sizeof(impl_ptr_->first_pass_stats[0]) *
              impl_ptr_->first_pass_stats.size();
 
@@ -806,9 +837,15 @@ void SimpleEncode::StartEncode() {
   impl_ptr_->cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
   vpx_img_alloc(&impl_ptr_->tmp_img, impl_ptr_->img_fmt, frame_width_,
                 frame_height_, 1);
+
   frame_coding_index_ = 0;
+  show_frame_count_ = 0;
+
   encode_command_set_external_arf_indexes(&impl_ptr_->cpi->encode_command,
-                                          external_arf_indexes_.data());
+                                          GetVectorData(external_arf_indexes_));
+
+  UpdateKeyFrameGroup(show_frame_count_);
+
   UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
                        &group_of_picture_);
   rewind(in_file_);
@@ -829,12 +866,25 @@ void SimpleEncode::EndEncode() {
   rewind(in_file_);
 }
 
-int SimpleEncode::GetKeyFrameGroupSize(int key_frame_index) const {
+void SimpleEncode::UpdateKeyFrameGroup(int key_frame_show_index) {
   const VP9_COMP *cpi = impl_ptr_->cpi;
-  return vp9_get_frames_to_next_key(&cpi->oxcf, &cpi->frame_info,
-                                    &cpi->twopass.first_pass_info,
-                                    key_frame_index, cpi->rc.min_gf_interval);
+  key_frame_group_index_ = 0;
+  key_frame_group_size_ = vp9_get_frames_to_next_key(
+      &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info,
+      key_frame_show_index, cpi->rc.min_gf_interval);
+  assert(key_frame_group_size_ > 0);
+  // Init the reference frame info when a new key frame group appears.
+  InitRefFrameInfo(&ref_frame_info_);
 }
+
+void SimpleEncode::PostUpdateKeyFrameGroupIndex(FrameType frame_type) {
+  if (frame_type != kFrameTypeAltRef) {
+    // key_frame_group_index_ only counts show frames
+    ++key_frame_group_index_;
+  }
+}
+
+int SimpleEncode::GetKeyFrameGroupSize() const { return key_frame_group_size_; }
 
 GroupOfPicture SimpleEncode::ObserveGroupOfPicture() const {
   return group_of_picture_;
@@ -852,8 +902,20 @@ void SimpleEncode::PostUpdateState(
   PostUpdateRefFrameInfo(encode_frame_result.frame_type, frame_coding_index_,
                          &ref_frame_info_);
   ++frame_coding_index_;
+  if (encode_frame_result.frame_type != kFrameTypeAltRef) {
+    // Only kFrameTypeAltRef is not a show frame
+    ++show_frame_count_;
+  }
+
+  PostUpdateKeyFrameGroupIndex(encode_frame_result.frame_type);
+  if (key_frame_group_index_ == key_frame_group_size_) {
+    UpdateKeyFrameGroup(show_frame_count_);
+  }
+
   IncreaseGroupOfPictureIndex(&group_of_picture_);
   if (IsGroupOfPictureFinished(group_of_picture_)) {
+    // This function needs to be called after ref_frame_info_ is updated
+    // properly in PostUpdateRefFrameInfo() and UpdateKeyFrameGroup().
     UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
                          &group_of_picture_);
   }
@@ -952,7 +1014,8 @@ int SimpleEncode::GetCodingFrameNum() const {
                              target_bitrate_, VPX_RC_LAST_PASS);
   FRAME_INFO frame_info = vp9_get_frame_info(&oxcf);
   FIRST_PASS_INFO first_pass_info;
-  fps_init_first_pass_info(&first_pass_info, impl_ptr_->first_pass_stats.data(),
+  fps_init_first_pass_info(&first_pass_info,
+                           GetVectorData(impl_ptr_->first_pass_stats),
                            num_frames_);
   return vp9_get_coding_frame_num(external_arf_indexes_.data(), &oxcf,
                                   &frame_info, &first_pass_info,
