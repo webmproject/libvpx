@@ -362,7 +362,7 @@
       of particular interest to real time streaming applications.
 
       Temporal scalability allows the encoder to produce a stream that can
-      be decimated to different frame rates, with independent rate targetting
+      be decimated to different frame rates, with independent rate targeting
       for each substream.
 
       Multiframe quality enhancement postprocessing can make visual quality

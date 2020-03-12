@@ -245,7 +245,7 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
   return target;
 }
 
-// TODO(marpan/jianj): bits_off_target and buffer_level are used in the saame
+// TODO(marpan/jianj): bits_off_target and buffer_level are used in the same
 // way for CBR mode, for the buffering updates below. Look into removing one
 // of these (i.e., bits_off_target).
 // Update the buffer level before encoding with the per-frame-bandwidth,
@@ -636,7 +636,7 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
         // In particular temporal layer counter (which is incremented in
         // vp9_inc_frame_in_layer()) won't be incremented, so on a dropped
         // frame we try the same temporal_layer_id on next incoming frame.
-        // This is to avoid an issue with temporal alignement with full
+        // This is to avoid an issue with temporal alignment with full
         // superframe dropping.
         vp9_inc_frame_in_layer(cpi);
       }
@@ -2235,7 +2235,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   // Periodic key frames is based on the super-frame counter
   // (svc.current_superframe), also only base spatial layer is key frame.
   // Key frame is set for any of the following: very first frame, frame flags
-  // indicates key, superframe counter hits key frequencey, or (non-intra) sync
+  // indicates key, superframe counter hits key frequency, or (non-intra) sync
   // flag is set for spatial layer 0.
   if ((cm->current_video_frame == 0 && !svc->previous_frame_is_intra_only) ||
       (cpi->frame_flags & FRAMEFLAGS_KEY) ||
@@ -2569,7 +2569,7 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
 
   // A maximum bitrate for a frame is defined.
   // However this limit is extended if a very high rate is given on the command
-  // line or the the rate cannnot be acheived because of a user specificed max q
+  // line or the rate can not be achieved because of a user specified max q
   // (e.g. when the user specifies lossless encode).
   //
   // If a level is specified that requires a lower maximum rate then the level

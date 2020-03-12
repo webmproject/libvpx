@@ -83,7 +83,7 @@ static const double rate_thresh_mult[FRAME_SCALE_STEPS] = { 1.0, 2.0 };
 static const double rcf_mult[FRAME_SCALE_STEPS] = { 1.0, 2.0 };
 
 typedef struct {
-  // Rate targetting variables
+  // Rate targeting variables
   int base_frame_target;  // A baseline frame target before adjustment
                           // for previous under or over shoot.
   int this_frame_target;  // Actual frame target after rc adjustment.

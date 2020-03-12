@@ -357,7 +357,7 @@ static void calc_iframe_target_size(VP8_COMP *cpi) {
 
   cpi->this_frame_target = (int)target;
 
-  /* TODO: if we separate rate targeting from Q targetting, move this.
+  /* TODO: if we separate rate targeting from Q targeting, move this.
    * Reset the active worst quality to the baseline value for key frames.
    */
   if (cpi->pass != 2) cpi->active_worst_quality = cpi->worst_quality;
