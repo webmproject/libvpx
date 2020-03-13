@@ -297,7 +297,7 @@ class SimpleEncode {
   // Therefore it also determines the group of picture size.
   // If set, VP9 will use the external arf index to make decision.
   // This function should be called only once after ComputeFirstPassStats(),
-  // before StartEncde().
+  // before StartEncode().
   void SetExternalGroupOfPicture(std::vector<int> external_arf_indexes);
 
   // Initializes the encoder for actual encoding.
@@ -340,6 +340,15 @@ class SimpleEncode {
   uint64_t GetFramePixelCount() const;
 
  private:
+  // Updates key_frame_group_size_, reset key_frame_group_index_ and init
+  // ref_frame_info_.
+  void UpdateKeyFrameGroup(int key_frame_show_index);
+
+  // Update key_frame_group_index_.
+  void PostUpdateKeyFrameGroupIndex(FrameType frame_type);
+
+  void PostUpdateState(const EncodeFrameResult &encode_frame_result);
+
   class EncodeImpl;
 
   int frame_width_;   // frame width in pixels.
@@ -358,19 +367,12 @@ class SimpleEncode {
 
   // The key frame group size includes one key frame plus the number of
   // following inter frames. Note that the key frame group size only counts the
-  // show frames. The number of no show frames like alternate refereces are not
+  // show frames. The number of no show frames like alternate references are not
   // counted.
   int key_frame_group_size_;
 
   // The index for the to-be-coded show frame in the key frame group.
   int key_frame_group_index_;
-
-  // Update key_frame_group_size_, reset key_frame_group_index_ and init
-  // ref_frame_info_.
-  void UpdateKeyFrameGroup(int key_frame_show_index);
-
-  // Update key_frame_group_index_.
-  void PostUpdateKeyFrameGroupIndex(FrameType frame_type);
 
   // Each show or no show frame is assigned with a coding index based on its
   // coding order (starting from zero) in the coding process of the entire
@@ -384,8 +386,6 @@ class SimpleEncode {
   // frame appears?
   // Reference frames info of the to-be-coded frame.
   RefFrameInfo ref_frame_info_;
-
-  void PostUpdateState(const EncodeFrameResult &encode_frame_result);
 };
 
 }  // namespace vp9
