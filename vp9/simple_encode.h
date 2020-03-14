@@ -83,6 +83,7 @@ struct RefFrameInfo {
   // kRefFrameTypeLast > kRefFrameTypePast > kRefFrameTypeFuture.
   // For example, if kRefFrameTypeLast and kRefFrameTypePast both point to the
   // same frame, kRefFrameTypePast will be set to invalid.
+  // 1: the ref frame type is available 0: the ref frame type is not available
   int valid_list[kRefFrameTypeMax];
 };
 
