@@ -627,6 +627,7 @@ process_toolchain() {
         check_add_cflags -Wmissing-declarations
         check_add_cflags -Wmissing-prototypes
         check_add_cflags -Wuninitialized
+        check_add_cflags -Wunreachable-code-loop-increment
         check_add_cflags -Wunused
         check_add_cflags -Wextra
         # check_add_cflags also adds to cxxflags. gtest does not do well with
