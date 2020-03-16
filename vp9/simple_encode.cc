@@ -123,13 +123,6 @@ static INLINE vpx_rational_t make_vpx_rational(int num, int den) {
   return v;
 }
 
-static INLINE vpx_rational_t invert_vpx_rational(vpx_rational_t v) {
-  vpx_rational_t inverse_v;
-  inverse_v.num = v.den;
-  inverse_v.den = v.num;
-  return inverse_v;
-}
-
 static INLINE FrameType
 get_frame_type_from_update_type(FRAME_UPDATE_TYPE update_type) {
   switch (update_type) {
@@ -852,7 +845,14 @@ void SimpleEncode::StartEncode() {
 
   if (out_file_ != nullptr) {
     const char *fourcc = "VP90";
-    vpx_rational_t time_base = invert_vpx_rational(frame_rate);
+    // In SimpleEncode, we use time_base = 1 / TICKS_PER_SEC.
+    // Based on that, the ivf_timestamp for each image is set to
+    // show_idx * TICKS_PER_SEC / frame_rate
+    // such that each image's actual timestamp in seconds can be computed as
+    // ivf_timestamp * time_base == show_idx / frame_rate
+    // TODO(angiebird): 1) Add unit test for ivf timestamp.
+    // 2) Simplify the frame_rate setting process.
+    vpx_rational_t time_base = make_vpx_rational(1, TICKS_PER_SEC);
     ivf_write_file_header_with_video_info(out_file_, *(const uint32_t *)fourcc,
                                           num_frames_, frame_width_,
                                           frame_height_, time_base);
