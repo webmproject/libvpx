@@ -4520,15 +4520,15 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   /* Rolling monitors of whether we are over or underspending used to
    * help regulate min and Max Q in two pass.
    */
-  cpi->rolling_target_bits =
-      ((cpi->rolling_target_bits * 3) + cpi->this_frame_target + 2) / 4;
-  cpi->rolling_actual_bits =
-      ((cpi->rolling_actual_bits * 3) + cpi->projected_frame_size + 2) / 4;
-  cpi->long_rolling_target_bits =
-      ((cpi->long_rolling_target_bits * 31) + cpi->this_frame_target + 16) / 32;
-  cpi->long_rolling_actual_bits =
-      ((cpi->long_rolling_actual_bits * 31) + cpi->projected_frame_size + 16) /
-      32;
+  cpi->rolling_target_bits = (int)ROUND64_POWER_OF_TWO(
+      (int64_t)cpi->rolling_target_bits * 3 + cpi->this_frame_target, 2);
+  cpi->rolling_actual_bits = (int)ROUND64_POWER_OF_TWO(
+      (int64_t)cpi->rolling_actual_bits * 3 + cpi->projected_frame_size, 2);
+  cpi->long_rolling_target_bits = (int)ROUND64_POWER_OF_TWO(
+      (int64_t)cpi->long_rolling_target_bits * 31 + cpi->this_frame_target, 5);
+  cpi->long_rolling_actual_bits = (int)ROUND64_POWER_OF_TWO(
+      (int64_t)cpi->long_rolling_actual_bits * 31 + cpi->projected_frame_size,
+      5);
 
   /* Actual bits spent */
   cpi->total_actual_bits += cpi->projected_frame_size;
