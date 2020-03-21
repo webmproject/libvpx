@@ -1885,14 +1885,15 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   // Rolling monitors of whether we are over or underspending used to help
   // regulate min and Max Q in two pass.
   if (!frame_is_intra_only(cm)) {
-    rc->rolling_target_bits = ROUND_POWER_OF_TWO(
-        rc->rolling_target_bits * 3 + rc->this_frame_target, 2);
-    rc->rolling_actual_bits = ROUND_POWER_OF_TWO(
-        rc->rolling_actual_bits * 3 + rc->projected_frame_size, 2);
-    rc->long_rolling_target_bits = ROUND_POWER_OF_TWO(
-        rc->long_rolling_target_bits * 31 + rc->this_frame_target, 5);
-    rc->long_rolling_actual_bits = ROUND_POWER_OF_TWO(
-        rc->long_rolling_actual_bits * 31 + rc->projected_frame_size, 5);
+    rc->rolling_target_bits = (int)ROUND64_POWER_OF_TWO(
+        (int64_t)rc->rolling_target_bits * 3 + rc->this_frame_target, 2);
+    rc->rolling_actual_bits = (int)ROUND64_POWER_OF_TWO(
+        (int64_t)rc->rolling_actual_bits * 3 + rc->projected_frame_size, 2);
+    rc->long_rolling_target_bits = (int)ROUND64_POWER_OF_TWO(
+        (int64_t)rc->long_rolling_target_bits * 31 + rc->this_frame_target, 5);
+    rc->long_rolling_actual_bits = (int)ROUND64_POWER_OF_TWO(
+        (int64_t)rc->long_rolling_actual_bits * 31 + rc->projected_frame_size,
+        5);
   }
 
   // Actual bits spent
@@ -1998,14 +1999,16 @@ void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
 static int calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const int af_ratio = rc->af_ratio_onepass_vbr;
-  int target =
+  int64_t target =
       (!rc->is_src_frame_alt_ref &&
        (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))
-          ? (rc->avg_frame_bandwidth * rc->baseline_gf_interval * af_ratio) /
+          ? ((int64_t)rc->avg_frame_bandwidth * rc->baseline_gf_interval *
+             af_ratio) /
                 (rc->baseline_gf_interval + af_ratio - 1)
-          : (rc->avg_frame_bandwidth * rc->baseline_gf_interval) /
+          : ((int64_t)rc->avg_frame_bandwidth * rc->baseline_gf_interval) /
                 (rc->baseline_gf_interval + af_ratio - 1);
-  return vp9_rc_clamp_pframe_target_size(cpi, target);
+  if (target > INT_MAX) target = INT_MAX;
+  return vp9_rc_clamp_pframe_target_size(cpi, (int)target);
 }
 
 static int calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
