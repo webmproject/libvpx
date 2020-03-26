@@ -52,6 +52,24 @@
       "revId": "d28d82263fc5df3585ed8c10d1d9ed095603e0e8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "420afbcd_62720564",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3753,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-03-26T21:07:03Z",
+      "side": 1,
+      "message": "Okay, I will submit a follow-up CL to address this issue.\n(Move initialization of static_scene_max_gf_interval to v9_rc_init)",
+      "parentUuid": "b36e1743_d1aa810b",
+      "revId": "d28d82263fc5df3585ed8c10d1d9ed095603e0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
