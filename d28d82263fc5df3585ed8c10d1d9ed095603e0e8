@@ -34,6 +34,24 @@
       "revId": "d28d82263fc5df3585ed8c10d1d9ed095603e0e8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b36e1743_d1aa810b",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3753,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-03-26T20:03:57Z",
+      "side": 1,
+      "message": "\u003e This is the setting I pick up from two-pass encode. We plan to use this setting to do rate-control experiment.\n\u003e \n\u003e Not sure if every mode will use this setting.\n\u003e \n\u003e Btw, I notice that vp9_rc_init() doesn\u0027t initialize every members in the structure.\n\u003e Do you think we should vp9_zero() the whole rc structure in vp9_rc_init?\n\nI think having one function to gather the initialization would make sense. There have been plenty of bugs between vp8/vp9/av1 as defaults occurred in multiple locations.",
+      "parentUuid": "410ee206_0ea426ce",
+      "revId": "d28d82263fc5df3585ed8c10d1d9ed095603e0e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
