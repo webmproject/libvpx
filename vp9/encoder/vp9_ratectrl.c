@@ -2657,8 +2657,8 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   RESIZE_ACTION resize_action = NO_RESIZE;
   int avg_qp_thr1 = 70;
   int avg_qp_thr2 = 50;
-  int min_width = 180;
-  int min_height = 90;
+  int min_width = 320;
+  int min_height = 180;
   int down_size_on = 1;
   cpi->resize_scale_num = 1;
   cpi->resize_scale_den = 1;
@@ -2669,19 +2669,8 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
     return 0;
   }
 
-  // Check current frame reslution to avoid generating frames smaller than
-  // the minimum resolution.
-  if (ONEHALFONLY_RESIZE) {
-    if ((cm->width >> 1) < min_width || (cm->height >> 1) < min_height)
-      down_size_on = 0;
-  } else {
-    if (cpi->resize_state == ORIG &&
-        (cm->width * 3 / 4 < min_width || cm->height * 3 / 4 < min_height))
-      return 0;
-    else if (cpi->resize_state == THREE_QUARTER &&
-             (cm->width * 3 / 4 < min_width || cm->height * 3 / 4 < min_height))
-      down_size_on = 0;
-  }
+  // No resizing down if frame size is below some limit.
+  if (cm->width * cm->height <= min_width * min_height) down_size_on = 0;
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   // If denoiser is on, apply a smaller qp threshold.
@@ -2707,8 +2696,9 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
       // Resize back up if average QP is low, and we are currently in a resized
       // down state, i.e. 1/2 or 3/4 of original resolution.
       // Currently, use a flag to turn 3/4 resizing feature on/off.
-      if (cpi->resize_buffer_underflow > (cpi->resize_count >> 2)) {
-        if (cpi->resize_state == THREE_QUARTER && down_size_on) {
+      if (cpi->resize_buffer_underflow > (cpi->resize_count >> 2) &&
+          down_size_on) {
+        if (cpi->resize_state == THREE_QUARTER) {
           resize_action = DOWN_ONEHALF;
           cpi->resize_state = ONE_HALF;
         } else if (cpi->resize_state == ORIG) {
