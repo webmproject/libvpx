@@ -337,7 +337,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     } else if (dynamic_drop_layer_ && single_layer_resize_) {
       // Change layer bitrates to set top layers to 0. This will trigger skip
       // encoding/dropping of top spatial layers.
-      if (video->frame() == 10) {
+      if (video->frame() == 2) {
         cfg_.rc_target_bitrate -=
             (cfg_.layer_target_bitrate[1] + cfg_.layer_target_bitrate[2]);
         middle_bitrate_ = cfg_.layer_target_bitrate[1];
@@ -348,9 +348,9 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
         cfg_.layer_target_bitrate[0] = 30;
         cfg_.rc_target_bitrate = cfg_.layer_target_bitrate[0];
         encoder->Config(&cfg_);
-      } else if (video->frame() == 300) {
+      } else if (video->frame() == 100) {
         // Set base spatial layer to very high to go back up to original size.
-        cfg_.layer_target_bitrate[0] = 300;
+        cfg_.layer_target_bitrate[0] = 400;
         cfg_.rc_target_bitrate = cfg_.layer_target_bitrate[0];
         encoder->Config(&cfg_);
       }
@@ -838,7 +838,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL_DisableEnableLayers) {
 // the fly switching to 1 spatial layer with dynamic resize enabled.
 // The resizer will resize the single layer down and back up again, as the
 // bitrate goes back up.
-TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL_SingleLayerResize) {
+TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2SL_SingleLayerResize) {
   SetSvcConfig(2, 1);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -850,10 +850,10 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL_SingleLayerResize) {
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
   cfg_.rc_resize_allowed = 1;
-  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
-                                       0, 400);
-  top_sl_width_ = 640;
-  top_sl_height_ = 480;
+  ::libvpx_test::I420VideoSource video("desktop_office1.1280_720-020.yuv", 1280,
+                                       720, 15, 1, 0, 300);
+  top_sl_width_ = 1280;
+  top_sl_height_ = 720;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
   dynamic_drop_layer_ = true;
