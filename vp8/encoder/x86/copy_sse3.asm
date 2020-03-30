@@ -91,7 +91,7 @@ SECTION .text
 ;    unsigned char *dst_ptr,
 ;    int  dst_stride,
 ;    int height);
-global sym(vp8_copy32xn_sse3) PRIVATE
+global sym(vp8_copy32xn_sse3)PRIVATE
 sym(vp8_copy32xn_sse3):
 
     STACK_FRAME_CREATE_X3

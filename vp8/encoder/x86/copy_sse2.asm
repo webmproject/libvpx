@@ -19,7 +19,7 @@ SECTION .text
 ;    unsigned char *dst_ptr,
 ;    int  dst_stride,
 ;    int height);
-global sym(vp8_copy32xn_sse2) PRIVATE
+global sym(vp8_copy32xn_sse2)PRIVATE
 sym(vp8_copy32xn_sse2):
     push        rbp
     mov         rbp, rsp
