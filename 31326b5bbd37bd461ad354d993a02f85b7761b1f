@@ -22,6 +22,30 @@
       "revId": "31326b5bbd37bd461ad354d993a02f85b7761b1f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17339c92_7d126ae9",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2672,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2020-03-30T15:51:15Z",
+      "side": 1,
+      "message": "i can increase the limit (to say 640x360) but then bunch of resize tests will fail in libvpx and also in webrtc, since they use common CIF clips. That\u0027s why i avoided this.",
+      "parentUuid": "4a4b7661_6ab97a83",
+      "range": {
+        "startLine": 2672,
+        "startChar": 4,
+        "endLine": 2672,
+        "endChar": 56
+      },
+      "revId": "31326b5bbd37bd461ad354d993a02f85b7761b1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
