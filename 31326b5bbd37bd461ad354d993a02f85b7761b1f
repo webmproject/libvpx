@@ -70,6 +70,30 @@
       "revId": "31326b5bbd37bd461ad354d993a02f85b7761b1f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e7bdea36_8be45c4a",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2672,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2020-03-30T18:57:21Z",
+      "side": 1,
+      "message": "Check the webrtc tests for resize, i think it uses CIF. We\u0027ll see it when we try to roll.",
+      "parentUuid": "b359770d_23e5c6e3",
+      "range": {
+        "startLine": 2672,
+        "startChar": 4,
+        "endLine": 2672,
+        "endChar": 56
+      },
+      "revId": "31326b5bbd37bd461ad354d993a02f85b7761b1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
