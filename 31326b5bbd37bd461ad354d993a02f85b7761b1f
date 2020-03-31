@@ -118,6 +118,30 @@
       "revId": "31326b5bbd37bd461ad354d993a02f85b7761b1f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "010e3852_cbbfaf93",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2672,
+      "author": {
+        "id": 1234969
+      },
+      "writtenOn": "2020-03-31T08:35:21Z",
+      "side": 1,
+      "message": "It all shouldn\u0027t be a problem, since the tests check for maximum number of downsizes. We shouldn\u0027t have any tests which require to downscale below QVGA, which the new change is preventing.",
+      "parentUuid": "7eb335f5_5b5f4571",
+      "range": {
+        "startLine": 2672,
+        "startChar": 4,
+        "endLine": 2672,
+        "endChar": 56
+      },
+      "revId": "31326b5bbd37bd461ad354d993a02f85b7761b1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": true
     }
   ]
 }
