@@ -5363,6 +5363,14 @@ static void encode_frame_to_data_rate(
 
   vp9_rc_postencode_update(cpi, *size);
 
+  if (oxcf->pass == 0 && !frame_is_intra_only(cm) &&
+      (!cpi->use_svc ||
+       (cpi->use_svc &&
+        !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame &&
+        cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1))) {
+    vp9_compute_frame_low_motion(cpi);
+  }
+
   *size = VPXMAX(1, *size);
 
 #if 0

@@ -1787,8 +1787,9 @@ static void update_altref_usage(VP9_COMP *const cpi) {
   }
 }
 
-static void compute_frame_low_motion(VP9_COMP *const cpi) {
+void vp9_compute_frame_low_motion(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
+  SVC *const svc = &cpi->svc;
   int mi_row, mi_col;
   MODE_INFO **mi = cm->mi_grid_visible;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1805,6 +1806,19 @@ static void compute_frame_low_motion(VP9_COMP *const cpi) {
   }
   cnt_zeromv = 100 * cnt_zeromv / (rows * cols);
   rc->avg_frame_low_motion = (3 * rc->avg_frame_low_motion + cnt_zeromv) >> 2;
+
+  // For SVC: set avg_frame_low_motion (only computed on top spatial layer)
+  // to all lower spatial layers.
+  if (cpi->use_svc && svc->spatial_layer_id == svc->number_spatial_layers - 1) {
+    int i;
+    for (i = 0; i < svc->number_spatial_layers - 1; ++i) {
+      const int layer = LAYER_IDS_TO_IDX(i, svc->temporal_layer_id,
+                                         svc->number_temporal_layers);
+      LAYER_CONTEXT *const lc = &svc->layer_context[layer];
+      RATE_CONTROL *const lrc = &lc->rc;
+      lrc->avg_frame_low_motion = rc->avg_frame_low_motion;
+    }
+  }
 }
 
 void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
@@ -1948,29 +1962,11 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   }
 
   if (oxcf->pass == 0) {
-    if (!frame_is_intra_only(cm) &&
-        (!cpi->use_svc ||
-         (cpi->use_svc &&
-          !svc->layer_context[svc->temporal_layer_id].is_key_frame &&
-          svc->spatial_layer_id == svc->number_spatial_layers - 1))) {
-      compute_frame_low_motion(cpi);
+    if (!frame_is_intra_only(cm))
       if (cpi->sf.use_altref_onepass) update_altref_usage(cpi);
-    }
-    // For SVC: set avg_frame_low_motion (only computed on top spatial layer)
-    // to all lower spatial layers.
-    if (cpi->use_svc &&
-        svc->spatial_layer_id == svc->number_spatial_layers - 1) {
-      int i;
-      for (i = 0; i < svc->number_spatial_layers - 1; ++i) {
-        const int layer = LAYER_IDS_TO_IDX(i, svc->temporal_layer_id,
-                                           svc->number_temporal_layers);
-        LAYER_CONTEXT *const lc = &svc->layer_context[layer];
-        RATE_CONTROL *const lrc = &lc->rc;
-        lrc->avg_frame_low_motion = rc->avg_frame_low_motion;
-      }
-    }
     cpi->rc.last_frame_is_src_altref = cpi->rc.is_src_frame_alt_ref;
   }
+
   if (!frame_is_intra_only(cm)) rc->reset_high_source_sad = 0;
 
   rc->last_avg_frame_bandwidth = rc->avg_frame_bandwidth;

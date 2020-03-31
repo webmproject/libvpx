@@ -330,6 +330,8 @@ void vp9_configure_buffer_updates(struct VP9_COMP *cpi, int gf_group_index);
 
 void vp9_estimate_qp_gop(struct VP9_COMP *cpi);
 
+void vp9_compute_frame_low_motion(struct VP9_COMP *const cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
