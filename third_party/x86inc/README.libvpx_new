@@ -12,3 +12,4 @@ Get configuration from vpx_config.asm.
 Prefix functions with vpx by default.
 Manage name mangling (prefixing with '_') manually because 'PREFIX' does not
   exist in libvpx.
+Copy PIC 'GLOBAL' macros from x86_abi_support.asm
