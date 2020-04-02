@@ -1,0 +1,10 @@
+URL: https://git.videolan.org/git/x264.git
+Version: 3e5aed95cc470f37e2db3e6506a8deb89b527720
+License: ISC
+License File: LICENSE
+
+Description:
+x264/libav's framework for x86 assembly. Contains a variety of macros and
+defines that help automatically allow assembly to work cross-platform.
+
+Local Modifications:
