@@ -34,8 +34,10 @@
 ; as this feature might be useful for others as well.  Send patches or ideas
 ; to x264-devel@videolan.org .
 
+%include "vpx_config.asm"
+
 %ifndef private_prefix
-    %define private_prefix x264
+    %define private_prefix vpx
 %endif
 
 %ifndef public_prefix
