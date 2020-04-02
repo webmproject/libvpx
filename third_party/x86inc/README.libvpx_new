@@ -14,3 +14,4 @@ Manage name mangling (prefixing with '_') manually because 'PREFIX' does not
   exist in libvpx.
 Copy PIC 'GLOBAL' macros from x86_abi_support.asm
 Use .text instead of .rodata on macho to avoid broken tables in PIC mode.
+Use .text with no alignment for aout.
