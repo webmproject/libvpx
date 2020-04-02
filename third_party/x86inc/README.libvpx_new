@@ -10,3 +10,5 @@ defines that help automatically allow assembly to work cross-platform.
 Local Modifications:
 Get configuration from vpx_config.asm.
 Prefix functions with vpx by default.
+Manage name mangling (prefixing with '_') manually because 'PREFIX' does not
+  exist in libvpx.
