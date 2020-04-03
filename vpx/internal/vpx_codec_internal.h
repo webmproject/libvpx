@@ -175,16 +175,15 @@ typedef const struct vpx_codec_ctrl_fn_map {
 /*!\brief decode data function pointer prototype
  *
  * Processes a buffer of coded data. If the processing results in a new
- * decoded frame becoming available, #VPX_CODEC_CB_PUT_SLICE and
- * #VPX_CODEC_CB_PUT_FRAME events are generated as appropriate. This
- * function is called by the generic vpx_codec_decode() wrapper function,
- * so plugins implementing this interface may trust the input parameters
- * to be properly initialized.
+ * decoded frame becoming available, put_slice and put_frame callbacks
+ * are invoked as appropriate. This function is called by the generic
+ * vpx_codec_decode() wrapper function, so plugins implementing this
+ * interface may trust the input parameters to be properly initialized.
  *
  * \param[in] ctx          Pointer to this instance's context
  * \param[in] data         Pointer to this block of new coded data. If
- *                         NULL, a #VPX_CODEC_CB_PUT_FRAME event is posted
- *                         for the previously decoded frame.
+ *                         NULL, the put_frame callback is invoked for
+ *                         the previously decoded frame.
  * \param[in] data_sz      Size of the coded data, in bytes.
  *
  * \return Returns #VPX_CODEC_OK if the coded data was processed completely
