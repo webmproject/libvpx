@@ -132,10 +132,12 @@
     %define PRIVATE :function hidden
   %elifidn __OUTPUT_FORMAT__,elfx32
     %define PRIVATE :function hidden
-  %elif LIBVPX_YASM_WIN64
-    %define PRIVATE
-  %else
+  %elifidn __OUTPUT_FORMAT__,macho32
     %define PRIVATE :private_extern
+  %elifidn __OUTPUT_FORMAT__,macho64
+    %define PRIVATE :private_extern
+  %else
+    %define PRIVATE
   %endif
 %else
   %define PRIVATE
