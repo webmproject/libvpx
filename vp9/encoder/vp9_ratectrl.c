@@ -249,7 +249,7 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
 // way for CBR mode, for the buffering updates below. Look into removing one
 // of these (i.e., bits_off_target).
 // Update the buffer level before encoding with the per-frame-bandwidth,
-static void update_buffer_level_preencode(VP9_COMP *cpi) {
+void vp9_update_buffer_level_preencode(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   rc->bits_off_target += rc->avg_frame_bandwidth;
   // Clip the buffer level to the maximum specified buffer size.
@@ -2098,7 +2098,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     vp9_cyclic_refresh_update_parameters(cpi);
 }
 
-static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
+int vp9_calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
   const SVC *const svc = &cpi->svc;
@@ -2147,7 +2147,7 @@ static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   return VPXMAX(min_frame_target, target);
 }
 
-static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
+int vp9_calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const RATE_CONTROL *rc = &cpi->rc;
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const SVC *const svc = &cpi->svc;
@@ -2253,7 +2253,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
       // Assumption here is that LAST_FRAME is being updated for a keyframe.
       // Thus no change in update flags.
-      target = calc_iframe_target_size_one_pass_cbr(cpi);
+      target = vp9_calc_iframe_target_size_one_pass_cbr(cpi);
     }
   } else {
     cm->frame_type = INTER_FRAME;
@@ -2266,7 +2266,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
           (svc->spatial_layer_id == 0 && cm->current_video_frame > 0)
               ? 0
               : svc->layer_context[svc->temporal_layer_id].is_key_frame;
-      target = calc_pframe_target_size_one_pass_cbr(cpi);
+      target = vp9_calc_pframe_target_size_one_pass_cbr(cpi);
     }
   }
 
@@ -2275,7 +2275,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
         svc->layer_context[layer].is_key_frame == 1) {
       cm->frame_type = KEY_FRAME;
       cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
-      target = calc_iframe_target_size_one_pass_cbr(cpi);
+      target = vp9_calc_iframe_target_size_one_pass_cbr(cpi);
     }
     // Set the buffer idx and refresh flags for key frames in simulcast mode.
     // Note the buffer slot for long-term reference is set below (line 2255),
@@ -2360,7 +2360,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   }
   if (svc->set_intra_only_frame) {
     set_intra_only_frame(cpi);
-    target = calc_iframe_target_size_one_pass_cbr(cpi);
+    target = vp9_calc_iframe_target_size_one_pass_cbr(cpi);
   }
   // Any update/change of global cyclic refresh parameters (amount/delta-qp)
   // should be done here, before the frame qp is selected.
@@ -2433,13 +2433,13 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     vp9_cyclic_refresh_update_parameters(cpi);
 
   if (frame_is_intra_only(cm))
-    target = calc_iframe_target_size_one_pass_cbr(cpi);
+    target = vp9_calc_iframe_target_size_one_pass_cbr(cpi);
   else
-    target = calc_pframe_target_size_one_pass_cbr(cpi);
+    target = vp9_calc_pframe_target_size_one_pass_cbr(cpi);
 
   vp9_rc_set_frame_target(cpi, target);
 
-  if (cm->show_frame) update_buffer_level_preencode(cpi);
+  if (cm->show_frame) vp9_update_buffer_level_preencode(cpi);
 
   if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC)
     cpi->resize_pending = vp9_resize_one_pass_cbr(cpi);
@@ -2742,7 +2742,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
     // Reset buffer level to optimal, update target size.
     rc->buffer_level = rc->optimal_buffer_level;
     rc->bits_off_target = rc->optimal_buffer_level;
-    rc->this_frame_target = calc_pframe_target_size_one_pass_cbr(cpi);
+    rc->this_frame_target = vp9_calc_pframe_target_size_one_pass_cbr(cpi);
     // Get the projected qindex, based on the scaled target frame size (scaled
     // so target_bits_per_mb in vp9_rc_regulate_q will be correct target).
     target_bits_per_frame = (resize_action >= 0)

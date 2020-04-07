@@ -1000,6 +1000,14 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
 
 void vp9_set_svc(VP9_COMP *cpi, int use_svc);
 
+// Check for resetting the rc flags (rc_1_frame, rc_2_frame) if the
+// configuration change has a large change in avg_frame_bandwidth.
+// For SVC check for resetting based on spatial layer average bandwidth.
+// Also reset buffer level to optimal level.
+void vp9_check_reset_rc_flag(VP9_COMP *cpi);
+
+void vp9_set_rc_buffer_sizes(VP9_COMP *cpi);
+
 static INLINE int stack_pop(int *stack, int stack_size) {
   int idx;
   const int r = stack[0];

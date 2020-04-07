@@ -397,6 +397,10 @@ TEST_INTRA_PRED_SPEED_BIN=./test_intra_pred_speed$(EXE_SFX)
 TEST_INTRA_PRED_SPEED_SRCS=$(addprefix test/,$(call enabled,TEST_INTRA_PRED_SPEED_SRCS))
 TEST_INTRA_PRED_SPEED_OBJS := $(sort $(call objs,$(TEST_INTRA_PRED_SPEED_SRCS)))
 
+RC_INTERFACE_TEST_BIN=./test_rc_interface$(EXE_SFX)
+RC_INTERFACE_TEST_SRCS=$(addprefix test/,$(call enabled,RC_INTERFACE_TEST_SRCS))
+RC_INTERFACE_TEST_OBJS := $(sort $(call objs,$(RC_INTERFACE_TEST_SRCS)))
+
 libvpx_test_srcs.txt:
 	@echo "    [CREATE] $@"
 	@echo $(LIBVPX_TEST_SRCS) | xargs -n1 echo | LC_ALL=C sort -u > $@
@@ -486,6 +490,25 @@ test_intra_pred_speed.$(VCPROJ_SFX): $(TEST_INTRA_PRED_SPEED_SRCS) vpx.$(VCPROJ_
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
             -L. -l$(CODEC_LIB) -l$(GTEST_LIB) $^
 endif  # TEST_INTRA_PRED_SPEED
+
+ifneq ($(strip $(RC_INTERFACE_TEST_OBJS)),)
+PROJECTS-$(CONFIG_MSVS) += test_rc_interface.$(VCPROJ_SFX)
+test_rc_interface.$(VCPROJ_SFX): \
+  $(RC_INTERFACE_TEST_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_SFX)
+	@echo "    [CREATE] $@"
+	$(qexec)$(GEN_VCPROJ) \
+            --exe \
+            --target=$(TOOLCHAIN) \
+            --name=test_rc_interface \
+            -D_VARIADIC_MAX=10 \
+            --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
+            --ver=$(CONFIG_VS_VERSION) \
+            --src-path-bare="$(SRC_PATH_BARE)" \
+            $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
+            --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
+            -I.-I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
+            -L. -l$(CODEC_LIB) -l$(GTEST_LIB) -lvp9rc$^
+endif  # RC_INTERFACE_TEST
 endif
 else
 
@@ -502,6 +525,21 @@ $(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += $(GTEST_INCLUDES)
 OBJS-yes += $(GTEST_OBJS)
 LIBS-yes += $(BUILD_PFX)libgtest.a $(BUILD_PFX)libgtest_g.a
 $(BUILD_PFX)libgtest_g.a: $(GTEST_OBJS)
+
+ifeq ($(CONFIG_VP9_ENCODER),yes)
+  VP9_PREFIX=vp9/
+  include $(SRC_PATH_BARE)/$(VP9_PREFIX)vp9cx.mk
+  RC_RTC_SRCS := $(addprefix $(VP9_PREFIX),$(call enabled,VP9_CX_SRCS))
+  RC_RTC_SRCS += $(VP9_PREFIX)vp9cx.mk vpx/vp8.h vpx/vp8cx.h
+  RC_RTC_SRCS += $(VP9_PREFIX)ratectrl_rtc.cc
+  RC_RTC_SRCS += $(VP9_PREFIX)ratectrl_rtc.h
+  VP9_CX_SRCS-$(CONFIG_VP9_ENCODER) += ratectrl_rtc.cc
+  VP9_CX_SRCS-$(CONFIG_VP9_ENCODER) += ratectrl_rtc.h
+  RC_RTC_OBJS=$(call objs,$(RC_RTC_SRCS))
+  OBJS-yes += $(RC_RTC_OBJS)
+  LIBS-yes += $(BUILD_PFX)libvp9rc.a $(BUILD_PFX)libvp9rc_g.a
+  $(BUILD_PFX)libvp9rc_g.a: $(RC_RTC_OBJS)
+endif
 
 LIBVPX_TEST_OBJS=$(sort $(call objs,$(LIBVPX_TEST_SRCS)))
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += $(GTEST_INCLUDES)
@@ -527,6 +565,18 @@ $(eval $(call linkerxx_template,$(TEST_INTRA_PRED_SPEED_BIN), \
               -L. -lvpx -lgtest $(extralibs) -lm))
 endif  # TEST_INTRA_PRED_SPEED
 
+ifneq ($(strip $(RC_INTERFACE_TEST_OBJS)),)
+$(RC_INTERFACE_TEST_OBJS) $(RC_INTERFACE_TEST_OBJS:.o=.d): \
+  CXXFLAGS += $(GTEST_INCLUDES)
+OBJS-yes += $(RC_INTERFACE_TEST_OBJS)
+BINS-yes += $(RC_INTERFACE_TEST_BIN)
+
+$(RC_INTERFACE_TEST_BIN): $(TEST_LIBS) libvp9rc.a
+$(eval $(call linkerxx_template,$(RC_INTERFACE_TEST_BIN), \
+              $(RC_INTERFACE_TEST_OBJS) \
+              -L. -lvpx -lgtest -lvp9rc $(extralibs) -lm))
+endif  # RC_INTERFACE_TEST
+
 endif  # CONFIG_UNIT_TESTS
 
 # Install test sources only if codec source is included
@@ -534,6 +584,7 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(patsubst $(SRC_PATH_BARE)/%,%,\
     $(shell find $(SRC_PATH_BARE)/third_party/googletest -type f))
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(LIBVPX_TEST_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(TEST_INTRA_PRED_SPEED_SRCS)
+INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(RC_INTERFACE_TEST_SRCS)
 
 define test_shard_template
 test:: test_shard.$(1)
@@ -574,6 +625,7 @@ endif
 
 ## Update the global src list
 SRCS += $(CODEC_SRCS) $(LIBVPX_TEST_SRCS) $(GTEST_SRCS)
+SRCS += $(RC_INTERFACE_TEST_SRCS)
 
 ##
 ## vpxdec/vpxenc tests.

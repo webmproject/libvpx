@@ -1523,8 +1523,29 @@ static void init_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   vp9_noise_estimate_init(&cpi->noise_estimate, cm->width, cm->height);
 }
 
-static void set_rc_buffer_sizes(RATE_CONTROL *rc,
-                                const VP9EncoderConfig *oxcf) {
+void vp9_check_reset_rc_flag(VP9_COMP *cpi) {
+  RATE_CONTROL *rc = &cpi->rc;
+
+  if (cpi->common.current_video_frame >
+      (unsigned int)cpi->svc.number_spatial_layers) {
+    if (cpi->use_svc) {
+      vp9_svc_check_reset_layer_rc_flag(cpi);
+    } else {
+      if (rc->avg_frame_bandwidth > (3 * rc->last_avg_frame_bandwidth >> 1) ||
+          rc->avg_frame_bandwidth < (rc->last_avg_frame_bandwidth >> 1)) {
+        rc->rc_1_frame = 0;
+        rc->rc_2_frame = 0;
+        rc->bits_off_target = rc->optimal_buffer_level;
+        rc->buffer_level = rc->optimal_buffer_level;
+      }
+    }
+  }
+}
+
+void vp9_set_rc_buffer_sizes(VP9_COMP *cpi) {
+  RATE_CONTROL *rc = &cpi->rc;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+
   const int64_t bandwidth = oxcf->target_bandwidth;
   const int64_t starting = oxcf->starting_buffer_level_ms;
   const int64_t optimal = oxcf->optimal_buffer_level_ms;
@@ -1535,6 +1556,11 @@ static void set_rc_buffer_sizes(RATE_CONTROL *rc,
       (optimal == 0) ? bandwidth / 8 : optimal * bandwidth / 1000;
   rc->maximum_buffer_size =
       (maximum == 0) ? bandwidth / 8 : maximum * bandwidth / 1000;
+
+  // Under a configuration change, where maximum_buffer_size may change,
+  // keep buffer level clipped to the maximum allowed buffer size.
+  rc->bits_off_target = VPXMIN(rc->bits_off_target, rc->maximum_buffer_size);
+  rc->buffer_level = VPXMIN(rc->buffer_level, rc->maximum_buffer_size);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1991,12 +2017,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   }
   cpi->encode_breakout = cpi->oxcf.encode_breakout;
 
-  set_rc_buffer_sizes(rc, &cpi->oxcf);
-
-  // Under a configuration change, where maximum_buffer_size may change,
-  // keep buffer level clipped to the maximum allowed buffer size.
-  rc->bits_off_target = VPXMIN(rc->bits_off_target, rc->maximum_buffer_size);
-  rc->buffer_level = VPXMIN(rc->buffer_level, rc->maximum_buffer_size);
+  vp9_set_rc_buffer_sizes(cpi);
 
   // Set up frame rate and related parameters rate control values.
   vp9_new_framerate(cpi, cpi->framerate);
@@ -2057,23 +2078,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
                                            (int)cpi->oxcf.target_bandwidth);
   }
 
-  // Check for resetting the rc flags (rc_1_frame, rc_2_frame) if the
-  // configuration change has a large change in avg_frame_bandwidth.
-  // For SVC check for resetting based on spatial layer average bandwidth.
-  // Also reset buffer level to optimal level.
-  if (cm->current_video_frame > (unsigned int)cpi->svc.number_spatial_layers) {
-    if (cpi->use_svc) {
-      vp9_svc_check_reset_layer_rc_flag(cpi);
-    } else {
-      if (rc->avg_frame_bandwidth > (3 * rc->last_avg_frame_bandwidth >> 1) ||
-          rc->avg_frame_bandwidth < (rc->last_avg_frame_bandwidth >> 1)) {
-        rc->rc_1_frame = 0;
-        rc->rc_2_frame = 0;
-        rc->bits_off_target = rc->optimal_buffer_level;
-        rc->buffer_level = rc->optimal_buffer_level;
-      }
-    }
-  }
+  vp9_check_reset_rc_flag(cpi);
 
   cpi->alt_ref_source = NULL;
   rc->is_src_frame_alt_ref = 0;
