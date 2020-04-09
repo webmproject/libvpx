@@ -791,10 +791,12 @@ static void set_rt_speed_feature_framesize_independent(
   }
 
   // Disable split to 8x8 for low-resolution at very high Q.
-  // For variance partition (speed >= 6).
+  // For variance partition (speed >= 6). Ignore the first few frames
+  // as avg_frame_qindex starts at max_q (worst_quality).
   if (cm->frame_type != KEY_FRAME && cm->width * cm->height <= 320 * 240 &&
       sf->partition_search_type == VAR_BASED_PARTITION &&
-      cpi->rc.avg_frame_qindex[INTER_FRAME] > 208)
+      cpi->rc.avg_frame_qindex[INTER_FRAME] > 208 &&
+      cpi->common.current_video_frame > 8)
     sf->disable_16x16part_nonkey = 1;
 
   if (sf->nonrd_use_ml_partition)
