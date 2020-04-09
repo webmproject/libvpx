@@ -728,7 +728,10 @@ static void set_rt_speed_feature_framesize_independent(
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
     sf->skip_encode_sb = 1;
-    sf->nonrd_keyframe = 1;
+    if (cpi->svc.number_spatial_layers > 1 && !cpi->svc.simulcast_mode)
+      sf->nonrd_keyframe = 0;
+    else
+      sf->nonrd_keyframe = 1;
     if (!cpi->use_svc) cpi->max_copied_frame = 4;
     if (cpi->row_mt && cpi->oxcf.max_threads > 1)
       sf->adaptive_rd_thresh_row_mt = 1;
