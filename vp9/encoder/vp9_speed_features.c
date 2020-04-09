@@ -787,6 +787,13 @@ static void set_rt_speed_feature_framesize_independent(
     if (cm->width * cm->height >= 640 * 360) sf->variance_part_thresh_mult = 2;
   }
 
+  // Disable split to 8x8 for low-resolution at very high Q.
+  // For variance partition (speed >= 6).
+  if (cm->frame_type != KEY_FRAME && cm->width * cm->height <= 320 * 240 &&
+      sf->partition_search_type == VAR_BASED_PARTITION &&
+      cpi->rc.avg_frame_qindex[INTER_FRAME] > 208)
+    sf->disable_16x16part_nonkey = 1;
+
   if (sf->nonrd_use_ml_partition)
     sf->partition_search_type = ML_BASED_PARTITION;
 
