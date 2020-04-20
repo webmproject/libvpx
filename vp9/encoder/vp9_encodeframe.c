@@ -37,14 +37,11 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_tile_common.h"
-#if !CONFIG_REALTIME_ONLY
+
 #include "vp9/encoder/vp9_aq_360.h"
 #include "vp9/encoder/vp9_aq_complexity.h"
-#endif
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
-#if !CONFIG_REALTIME_ONLY
 #include "vp9/encoder/vp9_aq_variance.h"
-#endif
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
@@ -159,7 +156,6 @@ unsigned int vp9_high_get_sby_perpixel_variance(VP9_COMP *cpi,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if !CONFIG_REALTIME_ONLY
 static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
                                                    const struct buf_2d *ref,
                                                    int mi_row, int mi_col,
@@ -188,7 +184,6 @@ static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi, MACROBLOCK *x,
   else
     return BLOCK_8X8;
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
                               int mi_col, BLOCK_SIZE bsize, int segment_index) {
@@ -211,7 +206,6 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
     case CYCLIC_REFRESH_AQ:
       mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
       break;
-#if !CONFIG_REALTIME_ONLY
     case VARIANCE_AQ:
       if (cm->frame_type == KEY_FRAME || cpi->refresh_alt_ref_frame ||
           cpi->force_update_segmentation ||
@@ -231,15 +225,14 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
         mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
       }
       break;
+    case LOOKAHEAD_AQ:
+      mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
+      break;
     case EQUATOR360_AQ:
       if (cm->frame_type == KEY_FRAME || cpi->force_update_segmentation)
         mi->segment_id = vp9_360aq_segment_id(mi_row, cm->mi_rows);
       else
         mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
-      break;
-#endif
-    case LOOKAHEAD_AQ:
-      mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
       break;
     case PSNR_AQ: mi->segment_id = segment_index; break;
     case PERCEPTUAL_AQ: mi->segment_id = x->segment_id; break;
@@ -1800,7 +1793,6 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   return 0;
 }
 
-#if !CONFIG_REALTIME_ONLY
 static void update_state(VP9_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
                          int mi_row, int mi_col, BLOCK_SIZE bsize,
                          int output_enabled) {
@@ -1929,7 +1921,6 @@ static void update_state(VP9_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
     }
   }
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                           int mi_row, int mi_col) {
@@ -1972,7 +1963,6 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   vp9_rd_cost_init(rd_cost);
 }
 
-#if !CONFIG_REALTIME_ONLY
 static void set_segment_rdmult(VP9_COMP *const cpi, MACROBLOCK *const x,
                                int mi_row, int mi_col, BLOCK_SIZE bsize,
                                AQ_MODE aq_mode) {
@@ -2117,7 +2107,6 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
   ctx->rate = rd_cost->rate;
   ctx->dist = rd_cost->dist;
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 static void update_stats(VP9_COMMON *cm, ThreadData *td) {
   const MACROBLOCK *x = &td->mb;
@@ -2178,7 +2167,6 @@ static void update_stats(VP9_COMMON *cm, ThreadData *td) {
   }
 }
 
-#if !CONFIG_REALTIME_ONLY
 static void restore_context(MACROBLOCK *const x, int mi_row, int mi_col,
                             ENTROPY_CONTEXT a[16 * MAX_MB_PLANE],
                             ENTROPY_CONTEXT l[16 * MAX_MB_PLANE],
@@ -2332,7 +2320,6 @@ static void encode_sb(VP9_COMP *cpi, ThreadData *td, const TileInfo *const tile,
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 // Check to see if the given partition size is allowed for a specified number
 // of 8x8 block rows and columns remaining in the image.
@@ -2669,7 +2656,6 @@ static void encode_sb_rt(VP9_COMP *cpi, ThreadData *td,
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
 }
 
-#if !CONFIG_REALTIME_ONLY
 static void rd_use_partition(VP9_COMP *cpi, ThreadData *td,
                              TileDataEnc *tile_data, MODE_INFO **mi_8x8,
                              TOKENEXTRA **tp, int mi_row, int mi_col,
@@ -3109,7 +3095,6 @@ static void set_partition_range(VP9_COMMON *cm, MACROBLOCKD *xd, int mi_row,
   *min_bs = min_size;
   *max_bs = max_size;
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 static INLINE void store_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   memcpy(ctx->pred_mv, x->pred_mv, sizeof(x->pred_mv));
@@ -3214,7 +3199,6 @@ static void nn_predict(const float *features, const NN_CONFIG *nn_config,
   }
 }
 
-#if !CONFIG_REALTIME_ONLY
 #define FEATURES 7
 // Machine-learning based partition search early termination.
 // Return 1 to skip split and rect partitions.
@@ -3664,7 +3648,6 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
   }
 }
 #undef FEATURES
-#endif  // !CONFIG_REALTIME_ONLY
 
 static double log_wiener_var(int64_t wiener_variance) {
   return log(1.0 + wiener_variance) / log(2.0);
@@ -3720,7 +3703,6 @@ static void build_kmeans_segmentation(VP9_COMP *cpi) {
   }
 }
 
-#if !CONFIG_REALTIME_ONLY
 static int wiener_var_segment(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
                               int mi_col) {
   VP9_COMMON *cm = &cpi->common;
@@ -3812,7 +3794,6 @@ static int get_rdmult_delta(VP9_COMP *cpi, BLOCK_SIZE bsize, int mi_row,
 
   return dr;
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 #if CONFIG_RATE_CTRL
 static void assign_partition_info(
@@ -4024,7 +4005,6 @@ static void store_superblock_info(
 }
 #endif  // CONFIG_RATE_CTRL
 
-#if !CONFIG_REALTIME_ONLY
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
@@ -4735,7 +4715,6 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
                                     sb_col_in_tile, num_sb_cols);
   }
 }
-#endif  // !CONFIG_REALTIME_ONLY
 
 static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   MACROBLOCK *const x = &cpi->td.mb;
@@ -6031,10 +6010,8 @@ void vp9_encode_sb_row(VP9_COMP *cpi, ThreadData *td, int tile_row,
 
   if (cpi->sf.use_nonrd_pick_mode)
     encode_nonrd_sb_row(cpi, td, this_tile, mi_row, &tok);
-#if !CONFIG_REALTIME_ONLY
   else
     encode_rd_sb_row(cpi, td, this_tile, mi_row, &tok);
-#endif
 
   cpi->tplist[tile_row][tile_col][tile_sb_row].stop = tok;
   cpi->tplist[tile_row][tile_col][tile_sb_row].count =
