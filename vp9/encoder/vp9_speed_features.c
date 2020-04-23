@@ -632,7 +632,6 @@ static void set_rt_speed_feature_framesize_independent(
       sf->use_compound_nonrd_pickmode = 1;
     }
     if (cm->width * cm->height > 1280 * 720) sf->cb_pred_filter_search = 1;
-    if (!cpi->external_resize) sf->use_source_sad = 1;
   }
 
   if (speed >= 6) {
@@ -644,6 +643,8 @@ static void set_rt_speed_feature_framesize_independent(
     sf->mv.search_method = NSTEP;
     sf->mv.reduce_first_step_size = 1;
     sf->skip_encode_sb = 0;
+
+    if (!cpi->external_resize) sf->use_source_sad = 1;
 
     if (sf->use_source_sad) {
       sf->adapt_partition_source_sad = 1;
