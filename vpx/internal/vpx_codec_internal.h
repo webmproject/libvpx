@@ -27,13 +27,15 @@
  *     </pre>
  *
  * An application instantiates a specific decoder instance by using
- * vpx_codec_init() and a pointer to the algorithm's interface structure:
+ * vpx_codec_dec_init() and a pointer to the algorithm's interface structure:
  *     <pre>
  *     my_app.c:
  *       extern vpx_codec_iface_t my_codec;
  *       {
  *           vpx_codec_ctx_t algo;
- *           res = vpx_codec_init(&algo, &my_codec);
+ *           int threads = 4;
+ *           vpx_codec_dec_cfg_t cfg = { threads, 0, 0 };
+ *           res = vpx_codec_dec_init(&algo, &my_codec, &cfg, 0);
  *       }
  *     </pre>
  *
