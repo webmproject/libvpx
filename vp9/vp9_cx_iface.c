@@ -698,6 +698,10 @@ static vpx_codec_err_t ctrl_set_cpuused(vpx_codec_alg_priv_t *ctx,
   extra_cfg.cpu_used = CAST(VP8E_SET_CPUUSED, args);
   extra_cfg.cpu_used = VPXMIN(9, extra_cfg.cpu_used);
   extra_cfg.cpu_used = VPXMAX(-9, extra_cfg.cpu_used);
+#if CONFIG_REALTIME_ONLY
+  if (extra_cfg.cpu_used > -5 && extra_cfg.cpu_used < 5)
+    extra_cfg.cpu_used = (extra_cfg.cpu_used > 0) ? 5 : -5;
+#endif
   return update_extra_cfg(ctx, &extra_cfg);
 }
 

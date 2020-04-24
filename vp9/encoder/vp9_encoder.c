@@ -44,11 +44,15 @@
 #include "vp9/common/vp9_tile_common.h"
 #include "vp9/common/vp9_scan.h"
 
+#if !CONFIG_REALTIME_ONLY
 #include "vp9/encoder/vp9_alt_ref_aq.h"
 #include "vp9/encoder/vp9_aq_360.h"
 #include "vp9/encoder/vp9_aq_complexity.h"
+#endif
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
+#if !CONFIG_REALTIME_ONLY
 #include "vp9/encoder/vp9_aq_variance.h"
+#endif
 #include "vp9/encoder/vp9_bitstream.h"
 #if CONFIG_INTERNAL_STATS
 #include "vp9/encoder/vp9_blockiness.h"
@@ -128,6 +132,7 @@ void highbd_wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
 void wht_fwd_txfm(int16_t *src_diff, int bw, tran_low_t *coeff,
                   TX_SIZE tx_size);
 
+#if !CONFIG_REALTIME_ONLY
 // compute adaptive threshold for skip recoding
 static int compute_context_model_thresh(const VP9_COMP *const cpi) {
   const VP9_COMMON *const cm = &cpi->common;
@@ -452,6 +457,7 @@ static int compute_context_model_diff(const VP9_COMMON *const cm) {
 
   return -diff;
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 // Test for whether to calculate metrics for the frame.
 static int is_psnr_calc_enabled(const VP9_COMP *cpi) {
@@ -2320,7 +2326,9 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
       cm, cpi->skin_map,
       vpx_calloc(cm->mi_rows * cm->mi_cols, sizeof(cpi->skin_map[0])));
 
+#if !CONFIG_REALTIME_ONLY
   CHECK_MEM_ERROR(cm, cpi->alt_ref_aq, vp9_alt_ref_aq_create());
+#endif
 
   CHECK_MEM_ERROR(
       cm, cpi->consec_zero_mv,
@@ -2806,7 +2814,9 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
     vp9_bitstream_encode_tiles_buffer_dealloc(cpi);
   }
 
+#if !CONFIG_REALTIME_ONLY
   vp9_alt_ref_aq_destroy(cpi->alt_ref_aq);
+#endif
 
   dealloc_compressor_data(cpi);
 
@@ -3082,6 +3092,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if !CONFIG_REALTIME_ONLY
 static int scale_down(VP9_COMP *cpi, int q) {
   RATE_CONTROL *const rc = &cpi->rc;
   GF_GROUP *const gf_group = &cpi->twopass.gf_group;
@@ -3185,6 +3196,7 @@ static int recode_loop_test(VP9_COMP *cpi, int high_limit, int low_limit, int q,
   }
   return force_recode;
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 static void update_ref_frames(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
@@ -4099,6 +4111,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     }
   }
 
+#if !CONFIG_REALTIME_ONLY
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
@@ -4107,15 +4120,20 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     vp9_360aq_frame_setup(cpi);
   } else if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
     vp9_setup_in_frame_q_adj(cpi);
-  } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-    vp9_cyclic_refresh_setup(cpi);
   } else if (cpi->oxcf.aq_mode == LOOKAHEAD_AQ) {
     // it may be pretty bad for rate-control,
     // and I should handle it somehow
     vp9_alt_ref_aq_setup_map(cpi->alt_ref_aq, cpi);
-  } else if (cpi->roi.enabled && !frame_is_intra_only(cm)) {
-    apply_roi_map(cpi);
+  } else {
+#endif
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+      vp9_cyclic_refresh_setup(cpi);
+    } else if (cpi->roi.enabled && !frame_is_intra_only(cm)) {
+      apply_roi_map(cpi);
+    }
+#if !CONFIG_REALTIME_ONLY
   }
+#endif
 
   apply_active_map(cpi);
 
@@ -4168,6 +4186,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   return 1;
 }
 
+#if !CONFIG_REALTIME_ONLY
 #define MAX_QSTEP_ADJ 4
 static int get_qstep_adj(int rate_excess, int rate_limit) {
   int qstep =
@@ -4546,6 +4565,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     restore_coding_context(cpi);
   }
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 static int get_ref_frame_flags(const VP9_COMP *cpi) {
   const int *const map = cpi->common.ref_frame_map;
@@ -4839,6 +4859,7 @@ static void spatial_denoise_frame(VP9_COMP *cpi) {
 }
 #endif  // ENABLE_KF_DENOISE
 
+#if !CONFIG_REALTIME_ONLY
 static void vp9_try_disable_lookahead_aq(VP9_COMP *cpi, size_t *size,
                                          uint8_t *dest) {
   if (cpi->common.seg.enabled)
@@ -4862,6 +4883,7 @@ static void vp9_try_disable_lookahead_aq(VP9_COMP *cpi, size_t *size,
         vp9_enable_segmentation(&cpi->common.seg);
     }
 }
+#endif
 
 static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
   RefCntBuffer *const ref_buffer = get_ref_cnt_buffer(cm, cm->new_fb_idx);
@@ -5179,7 +5201,9 @@ static void encode_frame_to_data_rate(
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {
     if (!encode_without_recode_loop(cpi, size, dest)) return;
   } else {
+#if !CONFIG_REALTIME_ONLY
     encode_with_recode_loop(cpi, size, dest);
+#endif
   }
 
   // TODO(jingning): When using show existing frame mode, we assume that the
@@ -5191,9 +5215,11 @@ static void encode_frame_to_data_rate(
                cm->ref_frame_map[cpi->alt_fb_idx]);
   }
 
+#if !CONFIG_REALTIME_ONLY
   // Disable segmentation if it decrease rate/distortion ratio
   if (cpi->oxcf.aq_mode == LOOKAHEAD_AQ)
     vp9_try_disable_lookahead_aq(cpi, size, dest);
+#endif
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
@@ -5397,8 +5423,10 @@ static void encode_frame_to_data_rate(
 
   cpi->force_update_segmentation = 0;
 
+#if !CONFIG_REALTIME_ONLY
   if (cpi->oxcf.aq_mode == LOOKAHEAD_AQ)
     vp9_alt_ref_aq_unset_all(cpi->alt_ref_aq, cpi);
+#endif
 
   cpi->svc.previous_frame_is_intra_only = cm->intra_only;
   cpi->svc.set_intra_only_frame = 0;
