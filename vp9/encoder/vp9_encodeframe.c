@@ -5069,8 +5069,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   (void)*tp_orig;
 
-  // Avoid checking for rectangular partitions for speed >= 6.
-  if (cpi->oxcf.speed >= 6) do_rect = 0;
+  // Avoid checking for rectangular partitions for speed >= 5.
+  if (cpi->oxcf.speed >= 5) do_rect = 0;
 
   assert(num_8x8_blocks_wide_lookup[bsize] ==
          num_8x8_blocks_high_lookup[bsize]);
