@@ -20,6 +20,7 @@ static MESH_PATTERN best_quality_mesh_pattern[MAX_MESH_STEP] = {
   { 64, 4 }, { 28, 2 }, { 15, 1 }, { 7, 1 }
 };
 
+#if !CONFIG_REALTIME_ONLY
 // Define 3 mesh density levels to control the number of searches.
 #define MESH_DENSITY_LEVELS 3
 static MESH_PATTERN
@@ -385,6 +386,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->simple_model_rd_from_var = 1;
   }
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
                                                      SPEED_FEATURES *sf,
@@ -846,11 +848,12 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi, int speed) {
   sf->rd_ml_partition.search_early_termination = 0;
   sf->rd_ml_partition.search_breakout = 0;
 
-  if (oxcf->mode == REALTIME) {
+  if (oxcf->mode == REALTIME)
     set_rt_speed_feature_framesize_dependent(cpi, sf, speed);
-  } else if (oxcf->mode == GOOD) {
+#if !CONFIG_REALTIME_ONLY
+  else if (oxcf->mode == GOOD)
     set_good_speed_feature_framesize_dependent(cpi, sf, speed);
-  }
+#endif
 
   if (sf->disable_split_mask == DISABLE_ALL_SPLIT) {
     sf->adaptive_pred_interp_filter = 0;
@@ -880,7 +883,9 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi, int speed) {
 
 void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi, int speed) {
   SPEED_FEATURES *const sf = &cpi->sf;
+#if !CONFIG_REALTIME_ONLY
   VP9_COMMON *const cm = &cpi->common;
+#endif
   MACROBLOCK *const x = &cpi->td.mb;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int i;
@@ -993,8 +998,10 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi, int speed) {
 
   if (oxcf->mode == REALTIME)
     set_rt_speed_feature_framesize_independent(cpi, sf, speed, oxcf->content);
+#if !CONFIG_REALTIME_ONLY
   else if (oxcf->mode == GOOD)
     set_good_speed_feature_framesize_independent(cpi, cm, sf, speed);
+#endif
 
   cpi->diamond_search_sad = vp9_diamond_search_sad;
 
