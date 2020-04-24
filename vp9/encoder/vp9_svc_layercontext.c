@@ -770,9 +770,7 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
 
   if (svc->disable_inter_layer_pred == INTER_LAYER_PRED_OFF &&
       svc->number_spatial_layers > 1 && svc->number_spatial_layers <= 3 &&
-      svc->number_temporal_layers <= 3 &&
-      !(svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
-        svc->use_set_ref_frame_config))
+      svc->number_temporal_layers <= 3)
     svc->simulcast_mode = 1;
   else
     svc->simulcast_mode = 0;
