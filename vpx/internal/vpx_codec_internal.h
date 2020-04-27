@@ -68,7 +68,7 @@ typedef struct vpx_codec_priv_enc_mr_cfg vpx_codec_priv_enc_mr_cfg_t;
 /*!\brief init function pointer prototype
  *
  * Performs algorithm-specific initialization of the decoder context. This
- * function is called by the generic vpx_codec_init() wrapper function, so
+ * function is called by vpx_codec_dec_init() and vpx_codec_enc_init(), so
  * plugins implementing this interface may trust the input parameters to be
  * properly initialized.
  *
