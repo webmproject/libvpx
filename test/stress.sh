@@ -52,7 +52,7 @@ stress_verify_environment() {
   fi
   for file in "${YUV}" "${VP8}" "${VP9}"; do
     if [ ! -e "${file}" ] ; then
-      download_and_check_file "${file}"
+      download_and_check_file "${file}" || return 1
     fi
   done
   if [ ! -e "${YUV}" ] || [ ! -e "${VP8}" ] || [ ! -e "${VP9}" ] ; then
