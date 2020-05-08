@@ -4533,9 +4533,11 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   /* Actual bits spent */
   cpi->total_actual_bits += cpi->projected_frame_size;
 
+#if 0 && CONFIG_INTERNAL_STATS
   /* Debug stats */
   cpi->total_target_vs_actual +=
       (cpi->this_frame_target - cpi->projected_frame_size);
+#endif
 
   cpi->buffer_level = cpi->bits_off_target;
 
