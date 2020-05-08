@@ -41,6 +41,7 @@ TEST(DecodeAPI, InvalidParams) {
             vpx_codec_decode(NULL, NULL, NELEMENTS(buf), NULL, 0));
   EXPECT_EQ(VPX_CODEC_INVALID_PARAM, vpx_codec_destroy(NULL));
   EXPECT_TRUE(vpx_codec_error(NULL) != NULL);
+  EXPECT_TRUE(vpx_codec_error_detail(NULL) == NULL);
 
   for (int i = 0; i < NELEMENTS(kCodecs); ++i) {
     EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
