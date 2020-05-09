@@ -734,6 +734,7 @@ process_toolchain() {
             # GTestLog must be modified to use Android logging utilities.
         ;;
         *-darwin-*)
+            check_add_cxxflags -std=c++11
             # iOS/ARM builds do not work with gtest. This does not match
             # x86 targets.
         ;;
