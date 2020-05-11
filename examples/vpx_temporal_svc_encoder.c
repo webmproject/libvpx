@@ -815,7 +815,7 @@ int main(int argc, char **argv) {
 #else
   if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    die_codec(&codec, "Failed to initialize encoder");
+    die("Failed to initialize encoder");
 
   if (strncmp(encoder->name, "vp8", 3) == 0) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, -speed);
