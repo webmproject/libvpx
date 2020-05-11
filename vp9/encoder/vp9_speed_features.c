@@ -621,7 +621,7 @@ static void set_rt_speed_feature_framesize_independent(
     // increase in encoding time.
     if (cpi->use_svc && svc->spatial_layer_id > 0) sf->nonrd_keyframe = 1;
     if (cm->frame_type != KEY_FRAME && cpi->resize_state == ORIG &&
-        cpi->oxcf.rc_mode == VPX_CBR) {
+        cpi->oxcf.rc_mode == VPX_CBR && !cpi->rc.disable_overshoot_maxq_cbr) {
       if (cm->width * cm->height <= 352 * 288 && !cpi->use_svc &&
           cpi->oxcf.content != VP9E_CONTENT_SCREEN)
         sf->overshoot_detection_cbr_rt = RE_ENCODE_MAXQ;
@@ -668,7 +668,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->base_mv_aggressive = 1;
     }
     if (cm->frame_type != KEY_FRAME && cpi->resize_state == ORIG &&
-        cpi->oxcf.rc_mode == VPX_CBR)
+        cpi->oxcf.rc_mode == VPX_CBR && !cpi->rc.disable_overshoot_maxq_cbr)
       sf->overshoot_detection_cbr_rt = FAST_DETECTION_MAXQ;
   }
 

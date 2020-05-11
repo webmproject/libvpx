@@ -195,7 +195,8 @@ typedef struct {
   int use_post_encode_drop;
   // External flag to enable post encode frame dropping, controlled by user.
   int ext_use_post_encode_drop;
-
+  // Flag to disable CBR feature to increase Q on overshoot detection.
+  int disable_overshoot_maxq_cbr;
   int damped_adjustment[RATE_FACTOR_LEVELS];
   double arf_active_best_quality_adjustment_factor;
   int arf_increase_active_best_quality;

@@ -684,6 +684,14 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_DELTA_Q_UV,
+
+  /*!\brief Codec control function to disable increase Q on overshoot in CBR.
+   *
+   * 0: On (default), 1: Disable.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_DISABLE_OVERSHOOT_MAXQ_CBR,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -1034,6 +1042,8 @@ VPX_CTRL_USE_TYPE(VP9E_SET_POSTENCODE_DROP, unsigned int)
 VPX_CTRL_USE_TYPE(VP9E_SET_DELTA_Q_UV, int)
 #define VPX_CTRL_VP9E_SET_DELTA_Q_UV
 
+VPX_CTRL_USE_TYPE(VP9E_SET_DISABLE_OVERSHOOT_MAXQ_CBR, int)
+#define VPX_CTRL_VP9E_SET_DISABLE_OVERSHOOT_MAXQ_CBR
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus
