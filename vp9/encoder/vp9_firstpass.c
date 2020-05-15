@@ -389,6 +389,29 @@ static int get_search_range(const VP9_COMP *cpi) {
   return sr;
 }
 
+// Reduce limits to keep the motion search within MV_MAX of ref_mv. Not doing
+// this can be problematic for big videos (8K) and may cause assert failure
+// (or memory violation) in mv_cost. Limits are only modified if they would
+// be non-empty. Returns 1 if limits are non-empty.
+static int intersect_limits_with_mv_max(MvLimits *mv_limits, const MV *ref_mv) {
+  const int row_min =
+      VPXMAX(mv_limits->row_min, (ref_mv->row + 7 - MV_MAX) >> 3);
+  const int row_max =
+      VPXMIN(mv_limits->row_max, (ref_mv->row - 1 + MV_MAX) >> 3);
+  const int col_min =
+      VPXMAX(mv_limits->col_min, (ref_mv->col + 7 - MV_MAX) >> 3);
+  const int col_max =
+      VPXMIN(mv_limits->col_max, (ref_mv->col - 1 + MV_MAX) >> 3);
+  if (row_min > row_max || col_min > col_max) {
+    return 0;
+  }
+  mv_limits->row_min = row_min;
+  mv_limits->row_max = row_max;
+  mv_limits->col_min = col_min;
+  mv_limits->col_max = col_max;
+  return 1;
+}
+
 static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                      const MV *ref_mv, MV *best_mv,
                                      int *best_motion_err) {
@@ -403,8 +426,13 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int step_param = 3;
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
   const int sr = get_search_range(cpi);
+  const MvLimits tmp_mv_limits = x->mv_limits;
   step_param += sr;
   further_steps -= sr;
+
+  if (!intersect_limits_with_mv_max(&x->mv_limits, ref_mv)) {
+    return;
+  }
 
   // Override the default variance function to use MSE.
   v_fn_ptr.vf = get_block_variance_fn(bsize);
@@ -451,6 +479,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
   }
+  x->mv_limits = tmp_mv_limits;
 }
 
 static BLOCK_SIZE get_bsize(const VP9_COMMON *cm, int mb_row, int mb_col) {
