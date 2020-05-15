@@ -1259,7 +1259,7 @@ static void vp9_svc_update_ref_frame_bypass_mode(VP9_COMP *const cpi) {
   BufferPool *const pool = cm->buffer_pool;
   int i;
   for (i = 0; i < REF_FRAMES; i++) {
-    if (cm->frame_type == KEY_FRAME ||
+    if ((cm->frame_type == KEY_FRAME && !svc->simulcast_mode) ||
         svc->update_buffer_slot[svc->spatial_layer_id] & (1 << i)) {
       ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[i], cm->new_fb_idx);
       svc->fb_idx_spatial_layer_id[i] = svc->spatial_layer_id;
