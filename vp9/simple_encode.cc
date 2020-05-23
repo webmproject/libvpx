@@ -813,6 +813,29 @@ T *GetVectorData(const std::vector<T> &v) {
   return const_cast<T *>(v.data());
 }
 
+static GOP_COMMAND GetGopCommand(const std::vector<int> &gop_map,
+                                 int start_show_index) {
+  assert(static_cast<size_t>(start_show_index) < gop_map.size());
+  GOP_COMMAND gop_command;
+  if (gop_map.size() > 0) {
+    int end_show_index = start_show_index + 1;
+    while (static_cast<size_t>(end_show_index) < gop_map.size() &&
+           gop_map[end_show_index] == 0) {
+      ++end_show_index;
+    }
+    const int show_frame_count = end_show_index - start_show_index;
+    int use_alt_ref = 1;
+    if (static_cast<size_t>(end_show_index) == gop_map.size()) {
+      // This is the last gop group, there must be no altref.
+      use_alt_ref = 0;
+    }
+    gop_command_on(&gop_command, show_frame_count, use_alt_ref);
+  } else {
+    gop_command_off(&gop_command);
+  }
+  return gop_command;
+}
+
 void SimpleEncode::StartEncode() {
   assert(impl_ptr_->first_pass_stats.size() > 0);
   vpx_rational_t frame_rate =
@@ -833,9 +856,6 @@ void SimpleEncode::StartEncode() {
 
   frame_coding_index_ = 0;
   show_frame_count_ = 0;
-
-  encode_command_set_external_arf_indexes(&impl_ptr_->cpi->encode_command,
-                                          GetVectorData(external_arf_indexes_));
 
   UpdateKeyFrameGroup(show_frame_count_);
 
@@ -914,6 +934,10 @@ void SimpleEncode::PostUpdateState(
 
   IncreaseGroupOfPictureIndex(&group_of_picture_);
   if (IsGroupOfPictureFinished(group_of_picture_)) {
+    const GOP_COMMAND gop_command =
+        GetGopCommand(external_arf_indexes_, show_frame_count_);
+    encode_command_set_gop_command(&impl_ptr_->cpi->encode_command,
+                                   gop_command);
     // This function needs to be called after ref_frame_info_ is updated
     // properly in PostUpdateRefFrameInfo() and UpdateKeyFrameGroup().
     UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
@@ -1002,8 +1026,24 @@ void SimpleEncode::EncodeFrameWithQuantizeIndex(
   encode_command_reset_external_quantize_index(&impl_ptr_->cpi->encode_command);
 }
 
+static int GetCodingFrameNumFromGopMap(const std::vector<int> &gop_map) {
+  int start_show_index = 0;
+  int coding_frame_count = 0;
+  while (static_cast<size_t>(start_show_index) < gop_map.size()) {
+    const GOP_COMMAND gop_command = GetGopCommand(gop_map, start_show_index);
+    start_show_index += gop_command.show_frame_count;
+    coding_frame_count += gop_command_coding_frame_count(&gop_command);
+  }
+  assert(start_show_index == gop_map.size());
+  return coding_frame_count;
+}
+
 int SimpleEncode::GetCodingFrameNum() const {
-  assert(impl_ptr_->first_pass_stats.size() - 1 > 0);
+  assert(impl_ptr_->first_pass_stats.size() > 0);
+  if (external_arf_indexes_.size() > 0) {
+    return GetCodingFrameNumFromGopMap(external_arf_indexes_);
+  }
+
   // These are the default settings for now.
   const int multi_layer_arf = 0;
   const int allow_alt_ref = 1;
@@ -1017,8 +1057,7 @@ int SimpleEncode::GetCodingFrameNum() const {
   fps_init_first_pass_info(&first_pass_info,
                            GetVectorData(impl_ptr_->first_pass_stats),
                            num_frames_);
-  return vp9_get_coding_frame_num(external_arf_indexes_.data(), &oxcf,
-                                  &frame_info, &first_pass_info,
+  return vp9_get_coding_frame_num(&oxcf, &frame_info, &first_pass_info,
                                   multi_layer_arf, allow_alt_ref);
 }
 

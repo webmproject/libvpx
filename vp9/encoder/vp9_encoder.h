@@ -532,24 +532,50 @@ typedef struct MOTION_VECTOR_INFO {
   int_mv mv[2];
 } MOTION_VECTOR_INFO;
 
+typedef struct GOP_COMMAND {
+  int use;  // use this command to set gop or not. If not, use vp9's decision.
+  int show_frame_count;
+  int use_alt_ref;
+} GOP_COMMAND;
+
+static INLINE void gop_command_on(GOP_COMMAND *gop_command,
+                                  int show_frame_count, int use_alt_ref) {
+  gop_command->use = 1;
+  gop_command->show_frame_count = show_frame_count;
+  gop_command->use_alt_ref = use_alt_ref;
+}
+
+static INLINE void gop_command_off(GOP_COMMAND *gop_command) {
+  gop_command->use = 0;
+  gop_command->show_frame_count = 0;
+  gop_command->use_alt_ref = 0;
+}
+
+static INLINE int gop_command_coding_frame_count(
+    const GOP_COMMAND *gop_command) {
+  if (gop_command->use == 0) {
+    assert(0);
+    return -1;
+  }
+  return gop_command->show_frame_count + gop_command->use_alt_ref;
+}
+
 typedef struct ENCODE_COMMAND {
   int use_external_quantize_index;
   int external_quantize_index;
-  // A list of binary flags set from the external controller.
-  // Each binary flag indicates whether the frame is an arf or not.
-  const int *external_arf_indexes;
+  GOP_COMMAND gop_command;
 } ENCODE_COMMAND;
 
 static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {
   vp9_zero(*encode_command);
   encode_command->use_external_quantize_index = 0;
   encode_command->external_quantize_index = -1;
-  encode_command->external_arf_indexes = NULL;
+  gop_command_off(&encode_command->gop_command);
 }
 
-static INLINE void encode_command_set_external_arf_indexes(
-    ENCODE_COMMAND *encode_command, const int *external_arf_indexes) {
-  encode_command->external_arf_indexes = external_arf_indexes;
+static INLINE void encode_command_set_gop_command(
+    ENCODE_COMMAND *encode_command, GOP_COMMAND gop_command) {
+  encode_command->gop_command = gop_command;
 }
 
 static INLINE void encode_command_set_external_quantize_index(
