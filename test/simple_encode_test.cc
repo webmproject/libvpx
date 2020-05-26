@@ -291,35 +291,39 @@ TEST(SimpleEncode, EncodeConsistencyTest3) {
 // Get QPs and arf locations from the first encode.
 // Set external arfs and QPs for the second encode.
 // Expect to get matched results.
-TEST(SimpleEncode, EncodeConsistencyTestUseExternalArfs) {
+TEST(SimpleEncode, EncodeConsistencySetExternalGroupOfPicture) {
   std::vector<int> quantize_index_list;
   std::vector<uint64_t> ref_sse_list;
   std::vector<double> ref_psnr_list;
   std::vector<size_t> ref_bit_size_list;
-  std::vector<int> external_arf_indexes(num_frames, 0);
+  std::vector<int> gop_map(num_frames, 0);
   {
     // The first encode.
     SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
                                target_bitrate, num_frames, infile_path);
     simple_encode.ComputeFirstPassStats();
-    const int num_coding_frames = simple_encode.GetCodingFrameNum();
     simple_encode.StartEncode();
-    for (int i = 0; i < num_coding_frames; ++i) {
-      EncodeFrameResult encode_frame_result;
-      simple_encode.EncodeFrame(&encode_frame_result);
-      quantize_index_list.push_back(encode_frame_result.quantize_index);
-      ref_sse_list.push_back(encode_frame_result.sse);
-      ref_psnr_list.push_back(encode_frame_result.psnr);
-      ref_bit_size_list.push_back(encode_frame_result.coding_data_bit_size);
-      if (encode_frame_result.frame_type == kFrameTypeKey) {
-        external_arf_indexes[encode_frame_result.show_idx] = 0;
-      } else if (encode_frame_result.frame_type == kFrameTypeAltRef) {
-        external_arf_indexes[encode_frame_result.show_idx] = 1;
-      } else {
-        // This has to be |= because we can't let overlay overwrites the
-        // arf type for the same frame.
-        external_arf_indexes[encode_frame_result.show_idx] |= 0;
+
+    int coded_show_frame_count = 0;
+    while (coded_show_frame_count < num_frames) {
+      const GroupOfPicture group_of_picture =
+          simple_encode.ObserveGroupOfPicture();
+      gop_map[coded_show_frame_count] |= kGopMapFlagStart;
+      if (group_of_picture.use_alt_ref) {
+        gop_map[coded_show_frame_count] |= kGopMapFlagUseAltRef;
       }
+      const std::vector<EncodeFrameInfo> &encode_frame_list =
+          group_of_picture.encode_frame_list;
+      for (size_t group_index = 0; group_index < encode_frame_list.size();
+           ++group_index) {
+        EncodeFrameResult encode_frame_result;
+        simple_encode.EncodeFrame(&encode_frame_result);
+        quantize_index_list.push_back(encode_frame_result.quantize_index);
+        ref_sse_list.push_back(encode_frame_result.sse);
+        ref_psnr_list.push_back(encode_frame_result.psnr);
+        ref_bit_size_list.push_back(encode_frame_result.coding_data_bit_size);
+      }
+      coded_show_frame_count += group_of_picture.show_frame_count;
     }
     simple_encode.EndEncode();
   }
@@ -329,7 +333,7 @@ TEST(SimpleEncode, EncodeConsistencyTestUseExternalArfs) {
     SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
                                target_bitrate, num_frames, infile_path);
     simple_encode.ComputeFirstPassStats();
-    simple_encode.SetExternalGroupOfPicture(external_arf_indexes);
+    simple_encode.SetExternalGroupOfPicture(gop_map);
     const int num_coding_frames = simple_encode.GetCodingFrameNum();
     EXPECT_EQ(static_cast<size_t>(num_coding_frames),
               quantize_index_list.size());

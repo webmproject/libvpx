@@ -612,6 +612,9 @@ static void SetGroupOfPicture(int first_is_key_frame, int use_alt_ref,
   group_of_picture->show_frame_count = coding_frame_count - use_alt_ref;
   group_of_picture->start_show_index = first_show_idx;
   group_of_picture->start_coding_index = start_coding_index;
+  group_of_picture->first_is_key_frame = first_is_key_frame;
+  group_of_picture->use_alt_ref = use_alt_ref;
+  group_of_picture->last_gop_use_alt_ref = last_gop_use_alt_ref;
 
   // We need to make a copy of start reference frame info because we
   // use it to simulate the ref frame update.
@@ -800,9 +803,8 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
   return output_stats;
 }
 
-void SimpleEncode::SetExternalGroupOfPicture(
-    std::vector<int> external_arf_indexes) {
-  external_arf_indexes_ = external_arf_indexes;
+void SimpleEncode::SetExternalGroupOfPicture(std::vector<int> gop_map) {
+  gop_map_ = gop_map;
 }
 
 template <typename T>
@@ -816,15 +818,18 @@ T *GetVectorData(const std::vector<T> &v) {
 static GOP_COMMAND GetGopCommand(const std::vector<int> &gop_map,
                                  int start_show_index) {
   assert(static_cast<size_t>(start_show_index) < gop_map.size());
+  assert((gop_map[start_show_index] & kGopMapFlagStart) != 0);
   GOP_COMMAND gop_command;
   if (gop_map.size() > 0) {
     int end_show_index = start_show_index + 1;
+    // gop_map[end_show_index] & kGopMapFlagStart == 0 means this is
+    // the start of a gop.
     while (static_cast<size_t>(end_show_index) < gop_map.size() &&
-           gop_map[end_show_index] == 0) {
+           (gop_map[end_show_index] & kGopMapFlagStart) == 0) {
       ++end_show_index;
     }
     const int show_frame_count = end_show_index - start_show_index;
-    int use_alt_ref = 1;
+    int use_alt_ref = (gop_map[start_show_index] & kGopMapFlagUseAltRef) != 0;
     if (static_cast<size_t>(end_show_index) == gop_map.size()) {
       // This is the last gop group, there must be no altref.
       use_alt_ref = 0;
@@ -934,8 +939,7 @@ void SimpleEncode::PostUpdateState(
 
   IncreaseGroupOfPictureIndex(&group_of_picture_);
   if (IsGroupOfPictureFinished(group_of_picture_)) {
-    const GOP_COMMAND gop_command =
-        GetGopCommand(external_arf_indexes_, show_frame_count_);
+    const GOP_COMMAND gop_command = GetGopCommand(gop_map_, show_frame_count_);
     encode_command_set_gop_command(&impl_ptr_->cpi->encode_command,
                                    gop_command);
     // This function needs to be called after ref_frame_info_ is updated
@@ -1040,8 +1044,8 @@ static int GetCodingFrameNumFromGopMap(const std::vector<int> &gop_map) {
 
 int SimpleEncode::GetCodingFrameNum() const {
   assert(impl_ptr_->first_pass_stats.size() > 0);
-  if (external_arf_indexes_.size() > 0) {
-    return GetCodingFrameNumFromGopMap(external_arf_indexes_);
+  if (gop_map_.size() > 0) {
+    return GetCodingFrameNumFromGopMap(gop_map_);
   }
 
   // These are the default settings for now.

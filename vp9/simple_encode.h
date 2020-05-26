@@ -39,6 +39,14 @@ enum RefFrameType {
   kRefFrameTypeNone = -1,
 };
 
+enum GopMapFlag {
+  kGopMapFlagStart =
+      1 << 0,  // Indicate this location is the start of a group of pictures.
+  kGopMapFlagUseAltRef =
+      1 << 1,  // Indicate this group of pictures will use an alt ref. Only set
+               // this flag when kGopMapFlagStart is set.
+};
+
 // The frame is split to 4x4 blocks.
 // This structure contains the information of each 4x4 block.
 struct PartitionInfo {
@@ -255,6 +263,7 @@ struct GroupOfPicture {
   // triggered when the coded frame is the last one in the previous group of
   // pictures.
   std::vector<EncodeFrameInfo> encode_frame_list;
+
   // Indicates the index of the next coding frame in encode_frame_list.
   // In other words, EncodeFrameInfo of the next coding frame can be
   // obtained with encode_frame_list[next_encode_frame_index].
@@ -263,13 +272,25 @@ struct GroupOfPicture {
   // will be increased after each EncodeFrame()/EncodeFrameWithQuantizeIndex()
   // call.
   int next_encode_frame_index;
+
   // Number of show frames in this group of pictures.
   int show_frame_count;
+
   // The show index/timestamp of the earliest show frame in the group of
   // pictures.
   int start_show_index;
-  // The coding index of the first coding frame in the group of picture.
+
+  // The coding index of the first coding frame in the group of pictures.
   int start_coding_index;
+
+  // Indicates whether this group of pictures starts with a key frame.
+  int first_is_key_frame;
+
+  // Indicates whether this group of pictures uses an alt ref.
+  int use_alt_ref;
+
+  // Indicates whether previous group of pictures used an alt ref.
+  int last_gop_use_alt_ref;
 };
 
 class SimpleEncode {
@@ -293,13 +314,17 @@ class SimpleEncode {
   // values. For details, please check FIRSTPASS_STATS in vp9_firstpass.h
   std::vector<std::vector<double>> ObserveFirstPassStats();
 
-  // Sets arf indexes for the video from external input.
-  // The arf index determines whether a frame is arf or not.
-  // Therefore it also determines the group of picture size.
-  // If set, VP9 will use the external arf index to make decision.
+  // Sets group of pictures map for coding the entire video.
+  // Each entry in the gop_map corresponds to a show frame in the video.
+  // Therefore, the size of gop_map should equal to the number of show frames in
+  // the entire video.
+  // If a given entry's kGopMapFlagStart is set, it means this is the start of a
+  // gop. Once kGopMapFlagStart is set, one can set kGopMapFlagUseAltRef to
+  // indicate whether this gop use altref.
+  // If a given entry is zero, it means it's in the middle of a gop.
   // This function should be called only once after ComputeFirstPassStats(),
   // before StartEncode().
-  void SetExternalGroupOfPicture(std::vector<int> external_arf_indexes);
+  void SetExternalGroupOfPicture(std::vector<int> gop_map);
 
   // Initializes the encoder for actual encoding.
   // This function should be called after ComputeFirstPassStats().
@@ -363,7 +388,7 @@ class SimpleEncode {
   std::FILE *out_file_;
   std::unique_ptr<EncodeImpl> impl_ptr_;
 
-  std::vector<int> external_arf_indexes_;
+  std::vector<int> gop_map_;
   GroupOfPicture group_of_picture_;
 
   // The key frame group size includes one key frame plus the number of
