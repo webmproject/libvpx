@@ -3771,7 +3771,6 @@ int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
   int show_idx = 0;
   int last_gop_use_alt_ref = 0;
   vp9_rc_init(oxcf, 1, &rc);
-  rc.static_scene_max_gf_interval = 250;
 
   while (show_idx < first_pass_info->num_frames) {
     int use_alt_ref;
