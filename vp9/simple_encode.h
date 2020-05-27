@@ -322,7 +322,7 @@ class SimpleEncode {
   std::vector<int> ObserveKeyFrameMap() const;
 
   // Sets group of pictures map for coding the entire video.
-  // Each entry in the gop_map is corresponding to a show frame in the video.
+  // Each entry in the gop_map corresponds to a show frame in the video.
   // Therefore, the size of gop_map should equal to the number of show frames in
   // the entire video.
   // If a given entry's kGopMapFlagStart is set, it means this is the start of a
@@ -331,7 +331,16 @@ class SimpleEncode {
   // If a given entry is zero, it means it's in the middle of a gop.
   // This function should be called only once after ComputeFirstPassStats(),
   // before StartEncode().
-  void SetExternalGroupOfPicture(std::vector<int> gop_map);
+  // This API will check and modify the gop_map to satisfy the following
+  // constraints.
+  // 1) Each key frame position should be at the start of a gop.
+  // 2) The last gop should not use an alt ref.
+  void SetExternalGroupOfPicturesMap(std::vector<int> gop_map);
+
+  // Observe the group of pictures map set through
+  // SetExternalGroupOfPicturesMap(). This function should be called after
+  // SetExternalGroupOfPicturesMap().
+  std::vector<int> ObserveExternalGroupOfPicturesMap();
 
   // Initializes the encoder for actual encoding.
   // This function should be called after ComputeFirstPassStats().

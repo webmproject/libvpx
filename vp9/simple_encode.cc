@@ -806,8 +806,36 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
   return output_stats;
 }
 
-void SimpleEncode::SetExternalGroupOfPicture(std::vector<int> gop_map) {
+void SimpleEncode::SetExternalGroupOfPicturesMap(std::vector<int> gop_map) {
   gop_map_ = gop_map;
+  // The following will check and modify gop_map_ to make sure the
+  // gop_map_ satisfies the constraints.
+  // 1) Each key frame position should be at the start of a gop.
+  // 2) The last gop should not use an alt ref.
+  assert(gop_map_.size() == key_frame_map_.size());
+  int last_gop_start = 0;
+  for (int i = 0; static_cast<size_t>(i) < gop_map_.size(); ++i) {
+    if (key_frame_map_[i] == 1 && gop_map_[i] == 0) {
+      fprintf(stderr, "Add an extra gop start at show_idx %d\n", i);
+      // Insert a gop start at key frame location.
+      gop_map_[i] |= kGopMapFlagStart;
+      gop_map_[i] |= kGopMapFlagUseAltRef;
+    }
+    if (gop_map_[i] & kGopMapFlagStart) {
+      last_gop_start = i;
+    }
+  }
+  if (gop_map_[last_gop_start] & kGopMapFlagUseAltRef) {
+    fprintf(stderr,
+            "Last group of pictures starting at show_idx %d shouldn't use alt "
+            "ref\n",
+            last_gop_start);
+    gop_map_[last_gop_start] &= ~kGopMapFlagUseAltRef;
+  }
+}
+
+std::vector<int> SimpleEncode::ObserveExternalGroupOfPicturesMap() {
+  return gop_map_;
 }
 
 template <typename T>
@@ -867,6 +895,8 @@ void SimpleEncode::StartEncode() {
 
   UpdateKeyFrameGroup(show_frame_count_);
 
+  const GOP_COMMAND gop_command = GetGopCommand(gop_map_, show_frame_count_);
+  encode_command_set_gop_command(&impl_ptr_->cpi->encode_command, gop_command);
   UpdateGroupOfPicture(impl_ptr_->cpi, frame_coding_index_, ref_frame_info_,
                        &group_of_picture_);
   rewind(in_file_);

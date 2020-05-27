@@ -319,7 +319,7 @@ TEST(SimpleEncode, EncodeConsistencyTest3) {
 // Get QPs and arf locations from the first encode.
 // Set external arfs and QPs for the second encode.
 // Expect to get matched results.
-TEST(SimpleEncode, EncodeConsistencySetExternalGroupOfPicture) {
+TEST(SimpleEncode, EncodeConsistencySetExternalGroupOfPicturesMap) {
   std::vector<int> quantize_index_list;
   std::vector<uint64_t> ref_sse_list;
   std::vector<double> ref_psnr_list;
@@ -361,7 +361,7 @@ TEST(SimpleEncode, EncodeConsistencySetExternalGroupOfPicture) {
     SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
                                target_bitrate, num_frames, infile_path);
     simple_encode.ComputeFirstPassStats();
-    simple_encode.SetExternalGroupOfPicture(gop_map);
+    simple_encode.SetExternalGroupOfPicturesMap(gop_map);
     const int num_coding_frames = simple_encode.GetCodingFrameNum();
     EXPECT_EQ(static_cast<size_t>(num_coding_frames),
               quantize_index_list.size());
@@ -377,6 +377,73 @@ TEST(SimpleEncode, EncodeConsistencySetExternalGroupOfPicture) {
     }
     simple_encode.EndEncode();
   }
+}
+
+TEST(SimpleEncode, SetExternalGroupOfPicturesMap) {
+  SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                             target_bitrate, num_frames, infile_path);
+  simple_encode.ComputeFirstPassStats();
+
+  std::vector<int> gop_map(num_frames, 0);
+
+  // Should be the first gop group.
+  gop_map[0] = 0;
+
+  // Second gop group with an alt ref.
+  gop_map[5] |= kGopMapFlagStart | kGopMapFlagUseAltRef;
+
+  // Third gop group without an alt ref.
+  gop_map[10] |= kGopMapFlagStart;
+
+  // Last gop group.
+  gop_map[14] |= kGopMapFlagStart | kGopMapFlagUseAltRef;
+
+  simple_encode.SetExternalGroupOfPicturesMap(gop_map);
+
+  std::vector<int> observed_gop_map =
+      simple_encode.ObserveExternalGroupOfPicturesMap();
+
+  // First gop group.
+  // There is always a key frame at show_idx 0 and key frame should always be
+  // the start of a gop. We expect ObserveExternalGroupOfPicturesMap() will
+  // insert an extra gop start here.
+  EXPECT_EQ(observed_gop_map[0], kGopMapFlagStart | kGopMapFlagUseAltRef);
+
+  // Second gop group with an alt ref.
+  EXPECT_EQ(observed_gop_map[5], kGopMapFlagStart | kGopMapFlagUseAltRef);
+
+  // Third gop group without an alt ref.
+  EXPECT_EQ(observed_gop_map[10], kGopMapFlagStart);
+
+  // Last gop group. The last gop is not supposed to use an alt ref. We expect
+  // ObserveExternalGroupOfPicturesMap() will remove the alt ref flag here.
+  EXPECT_EQ(observed_gop_map[14], kGopMapFlagStart);
+
+  int ref_gop_show_frame_count_list[4] = { 5, 5, 4, 3 };
+  size_t ref_gop_coded_frame_count_list[4] = { 6, 6, 4, 3 };
+  int gop_count = 0;
+
+  simple_encode.StartEncode();
+  int coded_show_frame_count = 0;
+  while (coded_show_frame_count < num_frames) {
+    const GroupOfPicture group_of_picture =
+        simple_encode.ObserveGroupOfPicture();
+    const std::vector<EncodeFrameInfo> &encode_frame_list =
+        group_of_picture.encode_frame_list;
+    EXPECT_EQ(encode_frame_list.size(),
+              ref_gop_coded_frame_count_list[gop_count]);
+    EXPECT_EQ(group_of_picture.show_frame_count,
+              ref_gop_show_frame_count_list[gop_count]);
+    for (size_t group_index = 0; group_index < encode_frame_list.size();
+         ++group_index) {
+      EncodeFrameResult encode_frame_result;
+      simple_encode.EncodeFrame(&encode_frame_result);
+    }
+    coded_show_frame_count += group_of_picture.show_frame_count;
+    ++gop_count;
+  }
+  EXPECT_EQ(gop_count, 4);
+  simple_encode.EndEncode();
 }
 
 TEST(SimpleEncode, GetEncodeFrameInfo) {
