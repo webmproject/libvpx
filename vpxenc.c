@@ -95,6 +95,8 @@ static const arg_def_t debugmode =
     ARG_DEF("D", "debug", 0, "Debug mode (makes output deterministic)");
 static const arg_def_t outputfile =
     ARG_DEF("o", "output", 1, "Output filename");
+static const arg_def_t use_nv12 =
+    ARG_DEF(NULL, "nv12", 0, "Input file is NV12 ");
 static const arg_def_t use_yv12 =
     ARG_DEF(NULL, "yv12", 0, "Input file is YV12 ");
 static const arg_def_t use_i420 =
@@ -220,7 +222,8 @@ static const arg_def_t error_resilient =
 static const arg_def_t lag_in_frames =
     ARG_DEF(NULL, "lag-in-frames", 1, "Max number of frames to lag");
 
-static const arg_def_t *global_args[] = { &use_yv12,
+static const arg_def_t *global_args[] = { &use_nv12,
+                                          &use_yv12,
                                           &use_i420,
                                           &use_i422,
                                           &use_i444,
@@ -696,6 +699,8 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
       global->deadline = VPX_DL_REALTIME;
     else if (arg_match(&arg, &use_yv12, argi))
       global->color_type = YV12;
+    else if (arg_match(&arg, &use_nv12, argi))
+      global->color_type = NV12;
     else if (arg_match(&arg, &use_i420, argi))
       global->color_type = I420;
     else if (arg_match(&arg, &use_i422, argi))
@@ -1642,6 +1647,7 @@ int main(int argc, const char **argv_) {
     case I444: input.fmt = VPX_IMG_FMT_I444; break;
     case I440: input.fmt = VPX_IMG_FMT_I440; break;
     case YV12: input.fmt = VPX_IMG_FMT_YV12; break;
+    case NV12: input.fmt = VPX_IMG_FMT_NV12; break;
   }
 
   {
