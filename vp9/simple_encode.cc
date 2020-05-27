@@ -779,6 +779,9 @@ void SimpleEncode::ComputeFirstPassStats() {
   free_encoder(cpi);
   rewind(in_file_);
   vpx_img_free(&img);
+
+  // Generate key_frame_map based on impl_ptr_->first_pass_stats.
+  key_frame_map_ = ComputeKeyFrameMap();
 }
 
 std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
@@ -1063,6 +1066,28 @@ int SimpleEncode::GetCodingFrameNum() const {
                            num_frames_);
   return vp9_get_coding_frame_num(&oxcf, &frame_info, &first_pass_info,
                                   multi_layer_arf, allow_alt_ref);
+}
+
+std::vector<int> SimpleEncode::ComputeKeyFrameMap() const {
+  assert(impl_ptr_->first_pass_stats.size() == num_frames_);
+  vpx_rational_t frame_rate =
+      make_vpx_rational(frame_rate_num_, frame_rate_den_);
+  const VP9EncoderConfig oxcf =
+      vp9_get_encoder_config(frame_width_, frame_height_, frame_rate,
+                             target_bitrate_, VPX_RC_LAST_PASS);
+  FRAME_INFO frame_info = vp9_get_frame_info(&oxcf);
+  FIRST_PASS_INFO first_pass_info;
+  fps_init_first_pass_info(&first_pass_info,
+                           GetVectorData(impl_ptr_->first_pass_stats),
+                           num_frames_);
+  std::vector<int> key_frame_map(num_frames_, 0);
+  vp9_get_key_frame_map(&oxcf, &frame_info, &first_pass_info,
+                        GetVectorData(key_frame_map));
+  return key_frame_map;
+}
+
+std::vector<int> SimpleEncode::ObserveKeyFrameMap() const {
+  return key_frame_map_;
 }
 
 uint64_t SimpleEncode::GetFramePixelCount() const {

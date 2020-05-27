@@ -304,8 +304,9 @@ class SimpleEncode {
   SimpleEncode(SimpleEncode &) = delete;
   SimpleEncode &operator=(const SimpleEncode &) = delete;
 
-  // Makes encoder compute the first pass stats and store it internally for
-  // future encode.
+  // Makes encoder compute the first pass stats and store it at
+  // impl_ptr_->first_pass_stats. key_frame_map_ is also computed based on the
+  // first pass stats.
   void ComputeFirstPassStats();
 
   // Outputs the first pass stats represented by a 2-D vector.
@@ -314,8 +315,14 @@ class SimpleEncode {
   // values. For details, please check FIRSTPASS_STATS in vp9_firstpass.h
   std::vector<std::vector<double>> ObserveFirstPassStats();
 
+  // Ouputs a copy of key_frame_map_, a binary vector with size equal to the
+  // number of show frames in the video. For each entry in the vector, 1
+  // indicates the position is a key frame and 0 indicates it's not a key frame.
+  // This function should be called after ComputeFirstPassStats()
+  std::vector<int> ObserveKeyFrameMap() const;
+
   // Sets group of pictures map for coding the entire video.
-  // Each entry in the gop_map corresponds to a show frame in the video.
+  // Each entry in the gop_map is corresponding to a show frame in the video.
   // Therefore, the size of gop_map should equal to the number of show frames in
   // the entire video.
   // If a given entry's kGopMapFlagStart is set, it means this is the start of a
@@ -366,6 +373,12 @@ class SimpleEncode {
   uint64_t GetFramePixelCount() const;
 
  private:
+  // Compute the key frame locations of the video based on first pass stats.
+  // The results are returned as a binary vector with 1s indicating keyframes
+  // and 0s indicating non keyframes.
+  // It has to be called after impl_ptr_->first_pass_stats is computed.
+  std::vector<int> ComputeKeyFrameMap() const;
+
   // Updates key_frame_group_size_, reset key_frame_group_index_ and init
   // ref_frame_info_.
   void UpdateKeyFrameGroup(int key_frame_show_index);
@@ -388,6 +401,7 @@ class SimpleEncode {
   std::FILE *out_file_;
   std::unique_ptr<EncodeImpl> impl_ptr_;
 
+  std::vector<int> key_frame_map_;
   std::vector<int> gop_map_;
   GroupOfPicture group_of_picture_;
 

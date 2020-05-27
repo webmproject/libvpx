@@ -106,6 +106,34 @@ TEST(SimpleEncode, EncodeFrame) {
   simple_encode.EndEncode();
 }
 
+TEST(SimpleEncode, ObserveKeyFrameMap) {
+  SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
+                             target_bitrate, num_frames, infile_path);
+  simple_encode.ComputeFirstPassStats();
+  std::vector<int> key_frame_map = simple_encode.ObserveKeyFrameMap();
+  EXPECT_EQ(key_frame_map.size(), static_cast<size_t>(num_frames));
+  simple_encode.StartEncode();
+  int coded_show_frame_count = 0;
+  while (coded_show_frame_count < num_frames) {
+    const GroupOfPicture group_of_picture =
+        simple_encode.ObserveGroupOfPicture();
+    const std::vector<EncodeFrameInfo> &encode_frame_list =
+        group_of_picture.encode_frame_list;
+    for (size_t group_index = 0; group_index < encode_frame_list.size();
+         ++group_index) {
+      EncodeFrameResult encode_frame_result;
+      simple_encode.EncodeFrame(&encode_frame_result);
+      if (encode_frame_result.frame_type == kFrameTypeKey) {
+        EXPECT_EQ(key_frame_map[encode_frame_result.show_idx], 1);
+      } else {
+        EXPECT_EQ(key_frame_map[encode_frame_result.show_idx], 0);
+      }
+    }
+    coded_show_frame_count += group_of_picture.show_frame_count;
+  }
+  simple_encode.EndEncode();
+}
+
 TEST(SimpleEncode, EncodeFrameWithQuantizeIndex) {
   SimpleEncode simple_encode(w, h, frame_rate_num, frame_rate_den,
                              target_bitrate, num_frames, infile_path);

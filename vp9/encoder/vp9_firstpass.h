@@ -290,6 +290,16 @@ int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
                              const FRAME_INFO *frame_info,
                              const FIRST_PASS_INFO *first_pass_info,
                              int multi_layer_arf, int allow_alt_ref);
+
+/*!\brief Compute a key frame binary map indicates whether key frames appear
+ * in the corresponding positions. The passed in key_frame_map must point to an
+ * integer array with length equal to first_pass_info->num_frames, which is the
+ * number of show frames in the video.
+ */
+void vp9_get_key_frame_map(const struct VP9EncoderConfig *oxcf,
+                           const FRAME_INFO *frame_info,
+                           const FIRST_PASS_INFO *first_pass_info,
+                           int *key_frame_map);
 #endif  // CONFIG_RATE_CTRL
 
 FIRSTPASS_STATS vp9_get_frame_stats(const TWO_PASS *twopass);

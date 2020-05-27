@@ -3796,6 +3796,30 @@ int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
   }
   return coding_frame_num;
 }
+
+void vp9_get_key_frame_map(const VP9EncoderConfig *oxcf,
+                           const FRAME_INFO *frame_info,
+                           const FIRST_PASS_INFO *first_pass_info,
+                           int *key_frame_map) {
+  int show_idx = 0;
+  RATE_CONTROL rc;
+  vp9_rc_init(oxcf, 1, &rc);
+
+  // key_frame_map points to an int array with size equal to
+  // first_pass_info->num_frames, which is also the number of show frames in the
+  // video.
+  memset(key_frame_map, 0,
+         sizeof(*key_frame_map) * first_pass_info->num_frames);
+  while (show_idx < first_pass_info->num_frames) {
+    int key_frame_group_size;
+    key_frame_map[show_idx] = 1;
+    key_frame_group_size = vp9_get_frames_to_next_key(
+        oxcf, frame_info, first_pass_info, show_idx, rc.min_gf_interval);
+    assert(key_frame_group_size > 0);
+    show_idx += key_frame_group_size;
+  }
+  assert(show_idx == first_pass_info->num_frames);
+}
 #endif  // CONFIG_RATE_CTRL
 
 FIRSTPASS_STATS vp9_get_frame_stats(const TWO_PASS *twopass) {
