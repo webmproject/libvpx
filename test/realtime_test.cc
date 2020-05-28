@@ -24,15 +24,15 @@ class RealtimeTest
       public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   RealtimeTest() : EncoderTest(GET_PARAM(0)), frame_packets_(0) {}
-  virtual ~RealtimeTest() {}
+  ~RealtimeTest() override {}
 
-  virtual void SetUp() {
+  void SetUp() override {
     InitializeConfig();
     cfg_.g_lag_in_frames = 0;
     SetMode(::libvpx_test::kRealTime);
   }
 
-  virtual void BeginPassHook(unsigned int /*pass*/) {
+  void BeginPassHook(unsigned int /*pass*/) override {
     // TODO(tomfinegan): We're changing the pass value here to make sure
     // we get frames when real time mode is combined with |g_pass| set to
     // VPX_RC_FIRST_PASS. This is necessary because EncoderTest::RunLoop() sets
@@ -41,14 +41,14 @@ class RealtimeTest
     cfg_.g_pass = VPX_RC_FIRST_PASS;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                          ::libvpx_test::Encoder *encoder) override {
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, 8);
     }
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t * /*pkt*/) {
+  void FramePktHook(const vpx_codec_cx_pkt_t * /*pkt*/) override {
     frame_packets_++;
   }
 
