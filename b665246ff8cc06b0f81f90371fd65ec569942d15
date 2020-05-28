@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ba25c69_2bfcb1fa",
+        "filename": "vpx/vpx_image.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-05-28T18:36:31Z",
+      "side": 1,
+      "message": "the only unfortunate thing is that there\u0027s no way to detect the availability of this at build time, it is a compatible abi change though. libvpx hasn\u0027t followed versioning all that well, but it would make this a 1.9 release.",
+      "revId": "b665246ff8cc06b0f81f90371fd65ec569942d15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
