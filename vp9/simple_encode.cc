@@ -848,10 +848,10 @@ T *GetVectorData(const std::vector<T> &v) {
 
 static GOP_COMMAND GetGopCommand(const std::vector<int> &gop_map,
                                  int start_show_index) {
-  assert(static_cast<size_t>(start_show_index) < gop_map.size());
-  assert((gop_map[start_show_index] & kGopMapFlagStart) != 0);
   GOP_COMMAND gop_command;
   if (gop_map.size() > 0) {
+    assert(static_cast<size_t>(start_show_index) < gop_map.size());
+    assert((gop_map[start_show_index] & kGopMapFlagStart) != 0);
     int end_show_index = start_show_index + 1;
     // gop_map[end_show_index] & kGopMapFlagStart == 0 means this is
     // the start of a gop.
@@ -1099,7 +1099,8 @@ int SimpleEncode::GetCodingFrameNum() const {
 }
 
 std::vector<int> SimpleEncode::ComputeKeyFrameMap() const {
-  assert(impl_ptr_->first_pass_stats.size() == num_frames_);
+  // The last entry of first_pass_stats is the overall stats.
+  assert(impl_ptr_->first_pass_stats.size() == num_frames_ + 1);
   vpx_rational_t frame_rate =
       make_vpx_rational(frame_rate_num_, frame_rate_den_);
   const VP9EncoderConfig oxcf =
