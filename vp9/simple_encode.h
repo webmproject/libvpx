@@ -335,7 +335,7 @@ class SimpleEncode {
   // constraints.
   // 1) Each key frame position should be at the start of a gop.
   // 2) The last gop should not use an alt ref.
-  void SetExternalGroupOfPicturesMap(std::vector<int> gop_map);
+  void SetExternalGroupOfPicturesMap(int *gop_map, int gop_map_size);
 
   // Observe the group of pictures map set through
   // SetExternalGroupOfPicturesMap(). This function should be called after

@@ -806,8 +806,11 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
   return output_stats;
 }
 
-void SimpleEncode::SetExternalGroupOfPicturesMap(std::vector<int> gop_map) {
-  gop_map_ = gop_map;
+void SimpleEncode::SetExternalGroupOfPicturesMap(int *gop_map,
+                                                 int gop_map_size) {
+  for (int i = 0; i < gop_map_size; ++i) {
+    gop_map_.push_back(gop_map[i]);
+  }
   // The following will check and modify gop_map_ to make sure the
   // gop_map_ satisfies the constraints.
   // 1) Each key frame position should be at the start of a gop.

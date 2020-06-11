@@ -389,7 +389,7 @@ TEST_F(SimpleEncodeTest, EncodeConsistencySetExternalGroupOfPicturesMap) {
                                frame_rate_den_, target_bitrate_, num_frames_,
                                in_file_path_str_.c_str());
     simple_encode.ComputeFirstPassStats();
-    simple_encode.SetExternalGroupOfPicturesMap(gop_map);
+    simple_encode.SetExternalGroupOfPicturesMap(gop_map.data(), gop_map.size());
     const int num_coding_frames = simple_encode.GetCodingFrameNum();
     EXPECT_EQ(static_cast<size_t>(num_coding_frames),
               quantize_index_list.size());
@@ -427,7 +427,7 @@ TEST_F(SimpleEncodeTest, SetExternalGroupOfPicturesMap) {
   // Last gop group.
   gop_map[14] |= kGopMapFlagStart | kGopMapFlagUseAltRef;
 
-  simple_encode.SetExternalGroupOfPicturesMap(gop_map);
+  simple_encode.SetExternalGroupOfPicturesMap(gop_map.data(), gop_map.size());
 
   std::vector<int> observed_gop_map =
       simple_encode.ObserveExternalGroupOfPicturesMap();
