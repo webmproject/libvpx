@@ -1899,7 +1899,7 @@ static vp9_extracfg get_extra_cfg() {
 
 VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
                                         vpx_rational_t frame_rate,
-                                        int target_bitrate,
+                                        int target_bitrate, int encode_speed,
                                         vpx_enc_pass enc_pass) {
   /* This function will generate the same VP9EncoderConfig used by the
    * vpxenc command given below.
@@ -1910,6 +1910,7 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
    * HEIGHT:  frame_height
    * FPS:     frame_rate
    * BITRATE: target_bitrate
+   * CPU_USED:encode_speed
    *
    * INPUT, OUTPUT, LIMIT will not affect VP9EncoderConfig
    *
@@ -1921,9 +1922,10 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
    * BITRATE=600
    * FPS=30/1
    * LIMIT=150
+   * CPU_USED=0
    * ./vpxenc --limit=$LIMIT --width=$WIDTH --height=$HEIGHT --fps=$FPS
    * --lag-in-frames=25 \
-   *  --codec=vp9 --good --cpu-used=0 --threads=0 --profile=0 \
+   *  --codec=vp9 --good --cpu-used=CPU_USED --threads=0 --profile=0 \
    *  --min-q=0 --max-q=63 --auto-alt-ref=1 --passes=2 --kf-max-dist=150 \
    *  --kf-min-dist=0 --drop-frame=0 --static-thresh=0 --bias-pct=50 \
    *  --minsection-pct=0 --maxsection-pct=150 --arnr-maxframes=7 --psnr \
@@ -1946,6 +1948,7 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
   oxcf.tile_columns = 0;
   oxcf.frame_parallel_decoding_mode = 0;
   oxcf.two_pass_vbrmax_section = 150;
+  oxcf.speed = abs(encode_speed);
   return oxcf;
 }
 
