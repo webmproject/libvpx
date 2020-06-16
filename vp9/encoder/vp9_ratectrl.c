@@ -2378,7 +2378,8 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   if (cm->show_frame) update_buffer_level_svc_preencode(cpi);
 
   if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC && svc->single_layer_svc == 1 &&
-      svc->spatial_layer_id == svc->first_spatial_layer_to_encode) {
+      svc->spatial_layer_id == svc->first_spatial_layer_to_encode &&
+      svc->temporal_layer_id == 0) {
     LAYER_CONTEXT *lc = NULL;
     cpi->resize_pending = vp9_resize_one_pass_cbr(cpi);
     if (cpi->resize_pending) {
