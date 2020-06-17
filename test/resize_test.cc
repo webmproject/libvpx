@@ -672,11 +672,11 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
     ASSERT_EQ(info->h, GetFrameHeight(idx));
     if (info->w != last_w || info->h != last_h) {
       resize_count++;
-      if (resize_count == 1) {
+      if (resize_count <= 2) {
         // Verify that resize down occurs.
         ASSERT_LT(info->w, last_w);
         ASSERT_LT(info->h, last_h);
-      } else if (resize_count == 2) {
+      } else if (resize_count > 2) {
         // Verify that resize up occurs.
         ASSERT_GT(info->w, last_w);
         ASSERT_GT(info->h, last_h);
@@ -687,8 +687,8 @@ TEST_P(ResizeRealtimeTest, TestInternalResizeDownUpChangeBitRate) {
   }
 
 #if CONFIG_VP9_DECODER
-  // Verify that we get 2 resize events in this test.
-  ASSERT_EQ(resize_count, 2) << "Resizing should occur twice.";
+  // Verify that we get 4 resize events in this test.
+  ASSERT_EQ(resize_count, 4) << "Resizing should occur twice.";
   EXPECT_EQ(static_cast<unsigned int>(0), GetMismatchFrames());
 #else
   printf("Warning: VP9 decoder unavailable, unable to check resize count!\n");

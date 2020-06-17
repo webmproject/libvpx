@@ -2385,6 +2385,11 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
             cpi->resize_scale_num * lc->scaling_factor_num;
         lc->scaling_factor_den_resize =
             cpi->resize_scale_den * lc->scaling_factor_den;
+        // Reset rate control for all temporal layers.
+        lc->rc.buffer_level = lc->rc.optimal_buffer_level;
+        lc->rc.bits_off_target = lc->rc.optimal_buffer_level;
+        lc->rc.rate_correction_factors[INTER_FRAME] =
+            rc->rate_correction_factors[INTER_FRAME];
       }
       // Set the size for this current temporal layer.
       lc = &svc->layer_context[svc->spatial_layer_id *
@@ -2657,6 +2662,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   int min_width = (320 * 4) / 3;
   int min_height = (180 * 4) / 3;
   int down_size_on = 1;
+  int force_downsize_rate = 0;
   cpi->resize_scale_num = 1;
   cpi->resize_scale_den = 1;
   // Don't resize on key frame; reset the counters on key frame.
@@ -2677,10 +2683,31 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   }
 #endif
 
+  // Force downsize based on per-frame-bandwidth, for extreme case,
+  // for HD input.
+  if (cpi->resize_state == ORIG && cm->width * cm->height >= 1280 * 720) {
+    if (rc->avg_frame_bandwidth < (int)(300000 / 30)) {
+      resize_action = DOWN_ONEHALF;
+      cpi->resize_state = ONE_HALF;
+      force_downsize_rate = 1;
+    } else if (rc->avg_frame_bandwidth < (int)(400000 / 30)) {
+      resize_action = ONEHALFONLY_RESIZE ? DOWN_ONEHALF : DOWN_THREEFOUR;
+      cpi->resize_state = ONEHALFONLY_RESIZE ? ONE_HALF : THREE_QUARTER;
+      force_downsize_rate = 1;
+    }
+  } else if (cpi->resize_state == THREE_QUARTER &&
+             cm->width * cm->height >= 960 * 540) {
+    if (rc->avg_frame_bandwidth < (int)(300000 / 30)) {
+      resize_action = DOWN_ONEHALF;
+      cpi->resize_state = ONE_HALF;
+      force_downsize_rate = 1;
+    }
+  }
+
   // Resize based on average buffer underflow and QP over some window.
   // Ignore samples close to key frame, since QP is usually high after key.
-  if (cpi->rc.frames_since_key > 2 * cpi->framerate) {
-    const int window = (int)(4 * cpi->framerate);
+  if (!force_downsize_rate && cpi->rc.frames_since_key > cpi->framerate) {
+    const int window = VPXMIN(30, (int)(2 * cpi->framerate));
     cpi->resize_avg_qp += cm->base_qindex;
     if (cpi->rc.buffer_level < (int)(30 * rc->optimal_buffer_level / 100))
       ++cpi->resize_buffer_underflow;
