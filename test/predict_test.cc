@@ -298,14 +298,14 @@ TEST_P(SixtapPredictTest, TestWithPresetData) {
       CompareBuffers(kExpectedDst, kExpectedDstStride, dst_, dst_stride_));
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, SixtapPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_c),
                       make_tuple(8, 8, &vp8_sixtap_predict8x8_c),
                       make_tuple(8, 4, &vp8_sixtap_predict8x4_c),
                       make_tuple(4, 4, &vp8_sixtap_predict4x4_c)));
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, SixtapPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_neon),
                       make_tuple(8, 8, &vp8_sixtap_predict8x8_neon),
@@ -313,19 +313,19 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 4, &vp8_sixtap_predict4x4_neon)));
 #endif
 #if HAVE_MMX
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MMX, SixtapPredictTest,
     ::testing::Values(make_tuple(4, 4, &vp8_sixtap_predict4x4_mmx)));
 #endif
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, SixtapPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_sse2),
                       make_tuple(8, 8, &vp8_sixtap_predict8x8_sse2),
                       make_tuple(8, 4, &vp8_sixtap_predict8x4_sse2)));
 #endif
 #if HAVE_SSSE3
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSSE3, SixtapPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_ssse3),
                       make_tuple(8, 8, &vp8_sixtap_predict8x8_ssse3),
@@ -333,7 +333,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 4, &vp8_sixtap_predict4x4_ssse3)));
 #endif
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, SixtapPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_msa),
                       make_tuple(8, 8, &vp8_sixtap_predict8x8_msa),
@@ -342,7 +342,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif
 
 #if HAVE_MMI
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MMI, SixtapPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_mmi),
                       make_tuple(8, 8, &vp8_sixtap_predict8x8_mmi),
@@ -367,14 +367,14 @@ TEST_P(BilinearPredictTest, DISABLED_Speed) {
   PrintMedian(title);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, BilinearPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_bilinear_predict16x16_c),
                       make_tuple(8, 8, &vp8_bilinear_predict8x8_c),
                       make_tuple(8, 4, &vp8_bilinear_predict8x4_c),
                       make_tuple(4, 4, &vp8_bilinear_predict4x4_c)));
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, BilinearPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_bilinear_predict16x16_neon),
                       make_tuple(8, 8, &vp8_bilinear_predict8x8_neon),
@@ -382,7 +382,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 4, &vp8_bilinear_predict4x4_neon)));
 #endif
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, BilinearPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_bilinear_predict16x16_sse2),
                       make_tuple(8, 8, &vp8_bilinear_predict8x8_sse2),
@@ -390,13 +390,13 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 4, &vp8_bilinear_predict4x4_sse2)));
 #endif
 #if HAVE_SSSE3
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSSE3, BilinearPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_bilinear_predict16x16_ssse3),
                       make_tuple(8, 8, &vp8_bilinear_predict8x8_ssse3)));
 #endif
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, BilinearPredictTest,
     ::testing::Values(make_tuple(16, 16, &vp8_bilinear_predict16x16_msa),
                       make_tuple(8, 8, &vp8_bilinear_predict8x8_msa),

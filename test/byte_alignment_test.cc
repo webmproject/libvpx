@@ -176,8 +176,8 @@ TEST_P(ByteAlignmentTest, TestAlignment) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(Alignments, ByteAlignmentTest,
-                        ::testing::ValuesIn(kBaTestParams));
+INSTANTIATE_TEST_SUITE_P(Alignments, ByteAlignmentTest,
+                         ::testing::ValuesIn(kBaTestParams));
 
 #endif  // CONFIG_WEBM_IO
 

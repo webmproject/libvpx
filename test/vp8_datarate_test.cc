@@ -430,9 +430,9 @@ TEST_P(DatarateTestRealTime, NV12) {
       << " The datarate for the file missed the target!";
 }
 
-VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES,
-                          ::testing::Values(0));
-VP8_INSTANTIATE_TEST_CASE(DatarateTestRealTime,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Values(-6, -12));
+VP8_INSTANTIATE_TEST_SUITE(DatarateTestLarge, ALL_TEST_MODES,
+                           ::testing::Values(0));
+VP8_INSTANTIATE_TEST_SUITE(DatarateTestRealTime,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Values(-6, -12));
 }  // namespace

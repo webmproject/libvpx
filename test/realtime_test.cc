@@ -76,9 +76,9 @@ TEST_P(RealtimeTest, DISABLED_IntegerOverflow) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-VP8_INSTANTIATE_TEST_CASE(RealtimeTest,
-                          ::testing::Values(::libvpx_test::kRealTime));
-VP9_INSTANTIATE_TEST_CASE(RealtimeTest,
-                          ::testing::Values(::libvpx_test::kRealTime));
+VP8_INSTANTIATE_TEST_SUITE(RealtimeTest,
+                           ::testing::Values(::libvpx_test::kRealTime));
+VP9_INSTANTIATE_TEST_SUITE(RealtimeTest,
+                           ::testing::Values(::libvpx_test::kRealTime));
 
 }  // namespace

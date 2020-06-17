@@ -132,12 +132,12 @@ TEST_P(VP9IntraPredTest, IntraPredTests) {
 
 // Instantiate a token test to avoid -Wuninitialized warnings when none of the
 // other tests are enabled.
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, VP9IntraPredTest,
     ::testing::Values(IntraPredParam(&vpx_d45_predictor_4x4_c,
                                      &vpx_d45_predictor_4x4_c, 4, 8)));
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VP9IntraPredTest,
     ::testing::Values(
         IntraPredParam(&vpx_d45_predictor_4x4_sse2, &vpx_d45_predictor_4x4_c, 4,
@@ -201,7 +201,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSSE3, VP9IntraPredTest,
     ::testing::Values(IntraPredParam(&vpx_d45_predictor_16x16_ssse3,
                                      &vpx_d45_predictor_16x16_c, 16, 8),
@@ -232,7 +232,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSSE3
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, VP9IntraPredTest,
     ::testing::Values(
         IntraPredParam(&vpx_d45_predictor_4x4_neon, &vpx_d45_predictor_4x4_c, 4,
@@ -306,7 +306,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_NEON
 
 #if HAVE_DSPR2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     DSPR2, VP9IntraPredTest,
     ::testing::Values(IntraPredParam(&vpx_dc_predictor_4x4_dspr2,
                                      &vpx_dc_predictor_4x4_c, 4, 8),
@@ -327,7 +327,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_DSPR2
 
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, VP9IntraPredTest,
     ::testing::Values(
         IntraPredParam(&vpx_dc_128_predictor_4x4_msa,
@@ -401,7 +401,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif
 
 #if HAVE_VSX
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     VSX, VP9IntraPredTest,
     ::testing::Values(IntraPredParam(&vpx_d45_predictor_16x16_vsx,
                                      &vpx_d45_predictor_16x16_c, 16, 8),
@@ -477,7 +477,7 @@ TEST_P(VP9HighbdIntraPredTest, HighbdIntraPredTests) {
 }
 
 #if HAVE_SSSE3
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSSE3_TO_C_8, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_d45_predictor_4x4_ssse3,
@@ -519,7 +519,7 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_ssse3,
                              &vpx_highbd_d207_predictor_32x32_c, 32, 8)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSSE3_TO_C_10, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_d45_predictor_4x4_ssse3,
@@ -561,7 +561,7 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_ssse3,
                              &vpx_highbd_d207_predictor_32x32_c, 32, 10)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSSE3_TO_C_12, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_d45_predictor_4x4_ssse3,
@@ -605,7 +605,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSSE3
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2_TO_C_8, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_dc_128_predictor_4x4_sse2,
@@ -675,7 +675,7 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_v_predictor_32x32_sse2,
                              &vpx_highbd_v_predictor_32x32_c, 32, 8)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2_TO_C_10, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_dc_128_predictor_4x4_sse2,
@@ -745,7 +745,7 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_v_predictor_32x32_sse2,
                              &vpx_highbd_v_predictor_32x32_c, 32, 10)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2_TO_C_12, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_dc_128_predictor_4x4_sse2,
@@ -817,7 +817,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON_TO_C_8, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_d45_predictor_4x4_neon,
@@ -893,7 +893,7 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_v_predictor_32x32_neon,
                              &vpx_highbd_v_predictor_32x32_c, 32, 8)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON_TO_C_10, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_d45_predictor_4x4_neon,
@@ -969,7 +969,7 @@ INSTANTIATE_TEST_CASE_P(
         HighbdIntraPredParam(&vpx_highbd_v_predictor_32x32_neon,
                              &vpx_highbd_v_predictor_32x32_c, 32, 10)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON_TO_C_12, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_d45_predictor_4x4_neon,

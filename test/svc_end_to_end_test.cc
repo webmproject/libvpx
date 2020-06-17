@@ -470,9 +470,9 @@ TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc1SL3TLSyncFrameIntraOnlyQVGA) {
 #endif
 }
 
-VP9_INSTANTIATE_TEST_CASE(SyncFrameOnePassCbrSvc, ::testing::Range(0, 3));
+VP9_INSTANTIATE_TEST_SUITE(SyncFrameOnePassCbrSvc, ::testing::Range(0, 3));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     VP9, ScalePartitionOnePassCbrSvc,
     ::testing::Values(
         static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)));

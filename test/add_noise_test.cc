@@ -129,20 +129,20 @@ TEST_P(AddNoiseTest, CheckCvsAssembly) {
 
 using std::make_tuple;
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, AddNoiseTest,
     ::testing::Values(make_tuple(3.25, vpx_plane_add_noise_c),
                       make_tuple(4.4, vpx_plane_add_noise_c)));
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, AddNoiseTest,
     ::testing::Values(make_tuple(3.25, vpx_plane_add_noise_sse2),
                       make_tuple(4.4, vpx_plane_add_noise_sse2)));
 #endif
 
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, AddNoiseTest,
     ::testing::Values(make_tuple(3.25, vpx_plane_add_noise_msa),
                       make_tuple(4.4, vpx_plane_add_noise_msa)));
