@@ -509,7 +509,7 @@ TEST_F(ExternalFrameBufferNonRefTest, ReleaseNonRefFrameBuffer) {
 }
 #endif  // CONFIG_WEBM_IO
 
-VP9_INSTANTIATE_TEST_CASE(
+VP9_INSTANTIATE_TEST_SUITE(
     ExternalFrameBufferMD5Test,
     ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
                         libvpx_test::kVP9TestVectors +

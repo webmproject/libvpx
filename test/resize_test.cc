@@ -793,14 +793,14 @@ TEST_P(ResizeCspTest, TestResizeCspWorks) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-VP8_INSTANTIATE_TEST_CASE(ResizeTest, ONE_PASS_TEST_MODES);
-VP9_INSTANTIATE_TEST_CASE(ResizeTest,
-                          ::testing::Values(::libvpx_test::kRealTime));
-VP9_INSTANTIATE_TEST_CASE(ResizeInternalTest,
-                          ::testing::Values(::libvpx_test::kOnePassBest));
-VP9_INSTANTIATE_TEST_CASE(ResizeRealtimeTest,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Range(5, 9));
-VP9_INSTANTIATE_TEST_CASE(ResizeCspTest,
-                          ::testing::Values(::libvpx_test::kRealTime));
+VP8_INSTANTIATE_TEST_SUITE(ResizeTest, ONE_PASS_TEST_MODES);
+VP9_INSTANTIATE_TEST_SUITE(ResizeTest,
+                           ::testing::Values(::libvpx_test::kRealTime));
+VP9_INSTANTIATE_TEST_SUITE(ResizeInternalTest,
+                           ::testing::Values(::libvpx_test::kOnePassBest));
+VP9_INSTANTIATE_TEST_SUITE(ResizeRealtimeTest,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Range(5, 9));
+VP9_INSTANTIATE_TEST_SUITE(ResizeCspTest,
+                           ::testing::Values(::libvpx_test::kRealTime));
 }  // namespace

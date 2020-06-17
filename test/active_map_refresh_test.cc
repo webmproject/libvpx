@@ -122,7 +122,7 @@ TEST_P(ActiveMapRefreshTest, Test) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-VP9_INSTANTIATE_TEST_CASE(ActiveMapRefreshTest,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::Range(5, 6));
+VP9_INSTANTIATE_TEST_SUITE(ActiveMapRefreshTest,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Range(5, 6));
 }  // namespace

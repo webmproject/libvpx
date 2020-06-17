@@ -107,8 +107,8 @@ TEST_P(DecodePerfTest, PerfTest) {
   printf("}\n");
 }
 
-INSTANTIATE_TEST_CASE_P(VP9, DecodePerfTest,
-                        ::testing::ValuesIn(kVP9DecodePerfVectors));
+INSTANTIATE_TEST_SUITE_P(VP9, DecodePerfTest,
+                         ::testing::ValuesIn(kVP9DecodePerfVectors));
 
 class VP9NewEncodeDecodePerfTest
     : public ::libvpx_test::EncoderTest,
@@ -258,6 +258,6 @@ TEST_P(VP9NewEncodeDecodePerfTest, PerfTest) {
   printf("}\n");
 }
 
-VP9_INSTANTIATE_TEST_CASE(VP9NewEncodeDecodePerfTest,
-                          ::testing::Values(::libvpx_test::kTwoPassGood));
+VP9_INSTANTIATE_TEST_SUITE(VP9NewEncodeDecodePerfTest,
+                           ::testing::Values(::libvpx_test::kTwoPassGood));
 }  // namespace

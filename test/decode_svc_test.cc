@@ -118,7 +118,7 @@ TEST_P(DecodeSvcTest, DecodeSvcTestUpToSpatialLayer10) {
   ASSERT_EQ(total_frames_, kNumFrames);
 }
 
-VP9_INSTANTIATE_TEST_CASE(
+VP9_INSTANTIATE_TEST_SUITE(
     DecodeSvcTest, ::testing::ValuesIn(libvpx_test::kVP9TestVectorsSvc,
                                        libvpx_test::kVP9TestVectorsSvc +
                                            libvpx_test::kNumVP9TestVectorsSvc));

@@ -147,7 +147,7 @@ TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
 
-VP9_INSTANTIATE_TEST_CASE(VpxEncoderParmsGetToDecoder,
-                          ::testing::ValuesIn(kVP9EncodeParameterSet),
-                          ::testing::ValuesIn(kVP9EncodePerfTestVectors));
+VP9_INSTANTIATE_TEST_SUITE(VpxEncoderParmsGetToDecoder,
+                           ::testing::ValuesIn(kVP9EncodeParameterSet),
+                           ::testing::ValuesIn(kVP9EncodePerfTestVectors));
 }  // namespace

@@ -215,7 +215,8 @@ using std::make_tuple;
 const BlockinessParam c_vp9_tests[] = { make_tuple(320, 240),
                                         make_tuple(318, 242),
                                         make_tuple(318, 238) };
-INSTANTIATE_TEST_CASE_P(C, BlockinessVP9Test, ::testing::ValuesIn(c_vp9_tests));
+INSTANTIATE_TEST_SUITE_P(C, BlockinessVP9Test,
+                         ::testing::ValuesIn(c_vp9_tests));
 #endif
 
 }  // namespace

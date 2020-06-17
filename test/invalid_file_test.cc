@@ -129,8 +129,8 @@ const DecodeParam kVP8InvalidFileTests[] = {
   { 1, "invalid-vp80-00-comprehensive-s17661_r01-05_b6-.ivf" },
 };
 
-VP8_INSTANTIATE_TEST_CASE(InvalidFileTest,
-                          ::testing::ValuesIn(kVP8InvalidFileTests));
+VP8_INSTANTIATE_TEST_SUITE(InvalidFileTest,
+                           ::testing::ValuesIn(kVP8InvalidFileTests));
 #endif  // CONFIG_VP8_DECODER
 
 #if CONFIG_VP9_DECODER
@@ -163,8 +163,8 @@ const DecodeParam kVP9InvalidFileTests[] = {
   { 1, "invalid-crbug-667044.webm" },
 };
 
-VP9_INSTANTIATE_TEST_CASE(InvalidFileTest,
-                          ::testing::ValuesIn(kVP9InvalidFileTests));
+VP9_INSTANTIATE_TEST_SUITE(InvalidFileTest,
+                           ::testing::ValuesIn(kVP9InvalidFileTests));
 #endif  // CONFIG_VP9_DECODER
 
 // This class will include test vectors that are expected to fail
@@ -184,8 +184,8 @@ const DecodeParam kVP8InvalidPeekTests[] = {
   { 1, "invalid-vp80-00-comprehensive-018.ivf.2kf_0x6.ivf" },
 };
 
-VP8_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,
-                          ::testing::ValuesIn(kVP8InvalidPeekTests));
+VP8_INSTANTIATE_TEST_SUITE(InvalidFileInvalidPeekTest,
+                           ::testing::ValuesIn(kVP8InvalidPeekTests));
 #endif  // CONFIG_VP8_DECODER
 
 #if CONFIG_VP9_DECODER
@@ -193,8 +193,9 @@ const DecodeParam kVP9InvalidFileInvalidPeekTests[] = {
   { 1, "invalid-vp90-01-v3.webm" },
 };
 
-VP9_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,
-                          ::testing::ValuesIn(kVP9InvalidFileInvalidPeekTests));
+VP9_INSTANTIATE_TEST_SUITE(
+    InvalidFileInvalidPeekTest,
+    ::testing::ValuesIn(kVP9InvalidFileInvalidPeekTests));
 
 const DecodeParam kMultiThreadedVP9InvalidFileTests[] = {
   { 4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm" },
@@ -210,7 +211,7 @@ const DecodeParam kMultiThreadedVP9InvalidFileTests[] = {
   { 4, "invalid-crbug-1562.ivf" },
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     VP9MultiThreaded, InvalidFileTest,
     ::testing::Combine(
         ::testing::Values(

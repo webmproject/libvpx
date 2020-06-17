@@ -155,25 +155,26 @@ TEST_P(IDCTTest, TestWithData) {
   ASSERT_TRUE(output->CheckPadding());
 }
 
-INSTANTIATE_TEST_CASE_P(C, IDCTTest, ::testing::Values(vp8_short_idct4x4llm_c));
+INSTANTIATE_TEST_SUITE_P(C, IDCTTest,
+                         ::testing::Values(vp8_short_idct4x4llm_c));
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(NEON, IDCTTest,
-                        ::testing::Values(vp8_short_idct4x4llm_neon));
+INSTANTIATE_TEST_SUITE_P(NEON, IDCTTest,
+                         ::testing::Values(vp8_short_idct4x4llm_neon));
 #endif  // HAVE_NEON
 
 #if HAVE_MMX
-INSTANTIATE_TEST_CASE_P(MMX, IDCTTest,
-                        ::testing::Values(vp8_short_idct4x4llm_mmx));
+INSTANTIATE_TEST_SUITE_P(MMX, IDCTTest,
+                         ::testing::Values(vp8_short_idct4x4llm_mmx));
 #endif  // HAVE_MMX
 
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(MSA, IDCTTest,
-                        ::testing::Values(vp8_short_idct4x4llm_msa));
+INSTANTIATE_TEST_SUITE_P(MSA, IDCTTest,
+                         ::testing::Values(vp8_short_idct4x4llm_msa));
 #endif  // HAVE_MSA
 
 #if HAVE_MMI
-INSTANTIATE_TEST_CASE_P(MMI, IDCTTest,
-                        ::testing::Values(vp8_short_idct4x4llm_mmi));
+INSTANTIATE_TEST_SUITE_P(MMI, IDCTTest,
+                         ::testing::Values(vp8_short_idct4x4llm_mmi));
 #endif  // HAVE_MMI
 }  // namespace

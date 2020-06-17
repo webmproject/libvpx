@@ -92,8 +92,8 @@ TEST_P(MotionVectorTestLarge, OverallTest) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
 
-VP9_INSTANTIATE_TEST_CASE(MotionVectorTestLarge,
-                          ::testing::ValuesIn(kEncodingModeVectors),
-                          ::testing::ValuesIn(kCpuUsedVectors),
-                          ::testing::ValuesIn(kMVTestModes));
+VP9_INSTANTIATE_TEST_SUITE(MotionVectorTestLarge,
+                           ::testing::ValuesIn(kEncodingModeVectors),
+                           ::testing::ValuesIn(kCpuUsedVectors),
+                           ::testing::ValuesIn(kMVTestModes));
 }  // namespace

@@ -126,6 +126,6 @@ TEST_P(CQTest, LinearPSNRIsHigherForCQLevel) {
   EXPECT_GE(cq_psnr_lin, vbr_psnr_lin);
 }
 
-VP8_INSTANTIATE_TEST_CASE(CQTest, ::testing::Range(kCQLevelMin, kCQLevelMax,
-                                                   kCQLevelStep));
+VP8_INSTANTIATE_TEST_SUITE(CQTest, ::testing::Range(kCQLevelMin, kCQLevelMax,
+                                                    kCQLevelStep));
 }  // namespace

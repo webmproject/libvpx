@@ -557,38 +557,38 @@ TEST_P(BlockErrorTestFP, DISABLED_Speed) {
 
 using std::make_tuple;
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, AverageTest,
     ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_avg_8x8_c),
                       make_tuple(16, 16, 1, 4, &vpx_avg_4x4_c)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, AverageTestHBD,
     ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_highbd_avg_8x8_c),
                       make_tuple(16, 16, 1, 4, &vpx_highbd_avg_4x4_c)));
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, AverageTestHBD,
     ::testing::Values(make_tuple(16, 16, 1, 8, &vpx_highbd_avg_8x8_sse2),
                       make_tuple(16, 16, 1, 4, &vpx_highbd_avg_4x4_sse2)));
 #endif  // HAVE_SSE2
 
-INSTANTIATE_TEST_CASE_P(C, SatdHighbdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_c),
-                                          make_tuple(64, &vpx_satd_c),
-                                          make_tuple(256, &vpx_satd_c),
-                                          make_tuple(1024, &vpx_satd_c)));
+INSTANTIATE_TEST_SUITE_P(C, SatdHighbdTest,
+                         ::testing::Values(make_tuple(16, &vpx_satd_c),
+                                           make_tuple(64, &vpx_satd_c),
+                                           make_tuple(256, &vpx_satd_c),
+                                           make_tuple(1024, &vpx_satd_c)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-INSTANTIATE_TEST_CASE_P(C, SatdLowbdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_c),
-                                          make_tuple(64, &vpx_satd_c),
-                                          make_tuple(256, &vpx_satd_c),
-                                          make_tuple(1024, &vpx_satd_c)));
+INSTANTIATE_TEST_SUITE_P(C, SatdLowbdTest,
+                         ::testing::Values(make_tuple(16, &vpx_satd_c),
+                                           make_tuple(64, &vpx_satd_c),
+                                           make_tuple(256, &vpx_satd_c),
+                                           make_tuple(1024, &vpx_satd_c)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_c),
                       make_tuple(64, &vp9_block_error_fp_c),
@@ -596,7 +596,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(1024, &vp9_block_error_fp_c)));
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, AverageTest,
     ::testing::Values(make_tuple(16, 16, 0, 8, &vpx_avg_8x8_sse2),
                       make_tuple(16, 16, 5, 8, &vpx_avg_8x8_sse2),
@@ -605,27 +605,27 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(16, 16, 5, 4, &vpx_avg_4x4_sse2),
                       make_tuple(32, 32, 15, 4, &vpx_avg_4x4_sse2)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, IntProRowTest,
     ::testing::Values(make_tuple(16, &vpx_int_pro_row_sse2, &vpx_int_pro_row_c),
                       make_tuple(32, &vpx_int_pro_row_sse2, &vpx_int_pro_row_c),
                       make_tuple(64, &vpx_int_pro_row_sse2,
                                  &vpx_int_pro_row_c)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, IntProColTest,
     ::testing::Values(make_tuple(16, &vpx_int_pro_col_sse2, &vpx_int_pro_col_c),
                       make_tuple(32, &vpx_int_pro_col_sse2, &vpx_int_pro_col_c),
                       make_tuple(64, &vpx_int_pro_col_sse2,
                                  &vpx_int_pro_col_c)));
 
-INSTANTIATE_TEST_CASE_P(SSE2, SatdLowbdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_sse2),
-                                          make_tuple(64, &vpx_satd_sse2),
-                                          make_tuple(256, &vpx_satd_sse2),
-                                          make_tuple(1024, &vpx_satd_sse2)));
+INSTANTIATE_TEST_SUITE_P(SSE2, SatdLowbdTest,
+                         ::testing::Values(make_tuple(16, &vpx_satd_sse2),
+                                           make_tuple(64, &vpx_satd_sse2),
+                                           make_tuple(256, &vpx_satd_sse2),
+                                           make_tuple(1024, &vpx_satd_sse2)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_sse2),
                       make_tuple(64, &vp9_block_error_fp_sse2),
@@ -634,14 +634,14 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_AVX2
-INSTANTIATE_TEST_CASE_P(AVX2, SatdLowbdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_avx2),
-                                          make_tuple(64, &vpx_satd_avx2),
-                                          make_tuple(256, &vpx_satd_avx2),
-                                          make_tuple(1024, &vpx_satd_avx2)));
+INSTANTIATE_TEST_SUITE_P(AVX2, SatdLowbdTest,
+                         ::testing::Values(make_tuple(16, &vpx_satd_avx2),
+                                           make_tuple(64, &vpx_satd_avx2),
+                                           make_tuple(256, &vpx_satd_avx2),
+                                           make_tuple(1024, &vpx_satd_avx2)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     AVX2, SatdHighbdTest,
     ::testing::Values(make_tuple(16, &vpx_highbd_satd_avx2),
                       make_tuple(64, &vpx_highbd_satd_avx2),
@@ -649,7 +649,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(1024, &vpx_highbd_satd_avx2)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     AVX2, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_avx2),
                       make_tuple(64, &vp9_block_error_fp_avx2),
@@ -658,7 +658,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, AverageTest,
     ::testing::Values(make_tuple(16, 16, 0, 8, &vpx_avg_8x8_neon),
                       make_tuple(16, 16, 5, 8, &vpx_avg_8x8_neon),
@@ -667,30 +667,30 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(16, 16, 5, 4, &vpx_avg_4x4_neon),
                       make_tuple(32, 32, 15, 4, &vpx_avg_4x4_neon)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, IntProRowTest,
     ::testing::Values(make_tuple(16, &vpx_int_pro_row_neon, &vpx_int_pro_row_c),
                       make_tuple(32, &vpx_int_pro_row_neon, &vpx_int_pro_row_c),
                       make_tuple(64, &vpx_int_pro_row_neon,
                                  &vpx_int_pro_row_c)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, IntProColTest,
     ::testing::Values(make_tuple(16, &vpx_int_pro_col_neon, &vpx_int_pro_col_c),
                       make_tuple(32, &vpx_int_pro_col_neon, &vpx_int_pro_col_c),
                       make_tuple(64, &vpx_int_pro_col_neon,
                                  &vpx_int_pro_col_c)));
 
-INSTANTIATE_TEST_CASE_P(NEON, SatdLowbdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_neon),
-                                          make_tuple(64, &vpx_satd_neon),
-                                          make_tuple(256, &vpx_satd_neon),
-                                          make_tuple(1024, &vpx_satd_neon)));
+INSTANTIATE_TEST_SUITE_P(NEON, SatdLowbdTest,
+                         ::testing::Values(make_tuple(16, &vpx_satd_neon),
+                                           make_tuple(64, &vpx_satd_neon),
+                                           make_tuple(256, &vpx_satd_neon),
+                                           make_tuple(1024, &vpx_satd_neon)));
 
 // TODO(jianj): Remove the highbitdepth flag once the SIMD functions are
 // in place.
 #if !CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_neon),
                       make_tuple(64, &vp9_block_error_fp_neon),
@@ -700,7 +700,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, AverageTest,
     ::testing::Values(make_tuple(16, 16, 0, 8, &vpx_avg_8x8_msa),
                       make_tuple(16, 16, 5, 8, &vpx_avg_8x8_msa),
@@ -709,14 +709,14 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(16, 16, 5, 4, &vpx_avg_4x4_msa),
                       make_tuple(32, 32, 15, 4, &vpx_avg_4x4_msa)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, IntProRowTest,
     ::testing::Values(make_tuple(16, &vpx_int_pro_row_msa, &vpx_int_pro_row_c),
                       make_tuple(32, &vpx_int_pro_row_msa, &vpx_int_pro_row_c),
                       make_tuple(64, &vpx_int_pro_row_msa,
                                  &vpx_int_pro_row_c)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, IntProColTest,
     ::testing::Values(make_tuple(16, &vpx_int_pro_col_msa, &vpx_int_pro_col_c),
                       make_tuple(32, &vpx_int_pro_col_msa, &vpx_int_pro_col_c),
@@ -726,11 +726,11 @@ INSTANTIATE_TEST_CASE_P(
 // TODO(jingning): Remove the highbitdepth flag once the SIMD functions are
 // in place.
 #if !CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(MSA, SatdLowbdTest,
-                        ::testing::Values(make_tuple(16, &vpx_satd_msa),
-                                          make_tuple(64, &vpx_satd_msa),
-                                          make_tuple(256, &vpx_satd_msa),
-                                          make_tuple(1024, &vpx_satd_msa)));
+INSTANTIATE_TEST_SUITE_P(MSA, SatdLowbdTest,
+                         ::testing::Values(make_tuple(16, &vpx_satd_msa),
+                                           make_tuple(64, &vpx_satd_msa),
+                                           make_tuple(256, &vpx_satd_msa),
+                                           make_tuple(1024, &vpx_satd_msa)));
 #endif  // !CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_MSA
 

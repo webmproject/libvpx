@@ -1276,7 +1276,8 @@ const ConvolveFunctions convolve8_c(
     vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 const ConvolveParam kArrayConvolve_c[] = { ALL_SIZES(convolve8_c) };
 #endif
-INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::ValuesIn(kArrayConvolve_c));
+INSTANTIATE_TEST_SUITE_P(C, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve_c));
 
 #if HAVE_SSE2 && VPX_ARCH_X86_64
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1317,8 +1318,8 @@ const ConvolveFunctions convolve8_sse2(
 
 const ConvolveParam kArrayConvolve_sse2[] = { ALL_SIZES(convolve8_sse2) };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve_sse2));
+INSTANTIATE_TEST_SUITE_P(SSE2, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve_sse2));
 #endif
 
 #if HAVE_SSSE3
@@ -1330,8 +1331,8 @@ const ConvolveFunctions convolve8_ssse3(
     vpx_scaled_avg_vert_c, vpx_scaled_2d_ssse3, vpx_scaled_avg_2d_c, 0);
 
 const ConvolveParam kArrayConvolve8_ssse3[] = { ALL_SIZES(convolve8_ssse3) };
-INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve8_ssse3));
+INSTANTIATE_TEST_SUITE_P(SSSE3, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve8_ssse3));
 #endif
 
 #if HAVE_AVX2
@@ -1362,8 +1363,8 @@ const ConvolveFunctions convolve12_avx2(
 const ConvolveParam kArrayConvolve8_avx2[] = { ALL_SIZES(convolve8_avx2),
                                                ALL_SIZES(convolve10_avx2),
                                                ALL_SIZES(convolve12_avx2) };
-INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve8_avx2));
+INSTANTIATE_TEST_SUITE_P(AVX2, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve8_avx2));
 #else   // !CONFIG_VP9_HIGHBITDEPTH
 const ConvolveFunctions convolve8_avx2(
     vpx_convolve_copy_c, vpx_convolve_avg_c, vpx_convolve8_horiz_avx2,
@@ -1372,8 +1373,8 @@ const ConvolveFunctions convolve8_avx2(
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
     vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 const ConvolveParam kArrayConvolve8_avx2[] = { ALL_SIZES(convolve8_avx2) };
-INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve8_avx2));
+INSTANTIATE_TEST_SUITE_P(AVX2, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve8_avx2));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_AVX2
 
@@ -1416,8 +1417,8 @@ const ConvolveFunctions convolve8_neon(
 
 const ConvolveParam kArrayConvolve_neon[] = { ALL_SIZES(convolve8_neon) };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(NEON, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve_neon));
+INSTANTIATE_TEST_SUITE_P(NEON, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve_neon));
 #endif  // HAVE_NEON
 
 #if HAVE_DSPR2
@@ -1429,8 +1430,8 @@ const ConvolveFunctions convolve8_dspr2(
     vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 
 const ConvolveParam kArrayConvolve8_dspr2[] = { ALL_SIZES(convolve8_dspr2) };
-INSTANTIATE_TEST_CASE_P(DSPR2, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve8_dspr2));
+INSTANTIATE_TEST_SUITE_P(DSPR2, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve8_dspr2));
 #endif  // HAVE_DSPR2
 
 #if HAVE_MSA
@@ -1442,8 +1443,8 @@ const ConvolveFunctions convolve8_msa(
     vpx_scaled_avg_vert_c, vpx_scaled_2d_msa, vpx_scaled_avg_2d_c, 0);
 
 const ConvolveParam kArrayConvolve8_msa[] = { ALL_SIZES(convolve8_msa) };
-INSTANTIATE_TEST_CASE_P(MSA, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve8_msa));
+INSTANTIATE_TEST_SUITE_P(MSA, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve8_msa));
 #endif  // HAVE_MSA
 
 #if HAVE_VSX
@@ -1454,8 +1455,8 @@ const ConvolveFunctions convolve8_vsx(
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
     vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 const ConvolveParam kArrayConvolve_vsx[] = { ALL_SIZES(convolve8_vsx) };
-INSTANTIATE_TEST_CASE_P(VSX, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve_vsx));
+INSTANTIATE_TEST_SUITE_P(VSX, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve_vsx));
 #endif  // HAVE_VSX
 
 #if HAVE_MMI
@@ -1466,7 +1467,7 @@ const ConvolveFunctions convolve8_mmi(
     vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c, vpx_scaled_vert_c,
     vpx_scaled_avg_vert_c, vpx_scaled_2d_c, vpx_scaled_avg_2d_c, 0);
 const ConvolveParam kArrayConvolve_mmi[] = { ALL_SIZES(convolve8_mmi) };
-INSTANTIATE_TEST_CASE_P(MMI, ConvolveTest,
-                        ::testing::ValuesIn(kArrayConvolve_mmi));
+INSTANTIATE_TEST_SUITE_P(MMI, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve_mmi));
 #endif  // HAVE_MMI
 }  // namespace
