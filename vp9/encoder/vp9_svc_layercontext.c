@@ -864,8 +864,9 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
     }
   }
 
-  // Reset the drop flags for all spatial layers, on the base layer.
-  if (svc->spatial_layer_id == 0) {
+  // Reset the drop flags for all spatial layers, on the
+  // first_spatial_layer_to_encode.
+  if (svc->spatial_layer_id == svc->first_spatial_layer_to_encode) {
     vp9_zero(svc->drop_spatial_layer);
     // TODO(jianj/marpan): Investigate why setting svc->lst/gld/alt_fb_idx
     // causes an issue with frame dropping and temporal layers, when the frame
