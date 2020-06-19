@@ -473,7 +473,7 @@ static const FuncInfo dct_c_func_info[] = {
     1 }
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, TransDCT,
     ::testing::Combine(
         ::testing::Range(0, static_cast<int>(sizeof(dct_c_func_info) /
@@ -505,7 +505,7 @@ static const FuncInfo dct_sse2_func_info[] = {
     &idct_wrapper<vpx_idct32x32_1024_add_sse2>, 32, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, TransDCT,
     ::testing::Combine(
         ::testing::Range(0, static_cast<int>(sizeof(dct_sse2_func_info) /
@@ -521,9 +521,9 @@ static const FuncInfo dct_ssse3_func_info = {
 };
 
 // TODO(johannkoenig): high bit depth fdct8x8.
-INSTANTIATE_TEST_CASE_P(SSSE3, TransDCT,
-                        ::testing::Values(make_tuple(0, &dct_ssse3_func_info, 0,
-                                                     VPX_BITS_8)));
+INSTANTIATE_TEST_SUITE_P(SSSE3, TransDCT,
+                         ::testing::Values(make_tuple(0, &dct_ssse3_func_info,
+                                                      0, VPX_BITS_8)));
 #endif  // HAVE_SSSE3 && !CONFIG_VP9_HIGHBITDEPTH && VPX_ARCH_X86_64
 
 #if HAVE_AVX2 && !CONFIG_VP9_HIGHBITDEPTH
@@ -533,9 +533,9 @@ static const FuncInfo dct_avx2_func_info = {
 };
 
 // TODO(johannkoenig): high bit depth fdct32x32.
-INSTANTIATE_TEST_CASE_P(AVX2, TransDCT,
-                        ::testing::Values(make_tuple(0, &dct_avx2_func_info, 0,
-                                                     VPX_BITS_8)));
+INSTANTIATE_TEST_SUITE_P(AVX2, TransDCT,
+                         ::testing::Values(make_tuple(0, &dct_avx2_func_info, 0,
+                                                      VPX_BITS_8)));
 #endif  // HAVE_AVX2 && !CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_NEON
@@ -550,7 +550,7 @@ static const FuncInfo dct_neon_func_info[4] = {
     &idct_wrapper<vpx_idct32x32_1024_add_neon>, 32, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, TransDCT,
     ::testing::Combine(::testing::Range(0, 4),
                        ::testing::Values(dct_neon_func_info),
@@ -569,11 +569,11 @@ static const FuncInfo dct_msa_func_info[4] = {
     32, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(MSA, TransDCT,
-                        ::testing::Combine(::testing::Range(0, 4),
-                                           ::testing::Values(dct_msa_func_info),
-                                           ::testing::Values(0),
-                                           ::testing::Values(VPX_BITS_8)));
+INSTANTIATE_TEST_SUITE_P(
+    MSA, TransDCT,
+    ::testing::Combine(::testing::Range(0, 4),
+                       ::testing::Values(dct_msa_func_info),
+                       ::testing::Values(0), ::testing::Values(VPX_BITS_8)));
 #endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
@@ -581,9 +581,9 @@ static const FuncInfo dct_vsx_func_info = {
   &fdct_wrapper<vpx_fdct4x4_c>, &idct_wrapper<vpx_idct4x4_16_add_vsx>, 4, 1
 };
 
-INSTANTIATE_TEST_CASE_P(VSX, TransDCT,
-                        ::testing::Values(make_tuple(0, &dct_vsx_func_info, 0,
-                                                     VPX_BITS_8)));
+INSTANTIATE_TEST_SUITE_P(VSX, TransDCT,
+                         ::testing::Values(make_tuple(0, &dct_vsx_func_info, 0,
+                                                      VPX_BITS_8)));
 #endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH &&
 
 #endif  // !CONFIG_EMULATE_HARDWARE
@@ -619,7 +619,7 @@ static const FuncInfo ht_c_func_info[] = {
   { &vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_c>, 16, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, TransHT,
     ::testing::Combine(
         ::testing::Range(0, static_cast<int>(sizeof(ht_c_func_info) /
@@ -645,7 +645,7 @@ static const FuncInfo ht_neon_func_info[] = {
   { &vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_neon>, 16, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, TransHT,
     ::testing::Combine(
         ::testing::Range(0, static_cast<int>(sizeof(ht_neon_func_info) /
@@ -662,11 +662,11 @@ static const FuncInfo ht_sse2_func_info[3] = {
   { &vp9_fht16x16_sse2, &iht_wrapper<vp9_iht16x16_256_add_sse2>, 16, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(SSE2, TransHT,
-                        ::testing::Combine(::testing::Range(0, 3),
-                                           ::testing::Values(ht_sse2_func_info),
-                                           ::testing::Range(0, 4),
-                                           ::testing::Values(VPX_BITS_8)));
+INSTANTIATE_TEST_SUITE_P(
+    SSE2, TransHT,
+    ::testing::Combine(::testing::Range(0, 3),
+                       ::testing::Values(ht_sse2_func_info),
+                       ::testing::Range(0, 4), ::testing::Values(VPX_BITS_8)));
 #endif  // HAVE_SSE2
 
 #if HAVE_SSE4_1 && CONFIG_VP9_HIGHBITDEPTH
@@ -679,7 +679,7 @@ static const FuncInfo ht_sse4_1_func_info[3] = {
     &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_sse4_1>, 16, 2 }
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE4_1, TransHT,
     ::testing::Combine(::testing::Range(0, 3),
                        ::testing::Values(ht_sse4_1_func_info),
@@ -695,11 +695,11 @@ static const FuncInfo ht_vsx_func_info[3] = {
   { &vp9_fht16x16_c, &iht_wrapper<vp9_iht16x16_256_add_vsx>, 16, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(VSX, TransHT,
-                        ::testing::Combine(::testing::Range(0, 3),
-                                           ::testing::Values(ht_vsx_func_info),
-                                           ::testing::Range(0, 4),
-                                           ::testing::Values(VPX_BITS_8)));
+INSTANTIATE_TEST_SUITE_P(VSX, TransHT,
+                         ::testing::Combine(::testing::Range(0, 3),
+                                            ::testing::Values(ht_vsx_func_info),
+                                            ::testing::Range(0, 4),
+                                            ::testing::Values(VPX_BITS_8)));
 #endif  // HAVE_VSX
 #endif  // !CONFIG_EMULATE_HARDWARE
 
@@ -726,7 +726,7 @@ static const FuncInfo wht_c_func_info[] = {
   { &fdct_wrapper<vp9_fwht4x4_c>, &idct_wrapper<vpx_iwht4x4_16_add_c>, 4, 1 }
 };
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, TransWHT,
     ::testing::Combine(
         ::testing::Range(0, static_cast<int>(sizeof(wht_c_func_info) /
@@ -739,9 +739,9 @@ static const FuncInfo wht_sse2_func_info = {
   &fdct_wrapper<vp9_fwht4x4_sse2>, &idct_wrapper<vpx_iwht4x4_16_add_sse2>, 4, 1
 };
 
-INSTANTIATE_TEST_CASE_P(SSE2, TransWHT,
-                        ::testing::Values(make_tuple(0, &wht_sse2_func_info, 0,
-                                                     VPX_BITS_8)));
+INSTANTIATE_TEST_SUITE_P(SSE2, TransWHT,
+                         ::testing::Values(make_tuple(0, &wht_sse2_func_info, 0,
+                                                      VPX_BITS_8)));
 #endif  // HAVE_SSE2 && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_VSX && !CONFIG_EMULATE_HARDWARE && !CONFIG_VP9_HIGHBITDEPTH
@@ -749,8 +749,8 @@ static const FuncInfo wht_vsx_func_info = {
   &fdct_wrapper<vp9_fwht4x4_c>, &idct_wrapper<vpx_iwht4x4_16_add_vsx>, 4, 1
 };
 
-INSTANTIATE_TEST_CASE_P(VSX, TransWHT,
-                        ::testing::Values(make_tuple(0, &wht_vsx_func_info, 0,
-                                                     VPX_BITS_8)));
+INSTANTIATE_TEST_SUITE_P(VSX, TransWHT,
+                         ::testing::Values(make_tuple(0, &wht_vsx_func_info, 0,
+                                                      VPX_BITS_8)));
 #endif  // HAVE_VSX && !CONFIG_EMULATE_HARDWARE
 }  // namespace

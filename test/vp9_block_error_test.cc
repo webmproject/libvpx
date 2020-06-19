@@ -185,12 +185,12 @@ const BlockErrorParam sse2_block_error_tests[] = {
              &BlockError8BitWrapper<vp9_block_error_c>, VPX_BITS_8)
 };
 
-INSTANTIATE_TEST_CASE_P(SSE2, BlockErrorTest,
-                        ::testing::ValuesIn(sse2_block_error_tests));
+INSTANTIATE_TEST_SUITE_P(SSE2, BlockErrorTest,
+                         ::testing::ValuesIn(sse2_block_error_tests));
 #endif  // HAVE_SSE2
 
 #if HAVE_AVX2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     AVX2, BlockErrorTest,
     ::testing::Values(make_tuple(&BlockError8BitWrapper<vp9_block_error_avx2>,
                                  &BlockError8BitWrapper<vp9_block_error_c>,

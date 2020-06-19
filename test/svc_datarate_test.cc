@@ -1529,29 +1529,29 @@ TEST_P(DatarateOnePassCbrSvcPostencodeDrop, OnePassCbrSvc2QL1TLScreen) {
 #endif
 }
 
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcSingleBR,
-                          ::testing::Range(5, 10));
+VP9_INSTANTIATE_TEST_SUITE(DatarateOnePassCbrSvcSingleBR,
+                           ::testing::Range(5, 10));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcPostencodeDrop,
-                          ::testing::Range(5, 6));
+VP9_INSTANTIATE_TEST_SUITE(DatarateOnePassCbrSvcPostencodeDrop,
+                           ::testing::Range(5, 6));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcInterLayerPredSingleBR,
-                          ::testing::Range(5, 10), ::testing::Range(0, 3));
+VP9_INSTANTIATE_TEST_SUITE(DatarateOnePassCbrSvcInterLayerPredSingleBR,
+                           ::testing::Range(5, 10), ::testing::Range(0, 3));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcMultiBR, ::testing::Range(5, 10),
-                          ::testing::Range(0, 3));
+VP9_INSTANTIATE_TEST_SUITE(DatarateOnePassCbrSvcMultiBR,
+                           ::testing::Range(5, 10), ::testing::Range(0, 3));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcFrameDropMultiBR,
-                          ::testing::Range(5, 10), ::testing::Range(0, 2),
-                          ::testing::Range(0, 3));
+VP9_INSTANTIATE_TEST_SUITE(DatarateOnePassCbrSvcFrameDropMultiBR,
+                           ::testing::Range(5, 10), ::testing::Range(0, 2),
+                           ::testing::Range(0, 3));
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcDenoiser,
-                          ::testing::Range(5, 10), ::testing::Range(1, 3),
-                          ::testing::Range(0, 3), ::testing::Range(0, 4));
+VP9_INSTANTIATE_TEST_SUITE(DatarateOnePassCbrSvcDenoiser,
+                           ::testing::Range(5, 10), ::testing::Range(1, 3),
+                           ::testing::Range(0, 3), ::testing::Range(0, 4));
 #endif
 
-VP9_INSTANTIATE_TEST_CASE(DatarateOnePassCbrSvcSmallKF, ::testing::Range(5, 10),
-                          ::testing::Range(32, 36));
+VP9_INSTANTIATE_TEST_SUITE(DatarateOnePassCbrSvcSmallKF,
+                           ::testing::Range(5, 10), ::testing::Range(32, 36));
 }  // namespace
 }  // namespace svc_test

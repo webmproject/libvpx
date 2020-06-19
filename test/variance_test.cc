@@ -738,23 +738,23 @@ TEST_P(VpxSubpelVarianceTest, Ref) { RefTest(); }
 TEST_P(VpxSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
 TEST_P(VpxSubpelAvgVarianceTest, Ref) { RefTest(); }
 
-INSTANTIATE_TEST_CASE_P(C, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_c));
+INSTANTIATE_TEST_SUITE_P(C, SumOfSquaresTest,
+                         ::testing::Values(vpx_get_mb_ss_c));
 
 typedef TestParams<Get4x4SseFunc> SseParams;
-INSTANTIATE_TEST_CASE_P(C, VpxSseTest,
-                        ::testing::Values(SseParams(2, 2,
-                                                    &vpx_get4x4sse_cs_c)));
+INSTANTIATE_TEST_SUITE_P(C, VpxSseTest,
+                         ::testing::Values(SseParams(2, 2,
+                                                     &vpx_get4x4sse_cs_c)));
 
 typedef TestParams<vpx_variance_fn_t> MseParams;
-INSTANTIATE_TEST_CASE_P(C, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_c),
-                                          MseParams(4, 3, &vpx_mse16x8_c),
-                                          MseParams(3, 4, &vpx_mse8x16_c),
-                                          MseParams(3, 3, &vpx_mse8x8_c)));
+INSTANTIATE_TEST_SUITE_P(C, VpxMseTest,
+                         ::testing::Values(MseParams(4, 4, &vpx_mse16x16_c),
+                                           MseParams(4, 3, &vpx_mse16x8_c),
+                                           MseParams(3, 4, &vpx_mse8x16_c),
+                                           MseParams(3, 3, &vpx_mse8x8_c)));
 
 typedef TestParams<vpx_variance_fn_t> VarianceParams;
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_c),
                       VarianceParams(6, 5, &vpx_variance64x32_c),
@@ -771,7 +771,7 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(2, 2, &vpx_variance4x4_c)));
 
 typedef TestParams<vpx_subpixvariance_fn_t> SubpelVarianceParams;
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_c, 0),
@@ -789,7 +789,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_c, 0)));
 
 typedef TestParams<vpx_subp_avg_variance_fn_t> SubpelAvgVarianceParams;
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, VpxSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_c, 0),
@@ -825,7 +825,7 @@ TEST_P(VpxHBDSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
 TEST_P(VpxHBDSubpelAvgVarianceTest, Ref) { RefTest(); }
 
 /* TODO(debargha): This test does not support the highbd version
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, VpxHBDMseTest,
     ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_c),
                       MseParams(4, 4, &vpx_highbd_12_mse16x8_c),
@@ -841,7 +841,7 @@ INSTANTIATE_TEST_CASE_P(
                       MseParams(4, 4, &vpx_highbd_8_mse8x8_c)));
 */
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, VpxHBDVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_highbd_12_variance64x64_c, 12),
                       VarianceParams(6, 5, &vpx_highbd_12_variance64x32_c, 12),
@@ -883,7 +883,7 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(2, 3, &vpx_highbd_8_variance4x8_c, 8),
                       VarianceParams(2, 2, &vpx_highbd_8_variance4x4_c, 8)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, VpxHBDSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_highbd_8_sub_pixel_variance64x64_c, 8),
@@ -941,7 +941,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(2, 2, &vpx_highbd_12_sub_pixel_variance4x4_c,
                              12)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     C, VpxHBDSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6,
@@ -1044,16 +1044,16 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(SSE2, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_sse2));
+INSTANTIATE_TEST_SUITE_P(SSE2, SumOfSquaresTest,
+                         ::testing::Values(vpx_get_mb_ss_sse2));
 
-INSTANTIATE_TEST_CASE_P(SSE2, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_sse2),
-                                          MseParams(4, 3, &vpx_mse16x8_sse2),
-                                          MseParams(3, 4, &vpx_mse8x16_sse2),
-                                          MseParams(3, 3, &vpx_mse8x8_sse2)));
+INSTANTIATE_TEST_SUITE_P(SSE2, VpxMseTest,
+                         ::testing::Values(MseParams(4, 4, &vpx_mse16x16_sse2),
+                                           MseParams(4, 3, &vpx_mse16x8_sse2),
+                                           MseParams(3, 4, &vpx_mse8x16_sse2),
+                                           MseParams(3, 3, &vpx_mse8x8_sse2)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_sse2),
                       VarianceParams(6, 5, &vpx_variance64x32_sse2),
@@ -1069,7 +1069,7 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(2, 3, &vpx_variance4x8_sse2),
                       VarianceParams(2, 2, &vpx_variance4x4_sse2)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_sse2, 0),
@@ -1086,7 +1086,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_sse2, 0),
         SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_sse2, 0)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_sse2, 0),
@@ -1105,7 +1105,7 @@ INSTANTIATE_TEST_CASE_P(
 
 #if CONFIG_VP9_HIGHBITDEPTH
 /* TODO(debargha): This test does not support the highbd version
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxHBDMseTest,
     ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_sse2),
                       MseParams(4, 3, &vpx_highbd_12_mse16x8_sse2),
@@ -1121,7 +1121,7 @@ INSTANTIATE_TEST_CASE_P(
                       MseParams(3, 3, &vpx_highbd_8_mse8x8_sse2)));
 */
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxHBDVarianceTest,
     ::testing::Values(
         VarianceParams(6, 6, &vpx_highbd_12_variance64x64_sse2, 12),
@@ -1155,7 +1155,7 @@ INSTANTIATE_TEST_CASE_P(
         VarianceParams(3, 4, &vpx_highbd_8_variance8x16_sse2, 8),
         VarianceParams(3, 3, &vpx_highbd_8_variance8x8_sse2, 8)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxHBDSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_highbd_12_sub_pixel_variance64x64_sse2,
@@ -1224,7 +1224,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_sse2,
                              8)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxHBDSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6,
@@ -1330,7 +1330,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSSE3, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_ssse3, 0),
@@ -1347,7 +1347,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_ssse3, 0),
         SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_ssse3, 0)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSSE3, VpxSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_ssse3,
@@ -1374,11 +1374,11 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSSE3
 
 #if HAVE_AVX2
-INSTANTIATE_TEST_CASE_P(AVX2, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_avx2),
-                                          MseParams(4, 3, &vpx_mse16x8_avx2)));
+INSTANTIATE_TEST_SUITE_P(AVX2, VpxMseTest,
+                         ::testing::Values(MseParams(4, 4, &vpx_mse16x16_avx2),
+                                           MseParams(4, 3, &vpx_mse16x8_avx2)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     AVX2, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_avx2),
                       VarianceParams(6, 5, &vpx_variance64x32_avx2),
@@ -1389,13 +1389,13 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(4, 4, &vpx_variance16x16_avx2),
                       VarianceParams(4, 3, &vpx_variance16x8_avx2)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     AVX2, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_avx2, 0),
         SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_avx2, 0)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     AVX2, VpxSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_avx2, 0),
@@ -1404,14 +1404,15 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(NEON, VpxSseTest,
-                        ::testing::Values(SseParams(2, 2,
-                                                    &vpx_get4x4sse_cs_neon)));
+INSTANTIATE_TEST_SUITE_P(NEON, VpxSseTest,
+                         ::testing::Values(SseParams(2, 2,
+                                                     &vpx_get4x4sse_cs_neon)));
 
-INSTANTIATE_TEST_CASE_P(NEON, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_neon)));
+INSTANTIATE_TEST_SUITE_P(NEON, VpxMseTest,
+                         ::testing::Values(MseParams(4, 4,
+                                                     &vpx_mse16x16_neon)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_neon),
                       VarianceParams(6, 5, &vpx_variance64x32_neon),
@@ -1427,7 +1428,7 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(2, 3, &vpx_variance4x8_neon),
                       VarianceParams(2, 2, &vpx_variance4x4_neon)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_neon, 0),
@@ -1444,7 +1445,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_neon, 0),
         SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_neon, 0)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, VpxSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_neon, 0),
@@ -1463,20 +1464,20 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(MSA, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_msa));
+INSTANTIATE_TEST_SUITE_P(MSA, SumOfSquaresTest,
+                         ::testing::Values(vpx_get_mb_ss_msa));
 
-INSTANTIATE_TEST_CASE_P(MSA, VpxSseTest,
-                        ::testing::Values(SseParams(2, 2,
-                                                    &vpx_get4x4sse_cs_msa)));
+INSTANTIATE_TEST_SUITE_P(MSA, VpxSseTest,
+                         ::testing::Values(SseParams(2, 2,
+                                                     &vpx_get4x4sse_cs_msa)));
 
-INSTANTIATE_TEST_CASE_P(MSA, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_msa),
-                                          MseParams(4, 3, &vpx_mse16x8_msa),
-                                          MseParams(3, 4, &vpx_mse8x16_msa),
-                                          MseParams(3, 3, &vpx_mse8x8_msa)));
+INSTANTIATE_TEST_SUITE_P(MSA, VpxMseTest,
+                         ::testing::Values(MseParams(4, 4, &vpx_mse16x16_msa),
+                                           MseParams(4, 3, &vpx_mse16x8_msa),
+                                           MseParams(3, 4, &vpx_mse8x16_msa),
+                                           MseParams(3, 3, &vpx_mse8x8_msa)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_msa),
                       VarianceParams(6, 5, &vpx_variance64x32_msa),
@@ -1492,7 +1493,7 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(2, 3, &vpx_variance4x8_msa),
                       VarianceParams(2, 2, &vpx_variance4x4_msa)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_msa, 0),
@@ -1509,7 +1510,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(6, 5, &vpx_sub_pixel_variance64x32_msa, 0),
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_msa, 0)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, VpxSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_msa, 0),
@@ -1528,19 +1529,19 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_MSA
 
 #if HAVE_VSX
-INSTANTIATE_TEST_CASE_P(VSX, SumOfSquaresTest,
-                        ::testing::Values(vpx_get_mb_ss_vsx));
+INSTANTIATE_TEST_SUITE_P(VSX, SumOfSquaresTest,
+                         ::testing::Values(vpx_get_mb_ss_vsx));
 
-INSTANTIATE_TEST_CASE_P(VSX, VpxSseTest,
-                        ::testing::Values(SseParams(2, 2,
-                                                    &vpx_get4x4sse_cs_vsx)));
-INSTANTIATE_TEST_CASE_P(VSX, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_vsx),
-                                          MseParams(4, 3, &vpx_mse16x8_vsx),
-                                          MseParams(3, 4, &vpx_mse8x16_vsx),
-                                          MseParams(3, 3, &vpx_mse8x8_vsx)));
+INSTANTIATE_TEST_SUITE_P(VSX, VpxSseTest,
+                         ::testing::Values(SseParams(2, 2,
+                                                     &vpx_get4x4sse_cs_vsx)));
+INSTANTIATE_TEST_SUITE_P(VSX, VpxMseTest,
+                         ::testing::Values(MseParams(4, 4, &vpx_mse16x16_vsx),
+                                           MseParams(4, 3, &vpx_mse16x8_vsx),
+                                           MseParams(3, 4, &vpx_mse8x16_vsx),
+                                           MseParams(3, 3, &vpx_mse8x8_vsx)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     VSX, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_vsx),
                       VarianceParams(6, 5, &vpx_variance64x32_vsx),
@@ -1558,13 +1559,13 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_VSX
 
 #if HAVE_MMI
-INSTANTIATE_TEST_CASE_P(MMI, VpxMseTest,
-                        ::testing::Values(MseParams(4, 4, &vpx_mse16x16_mmi),
-                                          MseParams(4, 3, &vpx_mse16x8_mmi),
-                                          MseParams(3, 4, &vpx_mse8x16_mmi),
-                                          MseParams(3, 3, &vpx_mse8x8_mmi)));
+INSTANTIATE_TEST_SUITE_P(MMI, VpxMseTest,
+                         ::testing::Values(MseParams(4, 4, &vpx_mse16x16_mmi),
+                                           MseParams(4, 3, &vpx_mse16x8_mmi),
+                                           MseParams(3, 4, &vpx_mse8x16_mmi),
+                                           MseParams(3, 3, &vpx_mse8x8_mmi)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MMI, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_mmi),
                       VarianceParams(6, 5, &vpx_variance64x32_mmi),
@@ -1580,7 +1581,7 @@ INSTANTIATE_TEST_CASE_P(
                       VarianceParams(2, 3, &vpx_variance4x8_mmi),
                       VarianceParams(2, 2, &vpx_variance4x4_mmi)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MMI, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_mmi, 0),
@@ -1597,7 +1598,7 @@ INSTANTIATE_TEST_CASE_P(
         SubpelVarianceParams(2, 3, &vpx_sub_pixel_variance4x8_mmi, 0),
         SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_mmi, 0)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MMI, VpxSubpelAvgVarianceTest,
     ::testing::Values(
         SubpelAvgVarianceParams(6, 6, &vpx_sub_pixel_avg_variance64x64_mmi, 0),

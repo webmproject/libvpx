@@ -104,7 +104,7 @@ using std::make_tuple;
 
 // Test for all block size.
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VP9DenoiserTest,
     ::testing::Values(make_tuple(&vp9_denoiser_filter_sse2, BLOCK_8X8),
                       make_tuple(&vp9_denoiser_filter_sse2, BLOCK_8X16),
@@ -119,7 +119,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_SSE2
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, VP9DenoiserTest,
     ::testing::Values(make_tuple(&vp9_denoiser_filter_neon, BLOCK_8X8),
                       make_tuple(&vp9_denoiser_filter_neon, BLOCK_8X16),

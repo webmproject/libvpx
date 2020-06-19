@@ -166,21 +166,21 @@ TEST_P(AvgPredTest, DISABLED_Speed) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(C, AvgPredTest,
-                        ::testing::Values(&vpx_comp_avg_pred_c));
+INSTANTIATE_TEST_SUITE_P(C, AvgPredTest,
+                         ::testing::Values(&vpx_comp_avg_pred_c));
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(SSE2, AvgPredTest,
-                        ::testing::Values(&vpx_comp_avg_pred_sse2));
+INSTANTIATE_TEST_SUITE_P(SSE2, AvgPredTest,
+                         ::testing::Values(&vpx_comp_avg_pred_sse2));
 #endif  // HAVE_SSE2
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(NEON, AvgPredTest,
-                        ::testing::Values(&vpx_comp_avg_pred_neon));
+INSTANTIATE_TEST_SUITE_P(NEON, AvgPredTest,
+                         ::testing::Values(&vpx_comp_avg_pred_neon));
 #endif  // HAVE_NEON
 
 #if HAVE_VSX
-INSTANTIATE_TEST_CASE_P(VSX, AvgPredTest,
-                        ::testing::Values(&vpx_comp_avg_pred_vsx));
+INSTANTIATE_TEST_SUITE_P(VSX, AvgPredTest,
+                         ::testing::Values(&vpx_comp_avg_pred_vsx));
 #endif  // HAVE_VSX
 }  // namespace

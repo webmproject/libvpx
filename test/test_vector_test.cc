@@ -153,7 +153,7 @@ TEST_P(TestVectorTest, MD5Match) {
 }
 
 #if CONFIG_VP8_DECODER
-VP8_INSTANTIATE_TEST_CASE(
+VP8_INSTANTIATE_TEST_SUITE(
     TestVectorTest,
     ::testing::Combine(
         ::testing::Values(1),   // Single thread.
@@ -163,7 +163,7 @@ VP8_INSTANTIATE_TEST_CASE(
                                 libvpx_test::kNumVP8TestVectors)));
 
 // Test VP8 decode in with different numbers of threads.
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     VP8MultiThreaded, TestVectorTest,
     ::testing::Combine(
         ::testing::Values(
@@ -178,7 +178,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP8_DECODER
 
 #if CONFIG_VP9_DECODER
-VP9_INSTANTIATE_TEST_CASE(
+VP9_INSTANTIATE_TEST_SUITE(
     TestVectorTest,
     ::testing::Combine(
         ::testing::Values(1),   // Single thread.
@@ -187,7 +187,7 @@ VP9_INSTANTIATE_TEST_CASE(
                             libvpx_test::kVP9TestVectors +
                                 libvpx_test::kNumVP9TestVectors)));
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     VP9MultiThreaded, TestVectorTest,
     ::testing::Combine(
         ::testing::Values(

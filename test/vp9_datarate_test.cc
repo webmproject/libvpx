@@ -935,23 +935,23 @@ TEST_P(DatarateTestVP9RealTimeDenoiser, DenoiserOffOn) {
 }
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTimeMultiBR,
-                          ::testing::Range(5, 10), ::testing::Range(0, 4));
+VP9_INSTANTIATE_TEST_SUITE(DatarateTestVP9RealTimeMultiBR,
+                           ::testing::Range(5, 10), ::testing::Range(0, 4));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9LargeVBR, ::testing::Range(5, 9),
-                          ::testing::Range(0, 2));
+VP9_INSTANTIATE_TEST_SUITE(DatarateTestVP9LargeVBR, ::testing::Range(5, 9),
+                           ::testing::Range(0, 2));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTime, ::testing::Range(5, 10));
+VP9_INSTANTIATE_TEST_SUITE(DatarateTestVP9RealTime, ::testing::Range(5, 10));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTimeDeltaQUV,
-                          ::testing::Range(5, 10),
-                          ::testing::Values(-5, -10, -15));
+VP9_INSTANTIATE_TEST_SUITE(DatarateTestVP9RealTimeDeltaQUV,
+                           ::testing::Range(5, 10),
+                           ::testing::Values(-5, -10, -15));
 
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9PostEncodeDrop,
-                          ::testing::Range(5, 6));
+VP9_INSTANTIATE_TEST_SUITE(DatarateTestVP9PostEncodeDrop,
+                           ::testing::Range(5, 6));
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9RealTimeDenoiser,
-                          ::testing::Range(5, 10));
+VP9_INSTANTIATE_TEST_SUITE(DatarateTestVP9RealTimeDenoiser,
+                           ::testing::Range(5, 10));
 #endif
 }  // namespace

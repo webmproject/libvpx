@@ -316,6 +316,6 @@ TEST(VP9DecodeMultiThreadedTest, NonFrameParallel) {
 }
 #endif  // CONFIG_WEBM_IO
 
-INSTANTIATE_TEST_CASE_P(Synchronous, VPxWorkerThreadTest, ::testing::Bool());
+INSTANTIATE_TEST_SUITE_P(Synchronous, VPxWorkerThreadTest, ::testing::Bool());
 
 }  // namespace

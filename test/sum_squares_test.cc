@@ -106,21 +106,21 @@ TEST_P(SumSquaresTest, ExtremeValues) {
 using std::make_tuple;
 
 #if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     NEON, SumSquaresTest,
     ::testing::Values(make_tuple(&vpx_sum_squares_2d_i16_c,
                                  &vpx_sum_squares_2d_i16_neon)));
 #endif  // HAVE_NEON
 
 #if HAVE_SSE2
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SSE2, SumSquaresTest,
     ::testing::Values(make_tuple(&vpx_sum_squares_2d_i16_c,
                                  &vpx_sum_squares_2d_i16_sse2)));
 #endif  // HAVE_SSE2
 
 #if HAVE_MSA
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     MSA, SumSquaresTest,
     ::testing::Values(make_tuple(&vpx_sum_squares_2d_i16_c,
                                  &vpx_sum_squares_2d_i16_msa)));

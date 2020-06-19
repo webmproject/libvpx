@@ -334,21 +334,21 @@ TEST_P(EndToEndTestLoopFilterThreading, TileCountChange) {
 }
 #endif  // CONFIG_VP9_DECODER
 
-VP9_INSTANTIATE_TEST_CASE(EndToEndTestLarge,
-                          ::testing::ValuesIn(kEncodingModeVectors),
-                          ::testing::ValuesIn(kTestVectors),
-                          ::testing::ValuesIn(kCpuUsedVectors));
+VP9_INSTANTIATE_TEST_SUITE(EndToEndTestLarge,
+                           ::testing::ValuesIn(kEncodingModeVectors),
+                           ::testing::ValuesIn(kTestVectors),
+                           ::testing::ValuesIn(kCpuUsedVectors));
 
-VP9_INSTANTIATE_TEST_CASE(EndToEndNV12,
-                          ::testing::Values(::libvpx_test::kRealTime),
-                          ::testing::ValuesIn(kTestVectorsNv12),
-                          ::testing::ValuesIn({ 6, 7, 8 }));
+VP9_INSTANTIATE_TEST_SUITE(EndToEndNV12,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::ValuesIn(kTestVectorsNv12),
+                           ::testing::ValuesIn({ 6, 7, 8 }));
 
-VP9_INSTANTIATE_TEST_CASE(EndToEndTestAdaptiveRDThresh,
-                          ::testing::Values(5, 6, 7), ::testing::Values(8, 9));
+VP9_INSTANTIATE_TEST_SUITE(EndToEndTestAdaptiveRDThresh,
+                           ::testing::Values(5, 6, 7), ::testing::Values(8, 9));
 
 #if CONFIG_VP9_DECODER
-VP9_INSTANTIATE_TEST_CASE(EndToEndTestLoopFilterThreading, ::testing::Bool(),
-                          ::testing::Range(2, 6));
+VP9_INSTANTIATE_TEST_SUITE(EndToEndTestLoopFilterThreading, ::testing::Bool(),
+                           ::testing::Range(2, 6));
 #endif  // CONFIG_VP9_DECODER
 }  // namespace
