@@ -110,7 +110,7 @@ static INLINE void vp8_filter_block1d_h6_mmi(unsigned char *src_ptr,
     "ldc1       %[ftmp3],       0x30(%[vp8_filter])                   \n\t"
     "ldc1       %[ftmp4],       0x40(%[vp8_filter])                   \n\t"
     "ldc1       %[ftmp5],       0x50(%[vp8_filter])                   \n\t"
-    "xor        %[fzero],       %[fzero],           %[fzero]          \n\t"
+    "pxor       %[fzero],       %[fzero],           %[fzero]          \n\t"
     "li         %[tmp0],        0x07                                  \n\t"
     "mtc1       %[tmp0],        %[ftmp7]                              \n\t"
     "li         %[tmp0],        0x08                                  \n\t"
@@ -137,12 +137,12 @@ static INLINE void vp8_filter_block1d_h6_mmi(unsigned char *src_ptr,
     "pmullh     %[ftmp6],       %[ftmp6],          %[ftmp5]           \n\t"
     "paddsh     %[ftmp8],       %[ftmp8],          %[ftmp6]           \n\t"
 
-    "dsrl       %[ftmp10],      %[ftmp10],         %[ftmp11]          \n\t"
+    "ssrld      %[ftmp10],      %[ftmp10],         %[ftmp11]          \n\t"
     "punpcklbh  %[ftmp6],       %[ftmp10],         %[fzero]           \n\t"
     "pmullh     %[ftmp6],       %[ftmp6],          %[ftmp2]           \n\t"
     "paddsh     %[ftmp8],       %[ftmp8],          %[ftmp6]           \n\t"
 
-    "dsrl       %[ftmp10],      %[ftmp10],         %[ftmp11]          \n\t"
+    "ssrld      %[ftmp10],      %[ftmp10],         %[ftmp11]          \n\t"
     "punpcklbh  %[ftmp6],       %[ftmp10],         %[fzero]           \n\t"
     "pmullh     %[ftmp6],       %[ftmp6],          %[ftmp3]           \n\t"
     "paddsh     %[ftmp8],       %[ftmp8],          %[ftmp6]           \n\t"
@@ -222,7 +222,7 @@ static INLINE void vp8_filter_block1dc_v6_mmi(
     "ldc1       %[ftmp3],     0x30(%[vp8_filter])                     \n\t"
     "ldc1       %[ftmp4],     0x40(%[vp8_filter])                     \n\t"
     "ldc1       %[ftmp5],     0x50(%[vp8_filter])                     \n\t"
-    "xor        %[fzero],     %[fzero],        %[fzero]               \n\t"
+    "pxor       %[fzero],     %[fzero],        %[fzero]               \n\t"
     "li         %[tmp0],      0x07                                    \n\t"
     "mtc1       %[tmp0],      %[ftmp13]                               \n\t"
 
@@ -314,7 +314,7 @@ static INLINE void vp8_filter_block1d_h6_filter0_mmi(
 #endif  // _MIPS_SIM == _ABIO32
 
   __asm__ volatile (
-    "xor        %[fzero],       %[fzero],           %[fzero]          \n\t"
+    "pxor       %[fzero],       %[fzero],           %[fzero]          \n\t"
 
     "1:                                                               \n\t"
     "gsldlc1    %[ftmp0],       0x07(%[src_ptr])                      \n\t"
@@ -351,7 +351,7 @@ static INLINE void vp8_filter_block1dc_v6_filter0_mmi(
 #endif  // _MIPS_SIM == _ABIO32
 
   __asm__ volatile (
-    "xor        %[fzero],     %[fzero],        %[fzero]               \n\t"
+    "pxor       %[fzero],     %[fzero],        %[fzero]               \n\t"
 
     "1:                                                               \n\t"
     "gsldlc1    %[ftmp0],     0x07(%[src_ptr])                        \n\t"

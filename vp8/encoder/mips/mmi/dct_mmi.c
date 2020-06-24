@@ -24,19 +24,19 @@
   "punpcklhw  %[ftmp5],   %[ftmp1],   %[ftmp0]         \n\t" \
   "punpcklhw  %[ftmp9],   %[ftmp2],   %[ftmp0]         \n\t" \
   "pshufh     %[ftmp9],   %[ftmp9],   %[ftmp10]        \n\t" \
-  "or         %[ftmp5],   %[ftmp5],   %[ftmp9]         \n\t" \
+  "por        %[ftmp5],   %[ftmp5],   %[ftmp9]         \n\t" \
   "punpckhhw  %[ftmp6],   %[ftmp1],   %[ftmp0]         \n\t" \
   "punpckhhw  %[ftmp9],   %[ftmp2],   %[ftmp0]         \n\t" \
   "pshufh     %[ftmp9],   %[ftmp9],   %[ftmp10]        \n\t" \
-  "or         %[ftmp6],   %[ftmp6],   %[ftmp9]         \n\t" \
+  "por        %[ftmp6],   %[ftmp6],   %[ftmp9]         \n\t" \
   "punpcklhw  %[ftmp7],   %[ftmp3],   %[ftmp0]         \n\t" \
   "punpcklhw  %[ftmp9],   %[ftmp4],   %[ftmp0]         \n\t" \
   "pshufh     %[ftmp9],   %[ftmp9],   %[ftmp10]        \n\t" \
-  "or         %[ftmp7],   %[ftmp7],   %[ftmp9]         \n\t" \
+  "por        %[ftmp7],   %[ftmp7],   %[ftmp9]         \n\t" \
   "punpckhhw  %[ftmp8],   %[ftmp3],   %[ftmp0]         \n\t" \
   "punpckhhw  %[ftmp9],   %[ftmp4],   %[ftmp0]         \n\t" \
   "pshufh     %[ftmp9],   %[ftmp9],   %[ftmp10]        \n\t" \
-  "or         %[ftmp8],   %[ftmp8],   %[ftmp9]         \n\t" \
+  "por        %[ftmp8],   %[ftmp8],   %[ftmp9]         \n\t" \
   "punpcklwd  %[ftmp1],   %[ftmp5],   %[ftmp7]         \n\t" \
   "punpckhwd  %[ftmp2],   %[ftmp5],   %[ftmp7]         \n\t" \
   "punpcklwd  %[ftmp3],   %[ftmp6],   %[ftmp8]         \n\t" \
@@ -90,7 +90,7 @@ void vp8_short_fdct4x4_mmi(int16_t *input, int16_t *output, int pitch) {
   DECLARE_ALIGNED(8, const uint64_t, ff_ph_8) = { 0x0008000800080008ULL };
 
   __asm__ volatile (
-    "xor        %[ftmp0],   %[ftmp0],      %[ftmp0]         \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],      %[ftmp0]         \n\t"
     "gsldlc1    %[ftmp1],   0x07(%[ip])                     \n\t"
     "gsldrc1    %[ftmp1],   0x00(%[ip])                     \n\t"
     MMI_ADDU(%[ip], %[ip], %[pitch])
@@ -237,7 +237,7 @@ void vp8_short_walsh4x4_mmi(int16_t *input, int16_t *output, int pitch) {
 
   __asm__ volatile (
     MMI_LI(%[tmp0], 0x02)
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
 
     "gsldlc1    %[ftmp1],   0x07(%[ip])                         \n\t"
@@ -340,49 +340,49 @@ void vp8_short_walsh4x4_mmi(int16_t *input, int16_t *output, int pitch) {
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
 
     "pcmpgtw    %[ftmp9],   %[ftmp0],       %[ftmp1]            \n\t"
-    "and        %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
+    "pand       %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
     "paddw      %[ftmp1],   %[ftmp1],       %[ftmp9]            \n\t"
     "paddw      %[ftmp1],   %[ftmp1],       %[ff_pw_03]         \n\t"
     "psraw      %[ftmp1],   %[ftmp1],       %[ftmp11]           \n\t"
 
     "pcmpgtw    %[ftmp9],   %[ftmp0],       %[ftmp2]            \n\t"
-    "and        %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
+    "pand       %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
     "paddw      %[ftmp2],   %[ftmp2],       %[ftmp9]            \n\t"
     "paddw      %[ftmp2],   %[ftmp2],       %[ff_pw_03]         \n\t"
     "psraw      %[ftmp2],   %[ftmp2],       %[ftmp11]           \n\t"
 
     "pcmpgtw    %[ftmp9],   %[ftmp0],       %[ftmp3]            \n\t"
-    "and        %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
+    "pand       %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
     "paddw      %[ftmp3],   %[ftmp3],       %[ftmp9]            \n\t"
     "paddw      %[ftmp3],   %[ftmp3],       %[ff_pw_03]         \n\t"
     "psraw      %[ftmp3],   %[ftmp3],       %[ftmp11]           \n\t"
 
     "pcmpgtw    %[ftmp9],   %[ftmp0],       %[ftmp4]            \n\t"
-    "and        %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
+    "pand       %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
     "paddw      %[ftmp4],   %[ftmp4],       %[ftmp9]            \n\t"
     "paddw      %[ftmp4],   %[ftmp4],       %[ff_pw_03]         \n\t"
     "psraw      %[ftmp4],   %[ftmp4],       %[ftmp11]           \n\t"
 
     "pcmpgtw    %[ftmp9],   %[ftmp0],       %[ftmp5]            \n\t"
-    "and        %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
+    "pand       %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
     "paddw      %[ftmp5],   %[ftmp5],       %[ftmp9]            \n\t"
     "paddw      %[ftmp5],   %[ftmp5],       %[ff_pw_03]         \n\t"
     "psraw      %[ftmp5],   %[ftmp5],       %[ftmp11]           \n\t"
 
     "pcmpgtw    %[ftmp9],   %[ftmp0],       %[ftmp6]            \n\t"
-    "and        %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
+    "pand       %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
     "paddw      %[ftmp6],   %[ftmp6],       %[ftmp9]            \n\t"
     "paddw      %[ftmp6],   %[ftmp6],       %[ff_pw_03]         \n\t"
     "psraw      %[ftmp6],   %[ftmp6],       %[ftmp11]           \n\t"
 
     "pcmpgtw    %[ftmp9],   %[ftmp0],       %[ftmp7]            \n\t"
-    "and        %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
+    "pand       %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
     "paddw      %[ftmp7],   %[ftmp7],       %[ftmp9]            \n\t"
     "paddw      %[ftmp7],   %[ftmp7],       %[ff_pw_03]         \n\t"
     "psraw      %[ftmp7],   %[ftmp7],       %[ftmp11]           \n\t"
 
     "pcmpgtw    %[ftmp9],   %[ftmp0],       %[ftmp8]            \n\t"
-    "and        %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
+    "pand       %[ftmp9],   %[ftmp9],       %[ff_pw_01]         \n\t"
     "paddw      %[ftmp8],   %[ftmp8],       %[ftmp9]            \n\t"
     "paddw      %[ftmp8],   %[ftmp8],       %[ff_pw_03]         \n\t"
     "psraw      %[ftmp8],   %[ftmp8],       %[ftmp11]           \n\t"

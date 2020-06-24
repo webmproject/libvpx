@@ -47,7 +47,7 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
 
   __asm__ volatile(
       // loop 0 ~ 7
-      "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]        \n\t"
+      "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]        \n\t"
       "gsldlc1    %[ftmp1],   0x07(%[coeff_ptr])              \n\t"
       "gsldrc1    %[ftmp1],   0x00(%[coeff_ptr])              \n\t"
       "li         %[tmp0],    0x0f                            \n\t"
@@ -56,10 +56,10 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
       "gsldrc1    %[ftmp2],   0x08(%[coeff_ptr])              \n\t"
 
       "psrah      %[ftmp3],   %[ftmp1],       %[ftmp9]        \n\t"
-      "xor        %[ftmp1],   %[ftmp3],       %[ftmp1]        \n\t"
+      "pxor       %[ftmp1],   %[ftmp3],       %[ftmp1]        \n\t"
       "psubh      %[ftmp1],   %[ftmp1],       %[ftmp3]        \n\t"
       "psrah      %[ftmp4],   %[ftmp2],       %[ftmp9]        \n\t"
-      "xor        %[ftmp2],   %[ftmp4],       %[ftmp2]        \n\t"
+      "pxor       %[ftmp2],   %[ftmp4],       %[ftmp2]        \n\t"
       "psubh      %[ftmp2],   %[ftmp2],       %[ftmp4]        \n\t"
 
       "gsldlc1    %[ftmp5],   0x07(%[round_ptr])              \n\t"
@@ -75,8 +75,8 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
       "pmulhuh    %[ftmp5],   %[ftmp5],       %[ftmp7]        \n\t"
       "pmulhuh    %[ftmp6],   %[ftmp6],       %[ftmp8]        \n\t"
 
-      "xor        %[ftmp7],   %[ftmp5],       %[ftmp3]        \n\t"
-      "xor        %[ftmp8],   %[ftmp6],       %[ftmp4]        \n\t"
+      "pxor       %[ftmp7],   %[ftmp5],       %[ftmp3]        \n\t"
+      "pxor       %[ftmp8],   %[ftmp6],       %[ftmp4]        \n\t"
       "psubh      %[ftmp7],   %[ftmp7],       %[ftmp3]        \n\t"
       "psubh      %[ftmp8],   %[ftmp8],       %[ftmp4]        \n\t"
       "gssdlc1    %[ftmp7],   0x07(%[qcoeff_ptr])             \n\t"
@@ -90,10 +90,10 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
       "gsldrc1    %[ftmp2],   0x08(%[inv_zig_zag])            \n\t"
       "pcmpeqh    %[ftmp5],   %[ftmp5],       %[ftmp0]        \n\t"
       "pcmpeqh    %[ftmp6],   %[ftmp6],       %[ftmp0]        \n\t"
-      "xor        %[ftmp5],   %[ftmp5],       %[ones]         \n\t"
-      "xor        %[ftmp6],   %[ftmp6],       %[ones]         \n\t"
-      "and        %[ftmp5],   %[ftmp5],       %[ftmp1]        \n\t"
-      "and        %[ftmp6],   %[ftmp6],       %[ftmp2]        \n\t"
+      "pxor       %[ftmp5],   %[ftmp5],       %[ones]         \n\t"
+      "pxor       %[ftmp6],   %[ftmp6],       %[ones]         \n\t"
+      "pand       %[ftmp5],   %[ftmp5],       %[ftmp1]        \n\t"
+      "pand       %[ftmp6],   %[ftmp6],       %[ftmp2]        \n\t"
       "pmaxsh     %[ftmp10],  %[ftmp5],       %[ftmp6]        \n\t"
 
       "gsldlc1    %[ftmp5],   0x07(%[dequant_ptr])            \n\t"
@@ -114,10 +114,10 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
       "gsldrc1    %[ftmp2],   0x18(%[coeff_ptr])              \n\t"
 
       "psrah      %[ftmp3],   %[ftmp1],       %[ftmp9]        \n\t"
-      "xor        %[ftmp1],   %[ftmp3],       %[ftmp1]        \n\t"
+      "pxor       %[ftmp1],   %[ftmp3],       %[ftmp1]        \n\t"
       "psubh      %[ftmp1],   %[ftmp1],       %[ftmp3]        \n\t"
       "psrah      %[ftmp4],   %[ftmp2],       %[ftmp9]        \n\t"
-      "xor        %[ftmp2],   %[ftmp4],       %[ftmp2]        \n\t"
+      "pxor       %[ftmp2],   %[ftmp4],       %[ftmp2]        \n\t"
       "psubh      %[ftmp2],   %[ftmp2],       %[ftmp4]        \n\t"
 
       "gsldlc1    %[ftmp5],   0x17(%[round_ptr])              \n\t"
@@ -133,8 +133,8 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
       "pmulhuh    %[ftmp5],   %[ftmp5],       %[ftmp7]        \n\t"
       "pmulhuh    %[ftmp6],   %[ftmp6],       %[ftmp8]        \n\t"
 
-      "xor        %[ftmp7],   %[ftmp5],       %[ftmp3]        \n\t"
-      "xor        %[ftmp8],   %[ftmp6],       %[ftmp4]        \n\t"
+      "pxor       %[ftmp7],   %[ftmp5],       %[ftmp3]        \n\t"
+      "pxor       %[ftmp8],   %[ftmp6],       %[ftmp4]        \n\t"
       "psubh      %[ftmp7],   %[ftmp7],       %[ftmp3]        \n\t"
       "psubh      %[ftmp8],   %[ftmp8],       %[ftmp4]        \n\t"
       "gssdlc1    %[ftmp7],   0x17(%[qcoeff_ptr])             \n\t"
@@ -148,10 +148,10 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
       "gsldrc1    %[ftmp2],   0x18(%[inv_zig_zag])            \n\t"
       "pcmpeqh    %[ftmp5],   %[ftmp5],       %[ftmp0]        \n\t"
       "pcmpeqh    %[ftmp6],   %[ftmp6],       %[ftmp0]        \n\t"
-      "xor        %[ftmp5],   %[ftmp5],       %[ones]         \n\t"
-      "xor        %[ftmp6],   %[ftmp6],       %[ones]         \n\t"
-      "and        %[ftmp5],   %[ftmp5],       %[ftmp1]        \n\t"
-      "and        %[ftmp6],   %[ftmp6],       %[ftmp2]        \n\t"
+      "pxor       %[ftmp5],   %[ftmp5],       %[ones]         \n\t"
+      "pxor       %[ftmp6],   %[ftmp6],       %[ones]         \n\t"
+      "pand       %[ftmp5],   %[ftmp5],       %[ftmp1]        \n\t"
+      "pand       %[ftmp6],   %[ftmp6],       %[ftmp2]        \n\t"
       "pmaxsh     %[ftmp11],  %[ftmp5],       %[ftmp6]        \n\t"
 
       "gsldlc1    %[ftmp5],   0x17(%[dequant_ptr])            \n\t"
@@ -177,7 +177,7 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
       "pmaxsh     %[ftmp10],  %[ftmp10],       %[ftmp11]      \n\t"
       "li         %[tmp0],    0xffff                          \n\t"
       "mtc1       %[tmp0],    %[ftmp9]                        \n\t"
-      "and        %[ftmp10],  %[ftmp10],       %[ftmp9]       \n\t"
+      "pand       %[ftmp10],  %[ftmp10],       %[ftmp9]       \n\t"
       "gssdlc1    %[ftmp10],  0x07(%[eob])                    \n\t"
       "gssdrc1    %[ftmp10],  0x00(%[eob])                    \n\t"
       : [ftmp0] "=&f"(ftmp[0]), [ftmp1] "=&f"(ftmp[1]), [ftmp2] "=&f"(ftmp[2]),
@@ -217,7 +217,7 @@ void vp8_regular_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
   //  memset(dqcoeff_ptr, 0, 32);
   /* clang-format off */
   __asm__ volatile (
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]        \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]        \n\t"
     "gssdlc1    %[ftmp0],   0x07(%[qcoeff_ptr])             \n\t"
     "gssdrc1    %[ftmp0],   0x00(%[qcoeff_ptr])             \n\t"
     "gssdlc1    %[ftmp0],   0x0f(%[qcoeff_ptr])             \n\t"

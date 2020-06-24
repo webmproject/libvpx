@@ -150,7 +150,7 @@ static const uint8_t bilinear_filters[8][2] = {
   "psrlh      %[ftmp2],   %[ftmp2],       %[ftmp6]            \n\t" \
                                                                     \
   /* store: temp2[0] ~ temp2[3] */                                  \
-  "and        %[ftmp2],   %[ftmp2],       %[mask]             \n\t" \
+  "pand       %[ftmp2],   %[ftmp2],       %[mask]             \n\t" \
   "packushb   %[ftmp2],   %[ftmp2],       %[ftmp0]            \n\t" \
   "gssdrc1    %[ftmp2],   0x00(%[temp2_ptr])                  \n\t"
 
@@ -163,7 +163,7 @@ static const uint8_t bilinear_filters[8][2] = {
   "psrlh      %[ftmp4],   %[ftmp4],       %[ftmp6]            \n\t" \
                                                                     \
   /* store: temp2[0] ~ temp2[3] */                                  \
-  "and        %[ftmp4],   %[ftmp4],       %[mask]             \n\t" \
+  "pand       %[ftmp4],   %[ftmp4],       %[mask]             \n\t" \
   "packushb   %[ftmp4],   %[ftmp4],       %[ftmp0]            \n\t" \
   "gssdrc1    %[ftmp4],   0x00(%[temp2_ptr])                  \n\t"
 
@@ -225,8 +225,8 @@ static const uint8_t bilinear_filters[8][2] = {
   "psrlh      %[ftmp3],   %[ftmp3],       %[ftmp14]           \n\t" \
                                                                     \
   /* store: temp2[0] ~ temp2[7] */                                  \
-  "and        %[ftmp2],   %[ftmp2],       %[mask]             \n\t" \
-  "and        %[ftmp3],   %[ftmp3],       %[mask]             \n\t" \
+  "pand       %[ftmp2],   %[ftmp2],       %[mask]             \n\t" \
+  "pand       %[ftmp3],   %[ftmp3],       %[mask]             \n\t" \
   "packushb   %[ftmp2],   %[ftmp2],       %[ftmp3]            \n\t" \
   "gssdlc1    %[ftmp2],   0x07(%[temp2_ptr])                  \n\t" \
   "gssdrc1    %[ftmp2],   0x00(%[temp2_ptr])                  \n\t"
@@ -247,8 +247,8 @@ static const uint8_t bilinear_filters[8][2] = {
   "psrlh      %[ftmp9],   %[ftmp9],       %[ftmp14]           \n\t" \
                                                                     \
   /* store: temp2[0] ~ temp2[7] */                                  \
-  "and        %[ftmp8],   %[ftmp8],       %[mask]             \n\t" \
-  "and        %[ftmp9],   %[ftmp9],       %[mask]             \n\t" \
+  "pand       %[ftmp8],   %[ftmp8],       %[mask]             \n\t" \
+  "pand       %[ftmp9],   %[ftmp9],       %[mask]             \n\t" \
   "packushb   %[ftmp8],   %[ftmp8],       %[ftmp9]            \n\t" \
   "gssdlc1    %[ftmp8],   0x07(%[temp2_ptr])                  \n\t" \
   "gssdrc1    %[ftmp8],   0x00(%[temp2_ptr])                  \n\t"
@@ -319,8 +319,8 @@ static const uint8_t bilinear_filters[8][2] = {
   "psrlh      %[ftmp5],   %[ftmp5],       %[ftmp14]           \n\t" \
                                                                     \
   /* store: temp2[8] ~ temp2[15] */                                 \
-  "and        %[ftmp4],   %[ftmp4],       %[mask]             \n\t" \
-  "and        %[ftmp5],   %[ftmp5],       %[mask]             \n\t" \
+  "pand       %[ftmp4],   %[ftmp4],       %[mask]             \n\t" \
+  "pand       %[ftmp5],   %[ftmp5],       %[mask]             \n\t" \
   "packushb   %[ftmp4],   %[ftmp4],       %[ftmp5]            \n\t" \
   "gssdlc1    %[ftmp4],   0x0f(%[temp2_ptr])                  \n\t" \
   "gssdrc1    %[ftmp4],   0x08(%[temp2_ptr])                  \n\t"
@@ -343,8 +343,8 @@ static const uint8_t bilinear_filters[8][2] = {
   "psrlh      %[ftmp11],  %[ftmp11],      %[ftmp14]           \n\t" \
                                                                     \
   /* store: temp2[8] ~ temp2[15] */                                 \
-  "and        %[ftmp10],  %[ftmp10],      %[mask]             \n\t" \
-  "and        %[ftmp11],  %[ftmp11],      %[mask]             \n\t" \
+  "pand       %[ftmp10],  %[ftmp10],      %[mask]             \n\t" \
+  "pand       %[ftmp11],  %[ftmp11],      %[mask]             \n\t" \
   "packushb   %[ftmp10],  %[ftmp10],      %[ftmp11]           \n\t" \
   "gssdlc1    %[ftmp10],  0x0f(%[temp2_ptr])                  \n\t" \
   "gssdrc1    %[ftmp10],  0x08(%[temp2_ptr])                  \n\t"
@@ -418,9 +418,9 @@ static inline uint32_t vpx_variance64x(const uint8_t *src_ptr, int src_stride,
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
     MMI_L(%[tmp0], %[high], 0x00)
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
     "1:                                                         \n\t"
     "gsldlc1    %[ftmp1],   0x07(%[src_ptr])                    \n\t"
     "gsldrc1    %[ftmp1],   0x00(%[src_ptr])                    \n\t"
@@ -478,7 +478,7 @@ static inline uint32_t vpx_variance64x(const uint8_t *src_ptr, int src_stride,
     "mfc1       %[tmp1],    %[ftmp9]                            \n\t"
     "mfhc1      %[tmp2],    %[ftmp9]                            \n\t"
     "addu       %[sum],     %[tmp1],        %[tmp2]             \n\t"
-    "dsrl       %[ftmp1],   %[ftmp10],      %[ftmp11]           \n\t"
+    "ssrld      %[ftmp1],   %[ftmp10],      %[ftmp11]           \n\t"
     "paddw      %[ftmp1],   %[ftmp1],       %[ftmp10]           \n\t"
     "swc1       %[ftmp1],   0x00(%[sse])                        \n\t"
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
@@ -523,9 +523,9 @@ uint32_t vpx_variance32x64_mmi(const uint8_t *src_ptr, int src_stride,
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
     "li         %[tmp0],    0x40                                \n\t"
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp9],   %[ftmp9],       %[ftmp9]            \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
     "1:                                                         \n\t"
     "gsldlc1    %[ftmp1],   0x07(%[src_ptr])                    \n\t"
     "gsldrc1    %[ftmp1],   0x00(%[src_ptr])                    \n\t"
@@ -559,7 +559,7 @@ uint32_t vpx_variance32x64_mmi(const uint8_t *src_ptr, int src_stride,
     "mfc1       %[tmp1],    %[ftmp9]                            \n\t"
     "mfhc1      %[tmp2],    %[ftmp9]                            \n\t"
     "addu       %[sum],     %[tmp1],        %[tmp2]             \n\t"
-    "dsrl       %[ftmp1],   %[ftmp10],      %[ftmp11]           \n\t"
+    "ssrld      %[ftmp1],   %[ftmp10],      %[ftmp11]           \n\t"
     "paddw      %[ftmp1],   %[ftmp1],       %[ftmp10]           \n\t"
     "swc1       %[ftmp1],   0x00(%[sse])                        \n\t"
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
@@ -594,10 +594,10 @@ static inline uint32_t vpx_variance32x(const uint8_t *src_ptr, int src_stride,
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
     MMI_L(%[tmp0], %[high], 0x00)
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
-    "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
-    "xor        %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
+    "pxor       %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
     "1:                                                         \n\t"
     "gsldlc1    %[ftmp1],   0x07(%[src_ptr])                    \n\t"
     "gsldrc1    %[ftmp1],   0x00(%[src_ptr])                    \n\t"
@@ -625,7 +625,7 @@ static inline uint32_t vpx_variance32x(const uint8_t *src_ptr, int src_stride,
     MMI_ADDU(%[ref_ptr], %[ref_ptr], %[ref_stride])
     "bnez       %[tmp0],    1b                                  \n\t"
 
-    "dsrl       %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
+    "ssrld      %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
     "paddw      %[ftmp9],   %[ftmp9],       %[ftmp8]            \n\t"
     "swc1       %[ftmp9],   0x00(%[sse])                        \n\t"
 
@@ -636,7 +636,7 @@ static inline uint32_t vpx_variance32x(const uint8_t *src_ptr, int src_stride,
     "paddw      %[ftmp3],   %[ftmp3],       %[ftmp4]            \n\t"
     "psubw      %[ftmp3],   %[ftmp3],       %[ftmp5]            \n\t"
     "psubw      %[ftmp3],   %[ftmp3],       %[ftmp6]            \n\t"
-    "dsrl       %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
+    "ssrld      %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
     "paddw      %[ftmp0],   %[ftmp0],       %[ftmp3]            \n\t"
     "swc1       %[ftmp0],   0x00(%[sum])                        \n\t"
 
@@ -680,10 +680,10 @@ static inline uint32_t vpx_variance16x(const uint8_t *src_ptr, int src_stride,
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
     MMI_L(%[tmp0], %[high], 0x00)
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
-    "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
-    "xor        %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
+    "pxor       %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
     "1:                                                         \n\t"
     "gsldlc1    %[ftmp1],   0x07(%[src_ptr])                    \n\t"
     "gsldrc1    %[ftmp1],   0x00(%[src_ptr])                    \n\t"
@@ -701,7 +701,7 @@ static inline uint32_t vpx_variance16x(const uint8_t *src_ptr, int src_stride,
     MMI_ADDU(%[ref_ptr], %[ref_ptr], %[ref_stride])
     "bnez       %[tmp0],    1b                                  \n\t"
 
-    "dsrl       %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
+    "ssrld      %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
     "paddw      %[ftmp9],   %[ftmp9],       %[ftmp8]            \n\t"
     "swc1       %[ftmp9],   0x00(%[sse])                        \n\t"
 
@@ -712,7 +712,7 @@ static inline uint32_t vpx_variance16x(const uint8_t *src_ptr, int src_stride,
     "paddw      %[ftmp3],   %[ftmp3],       %[ftmp4]            \n\t"
     "psubw      %[ftmp3],   %[ftmp3],       %[ftmp5]            \n\t"
     "psubw      %[ftmp3],   %[ftmp3],       %[ftmp6]            \n\t"
-    "dsrl       %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
+    "ssrld      %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
     "paddw      %[ftmp0],   %[ftmp0],       %[ftmp3]            \n\t"
     "swc1       %[ftmp0],   0x00(%[sum])                        \n\t"
 
@@ -757,10 +757,10 @@ static inline uint32_t vpx_variance8x(const uint8_t *src_ptr, int src_stride,
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
     MMI_L(%[tmp0], %[high], 0x00)
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
-    "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
-    "xor        %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],      %[ftmp10]           \n\t"
+    "pxor       %[ftmp12],  %[ftmp12],      %[ftmp12]           \n\t"
     "1:                                                         \n\t"
     "gsldlc1    %[ftmp1],   0x07(%[src_ptr])                    \n\t"
     "gsldrc1    %[ftmp1],   0x00(%[src_ptr])                    \n\t"
@@ -773,7 +773,7 @@ static inline uint32_t vpx_variance8x(const uint8_t *src_ptr, int src_stride,
     MMI_ADDU(%[ref_ptr], %[ref_ptr], %[ref_stride])
     "bnez       %[tmp0],    1b                                  \n\t"
 
-    "dsrl       %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
+    "ssrld      %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
     "paddw      %[ftmp9],   %[ftmp9],       %[ftmp8]            \n\t"
     "swc1       %[ftmp9],   0x00(%[sse])                        \n\t"
 
@@ -784,7 +784,7 @@ static inline uint32_t vpx_variance8x(const uint8_t *src_ptr, int src_stride,
     "paddw      %[ftmp3],   %[ftmp3],       %[ftmp4]            \n\t"
     "psubw      %[ftmp3],   %[ftmp3],       %[ftmp5]            \n\t"
     "psubw      %[ftmp3],   %[ftmp3],       %[ftmp6]            \n\t"
-    "dsrl       %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
+    "ssrld      %[ftmp0],   %[ftmp3],       %[ftmp11]           \n\t"
     "paddw      %[ftmp0],   %[ftmp0],       %[ftmp3]            \n\t"
     "swc1       %[ftmp0],   0x00(%[sum])                        \n\t"
 
@@ -829,10 +829,10 @@ static inline uint32_t vpx_variance4x(const uint8_t *src_ptr, int src_stride,
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp10]                           \n\t"
     MMI_L(%[tmp0], %[high], 0x00)
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
-    "xor        %[ftmp6],   %[ftmp6],       %[ftmp6]            \n\t"
-    "xor        %[ftmp7],   %[ftmp7],       %[ftmp7]            \n\t"
-    "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],       %[ftmp6]            \n\t"
+    "pxor       %[ftmp7],   %[ftmp7],       %[ftmp7]            \n\t"
+    "pxor       %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
     "1:                                                         \n\t"
     "gsldlc1    %[ftmp1],   0x07(%[src_ptr])                    \n\t"
     "gsldrc1    %[ftmp1],   0x00(%[src_ptr])                    \n\t"
@@ -845,7 +845,7 @@ static inline uint32_t vpx_variance4x(const uint8_t *src_ptr, int src_stride,
     MMI_ADDU(%[ref_ptr], %[ref_ptr], %[ref_stride])
     "bnez       %[tmp0],    1b                                  \n\t"
 
-    "dsrl       %[ftmp9],   %[ftmp6],       %[ftmp10]           \n\t"
+    "ssrld      %[ftmp9],   %[ftmp6],       %[ftmp10]           \n\t"
     "paddw      %[ftmp9],   %[ftmp9],       %[ftmp6]            \n\t"
     "swc1       %[ftmp9],   0x00(%[sse])                        \n\t"
 
@@ -856,7 +856,7 @@ static inline uint32_t vpx_variance4x(const uint8_t *src_ptr, int src_stride,
     "paddw      %[ftmp3],   %[ftmp3],       %[ftmp4]            \n\t"
     "psubw      %[ftmp3],   %[ftmp3],       %[ftmp5]            \n\t"
     "psubw      %[ftmp3],   %[ftmp3],       %[ftmp6]            \n\t"
-    "dsrl       %[ftmp0],   %[ftmp3],       %[ftmp10]           \n\t"
+    "ssrld      %[ftmp0],   %[ftmp3],       %[ftmp10]           \n\t"
     "paddw      %[ftmp0],   %[ftmp0],       %[ftmp3]            \n\t"
     "swc1       %[ftmp0],   0x00(%[sum])                        \n\t"
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
@@ -898,8 +898,8 @@ static inline uint32_t vpx_mse16x(const uint8_t *src_ptr, int src_stride,
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
     MMI_L(%[tmp0], %[high], 0x00)
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
-    "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
 
     "1:                                                         \n\t"
     VARIANCE_SSE_16
@@ -909,7 +909,7 @@ static inline uint32_t vpx_mse16x(const uint8_t *src_ptr, int src_stride,
     MMI_ADDU(%[ref_ptr], %[ref_ptr], %[ref_stride])
     "bnez       %[tmp0],    1b                                  \n\t"
 
-    "dsrl       %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
+    "ssrld      %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
     "paddw      %[ftmp9],   %[ftmp9],       %[ftmp8]            \n\t"
     "swc1       %[ftmp9],   0x00(%[sse])                        \n\t"
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
@@ -951,8 +951,8 @@ static inline uint32_t vpx_mse8x(const uint8_t *src_ptr, int src_stride,
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
     MMI_L(%[tmp0], %[high], 0x00)
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
-    "xor        %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp8],   %[ftmp8],       %[ftmp8]            \n\t"
 
     "1:                                                         \n\t"
     VARIANCE_SSE_8
@@ -962,7 +962,7 @@ static inline uint32_t vpx_mse8x(const uint8_t *src_ptr, int src_stride,
     MMI_ADDU(%[ref_ptr], %[ref_ptr], %[ref_stride])
     "bnez       %[tmp0],    1b                                  \n\t"
 
-    "dsrl       %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
+    "ssrld      %[ftmp9],   %[ftmp8],       %[ftmp11]           \n\t"
     "paddw      %[ftmp9],   %[ftmp9],       %[ftmp8]            \n\t"
     "swc1       %[ftmp9],   0x00(%[sse])                        \n\t"
     : [ftmp0]"=&f"(ftmp[0]),            [ftmp1]"=&f"(ftmp[1]),
@@ -1029,7 +1029,7 @@ static inline void var_filter_block2d_bil_16x(const uint8_t *src_ptr,
   const uint8_t *filter_y = bilinear_filters[y_offset];
 
   __asm__ volatile (
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     MMI_LI(%[tmp0], 0x07)
     MMI_MTC1(%[tmp0], %[ftmp14])
     "pshufh     %[filter_x0], %[filter_x0], %[ftmp0]            \n\t"
@@ -1111,7 +1111,7 @@ static inline void var_filter_block2d_bil_8x(const uint8_t *src_ptr,
   const uint8_t *filter_y = bilinear_filters[y_offset];
 
   __asm__ volatile (
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     MMI_LI(%[tmp0], 0x07)
     MMI_MTC1(%[tmp0], %[ftmp14])
     "pshufh     %[filter_x0], %[filter_x0], %[ftmp0]            \n\t"
@@ -1194,7 +1194,7 @@ static inline void var_filter_block2d_bil_4x(const uint8_t *src_ptr,
   const uint8_t *filter_y = bilinear_filters[y_offset];
 
   __asm__ volatile (
-    "xor        %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     MMI_LI(%[tmp0], 0x07)
     MMI_MTC1(%[tmp0], %[ftmp6])
     "pshufh     %[filter_x0], %[filter_x0], %[ftmp0]            \n\t"

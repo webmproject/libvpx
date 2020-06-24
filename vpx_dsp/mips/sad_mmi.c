@@ -365,7 +365,7 @@ static inline unsigned int vpx_sad64x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_REF_ABS_SUB_64
@@ -407,7 +407,7 @@ static inline unsigned int vpx_sad_avg64x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_AVGREF_ABS_SUB_64
@@ -451,7 +451,7 @@ static inline unsigned int vpx_sad32x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_REF_ABS_SUB_32
@@ -495,7 +495,7 @@ static inline unsigned int vpx_sad_avg32x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_AVGREF_ABS_SUB_32
@@ -540,7 +540,7 @@ static inline unsigned int vpx_sad16x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_REF_ABS_SUB_16
@@ -588,7 +588,7 @@ static inline unsigned int vpx_sad_avg16x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],       %[ftmp5]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_AVGREF_ABS_SUB_16
@@ -633,7 +633,7 @@ static inline unsigned int vpx_sad8x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp3],   %[ftmp3],       %[ftmp3]            \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],       %[ftmp3]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_REF_ABS_SUB_8
@@ -681,7 +681,7 @@ static inline unsigned int vpx_sad_avg8x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp3],   %[ftmp3],       %[ftmp3]            \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],       %[ftmp3]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_AVGREF_ABS_SUB_8
@@ -725,7 +725,7 @@ static inline unsigned int vpx_sad4x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp3],   %[ftmp3],       %[ftmp3]            \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],       %[ftmp3]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_REF_ABS_SUB_4
@@ -769,7 +769,7 @@ static inline unsigned int vpx_sad_avg4x(const uint8_t *src, int src_stride,
   mips_reg l_counter = counter;
 
   __asm__ volatile (
-    "xor        %[ftmp3],   %[ftmp3],       %[ftmp3]            \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],       %[ftmp3]            \n\t"
     "1:                                                         \n\t"
     // Include two loop body, to reduce loop time.
     SAD_SRC_AVGREF_ABS_SUB_4

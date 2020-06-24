@@ -56,14 +56,14 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "gsldrc1    %[ftmp4],   0x00(%[addr1])                          \n\t"
     "pasubub    %[ftmp1],   %[ftmp3],           %[ftmp4]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp10]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
 
     MMI_SUBU(%[addr1], %[src_ptr], %[src_pixel_step])
     "gsldlc1    %[ftmp5],   0x07(%[addr1])                          \n\t"
     "gsldrc1    %[ftmp5],   0x00(%[addr1])                          \n\t"
     "pasubub    %[ftmp9],   %[ftmp4],           %[ftmp5]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp9],           %[ftmp10]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
 
     "gsldlc1    %[ftmp6],   0x07(%[src_ptr])                        \n\t"
     "gsldrc1    %[ftmp6],   0x00(%[src_ptr])                        \n\t"
@@ -72,21 +72,21 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "gsldrc1    %[ftmp7],   0x00(%[addr0])                          \n\t"
     "pasubub    %[ftmp11],  %[ftmp7],           %[ftmp6]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp11],          %[ftmp10]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
 
     MMI_ADDU(%[addr1], %[src_ptr], %[src_pixel_step_x2])
     "gsldlc1    %[ftmp8],   0x07(%[addr1])                          \n\t"
     "gsldrc1    %[ftmp8],   0x00(%[addr1])                          \n\t"
     "pasubub    %[ftmp1],   %[ftmp8],           %[ftmp7]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp10]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
 
     MMI_ADDU(%[addr1], %[addr0], %[src_pixel_step_x2])
     "gsldlc1    %[ftmp2],   0x07(%[addr1])                          \n\t"
     "gsldrc1    %[ftmp2],   0x00(%[addr1])                          \n\t"
     "pasubub    %[ftmp1],   %[ftmp2],           %[ftmp8]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp10]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
 
     "pasubub    %[ftmp1],   %[ftmp5],           %[ftmp6]            \n\t"
     "paddusb    %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
@@ -99,8 +99,8 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "gsldlc1    %[ftmp10],  0x07(%[blimit])                         \n\t"
     "gsldrc1    %[ftmp10],  0x00(%[blimit])                         \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp10]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],          %[ftmp10]           \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],          %[ftmp10]           \n\t"
     "pcmpeqb    %[ftmp0],   %[ftmp0],           %[ftmp10]           \n\t"
 
     "gsldlc1    %[ftmp10],  0x07(%[thresh])                         \n\t"
@@ -108,29 +108,29 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "psubusb    %[ftmp1],   %[ftmp9],           %[ftmp10]           \n\t"
     "psubusb    %[ftmp2],   %[ftmp11],          %[ftmp10]           \n\t"
     "paddb      %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
-    "xor        %[ftmp2],   %[ftmp2],           %[ftmp2]            \n\t"
+    "pxor       %[ftmp2],   %[ftmp2],           %[ftmp2]            \n\t"
     "pcmpeqb    %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
     "pcmpeqb    %[ftmp2],   %[ftmp2],           %[ftmp2]            \n\t"
-    "xor        %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
+    "pxor       %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
 
-    "xor        %[ftmp4],   %[ftmp4],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp4],   %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
 
     "psubsb     %[ftmp2],   %[ftmp4],           %[ftmp7]            \n\t"
-    "and        %[ftmp2],   %[ftmp2],           %[ftmp1]            \n\t"
+    "pand       %[ftmp2],   %[ftmp2],           %[ftmp1]            \n\t"
     "psubsb     %[ftmp3],   %[ftmp6],           %[ftmp5]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp3]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp3]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp3]            \n\t"
-    "and        %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
+    "pand       %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
 
     "paddsb     %[ftmp8],   %[ftmp2],           %[ff_pb_03]         \n\t"
     "paddsb     %[ftmp9],   %[ftmp2],           %[ff_pb_04]         \n\t"
 
-    "xor        %[ftmp0],   %[ftmp0],           %[ftmp0]            \n\t"
-    "xor        %[ftmp11],  %[ftmp11],          %[ftmp11]           \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],           %[ftmp0]            \n\t"
+    "pxor       %[ftmp11],  %[ftmp11],          %[ftmp11]           \n\t"
     "punpcklbh  %[ftmp0],   %[ftmp0],           %[ftmp8]            \n\t"
     "punpckhbh  %[ftmp11],  %[ftmp11],          %[ftmp8]            \n\t"
 
@@ -139,10 +139,10 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "psrah      %[ftmp0],   %[ftmp0],           %[ftmp10]           \n\t"
     "psrah      %[ftmp11],  %[ftmp11],          %[ftmp10]           \n\t"
     "packsshb   %[ftmp8],   %[ftmp0],           %[ftmp11]           \n\t"
-    "xor        %[ftmp0],   %[ftmp0],           %[ftmp0]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],           %[ftmp0]            \n\t"
     "punpcklbh  %[ftmp0],   %[ftmp0],           %[ftmp9]            \n\t"
     "psrah      %[ftmp0],   %[ftmp0],           %[ftmp10]           \n\t"
-    "xor        %[ftmp11],  %[ftmp11],          %[ftmp11]           \n\t"
+    "pxor       %[ftmp11],  %[ftmp11],          %[ftmp11]           \n\t"
     "punpckhbh  %[ftmp9],   %[ftmp11],          %[ftmp9]            \n\t"
     "psrah      %[ftmp9],   %[ftmp9],           %[ftmp10]           \n\t"
     "paddsh     %[ftmp11],  %[ftmp0],           %[ff_ph_01]         \n\t"
@@ -156,24 +156,24 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "packsshb   %[ftmp11],  %[ftmp11],          %[ftmp9]            \n\t"
     "pandn      %[ftmp1],   %[ftmp1],           %[ftmp11]           \n\t"
     "paddsb     %[ftmp5],   %[ftmp5],           %[ftmp8]            \n\t"
-    "xor        %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
 
     MMI_SUBU(%[addr1], %[src_ptr], %[src_pixel_step])
     "gssdlc1    %[ftmp5],   0x07(%[addr1])                          \n\t"
     "gssdrc1    %[ftmp5],   0x00(%[addr1])                          \n\t"
     MMI_SUBU(%[addr1], %[src_ptr], %[src_pixel_step_x2])
     "paddsb     %[ftmp4],   %[ftmp4],           %[ftmp1]            \n\t"
-    "xor        %[ftmp4],   %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp4],   %[ftmp4],           %[ff_pb_80]         \n\t"
     "gssdlc1    %[ftmp4],   0x07(%[addr1])                          \n\t"
     "gssdrc1    %[ftmp4],   0x00(%[addr1])                          \n\t"
 
     "psubsb     %[ftmp6],   %[ftmp6],           %[ftmp0]            \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
     "gssdlc1    %[ftmp6],   0x07(%[src_ptr])                        \n\t"
     "gssdrc1    %[ftmp6],   0x00(%[src_ptr])                        \n\t"
 
     "psubsb     %[ftmp7],   %[ftmp7],           %[ftmp1]            \n\t"
-    "xor        %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
     "gssdlc1    %[ftmp7],   0x07(%[addr0])                          \n\t"
     "gssdrc1    %[ftmp7],   0x00(%[addr0])                          \n\t"
 
@@ -288,23 +288,23 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     /* abs (q2-q1) */
     "pasubub    %[ftmp7],   %[ftmp11],          %[ftmp10]           \n\t"
     "psubusb    %[ftmp7],   %[ftmp7],           %[ftmp8]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     /* ftmp3: abs(q1-q0) */
     "pasubub    %[ftmp3],   %[ftmp10],          %[ftmp9]            \n\t"
     "psubusb    %[ftmp7],   %[ftmp3],           %[ftmp8]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     /* ftmp4: abs(p1-p0) */
     "pasubub    %[ftmp4],   %[ftmp5],           %[ftmp6]            \n\t"
     "psubusb    %[ftmp7],   %[ftmp4],           %[ftmp8]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     /* abs (p2-p1) */
     "pasubub    %[ftmp7],   %[ftmp2],           %[ftmp5]            \n\t"
     "psubusb    %[ftmp7],   %[ftmp7],           %[ftmp8]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     /* abs (p3-p2) */
     "pasubub    %[ftmp7],   %[ftmp1],           %[ftmp2]            \n\t"
     "psubusb    %[ftmp7],   %[ftmp7],           %[ftmp8]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
 
     "gsldlc1    %[ftmp8],   0x07(%[blimit])                         \n\t"
     "gsldrc1    %[ftmp8],   0x00(%[blimit])                         \n\t"
@@ -314,14 +314,14 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     "paddusb    %[ftmp11],  %[ftmp11],          %[ftmp11]           \n\t"
     /* abs (p1-q1) */
     "pasubub    %[ftmp12],  %[ftmp10],          %[ftmp5]            \n\t"
-    "and        %[ftmp12],  %[ftmp12],          %[ff_pb_fe]         \n\t"
+    "pand       %[ftmp12],  %[ftmp12],          %[ff_pb_fe]         \n\t"
     "li         %[tmp0],    0x01                                    \n\t"
     "mtc1       %[tmp0],    %[ftmp1]                                \n\t"
     "psrlh      %[ftmp12],  %[ftmp12],          %[ftmp1]            \n\t"
     "paddusb    %[ftmp1],   %[ftmp11],          %[ftmp12]           \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp8]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
-    "xor        %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "pxor       %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
     /* ftmp0:mask */
     "pcmpeqb    %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
 
@@ -331,41 +331,41 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     /* ftmp3: abs(q1-q0)  ftmp4: abs(p1-p0) */
     "psubusb    %[ftmp4],   %[ftmp4],           %[ftmp8]            \n\t"
     "psubusb    %[ftmp3],   %[ftmp3],           %[ftmp8]            \n\t"
-    "or         %[ftmp2],   %[ftmp4],           %[ftmp3]            \n\t"
+    "por        %[ftmp2],   %[ftmp4],           %[ftmp3]            \n\t"
     "pcmpeqb    %[ftmp2],   %[ftmp2],           %[ftmp1]            \n\t"
     "pcmpeqb    %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
     /* ftmp1:hev */
-    "xor        %[ftmp1],   %[ftmp2],           %[ftmp1]            \n\t"
+    "pxor       %[ftmp1],   %[ftmp2],           %[ftmp1]            \n\t"
 
-    "xor        %[ftmp10],  %[ftmp10],          %[ff_pb_80]         \n\t"
-    "xor        %[ftmp9],   %[ftmp9],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],          %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp9],   %[ftmp9],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
 
     "psubsb     %[ftmp2],   %[ftmp5],           %[ftmp10]           \n\t"
-    "and        %[ftmp2],   %[ftmp2],           %[ftmp1]            \n\t"
+    "pand       %[ftmp2],   %[ftmp2],           %[ftmp1]            \n\t"
     "psubsb     %[ftmp3],   %[ftmp9],           %[ftmp6]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp3]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp3]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp3]            \n\t"
     /* ftmp2:filter_value */
-    "and        %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
+    "pand       %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
 
     "paddsb     %[ftmp11],  %[ftmp2],           %[ff_pb_04]         \n\t"
     "paddsb     %[ftmp12],  %[ftmp2],           %[ff_pb_03]         \n\t"
 
     "li         %[tmp0],    0x0b                                    \n\t"
     "mtc1       %[tmp0],    %[ftmp7]                                \n\t"
-    "xor       %[ftmp0],    %[ftmp0],           %[ftmp0]            \n\t"
-    "xor       %[ftmp8],    %[ftmp8],           %[ftmp8]            \n\t"
+    "pxor      %[ftmp0],    %[ftmp0],           %[ftmp0]            \n\t"
+    "pxor      %[ftmp8],    %[ftmp8],           %[ftmp8]            \n\t"
     "punpcklbh %[ftmp0],    %[ftmp0],           %[ftmp12]           \n\t"
     "punpckhbh %[ftmp8],    %[ftmp8],           %[ftmp12]           \n\t"
     "psrah     %[ftmp0],    %[ftmp0],           %[ftmp7]            \n\t"
     "psrah     %[ftmp8],    %[ftmp8],           %[ftmp7]            \n\t"
     "packsshb  %[ftmp12],   %[ftmp0],           %[ftmp8]            \n\t"
 
-    "xor       %[ftmp0],    %[ftmp0],           %[ftmp0]            \n\t"
-    "xor       %[ftmp8],    %[ftmp8],           %[ftmp8]            \n\t"
+    "pxor      %[ftmp0],    %[ftmp0],           %[ftmp0]            \n\t"
+    "pxor      %[ftmp8],    %[ftmp8],           %[ftmp8]            \n\t"
     "punpcklbh %[ftmp0],    %[ftmp0],           %[ftmp11]           \n\t"
     "punpckhbh %[ftmp8],    %[ftmp8],           %[ftmp11]           \n\t"
     "psrah     %[ftmp0],    %[ftmp0],           %[ftmp7]            \n\t"
@@ -373,9 +373,9 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     "packsshb  %[ftmp11],   %[ftmp0],           %[ftmp8]            \n\t"
 
     "psubsb     %[ftmp9],   %[ftmp9],           %[ftmp11]           \n\t"
-    "xor        %[ftmp9],   %[ftmp9],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp9],   %[ftmp9],           %[ff_pb_80]         \n\t"
     "paddsb     %[ftmp6],   %[ftmp6],           %[ftmp12]           \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
     "paddsh     %[ftmp0],   %[ftmp0],           %[ff_ph_01]         \n\t"
     "paddsh     %[ftmp8],   %[ftmp8],           %[ff_ph_01]         \n\t"
 
@@ -386,9 +386,9 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     "packsshb   %[ftmp2],   %[ftmp0],           %[ftmp8]            \n\t"
     "pandn      %[ftmp2],   %[ftmp1],           %[ftmp2]            \n\t"
     "psubsb     %[ftmp10],  %[ftmp10],          %[ftmp2]            \n\t"
-    "xor        %[ftmp10],  %[ftmp10],          %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],          %[ff_pb_80]         \n\t"
     "paddsb     %[ftmp5],   %[ftmp5],           %[ftmp2]            \n\t"
-    "xor        %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
 
     /* ftmp5: *op1 ; ftmp6: *op0 */
     "punpcklbh  %[ftmp2],   %[ftmp5],           %[ftmp6]            \n\t"
@@ -408,7 +408,7 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
 
     "li         %[tmp0],    0x20                                    \n\t"
     "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
-    "dsrl       %[ftmp2],   %[ftmp2],           %[ftmp9]            \n\t"
+    "ssrld      %[ftmp2],   %[ftmp2],           %[ftmp9]            \n\t"
     MMI_SLL(%[tmp0], %[src_pixel_step], 0x02)
     MMI_SUBU(%[addr1], %[addr0], %[tmp0])
     "gsswlc1    %[ftmp2],   0x05(%[addr1])                          \n\t"
@@ -419,21 +419,21 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     "gsswlc1    %[ftmp6],   0x05(%[addr1])                          \n\t"
     "gsswrc1    %[ftmp6],   0x02(%[addr1])                          \n\t"
 
-    "dsrl       %[ftmp6],   %[ftmp6],           %[ftmp9]            \n\t"
+    "ssrld      %[ftmp6],   %[ftmp6],           %[ftmp9]            \n\t"
     MMI_SUBU(%[addr1], %[src_ptr], %[src_pixel_step])
     "gsswlc1    %[ftmp6],   0x05(%[addr1])                          \n\t"
     "gsswrc1    %[ftmp6],   0x02(%[addr1])                          \n\t"
     "gsswlc1    %[ftmp1],   0x05(%[src_ptr])                        \n\t"
     "gsswrc1    %[ftmp1],   0x02(%[src_ptr])                        \n\t"
 
-    "dsrl       %[ftmp1],   %[ftmp1],           %[ftmp9]            \n\t"
+    "ssrld      %[ftmp1],   %[ftmp1],           %[ftmp9]            \n\t"
     "gsswlc1    %[ftmp1],   0x05(%[addr0])                          \n\t"
     "gsswrc1    %[ftmp1],   0x02(%[addr0])                          \n\t"
     MMI_ADDU(%[addr1], %[addr0], %[src_pixel_step])
     "gsswlc1    %[ftmp5],   0x05(%[addr1])                          \n\t"
     "gsswrc1    %[ftmp5],   0x02(%[addr1])                          \n\t"
 
-    "dsrl       %[ftmp5],   %[ftmp5],           %[ftmp9]            \n\t"
+    "ssrld      %[ftmp5],   %[ftmp5],           %[ftmp9]            \n\t"
     MMI_ADDU(%[addr1], %[addr0], %[tmp0])
     "gsswlc1    %[ftmp5],   0x05(%[addr1])                          \n\t"
     "gsswrc1    %[ftmp5],   0x02(%[addr1])                          \n\t"
@@ -532,31 +532,31 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
     "psubusb    %[ftmp0],   %[ftmp0],           %[ftmp9]            \n\t"
     "pasubub    %[ftmp1],   %[ftmp3],           %[ftmp4]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp9]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
     "pasubub    %[ftmp10],  %[ftmp4],           %[ftmp5]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp10],          %[ftmp9]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
     "pasubub    %[ftmp11],  %[ftmp7],           %[ftmp6]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp11],          %[ftmp9]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
     "pasubub    %[ftmp1],   %[ftmp8],           %[ftmp7]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp9]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
     "pasubub    %[ftmp1],   %[ftmp2],           %[ftmp8]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp9]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
 
     "pasubub    %[ftmp1],   %[ftmp5],           %[ftmp6]            \n\t"
     "paddusb    %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
     "pasubub    %[ftmp2],   %[ftmp4],           %[ftmp7]            \n\t"
-    "and        %[ftmp2],   %[ftmp2],           %[ff_pb_fe]         \n\t"
+    "pand       %[ftmp2],   %[ftmp2],           %[ff_pb_fe]         \n\t"
     "li         %[tmp0],    0x01                                    \n\t"
     "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
     "psrlh      %[ftmp2],   %[ftmp2],           %[ftmp9]            \n\t"
     "paddusb    %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp12]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
-    "xor        %[ftmp9],   %[ftmp9],           %[ftmp9]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+    "pxor       %[ftmp9],   %[ftmp9],           %[ftmp9]            \n\t"
     /* ftmp0: mask */
     "pcmpeqb    %[ftmp0],   %[ftmp0],           %[ftmp9]            \n\t"
 
@@ -565,24 +565,24 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
     "psubusb    %[ftmp1],   %[ftmp10],          %[ftmp9]            \n\t"
     "psubusb    %[ftmp2],   %[ftmp11],          %[ftmp9]            \n\t"
     "paddb      %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
-    "xor        %[ftmp2],   %[ftmp2],           %[ftmp2]            \n\t"
+    "pxor       %[ftmp2],   %[ftmp2],           %[ftmp2]            \n\t"
     "pcmpeqb    %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
     "pcmpeqb    %[ftmp2],   %[ftmp2],           %[ftmp2]            \n\t"
     /* ftmp1: hev */
-    "xor        %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
+    "pxor       %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
 
-    "xor        %[ftmp4],   %[ftmp4],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp4],   %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
     "psubsb     %[ftmp2],   %[ftmp4],           %[ftmp7]            \n\t"
     "psubsb     %[ftmp9],   %[ftmp6],           %[ftmp5]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp9]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp9]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp9]            \n\t"
-    "and        %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
+    "pand       %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
     "pandn      %[ftmp12],  %[ftmp1],           %[ftmp2]            \n\t"
-    "and        %[ftmp2],   %[ftmp2],           %[ftmp1]            \n\t"
+    "pand       %[ftmp2],   %[ftmp2],           %[ftmp1]            \n\t"
 
     "li         %[tmp0],    0x0b                                    \n\t"
     "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
@@ -595,13 +595,13 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
 
     "li         %[tmp0],    0x07                                    \n\t"
     "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
-    "xor        %[ftmp0],   %[ftmp0],           %[ftmp0]            \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],           %[ftmp0]            \n\t"
 
     VP8_MBLOOP_HPSRAB_ADD(%[ff_ph_1b00])
     "psubsb     %[ftmp6],   %[ftmp6],           %[ftmp1]            \n\t"
     "paddsb     %[ftmp5],   %[ftmp5],           %[ftmp1]            \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
     MMI_SLL(%[tmp0], %[src_pixel_step], 0x02)
     MMI_SUBU(%[src_ptr], %[src_ptr], %[tmp0])
     "gssdlc1    %[ftmp5],   0x07(%[src_ptr])                        \n\t"
@@ -613,8 +613,8 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
     VP8_MBLOOP_HPSRAB_ADD(%[ff_ph_1200])
     "paddsb     %[ftmp4],   %[ftmp4],           %[ftmp1]            \n\t"
     "psubsb     %[ftmp7],   %[ftmp7],           %[ftmp1]            \n\t"
-    "xor        %[ftmp4],   %[ftmp4],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp4],   %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
     MMI_ADDU(%[src_ptr], %[src_ptr], %[src_pixel_step])
     "gssdlc1    %[ftmp7],   0x07(%[src_ptr])                        \n\t"
     "gssdrc1    %[ftmp7],   0x00(%[src_ptr])                        \n\t"
@@ -624,12 +624,12 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
     "gssdrc1    %[ftmp4],   0x00(%[src_ptr])                        \n\t"
 
     VP8_MBLOOP_HPSRAB_ADD(%[ff_ph_0900])
-    "xor        %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp8],   %[ftmp8],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp8],   %[ftmp8],           %[ff_pb_80]         \n\t"
     "paddsb     %[ftmp3],   %[ftmp3],           %[ftmp1]            \n\t"
     "psubsb     %[ftmp8],   %[ftmp8],           %[ftmp1]            \n\t"
-    "xor        %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp8],   %[ftmp8],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp8],   %[ftmp8],           %[ff_pb_80]         \n\t"
     MMI_ADDU(%[src_ptr], %[src_ptr], %[tmp0])
     "gssdlc1    %[ftmp8],   0x07(%[src_ptr])                        \n\t"
     "gssdrc1    %[ftmp8],   0x00(%[src_ptr])                        \n\t"
@@ -662,8 +662,8 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
 }
 
 #define VP8_MBLOOP_VPSRAB_ADDH                                          \
-  "xor        %[ftmp7],   %[ftmp7],           %[ftmp7]            \n\t" \
-  "xor        %[ftmp8],   %[ftmp8],           %[ftmp8]            \n\t" \
+  "pxor       %[ftmp7],   %[ftmp7],           %[ftmp7]            \n\t" \
+  "pxor       %[ftmp8],   %[ftmp8],           %[ftmp8]            \n\t" \
   "punpcklbh  %[ftmp7],   %[ftmp7],           %[ftmp0]            \n\t" \
   "punpckhbh  %[ftmp8],   %[ftmp8],           %[ftmp0]            \n\t"
 
@@ -755,23 +755,23 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     /* abs (q2-q1) */
     "pasubub    %[ftmp7],   %[ftmp11],          %[ftmp10]           \n\t"
     "psubusb    %[ftmp7],   %[ftmp7],           %[ftmp13]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     /* ftmp3: abs(q1-q0) */
     "pasubub    %[ftmp3],   %[ftmp10],          %[ftmp9]            \n\t"
     "psubusb    %[ftmp7],   %[ftmp3],           %[ftmp13]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     /* ftmp4: abs(p1-p0) */
     "pasubub    %[ftmp4],   %[ftmp5],           %[ftmp6]            \n\t"
     "psubusb    %[ftmp7],   %[ftmp4],           %[ftmp13]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     /* abs (p2-p1) */
     "pasubub    %[ftmp7],   %[ftmp2],           %[ftmp5]            \n\t"
     "psubusb    %[ftmp7],   %[ftmp7],           %[ftmp13]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     /* abs (p3-p2) */
     "pasubub    %[ftmp7],   %[ftmp1],           %[ftmp2]            \n\t"
     "psubusb    %[ftmp7],   %[ftmp7],           %[ftmp13]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
 
     "gsldlc1    %[ftmp13],  0x07(%[blimit])                         \n\t"
     "gsldrc1    %[ftmp13],  0x00(%[blimit])                         \n\t"
@@ -782,14 +782,14 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     "paddusb    %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
     /* abs (p1-q1) / 2 */
     "pasubub    %[ftmp12],  %[ftmp10],          %[ftmp5]            \n\t"
-    "and        %[ftmp12],  %[ftmp12],          %[ff_pb_fe]         \n\t"
+    "pand       %[ftmp12],  %[ftmp12],          %[ff_pb_fe]         \n\t"
     "li         %[tmp0],    0x01                                    \n\t"
     "mtc1       %[tmp0],    %[ftmp8]                                \n\t"
     "psrlh      %[ftmp12],  %[ftmp12],          %[ftmp8]            \n\t"
     "paddusb    %[ftmp12],  %[ftmp1],           %[ftmp12]           \n\t"
     "psubusb    %[ftmp12],  %[ftmp12],          %[ftmp13]           \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp12]           \n\t"
-    "xor        %[ftmp12],  %[ftmp12],          %[ftmp12]           \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp12]           \n\t"
+    "pxor       %[ftmp12],  %[ftmp12],          %[ftmp12]           \n\t"
     /* ftmp0: mask */
     "pcmpeqb    %[ftmp0],   %[ftmp0],           %[ftmp12]           \n\t"
 
@@ -797,19 +797,19 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     "psubusb    %[ftmp4],   %[ftmp4],           %[ftmp7]            \n\t"
     /* abs(q1-q0) - thresh */
     "psubusb    %[ftmp3],   %[ftmp3],           %[ftmp7]            \n\t"
-    "or         %[ftmp3],   %[ftmp4],           %[ftmp3]            \n\t"
+    "por        %[ftmp3],   %[ftmp4],           %[ftmp3]            \n\t"
     "pcmpeqb    %[ftmp3],   %[ftmp3],           %[ftmp12]           \n\t"
     "pcmpeqb    %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
     /* ftmp1: hev */
-    "xor        %[ftmp1],   %[ftmp3],           %[ftmp1]            \n\t"
+    "pxor       %[ftmp1],   %[ftmp3],           %[ftmp1]            \n\t"
 
     /* ftmp2:ps2, ftmp5:ps1, ftmp6:ps0, ftmp9:qs0, ftmp10:qs1, ftmp11:qs2 */
-    "xor        %[ftmp11],  %[ftmp11],          %[ff_pb_80]         \n\t"
-    "xor        %[ftmp10],  %[ftmp10],          %[ff_pb_80]         \n\t"
-    "xor        %[ftmp9],   %[ftmp9],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp2],   %[ftmp2],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp11],  %[ftmp11],          %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp10],  %[ftmp10],          %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp9],   %[ftmp9],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp5],   %[ftmp5],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp2],   %[ftmp2],           %[ff_pb_80]         \n\t"
 
     "psubsb     %[ftmp3],   %[ftmp5],           %[ftmp10]           \n\t"
     "psubsb     %[ftmp4],   %[ftmp9],           %[ftmp6]            \n\t"
@@ -817,9 +817,9 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     "paddsb     %[ftmp3],   %[ftmp3],           %[ftmp4]            \n\t"
     "paddsb     %[ftmp3],   %[ftmp3],           %[ftmp4]            \n\t"
     /* filter_value &= mask */
-    "and        %[ftmp0],   %[ftmp0],           %[ftmp3]            \n\t"
+    "pand       %[ftmp0],   %[ftmp0],           %[ftmp3]            \n\t"
     /* Filter2 = filter_value & hev */
-    "and        %[ftmp3],   %[ftmp1],           %[ftmp0]            \n\t"
+    "pand       %[ftmp3],   %[ftmp1],           %[ftmp0]            \n\t"
     /* filter_value &= ~hev */
     "pandn      %[ftmp0],   %[ftmp1],           %[ftmp0]            \n\t"
 
@@ -852,10 +852,10 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     VP8_MBLOOP_VPSRAB_ADDT
     "psubsb     %[ftmp4],   %[ftmp9],           %[ftmp3]            \n\t"
     /* ftmp9: oq0 */
-    "xor        %[ftmp9],   %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp9],   %[ftmp4],           %[ff_pb_80]         \n\t"
     "paddsb     %[ftmp4],   %[ftmp6],           %[ftmp3]            \n\t"
     /* ftmp6: op0 */
-    "xor        %[ftmp6],   %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp4],           %[ff_pb_80]         \n\t"
 
     VP8_MBLOOP_VPSRAB_ADDH
     "paddh      %[ftmp1],   %[ff_ph_0900],      %[ff_ph_0900]       \n\t"
@@ -864,10 +864,10 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     VP8_MBLOOP_VPSRAB_ADDT
     "psubsb     %[ftmp4],   %[ftmp10],          %[ftmp3]            \n\t"
     /* ftmp10: oq1 */
-    "xor        %[ftmp10],   %[ftmp4],          %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp10],   %[ftmp4],          %[ff_pb_80]         \n\t"
     "paddsb     %[ftmp4],   %[ftmp5],           %[ftmp3]            \n\t"
     /* ftmp5: op1 */
-    "xor        %[ftmp5],   %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp5],   %[ftmp4],           %[ff_pb_80]         \n\t"
 
     VP8_MBLOOP_VPSRAB_ADDH
     "pmulhh     %[ftmp7],   %[ftmp7],           %[ff_ph_0900]       \n\t"
@@ -875,10 +875,10 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     VP8_MBLOOP_VPSRAB_ADDT
     "psubsb     %[ftmp4],   %[ftmp11],          %[ftmp3]            \n\t"
     /* ftmp11: oq2 */
-    "xor        %[ftmp11],  %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp11],  %[ftmp4],           %[ff_pb_80]         \n\t"
     "paddsb     %[ftmp4],   %[ftmp2],           %[ftmp3]            \n\t"
     /* ftmp2: op2 */
-    "xor        %[ftmp2],   %[ftmp4],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp2],   %[ftmp4],           %[ff_pb_80]         \n\t"
 
     "ldc1       %[ftmp12],  0x00(%[srct])                           \n\t"
     "ldc1       %[ftmp8],   0x08(%[srct])                           \n\t"
@@ -965,7 +965,7 @@ void vp8_mbloop_filter_vertical_edge_mmi(
   "psrlh      %[ftmp0],   %[ftmp0],           %[ftmp8]            \n\t" \
   "psrah      %[ftmp1],   %[ftmp5],           %[ftmp10]           \n\t" \
   "psllh      %[ftmp1],   %[ftmp1],           %[ftmp8]            \n\t" \
-  "or         %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+  "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
 
 void vp8_loop_filter_simple_horizontal_edge_mmi(unsigned char *src_ptr,
                                                 int src_pixel_step,
@@ -1008,14 +1008,14 @@ void vp8_loop_filter_simple_horizontal_edge_mmi(unsigned char *src_ptr,
     "paddusb    %[ftmp5],   %[ftmp5],           %[ftmp5]            \n\t"
     "paddusb    %[ftmp5],   %[ftmp5],           %[ftmp1]            \n\t"
     "psubusb    %[ftmp5],   %[ftmp5],           %[ftmp3]            \n\t"
-    "xor        %[ftmp3],   %[ftmp3],           %[ftmp3]            \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],           %[ftmp3]            \n\t"
     "pcmpeqb    %[ftmp5],   %[ftmp5],           %[ftmp3]            \n\t"
 
-    "xor        %[ftmp2],   %[ftmp2],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp2],   %[ftmp2],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp7],   %[ftmp7],           %[ff_pb_80]         \n\t"
     "psubsb     %[ftmp2],   %[ftmp2],           %[ftmp7]            \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp3],   %[ftmp0],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp3],   %[ftmp0],           %[ff_pb_80]         \n\t"
     "psubsb     %[ftmp0],   %[ftmp3],           %[ftmp6]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
@@ -1025,14 +1025,14 @@ void vp8_loop_filter_simple_horizontal_edge_mmi(unsigned char *src_ptr,
     "paddsb     %[ftmp5],   %[ftmp5],           %[ff_pb_04]         \n\t"
     VP8_SIMPLE_HPSRAB
     "psubsb     %[ftmp3],   %[ftmp3],           %[ftmp0]            \n\t"
-    "xor        %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
     "gssdlc1    %[ftmp3],   0x07(%[src_ptr])                        \n\t"
     "gssdrc1    %[ftmp3],   0x00(%[src_ptr])                        \n\t"
 
     "psubsb     %[ftmp5],   %[ftmp5],           %[ff_pb_01]         \n\t"
     VP8_SIMPLE_HPSRAB
     "paddsb     %[ftmp6],   %[ftmp6],           %[ftmp0]            \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
     MMI_SUBU(%[addr1], %[src_ptr], %[src_pixel_step])
     "gssdlc1    %[ftmp6],   0x07(%[addr1])                          \n\t"
     "gssdrc1    %[ftmp6],   0x00(%[addr1])                          \n\t"
@@ -1121,7 +1121,7 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "li         %[tmp0],    0x01                                    \n\t"
     "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
     "pasubub    %[ftmp6],   %[ftmp3],           %[ftmp0]            \n\t"
-    "and        %[ftmp6],   %[ftmp6],           %[ff_pb_fe]         \n\t"
+    "pand       %[ftmp6],   %[ftmp6],           %[ff_pb_fe]         \n\t"
     "psrlh      %[ftmp6],   %[ftmp6],           %[ftmp9]            \n\t"
     "pasubub    %[ftmp5],   %[ftmp1],           %[ftmp2]            \n\t"
     "paddusb    %[ftmp5],   %[ftmp5],           %[ftmp5]            \n\t"
@@ -1130,23 +1130,23 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "gsldlc1    %[ftmp7],   0x07(%[blimit])                         \n\t"
     "gsldrc1    %[ftmp7],   0x00(%[blimit])                         \n\t"
     "psubusb    %[ftmp5],   %[ftmp5],           %[ftmp7]            \n\t"
-    "xor        %[ftmp7],   %[ftmp7],           %[ftmp7]            \n\t"
+    "pxor       %[ftmp7],   %[ftmp7],           %[ftmp7]            \n\t"
     "pcmpeqb    %[ftmp5],   %[ftmp5],           %[ftmp7]            \n\t"
 
     "sdc1       %[ftmp0],   0x00(%[srct])                           \n\t"
     "sdc1       %[ftmp3],   0x08(%[srct])                           \n\t"
 
-    "xor        %[ftmp0],   %[ftmp0],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp0],   %[ftmp0],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
     "psubsb     %[ftmp0],   %[ftmp0],           %[ftmp3]            \n\t"
 
-    "xor        %[ftmp6],   %[ftmp1],           %[ff_pb_80]         \n\t"
-    "xor        %[ftmp3],   %[ftmp2],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp1],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp3],   %[ftmp2],           %[ff_pb_80]         \n\t"
     "psubsb     %[ftmp7],   %[ftmp3],           %[ftmp6]            \n\t"
     "paddsb     %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     "paddsb     %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     "paddsb     %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
-    "and        %[ftmp5],   %[ftmp5],           %[ftmp0]            \n\t"
+    "pand       %[ftmp5],   %[ftmp5],           %[ftmp0]            \n\t"
     "paddsb     %[ftmp5],   %[ftmp5],           %[ff_pb_04]         \n\t"
 
     "li         %[tmp0],    0x03                                    \n\t"
@@ -1159,9 +1159,9 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
     "psrah      %[ftmp7],   %[ftmp5],           %[ftmp9]            \n\t"
     "psllh      %[ftmp7],   %[ftmp7],           %[ftmp8]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     "psubsb     %[ftmp3],   %[ftmp3],           %[ftmp0]            \n\t"
-    "xor        %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
     "psubsb     %[ftmp5],   %[ftmp5],           %[ff_pb_01]         \n\t"
 
     "li         %[tmp0],    0x03                                    \n\t"
@@ -1174,9 +1174,9 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
     "psrah      %[ftmp5],   %[ftmp5],           %[ftmp9]            \n\t"
     "psllh      %[ftmp5],   %[ftmp5],           %[ftmp8]            \n\t"
-    "or         %[ftmp0],   %[ftmp0],           %[ftmp5]            \n\t"
+    "por        %[ftmp0],   %[ftmp0],           %[ftmp5]            \n\t"
     "paddsb     %[ftmp6],   %[ftmp6],           %[ftmp0]            \n\t"
-    "xor        %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
+    "pxor       %[ftmp6],   %[ftmp6],           %[ff_pb_80]         \n\t"
 
     "ldc1       %[ftmp0],   0x00(%[srct])                           \n\t"
     "ldc1       %[ftmp4],   0x08(%[srct])                           \n\t"
@@ -1195,7 +1195,7 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "punpckhhw  %[ftmp5],   %[ftmp1],           %[ftmp3]            \n\t"
     "punpcklhw  %[ftmp1],   %[ftmp1],           %[ftmp3]            \n\t"
 
-    "dsrl       %[ftmp0],   %[ftmp0],           %[ftmp10]           \n\t"
+    "ssrld      %[ftmp0],   %[ftmp0],           %[ftmp10]           \n\t"
     MMI_SUBU(%[addr1], %[addr0], %[src_pixel_step_x4])
     "gsswlc1    %[ftmp0],   0x03(%[addr1])                          \n\t"
     "gsswrc1    %[ftmp0],   0x00(%[addr1])                          \n\t"
@@ -1203,7 +1203,7 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "gsswlc1    %[ftmp6],   0x03(%[addr1])                          \n\t"
     "gsswrc1    %[ftmp6],   0x00(%[addr1])                          \n\t"
 
-    "dsrl       %[ftmp6],   %[ftmp6],           %[ftmp10]           \n\t"
+    "ssrld      %[ftmp6],   %[ftmp6],           %[ftmp10]           \n\t"
     "gsswlc1    %[ftmp1],   0x03(%[src_ptr])                        \n\t"
     "gsswrc1    %[ftmp1],   0x00(%[src_ptr])                        \n\t"
 
@@ -1215,11 +1215,11 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "gsswlc1    %[ftmp5],   0x03(%[addr1])                          \n\t"
     "gsswrc1    %[ftmp5],   0x00(%[addr1])                          \n\t"
 
-    "dsrl       %[ftmp1],   %[ftmp1],           %[ftmp10]           \n\t"
+    "ssrld      %[ftmp1],   %[ftmp1],           %[ftmp10]           \n\t"
     "gsswlc1    %[ftmp1],   0x03(%[addr0])                          \n\t"
     "gsswrc1    %[ftmp1],   0x00(%[addr0])                          \n\t"
 
-    "dsrl       %[ftmp5],   %[ftmp5],           %[ftmp10]           \n\t"
+    "ssrld      %[ftmp5],   %[ftmp5],           %[ftmp10]           \n\t"
     MMI_ADDU(%[addr1], %[addr0], %[src_pixel_step_x2])
     "gsswlc1    %[ftmp5],   0x03(%[addr1])                          \n\t"
     "gsswrc1    %[ftmp5],   0x00(%[addr1])                          \n\t"
