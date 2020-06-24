@@ -4040,8 +4040,11 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // For 1 pass CBR SVC, only ZEROMV is allowed for spatial reference frame
   // when svc->force_zero_mode_spatial_ref = 1. Under those conditions we can
   // avoid this frame-level upsampling (for non intra_only frames).
+  // For SVC single_layer mode, dynamic resize is allowed and we need to
+  // scale references for this case.
   if (frame_is_intra_only(cm) == 0 &&
-      !(is_one_pass_cbr_svc(cpi) && svc->force_zero_mode_spatial_ref)) {
+      ((svc->single_layer_svc && cpi->oxcf.resize_mode == RESIZE_DYNAMIC) ||
+       !(is_one_pass_cbr_svc(cpi) && svc->force_zero_mode_spatial_ref))) {
     vp9_scale_references(cpi);
   }
 
