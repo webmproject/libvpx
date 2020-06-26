@@ -198,6 +198,7 @@ typedef struct SVC {
 
   // Flag to indicate SVC is dynamically switched to a single layer.
   int single_layer_svc;
+  int resize_set;
 } SVC;
 
 struct VP9_COMP;

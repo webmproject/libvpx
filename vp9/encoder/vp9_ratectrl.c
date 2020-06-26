@@ -2405,9 +2405,11 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
                            lc->scaling_factor_num_resize,
                            lc->scaling_factor_den_resize, &width, &height);
       vp9_set_size_literal(cpi, width, height);
+      svc->resize_set = 1;
     }
   } else {
     cpi->resize_pending = 0;
+    svc->resize_set = 0;
   }
 }
 
