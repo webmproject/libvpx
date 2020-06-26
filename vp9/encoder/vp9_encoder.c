@@ -3749,13 +3749,17 @@ static void set_frame_size(VP9_COMP *cpi) {
 
   if (oxcf->pass == 0 && oxcf->rc_mode == VPX_CBR &&
       oxcf->resize_mode == RESIZE_DYNAMIC && cpi->resize_pending != 0) {
-    oxcf->scaled_frame_width =
-        (oxcf->width * cpi->resize_scale_num) / cpi->resize_scale_den;
-    oxcf->scaled_frame_height =
-        (oxcf->height * cpi->resize_scale_num) / cpi->resize_scale_den;
-    // There has been a change in frame size.
-    vp9_set_size_literal(cpi, oxcf->scaled_frame_width,
-                         oxcf->scaled_frame_height);
+    // For SVC scaled width/height will have been set (svc->resize_set=1)
+    // in get_svc_params based on the layer width/height.
+    if (!cpi->use_svc || !cpi->svc.resize_set) {
+      oxcf->scaled_frame_width =
+          (oxcf->width * cpi->resize_scale_num) / cpi->resize_scale_den;
+      oxcf->scaled_frame_height =
+          (oxcf->height * cpi->resize_scale_num) / cpi->resize_scale_den;
+      // There has been a change in frame size.
+      vp9_set_size_literal(cpi, oxcf->scaled_frame_width,
+                           oxcf->scaled_frame_height);
+    }
 
     // TODO(agrange) Scale cpi->max_mv_magnitude if frame-size has changed.
     set_mv_search_params(cpi);
