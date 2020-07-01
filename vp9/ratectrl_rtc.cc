@@ -107,7 +107,8 @@ void VP9RateControlRTC::UpdateRateControl(
   }
   vp9_set_rc_buffer_sizes(cpi_);
   vp9_new_framerate(cpi_, cpi_->framerate);
-  if (cpi_->svc.number_temporal_layers > 1) {
+  if (cpi_->svc.number_temporal_layers > 1 ||
+      cpi_->svc.number_spatial_layers > 1) {
     if (cm->current_video_frame == 0) vp9_init_layer_context(cpi_);
     vp9_update_layer_context_change_config(cpi_,
                                            (int)cpi_->oxcf.target_bandwidth);
