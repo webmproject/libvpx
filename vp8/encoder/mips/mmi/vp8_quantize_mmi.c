@@ -42,16 +42,17 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
 
   double ftmp[13];
   uint64_t tmp[1];
-  DECLARE_ALIGNED(8, const uint64_t, ones) = { 0xffffffffffffffffULL };
-  int eob = 0;
+  int64_t eob = 0;
+  double ones;
 
   __asm__ volatile(
       // loop 0 ~ 7
       "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]        \n\t"
+      "pcmpeqh    %[ones],    %[ones],        %[ones]         \n\t"
       "gsldlc1    %[ftmp1],   0x07(%[coeff_ptr])              \n\t"
       "gsldrc1    %[ftmp1],   0x00(%[coeff_ptr])              \n\t"
-      "li         %[tmp0],    0x0f                            \n\t"
-      "mtc1       %[tmp0],    %[ftmp9]                        \n\t"
+      "dli        %[tmp0],    0x0f                            \n\t"
+      "dmtc1      %[tmp0],    %[ftmp9]                        \n\t"
       "gsldlc1    %[ftmp2],   0x0f(%[coeff_ptr])              \n\t"
       "gsldrc1    %[ftmp2],   0x08(%[coeff_ptr])              \n\t"
 
@@ -165,18 +166,18 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
       "gssdlc1    %[ftmp6],   0x1f(%[dqcoeff_ptr])            \n\t"
       "gssdrc1    %[ftmp6],   0x18(%[dqcoeff_ptr])            \n\t"
 
-      "li         %[tmp0],    0x10                            \n\t"
-      "mtc1       %[tmp0],    %[ftmp9]                        \n\t"
+      "dli        %[tmp0],    0x10                            \n\t"
+      "dmtc1      %[tmp0],    %[ftmp9]                        \n\t"
 
       "pmaxsh     %[ftmp10],  %[ftmp10],       %[ftmp11]      \n\t"
       "psrlw      %[ftmp11],  %[ftmp10],       %[ftmp9]       \n\t"
       "pmaxsh     %[ftmp10],  %[ftmp10],       %[ftmp11]      \n\t"
-      "li         %[tmp0],    0xaa                            \n\t"
-      "mtc1       %[tmp0],    %[ftmp9]                        \n\t"
+      "dli        %[tmp0],    0xaa                            \n\t"
+      "dmtc1      %[tmp0],    %[ftmp9]                        \n\t"
       "pshufh     %[ftmp11],  %[ftmp10],       %[ftmp9]       \n\t"
       "pmaxsh     %[ftmp10],  %[ftmp10],       %[ftmp11]      \n\t"
-      "li         %[tmp0],    0xffff                          \n\t"
-      "mtc1       %[tmp0],    %[ftmp9]                        \n\t"
+      "dli        %[tmp0],    0xffff                          \n\t"
+      "dmtc1      %[tmp0],    %[ftmp9]                        \n\t"
       "pand       %[ftmp10],  %[ftmp10],       %[ftmp9]       \n\t"
       "gssdlc1    %[ftmp10],  0x07(%[eob])                    \n\t"
       "gssdrc1    %[ftmp10],  0x00(%[eob])                    \n\t"
@@ -184,15 +185,15 @@ void vp8_fast_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
         [ftmp3] "=&f"(ftmp[3]), [ftmp4] "=&f"(ftmp[4]), [ftmp5] "=&f"(ftmp[5]),
         [ftmp6] "=&f"(ftmp[6]), [ftmp7] "=&f"(ftmp[7]), [ftmp8] "=&f"(ftmp[8]),
         [ftmp9] "=&f"(ftmp[9]), [ftmp10] "=&f"(ftmp[10]),
-        [ftmp11] "=&f"(ftmp[11]), [ftmp12] "=&f"(ftmp[12]), [tmp0] "=&r"(tmp[0])
+        [ftmp11] "=&f"(ftmp[11]), [ftmp12] "=&f"(ftmp[12]),
+        [tmp0] "=&r"(tmp[0]), [ones] "=&f"(ones)
       : [coeff_ptr] "r"((mips_reg)coeff_ptr),
         [qcoeff_ptr] "r"((mips_reg)qcoeff_ptr),
         [dequant_ptr] "r"((mips_reg)dequant_ptr),
         [round_ptr] "r"((mips_reg)round_ptr),
         [quant_ptr] "r"((mips_reg)quant_ptr),
         [dqcoeff_ptr] "r"((mips_reg)dqcoeff_ptr),
-        [inv_zig_zag] "r"((mips_reg)inv_zig_zag), [eob] "r"((mips_reg)&eob),
-        [ones] "f"(ones)
+        [inv_zig_zag] "r"((mips_reg)inv_zig_zag), [eob] "r"((mips_reg)&eob)
       : "memory");
 
   *d->eob = eob;

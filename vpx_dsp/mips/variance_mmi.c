@@ -414,6 +414,7 @@ static inline uint32_t vpx_variance64x(const uint8_t *src_ptr, int src_stride,
 
   *sse = 0;
 
+  /* clang-format off */
   __asm__ volatile (
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
@@ -496,6 +497,7 @@ static inline uint32_t vpx_variance64x(const uint8_t *src_ptr, int src_stride,
       [high]"r"(&high), [sse]"r"(sse)
     : "memory"
   );
+  /* clang-format on */
 
   return *sse - (((int64_t)sum * sum) / (64 * high));
 }
@@ -519,6 +521,7 @@ uint32_t vpx_variance32x64_mmi(const uint8_t *src_ptr, int src_stride,
 
   *sse = 0;
 
+  /* clang-format off */
   __asm__ volatile (
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
@@ -577,6 +580,7 @@ uint32_t vpx_variance32x64_mmi(const uint8_t *src_ptr, int src_stride,
       [sse]"r"(sse)
     : "memory"
   );
+  /* clang-format on */
 
   return *sse - (((int64_t)sum * sum) / 2048);
 }
@@ -590,6 +594,7 @@ static inline uint32_t vpx_variance32x(const uint8_t *src_ptr, int src_stride,
 
   *sse = 0;
 
+  /* clang-format off */
   __asm__ volatile (
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
@@ -653,6 +658,7 @@ static inline uint32_t vpx_variance32x(const uint8_t *src_ptr, int src_stride,
       [high]"r"(&high), [sse]"r"(sse), [sum]"r"(&sum)
     : "memory"
   );
+  /* clang-format on */
 
   return *sse - (((int64_t)sum * sum) / (32 * high));
 }
@@ -676,6 +682,7 @@ static inline uint32_t vpx_variance16x(const uint8_t *src_ptr, int src_stride,
 
   *sse = 0;
 
+  /* clang-format off */
   __asm__ volatile (
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
@@ -729,6 +736,7 @@ static inline uint32_t vpx_variance16x(const uint8_t *src_ptr, int src_stride,
       [high]"r"(&high), [sse]"r"(sse), [sum]"r"(&sum)
     : "memory"
   );
+  /* clang-format on */
 
   return *sse - (((int64_t)sum * sum) / (16 * high));
 }
@@ -753,6 +761,7 @@ static inline uint32_t vpx_variance8x(const uint8_t *src_ptr, int src_stride,
 
   *sse = 0;
 
+  /* clang-format off */
   __asm__ volatile (
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
@@ -801,6 +810,7 @@ static inline uint32_t vpx_variance8x(const uint8_t *src_ptr, int src_stride,
       [high]"r"(&high), [sse]"r"(sse), [sum]"r"(&sum)
     : "memory"
   );
+  /* clang-format on */
 
   return *sse - (((int64_t)sum * sum) / (8 * high));
 }
@@ -825,6 +835,7 @@ static inline uint32_t vpx_variance4x(const uint8_t *src_ptr, int src_stride,
 
   *sse = 0;
 
+  /* clang-format off */
   __asm__ volatile (
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp10]                           \n\t"
@@ -872,6 +883,7 @@ static inline uint32_t vpx_variance4x(const uint8_t *src_ptr, int src_stride,
       [high]"r"(&high), [sse]"r"(sse), [sum]"r"(&sum)
     : "memory"
   );
+  /* clang-format on */
 
   return *sse - (((int64_t)sum * sum) / (4 * high));
 }
@@ -894,6 +906,7 @@ static inline uint32_t vpx_mse16x(const uint8_t *src_ptr, int src_stride,
 
   *sse = 0;
 
+  /* clang-format off */
   __asm__ volatile (
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
@@ -925,6 +938,7 @@ static inline uint32_t vpx_mse16x(const uint8_t *src_ptr, int src_stride,
       [high]"r"(&high), [sse]"r"(sse)
     : "memory"
   );
+  /* clang-format on */
 
   return *sse;
 }
@@ -947,6 +961,7 @@ static inline uint32_t vpx_mse8x(const uint8_t *src_ptr, int src_stride,
 
   *sse = 0;
 
+  /* clang-format off */
   __asm__ volatile (
     "li         %[tmp0],    0x20                                \n\t"
     "mtc1       %[tmp0],    %[ftmp11]                           \n\t"
@@ -978,6 +993,7 @@ static inline uint32_t vpx_mse8x(const uint8_t *src_ptr, int src_stride,
       [high]"r"(&high), [sse]"r"(sse)
     : "memory"
   );
+  /* clang-format on */
 
   return *sse;
 }
@@ -1021,22 +1037,39 @@ static inline void var_filter_block2d_bil_16x(const uint8_t *src_ptr,
   uint8_t *temp2_ptr = temp2;
   mips_reg l_counter = counter;
   double ftmp[15];
+  double ff_ph_40, mask;
+  double filter_x0, filter_x1, filter_y0, filter_y1;
   mips_reg tmp[2];
-  DECLARE_ALIGNED(8, const uint64_t, ff_ph_40) = { 0x0040004000400040ULL };
-  DECLARE_ALIGNED(8, const uint64_t, mask) = { 0x00ff00ff00ff00ffULL };
+  uint64_t x0, x1, y0, y1, all;
 
   const uint8_t *filter_x = bilinear_filters[x_offset];
   const uint8_t *filter_y = bilinear_filters[y_offset];
+  x0 = (uint64_t)filter_x[0];
+  x1 = (uint64_t)filter_x[1];
+  y0 = (uint64_t)filter_y[0];
+  y1 = (uint64_t)filter_y[1];
+  all = x0 | x1 << 8 | y0 << 16 | y1 << 24;
 
+  /* clang-format off */
   __asm__ volatile (
     "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    MMI_MTC1(%[all], %[ftmp14])
+    "punpcklbh  %[ftmp14],  %[ftmp14],      %[ftmp0]            \n\t"
+    "pshufh     %[filter_x0], %[ftmp14],    %[ftmp0]            \n\t"
+    MMI_LI(%[tmp0], 0x10)
+    MMI_MTC1(%[tmp0], %[mask])
+    "ssrld      %[ftmp14],  %[ftmp14],      %[mask]             \n\t"
+    "pshufh     %[filter_x1], %[ftmp14],    %[ftmp0]            \n\t"
+    "ssrld      %[ftmp14],  %[ftmp14],      %[mask]             \n\t"
+    "pshufh     %[filter_y0], %[ftmp14],    %[ftmp0]            \n\t"
+    "ssrld      %[ftmp14],  %[ftmp14],      %[mask]             \n\t"
+    "pshufh     %[filter_y1], %[ftmp14],    %[ftmp0]            \n\t"
     MMI_LI(%[tmp0], 0x07)
     MMI_MTC1(%[tmp0], %[ftmp14])
-    "pshufh     %[filter_x0], %[filter_x0], %[ftmp0]            \n\t"
-    "pshufh     %[filter_x1], %[filter_x1], %[ftmp0]            \n\t"
-    "pshufh     %[filter_y0], %[filter_y0], %[ftmp0]            \n\t"
-    "pshufh     %[filter_y1], %[filter_y1], %[ftmp0]            \n\t"
-
+    MMI_LI(%[tmp0], 0x0040004000400040)
+    MMI_MTC1(%[tmp0], %[ff_ph_40])
+    MMI_LI(%[tmp0], 0x00ff00ff00ff00ff)
+    MMI_MTC1(%[tmp0], %[mask])
     // fdata3: fdata3[0] ~ fdata3[15]
     VAR_FILTER_BLOCK2D_BIL_FIRST_PASS_16_A
 
@@ -1072,15 +1105,13 @@ static inline void var_filter_block2d_bil_16x(const uint8_t *src_ptr,
       [ftmp11] "=&f"(ftmp[11]), [ftmp12] "=&f"(ftmp[12]),
       [ftmp13] "=&f"(ftmp[13]), [ftmp14] "=&f"(ftmp[14]),
       [tmp0] "=&r"(tmp[0]), [src_ptr] "+&r"(src_ptr), [temp2_ptr] "+&r"(temp2_ptr),
-      [counter]"+&r"(l_counter)
-    : [filter_x0] "f"((uint64_t)filter_x[0]),
-      [filter_x1] "f"((uint64_t)filter_x[1]),
-      [filter_y0] "f"((uint64_t)filter_y[0]),
-      [filter_y1] "f"((uint64_t)filter_y[1]),
-      [src_stride] "r"((mips_reg)src_stride), [ff_ph_40] "f"(ff_ph_40),
-      [mask] "f"(mask)
+      [counter]"+&r"(l_counter), [ff_ph_40] "=&f"(ff_ph_40), [mask] "=&f"(mask),
+      [filter_x0] "=&f"(filter_x0), [filter_x1] "=&f"(filter_x1),
+      [filter_y0] "=&f"(filter_y0), [filter_y1] "=&f"(filter_y1)
+    : [src_stride] "r"((mips_reg)src_stride), [all] "r"(all)
     : "memory"
   );
+  /* clang-format on */
 }
 
 #define SUBPIX_VAR16XN(H)                                                      \
@@ -1105,19 +1136,38 @@ static inline void var_filter_block2d_bil_8x(const uint8_t *src_ptr,
   mips_reg l_counter = counter;
   double ftmp[15];
   mips_reg tmp[2];
-  DECLARE_ALIGNED(8, const uint64_t, ff_ph_40) = { 0x0040004000400040ULL };
-  DECLARE_ALIGNED(8, const uint64_t, mask) = { 0x00ff00ff00ff00ffULL };
+  double ff_ph_40, mask;
+  uint64_t x0, x1, y0, y1, all;
+  double filter_x0, filter_x1, filter_y0, filter_y1;
   const uint8_t *filter_x = bilinear_filters[x_offset];
   const uint8_t *filter_y = bilinear_filters[y_offset];
+  x0 = (uint64_t)filter_x[0];
+  x1 = (uint64_t)filter_x[1];
+  y0 = (uint64_t)filter_y[0];
+  y1 = (uint64_t)filter_y[1];
+  all = x0 | x1 << 8 | y0 << 16 | y1 << 24;
 
+  /* clang-format off */
   __asm__ volatile (
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    MMI_MTC1(%[all], %[ftmp14])
+    "punpcklbh  %[ftmp14],  %[ftmp14],      %[ftmp0]            \n\t"
+    "pshufh     %[filter_x0], %[ftmp14],    %[ftmp0]            \n\t"
+    MMI_LI(%[tmp0], 0x10)
+    MMI_MTC1(%[tmp0], %[mask])
+    "ssrld      %[ftmp14],  %[ftmp14],      %[mask]             \n\t"
+    "pshufh     %[filter_x1], %[ftmp14],    %[ftmp0]            \n\t"
+    "ssrld      %[ftmp14],  %[ftmp14],      %[mask]             \n\t"
+    "pshufh     %[filter_y0], %[ftmp14],    %[ftmp0]            \n\t"
+    "ssrld      %[ftmp14],  %[ftmp14],      %[mask]             \n\t"
+    "pshufh     %[filter_y1], %[ftmp14],    %[ftmp0]            \n\t"
     "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     MMI_LI(%[tmp0], 0x07)
     MMI_MTC1(%[tmp0], %[ftmp14])
-    "pshufh     %[filter_x0], %[filter_x0], %[ftmp0]            \n\t"
-    "pshufh     %[filter_x1], %[filter_x1], %[ftmp0]            \n\t"
-    "pshufh     %[filter_y0], %[filter_y0], %[ftmp0]            \n\t"
-    "pshufh     %[filter_y1], %[filter_y1], %[ftmp0]            \n\t"
+    MMI_LI(%[tmp0], 0x0040004000400040)
+    MMI_MTC1(%[tmp0], %[ff_ph_40])
+    MMI_LI(%[tmp0], 0x00ff00ff00ff00ff)
+    MMI_MTC1(%[tmp0], %[mask])
 
     // fdata3: fdata3[0] ~ fdata3[7]
     VAR_FILTER_BLOCK2D_BIL_FIRST_PASS_8_A
@@ -1154,15 +1204,13 @@ static inline void var_filter_block2d_bil_8x(const uint8_t *src_ptr,
       [ftmp11] "=&f"(ftmp[11]), [ftmp12] "=&f"(ftmp[12]),
       [ftmp13] "=&f"(ftmp[13]), [ftmp14] "=&f"(ftmp[14]),
       [tmp0] "=&r"(tmp[0]), [src_ptr] "+&r"(src_ptr), [temp2_ptr] "+&r"(temp2_ptr),
-      [counter]"+&r"(l_counter)
-    : [filter_x0] "f"((uint64_t)filter_x[0]),
-      [filter_x1] "f"((uint64_t)filter_x[1]),
-      [filter_y0] "f"((uint64_t)filter_y[0]),
-      [filter_y1] "f"((uint64_t)filter_y[1]),
-      [src_stride] "r"((mips_reg)src_stride), [ff_ph_40] "f"(ff_ph_40),
-      [mask] "f"(mask)
+      [counter]"+&r"(l_counter), [ff_ph_40] "=&f"(ff_ph_40), [mask] "=&f"(mask),
+      [filter_x0] "=&f"(filter_x0), [filter_x1] "=&f"(filter_x1),
+      [filter_y0] "=&f"(filter_y0), [filter_y1] "=&f"(filter_y1)
+    : [src_stride] "r"((mips_reg)src_stride), [all] "r"(all)
     : "memory"
   );
+  /* clang-format on */
 }
 
 #define SUBPIX_VAR8XN(H)                                                      \
@@ -1188,19 +1236,38 @@ static inline void var_filter_block2d_bil_4x(const uint8_t *src_ptr,
   mips_reg l_counter = counter;
   double ftmp[7];
   mips_reg tmp[2];
-  DECLARE_ALIGNED(8, const uint64_t, ff_ph_40) = { 0x0040004000400040ULL };
-  DECLARE_ALIGNED(8, const uint64_t, mask) = { 0x00ff00ff00ff00ffULL };
+  double ff_ph_40, mask;
+  uint64_t x0, x1, y0, y1, all;
+  double filter_x0, filter_x1, filter_y0, filter_y1;
   const uint8_t *filter_x = bilinear_filters[x_offset];
   const uint8_t *filter_y = bilinear_filters[y_offset];
+  x0 = (uint64_t)filter_x[0];
+  x1 = (uint64_t)filter_x[1];
+  y0 = (uint64_t)filter_y[0];
+  y1 = (uint64_t)filter_y[1];
+  all = x0 | x1 << 8 | y0 << 16 | y1 << 24;
 
+  /* clang-format off */
   __asm__ volatile (
+    "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
+    MMI_MTC1(%[all], %[ftmp6])
+    "punpcklbh  %[ftmp6],   %[ftmp6],       %[ftmp0]            \n\t"
+    "pshufh     %[filter_x0], %[ftmp6],     %[ftmp0]            \n\t"
+    MMI_LI(%[tmp0], 0x10)
+    MMI_MTC1(%[tmp0], %[mask])
+    "ssrld      %[ftmp6],   %[ftmp6],       %[mask]             \n\t"
+    "pshufh     %[filter_x1], %[ftmp6],     %[ftmp0]            \n\t"
+    "ssrld      %[ftmp6],   %[ftmp6],       %[mask]             \n\t"
+    "pshufh     %[filter_y0], %[ftmp6],     %[ftmp0]            \n\t"
+    "ssrld      %[ftmp6],   %[ftmp6],       %[mask]             \n\t"
+    "pshufh     %[filter_y1], %[ftmp6],     %[ftmp0]            \n\t"
     "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]            \n\t"
     MMI_LI(%[tmp0], 0x07)
     MMI_MTC1(%[tmp0], %[ftmp6])
-    "pshufh     %[filter_x0], %[filter_x0], %[ftmp0]            \n\t"
-    "pshufh     %[filter_x1], %[filter_x1], %[ftmp0]            \n\t"
-    "pshufh     %[filter_y0], %[filter_y0], %[ftmp0]            \n\t"
-    "pshufh     %[filter_y1], %[filter_y1], %[ftmp0]            \n\t"
+    MMI_LI(%[tmp0], 0x0040004000400040)
+    MMI_MTC1(%[tmp0], %[ff_ph_40])
+    MMI_LI(%[tmp0], 0x00ff00ff00ff00ff)
+    MMI_MTC1(%[tmp0], %[mask])
     // fdata3: fdata3[0] ~ fdata3[3]
     VAR_FILTER_BLOCK2D_BIL_FIRST_PASS_4_A
 
@@ -1232,15 +1299,14 @@ static inline void var_filter_block2d_bil_4x(const uint8_t *src_ptr,
     : [ftmp0] "=&f"(ftmp[0]), [ftmp1] "=&f"(ftmp[1]), [ftmp2] "=&f"(ftmp[2]),
       [ftmp3] "=&f"(ftmp[3]), [ftmp4] "=&f"(ftmp[4]), [ftmp5] "=&f"(ftmp[5]),
       [ftmp6] "=&f"(ftmp[6]), [tmp0] "=&r"(tmp[0]), [src_ptr] "+&r"(src_ptr),
-      [temp2_ptr] "+&r"(temp2_ptr), [counter]"+&r"(l_counter)
-    : [filter_x0] "f"((uint64_t)filter_x[0]),
-      [filter_x1] "f"((uint64_t)filter_x[1]),
-      [filter_y0] "f"((uint64_t)filter_y[0]),
-      [filter_y1] "f"((uint64_t)filter_y[1]),
-      [src_stride] "r"((mips_reg)src_stride), [ff_ph_40] "f"(ff_ph_40),
-      [mask] "f"(mask)
+      [temp2_ptr] "+&r"(temp2_ptr), [counter]"+&r"(l_counter),
+      [ff_ph_40] "=&f"(ff_ph_40), [mask] "=&f"(mask),
+      [filter_x0] "=&f"(filter_x0), [filter_x1] "=&f"(filter_x1),
+      [filter_y0] "=&f"(filter_y0), [filter_y1] "=&f"(filter_y1)
+    : [src_stride] "r"((mips_reg)src_stride), [all] "r"(all)
     : "memory"
   );
+  /* clang-format on */
 }
 
 #define SUBPIX_VAR4XN(H)                                                      \

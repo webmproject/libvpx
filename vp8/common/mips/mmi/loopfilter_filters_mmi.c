@@ -13,28 +13,25 @@
 #include "vp8/common/onyxc_int.h"
 #include "vpx_ports/asmdefs_mmi.h"
 
-DECLARE_ALIGNED(8, static const uint64_t, ff_ph_01) = { 0x0001000100010001ULL };
-DECLARE_ALIGNED(8, static const uint64_t,
-                ff_ph_003f) = { 0x003f003f003f003fULL };
-DECLARE_ALIGNED(8, static const uint64_t,
-                ff_ph_0900) = { 0x0900090009000900ULL };
-DECLARE_ALIGNED(8, static const uint64_t,
-                ff_ph_1200) = { 0x1200120012001200ULL };
-DECLARE_ALIGNED(8, static const uint64_t,
-                ff_ph_1b00) = { 0x1b001b001b001b00ULL };
-DECLARE_ALIGNED(8, static const uint64_t, ff_pb_fe) = { 0xfefefefefefefefeULL };
-DECLARE_ALIGNED(8, static const uint64_t, ff_pb_80) = { 0x8080808080808080ULL };
-DECLARE_ALIGNED(8, static const uint64_t, ff_pb_04) = { 0x0404040404040404ULL };
-DECLARE_ALIGNED(8, static const uint64_t, ff_pb_03) = { 0x0303030303030303ULL };
-DECLARE_ALIGNED(8, static const uint64_t, ff_pb_01) = { 0x0101010101010101ULL };
-
 void vp8_loop_filter_horizontal_edge_mmi(
     unsigned char *src_ptr, int src_pixel_step, const unsigned char *blimit,
     const unsigned char *limit, const unsigned char *thresh, int count) {
-  uint32_t tmp[1];
+  uint64_t tmp[1];
   mips_reg addr[2];
   double ftmp[12];
+  double ff_ph_01, ff_pb_fe, ff_pb_80, ff_pb_04, ff_pb_03;
+  /* clang-format off */
   __asm__ volatile (
+    "dli        %[tmp0],    0x0001000100010001                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_ph_01]                             \n\t"
+    "dli        %[tmp0],    0xfefefefefefefefe                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_fe]                             \n\t"
+    "dli        %[tmp0],    0x8080808080808080                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_80]                             \n\t"
+    "dli        %[tmp0],    0x0404040404040404                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_04]                             \n\t"
+    "dli        %[tmp0],    0x0303030303030303                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_03]                             \n\t"
     "1:                                                             \n\t"
     "gsldlc1    %[ftmp10],  0x07(%[limit])                          \n\t"
     "gsldrc1    %[ftmp10],  0x00(%[limit])                          \n\t"
@@ -91,9 +88,9 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "pasubub    %[ftmp1],   %[ftmp5],           %[ftmp6]            \n\t"
     "paddusb    %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
     "pasubub    %[ftmp2],   %[ftmp4],           %[ftmp7]            \n\t"
-    "and        %[ftmp2],   %[ftmp2],           %[ff_pb_fe]         \n\t"
-    "li         %[tmp0],    0x01                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp10]                               \n\t"
+    "pand       %[ftmp2],   %[ftmp2],           %[ff_pb_fe]         \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp10]                               \n\t"
     "psrlh      %[ftmp2],   %[ftmp2],           %[ftmp10]           \n\t"
     "paddusb    %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
     "gsldlc1    %[ftmp10],  0x07(%[blimit])                         \n\t"
@@ -134,8 +131,8 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "punpcklbh  %[ftmp0],   %[ftmp0],           %[ftmp8]            \n\t"
     "punpckhbh  %[ftmp11],  %[ftmp11],          %[ftmp8]            \n\t"
 
-    "li         %[tmp0],    0x0b                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp10]                               \n\t"
+    "dli        %[tmp0],    0x0b                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp10]                               \n\t"
     "psrah      %[ftmp0],   %[ftmp0],           %[ftmp10]           \n\t"
     "psrah      %[ftmp11],  %[ftmp11],          %[ftmp10]           \n\t"
     "packsshb   %[ftmp8],   %[ftmp0],           %[ftmp11]           \n\t"
@@ -149,8 +146,8 @@ void vp8_loop_filter_horizontal_edge_mmi(
     "packsshb   %[ftmp0],   %[ftmp0],           %[ftmp9]            \n\t"
     "paddsh     %[ftmp9],   %[ftmp9],           %[ff_ph_01]         \n\t"
 
-    "li         %[tmp0],    0x01                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp10]                               \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp10]                               \n\t"
     "psrah      %[ftmp11],  %[ftmp11],          %[ftmp10]           \n\t"
     "psrah      %[ftmp9],   %[ftmp9],           %[ftmp10]           \n\t"
     "packsshb   %[ftmp11],  %[ftmp11],          %[ftmp9]            \n\t"
@@ -188,17 +185,18 @@ void vp8_loop_filter_horizontal_edge_mmi(
       [ftmp10]"=&f"(ftmp[10]),            [ftmp11]"=&f"(ftmp[11]),
       [tmp0]"=&r"(tmp[0]),
       [addr0]"=&r"(addr[0]),            [addr1]"=&r"(addr[1]),
-      [src_ptr]"+&r"(src_ptr),          [count]"+&r"(count)
+      [src_ptr]"+&r"(src_ptr),          [count]"+&r"(count),
+      [ff_ph_01]"=&f"(ff_ph_01),        [ff_pb_fe]"=&f"(ff_pb_fe),
+      [ff_pb_80]"=&f"(ff_pb_80),        [ff_pb_04]"=&f"(ff_pb_04),
+      [ff_pb_03]"=&f"(ff_pb_03)
     : [limit]"r"(limit),                [blimit]"r"(blimit),
       [thresh]"r"(thresh),
       [src_pixel_step]"r"((mips_reg)src_pixel_step),
       [src_pixel_step_x2]"r"((mips_reg)(src_pixel_step<<1)),
-      [src_pixel_step_x4]"r"((mips_reg)(src_pixel_step<<2)),
-      [ff_ph_01]"f"(ff_ph_01),          [ff_pb_fe]"f"(ff_pb_fe),
-      [ff_pb_80]"f"(ff_pb_80),          [ff_pb_04]"f"(ff_pb_04),
-      [ff_pb_03]"f"(ff_pb_03)
+      [src_pixel_step_x4]"r"((mips_reg)(src_pixel_step<<2))
     : "memory"
   );
+  /* clang-format on */
 }
 
 void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
@@ -206,11 +204,23 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
                                        const unsigned char *blimit,
                                        const unsigned char *limit,
                                        const unsigned char *thresh, int count) {
-  uint32_t tmp[1];
+  uint64_t tmp[1];
   mips_reg addr[2];
   double ftmp[13];
+  double ff_pb_fe, ff_ph_01, ff_pb_03, ff_pb_04, ff_pb_80;
 
+  /* clang-format off */
   __asm__ volatile (
+    "dli        %[tmp0],    0xfefefefefefefefe                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_fe]                             \n\t"
+    "dli        %[tmp0],    0x0001000100010001                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_ph_01]                             \n\t"
+    "dli        %[tmp0],    0x0303030303030303                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_03]                             \n\t"
+    "dli        %[tmp0],    0x0404040404040404                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_04]                             \n\t"
+    "dli        %[tmp0],    0x8080808080808080                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_80]                             \n\t"
     MMI_SLL(%[tmp0], %[src_pixel_step], 0x02)
     MMI_ADDU(%[src_ptr], %[src_ptr], %[tmp0])
     MMI_SUBU(%[src_ptr], %[src_ptr], 0x04)
@@ -315,8 +325,8 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     /* abs (p1-q1) */
     "pasubub    %[ftmp12],  %[ftmp10],          %[ftmp5]            \n\t"
     "pand       %[ftmp12],  %[ftmp12],          %[ff_pb_fe]         \n\t"
-    "li         %[tmp0],    0x01                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp1]                                \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp1]                                \n\t"
     "psrlh      %[ftmp12],  %[ftmp12],          %[ftmp1]            \n\t"
     "paddusb    %[ftmp1],   %[ftmp11],          %[ftmp12]           \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp8]            \n\t"
@@ -354,8 +364,8 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     "paddsb     %[ftmp11],  %[ftmp2],           %[ff_pb_04]         \n\t"
     "paddsb     %[ftmp12],  %[ftmp2],           %[ff_pb_03]         \n\t"
 
-    "li         %[tmp0],    0x0b                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp7]                                \n\t"
+    "dli        %[tmp0],    0x0b                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp7]                                \n\t"
     "pxor      %[ftmp0],    %[ftmp0],           %[ftmp0]            \n\t"
     "pxor      %[ftmp8],    %[ftmp8],           %[ftmp8]            \n\t"
     "punpcklbh %[ftmp0],    %[ftmp0],           %[ftmp12]           \n\t"
@@ -379,8 +389,8 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
     "paddsh     %[ftmp0],   %[ftmp0],           %[ff_ph_01]         \n\t"
     "paddsh     %[ftmp8],   %[ftmp8],           %[ff_ph_01]         \n\t"
 
-    "li         %[tmp0],    0x01                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp7]                                \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp7]                                \n\t"
     "psrah      %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
     "psrah      %[ftmp8],   %[ftmp8],           %[ftmp7]            \n\t"
     "packsshb   %[ftmp2],   %[ftmp0],           %[ftmp8]            \n\t"
@@ -450,15 +460,16 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
       [ftmp10]"=&f"(ftmp[10]),            [ftmp11]"=&f"(ftmp[11]),
       [ftmp12]"=&f"(ftmp[12]),            [tmp0]"=&r"(tmp[0]),
       [addr0]"=&r"(addr[0]),            [addr1]"=&r"(addr[1]),
-      [src_ptr]"+&r"(src_ptr),          [count]"+&r"(count)
+      [src_ptr]"+&r"(src_ptr),          [count]"+&r"(count),
+      [ff_ph_01]"=&f"(ff_ph_01),        [ff_pb_03]"=&f"(ff_pb_03),
+      [ff_pb_04]"=&f"(ff_pb_04),        [ff_pb_80]"=&f"(ff_pb_80),
+      [ff_pb_fe]"=&f"(ff_pb_fe)
     : [limit]"r"(limit),                [blimit]"r"(blimit),
       [thresh]"r"(thresh),
-      [src_pixel_step]"r"((mips_reg)src_pixel_step),
-      [ff_ph_01]"f"(ff_ph_01),          [ff_pb_03]"f"(ff_pb_03),
-      [ff_pb_04]"f"(ff_pb_04),          [ff_pb_80]"f"(ff_pb_80),
-      [ff_pb_fe]"f"(ff_pb_fe)
+      [src_pixel_step]"r"((mips_reg)src_pixel_step)
     : "memory"
   );
+  /* clang-format on */
 }
 
 /* clang-format off */
@@ -484,10 +495,29 @@ void vp8_loop_filter_vertical_edge_mmi(unsigned char *src_ptr,
 void vp8_mbloop_filter_horizontal_edge_mmi(
     unsigned char *src_ptr, int src_pixel_step, const unsigned char *blimit,
     const unsigned char *limit, const unsigned char *thresh, int count) {
-  uint32_t tmp[1];
+  uint64_t tmp[1];
   double ftmp[13];
+  double ff_pb_fe, ff_pb_80, ff_pb_04, ff_pb_03, ff_ph_003f, ff_ph_0900,
+      ff_ph_1200, ff_ph_1b00;
 
+  /* clang-format off */
   __asm__ volatile (
+    "dli        %[tmp0],    0xfefefefefefefefe                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_fe]                             \n\t"
+    "dli        %[tmp0],    0x8080808080808080                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_80]                             \n\t"
+    "dli        %[tmp0],    0x0404040404040404                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_04]                             \n\t"
+    "dli        %[tmp0],    0x0303030303030303                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_03]                             \n\t"
+    "dli        %[tmp0],    0x003f003f003f003f                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_ph_003f]                           \n\t"
+    "dli        %[tmp0],    0x0900090009000900                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_ph_0900]                           \n\t"
+    "dli        %[tmp0],    0x1200120012001200                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_ph_1200]                           \n\t"
+    "dli        %[tmp0],    0x1b001b001b001b00                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_ph_1b00]                           \n\t"
     MMI_SLL(%[tmp0], %[src_pixel_step], 0x02)
     MMI_SUBU(%[src_ptr], %[src_ptr], %[tmp0])
     "1:                                                             \n\t"
@@ -550,8 +580,8 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
     "paddusb    %[ftmp1],   %[ftmp1],           %[ftmp1]            \n\t"
     "pasubub    %[ftmp2],   %[ftmp4],           %[ftmp7]            \n\t"
     "pand       %[ftmp2],   %[ftmp2],           %[ff_pb_fe]         \n\t"
-    "li         %[tmp0],    0x01                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
     "psrlh      %[ftmp2],   %[ftmp2],           %[ftmp9]            \n\t"
     "paddusb    %[ftmp1],   %[ftmp1],           %[ftmp2]            \n\t"
     "psubusb    %[ftmp1],   %[ftmp1],           %[ftmp12]           \n\t"
@@ -584,8 +614,8 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
     "pandn      %[ftmp12],  %[ftmp1],           %[ftmp2]            \n\t"
     "pand       %[ftmp2],   %[ftmp2],           %[ftmp1]            \n\t"
 
-    "li         %[tmp0],    0x0b                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x0b                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
     "paddsb     %[ftmp0],   %[ftmp2],           %[ff_pb_03]         \n\t"
     VP8_MBLOOP_HPSRAB
     "paddsb     %[ftmp5],   %[ftmp5],           %[ftmp0]            \n\t"
@@ -593,8 +623,8 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
     VP8_MBLOOP_HPSRAB
     "psubsb     %[ftmp6],   %[ftmp6],           %[ftmp0]            \n\t"
 
-    "li         %[tmp0],    0x07                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x07                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
     "pxor       %[ftmp0],   %[ftmp0],           %[ftmp0]            \n\t"
 
     VP8_MBLOOP_HPSRAB_ADD(%[ff_ph_1b00])
@@ -649,18 +679,20 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
       [ftmp8]"=&f"(ftmp[8]),              [ftmp9]"=&f"(ftmp[9]),
       [ftmp10]"=&f"(ftmp[10]),            [ftmp11]"=&f"(ftmp[11]),
       [ftmp12]"=&f"(ftmp[12]),            [tmp0]"=&r"(tmp[0]),
-      [src_ptr]"+&r"(src_ptr),            [count]"+&r"(count)
+      [src_ptr]"+&r"(src_ptr),            [count]"+&r"(count),
+      [ff_pb_fe]"=&f"(ff_pb_fe),          [ff_pb_80]"=&f"(ff_pb_80),
+      [ff_pb_04]"=&f"(ff_pb_04),          [ff_pb_03]"=&f"(ff_pb_03),
+      [ff_ph_0900]"=&f"(ff_ph_0900),      [ff_ph_1b00]"=&f"(ff_ph_1b00),
+      [ff_ph_1200]"=&f"(ff_ph_1200),      [ff_ph_003f]"=&f"(ff_ph_003f)
     : [limit]"r"(limit),                  [blimit]"r"(blimit),
       [thresh]"r"(thresh),
-      [src_pixel_step]"r"((mips_reg)src_pixel_step),
-      [ff_pb_fe]"f"(ff_pb_fe),            [ff_pb_80]"f"(ff_pb_80),
-      [ff_pb_04]"f"(ff_pb_04),            [ff_pb_03]"f"(ff_pb_03),
-      [ff_ph_0900]"f"(ff_ph_0900),        [ff_ph_1b00]"f"(ff_ph_1b00),
-      [ff_ph_1200]"f"(ff_ph_1200),        [ff_ph_003f]"f"(ff_ph_003f)
+      [src_pixel_step]"r"((mips_reg)src_pixel_step)
     : "memory"
   );
+  /* clang-format on */
 }
 
+/* clang-format off */
 #define VP8_MBLOOP_VPSRAB_ADDH                                          \
   "pxor       %[ftmp7],   %[ftmp7],           %[ftmp7]            \n\t" \
   "pxor       %[ftmp8],   %[ftmp8],           %[ftmp8]            \n\t" \
@@ -673,15 +705,30 @@ void vp8_mbloop_filter_horizontal_edge_mmi(
   "psrah      %[ftmp7],   %[ftmp7],           %[ftmp12]           \n\t" \
   "psrah      %[ftmp8],   %[ftmp8],           %[ftmp12]           \n\t" \
   "packsshb   %[ftmp3],   %[ftmp7],           %[ftmp8]            \n\t"
+/* clang-format on */
 
 void vp8_mbloop_filter_vertical_edge_mmi(
     unsigned char *src_ptr, int src_pixel_step, const unsigned char *blimit,
     const unsigned char *limit, const unsigned char *thresh, int count) {
   mips_reg tmp[1];
-  DECLARE_ALIGNED(8, const uint64_t, srct[1]);
+  DECLARE_ALIGNED(8, const uint64_t, srct[2]);
   double ftmp[14];
+  double ff_ph_003f, ff_ph_0900, ff_pb_fe, ff_pb_80, ff_pb_04, ff_pb_03;
 
+  /* clang-format off */
   __asm__ volatile (
+    "dli        %[tmp0],    0x003f003f003f003f                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_ph_003f]                           \n\t"
+    "dli        %[tmp0],    0x0900090009000900                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_ph_0900]                           \n\t"
+    "dli        %[tmp0],    0xfefefefefefefefe                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_fe]                             \n\t"
+    "dli        %[tmp0],    0x8080808080808080                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_80]                             \n\t"
+    "dli        %[tmp0],    0x0404040404040404                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_04]                             \n\t"
+    "dli        %[tmp0],    0x0303030303030303                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_03]                             \n\t"
     MMI_SUBU(%[src_ptr], %[src_ptr], 0x04)
 
     "1:                                                             \n\t"
@@ -783,8 +830,8 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     /* abs (p1-q1) / 2 */
     "pasubub    %[ftmp12],  %[ftmp10],          %[ftmp5]            \n\t"
     "pand       %[ftmp12],  %[ftmp12],          %[ff_pb_fe]         \n\t"
-    "li         %[tmp0],    0x01                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp8]                                \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp8]                                \n\t"
     "psrlh      %[ftmp12],  %[ftmp12],          %[ftmp8]            \n\t"
     "paddusb    %[ftmp12],  %[ftmp1],           %[ftmp12]           \n\t"
     "psubusb    %[ftmp12],  %[ftmp12],          %[ftmp13]           \n\t"
@@ -824,8 +871,8 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     "pandn      %[ftmp0],   %[ftmp1],           %[ftmp0]            \n\t"
 
     "paddsb     %[ftmp4],   %[ftmp3],           %[ff_pb_04]         \n\t"
-    "li         %[tmp0],    0x0b                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp12]                               \n\t"
+    "dli        %[tmp0],    0x0b                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp12]                               \n\t"
     "punpcklbh  %[ftmp7],   %[ftmp7],           %[ftmp4]            \n\t"
     "punpckhbh  %[ftmp8],   %[ftmp8],           %[ftmp4]            \n\t"
     "psrah      %[ftmp7],   %[ftmp7],           %[ftmp12]           \n\t"
@@ -842,8 +889,8 @@ void vp8_mbloop_filter_vertical_edge_mmi(
     /* ftmp6: ps0 */
     "paddsb     %[ftmp6],   %[ftmp6],           %[ftmp3]            \n\t"
 
-    "li         %[tmp0],    0x07                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp12]                               \n\t"
+    "dli        %[tmp0],    0x07                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp12]                               \n\t"
     VP8_MBLOOP_VPSRAB_ADDH
     "paddh      %[ftmp1],   %[ff_ph_0900],      %[ff_ph_0900]       \n\t"
     "paddh      %[ftmp1],   %[ftmp1],           %[ff_ph_0900]       \n\t"
@@ -948,17 +995,19 @@ void vp8_mbloop_filter_vertical_edge_mmi(
       [ftmp10]"=&f"(ftmp[10]),            [ftmp11]"=&f"(ftmp[11]),
       [ftmp12]"=&f"(ftmp[12]),            [ftmp13]"=&f"(ftmp[13]),
       [tmp0]"=&r"(tmp[0]),                [src_ptr]"+&r"(src_ptr),
-      [count]"+&r"(count)
+      [count]"+&r"(count),
+      [ff_ph_003f]"=&f"(ff_ph_003f),    [ff_ph_0900]"=&f"(ff_ph_0900),
+      [ff_pb_03]"=&f"(ff_pb_03),        [ff_pb_04]"=&f"(ff_pb_04),
+      [ff_pb_80]"=&f"(ff_pb_80),        [ff_pb_fe]"=&f"(ff_pb_fe)
     : [limit]"r"(limit),                [blimit]"r"(blimit),
       [srct]"r"(srct),                  [thresh]"r"(thresh),
-      [src_pixel_step]"r"((mips_reg)src_pixel_step),
-      [ff_ph_003f]"f"(ff_ph_003f),      [ff_ph_0900]"f"(ff_ph_0900),
-      [ff_pb_03]"f"(ff_pb_03),          [ff_pb_04]"f"(ff_pb_04),
-      [ff_pb_80]"f"(ff_pb_80),          [ff_pb_fe]"f"(ff_pb_fe)
+      [src_pixel_step]"r"((mips_reg)src_pixel_step)
     : "memory"
   );
+  /* clang-format on */
 }
 
+/* clang-format off */
 #define VP8_SIMPLE_HPSRAB                                               \
   "psllh      %[ftmp0],   %[ftmp5],           %[ftmp8]            \n\t" \
   "psrah      %[ftmp0],   %[ftmp0],           %[ftmp9]            \n\t" \
@@ -966,23 +1015,38 @@ void vp8_mbloop_filter_vertical_edge_mmi(
   "psrah      %[ftmp1],   %[ftmp5],           %[ftmp10]           \n\t" \
   "psllh      %[ftmp1],   %[ftmp1],           %[ftmp8]            \n\t" \
   "por        %[ftmp0],   %[ftmp0],           %[ftmp1]            \n\t"
+/* clang-format on */
 
 void vp8_loop_filter_simple_horizontal_edge_mmi(unsigned char *src_ptr,
                                                 int src_pixel_step,
                                                 const unsigned char *blimit) {
-  uint32_t tmp[1], count = 2;
+  uint64_t tmp[1], count = 2;
   mips_reg addr[2];
   double ftmp[12];
+  double ff_pb_fe, ff_pb_80, ff_pb_04, ff_pb_01;
 
+  /* clang-format off */
   __asm__ volatile (
-    "li         %[tmp0],    0x08                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp8]                                \n\t"
-    "li         %[tmp0],    0x03                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
-    "li         %[tmp0],    0x0b                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp10]                               \n\t"
-    "li         %[tmp0],    0x01                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp11]                               \n\t"
+    "dli        %[tmp0],    0x0b                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp10]                               \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp11]                               \n\t"
+    "dli        %[tmp0],    0x08                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp8]                                \n\t"
+    "dli        %[tmp0],    0x03                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x0b                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp10]                               \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp11]                               \n\t"
+    "dli        %[tmp0],    0xfefefefefefefefe                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_fe]                             \n\t"
+    "dli        %[tmp0],    0x8080808080808080                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_80]                             \n\t"
+    "dli        %[tmp0],    0x0404040404040404                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_04]                             \n\t"
+    "dli        %[tmp0],    0x0101010101010101                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_01]                             \n\t"
 
     "1:                                                             \n\t"
     "gsldlc1    %[ftmp3],   0x07(%[blimit])                         \n\t"
@@ -996,7 +1060,7 @@ void vp8_loop_filter_simple_horizontal_edge_mmi(unsigned char *src_ptr,
     "gsldlc1    %[ftmp7],   0x07(%[addr0])                          \n\t"
     "gsldrc1    %[ftmp7],   0x00(%[addr0])                          \n\t"
     "pasubub    %[ftmp1],   %[ftmp7],           %[ftmp2]            \n\t"
-    "and        %[ftmp1],   %[ftmp1],           %[ff_pb_fe]         \n\t"
+    "pand       %[ftmp1],   %[ftmp1],           %[ff_pb_fe]         \n\t"
     "psrlh      %[ftmp1],   %[ftmp1],           %[ftmp11]           \n\t"
 
     MMI_SUBU(%[addr1], %[src_ptr], %[src_pixel_step])
@@ -1020,7 +1084,7 @@ void vp8_loop_filter_simple_horizontal_edge_mmi(unsigned char *src_ptr,
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
     "paddsb     %[ftmp2],   %[ftmp2],           %[ftmp0]            \n\t"
-    "and        %[ftmp5],   %[ftmp5],           %[ftmp2]            \n\t"
+    "pand       %[ftmp5],   %[ftmp5],           %[ftmp2]            \n\t"
 
     "paddsb     %[ftmp5],   %[ftmp5],           %[ff_pb_04]         \n\t"
     VP8_SIMPLE_HPSRAB
@@ -1048,30 +1112,43 @@ void vp8_loop_filter_simple_horizontal_edge_mmi(unsigned char *src_ptr,
       [ftmp10]"=&f"(ftmp[10]),            [ftmp11]"=&f"(ftmp[11]),
       [tmp0]"=&r"(tmp[0]),
       [addr0]"=&r"(addr[0]),            [addr1]"=&r"(addr[1]),
-      [src_ptr]"+&r"(src_ptr),          [count]"+&r"(count)
+      [src_ptr]"+&r"(src_ptr),          [count]"+&r"(count),
+      [ff_pb_fe]"=&f"(ff_pb_fe),        [ff_pb_80]"=&f"(ff_pb_80),
+      [ff_pb_04]"=&f"(ff_pb_04),        [ff_pb_01]"=&f"(ff_pb_01)
     : [blimit]"r"(blimit),
       [src_pixel_step]"r"((mips_reg)src_pixel_step),
-      [src_pixel_step_x2]"r"((mips_reg)(src_pixel_step<<1)),
-      [ff_pb_fe]"f"(ff_pb_fe),          [ff_pb_80]"f"(ff_pb_80),
-      [ff_pb_04]"f"(ff_pb_04),          [ff_pb_01]"f"(ff_pb_01)
+      [src_pixel_step_x2]"r"((mips_reg)(src_pixel_step<<1))
     : "memory"
   );
+  /* clang-format on */
 }
 
 void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
                                               int src_pixel_step,
                                               const unsigned char *blimit) {
-  uint32_t tmp[1], count = 2;
+  uint64_t tmp[1], count = 2;
   mips_reg addr[2];
-  DECLARE_ALIGNED(8, const uint64_t, srct[1]);
-  double ftmp[12];
+  DECLARE_ALIGNED(8, const uint64_t, srct[2]);
+  double ftmp[12], ff_pb_fe, ff_pb_80, ff_pb_04, ff_pb_01;
 
+  /* clang-format off */
   __asm__ volatile (
-    "li         %[tmp0],    0x08                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp8]                                \n\t"
-    "li         %[tmp0],    0x20                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp10]                               \n\t"
-
+    "dli        %[tmp0],    0x08                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp8]                                \n\t"
+    "dli        %[tmp0],    0x20                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp10]                               \n\t"
+    "dli        %[tmp0],    0x08                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp8]                                \n\t"
+    "dli        %[tmp0],    0x20                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp10]                               \n\t"
+    "dli        %[tmp0],    0xfefefefefefefefe                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_fe]                             \n\t"
+    "dli        %[tmp0],    0x8080808080808080                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_80]                             \n\t"
+    "dli        %[tmp0],    0x0404040404040404                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_04]                             \n\t"
+    "dli        %[tmp0],    0x0101010101010101                      \n\t"
+    "dmtc1      %[tmp0],    %[ff_pb_01]                             \n\t"
     MMI_ADDU(%[src_ptr], %[src_ptr], %[src_pixel_step_x4])
     MMI_SUBU(%[src_ptr], %[src_ptr], 0x02)
 
@@ -1118,8 +1195,8 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "punpckhwd  %[ftmp3],   %[ftmp2],           %[ftmp5]            \n\t"
     "punpcklwd  %[ftmp2],   %[ftmp2],           %[ftmp5]            \n\t"
 
-    "li         %[tmp0],    0x01                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x01                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
     "pasubub    %[ftmp6],   %[ftmp3],           %[ftmp0]            \n\t"
     "pand       %[ftmp6],   %[ftmp6],           %[ff_pb_fe]         \n\t"
     "psrlh      %[ftmp6],   %[ftmp6],           %[ftmp9]            \n\t"
@@ -1149,14 +1226,14 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "pand       %[ftmp5],   %[ftmp5],           %[ftmp0]            \n\t"
     "paddsb     %[ftmp5],   %[ftmp5],           %[ff_pb_04]         \n\t"
 
-    "li         %[tmp0],    0x03                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x03                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
     "psllh      %[ftmp0],   %[ftmp5],           %[ftmp8]            \n\t"
     "psrah      %[ftmp0],   %[ftmp0],           %[ftmp9]            \n\t"
     "psrlh      %[ftmp0],   %[ftmp0],           %[ftmp8]            \n\t"
 
-    "li         %[tmp0],    0x0b                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x0b                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
     "psrah      %[ftmp7],   %[ftmp5],           %[ftmp9]            \n\t"
     "psllh      %[ftmp7],   %[ftmp7],           %[ftmp8]            \n\t"
     "por        %[ftmp0],   %[ftmp0],           %[ftmp7]            \n\t"
@@ -1164,14 +1241,14 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
     "pxor       %[ftmp3],   %[ftmp3],           %[ff_pb_80]         \n\t"
     "psubsb     %[ftmp5],   %[ftmp5],           %[ff_pb_01]         \n\t"
 
-    "li         %[tmp0],    0x03                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x03                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
     "psllh      %[ftmp0],   %[ftmp5],           %[ftmp8]            \n\t"
     "psrah      %[ftmp0],   %[ftmp0],           %[ftmp9]            \n\t"
     "psrlh      %[ftmp0],   %[ftmp0],           %[ftmp8]            \n\t"
 
-    "li         %[tmp0],    0x0b                                    \n\t"
-    "mtc1       %[tmp0],    %[ftmp9]                                \n\t"
+    "dli        %[tmp0],    0x0b                                    \n\t"
+    "dmtc1      %[tmp0],    %[ftmp9]                                \n\t"
     "psrah      %[ftmp5],   %[ftmp5],           %[ftmp9]            \n\t"
     "psllh      %[ftmp5],   %[ftmp5],           %[ftmp8]            \n\t"
     "por        %[ftmp0],   %[ftmp0],           %[ftmp5]            \n\t"
@@ -1235,16 +1312,17 @@ void vp8_loop_filter_simple_vertical_edge_mmi(unsigned char *src_ptr,
       [ftmp10]"=&f"(ftmp[10]),            [ftmp11]"=&f"(ftmp[11]),
       [tmp0]"=&r"(tmp[0]),
       [addr0]"=&r"(addr[0]),            [addr1]"=&r"(addr[1]),
-      [src_ptr]"+&r"(src_ptr),          [count]"+&r"(count)
+      [src_ptr]"+&r"(src_ptr),          [count]"+&r"(count),
+      [ff_pb_fe]"=&f"(ff_pb_fe),        [ff_pb_80]"=&f"(ff_pb_80),
+      [ff_pb_04]"=&f"(ff_pb_04),        [ff_pb_01]"=&f"(ff_pb_01)
     : [blimit]"r"(blimit),              [srct]"r"(srct),
       [src_pixel_step]"r"((mips_reg)src_pixel_step),
       [src_pixel_step_x2]"r"((mips_reg)(src_pixel_step<<1)),
       [src_pixel_step_x4]"r"((mips_reg)(src_pixel_step<<2)),
-      [src_pixel_step_x8]"r"((mips_reg)(src_pixel_step<<3)),
-      [ff_pb_fe]"f"(ff_pb_fe),          [ff_pb_80]"f"(ff_pb_80),
-      [ff_pb_04]"f"(ff_pb_04),          [ff_pb_01]"f"(ff_pb_01)
+      [src_pixel_step_x8]"r"((mips_reg)(src_pixel_step<<3))
     : "memory"
   );
+  /* clang-format on */
 }
 
 /* Horizontal MB filtering */
