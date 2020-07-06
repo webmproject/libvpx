@@ -2716,7 +2716,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   // Ignore samples close to key frame, since QP is usually high after key.
   if (!force_downsize_rate && cpi->rc.frames_since_key > cpi->framerate) {
     const int window = VPXMIN(30, (int)(2 * cpi->framerate));
-    cpi->resize_avg_qp += cm->base_qindex;
+    cpi->resize_avg_qp += rc->last_q[INTER_FRAME];
     if (cpi->rc.buffer_level < (int)(30 * rc->optimal_buffer_level / 100))
       ++cpi->resize_buffer_underflow;
     ++cpi->resize_count;
