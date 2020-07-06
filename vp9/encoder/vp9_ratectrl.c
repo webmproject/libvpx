@@ -1986,6 +1986,7 @@ void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
   cpi->rc.rc_2_frame = 0;
   cpi->rc.rc_1_frame = 0;
   cpi->rc.last_avg_frame_bandwidth = cpi->rc.avg_frame_bandwidth;
+  cpi->rc.last_q[INTER_FRAME] = cpi->common.base_qindex;
   // For SVC on dropped frame when framedrop_mode != LAYER_DROP:
   // in this mode the whole superframe may be dropped if only a single layer
   // has buffer underflow (below threshold). Since this can then lead to
