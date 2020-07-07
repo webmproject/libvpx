@@ -34,6 +34,24 @@
       "revId": "745979bc2913b4f26847084699d9fddd68b60410",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b031decb_a368e5da",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 44
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2020-07-07T00:48:57Z",
+      "side": 1,
+      "message": "we may want to use CBR instead of RTC",
+      "parentUuid": "8fa43915_10401bb5",
+      "revId": "745979bc2913b4f26847084699d9fddd68b60410",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
