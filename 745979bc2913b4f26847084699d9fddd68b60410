@@ -70,6 +70,24 @@
       "revId": "745979bc2913b4f26847084699d9fddd68b60410",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6634ab87_f96a8511",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 44
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2020-07-07T01:54:42Z",
+      "side": 1,
+      "message": "we would need a few changes for VBR, but yeah we could just call it VP9RC.\n\nwe added RTC because the layered rate control in libvpx has only been used for CBR mode for WebRTC application.",
+      "parentUuid": "d838519d_1fd7efc9",
+      "revId": "745979bc2913b4f26847084699d9fddd68b60410",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
