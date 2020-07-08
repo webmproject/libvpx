@@ -470,10 +470,11 @@ static vpx_rational64_t get_g_timebase_in_ts(vpx_rational_t g_timebase) {
 }
 
 static vpx_codec_err_t set_encoder_config(
-    VP9EncoderConfig *oxcf, const vpx_codec_enc_cfg_t *cfg,
+    VP9EncoderConfig *oxcf, vpx_codec_enc_cfg_t *cfg,
     const struct vp9_extracfg *extra_cfg) {
   const int is_vbr = cfg->rc_end_usage == VPX_VBR;
   int sl, tl;
+  unsigned int raw_target_rate;
   oxcf->profile = cfg->g_profile;
   oxcf->max_threads = (int)cfg->g_threads;
   oxcf->width = cfg->g_w;
@@ -500,8 +501,14 @@ static vpx_codec_err_t set_encoder_config(
       cfg->g_pass == VPX_RC_FIRST_PASS ? 0 : cfg->g_lag_in_frames;
   oxcf->rc_mode = cfg->rc_end_usage;
 
+  raw_target_rate =
+      (unsigned int)((int64_t)oxcf->width * oxcf->height * oxcf->bit_depth * 3 *
+                     oxcf->init_framerate / 1000);
+  // Cap target bitrate to raw rate
+  cfg->rc_target_bitrate = VPXMIN(raw_target_rate, cfg->rc_target_bitrate);
+
   // Convert target bandwidth from Kbit/s to Bit/s
-  oxcf->target_bandwidth = 1000 * cfg->rc_target_bitrate;
+  oxcf->target_bandwidth = 1000 * (int64_t)cfg->rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = extra_cfg->rc_max_intra_bitrate_pct;
   oxcf->rc_max_inter_bitrate_pct = extra_cfg->rc_max_inter_bitrate_pct;
   oxcf->gf_cbr_boost_pct = extra_cfg->gf_cbr_boost_pct;
