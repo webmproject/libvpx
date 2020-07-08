@@ -63,15 +63,10 @@ TEST_P(RealtimeTest, RealtimeFirstPassProducesFrames) {
   EXPECT_EQ(kFramesToEncode, frame_packets_);
 }
 
-// TODO(https://crbug.com/webm/1685): the following passes -fsanitize=undefined
-// with bitrate set to 140000000 for vp8 and 128000 for vp9. There are
-// additional failures with lower bitrates using -fsanitize=integer.
-TEST_P(RealtimeTest, DISABLED_IntegerOverflow) {
+TEST_P(RealtimeTest, IntegerOverflow) {
   ::libvpx_test::RandomVideoSource video;
   video.SetSize(800, 480);
   video.set_limit(20);
-  // TODO(https://crbug.com/webm/1685): this should be silently capped
-  // internally to the raw yuv rate or below.
   cfg_.rc_target_bitrate = 140000000;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
