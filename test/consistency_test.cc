@@ -39,7 +39,7 @@ class ConsistencyTestBase : public ::testing::Test {
  public:
   ConsistencyTestBase(int width, int height) : width_(width), height_(height) {}
 
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     source_data_[0] = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
     reference_data_[0] = reinterpret_cast<uint8_t *>(
@@ -52,7 +52,7 @@ class ConsistencyTestBase : public ::testing::Test {
   }
 
   static void ClearSsim() { memset(ssim_array_, 0, kDataBufferSize / 16); }
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     vpx_free(source_data_[0]);
     source_data_[0] = NULL;
     vpx_free(reference_data_[0]);

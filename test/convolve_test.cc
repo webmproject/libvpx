@@ -341,7 +341,7 @@ void wrapper_filter_block2d_8_c(const uint8_t *src_ptr,
 
 class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
  public:
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     // Force input_ to be unaligned, output to be 16 byte aligned.
     input_ = reinterpret_cast<uint8_t *>(
                  vpx_memalign(kDataAlignment, kInputBufferSize + 1)) +
@@ -363,7 +363,7 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
 
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     vpx_free(input_ - 1);
     input_ = NULL;
     vpx_free(output_);
