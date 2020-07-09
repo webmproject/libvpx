@@ -29,9 +29,9 @@ class CQTest : public ::libvpx_test::EncoderTest,
   // maps the cqlevel to the bitrate produced.
   typedef std::map<int, uint32_t> BitrateMap;
 
-  static void SetUpTestCase() { bitrates_.clear(); }
+  static void SetUpTestSuite() { bitrates_.clear(); }
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     ASSERT_TRUE(!HasFailure())
         << "skipping bitrate validation due to earlier failure.";
     uint32_t prev_actual_bitrate = kCQTargetBitrate;
