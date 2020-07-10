@@ -35,14 +35,14 @@ class BlockinessTestBase : public ::testing::Test {
  public:
   BlockinessTestBase(int width, int height) : width_(width), height_(height) {}
 
-  static void SetUpTestCase() {
+  static void SetUpTestSuite() {
     source_data_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
     reference_data_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBufferSize));
   }
 
-  static void TearDownTestCase() {
+  static void TearDownTestSuite() {
     vpx_free(source_data_);
     source_data_ = NULL;
     vpx_free(reference_data_);
