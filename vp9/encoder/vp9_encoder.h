@@ -563,15 +563,10 @@ static INLINE int gop_command_coding_frame_count(
 typedef struct ENCODE_COMMAND {
   int use_external_quantize_index;
   int external_quantize_index;
+  int use_external_target_frame_bits;
+  int target_frame_bits;
   GOP_COMMAND gop_command;
 } ENCODE_COMMAND;
-
-static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {
-  vp9_zero(*encode_command);
-  encode_command->use_external_quantize_index = 0;
-  encode_command->external_quantize_index = -1;
-  gop_command_off(&encode_command->gop_command);
-}
 
 static INLINE void encode_command_set_gop_command(
     ENCODE_COMMAND *encode_command, GOP_COMMAND gop_command) {
@@ -588,6 +583,25 @@ static INLINE void encode_command_reset_external_quantize_index(
     ENCODE_COMMAND *encode_command) {
   encode_command->use_external_quantize_index = 0;
   encode_command->external_quantize_index = -1;
+}
+
+static INLINE void encode_command_set_target_frame_bits(
+    ENCODE_COMMAND *encode_command, int target_frame_bits) {
+  encode_command->use_external_target_frame_bits = 1;
+  encode_command->target_frame_bits = target_frame_bits;
+}
+
+static INLINE void encode_command_reset_target_frame_bits(
+    ENCODE_COMMAND *encode_command) {
+  encode_command->use_external_target_frame_bits = 0;
+  encode_command->target_frame_bits = -1;
+}
+
+static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {
+  vp9_zero(*encode_command);
+  encode_command_reset_external_quantize_index(encode_command);
+  encode_command_reset_target_frame_bits(encode_command);
+  gop_command_off(&encode_command->gop_command);
 }
 
 // Returns number of units in size of 4, if not multiple not a multiple of 4,

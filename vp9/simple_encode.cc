@@ -1071,6 +1071,14 @@ void SimpleEncode::EncodeFrameWithQuantizeIndex(
   encode_command_reset_external_quantize_index(&impl_ptr_->cpi->encode_command);
 }
 
+void SimpleEncode::EncodeFrameWithTargetFrameBits(
+    EncodeFrameResult *encode_frame_result, int target_frame_bits) {
+  encode_command_set_target_frame_bits(&impl_ptr_->cpi->encode_command,
+                                       target_frame_bits);
+  EncodeFrame(encode_frame_result);
+  encode_command_reset_target_frame_bits(&impl_ptr_->cpi->encode_command);
+}
+
 static int GetCodingFrameNumFromGopMap(const std::vector<int> &gop_map) {
   int start_show_index = 0;
   int coding_frame_count = 0;

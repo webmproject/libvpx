@@ -382,6 +382,12 @@ class SimpleEncode {
   void EncodeFrameWithQuantizeIndex(EncodeFrameResult *encode_frame_result,
                                     int quantize_index);
 
+  // Encode a frame with target frame bits usage.
+  // The encoder will find a quantize index to make the actual frame bits usage
+  // match the target.
+  void EncodeFrameWithTargetFrameBits(EncodeFrameResult *encode_frame_result,
+                                      int target_frame_bits);
+
   // Gets the number of coding frames for the video. The coding frames include
   // show frame and no show frame.
   // This function should be called after ComputeFirstPassStats().
