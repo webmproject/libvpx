@@ -504,3 +504,8 @@ TEST_F(SimpleEncodeTest, GetFramePixelCount) {
 
 }  // namespace
 }  // namespace vp9
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
