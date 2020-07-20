@@ -173,7 +173,18 @@ INSTALL-LIBS-$(CONFIG_STATIC) += $(LIBSUBDIR)/libvpx.a
 INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
 endif
 
+ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_RATE_CTRL),yesyes)
+  SIMPLE_ENCODE_SRCS := $(call enabled,CODEC_SRCS)
+  SIMPLE_ENCODE_SRCS += $(VP9_PREFIX)simple_encode.cc
+  SIMPLE_ENCODE_SRCS += $(VP9_PREFIX)simple_encode.h
+  SIMPLE_ENCODE_SRCS += ivfenc.h
+  SIMPLE_ENCODE_SRCS += ivfenc.c
+  INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(VP9_PREFIX)simple_encode.cc
+  INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(VP9_PREFIX)simple_encode.h
+endif
+
 CODEC_SRCS=$(call enabled,CODEC_SRCS)
+
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 
@@ -263,8 +274,8 @@ PROJECTS-yes += vp9rc.$(VCPROJ_SFX)
 vp9rc.$(VCPROJ_SFX): vpx_config.asm
 vp9rc.$(VCPROJ_SFX): $(RTCD)
 
-endif
-else
+endif # ifeq ($(CONFIG_MSVS),yes)
+else # ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 LIBVPX_OBJS=$(call objs, $(filter-out $(ASM_INCLUDES), $(CODEC_SRCS)))
 OBJS-yes += $(LIBVPX_OBJS)
 LIBS-$(if yes,$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
@@ -377,7 +388,14 @@ ifeq ($(CONFIG_VP9_ENCODER),yes)
   $(BUILD_PFX)libvp9rc_g.a: $(RC_RTC_OBJS)
 endif
 
+ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_RATE_CTRL),yesyes)
+  SIMPLE_ENCODE_OBJS=$(call objs,$(SIMPLE_ENCODE_SRCS))
+  OBJS-yes += $(SIMPLE_ENCODE_OBJS)
+  LIBS-yes += $(BUILD_PFX)libsimple_encode.a $(BUILD_PFX)libsimple_encode_g.a
+  $(BUILD_PFX)libsimple_encode_g.a: $(SIMPLE_ENCODE_OBJS)
 endif
+
+endif # ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 
 libvpx.ver: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
@@ -434,19 +452,38 @@ ifeq ($(CONFIG_UNIT_TESTS),yes)
 LIBVPX_TEST_DATA_PATH ?= .
 
 include $(SRC_PATH_BARE)/test/test.mk
-LIBVPX_TEST_SRCS=$(addprefix test/,$(call enabled,LIBVPX_TEST_SRCS))
+
+# addprefix_clean behaves like addprefix if the target doesn't start with "../"
+# However, if the target starts with "../", instead of adding prefix,
+# it will remove "../".
+# Using addprefix_clean, we can avoid two different targets building the
+# same file, i.e.
+# test/../ivfenc.c.d: ivfenc.o
+# ivfenc.c.d: ivfenc.o
+# Note that the other way to solve this problem is using "realpath".
+# The "realpath" is supported by make 3.81 or later.
+addprefix_clean=$(patsubst $(1)../%,%,$(addprefix $(1), $(2)))
+LIBVPX_TEST_SRCS=$(call addprefix_clean,test/,$(call enabled,LIBVPX_TEST_SRCS))
+
 LIBVPX_TEST_BIN=./test_libvpx$(EXE_SFX)
 LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
 libvpx_test_data_url=https://storage.googleapis.com/downloads.webmproject.org/test_data/libvpx/$(1)
 
 TEST_INTRA_PRED_SPEED_BIN=./test_intra_pred_speed$(EXE_SFX)
-TEST_INTRA_PRED_SPEED_SRCS=$(addprefix test/,$(call enabled,TEST_INTRA_PRED_SPEED_SRCS))
+TEST_INTRA_PRED_SPEED_SRCS=$(call addprefix_clean,test/,\
+                           $(call enabled,TEST_INTRA_PRED_SPEED_SRCS))
 TEST_INTRA_PRED_SPEED_OBJS := $(sort $(call objs,$(TEST_INTRA_PRED_SPEED_SRCS)))
 
 RC_INTERFACE_TEST_BIN=./test_rc_interface$(EXE_SFX)
-RC_INTERFACE_TEST_SRCS=$(addprefix test/,$(call enabled,RC_INTERFACE_TEST_SRCS))
+RC_INTERFACE_TEST_SRCS=$(call addprefix_clean,test/,\
+                       $(call enabled,RC_INTERFACE_TEST_SRCS))
 RC_INTERFACE_TEST_OBJS := $(sort $(call objs,$(RC_INTERFACE_TEST_SRCS)))
+
+SIMPLE_ENCODE_TEST_BIN=./test_simple_encode$(EXE_SFX)
+SIMPLE_ENCODE_TEST_SRCS=$(call addprefix_clean,test/,\
+                        $(call enabled,SIMPLE_ENCODE_TEST_SRCS))
+SIMPLE_ENCODE_TEST_OBJS := $(sort $(call objs,$(SIMPLE_ENCODE_TEST_SRCS)))
 
 libvpx_test_srcs.txt:
 	@echo "    [CREATE] $@"
@@ -608,6 +645,18 @@ $(eval $(call linkerxx_template,$(RC_INTERFACE_TEST_BIN), \
               $(RC_INTERFACE_TEST_OBJS) \
               -L. -lvpx -lgtest -lvp9rc $(extralibs) -lm))
 endif  # RC_INTERFACE_TEST
+
+ifneq ($(strip $(SIMPLE_ENCODE_TEST_OBJS)),)
+$(SIMPLE_ENCODE_TEST_OBJS) $(SIMPLE_ENCODE_TEST_OBJS:.o=.d): \
+  CXXFLAGS += $(GTEST_INCLUDES)
+OBJS-yes += $(SIMPLE_ENCODE_TEST_OBJS)
+BINS-yes += $(SIMPLE_ENCODE_TEST_BIN)
+
+$(SIMPLE_ENCODE_TEST_BIN): $(TEST_LIBS) libsimple_encode.a
+$(eval $(call linkerxx_template,$(SIMPLE_ENCODE_TEST_BIN), \
+              $(SIMPLE_ENCODE_TEST_OBJS) \
+              -L. -lsimple_encode -lvpx -lgtest $(extralibs) -lm))
+endif  # SIMPLE_ENCODE_TEST
 
 endif  # CONFIG_UNIT_TESTS
 
