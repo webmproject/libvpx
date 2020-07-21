@@ -714,6 +714,7 @@ TEST_P(Trans16x16HT, QuantCheck) {
   RunQuantCheck(429, 729);
 }
 
+#if HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 class InvTrans16x16DCT : public Trans16x16TestBase,
                          public ::testing::TestWithParam<Idct16x16Param> {
  public:
@@ -743,6 +744,7 @@ class InvTrans16x16DCT : public Trans16x16TestBase,
 TEST_P(InvTrans16x16DCT, CompareReference) {
   CompareInvReference(ref_txfm_, thresh_);
 }
+#endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 using std::make_tuple;
 

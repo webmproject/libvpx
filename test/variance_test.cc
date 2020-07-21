@@ -807,14 +807,11 @@ INSTANTIATE_TEST_SUITE_P(
         SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_c, 0)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
-typedef MainTestClass<vpx_variance_fn_t> VpxHBDMseTest;
 typedef MainTestClass<vpx_variance_fn_t> VpxHBDVarianceTest;
 typedef SubpelVarianceTest<vpx_subpixvariance_fn_t> VpxHBDSubpelVarianceTest;
 typedef SubpelVarianceTest<vpx_subp_avg_variance_fn_t>
     VpxHBDSubpelAvgVarianceTest;
 
-TEST_P(VpxHBDMseTest, RefMse) { RefTestMse(); }
-TEST_P(VpxHBDMseTest, MaxMse) { MaxTestMse(); }
 TEST_P(VpxHBDVarianceTest, Zero) { ZeroTest(); }
 TEST_P(VpxHBDVarianceTest, Ref) { RefTest(); }
 TEST_P(VpxHBDVarianceTest, RefStride) { RefStrideTest(); }
@@ -825,6 +822,9 @@ TEST_P(VpxHBDSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
 TEST_P(VpxHBDSubpelAvgVarianceTest, Ref) { RefTest(); }
 
 /* TODO(debargha): This test does not support the highbd version
+typedef MainTestClass<vpx_variance_fn_t> VpxHBDMseTest;
+TEST_P(VpxHBDMseTest, RefMse) { RefTestMse(); }
+TEST_P(VpxHBDMseTest, MaxMse) { MaxTestMse(); }
 INSTANTIATE_TEST_SUITE_P(
     C, VpxHBDMseTest,
     ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_c),

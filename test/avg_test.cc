@@ -152,6 +152,7 @@ class AverageTestHBD : public AverageTestBase<uint16_t>,
 };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if HAVE_NEON || HAVE_SSE2 || HAVE_MSA
 typedef void (*IntProRowFunc)(int16_t hbuf[16], uint8_t const *ref,
                               const int ref_stride, const int height);
 
@@ -226,6 +227,7 @@ class IntProColTest : public AverageTestBase<uint8_t>,
   int16_t sum_asm_;
   int16_t sum_c_;
 };
+#endif  // HAVE_NEON || HAVE_SSE2 || HAVE_MSA
 
 typedef int (*SatdFunc)(const tran_low_t *coeffs, int length);
 typedef std::tuple<int, SatdFunc> SatdTestParam;
@@ -378,6 +380,7 @@ TEST_P(AverageTestHBD, Random) {
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if HAVE_NEON || HAVE_SSE2 || HAVE_MSA
 TEST_P(IntProRowTest, MinValue) {
   FillConstant(0);
   RunComparison();
@@ -407,6 +410,7 @@ TEST_P(IntProColTest, Random) {
   FillRandom();
   RunComparison();
 }
+#endif
 
 TEST_P(SatdLowbdTest, MinValue) {
   const int kMin = -32640;

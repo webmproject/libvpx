@@ -146,6 +146,8 @@ class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
   loop_op_t ref_loopfilter_op_;
 };
 
+#if HAVE_NEON || HAVE_SSE2 || \
+    (HAVE_DSPR2 || HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH)
 class Loop8Test9Param : public ::testing::TestWithParam<dualloop8_param_t> {
  public:
   virtual ~Loop8Test9Param() {}
@@ -164,6 +166,8 @@ class Loop8Test9Param : public ::testing::TestWithParam<dualloop8_param_t> {
   dual_loop_op_t loopfilter_op_;
   dual_loop_op_t ref_loopfilter_op_;
 };
+#endif  // HAVE_NEON || HAVE_SSE2 || (HAVE_DSPR2 || HAVE_MSA &&
+        // (!CONFIG_VP9_HIGHBITDEPTH))
 
 TEST_P(Loop8Test6Param, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
@@ -275,6 +279,8 @@ TEST_P(Loop8Test6Param, ValueCheck) {
       << "First failed at test case " << first_failure;
 }
 
+#if HAVE_NEON || HAVE_SSE2 || \
+    (HAVE_DSPR2 || HAVE_MSA && (!CONFIG_VP9_HIGHBITDEPTH))
 TEST_P(Loop8Test9Param, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
@@ -402,6 +408,8 @@ TEST_P(Loop8Test9Param, ValueCheck) {
          "loopfilter output. "
       << "First failed at test case " << first_failure;
 }
+#endif  // HAVE_NEON || HAVE_SSE2 || (HAVE_DSPR2 || HAVE_MSA &&
+        // (!CONFIG_VP9_HIGHBITDEPTH))
 
 using std::make_tuple;
 

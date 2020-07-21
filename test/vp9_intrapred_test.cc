@@ -457,6 +457,7 @@ struct HighbdIntraPredParam {
   int bit_depth;
 };
 
+#if HAVE_SSSE3 || HAVE_NEON || HAVE_SSE2
 template <>
 void IntraPredTest<uint16_t, HighbdIntraPredParam>::Predict() {
   const int bit_depth = params_.bit_depth;
@@ -466,7 +467,6 @@ void IntraPredTest<uint16_t, HighbdIntraPredParam>::Predict() {
 }
 
 typedef IntraPredTest<uint16_t, HighbdIntraPredParam> VP9HighbdIntraPredTest;
-
 TEST_P(VP9HighbdIntraPredTest, HighbdIntraPredTests) {
   // max block size is 32
   DECLARE_ALIGNED(16, uint16_t, left_col[2 * 32]);
@@ -475,6 +475,7 @@ TEST_P(VP9HighbdIntraPredTest, HighbdIntraPredTests) {
   DECLARE_ALIGNED(16, uint16_t, ref_dst[3 * 32 * 32]);
   RunTest(left_col, above_data, dst, ref_dst);
 }
+#endif
 
 #if HAVE_SSSE3
 INSTANTIATE_TEST_SUITE_P(

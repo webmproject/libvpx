@@ -121,11 +121,13 @@ ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),yesyes)
 LIBVPX_TEST_SRCS-yes                   += vp8_boolcoder_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp8_fragments_test.cc
 endif
-
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += add_noise_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += vp8_decrypt_test.cc
+ifneq (, $(filter yes, $(HAVE_SSE2) $(HAVE_SSSE3) $(HAVE_SSE4_1) $(HAVE_NEON) \
+                       $(HAVE_MSA) $(HAVE_MMI)))
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += quantize_test.cc
+endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += set_roi.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += vp8_fdct4x4_test.cc
@@ -174,7 +176,9 @@ ifneq ($(CONFIG_REALTIME_ONLY),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += yuv_temporal_filter_test.cc
 endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
+ifneq (, $(filter yes, $(HAVE_SSE2) $(HAVE_AVX2)))
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_block_error_test.cc
+endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_quantize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
 
@@ -188,7 +192,9 @@ LIBVPX_TEST_SRCS-$(CONFIG_NON_GREEDY_MV) += non_greedy_mv_test.cc
 endif
 
 ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_TEMPORAL_DENOISING),yesyes)
+ifneq (, $(filter yes, $(HAVE_SSE2) $(HAVE_AVX2)))
 LIBVPX_TEST_SRCS-yes += vp9_denoiser_test.cc
+endif
 endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_arf_freq_test.cc
 
@@ -201,7 +207,9 @@ endif # VP9
 ## Multi-codec / unconditional whitebox tests.
 
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
+ifneq (, $(filter yes, $(HAVE_NEON) $(HAVE_SSE2) $(HAVE_MSA)))
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sum_squares_test.cc
+endif
 
 TEST_INTRA_PRED_SPEED_SRCS-yes := test_intra_pred_speed.cc
 TEST_INTRA_PRED_SPEED_SRCS-yes += ../md5_utils.h ../md5_utils.c
