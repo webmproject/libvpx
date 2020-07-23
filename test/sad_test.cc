@@ -99,17 +99,17 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
 
   virtual void TearDown() {
     vpx_free(source_data8_);
-    source_data8_ = NULL;
+    source_data8_ = nullptr;
     vpx_free(reference_data8_);
-    reference_data8_ = NULL;
+    reference_data8_ = nullptr;
     vpx_free(second_pred8_);
-    second_pred8_ = NULL;
+    second_pred8_ = nullptr;
     vpx_free(source_data16_);
-    source_data16_ = NULL;
+    source_data16_ = nullptr;
     vpx_free(reference_data16_);
-    reference_data16_ = NULL;
+    reference_data16_ = nullptr;
     vpx_free(second_pred16_);
-    second_pred16_ = NULL;
+    second_pred16_ = nullptr;
 
     libvpx_test::ClearSystemState();
   }

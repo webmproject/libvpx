@@ -365,18 +365,18 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
 
   static void TearDownTestSuite() {
     vpx_free(input_ - 1);
-    input_ = NULL;
+    input_ = nullptr;
     vpx_free(output_);
-    output_ = NULL;
+    output_ = nullptr;
     vpx_free(output_ref_);
-    output_ref_ = NULL;
+    output_ref_ = nullptr;
 #if CONFIG_VP9_HIGHBITDEPTH
     vpx_free(input16_ - 1);
-    input16_ = NULL;
+    input16_ = nullptr;
     vpx_free(output16_);
-    output16_ = NULL;
+    output16_ = nullptr;
     vpx_free(output16_ref_);
-    output16_ref_ = NULL;
+    output16_ref_ = nullptr;
 #endif
   }
 
@@ -541,13 +541,13 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
 #endif
 };
 
-uint8_t *ConvolveTest::input_ = NULL;
-uint8_t *ConvolveTest::output_ = NULL;
-uint8_t *ConvolveTest::output_ref_ = NULL;
+uint8_t *ConvolveTest::input_ = nullptr;
+uint8_t *ConvolveTest::output_ = nullptr;
+uint8_t *ConvolveTest::output_ref_ = nullptr;
 #if CONFIG_VP9_HIGHBITDEPTH
-uint16_t *ConvolveTest::input16_ = NULL;
-uint16_t *ConvolveTest::output16_ = NULL;
-uint16_t *ConvolveTest::output16_ref_ = NULL;
+uint16_t *ConvolveTest::input16_ = nullptr;
+uint16_t *ConvolveTest::output16_ = nullptr;
+uint16_t *ConvolveTest::output16_ref_ = nullptr;
 #endif
 
 TEST_P(ConvolveTest, GuardBlocks) { CheckGuardBlocks(); }
@@ -562,7 +562,7 @@ TEST_P(ConvolveTest, DISABLED_Copy_Speed) {
 
   vpx_usec_timer_start(&timer);
   for (int n = 0; n < kNumTests; ++n) {
-    UUT_->copy_[0](in, kInputStride, out, kOutputStride, NULL, 0, 0, 0, 0,
+    UUT_->copy_[0](in, kInputStride, out, kOutputStride, nullptr, 0, 0, 0, 0,
                    width, height);
   }
   vpx_usec_timer_mark(&timer);
@@ -582,7 +582,7 @@ TEST_P(ConvolveTest, DISABLED_Avg_Speed) {
 
   vpx_usec_timer_start(&timer);
   for (int n = 0; n < kNumTests; ++n) {
-    UUT_->copy_[1](in, kInputStride, out, kOutputStride, NULL, 0, 0, 0, 0,
+    UUT_->copy_[1](in, kInputStride, out, kOutputStride, nullptr, 0, 0, 0, 0,
                    width, height);
   }
   vpx_usec_timer_mark(&timer);
@@ -780,7 +780,8 @@ TEST_P(ConvolveTest, Copy) {
   uint8_t *const out = output();
 
   ASM_REGISTER_STATE_CHECK(UUT_->copy_[0](in, kInputStride, out, kOutputStride,
-                                          NULL, 0, 0, 0, 0, Width(), Height()));
+                                          nullptr, 0, 0, 0, 0, Width(),
+                                          Height()));
 
   CheckGuardBlocks();
 
@@ -799,7 +800,8 @@ TEST_P(ConvolveTest, Avg) {
   CopyOutputToRef();
 
   ASM_REGISTER_STATE_CHECK(UUT_->copy_[1](in, kInputStride, out, kOutputStride,
-                                          NULL, 0, 0, 0, 0, Width(), Height()));
+                                          nullptr, 0, 0, 0, 0, Width(),
+                                          Height()));
 
   CheckGuardBlocks();
 
@@ -955,9 +957,9 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
                 UUT_->h8_[i](in, kInputStride, out, kOutputStride, filters,
                              filter_x, 16, 0, 16, Width(), Height()));
           else
-            ASM_REGISTER_STATE_CHECK(UUT_->copy_[i](in, kInputStride, out,
-                                                    kOutputStride, NULL, 0, 0,
-                                                    0, 0, Width(), Height()));
+            ASM_REGISTER_STATE_CHECK(
+                UUT_->copy_[i](in, kInputStride, out, kOutputStride, nullptr, 0,
+                               0, 0, 0, Width(), Height()));
 
           CheckGuardBlocks();
 
@@ -1053,9 +1055,9 @@ TEST_P(ConvolveTest, FilterExtremes) {
                   UUT_->h8_[0](in, kInputStride, out, kOutputStride, filters,
                                filter_x, 16, 0, 16, Width(), Height()));
             else
-              ASM_REGISTER_STATE_CHECK(UUT_->copy_[0](in, kInputStride, out,
-                                                      kOutputStride, NULL, 0, 0,
-                                                      0, 0, Width(), Height()));
+              ASM_REGISTER_STATE_CHECK(
+                  UUT_->copy_[0](in, kInputStride, out, kOutputStride, nullptr,
+                                 0, 0, 0, 0, Width(), Height()));
 
             for (int y = 0; y < Height(); ++y) {
               for (int x = 0; x < Width(); ++x)

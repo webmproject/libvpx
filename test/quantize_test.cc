@@ -46,9 +46,9 @@ class QuantizeTestBase {
  public:
   virtual ~QuantizeTestBase() {
     vp8_remove_compressor(&vp8_comp_);
-    vp8_comp_ = NULL;
+    vp8_comp_ = nullptr;
     vpx_free(macroblockd_dst_);
-    macroblockd_dst_ = NULL;
+    macroblockd_dst_ = nullptr;
     libvpx_test::ClearSystemState();
   }
 

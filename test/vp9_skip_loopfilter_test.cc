@@ -24,10 +24,11 @@ const char kVp9Md5File[] = "vp90-2-08-tile_1x8_frame_parallel.webm.md5";
 // Class for testing shutting off the loop filter.
 class SkipLoopFilterTest {
  public:
-  SkipLoopFilterTest() : video_(NULL), decoder_(NULL), md5_file_(NULL) {}
+  SkipLoopFilterTest()
+      : video_(nullptr), decoder_(nullptr), md5_file_(nullptr) {}
 
   ~SkipLoopFilterTest() {
-    if (md5_file_ != NULL) fclose(md5_file_);
+    if (md5_file_ != nullptr) fclose(md5_file_);
     delete decoder_;
     delete video_;
   }
@@ -37,8 +38,8 @@ class SkipLoopFilterTest {
     expected_md5_[0] = '\0';
     junk_[0] = '\0';
     video_ = new libvpx_test::WebMVideoSource(kVp9TestFile);
-    if (video_ == NULL) {
-      EXPECT_TRUE(video_ != NULL);
+    if (video_ == nullptr) {
+      EXPECT_NE(video_, nullptr);
       return false;
     }
     video_->Init();
@@ -47,8 +48,8 @@ class SkipLoopFilterTest {
     vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     if (num_threads > 0) cfg.threads = num_threads;
     decoder_ = new libvpx_test::VP9Decoder(cfg, 0);
-    if (decoder_ == NULL) {
-      EXPECT_TRUE(decoder_ != NULL);
+    if (decoder_ == nullptr) {
+      EXPECT_NE(decoder_, nullptr);
       return false;
     }
 
@@ -73,7 +74,7 @@ class SkipLoopFilterTest {
   }
 
   vpx_codec_err_t DecodeRemainingFrames() {
-    for (; video_->cxdata() != NULL; video_->Next()) {
+    for (; video_->cxdata() != nullptr; video_->Next()) {
       const vpx_codec_err_t res =
           decoder_->DecodeFrame(video_->cxdata(), video_->frame_size());
       if (res != VPX_CODEC_OK) return res;
@@ -93,13 +94,13 @@ class SkipLoopFilterTest {
   // TODO(fgalligan): Move the MD5 testing code into another class.
   void OpenMd5File(const std::string &md5_file_name) {
     md5_file_ = libvpx_test::OpenTestDataFile(md5_file_name);
-    ASSERT_TRUE(md5_file_ != NULL)
+    ASSERT_NE(md5_file_, nullptr)
         << "MD5 file open failed. Filename: " << md5_file_name;
   }
 
   // Reads the next line of the MD5 file.
   void ReadMd5() {
-    ASSERT_TRUE(md5_file_ != NULL);
+    ASSERT_NE(md5_file_, nullptr);
     const int res = fscanf(md5_file_, "%s  %s", expected_md5_, junk_);
     ASSERT_NE(EOF, res) << "Read md5 data failed";
     expected_md5_[32] = '\0';

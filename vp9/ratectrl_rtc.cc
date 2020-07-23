@@ -159,7 +159,7 @@ int VP9RateControlRTC::GetQP() const { return cpi_->common.base_qindex; }
 
 int VP9RateControlRTC::GetLoopfilterLevel() const {
   struct loopfilter *const lf = &cpi_->common.lf;
-  vp9_pick_filter_level(NULL, cpi_, LPF_PICK_FROM_Q);
+  vp9_pick_filter_level(nullptr, cpi_, LPF_PICK_FROM_Q);
   return lf->filter_level;
 }
 

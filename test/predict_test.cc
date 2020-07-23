@@ -41,11 +41,11 @@ class PredictTestBase : public AbstractBench,
  public:
   PredictTestBase()
       : width_(GET_PARAM(0)), height_(GET_PARAM(1)), predict_(GET_PARAM(2)),
-        src_(NULL), padded_dst_(NULL), dst_(NULL), dst_c_(NULL) {}
+        src_(nullptr), padded_dst_(nullptr), dst_(nullptr), dst_c_(nullptr) {}
 
   virtual void SetUp() {
     src_ = new uint8_t[kSrcSize];
-    ASSERT_TRUE(src_ != NULL);
+    ASSERT_NE(src_, nullptr);
 
     // padded_dst_ provides a buffer of kBorderSize around the destination
     // memory to facilitate detecting out of bounds writes.
@@ -53,11 +53,11 @@ class PredictTestBase : public AbstractBench,
     padded_dst_size_ = dst_stride_ * (kBorderSize + height_ + kBorderSize);
     padded_dst_ =
         reinterpret_cast<uint8_t *>(vpx_memalign(16, padded_dst_size_));
-    ASSERT_TRUE(padded_dst_ != NULL);
+    ASSERT_NE(padded_dst_, nullptr);
     dst_ = padded_dst_ + (kBorderSize * dst_stride_) + kBorderSize;
 
     dst_c_ = new uint8_t[16 * 16];
-    ASSERT_TRUE(dst_c_ != NULL);
+    ASSERT_NE(dst_c_, nullptr);
 
     memset(src_, 0, kSrcSize);
     memset(padded_dst_, 128, padded_dst_size_);
@@ -66,12 +66,12 @@ class PredictTestBase : public AbstractBench,
 
   virtual void TearDown() {
     delete[] src_;
-    src_ = NULL;
+    src_ = nullptr;
     vpx_free(padded_dst_);
-    padded_dst_ = NULL;
-    dst_ = NULL;
+    padded_dst_ = nullptr;
+    dst_ = nullptr;
     delete[] dst_c_;
-    dst_c_ = NULL;
+    dst_c_ = nullptr;
     libvpx_test::ClearSystemState();
   }
 

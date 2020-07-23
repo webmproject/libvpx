@@ -110,13 +110,13 @@ class VP9QuantizeBase : public AbstractBench {
     vpx_free(quant_ptr_);
     vpx_free(quant_shift_ptr_);
     vpx_free(dequant_ptr_);
-    zbin_ptr_ = NULL;
-    round_fp_ptr_ = NULL;
-    quant_fp_ptr_ = NULL;
-    round_ptr_ = NULL;
-    quant_ptr_ = NULL;
-    quant_shift_ptr_ = NULL;
-    dequant_ptr_ = NULL;
+    zbin_ptr_ = nullptr;
+    round_fp_ptr_ = nullptr;
+    quant_fp_ptr_ = nullptr;
+    round_ptr_ = nullptr;
+    quant_ptr_ = nullptr;
+    quant_shift_ptr_ = nullptr;
+    dequant_ptr_ = nullptr;
     libvpx_test::ClearSystemState();
   }
 

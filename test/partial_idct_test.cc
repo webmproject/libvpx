@@ -102,11 +102,11 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
 
   virtual void TearDown() {
     vpx_free(input_block_);
-    input_block_ = NULL;
+    input_block_ = nullptr;
     vpx_free(output_block_);
-    output_block_ = NULL;
+    output_block_ = nullptr;
     vpx_free(output_block_ref_);
-    output_block_ref_ = NULL;
+    output_block_ref_ = nullptr;
     libvpx_test::ClearSystemState();
   }
 

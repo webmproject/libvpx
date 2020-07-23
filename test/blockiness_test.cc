@@ -44,9 +44,9 @@ class BlockinessTestBase : public ::testing::Test {
 
   static void TearDownTestSuite() {
     vpx_free(source_data_);
-    source_data_ = NULL;
+    source_data_ = nullptr;
     vpx_free(reference_data_);
-    reference_data_ = NULL;
+    reference_data_ = nullptr;
   }
 
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
@@ -154,8 +154,8 @@ class BlockinessVP9Test
 };
 #endif  // CONFIG_VP9_ENCODER
 
-uint8_t *BlockinessTestBase::source_data_ = NULL;
-uint8_t *BlockinessTestBase::reference_data_ = NULL;
+uint8_t *BlockinessTestBase::source_data_ = nullptr;
+uint8_t *BlockinessTestBase::reference_data_ = nullptr;
 
 #if CONFIG_VP9_ENCODER
 TEST_P(BlockinessVP9Test, SourceBlockierThanReference) {

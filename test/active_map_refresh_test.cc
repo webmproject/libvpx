@@ -80,7 +80,7 @@ class ActiveMapRefreshTest
     } else if (video->frame() >= 2 && video->img()) {
       vpx_image_t *current = video->img();
       vpx_image_t *previous = y4m_holder_->img();
-      ASSERT_TRUE(previous != NULL);
+      ASSERT_NE(previous, nullptr);
       vpx_active_map_t map = vpx_active_map_t();
       const int width = static_cast<int>(current->d_w);
       const int height = static_cast<int>(current->d_h);

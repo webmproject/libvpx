@@ -88,7 +88,7 @@ TEST_P(MotionVectorTestLarge, OverallTest) {
       "niklas_640_480_30.yuv", VPX_IMG_FMT_I420, 3840, 2160,  // 2048, 1080,
       30, 1, 0, 5));
 
-  ASSERT_TRUE(video.get() != NULL);
+  ASSERT_NE(video.get(), nullptr);
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
 

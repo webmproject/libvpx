@@ -39,7 +39,7 @@ typedef tuple<PartialFdctFunc, int /* size */, vpx_bit_depth_t>
 
 tran_low_t partial_fdct_ref(const Buffer<int16_t> &in, int size) {
   int64_t sum = 0;
-  if (in.TopLeftPixel() != NULL) {
+  if (in.TopLeftPixel() != nullptr) {
     for (int y = 0; y < size; ++y) {
       for (int x = 0; x < size; ++x) {
         sum += in.TopLeftPixel()[y * in.stride() + x];
@@ -81,7 +81,7 @@ class PartialFdctTest : public ::testing::TestWithParam<PartialFdctParam> {
     Buffer<tran_low_t> output_block = Buffer<tran_low_t>(size_, size_, 0, 16);
     ASSERT_TRUE(output_block.Init());
 
-    if (output_block.TopLeftPixel() != NULL) {
+    if (output_block.TopLeftPixel() != nullptr) {
       for (int i = 0; i < 100; ++i) {
         if (i == 0) {
           input_block.Set(maxvalue);

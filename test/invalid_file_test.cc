@@ -38,15 +38,15 @@ std::ostream &operator<<(std::ostream &os, const DecodeParam &dp) {
 class InvalidFileTest : public ::libvpx_test::DecoderTest,
                         public ::libvpx_test::CodecTestWithParam<DecodeParam> {
  protected:
-  InvalidFileTest() : DecoderTest(GET_PARAM(0)), res_file_(NULL) {}
+  InvalidFileTest() : DecoderTest(GET_PARAM(0)), res_file_(nullptr) {}
 
   virtual ~InvalidFileTest() {
-    if (res_file_ != NULL) fclose(res_file_);
+    if (res_file_ != nullptr) fclose(res_file_);
   }
 
   void OpenResFile(const std::string &res_file_name_) {
     res_file_ = libvpx_test::OpenTestDataFile(res_file_name_);
-    ASSERT_TRUE(res_file_ != NULL)
+    ASSERT_NE(res_file_, nullptr)
         << "Result file open failed. Filename: " << res_file_name_;
   }
 
@@ -54,7 +54,7 @@ class InvalidFileTest : public ::libvpx_test::DecoderTest,
       const vpx_codec_err_t res_dec,
       const libvpx_test::CompressedVideoSource &video,
       libvpx_test::Decoder *decoder) {
-    EXPECT_TRUE(res_file_ != NULL);
+    EXPECT_NE(res_file_, nullptr);
     int expected_res_dec;
 
     // Read integer result.
@@ -102,7 +102,7 @@ class InvalidFileTest : public ::libvpx_test::DecoderTest,
       return;
 #endif
     }
-    ASSERT_TRUE(video.get() != NULL);
+    ASSERT_NE(video.get(), nullptr);
     video->Init();
 
     // Construct result file name. The file holds a list of expected integer

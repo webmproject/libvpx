@@ -54,13 +54,13 @@ class ConsistencyTestBase : public ::testing::Test {
   static void ClearSsim() { memset(ssim_array_, 0, kDataBufferSize / 16); }
   static void TearDownTestSuite() {
     vpx_free(source_data_[0]);
-    source_data_[0] = NULL;
+    source_data_[0] = nullptr;
     vpx_free(reference_data_[0]);
-    reference_data_[0] = NULL;
+    reference_data_[0] = nullptr;
     vpx_free(source_data_[1]);
-    source_data_[1] = NULL;
+    source_data_[1] = nullptr;
     vpx_free(reference_data_[1]);
-    reference_data_[1] = NULL;
+    reference_data_[1] = nullptr;
 
     delete[] ssim_array_;
   }
@@ -145,9 +145,9 @@ class ConsistencyVP9Test
 };
 #endif  // CONFIG_VP9_ENCODER
 
-uint8_t *ConsistencyTestBase::source_data_[2] = { NULL, NULL };
-uint8_t *ConsistencyTestBase::reference_data_[2] = { NULL, NULL };
-Ssimv *ConsistencyTestBase::ssim_array_ = NULL;
+uint8_t *ConsistencyTestBase::source_data_[2] = { nullptr, nullptr };
+uint8_t *ConsistencyTestBase::reference_data_[2] = { nullptr, nullptr };
+Ssimv *ConsistencyTestBase::ssim_array_ = nullptr;
 
 #if CONFIG_VP9_ENCODER
 TEST_P(ConsistencyVP9Test, ConsistencyIsZero) {

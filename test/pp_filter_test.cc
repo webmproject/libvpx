@@ -459,7 +459,7 @@ TEST_P(VpxMbPostProcDownTest, CheckLowFilterOutput) {
   SetRows(src_c_.TopLeftPixel(), rows_, cols_, src_c_.stride());
 
   unsigned char *expected_output = new unsigned char[rows_ * cols_];
-  ASSERT_TRUE(expected_output != NULL);
+  ASSERT_NE(expected_output, nullptr);
   SetRows(expected_output, rows_, cols_, cols_);
 
   RunFilterLevel(src_c_.TopLeftPixel(), rows_, cols_, src_c_.stride(), q2mbl(0),

@@ -40,7 +40,7 @@ typedef std::tuple<int, int, const char *> DecodeParam;
 class TestVectorTest : public ::libvpx_test::DecoderTest,
                        public ::libvpx_test::CodecTestWithParam<DecodeParam> {
  protected:
-  TestVectorTest() : DecoderTest(GET_PARAM(0)), md5_file_(NULL) {
+  TestVectorTest() : DecoderTest(GET_PARAM(0)), md5_file_(nullptr) {
 #if CONFIG_VP9_DECODER
     resize_clips_.insert(::libvpx_test::kVP9TestVectorsResize,
                          ::libvpx_test::kVP9TestVectorsResize +
@@ -54,7 +54,7 @@ class TestVectorTest : public ::libvpx_test::DecoderTest,
 
   void OpenMD5File(const std::string &md5_file_name_) {
     md5_file_ = libvpx_test::OpenTestDataFile(md5_file_name_);
-    ASSERT_TRUE(md5_file_ != NULL)
+    ASSERT_NE(md5_file_, nullptr)
         << "Md5 file open failed. Filename: " << md5_file_name_;
   }
 
@@ -79,7 +79,7 @@ class TestVectorTest : public ::libvpx_test::DecoderTest,
 
   virtual void DecompressedFrameHook(const vpx_image_t &img,
                                      const unsigned int frame_number) {
-    ASSERT_TRUE(md5_file_ != NULL);
+    ASSERT_NE(md5_file_, nullptr);
     char expected_md5[33];
     char junk[128];
 
@@ -137,7 +137,7 @@ TEST_P(TestVectorTest, MD5Match) {
     return;
 #endif
   }
-  ASSERT_TRUE(video.get() != NULL);
+  ASSERT_NE(video.get(), nullptr);
   video->Init();
 
   // Construct md5 file name.

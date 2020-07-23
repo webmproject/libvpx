@@ -142,7 +142,7 @@ TEST_P(VpxEncoderParmsGetToDecoder, BitstreamParms) {
 
   std::unique_ptr<libvpx_test::VideoSource> video(
       new libvpx_test::Y4mVideoSource(test_video_.name, 0, test_video_.frames));
-  ASSERT_TRUE(video.get() != NULL);
+  ASSERT_NE(video.get(), nullptr);
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }

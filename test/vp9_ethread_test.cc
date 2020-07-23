@@ -41,7 +41,7 @@ class VPxFirstPassEncoderThreadTest
 
     row_mt_mode_ = 1;
     first_pass_only_ = true;
-    firstpass_stats_.buf = NULL;
+    firstpass_stats_.buf = nullptr;
     firstpass_stats_.sz = 0;
   }
   virtual ~VPxFirstPassEncoderThreadTest() { free(firstpass_stats_.buf); }

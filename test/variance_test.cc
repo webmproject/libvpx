@@ -253,7 +253,7 @@ void SumOfSquaresTest::RefTest() {
 
 template <typename Func>
 struct TestParams {
-  TestParams(int log2w = 0, int log2h = 0, Func function = NULL,
+  TestParams(int log2w = 0, int log2h = 0, Func function = nullptr,
              int bit_depth_value = 0)
       : log2width(log2w), log2height(log2h), func(function) {
     use_high_bit_depth = (bit_depth_value > 0);
@@ -297,8 +297,8 @@ class MainTestClass
         use_high_bit_depth() ? sizeof(uint16_t) : sizeof(uint8_t);
     src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size() * unit));
     ref_ = new uint8_t[block_size() * unit];
-    ASSERT_TRUE(src_ != NULL);
-    ASSERT_TRUE(ref_ != NULL);
+    ASSERT_NE(src_, nullptr);
+    ASSERT_NE(ref_, nullptr);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (use_high_bit_depth()) {
       // TODO(skal): remove!
@@ -319,8 +319,8 @@ class MainTestClass
 
     vpx_free(src_);
     delete[] ref_;
-    src_ = NULL;
-    ref_ = NULL;
+    src_ = nullptr;
+    ref_ = nullptr;
     libvpx_test::ClearSystemState();
   }
 
@@ -573,9 +573,9 @@ class SubpelVarianceTest
           (block_size() + width() + height() + 1) * sizeof(uint16_t))));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     }
-    ASSERT_TRUE(src_ != NULL);
-    ASSERT_TRUE(sec_ != NULL);
-    ASSERT_TRUE(ref_ != NULL);
+    ASSERT_NE(src_, nullptr);
+    ASSERT_NE(sec_, nullptr);
+    ASSERT_NE(ref_, nullptr);
   }
 
   virtual void TearDown() {

@@ -32,7 +32,7 @@ typedef void (*IntraPredFunc)(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left);
 
 struct IntraPredParam {
-  IntraPredParam(IntraPredFunc pred = NULL, IntraPredFunc ref = NULL,
+  IntraPredParam(IntraPredFunc pred = nullptr, IntraPredFunc ref = nullptr,
                  int block_size_value = 0, int bit_depth_value = 0)
       : pred_fn(pred), ref_fn(ref), block_size(block_size_value),
         bit_depth(bit_depth_value) {}
@@ -446,8 +446,9 @@ typedef void (*HighbdIntraPred)(uint16_t *dst, ptrdiff_t stride,
                                 const uint16_t *above, const uint16_t *left,
                                 int bps);
 struct HighbdIntraPredParam {
-  HighbdIntraPredParam(HighbdIntraPred pred = NULL, HighbdIntraPred ref = NULL,
-                       int block_size_value = 0, int bit_depth_value = 0)
+  HighbdIntraPredParam(HighbdIntraPred pred = nullptr,
+                       HighbdIntraPred ref = nullptr, int block_size_value = 0,
+                       int bit_depth_value = 0)
       : pred_fn(pred), ref_fn(ref), block_size(block_size_value),
         bit_depth(bit_depth_value) {}
 

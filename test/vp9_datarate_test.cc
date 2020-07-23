@@ -701,7 +701,7 @@ TEST_P(DatarateTestVP9RealTime, RegionOfInterest) {
   // Use 2 states: 1 is center square, 0 is the rest.
   roi_.roi_map = reinterpret_cast<uint8_t *>(
       calloc(roi_.rows * roi_.cols, sizeof(*roi_.roi_map)));
-  ASSERT_TRUE(roi_.roi_map != NULL);
+  ASSERT_NE(roi_.roi_map, nullptr);
 
   for (unsigned int i = 0; i < roi_.rows; ++i) {
     for (unsigned int j = 0; j < roi_.cols; ++j) {
