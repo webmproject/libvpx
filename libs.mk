@@ -490,16 +490,17 @@ libvpx_test_srcs.txt:
 	@echo $(LIBVPX_TEST_SRCS) | xargs -n1 echo | LC_ALL=C sort -u > $@
 CLEAN-OBJS += libvpx_test_srcs.txt
 
+# Attempt to download the file using curl, retrying once if it fails for a
+# partial file (18).
 $(LIBVPX_TEST_DATA): $(SRC_PATH_BARE)/test/test-data.sha1
 	@echo "    [DOWNLOAD] $@"
-	# Attempt to download the file using curl, retrying once if it fails for a
-	# partial file (18).
 	$(qexec)( \
 	  trap 'rm -f $@' INT TERM; \
-	  curl="curl --retry 1 -L -o $@ $(call libvpx_test_data_url,$(@F))"; \
-	  $$curl; \
-	  case "$$?" in \
-	    18) $$curl -C -;; \
+	  curl="curl -S -s --retry 1 -L -o $@ $(call libvpx_test_data_url,$(@F))"; \
+	  $$curl; ret=$$?; \
+	  case "$$ret" in \
+	    18) $$curl -C - ;; \
+	    *) exit $$ret ;; \
 	  esac \
 	)
 
