@@ -60,7 +60,9 @@ struct PartitionInfo {
 
 constexpr int kMotionVectorPrecision = 8;
 
-// The frame is split to 4x4 blocks.
+// In the first pass. The frame is split to 16x16 blocks.
+// This structure contains the information of each 16x16 block.
+// In the second pass. The frame is split to 4x4 blocks.
 // This structure contains the information of each 4x4 block.
 struct MotionVectorInfo {
   // Number of valid motion vectors, always 0 if this block is in the key frame.
@@ -68,8 +70,8 @@ struct MotionVectorInfo {
   int mv_count;
   // The reference frame for motion vectors. If the second motion vector does
   // not exist (mv_count = 1), the reference frame is kNoneRefFrame.
-  // Otherwise, the reference frame is either kLastFrame, or kGoldenFrame,
-  // or kAltRefFrame.
+  // Otherwise, the reference frame is either kRefFrameTypeLast, or
+  // kRefFrameTypePast, or kRefFrameTypeFuture.
   RefFrameType ref_frame[2];
   // The row offset of motion vectors in the unit of pixel.
   // If the second motion vector does not exist, the value is 0.
@@ -245,7 +247,7 @@ struct EncodeFrameResult {
   std::vector<PartitionInfo> partition_info;
   // A vector of the motion vector information of the frame.
   // The number of elements is |num_rows_4x4| * |num_cols_4x4|.
-  // The frame is divided 4x4 blocks of |num_rows_4x4| rows and
+  // The frame is divided into 4x4 blocks of |num_rows_4x4| rows and
   // |num_cols_4x4| columns.
   // Each 4x4 block contains 0 motion vector if this is an intra predicted
   // frame (for example, the key frame). If the frame is inter predicted,
@@ -323,6 +325,12 @@ class SimpleEncode {
   // each video frame. The stats of each video frame is a vector of 25 double
   // values. For details, please check FIRSTPASS_STATS in vp9_firstpass.h
   std::vector<std::vector<double>> ObserveFirstPassStats();
+
+  // Outputs the first pass motion vectors represented by a 2-D vector.
+  // One can use the frame index at first dimension to retrieve the mvs for
+  // each video frame. The frame is divided into 16x16 blocks. The number of
+  // elements is round_up(|num_rows_4x4| / 4) * round_up(|num_cols_4x4| / 4).
+  std::vector<std::vector<MotionVectorInfo>> ObserveFirstPassMotionVectors();
 
   // Ouputs a copy of key_frame_map_, a binary vector with size equal to the
   // number of show frames in the video. For each entry in the vector, 1
@@ -451,6 +459,17 @@ class SimpleEncode {
   // frame appears?
   // Reference frames info of the to-be-coded frame.
   RefFrameInfo ref_frame_info_;
+
+  // A 2-D vector of motion vector information of the frame collected
+  // from the first pass. The first dimension is the frame index.
+  // Each frame is divided into 16x16 blocks. The number of elements is
+  // round_up(|num_rows_4x4| / 4) * round_up(|num_cols_4x4| / 4).
+  // Each 16x16 block contains 0 motion vector if this is an intra predicted
+  // frame (for example, the key frame). If the frame is inter predicted,
+  // each 16x16 block contains either 1 or 2 motion vectors.
+  // The first motion vector is always from the LAST_FRAME.
+  // The second motion vector is always from the GOLDEN_FRAME.
+  std::vector<std::vector<MotionVectorInfo>> fp_motion_vector_info_;
 };
 
 }  // namespace vp9

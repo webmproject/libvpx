@@ -60,6 +60,27 @@ TEST_F(SimpleEncodeTest, ComputeFirstPassStats) {
   }
 }
 
+TEST_F(SimpleEncodeTest, ObserveFirstPassMotionVectors) {
+  SimpleEncode simple_encode(width_, height_, frame_rate_num_, frame_rate_den_,
+                             target_bitrate_, num_frames_,
+                             in_file_path_str_.c_str());
+  simple_encode.ComputeFirstPassStats();
+  std::vector<std::vector<MotionVectorInfo>> fps_motion_vectors =
+      simple_encode.ObserveFirstPassMotionVectors();
+  EXPECT_EQ(fps_motion_vectors.size(), static_cast<size_t>(num_frames_));
+  const size_t num_blocks = ((width_ + 15) >> 4) * ((height_ + 15) >> 4);
+  EXPECT_EQ(num_blocks, fps_motion_vectors[0].size());
+  for (size_t i = 0; i < fps_motion_vectors.size(); ++i) {
+    EXPECT_EQ(num_blocks, fps_motion_vectors[i].size());
+    for (size_t j = 0; j < num_blocks; ++j) {
+      const int mv_count = fps_motion_vectors[i][j].mv_count;
+      const int ref_count = (fps_motion_vectors[i][j].ref_frame[0] > 0) +
+                            (fps_motion_vectors[i][j].ref_frame[1] > 0);
+      EXPECT_EQ(mv_count, ref_count);
+    }
+  }
+}
+
 TEST_F(SimpleEncodeTest, GetCodingFrameNum) {
   SimpleEncode simple_encode(width_, height_, frame_rate_num_, frame_rate_den_,
                              target_bitrate_, num_frames_,

@@ -839,6 +839,26 @@ static void accumulate_fp_mb_row_stat(TileDataEnc *this_tile,
                    fp_acc_data->image_data_start_row);
 }
 
+#if CONFIG_RATE_CTRL
+static void store_fp_motion_vector(VP9_COMP *cpi, const MV *mv,
+                                   const int mb_row, const int mb_col,
+                                   const int is_second_mv) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int mb_index = mb_row * cm->mb_cols + mb_col;
+  MOTION_VECTOR_INFO *this_motion_vector_info =
+      &cpi->fp_motion_vector_info[mb_index];
+  if (!is_second_mv) {
+    this_motion_vector_info->ref_frame[0] = LAST_FRAME;
+    this_motion_vector_info->mv[0].as_mv.row = mv->row;
+    this_motion_vector_info->mv[0].as_mv.col = mv->col;
+    return;
+  }
+  this_motion_vector_info->ref_frame[1] = GOLDEN_FRAME;
+  this_motion_vector_info->mv[1].as_mv.row = mv->row;
+  this_motion_vector_info->mv[1].as_mv.col = mv->col;
+}
+#endif  // CONFIG_RATE_CTRL
+
 #define NZ_MOTION_PENALTY 128
 #define INTRA_MODE_PENALTY 1024
 void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
@@ -1137,6 +1157,9 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
                 vp9_get_mvpred_var(x, &tmp_mv, &zero_mv, &v_fn_ptr, 0);
           }
         }
+#if CONFIG_RATE_CTRL
+        store_fp_motion_vector(cpi, &mv, mb_row, mb_col, /*is_second_mv=*/0);
+#endif  // CONFIG_RAGE_CTRL
 
         // Search in an older reference frame.
         if ((cm->current_video_frame > 1) && gld_yv12 != NULL) {
@@ -1158,6 +1181,10 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
           first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv, &gf_motion_error);
+#if CONFIG_RATE_CTRL
+          store_fp_motion_vector(cpi, &tmp_mv, mb_row, mb_col,
+                                 /*is_second_mv=*/1);
+#endif  // CONFIG_RAGE_CTRL
 
           if (gf_motion_error < motion_error && gf_motion_error < this_error)
             ++(fp_acc_data->second_ref_count);

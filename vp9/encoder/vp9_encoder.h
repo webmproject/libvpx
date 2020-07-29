@@ -642,6 +642,9 @@ static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {
 // Returns number of units in size of 4, if not multiple not a multiple of 4,
 // round it up. For example, size is 7, return 2.
 static INLINE int get_num_unit_4x4(int size) { return (size + 3) >> 2; }
+// Returns number of units in size of 16, if not multiple not a multiple of 16,
+// round it up. For example, size is 17, return 2.
+static INLINE int get_num_unit_16x16(int size) { return (size + 15) >> 4; }
 #endif  // CONFIG_RATE_CTRL
 
 typedef struct VP9_COMP {
@@ -952,6 +955,7 @@ typedef struct VP9_COMP {
   ENCODE_COMMAND encode_command;
   PARTITION_INFO *partition_info;
   MOTION_VECTOR_INFO *motion_vector_info;
+  MOTION_VECTOR_INFO *fp_motion_vector_info;
 
   RATE_QSTEP_MODEL rq_model[ENCODE_FRAME_TYPES];
 #endif
@@ -1000,6 +1004,27 @@ static INLINE void free_motion_vector_info(struct VP9_COMP *cpi) {
   cpi->motion_vector_info = NULL;
 }
 
+// Allocates memory for the first pass motion vector information.
+// The unit size is each 16x16 block.
+// Only called once in vp9_create_compressor().
+static INLINE void fp_motion_vector_info_init(struct VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int unit_width = get_num_unit_16x16(cpi->frame_info.frame_width);
+  const int unit_height = get_num_unit_16x16(cpi->frame_info.frame_height);
+  CHECK_MEM_ERROR(cm, cpi->fp_motion_vector_info,
+                  (MOTION_VECTOR_INFO *)vpx_calloc(unit_width * unit_height,
+                                                   sizeof(MOTION_VECTOR_INFO)));
+  memset(cpi->fp_motion_vector_info, 0,
+         unit_width * unit_height * sizeof(MOTION_VECTOR_INFO));
+}
+
+// Frees memory of the first pass motion vector information.
+// Only called once in dealloc_compressor_data().
+static INLINE void free_fp_motion_vector_info(struct VP9_COMP *cpi) {
+  vpx_free(cpi->fp_motion_vector_info);
+  cpi->fp_motion_vector_info = NULL;
+}
+
 // This is the c-version counter part of ImageBuffer
 typedef struct IMAGE_BUFFER {
   int allocated;
@@ -1021,6 +1046,7 @@ typedef struct ENCODE_FRAME_RESULT {
   FRAME_COUNTS frame_counts;
   const PARTITION_INFO *partition_info;
   const MOTION_VECTOR_INFO *motion_vector_info;
+  const MOTION_VECTOR_INFO *fp_motion_vector_info;
   IMAGE_BUFFER coded_frame;
 #endif  // CONFIG_RATE_CTRL
   int quantize_index;

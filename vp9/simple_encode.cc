@@ -471,8 +471,8 @@ static bool init_encode_frame_result(EncodeFrameResult *encode_frame_result,
   encode_frame_result->coding_data.reset(
       new (std::nothrow) uint8_t[max_coding_data_byte_size]);
 
-  encode_frame_result->num_rows_4x4 = get_num_unit_4x4(frame_width);
-  encode_frame_result->num_cols_4x4 = get_num_unit_4x4(frame_height);
+  encode_frame_result->num_rows_4x4 = get_num_unit_4x4(frame_height);
+  encode_frame_result->num_cols_4x4 = get_num_unit_4x4(frame_width);
   encode_frame_result->partition_info.resize(encode_frame_result->num_rows_4x4 *
                                              encode_frame_result->num_cols_4x4);
   encode_frame_result->motion_vector_info.resize(
@@ -742,6 +742,8 @@ void SimpleEncode::ComputeFirstPassStats() {
   struct lookahead_ctx *lookahead = cpi->lookahead;
   int i;
   int use_highbitdepth = 0;
+  const int num_rows_16x16 = get_num_unit_16x16(frame_height_);
+  const int num_cols_16x16 = get_num_unit_16x16(frame_width_);
 #if CONFIG_VP9_HIGHBITDEPTH
   use_highbitdepth = cpi->common.use_highbitdepth;
 #endif
@@ -774,6 +776,12 @@ void SimpleEncode::ComputeFirstPassStats() {
         // vp9_get_compressed_data only generates first pass stats not
         // compresses data
         assert(size == 0);
+        // Get vp9 first pass motion vector info.
+        std::vector<MotionVectorInfo> mv_info(num_rows_16x16 * num_cols_16x16);
+        update_motion_vector_info(&encode_frame_info.fp_motion_vector_info[0],
+                                  num_rows_16x16, num_cols_16x16,
+                                  mv_info.data());
+        fp_motion_vector_info_.push_back(mv_info);
       }
       impl_ptr_->first_pass_stats.push_back(vp9_get_frame_stats(&cpi->twopass));
     }
@@ -809,6 +817,11 @@ std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
     output_stats.push_back(this_stats);
   }
   return output_stats;
+}
+
+std::vector<std::vector<MotionVectorInfo>>
+SimpleEncode::ObserveFirstPassMotionVectors() {
+  return fp_motion_vector_info_;
 }
 
 void SimpleEncode::SetExternalGroupOfPicturesMap(int *gop_map,
