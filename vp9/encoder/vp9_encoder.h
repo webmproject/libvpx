@@ -560,6 +560,41 @@ static INLINE int gop_command_coding_frame_count(
   return gop_command->show_frame_count + gop_command->use_alt_ref;
 }
 
+// TODO(angiebird): See if we can merge this one with FrameType in
+// simple_encode.h
+typedef enum ENCODE_FRAME_TYPE {
+  ENCODE_FRAME_TYPE_KEY,
+  ENCODE_FRAME_TYPE_INTER,
+  ENCODE_FRAME_TYPE_ALTREF,
+  ENCODE_FRAME_TYPE_OVERLAY,
+  ENCODE_FRAME_TYPE_GOLDEN,
+  ENCODE_FRAME_TYPES,
+} ENCODE_FRAME_TYPE;
+
+// TODO(angiebird): Merge this function with get_frame_type_from_update_type()
+static INLINE ENCODE_FRAME_TYPE
+get_encode_frame_type(FRAME_UPDATE_TYPE update_type) {
+  switch (update_type) {
+    case KF_UPDATE: return ENCODE_FRAME_TYPE_KEY;
+    case ARF_UPDATE: return ENCODE_FRAME_TYPE_ALTREF;
+    case GF_UPDATE: return ENCODE_FRAME_TYPE_GOLDEN;
+    case OVERLAY_UPDATE: return ENCODE_FRAME_TYPE_OVERLAY;
+    case LF_UPDATE: return ENCODE_FRAME_TYPE_INTER;
+    default:
+      fprintf(stderr, "Unsupported update_type %d\n", update_type);
+      abort();
+      return ENCODE_FRAME_TYPE_INTER;
+  }
+}
+
+typedef struct RATE_QSTEP_MODEL {
+  // The rq model predict the bit usage as follows.
+  // rate = bias - ratio * log2(q_step)
+  int ready;
+  double bias;
+  double ratio;
+} RATE_QSTEP_MODEL;
+
 typedef struct ENCODE_COMMAND {
   int use_external_quantize_index;
   int external_quantize_index;
@@ -917,6 +952,8 @@ typedef struct VP9_COMP {
   ENCODE_COMMAND encode_command;
   PARTITION_INFO *partition_info;
   MOTION_VECTOR_INFO *motion_vector_info;
+
+  RATE_QSTEP_MODEL rq_model[ENCODE_FRAME_TYPES];
 #endif
 } VP9_COMP;
 
