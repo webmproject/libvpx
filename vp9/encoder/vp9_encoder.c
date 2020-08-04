@@ -4204,16 +4204,6 @@ static int get_qstep_adj(int rate_excess, int rate_limit) {
 }
 
 #if CONFIG_RATE_CTRL
-#define RATE_CTRL_MAX_RECODE_NUM 7
-
-typedef struct RATE_QINDEX_HISTORY {
-  int recode_count;
-  int q_index_history[RATE_CTRL_MAX_RECODE_NUM];
-  int rate_history[RATE_CTRL_MAX_RECODE_NUM];
-  int q_index_high;
-  int q_index_low;
-} RATE_QINDEX_HISTORY;
-
 static void init_rq_history(RATE_QINDEX_HISTORY *rq_history) {
   rq_history->recode_count = 0;
   rq_history->q_index_high = 255;
@@ -4330,8 +4320,12 @@ static void rq_model_update(const RATE_QINDEX_HISTORY *rq_history,
 }
 #endif  // CONFIG_RATE_CTRL
 
-static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
-                                    uint8_t *dest) {
+static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
+#if CONFIG_RATE_CTRL
+                                    ,
+                                    RATE_QINDEX_HISTORY *rq_history
+#endif  // CONFIG_RATE_CTRL
+) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -4354,8 +4348,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
       cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index];
   const ENCODE_FRAME_TYPE frame_type = get_encode_frame_type(update_type);
   RATE_QSTEP_MODEL *rq_model = &cpi->rq_model[frame_type];
-  RATE_QINDEX_HISTORY rq_history;
-  init_rq_history(&rq_history);
+  init_rq_history(rq_history);
 #endif  // CONFIG_RATE_CTRL
 
   if (cm->show_existing_frame) {
@@ -4406,8 +4399,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
 
 #if CONFIG_RATE_CTRL
     if (cpi->encode_command.use_external_target_frame_bits) {
-      q = rq_model_predict_q_index(rq_model, &rq_history,
-                                   rc->this_frame_target);
+      q = rq_model_predict_q_index(rq_model, rq_history, rc->this_frame_target);
     }
 #endif  // CONFIG_RATE_CTRL
     // Decide frame size bounds first time through.
@@ -4507,16 +4499,16 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     if (cpi->encode_command.use_external_target_frame_bits) {
       const double percent_diff = get_bits_percent_diff(
           rc->this_frame_target, rc->projected_frame_size);
-      update_rq_history(&rq_history, rc->this_frame_target,
+      update_rq_history(rq_history, rc->this_frame_target,
                         rc->projected_frame_size, q);
       loop_count += 1;
 
-      rq_model_update(&rq_history, rc->this_frame_target, rq_model);
+      rq_model_update(rq_history, rc->this_frame_target, rq_model);
 
       // Check if we hit the target bitrate.
       if (percent_diff <= 15 ||
-          rq_history.recode_count >= RATE_CTRL_MAX_RECODE_NUM ||
-          rq_history.q_index_low >= rq_history.q_index_high) {
+          rq_history->recode_count >= RATE_CTRL_MAX_RECODE_NUM ||
+          rq_history->q_index_low >= rq_history->q_index_high) {
         break;
       }
 
@@ -5374,8 +5366,12 @@ static void encode_frame_to_data_rate(
     if (!encode_without_recode_loop(cpi, size, dest)) return;
   } else {
 #if !CONFIG_REALTIME_ONLY
+#if CONFIG_RATE_CTRL
+    encode_with_recode_loop(cpi, size, dest, &encode_frame_result->rq_history);
+#else   // CONFIG_RATE_CTRL
     encode_with_recode_loop(cpi, size, dest);
-#endif
+#endif  // CONFIG_RATE_CTRL
+#endif  // !CONFIG_REALTIME_ONLY
   }
 
   // TODO(jingning): When using show existing frame mode, we assume that the
@@ -7561,6 +7557,7 @@ void vp9_init_encode_frame_result(ENCODE_FRAME_RESULT *encode_frame_result) {
   encode_frame_result->frame_coding_index = -1;
   vp9_zero(encode_frame_result->coded_frame);
   encode_frame_result->coded_frame.allocated = 0;
+  init_rq_history(&encode_frame_result->rq_history);
 #endif  // CONFIG_RATE_CTRL
 }
 

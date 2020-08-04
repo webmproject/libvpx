@@ -256,6 +256,12 @@ struct EncodeFrameResult {
   // share the same motion vector information.
   std::vector<MotionVectorInfo> motion_vector_info;
   ImageBuffer coded_frame;
+
+  // recode_count, q_index_history and rate_history are only available when
+  // EncodeFrameWithTargetFrameBits() is used.
+  int recode_count;
+  std::vector<int> q_index_history;
+  std::vector<int> rate_history;
 };
 
 struct GroupOfPicture {

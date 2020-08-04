@@ -1041,6 +1041,17 @@ typedef struct IMAGE_BUFFER {
   int plane_height[3];
   uint8_t *plane_buffer[3];
 } IMAGE_BUFFER;
+
+#define RATE_CTRL_MAX_RECODE_NUM 7
+
+typedef struct RATE_QINDEX_HISTORY {
+  int recode_count;
+  int q_index_history[RATE_CTRL_MAX_RECODE_NUM];
+  int rate_history[RATE_CTRL_MAX_RECODE_NUM];
+  int q_index_high;
+  int q_index_low;
+} RATE_QINDEX_HISTORY;
+
 #endif  // CONFIG_RATE_CTRL
 
 typedef struct ENCODE_FRAME_RESULT {
@@ -1056,6 +1067,7 @@ typedef struct ENCODE_FRAME_RESULT {
   const PARTITION_INFO *partition_info;
   const MOTION_VECTOR_INFO *motion_vector_info;
   IMAGE_BUFFER coded_frame;
+  RATE_QINDEX_HISTORY rq_history;
 #endif  // CONFIG_RATE_CTRL
   int quantize_index;
 } ENCODE_FRAME_RESULT;

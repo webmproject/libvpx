@@ -163,6 +163,40 @@ TEST_F(SimpleEncodeTest, ObserveKeyFrameMap) {
   simple_encode.EndEncode();
 }
 
+TEST_F(SimpleEncodeTest, EncodeFrameWithTargetFrameBits) {
+  SimpleEncode simple_encode(width_, height_, frame_rate_num_, frame_rate_den_,
+                             target_bitrate_, num_frames_,
+                             in_file_path_str_.c_str());
+  simple_encode.ComputeFirstPassStats();
+  const int num_coding_frames = simple_encode.GetCodingFrameNum();
+  simple_encode.StartEncode();
+  for (int i = 0; i < num_coding_frames; ++i) {
+    EncodeFrameInfo encode_frame_info = simple_encode.GetNextEncodeFrameInfo();
+    int target_frame_bits = 20000;
+    if (encode_frame_info.frame_type == kFrameTypeKey ||
+        encode_frame_info.frame_type == kFrameTypeAltRef ||
+        encode_frame_info.frame_type == kFrameTypeGolden) {
+      target_frame_bits = 100000;
+    }
+    if (encode_frame_info.frame_type == kFrameTypeOverlay) {
+      target_frame_bits = 2000;
+    }
+
+    EncodeFrameResult encode_frame_result;
+    simple_encode.EncodeFrameWithTargetFrameBits(&encode_frame_result,
+                                                 target_frame_bits);
+    const int recode_count = encode_frame_result.recode_count;
+    // TODO(angiebird): Replace 7 by RATE_CTRL_MAX_RECODE_NUM
+    EXPECT_LE(recode_count, 7);
+    EXPECT_GE(recode_count, 1);
+
+    double diff = fabs((double)encode_frame_result.coding_data_bit_size -
+                       target_frame_bits);
+    EXPECT_LE(diff * 100 / target_frame_bits, 15);
+  }
+  simple_encode.EndEncode();
+}
+
 TEST_F(SimpleEncodeTest, EncodeFrameWithQuantizeIndex) {
   SimpleEncode simple_encode(width_, height_, frame_rate_num_, frame_rate_den_,
                              target_bitrate_, num_frames_,

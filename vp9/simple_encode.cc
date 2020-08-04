@@ -485,6 +485,18 @@ static bool init_encode_frame_result(EncodeFrameResult *encode_frame_result,
                            frame_height, img_fmt);
 }
 
+static void encode_frame_result_update_rq_history(
+    const RATE_QINDEX_HISTORY *rq_history,
+    EncodeFrameResult *encode_frame_result) {
+  encode_frame_result->recode_count = rq_history->recode_count;
+  for (int i = 0; i < encode_frame_result->recode_count; ++i) {
+    const int q_index = rq_history->q_index_history[i];
+    const int rate = rq_history->rate_history[i];
+    encode_frame_result->q_index_history.push_back(q_index);
+    encode_frame_result->rate_history.push_back(rate);
+  }
+}
+
 static void update_encode_frame_result(
     EncodeFrameResult *encode_frame_result,
     const ENCODE_FRAME_RESULT *encode_frame_info) {
@@ -514,6 +526,8 @@ static void update_encode_frame_result(
                             &encode_frame_result->motion_vector_info[0]);
   update_frame_counts(&encode_frame_info->frame_counts,
                       &encode_frame_result->frame_counts);
+  encode_frame_result_update_rq_history(&encode_frame_info->rq_history,
+                                        encode_frame_result);
 }
 
 static void IncreaseGroupOfPictureIndex(GroupOfPicture *group_of_picture) {
