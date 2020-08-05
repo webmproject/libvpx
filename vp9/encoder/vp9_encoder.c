@@ -4265,7 +4265,7 @@ static double get_bits_percent_diff(int target_bits, int actual_bits) {
 static int rq_model_predict_q_index(const RATE_QSTEP_MODEL *rq_model,
                                     const RATE_QINDEX_HISTORY *rq_history,
                                     int target_bits) {
-  int q_index = -1;
+  int q_index = 128;
   if (rq_history->recode_count > 0) {
     const int actual_bits =
         rq_history->rate_history[rq_history->recode_count - 1];
@@ -4405,12 +4405,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size,
     }
 
 #if CONFIG_RATE_CTRL
-    {
-      const int suggested_q_index = rq_model_predict_q_index(
-          rq_model, &rq_history, rc->this_frame_target);
-      if (suggested_q_index != -1) {
-        q = suggested_q_index;
-      }
+    if (cpi->encode_command.use_external_target_frame_bits) {
+      q = rq_model_predict_q_index(rq_model, &rq_history,
+                                   rc->this_frame_target);
     }
 #endif  // CONFIG_RATE_CTRL
     // Decide frame size bounds first time through.
