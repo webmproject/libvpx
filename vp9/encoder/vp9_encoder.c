@@ -4324,7 +4324,7 @@ static void rq_model_update(const RATE_QINDEX_HISTORY *rq_history,
       const double prev_q_step = vp9_convert_qindex_to_q(prev_q, VPX_BITS_8);
       const int actual_bits = rq_history->rate_history[recode_count - 1];
       rq_model->ratio =
-          rq_model->ratio - (target_bits - actual_bits) / log2(prev_q_step);
+          rq_model->ratio + (target_bits - actual_bits) / log2(prev_q_step);
     }
   }
 }
