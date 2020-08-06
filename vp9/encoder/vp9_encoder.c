@@ -4259,8 +4259,7 @@ static int guess_q_index_linear(int prev_q_index, int target_bits,
 
 static double get_bits_percent_diff(int target_bits, int actual_bits) {
   double diff = abs(target_bits - actual_bits) * 1. / target_bits;
-  diff *= 100;
-  return diff;
+  return diff * 100;
 }
 
 static int rq_model_predict_q_index(const RATE_QSTEP_MODEL *rq_model,

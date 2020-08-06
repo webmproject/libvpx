@@ -588,7 +588,7 @@ get_encode_frame_type(FRAME_UPDATE_TYPE update_type) {
 }
 
 typedef struct RATE_QSTEP_MODEL {
-  // The rq model predict the bit usage as follows.
+  // The rq model predicts the bit usage as follows.
   // rate = bias - ratio * log2(q_step)
   int ready;
   double bias;
