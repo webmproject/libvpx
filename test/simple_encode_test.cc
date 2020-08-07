@@ -74,8 +74,9 @@ TEST_F(SimpleEncodeTest, ObserveFirstPassMotionVectors) {
     EXPECT_EQ(num_blocks, fps_motion_vectors[i].size());
     for (size_t j = 0; j < num_blocks; ++j) {
       const int mv_count = fps_motion_vectors[i][j].mv_count;
-      const int ref_count = (fps_motion_vectors[i][j].ref_frame[0] > 0) +
-                            (fps_motion_vectors[i][j].ref_frame[1] > 0);
+      const int ref_count =
+          (fps_motion_vectors[i][j].ref_frame[0] != kRefFrameTypeNone) +
+          (fps_motion_vectors[i][j].ref_frame[1] != kRefFrameTypeNone);
       EXPECT_EQ(mv_count, ref_count);
     }
   }

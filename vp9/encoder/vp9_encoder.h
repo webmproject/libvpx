@@ -983,6 +983,13 @@ static INLINE void free_partition_info(struct VP9_COMP *cpi) {
   cpi->partition_info = NULL;
 }
 
+static INLINE void reset_mv_info(MOTION_VECTOR_INFO *mv_info) {
+  mv_info->ref_frame[0] = NONE;
+  mv_info->ref_frame[1] = NONE;
+  mv_info->mv[0].as_int = INVALID_MV;
+  mv_info->mv[1].as_int = INVALID_MV;
+}
+
 // Allocates memory for the motion vector information.
 // The unit size is each 4x4 block.
 // Only called once in vp9_create_compressor().
@@ -1011,11 +1018,13 @@ static INLINE void fp_motion_vector_info_init(struct VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int unit_width = get_num_unit_16x16(cpi->frame_info.frame_width);
   const int unit_height = get_num_unit_16x16(cpi->frame_info.frame_height);
+  int i;
   CHECK_MEM_ERROR(cm, cpi->fp_motion_vector_info,
                   (MOTION_VECTOR_INFO *)vpx_calloc(unit_width * unit_height,
                                                    sizeof(MOTION_VECTOR_INFO)));
-  memset(cpi->fp_motion_vector_info, 0,
-         unit_width * unit_height * sizeof(MOTION_VECTOR_INFO));
+  for (i = 0; i < unit_width * unit_height; ++i) {
+    reset_mv_info(cpi->fp_motion_vector_info + i);
+  }
 }
 
 // Frees memory of the first pass motion vector information.
@@ -1046,7 +1055,6 @@ typedef struct ENCODE_FRAME_RESULT {
   FRAME_COUNTS frame_counts;
   const PARTITION_INFO *partition_info;
   const MOTION_VECTOR_INFO *motion_vector_info;
-  const MOTION_VECTOR_INFO *fp_motion_vector_info;
   IMAGE_BUFFER coded_frame;
 #endif  // CONFIG_RATE_CTRL
   int quantize_index;

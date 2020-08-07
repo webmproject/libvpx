@@ -778,9 +778,8 @@ void SimpleEncode::ComputeFirstPassStats() {
         assert(size == 0);
         // Get vp9 first pass motion vector info.
         std::vector<MotionVectorInfo> mv_info(num_rows_16x16 * num_cols_16x16);
-        update_motion_vector_info(&encode_frame_info.fp_motion_vector_info[0],
-                                  num_rows_16x16, num_cols_16x16,
-                                  mv_info.data());
+        update_motion_vector_info(cpi->fp_motion_vector_info, num_rows_16x16,
+                                  num_cols_16x16, mv_info.data());
         fp_motion_vector_info_.push_back(mv_info);
       }
       impl_ptr_->first_pass_stats.push_back(vp9_get_frame_stats(&cpi->twopass));

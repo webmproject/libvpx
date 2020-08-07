@@ -842,20 +842,16 @@ static void accumulate_fp_mb_row_stat(TileDataEnc *this_tile,
 #if CONFIG_RATE_CTRL
 static void store_fp_motion_vector(VP9_COMP *cpi, const MV *mv,
                                    const int mb_row, const int mb_col,
-                                   const int is_second_mv) {
+                                   MV_REFERENCE_FRAME frame_type,
+                                   const int mv_idx) {
   VP9_COMMON *const cm = &cpi->common;
   const int mb_index = mb_row * cm->mb_cols + mb_col;
   MOTION_VECTOR_INFO *this_motion_vector_info =
       &cpi->fp_motion_vector_info[mb_index];
-  if (!is_second_mv) {
-    this_motion_vector_info->ref_frame[0] = LAST_FRAME;
-    this_motion_vector_info->mv[0].as_mv.row = mv->row;
-    this_motion_vector_info->mv[0].as_mv.col = mv->col;
-    return;
+  this_motion_vector_info->ref_frame[mv_idx] = frame_type;
+  if (frame_type != INTRA_FRAME) {
+    this_motion_vector_info->mv[mv_idx].as_mv = *mv;
   }
-  this_motion_vector_info->ref_frame[1] = GOLDEN_FRAME;
-  this_motion_vector_info->mv[1].as_mv.row = mv->row;
-  this_motion_vector_info->mv[1].as_mv.col = mv->col;
 }
 #endif  // CONFIG_RATE_CTRL
 
@@ -1093,6 +1089,11 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
       struct buf_2d unscaled_last_source_buf_2d;
       vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[bsize];
 
+#if CONFIG_RATE_CTRL
+      // Store zero mv as default
+      store_fp_motion_vector(cpi, &mv, mb_row, mb_col, LAST_FRAME, 0);
+#endif  // CONFIG_RAGE_CTRL
+
       xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
@@ -1158,7 +1159,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
           }
         }
 #if CONFIG_RATE_CTRL
-        store_fp_motion_vector(cpi, &mv, mb_row, mb_col, /*is_second_mv=*/0);
+        store_fp_motion_vector(cpi, &mv, mb_row, mb_col, LAST_FRAME, 0);
 #endif  // CONFIG_RAGE_CTRL
 
         // Search in an older reference frame.
@@ -1182,8 +1183,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
 
           first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv, &gf_motion_error);
 #if CONFIG_RATE_CTRL
-          store_fp_motion_vector(cpi, &tmp_mv, mb_row, mb_col,
-                                 /*is_second_mv=*/1);
+          store_fp_motion_vector(cpi, &tmp_mv, mb_row, mb_col, GOLDEN_FRAME, 1);
 #endif  // CONFIG_RAGE_CTRL
 
           if (gf_motion_error < motion_error && gf_motion_error < this_error)
@@ -1358,6 +1358,9 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
       }
     } else {
       fp_acc_data->sr_coded_error += (int64_t)this_error;
+#if CONFIG_RATE_CTRL
+      store_fp_motion_vector(cpi, NULL, mb_row, mb_col, INTRA_FRAME, 0);
+#endif  // CONFIG_RAGE_CTRL
     }
     fp_acc_data->coded_error += (int64_t)this_error;
 
@@ -1383,6 +1386,10 @@ static void first_pass_encode(VP9_COMP *cpi, FIRSTPASS_DATA *fp_acc_data) {
   MV best_ref_mv;
   // Tiling is ignored in the first pass.
   vp9_tile_init(tile, cm, 0, 0);
+
+#if CONFIG_RATE_CTRL
+  fp_motion_vector_info_init(cpi);
+#endif
 
   for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
     best_ref_mv = zero_mv;
