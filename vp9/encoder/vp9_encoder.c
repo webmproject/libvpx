@@ -4228,8 +4228,9 @@ static int guess_q_index_from_model(const RATE_QSTEP_MODEL *rq_model,
   // The model predicts bits as follows.
   // target_bits = bias - ratio * log2(q_step)
   // Given the target_bits, we compute the q_step as follows.
-  const double q_step =
-      pow(2.0, (rq_model->bias - target_bits) / rq_model->ratio);
+  double q_step;
+  assert(rq_model->ratio > 0);
+  q_step = pow(2.0, (rq_model->bias - target_bits) / rq_model->ratio);
   // TODO(angiebird): Make this function support highbitdepth.
   return vp9_convert_q_to_qindex(q_step, VPX_BITS_8);
 }
@@ -4248,7 +4249,9 @@ static int guess_q_index_linear(int prev_q_index, int target_bits,
 }
 
 static double get_bits_percent_diff(int target_bits, int actual_bits) {
-  double diff = abs(target_bits - actual_bits) * 1. / target_bits;
+  double diff;
+  target_bits = VPXMAX(target_bits, 1);
+  diff = abs(target_bits - actual_bits) * 1. / target_bits;
   return diff * 100;
 }
 
@@ -4295,26 +4298,43 @@ static int rq_model_predict_q_index(const RATE_QSTEP_MODEL *rq_model,
 static void rq_model_update(const RATE_QINDEX_HISTORY *rq_history,
                             int target_bits, RATE_QSTEP_MODEL *rq_model) {
   const int recode_count = rq_history->recode_count;
+  const double delta = 0.00001;
   if (recode_count >= 2) {
-    // Fit the ratio and bias of rq_model based on last two recode histories.
-    const double s1 = vp9_convert_qindex_to_q(
-        rq_history->q_index_history[recode_count - 2], VPX_BITS_8);
-    const double s2 = vp9_convert_qindex_to_q(
-        rq_history->q_index_history[recode_count - 1], VPX_BITS_8);
-    const double r1 = rq_history->rate_history[recode_count - 2];
-    const double r2 = rq_history->rate_history[recode_count - 1];
-    rq_model->ratio = (r2 - r1) / (log2(s1) - log2(s2));
-    rq_model->bias = r1 + (rq_model->ratio) * log2(s1);
-    rq_model->ready = 1;
+    const int q_index1 = rq_history->q_index_history[recode_count - 2];
+    const int q_index2 = rq_history->q_index_history[recode_count - 1];
+    const int r1 = rq_history->rate_history[recode_count - 2];
+    const int r2 = rq_history->rate_history[recode_count - 1];
+    int valid = 0;
+    // lower q_index should yield higher bit rate
+    if (q_index1 < q_index2) {
+      valid = r1 > r2;
+    } else if (q_index1 > q_index2) {
+      valid = r1 < r2;
+    }
+    // Only update the model when the q_index and rate behave normally.
+    if (valid) {
+      // Fit the ratio and bias of rq_model based on last two recode histories.
+      const double s1 = vp9_convert_qindex_to_q(q_index1, VPX_BITS_8);
+      const double s2 = vp9_convert_qindex_to_q(q_index2, VPX_BITS_8);
+      if (fabs(log2(s1) - log2(s2)) > delta) {
+        rq_model->ratio = (r2 - r1) / (log2(s1) - log2(s2));
+        rq_model->bias = r1 + (rq_model->ratio) * log2(s1);
+        if (rq_model->ratio > delta && rq_model->bias > delta) {
+          rq_model->ready = 1;
+        }
+      }
+    }
   } else if (recode_count == 1) {
     if (rq_model->ready) {
       // Update the ratio only when the initial model exists and we only have
       // one recode history.
       const int prev_q = rq_history->q_index_history[recode_count - 1];
       const double prev_q_step = vp9_convert_qindex_to_q(prev_q, VPX_BITS_8);
-      const int actual_bits = rq_history->rate_history[recode_count - 1];
-      rq_model->ratio =
-          rq_model->ratio + (target_bits - actual_bits) / log2(prev_q_step);
+      if (fabs(log2(prev_q_step)) > delta) {
+        const int actual_bits = rq_history->rate_history[recode_count - 1];
+        rq_model->ratio =
+            rq_model->ratio + (target_bits - actual_bits) / log2(prev_q_step);
+      }
     }
   }
 }
