@@ -598,8 +598,11 @@ typedef struct RATE_QSTEP_MODEL {
 typedef struct ENCODE_COMMAND {
   int use_external_quantize_index;
   int external_quantize_index;
+
   int use_external_target_frame_bits;
   int target_frame_bits;
+  double target_frame_bits_error_percent;
+
   GOP_COMMAND gop_command;
 } ENCODE_COMMAND;
 
@@ -621,15 +624,19 @@ static INLINE void encode_command_reset_external_quantize_index(
 }
 
 static INLINE void encode_command_set_target_frame_bits(
-    ENCODE_COMMAND *encode_command, int target_frame_bits) {
+    ENCODE_COMMAND *encode_command, int target_frame_bits,
+    double target_frame_bits_error_percent) {
   encode_command->use_external_target_frame_bits = 1;
   encode_command->target_frame_bits = target_frame_bits;
+  encode_command->target_frame_bits_error_percent =
+      target_frame_bits_error_percent;
 }
 
 static INLINE void encode_command_reset_target_frame_bits(
     ENCODE_COMMAND *encode_command) {
   encode_command->use_external_target_frame_bits = 0;
   encode_command->target_frame_bits = -1;
+  encode_command->target_frame_bits_error_percent = 0;
 }
 
 static INLINE void encode_command_init(ENCODE_COMMAND *encode_command) {

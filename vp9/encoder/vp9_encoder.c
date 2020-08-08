@@ -4526,7 +4526,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       rq_model_update(rq_history, rc->this_frame_target, rq_model);
 
       // Check if we hit the target bitrate.
-      if (percent_diff <= 15 ||
+      if (percent_diff <= cpi->encode_command.target_frame_bits_error_percent ||
           rq_history->recode_count >= RATE_CTRL_MAX_RECODE_NUM ||
           rq_history->q_index_low >= rq_history->q_index_high) {
         break;

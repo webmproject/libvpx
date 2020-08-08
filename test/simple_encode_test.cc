@@ -182,9 +182,13 @@ TEST_F(SimpleEncodeTest, EncodeFrameWithTargetFrameBits) {
       target_frame_bits = 2000;
     }
 
+    double percent_diff = 15;
+    if (encode_frame_info.frame_type == kFrameTypeOverlay) {
+      percent_diff = 100;
+    }
     EncodeFrameResult encode_frame_result;
-    simple_encode.EncodeFrameWithTargetFrameBits(&encode_frame_result,
-                                                 target_frame_bits);
+    simple_encode.EncodeFrameWithTargetFrameBits(
+        &encode_frame_result, target_frame_bits, percent_diff);
     const int recode_count = encode_frame_result.recode_count;
     // TODO(angiebird): Replace 7 by RATE_CTRL_MAX_RECODE_NUM
     EXPECT_LE(recode_count, 7);
@@ -192,7 +196,7 @@ TEST_F(SimpleEncodeTest, EncodeFrameWithTargetFrameBits) {
 
     double diff = fabs((double)encode_frame_result.coding_data_bit_size -
                        target_frame_bits);
-    EXPECT_LE(diff * 100 / target_frame_bits, 15);
+    EXPECT_LE(diff * 100 / target_frame_bits, percent_diff);
   }
   simple_encode.EndEncode();
 }

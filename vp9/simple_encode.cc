@@ -1098,9 +1098,10 @@ void SimpleEncode::EncodeFrameWithQuantizeIndex(
 }
 
 void SimpleEncode::EncodeFrameWithTargetFrameBits(
-    EncodeFrameResult *encode_frame_result, int target_frame_bits) {
+    EncodeFrameResult *encode_frame_result, int target_frame_bits,
+    double percent_diff) {
   encode_command_set_target_frame_bits(&impl_ptr_->cpi->encode_command,
-                                       target_frame_bits);
+                                       target_frame_bits, percent_diff);
   EncodeFrame(encode_frame_result);
   encode_command_reset_target_frame_bits(&impl_ptr_->cpi->encode_command);
 }

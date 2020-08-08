@@ -398,9 +398,14 @@ class SimpleEncode {
 
   // Encode a frame with target frame bits usage.
   // The encoder will find a quantize index to make the actual frame bits usage
-  // match the target.
+  // match the target. EncodeFrameWithTargetFrameBits() will recode the frame
+  // update to 7 times to find a q_index to make the actual_frame_bits to
+  // satisfy following inequality.
+  // |actual_frame_bits - target_frame_bits| * 100 / target_frame_bits
+  // <= percent_diff.
   void EncodeFrameWithTargetFrameBits(EncodeFrameResult *encode_frame_result,
-                                      int target_frame_bits);
+                                      int target_frame_bits,
+                                      double percent_diff);
 
   // Gets the number of coding frames for the video. The coding frames include
   // show frame and no show frame.
