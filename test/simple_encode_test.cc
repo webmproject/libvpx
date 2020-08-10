@@ -172,14 +172,14 @@ TEST_F(SimpleEncodeTest, EncodeFrameWithTargetFrameBits) {
   simple_encode.StartEncode();
   for (int i = 0; i < num_coding_frames; ++i) {
     EncodeFrameInfo encode_frame_info = simple_encode.GetNextEncodeFrameInfo();
-    int target_frame_bits = 20000;
-    if (encode_frame_info.frame_type == kFrameTypeKey ||
-        encode_frame_info.frame_type == kFrameTypeAltRef ||
-        encode_frame_info.frame_type == kFrameTypeGolden) {
-      target_frame_bits = 100000;
-    }
-    if (encode_frame_info.frame_type == kFrameTypeOverlay) {
-      target_frame_bits = 2000;
+    int target_frame_bits;
+    switch (encode_frame_info.frame_type) {
+      case kFrameTypeInter: target_frame_bits = 20000; break;
+      case kFrameTypeKey:
+      case kFrameTypeAltRef:
+      case kFrameTypeGolden: target_frame_bits = 100000; break;
+      case kFrameTypeOverlay: target_frame_bits = 2000; break;
+      default: target_frame_bits = 20000;
     }
 
     double percent_diff = 15;
@@ -194,8 +194,8 @@ TEST_F(SimpleEncodeTest, EncodeFrameWithTargetFrameBits) {
     EXPECT_LE(recode_count, 7);
     EXPECT_GE(recode_count, 1);
 
-    double diff = fabs((double)encode_frame_result.coding_data_bit_size -
-                       target_frame_bits);
+    const double diff = fabs((double)encode_frame_result.coding_data_bit_size -
+                             target_frame_bits);
     EXPECT_LE(diff * 100 / target_frame_bits, percent_diff);
   }
   simple_encode.EndEncode();
