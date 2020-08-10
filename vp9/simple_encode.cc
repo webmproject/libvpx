@@ -959,6 +959,10 @@ void SimpleEncode::EndEncode() {
   impl_ptr_->cpi = nullptr;
   vpx_img_free(&impl_ptr_->tmp_img);
   rewind(in_file_);
+  if (out_file_ != nullptr) {
+    fclose(out_file_);
+    out_file_ = nullptr;
+  }
 }
 
 void SimpleEncode::UpdateKeyFrameGroup(int key_frame_show_index) {
