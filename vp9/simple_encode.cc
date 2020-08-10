@@ -167,7 +167,8 @@ static RefFrameType mv_ref_frame_to_ref_frame_type(
 
 static void update_motion_vector_info(
     const MOTION_VECTOR_INFO *input_motion_vector_info, const int num_rows_4x4,
-    const int num_cols_4x4, MotionVectorInfo *output_motion_vector_info) {
+    const int num_cols_4x4, MotionVectorInfo *output_motion_vector_info,
+    int motion_vector_scale) {
   const int num_units_4x4 = num_rows_4x4 * num_cols_4x4;
   for (int i = 0; i < num_units_4x4; ++i) {
     const MV_REFERENCE_FRAME *in_ref_frame =
@@ -185,16 +186,16 @@ static void update_motion_vector_info(
         mv_ref_frame_to_ref_frame_type(in_ref_frame[1]);
     output_motion_vector_info[i].mv_row[0] =
         (double)input_motion_vector_info[i].mv[0].as_mv.row /
-        kMotionVectorPrecision;
+        motion_vector_scale;
     output_motion_vector_info[i].mv_column[0] =
         (double)input_motion_vector_info[i].mv[0].as_mv.col /
-        kMotionVectorPrecision;
+        motion_vector_scale;
     output_motion_vector_info[i].mv_row[1] =
         (double)input_motion_vector_info[i].mv[1].as_mv.row /
-        kMotionVectorPrecision;
+        motion_vector_scale;
     output_motion_vector_info[i].mv_column[1] =
         (double)input_motion_vector_info[i].mv[1].as_mv.col /
-        kMotionVectorPrecision;
+        motion_vector_scale;
   }
 }
 
@@ -523,7 +524,8 @@ static void update_encode_frame_result(
   update_motion_vector_info(encode_frame_info->motion_vector_info,
                             encode_frame_result->num_rows_4x4,
                             encode_frame_result->num_cols_4x4,
-                            &encode_frame_result->motion_vector_info[0]);
+                            &encode_frame_result->motion_vector_info[0],
+                            kMotionVectorSubPixelPrecision);
   update_frame_counts(&encode_frame_info->frame_counts,
                       &encode_frame_result->frame_counts);
   encode_frame_result_update_rq_history(&encode_frame_info->rq_history,
@@ -793,7 +795,8 @@ void SimpleEncode::ComputeFirstPassStats() {
         // Get vp9 first pass motion vector info.
         std::vector<MotionVectorInfo> mv_info(num_rows_16x16 * num_cols_16x16);
         update_motion_vector_info(cpi->fp_motion_vector_info, num_rows_16x16,
-                                  num_cols_16x16, mv_info.data());
+                                  num_cols_16x16, mv_info.data(),
+                                  kMotionVectorFullPixelPrecision);
         fp_motion_vector_info_.push_back(mv_info);
       }
       impl_ptr_->first_pass_stats.push_back(vp9_get_frame_stats(&cpi->twopass));

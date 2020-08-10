@@ -58,7 +58,8 @@ struct PartitionInfo {
   int height;        // prediction block height
 };
 
-constexpr int kMotionVectorPrecision = 8;
+constexpr int kMotionVectorSubPixelPrecision = 8;
+constexpr int kMotionVectorFullPixelPrecision = 1;
 
 // In the first pass. The frame is split to 16x16 blocks.
 // This structure contains the information of each 16x16 block.
