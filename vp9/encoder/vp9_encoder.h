@@ -1025,12 +1025,19 @@ static INLINE void fp_motion_vector_info_init(struct VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int unit_width = get_num_unit_16x16(cpi->frame_info.frame_width);
   const int unit_height = get_num_unit_16x16(cpi->frame_info.frame_height);
-  int i;
   CHECK_MEM_ERROR(cm, cpi->fp_motion_vector_info,
                   (MOTION_VECTOR_INFO *)vpx_calloc(unit_width * unit_height,
                                                    sizeof(MOTION_VECTOR_INFO)));
+}
+
+static INLINE void fp_motion_vector_info_reset(
+    int frame_width, int frame_height,
+    MOTION_VECTOR_INFO *fp_motion_vector_info) {
+  const int unit_width = get_num_unit_16x16(frame_width);
+  const int unit_height = get_num_unit_16x16(frame_height);
+  int i;
   for (i = 0; i < unit_width * unit_height; ++i) {
-    reset_mv_info(cpi->fp_motion_vector_info + i);
+    reset_mv_info(fp_motion_vector_info + i);
   }
 }
 

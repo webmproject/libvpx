@@ -1388,7 +1388,9 @@ static void first_pass_encode(VP9_COMP *cpi, FIRSTPASS_DATA *fp_acc_data) {
   vp9_tile_init(tile, cm, 0, 0);
 
 #if CONFIG_RATE_CTRL
-  fp_motion_vector_info_init(cpi);
+  fp_motion_vector_info_reset(cpi->frame_info.frame_width,
+                              cpi->frame_info.frame_height,
+                              cpi->fp_motion_vector_info);
 #endif
 
   for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
