@@ -18,7 +18,7 @@
 YUV="${LIBVPX_TEST_DATA_PATH}/niklas_1280_720_30.yuv"
 VP8="${LIBVPX_TEST_DATA_PATH}/tos_vp8.webm"
 VP9="${LIBVPX_TEST_DATA_PATH}/vp90-2-sintel_1920x818_tile_1x4_fpm_2279kbps.webm"
-DATA_URL="http://downloads.webmproject.org/test_data/libvpx/"
+DATA_URL="https://storage.googleapis.com/downloads.webmproject.org/test_data/libvpx/"
 SHA1_FILE="$(dirname $0)/test-data.sha1"
 
 # Set sha1sum to proper sha program (sha1sum, shasum, sha1). This code is
