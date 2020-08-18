@@ -828,12 +828,15 @@ static void svc_output_rc_stats(
   vpx_codec_control(codec, VP9E_GET_SVC_LAYER_ID, layer_id);
   parse_superframe_index(cx_pkt->data.frame.buf, cx_pkt->data.frame.sz,
                          sizes_parsed, &count);
-  if (enc_cfg->ss_number_layers == 1) sizes[0] = cx_pkt->data.frame.sz;
-  for (sl = 0; sl < enc_cfg->ss_number_layers; ++sl) {
-    sizes[sl] = 0;
-    if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
-      sizes[sl] = sizes_parsed[num_layers_encoded];
-      num_layers_encoded++;
+  if (enc_cfg->ss_number_layers == 1) {
+    sizes[0] = cx_pkt->data.frame.sz;
+  } else {
+    for (sl = 0; sl < enc_cfg->ss_number_layers; ++sl) {
+      sizes[sl] = 0;
+      if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
+        sizes[sl] = sizes_parsed[num_layers_encoded];
+        num_layers_encoded++;
+      }
     }
   }
   for (sl = 0; sl < enc_cfg->ss_number_layers; ++sl) {
