@@ -1195,23 +1195,25 @@ EOF
             check_add_asflags -mips64r6 -mabi=64 -mhard-float -mfp64
             check_add_ldflags -mips64r6 -mabi=64 -mfp64
             ;;
+          loongson3*)
+            check_cflags -march=loongson3a && soft_enable mmi \
+              || disable_feature mmi
+            check_cflags -mmsa && soft_enable msa \
+              || disable_feature msa
+            tgt_isa=loongson3a
+            ;;
         esac
+
+        if enabled mmi || enabled msa; then
+          soft_enable runtime_cpu_detect
+        fi
 
         if enabled msa; then
           # TODO(libyuv:793)
           # The new mips functions in libyuv do not build
           # with the toolchains we currently use for testing.
           soft_disable libyuv
-
-          add_cflags -mmsa
-          add_asflags -mmsa
-          add_ldflags -mmsa
         fi
-      fi
-
-      if enabled mmi; then
-        tgt_isa=loongson3a
-        check_add_ldflags -march=loongson3a
       fi
 
       check_add_cflags -march=${tgt_isa}
