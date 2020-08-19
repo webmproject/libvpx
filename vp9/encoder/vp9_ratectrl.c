@@ -3262,7 +3262,7 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
       int tl = 0;
       int sl = 0;
       SVC *svc = &cpi->svc;
-      for (sl = 0; sl < svc->first_spatial_layer_to_encode; ++sl) {
+      for (sl = 0; sl < VPXMAX(1, svc->first_spatial_layer_to_encode); ++sl) {
         for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
           const int layer =
               LAYER_IDS_TO_IDX(sl, tl, svc->number_temporal_layers);
