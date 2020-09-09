@@ -202,6 +202,7 @@ class IntProRowTest : public AverageTestBase<uint8_t>,
   int16_t *hbuf_asm_;
   int16_t *hbuf_c_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(IntProRowTest);
 
 typedef int16_t (*IntProColFunc)(uint8_t const *ref, const int width);
 
@@ -228,6 +229,7 @@ class IntProColTest : public AverageTestBase<uint8_t>,
   int16_t sum_asm_;
   int16_t sum_c_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(IntProColTest);
 #endif  // HAVE_NEON || HAVE_SSE2 || HAVE_MSA
 
 typedef int (*SatdFunc)(const tran_low_t *coeffs, int length);

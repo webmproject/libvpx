@@ -145,6 +145,7 @@ class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
   loop_op_t loopfilter_op_;
   loop_op_t ref_loopfilter_op_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(Loop8Test6Param);
 
 #if HAVE_NEON || HAVE_SSE2 || \
     (HAVE_DSPR2 || HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH)
@@ -166,6 +167,7 @@ class Loop8Test9Param : public ::testing::TestWithParam<dualloop8_param_t> {
   dual_loop_op_t loopfilter_op_;
   dual_loop_op_t ref_loopfilter_op_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(Loop8Test9Param);
 #endif  // HAVE_NEON || HAVE_SSE2 || (HAVE_DSPR2 || HAVE_MSA &&
         // (!CONFIG_VP9_HIGHBITDEPTH))
 

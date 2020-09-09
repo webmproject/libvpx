@@ -67,6 +67,7 @@ class BlockErrorTest : public ::testing::TestWithParam<BlockErrorParam> {
   HBDBlockErrorFunc error_block_op_;
   HBDBlockErrorFunc ref_error_block_op_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(BlockErrorTest);
 
 TEST_P(BlockErrorTest, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());

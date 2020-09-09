@@ -740,6 +740,7 @@ class InvTrans16x16DCT : public Trans16x16TestBase,
   IdctFunc inv_txfm_;
   int thresh_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(InvTrans16x16DCT);
 
 TEST_P(InvTrans16x16DCT, CompareReference) {
   CompareInvReference(ref_txfm_, thresh_);

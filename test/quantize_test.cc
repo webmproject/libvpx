@@ -146,6 +146,7 @@ class QuantizeTest : public QuantizeTestBase,
   VP8Quantize asm_quant_;
   VP8Quantize c_quant_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(QuantizeTest);
 
 TEST_P(QuantizeTest, TestZeroInput) {
   FillCoeffConstant(0);

@@ -840,6 +840,7 @@ INSTANTIATE_TEST_SUITE_P(
                       MseParams(4, 4, &vpx_highbd_8_mse8x16_c),
                       MseParams(4, 4, &vpx_highbd_8_mse8x8_c)));
 */
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(VpxHBDMseTest);
 
 INSTANTIATE_TEST_SUITE_P(
     C, VpxHBDVarianceTest,

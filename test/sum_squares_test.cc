@@ -45,6 +45,7 @@ class SumSquaresTest : public ::testing::TestWithParam<SumSquaresParam> {
   SSI16Func ref_func_;
   SSI16Func tst_func_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SumSquaresTest);
 
 TEST_P(SumSquaresTest, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());

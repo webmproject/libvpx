@@ -468,6 +468,8 @@ void IntraPredTest<uint16_t, HighbdIntraPredParam>::Predict() {
 }
 
 typedef IntraPredTest<uint16_t, HighbdIntraPredParam> VP9HighbdIntraPredTest;
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(VP9HighbdIntraPredTest);
+
 TEST_P(VP9HighbdIntraPredTest, HighbdIntraPredTests) {
   // max block size is 32
   DECLARE_ALIGNED(16, uint16_t, left_col[2 * 32]);

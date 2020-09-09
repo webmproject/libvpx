@@ -51,6 +51,7 @@ class VP9DenoiserTest
  protected:
   BLOCK_SIZE bs_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(VP9DenoiserTest);
 
 TEST_P(VP9DenoiserTest, BitexactCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());

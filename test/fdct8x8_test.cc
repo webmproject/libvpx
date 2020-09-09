@@ -625,6 +625,7 @@ class InvTrans8x8DCT : public FwdTrans8x8TestBase,
   IdctFunc inv_txfm_;
   int thresh_;
 };
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(InvTrans8x8DCT);
 
 TEST_P(InvTrans8x8DCT, CompareReference) {
   CompareInvReference(ref_txfm_, thresh_);
