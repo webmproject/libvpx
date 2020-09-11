@@ -19,3 +19,5 @@ Local Modifications:
    LICENSE
    README.md
    src
+- Enable kErrorOnUninstantiatedParameterizedTest and
+  kErrorOnUninstantiatedTypeParameterizedTest in gtest.cc
