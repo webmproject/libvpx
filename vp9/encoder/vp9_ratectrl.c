@@ -2705,18 +2705,18 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   // Force downsize based on per-frame-bandwidth, for extreme case,
   // for HD input.
   if (cpi->resize_state == ORIG && cm->width * cm->height >= 1280 * 720) {
-    if (rc->avg_frame_bandwidth < (int)(300000 / 30)) {
+    if (rc->avg_frame_bandwidth < 300000 / 30) {
       resize_action = DOWN_ONEHALF;
       cpi->resize_state = ONE_HALF;
       force_downsize_rate = 1;
-    } else if (rc->avg_frame_bandwidth < (int)(400000 / 30)) {
+    } else if (rc->avg_frame_bandwidth < 400000 / 30) {
       resize_action = ONEHALFONLY_RESIZE ? DOWN_ONEHALF : DOWN_THREEFOUR;
       cpi->resize_state = ONEHALFONLY_RESIZE ? ONE_HALF : THREE_QUARTER;
       force_downsize_rate = 1;
     }
   } else if (cpi->resize_state == THREE_QUARTER &&
              cm->width * cm->height >= 960 * 540) {
-    if (rc->avg_frame_bandwidth < (int)(300000 / 30)) {
+    if (rc->avg_frame_bandwidth < 300000 / 30) {
       resize_action = DOWN_ONEHALF;
       cpi->resize_state = ONE_HALF;
       force_downsize_rate = 1;
