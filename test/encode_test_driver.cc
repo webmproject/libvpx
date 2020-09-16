@@ -216,7 +216,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
         switch (pkt->kind) {
           case VPX_CODEC_CX_FRAME_PKT:
             has_cxdata = true;
-            if (decoder.get() != nullptr && DoDecode()) {
+            if (decoder != nullptr && DoDecode()) {
               PreDecodeFrameHook(video, decoder.get());
               vpx_codec_err_t res_dec = decoder->DecodeFrame(
                   (const uint8_t *)pkt->data.frame.buf, pkt->data.frame.sz);
