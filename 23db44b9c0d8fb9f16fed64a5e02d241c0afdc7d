@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "49e29c91_f1e0e292",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 533,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2020-09-21T17:29:07Z",
+      "side": 1,
+      "message": "When I compared the vp9_args and vp9_arg_ctrl_map arrays carefully, I noticed that the entries in the two arrays do not match exactly.\n\nIn this CL I simply added a comment to describe the mismatch between the two arrays. A \"defensive-programming\" change would be to add dummy entries to vp9_arg_ctrl_map for bitdeptharg and inbitdeptharg so that the vp9_args and vp9_arg_ctrl_map arrays are the same size:\n\n                                         VP9E_SET_ROW_MT,\n+#if CONFIG_VP9_HIGHBITDEPTH\n+                                        0,  // bitdeptharg\n+                                        0,  // inbitdeptharg\n+#endif  // CONFIG_VP9_HIGHBITDEPTH\n                                         0 };\n\nThat would make the ARG_CTRL_CNT_MAX macro slightly larger than necessary. See my comments below.",
+      "revId": "23db44b9c0d8fb9f16fed64a5e02d241c0afdc7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cf37f25_9b4a4ae0",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 594,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2020-09-21T17:29:07Z",
+      "side": 1,
+      "message": "Note that ARG_CTRL_CNT_MAX is defined as the number of entries in vp9_arg_ctrl_map. This number does not need to include the dummy 0 entries in vp9_arg_ctrl_map, see my comment at line 612.",
+      "range": {
+        "startLine": 589,
+        "startChar": 0,
+        "endLine": 594,
+        "endChar": 6
+      },
+      "revId": "23db44b9c0d8fb9f16fed64a5e02d241c0afdc7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85f5aded_a06f9e96",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2020-09-21T17:29:07Z",
+      "side": 1,
+      "message": "The arg_ctrls array is declared to have the size ARG_CTRL_CNT_MAX. The dummy 0 entries in vp9_arg_ctrl_map are never stored in the arg_ctrls array, so if there are too many dummy 0 entries in vp9_arg_ctrl_map, we will be wasting space in the arg_ctrls array. If there are just a few dummy 0 entries, then this is okay.",
+      "revId": "23db44b9c0d8fb9f16fed64a5e02d241c0afdc7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
