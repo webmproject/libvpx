@@ -1732,6 +1732,24 @@ static vpx_codec_err_t ctrl_set_disable_loopfilter(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
+                                                      va_list args) {
+  EXT_RATECTRL *ext_ratectrl = &ctx->cpi->ext_ratectrl;
+  char **str_ptr = CAST(VP9E_SET_EXTERNAL_RATE_CONTROL, args);
+  const char *library_path = str_ptr[0];
+  const char *config = str_ptr[1];
+  if (strlen(library_path) >= MAX_EXT_RATECTRL_BUF_SIZE) {
+    return VPX_CODEC_ERROR;
+  }
+  if (strlen(config) >= MAX_EXT_RATECTRL_BUF_SIZE) {
+    return VPX_CODEC_ERROR;
+  }
+  snprintf(ext_ratectrl->library_path, MAX_EXT_RATECTRL_BUF_SIZE, "%s",
+           library_path);
+  snprintf(ext_ratectrl->config, MAX_EXT_RATECTRL_BUF_SIZE, "%s", config);
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP8_COPY_REFERENCE, ctrl_copy_reference },
 
@@ -1784,6 +1802,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_SVC_SPATIAL_LAYER_SYNC, ctrl_set_svc_spatial_layer_sync },
   { VP9E_SET_DELTA_Q_UV, ctrl_set_delta_q_uv },
   { VP9E_SET_DISABLE_LOOPFILTER, ctrl_set_disable_loopfilter },
+  { VP9E_SET_EXTERNAL_RATE_CONTROL, ctrl_set_external_rate_control },
 
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },
