@@ -774,6 +774,10 @@ process_common_toolchain() {
         tgt_isa=x86_64
         tgt_os=`echo $gcctarget | sed 's/.*\(darwin1[0-9]\).*/\1/'`
         ;;
+      *darwin20*)
+        tgt_isa=`uname -m`
+        tgt_os=`echo $gcctarget | sed 's/.*\(darwin2[0-9]\).*/\1/'`
+        ;;
       x86_64*mingw32*)
         tgt_os=win64
         ;;
@@ -848,7 +852,7 @@ process_common_toolchain() {
   # Handle darwin variants. Newer SDKs allow targeting older
   # platforms, so use the newest one available.
   case ${toolchain} in
-    arm*-darwin*)
+    arm*-darwin-)
       add_cflags "-miphoneos-version-min=${IOS_VERSION_MIN}"
       iphoneos_sdk_dir="$(show_darwin_sdk_path iphoneos)"
       if [ -d "${iphoneos_sdk_dir}" ]; then
@@ -856,7 +860,7 @@ process_common_toolchain() {
         add_ldflags "-isysroot ${iphoneos_sdk_dir}"
       fi
       ;;
-    x86*-darwin*)
+    *-darwin*)
       osx_sdk_dir="$(show_darwin_sdk_path macosx)"
       if [ -d "${osx_sdk_dir}" ]; then
         add_cflags  "-isysroot ${osx_sdk_dir}"
@@ -913,6 +917,10 @@ process_common_toolchain() {
     *-darwin19-*)
       add_cflags  "-mmacosx-version-min=10.15"
       add_ldflags "-mmacosx-version-min=10.15"
+      ;;
+    *-darwin20-*)
+      add_cflags  "-mmacosx-version-min=10.16"
+      add_ldflags "-mmacosx-version-min=10.16"
       ;;
     *-iphonesimulator-*)
       add_cflags  "-miphoneos-version-min=${IOS_VERSION_MIN}"
@@ -1087,7 +1095,7 @@ EOF
           soft_enable unit_tests
           ;;
 
-        darwin*)
+        darwin)
           if ! enabled external_build; then
             XCRUN_FIND="xcrun --sdk iphoneos --find"
             CXX="$(${XCRUN_FIND} clang++)"
