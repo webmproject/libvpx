@@ -88,7 +88,7 @@ class RcInterfaceTest : public ::testing::Test {
     std::ifstream one_layer_file;
     one_layer_file.open(libvpx_test::GetDataPath() +
                         "/rc_interface_test_one_layer");
-    ASSERT_EQ(one_layer_file.rdstate() & std::ifstream::failbit, 0);
+    ASSERT_TRUE(one_layer_file.good());
     for (size_t i = 0; i < kNumFrame; i++) {
       one_layer_file >> frame_info;
       if (frame_info.frame_id > 0) frame_params.frame_type = INTER_FRAME;
@@ -117,7 +117,7 @@ class RcInterfaceTest : public ::testing::Test {
     std::ifstream svc_file;
     svc_file.open(std::string(std::getenv("LIBVPX_TEST_DATA_PATH")) +
                   "/rc_interface_test_svc");
-    ASSERT_EQ(svc_file.rdstate() & std::ifstream::failbit, 0);
+    ASSERT_TRUE(svc_file.good());
     for (size_t i = 0; i < kNumFrame * rc_cfg_.ss_number_layers; i++) {
       svc_file >> frame_info;
       if (frame_info.frame_id > 0) frame_params.frame_type = INTER_FRAME;
