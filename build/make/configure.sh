@@ -852,7 +852,7 @@ process_common_toolchain() {
   # Handle darwin variants. Newer SDKs allow targeting older
   # platforms, so use the newest one available.
   case ${toolchain} in
-    arm*-darwin-)
+    arm*-darwin-*)
       add_cflags "-miphoneos-version-min=${IOS_VERSION_MIN}"
       iphoneos_sdk_dir="$(show_darwin_sdk_path iphoneos)"
       if [ -d "${iphoneos_sdk_dir}" ]; then
