@@ -79,7 +79,7 @@ class RcInterfaceTest : public ::testing::Test {
  protected:
   void RunOneLayer() {
     SetConfigOneLayer();
-    rc_api_->Create(rc_cfg_);
+    rc_api_ = libvpx::VP9RateControlRTC::Create(rc_cfg_);
     FrameInfo frame_info;
     libvpx::VP9FrameParamsQpRTC frame_params;
     frame_params.frame_type = KEY_FRAME;
@@ -110,7 +110,7 @@ class RcInterfaceTest : public ::testing::Test {
 
   void RunSVC() {
     SetConfigSVC();
-    rc_api_->Create(rc_cfg_);
+    rc_api_ = libvpx::VP9RateControlRTC::Create(rc_cfg_);
     FrameInfo frame_info;
     libvpx::VP9FrameParamsQpRTC frame_params;
     frame_params.frame_type = KEY_FRAME;
