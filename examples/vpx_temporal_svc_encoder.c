@@ -841,6 +841,7 @@ int main(int argc, char **argv) {
     vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
     vpx_codec_control(&codec, VP9E_SET_TUNE_CONTENT, 0);
     vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, get_msb(cfg.g_threads));
+    vpx_codec_control(&codec, VP9E_SET_DISABLE_LOOPFILTER, 0);
 #if ROI_MAP
     set_roi_map(encoder->name, &cfg, &roi);
     if (vpx_codec_control(&codec, VP9E_SET_ROI_MAP, &roi))

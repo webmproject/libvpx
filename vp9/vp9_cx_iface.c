@@ -1724,6 +1724,14 @@ static vpx_codec_err_t ctrl_set_disable_overshoot_maxq_cbr(
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_disable_loopfilter(vpx_codec_alg_priv_t *ctx,
+                                                   va_list args) {
+  VP9_COMP *const cpi = ctx->cpi;
+  const unsigned int data = va_arg(args, unsigned int);
+  cpi->loopfilter_ctrl = data;
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP8_COPY_REFERENCE, ctrl_copy_reference },
 
@@ -1775,6 +1783,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_SVC_GF_TEMPORAL_REF, ctrl_set_svc_gf_temporal_ref },
   { VP9E_SET_SVC_SPATIAL_LAYER_SYNC, ctrl_set_svc_spatial_layer_sync },
   { VP9E_SET_DELTA_Q_UV, ctrl_set_delta_q_uv },
+  { VP9E_SET_DISABLE_LOOPFILTER, ctrl_set_disable_loopfilter },
 
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },

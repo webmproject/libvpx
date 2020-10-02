@@ -3316,6 +3316,12 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
     return;
   }
 
+  if (cpi->loopfilter_ctrl == NO_LOOPFILTER ||
+      (!is_reference_frame && cpi->loopfilter_ctrl == LOOPFILTER_REFERENCE)) {
+    lf->filter_level = 0;
+    return;
+  }
+
   if (xd->lossless) {
     lf->filter_level = 0;
     lf->last_filt_level = 0;

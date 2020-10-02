@@ -692,6 +692,15 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_DISABLE_OVERSHOOT_MAXQ_CBR,
+
+  /*!\brief Codec control function to disable loopfilter.
+   *
+   * 0: Loopfilter on all frames, 1: Disable on non reference frames.
+   * 2: Disable on all frames.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_DISABLE_LOOPFILTER,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -1044,6 +1053,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_DELTA_Q_UV, int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_DISABLE_OVERSHOOT_MAXQ_CBR, int)
 #define VPX_CTRL_VP9E_SET_DISABLE_OVERSHOOT_MAXQ_CBR
+
+VPX_CTRL_USE_TYPE(VP9E_SET_DISABLE_LOOPFILTER, int)
+#define VPX_CTRL_VP9E_SET_DISABLE_LOOPFILTER
 /*!\endcond */
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus

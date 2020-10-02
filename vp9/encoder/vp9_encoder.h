@@ -147,6 +147,12 @@ typedef enum {
   kVeryHighSad = 6,
 } CONTENT_STATE_SB;
 
+typedef enum {
+  LOOPFILTER_ALL = 0,
+  LOOPFILTER_REFERENCE = 1,  // Disable loopfilter on non reference frames.
+  NO_LOOPFILTER = 2,         // Disable loopfilter on all frames.
+} LOOPFILTER_CONTROL;
+
 typedef struct VP9EncoderConfig {
   BITSTREAM_PROFILE profile;
   vpx_bit_depth_t bit_depth;     // Codec bit-depth.
@@ -958,6 +964,8 @@ typedef struct VP9_COMP {
 
   int multi_layer_arf;
   vpx_roi_map_t roi;
+
+  LOOPFILTER_CONTROL loopfilter_ctrl;
 #if CONFIG_RATE_CTRL
   ENCODE_COMMAND encode_command;
   PARTITION_INFO *partition_info;
