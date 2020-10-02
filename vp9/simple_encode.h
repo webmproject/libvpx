@@ -19,6 +19,11 @@
 
 namespace vp9 {
 
+enum StatusCode {
+  StatusOk = 0,
+  StatusError,
+};
+
 // TODO(angiebird): Add description for each frame type.
 enum FrameType {
   kFrameTypeKey = 0,
@@ -321,6 +326,32 @@ class SimpleEncode {
   // Setting the encode_speed to a higher level will yield faster coding
   // at the cost of lower compression efficiency.
   void SetEncodeSpeed(int encode_speed);
+
+  // Set encoder config
+  // The following configs in VP9EncoderConfig are allowed to change in this
+  // function. See https://ffmpeg.org/ffmpeg-codecs.html#libvpx for each
+  // config's meaning.
+  // Configs in VP9EncoderConfig:      Equivalent configs in ffmpeg:
+  // 1  key_freq                       -g
+  // 2  two_pass_vbrmin_section        -minrate * 100LL / bit_rate
+  // 3  two_pass_vbrmax_section        -maxrate * 100LL / bit_rate
+  // 4  under_shoot_pct                -undershoot-pct
+  // 5  over_shoot_pct                 -overshoot-pct
+  // 6  max_threads                    -threads
+  // 7  frame_parallel_decoding_mode   -frame-parallel
+  // 8  tile_column                    -tile-columns
+  // 9  arnr_max_frames                -arnr-maxframes
+  // 10 arnr_strength                  -arnr-strength
+  // 11 lag_in_frames                  -rc_lookahead
+  // 12 encode_breakout                -static-thresh
+  // 13 enable_tpl_model               -enable-tpl
+  // 14 enable_auto_arf                -auto-alt-ref
+  StatusCode SetEncodeConfig(const char *name, const char *value);
+
+  // A debug function that dumps configs from VP9EncoderConfig
+  // pass = 1: first pass, pass = 2: second pass
+  // fp: file pointer for dumping config
+  StatusCode DumpEncodeConfigs(int pass, FILE *fp);
 
   // Makes encoder compute the first pass stats and store it at
   // impl_ptr_->first_pass_stats. key_frame_map_ is also computed based on the
