@@ -17,6 +17,7 @@
  */
 #include "./vp8.h"
 #include "./vpx_encoder.h"
+#include "./vpx_ext_ratectrl.h"
 
 /*!\file
  * \brief Provides definitions for using VP8 or VP9 encoder algorithm within the
@@ -1067,7 +1068,7 @@ VPX_CTRL_USE_TYPE(VP9E_SET_DISABLE_OVERSHOOT_MAXQ_CBR, int)
 VPX_CTRL_USE_TYPE(VP9E_SET_DISABLE_LOOPFILTER, int)
 #define VPX_CTRL_VP9E_SET_DISABLE_LOOPFILTER
 
-VPX_CTRL_USE_TYPE(VP9E_SET_EXTERNAL_RATE_CONTROL, char **)
+VPX_CTRL_USE_TYPE(VP9E_SET_EXTERNAL_RATE_CONTROL, vpx_rc_funcs_t *)
 #define VPX_CTRL_VP9E_SET_EXTERNAL_RATE_CONTROL
 
 /*!\endcond */

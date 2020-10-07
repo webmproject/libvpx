@@ -15,6 +15,7 @@
 
 #include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
+#include "vpx/vpx_ext_ratectrl.h"
 #include "vpx/vp8cx.h"
 #if CONFIG_INTERNAL_STATS
 #include "vpx_dsp/ssim.h"
@@ -660,10 +661,10 @@ static INLINE int get_num_unit_4x4(int size) { return (size + 3) >> 2; }
 static INLINE int get_num_unit_16x16(int size) { return (size + 15) >> 4; }
 #endif  // CONFIG_RATE_CTRL
 
-#define MAX_EXT_RATECTRL_BUF_SIZE 500
 typedef struct EXT_RATECTRL {
-  char library_path[MAX_EXT_RATECTRL_BUF_SIZE];
-  char config[MAX_EXT_RATECTRL_BUF_SIZE];
+  int ready;
+  vpx_rc_model_t model;
+  vpx_rc_funcs_t funcs;
 } EXT_RATECTRL;
 
 typedef struct VP9_COMP {
