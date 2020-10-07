@@ -2664,6 +2664,7 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
   motion_vector_info_init(cpi);
   fp_motion_vector_info_init(cpi);
 #endif
+  vp9_extrc_init(&cpi->ext_ratectrl);
 
   return cpi;
 }
@@ -2833,6 +2834,8 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
     cpi->twopass.frame_mb_stats_buf = NULL;
   }
 #endif
+
+  vp9_extrc_delete(&cpi->ext_ratectrl);
 
   vp9_remove_common(cm);
   vp9_free_ref_frame_buffers(cm->buffer_pool);

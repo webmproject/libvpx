@@ -1735,7 +1735,24 @@ static vpx_codec_err_t ctrl_set_disable_loopfilter(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
                                                       va_list args) {
-  ctx->cpi->ext_ratectrl.funcs = *CAST(VP9E_SET_EXTERNAL_RATE_CONTROL, args);
+  vpx_rc_funcs_t funcs = *CAST(VP9E_SET_EXTERNAL_RATE_CONTROL, args);
+  VP9_COMP *cpi = ctx->cpi;
+  EXT_RATECTRL *ext_ratectrl = &cpi->ext_ratectrl;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
+  const FRAME_INFO *frame_info = &cpi->frame_info;
+  vpx_rc_config_t ratectrl_config;
+
+  ratectrl_config.frame_width = frame_info->frame_width;
+  ratectrl_config.frame_height = frame_info->frame_height;
+  ratectrl_config.show_frame_count = cpi->twopass.first_pass_info.num_frames;
+
+  // TODO(angiebird): Double check whether this is the proper way to set up
+  // target_bitrate and frame_rate.
+  ratectrl_config.target_bitrate_kbps = (int)(oxcf->target_bandwidth / 1000);
+  ratectrl_config.frame_rate_num = oxcf->g_timebase.den;
+  ratectrl_config.frame_rate_den = oxcf->g_timebase.num;
+
+  vp9_extrc_create(funcs, ratectrl_config, ext_ratectrl);
   return VPX_CODEC_OK;
 }
 

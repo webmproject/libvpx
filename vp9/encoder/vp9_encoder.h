@@ -39,6 +39,7 @@
 #include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_ethread.h"
+#include "vp9/encoder/vp9_ext_ratectrl.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_job_queue.h"
 #include "vp9/encoder/vp9_lookahead.h"
@@ -660,12 +661,6 @@ static INLINE int get_num_unit_4x4(int size) { return (size + 3) >> 2; }
 // round it up. For example, size is 17, return 2.
 static INLINE int get_num_unit_16x16(int size) { return (size + 15) >> 4; }
 #endif  // CONFIG_RATE_CTRL
-
-typedef struct EXT_RATECTRL {
-  int ready;
-  vpx_rc_model_t model;
-  vpx_rc_funcs_t funcs;
-} EXT_RATECTRL;
 
 typedef struct VP9_COMP {
   FRAME_INFO frame_info;

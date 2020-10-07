@@ -96,6 +96,8 @@ VP9_CX_SRCS-yes += encoder/vp9_skin_detection.c
 VP9_CX_SRCS-yes += encoder/vp9_skin_detection.h
 VP9_CX_SRCS-yes += encoder/vp9_noise_estimate.c
 VP9_CX_SRCS-yes += encoder/vp9_noise_estimate.h
+VP9_CX_SRCS-yes += encoder/vp9_ext_ratectrl.c
+VP9_CX_SRCS-yes += encoder/vp9_ext_ratectrl.h
 ifeq ($(CONFIG_VP9_POSTPROC),yes)
 VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/vp9_postproc.h
 VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/vp9_postproc.c

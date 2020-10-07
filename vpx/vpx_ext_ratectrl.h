@@ -45,6 +45,8 @@ typedef struct vpx_rc_config {
   int frame_height;
   int show_frame_count;
   int target_bitrate_kbps;
+  int frame_rate_num;
+  int frame_rate_den;
 } vpx_rc_config_t;
 
 /*!\brief Create an external rate control model callback prototype
