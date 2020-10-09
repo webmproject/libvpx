@@ -36,7 +36,7 @@ typedef struct vpx_rc_encodeframe_result {
 } vpx_rc_encodeframe_result_t;
 
 typedef struct vpx_rc_firstpass_stats {
-  double (*frame_stats)[26];
+  double (*frame_stats)[25];
   int num_frames;
 } vpx_rc_firstpass_stats_t;
 
