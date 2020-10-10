@@ -2463,6 +2463,8 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
 
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
 
+  vp9_extrc_init(&cpi->ext_ratectrl);
+
 #if !CONFIG_REALTIME_ONLY
   if (oxcf->pass == 1) {
     vp9_init_first_pass(cpi);
@@ -2536,6 +2538,8 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
       num_frames = packets - 1;
       fps_init_first_pass_info(&cpi->twopass.first_pass_info,
                                oxcf->two_pass_stats_in.buf, num_frames);
+      vp9_extrc_send_firstpass_stats(&cpi->ext_ratectrl,
+                                     &cpi->twopass.first_pass_info);
 
       vp9_init_second_pass(cpi);
     }
@@ -2664,7 +2668,6 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
   motion_vector_info_init(cpi);
   fp_motion_vector_info_init(cpi);
 #endif
-  vp9_extrc_init(&cpi->ext_ratectrl);
 
   return cpi;
 }

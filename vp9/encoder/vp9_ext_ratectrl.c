@@ -66,8 +66,8 @@ static void gen_rc_firstpass_stats(const FIRSTPASS_STATS *stats,
   rc_frame_stats->count = stats->count;
 }
 
-void vp9_extrc_send_firstpass_stats(const FIRST_PASS_INFO *first_pass_info,
-                                    EXT_RATECTRL *ext_ratectrl) {
+void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
+                                    const FIRST_PASS_INFO *first_pass_info) {
   if (ext_ratectrl->ready) {
     vpx_rc_firstpass_stats_t *rc_firstpass_stats =
         &ext_ratectrl->rc_firstpass_stats;

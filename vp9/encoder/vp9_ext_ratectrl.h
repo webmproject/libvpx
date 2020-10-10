@@ -29,7 +29,7 @@ void vp9_extrc_create(vpx_rc_funcs_t funcs, vpx_rc_config_t ratectrl_config,
 
 void vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl);
 
-void vp9_extrc_send_firstpass_stats(const FIRST_PASS_INFO *first_pass_info,
-                                    EXT_RATECTRL *ext_ratectrl);
+void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
+                                    const FIRST_PASS_INFO *first_pass_info);
 
 #endif  // VPX_VP9_ENCODER_VP9_EXT_RATECTRL_H_
