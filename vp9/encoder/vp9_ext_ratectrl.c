@@ -38,32 +38,32 @@ void vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl) {
 }
 
 static void gen_rc_firstpass_stats(const FIRSTPASS_STATS *stats,
-                                   double *rc_frame_stats) {
-  rc_frame_stats[0] = stats->frame;
-  rc_frame_stats[1] = stats->weight;
-  rc_frame_stats[2] = stats->intra_error;
-  rc_frame_stats[3] = stats->coded_error;
-  rc_frame_stats[4] = stats->sr_coded_error;
-  rc_frame_stats[5] = stats->frame_noise_energy;
-  rc_frame_stats[6] = stats->pcnt_inter;
-  rc_frame_stats[7] = stats->pcnt_motion;
-  rc_frame_stats[8] = stats->pcnt_second_ref;
-  rc_frame_stats[9] = stats->pcnt_neutral;
-  rc_frame_stats[10] = stats->pcnt_intra_low;
-  rc_frame_stats[11] = stats->pcnt_intra_high;
-  rc_frame_stats[12] = stats->intra_skip_pct;
-  rc_frame_stats[13] = stats->intra_smooth_pct;
-  rc_frame_stats[14] = stats->inactive_zone_rows;
-  rc_frame_stats[15] = stats->inactive_zone_cols;
-  rc_frame_stats[16] = stats->MVr;
-  rc_frame_stats[17] = stats->mvr_abs;
-  rc_frame_stats[18] = stats->MVc;
-  rc_frame_stats[19] = stats->mvc_abs;
-  rc_frame_stats[20] = stats->MVrv;
-  rc_frame_stats[21] = stats->MVcv;
-  rc_frame_stats[22] = stats->mv_in_out_count;
-  rc_frame_stats[23] = stats->duration;
-  rc_frame_stats[24] = stats->count;
+                                   vpx_rc_frame_stats_t *rc_frame_stats) {
+  rc_frame_stats->frame = stats->frame;
+  rc_frame_stats->weight = stats->weight;
+  rc_frame_stats->intra_error = stats->intra_error;
+  rc_frame_stats->coded_error = stats->coded_error;
+  rc_frame_stats->sr_coded_error = stats->sr_coded_error;
+  rc_frame_stats->frame_noise_energy = stats->frame_noise_energy;
+  rc_frame_stats->pcnt_inter = stats->pcnt_inter;
+  rc_frame_stats->pcnt_motion = stats->pcnt_motion;
+  rc_frame_stats->pcnt_second_ref = stats->pcnt_second_ref;
+  rc_frame_stats->pcnt_neutral = stats->pcnt_neutral;
+  rc_frame_stats->pcnt_intra_low = stats->pcnt_intra_low;
+  rc_frame_stats->pcnt_intra_high = stats->pcnt_intra_high;
+  rc_frame_stats->intra_skip_pct = stats->intra_skip_pct;
+  rc_frame_stats->intra_smooth_pct = stats->intra_smooth_pct;
+  rc_frame_stats->inactive_zone_rows = stats->inactive_zone_rows;
+  rc_frame_stats->inactive_zone_cols = stats->inactive_zone_cols;
+  rc_frame_stats->MVr = stats->MVr;
+  rc_frame_stats->mvr_abs = stats->mvr_abs;
+  rc_frame_stats->MVc = stats->MVc;
+  rc_frame_stats->mvc_abs = stats->mvc_abs;
+  rc_frame_stats->MVrv = stats->MVrv;
+  rc_frame_stats->MVcv = stats->MVcv;
+  rc_frame_stats->mv_in_out_count = stats->mv_in_out_count;
+  rc_frame_stats->duration = stats->duration;
+  rc_frame_stats->count = stats->count;
 }
 
 void vp9_extrc_send_firstpass_stats(const FIRST_PASS_INFO *first_pass_info,
@@ -75,7 +75,7 @@ void vp9_extrc_send_firstpass_stats(const FIRST_PASS_INFO *first_pass_info,
     assert(rc_firstpass_stats->num_frames == first_pass_info->num_frames);
     for (i = 0; i < rc_firstpass_stats->num_frames; ++i) {
       gen_rc_firstpass_stats(&first_pass_info->stats[i],
-                             rc_firstpass_stats->frame_stats[i]);
+                             &rc_firstpass_stats->frame_stats[i]);
     }
     ext_ratectrl->funcs.send_firstpass_stats(ext_ratectrl->model,
                                              rc_firstpass_stats);

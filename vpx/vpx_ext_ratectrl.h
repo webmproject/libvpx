@@ -35,8 +35,38 @@ typedef struct vpx_rc_encodeframe_result {
   int64_t pixel_count;
 } vpx_rc_encodeframe_result_t;
 
+// This is a mirror of vp9's FIRSTPASS_STATS
+// Only spatial_layer_id is omitted
+typedef struct vpx_rc_frame_stats {
+  double frame;
+  double weight;
+  double intra_error;
+  double coded_error;
+  double sr_coded_error;
+  double frame_noise_energy;
+  double pcnt_inter;
+  double pcnt_motion;
+  double pcnt_second_ref;
+  double pcnt_neutral;
+  double pcnt_intra_low;
+  double pcnt_intra_high;
+  double intra_skip_pct;
+  double intra_smooth_pct;
+  double inactive_zone_rows;
+  double inactive_zone_cols;
+  double MVr;
+  double mvr_abs;
+  double MVc;
+  double mvc_abs;
+  double MVrv;
+  double MVcv;
+  double mv_in_out_count;
+  double duration;
+  double count;
+} vpx_rc_frame_stats_t;
+
 typedef struct vpx_rc_firstpass_stats {
-  double (*frame_stats)[25];
+  vpx_rc_frame_stats_t *frame_stats;
   int num_frames;
 } vpx_rc_firstpass_stats_t;
 
