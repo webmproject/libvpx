@@ -32,4 +32,8 @@ void vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl);
 void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
                                     const FIRST_PASS_INFO *first_pass_info);
 
+void vp9_extrc_get_encodeframe_decision(
+    EXT_RATECTRL *ext_ratectrl, const GF_GROUP *gf_group, int show_index,
+    int coding_index, vpx_rc_encodeframe_decision_t *encode_frame_decision);
+
 #endif  // VPX_VP9_ENCODER_VP9_EXT_RATECTRL_H_

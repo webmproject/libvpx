@@ -81,3 +81,34 @@ void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
                                              rc_firstpass_stats);
   }
 }
+
+static int extrc_get_frame_type(FRAME_UPDATE_TYPE update_type) {
+  // TODO(angiebird): Add unit test to make sure this function behaves like
+  // get_frame_type_from_update_type()
+  // TODO(angiebird): Merge this function with get_frame_type_from_update_type()
+  switch (update_type) {
+    case KF_UPDATE: return 0;       // kFrameTypeKey;
+    case ARF_UPDATE: return 2;      // kFrameTypeAltRef;
+    case GF_UPDATE: return 4;       // kFrameTypeGolden;
+    case OVERLAY_UPDATE: return 3;  // kFrameTypeOverlay;
+    case LF_UPDATE: return 1;       // kFrameTypeInter;
+    default:
+      fprintf(stderr, "Unsupported update_type %d\n", update_type);
+      abort();
+      return 1;
+  }
+}
+
+void vp9_extrc_get_encodeframe_decision(
+    EXT_RATECTRL *ext_ratectrl, const GF_GROUP *gf_group, int show_index,
+    int coding_index, vpx_rc_encodeframe_decision_t *encode_frame_decision) {
+  if (ext_ratectrl->ready) {
+    FRAME_UPDATE_TYPE update_type = gf_group->update_type[gf_group->index];
+    vpx_rc_encodeframe_info_t encode_frame_info;
+    encode_frame_info.show_index = show_index;
+    encode_frame_info.coding_index = coding_index;
+    encode_frame_info.frame_type = extrc_get_frame_type(update_type);
+    ext_ratectrl->funcs.get_encodeframe_decision(
+        ext_ratectrl->model, &encode_frame_info, encode_frame_decision);
+  }
+}

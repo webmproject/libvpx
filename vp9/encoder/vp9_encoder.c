@@ -4480,6 +4480,14 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       q = cpi->encode_command.external_quantize_index;
     }
 #endif
+    if (cpi->ext_ratectrl.ready) {
+      const GF_GROUP *gf_group = &cpi->twopass.gf_group;
+      vpx_rc_encodeframe_decision_t encode_frame_decision;
+      vp9_extrc_get_encodeframe_decision(
+          &cpi->ext_ratectrl, gf_group, cm->current_video_frame,
+          cm->current_frame_coding_index, &encode_frame_decision);
+      q = encode_frame_decision.q_index;
+    }
 
     vp9_set_quantizer(cpi, q);
 
@@ -4519,6 +4527,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       if (frame_over_shoot_limit == 0) frame_over_shoot_limit = 1;
     }
 
+    if (cpi->ext_ratectrl.ready) {
+      break;
+    }
 #if CONFIG_RATE_CTRL
     // This part needs to be after save_coding_context() because
     // restore_coding_context will be called in the end of this function.

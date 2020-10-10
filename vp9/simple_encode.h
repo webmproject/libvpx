@@ -27,10 +27,10 @@ enum StatusCode {
 // TODO(angiebird): Add description for each frame type.
 enum FrameType {
   kFrameTypeKey = 0,
-  kFrameTypeInter,
-  kFrameTypeAltRef,
-  kFrameTypeOverlay,
-  kFrameTypeGolden,
+  kFrameTypeInter = 1,
+  kFrameTypeAltRef = 2,
+  kFrameTypeOverlay = 3,
+  kFrameTypeGolden = 4,
 };
 
 // TODO(angiebird): Add description for each reference frame type.
