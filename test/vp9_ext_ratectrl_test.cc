@@ -27,8 +27,9 @@ struct ToyRateCtrl {
   int coding_index;
 };
 
-int rc_create_model(void *priv, const vpx_rc_config_t *ratectrl_config,
-                    vpx_rc_model_t *rate_ctrl_model_pt) {
+vpx_rc_status_t rc_create_model(void *priv,
+                                const vpx_rc_config_t *ratectrl_config,
+                                vpx_rc_model_t *rate_ctrl_model_pt) {
   ToyRateCtrl *toy_rate_ctrl = new (std::nothrow) ToyRateCtrl;
   EXPECT_NE(toy_rate_ctrl, nullptr);
   toy_rate_ctrl->magic_number = kModelMagicNumber;
@@ -41,11 +42,12 @@ int rc_create_model(void *priv, const vpx_rc_config_t *ratectrl_config,
   EXPECT_EQ(ratectrl_config->target_bitrate_kbps, 24000);
   EXPECT_EQ(ratectrl_config->frame_rate_num, 30);
   EXPECT_EQ(ratectrl_config->frame_rate_den, 1);
-  return 0;
+  return vpx_rc_ok;
 }
 
-int rc_send_firstpass_stats(vpx_rc_model_t rate_ctrl_model,
-                            const vpx_rc_firstpass_stats_t *first_pass_stats) {
+vpx_rc_status_t rc_send_firstpass_stats(
+    vpx_rc_model_t rate_ctrl_model,
+    const vpx_rc_firstpass_stats_t *first_pass_stats) {
   const ToyRateCtrl *toy_rate_ctrl =
       static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
@@ -53,10 +55,10 @@ int rc_send_firstpass_stats(vpx_rc_model_t rate_ctrl_model,
   for (int i = 0; i < first_pass_stats->num_frames; ++i) {
     EXPECT_DOUBLE_EQ(first_pass_stats->frame_stats[i].frame, i);
   }
-  return 0;
+  return vpx_rc_ok;
 }
 
-int rc_get_encodeframe_decision(
+vpx_rc_status_t rc_get_encodeframe_decision(
     vpx_rc_model_t rate_ctrl_model,
     const vpx_rc_encodeframe_info_t *encode_frame_info,
     vpx_rc_encodeframe_decision_t *frame_decision) {
@@ -90,10 +92,10 @@ int rc_get_encodeframe_decision(
   } else {
     frame_decision->q_index = 100;
   }
-  return 0;
+  return vpx_rc_ok;
 }
 
-int rc_update_encodeframe_result(
+vpx_rc_status_t rc_update_encodeframe_result(
     vpx_rc_model_t rate_ctrl_model,
     const vpx_rc_encodeframe_result_t *encode_frame_result) {
   const ToyRateCtrl *toy_rate_ctrl =
@@ -105,14 +107,14 @@ int rc_update_encodeframe_result(
   if (toy_rate_ctrl->coding_index == kLosslessCodingIndex) {
     EXPECT_EQ(encode_frame_result->sse, 0);
   }
-  return 0;
+  return vpx_rc_ok;
 }
 
-int rc_delete_model(vpx_rc_model_t rate_ctrl_model) {
+vpx_rc_status_t rc_delete_model(vpx_rc_model_t rate_ctrl_model) {
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
   delete toy_rate_ctrl;
-  return 0;
+  return vpx_rc_ok;
 }
 
 class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
