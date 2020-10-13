@@ -36,4 +36,10 @@ void vp9_extrc_get_encodeframe_decision(
     EXT_RATECTRL *ext_ratectrl, const GF_GROUP *gf_group, int show_index,
     int coding_index, vpx_rc_encodeframe_decision_t *encode_frame_decision);
 
+void vp9_extrc_update_encodeframe_result(EXT_RATECTRL *ext_ratectrl,
+                                         int64_t bit_count,
+                                         const YV12_BUFFER_CONFIG *source_frame,
+                                         const YV12_BUFFER_CONFIG *coded_frame,
+                                         uint32_t input_bit_depth);
+
 #endif  // VPX_VP9_ENCODER_VP9_EXT_RATECTRL_H_

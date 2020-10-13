@@ -10,6 +10,7 @@
 
 #include "vp9/encoder/vp9_ext_ratectrl.h"
 #include "vp9/common/vp9_common.h"
+#include "vpx_dsp/psnr.h"
 
 void vp9_extrc_init(EXT_RATECTRL *ext_ratectrl) { vp9_zero(*ext_ratectrl); }
 
@@ -110,5 +111,30 @@ void vp9_extrc_get_encodeframe_decision(
     encode_frame_info.frame_type = extrc_get_frame_type(update_type);
     ext_ratectrl->funcs.get_encodeframe_decision(
         ext_ratectrl->model, &encode_frame_info, encode_frame_decision);
+  }
+}
+
+void vp9_extrc_update_encodeframe_result(EXT_RATECTRL *ext_ratectrl,
+                                         int64_t bit_count,
+                                         const YV12_BUFFER_CONFIG *source_frame,
+                                         const YV12_BUFFER_CONFIG *coded_frame,
+                                         uint32_t input_bit_depth) {
+  if (ext_ratectrl->ready) {
+    PSNR_STATS psnr;
+    vpx_rc_encodeframe_result_t encode_frame_result;
+    encode_frame_result.bit_count = bit_count;
+    encode_frame_result.pixel_count =
+        source_frame->y_width * source_frame->y_height +
+        2 * source_frame->uv_width * source_frame->uv_height;
+#if CONFIG_VP9_HIGHBITDEPTH
+    vpx_calc_highbd_psnr(source_frame, coded_frame, &psnr,
+                         source_frame->bit_depth, input_bit_depth);
+#else
+    (void)input_bit_depth;
+    vpx_calc_psnr(source_frame, coded_frame, &psnr);
+#endif
+    encode_frame_result.sse = psnr.sse[0];
+    ext_ratectrl->funcs.update_encodeframe_result(ext_ratectrl->model,
+                                                  &encode_frame_result);
   }
 }

@@ -5479,6 +5479,13 @@ static void encode_frame_to_data_rate(
   // build the bitstream
   vp9_pack_bitstream(cpi, dest, size);
 
+  {
+    const RefCntBuffer *coded_frame_buf =
+        get_ref_cnt_buffer(cm, cm->new_fb_idx);
+    vp9_extrc_update_encodeframe_result(&cpi->ext_ratectrl, (*size) << 3,
+                                        cpi->Source, &coded_frame_buf->buf,
+                                        cpi->oxcf.input_bit_depth);
+  }
 #if CONFIG_REALTIME_ONLY
   (void)encode_frame_result;
   assert(encode_frame_result == NULL);
@@ -7541,7 +7548,7 @@ static void update_encode_frame_result(
 #if CONFIG_RATE_CTRL
   PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
-  vpx_calc_highbd_psnr(source_frame, coded_frame_buf->buf, &psnr, bit_depth,
+  vpx_calc_highbd_psnr(source_frame, &coded_frame_buf->buf, &psnr, bit_depth,
                        input_bit_depth);
 #else   // CONFIG_VP9_HIGHBITDEPTH
   (void)bit_depth;
