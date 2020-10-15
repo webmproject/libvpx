@@ -17,6 +17,10 @@ extern "C" {
 
 #include "./vpx_integer.h"
 
+/*!\cond
+  TODO(angiebird): document these structures and fields to clear doxygen
+  warnings.*/
+
 typedef void *vpx_rc_model_t;
 
 typedef struct vpx_rc_encodeframe_decision {
@@ -148,6 +152,10 @@ typedef struct vpx_rc_funcs {
   vpx_rc_delete_model_cb_fn_t delete_model;
   void *priv;
 } vpx_rc_funcs_t;
+
+/*!\endcond
+  TODO(angiebird): document these structures and fields to clear doxygen
+  warnings.*/
 
 #ifdef __cplusplus
 }  // extern "C"
