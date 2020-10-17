@@ -72,10 +72,24 @@ vpx_rc_status_t rc_get_encodeframe_decision(
 
   if (encode_frame_info->coding_index == 0) {
     EXPECT_EQ(encode_frame_info->frame_type, 0 /*kFrameTypeKey*/);
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
+              0);  // kRefFrameTypeLast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[1],
+              0);  // kRefFrameTypePast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[2],
+              0);  // kRefFrameTypeFuture
   }
 
   if (encode_frame_info->coding_index == 1) {
     EXPECT_EQ(encode_frame_info->frame_type, 2 /*kFrameTypeAltRef*/);
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
+              1);  // kRefFrameTypeLast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[1],
+              0);  // kRefFrameTypePast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[2],
+              0);  // kRefFrameTypeFuture
+    EXPECT_EQ(encode_frame_info->ref_frame_coding_indexes[0],
+              0);  // kRefFrameTypeLast
   }
 
   if (encode_frame_info->coding_index >= 2 &&
@@ -85,6 +99,18 @@ vpx_rc_status_t rc_get_encodeframe_decision(
 
   if (encode_frame_info->coding_index == 5) {
     EXPECT_EQ(encode_frame_info->frame_type, 3 /*kFrameTypeOverlay*/);
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
+              1);  // kRefFrameTypeLast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[1],
+              1);  // kRefFrameTypePast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[2],
+              1);  // kRefFrameTypeFuture
+    EXPECT_EQ(encode_frame_info->ref_frame_coding_indexes[0],
+              4);  // kRefFrameTypeLast
+    EXPECT_EQ(encode_frame_info->ref_frame_coding_indexes[1],
+              0);  // kRefFrameTypePast
+    EXPECT_EQ(encode_frame_info->ref_frame_coding_indexes[2],
+              1);  // kRefFrameTypeFuture
   }
   if (encode_frame_info->coding_index == kLosslessCodingIndex) {
     // We should get sse == 0 at rc_update_encodeframe_result()

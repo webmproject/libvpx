@@ -31,6 +31,8 @@ typedef struct vpx_rc_encodeframe_info {
   int frame_type;
   int show_index;
   int coding_index;
+  int ref_frame_coding_indexes[3];
+  int ref_frame_valid_list[3];
 } vpx_rc_encodeframe_info_t;
 
 typedef struct vpx_rc_encodeframe_result {

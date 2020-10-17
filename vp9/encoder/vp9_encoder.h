@@ -1268,6 +1268,11 @@ void vp9_scale_references(VP9_COMP *cpi);
 
 void vp9_update_reference_frames(VP9_COMP *cpi);
 
+void vp9_get_ref_frame_info(FRAME_UPDATE_TYPE update_type, int ref_frame_flags,
+                            RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES],
+                            int *ref_frame_coding_indexes,
+                            int *ref_frame_valid_list);
+
 void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv);
 
 YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(
