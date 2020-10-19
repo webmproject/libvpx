@@ -3325,6 +3325,7 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   if (cpi->loopfilter_ctrl == NO_LOOPFILTER ||
       (!is_reference_frame && cpi->loopfilter_ctrl == LOOPFILTER_REFERENCE)) {
     lf->filter_level = 0;
+    vpx_extend_frame_inner_borders(cm->frame_to_show);
     return;
   }
 
