@@ -1739,20 +1739,23 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *cpi = ctx->cpi;
   EXT_RATECTRL *ext_ratectrl = &cpi->ext_ratectrl;
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
-  const FRAME_INFO *frame_info = &cpi->frame_info;
-  vpx_rc_config_t ratectrl_config;
+  // TODO(angiebird): Check the possibility of this flag being set at pass == 1
+  if (oxcf->pass == 2) {
+    const FRAME_INFO *frame_info = &cpi->frame_info;
+    vpx_rc_config_t ratectrl_config;
 
-  ratectrl_config.frame_width = frame_info->frame_width;
-  ratectrl_config.frame_height = frame_info->frame_height;
-  ratectrl_config.show_frame_count = cpi->twopass.first_pass_info.num_frames;
+    ratectrl_config.frame_width = frame_info->frame_width;
+    ratectrl_config.frame_height = frame_info->frame_height;
+    ratectrl_config.show_frame_count = cpi->twopass.first_pass_info.num_frames;
 
-  // TODO(angiebird): Double check whether this is the proper way to set up
-  // target_bitrate and frame_rate.
-  ratectrl_config.target_bitrate_kbps = (int)(oxcf->target_bandwidth / 1000);
-  ratectrl_config.frame_rate_num = oxcf->g_timebase.den;
-  ratectrl_config.frame_rate_den = oxcf->g_timebase.num;
+    // TODO(angiebird): Double check whether this is the proper way to set up
+    // target_bitrate and frame_rate.
+    ratectrl_config.target_bitrate_kbps = (int)(oxcf->target_bandwidth / 1000);
+    ratectrl_config.frame_rate_num = oxcf->g_timebase.den;
+    ratectrl_config.frame_rate_den = oxcf->g_timebase.num;
 
-  vp9_extrc_create(funcs, ratectrl_config, ext_ratectrl);
+    vp9_extrc_create(funcs, ratectrl_config, ext_ratectrl);
+  }
   return VPX_CODEC_OK;
 }
 

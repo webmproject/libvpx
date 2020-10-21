@@ -2538,8 +2538,6 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
       num_frames = packets - 1;
       fps_init_first_pass_info(&cpi->twopass.first_pass_info,
                                oxcf->two_pass_stats_in.buf, num_frames);
-      vp9_extrc_send_firstpass_stats(&cpi->ext_ratectrl,
-                                     &cpi->twopass.first_pass_info);
 
       vp9_init_second_pass(cpi);
     }
@@ -5483,9 +5481,9 @@ static void encode_frame_to_data_rate(
   {
     const RefCntBuffer *coded_frame_buf =
         get_ref_cnt_buffer(cm, cm->new_fb_idx);
-    vp9_extrc_update_encodeframe_result(&cpi->ext_ratectrl, (*size) << 3,
-                                        cpi->Source, &coded_frame_buf->buf,
-                                        cpi->oxcf.input_bit_depth);
+    vp9_extrc_update_encodeframe_result(
+        &cpi->ext_ratectrl, (*size) << 3, cpi->Source, &coded_frame_buf->buf,
+        cm->bit_depth, cpi->oxcf.input_bit_depth);
   }
 #if CONFIG_REALTIME_ONLY
   (void)encode_frame_result;
@@ -5517,7 +5515,7 @@ static void encode_frame_to_data_rate(
         ref_frame_flags,
         cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index],
         cpi->Source, coded_frame_buf, ref_frame_bufs, vp9_get_quantizer(cpi),
-        cpi->oxcf.input_bit_depth, cm->bit_depth, cpi->td.counts,
+        cm->bit_depth, cpi->oxcf.input_bit_depth, cpi->td.counts,
 #if CONFIG_RATE_CTRL
         cpi->partition_info, cpi->motion_vector_info,
 #endif  // CONFIG_RATE_CTRL
@@ -5674,6 +5672,11 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
                         unsigned int *frame_flags,
                         ENCODE_FRAME_RESULT *encode_frame_result) {
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
+
+  if (cpi->common.current_frame_coding_index == 0) {
+    vp9_extrc_send_firstpass_stats(&cpi->ext_ratectrl,
+                                   &cpi->twopass.first_pass_info);
+  }
 #if CONFIG_MISMATCH_DEBUG
   mismatch_move_frame_idx_w();
 #endif
