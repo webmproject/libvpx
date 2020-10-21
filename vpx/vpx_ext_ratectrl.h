@@ -31,6 +31,8 @@ typedef struct vpx_rc_encodeframe_info {
   int frame_type;
   int show_index;
   int coding_index;
+  int ref_frame_coding_indexes[3];
+  int ref_frame_valid_list[3];
 } vpx_rc_encodeframe_info_t;
 
 typedef struct vpx_rc_encodeframe_result {
@@ -38,6 +40,11 @@ typedef struct vpx_rc_encodeframe_result {
   int64_t bit_count;
   int64_t pixel_count;
 } vpx_rc_encodeframe_result_t;
+
+typedef enum vpx_rc_status {
+  vpx_rc_ok = 0,
+  vpx_rc_error = 1,
+} vpx_rc_status_t;
 
 // This is a mirror of vp9's FIRSTPASS_STATS
 // Only spatial_layer_id is omitted
@@ -92,7 +99,7 @@ typedef struct vpx_rc_config {
  * \param[in]  ratectrl_config    Pointer to vpx_rc_config_t
  * \param[out] rate_ctrl_model_pt Pointer to vpx_rc_model_t
  */
-typedef int (*vpx_rc_create_model_cb_fn_t)(
+typedef vpx_rc_status_t (*vpx_rc_create_model_cb_fn_t)(
     void *priv, const vpx_rc_config_t *ratectrl_config,
     vpx_rc_model_t *rate_ctrl_model_pt);
 
@@ -105,7 +112,7 @@ typedef int (*vpx_rc_create_model_cb_fn_t)(
  * \param[in]  rate_ctrl_model    rate control model
  * \param[in]  first_pass_stats   first pass stats
  */
-typedef int (*vpx_rc_send_firstpass_stats_cb_fn_t)(
+typedef vpx_rc_status_t (*vpx_rc_send_firstpass_stats_cb_fn_t)(
     vpx_rc_model_t rate_ctrl_model,
     const vpx_rc_firstpass_stats_t *first_pass_stats);
 
@@ -118,7 +125,7 @@ typedef int (*vpx_rc_send_firstpass_stats_cb_fn_t)(
  * \param[in]  encode_frame_info  information of the coding frame
  * \param[out] frame_decision     encode decision of the coding frame
  */
-typedef int (*vpx_rc_get_encodeframe_decision_cb_fn_t)(
+typedef vpx_rc_status_t (*vpx_rc_get_encodeframe_decision_cb_fn_t)(
     vpx_rc_model_t rate_ctrl_model,
     const vpx_rc_encodeframe_info_t *encode_frame_info,
     vpx_rc_encodeframe_decision_t *frame_decision);
@@ -131,7 +138,7 @@ typedef int (*vpx_rc_get_encodeframe_decision_cb_fn_t)(
  * \param[in]  rate_ctrl_model     rate control model
  * \param[out] encode_frame_result encode result of the coding frame
  */
-typedef int (*vpx_rc_update_encodeframe_result_cb_fn_t)(
+typedef vpx_rc_status_t (*vpx_rc_update_encodeframe_result_cb_fn_t)(
     vpx_rc_model_t rate_ctrl_model,
     const vpx_rc_encodeframe_result_t *encode_frame_result);
 
@@ -142,7 +149,8 @@ typedef int (*vpx_rc_update_encodeframe_result_cb_fn_t)(
  *
  * \param[in]  rate_ctrl_model     rate control model
  */
-typedef int (*vpx_rc_delete_model_cb_fn_t)(vpx_rc_model_t rate_ctrl_model);
+typedef vpx_rc_status_t (*vpx_rc_delete_model_cb_fn_t)(
+    vpx_rc_model_t rate_ctrl_model);
 
 typedef struct vpx_rc_funcs {
   vpx_rc_create_model_cb_fn_t create_model;

@@ -9,6 +9,7 @@
  */
 
 #include "vp9/encoder/vp9_ext_ratectrl.h"
+#include "vp9/encoder/vp9_encoder.h"
 #include "vp9/common/vp9_common.h"
 #include "vpx_dsp/psnr.h"
 
@@ -102,14 +103,20 @@ static int extrc_get_frame_type(FRAME_UPDATE_TYPE update_type) {
 }
 
 void vp9_extrc_get_encodeframe_decision(
-    EXT_RATECTRL *ext_ratectrl, const GF_GROUP *gf_group, int show_index,
-    int coding_index, vpx_rc_encodeframe_decision_t *encode_frame_decision) {
+    EXT_RATECTRL *ext_ratectrl, int show_index, int coding_index,
+    FRAME_UPDATE_TYPE update_type,
+    RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES], int ref_frame_flags,
+    vpx_rc_encodeframe_decision_t *encode_frame_decision) {
   if (ext_ratectrl->ready) {
-    FRAME_UPDATE_TYPE update_type = gf_group->update_type[gf_group->index];
     vpx_rc_encodeframe_info_t encode_frame_info;
     encode_frame_info.show_index = show_index;
     encode_frame_info.coding_index = coding_index;
     encode_frame_info.frame_type = extrc_get_frame_type(update_type);
+
+    vp9_get_ref_frame_info(update_type, ref_frame_flags, ref_frame_bufs,
+                           encode_frame_info.ref_frame_coding_indexes,
+                           encode_frame_info.ref_frame_valid_list);
+
     ext_ratectrl->funcs.get_encodeframe_decision(
         ext_ratectrl->model, &encode_frame_info, encode_frame_decision);
   }
