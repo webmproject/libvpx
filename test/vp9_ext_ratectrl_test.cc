@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <new>
+
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/util.h"
@@ -18,7 +20,7 @@
 namespace {
 
 constexpr int kModelMagicNumber = 51396;
-constexpr unsigned int PrivMagicNumber = 5566UL;
+constexpr unsigned int PrivMagicNumber = 5566;
 constexpr int kFrameNum = 5;
 constexpr int kLosslessCodingIndex = 2;
 
@@ -34,7 +36,7 @@ vpx_rc_status_t rc_create_model(void *priv,
   EXPECT_NE(toy_rate_ctrl, nullptr);
   toy_rate_ctrl->magic_number = kModelMagicNumber;
   toy_rate_ctrl->coding_index = -1;
-  *rate_ctrl_model_pt = (vpx_rc_model_t)toy_rate_ctrl;
+  *rate_ctrl_model_pt = toy_rate_ctrl;
   EXPECT_EQ(priv, reinterpret_cast<void *>(PrivMagicNumber));
   EXPECT_EQ(ratectrl_config->frame_width, 352);
   EXPECT_EQ(ratectrl_config->frame_height, 288);
@@ -128,7 +130,7 @@ vpx_rc_status_t rc_update_encodeframe_result(
       static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
 
-  int64_t ref_pixel_count = 352 * 288 * 3 / 2;
+  const int64_t ref_pixel_count = 352 * 288 * 3 / 2;
   EXPECT_EQ(encode_frame_result->pixel_count, ref_pixel_count);
   if (toy_rate_ctrl->coding_index == kLosslessCodingIndex) {
     EXPECT_EQ(encode_frame_result->sse, 0);
@@ -174,11 +176,12 @@ TEST_F(ExtRateCtrlTest, EncodeTest) {
   cfg_.rc_target_bitrate = 24000;
 
   std::unique_ptr<libvpx_test::VideoSource> video;
-  video.reset(new libvpx_test::YUVVideoSource("bus_352x288_420_f20_b8.yuv",
-                                              VPX_IMG_FMT_I420, 352, 288, 30, 1,
-                                              0, kFrameNum));
+  video.reset(new (std::nothrow) libvpx_test::YUVVideoSource(
+      "bus_352x288_420_f20_b8.yuv", VPX_IMG_FMT_I420, 352, 288, 30, 1, 0,
+      kFrameNum));
 
   ASSERT_NE(video.get(), nullptr);
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
+
 }  // namespace
