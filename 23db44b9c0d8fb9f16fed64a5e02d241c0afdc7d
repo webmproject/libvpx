@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": false,
       "key": {
         "uuid": "e0a3d5d6_ad697a1d",
         "filename": "/PATCHSET_LEVEL",
@@ -14,10 +15,27 @@
       "side": 1,
       "message": "I think the comment makes sense since the two table are used together. The size difference is minimal, but I don\u0027t know if extended the other array is necessary since it would still require an explanation.",
       "revId": "23db44b9c0d8fb9f16fed64a5e02d241c0afdc7d",
-      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
-      "unresolved": false
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9403fad1_5558cc96",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-10-27T23:55:06Z",
+      "side": 1,
+      "message": "Wan-Teh, any reason not to move forward with this? I made a comment in Jerome\u0027s change [1] about something similar since I remembered this change and didn\u0027t realize it hadn\u0027t landed.\n\n[1] https://chromium-review.googlesource.com/c/webm/libvpx/+/2503456",
+      "revId": "23db44b9c0d8fb9f16fed64a5e02d241c0afdc7d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
       "key": {
         "uuid": "49e29c91_f1e0e292",
         "filename": "vpxenc.c",
@@ -31,10 +49,10 @@
       "side": 1,
       "message": "When I compared the vp9_args and vp9_arg_ctrl_map arrays carefully, I noticed that the entries in the two arrays do not match exactly.\n\nIn this CL I simply added a comment to describe the mismatch between the two arrays. A \"defensive-programming\" change would be to add dummy entries to vp9_arg_ctrl_map for bitdeptharg and inbitdeptharg so that the vp9_args and vp9_arg_ctrl_map arrays are the same size:\n\n                                         VP9E_SET_ROW_MT,\n+#if CONFIG_VP9_HIGHBITDEPTH\n+                                        0,  // bitdeptharg\n+                                        0,  // inbitdeptharg\n+#endif  // CONFIG_VP9_HIGHBITDEPTH\n                                         0 };\n\nThat would make the ARG_CTRL_CNT_MAX macro slightly larger than necessary. See my comments below.",
       "revId": "23db44b9c0d8fb9f16fed64a5e02d241c0afdc7d",
-      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
-      "unresolved": false
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "9cf37f25_9b4a4ae0",
         "filename": "vpxenc.c",
@@ -54,10 +72,10 @@
         "endChar": 6
       },
       "revId": "23db44b9c0d8fb9f16fed64a5e02d241c0afdc7d",
-      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
-      "unresolved": false
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "85f5aded_a06f9e96",
         "filename": "vpxenc.c",
@@ -71,8 +89,7 @@
       "side": 1,
       "message": "The arg_ctrls array is declared to have the size ARG_CTRL_CNT_MAX. The dummy 0 entries in vp9_arg_ctrl_map are never stored in the arg_ctrls array, so if there are too many dummy 0 entries in vp9_arg_ctrl_map, we will be wasting space in the arg_ctrls array. If there are just a few dummy 0 entries, then this is okay.",
       "revId": "23db44b9c0d8fb9f16fed64a5e02d241c0afdc7d",
-      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
-      "unresolved": false
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
