@@ -465,6 +465,13 @@ static const arg_def_t target_level = ARG_DEF(
 static const arg_def_t row_mt =
     ARG_DEF(NULL, "row-mt", 1,
             "Enable row based non-deterministic multi-threading in VP9");
+
+static const arg_def_t disable_loopfilter =
+    ARG_DEF(NULL, "disable-loopfilter", 1,
+            "Control Loopfilter in VP9\n"
+            "0: Loopfilter on for all frames (default)\n"
+            "1: Loopfilter off for non reference frames\n"
+            "2: Loopfilter off for all frames");
 #endif
 
 #if CONFIG_VP9_ENCODER
@@ -495,6 +502,7 @@ static const arg_def_t *vp9_args[] = { &cpu_used_vp9,
                                        &max_gf_interval,
                                        &target_level,
                                        &row_mt,
+                                       &disable_loopfilter,
 #if CONFIG_VP9_HIGHBITDEPTH
                                        &bitdeptharg,
                                        &inbitdeptharg,
@@ -527,6 +535,7 @@ static const int vp9_arg_ctrl_map[] = { VP8E_SET_CPUUSED,
                                         VP9E_SET_MAX_GF_INTERVAL,
                                         VP9E_SET_TARGET_LEVEL,
                                         VP9E_SET_ROW_MT,
+                                        VP9E_SET_DISABLE_LOOPFILTER,
                                         0 };
 #endif
 
