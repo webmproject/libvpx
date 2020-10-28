@@ -150,7 +150,7 @@ class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
  protected:
   ExtRateCtrlTest() : EncoderTest(&::libvpx_test::kVP9) {}
 
-  ~ExtRateCtrlTest() = default;
+  ~ExtRateCtrlTest() override = default;
 
   void SetUp() override {
     InitializeConfig();
