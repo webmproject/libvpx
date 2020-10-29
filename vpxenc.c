@@ -503,6 +503,9 @@ static const arg_def_t *vp9_args[] = { &cpu_used_vp9,
                                        &target_level,
                                        &row_mt,
                                        &disable_loopfilter,
+// NOTE: The entries above have a corresponding entry in vp9_arg_ctrl_map. The
+// entries below do not have a corresponding entry in vp9_arg_ctrl_map. They
+// must be listed at the end of vp9_args.
 #if CONFIG_VP9_HIGHBITDEPTH
                                        &bitdeptharg,
                                        &inbitdeptharg,
