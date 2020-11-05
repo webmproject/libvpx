@@ -973,6 +973,7 @@ typedef struct VP9_COMP {
   PARTITION_INFO *partition_info;
   MOTION_VECTOR_INFO *motion_vector_info;
   MOTION_VECTOR_INFO *fp_motion_vector_info;
+  TplDepStats *tpl_stats_info;
 
   RATE_QSTEP_MODEL rq_model[ENCODE_FRAME_TYPES];
 #endif
@@ -1027,6 +1028,23 @@ static INLINE void motion_vector_info_init(struct VP9_COMP *cpi) {
 static INLINE void free_motion_vector_info(struct VP9_COMP *cpi) {
   vpx_free(cpi->motion_vector_info);
   cpi->motion_vector_info = NULL;
+}
+
+// Allocates memory for the tpl stats information.
+// Only called once in vp9_create_compressor().
+static INLINE void tpl_stats_info_init(struct VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  CHECK_MEM_ERROR(
+      cm, cpi->tpl_stats_info,
+      (TplDepStats *)vpx_calloc(MAX_LAG_BUFFERS, sizeof(TplDepStats)));
+  memset(cpi->tpl_stats_info, 0, MAX_LAG_BUFFERS * sizeof(TplDepStats));
+}
+
+// Frees memory of the tpl stats information.
+// Only called once in dealloc_compressor_data().
+static INLINE void free_tpl_stats_info(struct VP9_COMP *cpi) {
+  vpx_free(cpi->tpl_stats_info);
+  cpi->tpl_stats_info = NULL;
 }
 
 // Allocates memory for the first pass motion vector information.
@@ -1091,6 +1109,7 @@ typedef struct ENCODE_FRAME_RESULT {
   FRAME_COUNTS frame_counts;
   const PARTITION_INFO *partition_info;
   const MOTION_VECTOR_INFO *motion_vector_info;
+  const TplDepStats *tpl_stats_info;
   IMAGE_BUFFER coded_frame;
   RATE_QINDEX_HISTORY rq_history;
 #endif  // CONFIG_RATE_CTRL

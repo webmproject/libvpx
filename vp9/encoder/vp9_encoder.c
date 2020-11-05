@@ -1025,6 +1025,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   free_partition_info(cpi);
   free_motion_vector_info(cpi);
   free_fp_motion_vector_info(cpi);
+  free_tpl_stats_info(cpi);
 #endif
 
   vp9_free_ref_frame_buffers(cm->buffer_pool);
@@ -2665,6 +2666,7 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
   partition_info_init(cpi);
   motion_vector_info_init(cpi);
   fp_motion_vector_info_init(cpi);
+  tpl_stats_info_init(cpi);
 #endif
 
   return cpi;
@@ -5306,6 +5308,7 @@ static void update_encode_frame_result(
 #if CONFIG_RATE_CTRL
     const PARTITION_INFO *partition_info,
     const MOTION_VECTOR_INFO *motion_vector_info,
+    const TplDepStats *tpl_stats_info,
 #endif  // CONFIG_RATE_CTRL
     ENCODE_FRAME_RESULT *encode_frame_result);
 #endif  // !CONFIG_REALTIME_ONLY
@@ -5520,7 +5523,7 @@ static void encode_frame_to_data_rate(
         cpi->Source, coded_frame_buf, ref_frame_bufs, vp9_get_quantizer(cpi),
         cm->bit_depth, cpi->oxcf.input_bit_depth, cpi->td.counts,
 #if CONFIG_RATE_CTRL
-        cpi->partition_info, cpi->motion_vector_info,
+        cpi->partition_info, cpi->motion_vector_info, cpi->tpl_stats_info,
 #endif  // CONFIG_RATE_CTRL
         encode_frame_result);
   }
@@ -7371,6 +7374,48 @@ static void free_tpl_buffer(VP9_COMP *cpi) {
   }
 }
 
+#if CONFIG_RATE_CTRL
+static void accumulate_frame_tpl_stats(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  const GF_GROUP *gf_group = &cpi->twopass.gf_group;
+  int show_frame_count = 0;
+  int frame_idx;
+  // Accumulate tpl stats for each frame in the current group of picture.
+  for (frame_idx = 1; frame_idx < gf_group->gf_group_size; ++frame_idx) {
+    TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+    if (!tpl_frame->is_valid) continue;
+
+    TplDepStats *tpl_stats = tpl_frame->tpl_stats_ptr;
+    const int tpl_stride = tpl_frame->stride;
+    int64_t intra_cost_base = 0;
+    int64_t inter_cost_base = 0;
+    int64_t mc_dep_cost_base = 0;
+    int64_t mc_ref_cost_base = 0;
+    int64_t mc_flow_base = 0;
+    int row, col;
+
+    for (row = 0; row < cm->mi_rows && tpl_frame->is_valid; ++row) {
+      for (col = 0; col < cm->mi_cols; ++col) {
+        TplDepStats *this_stats = &tpl_stats[row * tpl_stride + col];
+        intra_cost_base += this_stats->intra_cost;
+        inter_cost_base += this_stats->inter_cost;
+        mc_dep_cost_base += this_stats->mc_dep_cost;
+        mc_ref_cost_base += this_stats->mc_ref_cost;
+        mc_flow_base += this_stats->mc_flow;
+      }
+    }
+
+    cpi->tpl_stats_info[show_frame_count].intra_cost = intra_cost_base;
+    cpi->tpl_stats_info[show_frame_count].inter_cost = inter_cost_base;
+    cpi->tpl_stats_info[show_frame_count].mc_dep_cost = mc_dep_cost_base;
+    cpi->tpl_stats_info[show_frame_count].mc_ref_cost = mc_ref_cost_base;
+    cpi->tpl_stats_info[show_frame_count].mc_flow = mc_flow_base;
+
+    ++show_frame_count;
+  }
+}
+#endif  // CONFIG_RATE_CTRL
+
 static void setup_tpl_stats(VP9_COMP *cpi) {
   GF_PICTURE gf_picture[MAX_ARF_GOP_SIZE];
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
@@ -7393,6 +7438,10 @@ static void setup_tpl_stats(VP9_COMP *cpi) {
   dump_tpl_stats(cpi, tpl_group_frames, gf_group, gf_picture, cpi->tpl_bsize);
 #endif  // DUMP_TPL_STATS
 #endif  // CONFIG_NON_GREEDY_MV
+
+#if CONFIG_RATE_CTRL
+  accumulate_frame_tpl_stats(cpi);
+#endif  // CONFIG_RATE_CTRL
 }
 
 void vp9_get_ref_frame_info(FRAME_UPDATE_TYPE update_type, int ref_frame_flags,
@@ -7575,6 +7624,7 @@ static void update_encode_frame_result(
 #if CONFIG_RATE_CTRL
     const PARTITION_INFO *partition_info,
     const MOTION_VECTOR_INFO *motion_vector_info,
+    const TplDepStats *tpl_stats_info,
 #endif  // CONFIG_RATE_CTRL
     ENCODE_FRAME_RESULT *encode_frame_result) {
 #if CONFIG_RATE_CTRL
@@ -7598,6 +7648,7 @@ static void update_encode_frame_result(
   copy_frame_counts(counts, &encode_frame_result->frame_counts);
   encode_frame_result->partition_info = partition_info;
   encode_frame_result->motion_vector_info = motion_vector_info;
+  encode_frame_result->tpl_stats_info = tpl_stats_info;
   if (encode_frame_result->coded_frame.allocated) {
     yv12_buffer_to_image_buffer(&coded_frame_buf->buf,
                                 &encode_frame_result->coded_frame);

@@ -87,6 +87,24 @@ struct MotionVectorInfo {
   double mv_column[2];
 };
 
+// Accumulated tpl stats of all blocks in one frame.
+// For each frame, the tpl stats are computed per 32x32 block.
+struct TplStatsInfo {
+  // Intra complexity: the sum of absolute transform difference (SATD) of
+  // intra predicted residuals.
+  int64_t intra_cost;
+  // Inter complexity: the SATD of inter predicted residuals.
+  int64_t inter_cost;
+  // Motion compensated information flow. It measures how much information
+  // is propagated from the current frame to other frames.
+  int64_t mc_flow;
+  // Motion compensated dependency cost. It equals to its own intra_cost
+  // plus the mc_flow.
+  int64_t mc_dep_cost;
+  // Motion compensated reference cost.
+  int64_t mc_ref_cost;
+};
+
 struct RefFrameInfo {
   int coding_indexes[kRefFrameTypeMax];
 
@@ -261,6 +279,18 @@ struct EncodeFrameResult {
   // Similar to partition info, all 4x4 blocks inside the same partition block
   // share the same motion vector information.
   std::vector<MotionVectorInfo> motion_vector_info;
+  // A vector of the tpl stats information.
+  // The tpl stats measure the complexity of a frame, as well as the
+  // informatioin propagated along the motion trajactory between frames, in
+  // the reference frame structure.
+  // The tpl stats could be used as a more accurate spatial and temporal
+  // complexity measure in addition to the first pass stats.
+  // The vector contains tpl stats for all show frames in a GOP.
+  // The tpl stats stored in the vector is according to the encoding order.
+  // For example, suppose there are N show frames for the current GOP.
+  // Then tpl_stats_info[0] stores the information of the first frame to be
+  // encoded for this GOP, i.e, the AltRef frame.
+  std::vector<TplStatsInfo> tpl_stats_info;
   ImageBuffer coded_frame;
 
   // recode_count, q_index_history and rate_history are only available when
