@@ -494,7 +494,31 @@ class LoopfilterOnePassCbrSvc : public OnePassCbrSvc,
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     PreEncodeFrameHookSetup(video, encoder);
-    encoder->Control(VP9E_SET_DISABLE_LOOPFILTER, loopfilter_off_);
+    if (number_temporal_layers_ > 1 || number_spatial_layers_ > 1) {
+      // Consider 3 cases:
+      if (loopfilter_off_ == 0) {
+        // loopfilter is on for all spatial layers on every superrframe.
+        for (int i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
+          svc_params_.loopfilter_ctrl[i] = 0;
+        }
+      } else if (loopfilter_off_ == 1) {
+        // loopfilter is off for non-reference frames for all spatial layers.
+        for (int i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
+          svc_params_.loopfilter_ctrl[i] = 1;
+        }
+      } else {
+        // loopfilter is off for all SL0 frames, and off only for non-reference
+        // frames for SL > 0.
+        svc_params_.loopfilter_ctrl[0] = 2;
+        for (int i = 1; i < VPX_SS_MAX_LAYERS; ++i) {
+          svc_params_.loopfilter_ctrl[i] = 1;
+        }
+      }
+      encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);
+    } else if (number_temporal_layers_ == 1 && number_spatial_layers_ == 1) {
+      // For non-SVC mode use the single layer control.
+      encoder->Control(VP9E_SET_DISABLE_LOOPFILTER, loopfilter_off_);
+    }
   }
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
@@ -524,6 +548,35 @@ class LoopfilterOnePassCbrSvc : public OnePassCbrSvc,
   int num_nonref_frames_;
 };
 
+TEST_P(LoopfilterOnePassCbrSvc, OnePassCbrSvc1SL1TLLoopfilterOff) {
+  SetSvcConfig(1, 1);
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.g_threads = 1;
+  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_target_bitrate = 800;
+  cfg_.kf_max_dist = 9999;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.g_error_resilient = 1;
+  cfg_.ts_rate_decimator[0] = 1;
+  cfg_.temporal_layering_mode = 0;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  cfg_.rc_target_bitrate = 600;
+  AssignLayerBitrates();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+#if CONFIG_VP9_DECODER
+  if (loopfilter_off_ == 0)
+    EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
+  else
+    EXPECT_EQ(GetMismatchFrames(), 0);
+#endif
+}
+
 TEST_P(LoopfilterOnePassCbrSvc, OnePassCbrSvc1SL3TLLoopfilterOff) {
   SetSvcConfig(1, 3);
   cfg_.rc_buf_initial_sz = 500;
@@ -542,7 +595,37 @@ TEST_P(LoopfilterOnePassCbrSvc, OnePassCbrSvc1SL3TLLoopfilterOff) {
   cfg_.ts_rate_decimator[1] = 2;
   cfg_.ts_rate_decimator[2] = 1;
   cfg_.temporal_layering_mode = 3;
+  ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
+                                       0, 400);
+  cfg_.rc_target_bitrate = 600;
+  AssignLayerBitrates();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+#if CONFIG_VP9_DECODER
+  if (loopfilter_off_ == 0)
+    EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
+  else
+    EXPECT_EQ(GetMismatchFrames(), 0);
+#endif
+}
 
+TEST_P(LoopfilterOnePassCbrSvc, OnePassCbrSvc3SL3TLLoopfilterOff) {
+  SetSvcConfig(3, 3);
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.g_threads = 1;
+  cfg_.rc_dropframe_thresh = 0;
+  cfg_.rc_target_bitrate = 800;
+  cfg_.kf_max_dist = 9999;
+  cfg_.rc_end_usage = VPX_CBR;
+  cfg_.g_lag_in_frames = 0;
+  cfg_.g_error_resilient = 1;
+  cfg_.ts_rate_decimator[0] = 4;
+  cfg_.ts_rate_decimator[1] = 2;
+  cfg_.ts_rate_decimator[2] = 1;
+  cfg_.temporal_layering_mode = 3;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   cfg_.rc_target_bitrate = 600;
