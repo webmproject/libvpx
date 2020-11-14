@@ -77,45 +77,153 @@ typedef enum vpx_rc_status {
   vpx_rc_error = 1,
 } vpx_rc_status_t;
 
-/*!\cond
-  TODO(angiebird): document these structures and fields to clear doxygen
-  warnings.*/
-
-// This is a mirror of vp9's FIRSTPASS_STATS
-// Only spatial_layer_id is omitted
+/*!\brief First pass frame stats
+ * This is a mirror of vp9's FIRSTPASS_STATS except that spatial_layer_id is
+ * omitted
+ */
 typedef struct vpx_rc_frame_stats {
+  /*!
+   * Frame number in display order, if stats are for a single frame.
+   * No real meaning for a collection of frames.
+   */
   double frame;
+  /*!
+   * Weight assigned to this frame (or total weight for the collection of
+   * frames) currently based on intra factor and brightness factor. This is used
+   * to distribute bits between easier and harder frames.
+   */
   double weight;
+  /*!
+   * Intra prediction error.
+   */
   double intra_error;
+  /*!
+   * Best of intra pred error and inter pred error using last frame as ref.
+   */
   double coded_error;
+  /*!
+   * Best of intra pred error and inter pred error using golden frame as ref.
+   */
   double sr_coded_error;
+  /*!
+   * Estimate the noise energy of the current frame.
+   */
   double frame_noise_energy;
+  /*!
+   * Percentage of blocks with inter pred error < intra pred error.
+   */
   double pcnt_inter;
+  /*!
+   * Percentage of blocks using (inter prediction and) non-zero motion vectors.
+   */
   double pcnt_motion;
+  /*!
+   * Percentage of blocks where golden frame was better than last or intra:
+   * inter pred error using golden frame < inter pred error using last frame and
+   * inter pred error using golden frame < intra pred error
+   */
   double pcnt_second_ref;
+  /*!
+   * Percentage of blocks where intra and inter prediction errors were very
+   * close. Note that this is a 'weighted count', that is, the so blocks may be
+   * weighted by how close the two errors were.
+   */
   double pcnt_neutral;
+  /*!
+   * Percentage of blocks that have intra error < inter error and inter error <
+   * LOW_I_THRESH LOW_I_THRESH = 24000 using bit_depth 8 LOW_I_THRESH = 24000 <<
+   * 4 using bit_depth 10 LOW_I_THRESH = 24000 << 8 using bit_depth 12
+   */
   double pcnt_intra_low;
+  /*!
+   * Percentage of blocks that have intra error < inter error and intra error <
+   * LOW_I_THRESH but inter error >= LOW_I_THRESH LOW_I_THRESH = 24000 using
+   * bit_depth 8 LOW_I_THRESH = 24000 << 4 using bit_depth 10 LOW_I_THRESH =
+   * 24000 << 8 using bit_depth 12
+   */
   double pcnt_intra_high;
+  /*!
+   * Percentage of blocks that have almost no intra error residual
+   * (i.e. are in effect completely flat and untextured in the intra
+   * domain). In natural videos this is uncommon, but it is much more
+   * common in animations, graphics and screen content, so may be used
+   * as a signal to detect these types of content.
+   */
   double intra_skip_pct;
+  /*!
+   * Percentage of blocks that have intra error < SMOOTH_INTRA_THRESH
+   * SMOOTH_INTRA_THRESH = 4000 using bit_depth 8
+   * SMOOTH_INTRA_THRESH = 4000 << 4 using bit_depth 10
+   * SMOOTH_INTRA_THRESH = 4000 << 8 using bit_depth 12
+   */
   double intra_smooth_pct;
+  /*!
+   * Image mask rows top and bottom.
+   */
   double inactive_zone_rows;
+  /*!
+   * Image mask columns at left and right edges.
+   */
   double inactive_zone_cols;
+  /*!
+   * Average of row motion vectors.
+   */
   double MVr;
+  /*!
+   * Mean of absolute value of row motion vectors.
+   */
   double mvr_abs;
+  /*!
+   * Mean of column motion vectors.
+   */
   double MVc;
+  /*!
+   * Mean of absolute value of column motion vectors.
+   */
   double mvc_abs;
+  /*!
+   * Variance of row motion vectors.
+   */
   double MVrv;
+  /*!
+   * Variance of column motion vectors.
+   */
   double MVcv;
+  /*!
+   * Value in range [-1,1] indicating fraction of row and column motion vectors
+   * that point inwards (negative MV value) or outwards (positive MV value).
+   * For example, value of 1 indicates, all row/column MVs are inwards.
+   */
   double mv_in_out_count;
+  /*!
+   * Duration of the frame / collection of frames.
+   */
   double duration;
+  /*!
+   * 1.0 if stats are for a single frame, OR
+   * Number of frames in this collection for which the stats are accumulated.
+   */
   double count;
 } vpx_rc_frame_stats_t;
 
+/*!\brief Collection of first pass frame stats
+ */
 typedef struct vpx_rc_firstpass_stats {
+  /*!
+   * Pointer to first pass frame stats.
+   * The pointed array of vpx_rc_frame_stats_t should have length equal to
+   * number of show frames in the video.
+   */
   vpx_rc_frame_stats_t *frame_stats;
+  /*!
+   * Number of show frames in the video.
+   */
   int num_frames;
 } vpx_rc_firstpass_stats_t;
 
+/*!\cond
+  TODO(angiebird): document these structures and fields to clear doxygen
+  warnings.*/
 typedef struct vpx_rc_config {
   int frame_width;
   int frame_height;
