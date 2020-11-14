@@ -221,16 +221,18 @@ typedef struct vpx_rc_firstpass_stats {
   int num_frames;
 } vpx_rc_firstpass_stats_t;
 
-/*!\cond
-  TODO(angiebird): document these structures and fields to clear doxygen
-  warnings.*/
+/*!\brief Encode config sent to external rate control model
+ */
 typedef struct vpx_rc_config {
-  int frame_width;
-  int frame_height;
-  int show_frame_count;
+  int frame_width;      /**< frame width */
+  int frame_height;     /**< frame height */
+  int show_frame_count; /**< number of visible frames in the video */
+  /*!
+   * Target bitrate in kilobytes per second
+   */
   int target_bitrate_kbps;
-  int frame_rate_num;
-  int frame_rate_den;
+  int frame_rate_num; /**< numerator of frame rate */
+  int frame_rate_den; /**< denominator of frame rate */
 } vpx_rc_config_t;
 
 /*!\brief Create an external rate control model callback prototype
@@ -294,6 +296,10 @@ typedef vpx_rc_status_t (*vpx_rc_update_encodeframe_result_cb_fn_t)(
  */
 typedef vpx_rc_status_t (*vpx_rc_delete_model_cb_fn_t)(
     vpx_rc_model_t rate_ctrl_model);
+
+/*!\cond
+  TODO(angiebird): document these structures and fields to clear doxygen
+  warnings.*/
 
 typedef struct vpx_rc_funcs {
   vpx_rc_create_model_cb_fn_t create_model;
