@@ -7383,8 +7383,6 @@ static void accumulate_frame_tpl_stats(VP9_COMP *cpi) {
   // Accumulate tpl stats for each frame in the current group of picture.
   for (frame_idx = 1; frame_idx < gf_group->gf_group_size; ++frame_idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-    if (!tpl_frame->is_valid) continue;
-
     TplDepStats *tpl_stats = tpl_frame->tpl_stats_ptr;
     const int tpl_stride = tpl_frame->stride;
     int64_t intra_cost_base = 0;
@@ -7393,6 +7391,8 @@ static void accumulate_frame_tpl_stats(VP9_COMP *cpi) {
     int64_t mc_ref_cost_base = 0;
     int64_t mc_flow_base = 0;
     int row, col;
+
+    if (!tpl_frame->is_valid) continue;
 
     for (row = 0; row < cm->mi_rows && tpl_frame->is_valid; ++row) {
       for (col = 0; col < cm->mi_cols; ++col) {
