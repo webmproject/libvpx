@@ -17,34 +17,69 @@ extern "C" {
 
 #include "./vpx_integer.h"
 
-/*!\cond
-  TODO(angiebird): document these structures and fields to clear doxygen
-  warnings.*/
-
+/*!\brief Abstract rate control model handler
+ *
+ * The encoder will receive the model handler from create_model() defined in
+ * vpx_rc_funcs_t.
+ */
 typedef void *vpx_rc_model_t;
 
+/*!\brief Encode frame decision made by the external rate control model
+ *
+ * The encoder will receive the decision from the external rate control model
+ * through get_encodeframe_decision() defined in vpx_rc_funcs_t.
+ */
 typedef struct vpx_rc_encodeframe_decision {
-  int q_index;
+  int q_index; /**< Quantizer step index [0..255]*/
 } vpx_rc_encodeframe_decision_t;
 
+/*!\brief Information for the frame to be encoded.
+ *
+ * The encoder will send the information to external rate control model through
+ * get_encodeframe_decision() defined in vpx_rc_funcs_t.
+ *
+ */
 typedef struct vpx_rc_encodeframe_info {
+  /*!
+   * 0: Key frame
+   * 1: Inter frame
+   * 2: Alternate reference frame
+   * 3: Overlay frame
+   * 4: Golden frame
+   */
   int frame_type;
-  int show_index;
-  int coding_index;
-  int ref_frame_coding_indexes[3];
+  int show_index;                  /**< display index, starts from zero*/
+  int coding_index;                /**< coding index, starts from zero*/
+  int ref_frame_coding_indexes[3]; /**< three reference frames' coding indices*/
+  /*!
+   * The validity of the three reference frames.
+   * 0: Invalid
+   * 1: Valid
+   */
   int ref_frame_valid_list[3];
 } vpx_rc_encodeframe_info_t;
 
+/*!\brief Frame coding result
+ *
+ * The encoder will send the result to the external rate control model through
+ * update_encodeframe_result() defined in vpx_rc_funcs_t.
+ */
 typedef struct vpx_rc_encodeframe_result {
-  int64_t sse;
-  int64_t bit_count;
-  int64_t pixel_count;
+  int64_t sse;         /**< sum of squared error of the reconstructed frame */
+  int64_t bit_count;   /**< number of bits spent on coding the frame*/
+  int64_t pixel_count; /**< number of pixels in YUV planes of the frame*/
 } vpx_rc_encodeframe_result_t;
 
+/*!\brief Status returned by rate control callback functions.
+ */
 typedef enum vpx_rc_status {
   vpx_rc_ok = 0,
   vpx_rc_error = 1,
 } vpx_rc_status_t;
+
+/*!\cond
+  TODO(angiebird): document these structures and fields to clear doxygen
+  warnings.*/
 
 // This is a mirror of vp9's FIRSTPASS_STATS
 // Only spatial_layer_id is omitted
