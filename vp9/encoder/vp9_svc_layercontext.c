@@ -357,8 +357,7 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   if (is_one_pass_cbr_svc(cpi) && lc->speed > 0) {
     cpi->oxcf.speed = lc->speed;
   }
-  if (lc->loopfilter_ctrl >= 0 || lc->loopfilter_ctrl < 3)
-    cpi->loopfilter_ctrl = lc->loopfilter_ctrl;
+  cpi->loopfilter_ctrl = lc->loopfilter_ctrl;
   // Reset the frames_since_key and frames_to_key counters to their values
   // before the layer restore. Keep these defined for the stream (not layer).
   if (cpi->svc.number_temporal_layers > 1 ||
