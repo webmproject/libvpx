@@ -24,6 +24,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1fcb326b_971ab770",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-17T22:15:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e9c2d205_69c3f3fc",
+      "range": {
+        "startLine": 22,
+        "startChar": 15,
+        "endLine": 22,
+        "endChar": 29
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "04449211_116e732e",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-11-17T01:59:47Z",
       "side": 1,
       "message": "you should be able to create a reference link with #vpx_rc_funcs_t or ::vpx_rc_funcs_t here and elsewhere",
+      "range": {
+        "startLine": 30,
+        "startChar": 49,
+        "endLine": 30,
+        "endChar": 63
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "52280c21_41a3b3d8",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-17T22:15:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "04449211_116e732e",
       "range": {
         "startLine": 30,
         "startChar": 49,
@@ -72,6 +120,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "45a4d1a1_b6de0987",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-17T22:15:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6c70936c_91468bb9",
+      "range": {
+        "startLine": 36,
+        "startChar": 9,
+        "endLine": 36,
+        "endChar": 36
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "56c1bc3c_17bf9a6f",
         "filename": "vpx/vpx_ext_ratectrl.h",
         "patchSetId": 3
@@ -83,6 +155,30 @@
       "writtenOn": "2020-11-17T01:59:47Z",
       "side": 1,
       "message": "\u0027display index, starts...\u0027?",
+      "range": {
+        "startLine": 51,
+        "startChar": 40,
+        "endLine": 51,
+        "endChar": 60
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "78985932_003c503f",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-17T22:15:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56c1bc3c_17bf9a6f",
       "range": {
         "startLine": 51,
         "startChar": 40,
@@ -118,6 +214,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "822de907_8dd7ada0",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-17T22:15:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0cf4c1d8_6271e5b5",
+      "range": {
+        "startLine": 52,
+        "startChar": 39,
+        "endLine": 52,
+        "endChar": 59
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "b74b79da_881a0bcc",
         "filename": "vpx/vpx_ext_ratectrl.h",
         "patchSetId": 3
@@ -129,6 +249,30 @@
       "writtenOn": "2020-11-17T01:59:47Z",
       "side": 1,
       "message": "Maybe \u0027The validity of the three reference frames\u0027?",
+      "range": {
+        "startLine": 55,
+        "startChar": 5,
+        "endLine": 55,
+        "endChar": 39
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "de74b648_0d47db04",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-17T22:15:20Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "b74b79da_881a0bcc",
       "range": {
         "startLine": 55,
         "startChar": 5,
