@@ -22,6 +22,121 @@
       },
       "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "04449211_116e732e",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-17T01:59:47Z",
+      "side": 1,
+      "message": "you should be able to create a reference link with #vpx_rc_funcs_t or ::vpx_rc_funcs_t here and elsewhere",
+      "range": {
+        "startLine": 30,
+        "startChar": 49,
+        "endLine": 30,
+        "endChar": 63
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6c70936c_91468bb9",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-17T01:59:47Z",
+      "side": 1,
+      "message": "Should this be something like: \u0027Information for the frame to be encoded\u0027?",
+      "range": {
+        "startLine": 36,
+        "startChar": 9,
+        "endLine": 36,
+        "endChar": 36
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "56c1bc3c_17bf9a6f",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-17T01:59:47Z",
+      "side": 1,
+      "message": "\u0027display index, starts...\u0027?",
+      "range": {
+        "startLine": 51,
+        "startChar": 40,
+        "endLine": 51,
+        "endChar": 60
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0cf4c1d8_6271e5b5",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-17T01:59:47Z",
+      "side": 1,
+      "message": "\u0027coding index, starts...\u0027?",
+      "range": {
+        "startLine": 52,
+        "startChar": 39,
+        "endLine": 52,
+        "endChar": 59
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b74b79da_881a0bcc",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-17T01:59:47Z",
+      "side": 1,
+      "message": "Maybe \u0027The validity of the three reference frames\u0027?",
+      "range": {
+        "startLine": 55,
+        "startChar": 5,
+        "endLine": 55,
+        "endChar": 39
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
