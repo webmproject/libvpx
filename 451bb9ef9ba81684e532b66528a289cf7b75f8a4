@@ -95,6 +95,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6b4c31ff_d6fd91d5",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-17T23:24:45Z",
+      "side": 1,
+      "message": "For some reason, #vpx_rc_funcs_t or ::vpx_rc_funcs_t will yield compiler error.\nI will figure out how to use link later.",
+      "parentUuid": "52280c21_41a3b3d8",
+      "range": {
+        "startLine": 30,
+        "startChar": 49,
+        "endLine": 30,
+        "endChar": 63
+      },
+      "revId": "451bb9ef9ba81684e532b66528a289cf7b75f8a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6c70936c_91468bb9",
