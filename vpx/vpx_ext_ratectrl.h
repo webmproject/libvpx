@@ -73,8 +73,8 @@ typedef struct vpx_rc_encodeframe_result {
 /*!\brief Status returned by rate control callback functions.
  */
 typedef enum vpx_rc_status {
-  vpx_rc_ok = 0,
-  vpx_rc_error = 1,
+  VPX_RC_OK = 0,
+  VPX_RC_ERROR = 1,
 } vpx_rc_status_t;
 
 /*!\brief First pass frame stats

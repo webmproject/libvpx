@@ -44,7 +44,7 @@ vpx_rc_status_t rc_create_model(void *priv,
   EXPECT_EQ(ratectrl_config->target_bitrate_kbps, 24000);
   EXPECT_EQ(ratectrl_config->frame_rate_num, 30);
   EXPECT_EQ(ratectrl_config->frame_rate_den, 1);
-  return vpx_rc_ok;
+  return VPX_RC_OK;
 }
 
 vpx_rc_status_t rc_send_firstpass_stats(
@@ -57,7 +57,7 @@ vpx_rc_status_t rc_send_firstpass_stats(
   for (int i = 0; i < first_pass_stats->num_frames; ++i) {
     EXPECT_DOUBLE_EQ(first_pass_stats->frame_stats[i].frame, i);
   }
-  return vpx_rc_ok;
+  return VPX_RC_OK;
 }
 
 vpx_rc_status_t rc_get_encodeframe_decision(
@@ -120,7 +120,7 @@ vpx_rc_status_t rc_get_encodeframe_decision(
   } else {
     frame_decision->q_index = 100;
   }
-  return vpx_rc_ok;
+  return VPX_RC_OK;
 }
 
 vpx_rc_status_t rc_update_encodeframe_result(
@@ -135,14 +135,14 @@ vpx_rc_status_t rc_update_encodeframe_result(
   if (toy_rate_ctrl->coding_index == kLosslessCodingIndex) {
     EXPECT_EQ(encode_frame_result->sse, 0);
   }
-  return vpx_rc_ok;
+  return VPX_RC_OK;
 }
 
 vpx_rc_status_t rc_delete_model(vpx_rc_model_t rate_ctrl_model) {
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
   delete toy_rate_ctrl;
-  return vpx_rc_ok;
+  return VPX_RC_OK;
 }
 
 class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
