@@ -297,22 +297,38 @@ typedef vpx_rc_status_t (*vpx_rc_update_encodeframe_result_cb_fn_t)(
 typedef vpx_rc_status_t (*vpx_rc_delete_model_cb_fn_t)(
     vpx_rc_model_t rate_ctrl_model);
 
-/*!\cond
-  TODO(angiebird): document these structures and fields to clear doxygen
-  warnings.*/
-
+/*!\brief Callback function set for external rate control.
+ *
+ * The user can enable external rate control by registering
+ * a set of callback functions with the codec control flag
+ * VP9E_SET_EXTERNAL_RATE_CONTROL.
+ */
 typedef struct vpx_rc_funcs {
+  /*!
+   * Create an external rate control model.
+   */
   vpx_rc_create_model_cb_fn_t create_model;
+  /*!
+   * Send first pass stats to the external rate control model.
+   */
   vpx_rc_send_firstpass_stats_cb_fn_t send_firstpass_stats;
+  /*!
+   * Get encodeframe decision from the external rate control model.
+   */
   vpx_rc_get_encodeframe_decision_cb_fn_t get_encodeframe_decision;
+  /*!
+   * Update encodeframe result to the external rate control model.
+   */
   vpx_rc_update_encodeframe_result_cb_fn_t update_encodeframe_result;
+  /*!
+   * Delete the external rate control model.
+   */
   vpx_rc_delete_model_cb_fn_t delete_model;
+  /*!
+   * Private data for the external rate control model.
+   */
   void *priv;
 } vpx_rc_funcs_t;
-
-/*!\endcond
-  TODO(angiebird): document these structures and fields to clear doxygen
-  warnings.*/
 
 #ifdef __cplusplus
 }  // extern "C"
