@@ -271,8 +271,8 @@ class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
  protected:
   virtual void Next() {
     ++frame_;
-    unsigned int width;
-    unsigned int height;
+    unsigned int width = 0;
+    unsigned int height = 0;
     ScaleForFrameNumber(frame_, kInitialWidth, kInitialHeight, &width, &height,
                         flag_codec_, smaller_width_larger_size_);
     SetSize(width, height);
