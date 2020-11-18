@@ -4511,8 +4511,8 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       get_ref_frame_bufs(cpi, ref_frame_bufs);
       vp9_extrc_get_encodeframe_decision(
           &cpi->ext_ratectrl, cm->current_video_frame,
-          cm->current_frame_coding_index, update_type, ref_frame_bufs,
-          ref_frame_flags, &encode_frame_decision);
+          cm->current_frame_coding_index, gf_group->index, update_type,
+          ref_frame_bufs, ref_frame_flags, &encode_frame_decision);
       q = encode_frame_decision.q_index;
     }
 

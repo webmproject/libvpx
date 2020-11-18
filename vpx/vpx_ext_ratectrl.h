@@ -17,6 +17,16 @@ extern "C" {
 
 #include "./vpx_integer.h"
 
+/*!\brief Current ABI version number
+ *
+ * \internal
+ * If this file is altered in any way that changes the ABI, this value
+ * must be bumped. Examples include, but are not limited to, changing
+ * types, removing or reassigning enums, adding/removing/rearranging
+ * fields to structures.
+ */
+#define VPX_EXT_RATECTRL_ABI_VERSION (1)
+
 /*!\brief Abstract rate control model handler
  *
  * The encoder will receive the model handler from create_model() defined in
@@ -48,8 +58,12 @@ typedef struct vpx_rc_encodeframe_info {
    * 4: Golden frame
    */
   int frame_type;
-  int show_index;                  /**< display index, starts from zero*/
-  int coding_index;                /**< coding index, starts from zero*/
+  int show_index;   /**< display index, starts from zero*/
+  int coding_index; /**< coding index, starts from zero*/
+  /*!
+   * index in group of picture, starts from zero.
+   */
+  int gop_index;
   int ref_frame_coding_indexes[3]; /**< three reference frames' coding indices*/
   /*!
    * The validity of the three reference frames.

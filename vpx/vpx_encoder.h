@@ -30,6 +30,7 @@ extern "C" {
 #endif
 
 #include "./vpx_codec.h"
+#include "./vpx_ext_ratectrl.h"
 
 /*! Temporal Scalability: Maximum length of the sequence defining frame
  * layer membership
@@ -57,7 +58,8 @@ extern "C" {
  * fields to structures
  */
 #define VPX_ENCODER_ABI_VERSION \
-  (14 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
+  (14 + VPX_CODEC_ABI_VERSION + \
+   VPX_EXT_RATECTRL_ABI_VERSION) /**<\hideinitializer*/
 
 /*! \brief Encoder capabilities bitfield
  *

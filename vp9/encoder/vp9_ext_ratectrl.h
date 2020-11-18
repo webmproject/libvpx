@@ -33,7 +33,7 @@ void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
                                     const FIRST_PASS_INFO *first_pass_info);
 
 void vp9_extrc_get_encodeframe_decision(
-    EXT_RATECTRL *ext_ratectrl, int show_index, int coding_index,
+    EXT_RATECTRL *ext_ratectrl, int show_index, int coding_index, int gop_index,
     FRAME_UPDATE_TYPE update_type,
     RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES], int ref_frame_flags,
     vpx_rc_encodeframe_decision_t *encode_frame_decision);
