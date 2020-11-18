@@ -16,6 +16,24 @@
       "message": "for correctness this should include an ABI bump since it\u0027s the only way we have to signal the change. if you included one for the addition of the functions then it should be ok from a released version perspective.",
       "revId": "5b63f0f821e94f8072eb483014cfc33b05978bb9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "42ba1c74_19803b1b",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-18T01:31:45Z",
+      "side": 1,
+      "message": "How to add ABI bump?\nI just pushed another CL that change this file\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/2546048/1\n\nShould I bump ABI in the latest CL or I should bump API for each CL?",
+      "parentUuid": "ed97e6ee_0745583e",
+      "revId": "5b63f0f821e94f8072eb483014cfc33b05978bb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
