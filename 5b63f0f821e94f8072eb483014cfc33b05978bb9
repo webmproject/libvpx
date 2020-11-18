@@ -34,6 +34,24 @@
       "parentUuid": "ed97e6ee_0745583e",
       "revId": "5b63f0f821e94f8072eb483014cfc33b05978bb9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "43a17fa6_260ed2a4",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-18T21:54:15Z",
+      "side": 1,
+      "message": "\u003e How to add ABI bump?\n\u003e I just pushed another CL that change this file\n\u003e https://chromium-review.googlesource.com/c/webm/libvpx/+/2546048/1\n\u003e \n\u003e Should I bump ABI in the latest CL or I should bump API for each CL?\n\nYou could do both for correctness, but since it isn\u0027t being used just the later one is probably enough.",
+      "parentUuid": "42ba1c74_19803b1b",
+      "revId": "5b63f0f821e94f8072eb483014cfc33b05978bb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
