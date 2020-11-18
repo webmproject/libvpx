@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ceaebf44_db36791f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-18T00:53:32Z",
+      "side": 1,
+      "message": "nothing blocking, just some thoughts for a follow up",
+      "revId": "c22a783bea8512a3413d9dd4abf82622cd89adcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "25d72ac2_9595c1d6",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-18T00:53:32Z",
+      "side": 1,
+      "message": "was this meant to be \u0027so the blocks...\u0027?",
+      "range": {
+        "startLine": 128,
+        "startChar": 59,
+        "endLine": 128,
+        "endChar": 72
+      },
+      "revId": "c22a783bea8512a3413d9dd4abf82622cd89adcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "382eca15_1b2d2765",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-18T00:53:32Z",
+      "side": 1,
+      "message": "this could be a bullet list, maybe clang-format merged the lines because there weren\u0027t any indicators",
+      "range": {
+        "startLine": 134,
+        "startChar": 18,
+        "endLine": 135,
+        "endChar": 70
+      },
+      "revId": "c22a783bea8512a3413d9dd4abf82622cd89adcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4dc5fd99_6b59c32d",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-18T00:53:32Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 140,
+        "startChar": 50,
+        "endLine": 142,
+        "endChar": 34
+      },
+      "revId": "c22a783bea8512a3413d9dd4abf82622cd89adcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d9819bf8_333795aa",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-18T00:53:32Z",
+      "side": 1,
+      "message": "this could be \u0027Mean\u0027 to match the next 3 comments",
+      "range": {
+        "startLine": 169,
+        "startChar": 5,
+        "endLine": 169,
+        "endChar": 12
+      },
+      "revId": "c22a783bea8512a3413d9dd4abf82622cd89adcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f52539e_29b43ffc",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-18T00:53:32Z",
+      "side": 1,
+      "message": "\u0027number\u0027? since this is a continuation of the sentence",
+      "range": {
+        "startLine": 204,
+        "startChar": 5,
+        "endLine": 204,
+        "endChar": 11
+      },
+      "revId": "c22a783bea8512a3413d9dd4abf82622cd89adcd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
