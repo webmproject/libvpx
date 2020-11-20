@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a8c03fc2_957e9118",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-20T03:57:04Z",
+      "side": 1,
+      "message": "one space is probably enough",
+      "range": {
+        "startLine": 24,
+        "startChar": 19,
+        "endLine": 24,
+        "endChar": 20
+      },
+      "revId": "7a3b41351f6f984836409c6f7bc8d5a067dc312a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "50989b43_b1136654",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-20T03:57:04Z",
+      "side": 1,
+      "message": "missing a period",
+      "range": {
+        "startLine": 26,
+        "startChar": 13,
+        "endLine": 26,
+        "endChar": 23
+      },
+      "revId": "7a3b41351f6f984836409c6f7bc8d5a067dc312a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5eb496f8_8a415440",
+        "filename": "vpx/vpx_ext_ratectrl.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-11-20T03:57:04Z",
+      "side": 1,
+      "message": "Nothing is checking this so it will be ineffective. The other ABI values accumulate through the encoder headers. Have a look at the other headers under vpx/.",
+      "revId": "7a3b41351f6f984836409c6f7bc8d5a067dc312a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
