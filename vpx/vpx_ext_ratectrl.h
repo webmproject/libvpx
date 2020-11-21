@@ -139,21 +139,23 @@ typedef struct vpx_rc_frame_stats {
   double pcnt_second_ref;
   /*!
    * Percentage of blocks where intra and inter prediction errors were very
-   * close. Note that this is a 'weighted count', that is, the so blocks may be
-   * weighted by how close the two errors were.
+   * close.
    */
   double pcnt_neutral;
   /*!
    * Percentage of blocks that have intra error < inter error and inter error <
-   * LOW_I_THRESH LOW_I_THRESH = 24000 using bit_depth 8 LOW_I_THRESH = 24000 <<
-   * 4 using bit_depth 10 LOW_I_THRESH = 24000 << 8 using bit_depth 12
+   * LOW_I_THRESH
+   * - bit_depth 8: LOW_I_THRESH = 24000
+   * - bit_depth 10: LOW_I_THRESH = 24000 << 4
+   * - bit_depth 12: LOW_I_THRESH = 24000 << 8
    */
   double pcnt_intra_low;
   /*!
    * Percentage of blocks that have intra error < inter error and intra error <
-   * LOW_I_THRESH but inter error >= LOW_I_THRESH LOW_I_THRESH = 24000 using
-   * bit_depth 8 LOW_I_THRESH = 24000 << 4 using bit_depth 10 LOW_I_THRESH =
-   * 24000 << 8 using bit_depth 12
+   * LOW_I_THRESH but inter error >= LOW_I_THRESH LOW_I_THRESH
+   * - bit_depth 8: LOW_I_THRESH = 24000
+   * - bit_depth 10: LOW_I_THRESH = 24000 << 4
+   * - bit_depth 12: LOW_I_THRESH = 24000 << 8
    */
   double pcnt_intra_high;
   /*!
@@ -166,9 +168,9 @@ typedef struct vpx_rc_frame_stats {
   double intra_skip_pct;
   /*!
    * Percentage of blocks that have intra error < SMOOTH_INTRA_THRESH
-   * SMOOTH_INTRA_THRESH = 4000 using bit_depth 8
-   * SMOOTH_INTRA_THRESH = 4000 << 4 using bit_depth 10
-   * SMOOTH_INTRA_THRESH = 4000 << 8 using bit_depth 12
+   * - bit_depth 8:  SMOOTH_INTRA_THRESH = 4000
+   * - bit_depth 10: SMOOTH_INTRA_THRESH = 4000 << 4
+   * - bit_depth 12: SMOOTH_INTRA_THRESH = 4000 << 8
    */
   double intra_smooth_pct;
   /*!
@@ -180,7 +182,7 @@ typedef struct vpx_rc_frame_stats {
    */
   double inactive_zone_cols;
   /*!
-   * Average of row motion vectors.
+   * Mean of row motion vectors.
    */
   double MVr;
   /*!
@@ -214,8 +216,8 @@ typedef struct vpx_rc_frame_stats {
    */
   double duration;
   /*!
-   * 1.0 if stats are for a single frame, OR
-   * Number of frames in this collection for which the stats are accumulated.
+   * 1.0 if stats are for a single frame, or
+   * number of frames whose stats are accumulated.
    */
   double count;
 } vpx_rc_frame_stats_t;
