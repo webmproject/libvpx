@@ -18,6 +18,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd20e6ba_bc044c00",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-21T01:20:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a51fdf6_9452bfe6",
+      "revId": "b3bcfa26cf69a21b5d5f84f2a31cbbd1cb5f1a64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "58618882_d89b0ebe",
@@ -31,6 +49,24 @@
       "writtenOn": "2020-11-20T19:25:45Z",
       "side": 1,
       "message": "cbr also requires minrate \u003d\u003d maxrate \u003d\u003d bitrate:\nhttps://ffmpeg.org/ffmpeg-codecs.html#libvpx",
+      "revId": "b3bcfa26cf69a21b5d5f84f2a31cbbd1cb5f1a64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e87f88ee_ea0faf8e",
+        "filename": "vp9/simple_encode.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2020-11-21T01:20:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "58618882_d89b0ebe",
       "revId": "b3bcfa26cf69a21b5d5f84f2a31cbbd1cb5f1a64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
