@@ -361,21 +361,32 @@ class SimpleEncode {
   // The following configs in VP9EncoderConfig are allowed to change in this
   // function. See https://ffmpeg.org/ffmpeg-codecs.html#libvpx for each
   // config's meaning.
-  // Configs in VP9EncoderConfig:      Equivalent configs in ffmpeg:
-  // 1  key_freq                       -g
-  // 2  two_pass_vbrmin_section        -minrate * 100LL / bit_rate
-  // 3  two_pass_vbrmax_section        -maxrate * 100LL / bit_rate
-  // 4  under_shoot_pct                -undershoot-pct
-  // 5  over_shoot_pct                 -overshoot-pct
-  // 6  max_threads                    -threads
-  // 7  frame_parallel_decoding_mode   -frame-parallel
-  // 8  tile_column                    -tile-columns
-  // 9  arnr_max_frames                -arnr-maxframes
-  // 10 arnr_strength                  -arnr-strength
-  // 11 lag_in_frames                  -rc_lookahead
-  // 12 encode_breakout                -static-thresh
-  // 13 enable_tpl_model               -enable-tpl
-  // 14 enable_auto_arf                -auto-alt-ref
+  // Configs in VP9EncoderConfig:          Equivalent configs in ffmpeg:
+  // 1  key_freq                           -g
+  // 2  two_pass_vbrmin_section            -minrate * 100LL / bit_rate
+  // 3  two_pass_vbrmax_section            -maxrate * 100LL / bit_rate
+  // 4  under_shoot_pct                    -undershoot-pct
+  // 5  over_shoot_pct                     -overshoot-pct
+  // 6  max_threads                        -threads
+  // 7  frame_parallel_decoding_mode       -frame-parallel
+  // 8  tile_column                        -tile-columns
+  // 9  arnr_max_frames                    -arnr-maxframes
+  // 10 arnr_strength                      -arnr-strength
+  // 11 lag_in_frames                      -rc_lookahead
+  // 12 encode_breakout                    -static-thresh
+  // 13 enable_tpl_model                   -enable-tpl
+  // 14 enable_auto_arf                    -auto-alt-ref
+  // 15 rc_mode
+  //    Possible Settings:
+  //      0 - Variable Bit Rate (VPX_VBR)  -b:v <bit_rate>
+  //      1 - Constant Bit Rate (VPX_CBR)  -b:v <bit_rate> -minrate <bit_rate>
+  //                                        -maxrate <bit_rate>
+  //        two_pass_vbrmin_section == 100   i.e. bit_rate == minrate == maxrate
+  //        two_pass_vbrmax_section == 100
+  //      2 - Constrained Quality (VPX_CQ) -crf <cq_level> -b:v bit_rate
+  //      3 - Constant Quality (VPX_Q)     -crf <cq_level> -b:v 0
+  //    See https://trac.ffmpeg.org/wiki/Encode/VP9 for more details.
+  // 16 cq_level                          see rc_mode for details.
   StatusCode SetEncodeConfig(const char *name, const char *value);
 
   // A debug function that dumps configs from VP9EncoderConfig
