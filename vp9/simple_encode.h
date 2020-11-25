@@ -281,7 +281,7 @@ struct EncodeFrameResult {
   std::vector<MotionVectorInfo> motion_vector_info;
   // A vector of the tpl stats information.
   // The tpl stats measure the complexity of a frame, as well as the
-  // informatioin propagated along the motion trajactory between frames, in
+  // information propagated along the motion trajectory between frames, in
   // the reference frame structure.
   // The tpl stats could be used as a more accurate spatial and temporal
   // complexity measure in addition to the first pass stats.
