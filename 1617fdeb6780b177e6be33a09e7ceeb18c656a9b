@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f1feb8e8_e83fa07d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2020-12-12T00:33:44Z",
+      "side": 0,
+      "message": "as long as this is validated somewhere it should be ok. in LAYER_CONTEXT this is an int so I think the warning was due to the use of || instead of \u0026\u0026",
+      "revId": "1617fdeb6780b177e6be33a09e7ceeb18c656a9b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
