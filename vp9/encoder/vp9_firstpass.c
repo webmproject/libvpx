@@ -1081,8 +1081,8 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
     x->mv_limits.col_max =
         ((cm->mb_cols - 1 - mb_col) * 16) + BORDER_MV_PIXELS_B16;
 
-    // Other than for the first frame do a motion search.
-    if (cm->current_video_frame > 0) {
+    // Other than for intra-only frame do a motion search.
+    if (!frame_is_intra_only(cm)) {
       int tmp_err, motion_error, this_motion_error, raw_motion_error;
       // Assume 0,0 motion with no mv overhead.
       MV mv = { 0, 0 }, tmp_mv = { 0, 0 };
