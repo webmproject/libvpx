@@ -134,8 +134,8 @@ void vp9_extrc_update_encodeframe_result(EXT_RATECTRL *ext_ratectrl,
     vpx_rc_encodeframe_result_t encode_frame_result;
     encode_frame_result.bit_count = bit_count;
     encode_frame_result.pixel_count =
-        source_frame->y_width * source_frame->y_height +
-        2 * source_frame->uv_width * source_frame->uv_height;
+        source_frame->y_crop_width * source_frame->y_crop_height +
+        2 * source_frame->uv_crop_width * source_frame->uv_crop_height;
 #if CONFIG_VP9_HIGHBITDEPTH
     vpx_calc_highbd_psnr(source_frame, coded_frame, &psnr, bit_depth,
                          input_bit_depth);
