@@ -4508,9 +4508,11 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       FRAME_UPDATE_TYPE update_type = gf_group->update_type[gf_group->index];
       const int ref_frame_flags = get_ref_frame_flags(cpi);
       RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES];
+      const RefCntBuffer *curr_frame_buf =
+          get_ref_cnt_buffer(cm, cm->new_fb_idx);
       get_ref_frame_bufs(cpi, ref_frame_bufs);
       vp9_extrc_get_encodeframe_decision(
-          &cpi->ext_ratectrl, cm->current_video_frame,
+          &cpi->ext_ratectrl, curr_frame_buf->frame_index,
           cm->current_frame_coding_index, gf_group->index, update_type,
           ref_frame_bufs, ref_frame_flags, &encode_frame_decision);
       q = encode_frame_decision.q_index;

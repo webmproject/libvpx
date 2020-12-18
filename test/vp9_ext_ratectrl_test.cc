@@ -73,6 +73,7 @@ vpx_rc_status_t rc_get_encodeframe_decision(
   EXPECT_EQ(encode_frame_info->coding_index, toy_rate_ctrl->coding_index);
 
   if (encode_frame_info->coding_index == 0) {
+    EXPECT_EQ(encode_frame_info->show_index, 0);
     EXPECT_EQ(encode_frame_info->gop_index, 0);
     EXPECT_EQ(encode_frame_info->frame_type, 0 /*kFrameTypeKey*/);
     EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
@@ -84,6 +85,7 @@ vpx_rc_status_t rc_get_encodeframe_decision(
   }
 
   if (encode_frame_info->coding_index == 1) {
+    EXPECT_EQ(encode_frame_info->show_index, 4);
     EXPECT_EQ(encode_frame_info->gop_index, 1);
     EXPECT_EQ(encode_frame_info->frame_type, 2 /*kFrameTypeAltRef*/);
     EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
@@ -104,6 +106,7 @@ vpx_rc_status_t rc_get_encodeframe_decision(
   }
 
   if (encode_frame_info->coding_index == 5) {
+    EXPECT_EQ(encode_frame_info->show_index, 4);
     EXPECT_EQ(encode_frame_info->gop_index, 0);
     EXPECT_EQ(encode_frame_info->frame_type, 3 /*kFrameTypeOverlay*/);
     EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
