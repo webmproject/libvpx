@@ -1744,6 +1744,7 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
   if (oxcf->pass == 2) {
     const FRAME_INFO *frame_info = &cpi->frame_info;
     vpx_rc_config_t ratectrl_config;
+    vpx_codec_err_t codec_status;
 
     ratectrl_config.frame_width = frame_info->frame_width;
     ratectrl_config.frame_height = frame_info->frame_height;
@@ -1755,7 +1756,10 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
     ratectrl_config.frame_rate_num = oxcf->g_timebase.den;
     ratectrl_config.frame_rate_den = oxcf->g_timebase.num;
 
-    vp9_extrc_create(funcs, ratectrl_config, ext_ratectrl);
+    codec_status = vp9_extrc_create(funcs, ratectrl_config, ext_ratectrl);
+    if (codec_status != VPX_CODEC_OK) {
+      return codec_status;
+    }
   }
   return VPX_CODEC_OK;
 }

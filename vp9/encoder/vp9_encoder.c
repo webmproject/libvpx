@@ -2464,7 +2464,12 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
 
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
 
-  vp9_extrc_init(&cpi->ext_ratectrl);
+  {
+    vpx_codec_err_t codec_status = vp9_extrc_init(&cpi->ext_ratectrl);
+    if (codec_status != VPX_CODEC_OK) {
+      vpx_internal_error(&cm->error, codec_status, "vp9_extrc_init() failed");
+    }
+  }
 
 #if !CONFIG_REALTIME_ONLY
   if (oxcf->pass == 1) {
@@ -4503,6 +4508,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
     }
 #endif
     if (cpi->ext_ratectrl.ready) {
+      vpx_codec_err_t codec_status;
       const GF_GROUP *gf_group = &cpi->twopass.gf_group;
       vpx_rc_encodeframe_decision_t encode_frame_decision;
       FRAME_UPDATE_TYPE update_type = gf_group->update_type[gf_group->index];
@@ -4511,10 +4517,14 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       const RefCntBuffer *curr_frame_buf =
           get_ref_cnt_buffer(cm, cm->new_fb_idx);
       get_ref_frame_bufs(cpi, ref_frame_bufs);
-      vp9_extrc_get_encodeframe_decision(
+      codec_status = vp9_extrc_get_encodeframe_decision(
           &cpi->ext_ratectrl, curr_frame_buf->frame_index,
           cm->current_frame_coding_index, gf_group->index, update_type,
           ref_frame_bufs, ref_frame_flags, &encode_frame_decision);
+      if (codec_status != VPX_CODEC_OK) {
+        vpx_internal_error(&cm->error, codec_status,
+                           "vp9_extrc_get_encodeframe_decision() failed");
+      }
       q = encode_frame_decision.q_index;
     }
 
@@ -5489,9 +5499,13 @@ static void encode_frame_to_data_rate(
   {
     const RefCntBuffer *coded_frame_buf =
         get_ref_cnt_buffer(cm, cm->new_fb_idx);
-    vp9_extrc_update_encodeframe_result(
+    vpx_codec_err_t codec_status = vp9_extrc_update_encodeframe_result(
         &cpi->ext_ratectrl, (*size) << 3, cpi->Source, &coded_frame_buf->buf,
         cm->bit_depth, cpi->oxcf.input_bit_depth);
+    if (codec_status != VPX_CODEC_OK) {
+      vpx_internal_error(&cm->error, codec_status,
+                         "vp9_extrc_update_encodeframe_result() failed");
+    }
   }
 #if CONFIG_REALTIME_ONLY
   (void)encode_frame_result;
@@ -5682,8 +5696,13 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
 
   if (cpi->common.current_frame_coding_index == 0) {
-    vp9_extrc_send_firstpass_stats(&cpi->ext_ratectrl,
-                                   &cpi->twopass.first_pass_info);
+    VP9_COMMON *cm = &cpi->common;
+    const vpx_codec_err_t codec_status = vp9_extrc_send_firstpass_stats(
+        &cpi->ext_ratectrl, &cpi->twopass.first_pass_info);
+    if (codec_status != VPX_CODEC_OK) {
+      vpx_internal_error(&cm->error, codec_status,
+                         "vp9_extrc_send_firstpass_stats() failed");
+    }
   }
 #if CONFIG_MISMATCH_DEBUG
   mismatch_move_frame_idx_w();
