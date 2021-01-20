@@ -164,14 +164,17 @@ vpx_codec_err_t vp9_extrc_get_encodeframe_decision(
   return VPX_CODEC_OK;
 }
 
-void vp9_extrc_update_encodeframe_result(EXT_RATECTRL *ext_ratectrl,
-                                         int64_t bit_count,
-                                         const YV12_BUFFER_CONFIG *source_frame,
-                                         const YV12_BUFFER_CONFIG *coded_frame,
-                                         uint32_t bit_depth,
-                                         uint32_t input_bit_depth) {
+vpx_codec_err_t vp9_extrc_update_encodeframe_result(
+    EXT_RATECTRL *ext_ratectrl, int64_t bit_count,
+    const YV12_BUFFER_CONFIG *source_frame,
+    const YV12_BUFFER_CONFIG *coded_frame, uint32_t bit_depth,
+    uint32_t input_bit_depth) {
+  if (ext_ratectrl == NULL) {
+    return VPX_CODEC_ERROR;
+  }
   if (ext_ratectrl->ready) {
     PSNR_STATS psnr;
+    vpx_rc_status_t rc_status;
     vpx_rc_encodeframe_result_t encode_frame_result;
     encode_frame_result.bit_count = bit_count;
     encode_frame_result.pixel_count =
@@ -186,7 +189,11 @@ void vp9_extrc_update_encodeframe_result(EXT_RATECTRL *ext_ratectrl,
     vpx_calc_psnr(source_frame, coded_frame, &psnr);
 #endif
     encode_frame_result.sse = psnr.sse[0];
-    ext_ratectrl->funcs.update_encodeframe_result(ext_ratectrl->model,
-                                                  &encode_frame_result);
+    rc_status = ext_ratectrl->funcs.update_encodeframe_result(
+        ext_ratectrl->model, &encode_frame_result);
+    if (rc_status == VPX_RC_ERROR) {
+      return VPX_CODEC_ERROR;
+    }
   }
+  return VPX_CODEC_OK;
 }
