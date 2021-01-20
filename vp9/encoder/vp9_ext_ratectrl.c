@@ -15,7 +15,7 @@
 
 vpx_codec_err_t vp9_extrc_init(EXT_RATECTRL *ext_ratectrl) {
   if (ext_ratectrl == NULL) {
-    return VPX_CODEC_ERROR;
+    return VPX_CODEC_INVALID_PARAM;
   }
   vp9_zero(*ext_ratectrl);
   return VPX_CODEC_OK;
@@ -27,7 +27,7 @@ vpx_codec_err_t vp9_extrc_create(vpx_rc_funcs_t funcs,
   vpx_rc_status_t rc_status;
   vpx_rc_firstpass_stats_t *rc_firstpass_stats;
   if (ext_ratectrl == NULL) {
-    return VPX_CODEC_ERROR;
+    return VPX_CODEC_INVALID_PARAM;
   }
   vp9_extrc_delete(ext_ratectrl);
   ext_ratectrl->funcs = funcs;
@@ -52,7 +52,7 @@ vpx_codec_err_t vp9_extrc_create(vpx_rc_funcs_t funcs,
 
 vpx_codec_err_t vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl) {
   if (ext_ratectrl == NULL) {
-    return VPX_CODEC_ERROR;
+    return VPX_CODEC_INVALID_PARAM;
   }
   if (ext_ratectrl->ready) {
     vpx_rc_status_t rc_status =
@@ -97,7 +97,7 @@ static void gen_rc_firstpass_stats(const FIRSTPASS_STATS *stats,
 vpx_codec_err_t vp9_extrc_send_firstpass_stats(
     EXT_RATECTRL *ext_ratectrl, const FIRST_PASS_INFO *first_pass_info) {
   if (ext_ratectrl == NULL) {
-    return VPX_CODEC_ERROR;
+    return VPX_CODEC_INVALID_PARAM;
   }
   if (ext_ratectrl->ready) {
     vpx_rc_status_t rc_status;
@@ -141,7 +141,7 @@ vpx_codec_err_t vp9_extrc_get_encodeframe_decision(
     RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES], int ref_frame_flags,
     vpx_rc_encodeframe_decision_t *encode_frame_decision) {
   if (ext_ratectrl == NULL) {
-    return VPX_CODEC_ERROR;
+    return VPX_CODEC_INVALID_PARAM;
   }
   if (ext_ratectrl->ready) {
     vpx_rc_status_t rc_status;
@@ -170,7 +170,7 @@ vpx_codec_err_t vp9_extrc_update_encodeframe_result(
     const YV12_BUFFER_CONFIG *coded_frame, uint32_t bit_depth,
     uint32_t input_bit_depth) {
   if (ext_ratectrl == NULL) {
-    return VPX_CODEC_ERROR;
+    return VPX_CODEC_INVALID_PARAM;
   }
   if (ext_ratectrl->ready) {
     PSNR_STATS psnr;
