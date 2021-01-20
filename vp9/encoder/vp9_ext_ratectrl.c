@@ -13,31 +13,56 @@
 #include "vp9/common/vp9_common.h"
 #include "vpx_dsp/psnr.h"
 
-void vp9_extrc_init(EXT_RATECTRL *ext_ratectrl) { vp9_zero(*ext_ratectrl); }
+vpx_codec_err_t vp9_extrc_init(EXT_RATECTRL *ext_ratectrl) {
+  if (ext_ratectrl == NULL) {
+    return VPX_CODEC_ERROR;
+  }
+  vp9_zero(*ext_ratectrl);
+  return VPX_CODEC_OK;
+}
 
-void vp9_extrc_create(vpx_rc_funcs_t funcs, vpx_rc_config_t ratectrl_config,
-                      EXT_RATECTRL *ext_ratectrl) {
+vpx_codec_err_t vp9_extrc_create(vpx_rc_funcs_t funcs,
+                                 vpx_rc_config_t ratectrl_config,
+                                 EXT_RATECTRL *ext_ratectrl) {
+  vpx_rc_status_t rc_status;
   vpx_rc_firstpass_stats_t *rc_firstpass_stats;
+  if (ext_ratectrl == NULL) {
+    return VPX_CODEC_ERROR;
+  }
   vp9_extrc_delete(ext_ratectrl);
   ext_ratectrl->funcs = funcs;
   ext_ratectrl->ratectrl_config = ratectrl_config;
-  ext_ratectrl->funcs.create_model(ext_ratectrl->funcs.priv,
-                                   &ext_ratectrl->ratectrl_config,
-                                   &ext_ratectrl->model);
+  rc_status = ext_ratectrl->funcs.create_model(ext_ratectrl->funcs.priv,
+                                               &ext_ratectrl->ratectrl_config,
+                                               &ext_ratectrl->model);
+  if (rc_status == VPX_RC_ERROR) {
+    return VPX_CODEC_ERROR;
+  }
   rc_firstpass_stats = &ext_ratectrl->rc_firstpass_stats;
   rc_firstpass_stats->num_frames = ratectrl_config.show_frame_count;
   rc_firstpass_stats->frame_stats =
       vpx_malloc(sizeof(*rc_firstpass_stats->frame_stats) *
                  rc_firstpass_stats->num_frames);
+  if (rc_firstpass_stats->frame_stats == NULL) {
+    return VPX_CODEC_MEM_ERROR;
+  }
   ext_ratectrl->ready = 1;
+  return VPX_CODEC_OK;
 }
 
-void vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl) {
+vpx_codec_err_t vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl) {
+  if (ext_ratectrl == NULL) {
+    return VPX_CODEC_ERROR;
+  }
   if (ext_ratectrl->ready) {
-    ext_ratectrl->funcs.delete_model(ext_ratectrl->model);
+    vpx_rc_status_t rc_status =
+        ext_ratectrl->funcs.delete_model(ext_ratectrl->model);
+    if (rc_status == VPX_RC_ERROR) {
+      return VPX_CODEC_ERROR;
+    }
     vpx_free(ext_ratectrl->rc_firstpass_stats.frame_stats);
   }
-  vp9_extrc_init(ext_ratectrl);
+  return vp9_extrc_init(ext_ratectrl);
 }
 
 static void gen_rc_firstpass_stats(const FIRSTPASS_STATS *stats,

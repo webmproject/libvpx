@@ -22,12 +22,13 @@ typedef struct EXT_RATECTRL {
   vpx_rc_firstpass_stats_t rc_firstpass_stats;
 } EXT_RATECTRL;
 
-void vp9_extrc_init(EXT_RATECTRL *ext_ratectrl);
+vpx_codec_err_t vp9_extrc_init(EXT_RATECTRL *ext_ratectrl);
 
-void vp9_extrc_create(vpx_rc_funcs_t funcs, vpx_rc_config_t ratectrl_config,
-                      EXT_RATECTRL *ext_ratectrl);
+vpx_codec_err_t vp9_extrc_create(vpx_rc_funcs_t funcs,
+                                 vpx_rc_config_t ratectrl_config,
+                                 EXT_RATECTRL *ext_ratectrl);
 
-void vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl);
+vpx_codec_err_t vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl);
 
 void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
                                     const FIRST_PASS_INFO *first_pass_info);
