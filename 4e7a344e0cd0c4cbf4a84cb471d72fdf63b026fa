@@ -18,6 +18,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3127e2ae_bf63c53a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-01-20T02:54:55Z",
+      "side": 1,
+      "message": "Okay, I will add a follow up CL to do so.",
+      "parentUuid": "652da350_ed1f7b7a",
+      "revId": "4e7a344e0cd0c4cbf4a84cb471d72fdf63b026fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "af652ceb_863658b0",
@@ -35,6 +53,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "55db385b_4d965de1",
+        "filename": "vp9/encoder/vp9_ext_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-01-20T02:54:55Z",
+      "side": 1,
+      "message": "I will submit a follow up CL to change this.",
+      "parentUuid": "af652ceb_863658b0",
+      "revId": "4e7a344e0cd0c4cbf4a84cb471d72fdf63b026fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "370275f9_348fcfbb",
@@ -48,6 +84,24 @@
       "writtenOn": "2021-01-20T01:52:05Z",
       "side": 1,
       "message": "VPX_CODEC_MEM_ERROR?",
+      "revId": "4e7a344e0cd0c4cbf4a84cb471d72fdf63b026fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6bacaea0_3c75e9bd",
+        "filename": "vp9/encoder/vp9_ext_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-01-20T02:54:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "370275f9_348fcfbb",
       "revId": "4e7a344e0cd0c4cbf4a84cb471d72fdf63b026fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
