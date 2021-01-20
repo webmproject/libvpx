@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5117f460_16fed719",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2849,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-01-20T19:45:48Z",
+      "side": 1,
+      "message": "throwing an error here (if setjmp were set) will leak the rest of the data. I wonder if it\u0027s necessary that this function returns an error (or calls init). the hook for vpx_internal_error is likely not set on the destroy.",
+      "revId": "4907c00a8ed3a5c1fbbbbbf18ae01503fa7c2a47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
