@@ -30,8 +30,8 @@ vpx_codec_err_t vp9_extrc_create(vpx_rc_funcs_t funcs,
 
 vpx_codec_err_t vp9_extrc_delete(EXT_RATECTRL *ext_ratectrl);
 
-void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
-                                    const FIRST_PASS_INFO *first_pass_info);
+vpx_codec_err_t vp9_extrc_send_firstpass_stats(
+    EXT_RATECTRL *ext_ratectrl, const FIRST_PASS_INFO *first_pass_info);
 
 void vp9_extrc_get_encodeframe_decision(
     EXT_RATECTRL *ext_ratectrl, int show_index, int coding_index, int gop_index,

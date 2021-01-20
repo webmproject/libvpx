@@ -94,9 +94,13 @@ static void gen_rc_firstpass_stats(const FIRSTPASS_STATS *stats,
   rc_frame_stats->count = stats->count;
 }
 
-void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
-                                    const FIRST_PASS_INFO *first_pass_info) {
+vpx_codec_err_t vp9_extrc_send_firstpass_stats(
+    EXT_RATECTRL *ext_ratectrl, const FIRST_PASS_INFO *first_pass_info) {
+  if (ext_ratectrl == NULL) {
+    return VPX_CODEC_ERROR;
+  }
   if (ext_ratectrl->ready) {
+    vpx_rc_status_t rc_status;
     vpx_rc_firstpass_stats_t *rc_firstpass_stats =
         &ext_ratectrl->rc_firstpass_stats;
     int i;
@@ -105,9 +109,13 @@ void vp9_extrc_send_firstpass_stats(EXT_RATECTRL *ext_ratectrl,
       gen_rc_firstpass_stats(&first_pass_info->stats[i],
                              &rc_firstpass_stats->frame_stats[i]);
     }
-    ext_ratectrl->funcs.send_firstpass_stats(ext_ratectrl->model,
-                                             rc_firstpass_stats);
+    rc_status = ext_ratectrl->funcs.send_firstpass_stats(ext_ratectrl->model,
+                                                         rc_firstpass_stats);
+    if (rc_status == VPX_RC_ERROR) {
+      return VPX_CODEC_ERROR;
+    }
   }
+  return VPX_CODEC_OK;
 }
 
 static int extrc_get_frame_type(FRAME_UPDATE_TYPE update_type) {
