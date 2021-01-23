@@ -7882,9 +7882,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   cm->new_fb_idx = get_free_fb(cm);
 
   if (cm->new_fb_idx == INVALID_IDX) return -1;
-
   cm->cur_frame = &pool->frame_bufs[cm->new_fb_idx];
-
+  // If the frame buffer for current frame is the same as previous frame, MV in
+  // the base layer shouldn't be used as it'll cause data race.
+  if (cm->cur_frame == cm->prev_frame) {
+    cpi->svc.use_base_mv = 0;
+  }
   // Start with a 0 size frame.
   *size = 0;
 
