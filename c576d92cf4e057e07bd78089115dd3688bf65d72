@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3373ce4f_660f39f4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1486190
+      },
+      "writtenOn": "2021-01-26T08:36:45Z",
+      "side": 1,
+      "message": "It is a reply to WebM Builds reviewer...",
+      "revId": "c576d92cf4e057e07bd78089115dd3688bf65d72",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
