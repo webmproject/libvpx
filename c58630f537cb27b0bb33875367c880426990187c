@@ -16,6 +16,24 @@
       "message": "turn off use_base_mv for non-base spatial layers",
       "revId": "c58630f537cb27b0bb33875367c880426990187c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5e3ca5ca_683fc9bf",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-01-27T18:12:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ee599c5_4b0a45cd",
+      "revId": "c58630f537cb27b0bb33875367c880426990187c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
