@@ -342,7 +342,7 @@ VP9_INSTANTIATE_TEST_SUITE(EndToEndTestLarge,
 VP9_INSTANTIATE_TEST_SUITE(EndToEndNV12,
                            ::testing::Values(::libvpx_test::kRealTime),
                            ::testing::ValuesIn(kTestVectorsNv12),
-                           ::testing::ValuesIn({ 6, 7, 8 }));
+                           ::testing::Values(6, 7, 8));
 
 VP9_INSTANTIATE_TEST_SUITE(EndToEndTestAdaptiveRDThresh,
                            ::testing::Values(5, 6, 7), ::testing::Values(8, 9));
