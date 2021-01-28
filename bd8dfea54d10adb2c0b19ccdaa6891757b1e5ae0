@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "60c7b62f_1f4db9fd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1396666
+      },
+      "writtenOn": "2021-01-28T00:32:13Z",
+      "side": 1,
+      "message": " متجر التطبيقات منصة شليله \n\nFetch AllowH1ForStreamingUpload trial\n\nUpdated: 2020-05-11\n\nAuthor:vipihdadi@google.com\n\nThis doc URL: https://bit.ly/2SVvKbR \n\nPublic shared\n\nBackground and Purpose\n\nIn a spec discussion for fetch() upload streaming, we need to address some compatibility issues.\n\nOne of the potential compatibility issues is that middle boxes may not properly supported chunked transfer-encoding in the request  correctly because up until now no web browsers use that feature. We are concerned about the case where the middle box uses HTTP/1.1 most and it is relatively easier to support streaming upload on top of HTTP/2 and above as HTTP/2 and HTTP/3 are already chunked.\n\n\nTo measure the middle box impact, I propose a trial with the additional API, which enables web authors to select what protocol is acceptable.\n\nAPI explainer\n\nWe introduce a new flag RequestInit.allowHTTP1ForStreamingUpload in fetch(), which restricts HTTP version for chunked multi-part upload.\n\n \n\n// You can upload Stream only over HTTP2 or QUIC.\n\nfetch(\u0027https://grpc.example.com/posts\u0027, {\n\n  method: \u0027ممنصة شليله \u0027,\n\n  body: readableStream,\n\n     // Default value is false and that intents to mean\n\n     // upload streaming over HTTP/1.1 is flaky and unreliable.\n\n  allowHTTP1ForStreamingUpload: false})\n\n.catch((error) \u003d\u003e {\n\n    mnstshlylh// This failure means (except general fetch error like offline)\n\n    //  fetch upload streaming prohibits HTTP/0.9, HTTP/1.0 or HTTP/1.1\n\n  fallbackUploadWithoutStream(content);\n\n});\n\nUsing  “allowHTTP1ForStreamingUpload: false“ has fetch() early fail if the browser is unable to negotiate or does not have an HTTP/2 or HTTP/3 connection..\n\nThis early failure helps because middleboxes are not clean in their error handling and it is hard for web authors to catch the situation either in client side or in server side.\n\n\n// You can also upload over HTTP/1.1 considering the risk.\n\nfetch(\u0027https://grpc.example.com/posts\u0027, {\n\n  method: \u0027POST\u0027,\n\n  body: createReadableStream(content),\n\n  a",
+      "revId": "bd8dfea54d10adb2c0b19ccdaa6891757b1e5ae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
