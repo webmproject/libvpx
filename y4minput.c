@@ -100,11 +100,50 @@ static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
   return 0;
 }
 
+// Copy a single tag into the buffer, along with a null character.
+// Returns 0 if any file IO errors occur.
+static int copy_tag(char *buf, size_t buf_len, char *end_tag, FILE *file) {
+  size_t i;
+  assert(buf_len >= 1);
+  // Skip leading space characters.
+  do {
+    if (!file_read(buf, 1, file)) {
+      return 0;
+    }
+  } while (buf[0] == ' ');
+
+  // If we hit the newline, treat this as the "empty" tag.
+  if (buf[0] == '\n') {
+    buf[0] = '\0';
+    *end_tag = '\n';
+    return 1;
+  }
+
+  // Copy over characters until a space is hit, or the buffer is exhausted.
+  for (i = 1; i < buf_len; ++i) {
+    if (!file_read(buf + i, 1, file)) {
+      return 0;
+    }
+    if (buf[i] == ' ' || buf[i] == '\n') {
+      break;
+    }
+  }
+  if (i == buf_len) {
+    fprintf(stderr, "Error: Y4M header tags must be less than %lu characters\n",
+            (unsigned long)i);
+    return 0;
+  }
+  *end_tag = buf[i];
+  buf[i] = '\0';
+  return 1;
+}
+
 /* Returns 1 if tags were parsed successfully, 0 otherwise. */
-static int parse_tags(y4m_input *y4m_ctx, char *buffer) {
+static int parse_tags(y4m_input *y4m_ctx, FILE *file) {
+  char tag[256];
+  char end; /* Character denoting the end of the tag, ' ' or '\n'. */
   /* Set Y4M tags to defaults, updating them as processing occurs. Mandatory
      fields are marked with -1 and will be checked after the tags are parsed. */
-  int ret;
   y4m_ctx->pic_w = -1;
   y4m_ctx->pic_h = -1;
   y4m_ctx->fps_n = -1; /* Also serves as marker for fps_d */
@@ -113,10 +152,16 @@ static int parse_tags(y4m_input *y4m_ctx, char *buffer) {
   y4m_ctx->interlace = '?';
   snprintf(y4m_ctx->chroma_type, sizeof(y4m_ctx->chroma_type), "420");
 
-  ret = y4m_parse_tags(y4m_ctx, buffer);
-  if (ret < 0) {
-    return 0;
-  }
+  /* Find one tag at a time. */
+  do {
+    if (!copy_tag(tag, sizeof(tag), &end, file)) {
+      return 0;
+    }
+    /* y4m_parse_tags returns 0 on success. */
+    if (y4m_parse_tags(y4m_ctx, tag)) {
+      return 0;
+    }
+  } while (end != '\n');
 
   /* Check the mandatory fields. */
   if (y4m_ctx->pic_w == -1) {
@@ -801,15 +846,11 @@ static void y4m_convert_null(y4m_input *_y4m, unsigned char *_dst,
 }
 
 static const char TAG[] = "YUV4MPEG2";
-/* Temporary until arbitrary header parsing submitted. */
-#define Y4M_HEADER_BUF_SIZE 200
 
 int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
                    int num_skip, int only_420) {
   // File must start with |TAG|.
-  char tag_buffer[9];                        // 9 == strlen(TAG)
-  char buffer[Y4M_HEADER_BUF_SIZE] = { 0 };  // Rest of header.
-  int i;
+  char tag_buffer[9];  // 9 == strlen(TAG)
   // Read as much as possible from |skip_buffer|, which were characters
   // that were previously read from the file to do input-type detection.
   assert(num_skip >= 0 && num_skip <= 8);
@@ -825,23 +866,12 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
     return -1;
   }
   // Next character must be a space.
-  if (!file_read(buffer, 1, file) || buffer[0] != ' ') {
+  if (!file_read(tag_buffer, 1, file) || tag_buffer[0] != ' ') {
     fprintf(stderr, "Error parsing header: space must follow %s\n", TAG);
     return -1;
   }
-  /*Read until newline, or Y4M_HEADER_BUF_SIZE cols, whichever happens first.*/
-  for (i = 0; i < Y4M_HEADER_BUF_SIZE - 1; i++) {
-    if (!file_read(buffer + i, 1, file)) return -1;
-    if (buffer[i] == '\n') break;
-  }
-  if (i == Y4M_HEADER_BUF_SIZE - 1) {
-    fprintf(stderr, "Error parsing header; not a %s file?\n", TAG);
-    return -1;
-  }
-  buffer[i] = '\0';
-  if (!parse_tags(y4m_ctx, buffer)) {
+  if (!parse_tags(y4m_ctx, file)) {
     fprintf(stderr, "Error parsing %s header.\n", TAG);
-    return -1;
   }
   if (y4m_ctx->interlace == '?') {
     fprintf(stderr,
