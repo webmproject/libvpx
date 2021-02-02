@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "29435e83_24864147",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-02-02T23:38:19Z",
+      "side": 1,
+      "message": "Hi James,\n\nGerrit has reported one static analysis failure for this patch.\nBut I think it\u0027s related to this patch. Do you know why?\n\nThanks.",
+      "revId": "b67cd60087ad07e69fdbf5a6ad807825ab8884c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
