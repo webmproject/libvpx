@@ -4402,6 +4402,17 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
   int qrange_adj = 1;
 #endif
 
+  // A flag which indicates whether we are recoding the current frame
+  // when the current frame size is larger than the max frame size in the
+  // external rate control model.
+  // This flag doesn't have any impact when external rate control is not used.
+  int ext_rc_recode = 0;
+  // Maximal frame size allowed by the external rate control.
+  // case: 0, we ignore the max frame size limit, and encode with the qindex
+  // passed in by the external rate control model.
+  // case: -1, we take VP9's decision for the max frame size.
+  int ext_rc_max_frame_size = 0;
+
 #if CONFIG_RATE_CTRL
   const FRAME_UPDATE_TYPE update_type =
       cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index];
@@ -4507,7 +4518,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       q = cpi->encode_command.external_quantize_index;
     }
 #endif
-    if (cpi->ext_ratectrl.ready) {
+    if (cpi->ext_ratectrl.ready && !ext_rc_recode) {
       vpx_codec_err_t codec_status;
       const GF_GROUP *gf_group = &cpi->twopass.gf_group;
       vpx_rc_encodeframe_decision_t encode_frame_decision;
@@ -4526,6 +4537,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
                            "vp9_extrc_get_encodeframe_decision() failed");
       }
       q = encode_frame_decision.q_index;
+      ext_rc_max_frame_size = encode_frame_decision.max_frame_size;
     }
 
     vp9_set_quantizer(cpi, q);
@@ -4567,7 +4579,24 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
     }
 
     if (cpi->ext_ratectrl.ready) {
-      break;
+      // In general, for the external rate control, we take the qindex provided
+      // as input and encode the frame with this qindex faithfully. However,
+      // in some extreme scenarios, the provided qindex leads to a massive
+      // overshoot of frame size. In this case, we fall back to VP9's decision
+      // to pick a new qindex and recode the frame. We return the new qindex
+      // through the API to the external model.
+      if (ext_rc_max_frame_size == 0) {
+        break;
+      } else if (ext_rc_max_frame_size == -1) {
+        if (rc->projected_frame_size < rc->max_frame_bandwidth) {
+          break;
+        }
+      } else {
+        if (rc->projected_frame_size < ext_rc_max_frame_size) {
+          break;
+        }
+      }
+      ext_rc_recode = 1;
     }
 #if CONFIG_RATE_CTRL
     // This part needs to be after save_coding_context() because
@@ -5501,7 +5530,7 @@ static void encode_frame_to_data_rate(
         get_ref_cnt_buffer(cm, cm->new_fb_idx);
     vpx_codec_err_t codec_status = vp9_extrc_update_encodeframe_result(
         &cpi->ext_ratectrl, (*size) << 3, cpi->Source, &coded_frame_buf->buf,
-        cm->bit_depth, cpi->oxcf.input_bit_depth);
+        cm->bit_depth, cpi->oxcf.input_bit_depth, cm->base_qindex);
     if (codec_status != VPX_CODEC_OK) {
       vpx_internal_error(&cm->error, codec_status,
                          "vp9_extrc_update_encodeframe_result() failed");
