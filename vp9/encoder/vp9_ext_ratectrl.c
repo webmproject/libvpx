@@ -168,7 +168,7 @@ vpx_codec_err_t vp9_extrc_update_encodeframe_result(
     EXT_RATECTRL *ext_ratectrl, int64_t bit_count,
     const YV12_BUFFER_CONFIG *source_frame,
     const YV12_BUFFER_CONFIG *coded_frame, uint32_t bit_depth,
-    uint32_t input_bit_depth) {
+    uint32_t input_bit_depth, const int actual_encoding_qindex) {
   if (ext_ratectrl == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
@@ -180,6 +180,7 @@ vpx_codec_err_t vp9_extrc_update_encodeframe_result(
     encode_frame_result.pixel_count =
         source_frame->y_crop_width * source_frame->y_crop_height +
         2 * source_frame->uv_crop_width * source_frame->uv_crop_height;
+    encode_frame_result.actual_encoding_qindex = actual_encoding_qindex;
 #if CONFIG_VP9_HIGHBITDEPTH
     vpx_calc_highbd_psnr(source_frame, coded_frame, &psnr, bit_depth,
                          input_bit_depth);

@@ -43,6 +43,6 @@ vpx_codec_err_t vp9_extrc_update_encodeframe_result(
     EXT_RATECTRL *ext_ratectrl, int64_t bit_count,
     const YV12_BUFFER_CONFIG *source_frame,
     const YV12_BUFFER_CONFIG *coded_frame, uint32_t bit_depth,
-    uint32_t input_bit_depth);
+    uint32_t input_bit_depth, int actual_encoding_qindex);
 
 #endif  // VPX_VP9_ENCODER_VP9_EXT_RATECTRL_H_
