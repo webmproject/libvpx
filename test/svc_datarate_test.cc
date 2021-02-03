@@ -84,6 +84,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
       prev_frame_width[i] = 320;
       prev_frame_height[i] = 240;
     }
+    ksvc_flex_noupd_tlenh_ = false;
   }
   virtual void BeginPassHook(unsigned int /*pass*/) {}
 
@@ -91,9 +92,10 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
   // bypass/flexible mode. The pattern corresponds to the pattern
   // VP9E_TEMPORAL_LAYERING_MODE_0101 (temporal_layering_mode == 2) used in
   // non-flexible mode, except that we disable inter-layer prediction.
-  void set_frame_flags_bypass_mode(
-      int tl, int num_spatial_layers, int is_key_frame,
-      vpx_svc_ref_frame_config_t *ref_frame_config) {
+  void set_frame_flags_bypass_mode(int tl, int num_spatial_layers,
+                                   int is_key_frame,
+                                   vpx_svc_ref_frame_config_t *ref_frame_config,
+                                   int noupdate_tlenh) {
     for (int sl = 0; sl < num_spatial_layers; ++sl)
       ref_frame_config->update_buffer_slot[sl] = 0;
 
@@ -154,6 +156,9 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
           ref_frame_config->update_buffer_slot[sl] |=
               1 << ref_frame_config->alt_fb_idx[sl];
         }
+        // Force no update on all spatial layers for temporal enhancement layer
+        // frames.
+        if (noupdate_tlenh) ref_frame_config->update_buffer_slot[sl] = 0;
       }
     }
   }
@@ -244,6 +249,22 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
       }
     }
 
+    if (ksvc_flex_noupd_tlenh_) {
+      vpx_svc_layer_id_t layer_id;
+      layer_id.spatial_layer_id = 0;
+      layer_id.temporal_layer_id = (video->frame() % 2 != 0);
+      temporal_layer_id_ = layer_id.temporal_layer_id;
+      for (int i = 0; i < number_spatial_layers_; i++) {
+        layer_id.temporal_layer_id_per_spatial[i] = temporal_layer_id_;
+        ref_frame_config.duration[i] = 1;
+      }
+      encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
+      set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
+                                  number_spatial_layers_, 0, &ref_frame_config,
+                                  1);
+      encoder->Control(VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_frame_config);
+    }
+
     if (update_pattern_ && video->frame() >= 100) {
       vpx_svc_layer_id_t layer_id;
       if (video->frame() == 100) {
@@ -258,7 +279,8 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
         layer_id.temporal_layer_id_per_spatial[i] = temporal_layer_id_;
       encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
       set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
-                                  number_spatial_layers_, 0, &ref_frame_config);
+                                  number_spatial_layers_, 0, &ref_frame_config,
+                                  0);
       encoder->Control(VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_frame_config);
     }
 
@@ -557,9 +579,14 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
   }
 
   virtual void MismatchHook(const vpx_image_t *img1, const vpx_image_t *img2) {
-    double mismatch_psnr = compute_psnr(img1, img2);
-    mismatch_psnr_ += mismatch_psnr;
-    ++mismatch_nframes_;
+    // TODO(marpan): Look into why an assert is triggered in compute_psnr
+    // for mismatch frames for the special test case: ksvc_flex_noupd_tlenh.
+    // Has to do with dropped frames in bypass/flexible svc mode.
+    if (!ksvc_flex_noupd_tlenh_) {
+      double mismatch_psnr = compute_psnr(img1, img2);
+      mismatch_psnr_ += mismatch_psnr;
+      ++mismatch_nframes_;
+    }
   }
 
   unsigned int GetMismatchFrames() { return mismatch_nframes_; }
@@ -604,6 +631,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
   int num_resize_down_;
   unsigned int prev_frame_width[VPX_MAX_LAYERS];
   unsigned int prev_frame_height[VPX_MAX_LAYERS];
+  bool ksvc_flex_noupd_tlenh_;
 
  private:
   virtual void SetConfig(const int num_temporal_layer) {
@@ -1104,6 +1132,36 @@ TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc3SL3TL4Threads) {
   // encoder will avoid loopfilter on these frames.
   EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
 #endif
+}
+
+// Check basic rate targeting for 1 pass CBR SVC: 3 spatial layers and
+// 2 temporal layers, for KSVC in flexible mode with no update of reference
+// frames for all spatial layers on TL > 0 superframes.
+// Run HD clip with 4 threads.
+TEST_P(DatarateOnePassCbrSvcFrameDropMultiBR, OnePassCbrSvc3SL2TL4ThKSVCFlex) {
+  SetSvcConfig(3, 2);
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 0;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.g_threads = 4;
+  cfg_.rc_dropframe_thresh = 30;
+  cfg_.kf_max_dist = 9999;
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
+  top_sl_width_ = 1280;
+  top_sl_height_ = 720;
+  layer_framedrop_ = 0;
+  const int bitrates[3] = { 200, 400, 600 };
+  cfg_.rc_target_bitrate = bitrates[GET_PARAM(3)];
+  ResetModel();
+  layer_framedrop_ = GET_PARAM(2);
+  AssignLayerBitrates();
+  ksvc_flex_noupd_tlenh_ = true;
+  cfg_.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.58,
+                          1.2);
 }
 
 // Params: speed setting, inter-layer prediction mode.
