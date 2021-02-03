@@ -930,6 +930,7 @@ int main(int argc, char **argv) {
           // Update for short-time encoding bitrate states, for moving window
           // of size rc->window, shifted by rc->window / 2.
           // Ignore first window segment, due to key frame.
+          if (rc.window_size == 0) rc.window_size = 15;
           if (frame_cnt > rc.window_size) {
             sum_bitrate += 0.001 * 8.0 * pkt->data.frame.sz * framerate;
             if (frame_cnt % rc.window_size == 0) {
