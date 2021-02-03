@@ -87,7 +87,7 @@ TEST_P(VP8DenoiserTest, BitexactCheck) {
     // Check bitexactness.
     for (int h = 0; h < 16; ++h) {
       for (int w = 0; w < 16; ++w) {
-        EXPECT_EQ(avg_block_c[h * stride + w], avg_block_sse2[h * stride + w]);
+        ASSERT_EQ(avg_block_c[h * stride + w], avg_block_sse2[h * stride + w]);
       }
     }
 
@@ -103,7 +103,7 @@ TEST_P(VP8DenoiserTest, BitexactCheck) {
     // Check bitexactness.
     for (int h = 0; h < 16; ++h) {
       for (int w = 0; w < 16; ++w) {
-        EXPECT_EQ(avg_block_c[h * stride + w], avg_block_sse2[h * stride + w]);
+        ASSERT_EQ(avg_block_c[h * stride + w], avg_block_sse2[h * stride + w]);
       }
     }
   }
