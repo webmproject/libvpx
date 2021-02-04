@@ -153,8 +153,8 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
           ref_frame_config->reference_last[sl] = 1;
           ref_frame_config->reference_golden[sl] = 0;
           ref_frame_config->reference_alt_ref[sl] = 0;
-          ref_frame_config->update_buffer_slot[sl] |=
-              1 << ref_frame_config->alt_fb_idx[sl];
+          // Non reference frame on top temporal top spatial.
+          ref_frame_config->update_buffer_slot[sl] = 0;
         }
         // Force no update on all spatial layers for temporal enhancement layer
         // frames.
@@ -275,8 +275,10 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
       layer_id.spatial_layer_id = 0;
       layer_id.temporal_layer_id = (video->frame() % 2 != 0);
       temporal_layer_id_ = layer_id.temporal_layer_id;
-      for (int i = 0; i < number_spatial_layers_; i++)
+      for (int i = 0; i < number_spatial_layers_; i++) {
         layer_id.temporal_layer_id_per_spatial[i] = temporal_layer_id_;
+        ref_frame_config.duration[i] = 1;
+      }
       encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
       set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
                                   number_spatial_layers_, 0, &ref_frame_config,
@@ -750,14 +752,14 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc3SL2TLDynamicPatternChange) {
   cfg_.g_threads = 1;
   cfg_.rc_dropframe_thresh = 30;
   cfg_.kf_max_dist = 9999;
-  // Change SVC pattern on the fly.
-  update_pattern_ = 1;
   ::libvpx_test::I420VideoSource video("niklas_640_480_30.yuv", 640, 480, 30, 1,
                                        0, 400);
   top_sl_width_ = 640;
   top_sl_height_ = 480;
   cfg_.rc_target_bitrate = 800;
   ResetModel();
+  // Change SVC pattern on the fly.
+  update_pattern_ = 1;
   AssignLayerBitrates();
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_, 0.78,
