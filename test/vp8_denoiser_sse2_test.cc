@@ -40,7 +40,12 @@ class VP8DenoiserTest : public ::testing::TestWithParam<int> {
   int increase_denoising_;
 };
 
+// TODO(https://crbug.com/webm/1718): This test fails with gcc 8-10.
+#if defined(__GNUC__) && __GNUC__ >= 8
+TEST_P(VP8DenoiserTest, DISABLED_BitexactCheck) {
+#else
 TEST_P(VP8DenoiserTest, BitexactCheck) {
+#endif
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 4000;
   const int stride = 16;
