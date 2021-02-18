@@ -16,6 +16,24 @@
       "message": "doesn\u0027t this have to be set?",
       "revId": "24bd0733efad6ee63eda3c49ecb730e316eb2483",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bf14c287_457f4dbe",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-02-18T06:11:05Z",
+      "side": 0,
+      "message": "The other sample encoder vpx_temporal_svc_encoder doesn\u0027t set this",
+      "parentUuid": "e17e57cc_3a6d3d87",
+      "revId": "24bd0733efad6ee63eda3c49ecb730e316eb2483",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
