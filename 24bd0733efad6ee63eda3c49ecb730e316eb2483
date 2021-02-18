@@ -34,6 +34,24 @@
       "parentUuid": "e17e57cc_3a6d3d87",
       "revId": "24bd0733efad6ee63eda3c49ecb730e316eb2483",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b4562082_ba2a4e37",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-02-18T17:25:53Z",
+      "side": 0,
+      "message": "Verified g_pass is set to 0 by default and this sample encoder is bitexact before/after this change with 3TL 3SL.",
+      "parentUuid": "bf14c287_457f4dbe",
+      "revId": "24bd0733efad6ee63eda3c49ecb730e316eb2483",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
