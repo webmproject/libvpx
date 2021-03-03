@@ -54,6 +54,31 @@
 #define NCOUNT_INTRA_THRESH 8192
 #define NCOUNT_INTRA_FACTOR 3
 
+#define SR_DIFF_PART 0.0015
+#define INTRA_PART 0.005
+#define DEFAULT_DECAY_LIMIT 0.75
+#define LOW_SR_DIFF_TRHESH 0.1
+#define SR_DIFF_MAX 128.0
+#define LOW_CODED_ERR_PER_MB 10.0
+#define NCOUNT_FRAME_II_THRESH 6.0
+#define BASELINE_ERR_PER_MB 12500.0
+#define GF_MAX_FRAME_BOOST 96.0
+
+#ifdef AGGRESSIVE_VBR
+#define KF_MAX_FRAME_BOOST 80.0
+#define MAX_KF_TOT_BOOST 4800
+#else
+#define KF_MAX_FRAME_BOOST 96.0
+#define MAX_KF_TOT_BOOST 5400
+#endif
+
+#define ZM_POWER_FACTOR 0.75
+#define MINQ_ADJ_LIMIT 48
+#define MINQ_ADJ_LIMIT_CQ 20
+#define HIGH_UNDERSHOOT_RATIO 2
+#define AV_WQ_FACTOR 4.0
+#define DEF_EPMB_LOW 2000.0
+
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x)-0.000001 : (x) + 0.000001)
 
 #if ARF_STATS_OUTPUT
@@ -1807,14 +1832,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   twopass->arnr_strength_adjustment = 0;
 }
 
-#define SR_DIFF_PART 0.0015
-#define INTRA_PART 0.005
-#define DEFAULT_DECAY_LIMIT 0.75
-#define LOW_SR_DIFF_TRHESH 0.1
-#define SR_DIFF_MAX 128.0
-#define LOW_CODED_ERR_PER_MB 10.0
-#define NCOUNT_FRAME_II_THRESH 6.0
-
 static double get_sr_decay_rate(const FRAME_INFO *frame_info,
                                 const FIRSTPASS_STATS *frame) {
   double sr_diff = (frame->sr_coded_error - frame->coded_error);
@@ -1852,8 +1869,6 @@ static double get_zero_motion_factor(const FRAME_INFO *frame_info,
   double sr_decay = get_sr_decay_rate(frame_info, frame_stats);
   return VPXMIN(sr_decay, zero_motion_pct);
 }
-
-#define ZM_POWER_FACTOR 0.75
 
 static double get_prediction_decay_rate(const FRAME_INFO *frame_info,
                                         const FIRSTPASS_STATS *frame_stats) {
@@ -1942,8 +1957,6 @@ static void accumulate_frame_motion_stats(const FIRSTPASS_STATS *stats,
   }
 }
 
-#define BASELINE_ERR_PER_MB 12500.0
-#define GF_MAX_BOOST 96.0
 static double calc_frame_boost(const FRAME_INFO *frame_info,
                                const FIRSTPASS_STATS *this_frame,
                                int avg_frame_qindex,
@@ -1965,7 +1978,7 @@ static double calc_frame_boost(const FRAME_INFO *frame_info,
   // Q correction and scalling
   frame_boost = frame_boost * boost_q_correction;
 
-  return VPXMIN(frame_boost, GF_MAX_BOOST * boost_q_correction);
+  return VPXMIN(frame_boost, GF_MAX_FRAME_BOOST * boost_q_correction);
 }
 
 static double kf_err_per_mb(VP9_COMP *cpi) {
@@ -3159,14 +3172,6 @@ static int test_candidate_kf(const FIRST_PASS_INFO *first_pass_info,
 #define MIN_SCAN_FRAMES_FOR_KF_BOOST 32
 #define KF_ABS_ZOOM_THRESH 6.0
 
-#ifdef AGGRESSIVE_VBR
-#define KF_MAX_FRAME_BOOST 80.0
-#define MAX_KF_TOT_BOOST 4800
-#else
-#define KF_MAX_FRAME_BOOST 96.0
-#define MAX_KF_TOT_BOOST 5400
-#endif
-
 int vp9_get_frames_to_next_key(const VP9EncoderConfig *oxcf,
                                const FRAME_INFO *frame_info,
                                const FIRST_PASS_INFO *first_pass_info,
@@ -3470,6 +3475,113 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
           twopass->stats_in->pcnt_inter - twopass->stats_in->pcnt_motion == 1);
 }
 
+// Configure image size specific vizier parameters.
+// Later these will be set via additional command line options
+static void init_vizier_params(RATE_CONTROL *const rc, int screen_area) {
+  if (1) {
+    // Force defaults for now
+    rc->active_wq_factor = AV_WQ_FACTOR;
+    rc->base_err_per_mb = BASELINE_ERR_PER_MB;
+    rc->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
+    rc->sr_diff_part = SR_DIFF_PART;
+    rc->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+    rc->gf_max_total_boost = MAX_GF_BOOST;
+    rc->kf_err_per_mb = DEF_EPMB_LOW;
+    rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;     // Max for first kf.
+    rc->kf_frame_max_boost_subs = KF_MAX_FRAME_BOOST / 2;  // Max for other kfs.
+    rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
+    rc->zm_power_factor = ZM_POWER_FACTOR;
+  } else {
+    // Vizer experimental parameters from training.
+    // Later these will be set via the command line.
+    if (screen_area <= 176 * 144) {
+      rc->active_wq_factor = 46.0;
+      rc->base_err_per_mb = 37597.399760969536;
+      rc->sr_default_decay_limit = 0.3905639800962774;
+      rc->sr_diff_part = 0.009599023654146284;
+      rc->gf_frame_max_boost = 87.27362648627846;
+      rc->gf_max_total_boost = MAX_GF_BOOST;
+      rc->kf_err_per_mb = 1854.8255436877148;
+      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
+      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      rc->zm_power_factor = 2.93715229184991;
+    } else if (screen_area <= 320 * 240) {
+      rc->active_wq_factor = 55.0;
+      rc->base_err_per_mb = 34525.33177195309;
+      rc->sr_default_decay_limit = 0.23901360046804604;
+      rc->sr_diff_part = 0.008581014394766773;
+      rc->gf_frame_max_boost = 127.34978204980285;
+      rc->gf_max_total_boost = MAX_GF_BOOST;
+      rc->kf_err_per_mb = 723.8337508755031;
+      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
+      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      rc->zm_power_factor = 3.5299221493593413;
+    } else if (screen_area <= 640 * 360) {
+      rc->active_wq_factor = 12.5;
+      rc->base_err_per_mb = 18823.978018028298;
+      rc->sr_default_decay_limit = 0.6043527690301296;
+      rc->sr_diff_part = 0.00343296783885544;
+      rc->gf_frame_max_boost = 75.17672317013668;
+      rc->gf_max_total_boost = MAX_GF_BOOST;
+      rc->kf_err_per_mb = 422.2871502380377;
+      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
+      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      rc->zm_power_factor = 2.265742666649307;
+    } else if (screen_area <= 854 * 480) {
+      rc->active_wq_factor = 51.5;
+      rc->base_err_per_mb = 33718.98307662595;
+      rc->sr_default_decay_limit = 0.33633414970713393;
+      rc->sr_diff_part = 0.00868988716928333;
+      rc->gf_frame_max_boost = 85.2868528581522;
+      rc->gf_max_total_boost = MAX_GF_BOOST;
+      rc->kf_err_per_mb = 1513.4883914008383;
+      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
+      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      rc->zm_power_factor = 3.552278528517416;
+    } else if (screen_area <= 1280 * 720) {
+      rc->active_wq_factor = 41.5;
+      rc->base_err_per_mb = 29527.46375825401;
+      rc->sr_default_decay_limit = 0.5009117586299728;
+      rc->sr_diff_part = 0.005007364627260114;
+      rc->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+      rc->gf_max_total_boost = MAX_GF_BOOST;
+      rc->kf_err_per_mb = 998.6342911785146;
+      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
+      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      rc->zm_power_factor = 2.568627575572356;
+    } else if (screen_area <= 1920 * 1080) {
+      rc->active_wq_factor = 31.0;
+      rc->base_err_per_mb = 34474.723463367416;
+      rc->sr_default_decay_limit = 0.23346886902707745;
+      rc->sr_diff_part = 0.011431716637966029;
+      rc->gf_frame_max_boost = 81.00472969483079;
+      rc->gf_max_total_boost = MAX_GF_BOOST;
+      rc->kf_err_per_mb = 35931.25734431429;
+      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
+      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      rc->zm_power_factor = 5.5776463538431935;
+    } else {
+      rc->active_wq_factor = AV_WQ_FACTOR;
+      rc->base_err_per_mb = BASELINE_ERR_PER_MB;
+      rc->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
+      rc->sr_diff_part = SR_DIFF_PART;
+      rc->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+      rc->gf_max_total_boost = MAX_GF_BOOST;
+      rc->kf_err_per_mb = DEF_EPMB_LOW;
+      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
+      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      rc->zm_power_factor = ZM_POWER_FACTOR;
+    }
+  }
+}
+
 void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -3479,6 +3591,13 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   const int show_idx = cm->current_video_frame;
 
   if (!twopass->stats_in) return;
+
+  // Configure image size specific vizier parameters
+  if (cm->current_video_frame == 0) {
+    unsigned int screen_area = (cm->width * cm->height);
+
+    init_vizier_params(rc, screen_area);
+  }
 
   // If this is an arf frame then we dont want to read the stats file or
   // advance the input pointer as we already have what we need.
@@ -3605,9 +3724,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   subtract_stats(&twopass->total_left_stats, &this_frame);
 }
 
-#define MINQ_ADJ_LIMIT 48
-#define MINQ_ADJ_LIMIT_CQ 20
-#define HIGH_UNDERSHOOT_RATIO 2
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
