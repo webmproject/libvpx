@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c80f6806_71ad9ce3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2021-03-03T16:49:12Z",
+      "side": 1,
+      "message": "Replaces previous patch after clean up.",
+      "revId": "4ec4b211321cdbdef1b5ca320011b348e00a9727",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
