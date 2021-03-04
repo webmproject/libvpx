@@ -1296,10 +1296,6 @@ EOF
           enabled optimizations && disabled gprof && check_add_cflags -fomit-frame-pointer
           ;;
         vs*)
-          # When building with Microsoft Visual Studio the assembler is
-          # invoked directly. Checking at configure time is unnecessary.
-          # Skip the check by setting AS arbitrarily
-          AS=msvs
           msvs_arch_dir=x86-msvs
           case ${tgt_cc##vs} in
             14)

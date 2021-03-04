@@ -232,6 +232,7 @@ vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def
             --ver=$(CONFIG_VS_VERSION) \
             --src-path-bare="$(SRC_PATH_BARE)" \
             --out=$@ $(CFLAGS) \
+            --as=$(AS) \
             $(filter $(SRC_PATH_BARE)/vp8/%.c, $(VCPROJ_SRCS)) \
             $(filter $(SRC_PATH_BARE)/vp8/%.h, $(VCPROJ_SRCS)) \
             $(filter $(SRC_PATH_BARE)/vp9/%.c, $(VCPROJ_SRCS)) \
@@ -262,6 +263,7 @@ vp9rc.$(VCPROJ_SFX): $(RC_RTC_SRCS)
             --ver=$(CONFIG_VS_VERSION) \
             --src-path-bare="$(SRC_PATH_BARE)" \
             --out=$@ $(CFLAGS) \
+            --as=$(AS) \
             $(filter $(SRC_PATH_BARE)/vp9/%.c, $(VCPROJ_SRCS)) \
             $(filter $(SRC_PATH_BARE)/vp9/%.cc, $(VCPROJ_SRCS)) \
             $(filter $(SRC_PATH_BARE)/vp9/%.h, $(VCPROJ_SRCS)) \
@@ -536,6 +538,7 @@ gtest.$(VCPROJ_SFX): $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.c
             --proj-guid=EC00E1EC-AF68-4D92-A255-181690D1C9B1 \
             --ver=$(CONFIG_VS_VERSION) \
             --src-path-bare="$(SRC_PATH_BARE)" \
+            --as=$(AS) \
             -D_VARIADIC_MAX=10 \
             --out=gtest.$(VCPROJ_SFX) $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" -I"$(SRC_PATH_BARE)/third_party/googletest/src"
@@ -552,6 +555,7 @@ test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_
             --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
             --ver=$(CONFIG_VS_VERSION) \
             --src-path-bare="$(SRC_PATH_BARE)" \
+            --as=$(AS) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
@@ -574,6 +578,7 @@ test_intra_pred_speed.$(VCPROJ_SFX): $(TEST_INTRA_PRED_SPEED_SRCS) vpx.$(VCPROJ_
             --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
             --ver=$(CONFIG_VS_VERSION) \
             --src-path-bare="$(SRC_PATH_BARE)" \
+            --as=$(AS) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
@@ -592,6 +597,7 @@ test_rc_interface.$(VCPROJ_SFX): $(RC_INTERFACE_TEST_SRCS) vpx.$(VCPROJ_SFX) \
             -D_VARIADIC_MAX=10 \
             --proj-guid=30458F88-1BC6-4689-B41C-50F3737AAB27 \
             --ver=$(CONFIG_VS_VERSION) \
+            --as=$(AS) \
             --src-path-bare="$(SRC_PATH_BARE)" \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
