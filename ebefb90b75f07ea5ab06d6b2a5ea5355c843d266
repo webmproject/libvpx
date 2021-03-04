@@ -34,6 +34,24 @@
       "parentUuid": "4418aa56_9dbac0ba",
       "revId": "ebefb90b75f07ea5ab06d6b2a5ea5355c843d266",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c266e11c_55e6f65b",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1302,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-03-04T19:55:10Z",
+      "side": 0,
+      "message": "\u003e Here $AS is always one of {auto (when --as is not passed to configure), nasm, yasm}. Do you mean \"auto\" when you say \"AS is unset\"?\n\nYes, I guess I was thinking auto, I forgot that was the value being used. As long as with this change we\u0027re still treating it as an external build and not testing for the binary then I think it should be ok.",
+      "parentUuid": "87386cb1_18dffc41",
+      "revId": "ebefb90b75f07ea5ab06d6b2a5ea5355c843d266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
