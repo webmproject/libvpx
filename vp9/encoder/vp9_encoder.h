@@ -746,6 +746,7 @@ typedef struct VP9_COMP {
   // Ambient reconstruction err target for force key frames
   int64_t ambient_err;
 
+  RD_CONTROL rd_ctrl;
   RD_OPT rd;
 
   CODING_CONTEXT coding_context;
