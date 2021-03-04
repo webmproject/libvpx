@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f010521_fb91c44d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 758,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-03-04T18:25:08Z",
+      "side": 1,
+      "message": "this should be applied to all targets for consistency. cygwin will autodetect the win64 target.",
+      "revId": "16756edd0d3a44879a2f2b7b50482b83ab024458",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
