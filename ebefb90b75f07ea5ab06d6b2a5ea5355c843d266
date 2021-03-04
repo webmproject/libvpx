@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4418aa56_9dbac0ba",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1302,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-03-04T03:59:51Z",
+      "side": 0,
+      "message": "I think this might break trying to generate project files on a different platform if the assembler is now auto-detected. If AS is unset we may want to keep this and set the default to yasm.",
+      "revId": "ebefb90b75f07ea5ab06d6b2a5ea5355c843d266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
