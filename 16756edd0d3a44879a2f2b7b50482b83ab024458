@@ -16,6 +16,24 @@
       "message": "this should be applied to all targets for consistency. cygwin will autodetect the win64 target.",
       "revId": "16756edd0d3a44879a2f2b7b50482b83ab024458",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "db3ffa55_64db2f84",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 758,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-03-04T19:19:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4f010521_fb91c44d",
+      "revId": "16756edd0d3a44879a2f2b7b50482b83ab024458",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
