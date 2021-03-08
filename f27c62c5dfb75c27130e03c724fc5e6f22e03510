@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cab233c3_21f15377",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2021-03-08T15:55:44Z",
+      "side": 1,
+      "message": "Patch 5 reverts a simple line split in patch 4. Jenkins complained about a line being too long in patch 3 but when this line is split it fails the style check and insists it should not be split.\n\nThe line as now coded is what is suggested and required by the style checker !",
+      "revId": "f27c62c5dfb75c27130e03c724fc5e6f22e03510",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
