@@ -4398,6 +4398,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
   int frame_over_shoot_limit;
   int frame_under_shoot_limit;
   int q = 0, q_low = 0, q_high = 0;
+  int last_q_attempt = 0;
   int enable_acl;
 #ifdef AGGRESSIVE_VBR
   int qrange_adj = 1;
@@ -4413,6 +4414,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
   // passed in by the external rate control model.
   // case: -1, we take VP9's decision for the max frame size.
   int ext_rc_max_frame_size = 0;
+  const int orig_rc_max_frame_bandwidth = rc->max_frame_bandwidth;
 
 #if CONFIG_RATE_CTRL
   const FRAME_UPDATE_TYPE update_type =
@@ -4580,6 +4582,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
     }
 
     if (cpi->ext_ratectrl.ready) {
+      last_q_attempt = q;
       // In general, for the external rate control, we take the qindex provided
       // as input and encode the frame with this qindex faithfully. However,
       // in some extreme scenarios, the provided qindex leads to a massive
@@ -4597,6 +4600,10 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
           break;
         }
       }
+      rc->max_frame_bandwidth = ext_rc_max_frame_size;
+      // If the current frame size exceeds the ext_rc_max_frame_size,
+      // we adjust the worst qindex to meet the frame size constraint.
+      q_high = 255;
       ext_rc_recode = 1;
     }
 #if CONFIG_RATE_CTRL
@@ -4796,6 +4803,23 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
         rc->projected_frame_size < rc->max_frame_bandwidth)
       loop = 0;
 
+    // Special handling of external max frame size constraint
+    if (ext_rc_recode) {
+      // If the largest q is not able to meet the max frame size limit,
+      // do nothing.
+      if (rc->projected_frame_size > ext_rc_max_frame_size &&
+          last_q_attempt == 255) {
+        break;
+      }
+      // If VP9's q selection leads to a smaller q, we force it to use
+      // a larger q to better approximate the external max frame size
+      // constraint.
+      if (rc->projected_frame_size > ext_rc_max_frame_size &&
+          q <= last_q_attempt) {
+        q = VPXMIN(255, last_q_attempt + 1);
+      }
+    }
+
     if (loop) {
       ++loop_count;
       ++loop_at_this_size;
@@ -4808,6 +4832,8 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF)
       if (loop) restore_coding_context(cpi);
   } while (loop);
+
+  rc->max_frame_bandwidth = orig_rc_max_frame_bandwidth;
 
 #ifdef AGGRESSIVE_VBR
   if (two_pass_first_group_inter(cpi)) {
