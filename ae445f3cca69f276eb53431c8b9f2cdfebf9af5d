@@ -34,6 +34,24 @@
       "parentUuid": "dbafef0e_e79af6b8",
       "revId": "ae445f3cca69f276eb53431c8b9f2cdfebf9af5d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b6540894_a6765368",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-03-09T17:11:42Z",
+      "side": 1,
+      "message": "As we discussed in email, I\u0027ll tag this one as rc2 and send a note to webm-discuss.",
+      "parentUuid": "286c433e_90f480d4",
+      "revId": "ae445f3cca69f276eb53431c8b9f2cdfebf9af5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
