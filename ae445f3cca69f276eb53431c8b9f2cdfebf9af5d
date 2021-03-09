@@ -16,6 +16,24 @@
       "message": "I\u0027ll hold this one until this Friday. It\u0027s unlikely that there will be something that\u0027s needed to be cherry picked.",
       "revId": "ae445f3cca69f276eb53431c8b9f2cdfebf9af5d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "286c433e_90f480d4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-03-09T03:03:09Z",
+      "side": 1,
+      "message": "\u003e I\u0027ll hold this one until this Friday. It\u0027s unlikely that there will be something that\u0027s needed to be cherry picked.\n\nI think it would be good to adopt the practice of posting a note about the latest rc to webm-discuss and leaving a week or so in case there are comments.",
+      "parentUuid": "dbafef0e_e79af6b8",
+      "revId": "ae445f3cca69f276eb53431c8b9f2cdfebf9af5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
