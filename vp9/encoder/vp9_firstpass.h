@@ -221,6 +221,19 @@ typedef struct {
   int last_qindex_of_arf_layer[MAX_ARF_LAYERS];
 
   GF_GROUP gf_group;
+
+  // Vizeir project experimental two pass rate control parameters.
+  double active_wq_factor;
+  double base_err_per_mb;
+  double sr_default_decay_limit;
+  double sr_diff_part;
+  double kf_err_per_mb;
+  double kf_frame_max_boost_first;  // Max for first kf in a chunk.
+  double kf_frame_max_boost_subs;   // Max for subsequent mid chunk kfs.
+  int kf_max_total_boost;
+  int gf_max_total_boost;
+  double gf_frame_max_boost;
+  double zm_power_factor;
 } TWO_PASS;
 
 struct VP9_COMP;
@@ -249,8 +262,8 @@ void calculate_coded_size(struct VP9_COMP *cpi, int *scaled_frame_width,
 struct VP9EncoderConfig;
 int vp9_get_frames_to_next_key(const struct VP9EncoderConfig *oxcf,
                                const FRAME_INFO *frame_info,
-                               const FIRST_PASS_INFO *first_pass_info,
-                               int kf_show_idx, int min_gf_interval);
+                               const TWO_PASS *const twopass, int kf_show_idx,
+                               int min_gf_interval);
 #if CONFIG_RATE_CTRL
 /* Call this function to get info about the next group of pictures.
  * This function should be called after vp9_create_compressor() when encoding

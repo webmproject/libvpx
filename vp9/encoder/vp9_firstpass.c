@@ -77,7 +77,6 @@
 #define MINQ_ADJ_LIMIT_CQ 20
 #define HIGH_UNDERSHOOT_RATIO 2
 #define AV_WQ_FACTOR 4.0
-#define DEF_EPMB_LOW 2000.0
 
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x)-0.000001 : (x) + 0.000001)
 
@@ -1833,6 +1832,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 }
 
 static double get_sr_decay_rate(const FRAME_INFO *frame_info,
+                                const TWO_PASS *const twopass,
                                 const FIRSTPASS_STATS *frame) {
   double sr_diff = (frame->sr_coded_error - frame->coded_error);
   double sr_decay = 1.0;
@@ -1854,28 +1854,31 @@ static double get_sr_decay_rate(const FRAME_INFO *frame_info,
 
   if ((sr_diff > LOW_SR_DIFF_TRHESH)) {
     sr_diff = VPXMIN(sr_diff, SR_DIFF_MAX);
-    sr_decay = 1.0 - (SR_DIFF_PART * sr_diff) - motion_amplitude_part -
+    sr_decay = 1.0 - (twopass->sr_diff_part * sr_diff) - motion_amplitude_part -
                (INTRA_PART * modified_pcnt_intra);
   }
-  return VPXMAX(sr_decay, DEFAULT_DECAY_LIMIT);
+  return VPXMAX(sr_decay, twopass->sr_default_decay_limit);
 }
 
 // This function gives an estimate of how badly we believe the prediction
 // quality is decaying from frame to frame.
 static double get_zero_motion_factor(const FRAME_INFO *frame_info,
+                                     const TWO_PASS *const twopass,
                                      const FIRSTPASS_STATS *frame_stats) {
   const double zero_motion_pct =
       frame_stats->pcnt_inter - frame_stats->pcnt_motion;
-  double sr_decay = get_sr_decay_rate(frame_info, frame_stats);
+  double sr_decay = get_sr_decay_rate(frame_info, twopass, frame_stats);
   return VPXMIN(sr_decay, zero_motion_pct);
 }
 
 static double get_prediction_decay_rate(const FRAME_INFO *frame_info,
+                                        const TWO_PASS *const twopass,
                                         const FIRSTPASS_STATS *frame_stats) {
-  const double sr_decay_rate = get_sr_decay_rate(frame_info, frame_stats);
+  const double sr_decay_rate =
+      get_sr_decay_rate(frame_info, twopass, frame_stats);
   const double zero_motion_factor =
       (0.95 * pow((frame_stats->pcnt_inter - frame_stats->pcnt_motion),
-                  ZM_POWER_FACTOR));
+                  twopass->zm_power_factor));
 
   return VPXMAX(zero_motion_factor,
                 (sr_decay_rate + ((1.0 - sr_decay_rate) * zero_motion_factor)));
@@ -1959,6 +1962,7 @@ static void accumulate_frame_motion_stats(const FIRSTPASS_STATS *stats,
 
 static double calc_frame_boost(const FRAME_INFO *frame_info,
                                const FIRSTPASS_STATS *this_frame,
+                               const TWO_PASS *const twopass,
                                int avg_frame_qindex,
                                double this_frame_mv_in_out) {
   double frame_boost;
@@ -1968,7 +1972,7 @@ static double calc_frame_boost(const FRAME_INFO *frame_info,
   const double active_area = calculate_active_area(frame_info, this_frame);
 
   // Underlying boost factor is based on inter error ratio.
-  frame_boost = (BASELINE_ERR_PER_MB * active_area) /
+  frame_boost = (twopass->base_err_per_mb * active_area) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
 
   // Small adjustment for cases where there is a zoom out
@@ -1978,37 +1982,25 @@ static double calc_frame_boost(const FRAME_INFO *frame_info,
   // Q correction and scalling
   frame_boost = frame_boost * boost_q_correction;
 
-  return VPXMIN(frame_boost, GF_MAX_FRAME_BOOST * boost_q_correction);
-}
-
-static double kf_err_per_mb(VP9_COMP *cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
-  unsigned int screen_area = (cm->width * cm->height);
-
-  // Use a different error per mb factor for calculating boost for
-  //  different formats.
-  if (screen_area < 1280 * 720) {
-    return 2000.0;
-  } else if (screen_area < 1920 * 1080) {
-    return 500.0;
-  }
-  return 250.0;
+  return VPXMIN(frame_boost, twopass->gf_frame_max_boost * boost_q_correction);
 }
 
 static double calc_kf_frame_boost(VP9_COMP *cpi,
                                   const FIRSTPASS_STATS *this_frame,
                                   double *sr_accumulator,
                                   double this_frame_mv_in_out,
-                                  double max_boost) {
+                                  double zm_factor) {
+  TWO_PASS *const twopass = &cpi->twopass;
   double frame_boost;
   const double lq = vp9_convert_qindex_to_q(
       cpi->rc.avg_frame_qindex[INTER_FRAME], cpi->common.bit_depth);
   const double boost_q_correction = VPXMIN((0.50 + (lq * 0.015)), 2.00);
   const double active_area =
       calculate_active_area(&cpi->frame_info, this_frame);
+  double max_boost;
 
   // Underlying boost factor is based on inter error ratio.
-  frame_boost = (kf_err_per_mb(cpi) * active_area) /
+  frame_boost = (twopass->kf_err_per_mb * active_area) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error + *sr_accumulator);
 
   // Update the accumulator for second ref error difference.
@@ -2027,13 +2019,20 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
   // boost calculation.
   frame_boost = ((frame_boost + 40.0) * boost_q_correction);
 
-  return VPXMIN(frame_boost, max_boost * boost_q_correction);
+  // Maximum allowed boost this frame. May be different for first vs subsequent
+  // key frames.
+  max_boost = (cpi->common.current_video_frame == 0)
+                  ? twopass->kf_frame_max_boost_first
+                  : twopass->kf_frame_max_boost_subs;
+  max_boost *= zm_factor * boost_q_correction;
+
+  return VPXMIN(frame_boost, max_boost);
 }
 
 static int compute_arf_boost(const FRAME_INFO *frame_info,
-                             const FIRST_PASS_INFO *first_pass_info,
-                             int arf_show_idx, int f_frames, int b_frames,
-                             int avg_frame_qindex) {
+                             TWO_PASS *const twopass, int arf_show_idx,
+                             int f_frames, int b_frames, int avg_frame_qindex) {
+  const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   int i;
   double boost_score = 0.0;
   double mv_ratio_accumulator = 0.0;
@@ -2064,14 +2063,15 @@ static int compute_arf_boost(const FRAME_INFO *frame_info,
 
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(frame_info, this_frame);
+      decay_accumulator *=
+          get_prediction_decay_rate(frame_info, twopass, this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR
                               : decay_accumulator;
     }
-    boost_score += decay_accumulator * calc_frame_boost(frame_info, this_frame,
-                                                        avg_frame_qindex,
-                                                        this_frame_mv_in_out);
+    boost_score += decay_accumulator *
+                   calc_frame_boost(frame_info, this_frame, twopass,
+                                    avg_frame_qindex, this_frame_mv_in_out);
   }
 
   arf_boost = (int)boost_score;
@@ -2104,14 +2104,15 @@ static int compute_arf_boost(const FRAME_INFO *frame_info,
 
     // Cumulative effect of prediction quality decay.
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(frame_info, this_frame);
+      decay_accumulator *=
+          get_prediction_decay_rate(frame_info, twopass, this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR
                               : decay_accumulator;
     }
-    boost_score += decay_accumulator * calc_frame_boost(frame_info, this_frame,
-                                                        avg_frame_qindex,
-                                                        this_frame_mv_in_out);
+    boost_score += decay_accumulator *
+                   calc_frame_boost(frame_info, this_frame, twopass,
+                                    avg_frame_qindex, this_frame_mv_in_out);
   }
   arf_boost += (int)boost_score;
 
@@ -2127,8 +2128,8 @@ static int calc_arf_boost(VP9_COMP *cpi, int f_frames, int b_frames) {
   TWO_PASS *const twopass = &cpi->twopass;
   const int avg_inter_frame_qindex = cpi->rc.avg_frame_qindex[INTER_FRAME];
   int arf_show_idx = get_show_idx(twopass);
-  return compute_arf_boost(frame_info, &twopass->first_pass_info, arf_show_idx,
-                           f_frames, b_frames, avg_inter_frame_qindex);
+  return compute_arf_boost(frame_info, twopass, arf_show_idx, f_frames,
+                           b_frames, avg_inter_frame_qindex);
 }
 
 // Calculate a section intra ratio used in setting max loop filter.
@@ -2557,10 +2558,11 @@ typedef struct RANGE {
  * structs.
  */
 static int get_gop_coding_frame_num(
-    int *use_alt_ref, const FRAME_INFO *frame_info,
-    const FIRST_PASS_INFO *first_pass_info, const RATE_CONTROL *rc,
-    int gf_start_show_idx, const RANGE *active_gf_interval,
-    double gop_intra_factor, int lag_in_frames) {
+    int *use_alt_ref, const FRAME_INFO *frame_info, TWO_PASS *const twopass,
+    const RATE_CONTROL *rc, int gf_start_show_idx,
+    const RANGE *active_gf_interval, double gop_intra_factor,
+    int lag_in_frames) {
+  const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   double loop_decay_rate = 1.00;
   double mv_ratio_accumulator = 0.0;
   double this_frame_mv_in_out = 0.0;
@@ -2603,13 +2605,14 @@ static int get_gop_coding_frame_num(
     if ((rc->frames_since_key + gop_coding_frames - 1) > 1) {
       zero_motion_accumulator =
           VPXMIN(zero_motion_accumulator,
-                 get_zero_motion_factor(frame_info, next_frame));
+                 get_zero_motion_factor(frame_info, twopass, next_frame));
     }
 
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
       double last_loop_decay_rate = loop_decay_rate;
-      loop_decay_rate = get_prediction_decay_rate(frame_info, next_frame);
+      loop_decay_rate =
+          get_prediction_decay_rate(frame_info, twopass, next_frame);
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -2807,14 +2810,14 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
       use_alt_ref = gop_command->use_alt_ref;
     } else {
       gop_coding_frames = get_gop_coding_frame_num(
-          &use_alt_ref, frame_info, first_pass_info, rc, gf_start_show_idx,
+          &use_alt_ref, frame_info, twopass, rc, gf_start_show_idx,
           &active_gf_interval, gop_intra_factor, cpi->oxcf.lag_in_frames);
       use_alt_ref &= allow_alt_ref;
     }
   }
 #else
   gop_coding_frames = get_gop_coding_frame_num(
-      &use_alt_ref, frame_info, first_pass_info, rc, gf_start_show_idx,
+      &use_alt_ref, frame_info, twopass, rc, gf_start_show_idx,
       &active_gf_interval, gop_intra_factor, cpi->oxcf.lag_in_frames);
   use_alt_ref &= allow_alt_ref;
 #endif
@@ -2836,8 +2839,8 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
 
     // Calculate the boost for alt ref.
     rc->gfu_boost =
-        compute_arf_boost(frame_info, first_pass_info, arf_show_idx, f_frames,
-                          b_frames, avg_inter_frame_qindex);
+        compute_arf_boost(frame_info, twopass, arf_show_idx, f_frames, b_frames,
+                          avg_inter_frame_qindex);
     rc->source_alt_ref_pending = 1;
   } else {
     const int f_frames = gop_coding_frames - 1;
@@ -2847,9 +2850,9 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     const int gld_show_idx =
         VPXMIN(gf_start_show_idx + 1, fps_get_num_frames(first_pass_info));
     const int arf_boost =
-        compute_arf_boost(frame_info, first_pass_info, gld_show_idx, f_frames,
-                          b_frames, avg_inter_frame_qindex);
-    rc->gfu_boost = VPXMIN(MAX_GF_BOOST, arf_boost);
+        compute_arf_boost(frame_info, twopass, gld_show_idx, f_frames, b_frames,
+                          avg_inter_frame_qindex);
+    rc->gfu_boost = VPXMIN(twopass->gf_max_total_boost, arf_boost);
     rc->source_alt_ref_pending = 0;
   }
 
@@ -2952,7 +2955,9 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
         cpi, group_av_err, (group_av_skip_pct + group_av_inactive_zone),
         group_av_noise, vbr_group_bits_per_frame);
     twopass->active_worst_quality =
-        (tmp_q + (twopass->active_worst_quality * 3)) >> 2;
+        (int)((tmp_q + (twopass->active_worst_quality *
+                        (twopass->active_wq_factor - 1))) /
+              twopass->active_wq_factor);
 
 #if CONFIG_ALWAYS_ADJUST_BPM
     // Reset rolling actual and target bits counters for ARF groups.
@@ -3174,8 +3179,9 @@ static int test_candidate_kf(const FIRST_PASS_INFO *first_pass_info,
 
 int vp9_get_frames_to_next_key(const VP9EncoderConfig *oxcf,
                                const FRAME_INFO *frame_info,
-                               const FIRST_PASS_INFO *first_pass_info,
-                               int kf_show_idx, int min_gf_interval) {
+                               const TWO_PASS *const twopass, int kf_show_idx,
+                               int min_gf_interval) {
+  const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   double recent_loop_decay[FRAMES_TO_CHECK_DECAY];
   int j;
   int frames_to_key;
@@ -3202,7 +3208,8 @@ int vp9_get_frames_to_next_key(const VP9EncoderConfig *oxcf,
           break;
 
         // How fast is the prediction quality decaying?
-        loop_decay_rate = get_prediction_decay_rate(frame_info, next_frame);
+        loop_decay_rate =
+            get_prediction_decay_rate(frame_info, twopass, next_frame);
 
         // We want to know something about the recent past... rather than
         // as used elsewhere where we are concerned with decay in prediction
@@ -3289,7 +3296,7 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
                                      mean_mod_score, av_err);
 
   rc->frames_to_key = vp9_get_frames_to_next_key(
-      oxcf, frame_info, first_pass_info, kf_show_idx, rc->min_gf_interval);
+      oxcf, frame_info, twopass, kf_show_idx, rc->min_gf_interval);
 
   // If there is a max kf interval set by the user we must obey it.
   // We already breakout of the loop above at 2x max.
@@ -3369,9 +3376,9 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
       // Monitor for static sections.
       // First frame in kf group the second ref indicator is invalid.
       if (i > 0) {
-        zero_motion_accumulator =
-            VPXMIN(zero_motion_accumulator,
-                   get_zero_motion_factor(&cpi->frame_info, &next_frame));
+        zero_motion_accumulator = VPXMIN(
+            zero_motion_accumulator,
+            get_zero_motion_factor(&cpi->frame_info, twopass, &next_frame));
       } else {
         zero_motion_accumulator =
             next_frame.pcnt_inter - next_frame.pcnt_motion;
@@ -3385,8 +3392,8 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
       // the first key frame or it points to a refernce before the new key
       // frame.
       if (i < 2) sr_accumulator = 0.0;
-      frame_boost = calc_kf_frame_boost(cpi, &next_frame, &sr_accumulator, 0,
-                                        KF_MAX_FRAME_BOOST * zm_factor);
+      frame_boost =
+          calc_kf_frame_boost(cpi, &next_frame, &sr_accumulator, 0, zm_factor);
 
       boost_score += frame_boost;
 
@@ -3415,12 +3422,12 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   // Special case for static / slide show content but dont apply
   // if the kf group is very short.
   if ((zero_motion_accumulator > 0.99) && (rc->frames_to_key > 8)) {
-    rc->kf_boost = MAX_KF_TOT_BOOST;
+    rc->kf_boost = twopass->kf_max_total_boost;
   } else {
-    // Apply various clamps for min and max boost
+    // Apply various clamps for min and max oost
     rc->kf_boost = VPXMAX((int)boost_score, (rc->frames_to_key * 3));
     rc->kf_boost = VPXMAX(rc->kf_boost, MIN_KF_TOT_BOOST);
-    rc->kf_boost = VPXMIN(rc->kf_boost, MAX_KF_TOT_BOOST);
+    rc->kf_boost = VPXMIN(rc->kf_boost, twopass->kf_max_total_boost);
   }
 
   // Work out how many bits to allocate for the key frame itself.
@@ -3477,107 +3484,113 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
 
 // Configure image size specific vizier parameters.
 // Later these will be set via additional command line options
-static void init_vizier_params(RATE_CONTROL *const rc, int screen_area) {
+static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
   if (1) {
     // Force defaults for now
-    rc->active_wq_factor = AV_WQ_FACTOR;
-    rc->base_err_per_mb = BASELINE_ERR_PER_MB;
-    rc->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
-    rc->sr_diff_part = SR_DIFF_PART;
-    rc->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
-    rc->gf_max_total_boost = MAX_GF_BOOST;
-    rc->kf_err_per_mb = DEF_EPMB_LOW;
-    rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;     // Max for first kf.
-    rc->kf_frame_max_boost_subs = KF_MAX_FRAME_BOOST / 2;  // Max for other kfs.
-    rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
-    rc->zm_power_factor = ZM_POWER_FACTOR;
+    twopass->active_wq_factor = AV_WQ_FACTOR;
+    twopass->base_err_per_mb = BASELINE_ERR_PER_MB;
+    twopass->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
+    twopass->sr_diff_part = SR_DIFF_PART;
+    twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+    twopass->gf_max_total_boost = MAX_GF_BOOST;
+    if (screen_area < 1280 * 720) {
+      twopass->kf_err_per_mb = 2000.0;
+    } else if (screen_area < 1920 * 1080) {
+      twopass->kf_err_per_mb = 500.0;
+    } else {
+      twopass->kf_err_per_mb = 250.0;
+    }
+    twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+    twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+    twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+    twopass->zm_power_factor = ZM_POWER_FACTOR;
   } else {
     // Vizer experimental parameters from training.
     // Later these will be set via the command line.
     if (screen_area <= 176 * 144) {
-      rc->active_wq_factor = 46.0;
-      rc->base_err_per_mb = 37597.399760969536;
-      rc->sr_default_decay_limit = 0.3905639800962774;
-      rc->sr_diff_part = 0.009599023654146284;
-      rc->gf_frame_max_boost = 87.27362648627846;
-      rc->gf_max_total_boost = MAX_GF_BOOST;
-      rc->kf_err_per_mb = 1854.8255436877148;
-      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
-      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      rc->zm_power_factor = 2.93715229184991;
+      twopass->active_wq_factor = 46.0;
+      twopass->base_err_per_mb = 37597.399760969536;
+      twopass->sr_default_decay_limit = 0.3905639800962774;
+      twopass->sr_diff_part = 0.009599023654146284;
+      twopass->gf_frame_max_boost = 87.27362648627846;
+      twopass->gf_max_total_boost = MAX_GF_BOOST;
+      twopass->kf_err_per_mb = 1854.8255436877148;
+      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      twopass->zm_power_factor = 2.93715229184991;
     } else if (screen_area <= 320 * 240) {
-      rc->active_wq_factor = 55.0;
-      rc->base_err_per_mb = 34525.33177195309;
-      rc->sr_default_decay_limit = 0.23901360046804604;
-      rc->sr_diff_part = 0.008581014394766773;
-      rc->gf_frame_max_boost = 127.34978204980285;
-      rc->gf_max_total_boost = MAX_GF_BOOST;
-      rc->kf_err_per_mb = 723.8337508755031;
-      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
-      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      rc->zm_power_factor = 3.5299221493593413;
+      twopass->active_wq_factor = 55.0;
+      twopass->base_err_per_mb = 34525.33177195309;
+      twopass->sr_default_decay_limit = 0.23901360046804604;
+      twopass->sr_diff_part = 0.008581014394766773;
+      twopass->gf_frame_max_boost = 127.34978204980285;
+      twopass->gf_max_total_boost = MAX_GF_BOOST;
+      twopass->kf_err_per_mb = 723.8337508755031;
+      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      twopass->zm_power_factor = 3.5299221493593413;
     } else if (screen_area <= 640 * 360) {
-      rc->active_wq_factor = 12.5;
-      rc->base_err_per_mb = 18823.978018028298;
-      rc->sr_default_decay_limit = 0.6043527690301296;
-      rc->sr_diff_part = 0.00343296783885544;
-      rc->gf_frame_max_boost = 75.17672317013668;
-      rc->gf_max_total_boost = MAX_GF_BOOST;
-      rc->kf_err_per_mb = 422.2871502380377;
-      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
-      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      rc->zm_power_factor = 2.265742666649307;
+      twopass->active_wq_factor = 12.5;
+      twopass->base_err_per_mb = 18823.978018028298;
+      twopass->sr_default_decay_limit = 0.6043527690301296;
+      twopass->sr_diff_part = 0.00343296783885544;
+      twopass->gf_frame_max_boost = 75.17672317013668;
+      twopass->gf_max_total_boost = MAX_GF_BOOST;
+      twopass->kf_err_per_mb = 422.2871502380377;
+      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      twopass->zm_power_factor = 2.265742666649307;
     } else if (screen_area <= 854 * 480) {
-      rc->active_wq_factor = 51.5;
-      rc->base_err_per_mb = 33718.98307662595;
-      rc->sr_default_decay_limit = 0.33633414970713393;
-      rc->sr_diff_part = 0.00868988716928333;
-      rc->gf_frame_max_boost = 85.2868528581522;
-      rc->gf_max_total_boost = MAX_GF_BOOST;
-      rc->kf_err_per_mb = 1513.4883914008383;
-      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
-      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      rc->zm_power_factor = 3.552278528517416;
+      twopass->active_wq_factor = 51.5;
+      twopass->base_err_per_mb = 33718.98307662595;
+      twopass->sr_default_decay_limit = 0.33633414970713393;
+      twopass->sr_diff_part = 0.00868988716928333;
+      twopass->gf_frame_max_boost = 85.2868528581522;
+      twopass->gf_max_total_boost = MAX_GF_BOOST;
+      twopass->kf_err_per_mb = 1513.4883914008383;
+      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      twopass->zm_power_factor = 3.552278528517416;
     } else if (screen_area <= 1280 * 720) {
-      rc->active_wq_factor = 41.5;
-      rc->base_err_per_mb = 29527.46375825401;
-      rc->sr_default_decay_limit = 0.5009117586299728;
-      rc->sr_diff_part = 0.005007364627260114;
-      rc->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
-      rc->gf_max_total_boost = MAX_GF_BOOST;
-      rc->kf_err_per_mb = 998.6342911785146;
-      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
-      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      rc->zm_power_factor = 2.568627575572356;
+      twopass->active_wq_factor = 41.5;
+      twopass->base_err_per_mb = 29527.46375825401;
+      twopass->sr_default_decay_limit = 0.5009117586299728;
+      twopass->sr_diff_part = 0.005007364627260114;
+      twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+      twopass->gf_max_total_boost = MAX_GF_BOOST;
+      twopass->kf_err_per_mb = 998.6342911785146;
+      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      twopass->zm_power_factor = 2.568627575572356;
     } else if (screen_area <= 1920 * 1080) {
-      rc->active_wq_factor = 31.0;
-      rc->base_err_per_mb = 34474.723463367416;
-      rc->sr_default_decay_limit = 0.23346886902707745;
-      rc->sr_diff_part = 0.011431716637966029;
-      rc->gf_frame_max_boost = 81.00472969483079;
-      rc->gf_max_total_boost = MAX_GF_BOOST;
-      rc->kf_err_per_mb = 35931.25734431429;
-      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
-      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      rc->zm_power_factor = 5.5776463538431935;
+      twopass->active_wq_factor = 31.0;
+      twopass->base_err_per_mb = 34474.723463367416;
+      twopass->sr_default_decay_limit = 0.23346886902707745;
+      twopass->sr_diff_part = 0.011431716637966029;
+      twopass->gf_frame_max_boost = 81.00472969483079;
+      twopass->gf_max_total_boost = MAX_GF_BOOST;
+      twopass->kf_err_per_mb = 35931.25734431429;
+      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      twopass->zm_power_factor = 5.5776463538431935;
     } else {
-      rc->active_wq_factor = AV_WQ_FACTOR;
-      rc->base_err_per_mb = BASELINE_ERR_PER_MB;
-      rc->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
-      rc->sr_diff_part = SR_DIFF_PART;
-      rc->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
-      rc->gf_max_total_boost = MAX_GF_BOOST;
-      rc->kf_err_per_mb = DEF_EPMB_LOW;
-      rc->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-      rc->kf_frame_max_boost_subs = rc->kf_frame_max_boost_first / 2;
-      rc->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      rc->zm_power_factor = ZM_POWER_FACTOR;
+      twopass->active_wq_factor = AV_WQ_FACTOR;
+      twopass->base_err_per_mb = BASELINE_ERR_PER_MB;
+      twopass->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
+      twopass->sr_diff_part = SR_DIFF_PART;
+      twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+      twopass->gf_max_total_boost = MAX_GF_BOOST;
+      twopass->kf_err_per_mb = 250.0;
+      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+      twopass->zm_power_factor = ZM_POWER_FACTOR;
     }
   }
 }
@@ -3596,7 +3609,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   if (cm->current_video_frame == 0) {
     unsigned int screen_area = (cm->width * cm->height);
 
-    init_vizier_params(rc, screen_area);
+    init_vizier_params(twopass, screen_area);
   }
 
   // If this is an arf frame then we dont want to read the stats file or
@@ -3862,9 +3875,9 @@ void vp9_get_next_group_of_picture(const VP9_COMP *cpi, int *first_is_key_frame,
 
   *first_is_key_frame = 0;
   if (rc.frames_to_key == 0) {
-    rc.frames_to_key = vp9_get_frames_to_next_key(
-        &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info,
-        *first_show_idx, rc.min_gf_interval);
+    rc.frames_to_key =
+        vp9_get_frames_to_next_key(&cpi->oxcf, &cpi->frame_info, twopass,
+                                   *first_show_idx, rc.min_gf_interval);
     rc.frames_since_key = 0;
     *first_is_key_frame = 1;
   }
@@ -3903,9 +3916,9 @@ int vp9_get_gop_coding_frame_count(const VP9EncoderConfig *oxcf,
     gop_intra_factor = 1.0;
   }
 
-  frame_count = get_gop_coding_frame_num(
-      use_alt_ref, frame_info, first_pass_info, rc, show_idx,
-      &active_gf_interval, gop_intra_factor, oxcf->lag_in_frames);
+  frame_count = get_gop_coding_frame_num(use_alt_ref, frame_info, twopass, rc,
+                                         show_idx, &active_gf_interval,
+                                         gop_intra_factor, oxcf->lag_in_frames);
   *use_alt_ref &= allow_alt_ref;
   return frame_count;
 }
@@ -3929,7 +3942,7 @@ int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
     int first_is_key_frame = 0;
     if (rc.frames_to_key == 0) {
       rc.frames_to_key = vp9_get_frames_to_next_key(
-          oxcf, frame_info, first_pass_info, show_idx, rc.min_gf_interval);
+          oxcf, frame_info, twopass, show_idx, rc.min_gf_interval);
       rc.frames_since_key = 0;
       first_is_key_frame = 1;
     }
@@ -3951,8 +3964,7 @@ int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
 
 void vp9_get_key_frame_map(const VP9EncoderConfig *oxcf,
                            const FRAME_INFO *frame_info,
-                           const FIRST_PASS_INFO *first_pass_info,
-                           int *key_frame_map) {
+                           const TWO_PASS *const twopass, int *key_frame_map) {
   int show_idx = 0;
   RATE_CONTROL rc;
   vp9_rc_init(oxcf, 1, &rc);
@@ -3966,7 +3978,7 @@ void vp9_get_key_frame_map(const VP9EncoderConfig *oxcf,
     int key_frame_group_size;
     key_frame_map[show_idx] = 1;
     key_frame_group_size = vp9_get_frames_to_next_key(
-        oxcf, frame_info, first_pass_info, show_idx, rc.min_gf_interval);
+        oxcf, frame_info, twopass, show_idx, rc.min_gf_interval);
     assert(key_frame_group_size > 0);
     show_idx += key_frame_group_size;
   }
