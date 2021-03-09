@@ -3567,7 +3567,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
       twopass->zm_power_factor = 2.568627575572356;
-    } else if (screen_area <= 1920 * 1080) {
+    } else {
       twopass->active_wq_factor = 31.0;
       twopass->base_err_per_mb = 34474.723463367416;
       twopass->sr_default_decay_limit = 0.23346886902707745;
@@ -3579,18 +3579,6 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
       twopass->zm_power_factor = 5.5776463538431935;
-    } else {
-      twopass->active_wq_factor = AV_WQ_FACTOR;
-      twopass->base_err_per_mb = BASELINE_ERR_PER_MB;
-      twopass->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
-      twopass->sr_diff_part = SR_DIFF_PART;
-      twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
-      twopass->gf_max_total_boost = MAX_GF_BOOST;
-      twopass->kf_err_per_mb = 250.0;
-      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_power_factor = ZM_POWER_FACTOR;
     }
   }
 }
