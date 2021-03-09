@@ -3520,7 +3520,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 1854.8255436877148;
       twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_first = 25.5;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
       twopass->zm_power_factor = 2.93715229184991;
@@ -3533,7 +3533,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 723.8337508755031;
       twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_first = 185.0;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
       twopass->zm_power_factor = 3.5299221493593413;
@@ -3546,7 +3546,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 422.2871502380377;
       twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_first = 224.5;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
       twopass->zm_power_factor = 2.265742666649307;
@@ -3559,7 +3559,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 1513.4883914008383;
       twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_first = 28.0;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
       twopass->zm_power_factor = 3.552278528517416;
@@ -3568,11 +3568,11 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->base_err_per_mb = 29527.46375825401;
       twopass->sr_default_decay_limit = 0.5009117586299728;
       twopass->sr_diff_part = 0.005007364627260114;
-      twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+      twopass->gf_frame_max_boost = 81.00472969483079;
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 998.6342911785146;
       twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_first = 53.0;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
       twopass->zm_power_factor = 2.568627575572356;
@@ -3581,11 +3581,11 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->base_err_per_mb = 34474.723463367416;
       twopass->sr_default_decay_limit = 0.23346886902707745;
       twopass->sr_diff_part = 0.011431716637966029;
-      twopass->gf_frame_max_boost = 81.00472969483079;
+      twopass->gf_frame_max_boost = 213.2940230360479;
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 35931.25734431429;
       twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+      twopass->kf_frame_max_boost_first = 419.5;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
       twopass->zm_power_factor = 5.5776463538431935;
