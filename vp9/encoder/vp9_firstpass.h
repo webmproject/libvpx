@@ -228,6 +228,7 @@ typedef struct {
   double sr_default_decay_limit;
   double sr_diff_part;
   double kf_err_per_mb;
+  double kf_frame_min_boost;
   double kf_frame_max_boost_first;  // Max for first kf in a chunk.
   double kf_frame_max_boost_subs;   // Max for subsequent mid chunk kfs.
   int kf_max_total_boost;

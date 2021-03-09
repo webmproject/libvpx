@@ -65,9 +65,11 @@
 #define GF_MAX_FRAME_BOOST 96.0
 
 #ifdef AGGRESSIVE_VBR
+#define KF_MIN_FRAME_BOOST 40.0
 #define KF_MAX_FRAME_BOOST 80.0
 #define MAX_KF_TOT_BOOST 4800
 #else
+#define KF_MIN_FRAME_BOOST 40.0
 #define KF_MAX_FRAME_BOOST 96.0
 #define MAX_KF_TOT_BOOST 5400
 #endif
@@ -2017,7 +2019,8 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
   // The 40.0 value here is an experimentally derived baseline minimum.
   // This value is in line with the minimum per frame boost in the alt_ref
   // boost calculation.
-  frame_boost = ((frame_boost + 40.0) * boost_q_correction);
+  frame_boost =
+      ((frame_boost + twopass->kf_frame_min_boost) * boost_q_correction);
 
   // Maximum allowed boost this frame. May be different for first vs subsequent
   // key frames.
@@ -3500,6 +3503,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
     } else {
       twopass->kf_err_per_mb = 250.0;
     }
+    twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
     twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
     twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
     twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
@@ -3515,6 +3519,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_frame_max_boost = 87.27362648627846;
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 1854.8255436877148;
+      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
       twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
@@ -3527,6 +3532,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_frame_max_boost = 127.34978204980285;
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 723.8337508755031;
+      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
       twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
@@ -3539,6 +3545,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_frame_max_boost = 75.17672317013668;
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 422.2871502380377;
+      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
       twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
@@ -3551,6 +3558,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_frame_max_boost = 85.2868528581522;
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 1513.4883914008383;
+      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
       twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
@@ -3563,6 +3571,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 998.6342911785146;
+      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
       twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
@@ -3575,6 +3584,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->gf_frame_max_boost = 81.00472969483079;
       twopass->gf_max_total_boost = MAX_GF_BOOST;
       twopass->kf_err_per_mb = 35931.25734431429;
+      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
       twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
