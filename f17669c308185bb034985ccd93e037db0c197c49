@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "813eba7a_5b55f59b",
+        "filename": "CHANGELOG",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-03-09T03:05:14Z",
+      "side": 1,
+      "message": "partial",
+      "range": {
+        "startLine": 18,
+        "startChar": 61,
+        "endLine": 18,
+        "endChar": 67
+      },
+      "revId": "f17669c308185bb034985ccd93e037db0c197c49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
