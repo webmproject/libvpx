@@ -287,8 +287,20 @@ OBJS-yes += $(LIBVPX_OBJS)
 LIBS-$(if yes,$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
+# Updating version info.
+# https://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
+# For libtool: c=<current>, a=<age>, r=<revision>
+# libtool generates .so file as .so.[c-a].a.r, while -version-info c:r:a is
+# passed to libtool.
+#
+# libvpx library file is generated as libvpx.so.<MAJOR>.<MINOR>.<PATCH>
+# MAJOR = c-a, MINOR = a, PATCH = r
+#
+# To determine SO_VERSION_{MAJOR,MINOR,PATCH}, calculate c,a,r with current
+# SO_VERSION_* then follow the rules in the link to detemine the new version
+# (c1, a1, r1) and set MAJOR to [c1-a1], MINOR to a1 and PATCH to r1
 SO_VERSION_MAJOR := 6
-SO_VERSION_MINOR := 3
+SO_VERSION_MINOR := 4
 SO_VERSION_PATCH := 0
 ifeq ($(filter darwin%,$(TGT_OS)),$(TGT_OS))
 LIBVPX_SO               := libvpx.$(SO_VERSION_MAJOR).dylib
