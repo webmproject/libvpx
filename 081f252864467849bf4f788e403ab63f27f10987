@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e917d4f3_5dcd924b",
+        "filename": "README",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-03-10T03:42:23Z",
+      "side": 1,
+      "message": "you\u0027ll need to update these refs too or just make msys2 [7]",
+      "range": {
+        "startLine": 14,
+        "startChar": 49,
+        "endLine": 14,
+        "endChar": 52
+      },
+      "revId": "081f252864467849bf4f788e403ab63f27f10987",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "927bdcb0_e4aed2f1",
+        "filename": "libs.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-03-10T03:42:23Z",
+      "side": 1,
+      "message": "we should probably add the same comment here as in libaom on how to update these values",
+      "revId": "081f252864467849bf4f788e403ab63f27f10987",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
