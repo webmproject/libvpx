@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5961c739_3926878b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2021-03-11T14:00:37Z",
+      "side": 1,
+      "message": "\u003e Patch Set 4: Verified-1 Code-Review+1\n\u003e \n\u003e Looks like a trivial rebase of patch set 3.\n\nRe-apply plus 2 after simple rebase.",
+      "revId": "8851ed5787b6e30b1f212b171da6cbaa9778a799",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
