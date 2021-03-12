@@ -378,6 +378,9 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
 #endif
 
   oxcf->cpu_used = vp8_cfg.cpu_used;
+  if (cfg.g_pass == VPX_RC_FIRST_PASS) {
+    oxcf->cpu_used = VPXMAX(4, oxcf->cpu_used);
+  }
   oxcf->encode_breakout = vp8_cfg.static_thresh;
   oxcf->play_alternate = vp8_cfg.enable_auto_alt_ref;
   oxcf->noise_sensitivity = vp8_cfg.noise_sensitivity;
