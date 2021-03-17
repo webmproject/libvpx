@@ -693,6 +693,90 @@ typedef struct vpx_codec_enc_cfg {
    *
    */
   int temporal_layering_mode;
+
+  /*!\brief Active worst quality factor.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t active_wq_factor;
+
+  /*!\brief Base error per macroblock.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t base_err_per_mb;
+
+  /*!\brief Second reference default decay limit.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t sr_default_decay_limit;
+
+  /*!\brief Second reference difference factor.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t sr_diff_factor;
+
+  /*!\brief Keyframe error per macroblock.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t kf_err_per_mb;
+
+  /*!\brief Keyframe minimum boost.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t kf_frame_min_boost;
+
+  /*!\brief Keyframe maximum boost, for the first keyframe in a chunk.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t kf_frame_max_boost_first;
+
+  /*!\brief Keyframe maximum boost, for subsequent keyframes.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t kf_frame_max_boost_subs;
+
+  /*!\brief Keyframe maximum total boost.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t kf_max_total_boost;
+
+  /*!\brief Golden frame maximum total boost.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t gf_max_total_boost;
+
+  /*!\brief Golden frame maximum boost.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t gf_frame_max_boost;
+
+  /*!\brief Zero motion power factor.
+   *
+   * Rate control parameters, set from external experiment results.
+   *
+   */
+  vpx_rational_t zm_power_factor;
 } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 
 /*!\brief  vp9 svc extra configure parameters

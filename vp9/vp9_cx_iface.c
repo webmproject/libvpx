@@ -1883,14 +1883,26 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
 
         VPX_SS_DEFAULT_LAYERS,  // ss_number_layers
         { 0 },
-        { 0 },  // ss_target_bitrate
-        1,      // ts_number_layers
-        { 0 },  // ts_target_bitrate
-        { 0 },  // ts_rate_decimator
-        0,      // ts_periodicity
-        { 0 },  // ts_layer_id
-        { 0 },  // layer_taget_bitrate
-        0       // temporal_layering_mode
+        { 0 },     // ss_target_bitrate
+        1,         // ts_number_layers
+        { 0 },     // ts_target_bitrate
+        { 0 },     // ts_rate_decimator
+        0,         // ts_periodicity
+        { 0 },     // ts_layer_id
+        { 0 },     // layer_taget_bitrate
+        0,         // temporal_layering_mode
+        { 0, 0 },  // active_wq_factor
+        { 0, 0 },  // base_err_per_mb
+        { 0, 0 },  // sr_default_decay_limit
+        { 0, 0 },  // sr_diff_factor
+        { 0, 0 },  // kf_err_per_mb
+        { 0, 0 },  // kf_frame_min_boost
+        { 0, 0 },  // kf_frame_max_boost_first
+        { 0, 0 },  // kf_frame_max_boost_subs
+        { 0, 0 },  // kf_max_total_boost
+        { 0, 0 },  // gf_max_total_boost
+        { 0, 0 },  // gf_frame_max_boost
+        { 0, 0 },  // zm_power_factor
     } },
 };
 
