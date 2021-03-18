@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "36963722_f259655f",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1001562
+      },
+      "writtenOn": "2021-03-18T20:30:49Z",
+      "side": 0,
+      "message": "In libvpx, the \u0027pad\u0027 member has an effect. It\u0027s just that it pads the struct to 136 bytes rather than 128 bytes in 64-bit builds. So removing the \u0027pad\u0027 member will make the struct smaller. We will need to analyze how this struct is used to see if it is safe. Very likely we will reach the same conclusion, but we need to analyze it.",
+      "revId": "04086a30664d2a3e89d6a6e4e1c18f1a82c8f958",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
