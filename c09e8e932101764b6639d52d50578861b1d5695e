@@ -34,6 +34,24 @@
       "parentUuid": "723d44a3_602eace1",
       "revId": "c09e8e932101764b6639d52d50578861b1d5695e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3c053627_fdd035c5",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1501342
+      },
+      "writtenOn": "2021-03-18T15:29:35Z",
+      "side": 1,
+      "message": "Build succeeded.\n    0 Warning(s)\n    0 Error(s)",
+      "parentUuid": "0e4fcd0b_5551699a",
+      "revId": "c09e8e932101764b6639d52d50578861b1d5695e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
