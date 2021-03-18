@@ -16,6 +16,24 @@
       "message": "just to restore my earlier suggestion about using [[ ]] as we\u0027re in bash:\n[[ \"$shell_name\" \u003d \"Cygwin\" || \"$shell_name\" \u003d \"Msys\" ]] should work here",
       "revId": "c09e8e932101764b6639d52d50578861b1d5695e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0e4fcd0b_5551699a",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-03-18T00:02:56Z",
+      "side": 1,
+      "message": "\u003e just to restore my earlier suggestion about using [[ ]] as we\u0027re in bash:\n\u003e [[ \"$shell_name\" \u003d \"Cygwin\" || \"$shell_name\" \u003d \"Msys\" ]] should work here\n\nThe output from this version looks correct to me under cygwin and msys. Jerome and Adam does this work for you?",
+      "parentUuid": "723d44a3_602eace1",
+      "revId": "c09e8e932101764b6639d52d50578861b1d5695e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
