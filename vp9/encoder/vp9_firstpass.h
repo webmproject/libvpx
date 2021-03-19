@@ -226,7 +226,7 @@ typedef struct {
   double active_wq_factor;
   double base_err_per_mb;
   double sr_default_decay_limit;
-  double sr_diff_part;
+  double sr_diff_factor;
   double kf_err_per_mb;
   double kf_frame_min_boost;
   double kf_frame_max_boost_first;  // Max for first kf in a chunk.
@@ -262,7 +262,6 @@ void calculate_coded_size(struct VP9_COMP *cpi, int *scaled_frame_width,
 
 struct VP9EncoderConfig;
 int vp9_get_frames_to_next_key(const struct VP9EncoderConfig *oxcf,
-                               const FRAME_INFO *frame_info,
                                const TWO_PASS *const twopass, int kf_show_idx,
                                int min_gf_interval);
 #if CONFIG_RATE_CTRL
@@ -311,7 +310,6 @@ int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
  * number of show frames in the video.
  */
 void vp9_get_key_frame_map(const struct VP9EncoderConfig *oxcf,
-                           const FRAME_INFO *frame_info,
                            const FIRST_PASS_INFO *first_pass_info,
                            int *key_frame_map);
 #endif  // CONFIG_RATE_CTRL
