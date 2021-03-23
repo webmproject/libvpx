@@ -16,6 +16,23 @@
       "message": "Paul, can you take a look at this patch?",
       "revId": "61d4c12a75a5b4ff57df8bcbd0d03d02a1052524",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "494b0765_7479acd3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2021-03-23T14:14:37Z",
+      "side": 1,
+      "message": "I think this looks OK though I intend ultimately to present most of the controls as a factor that adjusts the behavior either side of the current default behavior, rather then the raw value. Hence for example I now have the sr_diff_factor field instead of the sr_diff_part. As such we may want to change names to reflect this as we change them over to this form. We will also need to do the RD parameters but again I am looking to work out a better way of presenting that and hopefully reduce it to one factor each for inter and key frames as the current tweaking of individual multipliers at specific Q thresholds is likely going to cause problems and over-fitting.\n\nFor now lets use this to test the process but we may need to tweak the names, value ranges etc later.\n\n",
+      "revId": "61d4c12a75a5b4ff57df8bcbd0d03d02a1052524",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
