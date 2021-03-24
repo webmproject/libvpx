@@ -51,6 +51,24 @@
       "parentUuid": "494b0765_7479acd3",
       "revId": "61d4c12a75a5b4ff57df8bcbd0d03d02a1052524",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e70adf57_546ab611",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-03-24T04:20:30Z",
+      "side": 1,
+      "message": "I agree that setting parameters arbitrarily will be easily trapped in overfitting. I do think that having some range constraints on these RC parameters is important to improve stability.\n\nI think that with a ML model, it is likely that the metrics could be better than the current baseline. However, my concerns are two folds.\n\nFirst, we don\u0027t know whether the ML model fully explores the capacity of the RC design. It may show some metric gain over the baseline. But if it not significantly better or having problems in some cases, for example, at some bit rate range, shall we accept the ML model?\n\nSecond, we don\u0027t know how can we maintain or improve the model. ML models are not easy to interpret and evolve.\n\nFor this command line option only, I think using rational numbers makes sense. After all it is compatible with the internal convert anyway.\n\nAnd yes, names should be corrected.",
+      "parentUuid": "7cac857c_13aa2a1a",
+      "revId": "61d4c12a75a5b4ff57df8bcbd0d03d02a1052524",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
