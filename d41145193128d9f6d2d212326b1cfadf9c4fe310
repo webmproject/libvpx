@@ -22,6 +22,30 @@
       },
       "revId": "d41145193128d9f6d2d212326b1cfadf9c4fe310",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e0e4a443_07012a99",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-03-30T06:09:21Z",
+      "side": 1,
+      "message": "I have change the variable to match \"sr_diff_factor\". Now the patch provides the functionality to receive values from command line as rational numbers, and pass the value to \"twopass\" struct. But the actual value used in RC is still determined in your function \"init_vizier_params()\".",
+      "parentUuid": "5a7acdef_00dffe12",
+      "range": {
+        "startLine": 652,
+        "startChar": 15,
+        "endLine": 652,
+        "endChar": 27
+      },
+      "revId": "d41145193128d9f6d2d212326b1cfadf9c4fe310",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
