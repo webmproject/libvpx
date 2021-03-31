@@ -103,13 +103,9 @@ typedef enum {
 
 typedef struct {
   // RD multiplier control factors added for Vizier project.
-  double rd_mult_inter_low_qp_fac;
-  double rd_mult_inter_mid_qp_fac;
-  double rd_mult_inter_high_qp_fac;
-  double rd_mult_key_ultralow_qp_fac;
-  double rd_mult_key_low_qp_fac;
-  double rd_mult_key_mid_qp_fac;
-  double rd_mult_key_high_qp_fac;
+  double rd_mult_inter_qp_fac;
+  double rd_mult_arf_qp_fac;
+  double rd_mult_key_qp_fac;
 } RD_CONTROL;
 
 typedef struct RD_OPT {
