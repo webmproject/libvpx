@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <cstdint>
 #include <new>
 
 #include "test/codec_factory.h"
@@ -20,7 +21,7 @@
 namespace {
 
 constexpr int kModelMagicNumber = 51396;
-constexpr unsigned int PrivMagicNumber = 5566;
+constexpr uintptr_t PrivMagicNumber = 5566;
 constexpr int kFrameNum = 5;
 constexpr int kLosslessCodingIndex = 2;
 
