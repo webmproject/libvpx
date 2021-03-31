@@ -205,64 +205,73 @@ void vp9_init_rd_parameters(VP9_COMP *cpi) {
   // Make sure this function is floating point safe.
   vpx_clear_system_state();
 
-  rdc->rd_mult_q_sq_key_high_qp = 7.5;  // No defined Vizer values yet
+  rdc->rd_mult_key_high_qp_fac = 1.0;  // Default: no Vizer values yet
 
   if (0) {
     unsigned int screen_area = (cpi->common.width * cpi->common.height);
 
     if (screen_area <= 176 * 144) {
-      rdc->rd_mult_q_sq_inter_low_qp = 4.0718581295922025;
-      rdc->rd_mult_q_sq_inter_mid_qp = 4.031435609256739;
-      rdc->rd_mult_q_sq_inter_high_qp = 4.295745965132044;
-      rdc->rd_mult_q_sq_key_ultralow_qp = 4.290774097327333;
-      rdc->rd_mult_q_sq_key_low_qp = 5.7037775720838155;
-      rdc->rd_mult_q_sq_key_mid_qp = 4.72424015517201;
+      rdc->rd_mult_inter_low_qp_fac = 1.018;
+      rdc->rd_mult_inter_mid_qp_fac = 0.896;
+      rdc->rd_mult_inter_high_qp_fac = 1.432;
+      rdc->rd_mult_key_ultralow_qp_fac = 1.073;
+      rdc->rd_mult_key_low_qp_fac = 1.630;
+      rdc->rd_mult_key_mid_qp_fac = 1.050;
     } else if (screen_area <= 320 * 240) {
-      rdc->rd_mult_q_sq_inter_low_qp = 4.506676356706102;
-      rdc->rd_mult_q_sq_inter_mid_qp = 4.489349899621181;
-      rdc->rd_mult_q_sq_inter_high_qp = 4.388244213131458;
-      rdc->rd_mult_q_sq_key_ultralow_qp = 4.217074424696166;
-      rdc->rd_mult_q_sq_key_low_qp = 4.497000582319771;
-      rdc->rd_mult_q_sq_key_mid_qp = 4.2825894884789735;
+      rdc->rd_mult_inter_low_qp_fac = 1.127;
+      rdc->rd_mult_inter_mid_qp_fac = 0.998;
+      rdc->rd_mult_inter_high_qp_fac = 1.463;
+      rdc->rd_mult_key_ultralow_qp_fac = 1.054;
+      rdc->rd_mult_key_low_qp_fac = 1.285;
+      rdc->rd_mult_key_mid_qp_fac = 0.952;
     } else if (screen_area <= 640 * 360) {
-      rdc->rd_mult_q_sq_inter_low_qp = 4.730644123689013;
-      rdc->rd_mult_q_sq_inter_mid_qp = 4.314589509578551;
-      rdc->rd_mult_q_sq_inter_high_qp = 4.3702861603380025;
-      rdc->rd_mult_q_sq_key_ultralow_qp = 4.576902541873747;
-      rdc->rd_mult_q_sq_key_low_qp = 6.068652999601526;
-      rdc->rd_mult_q_sq_key_mid_qp = 4.817707474077241;
+      rdc->rd_mult_inter_low_qp_fac = 1.183;
+      rdc->rd_mult_inter_mid_qp_fac = 0.959;
+      rdc->rd_mult_inter_high_qp_fac = 1.457;
+      rdc->rd_mult_key_ultralow_qp_fac = 1.144;
+      rdc->rd_mult_key_low_qp_fac = 1.734;
+      rdc->rd_mult_key_mid_qp_fac = 1.071;
     } else if (screen_area <= 854 * 480) {
-      rdc->rd_mult_q_sq_inter_low_qp = 4.811470143416073;
-      rdc->rd_mult_q_sq_inter_mid_qp = 4.621618127750201;
-      rdc->rd_mult_q_sq_inter_high_qp = 3.969083125219539;
-      rdc->rd_mult_q_sq_key_ultralow_qp = 4.9854544277222566;
-      rdc->rd_mult_q_sq_key_low_qp = 5.073157238799473;
-      rdc->rd_mult_q_sq_key_mid_qp = 5.7587672849242635;
+      rdc->rd_mult_inter_low_qp_fac = 1.203;
+      rdc->rd_mult_inter_mid_qp_fac = 1.027;
+      rdc->rd_mult_inter_high_qp_fac = 1.027;
+      rdc->rd_mult_key_ultralow_qp_fac = 1.246;
+      rdc->rd_mult_key_low_qp_fac = 1.246;
+      rdc->rd_mult_key_mid_qp_fac = 1.280;
     } else if (screen_area <= 1280 * 720) {
-      rdc->rd_mult_q_sq_inter_low_qp = 5.119381136011107;
-      rdc->rd_mult_q_sq_inter_mid_qp = 4.518613675766538;
-      rdc->rd_mult_q_sq_inter_high_qp = 4.410712348825541;
-      rdc->rd_mult_q_sq_key_ultralow_qp = 3.9468491666607326;
-      rdc->rd_mult_q_sq_key_low_qp = 5.848703119971484;
-      rdc->rd_mult_q_sq_key_mid_qp = 5.368947246228739;
+      rdc->rd_mult_inter_low_qp_fac = 1.280;
+      rdc->rd_mult_inter_mid_qp_fac = 1.004;
+      rdc->rd_mult_inter_high_qp_fac = 1.470;
+      rdc->rd_mult_key_ultralow_qp_fac = 0.987;
+      rdc->rd_mult_key_low_qp_fac = 1.671;
+      rdc->rd_mult_key_mid_qp_fac = 1.193;
     } else {
-      rdc->rd_mult_q_sq_inter_low_qp = 6.00569815296199;
-      rdc->rd_mult_q_sq_inter_mid_qp = 3.932565684947023;
-      rdc->rd_mult_q_sq_inter_high_qp = 3.2141187537667797;
-      rdc->rd_mult_q_sq_key_ultralow_qp = 4.399795006320089;
-      rdc->rd_mult_q_sq_key_low_qp = 10.582906599488298;
-      rdc->rd_mult_q_sq_key_mid_qp = 6.274162346360692;
+      rdc->rd_mult_inter_low_qp_fac = 1.50;
+      rdc->rd_mult_inter_mid_qp_fac = 0.874;
+      rdc->rd_mult_inter_high_qp_fac = 1.07;
+      rdc->rd_mult_key_ultralow_qp_fac = 1.1;
+      rdc->rd_mult_key_low_qp_fac = 2.35;
+      rdc->rd_mult_key_mid_qp_fac = 0.837;
     }
   } else {
     // For now force defaults unless testing
-    rdc->rd_mult_q_sq_inter_low_qp = 4.0;
-    rdc->rd_mult_q_sq_inter_mid_qp = 4.5;
-    rdc->rd_mult_q_sq_inter_high_qp = 3.0;
-    rdc->rd_mult_q_sq_key_ultralow_qp = 4.0;
-    rdc->rd_mult_q_sq_key_low_qp = 3.5;
-    rdc->rd_mult_q_sq_key_mid_qp = 4.5;
+    rdc->rd_mult_inter_low_qp_fac = 1.0;
+    rdc->rd_mult_inter_mid_qp_fac = 1.0;
+    rdc->rd_mult_inter_high_qp_fac = 1.0;
+    rdc->rd_mult_key_ultralow_qp_fac = 1.0;
+    rdc->rd_mult_key_low_qp_fac = 1.0;
+    rdc->rd_mult_key_mid_qp_fac = 1.0;
   }
 }
+
+// Default Rd multiplier values for Q ranges
+#define INTER_LOW_QP_RDM 4.0
+#define INTER_MID_QP_RDM 4.5
+#define INTER_HIGH_QP_RDM 3.0
+#define KEY_ULOW_QP_RDM 4.0
+#define KEY_LOW_QP_RDM 3.5
+#define KEY_MID_QP_RDM 4.5
+#define KEY_HIGH_QP_RDM 7.5
 
 int vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
   const RD_CONTROL *rdc = &cpi->rd_ctrl;
@@ -275,22 +284,28 @@ int vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
 
   if (cpi->common.frame_type != KEY_FRAME) {
     if (qindex < 128) {
-      rdmult = (int)((double)rdmult * rdc->rd_mult_q_sq_inter_low_qp);
+      rdmult = (int)((double)rdmult * INTER_LOW_QP_RDM *
+                     rdc->rd_mult_inter_low_qp_fac);
     } else if (qindex < 190) {
-      rdmult = (int)((double)rdmult * rdc->rd_mult_q_sq_inter_mid_qp);
+      rdmult = (int)((double)rdmult * INTER_MID_QP_RDM *
+                     rdc->rd_mult_inter_mid_qp_fac);
     } else {
-      rdmult = (int)((double)rdmult * rdc->rd_mult_q_sq_inter_high_qp);
+      rdmult = (int)((double)rdmult * INTER_HIGH_QP_RDM *
+                     rdc->rd_mult_inter_high_qp_fac);
     }
   } else {
     if (qindex < 64) {
-      rdmult = (int)((double)rdmult * rdc->rd_mult_q_sq_key_ultralow_qp);
+      rdmult = (int)((double)rdmult * KEY_ULOW_QP_RDM *
+                     rdc->rd_mult_key_ultralow_qp_fac);
     } else if (qindex <= 128) {
-      rdmult = (int)((double)rdmult * rdc->rd_mult_q_sq_key_low_qp);
+      rdmult =
+          (int)((double)rdmult * KEY_LOW_QP_RDM * rdc->rd_mult_key_low_qp_fac);
     } else if (qindex < 190) {
-      rdmult = (int)((double)rdmult * rdc->rd_mult_q_sq_key_mid_qp);
-
+      rdmult =
+          (int)((double)rdmult * KEY_MID_QP_RDM * rdc->rd_mult_key_mid_qp_fac);
     } else {
-      rdmult = (int)((double)rdmult * rdc->rd_mult_q_sq_key_high_qp);
+      rdmult = (int)((double)rdmult * KEY_HIGH_QP_RDM *
+                     rdc->rd_mult_key_high_qp_fac);
     }
   }
 
