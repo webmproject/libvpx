@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4650dd47_81155583",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-04-01T16:44:35Z",
+      "side": 1,
+      "message": "Is this CL the same as the last one?\nhttps://chromium-review.googlesource.com/c/webm/libvpx/+/2797334",
+      "revId": "9e6dd4db10cc163bc2f14afdf775f75121b2133a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
