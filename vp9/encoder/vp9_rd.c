@@ -205,62 +205,36 @@ void vp9_init_rd_parameters(VP9_COMP *cpi) {
   // Make sure this function is floating point safe.
   vpx_clear_system_state();
 
-  rdc->rd_mult_key_high_qp_fac = 1.0;  // Default: no Vizer values yet
+  rdc->rd_mult_arf_qp_fac = 1.0;  // Default: No Vizier values yet
 
+  // These hard wired estimates for the Vizier values will be removed later
+  // as the per format factors will be set on the command line.
   if (0) {
     unsigned int screen_area = (cpi->common.width * cpi->common.height);
 
     if (screen_area <= 176 * 144) {
-      rdc->rd_mult_inter_low_qp_fac = 1.018;
-      rdc->rd_mult_inter_mid_qp_fac = 0.896;
-      rdc->rd_mult_inter_high_qp_fac = 1.432;
-      rdc->rd_mult_key_ultralow_qp_fac = 1.073;
-      rdc->rd_mult_key_low_qp_fac = 1.630;
-      rdc->rd_mult_key_mid_qp_fac = 1.050;
+      rdc->rd_mult_inter_qp_fac = 0.896;
+      rdc->rd_mult_key_qp_fac = 1.050;
     } else if (screen_area <= 320 * 240) {
-      rdc->rd_mult_inter_low_qp_fac = 1.127;
-      rdc->rd_mult_inter_mid_qp_fac = 0.998;
-      rdc->rd_mult_inter_high_qp_fac = 1.463;
-      rdc->rd_mult_key_ultralow_qp_fac = 1.054;
-      rdc->rd_mult_key_low_qp_fac = 1.285;
-      rdc->rd_mult_key_mid_qp_fac = 0.952;
+      rdc->rd_mult_inter_qp_fac = 0.998;
+      rdc->rd_mult_key_qp_fac = 0.952;
     } else if (screen_area <= 640 * 360) {
-      rdc->rd_mult_inter_low_qp_fac = 1.183;
-      rdc->rd_mult_inter_mid_qp_fac = 0.959;
-      rdc->rd_mult_inter_high_qp_fac = 1.457;
-      rdc->rd_mult_key_ultralow_qp_fac = 1.144;
-      rdc->rd_mult_key_low_qp_fac = 1.734;
-      rdc->rd_mult_key_mid_qp_fac = 1.071;
+      rdc->rd_mult_inter_qp_fac = 0.959;
+      rdc->rd_mult_key_qp_fac = 1.071;
     } else if (screen_area <= 854 * 480) {
-      rdc->rd_mult_inter_low_qp_fac = 1.203;
-      rdc->rd_mult_inter_mid_qp_fac = 1.027;
-      rdc->rd_mult_inter_high_qp_fac = 1.027;
-      rdc->rd_mult_key_ultralow_qp_fac = 1.246;
-      rdc->rd_mult_key_low_qp_fac = 1.246;
-      rdc->rd_mult_key_mid_qp_fac = 1.280;
+      rdc->rd_mult_inter_qp_fac = 1.027;
+      rdc->rd_mult_key_qp_fac = 1.280;
     } else if (screen_area <= 1280 * 720) {
-      rdc->rd_mult_inter_low_qp_fac = 1.280;
-      rdc->rd_mult_inter_mid_qp_fac = 1.004;
-      rdc->rd_mult_inter_high_qp_fac = 1.470;
-      rdc->rd_mult_key_ultralow_qp_fac = 0.987;
-      rdc->rd_mult_key_low_qp_fac = 1.671;
-      rdc->rd_mult_key_mid_qp_fac = 1.193;
+      rdc->rd_mult_inter_qp_fac = 1.004;
+      rdc->rd_mult_key_qp_fac = 1.193;
     } else {
-      rdc->rd_mult_inter_low_qp_fac = 1.50;
-      rdc->rd_mult_inter_mid_qp_fac = 0.874;
-      rdc->rd_mult_inter_high_qp_fac = 1.07;
-      rdc->rd_mult_key_ultralow_qp_fac = 1.1;
-      rdc->rd_mult_key_low_qp_fac = 2.35;
-      rdc->rd_mult_key_mid_qp_fac = 0.837;
+      rdc->rd_mult_inter_qp_fac = 0.874;
+      rdc->rd_mult_key_qp_fac = 0.837;
     }
   } else {
     // For now force defaults unless testing
-    rdc->rd_mult_inter_low_qp_fac = 1.0;
-    rdc->rd_mult_inter_mid_qp_fac = 1.0;
-    rdc->rd_mult_inter_high_qp_fac = 1.0;
-    rdc->rd_mult_key_ultralow_qp_fac = 1.0;
-    rdc->rd_mult_key_low_qp_fac = 1.0;
-    rdc->rd_mult_key_mid_qp_fac = 1.0;
+    rdc->rd_mult_inter_qp_fac = 1.0;
+    rdc->rd_mult_key_qp_fac = 1.0;
   }
 }
 
@@ -273,6 +247,27 @@ void vp9_init_rd_parameters(VP9_COMP *cpi) {
 #define KEY_MID_QP_RDM 4.5
 #define KEY_HIGH_QP_RDM 7.5
 
+// Returns the default rd multiplier for inter frames for a given qindex.
+// The function here is a first pass estimate based on data from
+// a previous Vizer run
+static double def_inter_rd_multiplier(int qindex) {
+  return 4.15 + (0.001 * (double)qindex);
+}
+
+// Returns the default rd multiplier for ARF/Golden Frames for a given qindex.
+// The function here is a first pass estimate based on data from
+// a previous Vizer run
+static double def_arf_rd_multiplier(int qindex) {
+  return 4.25 + (0.001 * (double)qindex);
+}
+
+// Returns the default rd multiplier for key frames for a given qindex.
+// The function here is a first pass estimate based on data from
+// a previous Vizer run
+static double def_kf_rd_multiplier(int qindex) {
+  return 4.35 + (0.001 * (double)qindex);
+}
+
 int vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
   const RD_CONTROL *rdc = &cpi->rd_ctrl;
   const int q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
@@ -282,31 +277,16 @@ int vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
   // Make sure this function is floating point safe.
   vpx_clear_system_state();
 
-  if (cpi->common.frame_type != KEY_FRAME) {
-    if (qindex < 128) {
-      rdmult = (int)((double)rdmult * INTER_LOW_QP_RDM *
-                     rdc->rd_mult_inter_low_qp_fac);
-    } else if (qindex < 190) {
-      rdmult = (int)((double)rdmult * INTER_MID_QP_RDM *
-                     rdc->rd_mult_inter_mid_qp_fac);
-    } else {
-      rdmult = (int)((double)rdmult * INTER_HIGH_QP_RDM *
-                     rdc->rd_mult_inter_high_qp_fac);
-    }
+  if (cpi->common.frame_type == KEY_FRAME) {
+    double def_rd_q_mult = def_kf_rd_multiplier(qindex);
+    rdmult = (int)((double)rdmult * def_rd_q_mult * rdc->rd_mult_key_qp_fac);
+  } else if (!cpi->rc.is_src_frame_alt_ref &&
+             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
+    double def_rd_q_mult = def_arf_rd_multiplier(qindex);
+    rdmult = (int)((double)rdmult * def_rd_q_mult * rdc->rd_mult_arf_qp_fac);
   } else {
-    if (qindex < 64) {
-      rdmult = (int)((double)rdmult * KEY_ULOW_QP_RDM *
-                     rdc->rd_mult_key_ultralow_qp_fac);
-    } else if (qindex <= 128) {
-      rdmult =
-          (int)((double)rdmult * KEY_LOW_QP_RDM * rdc->rd_mult_key_low_qp_fac);
-    } else if (qindex < 190) {
-      rdmult =
-          (int)((double)rdmult * KEY_MID_QP_RDM * rdc->rd_mult_key_mid_qp_fac);
-    } else {
-      rdmult = (int)((double)rdmult * KEY_HIGH_QP_RDM *
-                     rdc->rd_mult_key_high_qp_fac);
-    }
+    double def_rd_q_mult = def_inter_rd_multiplier(qindex);
+    rdmult = (int)((double)rdmult * def_rd_q_mult * rdc->rd_mult_inter_qp_fac);
   }
 
 #if CONFIG_VP9_HIGHBITDEPTH
