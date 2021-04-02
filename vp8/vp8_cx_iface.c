@@ -257,6 +257,19 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     ERROR("g_threads cannot be bigger than number of token partitions");
 #endif
 
+  // The range below shall be further tuned.
+  RANGE_CHECK(cfg, active_wq_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, base_err_per_mb.den, 1, 1000);
+  RANGE_CHECK(cfg, sr_default_decay_limit.den, 1, 1000);
+  RANGE_CHECK(cfg, sr_diff_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_err_per_mb.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_min_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_max_boost_subs.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_max_total_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_max_total_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_frame_max_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, zm_power_factor.den, 1, 1000);
+
   return VPX_CODEC_OK;
 }
 
@@ -1289,18 +1302,18 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] = {
         { 0 },    /* ts_layer_id */
         { 0 },    /* layer_target_bitrate */
         0,        /* temporal_layering_mode */
-        { 0, 0 }, /* active_wq_factor */
-        { 0, 0 }, /* base_err_per_mb */
-        { 0, 0 }, /* sr_default_decay_limit */
-        { 0, 0 }, /* sr_diff_factor */
-        { 0, 0 }, /* kf_err_per_mb */
-        { 0, 0 }, /* kf_frame_min_boost */
-        { 0, 0 }, /* kf_frame_max_boost_first */
-        { 0, 0 }, /* kf_frame_max_boost_subs */
-        { 0, 0 }, /* kf_max_total_boost */
-        { 0, 0 }, /* gf_max_total_boost */
-        { 0, 0 }, /* gf_frame_max_boost */
-        { 0, 0 }, /* zm_power_factor */
+        { 0, 1 }, /* active_wq_factor */
+        { 0, 1 }, /* base_err_per_mb */
+        { 0, 1 }, /* sr_default_decay_limit */
+        { 0, 1 }, /* sr_diff_factor */
+        { 0, 1 }, /* kf_err_per_mb */
+        { 0, 1 }, /* kf_frame_min_boost */
+        { 0, 1 }, /* kf_frame_max_boost_first */
+        { 0, 1 }, /* kf_frame_max_boost_subs */
+        { 0, 1 }, /* kf_max_total_boost */
+        { 0, 1 }, /* gf_max_total_boost */
+        { 0, 1 }, /* gf_frame_max_boost */
+        { 0, 1 }, /* zm_power_factor */
     } },
 };
 

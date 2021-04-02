@@ -348,6 +348,20 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   }
   RANGE_CHECK(extra_cfg, color_space, VPX_CS_UNKNOWN, VPX_CS_SRGB);
   RANGE_CHECK(extra_cfg, color_range, VPX_CR_STUDIO_RANGE, VPX_CR_FULL_RANGE);
+
+  // The range below shall be further tuned.
+  RANGE_CHECK(cfg, active_wq_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, base_err_per_mb.den, 1, 1000);
+  RANGE_CHECK(cfg, sr_default_decay_limit.den, 1, 1000);
+  RANGE_CHECK(cfg, sr_diff_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_err_per_mb.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_min_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_max_boost_subs.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_max_total_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_max_total_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_frame_max_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, zm_power_factor.den, 1, 1000);
+
   return VPX_CODEC_OK;
 }
 
@@ -638,6 +652,41 @@ static vpx_codec_err_t set_encoder_config(
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t set_twopass_params_from_config(
+    const vpx_codec_enc_cfg_t *const cfg, struct VP9_COMP *cpi) {
+  if (cpi == NULL) return VPX_CODEC_ERROR;
+
+  cpi->twopass.active_wq_factor =
+      (double)cfg->active_wq_factor.num / (double)cfg->active_wq_factor.den;
+  cpi->twopass.base_err_per_mb =
+      (double)cfg->base_err_per_mb.num / (double)cfg->base_err_per_mb.den;
+  cpi->twopass.sr_default_decay_limit =
+      (double)cfg->sr_default_decay_limit.num /
+      (double)cfg->sr_default_decay_limit.den;
+  cpi->twopass.sr_diff_factor =
+      (double)cfg->sr_diff_factor.num / (double)cfg->sr_diff_factor.den;
+  cpi->twopass.kf_err_per_mb =
+      (double)cfg->kf_err_per_mb.num / (double)cfg->kf_err_per_mb.den;
+  cpi->twopass.kf_frame_min_boost =
+      (double)cfg->kf_frame_min_boost.num / (double)cfg->kf_frame_min_boost.den;
+  cpi->twopass.kf_frame_max_boost_first =
+      (double)cfg->kf_frame_max_boost_first.num /
+      (double)cfg->kf_frame_max_boost_first.den;
+  cpi->twopass.kf_frame_max_boost_subs =
+      (double)cfg->kf_frame_max_boost_subs.num /
+      (double)cfg->kf_frame_max_boost_subs.den;
+  cpi->twopass.kf_max_total_boost = (int)((double)cfg->kf_max_total_boost.num /
+                                          (double)cfg->kf_max_total_boost.den);
+  cpi->twopass.gf_max_total_boost = (int)((double)cfg->gf_max_total_boost.num /
+                                          (double)cfg->gf_max_total_boost.den);
+  cpi->twopass.gf_frame_max_boost =
+      (double)cfg->gf_frame_max_boost.num / (double)cfg->gf_frame_max_boost.den;
+  cpi->twopass.zm_power_factor =
+      (double)cfg->zm_power_factor.num / (double)cfg->zm_power_factor.den;
+
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
                                           const vpx_codec_enc_cfg_t *cfg) {
   vpx_codec_err_t res;
@@ -664,6 +713,7 @@ static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
   if (res == VPX_CODEC_OK) {
     ctx->cfg = *cfg;
     set_encoder_config(&ctx->oxcf, &ctx->cfg, &ctx->extra_cfg);
+    set_twopass_params_from_config(&ctx->cfg, ctx->cpi);
     // On profile change, request a key frame
     force_key |= ctx->cpi->common.profile != ctx->oxcf.profile;
     vp9_change_config(ctx->cpi, &ctx->oxcf);
@@ -696,6 +746,7 @@ static vpx_codec_err_t update_extra_cfg(vpx_codec_alg_priv_t *ctx,
   if (res == VPX_CODEC_OK) {
     ctx->extra_cfg = *extra_cfg;
     set_encoder_config(&ctx->oxcf, &ctx->cfg, &ctx->extra_cfg);
+    set_twopass_params_from_config(&ctx->cfg, ctx->cpi);
     vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
   return res;
@@ -940,6 +991,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 #endif
       priv->cpi = vp9_create_compressor(&priv->oxcf, priv->buffer_pool);
       if (priv->cpi == NULL) res = VPX_CODEC_MEM_ERROR;
+      set_twopass_params_from_config(&priv->cfg, priv->cpi);
     }
   }
 
@@ -1891,18 +1943,18 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
         { 0 },     // ts_layer_id
         { 0 },     // layer_taget_bitrate
         0,         // temporal_layering_mode
-        { 0, 0 },  // active_wq_factor
-        { 0, 0 },  // base_err_per_mb
-        { 0, 0 },  // sr_default_decay_limit
-        { 0, 0 },  // sr_diff_factor
-        { 0, 0 },  // kf_err_per_mb
-        { 0, 0 },  // kf_frame_min_boost
-        { 0, 0 },  // kf_frame_max_boost_first
-        { 0, 0 },  // kf_frame_max_boost_subs
-        { 0, 0 },  // kf_max_total_boost
-        { 0, 0 },  // gf_max_total_boost
-        { 0, 0 },  // gf_frame_max_boost
-        { 0, 0 },  // zm_power_factor
+        { 0, 1 },  // active_wq_factor
+        { 0, 1 },  // base_err_per_mb
+        { 0, 1 },  // sr_default_decay_limit
+        { 0, 1 },  // sr_diff_factor
+        { 0, 1 },  // kf_err_per_mb
+        { 0, 1 },  // kf_frame_min_boost
+        { 0, 1 },  // kf_frame_max_boost_first
+        { 0, 1 },  // kf_frame_max_boost_subs
+        { 0, 1 },  // kf_max_total_boost
+        { 0, 1 },  // gf_max_total_boost
+        { 0, 1 },  // gf_frame_max_boost
+        { 0, 1 },  // zm_power_factor
     } },
 };
 
