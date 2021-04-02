@@ -2545,6 +2545,9 @@ typedef struct RANGE {
  * (The following fields will remain unchanged after initialization of encoder.)
  *   rc->static_scene_max_gf_interval
  *   rc->min_gf_interval
+ *   twopass->sr_diff_factor
+ *   twopass->sr_default_decay_limit
+ *   twopass->zm_factor
  *
  * Dynamic fields:
  * (The following fields will be updated before or after coding each frame.)
@@ -2559,10 +2562,10 @@ typedef struct RANGE {
  * structs.
  */
 static int get_gop_coding_frame_num(
-    int *use_alt_ref, const FRAME_INFO *frame_info, TWO_PASS *const twopass,
-    const RATE_CONTROL *rc, int gf_start_show_idx,
-    const RANGE *active_gf_interval, double gop_intra_factor,
-    int lag_in_frames) {
+    int *use_alt_ref, const FRAME_INFO *frame_info,
+    const TWO_PASS *const twopass, const RATE_CONTROL *rc,
+    int gf_start_show_idx, const RANGE *active_gf_interval,
+    double gop_intra_factor, int lag_in_frames) {
   const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   double loop_decay_rate = 1.00;
   double mv_ratio_accumulator = 0.0;
@@ -3868,7 +3871,7 @@ void vp9_get_next_group_of_picture(const VP9_COMP *cpi, int *first_is_key_frame,
   *first_is_key_frame = 0;
   if (rc.frames_to_key == 0) {
     rc.frames_to_key = vp9_get_frames_to_next_key(
-        &cpi->oxcf, twopass, *first_show_idx, rc.min_gf_interval);
+        &cpi->oxcf, &cpi->twopass, *first_show_idx, rc.min_gf_interval);
     rc.frames_since_key = 0;
     *first_is_key_frame = 1;
   }
@@ -3879,15 +3882,15 @@ void vp9_get_next_group_of_picture(const VP9_COMP *cpi, int *first_is_key_frame,
     assert(*coding_frame_count < rc.frames_to_key);
   } else {
     *coding_frame_count = vp9_get_gop_coding_frame_count(
-        &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info, &rc,
-        *first_show_idx, multi_layer_arf, allow_alt_ref, *first_is_key_frame,
+        &cpi->oxcf, &cpi->twopass, &cpi->frame_info, &rc, *first_show_idx,
+        multi_layer_arf, allow_alt_ref, *first_is_key_frame,
         *last_gop_use_alt_ref, use_alt_ref);
   }
 }
 
 int vp9_get_gop_coding_frame_count(const VP9EncoderConfig *oxcf,
+                                   const TWO_PASS *const twopass,
                                    const FRAME_INFO *frame_info,
-                                   const FIRST_PASS_INFO *first_pass_info,
                                    const RATE_CONTROL *rc, int show_idx,
                                    int multi_layer_arf, int allow_alt_ref,
                                    int first_is_key_frame,
@@ -3917,6 +3920,7 @@ int vp9_get_gop_coding_frame_count(const VP9EncoderConfig *oxcf,
 // Under CONFIG_RATE_CTRL, once the first_pass_info is ready, the number of
 // coding frames (including show frame and alt ref) can be determined.
 int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
+                             const TWO_PASS *const twopass,
                              const FRAME_INFO *frame_info,
                              const FIRST_PASS_INFO *first_pass_info,
                              int multi_layer_arf, int allow_alt_ref) {
@@ -3939,7 +3943,7 @@ int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
     }
 
     gop_coding_frame_count = vp9_get_gop_coding_frame_count(
-        oxcf, frame_info, first_pass_info, &rc, show_idx, multi_layer_arf,
+        oxcf, twopass, frame_info, &rc, show_idx, multi_layer_arf,
         allow_alt_ref, first_is_key_frame, last_gop_use_alt_ref, &use_alt_ref);
 
     rc.source_alt_ref_active = use_alt_ref;
@@ -3955,6 +3959,7 @@ int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
 
 void vp9_get_key_frame_map(const VP9EncoderConfig *oxcf,
                            const TWO_PASS *const twopass, int *key_frame_map) {
+  const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   int show_idx = 0;
   RATE_CONTROL rc;
   vp9_rc_init(oxcf, 1, &rc);
