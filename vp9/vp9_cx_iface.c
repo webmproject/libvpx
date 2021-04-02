@@ -638,41 +638,6 @@ static vpx_codec_err_t set_encoder_config(
   return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t set_twopass_params_from_config(
-    const vpx_codec_enc_cfg_t *const cfg, struct VP9_COMP *cpi) {
-  if (cpi == NULL) return VPX_CODEC_ERROR;
-
-  cpi->twopass.active_wq_factor =
-      (double)cfg->active_wq_factor.num / (double)cfg->active_wq_factor.den;
-  cpi->twopass.base_err_per_mb =
-      (double)cfg->base_err_per_mb.num / (double)cfg->base_err_per_mb.den;
-  cpi->twopass.sr_default_decay_limit =
-      (double)cfg->sr_default_decay_limit.num /
-      (double)cfg->sr_default_decay_limit.den;
-  cpi->twopass.sr_diff_factor =
-      (double)cfg->sr_diff_factor.num / (double)cfg->sr_diff_factor.den;
-  cpi->twopass.kf_err_per_mb =
-      (double)cfg->kf_err_per_mb.num / (double)cfg->kf_err_per_mb.den;
-  cpi->twopass.kf_frame_min_boost =
-      (double)cfg->kf_frame_min_boost.num / (double)cfg->kf_frame_min_boost.den;
-  cpi->twopass.kf_frame_max_boost_first =
-      (double)cfg->kf_frame_max_boost_first.num /
-      (double)cfg->kf_frame_max_boost_first.den;
-  cpi->twopass.kf_frame_max_boost_subs =
-      (double)cfg->kf_frame_max_boost_subs.num /
-      (double)cfg->kf_frame_max_boost_subs.den;
-  cpi->twopass.kf_max_total_boost = (int)((double)cfg->kf_max_total_boost.num /
-                                          (double)cfg->kf_max_total_boost.den);
-  cpi->twopass.gf_max_total_boost = (int)((double)cfg->gf_max_total_boost.num /
-                                          (double)cfg->gf_max_total_boost.den);
-  cpi->twopass.gf_frame_max_boost =
-      (double)cfg->gf_frame_max_boost.num / (double)cfg->gf_frame_max_boost.den;
-  cpi->twopass.zm_power_factor =
-      (double)cfg->zm_power_factor.num / (double)cfg->zm_power_factor.den;
-
-  return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
                                           const vpx_codec_enc_cfg_t *cfg) {
   vpx_codec_err_t res;
@@ -699,7 +664,6 @@ static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
   if (res == VPX_CODEC_OK) {
     ctx->cfg = *cfg;
     set_encoder_config(&ctx->oxcf, &ctx->cfg, &ctx->extra_cfg);
-    set_twopass_params_from_config(&ctx->cfg, ctx->cpi);
     // On profile change, request a key frame
     force_key |= ctx->cpi->common.profile != ctx->oxcf.profile;
     vp9_change_config(ctx->cpi, &ctx->oxcf);
@@ -732,7 +696,6 @@ static vpx_codec_err_t update_extra_cfg(vpx_codec_alg_priv_t *ctx,
   if (res == VPX_CODEC_OK) {
     ctx->extra_cfg = *extra_cfg;
     set_encoder_config(&ctx->oxcf, &ctx->cfg, &ctx->extra_cfg);
-    set_twopass_params_from_config(&ctx->cfg, ctx->cpi);
     vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
   return res;
@@ -977,7 +940,6 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 #endif
       priv->cpi = vp9_create_compressor(&priv->oxcf, priv->buffer_pool);
       if (priv->cpi == NULL) res = VPX_CODEC_MEM_ERROR;
-      set_twopass_params_from_config(&priv->cfg, priv->cpi);
     }
   }
 
