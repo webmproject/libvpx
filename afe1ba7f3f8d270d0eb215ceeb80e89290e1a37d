@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7e2411d_c716069b",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-04-05T22:45:56Z",
+      "side": 1,
+      "message": "a single cast should be enough, but this ok either way.",
+      "range": {
+        "startLine": 660,
+        "startChar": 42,
+        "endLine": 660,
+        "endChar": 50
+      },
+      "revId": "afe1ba7f3f8d270d0eb215ceeb80e89290e1a37d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
