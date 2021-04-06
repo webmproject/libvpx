@@ -234,7 +234,7 @@ typedef struct {
   int kf_max_total_boost;
   int gf_max_total_boost;
   double gf_frame_max_boost;
-  double zm_power_factor;
+  double zm_factor;
 } TWO_PASS;
 
 struct VP9_COMP;
