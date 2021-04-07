@@ -238,15 +238,6 @@ void vp9_init_rd_parameters(VP9_COMP *cpi) {
   }
 }
 
-// Default Rd multiplier values for Q ranges
-#define INTER_LOW_QP_RDM 4.0
-#define INTER_MID_QP_RDM 4.5
-#define INTER_HIGH_QP_RDM 3.0
-#define KEY_ULOW_QP_RDM 4.0
-#define KEY_LOW_QP_RDM 3.5
-#define KEY_MID_QP_RDM 4.5
-#define KEY_HIGH_QP_RDM 7.5
-
 // Returns the default rd multiplier for inter frames for a given qindex.
 // The function here is a first pass estimate based on data from
 // a previous Vizer run
