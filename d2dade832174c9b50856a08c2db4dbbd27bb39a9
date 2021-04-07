@@ -22,6 +22,30 @@
       },
       "revId": "d2dade832174c9b50856a08c2db4dbbd27bb39a9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f6169ddc_dc65ae55",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2560,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-04-07T00:15:38Z",
+      "side": 1,
+      "message": "The comment here is not affected by the change.\nUnused parameters in vp9_firstpass.h comment is deleted.",
+      "parentUuid": "da9013e8_9745e0c4",
+      "range": {
+        "startLine": 2542,
+        "startChar": 0,
+        "endLine": 2560,
+        "endChar": 3
+      },
+      "revId": "d2dade832174c9b50856a08c2db4dbbd27bb39a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
