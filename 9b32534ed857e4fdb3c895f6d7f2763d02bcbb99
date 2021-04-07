@@ -16,6 +16,24 @@
       "message": "just so the commit message is self-contained you could add the short commit (git log --oneline) for reference:\nd3aaac367 Change calculation of rd multiplier.",
       "revId": "9b32534ed857e4fdb3c895f6d7f2763d02bcbb99",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5522ddbd_3f1e3008",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-04-07T03:15:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07bc3b39_27dd16d0",
+      "revId": "9b32534ed857e4fdb3c895f6d7f2763d02bcbb99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
