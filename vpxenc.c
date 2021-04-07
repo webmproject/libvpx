@@ -310,7 +310,7 @@ static const arg_def_t gf_max_total_boost =
     ARG_DEF(NULL, "gf-max-total-boost", 1, "Golden frame max total boost");
 static const arg_def_t gf_frame_max_boost =
     ARG_DEF(NULL, "gf-frame-max-boost", 1, "Golden frame max boost");
-static const arg_def_t zm_power_factor =
+static const arg_def_t zm_factor =
     ARG_DEF(NULL, "zm-power-factor", 1, "Zero motion power factor");
 static const arg_def_t *vizier_rc_args[] = { &active_wq_factor,
                                              &base_err_per_mb,
@@ -323,7 +323,7 @@ static const arg_def_t *vizier_rc_args[] = { &active_wq_factor,
                                              &kf_max_total_boost,
                                              &gf_max_total_boost,
                                              &gf_frame_max_boost,
-                                             &zm_power_factor,
+                                             &zm_factor,
                                              NULL };
 #endif
 
@@ -1048,8 +1048,8 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.gf_max_total_boost = arg_parse_rational(&arg);
     } else if (arg_match(&arg, &gf_frame_max_boost, argi)) {
       config->cfg.gf_frame_max_boost = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &zm_power_factor, argi)) {
-      config->cfg.zm_power_factor = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &zm_factor, argi)) {
+      config->cfg.zm_factor = arg_parse_rational(&arg);
 #endif
 #if CONFIG_VP9_HIGHBITDEPTH
     } else if (arg_match(&arg, &test16bitinternalarg, argi)) {

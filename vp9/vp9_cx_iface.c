@@ -360,7 +360,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(cfg, kf_max_total_boost.den, 1, 1000);
   RANGE_CHECK(cfg, gf_max_total_boost.den, 1, 1000);
   RANGE_CHECK(cfg, gf_frame_max_boost.den, 1, 1000);
-  RANGE_CHECK(cfg, zm_power_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, zm_factor.den, 1, 1000);
 
   return VPX_CODEC_OK;
 }
@@ -681,8 +681,8 @@ static vpx_codec_err_t set_twopass_params_from_config(
                                           (double)cfg->gf_max_total_boost.den);
   cpi->twopass.gf_frame_max_boost =
       (double)cfg->gf_frame_max_boost.num / (double)cfg->gf_frame_max_boost.den;
-  cpi->twopass.zm_power_factor =
-      (double)cfg->zm_power_factor.num / (double)cfg->zm_power_factor.den;
+  cpi->twopass.zm_factor =
+      (double)cfg->zm_factor.num / (double)cfg->zm_factor.den;
 
   return VPX_CODEC_OK;
 }
@@ -1954,7 +1954,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
         { 0, 1 },  // kf_max_total_boost
         { 0, 1 },  // gf_max_total_boost
         { 0, 1 },  // gf_frame_max_boost
-        { 0, 1 },  // zm_power_factor
+        { 0, 1 },  // zm_factor
     } },
 };
 

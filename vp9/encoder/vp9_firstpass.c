@@ -73,7 +73,7 @@
 #define MAX_KF_TOT_BOOST 5400
 #endif
 
-#define ZM_POWER_FACTOR 0.75
+#define DEFAULT_ZM_FACTOR 0.5
 #define MINQ_ADJ_LIMIT 48
 #define MINQ_ADJ_LIMIT_CQ 20
 #define HIGH_UNDERSHOOT_RATIO 2
@@ -1878,9 +1878,17 @@ static double get_zero_motion_factor(const TWO_PASS *const twopass,
 static double get_prediction_decay_rate(const TWO_PASS *const twopass,
                                         const FIRSTPASS_STATS *frame_stats) {
   const double sr_decay_rate = get_sr_decay_rate(twopass, frame_stats);
-  const double zero_motion_factor =
-      (0.95 * pow((frame_stats->pcnt_inter - frame_stats->pcnt_motion),
-                  twopass->zm_power_factor));
+  double zero_motion_factor =
+      twopass->zm_factor * DEFAULT_ZM_FACTOR *
+      (frame_stats->pcnt_inter - frame_stats->pcnt_motion);
+
+  // Clamp value to range 0.0 to 1.0
+  // This should happen anyway if input values are sensibly clamped but checked
+  // here just in case.
+  if (zero_motion_factor > 1.0)
+    zero_motion_factor = 1.0;
+  else if (zero_motion_factor < 0.0)
+    zero_motion_factor = 0.0;
 
   return VPXMAX(zero_motion_factor,
                 (sr_decay_rate + ((1.0 - sr_decay_rate) * zero_motion_factor)));
@@ -3501,7 +3509,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
     twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
     twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
     twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-    twopass->zm_power_factor = ZM_POWER_FACTOR;
+    twopass->zm_factor = 1.0;
   } else {
     // Vizer experimental parameters from training.
     // Later these will be set via the command line.
@@ -3517,7 +3525,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->kf_frame_max_boost_first = 25.5;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_power_factor = 2.93715229184991;
+      twopass->zm_factor = 1.0;
     } else if (screen_area <= 320 * 240) {
       twopass->active_wq_factor = 55.0;
       twopass->base_err_per_mb = 34525.33177195309;
@@ -3530,7 +3538,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->kf_frame_max_boost_first = 185.0;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_power_factor = 3.5299221493593413;
+      twopass->zm_factor = 1.0;
     } else if (screen_area <= 640 * 360) {
       twopass->active_wq_factor = 12.5;
       twopass->base_err_per_mb = 18823.978018028298;
@@ -3543,7 +3551,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->kf_frame_max_boost_first = 224.5;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_power_factor = 2.265742666649307;
+      twopass->zm_factor = 1.0;
     } else if (screen_area <= 854 * 480) {
       twopass->active_wq_factor = 51.5;
       twopass->base_err_per_mb = 33718.98307662595;
@@ -3556,7 +3564,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->kf_frame_max_boost_first = 28.0;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_power_factor = 3.552278528517416;
+      twopass->zm_factor = 1.0;
     } else if (screen_area <= 1280 * 720) {
       twopass->active_wq_factor = 41.5;
       twopass->base_err_per_mb = 29527.46375825401;
@@ -3569,7 +3577,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->kf_frame_max_boost_first = 53.0;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_power_factor = 2.568627575572356;
+      twopass->zm_factor = 1.0;
     } else {
       twopass->active_wq_factor = 31.0;
       twopass->base_err_per_mb = 34474.723463367416;
@@ -3582,7 +3590,7 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
       twopass->kf_frame_max_boost_first = 419.5;
       twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
       twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_power_factor = 5.5776463538431935;
+      twopass->zm_factor = 1.0;
     }
   }
 }

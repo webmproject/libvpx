@@ -776,7 +776,7 @@ typedef struct vpx_codec_enc_cfg {
    * Rate control parameters, set from external experiment results.
    *
    */
-  vpx_rational_t zm_power_factor;
+  vpx_rational_t zm_factor;
 } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 
 /*!\brief  vp9 svc extra configure parameters
