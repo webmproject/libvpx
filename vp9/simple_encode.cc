@@ -1084,8 +1084,7 @@ void SimpleEncode::UpdateKeyFrameGroup(int key_frame_show_index) {
   const VP9_COMP *cpi = impl_ptr_->cpi;
   key_frame_group_index_ = 0;
   key_frame_group_size_ = vp9_get_frames_to_next_key(
-      &cpi->oxcf, &cpi->frame_info, &cpi->twopass.first_pass_info,
-      key_frame_show_index, cpi->rc.min_gf_interval);
+      &cpi->oxcf, &cpi->twopass, key_frame_show_index, cpi->rc.min_gf_interval);
   assert(key_frame_group_size_ > 0);
   // Init the reference frame info when a new key frame group appears.
   InitRefFrameInfo(&ref_frame_info_);
@@ -1250,6 +1249,7 @@ int SimpleEncode::GetCodingFrameNum() const {
   }
 
   // These are the default settings for now.
+  const VP9_COMP *cpi = impl_ptr_->cpi;
   const int multi_layer_arf = 0;
   const int allow_alt_ref = 1;
   vpx_rational_t frame_rate =
@@ -1262,11 +1262,13 @@ int SimpleEncode::GetCodingFrameNum() const {
   fps_init_first_pass_info(&first_pass_info,
                            GetVectorData(impl_ptr_->first_pass_stats),
                            num_frames_);
-  return vp9_get_coding_frame_num(&oxcf, &frame_info, &first_pass_info,
-                                  multi_layer_arf, allow_alt_ref);
+  return vp9_get_coding_frame_num(&oxcf, &cpi->twopass, &frame_info,
+                                  &first_pass_info, multi_layer_arf,
+                                  allow_alt_ref);
 }
 
 std::vector<int> SimpleEncode::ComputeKeyFrameMap() const {
+  const VP9_COMP *cpi = impl_ptr_->cpi;
   // The last entry of first_pass_stats is the overall stats.
   assert(impl_ptr_->first_pass_stats.size() == num_frames_ + 1);
   vpx_rational_t frame_rate =
@@ -1274,14 +1276,12 @@ std::vector<int> SimpleEncode::ComputeKeyFrameMap() const {
   const VP9EncoderConfig oxcf = GetEncodeConfig(
       frame_width_, frame_height_, frame_rate, target_bitrate_, encode_speed_,
       VPX_RC_LAST_PASS, impl_ptr_->encode_config_list);
-  FRAME_INFO frame_info = vp9_get_frame_info(&oxcf);
   FIRST_PASS_INFO first_pass_info;
   fps_init_first_pass_info(&first_pass_info,
                            GetVectorData(impl_ptr_->first_pass_stats),
                            num_frames_);
   std::vector<int> key_frame_map(num_frames_, 0);
-  vp9_get_key_frame_map(&oxcf, &frame_info, &first_pass_info,
-                        GetVectorData(key_frame_map));
+  vp9_get_key_frame_map(&oxcf, &cpi->twopass, GetVectorData(key_frame_map));
   return key_frame_map;
 }
 
