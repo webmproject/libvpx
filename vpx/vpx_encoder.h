@@ -694,9 +694,17 @@ typedef struct vpx_codec_enc_cfg {
    */
   int temporal_layering_mode;
 
+  /*!\brief A flag indicating whether to use external rate control parameters.
+   * By default is 0. If set to 1, the following parameters will be used in the
+   * rate control system.
+   */
+  int use_vizier_rc_params;
+
   /*!\brief Active worst quality factor.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t active_wq_factor;
@@ -704,6 +712,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Base error per macroblock.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t base_err_per_mb;
@@ -711,6 +721,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Second reference default decay limit.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t sr_default_decay_limit;
@@ -718,6 +730,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Second reference difference factor.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t sr_diff_factor;
@@ -725,6 +739,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Keyframe error per macroblock.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t kf_err_per_mb;
@@ -732,6 +748,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Keyframe minimum boost.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t kf_frame_min_boost;
@@ -739,6 +757,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Keyframe maximum boost, for the first keyframe in a chunk.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t kf_frame_max_boost_first;
@@ -746,6 +766,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Keyframe maximum boost, for subsequent keyframes.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t kf_frame_max_boost_subs;
@@ -753,6 +775,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Keyframe maximum total boost.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t kf_max_total_boost;
@@ -760,6 +784,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Golden frame maximum total boost.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t gf_max_total_boost;
@@ -767,6 +793,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Golden frame maximum boost.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t gf_frame_max_boost;
@@ -774,6 +802,8 @@ typedef struct vpx_codec_enc_cfg {
   /*!\brief Zero motion power factor.
    *
    * Rate control parameters, set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
    *
    */
   vpx_rational_t zm_factor;

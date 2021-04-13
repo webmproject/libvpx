@@ -288,6 +288,8 @@ static const arg_def_t *rc_args[] = {
 };
 
 #if CONFIG_VP9_ENCODER
+static const arg_def_t use_vizier_rc_params =
+    ARG_DEF(NULL, "use-vizier-rc-params", 1, "Use vizier rc params");
 static const arg_def_t active_wq_factor =
     ARG_DEF(NULL, "active-wq-factor", 1, "Active worst quality factor");
 static const arg_def_t base_err_per_mb =
@@ -311,8 +313,9 @@ static const arg_def_t gf_max_total_boost =
 static const arg_def_t gf_frame_max_boost =
     ARG_DEF(NULL, "gf-frame-max-boost", 1, "Golden frame max boost");
 static const arg_def_t zm_factor =
-    ARG_DEF(NULL, "zm-power-factor", 1, "Zero motion power factor");
-static const arg_def_t *vizier_rc_args[] = { &active_wq_factor,
+    ARG_DEF(NULL, "zm-factor", 1, "Zero motion power factor");
+static const arg_def_t *vizier_rc_args[] = { &use_vizier_rc_params,
+                                             &active_wq_factor,
                                              &base_err_per_mb,
                                              &sr_default_decay_limit,
                                              &sr_diff_factor,
@@ -1026,6 +1029,8 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
     } else if (arg_match(&arg, &kf_disabled, argi)) {
       config->cfg.kf_mode = VPX_KF_DISABLED;
 #if CONFIG_VP9_ENCODER
+    } else if (arg_match(&arg, &use_vizier_rc_params, argi)) {
+      config->cfg.use_vizier_rc_params = arg_parse_int(&arg);
     } else if (arg_match(&arg, &active_wq_factor, argi)) {
       config->cfg.active_wq_factor = arg_parse_rational(&arg);
     } else if (arg_match(&arg, &base_err_per_mb, argi)) {
@@ -1246,6 +1251,7 @@ static void show_stream_config(struct stream_state *stream,
   SHOW(kf_min_dist);
   SHOW(kf_max_dist);
   // Temporary use for debug
+  SHOW(use_vizier_rc_params);
   SHOW(active_wq_factor.num);
   SHOW(active_wq_factor.den);
 }

@@ -258,6 +258,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
 #endif
 
   // The range below shall be further tuned.
+  RANGE_CHECK(cfg, use_vizier_rc_params, 0, 1);
   RANGE_CHECK(cfg, active_wq_factor.den, 1, 1000);
   RANGE_CHECK(cfg, base_err_per_mb.den, 1, 1000);
   RANGE_CHECK(cfg, sr_default_decay_limit.den, 1, 1000);
@@ -1302,6 +1303,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] = {
         { 0 },    /* ts_layer_id */
         { 0 },    /* layer_target_bitrate */
         0,        /* temporal_layering_mode */
+        0,        /* use_vizier_rc_params */
         { 0, 1 }, /* active_wq_factor */
         { 0, 1 }, /* base_err_per_mb */
         { 0, 1 }, /* sr_default_decay_limit */

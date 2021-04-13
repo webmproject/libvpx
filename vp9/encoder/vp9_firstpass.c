@@ -3493,109 +3493,32 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
 // Configure image size specific vizier parameters.
 // Later these will be set via additional command line options
 static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
-  if (1) {
-    // Force defaults for now
-    twopass->active_wq_factor = AV_WQ_FACTOR;
-    twopass->base_err_per_mb = BASELINE_ERR_PER_MB;
-    twopass->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
-    twopass->sr_diff_factor = 1.0;
-    twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
-    twopass->gf_max_total_boost = MAX_GF_BOOST;
-    if (screen_area < 1280 * 720) {
-      twopass->kf_err_per_mb = 2000.0;
-    } else if (screen_area < 1920 * 1080) {
-      twopass->kf_err_per_mb = 500.0;
-    } else {
-      twopass->kf_err_per_mb = 250.0;
-    }
-    twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-    twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-    twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-    twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-    twopass->zm_factor = 1.0;
+  // When |use_vizier_rc_params| is 1, we expect the rc parameters have been
+  // initialized by the pass in values.
+  // Be careful that parameters below are only initialized to 0, if we do not
+  // pass values to them. It is desired to take care of each parameter when
+  // using |use_vizier_rc_params|.
+  if (twopass->use_vizier_rc_params) return;
+
+  // When |use_vizier_rc_params| is 0, use defaults for now.
+  twopass->active_wq_factor = AV_WQ_FACTOR;
+  twopass->base_err_per_mb = BASELINE_ERR_PER_MB;
+  twopass->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
+  twopass->sr_diff_factor = 1.0;
+  twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+  twopass->gf_max_total_boost = MAX_GF_BOOST;
+  if (screen_area < 1280 * 720) {
+    twopass->kf_err_per_mb = 2000.0;
+  } else if (screen_area < 1920 * 1080) {
+    twopass->kf_err_per_mb = 500.0;
   } else {
-    // Vizer experimental parameters from training.
-    // Later these will be set via the command line.
-    if (screen_area <= 176 * 144) {
-      twopass->active_wq_factor = 46.0;
-      twopass->base_err_per_mb = 37597.399760969536;
-      twopass->sr_default_decay_limit = 0.3905639800962774;
-      twopass->sr_diff_factor = 6.4;
-      twopass->gf_frame_max_boost = 87.27362648627846;
-      twopass->gf_max_total_boost = MAX_GF_BOOST;
-      twopass->kf_err_per_mb = 1854.8255436877148;
-      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = 25.5;
-      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_factor = 1.0;
-    } else if (screen_area <= 320 * 240) {
-      twopass->active_wq_factor = 55.0;
-      twopass->base_err_per_mb = 34525.33177195309;
-      twopass->sr_default_decay_limit = 0.23901360046804604;
-      twopass->sr_diff_factor = 5.73;
-      twopass->gf_frame_max_boost = 127.34978204980285;
-      twopass->gf_max_total_boost = MAX_GF_BOOST;
-      twopass->kf_err_per_mb = 723.8337508755031;
-      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = 185.0;
-      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_factor = 1.0;
-    } else if (screen_area <= 640 * 360) {
-      twopass->active_wq_factor = 12.5;
-      twopass->base_err_per_mb = 18823.978018028298;
-      twopass->sr_default_decay_limit = 0.6043527690301296;
-      twopass->sr_diff_factor = 2.28;
-      twopass->gf_frame_max_boost = 75.17672317013668;
-      twopass->gf_max_total_boost = MAX_GF_BOOST;
-      twopass->kf_err_per_mb = 422.2871502380377;
-      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = 224.5;
-      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_factor = 1.0;
-    } else if (screen_area <= 854 * 480) {
-      twopass->active_wq_factor = 51.5;
-      twopass->base_err_per_mb = 33718.98307662595;
-      twopass->sr_default_decay_limit = 0.33633414970713393;
-      twopass->sr_diff_factor = 5.8;
-      twopass->gf_frame_max_boost = 85.2868528581522;
-      twopass->gf_max_total_boost = MAX_GF_BOOST;
-      twopass->kf_err_per_mb = 1513.4883914008383;
-      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = 28.0;
-      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_factor = 1.0;
-    } else if (screen_area <= 1280 * 720) {
-      twopass->active_wq_factor = 41.5;
-      twopass->base_err_per_mb = 29527.46375825401;
-      twopass->sr_default_decay_limit = 0.5009117586299728;
-      twopass->sr_diff_factor = 3.33;
-      twopass->gf_frame_max_boost = 81.00472969483079;
-      twopass->gf_max_total_boost = MAX_GF_BOOST;
-      twopass->kf_err_per_mb = 998.6342911785146;
-      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = 53.0;
-      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_factor = 1.0;
-    } else {
-      twopass->active_wq_factor = 31.0;
-      twopass->base_err_per_mb = 34474.723463367416;
-      twopass->sr_default_decay_limit = 0.23346886902707745;
-      twopass->sr_diff_factor = 7.6;
-      twopass->gf_frame_max_boost = 213.2940230360479;
-      twopass->gf_max_total_boost = MAX_GF_BOOST;
-      twopass->kf_err_per_mb = 35931.25734431429;
-      twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-      twopass->kf_frame_max_boost_first = 419.5;
-      twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-      twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-      twopass->zm_factor = 1.0;
-    }
+    twopass->kf_err_per_mb = 250.0;
   }
+  twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
+  twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+  twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
+  twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+  twopass->zm_factor = 1.0;
 }
 
 void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
