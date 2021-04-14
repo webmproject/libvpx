@@ -223,6 +223,10 @@ typedef struct {
   GF_GROUP gf_group;
 
   // Vizeir project experimental two pass rate control parameters.
+  // When |use_vizier_rc_params| is 1, the following parameters will
+  // be overwritten by pass in values. Otherwise, they are initialized
+  // by default values.
+  int use_vizier_rc_params;
   double active_wq_factor;
   double base_err_per_mb;
   double sr_default_decay_limit;
