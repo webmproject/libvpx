@@ -314,6 +314,12 @@ static const arg_def_t gf_frame_max_boost =
     ARG_DEF(NULL, "gf-frame-max-boost", 1, "Golden frame max boost");
 static const arg_def_t zm_factor =
     ARG_DEF(NULL, "zm-factor", 1, "Zero motion power factor");
+static const arg_def_t rd_mult_inter_qp_fac =
+    ARG_DEF(NULL, "rd-mult-inter-qp-fac", 1, "RD multiplier for inter frames");
+static const arg_def_t rd_mult_arf_qp_fac =
+    ARG_DEF(NULL, "rd-mult-arf-qp-fac", 1, "RD multiplier for alt-ref frames");
+static const arg_def_t rd_mult_key_qp_fac =
+    ARG_DEF(NULL, "rd-mult-key-qp-fac", 1, "RD multiplier for key frames");
 static const arg_def_t *vizier_rc_args[] = { &use_vizier_rc_params,
                                              &active_wq_factor,
                                              &base_err_per_mb,
@@ -327,6 +333,9 @@ static const arg_def_t *vizier_rc_args[] = { &use_vizier_rc_params,
                                              &gf_max_total_boost,
                                              &gf_frame_max_boost,
                                              &zm_factor,
+                                             &rd_mult_inter_qp_fac,
+                                             &rd_mult_arf_qp_fac,
+                                             &rd_mult_key_qp_fac,
                                              NULL };
 #endif
 
@@ -1055,6 +1064,12 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.gf_frame_max_boost = arg_parse_rational(&arg);
     } else if (arg_match(&arg, &zm_factor, argi)) {
       config->cfg.zm_factor = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &rd_mult_inter_qp_fac, argi)) {
+      config->cfg.rd_mult_inter_qp_fac = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &rd_mult_arf_qp_fac, argi)) {
+      config->cfg.rd_mult_arf_qp_fac = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &rd_mult_key_qp_fac, argi)) {
+      config->cfg.rd_mult_key_qp_fac = arg_parse_rational(&arg);
 #endif
 #if CONFIG_VP9_HIGHBITDEPTH
     } else if (arg_match(&arg, &test16bitinternalarg, argi)) {

@@ -202,40 +202,19 @@ static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = { 128, 144, 128,
 void vp9_init_rd_parameters(VP9_COMP *cpi) {
   RD_CONTROL *const rdc = &cpi->rd_ctrl;
 
+  // When |use_vizier_rc_params| is 1, we expect the rd parameters have been
+  // initialized by the pass in values.
+  // Be careful that parameters below are only initialized to 1, if we do not
+  // pass values to them. It is desired to take care of each parameter when
+  // using |use_vizier_rc_params|.
+  if (cpi->twopass.use_vizier_rc_params) return;
+
   // Make sure this function is floating point safe.
   vpx_clear_system_state();
 
-  rdc->rd_mult_arf_qp_fac = 1.0;  // Default: No Vizier values yet
-
-  // These hard wired estimates for the Vizier values will be removed later
-  // as the per format factors will be set on the command line.
-  if (0) {
-    unsigned int screen_area = (cpi->common.width * cpi->common.height);
-
-    if (screen_area <= 176 * 144) {
-      rdc->rd_mult_inter_qp_fac = 0.896;
-      rdc->rd_mult_key_qp_fac = 1.050;
-    } else if (screen_area <= 320 * 240) {
-      rdc->rd_mult_inter_qp_fac = 0.998;
-      rdc->rd_mult_key_qp_fac = 0.952;
-    } else if (screen_area <= 640 * 360) {
-      rdc->rd_mult_inter_qp_fac = 0.959;
-      rdc->rd_mult_key_qp_fac = 1.071;
-    } else if (screen_area <= 854 * 480) {
-      rdc->rd_mult_inter_qp_fac = 1.027;
-      rdc->rd_mult_key_qp_fac = 1.280;
-    } else if (screen_area <= 1280 * 720) {
-      rdc->rd_mult_inter_qp_fac = 1.004;
-      rdc->rd_mult_key_qp_fac = 1.193;
-    } else {
-      rdc->rd_mult_inter_qp_fac = 0.874;
-      rdc->rd_mult_key_qp_fac = 0.837;
-    }
-  } else {
-    // For now force defaults unless testing
-    rdc->rd_mult_inter_qp_fac = 1.0;
-    rdc->rd_mult_key_qp_fac = 1.0;
-  }
+  rdc->rd_mult_inter_qp_fac = 1.0;
+  rdc->rd_mult_arf_qp_fac = 1.0;
+  rdc->rd_mult_key_qp_fac = 1.0;
 }
 
 // Returns the default rd multiplier for inter frames for a given qindex.

@@ -807,6 +807,36 @@ typedef struct vpx_codec_enc_cfg {
    *
    */
   vpx_rational_t zm_factor;
+
+  /*!\brief Rate-distortion multiplier for inter frames.
+   * The multiplier is a crucial parameter in the calculation of rate distortion
+   * cost. It is often related to the qp (qindex) value.
+   * Rate control parameters, could be set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
+   *
+   */
+  vpx_rational_t rd_mult_inter_qp_fac;
+
+  /*!\brief Rate-distortion multiplier for alt-ref frames.
+   * The multiplier is a crucial parameter in the calculation of rate distortion
+   * cost. It is often related to the qp (qindex) value.
+   * Rate control parameters, could be set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
+   *
+   */
+  vpx_rational_t rd_mult_arf_qp_fac;
+
+  /*!\brief Rate-distortion multiplier for key frames.
+   * The multiplier is a crucial parameter in the calculation of rate distortion
+   * cost. It is often related to the qp (qindex) value.
+   * Rate control parameters, could be set from external experiment results.
+   * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
+   * used. Otherwise, the default value is used.
+   *
+   */
+  vpx_rational_t rd_mult_key_qp_fac;
 } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 
 /*!\brief  vp9 svc extra configure parameters
