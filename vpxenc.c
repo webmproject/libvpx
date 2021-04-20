@@ -292,46 +292,52 @@ static const arg_def_t use_vizier_rc_params =
     ARG_DEF(NULL, "use-vizier-rc-params", 1, "Use vizier rc params");
 static const arg_def_t active_wq_factor =
     ARG_DEF(NULL, "active-wq-factor", 1, "Active worst quality factor");
-static const arg_def_t base_err_per_mb =
-    ARG_DEF(NULL, "base-err-per-mb", 1, "Base error per macroblock");
+static const arg_def_t err_per_mb_factor =
+    ARG_DEF(NULL, "err-per-mb-factor", 1, "Error per macroblock factor");
 static const arg_def_t sr_default_decay_limit = ARG_DEF(
     NULL, "sr-default-decay-limit", 1, "Second reference default decay limit");
 static const arg_def_t sr_diff_factor =
     ARG_DEF(NULL, "sr-diff-factor", 1, "Second reference diff factor");
-static const arg_def_t kf_err_per_mb =
-    ARG_DEF(NULL, "kf-err-per-mb", 1, "Keyframe error per macroblock");
-static const arg_def_t kf_frame_min_boost =
-    ARG_DEF(NULL, "kf-frame-min-boost", 1, "Keyframe min boost");
-static const arg_def_t kf_frame_max_boost_first = ARG_DEF(
-    NULL, "kf-frame-max-boost-first", 1, "Max for the first keyframe boost");
-static const arg_def_t kf_frame_max_boost_subs = ARG_DEF(
-    NULL, "kf-frame-max-boost-subs", 1, "Max for subsequent keyframe boost");
-static const arg_def_t kf_max_total_boost =
-    ARG_DEF(NULL, "kf-max-total-boost", 1, "Keyframe max total boost");
-static const arg_def_t gf_max_total_boost =
-    ARG_DEF(NULL, "gf-max-total-boost", 1, "Golden frame max total boost");
-static const arg_def_t gf_frame_max_boost =
-    ARG_DEF(NULL, "gf-frame-max-boost", 1, "Golden frame max boost");
+static const arg_def_t kf_err_per_mb_factor = ARG_DEF(
+    NULL, "kf-err-per-mb-factor", 1, "Keyframe error per macroblock factor");
+static const arg_def_t kf_frame_min_boost_factor =
+    ARG_DEF(NULL, "kf-frame-min-boost-factor", 1, "Keyframe min boost");
+static const arg_def_t kf_frame_max_boost_first_factor =
+    ARG_DEF(NULL, "kf-frame-max-boost-first-factor", 1,
+            "Max keyframe boost adjustment factor for first frame");
+static const arg_def_t kf_frame_max_boost_subs_factor =
+    ARG_DEF(NULL, "kf-frame-max-boost-subs-factor", 1,
+            "Max boost adjustment factor for subsequent KFs");
+static const arg_def_t kf_max_total_boost_factor = ARG_DEF(
+    NULL, "kf-max-total-boost-factor", 1, "Keyframe max total boost factor");
+static const arg_def_t gf_max_total_boost_factor =
+    ARG_DEF(NULL, "gf-max-total-boost-factor", 1,
+            "Golden frame max total boost factor");
+static const arg_def_t gf_frame_max_boost_factor =
+    ARG_DEF(NULL, "gf-frame-max-boost-factor", 1,
+            "Golden frame max per frame boost factor");
 static const arg_def_t zm_factor =
     ARG_DEF(NULL, "zm-factor", 1, "Zero motion power factor");
 static const arg_def_t rd_mult_inter_qp_fac =
-    ARG_DEF(NULL, "rd-mult-inter-qp-fac", 1, "RD multiplier for inter frames");
+    ARG_DEF(NULL, "rd-mult-inter-qp-fac", 1,
+            "RD multiplier adjustment for inter frames");
 static const arg_def_t rd_mult_arf_qp_fac =
-    ARG_DEF(NULL, "rd-mult-arf-qp-fac", 1, "RD multiplier for alt-ref frames");
-static const arg_def_t rd_mult_key_qp_fac =
-    ARG_DEF(NULL, "rd-mult-key-qp-fac", 1, "RD multiplier for key frames");
+    ARG_DEF(NULL, "rd-mult-arf-qp-fac", 1,
+            "RD multiplier adjustment for alt-ref frames");
+static const arg_def_t rd_mult_key_qp_fac = ARG_DEF(
+    NULL, "rd-mult-key-qp-fac", 1, "RD multiplier adjustment for key frames");
 static const arg_def_t *vizier_rc_args[] = { &use_vizier_rc_params,
                                              &active_wq_factor,
-                                             &base_err_per_mb,
+                                             &err_per_mb_factor,
                                              &sr_default_decay_limit,
                                              &sr_diff_factor,
-                                             &kf_err_per_mb,
-                                             &kf_frame_min_boost,
-                                             &kf_frame_max_boost_first,
-                                             &kf_frame_max_boost_subs,
-                                             &kf_max_total_boost,
-                                             &gf_max_total_boost,
-                                             &gf_frame_max_boost,
+                                             &kf_err_per_mb_factor,
+                                             &kf_frame_min_boost_factor,
+                                             &kf_frame_max_boost_first_factor,
+                                             &kf_frame_max_boost_subs_factor,
+                                             &kf_max_total_boost_factor,
+                                             &gf_max_total_boost_factor,
+                                             &gf_frame_max_boost_factor,
                                              &zm_factor,
                                              &rd_mult_inter_qp_fac,
                                              &rd_mult_arf_qp_fac,
@@ -1042,26 +1048,26 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.use_vizier_rc_params = arg_parse_int(&arg);
     } else if (arg_match(&arg, &active_wq_factor, argi)) {
       config->cfg.active_wq_factor = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &base_err_per_mb, argi)) {
-      config->cfg.base_err_per_mb = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &err_per_mb_factor, argi)) {
+      config->cfg.err_per_mb_factor = arg_parse_rational(&arg);
     } else if (arg_match(&arg, &sr_default_decay_limit, argi)) {
       config->cfg.sr_default_decay_limit = arg_parse_rational(&arg);
     } else if (arg_match(&arg, &sr_diff_factor, argi)) {
       config->cfg.sr_diff_factor = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &kf_err_per_mb, argi)) {
-      config->cfg.kf_err_per_mb = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &kf_frame_min_boost, argi)) {
-      config->cfg.kf_frame_min_boost = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &kf_frame_max_boost_first, argi)) {
-      config->cfg.kf_frame_max_boost_first = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &kf_frame_max_boost_subs, argi)) {
-      config->cfg.kf_frame_max_boost_subs = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &kf_max_total_boost, argi)) {
-      config->cfg.kf_max_total_boost = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &gf_max_total_boost, argi)) {
-      config->cfg.gf_max_total_boost = arg_parse_rational(&arg);
-    } else if (arg_match(&arg, &gf_frame_max_boost, argi)) {
-      config->cfg.gf_frame_max_boost = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &kf_err_per_mb_factor, argi)) {
+      config->cfg.kf_err_per_mb_factor = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &kf_frame_min_boost_factor, argi)) {
+      config->cfg.kf_frame_min_boost_factor = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &kf_frame_max_boost_first_factor, argi)) {
+      config->cfg.kf_frame_max_boost_first_factor = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &kf_frame_max_boost_subs_factor, argi)) {
+      config->cfg.kf_frame_max_boost_subs_factor = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &kf_max_total_boost_factor, argi)) {
+      config->cfg.kf_max_total_boost_factor = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &gf_max_total_boost_factor, argi)) {
+      config->cfg.gf_max_total_boost_factor = arg_parse_rational(&arg);
+    } else if (arg_match(&arg, &gf_frame_max_boost_factor, argi)) {
+      config->cfg.gf_frame_max_boost_factor = arg_parse_rational(&arg);
     } else if (arg_match(&arg, &zm_factor, argi)) {
       config->cfg.zm_factor = arg_parse_rational(&arg);
     } else if (arg_match(&arg, &rd_mult_inter_qp_fac, argi)) {

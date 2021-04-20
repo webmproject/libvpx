@@ -260,15 +260,15 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   // The range below shall be further tuned.
   RANGE_CHECK(cfg, use_vizier_rc_params, 0, 1);
   RANGE_CHECK(cfg, active_wq_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, base_err_per_mb.den, 1, 1000);
+  RANGE_CHECK(cfg, err_per_mb_factor.den, 1, 1000);
   RANGE_CHECK(cfg, sr_default_decay_limit.den, 1, 1000);
   RANGE_CHECK(cfg, sr_diff_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_err_per_mb.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_frame_min_boost.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_frame_max_boost_subs.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_max_total_boost.den, 1, 1000);
-  RANGE_CHECK(cfg, gf_max_total_boost.den, 1, 1000);
-  RANGE_CHECK(cfg, gf_frame_max_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_err_per_mb_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_min_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_max_boost_subs_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_max_total_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_max_total_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_frame_max_boost_factor.den, 1, 1000);
   RANGE_CHECK(cfg, zm_factor.den, 1, 1000);
   RANGE_CHECK(cfg, rd_mult_inter_qp_fac.den, 1, 1000);
   RANGE_CHECK(cfg, rd_mult_arf_qp_fac.den, 1, 1000);
@@ -1307,18 +1307,18 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] = {
         { 0 },    /* layer_target_bitrate */
         0,        /* temporal_layering_mode */
         0,        /* use_vizier_rc_params */
-        { 0, 1 }, /* active_wq_factor */
-        { 0, 1 }, /* base_err_per_mb */
-        { 0, 1 }, /* sr_default_decay_limit */
-        { 0, 1 }, /* sr_diff_factor */
-        { 0, 1 }, /* kf_err_per_mb */
-        { 0, 1 }, /* kf_frame_min_boost */
-        { 0, 1 }, /* kf_frame_max_boost_first */
-        { 0, 1 }, /* kf_frame_max_boost_subs */
-        { 0, 1 }, /* kf_max_total_boost */
-        { 0, 1 }, /* gf_max_total_boost */
-        { 0, 1 }, /* gf_frame_max_boost */
-        { 0, 1 }, /* zm_factor */
+        { 1, 1 }, /* active_wq_factor */
+        { 1, 1 }, /* err_per_mb_factor */
+        { 1, 1 }, /* sr_default_decay_limit */
+        { 1, 1 }, /* sr_diff_factor */
+        { 1, 1 }, /* kf_err_per_mb_factor */
+        { 1, 1 }, /* kf_frame_min_boost_factor */
+        { 1, 1 }, /* kf_frame_max_boost_first_factor */
+        { 1, 1 }, /* kf_frame_max_boost_subs_factor */
+        { 1, 1 }, /* kf_max_total_boost_factor */
+        { 1, 1 }, /* gf_max_total_boost_factor */
+        { 1, 1 }, /* gf_frame_max_boost_factor */
+        { 1, 1 }, /* zm_factor */
         { 1, 1 }, /* rd_mult_inter_qp_fac */
         { 1, 1 }, /* rd_mult_arf_qp_fac */
         { 1, 1 }, /* rd_mult_key_qp_fac */

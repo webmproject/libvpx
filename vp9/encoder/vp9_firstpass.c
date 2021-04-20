@@ -1878,8 +1878,7 @@ static double get_prediction_decay_rate(const TWO_PASS *const twopass,
                                         const FIRSTPASS_STATS *frame_stats) {
   const double sr_decay_rate = get_sr_decay_rate(twopass, frame_stats);
   double zero_motion_factor =
-      twopass->zm_factor * DEFAULT_ZM_FACTOR *
-      (frame_stats->pcnt_inter - frame_stats->pcnt_motion);
+      twopass->zm_factor * (frame_stats->pcnt_inter - frame_stats->pcnt_motion);
 
   // Clamp value to range 0.0 to 1.0
   // This should happen anyway if input values are sensibly clamped but checked
@@ -1981,7 +1980,7 @@ static double calc_frame_boost(const FRAME_INFO *frame_info,
   const double active_area = calculate_active_area(frame_info, this_frame);
 
   // Underlying boost factor is based on inter error ratio.
-  frame_boost = (twopass->base_err_per_mb * active_area) /
+  frame_boost = (twopass->err_per_mb * active_area) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
 
   // Small adjustment for cases where there is a zoom out
@@ -2027,7 +2026,7 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
   // This value is in line with the minimum per frame boost in the alt_ref
   // boost calculation.
   frame_boost =
-      ((frame_boost + twopass->kf_frame_min_boost) * boost_q_correction);
+      (frame_boost + twopass->kf_frame_min_boost) * boost_q_correction;
 
   // Maximum allowed boost this frame. May be different for first vs subsequent
   // key frames.
@@ -2861,7 +2860,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     const int arf_boost =
         compute_arf_boost(frame_info, twopass, gld_show_idx, f_frames, b_frames,
                           avg_inter_frame_qindex);
-    rc->gfu_boost = VPXMIN(twopass->gf_max_total_boost, arf_boost);
+    rc->gfu_boost = VPXMIN((int)twopass->gf_max_total_boost, arf_boost);
     rc->source_alt_ref_pending = 0;
   }
 
@@ -3429,12 +3428,12 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   // Special case for static / slide show content but dont apply
   // if the kf group is very short.
   if ((zero_motion_accumulator > 0.99) && (rc->frames_to_key > 8)) {
-    rc->kf_boost = twopass->kf_max_total_boost;
+    rc->kf_boost = (int)(twopass->kf_max_total_boost);
   } else {
     // Apply various clamps for min and max oost
     rc->kf_boost = VPXMAX((int)boost_score, (rc->frames_to_key * 3));
     rc->kf_boost = VPXMAX(rc->kf_boost, MIN_KF_TOT_BOOST);
-    rc->kf_boost = VPXMIN(rc->kf_boost, twopass->kf_max_total_boost);
+    rc->kf_boost = VPXMIN(rc->kf_boost, (int)(twopass->kf_max_total_boost));
   }
 
   // Work out how many bits to allocate for the key frame itself.
@@ -3492,32 +3491,56 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
 // Configure image size specific vizier parameters.
 // Later these will be set via additional command line options
 static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
-  // When |use_vizier_rc_params| is 1, we expect the rc parameters have been
-  // initialized by the pass in values.
-  // Be careful that parameters below are only initialized to 0, if we do not
-  // pass values to them. It is desired to take care of each parameter when
-  // using |use_vizier_rc_params|.
-  if (twopass->use_vizier_rc_params) return;
+  // When |use_vizier_rc_params| is 1, we expect the rc parameters below to
+  // have been initialised on the command line as adjustment factors such
+  // that a factor of 1.0 will match the default behavior when
+  // |use_vizier_rc_params| is 0
+  if (twopass->use_vizier_rc_params) {
+    twopass->active_wq_factor *= AV_WQ_FACTOR;
+    twopass->err_per_mb *= BASELINE_ERR_PER_MB;
+    twopass->sr_default_decay_limit *= DEFAULT_DECAY_LIMIT;
+    twopass->sr_diff_factor *= 1.0;
+    twopass->gf_frame_max_boost *= GF_MAX_FRAME_BOOST;
+    twopass->gf_max_total_boost *= MAX_GF_BOOST;
+    twopass->kf_frame_min_boost *= KF_MIN_FRAME_BOOST;
+    twopass->kf_frame_max_boost_first *= KF_MAX_FRAME_BOOST;
+    twopass->kf_frame_max_boost_subs *= KF_MAX_FRAME_BOOST;
+    twopass->kf_max_total_boost *= MAX_KF_TOT_BOOST;
+    twopass->zm_factor *= DEFAULT_ZM_FACTOR;
 
-  // When |use_vizier_rc_params| is 0, use defaults for now.
-  twopass->active_wq_factor = AV_WQ_FACTOR;
-  twopass->base_err_per_mb = BASELINE_ERR_PER_MB;
-  twopass->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
-  twopass->sr_diff_factor = 1.0;
-  twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
-  twopass->gf_max_total_boost = MAX_GF_BOOST;
-  if (screen_area < 1280 * 720) {
-    twopass->kf_err_per_mb = 2000.0;
-  } else if (screen_area < 1920 * 1080) {
-    twopass->kf_err_per_mb = 500.0;
+    // Correction for the fact that the kf_err_per_mb_factor default is
+    // already different for different video formats and ensures that a passed
+    // in value of 1.0 on the vizier command line will still match the current
+    // default.
+    if (screen_area < 1280 * 720) {
+      twopass->kf_err_per_mb *= 2000.0;
+    } else if (screen_area < 1920 * 1080) {
+      twopass->kf_err_per_mb *= 500.0;
+    } else {
+      twopass->kf_err_per_mb *= 250.0;
+    }
   } else {
-    twopass->kf_err_per_mb = 250.0;
+    // When |use_vizier_rc_params| is 0, use defaults.
+    twopass->active_wq_factor = AV_WQ_FACTOR;
+    twopass->err_per_mb = BASELINE_ERR_PER_MB;
+    twopass->sr_default_decay_limit = DEFAULT_DECAY_LIMIT;
+    twopass->sr_diff_factor = 1.0;
+    twopass->gf_frame_max_boost = GF_MAX_FRAME_BOOST;
+    twopass->gf_max_total_boost = MAX_GF_BOOST;
+    twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
+    twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
+    twopass->kf_frame_max_boost_subs = KF_MAX_FRAME_BOOST;
+    twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
+    twopass->zm_factor = DEFAULT_ZM_FACTOR;
+
+    if (screen_area < 1280 * 720) {
+      twopass->kf_err_per_mb = 2000.0;
+    } else if (screen_area < 1920 * 1080) {
+      twopass->kf_err_per_mb = 500.0;
+    } else {
+      twopass->kf_err_per_mb = 250.0;
+    }
   }
-  twopass->kf_frame_min_boost = KF_MIN_FRAME_BOOST;
-  twopass->kf_frame_max_boost_first = KF_MAX_FRAME_BOOST;
-  twopass->kf_frame_max_boost_subs = twopass->kf_frame_max_boost_first;
-  twopass->kf_max_total_boost = MAX_KF_TOT_BOOST;
-  twopass->zm_factor = 1.0;
 }
 
 void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {

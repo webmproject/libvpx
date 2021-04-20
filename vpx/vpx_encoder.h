@@ -709,14 +709,14 @@ typedef struct vpx_codec_enc_cfg {
    */
   vpx_rational_t active_wq_factor;
 
-  /*!\brief Base error per macroblock.
+  /*!\brief Error per macroblock adjustment factor.
    *
    * Rate control parameters, set from external experiment results.
    * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
    * used. Otherwise, the default value is used.
    *
    */
-  vpx_rational_t base_err_per_mb;
+  vpx_rational_t err_per_mb_factor;
 
   /*!\brief Second reference default decay limit.
    *
@@ -736,68 +736,69 @@ typedef struct vpx_codec_enc_cfg {
    */
   vpx_rational_t sr_diff_factor;
 
-  /*!\brief Keyframe error per macroblock.
+  /*!\brief Keyframe error per macroblock adjustment factor.
    *
    * Rate control parameters, set from external experiment results.
    * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
    * used. Otherwise, the default value is used.
    *
    */
-  vpx_rational_t kf_err_per_mb;
+  vpx_rational_t kf_err_per_mb_factor;
 
-  /*!\brief Keyframe minimum boost.
+  /*!\brief Keyframe minimum boost adjustment factor.
    *
    * Rate control parameters, set from external experiment results.
    * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
    * used. Otherwise, the default value is used.
    *
    */
-  vpx_rational_t kf_frame_min_boost;
+  vpx_rational_t kf_frame_min_boost_factor;
 
-  /*!\brief Keyframe maximum boost, for the first keyframe in a chunk.
+  /*!\brief Keyframe maximum boost adjustment factor, for the first keyframe
+   * in a chunk.
    *
    * Rate control parameters, set from external experiment results.
    * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
    * used. Otherwise, the default value is used.
    *
    */
-  vpx_rational_t kf_frame_max_boost_first;
+  vpx_rational_t kf_frame_max_boost_first_factor;
 
-  /*!\brief Keyframe maximum boost, for subsequent keyframes.
+  /*!\brief Keyframe maximum boost adjustment factor, for subsequent keyframes.
    *
    * Rate control parameters, set from external experiment results.
    * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
    * used. Otherwise, the default value is used.
    *
    */
-  vpx_rational_t kf_frame_max_boost_subs;
+  vpx_rational_t kf_frame_max_boost_subs_factor;
 
-  /*!\brief Keyframe maximum total boost.
+  /*!\brief Keyframe maximum total boost adjustment factor.
    *
    * Rate control parameters, set from external experiment results.
    * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
    * used. Otherwise, the default value is used.
    *
    */
-  vpx_rational_t kf_max_total_boost;
+  vpx_rational_t kf_max_total_boost_factor;
 
-  /*!\brief Golden frame maximum total boost.
+  /*!\brief Golden frame maximum total boost adjustment factor.
    *
    * Rate control parameters, set from external experiment results.
    * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
    * used. Otherwise, the default value is used.
    *
    */
-  vpx_rational_t gf_max_total_boost;
+  vpx_rational_t gf_max_total_boost_factor;
 
-  /*!\brief Golden frame maximum boost.
+  /*!\brief Golden frame maximum boost adjustment factor.
    *
    * Rate control parameters, set from external experiment results.
    * Only when |use_vizier_rc_params| is set to 1, the pass in value will be
    * used. Otherwise, the default value is used.
    *
    */
-  vpx_rational_t gf_frame_max_boost;
+  vpx_rational_t gf_frame_max_boost_factor;
 
   /*!\brief Zero motion power factor.
    *

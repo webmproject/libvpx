@@ -228,15 +228,15 @@ typedef struct {
   // by default values.
   int use_vizier_rc_params;
   double active_wq_factor;
-  double base_err_per_mb;
+  double err_per_mb;
   double sr_default_decay_limit;
   double sr_diff_factor;
   double kf_err_per_mb;
   double kf_frame_min_boost;
   double kf_frame_max_boost_first;  // Max for first kf in a chunk.
   double kf_frame_max_boost_subs;   // Max for subsequent mid chunk kfs.
-  int kf_max_total_boost;
-  int gf_max_total_boost;
+  double kf_max_total_boost;
+  double gf_max_total_boost;
   double gf_frame_max_boost;
   double zm_factor;
 } TWO_PASS;

@@ -352,15 +352,15 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   // The range below shall be further tuned.
   RANGE_CHECK(cfg, use_vizier_rc_params, 0, 1);
   RANGE_CHECK(cfg, active_wq_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, base_err_per_mb.den, 1, 1000);
+  RANGE_CHECK(cfg, err_per_mb_factor.den, 1, 1000);
   RANGE_CHECK(cfg, sr_default_decay_limit.den, 1, 1000);
   RANGE_CHECK(cfg, sr_diff_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_err_per_mb.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_frame_min_boost.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_frame_max_boost_subs.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_max_total_boost.den, 1, 1000);
-  RANGE_CHECK(cfg, gf_max_total_boost.den, 1, 1000);
-  RANGE_CHECK(cfg, gf_frame_max_boost.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_err_per_mb_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_min_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_max_boost_subs_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_max_total_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_max_total_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_frame_max_boost_factor.den, 1, 1000);
   RANGE_CHECK(cfg, zm_factor.den, 1, 1000);
   RANGE_CHECK(cfg, rd_mult_inter_qp_fac.den, 1, 1000);
   RANGE_CHECK(cfg, rd_mult_arf_qp_fac.den, 1, 1000);
@@ -662,31 +662,35 @@ static vpx_codec_err_t set_twopass_params_from_config(
   if (cpi == NULL) return VPX_CODEC_ERROR;
 
   cpi->twopass.use_vizier_rc_params = cfg->use_vizier_rc_params;
+
+  // The values set here are factors that will be applied to default values
+  // to get the final value used in the two pass code. 1.0 will hence
+  // match the default behaviour when not using passed in values.
   cpi->twopass.active_wq_factor =
       (double)cfg->active_wq_factor.num / (double)cfg->active_wq_factor.den;
-  cpi->twopass.base_err_per_mb =
-      (double)cfg->base_err_per_mb.num / (double)cfg->base_err_per_mb.den;
+  cpi->twopass.err_per_mb =
+      (double)cfg->err_per_mb_factor.num / (double)cfg->err_per_mb_factor.den;
   cpi->twopass.sr_default_decay_limit =
       (double)cfg->sr_default_decay_limit.num /
       (double)cfg->sr_default_decay_limit.den;
   cpi->twopass.sr_diff_factor =
       (double)cfg->sr_diff_factor.num / (double)cfg->sr_diff_factor.den;
-  cpi->twopass.kf_err_per_mb =
-      (double)cfg->kf_err_per_mb.num / (double)cfg->kf_err_per_mb.den;
-  cpi->twopass.kf_frame_min_boost =
-      (double)cfg->kf_frame_min_boost.num / (double)cfg->kf_frame_min_boost.den;
+  cpi->twopass.kf_err_per_mb = (double)cfg->kf_err_per_mb_factor.num /
+                               (double)cfg->kf_err_per_mb_factor.den;
+  cpi->twopass.kf_frame_min_boost = (double)cfg->kf_frame_min_boost_factor.num /
+                                    (double)cfg->kf_frame_min_boost_factor.den;
   cpi->twopass.kf_frame_max_boost_first =
-      (double)cfg->kf_frame_max_boost_first.num /
-      (double)cfg->kf_frame_max_boost_first.den;
+      (double)cfg->kf_frame_max_boost_first_factor.num /
+      (double)cfg->kf_frame_max_boost_first_factor.den;
   cpi->twopass.kf_frame_max_boost_subs =
-      (double)cfg->kf_frame_max_boost_subs.num /
-      (double)cfg->kf_frame_max_boost_subs.den;
-  cpi->twopass.kf_max_total_boost = (int)((double)cfg->kf_max_total_boost.num /
-                                          (double)cfg->kf_max_total_boost.den);
-  cpi->twopass.gf_max_total_boost = (int)((double)cfg->gf_max_total_boost.num /
-                                          (double)cfg->gf_max_total_boost.den);
-  cpi->twopass.gf_frame_max_boost =
-      (double)cfg->gf_frame_max_boost.num / (double)cfg->gf_frame_max_boost.den;
+      (double)cfg->kf_frame_max_boost_subs_factor.num /
+      (double)cfg->kf_frame_max_boost_subs_factor.den;
+  cpi->twopass.kf_max_total_boost = (double)cfg->kf_max_total_boost_factor.num /
+                                    (double)cfg->kf_max_total_boost_factor.den;
+  cpi->twopass.gf_max_total_boost = (double)cfg->gf_max_total_boost_factor.num /
+                                    (double)cfg->gf_max_total_boost_factor.den;
+  cpi->twopass.gf_frame_max_boost = (double)cfg->gf_frame_max_boost_factor.num /
+                                    (double)cfg->gf_frame_max_boost_factor.den;
   cpi->twopass.zm_factor =
       (double)cfg->zm_factor.num / (double)cfg->zm_factor.den;
   cpi->rd_ctrl.rd_mult_inter_qp_fac = (double)cfg->rd_mult_inter_qp_fac.num /
@@ -1956,18 +1960,18 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
         { 0 },     // layer_taget_bitrate
         0,         // temporal_layering_mode
         0,         // use_vizier_rc_params
-        { 0, 1 },  // active_wq_factor
-        { 0, 1 },  // base_err_per_mb
-        { 0, 1 },  // sr_default_decay_limit
-        { 0, 1 },  // sr_diff_factor
-        { 0, 1 },  // kf_err_per_mb
-        { 0, 1 },  // kf_frame_min_boost
-        { 0, 1 },  // kf_frame_max_boost_first
-        { 0, 1 },  // kf_frame_max_boost_subs
-        { 0, 1 },  // kf_max_total_boost
-        { 0, 1 },  // gf_max_total_boost
-        { 0, 1 },  // gf_frame_max_boost
-        { 0, 1 },  // zm_factor
+        { 1, 1 },  // active_wq_factor
+        { 1, 1 },  // err_per_mb_factor
+        { 1, 1 },  // sr_default_decay_limit
+        { 1, 1 },  // sr_diff_factor
+        { 1, 1 },  // kf_err_per_mb_factor
+        { 1, 1 },  // kf_frame_min_boost_factor
+        { 1, 1 },  // kf_frame_max_boost_first_factor
+        { 1, 1 },  // kf_frame_max_boost_subs_factor
+        { 1, 1 },  // kf_max_total_boost_factor
+        { 1, 1 },  // gf_max_total_boost_factor
+        { 1, 1 },  // gf_frame_max_boost_factor
+        { 1, 1 },  // zm_factor
         { 1, 1 },  // rd_mult_inter_qp_fac
         { 1, 1 },  // rd_mult_arf_qp_fac
         { 1, 1 },  // rd_mult_key_qp_fac
