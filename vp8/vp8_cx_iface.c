@@ -152,8 +152,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(cfg, g_lag_in_frames, 25);
 #endif
   RANGE_CHECK(cfg, rc_end_usage, VPX_VBR, VPX_Q);
-  RANGE_CHECK_HI(cfg, rc_undershoot_pct, 1000);
-  RANGE_CHECK_HI(cfg, rc_overshoot_pct, 1000);
+  RANGE_CHECK_HI(cfg, rc_undershoot_pct, 100);
+  RANGE_CHECK_HI(cfg, rc_overshoot_pct, 100);
   RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
   RANGE_CHECK(cfg, kf_mode, VPX_KF_DISABLED, VPX_KF_AUTO);
 

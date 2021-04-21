@@ -498,7 +498,7 @@ typedef struct vpx_codec_enc_cfg {
    * undershoot level (current rate vs target) beyond which more aggressive
    * corrective measures are taken.
    *   *
-   * Valid values in the range VP8:0-1000 VP9: 0-100.
+   * Valid values in the range VP8:0-100 VP9: 0-100.
    */
   unsigned int rc_undershoot_pct;
 
@@ -513,7 +513,7 @@ typedef struct vpx_codec_enc_cfg {
    * overshoot level (current rate vs target) beyond which more aggressive
    * corrective measures are taken.
    *
-   * Valid values in the range VP8:0-1000 VP9: 0-100.
+   * Valid values in the range VP8:0-100 VP9: 0-100.
    */
   unsigned int rc_overshoot_pct;
 
