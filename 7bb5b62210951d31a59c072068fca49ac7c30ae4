@@ -16,6 +16,23 @@
       "message": "Please review.",
       "revId": "7bb5b62210951d31a59c072068fca49ac7c30ae4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "51e1cf76_fccedd4d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-04-21T18:46:46Z",
+      "side": 1,
+      "message": "Thanks for the change, I think this was derived from the check in the code:\nhttps://chromium.googlesource.com/webm/libvpx/+/refs/heads/ruddy/vp8/vp8_cx_iface.c#155",
+      "revId": "7bb5b62210951d31a59c072068fca49ac7c30ae4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
