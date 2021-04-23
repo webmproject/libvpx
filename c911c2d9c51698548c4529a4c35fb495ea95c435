@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7069bb7d_f97ddbd6",
+        "filename": "CONTRIBUTING.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-04-23T23:52:12Z",
+      "side": 0,
+      "message": "I forgot I added this. I don\u0027t have a strong preference for either, but I\u0027m happy to sync in the opposite direction before this copy/paste gets out of hand.",
+      "revId": "c911c2d9c51698548c4529a4c35fb495ea95c435",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
