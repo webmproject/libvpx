@@ -1832,33 +1832,35 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 }
 
 /* This function considers how the quality of prediction may be deteriorating
- * with distance. It comapres the coded error for the last frame and the
+ * with distance. It compares the coded error for the last frame and the
  * second reference frame (usually two frames old) and also applies a factor
  * based on the extent of INTRA coding.
  *
  * The decay factor is then used to reduce the contribution of frames further
- * from the alt-ref or golden frame, to the bitframe boost calculation for that
+ * from the alt-ref or golden frame, to the bitrate boost calculation for that
  * alt-ref or golden frame.
  */
 static double get_sr_decay_rate(const TWO_PASS *const twopass,
                                 const FIRSTPASS_STATS *frame) {
   double sr_diff = (frame->sr_coded_error - frame->coded_error);
   double sr_decay = 1.0;
-  double modified_pct_inter;
-  double modified_pcnt_intra;
 
-  modified_pct_inter = frame->pcnt_inter;
-  if ((frame->coded_error > LOW_CODED_ERR_PER_MB) &&
-      ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
-       (double)NCOUNT_FRAME_II_THRESH)) {
-    modified_pct_inter =
-        frame->pcnt_inter + frame->pcnt_intra_low - frame->pcnt_neutral;
-  }
-  modified_pcnt_intra = 100 * (1.0 - modified_pct_inter);
-
+  // Do nothing if the second ref to last frame error difference is
+  // very small or even negative.
   if ((sr_diff > LOW_SR_DIFF_TRHESH)) {
-    double sr_diff_part =
+    const double sr_diff_part =
         twopass->sr_diff_factor * ((sr_diff * 0.25) / frame->intra_error);
+    double modified_pct_inter = frame->pcnt_inter;
+    double modified_pcnt_intra;
+
+    if ((frame->coded_error > LOW_CODED_ERR_PER_MB) &&
+        ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
+         (double)NCOUNT_FRAME_II_THRESH)) {
+      modified_pct_inter =
+          frame->pcnt_inter + frame->pcnt_intra_low - frame->pcnt_neutral;
+    }
+    modified_pcnt_intra = 100 * (1.0 - modified_pct_inter);
+
     sr_decay = 1.0 - sr_diff_part - (INTRA_PART * modified_pcnt_intra);
   }
   return VPXMAX(sr_decay, twopass->sr_default_decay_limit);
@@ -1979,7 +1981,7 @@ static double calc_frame_boost(const FRAME_INFO *frame_info,
   const double boost_q_correction = VPXMIN((0.5 + (lq * 0.015)), 1.5);
   const double active_area = calculate_active_area(frame_info, this_frame);
 
-  // Underlying boost factor is based on inter error ratio.
+  // Frame booost is based on inter error.
   frame_boost = (twopass->err_per_mb * active_area) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
 
@@ -2007,7 +2009,7 @@ static double calc_kf_frame_boost(VP9_COMP *cpi,
       calculate_active_area(&cpi->frame_info, this_frame);
   double max_boost;
 
-  // Underlying boost factor is based on inter error ratio.
+  // Frame booost is based on inter error.
   frame_boost = (twopass->kf_err_per_mb * active_area) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error + *sr_accumulator);
 
@@ -3499,14 +3501,21 @@ static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
     twopass->active_wq_factor *= AV_WQ_FACTOR;
     twopass->err_per_mb *= BASELINE_ERR_PER_MB;
     twopass->sr_default_decay_limit *= DEFAULT_DECAY_LIMIT;
+    if (twopass->sr_default_decay_limit > 1.0)  // > 1.0 here makes no sense
+      twopass->sr_default_decay_limit = 1.0;
     twopass->sr_diff_factor *= 1.0;
     twopass->gf_frame_max_boost *= GF_MAX_FRAME_BOOST;
     twopass->gf_max_total_boost *= MAX_GF_BOOST;
+    // NOTE: In use max boost has precedence over min boost. So even if min is
+    // somehow set higher than max the final boost value will be clamped to the
+    // appropriate maximum.
     twopass->kf_frame_min_boost *= KF_MIN_FRAME_BOOST;
     twopass->kf_frame_max_boost_first *= KF_MAX_FRAME_BOOST;
     twopass->kf_frame_max_boost_subs *= KF_MAX_FRAME_BOOST;
     twopass->kf_max_total_boost *= MAX_KF_TOT_BOOST;
     twopass->zm_factor *= DEFAULT_ZM_FACTOR;
+    if (twopass->zm_factor > 1.0)  // > 1.0 here makes no sense
+      twopass->zm_factor = 1.0;
 
     // Correction for the fact that the kf_err_per_mb_factor default is
     // already different for different video formats and ensures that a passed

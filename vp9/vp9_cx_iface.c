@@ -664,41 +664,118 @@ static vpx_codec_err_t set_twopass_params_from_config(
   cpi->twopass.use_vizier_rc_params = cfg->use_vizier_rc_params;
 
   // The values set here are factors that will be applied to default values
-  // to get the final value used in the two pass code. 1.0 will hence
+  // to get the final value used in the two pass code. Hence 1.0 will
   // match the default behaviour when not using passed in values.
+  // We also apply limits here to prevent the user from applying settings
+  // that make no sense.
   cpi->twopass.active_wq_factor =
       (double)cfg->active_wq_factor.num / (double)cfg->active_wq_factor.den;
+  if (cpi->twopass.active_wq_factor < 0.25)
+    cpi->twopass.active_wq_factor = 0.25;
+  else if (cpi->twopass.active_wq_factor > 16.0)
+    cpi->twopass.active_wq_factor = 16.0;
+
   cpi->twopass.err_per_mb =
       (double)cfg->err_per_mb_factor.num / (double)cfg->err_per_mb_factor.den;
+  if (cpi->twopass.err_per_mb < 0.25)
+    cpi->twopass.err_per_mb = 0.25;
+  else if (cpi->twopass.err_per_mb > 4.0)
+    cpi->twopass.err_per_mb = 4.0;
+
   cpi->twopass.sr_default_decay_limit =
       (double)cfg->sr_default_decay_limit.num /
       (double)cfg->sr_default_decay_limit.den;
+  if (cpi->twopass.sr_default_decay_limit < 0.25)
+    cpi->twopass.sr_default_decay_limit = 0.25;
+  // If the default changes this will need to change.
+  else if (cpi->twopass.sr_default_decay_limit > 1.33)
+    cpi->twopass.sr_default_decay_limit = 1.33;
+
   cpi->twopass.sr_diff_factor =
       (double)cfg->sr_diff_factor.num / (double)cfg->sr_diff_factor.den;
+  if (cpi->twopass.sr_diff_factor < 0.25)
+    cpi->twopass.sr_diff_factor = 0.25;
+  else if (cpi->twopass.sr_diff_factor > 4.0)
+    cpi->twopass.sr_diff_factor = 4.0;
+
   cpi->twopass.kf_err_per_mb = (double)cfg->kf_err_per_mb_factor.num /
                                (double)cfg->kf_err_per_mb_factor.den;
+  if (cpi->twopass.kf_err_per_mb < 0.25)
+    cpi->twopass.kf_err_per_mb = 0.25;
+  else if (cpi->twopass.kf_err_per_mb > 4.0)
+    cpi->twopass.kf_err_per_mb = 4.0;
+
   cpi->twopass.kf_frame_min_boost = (double)cfg->kf_frame_min_boost_factor.num /
                                     (double)cfg->kf_frame_min_boost_factor.den;
+  if (cpi->twopass.kf_frame_min_boost < 0.25)
+    cpi->twopass.kf_frame_min_boost = 0.25;
+  else if (cpi->twopass.kf_frame_min_boost > 4.0)
+    cpi->twopass.kf_frame_min_boost = 4.0;
+
   cpi->twopass.kf_frame_max_boost_first =
       (double)cfg->kf_frame_max_boost_first_factor.num /
       (double)cfg->kf_frame_max_boost_first_factor.den;
+  if (cpi->twopass.kf_frame_max_boost_first < 0.25)
+    cpi->twopass.kf_frame_max_boost_first = 0.25;
+  else if (cpi->twopass.kf_frame_max_boost_first > 4.0)
+    cpi->twopass.kf_frame_max_boost_first = 4.0;
+
   cpi->twopass.kf_frame_max_boost_subs =
       (double)cfg->kf_frame_max_boost_subs_factor.num /
       (double)cfg->kf_frame_max_boost_subs_factor.den;
+  if (cpi->twopass.kf_frame_max_boost_subs < 0.25)
+    cpi->twopass.kf_frame_max_boost_subs = 0.25;
+  else if (cpi->twopass.kf_frame_max_boost_subs > 4.0)
+    cpi->twopass.kf_frame_max_boost_subs = 4.0;
+
   cpi->twopass.kf_max_total_boost = (double)cfg->kf_max_total_boost_factor.num /
                                     (double)cfg->kf_max_total_boost_factor.den;
+  if (cpi->twopass.kf_max_total_boost < 0.25)
+    cpi->twopass.kf_max_total_boost = 0.25;
+  else if (cpi->twopass.kf_max_total_boost > 4.0)
+    cpi->twopass.kf_max_total_boost = 4.0;
+
   cpi->twopass.gf_max_total_boost = (double)cfg->gf_max_total_boost_factor.num /
                                     (double)cfg->gf_max_total_boost_factor.den;
+  if (cpi->twopass.gf_max_total_boost < 0.25)
+    cpi->twopass.gf_max_total_boost = 0.25;
+  else if (cpi->twopass.gf_max_total_boost > 4.0)
+    cpi->twopass.gf_max_total_boost = 4.0;
+
   cpi->twopass.gf_frame_max_boost = (double)cfg->gf_frame_max_boost_factor.num /
                                     (double)cfg->gf_frame_max_boost_factor.den;
+  if (cpi->twopass.gf_frame_max_boost < 0.25)
+    cpi->twopass.gf_frame_max_boost = 0.25;
+  else if (cpi->twopass.gf_frame_max_boost > 4.0)
+    cpi->twopass.gf_frame_max_boost = 4.0;
+
   cpi->twopass.zm_factor =
       (double)cfg->zm_factor.num / (double)cfg->zm_factor.den;
+  if (cpi->twopass.zm_factor < 0.25)
+    cpi->twopass.zm_factor = 0.25;
+  else if (cpi->twopass.zm_factor > 2.0)
+    cpi->twopass.zm_factor = 2.0;
+
   cpi->rd_ctrl.rd_mult_inter_qp_fac = (double)cfg->rd_mult_inter_qp_fac.num /
                                       (double)cfg->rd_mult_inter_qp_fac.den;
+  if (cpi->rd_ctrl.rd_mult_inter_qp_fac < 0.25)
+    cpi->rd_ctrl.rd_mult_inter_qp_fac = 0.25;
+  else if (cpi->rd_ctrl.rd_mult_inter_qp_fac > 4.0)
+    cpi->rd_ctrl.rd_mult_inter_qp_fac = 4.0;
+
   cpi->rd_ctrl.rd_mult_arf_qp_fac =
       (double)cfg->rd_mult_arf_qp_fac.num / (double)cfg->rd_mult_arf_qp_fac.den;
+  if (cpi->rd_ctrl.rd_mult_arf_qp_fac < 0.25)
+    cpi->rd_ctrl.rd_mult_arf_qp_fac = 0.25;
+  else if (cpi->rd_ctrl.rd_mult_arf_qp_fac > 4.0)
+    cpi->rd_ctrl.rd_mult_arf_qp_fac = 4.0;
+
   cpi->rd_ctrl.rd_mult_key_qp_fac =
       (double)cfg->rd_mult_key_qp_fac.num / (double)cfg->rd_mult_key_qp_fac.den;
+  if (cpi->rd_ctrl.rd_mult_key_qp_fac < 0.25)
+    cpi->rd_ctrl.rd_mult_key_qp_fac = 0.25;
+  else if (cpi->rd_ctrl.rd_mult_key_qp_fac > 4.0)
+    cpi->rd_ctrl.rd_mult_key_qp_fac = 4.0;
 
   return VPX_CODEC_OK;
 }
