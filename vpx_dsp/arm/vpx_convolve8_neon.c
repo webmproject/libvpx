@@ -145,7 +145,7 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       src += 4;
       dst += 4;
       w -= 4;
-    } while (w > 0);
+    } while (w != 0);
   } else {
     const int16x8_t filter3 = vdupq_lane_s16(vget_low_s16(filters), 3);
     const int16x8_t filter4 = vdupq_lane_s16(vget_high_s16(filters), 0);
@@ -296,7 +296,7 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
           s += 8;
           d += 8;
           width -= 8;
-        } while (width > 0);
+        } while (width != 0);
         src += 8 * src_stride;
         dst += 8 * dst_stride;
         h -= 8;
@@ -402,7 +402,7 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       src += 4;
       dst += 4;
       w -= 4;
-    } while (w > 0);
+    } while (w != 0);
   } else {
     const int16x8_t filter3 = vdupq_lane_s16(vget_low_s16(filters), 3);
     const int16x8_t filter4 = vdupq_lane_s16(vget_high_s16(filters), 0);
@@ -586,7 +586,7 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
           s += 8;
           d += 8;
           width -= 8;
-        } while (width > 0);
+        } while (width != 0);
         src += 8 * src_stride;
         dst += 8 * dst_stride;
         h -= 8;
@@ -679,7 +679,7 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       s5 = s9;
       s6 = s10;
       h -= 4;
-    } while (h > 0);
+    } while (h != 0);
   } else {
     const int16x8_t filter3 = vdupq_lane_s16(vget_low_s16(filters), 3);
     const int16x8_t filter4 = vdupq_lane_s16(vget_high_s16(filters), 0);
@@ -759,11 +759,11 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
         s5 = s9;
         s6 = s10;
         height -= 4;
-      } while (height > 0);
+      } while (height != 0);
       src += 8;
       dst += 8;
       w -= 8;
-    } while (w > 0);
+    } while (w != 0);
   }
 }
 
@@ -860,7 +860,7 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       s5 = s9;
       s6 = s10;
       h -= 4;
-    } while (h > 0);
+    } while (h != 0);
   } else {
     const int16x8_t filter3 = vdupq_lane_s16(vget_low_s16(filters), 3);
     const int16x8_t filter4 = vdupq_lane_s16(vget_high_s16(filters), 0);
@@ -950,10 +950,10 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
         s5 = s9;
         s6 = s10;
         height -= 4;
-      } while (height > 0);
+      } while (height != 0);
       src += 8;
       dst += 8;
       w -= 8;
-    } while (w > 0);
+    } while (w != 0);
   }
 }
