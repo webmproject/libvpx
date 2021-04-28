@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d3effd3_c1b77529",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-04-28T01:17:53Z",
+      "side": 1,
+      "message": "Alex this is another area that\u0027s worth exploring. In assembly code we might have a cascade of loops that do 64, 32, 16, 8, 4. Swapping the order of checks here with for loops might help. At least that would cover cases where intermediate_height is not divisible by 8.\n\nhttps://chromium.googlesource.com/webm/libvpx/+/refs/tags/v1.10.0/vpx_dsp/arm/vpx_convolve_neon.c#26",
+      "revId": "ff67c848115ae1356f21d361342091140d176c1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
