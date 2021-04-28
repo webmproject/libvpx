@@ -16,6 +16,23 @@
       "message": "Thank you for the reviews, Anything else blocking the push? If not, please help with the commit, I\u0027m not a committer.",
       "revId": "adc185feb7b7aabd6407cc41ad1f3c1e9c1e8b17",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3809624b_f7d0bb32",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-04-28T02:27:49Z",
+      "side": 1,
+      "message": "This check is replicated in ffmpeg. For correctness we could update it there based on the abi version if that changes again. We never did correct things for vp9:\n\nhttps://git.ffmpeg.org/gitweb/ffmpeg.git/blob_plain/HEAD:/libavcodec/libvpxenc.c",
+      "revId": "adc185feb7b7aabd6407cc41ad1f3c1e9c1e8b17",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
