@@ -1882,13 +1882,8 @@ static double get_prediction_decay_rate(const TWO_PASS *const twopass,
   double zero_motion_factor =
       twopass->zm_factor * (frame_stats->pcnt_inter - frame_stats->pcnt_motion);
 
-  // Clamp value to range 0.0 to 1.0
-  // This should happen anyway if input values are sensibly clamped but checked
-  // here just in case.
-  if (zero_motion_factor > 1.0)
-    zero_motion_factor = 1.0;
-  else if (zero_motion_factor < 0.0)
-    zero_motion_factor = 0.0;
+  // Check that the zero motion factor is valid
+  assert(zero_motion_factor >= 0.0 && zero_motion_factor <= 1.0);
 
   return VPXMAX(zero_motion_factor,
                 (sr_decay_rate + ((1.0 - sr_decay_rate) * zero_motion_factor)));
