@@ -16,6 +16,86 @@
       "message": "PS 2 should make the code formatting bot happy.",
       "revId": "8838f24e837c7280573891b66ce8e2d26006c946",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8ec9b624_87ae1c0d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-04T18:41:43Z",
+      "side": 1,
+      "message": "Thanks for the patch Jonathan.\n\nThis passes test vectors locally. It could be extended for use in vpx_dsp/arm/vpx_scaled_convolve8_neon.c, but that is a less common configuration. A high-bitdepth variant would be another area that could be followed up with.",
+      "revId": "8838f24e837c7280573891b66ce8e2d26006c946",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "265594b6_4c35e6a3",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-04T18:41:43Z",
+      "side": 1,
+      "message": "just out of curiosity, is there a benefit to aligning beyond 8/16 on this platform?",
+      "range": {
+        "startLine": 58,
+        "startChar": 16,
+        "endLine": 58,
+        "endChar": 18
+      },
+      "revId": "8838f24e837c7280573891b66ce8e2d26006c946",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7fb2edd6_31ec55f0",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-04T18:41:43Z",
+      "side": 1,
+      "message": "in the end the lanes are extracted anyway, but to your point about sticking with d registers when possible is there any difference if we change this to 4 shifts?",
+      "revId": "8838f24e837c7280573891b66ce8e2d26006c946",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "32252c27_58623462",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-04T18:41:43Z",
+      "side": 1,
+      "message": "Availability these of xN intrinsics is mixed, I think x2 then x4 and later x3 was added. So this will fail with gcc-8. The builders have 8.3.0 so to add coverage for this configuration we\u0027d need an adapter or to do the 3 loads. In practice in other projects the compiler was doing the right thing with 3, but for convenience the adapter would be better. Can you add something to vpx_dsp/arm/mem_neon.h or for this?",
+      "range": {
+        "startLine": 122,
+        "startChar": 37,
+        "endLine": 122,
+        "endChar": 48
+      },
+      "revId": "8838f24e837c7280573891b66ce8e2d26006c946",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
