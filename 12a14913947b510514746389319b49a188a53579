@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "346e5361_f65d7972",
+        "filename": "vp9/encoder/arm/neon/vp9_denoiser_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-04T19:29:39Z",
+      "side": 1,
+      "message": "there\u0027s more in this area that can be done. I\u0027ll need to rework some the other horizontal add functions to return an int directly.",
+      "revId": "12a14913947b510514746389319b49a188a53579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
