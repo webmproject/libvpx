@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1e5b987c_f6f90d53",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-04T14:06:36Z",
+      "side": 1,
+      "message": "This implementation of horizontal convolution improves VP9 encoding by 5-10% on a Neoverse-N1 core (depending on the encode parameters.)\n\nThis code path is gated on the dot product feature macro and the default \u0027configure\u0027 options (-march flag) in libvpx do not enable it. To enable the path, set \"-march\u003darmv8.2-a+dotprod\", or an equivalent that implies \"dotprod\". (We could be a bit cleverer about this and do run-time feature detection but the intention at the moment is to just get the ball rolling.)",
+      "revId": "f3ec1b31751204d5db34a1e092cd7915dc8a16c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
