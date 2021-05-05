@@ -53,6 +53,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2c44195_9108c0c4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-05T19:56:55Z",
+      "side": 1,
+      "message": "\u003e A high-bitdepth implementation would not be possible using the Armv8.4-A dot product instructions as they only accept 8-bit operands. (It was tricky to make things fit with standard bitdepth - requiring a 128 * filter fudge factor.) The best hope for high-bitdepth is to use the new dot product instructions coming in Armv8.6-A and Armv9-A.\n\u003e \n\u003e Implementing the scaled-convolution function could be done in a subsequent patch. Could you help me understand when the different variants get used? There\u0027s this standard covolution, the averaging variant and the scaling one?\n\nThat\u0027s right, the difference is whether there\u0027s compound or single prediction and if the frame is scaled [1]. See 8.5.2.4 Block inter prediction process [2]. Scaling is determined by rc_resize_allowed [3] (--resize_allowed and related in vpxenc). This isn\u0027t widely used in e.g., vod in practice. I think it can be ignored for your purposes.\n\n[1] https://source.chromium.org/chromium/chromium/src/+/main:third_party/libvpx/source/libvpx/vp9/common/vp9_scale.c;l\u003d79\n[2] https://storage.googleapis.com/downloads.webmproject.org/docs/vp9/vp9-bitstream-specification-v0.6-20160331-draft.pdf\n[3] https://source.chromium.org/chromium/chromium/src/+/main:third_party/libvpx/source/libvpx/vpx/vpx_encoder.h;l\u003d395",
+      "parentUuid": "8de13bac_a30e572c",
+      "revId": "8838f24e837c7280573891b66ce8e2d26006c946",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "265594b6_4c35e6a3",
@@ -131,6 +149,24 @@
       "side": 1,
       "message": "So the point was more to do with not moving to Q-registers when it\u0027s cost-inefficient[1] - i.e. combining things only to split them apart again after a single operation. There\u0027s no cost penalty here to do the combine as the instructions backing vqmovn can write to the top or bottom half of a Q-register. Additionally, the narrowing right shift instruction only takes Q-register inputs so keeping these separate would require an explicit, less useful combine with a zero-register. \n\nThere\u0027s no benefit from changing this to four shifts because it would make the subsequent store rather tricky - you\u0027d need extra unzip instructions to get things in the right place as the vqmovn and vqrshrun both narrow the element width.\n\n[1] https://source.chromium.org/chromium/chromium/src/+/main:third_party/libvpx/source/libvpx/vpx_dsp/arm/vpx_convolve8_neon.c;l\u003d927",
       "parentUuid": "7fb2edd6_31ec55f0",
+      "revId": "8838f24e837c7280573891b66ce8e2d26006c946",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a4759bc_335f5793",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-05T19:56:55Z",
+      "side": 1,
+      "message": "\u003e So the point was more to do with not moving to Q-registers when it\u0027s cost-inefficient[1] - i.e. combining things only to split them apart again after a single operation. There\u0027s no cost penalty here to do the combine as the instructions backing vqmovn can write to the top or bottom half of a Q-register. Additionally, the narrowing right shift instruction only takes Q-register inputs so keeping these separate would require an explicit, less useful combine with a zero-register. \n\u003e \n\u003e There\u0027s no benefit from changing this to four shifts because it would make the subsequent store rather tricky - you\u0027d need extra unzip instructions to get things in the right place as the vqmovn and vqrshrun both narrow the element width.\n\u003e \n\nThanks for clarifying.\n\n\u003e [1] https://source.chromium.org/chromium/chromium/src/+/main:third_party/libvpx/source/libvpx/vpx_dsp/arm/vpx_convolve8_neon.c;l\u003d927",
+      "parentUuid": "74596eac_eacb005b",
       "revId": "8838f24e837c7280573891b66ce8e2d26006c946",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
