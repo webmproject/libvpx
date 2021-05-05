@@ -19,6 +19,24 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
+// Support for these xN intrinsics is lacking in older versions of GCC.
+#if defined(__GNUC__) && !defined(__clang__)
+#if __GNUC__ < 8 || defined(__arm__)
+static INLINE uint8x16x2_t vld1q_u8_x2(uint8_t const *ptr) {
+  uint8x16x2_t res = { { vld1q_u8(ptr + 0 * 16), vld1q_u8(ptr + 1 * 16) } };
+  return res;
+}
+#endif
+
+#if __GNUC__ < 9 || defined(__arm__)
+static INLINE uint8x16x3_t vld1q_u8_x3(uint8_t const *ptr) {
+  uint8x16x3_t res = { { vld1q_u8(ptr + 0 * 16), vld1q_u8(ptr + 1 * 16),
+                         vld1q_u8(ptr + 2 * 16) } };
+  return res;
+}
+#endif
+#endif
+
 static INLINE int16x4_t create_s16x4_neon(const int16_t c0, const int16_t c1,
                                           const int16_t c2, const int16_t c3) {
   return vcreate_s16((uint16_t)c0 | ((uint32_t)c1 << 16) |

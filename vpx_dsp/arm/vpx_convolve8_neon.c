@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/arm/vpx_convolve8_neon.h"
 #include "vpx_ports/mem.h"
@@ -51,6 +52,112 @@ static INLINE void store_u8_8x8(uint8_t *s, const ptrdiff_t p,
   s += p;
   vst1_u8(s, s7);
 }
+
+#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD) && \
+    (__ARM_FEATURE_DOTPROD == 1)
+
+DECLARE_ALIGNED(16, static const uint8_t, dot_prod_permute_tbl[48]) = {
+  0, 1, 2,  3,  1, 2,  3,  4,  2,  3,  4,  5,  3,  4,  5,  6,
+  4, 5, 6,  7,  5, 6,  7,  8,  6,  7,  8,  9,  7,  8,  9,  10,
+  8, 9, 10, 11, 9, 10, 11, 12, 10, 11, 12, 13, 11, 12, 13, 14
+};
+
+void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
+                              uint8_t *dst, ptrdiff_t dst_stride,
+                              const InterpKernel *filter, int x0_q4,
+                              int x_step_q4, int y0_q4, int y_step_q4, int w,
+                              int h) {
+  const int8x8_t filters = vmovn_s16(vld1q_s16(filter[x0_q4]));
+  const int16x8_t correct_tmp = vmulq_n_s16(vld1q_s16(filter[x0_q4]), 128);
+  const int32x4_t correction = vdupq_n_s32((int32_t)vaddvq_s16(correct_tmp));
+  const uint8x16_t range_limit = vdupq_n_u8(128);
+  uint8x16_t s0, s1, s2, s3;
+
+  assert(!((intptr_t)dst & 3));
+  assert(!(dst_stride & 3));
+  assert(x_step_q4 == 16);
+
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
+
+  src -= 3;
+
+  if (w == 4) {
+    const uint8x16x2_t permute_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
+    do {
+      int32x4_t t0, t1, t2, t3;
+      int16x8_t t01, t23;
+      uint8x8_t d01, d23;
+
+      s0 = vld1q_u8(src);
+      src += src_stride;
+      s1 = vld1q_u8(src);
+      src += src_stride;
+      s2 = vld1q_u8(src);
+      src += src_stride;
+      s3 = vld1q_u8(src);
+      src += src_stride;
+
+      t0 = convolve8_4_dot(s0, filters, correction, range_limit, permute_tbl);
+      t1 = convolve8_4_dot(s1, filters, correction, range_limit, permute_tbl);
+      t2 = convolve8_4_dot(s2, filters, correction, range_limit, permute_tbl);
+      t3 = convolve8_4_dot(s3, filters, correction, range_limit, permute_tbl);
+
+      t01 = vcombine_s16(vqmovn_s32(t0), vqmovn_s32(t1));
+      t23 = vcombine_s16(vqmovn_s32(t2), vqmovn_s32(t3));
+      d01 = vqrshrun_n_s16(t01, 7);
+      d23 = vqrshrun_n_s16(t23, 7);
+
+      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 0);
+      dst += dst_stride;
+      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 1);
+      dst += dst_stride;
+      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 0);
+      dst += dst_stride;
+      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 1);
+      dst += dst_stride;
+      h -= 4;
+    } while (h > 0);
+  } else {
+    const uint8x16x3_t permute_tbl = vld1q_u8_x3(dot_prod_permute_tbl);
+    const uint8_t *s;
+    uint8_t *d;
+    int width;
+    uint8x8_t d0, d1, d2, d3;
+
+    do {
+      width = w;
+      s = src;
+      d = dst;
+      do {
+        s0 = vld1q_u8(s + 0 * src_stride);
+        s1 = vld1q_u8(s + 1 * src_stride);
+        s2 = vld1q_u8(s + 2 * src_stride);
+        s3 = vld1q_u8(s + 3 * src_stride);
+
+        d0 = convolve8_8_dot(s0, filters, correction, range_limit, permute_tbl);
+        d1 = convolve8_8_dot(s1, filters, correction, range_limit, permute_tbl);
+        d2 = convolve8_8_dot(s2, filters, correction, range_limit, permute_tbl);
+        d3 = convolve8_8_dot(s3, filters, correction, range_limit, permute_tbl);
+
+        vst1_u8(d + 0 * dst_stride, d0);
+        vst1_u8(d + 1 * dst_stride, d1);
+        vst1_u8(d + 2 * dst_stride, d2);
+        vst1_u8(d + 3 * dst_stride, d3);
+
+        s += 8;
+        d += 8;
+        width -= 8;
+      } while (width > 0);
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 0);
+  }
+}
+
+#else
 
 void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
@@ -304,6 +411,8 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
     }
   }
 }
+
+#endif
 
 void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                                   uint8_t *dst, ptrdiff_t dst_stride,
