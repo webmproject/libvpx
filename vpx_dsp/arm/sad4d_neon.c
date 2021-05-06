@@ -243,7 +243,7 @@ static INLINE void sad16_neon(const uint8_t *ref_ptr, const uint8x16_t src_ptr,
 static INLINE void sad16x_4d(const uint8_t *src_ptr, int src_stride,
                              const uint8_t *const ref_array[4], int ref_stride,
                              uint32_t *res, const int height) {
-  int i, j;
+  int i;
   const uint8_t *ref_loop[4] = { ref_array[0], ref_array[1], ref_array[2],
                                  ref_array[3] };
   uint16x8_t sum[4] = { vdupq_n_u16(0), vdupq_n_u16(0), vdupq_n_u16(0),
@@ -252,10 +252,15 @@ static INLINE void sad16x_4d(const uint8_t *src_ptr, int src_stride,
   for (i = 0; i < height; ++i) {
     const uint8x16_t s = vld1q_u8(src_ptr);
     src_ptr += src_stride;
-    for (j = 0; j < 4; ++j) {
-      sad16_neon(ref_loop[j], s, &sum[j]);
-      ref_loop[j] += ref_stride;
-    }
+    /* Manual unrolling here stops the compiler from getting confused. */
+    sad16_neon(ref_loop[0], s, &sum[0]);
+    ref_loop[0] += ref_stride;
+    sad16_neon(ref_loop[1], s, &sum[1]);
+    ref_loop[1] += ref_stride;
+    sad16_neon(ref_loop[2], s, &sum[2]);
+    ref_loop[2] += ref_stride;
+    sad16_neon(ref_loop[3], s, &sum[3]);
+    ref_loop[3] += ref_stride;
   }
 
   sad_512_pel_final_neon(sum, res);
