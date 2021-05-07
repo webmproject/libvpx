@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4036c441_44994c9e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-07T13:59:09Z",
+      "side": 1,
+      "message": "This patch and the SAD unrolling give a ~2% perf boost @1080p and reduce code size for 64-bit builds.",
+      "revId": "2feb450841bdfdb95e431092edc38c8bae50ea04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
