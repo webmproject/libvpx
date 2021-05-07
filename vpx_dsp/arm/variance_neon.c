@@ -66,10 +66,9 @@ static void variance_neon_w4x4(const uint8_t *src_ptr, int src_stride,
     ref_ptr += 4 * ref_stride;
   }
 
-  *sum = vget_lane_s32(horizontal_add_int16x8(sum_s16), 0);
-  *sse = vget_lane_u32(horizontal_add_uint32x4(vreinterpretq_u32_s32(
-                           vaddq_s32(sse_lo_s32, sse_hi_s32))),
-                       0);
+  *sum = horizontal_add_int16x8(sum_s16);
+  *sse = horizontal_add_uint32x4(
+      vreinterpretq_u32_s32(vaddq_s32(sse_lo_s32, sse_hi_s32)));
 }
 
 // Process a block of any size where the width is divisible by 16.
@@ -115,10 +114,9 @@ static void variance_neon_w16(const uint8_t *src_ptr, int src_stride,
     ref_ptr += ref_stride;
   }
 
-  *sum = vget_lane_s32(horizontal_add_int16x8(sum_s16), 0);
-  *sse = vget_lane_u32(horizontal_add_uint32x4(vreinterpretq_u32_s32(
-                           vaddq_s32(sse_lo_s32, sse_hi_s32))),
-                       0);
+  *sum = horizontal_add_int16x8(sum_s16);
+  *sse = horizontal_add_uint32x4(
+      vreinterpretq_u32_s32(vaddq_s32(sse_lo_s32, sse_hi_s32)));
 }
 
 // Process a block of width 8 two rows at a time.
@@ -157,10 +155,9 @@ static void variance_neon_w8x2(const uint8_t *src_ptr, int src_stride,
     i += 2;
   } while (i < h);
 
-  *sum = vget_lane_s32(horizontal_add_int16x8(sum_s16), 0);
-  *sse = vget_lane_u32(horizontal_add_uint32x4(vreinterpretq_u32_s32(
-                           vaddq_s32(sse_lo_s32, sse_hi_s32))),
-                       0);
+  *sum = horizontal_add_int16x8(sum_s16);
+  *sse = horizontal_add_uint32x4(
+      vreinterpretq_u32_s32(vaddq_s32(sse_lo_s32, sse_hi_s32)));
 }
 
 void vpx_get8x8var_neon(const uint8_t *src_ptr, int src_stride,
