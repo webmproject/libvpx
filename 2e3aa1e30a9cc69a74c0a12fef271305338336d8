@@ -39,6 +39,30 @@
       },
       "revId": "2e3aa1e30a9cc69a74c0a12fef271305338336d8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7c0ea50b_d2255603",
+        "filename": "vpx_dsp/arm/sad4d_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-07T14:41:48Z",
+      "side": 1,
+      "message": "Both cases using a very recent Clang (a few weeks behind LLVM master tip)\n\nBefore:\n\n_vpx_sad16x8x4d_neon:\n00000000000008a0        sub     sp, sp, #0x80\n00000000000008a4        stp     x29, x30, [sp, #0x70]\n00000000000008a8        add     x29, sp, #0x70\n00000000000008ac        adrp    x9, ___stack_chk_guard@GOTPAGE\n00000000000008b0        mov     w8, wzr\n00000000000008b4        ldr     x9, [x9, ___stack_chk_guard@GOTPAGEOFF]\n00000000000008b8        mov     x10, sp\n00000000000008bc        sxtw    x11, w1\n00000000000008c0        ldr     x9, [x9]\n00000000000008c4        sxtw    x12, w3\n00000000000008c8        stur    x9, [x29, #-0x8]\n00000000000008cc        sub     x9, x29, #0x30\n00000000000008d0        ldp     q0, q1, [x2]\n00000000000008d4        stp     q0, q1, [x29, #-0x30]\n00000000000008d8        movi.2d v0, #0000000000000000\n00000000000008dc        stp     q0, q0, [sp, #0x20]\n00000000000008e0        stp     q0, q0, [sp]\n00000000000008e4        ldr     q0, [x0]\n00000000000008e8        mov     x13, xzr\n00000000000008ec        ext.16b v1, v0, v0, #0x8\n00000000000008f0        lsl     x14, x13, #3\n00000000000008f4        lsl     x16, x13, #4\n00000000000008f8        add     x13, x13, #0x1\n00000000000008fc        ldr     x15, [x9, x14]\n0000000000000900        ldr     q2, [x15]\n0000000000000904        ldr     q3, [x10, x16]\n0000000000000908        add     x15, x15, x12\n000000000000090c        cmp     x13, #0x4\n0000000000000910        str     x15, [x9, x14]\n0000000000000914        ext.16b v4, v2, v2, #0x8\n0000000000000918        uabal.8h        v3, v0, v2\n000000000000091c        uabal.8h        v3, v1, v4\n0000000000000920        str     q3, [x10, x16]\n0000000000000924        b.ne    0x8f0\n0000000000000928        add     w8, w8, #0x1\n000000000000092c        add     x0, x0, x11\n0000000000000930        cmp     w8, #0x8\n0000000000000934        b.ne    0x8e4\n0000000000000938        ldp     q0, q1, [sp]\n000000000000093c        adrp    x9, ___stack_chk_guard@GOTPAGE\n0000000000000940        addp.8h v0, v0, v1\n0000000000000944        ldp     q2, q3, [sp, #0x20]\n0000000000000948        addp.8h v1, v2, v3\n000000000000094c        addp.8h v0, v0, v1\n0000000000000950        uaddlp.4s       v0, v0\n0000000000000954        str     q0, [x4]\n0000000000000958        ldur    x8, [x29, #-0x8]\n000000000000095c        ldr     x9, [x9, ___stack_chk_guard@GOTPAGEOFF]\n0000000000000960        ldr     x9, [x9]\n0000000000000964        cmp     x9, x8\n0000000000000968        b.ne    0x978\n000000000000096c        ldp     x29, x30, [sp, #0x70]\n0000000000000970        add     sp, sp, #0x80\n0000000000000974        ret\n0000000000000978        bl      ___stack_chk_fail\n000000000000097c        nop\n\nAfter:\n\n_vpx_sad16x8x4d_neon:\n00000000000008a0        ldp     x10, x9, [x2, #0x10]\n00000000000008a4        movi.2d v0, #0000000000000000\n00000000000008a8        ldp     x13, x12, [x2]\n00000000000008ac        movi.2d v1, #0000000000000000\n00000000000008b0        movi.2d v2, #0000000000000000\n00000000000008b4        movi.2d v3, #0000000000000000\n00000000000008b8        mov     x8, xzr\n00000000000008bc        sxtw    x11, w1\n00000000000008c0        sxtw    x14, w3\n00000000000008c4        mov     w15, #0x8\n00000000000008c8        ldr     q4, [x13, x8]\n00000000000008cc        subs    w15, w15, #0x1\n00000000000008d0        ldr     q5, [x0]\n00000000000008d4        add     x0, x0, x11\n00000000000008d8        uabal.8h        v0, v5, v4\n00000000000008dc        uabal2.8h       v0, v5, v4\n00000000000008e0        ldr     q4, [x12, x8]\n00000000000008e4        uabal.8h        v1, v5, v4\n00000000000008e8        uabal2.8h       v1, v5, v4\n00000000000008ec        ldr     q4, [x10, x8]\n00000000000008f0        uabal.8h        v2, v5, v4\n00000000000008f4        uabal2.8h       v2, v5, v4\n00000000000008f8        ldr     q4, [x9, x8]\n00000000000008fc        add     x8, x8, x14\n0000000000000900        uabal.8h        v3, v5, v4\n0000000000000904        uabal2.8h       v3, v5, v4\n0000000000000908        b.ne    0x8c8\n000000000000090c        addp.8h v0, v0, v1\n0000000000000910        addp.8h v1, v2, v3\n0000000000000914        addp.8h v0, v0, v1\n0000000000000918        uaddlp.4s       v0, v0\n000000000000091c        str     q0, [x4]\n0000000000000920        ret\n0000000000000924        nop\n0000000000000928        nop\n000000000000092c        nop",
+      "parentUuid": "f939d8bf_ee60af5b",
+      "range": {
+        "startLine": 255,
+        "startChar": 61,
+        "endLine": 255,
+        "endChar": 69
+      },
+      "revId": "2e3aa1e30a9cc69a74c0a12fef271305338336d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
