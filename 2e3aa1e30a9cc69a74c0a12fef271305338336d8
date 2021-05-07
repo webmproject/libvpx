@@ -87,6 +87,30 @@
       },
       "revId": "2e3aa1e30a9cc69a74c0a12fef271305338336d8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c2ac2ee_6f3ddd71",
+        "filename": "vpx_dsp/arm/sad4d_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-07T18:49:03Z",
+      "side": 1,
+      "message": "\u003e Thanks!\n\nI think we\u0027ve seen bugs in both directions, where rerolling helped. Those were cases where we pared things down from 16 to 4 though.",
+      "parentUuid": "8dc9087a_9d80a8f1",
+      "range": {
+        "startLine": 255,
+        "startChar": 61,
+        "endLine": 255,
+        "endChar": 69
+      },
+      "revId": "2e3aa1e30a9cc69a74c0a12fef271305338336d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
