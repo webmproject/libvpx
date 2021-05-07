@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c7aca80c_bcbc2243",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-07T18:52:47Z",
+      "side": 1,
+      "message": "Thanks for the patches Jonathan. For tracking purposes I added \u0027Bug: b/181236880\u0027 to the commit message. If you have any other changes you can add the same one.",
+      "revId": "f7364c05748b70a1e0fd57849665a9d9f0990803",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
