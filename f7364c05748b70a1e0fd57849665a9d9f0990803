@@ -51,6 +51,24 @@
       "parentUuid": "c7aca80c_bcbc2243",
       "revId": "f7364c05748b70a1e0fd57849665a9d9f0990803",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "578739ff_eb316fc5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-08T02:02:51Z",
+      "side": 1,
+      "message": "\u003e BTW, do your bots do automatic rebasing like the Chromium ones do? No issues if they don\u0027t, I was just intruiged by the merge commit a few days ago.\n\nNo, there\u0027s no commit queue here and this project uses the merge if necessary submit type in gerrit [1]. Since there\u0027s no commit queue rebase or merge can still result in breakage, but the merge has the advantage that your local branch can be deleted without forcing.\n\n[1] https://gerrit-review.googlesource.com/Documentation/intro-project-owner.html#submit-type",
+      "parentUuid": "bebd002a_3c714641",
+      "revId": "f7364c05748b70a1e0fd57849665a9d9f0990803",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
