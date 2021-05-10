@@ -22,6 +22,30 @@
       },
       "revId": "2db85c269bc5479e48ea7cd4fde85236ee0bc347",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c768e9e8_d57eef9e",
+        "filename": "vpx_dsp/arm/sad4d_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-10T20:41:29Z",
+      "side": 1,
+      "message": "A32 and A64 are instructions sets while AArch32 and AArch64 are processor execution modes. I.e. an Armv8 processor executing in AArch64 (64-bit) mode would be executing A64 instructions and vice versa for AArch32 and A32 - so one necessarily implies the other.\n\nBefore Armv8, there was only 32-bit \"Arm\" (Armv7 is roughly equivalent to AArch32), hence the 32-bit toolchain triples in use today are e.g. arm-linux-gnueabi. If we had been consistent (and had the benefit of hindsight) we probably would have had aarch32-linux-gnu... and aarch64-linux-gnu. The compiler-defined macros to determine the target are \"__arm__\" and \"__aarch64__\".\n\nTo add to the confusion of modes and instructions sets, some people refer to \"64-bit Arm\" as \"arm64\" - which we don\u0027t officially recognize.",
+      "parentUuid": "1b642f81_52106e8a",
+      "range": {
+        "startLine": 240,
+        "startChar": 12,
+        "endLine": 240,
+        "endChar": 23
+      },
+      "revId": "2db85c269bc5479e48ea7cd4fde85236ee0bc347",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
