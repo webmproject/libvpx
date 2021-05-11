@@ -40,6 +40,33 @@ static INLINE uint32_t horizontal_add_uint16x8(const uint16x8_t a) {
 #endif
 }
 
+static INLINE int32_t horizontal_add_int32x2(const int32x2_t a) {
+#if defined(__aarch64__)
+  return vaddv_s32(a);
+#else
+  return vget_lane_s32(a, 0) + vget_lane_s32(a, 1);
+#endif
+}
+
+static INLINE uint32_t horizontal_add_uint32x2(const uint32x2_t a) {
+#if defined(__aarch64__)
+  return vaddv_u32(a);
+#else
+  return vget_lane_u32(a, 0) + vget_lane_u32(a, 1);
+#endif
+}
+
+static INLINE int32_t horizontal_add_int32x4(const int32x4_t a) {
+#if defined(__aarch64__)
+  return vaddvq_s32(a);
+#else
+  const int64x2_t b = vpaddlq_s32(a);
+  const int32x2_t c = vadd_s32(vreinterpret_s32_s64(vget_low_s64(b)),
+                               vreinterpret_s32_s64(vget_high_s64(b)));
+  return vget_lane_s32(c, 0);
+#endif
+}
+
 static INLINE uint32_t horizontal_add_uint32x4(const uint32x4_t a) {
 #if defined(__aarch64__)
   return vaddvq_u32(a);
