@@ -16,6 +16,23 @@
       "message": "This one gives a boost of ~3% @1080p.",
       "revId": "d6595fec4176763fc71e3e641484b344d6d844b3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "accabbee_90c2c494",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-12T16:49:00Z",
+      "side": 1,
+      "message": "Looking at the Jenkins console log, this looks a bot failure (as distinct from a failure due to my patch.)",
+      "revId": "d6595fec4176763fc71e3e641484b344d6d844b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
