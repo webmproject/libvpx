@@ -80,6 +80,30 @@
       },
       "revId": "d6595fec4176763fc71e3e641484b344d6d844b3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "75d8a2df_a9365ee8",
+        "filename": "vpx_dsp/arm/sum_neon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-12T22:00:45Z",
+      "side": 1,
+      "message": "Ah yes - thanks for fixing.",
+      "parentUuid": "863681ca_4e89985a",
+      "range": {
+        "startLine": 64,
+        "startChar": 44,
+        "endLine": 64,
+        "endChar": 51
+      },
+      "revId": "d6595fec4176763fc71e3e641484b344d6d844b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
