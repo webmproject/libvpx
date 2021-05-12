@@ -33,6 +33,29 @@
       "message": "Looking at the Jenkins console log, this looks a bot failure (as distinct from a failure due to my patch.)",
       "revId": "d6595fec4176763fc71e3e641484b344d6d844b3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9bb48bae_ebb63619",
+        "filename": "vpx_dsp/arm/sum_neon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-12T20:57:39Z",
+      "side": 1,
+      "message": "should be s32_",
+      "range": {
+        "startLine": 64,
+        "startChar": 44,
+        "endLine": 64,
+        "endChar": 51
+      },
+      "revId": "d6595fec4176763fc71e3e641484b344d6d844b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
