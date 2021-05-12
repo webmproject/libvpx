@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8059f09d_c12b6396",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-12T16:46:41Z",
+      "side": 1,
+      "message": "Only worth ~1.5% boost due to the extra data re-arrangement.",
+      "revId": "0d980f1271aec5e91576911b3f382fa41a821fc5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
