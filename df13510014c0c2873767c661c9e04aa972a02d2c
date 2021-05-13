@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "34c62e81_043a27bf",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-13T22:41:01Z",
+      "side": 1,
+      "message": "this and the increment on src_ptr at line 503 (and in the other variant of the function) can be removed though the compiler is probably already taking care of it.",
+      "revId": "df13510014c0c2873767c661c9e04aa972a02d2c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
