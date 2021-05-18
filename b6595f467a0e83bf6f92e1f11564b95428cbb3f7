@@ -16,6 +16,24 @@
       "message": "this needs a cast back to u8. I added build coverage [1] and will upload something to use load_u8() to hide the back and forth.\n\n[1] https://build.webmproject.org/jenkins/view/libvpx%20per%20commit/job/libvpx__per-commit_compile/40593/arch\u003darmv8.4-linux-gcc,config\u003dsmall/console",
       "revId": "b6595f467a0e83bf6f92e1f11564b95428cbb3f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "660fe3bf_06601a60",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-18T20:34:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "28b0b8f2_ec8181ef",
+      "revId": "b6595f467a0e83bf6f92e1f11564b95428cbb3f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
