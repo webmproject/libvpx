@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aab757cf_45b9070e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-24T13:52:26Z",
+      "side": 1,
+      "message": "PS 3 fixes \"missing braces\" around initializer warning.",
+      "revId": "d1513ea9b04a5f5f7cdda168a9a94bbc42a94c78",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
