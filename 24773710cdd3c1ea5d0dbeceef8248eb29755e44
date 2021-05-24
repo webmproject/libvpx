@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f4854757_6d222db3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1247893
+      },
+      "writtenOn": "2021-05-24T10:02:35Z",
+      "side": 1,
+      "message": "Being a bit cleverer about the data rearrangement gets us an extra 2.5%.",
+      "revId": "24773710cdd3c1ea5d0dbeceef8248eb29755e44",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
