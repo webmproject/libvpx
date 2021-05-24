@@ -3878,9 +3878,9 @@ int vp9_get_gop_coding_frame_count(const VP9EncoderConfig *oxcf,
 // coding frames (including show frame and alt ref) can be determined.
 int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
                              const TWO_PASS *const twopass,
-                             const FRAME_INFO *frame_info,
-                             const FIRST_PASS_INFO *first_pass_info,
-                             int multi_layer_arf, int allow_alt_ref) {
+                             const FRAME_INFO *frame_info, int multi_layer_arf,
+                             int allow_alt_ref) {
+  const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
   int coding_frame_num = 0;
   RATE_CONTROL rc;
   int gop_coding_frame_count;

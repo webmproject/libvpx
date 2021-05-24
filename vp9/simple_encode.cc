@@ -872,14 +872,14 @@ void SimpleEncode::ComputeFirstPassStats() {
   const VP9EncoderConfig oxcf = GetEncodeConfig(
       frame_width_, frame_height_, frame_rate, target_bitrate_, encode_speed_,
       VPX_RC_FIRST_PASS, impl_ptr_->encode_config_list);
-  VP9_COMP *cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
-  struct lookahead_ctx *lookahead = cpi->lookahead;
+  impl_ptr_->cpi = init_encoder(&oxcf, impl_ptr_->img_fmt);
+  struct lookahead_ctx *lookahead = impl_ptr_->cpi->lookahead;
   int i;
   int use_highbitdepth = 0;
   const int num_rows_16x16 = get_num_unit_16x16(frame_height_);
   const int num_cols_16x16 = get_num_unit_16x16(frame_width_);
 #if CONFIG_VP9_HIGHBITDEPTH
-  use_highbitdepth = cpi->common.use_highbitdepth;
+  use_highbitdepth = impl_ptr_->cpi->common.use_highbitdepth;
 #endif
   vpx_image_t img;
   vpx_img_alloc(&img, impl_ptr_->img_fmt, frame_width_, frame_height_, 1);
@@ -905,30 +905,38 @@ void SimpleEncode::ComputeFirstPassStats() {
         ENCODE_FRAME_RESULT encode_frame_info;
         vp9_init_encode_frame_result(&encode_frame_info);
         // TODO(angiebird): Call vp9_first_pass directly
-        vp9_get_compressed_data(cpi, &frame_flags, &size, nullptr, &time_stamp,
-                                &time_end, flush, &encode_frame_info);
+        vp9_get_compressed_data(impl_ptr_->cpi, &frame_flags, &size, nullptr,
+                                &time_stamp, &time_end, flush,
+                                &encode_frame_info);
         // vp9_get_compressed_data only generates first pass stats not
         // compresses data
         assert(size == 0);
         // Get vp9 first pass motion vector info.
         std::vector<MotionVectorInfo> mv_info(num_rows_16x16 * num_cols_16x16);
-        update_motion_vector_info(cpi->fp_motion_vector_info, num_rows_16x16,
-                                  num_cols_16x16, mv_info.data(),
-                                  kMotionVectorFullPixelPrecision);
+        update_motion_vector_info(
+            impl_ptr_->cpi->fp_motion_vector_info, num_rows_16x16,
+            num_cols_16x16, mv_info.data(), kMotionVectorFullPixelPrecision);
         fp_motion_vector_info_.push_back(mv_info);
       }
-      impl_ptr_->first_pass_stats.push_back(vp9_get_frame_stats(&cpi->twopass));
+      impl_ptr_->first_pass_stats.push_back(
+          vp9_get_frame_stats(&impl_ptr_->cpi->twopass));
     }
   }
-  vp9_end_first_pass(cpi);
   // TODO(angiebird): Store the total_stats apart form first_pass_stats
-  impl_ptr_->first_pass_stats.push_back(vp9_get_total_stats(&cpi->twopass));
-  free_encoder(cpi);
-  rewind(in_file_);
-  vpx_img_free(&img);
+  impl_ptr_->first_pass_stats.push_back(
+      vp9_get_total_stats(&impl_ptr_->cpi->twopass));
+  vp9_end_first_pass(impl_ptr_->cpi);
+  fps_init_first_pass_info(&cpi->twopass.first_pass_info,
+                           GetVectorData(impl_ptr_->first_pass_stats),
+                           num_frames_);
 
   // Generate key_frame_map based on impl_ptr_->first_pass_stats.
   key_frame_map_ = ComputeKeyFrameMap();
+
+  free_encoder(impl_ptr_->cpi);
+  impl_ptr_->cpi = nullptr;
+  rewind(in_file_);
+  vpx_img_free(&img);
 }
 
 std::vector<std::vector<double>> SimpleEncode::ObserveFirstPassStats() {
@@ -1249,7 +1257,7 @@ int SimpleEncode::GetCodingFrameNum() const {
   }
 
   // These are the default settings for now.
-  const VP9_COMP *cpi = impl_ptr_->cpi;
+  VP9_COMP *cpi = impl_ptr_->cpi;
   const int multi_layer_arf = 0;
   const int allow_alt_ref = 1;
   vpx_rational_t frame_rate =
@@ -1258,13 +1266,11 @@ int SimpleEncode::GetCodingFrameNum() const {
       frame_width_, frame_height_, frame_rate, target_bitrate_, encode_speed_,
       VPX_RC_LAST_PASS, impl_ptr_->encode_config_list);
   FRAME_INFO frame_info = vp9_get_frame_info(&oxcf);
-  FIRST_PASS_INFO first_pass_info;
-  fps_init_first_pass_info(&first_pass_info,
+  fps_init_first_pass_info(&cpi->twopass.first_pass_info,
                            GetVectorData(impl_ptr_->first_pass_stats),
                            num_frames_);
   return vp9_get_coding_frame_num(&oxcf, &cpi->twopass, &frame_info,
-                                  &first_pass_info, multi_layer_arf,
-                                  allow_alt_ref);
+                                  multi_layer_arf, allow_alt_ref);
 }
 
 std::vector<int> SimpleEncode::ComputeKeyFrameMap() const {
@@ -1276,10 +1282,6 @@ std::vector<int> SimpleEncode::ComputeKeyFrameMap() const {
   const VP9EncoderConfig oxcf = GetEncodeConfig(
       frame_width_, frame_height_, frame_rate, target_bitrate_, encode_speed_,
       VPX_RC_LAST_PASS, impl_ptr_->encode_config_list);
-  FIRST_PASS_INFO first_pass_info;
-  fps_init_first_pass_info(&first_pass_info,
-                           GetVectorData(impl_ptr_->first_pass_stats),
-                           num_frames_);
   std::vector<int> key_frame_map(num_frames_, 0);
   vp9_get_key_frame_map(&oxcf, &cpi->twopass, GetVectorData(key_frame_map));
   return key_frame_map;

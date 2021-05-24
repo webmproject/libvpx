@@ -305,9 +305,8 @@ int vp9_get_gop_coding_frame_count(const struct VP9EncoderConfig *oxcf,
 
 int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
                              const TWO_PASS *const twopass,
-                             const FRAME_INFO *frame_info,
-                             const FIRST_PASS_INFO *first_pass_info,
-                             int multi_layer_arf, int allow_alt_ref);
+                             const FRAME_INFO *frame_info, int multi_layer_arf,
+                             int allow_alt_ref);
 
 /*!\brief Compute a key frame binary map indicates whether key frames appear
  * in the corresponding positions. The passed in key_frame_map must point to an
