@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "da4592ea_e213ff6b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-05-25T00:23:18Z",
+      "side": 1,
+      "message": "The simple encode environment was broken due to recent function signature changes to rate control and associated structure. This cl fixes it.",
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
