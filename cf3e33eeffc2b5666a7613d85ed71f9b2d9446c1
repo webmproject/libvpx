@@ -34,6 +34,52 @@
       "parentUuid": "da4592ea_e213ff6b",
       "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d90f3224_677dccce",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-05-25T00:55:41Z",
+      "side": 1,
+      "message": "This cpi will be freed at the end of this function.\nDo we need to put it into impl_ptr_?",
+      "range": {
+        "startLine": 875,
+        "startChar": 2,
+        "endLine": 875,
+        "endChar": 16
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9ef3493c_aa31da59",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-05-25T00:55:41Z",
+      "side": 1,
+      "message": "What is the difference between using declared first_pass_info and cpi-\u003etwopass.first_pass_info?",
+      "range": {
+        "startLine": 1281,
+        "startChar": 27,
+        "endLine": 1281,
+        "endChar": 56
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
