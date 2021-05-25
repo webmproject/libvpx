@@ -36,6 +36,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d163df9_2f345dcc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-05-25T04:15:19Z",
+      "side": 1,
+      "message": "Not functions used in simple encode environment, but structures in cpi.\nSome variables in cpi is moved to one structure.",
+      "parentUuid": "5ad5ac9b_3061269e",
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d90f3224_677dccce",
@@ -59,6 +77,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2a1faaec_27dea3a8",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-05-25T04:15:19Z",
+      "side": 1,
+      "message": "Yes we need to.\nPlease note function \"ComputeKeyFrameMap\", which is at inside this function, line 931, uses \"impl_ptr_-\u003ecpi\". So we need to init it here.",
+      "parentUuid": "d90f3224_677dccce",
+      "range": {
+        "startLine": 875,
+        "startChar": 2,
+        "endLine": 875,
+        "endChar": 16
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9ef3493c_aa31da59",
@@ -72,6 +114,30 @@
       "writtenOn": "2021-05-25T00:55:41Z",
       "side": 1,
       "message": "What is the difference between using declared first_pass_info and cpi-\u003etwopass.first_pass_info?",
+      "range": {
+        "startLine": 1281,
+        "startChar": 27,
+        "endLine": 1281,
+        "endChar": 56
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "436a244b_d06255c5",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-05-25T04:15:19Z",
+      "side": 1,
+      "message": "If we use declared first_pass_info, we also need to pass it into \"vp9_get_key_frame_map()\".\n\nWhile in the last cl (https://chromium-review.googlesource.com/c/webm/libvpx/+/2802850), I removed the input parameter \"first_pass_info\" and thought it could be inferred from \"twopass-\u003efirst_pass_info\", which actually has not been set.\n\nSo I decide to not using a declared variable, instead just init the corresponding struct in twopass.",
+      "parentUuid": "9ef3493c_aa31da59",
       "range": {
         "startLine": 1281,
         "startChar": 27,
