@@ -124,6 +124,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8529e2f5_ff4b2556",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-05-25T23:32:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8019ae5_a915784b",
+      "range": {
+        "startLine": 933,
+        "startChar": 2,
+        "endLine": 933,
+        "endChar": 31
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "51c19dce_3bc16b82",
@@ -137,6 +161,30 @@
       "writtenOn": "2021-05-25T22:24:11Z",
       "side": 1,
       "message": "The \"const\" of cpi is important.\nIt means that this function won\u0027t change anything in the cpi.",
+      "range": {
+        "startLine": 1273,
+        "startChar": 2,
+        "endLine": 1273,
+        "endChar": 32
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d8ad180d_a86c9920",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1273,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-05-25T23:32:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "51c19dce_3bc16b82",
       "range": {
         "startLine": 1273,
         "startChar": 2,
@@ -208,6 +256,30 @@
       "side": 1,
       "message": "I would recommend to move this line to ComputeFirstPassStats() right after vp9_end_first_pass().\nSo that we can keep the \"const\" for cpi",
       "parentUuid": "436a244b_d06255c5",
+      "range": {
+        "startLine": 1281,
+        "startChar": 27,
+        "endLine": 1281,
+        "endChar": 56
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "07e5163c_294aded2",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-05-25T23:32:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0108a375_edc89a6b",
       "range": {
         "startLine": 1281,
         "startChar": 27,
