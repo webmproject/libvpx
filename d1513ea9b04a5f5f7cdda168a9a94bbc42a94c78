@@ -16,6 +16,69 @@
       "message": "PS 3 fixes \"missing braces\" around initializer warning.",
       "revId": "d1513ea9b04a5f5f7cdda168a9a94bbc42a94c78",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "da15022d_d47134d0",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-25T00:17:14Z",
+      "side": 1,
+      "message": "generally functions are defined after tables. I\u0027ll reorder these when I correct the typos.",
+      "revId": "d1513ea9b04a5f5f7cdda168a9a94bbc42a94c78",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "55d58ef0_bb05496e",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 930,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-25T00:17:14Z",
+      "side": 1,
+      "message": "transpose",
+      "range": {
+        "startLine": 930,
+        "startChar": 46,
+        "endLine": 930,
+        "endChar": 54
+      },
+      "revId": "d1513ea9b04a5f5f7cdda168a9a94bbc42a94c78",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3e3a3513_19c1b37d",
+        "filename": "vpx_dsp/arm/vpx_convolve8_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-25T00:17:14Z",
+      "side": 1,
+      "message": "transpose",
+      "range": {
+        "startLine": 1023,
+        "startChar": 48,
+        "endLine": 1023,
+        "endChar": 56
+      },
+      "revId": "d1513ea9b04a5f5f7cdda168a9a94bbc42a94c78",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
