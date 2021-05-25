@@ -103,6 +103,52 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a8019ae5_a915784b",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-05-25T22:24:11Z",
+      "side": 1,
+      "message": "You will need to set impl_ptr-\u003ecpi to nullptr.",
+      "range": {
+        "startLine": 933,
+        "startChar": 2,
+        "endLine": 933,
+        "endChar": 31
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "51c19dce_3bc16b82",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1273,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-05-25T22:24:11Z",
+      "side": 1,
+      "message": "The \"const\" of cpi is important.\nIt means that this function won\u0027t change anything in the cpi.",
+      "range": {
+        "startLine": 1273,
+        "startChar": 2,
+        "endLine": 1273,
+        "endChar": 32
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "9ef3493c_aa31da59",
         "filename": "vp9/simple_encode.cc",
         "patchSetId": 1
@@ -138,6 +184,30 @@
       "side": 1,
       "message": "If we use declared first_pass_info, we also need to pass it into \"vp9_get_key_frame_map()\".\n\nWhile in the last cl (https://chromium-review.googlesource.com/c/webm/libvpx/+/2802850), I removed the input parameter \"first_pass_info\" and thought it could be inferred from \"twopass-\u003efirst_pass_info\", which actually has not been set.\n\nSo I decide to not using a declared variable, instead just init the corresponding struct in twopass.",
       "parentUuid": "9ef3493c_aa31da59",
+      "range": {
+        "startLine": 1281,
+        "startChar": 27,
+        "endLine": 1281,
+        "endChar": 56
+      },
+      "revId": "cf3e33eeffc2b5666a7613d85ed71f9b2d9446c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0108a375_edc89a6b",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-05-25T22:24:11Z",
+      "side": 1,
+      "message": "I would recommend to move this line to ComputeFirstPassStats() right after vp9_end_first_pass().\nSo that we can keep the \"const\" for cpi",
+      "parentUuid": "436a244b_d06255c5",
       "range": {
         "startLine": 1281,
         "startChar": 27,
