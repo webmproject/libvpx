@@ -283,7 +283,7 @@ typedef const struct vpx_codec_enc_cfg_map {
   vpx_codec_enc_cfg_t cfg;
 } vpx_codec_enc_cfg_map_t;
 
-/*!\brief Decoder algorithm interface interface
+/*!\brief Decoder algorithm interface
  *
  * All decoders \ref MUST expose a variable of this type.
  */
