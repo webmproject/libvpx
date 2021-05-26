@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a0a93bbe_4cd1ec83",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-05-26T22:12:20Z",
+      "side": 1,
+      "message": "Good catch, thanks for the patch.",
+      "revId": "d42b93a15f182b0cd2bcc639e6951c40da6da8ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
