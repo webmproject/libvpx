@@ -257,6 +257,7 @@ void vp9_first_pass_encode_tile_mb_row(struct VP9_COMP *cpi,
 
 void vp9_init_second_pass(struct VP9_COMP *cpi);
 void vp9_rc_get_second_pass_params(struct VP9_COMP *cpi);
+void vp9_init_vizier_params(TWO_PASS *const twopass, int screen_area);
 
 // Post encode update of the rate control parameters for 2-pass
 void vp9_twopass_postencode_update(struct VP9_COMP *cpi);
@@ -304,7 +305,7 @@ int vp9_get_gop_coding_frame_count(const struct VP9EncoderConfig *oxcf,
                                    int last_gop_use_alt_ref, int *use_alt_ref);
 
 int vp9_get_coding_frame_num(const struct VP9EncoderConfig *oxcf,
-                             const TWO_PASS *const twopass,
+                             TWO_PASS *const twopass,
                              const FRAME_INFO *frame_info, int multi_layer_arf,
                              int allow_alt_ref);
 

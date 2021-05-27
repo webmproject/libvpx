@@ -3487,7 +3487,7 @@ static int is_skippable_frame(const VP9_COMP *cpi) {
 
 // Configure image size specific vizier parameters.
 // Later these will be set via additional command line options
-static void init_vizier_params(TWO_PASS *const twopass, int screen_area) {
+void vp9_init_vizier_params(TWO_PASS *const twopass, int screen_area) {
   // When |use_vizier_rc_params| is 1, we expect the rc parameters below to
   // have been initialised on the command line as adjustment factors such
   // that a factor of 1.0 will match the default behavior when
@@ -3561,7 +3561,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   if (cm->current_video_frame == 0) {
     unsigned int screen_area = (cm->width * cm->height);
 
-    init_vizier_params(twopass, screen_area);
+    vp9_init_vizier_params(twopass, screen_area);
   }
 
   // If this is an arf frame then we dont want to read the stats file or
@@ -3877,7 +3877,7 @@ int vp9_get_gop_coding_frame_count(const VP9EncoderConfig *oxcf,
 // Under CONFIG_RATE_CTRL, once the first_pass_info is ready, the number of
 // coding frames (including show frame and alt ref) can be determined.
 int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
-                             const TWO_PASS *const twopass,
+                             TWO_PASS *const twopass,
                              const FRAME_INFO *frame_info, int multi_layer_arf,
                              int allow_alt_ref) {
   const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
