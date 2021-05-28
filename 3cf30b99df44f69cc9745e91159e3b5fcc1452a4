@@ -16,6 +16,24 @@
       "message": "Is there unit test you can add to catch future errors ? ",
       "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "769b7c82_f3b19b84",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-05-28T19:02:37Z",
+      "side": 1,
+      "message": "We have some tests but not triggerd by Gerrit. I plan to add them in test for every cl.",
+      "parentUuid": "bf311d29_40b2109e",
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
