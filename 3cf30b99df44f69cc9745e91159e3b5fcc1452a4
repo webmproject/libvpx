@@ -52,6 +52,161 @@
       "parentUuid": "769b7c82_f3b19b84",
       "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "040b208e_6fb4afed",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-03T23:21:37Z",
+      "side": 1,
+      "message": "Hi Cheng,\nThanks for fixing the issue.\nSorry that I didn\u0027t review your CL earlier.\nThe following is my suggestions.",
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "227b25d8_77ae903b",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3892,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-03T23:21:37Z",
+      "side": 1,
+      "message": "We shouldn\u0027t call vp9_init_vizier_params() here.\nvp9_init_vizier_params() will change the parameter in twopass cumulatively.\nIf user call this function twice, the twopass will be updated incorrectly.",
+      "range": {
+        "startLine": 3892,
+        "startChar": 2,
+        "endLine": 3892,
+        "endChar": 47
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2b32ebd2_d3dbb4bf",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 928,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-03T23:21:37Z",
+      "side": 1,
+      "message": "Let\u0027s call\nvp9_init_vizier_params(\u0026cpi-\u003etwopass, screen_area);\nhere?",
+      "range": {
+        "startLine": 928,
+        "startChar": 2,
+        "endLine": 928,
+        "endChar": 37
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "095d3250_e0cf4aa0",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-03T23:21:37Z",
+      "side": 1,
+      "message": "We still need to set\nimpl_ptr_-\u003ecpi to nullptr here right?",
+      "range": {
+        "startLine": 933,
+        "startChar": 2,
+        "endLine": 933,
+        "endChar": 6
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "830706e4_8cafda41",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1090,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-03T23:21:37Z",
+      "side": 1,
+      "message": "My impression is vp9_init_vizier_params() is not stateless, therefore it should only be called once after cpi is created.\nI would recommend to only call this function at\n1) ComputeFirstPassStats() after vp9_end_first_pass()\n2) StartEncode() after init_encoder()\n\nWe also need to comment out vp9_init_vizier_params() in vp9_rc_get_second_pass_params() when CONFIG_RATE_CTRL is on.\n\nThis way, we guarantee that vp9_init_vizier_params() will only be called once whenever a cpi is created.\n\nMoreover, screen_area can be inferred from frame_width_ and frame_height_\n\n\nNote that, UpdateKeyFrameGroup() and vp9_get_coding_frame_num() may be called multiple times.",
+      "range": {
+        "startLine": 1089,
+        "startChar": 0,
+        "endLine": 1090,
+        "endChar": 53
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f6141c59_b023642e",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1275,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-03T23:21:37Z",
+      "side": 1,
+      "message": "Let\u0027s keep the const?",
+      "range": {
+        "startLine": 1275,
+        "startChar": 2,
+        "endLine": 1275,
+        "endChar": 33
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1ca857e2_6ca47a3d",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1286,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-03T23:21:37Z",
+      "side": 1,
+      "message": "Let\u0027s keep this part in ComputeFirstPassStats() after vp9_end_first_pass()",
+      "range": {
+        "startLine": 1284,
+        "startChar": 0,
+        "endLine": 1286,
+        "endChar": 40
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
