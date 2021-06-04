@@ -94,6 +94,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "dddf2640_079ece4f",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3892,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-04T00:09:44Z",
+      "side": 1,
+      "message": "It is true that vp9_init_vizier_params() could change RC parameters cumulatively. But it is only when \"twopass-\u003euse_vizier_rc_params\" is true, which is another experiment that is not compatible with the L2E rate control experiment.\nThat\u0027s why I put the function here, even though \"vp9_get_coding_frame_num()\" is called multiple times, those RC parameters are always set to default values.\n\nBut I agree this might also be dangerous, if someday \"twopass-\u003euse_vizier_rc_params\" is compatible with the L2E rate control experiment.",
+      "parentUuid": "227b25d8_77ae903b",
+      "range": {
+        "startLine": 3892,
+        "startChar": 2,
+        "endLine": 3892,
+        "endChar": 47
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2b32ebd2_d3dbb4bf",
@@ -107,6 +131,30 @@
       "writtenOn": "2021-06-03T23:21:37Z",
       "side": 1,
       "message": "Let\u0027s call\nvp9_init_vizier_params(\u0026cpi-\u003etwopass, screen_area);\nhere?",
+      "range": {
+        "startLine": 928,
+        "startChar": 2,
+        "endLine": 928,
+        "endChar": 37
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "683514c9_9e217ad6",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 928,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-04T00:09:44Z",
+      "side": 1,
+      "message": "Unfortunately we can\u0027t, please see my other comments.",
+      "parentUuid": "2b32ebd2_d3dbb4bf",
       "range": {
         "startLine": 928,
         "startChar": 2,
@@ -140,6 +188,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b41ed117_39618b40",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-04T00:09:44Z",
+      "side": 1,
+      "message": "Unfortunately no, cpi will be used later. Specifically in GetCodingFrameNum(). In the test TEST_F(SimpleEncodeTest, GetCodingFrameNum).",
+      "parentUuid": "095d3250_e0cf4aa0",
+      "range": {
+        "startLine": 933,
+        "startChar": 2,
+        "endLine": 933,
+        "endChar": 6
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "830706e4_8cafda41",
@@ -153,6 +225,30 @@
       "writtenOn": "2021-06-03T23:21:37Z",
       "side": 1,
       "message": "My impression is vp9_init_vizier_params() is not stateless, therefore it should only be called once after cpi is created.\nI would recommend to only call this function at\n1) ComputeFirstPassStats() after vp9_end_first_pass()\n2) StartEncode() after init_encoder()\n\nWe also need to comment out vp9_init_vizier_params() in vp9_rc_get_second_pass_params() when CONFIG_RATE_CTRL is on.\n\nThis way, we guarantee that vp9_init_vizier_params() will only be called once whenever a cpi is created.\n\nMoreover, screen_area can be inferred from frame_width_ and frame_height_\n\n\nNote that, UpdateKeyFrameGroup() and vp9_get_coding_frame_num() may be called multiple times.",
+      "range": {
+        "startLine": 1089,
+        "startChar": 0,
+        "endLine": 1090,
+        "endChar": 53
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "deabf15f_e64975c4",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1090,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-04T00:09:44Z",
+      "side": 1,
+      "message": "Thanks for these suggestions. I agree that we could find a better way to call \"vp9_init_vizier_params()\".\nBut for now the cl is correct, as I have explained, function \"vp9_init_vizier_params()\" can be called multiple times for the simple_encode environment.\n\nWe can\u0027t call this function in ComputeFirstPassStats(). Because the cpi structure will be freed after it. While we still need the RC parameters in following functions.\n\nTaking this test as an example:\nTEST_F(SimpleEncodeTest, GetCodingFrameNum) {\n  SimpleEncode simple_encode(width_, height_, frame_rate_num_, frame_rate_den_,\n                             target_bitrate_, num_frames_,\n                             in_file_path_str_.c_str());\n  simple_encode.ComputeFirstPassStats();\n  const int num_coding_frames \u003d simple_encode.GetCodingFrameNum();\n  EXPECT_EQ(num_coding_frames, 19);\n}\n\ncpi structure has been destroyed after ComputeFirstPassStats().\nAnd we need the RC parameters in GetCodingFrameNum() to determine arf and coding number. That\u0027s why I have to call vp9_init_vizier_params() in vp9_get_coding_frame_num().",
+      "parentUuid": "830706e4_8cafda41",
       "range": {
         "startLine": 1089,
         "startChar": 0,
@@ -186,6 +282,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bc0aa82f_2498ca3c",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1275,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-04T00:09:44Z",
+      "side": 1,
+      "message": "Please see the next comment.",
+      "parentUuid": "f6141c59_b023642e",
+      "range": {
+        "startLine": 1275,
+        "startChar": 2,
+        "endLine": 1275,
+        "endChar": 33
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1ca857e2_6ca47a3d",
@@ -199,6 +319,30 @@
       "writtenOn": "2021-06-03T23:21:37Z",
       "side": 1,
       "message": "Let\u0027s keep this part in ComputeFirstPassStats() after vp9_end_first_pass()",
+      "range": {
+        "startLine": 1284,
+        "startChar": 0,
+        "endLine": 1286,
+        "endChar": 40
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f77add38_86b90a50",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1286,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-04T00:09:44Z",
+      "side": 1,
+      "message": "We need GetEncodeConfig() first to call fps_init_first_pass_info(). So it can\u0027t be moved out side.",
+      "parentUuid": "1ca857e2_6ca47a3d",
       "range": {
         "startLine": 1284,
         "startChar": 0,
