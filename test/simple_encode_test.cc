@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/video_source.h"
 #include "vp9/simple_encode.h"
 
 namespace vp9 {
@@ -36,7 +37,8 @@ class SimpleEncodeTest : public ::testing::Test {
   const int frame_rate_den_ = 1;
   const int target_bitrate_ = 1000;
   const int num_frames_ = 17;
-  const std::string in_file_path_str_ = "bus_352x288_420_f20_b8.yuv";
+  const std::string in_file_path_str_ =
+      libvpx_test::GetDataPath() + "/bus_352x288_420_f20_b8.yuv";
 };
 
 TEST_F(SimpleEncodeTest, ComputeFirstPassStats) {
