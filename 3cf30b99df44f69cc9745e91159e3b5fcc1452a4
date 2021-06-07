@@ -236,6 +236,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5c4d586c_2b811c41",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-07T22:42:24Z",
+      "side": 1,
+      "message": "free_encoder() destroys buffers allocated for cpi.\nBut the structure cpi itself is not destroyed, and some variables (not pointers) are still available, for example cpi-\u003etwopass is still valid after free_encoder().\nUnless we set cpi \u003d nullptr.",
+      "parentUuid": "04f28423_49e34731",
+      "range": {
+        "startLine": 933,
+        "startChar": 2,
+        "endLine": 933,
+        "endChar": 6
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "830706e4_8cafda41",
@@ -297,6 +321,30 @@
       "side": 1,
       "message": "I see.\nvp9_get_coding_frame_num() originally depends on firstpass stats only, but now it depends on twopass as well.\n\nI would suggest calling vp9_get_coding_frame_num() in ComputeFirstPassStats() and cache the frame_num in a private variable of SimpleEncode.\n\nThen return the frame_num in GetCodingFrameNum()\n\nRight now, we are trying to use cpi after it\u0027s freed.\nI don\u0027t think it\u0027s safe to do that.",
       "parentUuid": "deabf15f_e64975c4",
+      "range": {
+        "startLine": 1089,
+        "startChar": 0,
+        "endLine": 1090,
+        "endChar": 53
+      },
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8d6a0779_fa4110d4",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 1090,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-07T22:42:24Z",
+      "side": 1,
+      "message": "I agree. We might need to separate the structure \"twopass\" from cpi.\nLet me see what I can do there.",
+      "parentUuid": "ca26012b_abfd5ea9",
       "range": {
         "startLine": 1089,
         "startChar": 0,
