@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3fabed6a_3f4efd67",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3496,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-08T23:30:23Z",
+      "side": 1,
+      "message": "Will use_vizier_rc_params \u003d\u003d 0 when simple_encode call this function?\nFor example, \"twopass-\u003eactive_wq_factor *\u003d AV_WQ_FACTOR;\"\nseems assuming that twopass is already initialized.\n\nRight now in simple_encode, we are declare twopass (without other init func) and then call vp9_init_vizier_params(), i.e. \n\nTWO_PASS twopass;\nvp9_init_vizier_params();\n\nIf we are using only the logics in \"use_vizier_rc_params \u003d\u003d 0\", I would recommend to write a separate sub-function for that part.\n\nSorry, I am giving out a lot of comments.\nBut I think it\u0027s important to clarify things out.\n\nThanks for fixing this issue.",
+      "range": {
+        "startLine": 3495,
+        "startChar": 0,
+        "endLine": 3496,
+        "endChar": 46
+      },
+      "revId": "463d33145de28770f815466db0ffc85d14442043",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
