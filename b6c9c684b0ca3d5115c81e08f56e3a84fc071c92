@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2b3757b6_9ef5d378",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-08T00:03:13Z",
+      "side": 1,
+      "message": "Hi Angie. I make changes to where vp9_init_vizier_params() should be called. And ensure cpi is not called after calling free_encoder(). Please take another look.",
+      "revId": "b6c9c684b0ca3d5115c81e08f56e3a84fc071c92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
