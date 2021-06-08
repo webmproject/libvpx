@@ -120,6 +120,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "d1e88164_be67b4ee",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 820,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-08T00:52:04Z",
+      "side": 1,
+      "message": "if these fopen() calls fail or the allocation above calls to this calls will crash.\n\nfactory functions are preferred for this reason, among others:\nhttps://abseil.io/tips/42",
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2b32ebd2_d3dbb4bf",
         "filename": "vp9/simple_encode.cc",
         "patchSetId": 1
