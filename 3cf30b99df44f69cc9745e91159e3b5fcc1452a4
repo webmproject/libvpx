@@ -135,6 +135,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "db87f721_64d4abba",
+        "filename": "vp9/simple_encode.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 820,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-09T05:29:59Z",
+      "side": 1,
+      "message": "Thanks for the tip. I\u0027m afraid the refactor to initializer method leads to a massive change. All L2E code depends on the initialization function right now.",
+      "parentUuid": "d1e88164_be67b4ee",
+      "revId": "3cf30b99df44f69cc9745e91159e3b5fcc1452a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2b32ebd2_d3dbb4bf",

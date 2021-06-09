@@ -22,6 +22,30 @@
       },
       "revId": "463d33145de28770f815466db0ffc85d14442043",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4a68944a_dd566021",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3496,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-09T05:29:59Z",
+      "side": 1,
+      "message": "First, when simple_encode is used, twopass-\u003euse_vizier_rc_params is always 0.\nIt is set from the command line option.\n\nSecond, rc parameters in twopass are initialized to 1.0 or read from command line.\n\nNow there\u0027re three use cases.\n(1). for normal libvpx two pass encoding, twopass-\u003euse_vizier_rc_params is 0.\n\"twopass-\u003eactive_wq_factor \u003d AV_WQ_FACTOR;\"\n\n(2). for the vizier experiment, which is also two pass encoding, twopass-\u003euse_vizier_rc_params is 0.\n\"twopass-\u003eactive_wq_factor *\u003d AV_WQ_FACTOR;\"\nAnd in this case the vizier experiment sets twopass-\u003eactive_wq_factor to values in [0.8, 1.2].\n\n(3). for simple encode, twopass-\u003euse_vizier_rc_params is 0.\n\"twopass-\u003eactive_wq_factor \u003d AV_WQ_FACTOR;\"\n\nComment: \"If we are using only the logics in \"use_vizier_rc_params \u003d\u003d 0\", I would recommend to write a separate sub-function for that part.\"\n\nMy thought:\nBoth the default libvpx twopass coding and simple_encode goes through \"use_vizier_rc_params \u003d\u003d 0\". I think keeping it as a single function makes more sense. If there are new changes to these RC parameters (likely), and the initialization for simple_encode is in a separate function, the behavior could differ if one forgets to update RC parameters for simple_encode (also very likely).",
+      "parentUuid": "3fabed6a_3f4efd67",
+      "range": {
+        "startLine": 3495,
+        "startChar": 0,
+        "endLine": 3496,
+        "endChar": 46
+      },
+      "revId": "463d33145de28770f815466db0ffc85d14442043",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
