@@ -1248,7 +1248,7 @@ static int GetCodingFrameNumFromGopMap(const std::vector<int> &gop_map) {
     start_show_index += gop_command.show_frame_count;
     coding_frame_count += gop_command_coding_frame_count(&gop_command);
   }
-  assert(start_show_index == gop_map.size());
+  assert(static_cast<size_t>(start_show_index) == gop_map.size());
   return coding_frame_count;
 }
 
@@ -1279,7 +1279,8 @@ int SimpleEncode::GetCodingFrameNum() const {
 
 std::vector<int> SimpleEncode::ComputeKeyFrameMap() const {
   // The last entry of first_pass_stats is the overall stats.
-  assert(impl_ptr_->first_pass_stats.size() == num_frames_ + 1);
+  assert(impl_ptr_->first_pass_stats.size() ==
+         static_cast<size_t>(num_frames_) + 1);
   vpx_rational_t frame_rate =
       make_vpx_rational(frame_rate_num_, frame_rate_den_);
   const VP9EncoderConfig oxcf = GetEncodeConfig(
