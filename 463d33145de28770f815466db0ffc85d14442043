@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f5bf28b_7f14a64e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2021-06-10T13:28:32Z",
+      "side": 1,
+      "message": "LGTM too thanks.",
+      "revId": "463d33145de28770f815466db0ffc85d14442043",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3fabed6a_3f4efd67",
