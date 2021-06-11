@@ -1276,7 +1276,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] = {
         VPX_VBR,     /* rc_end_usage */
         { NULL, 0 }, /* rc_twopass_stats_in */
         { NULL, 0 }, /* rc_firstpass_mb_stats_in */
-        256,         /* rc_target_bandwidth */
+        256,         /* rc_target_bitrate */
         4,           /* rc_min_quantizer */
         63,          /* rc_max_quantizer */
         100,         /* rc_undershoot_pct */
