@@ -16,6 +16,23 @@
       "message": "Thank you! I forgot that these comments may have come from libvpx.",
       "revId": "d85c54d4e870e979062e275a1a58a3a44f64e601",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8aec3028_74f2d2e8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-12T02:47:55Z",
+      "side": 1,
+      "message": "Looks like I enabled simple encode in the build a little too soon. This is cosmetic so I\u0027ll bypass the presubmit.",
+      "revId": "d85c54d4e870e979062e275a1a58a3a44f64e601",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
