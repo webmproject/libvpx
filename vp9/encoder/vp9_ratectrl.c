@@ -2009,7 +2009,7 @@ void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
   }
 }
 
-static int calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
+int vp9_calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const int af_ratio = rc->af_ratio_onepass_vbr;
   int64_t target =
@@ -2024,7 +2024,7 @@ static int calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   return vp9_rc_clamp_pframe_target_size(cpi, (int)target);
 }
 
-static int calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
+int vp9_calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   static const int kf_ratio = 25;
   const RATE_CONTROL *rc = &cpi->rc;
   const int target = rc->avg_frame_bandwidth * kf_ratio;
@@ -2050,22 +2050,9 @@ static void adjust_gfint_frame_constraint(VP9_COMP *cpi, int frame_constraint) {
   }
 }
 
-void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
+void vp9_set_gf_update_one_pass_vbr(VP9_COMP *const cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
-  int target;
-  if (!cpi->refresh_alt_ref_frame &&
-      (cm->current_video_frame == 0 || (cpi->frame_flags & FRAMEFLAGS_KEY) ||
-       rc->frames_to_key == 0)) {
-    cm->frame_type = KEY_FRAME;
-    rc->this_key_frame_forced =
-        cm->current_video_frame != 0 && rc->frames_to_key == 0;
-    rc->frames_to_key = cpi->oxcf.key_freq;
-    rc->kf_boost = DEFAULT_KF_BOOST;
-    rc->source_alt_ref_active = 0;
-  } else {
-    cm->frame_type = INTER_FRAME;
-  }
+  VP9_COMMON *const cm = &cpi->common;
   if (rc->frames_till_gf_update_due == 0) {
     double rate_err = 1.0;
     rc->gfu_boost = DEFAULT_GF_BOOST;
@@ -2084,15 +2071,18 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
           rate_err > 3.5) {
         rc->baseline_gf_interval =
             VPXMIN(15, (3 * rc->baseline_gf_interval) >> 1);
-      } else if (rc->avg_frame_low_motion < 20) {
+      } else if (rc->avg_frame_low_motion > 0 &&
+                 rc->avg_frame_low_motion < 20) {
         // Decrease gf interval for high motion case.
         rc->baseline_gf_interval = VPXMAX(6, rc->baseline_gf_interval >> 1);
       }
-      // Adjust boost and af_ratio based on avg_frame_low_motion, which varies
-      // between 0 and 100 (stationary, 100% zero/small motion).
-      rc->gfu_boost =
-          VPXMAX(500, DEFAULT_GF_BOOST * (rc->avg_frame_low_motion << 1) /
-                          (rc->avg_frame_low_motion + 100));
+      if (rc->avg_frame_low_motion > 0) {
+        // Adjust boost and af_ratio based on avg_frame_low_motion, which
+        // varies between 0 and 100 (stationary, 100% zero/small motion).
+        rc->gfu_boost =
+            VPXMAX(500, DEFAULT_GF_BOOST * (rc->avg_frame_low_motion << 1) /
+                            (rc->avg_frame_low_motion + 100));
+      }
       rc->af_ratio_onepass_vbr = VPXMIN(15, VPXMAX(5, 3 * rc->gfu_boost / 400));
     }
     adjust_gfint_frame_constraint(cpi, rc->frames_to_key);
@@ -2105,10 +2095,29 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
       rc->alt_ref_gf_group = 1;
     }
   }
+}
+
+void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
+  int target;
+  if (!cpi->refresh_alt_ref_frame &&
+      (cm->current_video_frame == 0 || (cpi->frame_flags & FRAMEFLAGS_KEY) ||
+       rc->frames_to_key == 0)) {
+    cm->frame_type = KEY_FRAME;
+    rc->this_key_frame_forced =
+        cm->current_video_frame != 0 && rc->frames_to_key == 0;
+    rc->frames_to_key = cpi->oxcf.key_freq;
+    rc->kf_boost = DEFAULT_KF_BOOST;
+    rc->source_alt_ref_active = 0;
+  } else {
+    cm->frame_type = INTER_FRAME;
+  }
+  vp9_set_gf_update_one_pass_vbr(cpi);
   if (cm->frame_type == KEY_FRAME)
-    target = calc_iframe_target_size_one_pass_vbr(cpi);
+    target = vp9_calc_iframe_target_size_one_pass_vbr(cpi);
   else
-    target = calc_pframe_target_size_one_pass_vbr(cpi);
+    target = vp9_calc_pframe_target_size_one_pass_vbr(cpi);
   vp9_rc_set_frame_target(cpi, target);
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->oxcf.pass == 0)
     vp9_cyclic_refresh_update_parameters(cpi);
@@ -2953,7 +2962,7 @@ static void adjust_gf_boost_lag_one_pass_vbr(VP9_COMP *cpi,
         }
       }
     }
-    target = calc_pframe_target_size_one_pass_vbr(cpi);
+    target = vp9_calc_pframe_target_size_one_pass_vbr(cpi);
     vp9_rc_set_frame_target(cpi, target);
   }
   rc->prev_avg_source_sad_lag = avg_source_sad_lag;
@@ -3163,7 +3172,7 @@ void vp9_scene_detection_onepass(VP9_COMP *cpi) {
           VPXMIN(20, VPXMAX(10, rc->baseline_gf_interval));
       adjust_gfint_frame_constraint(cpi, rc->frames_to_key);
       rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-      target = calc_pframe_target_size_one_pass_vbr(cpi);
+      target = vp9_calc_pframe_target_size_one_pass_vbr(cpi);
       vp9_rc_set_frame_target(cpi, target);
       rc->count_last_scene_change = 0;
     } else {

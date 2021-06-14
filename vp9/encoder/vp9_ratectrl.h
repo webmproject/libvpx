@@ -255,6 +255,9 @@ void vp9_rc_get_one_pass_vbr_params(struct VP9_COMP *cpi);
 void vp9_rc_get_one_pass_cbr_params(struct VP9_COMP *cpi);
 int vp9_calc_pframe_target_size_one_pass_cbr(const struct VP9_COMP *cpi);
 int vp9_calc_iframe_target_size_one_pass_cbr(const struct VP9_COMP *cpi);
+int vp9_calc_pframe_target_size_one_pass_vbr(const struct VP9_COMP *cpi);
+int vp9_calc_iframe_target_size_one_pass_vbr(const struct VP9_COMP *cpi);
+void vp9_set_gf_update_one_pass_vbr(struct VP9_COMP *const cpi);
 void vp9_update_buffer_level_preencode(struct VP9_COMP *cpi);
 void vp9_rc_get_svc_params(struct VP9_COMP *cpi);
 
