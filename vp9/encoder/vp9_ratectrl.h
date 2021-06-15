@@ -27,6 +27,9 @@ extern "C" {
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS 9
 
+#define DEFAULT_KF_BOOST 2000
+#define DEFAULT_GF_BOOST 2000
+
 #define MIN_GF_INTERVAL 4
 #define MAX_GF_INTERVAL 16
 #define FIXED_GF_INTERVAL 8  // Used in some testing modes only
