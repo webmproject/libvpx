@@ -115,8 +115,7 @@ class RcInterfaceTest : public ::testing::Test {
     libvpx::VP9FrameParamsQpRTC frame_params;
     frame_params.frame_type = KEY_FRAME;
     std::ifstream svc_file;
-    svc_file.open(std::string(std::getenv("LIBVPX_TEST_DATA_PATH")) +
-                  "/rc_interface_test_svc");
+    svc_file.open(libvpx_test::GetDataPath() + "/rc_interface_test_svc");
     ASSERT_TRUE(svc_file.good());
     for (size_t i = 0; i < kNumFrame * rc_cfg_.ss_number_layers; i++) {
       svc_file >> frame_info;
