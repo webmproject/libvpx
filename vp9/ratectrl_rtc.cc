@@ -39,6 +39,8 @@ void VP9RateControlRTC::InitRateControl(const VP9RateControlRtcConfig &rc_cfg) {
   cm->bit_depth = VPX_BITS_8;
   cm->show_frame = 1;
   oxcf->rc_mode = VPX_CBR;
+  oxcf->profile = cm->profile;
+  oxcf->bit_depth = cm->bit_depth;
   oxcf->pass = 0;
   oxcf->aq_mode = NO_AQ;
   oxcf->content = VP9E_CONTENT_DEFAULT;
