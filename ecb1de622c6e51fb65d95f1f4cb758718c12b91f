@@ -16,6 +16,23 @@
       "message": "Could you please keep the subject of this CL within 50 characters?\n\nFrom Jenkins:\n\nThe commit subject: \u0027Initialize VP9EncoderConfig profile and bit depth for VP9RateControlRTC\u0027 is too long! (71 characters)\nTry to keep this to 50 or less.\nhttps://www.git-scm.com/book/en/v2/Distributed-Git-Contributing-to-a-Project#_commit_guidelines",
       "revId": "ecb1de622c6e51fb65d95f1f4cb758718c12b91f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "998282af_511aedfe",
+        "filename": "vp9/ratectrl_rtc.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2021-06-16T17:07:16Z",
+      "side": 1,
+      "message": "Remove the default settings at line 38 and 39?",
+      "revId": "ecb1de622c6e51fb65d95f1f4cb758718c12b91f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
