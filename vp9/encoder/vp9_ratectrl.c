@@ -2076,13 +2076,14 @@ void vp9_set_gf_update_one_pass_vbr(VP9_COMP *const cpi) {
         // Decrease gf interval for high motion case.
         rc->baseline_gf_interval = VPXMAX(6, rc->baseline_gf_interval >> 1);
       }
-      if (rc->avg_frame_low_motion > 0) {
-        // Adjust boost and af_ratio based on avg_frame_low_motion, which
-        // varies between 0 and 100 (stationary, 100% zero/small motion).
+      // Adjust boost and af_ratio based on avg_frame_low_motion, which
+      // varies between 0 and 100 (stationary, 100% zero/small motion).
+      if (rc->avg_frame_low_motion > 0)
         rc->gfu_boost =
             VPXMAX(500, DEFAULT_GF_BOOST * (rc->avg_frame_low_motion << 1) /
                             (rc->avg_frame_low_motion + 100));
-      }
+      else if (rc->avg_frame_low_motion == 0 && rate_err > 1.0)
+        rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
       rc->af_ratio_onepass_vbr = VPXMIN(15, VPXMAX(5, 3 * rc->gfu_boost / 400));
     }
     adjust_gfint_frame_constraint(cpi, rc->frames_to_key);
