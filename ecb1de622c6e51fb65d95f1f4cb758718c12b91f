@@ -18,6 +18,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7770acaf_253ddc78",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1253028
+      },
+      "writtenOn": "2021-06-17T01:50:40Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "c36ea779_b296f451",
+      "revId": "ecb1de622c6e51fb65d95f1f4cb758718c12b91f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "998282af_511aedfe",
@@ -49,6 +67,42 @@
       "side": 1,
       "message": "AFAIK, this is the only place in RateControlRTC based encode code path that assign profile \u0026 bit_depth. If we remove the defaults, will it mess up the third-party(eg: chromeOS hardware encoder) usage of RateControlRTC ?",
       "parentUuid": "998282af_511aedfe",
+      "revId": "ecb1de622c6e51fb65d95f1f4cb758718c12b91f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c4608f08_fbce3381",
+        "filename": "vp9/ratectrl_rtc.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1253028
+      },
+      "writtenOn": "2021-06-17T01:50:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76fca820_9e1693a4",
+      "revId": "ecb1de622c6e51fb65d95f1f4cb758718c12b91f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "15a4c70e_0033bead",
+        "filename": "vp9/ratectrl_rtc.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1253028
+      },
+      "writtenOn": "2021-06-17T01:50:40Z",
+      "side": 1,
+      "message": "Yes, we should the default settings for cm here for third-party usage after some test.",
+      "parentUuid": "76fca820_9e1693a4",
       "revId": "ecb1de622c6e51fb65d95f1f4cb758718c12b91f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
