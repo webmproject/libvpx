@@ -16,6 +16,23 @@
       "message": "put comments on 1 layer CBR and VBR case:\nboth have AQ_MODE\u003d0 and change bitrate, etc ...",
       "revId": "fe3598f757f63d528a62f2ac99bfc75150b0b665",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e585b78b_2e09f2c9",
+        "filename": "vp9/ratectrl_rtc.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2021-06-17T18:47:04Z",
+      "side": 1,
+      "message": "add this too: rc-\u003ekf_boost \u003d DEFAULT_KF_BOOST;",
+      "revId": "fe3598f757f63d528a62f2ac99bfc75150b0b665",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
