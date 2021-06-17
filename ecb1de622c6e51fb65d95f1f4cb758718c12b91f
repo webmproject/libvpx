@@ -33,6 +33,24 @@
       "message": "Remove the default settings at line 38 and 39?",
       "revId": "ecb1de622c6e51fb65d95f1f4cb758718c12b91f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "76fca820_9e1693a4",
+        "filename": "vp9/ratectrl_rtc.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1245378
+      },
+      "writtenOn": "2021-06-17T00:03:20Z",
+      "side": 1,
+      "message": "AFAIK, this is the only place in RateControlRTC based encode code path that assign profile \u0026 bit_depth. If we remove the defaults, will it mess up the third-party(eg: chromeOS hardware encoder) usage of RateControlRTC ?",
+      "parentUuid": "998282af_511aedfe",
+      "revId": "ecb1de622c6e51fb65d95f1f4cb758718c12b91f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
