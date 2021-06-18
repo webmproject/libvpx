@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bbb134ce_bb5cd5da",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-18T20:39:49Z",
+      "side": 1,
+      "message": "Just fixed a typo in the commit message.",
+      "revId": "2380e13da8a5bba3e8afdb14e0aa61fd980a49c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
