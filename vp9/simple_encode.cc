@@ -793,6 +793,7 @@ static VP9EncoderConfig GetEncodeConfig(
   if (enc_pass == VPX_RC_FIRST_PASS) {
     oxcf.lag_in_frames = 0;
   }
+  oxcf.use_simple_encode_api = 1;
   return oxcf;
 }
 
