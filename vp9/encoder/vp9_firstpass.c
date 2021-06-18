@@ -3836,7 +3836,7 @@ void vp9_get_next_group_of_picture(const VP9_COMP *cpi, int *first_is_key_frame,
   if (gop_command->use) {
     *coding_frame_count = gop_command_coding_frame_count(gop_command);
     *use_alt_ref = gop_command->use_alt_ref;
-    assert(*coding_frame_count < rc.frames_to_key);
+    assert(gop_command->show_frame_count <= rc.frames_to_key);
   } else {
     *coding_frame_count = vp9_get_gop_coding_frame_count(
         &cpi->oxcf, &cpi->twopass, &cpi->frame_info, &rc, *first_show_idx,

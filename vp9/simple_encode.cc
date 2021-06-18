@@ -1009,8 +1009,7 @@ T *GetVectorData(const std::vector<T> &v) {
 static GOP_COMMAND GetGopCommand(const std::vector<int> &gop_map,
                                  int start_show_index) {
   GOP_COMMAND gop_command;
-  if (gop_map.size() > 0) {
-    assert(static_cast<size_t>(start_show_index) < gop_map.size());
+  if (static_cast<size_t>(start_show_index) < gop_map.size()) {
     assert((gop_map[start_show_index] & kGopMapFlagStart) != 0);
     int end_show_index = start_show_index + 1;
     // gop_map[end_show_index] & kGopMapFlagStart == 0 means this is
