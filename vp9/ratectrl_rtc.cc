@@ -38,13 +38,16 @@ void VP9RateControlRTC::InitRateControl(const VP9RateControlRtcConfig &rc_cfg) {
   cm->profile = PROFILE_0;
   cm->bit_depth = VPX_BITS_8;
   cm->show_frame = 1;
-  oxcf->rc_mode = VPX_CBR;
   oxcf->profile = cm->profile;
   oxcf->bit_depth = cm->bit_depth;
+  oxcf->rc_mode = rc_cfg.rc_mode;
   oxcf->pass = 0;
   oxcf->aq_mode = NO_AQ;
   oxcf->content = VP9E_CONTENT_DEFAULT;
   oxcf->drop_frames_water_mark = 0;
+  cm->current_video_frame = 0;
+  oxcf->key_freq = rc_cfg.key_freq;
+  rc->kf_boost = DEFAULT_KF_BOOST;
 
   UpdateRateControl(rc_cfg);
 
@@ -57,8 +60,8 @@ void VP9RateControlRTC::InitRateControl(const VP9RateControlRtcConfig &rc_cfg) {
   rc->rc_2_frame = 0;
   vp9_rc_init_minq_luts();
   vp9_rc_init(oxcf, 0, rc);
+  rc->frames_to_key = oxcf->key_freq;
   cpi_->sf.use_nonrd_pick_mode = 1;
-  cm->current_video_frame = 0;
 }
 
 void VP9RateControlRTC::UpdateRateControl(
@@ -75,6 +78,7 @@ void VP9RateControlRTC::UpdateRateControl(
   oxcf->best_allowed_q = vp9_quantizer_to_qindex(rc_cfg.min_quantizer);
   rc->worst_quality = oxcf->worst_allowed_q;
   rc->best_quality = oxcf->best_allowed_q;
+  oxcf->init_framerate = rc_cfg.framerate;
   oxcf->target_bandwidth = 1000 * rc_cfg.target_bandwidth;
   oxcf->starting_buffer_level_ms = rc_cfg.buf_initial_sz;
   oxcf->optimal_buffer_level_ms = rc_cfg.buf_optimal_sz;
@@ -140,11 +144,24 @@ void VP9RateControlRTC::ComputeQP(const VP9FrameParamsQpRTC &frame_params) {
   cpi_->sf.use_nonrd_pick_mode = 1;
   if (cpi_->svc.number_spatial_layers == 1 &&
       cpi_->svc.number_temporal_layers == 1) {
-    int target;
-    if (frame_is_intra_only(cm))
-      target = vp9_calc_iframe_target_size_one_pass_cbr(cpi_);
-    else
-      target = vp9_calc_pframe_target_size_one_pass_cbr(cpi_);
+    int target = 0;
+    if (cpi_->oxcf.rc_mode == VPX_CBR) {
+      if (frame_is_intra_only(cm))
+        target = vp9_calc_iframe_target_size_one_pass_cbr(cpi_);
+      else
+        target = vp9_calc_pframe_target_size_one_pass_cbr(cpi_);
+    } else if (cpi_->oxcf.rc_mode == VPX_VBR) {
+      if (cm->frame_type == KEY_FRAME) {
+        cpi_->rc.this_key_frame_forced =
+            cm->current_video_frame != 0 && cpi_->rc.frames_to_key == 0;
+        cpi_->rc.frames_to_key = cpi_->oxcf.key_freq;
+      }
+      vp9_set_gf_update_one_pass_vbr(cpi_);
+      if (frame_is_intra_only(cm))
+        target = vp9_calc_iframe_target_size_one_pass_vbr(cpi_);
+      else
+        target = vp9_calc_pframe_target_size_one_pass_vbr(cpi_);
+    }
     vp9_rc_set_frame_target(cpi_, target);
     vp9_update_buffer_level_preencode(cpi_);
   } else {

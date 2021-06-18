@@ -49,6 +49,10 @@ struct VP9RateControlRtcConfig {
   int scaling_factor_den[VPX_SS_MAX_LAYERS];
   int layer_target_bitrate[VPX_MAX_LAYERS];
   int ts_rate_decimator[VPX_TS_MAX_LAYERS];
+  // vbr, cbr
+  enum vpx_rc_mode rc_mode;
+  // key frame frequency
+  int key_freq;
 };
 
 struct VP9FrameParamsQpRTC {

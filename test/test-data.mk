@@ -28,6 +28,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += rush_hour_444.y4m
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += screendata.y4m
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += niklas_640_480_30.yuv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += rc_interface_test_one_layer
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += rc_interface_test_one_layer_vbr
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += rc_interface_test_one_layer_vbr_periodic_key
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += rc_interface_test_svc
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += bus_352x288_420_f20_b8.yuv
 
