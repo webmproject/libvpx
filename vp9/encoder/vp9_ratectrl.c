@@ -2009,7 +2009,7 @@ void vp9_rc_postencode_update_drop_frame(VP9_COMP *cpi) {
   }
 }
 
-int vp9_calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
+int vp9_calc_pframe_target_size_one_pass_vbr(const VP9_COMP *cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const int af_ratio = rc->af_ratio_onepass_vbr;
   int64_t target =
@@ -2024,7 +2024,7 @@ int vp9_calc_pframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
   return vp9_rc_clamp_pframe_target_size(cpi, (int)target);
 }
 
-int vp9_calc_iframe_target_size_one_pass_vbr(const VP9_COMP *const cpi) {
+int vp9_calc_iframe_target_size_one_pass_vbr(const VP9_COMP *cpi) {
   static const int kf_ratio = 25;
   const RATE_CONTROL *rc = &cpi->rc;
   const int target = rc->avg_frame_bandwidth * kf_ratio;
