@@ -407,6 +407,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->source_alt_ref_active = 0;
 
   rc->frames_till_gf_update_due = 0;
+  rc->constrain_gf_key_freq_onepass_vbr = 1;
   rc->ni_av_qi = oxcf->worst_allowed_q;
   rc->ni_tot_qi = 0;
   rc->ni_frames = 0;
@@ -2085,7 +2086,8 @@ void vp9_set_gf_update_one_pass_vbr(VP9_COMP *const cpi) {
         rc->gfu_boost = DEFAULT_GF_BOOST >> 1;
       rc->af_ratio_onepass_vbr = VPXMIN(15, VPXMAX(5, 3 * rc->gfu_boost / 400));
     }
-    adjust_gfint_frame_constraint(cpi, rc->frames_to_key);
+    if (rc->constrain_gf_key_freq_onepass_vbr)
+      adjust_gfint_frame_constraint(cpi, rc->frames_to_key);
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     cpi->refresh_golden_frame = 1;
     rc->source_alt_ref_pending = 0;
