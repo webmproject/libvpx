@@ -70,6 +70,30 @@
       },
       "revId": "f0c51f91fe695876908221c90252b661ca9d1d47",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "74289bd3_58fffede",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 804,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-22T19:04:50Z",
+      "side": 1,
+      "message": "Done.\nI also add a TODO so that in the future we might completely remove SKIP_TXFM_AC_DC from vp9.",
+      "parentUuid": "5ba70b33_d0d1abc5",
+      "range": {
+        "startLine": 804,
+        "startChar": 23,
+        "endLine": 804,
+        "endChar": 44
+      },
+      "revId": "f0c51f91fe695876908221c90252b661ca9d1d47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
