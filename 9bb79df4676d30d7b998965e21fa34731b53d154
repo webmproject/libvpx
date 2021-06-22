@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "28d39cdf_2d9ffac6",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-22T23:55:36Z",
+      "side": 1,
+      "message": "you can keep it assigned to you or make it https://crbug.com/webm/1729 to make the reference self-contained. Either way it would be good to mention the bug here.",
+      "range": {
+        "startLine": 160,
+        "startChar": 8,
+        "endLine": 160,
+        "endChar": 17
+      },
+      "revId": "9bb79df4676d30d7b998965e21fa34731b53d154",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0f87a992_02ca77dd",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-22T23:55:36Z",
+      "side": 1,
+      "message": "...the risk of...\n\nand predition -\u003e prediction",
+      "range": {
+        "startLine": 802,
+        "startChar": 20,
+        "endLine": 802,
+        "endChar": 28
+      },
+      "revId": "9bb79df4676d30d7b998965e21fa34731b53d154",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
