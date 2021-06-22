@@ -22,6 +22,30 @@
       },
       "revId": "f0c51f91fe695876908221c90252b661ca9d1d47",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a13da945_d32e0c2d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 804,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-22T17:33:18Z",
+      "side": 1,
+      "message": "Do you mean removing the speed feature? I think having a speed feature makes tracking this easier even though it is 0 all the time. \n\nSKIP_TXFM_AC_DC is a declared macro. The model rd functions that determine it are by default used in RDO, which also makes other decisions. So I decide to use a separate feature to only put restriction on this transform skip behavior.",
+      "parentUuid": "0c9fe530_38a74ef2",
+      "range": {
+        "startLine": 804,
+        "startChar": 23,
+        "endLine": 804,
+        "endChar": 44
+      },
+      "revId": "f0c51f91fe695876908221c90252b661ca9d1d47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
