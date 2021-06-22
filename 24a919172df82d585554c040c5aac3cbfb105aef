@@ -16,6 +16,23 @@
       "message": "This will be somewhat problematic because it will now make the main library depend on C++. This is a breaking change.",
       "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0c6a1ae5_5a2ce4f9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-22T23:32:07Z",
+      "side": 1,
+      "message": "Ah I may have misremembered when I posted my first comment. I guess the main issue is now we produce a libsimple_encode.a which shadows the C symbols from libvpx.a",
+      "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
