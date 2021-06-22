@@ -1114,8 +1114,10 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
       vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[bsize];
 
 #if CONFIG_RATE_CTRL
-      // Store zero mv as default
-      store_fp_motion_vector(cpi, &mv, mb_row, mb_col, LAST_FRAME, 0);
+      if (cpi->oxcf.use_simple_encode_api) {
+        // Store zero mv as default
+        store_fp_motion_vector(cpi, &mv, mb_row, mb_col, LAST_FRAME, 0);
+      }
 #endif  // CONFIG_RAGE_CTRL
 
       xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
@@ -1183,7 +1185,9 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
           }
         }
 #if CONFIG_RATE_CTRL
-        store_fp_motion_vector(cpi, &mv, mb_row, mb_col, LAST_FRAME, 0);
+        if (cpi->oxcf.use_simple_encode_api) {
+          store_fp_motion_vector(cpi, &mv, mb_row, mb_col, LAST_FRAME, 0);
+        }
 #endif  // CONFIG_RAGE_CTRL
 
         // Search in an older reference frame.
@@ -1207,7 +1211,10 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
 
           first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv, &gf_motion_error);
 #if CONFIG_RATE_CTRL
-          store_fp_motion_vector(cpi, &tmp_mv, mb_row, mb_col, GOLDEN_FRAME, 1);
+          if (cpi->oxcf.use_simple_encode_api) {
+            store_fp_motion_vector(cpi, &tmp_mv, mb_row, mb_col, GOLDEN_FRAME,
+                                   1);
+          }
 #endif  // CONFIG_RAGE_CTRL
 
           if (gf_motion_error < motion_error && gf_motion_error < this_error)
@@ -1383,7 +1390,9 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
     } else {
       fp_acc_data->sr_coded_error += (int64_t)this_error;
 #if CONFIG_RATE_CTRL
-      store_fp_motion_vector(cpi, NULL, mb_row, mb_col, INTRA_FRAME, 0);
+      if (cpi->oxcf.use_simple_encode_api) {
+        store_fp_motion_vector(cpi, NULL, mb_row, mb_col, INTRA_FRAME, 0);
+      }
 #endif  // CONFIG_RAGE_CTRL
     }
     fp_acc_data->coded_error += (int64_t)this_error;
@@ -1412,9 +1421,11 @@ static void first_pass_encode(VP9_COMP *cpi, FIRSTPASS_DATA *fp_acc_data) {
   vp9_tile_init(tile, cm, 0, 0);
 
 #if CONFIG_RATE_CTRL
-  fp_motion_vector_info_reset(cpi->frame_info.frame_width,
-                              cpi->frame_info.frame_height,
-                              cpi->fp_motion_vector_info);
+  if (cpi->oxcf.use_simple_encode_api) {
+    fp_motion_vector_info_reset(cpi->frame_info.frame_width,
+                                cpi->frame_info.frame_height,
+                                cpi->fp_motion_vector_info);
+  }
 #endif
 
   for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
@@ -2677,25 +2688,25 @@ static int get_gop_coding_frame_num(
   return gop_coding_frames;
 }
 
+static RANGE get_active_gf_inverval_range_simple(int min_gf_interval,
+                                                 int arf_active_or_kf,
+                                                 int frames_to_key) {
+  RANGE active_gf_interval;
+  active_gf_interval.min = min_gf_interval + arf_active_or_kf + 2;
+  active_gf_interval.max = 16 + arf_active_or_kf;
+
+  if ((active_gf_interval.max <= frames_to_key) &&
+      (active_gf_interval.max >= (frames_to_key - min_gf_interval))) {
+    active_gf_interval.min = frames_to_key / 2;
+    active_gf_interval.max = frames_to_key / 2;
+  }
+  return active_gf_interval;
+}
+
 static RANGE get_active_gf_inverval_range(
     const FRAME_INFO *frame_info, const RATE_CONTROL *rc, int arf_active_or_kf,
     int gf_start_show_idx, int active_worst_quality, int last_boosted_qindex) {
   RANGE active_gf_interval;
-#if CONFIG_RATE_CTRL
-  (void)frame_info;
-  (void)gf_start_show_idx;
-  (void)active_worst_quality;
-  (void)last_boosted_qindex;
-  active_gf_interval.min = rc->min_gf_interval + arf_active_or_kf + 2;
-
-  active_gf_interval.max = 16 + arf_active_or_kf;
-
-  if ((active_gf_interval.max <= rc->frames_to_key) &&
-      (active_gf_interval.max >= (rc->frames_to_key - rc->min_gf_interval))) {
-    active_gf_interval.min = rc->frames_to_key / 2;
-    active_gf_interval.max = rc->frames_to_key / 2;
-  }
-#else
   int int_max_q = (int)(vp9_convert_qindex_to_q(active_worst_quality,
                                                 frame_info->bit_depth));
   int q_term = (gf_start_show_idx == 0)
@@ -2733,7 +2744,6 @@ static RANGE get_active_gf_inverval_range(
   }
   active_gf_interval.max =
       VPXMAX(active_gf_interval.max, active_gf_interval.min);
-#endif
   return active_gf_interval;
 }
 
@@ -2794,9 +2804,14 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
 
   vpx_clear_system_state();
 
-  active_gf_interval = get_active_gf_inverval_range(
-      frame_info, rc, arf_active_or_kf, gf_start_show_idx,
-      twopass->active_worst_quality, rc->last_boosted_qindex);
+  if (oxcf->use_simple_encode_api) {
+    active_gf_interval = get_active_gf_inverval_range_simple(
+        rc->min_gf_interval, arf_active_or_kf, rc->frames_to_key);
+  } else {
+    active_gf_interval = get_active_gf_inverval_range(
+        frame_info, rc, arf_active_or_kf, gf_start_show_idx,
+        twopass->active_worst_quality, rc->last_boosted_qindex);
+  }
 
   if (cpi->multi_layer_arf) {
     int arf_layers = get_arf_layers(cpi->multi_layer_arf, oxcf->enable_auto_arf,
@@ -2806,25 +2821,21 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     gop_intra_factor = 1.0;
   }
 
+  gop_coding_frames = get_gop_coding_frame_num(
+      &use_alt_ref, frame_info, twopass, rc, gf_start_show_idx,
+      &active_gf_interval, gop_intra_factor, cpi->oxcf.lag_in_frames);
+  use_alt_ref &= allow_alt_ref;
 #if CONFIG_RATE_CTRL
-  {
+  // If the external gop_command is on, we will override the decisions
+  // of gop_coding_frames and use_alt_ref.
+  if (cpi->oxcf.use_simple_encode_api) {
     const GOP_COMMAND *gop_command = &cpi->encode_command.gop_command;
     assert(allow_alt_ref == 1);
     if (gop_command->use) {
       gop_coding_frames = gop_command_coding_frame_count(gop_command);
       use_alt_ref = gop_command->use_alt_ref;
-    } else {
-      gop_coding_frames = get_gop_coding_frame_num(
-          &use_alt_ref, frame_info, twopass, rc, gf_start_show_idx,
-          &active_gf_interval, gop_intra_factor, cpi->oxcf.lag_in_frames);
-      use_alt_ref &= allow_alt_ref;
     }
   }
-#else
-  gop_coding_frames = get_gop_coding_frame_num(
-      &use_alt_ref, frame_info, twopass, rc, gf_start_show_idx,
-      &active_gf_interval, gop_intra_factor, cpi->oxcf.lag_in_frames);
-  use_alt_ref &= allow_alt_ref;
 #endif
 
   // Was the group length constrained by the requirement for a new KF?
@@ -3836,7 +3847,7 @@ void vp9_get_next_group_of_picture(const VP9_COMP *cpi, int *first_is_key_frame,
   if (gop_command->use) {
     *coding_frame_count = gop_command_coding_frame_count(gop_command);
     *use_alt_ref = gop_command->use_alt_ref;
-    assert(*coding_frame_count < rc.frames_to_key);
+    assert(gop_command->show_frame_count <= rc.frames_to_key);
   } else {
     *coding_frame_count = vp9_get_gop_coding_frame_count(
         &cpi->oxcf, &cpi->twopass, &cpi->frame_info, &rc, *first_show_idx,
@@ -3855,12 +3866,19 @@ int vp9_get_gop_coding_frame_count(const VP9EncoderConfig *oxcf,
   int frame_count;
   double gop_intra_factor;
   const int arf_active_or_kf = last_gop_use_alt_ref || first_is_key_frame;
-  RANGE active_gf_interval = get_active_gf_inverval_range(
-      frame_info, rc, arf_active_or_kf, show_idx, /*active_worst_quality=*/0,
-      /*last_boosted_qindex=*/0);
+  RANGE active_gf_interval;
+  int arf_layers;
+  if (oxcf->use_simple_encode_api) {
+    active_gf_interval = get_active_gf_inverval_range_simple(
+        rc->min_gf_interval, arf_active_or_kf, rc->frames_to_key);
+  } else {
+    active_gf_interval = get_active_gf_inverval_range(
+        frame_info, rc, arf_active_or_kf, show_idx, /*active_worst_quality=*/0,
+        /*last_boosted_qindex=*/0);
+  }
 
-  const int arf_layers = get_arf_layers(multi_layer_arf, oxcf->enable_auto_arf,
-                                        active_gf_interval.max);
+  arf_layers = get_arf_layers(multi_layer_arf, oxcf->enable_auto_arf,
+                              active_gf_interval.max);
   if (multi_layer_arf) {
     gop_intra_factor = 1.0 + 0.25 * arf_layers;
   } else {
@@ -3877,7 +3895,7 @@ int vp9_get_gop_coding_frame_count(const VP9EncoderConfig *oxcf,
 // Under CONFIG_RATE_CTRL, once the first_pass_info is ready, the number of
 // coding frames (including show frame and alt ref) can be determined.
 int vp9_get_coding_frame_num(const VP9EncoderConfig *oxcf,
-                             TWO_PASS *const twopass,
+                             const TWO_PASS *const twopass,
                              const FRAME_INFO *frame_info, int multi_layer_arf,
                              int allow_alt_ref) {
   const FIRST_PASS_INFO *first_pass_info = &twopass->first_pass_info;
