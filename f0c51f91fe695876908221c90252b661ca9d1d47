@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0c9fe530_38a74ef2",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 804,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2021-06-22T06:33:51Z",
+      "side": 1,
+      "message": "This is set to be 0 all the time. Does it make more sense to simply disallow skip_txfm_flag to be SKIP_TXFM_AC_DC then?",
+      "range": {
+        "startLine": 804,
+        "startChar": 23,
+        "endLine": 804,
+        "endChar": 44
+      },
+      "revId": "f0c51f91fe695876908221c90252b661ca9d1d47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
