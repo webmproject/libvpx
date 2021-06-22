@@ -46,7 +46,6 @@ void VP9RateControlRTC::InitRateControl(const VP9RateControlRtcConfig &rc_cfg) {
   oxcf->content = VP9E_CONTENT_DEFAULT;
   oxcf->drop_frames_water_mark = 0;
   cm->current_video_frame = 0;
-  oxcf->key_freq = rc_cfg.key_freq;
   rc->kf_boost = DEFAULT_KF_BOOST;
 
   UpdateRateControl(rc_cfg);
@@ -60,7 +59,7 @@ void VP9RateControlRTC::InitRateControl(const VP9RateControlRtcConfig &rc_cfg) {
   rc->rc_2_frame = 0;
   vp9_rc_init_minq_luts();
   vp9_rc_init(oxcf, 0, rc);
-  rc->frames_to_key = oxcf->key_freq;
+  rc->constrain_gf_key_freq_onepass_vbr = 0;
   cpi_->sf.use_nonrd_pick_mode = 1;
 }
 
@@ -152,8 +151,7 @@ void VP9RateControlRTC::ComputeQP(const VP9FrameParamsQpRTC &frame_params) {
         target = vp9_calc_pframe_target_size_one_pass_cbr(cpi_);
     } else if (cpi_->oxcf.rc_mode == VPX_VBR) {
       if (cm->frame_type == KEY_FRAME) {
-        cpi_->rc.this_key_frame_forced =
-            cm->current_video_frame != 0 && cpi_->rc.frames_to_key == 0;
+        cpi_->rc.this_key_frame_forced = cm->current_video_frame != 0;
         cpi_->rc.frames_to_key = cpi_->oxcf.key_freq;
       }
       vp9_set_gf_update_one_pass_vbr(cpi_);
