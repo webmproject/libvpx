@@ -16,6 +16,24 @@
       "message": "You\u0027ll need to rebase to pick up the simple encode assertion fix from Angie since I enabled the test now.",
       "revId": "f7a4026ad17f77381f4b14e214955d783066b93a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f28518db_965d304a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-23T21:05:43Z",
+      "side": 1,
+      "message": "I already rebased it. It seems the failure still exists. That is strange.",
+      "parentUuid": "2ad5ca6a_8e1dc530",
+      "revId": "f7a4026ad17f77381f4b14e214955d783066b93a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
