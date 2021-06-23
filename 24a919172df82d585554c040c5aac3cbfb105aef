@@ -33,6 +33,24 @@
       "message": "Ah I may have misremembered when I posted my first comment. I guess the main issue is now we produce a libsimple_encode.a which shadows the C symbols from libvpx.a",
       "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "45ddbff0_49612ff7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-23T01:42:23Z",
+      "side": 1,
+      "message": "I guess we don\u0027t need libsimple_encode.a anymore?",
+      "parentUuid": "0c6a1ae5_5a2ce4f9",
+      "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
