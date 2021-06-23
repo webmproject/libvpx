@@ -51,6 +51,42 @@
       "parentUuid": "0c6a1ae5_5a2ce4f9",
       "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e7b6c30a_1c29ecf5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-23T01:52:06Z",
+      "side": 1,
+      "message": "If this is an issue, we don\u0027t need to include simple_encode.cc and simple_encode.h in libvpx.a",
+      "parentUuid": "8171ec6e_f0e5f859",
+      "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "74505c36_bad900ea",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-23T01:52:06Z",
+      "side": 1,
+      "message": "Or we can create a target simple_encode on google3 that depends on libvpx.\nI will need to figure out how it works on google3.",
+      "parentUuid": "45ddbff0_49612ff7",
+      "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
