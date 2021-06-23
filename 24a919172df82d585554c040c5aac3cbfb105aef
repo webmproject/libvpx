@@ -87,6 +87,24 @@
       "parentUuid": "45ddbff0_49612ff7",
       "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c673ee26_82d34548",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-23T17:28:38Z",
+      "side": 1,
+      "message": "\u003e Or we can create a target simple_encode on google3 that depends on libvpx.\n\u003e I will need to figure out how it works on google3.\n\nA separate lib with a dependency on libvpx would be safest, but we may run into issues if you want to access private functions. For custom configurations we could enable this, but if we\u0027re going to leave things as is I\u0027d prefer to keep it off by default. We can move it from the experimental group though.",
+      "parentUuid": "74505c36_bad900ea",
+      "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
