@@ -24,6 +24,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a8ef59b_91cb2a8b",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-23T00:08:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "28d39cdf_2d9ffac6",
+      "range": {
+        "startLine": 160,
+        "startChar": 8,
+        "endLine": 160,
+        "endChar": 17
+      },
+      "revId": "9bb79df4676d30d7b998965e21fa34731b53d154",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0f87a992_02ca77dd",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-06-22T23:55:36Z",
       "side": 1,
       "message": "...the risk of...\n\nand predition -\u003e prediction",
+      "range": {
+        "startLine": 802,
+        "startChar": 20,
+        "endLine": 802,
+        "endChar": 28
+      },
+      "revId": "9bb79df4676d30d7b998965e21fa34731b53d154",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8c1dbd7_445b31e7",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-23T00:08:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0f87a992_02ca77dd",
       "range": {
         "startLine": 802,
         "startChar": 20,
