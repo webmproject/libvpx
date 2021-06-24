@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd05bc3f_ee830e90",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 800,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2021-06-24T16:42:19Z",
+      "side": 1,
+      "message": "if SKIP_TXFM_AC_DC is not used anywhere, should we not allow x-\u003eskip_txfm get this assigned?",
+      "range": {
+        "startLine": 800,
+        "startChar": 26,
+        "endLine": 800,
+        "endChar": 35
+      },
+      "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "382d9a56_5ea51d58",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2021-06-24T16:42:19Z",
+      "side": 1,
+      "message": "this chunk can be removed too.",
+      "range": {
+        "startLine": 837,
+        "startChar": 6,
+        "endLine": 838,
+        "endChar": 17
+      },
+      "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
