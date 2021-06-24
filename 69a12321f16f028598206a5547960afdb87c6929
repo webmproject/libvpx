@@ -16,6 +16,24 @@
       "message": "@Jerome, @Marco:\nHow to provide the max \u0026 min bitrate for a VBR?\nIIUC, max_inter/intra_bit_rates are for controlling the frame size.\n\nDoes the target bitrate indicates the max bitrate?",
       "revId": "69a12321f16f028598206a5547960afdb87c6929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4e6e0689_cb0c2248",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-06-24T23:21:49Z",
+      "side": 1,
+      "message": "We don\u0027t have the setting for min rate for 1-pass VBR.\n\ntarget bitrate corresponds to the long term average bitrate.",
+      "parentUuid": "e7bd1eb0_27a31c55",
+      "revId": "69a12321f16f028598206a5547960afdb87c6929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
