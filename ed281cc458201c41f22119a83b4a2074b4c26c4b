@@ -141,6 +141,30 @@
       },
       "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "81008868_b55b9e09",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-24T21:33:54Z",
+      "side": 1,
+      "message": "It is a gcc warning.",
+      "parentUuid": "5e396a5c_e3e07f8f",
+      "range": {
+        "startLine": 837,
+        "startChar": 6,
+        "endLine": 838,
+        "endChar": 17
+      },
+      "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
