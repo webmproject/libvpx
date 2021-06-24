@@ -93,6 +93,30 @@
       },
       "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b37f979a_32b31452",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-24T19:30:39Z",
+      "side": 1,
+      "message": "\u003e If these lines are removed, static analysis reports errors.\n\u003e \"dist\" could be used uninitialized on line 843, although we know it will not.\n\u003e So these two lines basically silence the warning.\n\nWith the assert(0) the analysis shouldn\u0027t, but maybe it\u0027s a bug. When you saw it was it before you added the assert?",
+      "parentUuid": "ae753ab3_c582641a",
+      "range": {
+        "startLine": 837,
+        "startChar": 6,
+        "endLine": 838,
+        "endChar": 17
+      },
+      "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
