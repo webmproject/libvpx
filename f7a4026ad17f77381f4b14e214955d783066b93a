@@ -52,6 +52,24 @@
       "parentUuid": "f28518db_965d304a",
       "revId": "f7a4026ad17f77381f4b14e214955d783066b93a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72d3ac58_4182b721",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-24T16:20:27Z",
+      "side": 1,
+      "message": "Now the build succeeds. Please take a look.",
+      "parentUuid": "eb618d7a_b39a298b",
+      "revId": "f7a4026ad17f77381f4b14e214955d783066b93a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
