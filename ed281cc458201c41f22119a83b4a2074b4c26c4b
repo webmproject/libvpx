@@ -24,6 +24,30 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e3958631_6067dcf6",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 800,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-24T17:13:21Z",
+      "side": 1,
+      "message": "I think \"skip_txfm\" could be removed. But we need more investigation to make sure it doesn\u0027t change the encoder behavior.\nThat will be a large clean up.\nIt could be a follow-up.",
+      "parentUuid": "dd05bc3f_ee830e90",
+      "range": {
+        "startLine": 800,
+        "startChar": 26,
+        "endLine": 800,
+        "endChar": 35
+      },
+      "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "382d9a56_5ea51d58",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-06-24T16:42:19Z",
       "side": 1,
       "message": "this chunk can be removed too.",
+      "range": {
+        "startLine": 837,
+        "startChar": 6,
+        "endLine": 838,
+        "endChar": 17
+      },
+      "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ae753ab3_c582641a",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-24T17:13:21Z",
+      "side": 1,
+      "message": "If these lines are removed, static analysis reports errors.\n\"dist\" could be used uninitialized on line 843, although we know it will not.\nSo these two lines basically silence the warning.",
+      "parentUuid": "382d9a56_5ea51d58",
       "range": {
         "startLine": 837,
         "startChar": 6,
