@@ -189,6 +189,30 @@
       },
       "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d4335f6_9c11a78b",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1129564
+      },
+      "writtenOn": "2021-06-25T23:32:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb889457_7970dd23",
+      "range": {
+        "startLine": 837,
+        "startChar": 6,
+        "endLine": 838,
+        "endChar": 17
+      },
+      "revId": "ed281cc458201c41f22119a83b4a2074b4c26c4b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
