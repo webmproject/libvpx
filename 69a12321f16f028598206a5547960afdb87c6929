@@ -69,6 +69,24 @@
       "message": "Shall we fill \n  int max_quantizers[VPX_MAX_LAYERS];\n  int min_quantizers[VPX_MAX_LAYERS];\n  int scaling_factor_num[VPX_SS_MAX_LAYERS];\n  int scaling_factor_den[VPX_SS_MAX_LAYERS];\n  int layer_target_bitrate[VPX_MAX_LAYERS];\n  int ts_rate_decimator[VPX_TS_MAX_LAYERS];\n?",
       "revId": "69a12321f16f028598206a5547960afdb87c6929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "01bb4d69_9461fb98",
+        "filename": "vp9/ratectrl_rtc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-06-25T16:24:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "098f9137_555a778f",
+      "revId": "69a12321f16f028598206a5547960afdb87c6929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
