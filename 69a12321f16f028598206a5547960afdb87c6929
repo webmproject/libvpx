@@ -54,6 +54,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "76d731f4_bc3b801c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-06-25T18:06:48Z",
+      "side": 1,
+      "message": "The VBR mode here is specifically for 1 pass with 0 lag. There is a golden frame period which is 8-20 frames and it takes at least several periods to hit the target.",
+      "parentUuid": "8325b512_43efc5b2",
+      "revId": "69a12321f16f028598206a5547960afdb87c6929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "098f9137_555a778f",
