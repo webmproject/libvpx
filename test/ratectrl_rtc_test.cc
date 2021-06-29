@@ -127,6 +127,7 @@ class RcInterfaceTest
     rc_cfg_.max_quantizers[0] = 52;
     rc_cfg_.min_quantizers[0] = 2;
     rc_cfg_.rc_mode = rc_mode;
+    rc_cfg_.aq_mode = aq_mode_;
 
     // Encoder settings for ground truth.
     cfg_.g_w = 1280;
@@ -364,7 +365,7 @@ TEST_P(RcInterfaceTest, OneLayerVBRPeriodicKey) { RunOneLayerVBRPeriodicKey(); }
 
 TEST_P(RcInterfaceSvcTest, Svc) { RunSvc(); }
 
-VP9_INSTANTIATE_TEST_SUITE(RcInterfaceTest, ::testing::Values(0),
+VP9_INSTANTIATE_TEST_SUITE(RcInterfaceTest, ::testing::Values(0, 3),
                            ::testing::Values(VPX_CBR, VPX_VBR));
 VP9_INSTANTIATE_TEST_SUITE(RcInterfaceSvcTest, ::testing::Values(0));
 }  // namespace

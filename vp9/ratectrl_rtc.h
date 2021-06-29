@@ -18,6 +18,7 @@
 #include "vp9/common/vp9_enums.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/vp9_iface_common.h"
+#include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/vp9_cx_iface.h"
@@ -42,6 +43,7 @@ struct VP9RateControlRtcConfig {
     framerate = 30.0;
     ss_number_layers = ts_number_layers = 1;
     rc_mode = VPX_CBR;
+    aq_mode = 0;
     vp9_zero(max_quantizers);
     vp9_zero(min_quantizers);
     vp9_zero(scaling_factor_den);
@@ -82,6 +84,7 @@ struct VP9RateControlRtcConfig {
   int ts_rate_decimator[VPX_TS_MAX_LAYERS];
   // vbr, cbr
   enum vpx_rc_mode rc_mode;
+  int aq_mode;
 };
 
 struct VP9FrameParamsQpRTC {
@@ -129,6 +132,11 @@ class VP9RateControlRTC {
           }
         }
       }
+      if (cpi_->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+        vpx_free(cpi_->segmentation_map);
+        cpi_->segmentation_map = NULL;
+        vp9_cyclic_refresh_free(cpi_->cyclic_refresh);
+      }
       vpx_free(cpi_);
     }
   }
@@ -137,6 +145,8 @@ class VP9RateControlRTC {
   // GetQP() needs to be called after ComputeQP() to get the latest QP
   int GetQP() const;
   int GetLoopfilterLevel() const;
+  signed char *GetCyclicRefreshMap() const;
+  int *GetDeltaQ() const;
   void ComputeQP(const VP9FrameParamsQpRTC &frame_params);
   // Feedback to rate control with the size of current encoded frame
   void PostEncodeUpdate(uint64_t encoded_frame_size);
