@@ -123,6 +123,24 @@
       "parentUuid": "c673ee26_82d34548",
       "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7a7959a_80a47340",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-06-29T19:23:12Z",
+      "side": 1,
+      "message": "\u003e The issue is if we use a different compile flag, we suffer from duplicate symbols again. You can\u0027t use libvpx and this library at the same time.\n\u003e \n\nRight, I was thinking of simple encode as a separate lib that could call into libvpx via public functions, not try to bundle the entire library into one.\n\n\u003e I tested the performance already. It doesn\u0027t affect the default performance.\n\u003e Coding stats remains the same.",
+      "parentUuid": "63babea4_b9c35f0a",
+      "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
