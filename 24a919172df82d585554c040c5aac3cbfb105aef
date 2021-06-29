@@ -141,6 +141,24 @@
       "parentUuid": "63babea4_b9c35f0a",
       "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ba3814a1_baa78883",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-29T21:03:54Z",
+      "side": 1,
+      "message": "Great. I will make sure simple_encode.cc and .h are not included in libvpx.\nStill need to figure how to achieve that.\nWill work on this CL later this week or early next week again.\nThanks for the comments.",
+      "parentUuid": "a7a7959a_80a47340",
+      "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
