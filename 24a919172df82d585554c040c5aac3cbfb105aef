@@ -105,6 +105,24 @@
       "parentUuid": "74505c36_bad900ea",
       "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "63babea4_b9c35f0a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1132564
+      },
+      "writtenOn": "2021-06-29T17:25:22Z",
+      "side": 1,
+      "message": "The issue is if we use a different compile flag, we suffer from duplicate symbols again. You can\u0027t use libvpx and this library at the same time.\n\nI tested the performance already. It doesn\u0027t affect the default performance.\nCoding stats remains the same.",
+      "parentUuid": "c673ee26_82d34548",
+      "revId": "24a919172df82d585554c040c5aac3cbfb105aef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
