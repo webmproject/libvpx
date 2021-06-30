@@ -51,6 +51,24 @@
       "message": "the _setup()should go before rc_pick_q_bounds(), so before line 179",
       "revId": "dcec8779917a26ff172238faab7f62256d3710a7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4847930c_f67a9a8a",
+        "filename": "vp9/ratectrl_rtc.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2021-06-30T05:39:09Z",
+      "side": 1,
+      "message": "ignore this, setup should go after pick_q",
+      "parentUuid": "daf4accc_2fa19daa",
+      "revId": "dcec8779917a26ff172238faab7f62256d3710a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
