@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d6e1caea_2ff034e9",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-01T01:48:32Z",
+      "side": 1,
+      "message": "given line 362 INT_MAX is probably a safer place to start. really we should be doing some further validation of target before that to cover the other paths.",
+      "revId": "00ce8609a8e651214a0f3387b6b1f68ccfe0fb04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
