@@ -22,6 +22,30 @@
       },
       "revId": "350b0b47f2b126ae33607002590d58aca18033bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5412d438_85b400c7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-07-02T17:57:32Z",
+      "side": 1,
+      "message": "\u003e Jerome I think a pass to normalize the types would be a good idea.\n\nThanks for the fix. I\u0027ll give it a pass.",
+      "parentUuid": "d8d5b72f_39558709",
+      "range": {
+        "startLine": 11,
+        "startChar": 5,
+        "endLine": 11,
+        "endChar": 65
+      },
+      "revId": "350b0b47f2b126ae33607002590d58aca18033bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
