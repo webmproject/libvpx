@@ -50,7 +50,7 @@ struct VP9RateControlRtcConfig {
     vp9_zero(ts_rate_decimator);
     scaling_factor_num[0] = 1;
     scaling_factor_den[0] = 1;
-    layer_target_bitrate[0] = target_bandwidth;
+    layer_target_bitrate[0] = static_cast<int>(target_bandwidth);
     max_quantizers[0] = max_quantizer;
     min_quantizers[0] = min_quantizer;
     ts_rate_decimator[0] = 1;
