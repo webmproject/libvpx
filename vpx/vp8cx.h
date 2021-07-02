@@ -712,6 +712,12 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_SET_EXTERNAL_RATE_CONTROL,
+
+  /*!\brief Codec control function to get loopfilter level in the encoder.
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_GET_LOOPFILTER_LEVEL,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -1036,6 +1042,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_ROW_MT, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_GET_LEVEL, int *)
 #define VPX_CTRL_VP9E_GET_LEVEL
+
+VPX_CTRL_USE_TYPE(VP9E_GET_LOOPFILTER_LEVEL, int *)
+#define VPX_CTRL_VP9E_GET_LOOPFILTER_LEVEL
 
 VPX_CTRL_USE_TYPE(VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST, unsigned int)
 #define VPX_CTRL_VP9E_ENABLE_MOTION_VECTOR_UNIT_TEST

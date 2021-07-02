@@ -834,6 +834,14 @@ static vpx_codec_err_t ctrl_get_quantizer64(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_get_loopfilter_level(vpx_codec_alg_priv_t *ctx,
+                                                 va_list args) {
+  int *const arg = va_arg(args, int *);
+  if (arg == NULL) return VPX_CODEC_INVALID_PARAM;
+  *arg = ctx->cpi->common.lf.filter_level;
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t update_extra_cfg(vpx_codec_alg_priv_t *ctx,
                                         const struct vp9_extracfg *extra_cfg) {
   const vpx_codec_err_t res = validate_config(ctx, &ctx->cfg, extra_cfg);
@@ -1967,6 +1975,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },
   { VP8E_GET_LAST_QUANTIZER_64, ctrl_get_quantizer64 },
+  { VP9E_GET_LOOPFILTER_LEVEL, ctrl_get_loopfilter_level },
   { VP9_GET_REFERENCE, ctrl_get_reference },
   { VP9E_GET_SVC_LAYER_ID, ctrl_get_svc_layer_id },
   { VP9E_GET_ACTIVEMAP, ctrl_get_active_map },
