@@ -151,6 +151,12 @@ $(BUILD_PFX)%_vsx.c.o: CFLAGS += -maltivec -mvsx
 $(BUILD_PFX)%_msa.c.d: CFLAGS += -mmsa
 $(BUILD_PFX)%_msa.c.o: CFLAGS += -mmsa
 
+# LOONGARCH
+$(BUILD_PFX)%_lsx.c.d:  CFLAGS += -mlsx
+$(BUILD_PFX)%_lsx.c.o:  CFLAGS += -mlsx
+$(BUILD_PFX)%_lasx.c.d: CFLAGS += -mlasx
+$(BUILD_PFX)%_lasx.c.o: CFLAGS += -mlasx
+
 $(BUILD_PFX)%.c.d: %.c
 	$(if $(quiet),@echo "    [DEP] $@")
 	$(qexec)mkdir -p $(dir $@)
