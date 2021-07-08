@@ -33,6 +33,23 @@
       "message": "Friendly ping",
       "revId": "5f345a9246b71374cbedeb28b0e0b0101701732a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b889875b_c3e74bfb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1178975
+      },
+      "writtenOn": "2021-07-08T19:48:41Z",
+      "side": 1,
+      "message": "Thanks for the review!\nI don\u0027t have permission to submit on this project and I don\u0027t see an autosubmit button, so someone else is probably going to have to submit it for me.",
+      "revId": "5f345a9246b71374cbedeb28b0e0b0101701732a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
