@@ -16,6 +16,23 @@
       "message": "I think this is good to address the bug. We can look at doing general sanitization of this value in a follow up.\n\nMarco, any opinion?",
       "revId": "5f345a9246b71374cbedeb28b0e0b0101701732a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a715b5b6_14d4fa24",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1178975
+      },
+      "writtenOn": "2021-07-08T17:25:17Z",
+      "side": 1,
+      "message": "Friendly ping",
+      "revId": "5f345a9246b71374cbedeb28b0e0b0101701732a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     }
   ]
 }
