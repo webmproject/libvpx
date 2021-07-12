@@ -493,10 +493,12 @@ TEST_INTRA_PRED_SPEED_SRCS=$(call addprefix_clean,test/,\
                            $(call enabled,TEST_INTRA_PRED_SPEED_SRCS))
 TEST_INTRA_PRED_SPEED_OBJS := $(sort $(call objs,$(TEST_INTRA_PRED_SPEED_SRCS)))
 
+ifeq ($(CONFIG_VP9_ENCODER),yes)
 RC_INTERFACE_TEST_BIN=./test_rc_interface$(EXE_SFX)
 RC_INTERFACE_TEST_SRCS=$(call addprefix_clean,test/,\
                        $(call enabled,RC_INTERFACE_TEST_SRCS))
 RC_INTERFACE_TEST_OBJS := $(sort $(call objs,$(RC_INTERFACE_TEST_SRCS)))
+endif
 
 SIMPLE_ENCODE_TEST_BIN=./test_simple_encode$(EXE_SFX)
 SIMPLE_ENCODE_TEST_SRCS=$(call addprefix_clean,test/,\
@@ -597,6 +599,7 @@ test_intra_pred_speed.$(VCPROJ_SFX): $(TEST_INTRA_PRED_SPEED_SRCS) vpx.$(VCPROJ_
             -L. -l$(CODEC_LIB) -l$(GTEST_LIB) $^
 endif  # TEST_INTRA_PRED_SPEED
 
+ifeq ($(CONFIG_VP9_ENCODER),yes)
 ifneq ($(strip $(RC_INTERFACE_TEST_OBJS)),)
 PROJECTS-$(CONFIG_MSVS) += test_rc_interface.$(VCPROJ_SFX)
 test_rc_interface.$(VCPROJ_SFX): $(RC_INTERFACE_TEST_SRCS) vpx.$(VCPROJ_SFX) \
@@ -616,6 +619,7 @@ test_rc_interface.$(VCPROJ_SFX): $(RC_INTERFACE_TEST_SRCS) vpx.$(VCPROJ_SFX) \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
             -L. -l$(CODEC_LIB) -l$(RC_RTC_LIB) -l$(GTEST_LIB) $^
 endif  # RC_INTERFACE_TEST
+endif  # CONFIG_VP9_ENCODER
 endif
 else
 
@@ -657,6 +661,7 @@ $(eval $(call linkerxx_template,$(TEST_INTRA_PRED_SPEED_BIN), \
               -L. -lvpx -lgtest $(extralibs) -lm))
 endif  # TEST_INTRA_PRED_SPEED
 
+ifeq ($(CONFIG_VP9_ENCODER),yes)
 ifneq ($(strip $(RC_INTERFACE_TEST_OBJS)),)
 $(RC_INTERFACE_TEST_OBJS) $(RC_INTERFACE_TEST_OBJS:.o=.d): \
   CXXFLAGS += $(GTEST_INCLUDES)
@@ -668,6 +673,7 @@ $(eval $(call linkerxx_template,$(RC_INTERFACE_TEST_BIN), \
               $(RC_INTERFACE_TEST_OBJS) \
               -L. -lvpx -lgtest -lvp9rc $(extralibs) -lm))
 endif  # RC_INTERFACE_TEST
+endif  # CONFIG_VP9_ENCODER
 
 ifneq ($(strip $(SIMPLE_ENCODE_TEST_OBJS)),)
 $(SIMPLE_ENCODE_TEST_OBJS) $(SIMPLE_ENCODE_TEST_OBJS:.o=.d): \
