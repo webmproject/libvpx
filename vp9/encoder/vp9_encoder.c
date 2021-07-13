@@ -2304,6 +2304,7 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
       cm, cm->frame_contexts,
       (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS, sizeof(*cm->frame_contexts)));
 
+  cpi->compute_frame_low_motion_onepass = 1;
   cpi->use_svc = 0;
   cpi->resize_state = ORIG;
   cpi->external_resize = 0;
@@ -5747,7 +5748,8 @@ static void encode_frame_to_data_rate(
 
   vp9_rc_postencode_update(cpi, *size);
 
-  if (oxcf->pass == 0 && !frame_is_intra_only(cm) &&
+  if (cpi->compute_frame_low_motion_onepass && oxcf->pass == 0 &&
+      !frame_is_intra_only(cm) &&
       (!cpi->use_svc ||
        (cpi->use_svc &&
         !cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame &&

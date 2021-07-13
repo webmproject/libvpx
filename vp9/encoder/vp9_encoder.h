@@ -961,6 +961,8 @@ typedef struct VP9_COMP {
 
   int compute_source_sad_onepass;
 
+  int compute_frame_low_motion_onepass;
+
   LevelConstraint level_constraint;
 
   uint8_t *count_arf_frame_usage;
