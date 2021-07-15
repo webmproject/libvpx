@@ -322,8 +322,8 @@ void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
     const int prev_layer_target_bandwidth =
         oxcf->layer_target_bitrate[st_idx - 1];
     lc->avg_frame_size =
-        (int)((lc->target_bandwidth - prev_layer_target_bandwidth) /
-              (lc->framerate - prev_layer_framerate));
+        (int)round((lc->target_bandwidth - prev_layer_target_bandwidth) /
+                   (lc->framerate - prev_layer_framerate));
   }
 }
 
