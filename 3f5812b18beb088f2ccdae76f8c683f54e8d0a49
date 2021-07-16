@@ -1,0 +1,170 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cefa4b95_1c4e18d9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-16T22:44:56Z",
+      "side": 1,
+      "message": "the sha1sum\u0027s could be deleted for the files too.",
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ddd9dbff_c6225171",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-16T22:44:56Z",
+      "side": 1,
+      "message": "maybe \u0027kNumFrames\u0027 while you\u0027re here",
+      "range": {
+        "startLine": 27,
+        "startChar": 13,
+        "endLine": 27,
+        "endChar": 22
+      },
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7109a2de_32b2f294",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-16T22:44:56Z",
+      "side": 1,
+      "message": "you can drop the \u0027::\u0027 to be consistent with the other argument. I don\u0027t think there\u0027s a high risk of a name conflict.",
+      "range": {
+        "startLine": 48,
+        "startChar": 34,
+        "endLine": 48,
+        "endChar": 36
+      },
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f3510810_fee730ea",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-16T22:44:56Z",
+      "side": 1,
+      "message": "in this case you could make this a positive check and return early to save the indent",
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "234a214a_655e0f59",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-16T22:44:56Z",
+      "side": 1,
+      "message": "SetEncoderConfig/Configuration? or could this just use SetConfig() passing a cfg_ parameter if the contents only differ by rc_end_usage",
+      "range": {
+        "startLine": 134,
+        "startChar": 7,
+        "endLine": 134,
+        "endChar": 17
+      },
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "42f61633_1450eaed",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-16T22:44:56Z",
+      "side": 1,
+      "message": "no need to override this if there isn\u0027t anything to be done. there shouldn\u0027t be an encode/decode mismatch so this would hide an issue, no?",
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fd3712c4_db2b519e",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-16T22:44:56Z",
+      "side": 1,
+      "message": "no need for the cast if framerate is the same type",
+      "range": {
+        "startLine": 318,
+        "startChar": 24,
+        "endLine": 318,
+        "endChar": 32
+      },
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4159963b_4063aad1",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-16T22:44:56Z",
+      "side": 1,
+      "message": "we\u0027ve got a mix of SVC and Svc in the code, technically Svc would be preferred:\nhttps://google.github.io/styleguide/cppguide.html#General_Naming_Rules",
+      "range": {
+        "startLine": 367,
+        "startChar": 37,
+        "endLine": 367,
+        "endChar": 40
+      },
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    }
+  ]
+}
