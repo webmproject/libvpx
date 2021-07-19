@@ -225,6 +225,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "28d28ea6_9b79850e",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2021-07-19T19:41:57Z",
+      "side": 1,
+      "message": "\u003e actually mismatch is expected for SVC because the top spatial layer in the top temporal layer doesn\u0027t apply loopfilter since it\u0027s a non reference frame. See here\n\u003e https://chromium.googlesource.com/webm/libvpx/+/refs/heads/main/test/svc_end_to_end_test.cc#278\n\nThanks, can you add a similar comment here too please?",
+      "parentUuid": "8fc39139_83b46874",
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "fd3712c4_db2b519e",
         "filename": "test/ratectrl_rtc_test.cc",
         "patchSetId": 6
