@@ -18,6 +18,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fa702bfd_c506f8a5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-07-19T17:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cefa4b95_1c4e18d9",
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ddd9dbff_c6225171",
@@ -31,6 +49,30 @@
       "writtenOn": "2021-07-16T22:44:56Z",
       "side": 1,
       "message": "maybe \u0027kNumFrames\u0027 while you\u0027re here",
+      "range": {
+        "startLine": 27,
+        "startChar": 13,
+        "endLine": 27,
+        "endChar": 22
+      },
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a7e725ae_0fcf0da1",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-07-19T17:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ddd9dbff_c6225171",
       "range": {
         "startLine": 27,
         "startChar": 13,
@@ -81,6 +123,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9110c1bc_333fa75c",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-07-19T17:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f3510810_fee730ea",
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "234a214a_655e0f59",
@@ -94,6 +154,30 @@
       "writtenOn": "2021-07-16T22:44:56Z",
       "side": 1,
       "message": "SetEncoderConfig/Configuration? or could this just use SetConfig() passing a cfg_ parameter if the contents only differ by rc_end_usage",
+      "range": {
+        "startLine": 134,
+        "startChar": 7,
+        "endLine": 134,
+        "endChar": 17
+      },
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fccafd9c_e30ba08e",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-07-19T17:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "234a214a_655e0f59",
       "range": {
         "startLine": 134,
         "startChar": 7,
@@ -121,6 +205,24 @@
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8fc39139_83b46874",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-07-19T17:10:52Z",
+      "side": 1,
+      "message": "actually mismatch is expected for SVC because the top spatial layer in the top temporal layer doesn\u0027t apply loopfilter since it\u0027s a non reference frame. See here\nhttps://chromium.googlesource.com/webm/libvpx/+/refs/heads/main/test/svc_end_to_end_test.cc#278",
+      "parentUuid": "42f61633_1450eaed",
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "fd3712c4_db2b519e",
@@ -134,6 +236,30 @@
       "writtenOn": "2021-07-16T22:44:56Z",
       "side": 1,
       "message": "no need for the cast if framerate is the same type",
+      "range": {
+        "startLine": 318,
+        "startChar": 24,
+        "endLine": 318,
+        "endChar": 32
+      },
+      "revId": "3f5812b18beb088f2ccdae76f8c683f54e8d0a49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8f7b851_d6b4750b",
+        "filename": "test/ratectrl_rtc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1171444
+      },
+      "writtenOn": "2021-07-19T17:10:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd3712c4_db2b519e",
       "range": {
         "startLine": 318,
         "startChar": 24,
