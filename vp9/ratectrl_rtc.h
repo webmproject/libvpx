@@ -117,13 +117,16 @@ class VP9RateControlRTC {
       const VP9RateControlRtcConfig &cfg);
   ~VP9RateControlRTC() {
     if (cpi_) {
-      for (int sl = 0; sl < cpi_->svc.number_spatial_layers; sl++) {
-        for (int tl = 0; tl < cpi_->svc.number_temporal_layers; tl++) {
-          int layer = LAYER_IDS_TO_IDX(sl, tl, cpi_->oxcf.ts_number_layers);
-          LAYER_CONTEXT *const lc = &cpi_->svc.layer_context[layer];
-          vpx_free(lc->map);
-          vpx_free(lc->last_coded_q_map);
-          vpx_free(lc->consec_zero_mv);
+      if (cpi_->svc.number_spatial_layers > 1 ||
+          cpi_->svc.number_temporal_layers > 1) {
+        for (int sl = 0; sl < cpi_->svc.number_spatial_layers; sl++) {
+          for (int tl = 0; tl < cpi_->svc.number_temporal_layers; tl++) {
+            int layer = LAYER_IDS_TO_IDX(sl, tl, cpi_->oxcf.ts_number_layers);
+            LAYER_CONTEXT *const lc = &cpi_->svc.layer_context[layer];
+            vpx_free(lc->map);
+            vpx_free(lc->last_coded_q_map);
+            vpx_free(lc->consec_zero_mv);
+          }
         }
       }
       vpx_free(cpi_);
