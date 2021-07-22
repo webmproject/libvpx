@@ -301,9 +301,9 @@ static void init_temporal_layer_context(VP8_COMP *cpi, VP8_CONFIG *oxcf,
   /* Work out the average size of a frame within this layer */
   if (layer > 0) {
     lc->avg_frame_size_for_layer =
-        (int)((cpi->oxcf.target_bitrate[layer] -
-               cpi->oxcf.target_bitrate[layer - 1]) *
-              1000 / (lc->framerate - prev_layer_framerate));
+        (int)round((cpi->oxcf.target_bitrate[layer] -
+                    cpi->oxcf.target_bitrate[layer - 1]) *
+                   1000 / (lc->framerate - prev_layer_framerate));
   }
 
   lc->active_worst_quality = cpi->oxcf.worst_allowed_q;
