@@ -3709,6 +3709,10 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q, int *bottom_index,
     cpi->rc.force_max_q = 0;
   }
 
+  if (cpi->use_svc) {
+    cpi->svc.base_qindex[cpi->svc.spatial_layer_id] = *q;
+  }
+
   if (!frame_is_intra_only(cm)) {
     vp9_set_high_precision_mv(cpi, (*q) < HIGH_PRECISION_MV_QTHRESH);
   }

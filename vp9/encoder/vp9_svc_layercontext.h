@@ -173,6 +173,8 @@ typedef struct SVC {
   uint8_t fb_idx_temporal_layer_id[REF_FRAMES];
 
   int spatial_layer_sync[VPX_SS_MAX_LAYERS];
+  // Quantizer for each spatial layer.
+  int base_qindex[VPX_SS_MAX_LAYERS];
   uint8_t set_intra_only_frame;
   uint8_t previous_frame_is_intra_only;
   uint8_t superframe_has_layer_sync;
