@@ -711,9 +711,6 @@ typedef struct VP9_COMP {
   TileDataEnc *tile_data;
   int allocated_tiles;  // Keep track of memory allocated for tiles.
 
-  // For a still frame, this flag is set to 1 to skip partition search.
-  int partition_search_skippable_frame;
-
   int scaled_ref_idx[REFS_PER_FRAME];
   int lst_fb_idx;
   int gld_fb_idx;

@@ -525,9 +525,6 @@ typedef struct SPEED_FEATURES {
     int prune_rect_thresh[4];
   } rd_ml_partition;
 
-  // Allow skipping partition search for still image frame
-  int allow_partition_search_skip;
-
   // Fast approximation of vp9_model_rd_from_var_lapndz
   int simple_model_rd_from_var;
 
