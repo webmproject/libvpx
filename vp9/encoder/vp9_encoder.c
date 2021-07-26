@@ -2323,7 +2323,6 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
   vp9_init_rd_parameters(cpi);
 
   init_frame_indexes(cm);
-  cpi->partition_search_skippable_frame = 0;
   cpi->tile_data = NULL;
 
   realloc_segmentation_maps(cpi);

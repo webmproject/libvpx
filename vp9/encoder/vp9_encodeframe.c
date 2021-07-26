@@ -160,6 +160,7 @@ unsigned int vp9_high_get_sby_perpixel_variance(VP9_COMP *cpi,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if !CONFIG_REALTIME_ONLY
+#if CONFIG_FP_MB_STATS
 static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
                                                    const struct buf_2d *ref,
                                                    int mi_row, int mi_col,
@@ -174,20 +175,8 @@ static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
   var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride, last_y, last->y_stride, &sse);
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
+#endif
 
-static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi, MACROBLOCK *x,
-                                                   int mi_row, int mi_col) {
-  unsigned int var = get_sby_perpixel_diff_variance(
-      cpi, &x->plane[0].src, mi_row, mi_col, BLOCK_64X64);
-  if (var < 8)
-    return BLOCK_64X64;
-  else if (var < 128)
-    return BLOCK_32X32;
-  else if (var < 2048)
-    return BLOCK_16X16;
-  else
-    return BLOCK_8X8;
-}
 #endif  // !CONFIG_REALTIME_ONLY
 
 static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
@@ -4702,13 +4691,6 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
       const BLOCK_SIZE bsize =
           seg_skip ? BLOCK_64X64 : sf->always_this_block_size;
       set_offsets(cpi, tile_info, x, mi_row, mi_col, BLOCK_64X64);
-      set_fixed_partitioning(cpi, tile_info, mi, mi_row, mi_col, bsize);
-      rd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                       &dummy_rate, &dummy_dist, 1, td->pc_root);
-    } else if (cpi->partition_search_skippable_frame) {
-      BLOCK_SIZE bsize;
-      set_offsets(cpi, tile_info, x, mi_row, mi_col, BLOCK_64X64);
-      bsize = get_rd_var_based_fixed_partition(cpi, x, mi_row, mi_col);
       set_fixed_partitioning(cpi, tile_info, mi, mi_row, mi_col, bsize);
       rd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col, BLOCK_64X64,
                        &dummy_rate, &dummy_dist, 1, td->pc_root);
