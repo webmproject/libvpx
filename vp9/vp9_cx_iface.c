@@ -583,10 +583,6 @@ static vpx_codec_err_t set_encoder_config(
 
   vp9_set_first_pass_stats(oxcf, &cfg->rc_twopass_stats_in);
 
-#if CONFIG_FP_MB_STATS
-  oxcf->firstpass_mb_stats_in = cfg->rc_firstpass_mb_stats_in;
-#endif
-
   oxcf->color_space = extra_cfg->color_space;
   oxcf->color_range = extra_cfg->color_range;
   oxcf->render_width = extra_cfg->render_width;
@@ -2305,11 +2301,6 @@ void vp9_dump_encoder_config(const VP9EncoderConfig *oxcf, FILE *fp) {
   DUMP_STRUCT_VALUE(fp, oxcf, target_level);
 
   // TODO(angiebird): dump two_pass_stats_in
-
-#if CONFIG_FP_MB_STATS
-  // TODO(angiebird): dump firstpass_mb_stats_in
-#endif
-
   DUMP_STRUCT_VALUE(fp, oxcf, tuning);
   DUMP_STRUCT_VALUE(fp, oxcf, content);
 #if CONFIG_VP9_HIGHBITDEPTH

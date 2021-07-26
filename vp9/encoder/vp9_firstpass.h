@@ -21,27 +21,6 @@
 extern "C" {
 #endif
 
-#if CONFIG_FP_MB_STATS
-
-#define FPMB_DCINTRA_MASK 0x01
-
-#define FPMB_MOTION_ZERO_MASK 0x02
-#define FPMB_MOTION_LEFT_MASK 0x04
-#define FPMB_MOTION_RIGHT_MASK 0x08
-#define FPMB_MOTION_UP_MASK 0x10
-#define FPMB_MOTION_DOWN_MASK 0x20
-
-#define FPMB_ERROR_SMALL_MASK 0x40
-#define FPMB_ERROR_LARGE_MASK 0x80
-#define FPMB_ERROR_SMALL_TH 2000
-#define FPMB_ERROR_LARGE_TH 48000
-
-typedef struct {
-  uint8_t *mb_stats_start;
-  uint8_t *mb_stats_end;
-} FIRSTPASS_MB_STATS;
-#endif
-
 #define INVALID_ROW (-1)
 
 #define MAX_ARF_LAYERS 6
@@ -187,12 +166,6 @@ typedef struct {
   double normalized_score_left;
   double mb_av_energy;
   double mb_smooth_pct;
-
-#if CONFIG_FP_MB_STATS
-  uint8_t *frame_mb_stats_buf;
-  uint8_t *this_frame_mb_stats;
-  FIRSTPASS_MB_STATS firstpass_mb_stats;
-#endif
 
   FP_MB_FLOAT_STATS *fp_mb_float_stats;
 

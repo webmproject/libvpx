@@ -2363,17 +2363,6 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
         vpx_calloc(cm->MBs * sizeof(*cpi->mbgraph_stats[i].mb_stats), 1));
   }
 
-#if CONFIG_FP_MB_STATS
-  cpi->use_fp_mb_stats = 0;
-  if (cpi->use_fp_mb_stats) {
-    // a place holder used to store the first pass mb stats in the first pass
-    CHECK_MEM_ERROR(cm, cpi->twopass.frame_mb_stats_buf,
-                    vpx_calloc(cm->MBs * sizeof(uint8_t), 1));
-  } else {
-    cpi->twopass.frame_mb_stats_buf = NULL;
-  }
-#endif
-
   cpi->refresh_alt_ref_frame = 0;
   cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 
@@ -2526,18 +2515,6 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
       vp9_init_second_pass_spatial_svc(cpi);
     } else {
       int num_frames;
-#if CONFIG_FP_MB_STATS
-      if (cpi->use_fp_mb_stats) {
-        const size_t psz = cpi->common.MBs * sizeof(uint8_t);
-        const int ps = (int)(oxcf->firstpass_mb_stats_in.sz / psz);
-
-        cpi->twopass.firstpass_mb_stats.mb_stats_start =
-            oxcf->firstpass_mb_stats_in.buf;
-        cpi->twopass.firstpass_mb_stats.mb_stats_end =
-            cpi->twopass.firstpass_mb_stats.mb_stats_start +
-            (ps - 1) * cpi->common.MBs * sizeof(uint8_t);
-      }
-#endif
 
       cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
       cpi->twopass.stats_in = cpi->twopass.stats_in_start;
@@ -2840,13 +2817,6 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
        ++i) {
     vpx_free(cpi->mbgraph_stats[i].mb_stats);
   }
-
-#if CONFIG_FP_MB_STATS
-  if (cpi->use_fp_mb_stats) {
-    vpx_free(cpi->twopass.frame_mb_stats_buf);
-    cpi->twopass.frame_mb_stats_buf = NULL;
-  }
-#endif
 
   vp9_extrc_delete(&cpi->ext_ratectrl);
 

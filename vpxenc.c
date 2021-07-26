@@ -114,10 +114,6 @@ static const arg_def_t pass_arg =
     ARG_DEF(NULL, "pass", 1, "Pass to execute (1/2)");
 static const arg_def_t fpf_name =
     ARG_DEF(NULL, "fpf", 1, "First pass statistics file name");
-#if CONFIG_FP_MB_STATS
-static const arg_def_t fpmbf_name =
-    ARG_DEF(NULL, "fpmbf", 1, "First pass block statistics file name");
-#endif
 static const arg_def_t limit =
     ARG_DEF(NULL, "limit", 1, "Stop encoding after n input frames");
 static const arg_def_t skip =
@@ -674,9 +670,6 @@ struct stream_config {
   struct vpx_codec_enc_cfg cfg;
   const char *out_fn;
   const char *stats_fn;
-#if CONFIG_FP_MB_STATS
-  const char *fpmb_stats_fn;
-#endif
   stereo_format_t stereo_fmt;
   int arg_ctrls[ARG_CTRL_CNT_MAX][2];
   int arg_ctrl_cnt;
@@ -704,9 +697,6 @@ struct stream_state {
   uint64_t cx_time;
   size_t nbytes;
   stats_io_t stats;
-#if CONFIG_FP_MB_STATS
-  stats_io_t fpmb_stats;
-#endif
   struct vpx_image *img;
   vpx_codec_ctx_t decoder;
   int mismatch_seen;
@@ -943,10 +933,6 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->out_fn = arg.val;
     } else if (arg_match(&arg, &fpf_name, argi)) {
       config->stats_fn = arg.val;
-#if CONFIG_FP_MB_STATS
-    } else if (arg_match(&arg, &fpmbf_name, argi)) {
-      config->fpmb_stats_fn = arg.val;
-#endif
     } else if (arg_match(&arg, &use_webm, argi)) {
 #if CONFIG_WEBM_IO
       config->write_webm = 1;
@@ -1169,17 +1155,6 @@ static void validate_stream_config(const struct stream_state *stream,
         fatal("Stream %d: duplicate stats file (from stream %d)",
               streami->index, stream->index);
     }
-
-#if CONFIG_FP_MB_STATS
-    /* Check for two streams sharing a mb stats file. */
-    if (streami != stream) {
-      const char *a = stream->config.fpmb_stats_fn;
-      const char *b = streami->config.fpmb_stats_fn;
-      if (a && b && !strcmp(a, b))
-        fatal("Stream %d: duplicate mb stats file (from stream %d)",
-              streami->index, stream->index);
-    }
-#endif
   }
 }
 
@@ -1338,26 +1313,11 @@ static void setup_pass(struct stream_state *stream,
       fatal("Failed to open statistics store");
   }
 
-#if CONFIG_FP_MB_STATS
-  if (stream->config.fpmb_stats_fn) {
-    if (!stats_open_file(&stream->fpmb_stats, stream->config.fpmb_stats_fn,
-                         pass))
-      fatal("Failed to open mb statistics store");
-  } else {
-    if (!stats_open_mem(&stream->fpmb_stats, pass))
-      fatal("Failed to open mb statistics store");
-  }
-#endif
-
   stream->config.cfg.g_pass = global->passes == 2
                                   ? pass ? VPX_RC_LAST_PASS : VPX_RC_FIRST_PASS
                                   : VPX_RC_ONE_PASS;
   if (pass) {
     stream->config.cfg.rc_twopass_stats_in = stats_get(&stream->stats);
-#if CONFIG_FP_MB_STATS
-    stream->config.cfg.rc_firstpass_mb_stats_in =
-        stats_get(&stream->fpmb_stats);
-#endif
   }
 
   stream->cx_time = 0;
@@ -1569,13 +1529,6 @@ static void get_cx_data(struct stream_state *stream,
                     pkt->data.twopass_stats.sz);
         stream->nbytes += pkt->data.raw.sz;
         break;
-#if CONFIG_FP_MB_STATS
-      case VPX_CODEC_FPMB_STATS_PKT:
-        stats_write(&stream->fpmb_stats, pkt->data.firstpass_mb_stats.buf,
-                    pkt->data.firstpass_mb_stats.sz);
-        stream->nbytes += pkt->data.raw.sz;
-        break;
-#endif
       case VPX_CODEC_PSNR_PKT:
 
         if (global->show_psnr) {
@@ -2068,10 +2021,6 @@ int main(int argc, const char **argv_) {
     FOREACH_STREAM(close_output_file(stream, global.codec->fourcc));
 
     FOREACH_STREAM(stats_close(&stream->stats, global.passes - 1));
-
-#if CONFIG_FP_MB_STATS
-    FOREACH_STREAM(stats_close(&stream->fpmb_stats, global.passes - 1));
-#endif
 
     if (global.pass) break;
   }
