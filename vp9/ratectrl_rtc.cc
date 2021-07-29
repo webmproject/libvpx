@@ -25,9 +25,9 @@ std::unique_ptr<VP9RateControlRTC> VP9RateControlRTC::Create(
                                                 VP9RateControlRTC());
   if (!rc_api) return nullptr;
   rc_api->cpi_ = static_cast<VP9_COMP *>(vpx_memalign(32, sizeof(*cpi_)));
-  if (rc_api->cpi_ == nullptr) {
-    return nullptr;
-  }
+  if (!rc_api->cpi_) return nullptr;
+  vp9_zero(*rc_api->cpi_);
+
   rc_api->InitRateControl(cfg);
   if (cfg.aq_mode) {
     VP9_COMP *const cpi = rc_api->cpi_;
