@@ -277,9 +277,9 @@ static void update_buffer_level_svc_preencode(VP9_COMP *cpi) {
         svc->current_superframe > 0) {
       // TODO(marpan): This may need to be modified for temporal layers.
       const double framerate_pts = 10000000.0 / ts_delta;
-      lrc->bits_off_target += (int)(lc->target_bandwidth / framerate_pts);
+      lrc->bits_off_target += (int)round(lc->target_bandwidth / framerate_pts);
     } else {
-      lrc->bits_off_target += (int)(lc->target_bandwidth / lc->framerate);
+      lrc->bits_off_target += (int)round(lc->target_bandwidth / lc->framerate);
     }
     // Clip buffer level to maximum buffer size for the layer.
     lrc->bits_off_target =
