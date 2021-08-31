@@ -747,7 +747,7 @@ enum vp8e_enc_control_id {
    *
    * This will turn off cyclic refresh for vp8.
    *
-   * With those, the rate control is expected to work exactly the same as the
+   * With this, the rate control is expected to work exactly the same as the
    * interface provided in vp8_ratectrl_rtc.cc/h
    *
    * Supported in codecs: VP8

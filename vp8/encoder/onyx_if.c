@@ -4017,7 +4017,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     if (frame_over_shoot_limit == 0) frame_over_shoot_limit = 1;
 
     /* Are we are overshooting and up against the limit of active max Q. */
-    if (((cpi->pass != 2) ||
+    if (!cpi->rt_always_update_correction_factor &&
+        ((cpi->pass != 2) ||
          (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)) &&
         (Q == cpi->active_worst_quality) &&
         (cpi->active_worst_quality < cpi->worst_quality) &&
@@ -4446,8 +4447,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     }
   }
 
-  if (cpi->rt_always_update_correction_factor || !active_worst_qchanged)
-    vp8_update_rate_correction_factors(cpi, 2);
+  if (!active_worst_qchanged) vp8_update_rate_correction_factors(cpi, 2);
 
   cpi->last_q[cm->frame_type] = cm->base_qindex;
 

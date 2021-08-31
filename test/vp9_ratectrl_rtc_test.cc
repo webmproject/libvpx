@@ -371,8 +371,3 @@ VP9_INSTANTIATE_TEST_SUITE(RcInterfaceTest, ::testing::Values(0, 3),
                            ::testing::Values(VPX_CBR, VPX_VBR));
 VP9_INSTANTIATE_TEST_SUITE(RcInterfaceSvcTest, ::testing::Values(0, 3));
 }  // namespace
-
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
