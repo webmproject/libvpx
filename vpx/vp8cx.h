@@ -742,6 +742,17 @@ enum vp8e_enc_control_id {
    * Supported in codecs: VP9
    */
   VP9E_GET_LAST_QUANTIZER_SVC_LAYERS,
+
+  /*!\brief Codec control to disable internal features in rate control.
+   *
+   * This will turn off cyclic refresh for vp8.
+   *
+   * With those, the rate control is expected to work exactly the same as the
+   * interface provided in vp8_ratectrl_rtc.cc/h
+   *
+   * Supported in codecs: VP8
+   */
+  VP8E_SET_RTC_EXTERNAL_RATECTRL,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -1106,6 +1117,9 @@ VPX_CTRL_USE_TYPE(VP9E_SET_DISABLE_LOOPFILTER, int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_RTC_EXTERNAL_RATECTRL, int)
 #define VPX_CTRL_VP9E_SET_RTC_EXTERNAL_RATECTRL
+
+VPX_CTRL_USE_TYPE(VP8E_SET_RTC_EXTERNAL_RATECTRL, int)
+#define VPX_CTRL_VP8E_SET_RTC_EXTERNAL_RATECTRL
 
 VPX_CTRL_USE_TYPE(VP9E_SET_EXTERNAL_RATE_CONTROL, vpx_rc_funcs_t *)
 #define VPX_CTRL_VP9E_SET_EXTERNAL_RATE_CONTROL
