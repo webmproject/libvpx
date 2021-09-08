@@ -1910,6 +1910,7 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
 
   cpi->force_maxqp = 0;
   cpi->frames_since_last_drop_overshoot = 0;
+  cpi->rt_always_update_correction_factor = 0;
 
   cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 #if CONFIG_INTERNAL_STATS
@@ -4445,7 +4446,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     }
   }
 
-  if (!active_worst_qchanged) vp8_update_rate_correction_factors(cpi, 2);
+  if (cpi->rt_always_update_correction_factor || !active_worst_qchanged)
+    vp8_update_rate_correction_factors(cpi, 2);
 
   cpi->last_q[cm->frame_type] = cm->base_qindex;
 

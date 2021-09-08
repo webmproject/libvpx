@@ -702,6 +702,10 @@ typedef struct VP8_COMP {
   int use_roi_static_threshold;
 
   int ext_refresh_frame_flags_pending;
+
+  // Always update correction factor used for rate control after each frame for
+  // realtime encoding.
+  int rt_always_update_correction_factor;
 } VP8_COMP;
 
 void vp8_initialize_enc(void);
