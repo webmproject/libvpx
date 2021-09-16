@@ -100,7 +100,8 @@ void VP8RateControlRTC::UpdateRateControl(
   cpi_->worst_quality = oxcf->worst_allowed_q;
   cpi_->best_quality = oxcf->best_allowed_q;
   cpi_->output_framerate = rc_cfg.framerate;
-  oxcf->target_bandwidth = 1000 * rc_cfg.target_bandwidth;
+  oxcf->target_bandwidth =
+      static_cast<unsigned int>(1000 * rc_cfg.target_bandwidth);
   oxcf->fixed_q = -1;
   oxcf->error_resilient_mode = 1;
   oxcf->starting_buffer_level_in_ms = rc_cfg.buf_initial_sz;
