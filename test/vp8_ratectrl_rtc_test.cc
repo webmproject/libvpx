@@ -61,20 +61,81 @@ class Vp8RcInterfaceTest
     SetMode(::libvpx_test::kRealTime);
   }
 
+  // From error_resilience_test.cc
+  int SetFrameFlags(int frame_num, int num_temp_layers) {
+    int frame_flags = 0;
+    if (num_temp_layers == 2) {
+      if (frame_num % 2 == 0) {
+        // Layer 0: predict from L and ARF, update L.
+        frame_flags =
+            VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
+      } else {
+        // Layer 1: predict from L, G and ARF, and update G.
+        frame_flags = VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_LAST |
+                      VP8_EFLAG_NO_UPD_ENTROPY;
+      }
+    } else if (num_temp_layers == 3) {
+      if (frame_num % 4 == 0) {
+        // Layer 0: predict from L, update L.
+        frame_flags = VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF |
+                      VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF;
+      } else if ((frame_num - 2) % 4 == 0) {
+        // Layer 1: predict from L, G,  update G.
+        frame_flags =
+            VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_REF_ARF;
+      } else if ((frame_num - 1) % 2 == 0) {
+        // Layer 2: predict from L, G, ARF; update ARG.
+        frame_flags = VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_LAST;
+      }
+    }
+    return frame_flags;
+  }
+
+  int SetLayerId(int frame_num, int num_temp_layers) {
+    int layer_id = 0;
+    if (num_temp_layers == 2) {
+      if (frame_num % 2 == 0) {
+        layer_id = 0;
+      } else {
+        layer_id = 1;
+      }
+    } else if (num_temp_layers == 3) {
+      if (frame_num % 4 == 0) {
+        layer_id = 0;
+      } else if ((frame_num - 2) % 4 == 0) {
+        layer_id = 1;
+      } else if ((frame_num - 1) % 2 == 0) {
+        layer_id = 2;
+      }
+    }
+    return layer_id;
+  }
+
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (video->frame() == 0) {
-      encoder->Control(VP8E_SET_CPUUSED, -6);
-      encoder->Control(VP8E_SET_RTC_EXTERNAL_RATECTRL, 1);
-      encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 1000);
+    if (rc_cfg_.ts_number_layers > 1) {
+      const int layer_id = SetLayerId(video->frame(), cfg_.ts_number_layers);
+      const int frame_flags =
+          SetFrameFlags(video->frame(), cfg_.ts_number_layers);
+      frame_params_.temporal_layer_id = layer_id;
+      if (video->frame() > 0) {
+        encoder->Control(VP8E_SET_TEMPORAL_LAYER_ID, layer_id);
+        encoder->Control(VP8E_SET_FRAME_FLAGS, frame_flags);
+      }
+    } else {
+      if (video->frame() == 0) {
+        encoder->Control(VP8E_SET_CPUUSED, -6);
+        encoder->Control(VP8E_SET_RTC_EXTERNAL_RATECTRL, 1);
+        encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 1000);
+      }
+      if (frame_params_.frame_type == INTER_FRAME) {
+        // Disable golden frame update.
+        frame_flags_ |= VP8_EFLAG_NO_UPD_GF;
+        frame_flags_ |= VP8_EFLAG_NO_UPD_ARF;
+      }
     }
     frame_params_.frame_type =
         video->frame() % key_interval_ == 0 ? KEY_FRAME : INTER_FRAME;
-    if (frame_params_.frame_type == INTER_FRAME) {
-      // Disable golden frame update.
-      frame_flags_ |= VP8_EFLAG_NO_UPD_GF;
-      frame_flags_ |= VP8_EFLAG_NO_UPD_ARF;
-    }
     encoder_exit_ = video->frame() == test_video_.frames;
   }
 
@@ -125,6 +186,38 @@ class Vp8RcInterfaceTest
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   }
 
+  void RunTemporalLayers2TL() {
+    test_video_ = GET_PARAM(2);
+    target_bitrate_ = GET_PARAM(1);
+    if (test_video_.width == 1280 && target_bitrate_ == 200) return;
+    if (test_video_.width == 640 && target_bitrate_ == 1000) return;
+    SetConfigTemporalLayers(2);
+    rc_api_ = libvpx::VP8RateControlRTC::Create(rc_cfg_);
+    rc_api_->UpdateRateControl(rc_cfg_);
+
+    ::libvpx_test::I420VideoSource video(test_video_.name, test_video_.width,
+                                         test_video_.height, 30, 1, 0,
+                                         test_video_.frames);
+
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  }
+
+  void RunTemporalLayers3TL() {
+    test_video_ = GET_PARAM(2);
+    target_bitrate_ = GET_PARAM(1);
+    if (test_video_.width == 1280 && target_bitrate_ == 200) return;
+    if (test_video_.width == 640 && target_bitrate_ == 1000) return;
+    SetConfigTemporalLayers(3);
+    rc_api_ = libvpx::VP8RateControlRTC::Create(rc_cfg_);
+    rc_api_->UpdateRateControl(rc_cfg_);
+
+    ::libvpx_test::I420VideoSource video(test_video_.name, test_video_.width,
+                                         test_video_.height, 30, 1, 0,
+                                         test_video_.frames);
+
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  }
+
  private:
   void SetConfig() {
     rc_cfg_.width = test_video_.width;
@@ -160,6 +253,72 @@ class Vp8RcInterfaceTest
     cfg_.kf_max_dist = key_interval_;
   }
 
+  void SetConfigTemporalLayers(int temporal_layers) {
+    rc_cfg_.width = test_video_.width;
+    rc_cfg_.height = test_video_.height;
+    rc_cfg_.max_quantizer = 60;
+    rc_cfg_.min_quantizer = 2;
+    rc_cfg_.target_bandwidth = target_bitrate_;
+    rc_cfg_.buf_initial_sz = 600;
+    rc_cfg_.buf_optimal_sz = 600;
+    rc_cfg_.buf_sz = target_bitrate_;
+    rc_cfg_.undershoot_pct = 50;
+    rc_cfg_.overshoot_pct = 50;
+    rc_cfg_.max_intra_bitrate_pct = 1000;
+    rc_cfg_.framerate = 30.0;
+    if (temporal_layers == 2) {
+      rc_cfg_.layer_target_bitrate[0] = 60 * target_bitrate_ / 100;
+      rc_cfg_.layer_target_bitrate[1] = target_bitrate_;
+      rc_cfg_.ts_rate_decimator[0] = 2;
+      rc_cfg_.ts_rate_decimator[1] = 1;
+    } else if (temporal_layers == 3) {
+      rc_cfg_.layer_target_bitrate[0] = 40 * target_bitrate_ / 100;
+      rc_cfg_.layer_target_bitrate[1] = 60 * target_bitrate_ / 100;
+      rc_cfg_.layer_target_bitrate[2] = target_bitrate_;
+      rc_cfg_.ts_rate_decimator[0] = 4;
+      rc_cfg_.ts_rate_decimator[1] = 2;
+      rc_cfg_.ts_rate_decimator[2] = 1;
+    }
+
+    rc_cfg_.ts_number_layers = temporal_layers;
+
+    // Encoder settings for ground truth.
+    cfg_.g_w = test_video_.width;
+    cfg_.g_h = test_video_.height;
+    cfg_.rc_undershoot_pct = 50;
+    cfg_.rc_overshoot_pct = 50;
+    cfg_.rc_buf_initial_sz = 600;
+    cfg_.rc_buf_optimal_sz = 600;
+    cfg_.rc_buf_sz = target_bitrate_;
+    cfg_.rc_dropframe_thresh = 0;
+    cfg_.rc_min_quantizer = 2;
+    cfg_.rc_max_quantizer = 60;
+    cfg_.rc_end_usage = VPX_CBR;
+    cfg_.g_lag_in_frames = 0;
+    cfg_.g_error_resilient = 1;
+    cfg_.rc_target_bitrate = target_bitrate_;
+    cfg_.kf_min_dist = key_interval_;
+    cfg_.kf_max_dist = key_interval_;
+    // 2 Temporal layers, no spatial layers, CBR mode.
+    cfg_.ss_number_layers = 1;
+    cfg_.ts_number_layers = temporal_layers;
+    if (temporal_layers == 2) {
+      cfg_.ts_rate_decimator[0] = 2;
+      cfg_.ts_rate_decimator[1] = 1;
+      cfg_.ts_periodicity = 2;
+      cfg_.ts_target_bitrate[0] = 60 * cfg_.rc_target_bitrate / 100;
+      cfg_.ts_target_bitrate[1] = cfg_.rc_target_bitrate;
+    } else if (temporal_layers == 3) {
+      cfg_.ts_rate_decimator[0] = 4;
+      cfg_.ts_rate_decimator[1] = 2;
+      cfg_.ts_rate_decimator[2] = 1;
+      cfg_.ts_periodicity = 4;
+      cfg_.ts_target_bitrate[0] = 40 * cfg_.rc_target_bitrate / 100;
+      cfg_.ts_target_bitrate[1] = 60 * cfg_.rc_target_bitrate / 100;
+      cfg_.ts_target_bitrate[2] = cfg_.rc_target_bitrate;
+    }
+  }
+
   std::unique_ptr<libvpx::VP8RateControlRTC> rc_api_;
   libvpx::VP8RateControlRtcConfig rc_cfg_;
   int key_interval_;
@@ -172,6 +331,10 @@ class Vp8RcInterfaceTest
 TEST_P(Vp8RcInterfaceTest, OneLayer) { RunOneLayer(); }
 
 TEST_P(Vp8RcInterfaceTest, OneLayerPeriodicKey) { RunPeriodicKey(); }
+
+TEST_P(Vp8RcInterfaceTest, TemporalLayers2TL) { RunTemporalLayers2TL(); }
+
+TEST_P(Vp8RcInterfaceTest, TemporalLayers3TL) { RunTemporalLayers3TL(); }
 
 VP8_INSTANTIATE_TEST_SUITE(Vp8RcInterfaceTest,
                            ::testing::Values(200, 400, 1000),

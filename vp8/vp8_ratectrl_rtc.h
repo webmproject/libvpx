@@ -29,6 +29,7 @@ struct VP8RateControlRtcConfig : public VpxRateControlRtcConfig {
 
 struct VP8FrameParamsQpRTC {
   FRAME_TYPE frame_type;
+  int temporal_layer_id;
 };
 
 class VP8RateControlRTC {

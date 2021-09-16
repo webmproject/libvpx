@@ -8,9 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
 #include <new>
 #include "vp8/vp8_ratectrl_rtc.h"
 #include "vp8/encoder/ratectrl.h"
+#include "vpx_ports/system_state.h"
 
 namespace libvpx {
 /* Quant MOD */
@@ -90,7 +92,7 @@ void VP8RateControlRTC::UpdateRateControl(
     const VP8RateControlRtcConfig &rc_cfg) {
   VP8_COMMON *cm = &cpi_->common;
   VP8_CONFIG *oxcf = &cpi_->oxcf;
-
+  vpx_clear_system_state();
   cm->Width = rc_cfg.width;
   cm->Height = rc_cfg.height;
   oxcf->Width = rc_cfg.width;
@@ -102,6 +104,7 @@ void VP8RateControlRTC::UpdateRateControl(
   cpi_->output_framerate = rc_cfg.framerate;
   oxcf->target_bandwidth =
       static_cast<unsigned int>(1000 * rc_cfg.target_bandwidth);
+  cpi_->ref_framerate = cpi_->output_framerate;
   oxcf->fixed_q = -1;
   oxcf->error_resilient_mode = 1;
   oxcf->starting_buffer_level_in_ms = rc_cfg.buf_initial_sz;
@@ -110,7 +113,7 @@ void VP8RateControlRTC::UpdateRateControl(
   oxcf->starting_buffer_level = rc_cfg.buf_initial_sz;
   oxcf->optimal_buffer_level = rc_cfg.buf_optimal_sz;
   oxcf->maximum_buffer_size = rc_cfg.buf_sz;
-  oxcf->number_of_layers = 1;
+  oxcf->number_of_layers = rc_cfg.ts_number_layers;
   cpi_->buffered_mode = oxcf->optimal_buffer_level > 0;
   oxcf->under_shoot_pct = rc_cfg.undershoot_pct;
   oxcf->over_shoot_pct = rc_cfg.overshoot_pct;
@@ -119,6 +122,20 @@ void VP8RateControlRTC::UpdateRateControl(
   for (int i = 0; i < KEY_FRAME_CONTEXT; ++i) {
     cpi_->prior_key_frame_distance[i] =
         static_cast<int>(cpi_->output_framerate);
+  }
+
+  if (oxcf->number_of_layers > 1) {
+    memcpy(oxcf->target_bitrate, rc_cfg.layer_target_bitrate,
+           sizeof(rc_cfg.layer_target_bitrate));
+    memcpy(oxcf->rate_decimator, rc_cfg.ts_rate_decimator,
+           sizeof(rc_cfg.ts_rate_decimator));
+    oxcf->periodicity = 2;
+
+    double prev_layer_framerate = 0;
+    for (unsigned int i = 0; i < oxcf->number_of_layers; ++i) {
+      vp8_init_temporal_layer_context(cpi_, oxcf, i, prev_layer_framerate);
+      prev_layer_framerate = cpi_->output_framerate / oxcf->rate_decimator[i];
+    }
   }
 
   cpi_->total_actual_bits = 0;
@@ -155,6 +172,15 @@ void VP8RateControlRTC::UpdateRateControl(
 
 void VP8RateControlRTC::ComputeQP(const VP8FrameParamsQpRTC &frame_params) {
   VP8_COMMON *const cm = &cpi_->common;
+  vpx_clear_system_state();
+  if (cpi_->oxcf.number_of_layers > 1) {
+    cpi_->temporal_layer_id = frame_params.temporal_layer_id;
+    const int layer = frame_params.temporal_layer_id;
+    vp8_update_layer_contexts(cpi_);
+    /* Restore layer specific context & set frame rate */
+    vp8_restore_layer_context(cpi_, layer);
+    vp8_new_framerate(cpi_, cpi_->layer_context[layer].framerate);
+  }
   cm->frame_type = frame_params.frame_type;
   cm->refresh_golden_frame = (cm->frame_type == KEY_FRAME) ? 1 : 0;
   cm->refresh_alt_ref_frame = (cm->frame_type == KEY_FRAME) ? 1 : 0;
@@ -231,9 +257,15 @@ int VP8RateControlRTC::GetQP() const { return q_; }
 
 void VP8RateControlRTC::PostEncodeUpdate(uint64_t encoded_frame_size) {
   VP8_COMMON *const cm = &cpi_->common;
-
+  vpx_clear_system_state();
   cpi_->total_byte_count += encoded_frame_size;
   cpi_->projected_frame_size = static_cast<int>(encoded_frame_size << 3);
+  if (cpi_->oxcf.number_of_layers > 1) {
+    for (unsigned int i = cpi_->current_layer + 1;
+         i < cpi_->oxcf.number_of_layers; ++i) {
+      cpi_->layer_context[i].total_byte_count += encoded_frame_size;
+    }
+  }
 
   vp8_update_rate_correction_factors(cpi_, 2);
 
@@ -283,7 +315,30 @@ void VP8RateControlRTC::PostEncodeUpdate(uint64_t encoded_frame_size) {
   cpi_->total_actual_bits += cpi_->projected_frame_size;
   cpi_->buffer_level = cpi_->bits_off_target;
 
+  /* Propagate values to higher temporal layers */
+  if (cpi_->oxcf.number_of_layers > 1) {
+    for (unsigned int i = cpi_->current_layer + 1;
+         i < cpi_->oxcf.number_of_layers; ++i) {
+      LAYER_CONTEXT *lc = &cpi_->layer_context[i];
+      int bits_off_for_this_layer = (int)round(
+          lc->target_bandwidth / lc->framerate - cpi_->projected_frame_size);
+
+      lc->bits_off_target += bits_off_for_this_layer;
+
+      /* Clip buffer level to maximum buffer size for the layer */
+      if (lc->bits_off_target > lc->maximum_buffer_size) {
+        lc->bits_off_target = lc->maximum_buffer_size;
+      }
+
+      lc->total_actual_bits += cpi_->projected_frame_size;
+      lc->total_target_vs_actual += bits_off_for_this_layer;
+      lc->buffer_level = lc->bits_off_target;
+    }
+  }
+
   cpi_->common.current_video_frame++;
   cpi_->frames_since_key++;
+
+  if (cpi_->oxcf.number_of_layers > 1) vp8_save_layer_context(cpi_);
 }
 }  // namespace libvpx
