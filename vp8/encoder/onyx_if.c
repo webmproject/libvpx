@@ -4921,6 +4921,8 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 
       this_duration = cpi->source->ts_end - cpi->last_end_time_stamp_seen;
       last_duration = cpi->last_end_time_stamp_seen - cpi->last_time_stamp_seen;
+      // Cap this to avoid overflow of (this_duration - last_duration) * 10
+      this_duration = VPXMIN(this_duration, INT64_MAX / 10);
       /* do a step update if the duration changes by 10% */
       if (last_duration) {
         step = (int)(((this_duration - last_duration) * 10 / last_duration));
