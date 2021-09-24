@@ -168,6 +168,7 @@ void VP8RateControlRTC::UpdateRateControl(
   }
 
   vp8_new_framerate(cpi_, cpi_->framerate);
+  vpx_clear_system_state();
 }
 
 void VP8RateControlRTC::ComputeQP(const VP8FrameParamsQpRTC &frame_params) {
@@ -251,6 +252,7 @@ void VP8RateControlRTC::ComputeQP(const VP8FrameParamsQpRTC &frame_params) {
 
   q_ = vp8_regulate_q(cpi_, cpi_->this_frame_target);
   vp8_set_quantizer(cpi_, q_);
+  vpx_clear_system_state();
 }
 
 int VP8RateControlRTC::GetQP() const { return q_; }
@@ -340,5 +342,6 @@ void VP8RateControlRTC::PostEncodeUpdate(uint64_t encoded_frame_size) {
   cpi_->frames_since_key++;
 
   if (cpi_->oxcf.number_of_layers > 1) vp8_save_layer_context(cpi_);
+  vpx_clear_system_state();
 }
 }  // namespace libvpx
