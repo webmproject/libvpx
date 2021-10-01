@@ -4516,10 +4516,10 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
   }
 
-  // If the frame dropper is not enabled, don't let the buffer level go below
-  // some threshold, given here by -|maximum_buffer_size|. For now we only do
-  // this for screen content input.
-  if (cpi->drop_frames_allowed == 0 && cpi->oxcf.screen_content_mode &&
+  // Don't let the buffer level go below some threshold, given here
+  // by -|maximum_buffer_size|. For now we only do this for
+  // screen content input.
+  if (cpi->oxcf.screen_content_mode &&
       cpi->bits_off_target < -cpi->oxcf.maximum_buffer_size) {
     cpi->bits_off_target = -cpi->oxcf.maximum_buffer_size;
   }
