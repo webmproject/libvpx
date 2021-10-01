@@ -5320,17 +5320,13 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows,
     return -1;
   }
 
-  // Range check the delta Q values and convert the external Q range values
-  // to internal ones.
-  if ((abs(delta_q[0]) > range) || (abs(delta_q[1]) > range) ||
-      (abs(delta_q[2]) > range) || (abs(delta_q[3]) > range)) {
-    return -1;
-  }
-
-  // Range check the delta lf values
-  if ((abs(delta_lf[0]) > range) || (abs(delta_lf[1]) > range) ||
-      (abs(delta_lf[2]) > range) || (abs(delta_lf[3]) > range)) {
-    return -1;
+  for (i = 0; i < MAX_MB_SEGMENTS; ++i) {
+    // Note abs() alone can't be used as the behavior of abs(INT_MIN) is
+    // undefined.
+    if (delta_q[i] > range || delta_q[i] < -range || delta_lf[i] > range ||
+        delta_lf[i] < -range) {
+      return -1;
+    }
   }
 
   // Also disable segmentation if no deltas are specified.

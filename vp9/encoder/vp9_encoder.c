@@ -654,10 +654,15 @@ static void init_level_info(Vp9LevelInfo *level_info) {
 }
 
 static int check_seg_range(int seg_data[8], int range) {
-  return !(abs(seg_data[0]) > range || abs(seg_data[1]) > range ||
-           abs(seg_data[2]) > range || abs(seg_data[3]) > range ||
-           abs(seg_data[4]) > range || abs(seg_data[5]) > range ||
-           abs(seg_data[6]) > range || abs(seg_data[7]) > range);
+  int i;
+  for (i = 0; i < 8; ++i) {
+    // Note abs() alone can't be used as the behavior of abs(INT_MIN) is
+    // undefined.
+    if (seg_data[i] > range || seg_data[i] < -range) {
+      return 0;
+    }
+  }
+  return 1;
 }
 
 VP9_LEVEL vp9_get_level(const Vp9LevelSpec *const level_spec) {
