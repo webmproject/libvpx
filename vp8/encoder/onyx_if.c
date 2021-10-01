@@ -3481,7 +3481,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
    * Note that dropping a key frame can be problematic if spatial
    * resampling is also active
    */
-  if (cpi->decimation_factor > 0) {
+  if (cpi->decimation_factor > 0 && cpi->drop_frames_allowed) {
     switch (cpi->decimation_factor) {
       case 1:
         cpi->per_frame_bandwidth = cpi->per_frame_bandwidth * 3 / 2;
