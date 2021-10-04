@@ -808,8 +808,8 @@ typedef struct vpx_roi_map {
   unsigned int rows; /**< Number of rows. */
   unsigned int cols; /**< Number of columns. */
   /*! VP8 only uses the first 4 segments. VP9 uses 8 segments. */
-  int delta_q[8];  /**< Quantizer deltas. */
-  int delta_lf[8]; /**< Loop filter deltas. */
+  int delta_q[8];  /**< Quantizer deltas. Valid range: [-63, 63].*/
+  int delta_lf[8]; /**< Loop filter deltas. Valid range: [-63, 63].*/
   /*! skip and ref frame segment is only used in VP9. */
   int skip[8];      /**< Skip this block. */
   int ref_frame[8]; /**< Reference frame for this block. */
