@@ -1,3 +1,29 @@
+2021-09-27 v1.11.0 "Smew Duck"
+  This maintenance release adds support for VBR mode in VP9 rate control
+  interface, new codec controls to get quantization parameters and loop filter
+  levels, and includes several improvements to NEON and numerous bug fixes.
+
+  - Upgrading:
+    New codec control is added to get quantization parameters and loop filter
+    levels.
+
+    VBR mode is supported in VP9 rate control library.
+
+  - Enhancement:
+    Numerous improvements for Neon optimizations.
+    Code clean-up and refactoring.
+    Calculation of rd multiplier is changed with BDRATE gains.
+
+  - Bug fixes:
+    Fix to overflow on duration.
+    Fix to several instances of -Wunused-but-set-variable.
+    Fix to avoid chroma resampling for 420mpeg2 input.
+    Fix to overflow in calc_iframe_target_size.
+    Fix to disallow skipping transform and quantization.
+    Fix some -Wsign-compare warnings in simple_encode.
+    Fix input file path in simple_encode_test.
+    Fix valid range for under/over_shoot pct.
+
 2021-03-09 v1.10.0 "Ruddy Duck"
   This maintenance release adds support for darwin20 and new codec controls, as
   well as numerous bug fixes.
