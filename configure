@@ -621,6 +621,7 @@ process_toolchain() {
         check_add_cflags -Wdeclaration-after-statement
         check_add_cflags -Wdisabled-optimization
         check_add_cflags -Wfloat-conversion
+        check_add_cflags -Wformat=2
         check_add_cflags -Wparentheses-equality
         check_add_cflags -Wpointer-arith
         check_add_cflags -Wtype-limits

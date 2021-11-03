@@ -58,8 +58,8 @@ static size_t wrap_fwrite(const void *ptr, size_t size, size_t nmemb,
 
 static const char *exec_name;
 
-static void warn_or_exit_on_errorv(vpx_codec_ctx_t *ctx, int fatal,
-                                   const char *s, va_list ap) {
+static VPX_TOOLS_FORMAT_PRINTF(3, 0) void warn_or_exit_on_errorv(
+    vpx_codec_ctx_t *ctx, int fatal, const char *s, va_list ap) {
   if (ctx->err) {
     const char *detail = vpx_codec_error_detail(ctx);
 
@@ -72,7 +72,9 @@ static void warn_or_exit_on_errorv(vpx_codec_ctx_t *ctx, int fatal,
   }
 }
 
-static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s, ...) {
+static VPX_TOOLS_FORMAT_PRINTF(2,
+                               3) void ctx_exit_on_error(vpx_codec_ctx_t *ctx,
+                                                         const char *s, ...) {
   va_list ap;
 
   va_start(ap, s);
@@ -80,8 +82,8 @@ static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s, ...) {
   va_end(ap);
 }
 
-static void warn_or_exit_on_error(vpx_codec_ctx_t *ctx, int fatal,
-                                  const char *s, ...) {
+static VPX_TOOLS_FORMAT_PRINTF(3, 4) void warn_or_exit_on_error(
+    vpx_codec_ctx_t *ctx, int fatal, const char *s, ...) {
   va_list ap;
 
   va_start(ap, s);
