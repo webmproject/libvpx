@@ -314,7 +314,7 @@ static void calc_iframe_target_size(VP8_COMP *cpi) {
      * bandwidth per second * fraction of the initial buffer
      * level
      */
-    target = cpi->oxcf.starting_buffer_level / 2;
+    target = (uint64_t)cpi->oxcf.starting_buffer_level / 2;
 
     if (target > cpi->oxcf.target_bandwidth * 3 / 2) {
       target = cpi->oxcf.target_bandwidth * 3 / 2;

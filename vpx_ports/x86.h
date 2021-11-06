@@ -391,7 +391,7 @@ static INLINE unsigned int x87_set_double_precision(void) {
   // Reserved                      01B
   // Double Precision (53-Bits)    10B
   // Extended Precision (64-Bits)  11B
-  x87_set_control_word((mode & ~0x300) | 0x200);
+  x87_set_control_word((mode & ~0x300u) | 0x200u);
   return mode;
 }
 

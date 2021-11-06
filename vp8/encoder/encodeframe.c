@@ -634,8 +634,8 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
                              cpi->prob_last_coded, cpi->prob_gf_coded);
   }
 
-  xd->fullpixel_mask = 0xffffffff;
-  if (cm->full_pixel) xd->fullpixel_mask = 0xfffffff8;
+  xd->fullpixel_mask = ~0;
+  if (cm->full_pixel) xd->fullpixel_mask = ~7;
 
   vp8_zero(x->coef_counts);
   vp8_zero(x->ymode_count);
