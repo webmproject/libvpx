@@ -339,7 +339,9 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->end_usage = USAGE_CONSTANT_QUALITY;
   }
 
-  oxcf->target_bandwidth = cfg.rc_target_bitrate;
+  // Cap the target rate to 1000 Mbps to avoid some integer overflows in
+  // target bandwidth calculations.
+  oxcf->target_bandwidth = VPXMIN(cfg.rc_target_bitrate, 1000000);
   oxcf->rc_max_intra_bitrate_pct = vp8_cfg.rc_max_intra_bitrate_pct;
   oxcf->gf_cbr_boost_pct = vp8_cfg.gf_cbr_boost_pct;
 
