@@ -1079,8 +1079,8 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var) {
 
   /* Work out a size correction factor. */
   if (projected_size_based_on_q > 0) {
-    correction_factor =
-        (100 * cpi->projected_frame_size) / projected_size_based_on_q;
+    correction_factor = (int)((100 * (int64_t)cpi->projected_frame_size) /
+                              projected_size_based_on_q);
   }
 
   /* More heavily damped adjustment used if we have been oscillating
