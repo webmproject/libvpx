@@ -16,7 +16,7 @@
 
 #include "./vpx_config.h"
 
-static INLINE void storeu_uint32(void *dst, uint32_t v) {
+static INLINE void storeu_int32(void *dst, int32_t v) {
   memcpy(dst, &v, sizeof(v));
 }
 
