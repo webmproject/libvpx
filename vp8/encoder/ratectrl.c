@@ -781,6 +781,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi) {
         }
       } else {
         int percent_high = 0;
+        int64_t target = cpi->this_frame_target;
 
         if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
             (cpi->buffer_level > cpi->oxcf.optimal_buffer_level)) {
@@ -798,7 +799,9 @@ static void calc_pframe_target_size(VP8_COMP *cpi) {
           percent_high = 0;
         }
 
-        cpi->this_frame_target += (cpi->this_frame_target * percent_high) / 200;
+        target += (target * percent_high) / 200;
+        target = VPXMIN(target, INT_MAX);
+        cpi->this_frame_target = (int)target;
 
         /* Are we allowing control of active_worst_allowed_q according
          * to buffer level.
