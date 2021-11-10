@@ -47,13 +47,13 @@ specialize qw/vp8_dequant_idct_add_uv_block sse2 neon dspr2 msa mmi/;
 # Loopfilter
 #
 add_proto qw/void vp8_loop_filter_mbv/, "unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr, int y_stride, int uv_stride, struct loop_filter_info *lfi";
-specialize qw/vp8_loop_filter_mbv sse2 neon dspr2 msa mmi/;
+specialize qw/vp8_loop_filter_mbv sse2 neon dspr2 msa mmi lsx/;
 
 add_proto qw/void vp8_loop_filter_bv/, "unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr, int y_stride, int uv_stride, struct loop_filter_info *lfi";
 specialize qw/vp8_loop_filter_bv sse2 neon dspr2 msa mmi/;
 
 add_proto qw/void vp8_loop_filter_mbh/, "unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr, int y_stride, int uv_stride, struct loop_filter_info *lfi";
-specialize qw/vp8_loop_filter_mbh sse2 neon dspr2 msa mmi/;
+specialize qw/vp8_loop_filter_mbh sse2 neon dspr2 msa mmi lsx/;
 
 add_proto qw/void vp8_loop_filter_bh/, "unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr, int y_stride, int uv_stride, struct loop_filter_info *lfi";
 specialize qw/vp8_loop_filter_bh sse2 neon dspr2 msa mmi/;
@@ -146,10 +146,10 @@ if (vpx_config("CONFIG_POSTPROC") eq "yes") {
 # Subpixel
 #
 add_proto qw/void vp8_sixtap_predict16x16/, "unsigned char *src_ptr, int src_pixels_per_line, int xoffset, int yoffset, unsigned char *dst_ptr, int dst_pitch";
-specialize qw/vp8_sixtap_predict16x16 sse2 ssse3 neon dspr2 msa mmi/;
+specialize qw/vp8_sixtap_predict16x16 sse2 ssse3 neon dspr2 msa mmi lsx/;
 
 add_proto qw/void vp8_sixtap_predict8x8/, "unsigned char *src_ptr, int src_pixels_per_line, int xoffset, int yoffset, unsigned char *dst_ptr, int dst_pitch";
-specialize qw/vp8_sixtap_predict8x8 sse2 ssse3 neon dspr2 msa mmi/;
+specialize qw/vp8_sixtap_predict8x8 sse2 ssse3 neon dspr2 msa mmi lsx/;
 
 add_proto qw/void vp8_sixtap_predict8x4/, "unsigned char *src_ptr, int src_pixels_per_line, int xoffset, int yoffset, unsigned char *dst_ptr, int dst_pitch";
 specialize qw/vp8_sixtap_predict8x4 sse2 ssse3 neon dspr2 msa mmi/;

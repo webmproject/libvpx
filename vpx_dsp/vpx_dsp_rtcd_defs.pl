@@ -117,7 +117,7 @@ specialize qw/vpx_tm_predictor_8x8 neon dspr2 msa sse2/;
 
 add_proto qw/void vpx_dc_predictor_8x8/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 # TODO(crbug.com/webm/1522): Re-enable vsx implementation.
-specialize qw/vpx_dc_predictor_8x8 dspr2 neon msa sse2/;
+specialize qw/vpx_dc_predictor_8x8 dspr2 neon msa sse2 lsx/;
 
 add_proto qw/void vpx_dc_top_predictor_8x8/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_dc_top_predictor_8x8 neon msa sse2/;
@@ -155,7 +155,7 @@ add_proto qw/void vpx_tm_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, cons
 specialize qw/vpx_tm_predictor_16x16 neon msa sse2 vsx/;
 
 add_proto qw/void vpx_dc_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_dc_predictor_16x16 dspr2 neon msa sse2 vsx/;
+specialize qw/vpx_dc_predictor_16x16 dspr2 neon msa sse2 vsx lsx/;
 
 add_proto qw/void vpx_dc_top_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_dc_top_predictor_16x16 neon msa sse2 vsx/;
