@@ -223,9 +223,10 @@ int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
   if (target > rc->max_frame_bandwidth) target = rc->max_frame_bandwidth;
 
   if (oxcf->rc_max_inter_bitrate_pct) {
-    const int max_rate =
-        rc->avg_frame_bandwidth * oxcf->rc_max_inter_bitrate_pct / 100;
-    target = VPXMIN(target, max_rate);
+    const int64_t max_rate =
+        (int64_t)rc->avg_frame_bandwidth * oxcf->rc_max_inter_bitrate_pct / 100;
+    // target is of type int and VPXMIN cannot evaluate to larger than target
+    target = (int)VPXMIN(target, max_rate);
   }
   return target;
 }
@@ -234,9 +235,9 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
   const RATE_CONTROL *rc = &cpi->rc;
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
   if (oxcf->rc_max_intra_bitrate_pct) {
-    const int max_rate =
-        rc->avg_frame_bandwidth * oxcf->rc_max_intra_bitrate_pct / 100;
-    target = VPXMIN(target, max_rate);
+    const int64_t max_rate =
+        (int64_t)rc->avg_frame_bandwidth * oxcf->rc_max_intra_bitrate_pct / 100;
+    target = (int)VPXMIN(target, max_rate);
   }
   if (target > rc->max_frame_bandwidth) target = rc->max_frame_bandwidth;
   return target;
