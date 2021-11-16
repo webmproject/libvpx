@@ -19,7 +19,14 @@
 
 namespace {
 
-#define NELEMENTS(x) static_cast<int>(sizeof(x) / sizeof(x[0]))
+const vpx_codec_iface_t *kCodecIfaces[] = {
+#if CONFIG_VP8_ENCODER
+  &vpx_codec_vp8_cx_algo,
+#endif
+#if CONFIG_VP9_ENCODER
+  &vpx_codec_vp9_cx_algo,
+#endif
+};
 
 bool IsVP9(const vpx_codec_iface_t *iface) {
   static const char kVP9Name[] = "WebM Project VP9";
@@ -28,14 +35,6 @@ bool IsVP9(const vpx_codec_iface_t *iface) {
 }
 
 TEST(EncodeAPI, InvalidParams) {
-  static const vpx_codec_iface_t *kCodecs[] = {
-#if CONFIG_VP8_ENCODER
-    &vpx_codec_vp8_cx_algo,
-#endif
-#if CONFIG_VP9_ENCODER
-    &vpx_codec_vp9_cx_algo,
-#endif
-  };
   uint8_t buf[1] = { 0 };
   vpx_image_t img;
   vpx_codec_ctx_t enc;
@@ -58,17 +57,17 @@ TEST(EncodeAPI, InvalidParams) {
             vpx_codec_enc_config_default(nullptr, &cfg, 0));
   EXPECT_NE(vpx_codec_error(nullptr), nullptr);
 
-  for (int i = 0; i < NELEMENTS(kCodecs); ++i) {
-    SCOPED_TRACE(vpx_codec_iface_name(kCodecs[i]));
+  for (const auto *iface : kCodecIfaces) {
+    SCOPED_TRACE(vpx_codec_iface_name(iface));
     EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
-              vpx_codec_enc_init(nullptr, kCodecs[i], nullptr, 0));
+              vpx_codec_enc_init(nullptr, iface, nullptr, 0));
     EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
-              vpx_codec_enc_init(&enc, kCodecs[i], nullptr, 0));
+              vpx_codec_enc_init(&enc, iface, nullptr, 0));
     EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
-              vpx_codec_enc_config_default(kCodecs[i], &cfg, 1));
+              vpx_codec_enc_config_default(iface, &cfg, 1));
 
-    EXPECT_EQ(VPX_CODEC_OK, vpx_codec_enc_config_default(kCodecs[i], &cfg, 0));
-    EXPECT_EQ(VPX_CODEC_OK, vpx_codec_enc_init(&enc, kCodecs[i], &cfg, 0));
+    EXPECT_EQ(VPX_CODEC_OK, vpx_codec_enc_config_default(iface, &cfg, 0));
+    EXPECT_EQ(VPX_CODEC_OK, vpx_codec_enc_init(&enc, iface, &cfg, 0));
     EXPECT_EQ(VPX_CODEC_OK, vpx_codec_encode(&enc, nullptr, 0, 0, 0, 0));
 
     EXPECT_EQ(VPX_CODEC_OK, vpx_codec_destroy(&enc));
@@ -124,14 +123,6 @@ TEST(EncodeAPI, ImageSizeSetting) {
 // (ts_target_bitrate[]) to 0 for both layers. This should fail independent of
 // CONFIG_MULTI_RES_ENCODING.
 TEST(EncodeAPI, MultiResEncode) {
-  static const vpx_codec_iface_t *kCodecs[] = {
-#if CONFIG_VP8_ENCODER
-    &vpx_codec_vp8_cx_algo,
-#endif
-#if CONFIG_VP9_ENCODER
-    &vpx_codec_vp9_cx_algo,
-#endif
-  };
   const int width = 1280;
   const int height = 720;
   const int width_down = width / 2;
@@ -139,8 +130,7 @@ TEST(EncodeAPI, MultiResEncode) {
   const int target_bitrate = 1000;
   const int framerate = 30;
 
-  for (int c = 0; c < NELEMENTS(kCodecs); ++c) {
-    const vpx_codec_iface_t *const iface = kCodecs[c];
+  for (const auto *iface : kCodecIfaces) {
     vpx_codec_ctx_t enc[2];
     vpx_codec_enc_cfg_t cfg[2];
     vpx_rational_t dsf[2] = { { 2, 1 }, { 2, 1 } };
