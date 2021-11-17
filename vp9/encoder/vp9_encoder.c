@@ -2676,7 +2676,6 @@ static void free_tpl_buffer(VP9_COMP *cpi);
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *cm;
   unsigned int i;
-  int t;
 
   if (!cpi) return;
 
@@ -2789,28 +2788,10 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
   free_tpl_buffer(cpi);
 
-  for (t = 0; t < cpi->num_workers; ++t) {
-    VPxWorker *const worker = &cpi->workers[t];
-    EncWorkerData *const thread_data = &cpi->tile_thr_data[t];
-
-    // Deallocate allocated threads.
-    vpx_get_worker_interface()->end(worker);
-
-    // Deallocate allocated thread data.
-    if (t < cpi->num_workers - 1) {
-      vpx_free(thread_data->td->counts);
-      vp9_free_pc_tree(thread_data->td);
-      vpx_free(thread_data->td);
-    }
-  }
-  vpx_free(cpi->tile_thr_data);
-  vpx_free(cpi->workers);
+  vp9_loop_filter_dealloc(&cpi->lf_row_sync);
+  vp9_bitstream_encode_tiles_buffer_dealloc(cpi);
   vp9_row_mt_mem_dealloc(cpi);
-
-  if (cpi->num_workers > 1) {
-    vp9_loop_filter_dealloc(&cpi->lf_row_sync);
-    vp9_bitstream_encode_tiles_buffer_dealloc(cpi);
-  }
+  vp9_encode_free_mt_data(cpi);
 
 #if !CONFIG_REALTIME_ONLY
   vp9_alt_ref_aq_destroy(cpi->alt_ref_aq);
