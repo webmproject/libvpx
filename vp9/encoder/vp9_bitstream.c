@@ -554,7 +554,7 @@ static void update_coef_probs_common(vpx_writer *const bc, VP9_COMP *cpi,
   switch (cpi->sf.use_fast_coef_updates) {
     case TWO_LOOP: {
       /* dry run to see if there is any update at all needed */
-      int savings = 0;
+      int64_t savings = 0;
       int update[2] = { 0, 0 };
       for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
