@@ -10,10 +10,12 @@
 
 #include <climits>
 #include <cstring>
+#include <initializer_list>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
+#include "test/video_source.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 
@@ -297,6 +299,64 @@ TEST(EncodeAPI, SetRoi) {
     }
 
     EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  }
+}
+
+void InitCodec(const vpx_codec_iface_t &iface, int width, int height,
+               vpx_codec_ctx_t *enc, vpx_codec_enc_cfg_t *cfg) {
+  ASSERT_EQ(vpx_codec_enc_config_default(&iface, cfg, 0), VPX_CODEC_OK);
+  cfg->g_w = width;
+  cfg->g_h = height;
+  cfg->g_lag_in_frames = 0;
+  cfg->g_pass = VPX_RC_ONE_PASS;
+  ASSERT_EQ(vpx_codec_enc_init(enc, &iface, cfg, 0), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control_(enc, VP8E_SET_CPUUSED, 2), VPX_CODEC_OK);
+}
+
+// Encodes 1 frame of size |cfg.g_w| x |cfg.g_h| setting |enc|'s configuration
+// to |cfg|.
+void EncodeWithConfig(const vpx_codec_enc_cfg_t &cfg, vpx_codec_ctx_t *enc) {
+  libvpx_test::DummyVideoSource video;
+  video.SetSize(cfg.g_w, cfg.g_h);
+  video.Begin();
+  EXPECT_EQ(vpx_codec_enc_config_set(enc, &cfg), VPX_CODEC_OK)
+      << vpx_codec_error_detail(enc);
+
+  EXPECT_EQ(vpx_codec_encode(enc, video.img(), video.pts(), video.duration(),
+                             /*flags=*/0, VPX_DL_GOOD_QUALITY),
+            VPX_CODEC_OK)
+      << vpx_codec_error_detail(enc);
+}
+
+TEST(EncodeAPI, ConfigChangeThreadCount) {
+  constexpr int kWidth = 1920;
+  constexpr int kHeight = 1080;
+
+  for (const auto *iface : kCodecIfaces) {
+    SCOPED_TRACE(vpx_codec_iface_name(iface));
+    for (int i = 0; i < (IsVP9(iface) ? 2 : 1); ++i) {
+      vpx_codec_enc_cfg_t cfg;
+      struct Encoder {
+        ~Encoder() { EXPECT_EQ(vpx_codec_destroy(&ctx), VPX_CODEC_OK); }
+        vpx_codec_ctx_t ctx = {};
+      } enc;
+
+      EXPECT_NO_FATAL_FAILURE(
+          InitCodec(*iface, kWidth, kHeight, &enc.ctx, &cfg));
+      if (IsVP9(iface)) {
+        EXPECT_EQ(vpx_codec_control_(&enc.ctx, VP9E_SET_TILE_COLUMNS, 6),
+                  VPX_CODEC_OK);
+        EXPECT_EQ(vpx_codec_control_(&enc.ctx, VP9E_SET_ROW_MT, i),
+                  VPX_CODEC_OK);
+      }
+
+      for (const auto threads : { 1, 4, 8, 6, 2, 1 }) {
+        cfg.g_threads = threads;
+        EXPECT_NO_FATAL_FAILURE(EncodeWithConfig(cfg, &enc.ctx))
+            << "iteration: " << i << " threads: " << threads;
+      }
+    }
   }
 }
 
