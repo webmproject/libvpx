@@ -639,7 +639,8 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
 
   vp8_zero(x->coef_counts);
   vp8_zero(x->ymode_count);
-  vp8_zero(x->uv_mode_count) x->prediction_error = 0;
+  vp8_zero(x->uv_mode_count);
+  x->prediction_error = 0;
   x->intra_error = 0;
   vp8_zero(x->count_mb_ref_frame_usage);
 }
@@ -766,12 +767,12 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 
       for (mb_row = 0; mb_row < cm->mb_rows;
            mb_row += (cpi->encoding_thread_count + 1)) {
-        vp8_zero(cm->left_context)
+        vp8_zero(cm->left_context);
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
-            tp = cpi->tok;
+        tp = cpi->tok;
 #else
-            tp = cpi->tok + mb_row * (cm->mb_cols * 16 * 24);
+        tp = cpi->tok + mb_row * (cm->mb_cols * 16 * 24);
 #endif
 
         encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);
@@ -858,10 +859,10 @@ void vp8_encode_frame(VP8_COMP *cpi) {
 
       /* for each macroblock row in image */
       for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
-        vp8_zero(cm->left_context)
+        vp8_zero(cm->left_context);
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
-            tp = cpi->tok;
+        tp = cpi->tok;
 #endif
 
         encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);

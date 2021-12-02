@@ -1023,7 +1023,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
 
       memset(cpi->mb.error_bins, 0, sizeof(cpi->mb.error_bins));
 
-  }; /* switch */
+  } /* switch */
 
   /* Slow quant, dct and trellis not worthwhile for first pass
    * so make sure they are always turned off.

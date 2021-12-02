@@ -204,19 +204,21 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride) {
 /* returns distortion + motion vector cost */
 #define ERR(r, c) (MVC(r, c) + DIST(r, c))
 /* checks if (r,c) has better score than previous best */
-#define CHECK_BETTER(v, r, c)                           \
-  IFMVCV(r, c,                                          \
-         {                                              \
-           thismse = DIST(r, c);                        \
-           if ((v = (MVC(r, c) + thismse)) < besterr) { \
-             besterr = v;                               \
-             br = r;                                    \
-             bc = c;                                    \
-             *distortion = thismse;                     \
-             *sse1 = sse;                               \
-           }                                            \
-         },                                             \
-         v = UINT_MAX;)
+#define CHECK_BETTER(v, r, c)                             \
+  do {                                                    \
+    IFMVCV(r, c,                                          \
+           {                                              \
+             thismse = DIST(r, c);                        \
+             if ((v = (MVC(r, c) + thismse)) < besterr) { \
+               besterr = v;                               \
+               br = r;                                    \
+               bc = c;                                    \
+               *distortion = thismse;                     \
+               *sse1 = sse;                               \
+             }                                            \
+           },                                             \
+           v = UINT_MAX;)                                 \
+  } while (0)
 
 int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                              int_mv *bestmv, int_mv *ref_mv,
@@ -800,13 +802,13 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 }
 
 #define CHECK_BOUNDS(range)                    \
-  {                                            \
+  do {                                         \
     all_in = 1;                                \
     all_in &= ((br - range) >= x->mv_row_min); \
     all_in &= ((br + range) <= x->mv_row_max); \
     all_in &= ((bc - range) >= x->mv_col_min); \
     all_in &= ((bc + range) <= x->mv_col_max); \
-  }
+  } while (0)
 
 #define CHECK_POINT                                  \
   {                                                  \
@@ -817,7 +819,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
 #define CHECK_BETTER                                                     \
-  {                                                                      \
+  do {                                                                   \
     if (thissad < bestsad) {                                             \
       thissad +=                                                         \
           mvsad_err_cost(&this_mv, &fcenter_mv, mvsadcost, sad_per_bit); \
@@ -826,7 +828,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         best_site = i;                                                   \
       }                                                                  \
     }                                                                    \
-  }
+  } while (0)
 
 static const MV next_chkpts[6][3] = {
   { { -2, 0 }, { -1, -2 }, { 1, -2 } }, { { -1, -2 }, { 1, -2 }, { 2, 0 } },
@@ -901,7 +903,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 #endif
 
   /* hex search */
-  CHECK_BOUNDS(2)
+  CHECK_BOUNDS(2);
 
   if (all_in) {
     for (i = 0; i < 6; ++i) {
@@ -910,7 +912,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
       this_offset = base_offset + (this_mv.as_mv.row * in_what_stride) +
                     this_mv.as_mv.col;
       thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride);
-      CHECK_BETTER
+      CHECK_BETTER;
     }
   } else {
     for (i = 0; i < 6; ++i) {
@@ -920,7 +922,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
       this_offset = base_offset + (this_mv.as_mv.row * in_what_stride) +
                     this_mv.as_mv.col;
       thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride);
-      CHECK_BETTER
+      CHECK_BETTER;
     }
   }
 
@@ -934,7 +936,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 
   for (j = 1; j < hex_range; ++j) {
     best_site = -1;
-    CHECK_BOUNDS(2)
+    CHECK_BOUNDS(2);
 
     if (all_in) {
       for (i = 0; i < 3; ++i) {
@@ -943,7 +945,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         this_offset = base_offset + (this_mv.as_mv.row * (in_what_stride)) +
                       this_mv.as_mv.col;
         thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride);
-        CHECK_BETTER
+        CHECK_BETTER;
       }
     } else {
       for (i = 0; i < 3; ++i) {
@@ -953,7 +955,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         this_offset = base_offset + (this_mv.as_mv.row * (in_what_stride)) +
                       this_mv.as_mv.col;
         thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride);
-        CHECK_BETTER
+        CHECK_BETTER;
       }
     }
 
@@ -975,7 +977,7 @@ int vp8_hex_search(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
 cal_neighbors:
   for (j = 0; j < dia_range; ++j) {
     best_site = -1;
-    CHECK_BOUNDS(1)
+    CHECK_BOUNDS(1);
 
     if (all_in) {
       for (i = 0; i < 4; ++i) {
@@ -984,7 +986,7 @@ cal_neighbors:
         this_offset = base_offset + (this_mv.as_mv.row * (in_what_stride)) +
                       this_mv.as_mv.col;
         thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride);
-        CHECK_BETTER
+        CHECK_BETTER;
       }
     } else {
       for (i = 0; i < 4; ++i) {
@@ -994,7 +996,7 @@ cal_neighbors:
         this_offset = base_offset + (this_mv.as_mv.row * (in_what_stride)) +
                       this_mv.as_mv.col;
         thissad = vfp->sdf(what, what_stride, this_offset, in_what_stride);
-        CHECK_BETTER
+        CHECK_BETTER;
       }
     }
 

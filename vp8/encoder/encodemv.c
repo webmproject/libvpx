@@ -205,8 +205,11 @@ static void write_component_probs(vp8_writer *const w,
   (void)rc;
   vp8_copy_array(Pnew, default_mvc, MVPcount);
 
-  vp8_zero(is_short_ct) vp8_zero(sign_ct) vp8_zero(bit_ct) vp8_zero(short_ct)
-      vp8_zero(short_bct)
+  vp8_zero(is_short_ct);
+  vp8_zero(sign_ct);
+  vp8_zero(bit_ct);
+  vp8_zero(short_ct);
+  vp8_zero(short_bct);
 
   /* j=0 */
   {
