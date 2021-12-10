@@ -18,7 +18,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/static_assert.h"
 #include "vpx_ports/system_state.h"
-#include "vpx_ports/vpx_once.h"
 #include "vpx_util/vpx_timestamp.h"
 #include "vp8/encoder/onyx_int.h"
 #include "vpx/vp8cx.h"
@@ -694,7 +693,7 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
       ctx->priv->enc.total_encoders = 1;
     }
 
-    once(vp8_initialize_enc);
+    vp8_initialize_enc();
 
     res = validate_config(priv, &priv->cfg, &priv->vp8_cfg, 0);
 

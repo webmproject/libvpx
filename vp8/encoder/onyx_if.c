@@ -36,6 +36,7 @@
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
 #include "vpx_ports/system_state.h"
+#include "vpx_ports/vpx_once.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_util/vpx_write_yuv_frame.h"
 #if VPX_ARCH_ARM
@@ -394,15 +395,12 @@ static void setup_features(VP8_COMP *cpi) {
 
 static void dealloc_raw_frame_buffers(VP8_COMP *cpi);
 
-void vp8_initialize_enc(void) {
-  static volatile int init_done = 0;
-
-  if (!init_done) {
-    vpx_dsp_rtcd();
-    vp8_init_intra_predictors();
-    init_done = 1;
-  }
+static void initialize_enc(void) {
+  vpx_dsp_rtcd();
+  vp8_init_intra_predictors();
 }
+
+void vp8_initialize_enc(void) { once(initialize_enc); }
 
 static void dealloc_compressor_data(VP8_COMP *cpi) {
   vpx_free(cpi->tplist);
