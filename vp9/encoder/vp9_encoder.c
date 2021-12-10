@@ -25,6 +25,7 @@
 #endif
 #include "vpx_ports/mem.h"
 #include "vpx_ports/system_state.h"
+#include "vpx_ports/vpx_once.h"
 #include "vpx_ports/vpx_timer.h"
 #if CONFIG_BITSTREAM_DEBUG || CONFIG_MISMATCH_DEBUG
 #include "vpx_util/vpx_debug_util.h"
@@ -929,23 +930,20 @@ static void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
   cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 }
 
-void vp9_initialize_enc(void) {
-  static volatile int init_done = 0;
-
-  if (!init_done) {
-    vp9_rtcd();
-    vpx_dsp_rtcd();
-    vpx_scale_rtcd();
-    vp9_init_intra_predictors();
-    vp9_init_me_luts();
-    vp9_rc_init_minq_luts();
-    vp9_entropy_mv_init();
+static void initialize_enc(void) {
+  vp9_rtcd();
+  vpx_dsp_rtcd();
+  vpx_scale_rtcd();
+  vp9_init_intra_predictors();
+  vp9_init_me_luts();
+  vp9_rc_init_minq_luts();
+  vp9_entropy_mv_init();
 #if !CONFIG_REALTIME_ONLY
-    vp9_temporal_filter_init();
+  vp9_temporal_filter_init();
 #endif
-    init_done = 1;
-  }
 }
+
+void vp9_initialize_enc(void) { once(initialize_enc); }
 
 static void dealloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
