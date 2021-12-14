@@ -85,9 +85,7 @@ TEST_P(RealtimeTest, IntegerOverflow) { TestIntegerOverflow(2048, 2048); }
 
 TEST_P(RealtimeTest, IntegerOverflowLarge) {
   if (IsVP9()) {
-    GTEST_SKIP() << "TODO(https://crbug.com/webm/1750): Enable this test after "
-                    "undefined sanitizer warnings are fixed.";
-    // TestIntegerOverflow(16384, 16384);
+    TestIntegerOverflow(16384, 16384);
   } else {
     GTEST_SKIP()
         << "TODO(https://crbug.com/webm/1748,https://crbug.com/webm/1751):"
