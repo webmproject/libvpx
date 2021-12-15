@@ -563,7 +563,7 @@ static void update_coef_probs_common(vpx_writer *const bc, VP9_COMP *cpi,
               for (t = 0; t < entropy_nodes_update; ++t) {
                 vpx_prob newp = new_coef_probs[i][j][k][l][t];
                 const vpx_prob oldp = old_coef_probs[i][j][k][l][t];
-                int s;
+                int64_t s;
                 int u = 0;
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
@@ -600,7 +600,7 @@ static void update_coef_probs_common(vpx_writer *const bc, VP9_COMP *cpi,
                 vpx_prob newp = new_coef_probs[i][j][k][l][t];
                 vpx_prob *oldp = old_coef_probs[i][j][k][l] + t;
                 const vpx_prob upd = DIFF_UPDATE_PROB;
-                int s;
+                int64_t s;
                 int u = 0;
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
@@ -636,7 +636,7 @@ static void update_coef_probs_common(vpx_writer *const bc, VP9_COMP *cpi,
               for (t = 0; t < entropy_nodes_update; ++t) {
                 vpx_prob newp = new_coef_probs[i][j][k][l][t];
                 vpx_prob *oldp = old_coef_probs[i][j][k][l] + t;
-                int s;
+                int64_t s;
                 int u = 0;
 
                 if (t == PIVOT_NODE) {
