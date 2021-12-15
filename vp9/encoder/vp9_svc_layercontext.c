@@ -73,7 +73,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     svc->downsample_filter_type[sl] = BILINEAR;
     svc->downsample_filter_phase[sl] = 8;  // Set to 8 for averaging filter.
     svc->framedrop_thresh[sl] = oxcf->drop_frames_water_mark;
-    svc->fb_idx_upd_tl0[sl] = -1;
+    svc->fb_idx_upd_tl0[sl] = INVALID_IDX;
     svc->drop_count[sl] = 0;
     svc->spatial_layer_sync[sl] = 0;
     svc->force_drop_constrained_from_above[sl] = 0;
@@ -462,32 +462,21 @@ static void reset_fb_idx_unused(VP9_COMP *const cpi) {
   // fb_idx for that reference to the first one used/referenced.
   // This is to avoid setting fb_idx for a reference to a slot that is not
   // used/needed (i.e., since that reference is not referenced or refreshed).
-  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
-                                    VP9_ALT_FLAG };
-  MV_REFERENCE_FRAME ref_frame;
-  MV_REFERENCE_FRAME first_ref = 0;
-  int first_fb_idx = 0;
-  int fb_idx[3] = { cpi->lst_fb_idx, cpi->gld_fb_idx, cpi->alt_fb_idx };
-  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
-    if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      first_ref = ref_frame;
-      first_fb_idx = fb_idx[ref_frame - 1];
-      break;
+  const MV_REFERENCE_FRAME first_ref = get_first_ref_frame(cpi);
+  const int map_idx = get_ref_frame_map_idx(cpi, first_ref);
+  if (map_idx != INVALID_IDX) {
+    if (!(cpi->ref_frame_flags & VP9_LAST_FLAG ||
+          cpi->ext_refresh_last_frame)) {
+      cpi->lst_fb_idx = map_idx;
     }
-  }
-  if (first_ref > 0) {
-    if (first_ref != LAST_FRAME &&
-        !(cpi->ref_frame_flags & flag_list[LAST_FRAME]) &&
-        !cpi->ext_refresh_last_frame)
-      cpi->lst_fb_idx = first_fb_idx;
-    else if (first_ref != GOLDEN_FRAME &&
-             !(cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]) &&
-             !cpi->ext_refresh_golden_frame)
-      cpi->gld_fb_idx = first_fb_idx;
-    else if (first_ref != ALTREF_FRAME &&
-             !(cpi->ref_frame_flags & flag_list[ALTREF_FRAME]) &&
-             !cpi->ext_refresh_alt_ref_frame)
-      cpi->alt_fb_idx = first_fb_idx;
+    if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG ||
+          cpi->ext_refresh_golden_frame)) {
+      cpi->gld_fb_idx = map_idx;
+    }
+    if (!(cpi->ref_frame_flags & VP9_ALT_FLAG ||
+          cpi->ext_refresh_alt_ref_frame)) {
+      cpi->alt_fb_idx = map_idx;
+    }
   }
 }
 
@@ -716,9 +705,9 @@ static void set_flags_and_fb_idx_bypass_via_set_ref_frame_config(
   int sl = svc->spatial_layer_id = svc->spatial_layer_to_encode;
   cpi->svc.temporal_layer_id = cpi->svc.temporal_layer_id_per_spatial[sl];
   cpi->ext_refresh_frame_flags_pending = 1;
-  cpi->lst_fb_idx = svc->lst_fb_idx[sl];
-  cpi->gld_fb_idx = svc->gld_fb_idx[sl];
-  cpi->alt_fb_idx = svc->alt_fb_idx[sl];
+  if (svc->reference_last[sl]) cpi->lst_fb_idx = svc->lst_fb_idx[sl];
+  if (svc->reference_golden[sl]) cpi->gld_fb_idx = svc->gld_fb_idx[sl];
+  if (svc->reference_altref[sl]) cpi->alt_fb_idx = svc->alt_fb_idx[sl];
   cpi->ext_refresh_last_frame = 0;
   cpi->ext_refresh_golden_frame = 0;
   cpi->ext_refresh_alt_ref_frame = 0;
@@ -875,9 +864,9 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
     // flags are passed via the encode call (bypass mode). Issue is that we're
     // resetting ext_refresh_frame_flags_pending to 0 on frame drops.
     if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
-      memset(&svc->lst_fb_idx, -1, sizeof(svc->lst_fb_idx));
-      memset(&svc->gld_fb_idx, -1, sizeof(svc->lst_fb_idx));
-      memset(&svc->alt_fb_idx, -1, sizeof(svc->lst_fb_idx));
+      memset(&svc->lst_fb_idx, INVALID_IDX, sizeof(svc->lst_fb_idx));
+      memset(&svc->gld_fb_idx, INVALID_IDX, sizeof(svc->lst_fb_idx));
+      memset(&svc->alt_fb_idx, INVALID_IDX, sizeof(svc->lst_fb_idx));
       // These are set by API before the superframe is encoded and they are
       // passed to encoder layer by layer. Don't reset them on layer 0 in bypass
       // mode.
@@ -970,7 +959,7 @@ int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
 
   if (svc->temporal_layering_mode != VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
       svc->last_layer_dropped[svc->spatial_layer_id] &&
-      svc->fb_idx_upd_tl0[svc->spatial_layer_id] != -1 &&
+      svc->fb_idx_upd_tl0[svc->spatial_layer_id] != INVALID_IDX &&
       !svc->layer_context[svc->temporal_layer_id].is_key_frame) {
     // For fixed/non-flexible mode, if the previous frame (same spatial layer
     // from previous superframe) was dropped, make sure the lst_fb_idx
