@@ -340,7 +340,7 @@ int vpx_satd_c(const tran_low_t *coeff, int length) {
 
 // Integer projection onto row vectors.
 // height: value range {16, 32, 64}.
-void vpx_int_pro_row_c(int16_t *hbuf /*[16]*/, const uint8_t *ref,
+void vpx_int_pro_row_c(int16_t hbuf[16], const uint8_t *ref,
                        const int ref_stride, const int height) {
   int idx;
   const int norm_factor = height >> 1;
