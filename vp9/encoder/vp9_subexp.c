@@ -163,14 +163,14 @@ int64_t vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
     for (newp = *bestp; (newp - oldp) * step_sign < 0; newp += step) {
       if (newp < 1 || newp > 255) continue;
       newplist = vp9_pareto8_full[newp - 1];
-      new_b = cost_branch256(ct + 2 * PIVOT_NODE, newp);
+      new_b = cost_branch256(ct + 2 * PIVOT_NODE, (vpx_prob)newp);
       for (i = UNCONSTRAINED_NODES; i < ENTROPY_NODES; ++i)
         new_b += cost_branch256(ct + 2 * i, newplist[i - UNCONSTRAINED_NODES]);
-      update_b = prob_diff_update_cost(newp, oldp) + upd_cost;
+      update_b = prob_diff_update_cost((vpx_prob)newp, oldp) + upd_cost;
       savings = old_b - new_b - update_b;
       if (savings > bestsavings) {
         bestsavings = savings;
-        bestnewp = newp;
+        bestnewp = (vpx_prob)newp;
       }
     }
   }
