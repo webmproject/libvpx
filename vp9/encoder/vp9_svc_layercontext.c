@@ -719,8 +719,6 @@ static void set_flags_and_fb_idx_bypass_via_set_ref_frame_config(
 
 void vp9_copy_flags_ref_update_idx(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
-  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
-                                    VP9_ALT_FLAG };
   int sl = svc->spatial_layer_id;
   svc->lst_fb_idx[sl] = cpi->lst_fb_idx;
   svc->gld_fb_idx[sl] = cpi->gld_fb_idx;
@@ -743,12 +741,9 @@ void vp9_copy_flags_ref_update_idx(VP9_COMP *const cpi) {
   svc->update_golden[sl] = (uint8_t)cpi->refresh_golden_frame;
   svc->update_altref[sl] = (uint8_t)cpi->refresh_alt_ref_frame;
 
-  svc->reference_last[sl] =
-      (uint8_t)(cpi->ref_frame_flags & flag_list[LAST_FRAME]);
-  svc->reference_golden[sl] =
-      (uint8_t)(cpi->ref_frame_flags & flag_list[GOLDEN_FRAME]);
-  svc->reference_altref[sl] =
-      (uint8_t)(cpi->ref_frame_flags & flag_list[ALTREF_FRAME]);
+  svc->reference_last[sl] = (uint8_t)(cpi->ref_frame_flags & VP9_LAST_FLAG);
+  svc->reference_golden[sl] = (uint8_t)(cpi->ref_frame_flags & VP9_GOLD_FLAG);
+  svc->reference_altref[sl] = (uint8_t)(cpi->ref_frame_flags & VP9_ALT_FLAG);
 }
 
 int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
@@ -1069,15 +1064,14 @@ void vp9_svc_constrain_inter_layer_pred(VP9_COMP *const cpi) {
       svc->disable_inter_layer_pred == INTER_LAYER_PRED_OFF ||
       svc->drop_spatial_layer[sl - 1]) {
     MV_REFERENCE_FRAME ref_frame;
-    static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
-                                      VP9_ALT_FLAG };
     for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
       const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
-      if (yv12 != NULL && (cpi->ref_frame_flags & flag_list[ref_frame])) {
+      if (yv12 != NULL &&
+          (cpi->ref_frame_flags & ref_frame_to_flag(ref_frame))) {
         const struct scale_factors *const scale_fac =
             &cm->frame_refs[ref_frame - 1].sf;
         if (vp9_is_scaled(scale_fac)) {
-          cpi->ref_frame_flags &= (~flag_list[ref_frame]);
+          cpi->ref_frame_flags &= (~ref_frame_to_flag(ref_frame));
           // Point golden/altref frame buffer index to last.
           if (!svc->simulcast_mode) {
             if (ref_frame == GOLDEN_FRAME)

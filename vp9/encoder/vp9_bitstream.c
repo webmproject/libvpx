@@ -1241,9 +1241,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       vpx_wb_write_literal(wb, vp9_get_refresh_mask(cpi), REF_FRAMES);
       write_frame_size(cm, wb);
     } else {
-      static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
-                                        VP9_ALT_FLAG };
-      const MV_REFERENCE_FRAME first_ref = get_first_ref_frame(cpi);
+      const int first_ref = get_first_ref_frame(cpi);
       const int first_ref_map_idx = get_ref_frame_map_idx(cpi, first_ref);
       MV_REFERENCE_FRAME ref_frame;
       vpx_wb_write_literal(wb, vp9_get_refresh_mask(cpi), REF_FRAMES);
@@ -1251,7 +1249,8 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       // If a reference frame is not referenced, then set the index for that
       // reference to the first one used/referenced.
       for (ref_frame = LAST_FRAME; ref_frame < MAX_REF_FRAMES; ++ref_frame) {
-        const int referenced = cpi->ref_frame_flags & flag_list[ref_frame];
+        const int referenced =
+            cpi->ref_frame_flags & ref_frame_to_flag(ref_frame);
         const int map_idx = referenced ? get_ref_frame_map_idx(cpi, ref_frame)
                                        : first_ref_map_idx;
         assert(map_idx != INVALID_IDX);
