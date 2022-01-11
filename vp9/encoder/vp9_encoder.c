@@ -586,6 +586,8 @@ static void apply_roi_map(VP9_COMP *cpi) {
   int ref_frame[8];
   int internal_delta_q[MAX_SEGMENTS];
   int i;
+  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
+                                    VP9_ALT_FLAG };
 
   // TODO(jianj): Investigate why ROI not working in speed < 5 or in non
   // realtime mode.
@@ -626,7 +628,7 @@ static void apply_roi_map(VP9_COMP *cpi) {
         valid_ref = 0;
       // If GOLDEN is selected, make sure it's set as reference.
       if (ref_frame[i] == GOLDEN_FRAME &&
-          !(cpi->ref_frame_flags & ref_frame_to_flag(ref_frame[i]))) {
+          !(cpi->ref_frame_flags & flag_list[ref_frame[i]])) {
         valid_ref = 0;
       }
       // GOLDEN was updated in previous encoded frame, so GOLDEN and LAST are

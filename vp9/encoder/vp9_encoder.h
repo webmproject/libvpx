@@ -1196,17 +1196,12 @@ static INLINE int frame_is_kf_gf_arf(const VP9_COMP *cpi) {
          (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref);
 }
 
-static INLINE int ref_frame_to_flag(int8_t ref_frame) {
-  static const int kVp9RefFlagList[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
-                                          VP9_ALT_FLAG };
-  assert(ref_frame >= LAST_FRAME && ref_frame <= ALTREF_FRAME);
-  return kVp9RefFlagList[ref_frame];
-}
-
-static INLINE int get_first_ref_frame(VP9_COMP *const cpi) {
-  int ref_frame = LAST_FRAME;
+static INLINE MV_REFERENCE_FRAME get_first_ref_frame(VP9_COMP *const cpi) {
+  static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
+                                    VP9_ALT_FLAG };
+  MV_REFERENCE_FRAME ref_frame = LAST_FRAME;
   while (ref_frame < MAX_REF_FRAMES) {
-    if (cpi->ref_frame_flags & ref_frame_to_flag(ref_frame)) break;
+    if (cpi->ref_frame_flags & flag_list[ref_frame]) break;
     ref_frame++;
   }
   return ref_frame;
