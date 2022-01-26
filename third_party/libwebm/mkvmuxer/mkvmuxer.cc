@@ -2622,8 +2622,7 @@ bool Cluster::Finalize(bool set_last_frame_duration, uint64_t duration) {
 
 uint64_t Cluster::Size() const {
   const uint64_t element_size =
-      EbmlMasterElementSize(static_cast<uint64_t>(libwebm::kMkvCluster),
-                            uint64_t{0xFFFFFFFFFFFFFFFFU}) +
+      EbmlMasterElementSize(libwebm::kMkvCluster, 0xFFFFFFFFFFFFFFFFULL) +
       payload_size_;
   return element_size;
 }
