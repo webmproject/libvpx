@@ -617,7 +617,7 @@ static void apply_roi_map(VP9_COMP *cpi) {
     }
     if (skip[i] != 0) {
       vp9_enable_segfeature(seg, i, SEG_LVL_SKIP);
-      vp9_set_segdata(seg, i, SEG_LVL_SKIP, skip[i]);
+      vp9_set_segdata(seg, i, SEG_LVL_SKIP, 0);
     }
     if (ref_frame[i] >= 0) {
       int valid_ref = 1;
@@ -4114,11 +4114,22 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     vp9_alt_ref_aq_setup_map(cpi->alt_ref_aq, cpi);
   } else {
 #endif
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+    // If ROI is enabled and skip feature is used for segmentation, apply cyclic
+    // refresh but not apply ROI for skip for the first 20 frames (defined by
+    // FRAMES_NO_SKIPPING_AFTER_KEY) after key frame to improve quality.
+    if (cpi->roi.enabled && !frame_is_intra_only(cm)) {
+      if (cpi->roi.skip[BACKGROUND_SEG_SKIP_ID]) {
+        if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+          vp9_cyclic_refresh_setup(cpi);
+        if (cpi->rc.frames_since_key > FRAMES_NO_SKIPPING_AFTER_KEY)
+          apply_roi_map(cpi);
+      } else {
+        apply_roi_map(cpi);
+      }
+    } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
       vp9_cyclic_refresh_setup(cpi);
-    } else if (cpi->roi.enabled && !frame_is_intra_only(cm)) {
-      apply_roi_map(cpi);
     }
+
 #if !CONFIG_REALTIME_ONLY
   }
 #endif

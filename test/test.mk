@@ -156,6 +156,7 @@ LIBVPX_TEST_SRCS-yes                   += superframe_test.cc
 LIBVPX_TEST_SRCS-yes                   += tile_independence_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_encoder_parms_get_to_decoder.cc
+LIBVPX_TEST_SRCS-yes                   += vp9_roi_test.cc
 endif
 
 LIBVPX_TEST_SRCS-yes                   += convolve_test.cc
