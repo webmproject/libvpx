@@ -8,7 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "memory"
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -16,8 +18,11 @@
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
 #include "test/util.h"
+#include "test/video_source.h"
 #include "test/y4m_video_source.h"
 #include "test/yuv_video_source.h"
+#include "vpx/vp8cx.h"
+#include "vpx/vpx_encoder.h"
 
 #define MASK_WIDTH 40
 #define MASK_HEIGHT 30
