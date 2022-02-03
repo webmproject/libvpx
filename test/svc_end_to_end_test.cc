@@ -171,9 +171,14 @@ class SyncFrameOnePassCbrSvc : public OnePassCbrSvc,
         decoder->Control(VP9_DECODE_SVC_SPATIAL_LAYER,
                          decode_to_layer_before_sync_);
     } else {
-      if (decode_to_layer_after_sync_ >= 0)
-        decoder->Control(VP9_DECODE_SVC_SPATIAL_LAYER,
-                         decode_to_layer_after_sync_);
+      if (decode_to_layer_after_sync_ >= 0) {
+        int decode_to_layer = decode_to_layer_after_sync_;
+        // Overlay frame is additional layer for intra-only.
+        if (video->frame() == frame_to_sync_ && intra_only_test_ &&
+            decode_to_layer_after_sync_ == 0 && number_spatial_layers_ > 1)
+          decode_to_layer += 1;
+        decoder->Control(VP9_DECODE_SVC_SPATIAL_LAYER, decode_to_layer);
+      }
     }
   }
 #endif
@@ -246,7 +251,7 @@ class SyncFrameOnePassCbrSvc : public OnePassCbrSvc,
       cfg_.temporal_layering_mode = 2;
     } else if (num_temporal_layer == 1) {
       cfg_.ts_rate_decimator[0] = 1;
-      cfg_.temporal_layering_mode = 1;
+      cfg_.temporal_layering_mode = 0;
     }
   }
 };
@@ -390,6 +395,37 @@ TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc2SL3TLSyncFrameVGADenoise) {
 }
 #endif
 
+// Encode 3 spatial, 3 temporal layer but don't start decoding.
+// During the sequence insert intra-only on base/qvga layer at frame 20
+// and start decoding only QVGA layer from there.
+TEST_P(SyncFrameOnePassCbrSvc,
+       OnePassCbrSvc3SL3TLSyncFrameStartDecodeOnIntraOnlyQVGA) {
+  SetSvcConfig(3, 3);
+  frame_to_start_decode_ = 20;
+  frame_to_sync_ = 20;
+  decode_to_layer_before_sync_ = 2;
+  decode_to_layer_after_sync_ = 0;
+  intra_only_test_ = true;
+
+  // Set up svc layer sync structure.
+  svc_layer_sync_.base_layer_intra_only = 1;
+  svc_layer_sync_.spatial_layer_sync[0] = 1;
+  svc_layer_sync_.spatial_layer_sync[1] = 0;
+  svc_layer_sync_.spatial_layer_sync[2] = 0;
+
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 0, 60);
+  cfg_.rc_target_bitrate = 600;
+  AssignLayerBitrates();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+#if CONFIG_VP9_DECODER
+  // The non-reference frames are expected to be mismatched frames as the
+  // encoder will avoid loopfilter on these frames.
+  if (0 && decode_to_layer_before_sync_ == decode_to_layer_after_sync_) {
+    EXPECT_EQ(GetNonRefFrames(), GetMismatchFrames());
+  }
+#endif
+}
+
 // Start decoding from beginning of sequence, during sequence insert intra-only
 // on base/qvga layer. Decode all layers.
 TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc3SL3TLSyncFrameIntraOnlyQVGA) {
@@ -397,8 +433,9 @@ TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc3SL3TLSyncFrameIntraOnlyQVGA) {
   frame_to_start_decode_ = 0;
   frame_to_sync_ = 20;
   decode_to_layer_before_sync_ = 2;
-  // The superframe containing intra-only layer will have 4 frames. Thus set the
-  // layer to decode after sync frame to 3.
+  // The superframe containing intra-only layer will have +1 frames. Thus set
+  // the layer to decode after sync frame to +1 from
+  // decode_to_layer_before_sync.
   decode_to_layer_after_sync_ = 3;
   intra_only_test_ = true;
 
@@ -426,8 +463,9 @@ TEST_P(SyncFrameOnePassCbrSvc, OnePassCbrSvc3SL3TLSyncFrameIntraOnlyVGA) {
   frame_to_start_decode_ = 0;
   frame_to_sync_ = 20;
   decode_to_layer_before_sync_ = 2;
-  // The superframe containing intra-only layer will have 4 frames. Thus set the
-  // layer to decode after sync frame to 3.
+  // The superframe containing intra-only layer will have +1 frames. Thus set
+  // the layer to decode after sync frame to +1 from
+  // decode_to_layer_before_sync.
   decode_to_layer_after_sync_ = 3;
   intra_only_test_ = true;
 
