@@ -1234,6 +1234,7 @@ void vp9_svc_check_spatial_layer_sync(VP9_COMP *const cpi) {
 
 void vp9_svc_update_ref_frame_buffer_idx(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
+  int i = 0;
   // Update the usage of frame buffer index for base spatial layers.
   if (svc->spatial_layer_id == 0) {
     if ((cpi->ref_frame_flags & VP9_LAST_FLAG) || cpi->refresh_last_frame)
@@ -1242,6 +1243,11 @@ void vp9_svc_update_ref_frame_buffer_idx(VP9_COMP *const cpi) {
       svc->fb_idx_base[cpi->gld_fb_idx] = 1;
     if ((cpi->ref_frame_flags & VP9_ALT_FLAG) || cpi->refresh_alt_ref_frame)
       svc->fb_idx_base[cpi->alt_fb_idx] = 1;
+    // For bypass/flexible mode: check for refresh slots.
+    if (svc->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {
+      for (i = 0; i < REF_FRAMES; ++i)
+        if (svc->update_buffer_slot[0] & (1 << i)) svc->fb_idx_base[i] = 1;
+    }
   }
 }
 

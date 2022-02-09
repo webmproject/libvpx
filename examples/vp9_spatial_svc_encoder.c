@@ -579,7 +579,8 @@ static void set_frame_flags_bypass_mode_ex0(
       ref_frame_config->alt_fb_idx[sl] = 0;
     } else if (tl == 1) {
       ref_frame_config->lst_fb_idx[sl] = sl;
-      ref_frame_config->gld_fb_idx[sl] = num_spatial_layers + sl - 1;
+      ref_frame_config->gld_fb_idx[sl] =
+          (sl == 0) ? 0 : num_spatial_layers + sl - 1;
       ref_frame_config->alt_fb_idx[sl] = num_spatial_layers + sl;
     }
     // Set the reference and update flags.
