@@ -163,6 +163,12 @@ DSP_SRCS-$(HAVE_DSPR2)  += mips/convolve8_vert_dspr2.c
 
 DSP_SRCS-$(HAVE_VSX)  += ppc/vpx_convolve_vsx.c
 
+# common (lsx)
+DSP_SRCS-$(HAVE_LSX) += loongarch/vpx_convolve8_horiz_lsx.c
+DSP_SRCS-$(HAVE_LSX) += loongarch/vpx_convolve8_vert_lsx.c
+DSP_SRCS-$(HAVE_LSX) += loongarch/vpx_convolve8_lsx.c
+DSP_SRCS-$(HAVE_LSX) += loongarch/vpx_convolve_lsx.h
+
 # loop filters
 DSP_SRCS-yes += loopfilter.c
 
