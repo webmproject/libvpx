@@ -692,4 +692,16 @@ INSTANTIATE_TEST_SUITE_P(
                                  &vpx_lpf_vertical_8_dual_c, 8)));
 #endif  // HAVE_MSA && (!CONFIG_VP9_HIGHBITDEPTH)
 
+#if HAVE_LSX && (!CONFIG_VP9_HIGHBITDEPTH)
+INSTANTIATE_TEST_SUITE_P(
+    LSX, Loop8Test6Param,
+    ::testing::Values(
+        make_tuple(&vpx_lpf_horizontal_8_lsx, &vpx_lpf_horizontal_8_c, 8),
+        make_tuple(&vpx_lpf_horizontal_16_dual_lsx,
+                   &vpx_lpf_horizontal_16_dual_c, 8),
+        make_tuple(&vpx_lpf_vertical_8_lsx, &vpx_lpf_vertical_8_c, 8),
+        make_tuple(&vpx_lpf_vertical_16_dual_lsx, &vpx_lpf_vertical_16_dual_c,
+                   8)));
+#endif  // HAVE_LSX && (!CONFIG_VP9_HIGHBITDEPTH)
+
 }  // namespace

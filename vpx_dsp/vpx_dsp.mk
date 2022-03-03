@@ -189,7 +189,9 @@ DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_mb_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_mb_horiz_dspr2.c
 DSP_SRCS-$(HAVE_DSPR2)  += mips/loopfilter_mb_vert_dspr2.c
 
+DSP_SRCS-$(HAVE_LSX)    += loongarch/loopfilter_lsx.h
 DSP_SRCS-$(HAVE_LSX)    += loongarch/loopfilter_16_lsx.c
+DSP_SRCS-$(HAVE_LSX)    += loongarch/loopfilter_8_lsx.c
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_NEON)   += arm/highbd_loopfilter_neon.c
