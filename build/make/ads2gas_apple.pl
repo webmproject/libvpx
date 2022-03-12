@@ -94,35 +94,17 @@ while (<STDIN>)
     s/\bENDP\b//g;
 
     # EQU directive
-    s/(\S+\s+)EQU(\s+\S+)/.set $1, $2/;
+    s/(\S+\s+)EQU(\s+\S+)/.equ $1, $2/;
 
     # Begin macro definition
     if (/\bMACRO\b/) {
         # Process next line down, which will be the macro definition
         $_ = <STDIN>;
-
-        $trimmed = trim($_);
-
-        # remove commas that are separating list
-        $trimmed =~ s/,//g;
-
-        # string to array
-        @incoming_array = split(/\s+/, $trimmed);
-
-        print ".macro @incoming_array[0]\n";
-
-        # remove the first element, as that is the name of the macro
-        shift (@incoming_array);
-
-        @macro_aliases{@incoming_array} = @mapping_list;
-
-        next;
+        s/^/.macro/;
+        s/\$//g;             # Remove $ from the variables in the declaration
     }
 
-    while (($key, $value) = each(%macro_aliases)) {
-        $key =~ s/\$/\\\$/;
-        s/$key\b/$value/g;
-    }
+    s/\$/\\/g;               # Use \ to reference formal parameters
     # End macro definition
 
     s/\bMEND\b/.endm/;       # No need to tell it where to stop assembling
