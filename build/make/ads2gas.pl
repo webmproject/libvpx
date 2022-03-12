@@ -42,39 +42,11 @@ if ($thumb) {
 
 while (<STDIN>)
 {
-    undef $comment;
-    undef $line;
-    $comment_char = ";";
-    $comment_sub = "@";
-
-    # Handle comments.
-    if (/$comment_char/)
-    {
-      $comment = "";
-      ($line, $comment) = /(.*?)$comment_char(.*)/;
-      $_ = $line;
-    }
-
     # Load and store alignment
     s/@/,:/g;
 
-    # Hexadecimal constants prefaced by 0x
-    s/#&/#0x/g;
-
-    # Convert :OR: to |
-    s/:OR:/ | /g;
-
-    # Convert :AND: to &
-    s/:AND:/ & /g;
-
-    # Convert :NOT: to ~
-    s/:NOT:/ ~ /g;
-
-    # Convert :SHL: to <<
-    s/:SHL:/ << /g;
-
-    # Convert :SHR: to >>
-    s/:SHR:/ >> /g;
+    # Comment character
+    s/;/@/;
 
     # Convert ELSE to .else
     s/\bELSE\b/.else/g;
@@ -82,44 +54,13 @@ while (<STDIN>)
     # Convert ENDIF to .endif
     s/\bENDIF\b/.endif/g;
 
-    # Convert ELSEIF to .elseif
-    s/\bELSEIF\b/.elseif/g;
-
-    # Convert LTORG to .ltorg
-    s/\bLTORG\b/.ltorg/g;
-
-    # Convert endfunc to nothing.
-    s/\bendfunc\b//ig;
-
-    # Convert FUNCTION to nothing.
-    s/\bFUNCTION\b//g;
-    s/\bfunction\b//g;
-
-    s/\bENTRY\b//g;
-    s/\bMSARMASM\b/0/g;
-    s/^\s+end\s+$//g;
-
-    # Convert IF :DEF:to .if
-    # gcc doesn't have the ability to do a conditional
-    # if defined variable that is set by IF :DEF: on
-    # armasm, so convert it to a normal .if and then
-    # make sure to define a value elesewhere
-    if (s/\bIF :DEF:\b/.if /g)
-    {
-        s/=/==/g;
-    }
-
     # Convert IF to .if
-    if (s/\bIF\b/.if/g)
-    {
+    if (s/\bIF\b/.if/g) {
         s/=+/==/g;
     }
 
     # Convert INCLUDE to .INCLUDE "file"
     s/INCLUDE(\s*)(.*)$/.include $1\"$2\"/;
-
-    # Code directive (ARM vs Thumb)
-    s/CODE([0-9][0-9])/.code $1/;
 
     # No AREA required
     # But ALIGNs in AREA must be obeyed
@@ -127,37 +68,17 @@ while (<STDIN>)
     # If no ALIGN, strip the AREA and align to 4 bytes
     s/^\s*AREA.*$/.text\n.p2align 2/;
 
-    # DCD to .word
-    # This one is for incoming symbols
-    s/DCD\s+\|(\w*)\|/.long $1/;
-
-    # DCW to .short
-    s/DCW\s+\|(\w*)\|/.short $1/;
-    s/DCW(.*)/.short $1/;
-
-    # Constants defined in scope
-    s/DCD(.*)/.long $1/;
-    s/DCB(.*)/.byte $1/;
-
-    # Make function visible to linker, and make additional symbol with
-    # prepended underscore
+    # Make function visible to linker.
     if ($elf) {
         s/EXPORT\s+\|([\$\w]*)\|/.global $1 \n\t.type $1, function/;
     } else {
         s/EXPORT\s+\|([\$\w]*)\|/.global $1/;
     }
-    s/IMPORT\s+\|([\$\w]*)\|/.global $1/;
 
-    s/EXPORT\s+([\$\w]*)/.global $1/;
-    s/export\s+([\$\w]*)/.global $1/;
-
-    # No vertical bars required; make additional symbol with prepended
-    # underscore
-    s/^\|(\$?\w+)\|/_$1\n\t$1:/g;
+    # No vertical bars on function names
+    s/^\|(\$?\w+)\|/$1/g;
 
     # Labels need trailing colon
-#   s/^(\w+)/$1:/ if !/EQU/;
-    # put the colon at the end of the line in the macro
     s/^([a-zA-Z_0-9\$]+)/$1:/ if !/EQU/;
 
     # ALIGN directive
@@ -165,7 +86,7 @@ while (<STDIN>)
 
     if ($thumb) {
         # ARM code - we force everything to thumb with the declaration in the header
-        s/\sARM//g;
+        s/\s+ARM//g;
     } else {
         # ARM code
         s/\sARM/.arm/g;
@@ -175,12 +96,8 @@ while (<STDIN>)
     s/(push\s+)(r\d+)/stmdb sp\!, \{$2\}/g;
     s/(pop\s+)(r\d+)/ldmia sp\!, \{$2\}/g;
 
-    # NEON code
-    s/(vld1.\d+\s+)(q\d+)/$1\{$2\}/g;
-    s/(vtbl.\d+\s+[^,]+),([^,]+)/$1,\{$2\}/g;
-
     if ($thumb) {
-        thumb::FixThumbInstructions($_, 0);
+        thumb::FixThumbInstructions($_);
     }
 
     # eabi_attributes numerical equivalents can be found in the
@@ -193,22 +110,21 @@ while (<STDIN>)
         # PRESERVE8 Stack 8-byte align is preserved
         s/\sPRESERVE8/.eabi_attribute 25, 1 \@Tag_ABI_align_preserved/g;
     } else {
-        s/\sREQUIRE8//;
-        s/\sPRESERVE8//;
+        s/\s+REQUIRE8//;
+        s/\s+PRESERVE8//;
     }
 
     # Use PROC and ENDP to give the symbols a .size directive.
     # This makes them show up properly in debugging tools like gdb and valgrind.
-    if (/\bPROC\b/)
-    {
+    if (/\bPROC\b/) {
         my $proc;
         /^_([\.0-9A-Z_a-z]\w+)\b/;
         $proc = $1;
         push(@proc_stack, $proc) if ($proc);
         s/\bPROC\b/@ $&/;
     }
-    if (/\bENDP\b/)
-    {
+
+    if (/\bENDP\b/) {
         my $proc;
         s/\bENDP\b/@ $&/;
         $proc = pop(@proc_stack);
@@ -220,18 +136,18 @@ while (<STDIN>)
 
     # Begin macro definition
     if (/\bMACRO\b/) {
+        # Process next line down, which will be the macro definition
         $_ = <STDIN>;
         s/^/.macro/;
-        s/\$//g;                # remove formal param reference
-        s/;/@/g;                # change comment characters
+        s/\$//g;             # Remove $ from the variables in the declaration
     }
 
-    # For macros, use \ to reference formal params
-    s/\$/\\/g;                  # End macro definition
-    s/\bMEND\b/.endm/;              # No need to tell it where to stop assembling
+    s/\$/\\/g;               # Use \ to reference formal parameters
+    # End macro definition
+
+    s/\bMEND\b/.endm/;       # No need to tell it where to stop assembling
     next if /^\s*END\s*$/;
     print;
-    print "$comment_sub$comment\n" if defined $comment;
 }
 
 # Mark that this object doesn't need an executable stack.
