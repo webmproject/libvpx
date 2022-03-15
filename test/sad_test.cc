@@ -1128,4 +1128,22 @@ const SadMxNx4Param x4d_mmi_tests[] = {
 };
 INSTANTIATE_TEST_SUITE_P(MMI, SADx4Test, ::testing::ValuesIn(x4d_mmi_tests));
 #endif  // HAVE_MMI
+
+//------------------------------------------------------------------------------
+// loongarch functions
+#if HAVE_LSX
+const SadMxNParam lsx_tests[] = {
+  SadMxNParam(64, 64, &vpx_sad64x64_lsx),
+  SadMxNParam(32, 32, &vpx_sad32x32_lsx),
+};
+INSTANTIATE_TEST_SUITE_P(LSX, SADTest, ::testing::ValuesIn(lsx_tests));
+
+const SadMxNx4Param x4d_lsx_tests[] = {
+  SadMxNx4Param(64, 64, &vpx_sad64x64x4d_lsx),
+  SadMxNx4Param(32, 32, &vpx_sad32x32x4d_lsx),
+  SadMxNx4Param(16, 16, &vpx_sad16x16x4d_lsx),
+};
+INSTANTIATE_TEST_SUITE_P(LSX, SADx4Test, ::testing::ValuesIn(x4d_lsx_tests));
+#endif  // HAVE_LSX
+
 }  // namespace
