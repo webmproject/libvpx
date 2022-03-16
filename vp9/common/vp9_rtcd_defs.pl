@@ -159,9 +159,9 @@ add_proto qw/void vp9_fwht4x4/, "const int16_t *input, tran_low_t *output, int s
 
 # Note that there are more specializations appended when CONFIG_VP9_HIGHBITDEPTH
 # is off.
-specialize qw/vp9_fht4x4 sse2/;
-specialize qw/vp9_fht8x8 sse2/;
-specialize qw/vp9_fht16x16 sse2/;
+specialize qw/vp9_fht4x4 sse2 neon/;
+specialize qw/vp9_fht8x8 sse2 neon/;
+specialize qw/vp9_fht16x16 sse2 neon/;
 specialize qw/vp9_fwht4x4 sse2/;
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") ne "yes") {
   # Note that these specializations are appended to the above ones.
