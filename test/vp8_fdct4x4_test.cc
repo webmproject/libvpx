@@ -203,4 +203,9 @@ INSTANTIATE_TEST_SUITE_P(MSA, FdctTest,
 INSTANTIATE_TEST_SUITE_P(MMI, FdctTest,
                          ::testing::Values(vp8_short_fdct4x4_mmi));
 #endif  // HAVE_MMI
+
+#if HAVE_LSX
+INSTANTIATE_TEST_SUITE_P(LSX, FdctTest,
+                         ::testing::Values(vp8_short_fdct4x4_lsx));
+#endif  // HAVE_LSX
 }  // namespace
