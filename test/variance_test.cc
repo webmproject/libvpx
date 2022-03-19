@@ -1649,4 +1649,11 @@ INSTANTIATE_TEST_SUITE_P(
         SubpelAvgVarianceParams(2, 3, &vpx_sub_pixel_avg_variance4x8_mmi, 0),
         SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_mmi, 0)));
 #endif  // HAVE_MMI
+
+#if HAVE_LSX
+INSTANTIATE_TEST_SUITE_P(
+    LSX, VpxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_lsx),
+                      VarianceParams(5, 5, &vpx_variance32x32_lsx)));
+#endif
 }  // namespace
