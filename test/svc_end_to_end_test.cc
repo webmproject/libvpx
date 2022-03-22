@@ -251,12 +251,13 @@ class SyncFrameOnePassCbrSvc : public OnePassCbrSvc,
       temporal_layer_id_ = layer_id.temporal_layer_id;
       for (int i = 0; i < number_spatial_layers_; i++) {
         layer_id.temporal_layer_id_per_spatial[i] = temporal_layer_id_;
-        ref_frame_config.duration[i] = 1;
+        ref_frame_config_.duration[i] = 1;
       }
       encoder->Control(VP9E_SET_SVC_LAYER_ID, &layer_id);
       set_frame_flags_bypass_mode(layer_id.temporal_layer_id,
-                                  number_spatial_layers_, 0, &ref_frame_config);
-      encoder->Control(VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_frame_config);
+                                  number_spatial_layers_, 0,
+                                  &ref_frame_config_);
+      encoder->Control(VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_frame_config_);
     }
     if (video->frame() == frame_to_sync_) {
       encoder->Control(VP9E_SET_SVC_SPATIAL_LAYER_SYNC, &svc_layer_sync_);
@@ -327,7 +328,7 @@ class SyncFrameOnePassCbrSvc : public OnePassCbrSvc,
   unsigned int mismatch_nframes_;
   unsigned int num_nonref_frames_;
   bool flexible_mode_;
-  vpx_svc_ref_frame_config_t ref_frame_config;
+  vpx_svc_ref_frame_config_t ref_frame_config_;
 
  private:
   virtual void SetConfig(const int num_temporal_layer) {
