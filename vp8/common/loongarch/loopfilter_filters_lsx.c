@@ -32,9 +32,9 @@
     filt = __lsx_vsadd_b(filt, q0_sub_p0);                   \
     filt = __lsx_vand_v(filt, mask);                         \
     t1 = __lsx_vsadd_b(filt, cnst4b);                        \
-    t1 = __lsx_vsra_b(filt, cnst3b);                         \
+    t1 = __lsx_vsra_b(t1, cnst3b);                           \
     t2 = __lsx_vsadd_b(filt, cnst3b);                        \
-    t2 = __lsx_vsra_b(filt, cnst3b);                         \
+    t2 = __lsx_vsra_b(t2, cnst3b);                           \
     q0_m = __lsx_vssub_b(q0_m, t1);                          \
     q0 = __lsx_vxori_b(q0_m, 0x80);                          \
     p0_m = __lsx_vsadd_b(p0_m, t2);                          \
@@ -158,7 +158,6 @@ static void loop_filter_horizontal_4_dual_lsx(uint8_t *src, int32_t pitch,
                                               const uint8_t *b_limit1_ptr,
                                               const uint8_t *limit1_ptr,
                                               const uint8_t *thresh1_ptr) {
-  uint8_t *temp_src;
   int32_t pitch_x2 = pitch << 1;
   int32_t pitch_x3 = pitch_x2 + pitch;
   int32_t pitch_x4 = pitch << 2;
@@ -167,12 +166,11 @@ static void loop_filter_horizontal_4_dual_lsx(uint8_t *src, int32_t pitch,
   __m128i thresh0, b_limit0, limit0, thresh1, b_limit1, limit1;
   __m128i p3, p2, p1, p0, q3, q2, q1, q0;
 
-  temp_src = src - pitch_x4;
-  DUP4_ARG2(__lsx_vldx, temp_src, 0, temp_src, pitch, temp_src, pitch_x2,
-            temp_src, pitch_x3, p3, p2, p1, p0);
-  temp_src += pitch_x4;
-  DUP4_ARG2(__lsx_vldx, temp_src, 0, temp_src, pitch, temp_src, pitch_x2,
-            temp_src, pitch_x3, q0, q1, q2, q3);
+  DUP4_ARG2(__lsx_vldx, src, -pitch_x4, src, -pitch_x3, src, -pitch_x2, src,
+            -pitch, p3, p2, p1, p0);
+  q0 = __lsx_vld(src, 0);
+  DUP2_ARG2(__lsx_vldx, src, pitch, src, pitch_x2, q1, q2);
+  q3 = __lsx_vldx(src, pitch_x3);
 
   thresh0 = __lsx_vreplgr2vr_b(*thresh0_ptr);
   thresh1 = __lsx_vreplgr2vr_b(*thresh1_ptr);
@@ -336,15 +334,15 @@ static void loop_filter_horizontal_edge_uv_lsx(uint8_t *src_u, uint8_t *src_v,
                mask, flat);
   VP8_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev);
 
-  __lsx_vstelm_d(p1, src_u, 0, 0);
-  __lsx_vstelm_d(p0, src_u + pitch, 0, 0);
-  __lsx_vstelm_d(q0, src_u + pitch_x2, 0, 0);
-  __lsx_vstelm_d(q1, src_u + pitch_x3, 0, 0);
+  __lsx_vstelm_d(q1, src_u + pitch, 0, 0);
+  __lsx_vstelm_d(q0, src_u, 0, 0);
+  __lsx_vstelm_d(p0, src_u - pitch, 0, 0);
+  __lsx_vstelm_d(p1, src_u - pitch_x2, 0, 0);
 
-  __lsx_vstelm_d(p1, src_v, 0, 1);
-  __lsx_vstelm_d(p0, src_v + pitch, 0, 1);
-  __lsx_vstelm_d(q0, src_v + pitch_x2, 0, 1);
-  __lsx_vstelm_d(q1, src_v + pitch_x3, 0, 1);
+  __lsx_vstelm_d(q1, src_v + pitch, 0, 1);
+  __lsx_vstelm_d(q0, src_v, 0, 1);
+  __lsx_vstelm_d(p0, src_v - pitch, 0, 1);
+  __lsx_vstelm_d(p1, src_v - pitch_x2, 0, 1);
 }
 
 static void loop_filter_vertical_edge_uv_lsx(uint8_t *src_u, uint8_t *src_v,
@@ -396,8 +394,8 @@ static void loop_filter_vertical_edge_uv_lsx(uint8_t *src_u, uint8_t *src_v,
   tmp2 = __lsx_vilvl_h(tmp1, tmp0);
   tmp3 = __lsx_vilvh_h(tmp1, tmp0);
 
-  tmp0 = __lsx_vilvl_b(p0, q1);
-  tmp1 = __lsx_vilvl_b(q1, q0);
+  tmp0 = __lsx_vilvh_b(p0, p1);
+  tmp1 = __lsx_vilvh_b(q1, q0);
   tmp4 = __lsx_vilvl_h(tmp1, tmp0);
   tmp5 = __lsx_vilvh_h(tmp1, tmp0);
 
