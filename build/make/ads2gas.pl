@@ -147,6 +147,7 @@ while (<STDIN>)
 
     s/\bMEND\b/.endm/;       # No need to tell it where to stop assembling
     next if /^\s*END\s*$/;
+    s/[ \t]+$//;
     print;
 }
 
