@@ -118,7 +118,8 @@ while (<STDIN>)
     # This makes them show up properly in debugging tools like gdb and valgrind.
     if (/\bPROC\b/) {
         my $proc;
-        /^_([\.0-9A-Z_a-z]\w+)\b/;
+        # Match the function name so it can be stored in $proc
+        /^([\.0-9A-Z_a-z]\w+)\b/;
         $proc = $1;
         push(@proc_stack, $proc) if ($proc);
         s/\bPROC\b/@ $&/;
