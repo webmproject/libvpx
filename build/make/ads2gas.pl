@@ -32,7 +32,7 @@ foreach my $arg (@ARGV) {
 
 print "@ This file was created from a .asm file\n";
 print "@  using the ads2gas.pl script.\n";
-print "\t.syntax unified\n";
+print ".syntax unified\n";
 if ($thumb) {
     print "\t.thumb\n";
 }
@@ -60,19 +60,19 @@ while (<STDIN>)
     }
 
     # Convert INCLUDE to .INCLUDE "file"
-    s/INCLUDE(\s*)(.*)$/.include $1\"$2\"/;
+    s/INCLUDE\s?(.*)$/.include \"$1\"/;
 
     # No AREA required
     # But ALIGNs in AREA must be obeyed
-    s/^\s*AREA.*ALIGN=([0-9])$/.text\n.p2align $1/;
+    s/^(\s*)\bAREA\b.*ALIGN=([0-9])$/$1.text\n$1.p2align $2/;
     # If no ALIGN, strip the AREA and align to 4 bytes
-    s/^\s*AREA.*$/.text\n.p2align 2/;
+    s/^(\s*)\bAREA\b.*$/$1.text\n$1.p2align 2/;
 
     # Make function visible to linker.
     if ($elf) {
-        s/EXPORT\s+\|([\$\w]*)\|/.global $1 \n\t.type $1, function/;
+        s/(\s*)EXPORT\s+\|([\$\w]*)\|/$1.global $2\n$1.type $2, function/;
     } else {
-        s/EXPORT\s+\|([\$\w]*)\|/.global $1/;
+        s/(\s*)EXPORT\s+\|([\$\w]*)\|/$1.global $2/;
     }
 
     # No vertical bars on function names
@@ -85,11 +85,12 @@ while (<STDIN>)
     s/\bALIGN\b/.balign/g;
 
     if ($thumb) {
-        # ARM code - we force everything to thumb with the declaration in the header
-        s/\s+ARM//g;
+        # ARM code - we force everything to thumb with the declaration in the
+        # header
+        s/\bARM\b//g;
     } else {
         # ARM code
-        s/\sARM/.arm/g;
+        s/\bARM\b/.arm/g;
     }
 
     # push/pop
@@ -105,13 +106,13 @@ while (<STDIN>)
 
     if ($elf) {
         # REQUIRE8 Stack is required to be 8-byte aligned
-        s/\sREQUIRE8/.eabi_attribute 24, 1 \@Tag_ABI_align_needed/g;
+        s/\bREQUIRE8\b/.eabi_attribute 24, 1 \@Tag_ABI_align_needed/g;
 
         # PRESERVE8 Stack 8-byte align is preserved
-        s/\sPRESERVE8/.eabi_attribute 25, 1 \@Tag_ABI_align_preserved/g;
+        s/\bPRESERVE8\b/.eabi_attribute 25, 1 \@Tag_ABI_align_preserved/g;
     } else {
-        s/\s+REQUIRE8//;
-        s/\s+PRESERVE8//;
+        s/\bREQUIRE8\b//;
+        s/\bPRESERVE8\b//;
     }
 
     # Use PROC and ENDP to give the symbols a .size directive.
@@ -129,7 +130,7 @@ while (<STDIN>)
         my $proc;
         s/\bENDP\b/@ $&/;
         $proc = pop(@proc_stack);
-        $_ = "\t.size $proc, .-$proc".$_ if ($proc and $elf);
+        $_ = ".size $proc, .-$proc".$_ if ($proc and $elf);
     }
 
     # EQU directive
@@ -153,4 +154,4 @@ while (<STDIN>)
 }
 
 # Mark that this object doesn't need an executable stack.
-printf ("\t.section\t.note.GNU-stack,\"\",\%\%progbits\n") if $elf;
+printf ("    .section .note.GNU-stack,\"\",\%\%progbits\n") if $elf;

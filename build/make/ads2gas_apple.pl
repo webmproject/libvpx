@@ -20,7 +20,7 @@
 
 print "@ This file was created from a .asm file\n";
 print "@  using the ads2gas_apple.pl script.\n\n";
-print "\t.syntax unified\n";
+print ".syntax unified\n";
 
 my %macro_aliases;
 
@@ -57,13 +57,13 @@ while (<STDIN>)
     }
 
     # Convert INCLUDE to .INCLUDE "file"
-    s/INCLUDE(\s*)(.*)$/.include $1\"$2\"/;
+    s/INCLUDE\s?(.*)$/.include \"$1\"/;
 
     # No AREA required
     # But ALIGNs in AREA must be obeyed
-    s/^\s*AREA.*ALIGN=([0-9])$/.text\n.p2align $1/;
+    s/^(\s*)\bAREA\b.*ALIGN=([0-9])$/$1.text\n$1.p2align $2/;
     # If no ALIGN, strip the AREA and align to 4 bytes
-    s/^\s*AREA.*$/.text\n.p2align 2/;
+    s/^(\s*)\bAREA\b.*$/$1.text\n$1.p2align 2/;
 
     # Make function visible to linker.
     s/EXPORT\s+\|([\$\w]*)\|/.globl _$1/;
