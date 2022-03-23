@@ -45,23 +45,39 @@ static INLINE unsigned int sad(const uint8_t *src_ptr, int src_stride,
     return sad(src_ptr, src_stride, comp_pred, m, m, n);                      \
   }
 
-// depending on call sites, pass **ref_array to avoid & in subsequent call and
-// de-dup with 4D below.
+// Compare |src_ptr| to |k| adjacent blocks starting at |ref_ptr|.
+// |k| == {3,8}. Used in vp8 for an exhaustive search.
+// src:           ref:
+//  0  1  2  3     0  1  2  3  x  x
+//  4  5  6  7     6  7  8  9  x  x
+//  8  9 10 11    12 13 14 15  x  x
+// 12 13 14 15    18 19 20 21  x  x
+//
+//                 x  1  2  3  4  x
+//                 x  7  8  9 10  x
+//                 x 13 14 15 16  x
+//                 x 19 20 21 22  x
+//
+//                 x  x  2  3  4  5
+//                 x  x  8  9 10 11
+//                 x  x 14 15 16 17
+//                 x  x 20 21 22 23
+//
 #define sadMxNxK(m, n, k)                                                     \
   void vpx_sad##m##x##n##x##k##_c(const uint8_t *src_ptr, int src_stride,     \
                                   const uint8_t *ref_ptr, int ref_stride,     \
-                                  uint32_t *sad_array) {                      \
+                                  uint32_t sad_array[k]) {                    \
     int i;                                                                    \
     for (i = 0; i < k; ++i)                                                   \
       sad_array[i] =                                                          \
-          vpx_sad##m##x##n##_c(src_ptr, src_stride, &ref_ptr[i], ref_stride); \
+          vpx_sad##m##x##n##_c(src_ptr, src_stride, ref_ptr + i, ref_stride); \
   }
 
-// This appears to be equivalent to the above when k == 4 and refs is const
+// Compare |src_ptr| to 4 distinct references in |ref_array[]|
 #define sadMxNx4D(m, n)                                                        \
   void vpx_sad##m##x##n##x4d_c(const uint8_t *src_ptr, int src_stride,         \
-                               const uint8_t *const ref_array[],               \
-                               int ref_stride, uint32_t *sad_array) {          \
+                               const uint8_t *const ref_array[4],              \
+                               int ref_stride, uint32_t sad_array[4]) {        \
     int i;                                                                     \
     for (i = 0; i < 4; ++i)                                                    \
       sad_array[i] =                                                           \
@@ -181,15 +197,15 @@ static INLINE unsigned int highbd_sadb(const uint8_t *src8_ptr, int src_stride,
     return highbd_sadb(src_ptr, src_stride, comp_pred, m, m, n);               \
   }
 
-#define highbd_sadMxNx4D(m, n)                                                \
-  void vpx_highbd_sad##m##x##n##x4d_c(const uint8_t *src_ptr, int src_stride, \
-                                      const uint8_t *const ref_array[],       \
-                                      int ref_stride, uint32_t *sad_array) {  \
-    int i;                                                                    \
-    for (i = 0; i < 4; ++i) {                                                 \
-      sad_array[i] = vpx_highbd_sad##m##x##n##_c(src_ptr, src_stride,         \
-                                                 ref_array[i], ref_stride);   \
-    }                                                                         \
+#define highbd_sadMxNx4D(m, n)                                                 \
+  void vpx_highbd_sad##m##x##n##x4d_c(const uint8_t *src_ptr, int src_stride,  \
+                                      const uint8_t *const ref_array[4],       \
+                                      int ref_stride, uint32_t sad_array[4]) { \
+    int i;                                                                     \
+    for (i = 0; i < 4; ++i) {                                                  \
+      sad_array[i] = vpx_highbd_sad##m##x##n##_c(src_ptr, src_stride,          \
+                                                 ref_array[i], ref_stride);    \
+    }                                                                          \
   }
 
 /* clang-format off */
