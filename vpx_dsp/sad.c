@@ -45,35 +45,7 @@ static INLINE unsigned int sad(const uint8_t *src_ptr, int src_stride,
     return sad(src_ptr, src_stride, comp_pred, m, m, n);                      \
   }
 
-// Compare |src_ptr| to |k| adjacent blocks starting at |ref_ptr|.
-// |k| == {3,8}. Used in vp8 for an exhaustive search.
-// src:           ref:
-//  0  1  2  3     0  1  2  3  x  x
-//  4  5  6  7     6  7  8  9  x  x
-//  8  9 10 11    12 13 14 15  x  x
-// 12 13 14 15    18 19 20 21  x  x
-//
-//                 x  1  2  3  4  x
-//                 x  7  8  9 10  x
-//                 x 13 14 15 16  x
-//                 x 19 20 21 22  x
-//
-//                 x  x  2  3  4  5
-//                 x  x  8  9 10 11
-//                 x  x 14 15 16 17
-//                 x  x 20 21 22 23
-//
-#define sadMxNxK(m, n, k)                                                     \
-  void vpx_sad##m##x##n##x##k##_c(const uint8_t *src_ptr, int src_stride,     \
-                                  const uint8_t *ref_ptr, int ref_stride,     \
-                                  uint32_t sad_array[k]) {                    \
-    int i;                                                                    \
-    for (i = 0; i < k; ++i)                                                   \
-      sad_array[i] =                                                          \
-          vpx_sad##m##x##n##_c(src_ptr, src_stride, ref_ptr + i, ref_stride); \
-  }
-
-// Compare |src_ptr| to 4 distinct references in |ref_array[]|
+// Compare |src_ptr| to 4 distinct references in |ref_array[4]|
 #define sadMxNx4D(m, n)                                                        \
   void vpx_sad##m##x##n##x4d_c(const uint8_t *src_ptr, int src_stride,         \
                                const uint8_t *const ref_array[4],              \
@@ -99,7 +71,6 @@ sadMxNx4D(32, 64)
 
 // 32x32
 sadMxN(32, 32)
-sadMxNxK(32, 32, 8)
 sadMxNx4D(32, 32)
 
 // 32x16
@@ -112,26 +83,18 @@ sadMxNx4D(16, 32)
 
 // 16x16
 sadMxN(16, 16)
-sadMxNxK(16, 16, 3)
-sadMxNxK(16, 16, 8)
 sadMxNx4D(16, 16)
 
 // 16x8
 sadMxN(16, 8)
-sadMxNxK(16, 8, 3)
-sadMxNxK(16, 8, 8)
 sadMxNx4D(16, 8)
 
 // 8x16
 sadMxN(8, 16)
-sadMxNxK(8, 16, 3)
-sadMxNxK(8, 16, 8)
 sadMxNx4D(8, 16)
 
 // 8x8
 sadMxN(8, 8)
-sadMxNxK(8, 8, 3)
-sadMxNxK(8, 8, 8)
 sadMxNx4D(8, 8)
 
 // 8x4
@@ -144,8 +107,6 @@ sadMxNx4D(4, 8)
 
 // 4x4
 sadMxN(4, 4)
-sadMxNxK(4, 4, 3)
-sadMxNxK(4, 4, 8)
 sadMxNx4D(4, 4)
 /* clang-format on */
 

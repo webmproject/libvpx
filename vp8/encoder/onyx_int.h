@@ -549,7 +549,6 @@ typedef struct VP8_COMP {
   unsigned char *partition_d_end[MAX_PARTITIONS];
 
   fractional_mv_step_fp *find_fractional_mv_step;
-  vp8_full_search_fn_t full_search_sad;
   vp8_refining_search_fn_t refining_search_sad;
   vp8_diamond_search_fn_t diamond_search_sad;
   vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SEGMENTS];

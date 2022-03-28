@@ -1796,29 +1796,6 @@ static int64_t exhaustive_mesh_search_single_step(
   end_col = VPXMIN(center_mv->col + range, mv_limits->col_max);
   for (r = start_row; r <= end_row; r += 1) {
     c = start_col;
-    // sdx8f may not be available some block size
-    if (fn_ptr->sdx8f) {
-      while (c + 7 <= end_col) {
-        unsigned int sads[8];
-        const MV mv = { r, c };
-        const uint8_t *buf = get_buf_from_mv(pre, &mv);
-        fn_ptr->sdx8f(src->buf, src->stride, buf, pre->stride, sads);
-
-        for (i = 0; i < 8; ++i) {
-          int64_t sad = (int64_t)sads[i] << LOG2_PRECISION;
-          if (sad < best_sad) {
-            const MV mv = { r, c + i };
-            sad += lambda *
-                   vp9_nb_mvs_inconsistency(&mv, nb_full_mvs, full_mv_num);
-            if (sad < best_sad) {
-              best_sad = sad;
-              *best_mv = mv;
-            }
-          }
-        }
-        c += 8;
-      }
-    }
     while (c + 3 <= end_col) {
       unsigned int sads[4];
       const uint8_t *addrs[4];
