@@ -38,26 +38,24 @@ namespace {
 const int number_of_iterations = 100;
 
 typedef void (*QuantizeFunc)(const tran_low_t *coeff, intptr_t count,
-                             int skip_block, const int16_t *zbin,
-                             const int16_t *round, const int16_t *quant,
-                             const int16_t *quant_shift, tran_low_t *qcoeff,
-                             tran_low_t *dqcoeff, const int16_t *dequant,
-                             uint16_t *eob, const int16_t *scan,
-                             const int16_t *iscan);
+                             const int16_t *zbin, const int16_t *round,
+                             const int16_t *quant, const int16_t *quant_shift,
+                             tran_low_t *qcoeff, tran_low_t *dqcoeff,
+                             const int16_t *dequant, uint16_t *eob,
+                             const int16_t *scan, const int16_t *iscan);
 typedef std::tuple<QuantizeFunc, QuantizeFunc, vpx_bit_depth_t,
                    int /*max_size*/, bool /*is_fp*/>
     QuantizeParam;
 
 // Wrapper for FP version which does not use zbin or quant_shift.
 typedef void (*QuantizeFPFunc)(const tran_low_t *coeff, intptr_t count,
-                               int skip_block, const int16_t *round,
-                               const int16_t *quant, tran_low_t *qcoeff,
-                               tran_low_t *dqcoeff, const int16_t *dequant,
-                               uint16_t *eob, const int16_t *scan,
-                               const int16_t *iscan);
+                               const int16_t *round, const int16_t *quant,
+                               tran_low_t *qcoeff, tran_low_t *dqcoeff,
+                               const int16_t *dequant, uint16_t *eob,
+                               const int16_t *scan, const int16_t *iscan);
 
 template <QuantizeFPFunc fn>
-void QuantFPWrapper(const tran_low_t *coeff, intptr_t count, int skip_block,
+void QuantFPWrapper(const tran_low_t *coeff, intptr_t count,
                     const int16_t *zbin, const int16_t *round,
                     const int16_t *quant, const int16_t *quant_shift,
                     tran_low_t *qcoeff, tran_low_t *dqcoeff,
@@ -66,8 +64,7 @@ void QuantFPWrapper(const tran_low_t *coeff, intptr_t count, int skip_block,
   (void)zbin;
   (void)quant_shift;
 
-  fn(coeff, count, skip_block, round, quant, qcoeff, dqcoeff, dequant, eob,
-     scan, iscan);
+  fn(coeff, count, round, quant, qcoeff, dqcoeff, dequant, eob, scan, iscan);
 }
 
 class VP9QuantizeBase : public AbstractBench {
@@ -138,7 +135,6 @@ class VP9QuantizeBase : public AbstractBench {
   int16_t *r_ptr_;
   int16_t *q_ptr_;
   int count_;
-  int skip_block_;
   const scan_order *scan_;
   uint16_t eob_;
 };
@@ -157,8 +153,8 @@ class VP9QuantizeTest : public VP9QuantizeBase,
 };
 
 void VP9QuantizeTest::Run() {
-  quantize_op_(coeff_.TopLeftPixel(), count_, skip_block_, zbin_ptr_, r_ptr_,
-               q_ptr_, quant_shift_ptr_, qcoeff_.TopLeftPixel(),
+  quantize_op_(coeff_.TopLeftPixel(), count_, zbin_ptr_, r_ptr_, q_ptr_,
+               quant_shift_ptr_, qcoeff_.TopLeftPixel(),
                dqcoeff_.TopLeftPixel(), dequant_ptr_, &eob_, scan_->scan,
                scan_->iscan);
 }
@@ -167,16 +163,14 @@ void VP9QuantizeTest::Run() {
 // determine if further multiplication operations are needed.
 // Based on vp9_quantize_fp_sse2().
 inline void quant_fp_nz(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                        int skip_block, const int16_t *round_ptr,
-                        const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
-                        tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                        uint16_t *eob_ptr, const int16_t *scan,
-                        const int16_t *iscan, int is_32x32) {
+                        const int16_t *round_ptr, const int16_t *quant_ptr,
+                        tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                        const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                        const int16_t *scan, const int16_t *iscan,
+                        int is_32x32) {
   int i, eob = -1;
   const int thr = dequant_ptr[1] >> (1 + is_32x32);
   (void)iscan;
-  (void)skip_block;
-  assert(!skip_block);
 
   // Quantization pass: All coefficients with index >= zero_flag are
   // skippable. Note: zero_flag can be zero.
@@ -243,22 +237,20 @@ inline void quant_fp_nz(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 }
 
 void quantize_fp_nz_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                      int skip_block, const int16_t *round_ptr,
-                      const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
-                      tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                      uint16_t *eob_ptr, const int16_t *scan,
-                      const int16_t *iscan) {
-  quant_fp_nz(coeff_ptr, n_coeffs, skip_block, round_ptr, quant_ptr, qcoeff_ptr,
+                      const int16_t *round_ptr, const int16_t *quant_ptr,
+                      tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                      const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                      const int16_t *scan, const int16_t *iscan) {
+  quant_fp_nz(coeff_ptr, n_coeffs, round_ptr, quant_ptr, qcoeff_ptr,
               dqcoeff_ptr, dequant_ptr, eob_ptr, scan, iscan, 0);
 }
 
 void quantize_fp_32x32_nz_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                            int skip_block, const int16_t *round_ptr,
-                            const int16_t *quant_ptr, tran_low_t *qcoeff_ptr,
-                            tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-                            uint16_t *eob_ptr, const int16_t *scan,
-                            const int16_t *iscan) {
-  quant_fp_nz(coeff_ptr, n_coeffs, skip_block, round_ptr, quant_ptr, qcoeff_ptr,
+                            const int16_t *round_ptr, const int16_t *quant_ptr,
+                            tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                            const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                            const int16_t *scan, const int16_t *iscan) {
+  quant_fp_nz(coeff_ptr, n_coeffs, round_ptr, quant_ptr, qcoeff_ptr,
               dqcoeff_ptr, dequant_ptr, eob_ptr, scan, iscan, 1);
 }
 
@@ -316,9 +308,6 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
   eob_ = 0;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    // Test skip block for the first three iterations to catch all the different
-    // sizes.
-    const int skip_block = 0;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = static_cast<TX_SIZE>(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -332,13 +321,13 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_, round_fp_ptr_,
                          quant_fp_ptr_);
-    ref_quantize_op_(coeff_.TopLeftPixel(), count_, skip_block, zbin_ptr_,
-                     r_ptr_, q_ptr_, quant_shift_ptr_,
-                     ref_qcoeff.TopLeftPixel(), ref_dqcoeff.TopLeftPixel(),
-                     dequant_ptr_, &ref_eob, scan_->scan, scan_->iscan);
+    ref_quantize_op_(coeff_.TopLeftPixel(), count_, zbin_ptr_, r_ptr_, q_ptr_,
+                     quant_shift_ptr_, ref_qcoeff.TopLeftPixel(),
+                     ref_dqcoeff.TopLeftPixel(), dequant_ptr_, &ref_eob,
+                     scan_->scan, scan_->iscan);
 
     ASM_REGISTER_STATE_CHECK(quantize_op_(
-        coeff_.TopLeftPixel(), count_, skip_block, zbin_ptr_, r_ptr_, q_ptr_,
+        coeff_.TopLeftPixel(), count_, zbin_ptr_, r_ptr_, q_ptr_,
         quant_shift_ptr_, qcoeff_.TopLeftPixel(), dqcoeff_.TopLeftPixel(),
         dequant_ptr_, &eob_, scan_->scan, scan_->iscan));
 
@@ -372,7 +361,6 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
   const uint32_t max_index = max_size_ * max_size_ - 1;
 
   for (int i = 0; i < number_of_iterations; ++i) {
-    skip_block_ = 0;
     TX_SIZE sz;
     if (max_size_ == 16) {
       sz = static_cast<TX_SIZE>(i % 3);  // TX_4X4, TX_8X8 TX_16X16
@@ -391,13 +379,13 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
     GenerateHelperArrays(&rnd, zbin_ptr_, round_ptr_, quant_ptr_,
                          quant_shift_ptr_, dequant_ptr_, round_fp_ptr_,
                          quant_fp_ptr_);
-    ref_quantize_op_(coeff_.TopLeftPixel(), count_, skip_block_, zbin_ptr_,
-                     r_ptr_, q_ptr_, quant_shift_ptr_,
-                     ref_qcoeff.TopLeftPixel(), ref_dqcoeff.TopLeftPixel(),
-                     dequant_ptr_, &ref_eob, scan_->scan, scan_->iscan);
+    ref_quantize_op_(coeff_.TopLeftPixel(), count_, zbin_ptr_, r_ptr_, q_ptr_,
+                     quant_shift_ptr_, ref_qcoeff.TopLeftPixel(),
+                     ref_dqcoeff.TopLeftPixel(), dequant_ptr_, &ref_eob,
+                     scan_->scan, scan_->iscan);
 
     ASM_REGISTER_STATE_CHECK(quantize_op_(
-        coeff_.TopLeftPixel(), count_, skip_block_, zbin_ptr_, r_ptr_, q_ptr_,
+        coeff_.TopLeftPixel(), count_, zbin_ptr_, r_ptr_, q_ptr_,
         quant_shift_ptr_, qcoeff_.TopLeftPixel(), dqcoeff_.TopLeftPixel(),
         dequant_ptr_, &eob_, scan_->scan, scan_->iscan));
 
@@ -433,7 +421,6 @@ TEST_P(VP9QuantizeTest, DISABLED_Speed) {
   for (TX_SIZE sz = starting_sz; sz <= ending_sz; ++sz) {
     // zbin > coeff, zbin < coeff.
     for (int i = 0; i < 2; ++i) {
-      skip_block_ = 0;
       // TX_TYPE defines the scan order. That is not relevant to the speed test.
       // Pick the first one.
       const TX_TYPE tx_type = DCT_DCT;
