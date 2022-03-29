@@ -11,8 +11,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 
-static INLINE void calc_final_4(const __m256i *const sums /*[4]*/,
-                                uint32_t *sad_array) {
+static INLINE void calc_final_4(const __m256i sums[4], uint32_t sad_array[4]) {
   const __m256i t0 = _mm256_hadd_epi32(sums[0], sums[1]);
   const __m256i t1 = _mm256_hadd_epi32(sums[2], sums[3]);
   const __m256i t2 = _mm256_hadd_epi32(t0, t1);
@@ -22,8 +21,8 @@ static INLINE void calc_final_4(const __m256i *const sums /*[4]*/,
 }
 
 void vpx_sad32x32x4d_avx2(const uint8_t *src_ptr, int src_stride,
-                          const uint8_t *const ref_array[/*4*/], int ref_stride,
-                          uint32_t *sad_array /*[4]*/) {
+                          const uint8_t *const ref_array[4], int ref_stride,
+                          uint32_t sad_array[4]) {
   int i;
   const uint8_t *refs[4];
   __m256i sums[4];
@@ -71,7 +70,7 @@ void vpx_sad32x32x4d_avx2(const uint8_t *src_ptr, int src_stride,
 
 void vpx_sad32x32x8_avx2(const uint8_t *src_ptr, int src_stride,
                          const uint8_t *ref_ptr, int ref_stride,
-                         uint32_t *sad_array) {
+                         uint32_t sad_array[8]) {
   int i;
   __m256i sums[8];
 
@@ -127,8 +126,8 @@ void vpx_sad32x32x8_avx2(const uint8_t *src_ptr, int src_stride,
 }
 
 void vpx_sad64x64x4d_avx2(const uint8_t *src_ptr, int src_stride,
-                          const uint8_t *const ref_array[/*4*/], int ref_stride,
-                          uint32_t *sad_array /*[4]*/) {
+                          const uint8_t *const ref_array[4], int ref_stride,
+                          uint32_t sad_array[4]) {
   __m256i sums[4];
   int i;
   const uint8_t *refs[4];

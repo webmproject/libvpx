@@ -1040,77 +1040,77 @@ static uint32_t avgsad_64width_msa(const uint8_t *src, int32_t src_stride,
 #define VPX_SAD_4xHEIGHTx3_MSA(height)                                   \
   void vpx_sad4x##height##x3_msa(const uint8_t *src, int32_t src_stride, \
                                  const uint8_t *ref, int32_t ref_stride, \
-                                 uint32_t *sads) {                       \
+                                 uint32_t sads[3]) {                     \
     sad_4width_x3_msa(src, src_stride, ref, ref_stride, height, sads);   \
   }
 
 #define VPX_SAD_8xHEIGHTx3_MSA(height)                                   \
   void vpx_sad8x##height##x3_msa(const uint8_t *src, int32_t src_stride, \
                                  const uint8_t *ref, int32_t ref_stride, \
-                                 uint32_t *sads) {                       \
+                                 uint32_t sads[3]) {                     \
     sad_8width_x3_msa(src, src_stride, ref, ref_stride, height, sads);   \
   }
 
 #define VPX_SAD_16xHEIGHTx3_MSA(height)                                   \
   void vpx_sad16x##height##x3_msa(const uint8_t *src, int32_t src_stride, \
                                   const uint8_t *ref, int32_t ref_stride, \
-                                  uint32_t *sads) {                       \
+                                  uint32_t sads[3]) {                     \
     sad_16width_x3_msa(src, src_stride, ref, ref_stride, height, sads);   \
   }
 
 #define VPX_SAD_4xHEIGHTx8_MSA(height)                                   \
   void vpx_sad4x##height##x8_msa(const uint8_t *src, int32_t src_stride, \
                                  const uint8_t *ref, int32_t ref_stride, \
-                                 uint32_t *sads) {                       \
+                                 uint32_t sads[8]) {                     \
     sad_4width_x8_msa(src, src_stride, ref, ref_stride, height, sads);   \
   }
 
 #define VPX_SAD_8xHEIGHTx8_MSA(height)                                   \
   void vpx_sad8x##height##x8_msa(const uint8_t *src, int32_t src_stride, \
                                  const uint8_t *ref, int32_t ref_stride, \
-                                 uint32_t *sads) {                       \
+                                 uint32_t sads[8]) {                     \
     sad_8width_x8_msa(src, src_stride, ref, ref_stride, height, sads);   \
   }
 
 #define VPX_SAD_16xHEIGHTx8_MSA(height)                                   \
   void vpx_sad16x##height##x8_msa(const uint8_t *src, int32_t src_stride, \
                                   const uint8_t *ref, int32_t ref_stride, \
-                                  uint32_t *sads) {                       \
+                                  uint32_t sads[8]) {                     \
     sad_16width_x8_msa(src, src_stride, ref, ref_stride, height, sads);   \
   }
 
 #define VPX_SAD_4xHEIGHTx4D_MSA(height)                                   \
   void vpx_sad4x##height##x4d_msa(const uint8_t *src, int32_t src_stride, \
-                                  const uint8_t *const refs[],            \
-                                  int32_t ref_stride, uint32_t *sads) {   \
+                                  const uint8_t *const refs[4],           \
+                                  int32_t ref_stride, uint32_t sads[4]) { \
     sad_4width_x4d_msa(src, src_stride, refs, ref_stride, height, sads);  \
   }
 
 #define VPX_SAD_8xHEIGHTx4D_MSA(height)                                   \
   void vpx_sad8x##height##x4d_msa(const uint8_t *src, int32_t src_stride, \
-                                  const uint8_t *const refs[],            \
-                                  int32_t ref_stride, uint32_t *sads) {   \
+                                  const uint8_t *const refs[4],           \
+                                  int32_t ref_stride, uint32_t sads[4]) { \
     sad_8width_x4d_msa(src, src_stride, refs, ref_stride, height, sads);  \
   }
 
 #define VPX_SAD_16xHEIGHTx4D_MSA(height)                                   \
   void vpx_sad16x##height##x4d_msa(const uint8_t *src, int32_t src_stride, \
-                                   const uint8_t *const refs[],            \
-                                   int32_t ref_stride, uint32_t *sads) {   \
+                                   const uint8_t *const refs[4],           \
+                                   int32_t ref_stride, uint32_t sads[4]) { \
     sad_16width_x4d_msa(src, src_stride, refs, ref_stride, height, sads);  \
   }
 
 #define VPX_SAD_32xHEIGHTx4D_MSA(height)                                   \
   void vpx_sad32x##height##x4d_msa(const uint8_t *src, int32_t src_stride, \
-                                   const uint8_t *const refs[],            \
-                                   int32_t ref_stride, uint32_t *sads) {   \
+                                   const uint8_t *const refs[4],           \
+                                   int32_t ref_stride, uint32_t sads[4]) { \
     sad_32width_x4d_msa(src, src_stride, refs, ref_stride, height, sads);  \
   }
 
 #define VPX_SAD_64xHEIGHTx4D_MSA(height)                                   \
   void vpx_sad64x##height##x4d_msa(const uint8_t *src, int32_t src_stride, \
-                                   const uint8_t *const refs[],            \
-                                   int32_t ref_stride, uint32_t *sads) {   \
+                                   const uint8_t *const refs[4],           \
+                                   int32_t ref_stride, uint32_t sads[4]) { \
     sad_64width_x4d_msa(src, src_stride, refs, ref_stride, height, sads);  \
   }
 
