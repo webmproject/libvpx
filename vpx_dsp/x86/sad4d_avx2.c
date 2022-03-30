@@ -11,7 +11,12 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
 
-static INLINE void calc_final_4(const __m256i sums[4], uint32_t sad_array[4]) {
+// Note with sums[4] some versions of Visual Studio may fail due to parameter
+// alignment, though the functions should be equivalent:
+// error C2719: 'sums': formal parameter with requested alignment of 32 won't be
+// aligned
+static INLINE void calc_final_4(const __m256i *const sums /*[4]*/,
+                                uint32_t sad_array[4]) {
   const __m256i t0 = _mm256_hadd_epi32(sums[0], sums[1]);
   const __m256i t1 = _mm256_hadd_epi32(sums[2], sums[3]);
   const __m256i t2 = _mm256_hadd_epi32(t0, t1);
