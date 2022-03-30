@@ -14,6 +14,17 @@
 #include "vpx_util/loongson_intrinsics.h"
 #include "vpx_dsp/vpx_filter.h"
 
+#define LSX_LD_4(_src, _stride, _src0, _src1, _src2, _src3) \
+  {                                                         \
+    _src0 = __lsx_vld(_src, 0);                             \
+    _src += _stride;                                        \
+    _src1 = __lsx_vld(_src, 0);                             \
+    _src += _stride;                                        \
+    _src2 = __lsx_vld(_src, 0);                             \
+    _src += _stride;                                        \
+    _src3 = __lsx_vld(_src, 0);                             \
+  }
+
 #define FILT_8TAP_DPADD_S_H(_reg0, _reg1, _reg2, _reg3, _filter0, _filter1, \
                             _filter2, _filter3)                             \
   ({                                                                        \
