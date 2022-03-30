@@ -30,7 +30,6 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/msvc.h"
 #include "vpx_ports/vpx_timer.h"
-#include "vpx_dsp/quantize.h"
 
 using libvpx_test::ACMRandom;
 using libvpx_test::Buffer;
@@ -467,10 +466,13 @@ INSTANTIATE_TEST_SUITE_P(
     SSE2, VP9QuantizeTest,
     ::testing::Values(make_tuple(&vpx_quantize_b_sse2, &vpx_quantize_b_c,
                                  VPX_BITS_8, 16, false),
-                      make_tuple(&vpx_quantize_b_sse2, &vpx_highbd_quantize_b_c,
+                      make_tuple(&vpx_quantize_b_sse2, &vpx_quantize_b_c,
                                  VPX_BITS_10, 16, false),
-                      make_tuple(&vpx_quantize_b_sse2, &vpx_highbd_quantize_b_c,
-                                 VPX_BITS_12, 16, false)));
+                      make_tuple(&vpx_quantize_b_sse2, &vpx_quantize_b_c,
+                                 VPX_BITS_12, 16, false),
+                      make_tuple(&QuantFPWrapper<vp9_quantize_fp_sse2>,
+                                 &QuantFPWrapper<quantize_fp_nz_c>, VPX_BITS_8,
+                                 16, true)));
 #else
 INSTANTIATE_TEST_SUITE_P(
     SSE2, VP9QuantizeTest,
@@ -484,6 +486,28 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if HAVE_SSSE3
 #if VPX_ARCH_X86_64
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_SUITE_P(
+    SSSE3, VP9QuantizeTest,
+    ::testing::Values(
+        make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c, VPX_BITS_8, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c, VPX_BITS_10, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c, VPX_BITS_12, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_32x32_ssse3, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_8, 32, false),
+        make_tuple(&vpx_quantize_b_32x32_ssse3, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_10, 32, false),
+        make_tuple(&vpx_quantize_b_32x32_ssse3, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_12, 32, false),
+        make_tuple(&QuantFPWrapper<vp9_quantize_fp_ssse3>,
+                   &QuantFPWrapper<quantize_fp_nz_c>, VPX_BITS_8, 16, true),
+        make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_ssse3>,
+                   &QuantFPWrapper<quantize_fp_32x32_nz_c>, VPX_BITS_8, 32,
+                   true)));
+#else
 INSTANTIATE_TEST_SUITE_P(
     SSSE3, VP9QuantizeTest,
     ::testing::Values(make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c,
@@ -497,6 +521,24 @@ INSTANTIATE_TEST_SUITE_P(
                       make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_ssse3>,
                                  &QuantFPWrapper<quantize_fp_32x32_nz_c>,
                                  VPX_BITS_8, 32, true)));
+#endif  // #CONFIG_VP9_HIGHBITDEPTH
+#else
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_SUITE_P(
+    SSSE3, VP9QuantizeTest,
+    ::testing::Values(
+        make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c, VPX_BITS_8, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c, VPX_BITS_10, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_ssse3, &vpx_quantize_b_c, VPX_BITS_12, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_32x32_ssse3, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_8, 32, false),
+        make_tuple(&vpx_quantize_b_32x32_ssse3, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_10, 32, false),
+        make_tuple(&vpx_quantize_b_32x32_ssse3, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_12, 32, false)));
 #else
 INSTANTIATE_TEST_SUITE_P(
     SSSE3, VP9QuantizeTest,
@@ -505,7 +547,7 @@ INSTANTIATE_TEST_SUITE_P(
                       make_tuple(&vpx_quantize_b_32x32_ssse3,
                                  &vpx_quantize_b_32x32_c, VPX_BITS_8, 32,
                                  false)));
-
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // VPX_ARCH_X86_64
 #endif  // HAVE_SSSE3
 
@@ -516,15 +558,15 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         make_tuple(&vpx_quantize_b_avx, &vpx_quantize_b_c, VPX_BITS_8, 16,
                    false),
-        make_tuple(&vpx_quantize_b_avx, &vpx_highbd_quantize_b_c, VPX_BITS_10,
-                   16, false),
-        make_tuple(&vpx_quantize_b_avx, &vpx_highbd_quantize_b_c, VPX_BITS_12,
-                   16, false),
-        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_highbd_quantize_b_32x32_c,
+        make_tuple(&vpx_quantize_b_avx, &vpx_quantize_b_c, VPX_BITS_10, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_avx, &vpx_quantize_b_c, VPX_BITS_12, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_quantize_b_32x32_c,
                    VPX_BITS_8, 32, false),
-        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_highbd_quantize_b_32x32_c,
+        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_quantize_b_32x32_c,
                    VPX_BITS_10, 32, false),
-        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_highbd_quantize_b_32x32_c,
+        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_quantize_b_32x32_c,
                    VPX_BITS_12, 32, false)));
 
 #else
@@ -547,6 +589,28 @@ INSTANTIATE_TEST_SUITE_P(
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_SUITE_P(
+    NEON, VP9QuantizeTest,
+    ::testing::Values(
+        make_tuple(&vpx_quantize_b_neon, &vpx_quantize_b_c, VPX_BITS_8, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_neon, &vpx_quantize_b_c, VPX_BITS_10, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_neon, &vpx_quantize_b_c, VPX_BITS_12, 16,
+                   false),
+        make_tuple(&vpx_quantize_b_32x32_neon, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_8, 32, false),
+        make_tuple(&vpx_quantize_b_32x32_neon, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_10, 32, false),
+        make_tuple(&vpx_quantize_b_32x32_neon, &vpx_quantize_b_32x32_c,
+                   VPX_BITS_12, 32, false),
+        make_tuple(&QuantFPWrapper<vp9_quantize_fp_neon>,
+                   &QuantFPWrapper<vp9_quantize_fp_c>, VPX_BITS_8, 16, true),
+        make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_neon>,
+                   &QuantFPWrapper<vp9_quantize_fp_32x32_c>, VPX_BITS_8, 32,
+                   true)));
+#else
 INSTANTIATE_TEST_SUITE_P(
     NEON, VP9QuantizeTest,
     ::testing::Values(make_tuple(&vpx_quantize_b_neon, &vpx_quantize_b_c,
@@ -560,6 +624,7 @@ INSTANTIATE_TEST_SUITE_P(
                       make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_neon>,
                                  &QuantFPWrapper<vp9_quantize_fp_32x32_c>,
                                  VPX_BITS_8, 32, true)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON
 
 #if HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH

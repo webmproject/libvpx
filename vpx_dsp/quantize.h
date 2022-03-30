@@ -38,22 +38,7 @@ void vpx_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
                                   tran_low_t *dqcoeff_ptr,
                                   const int16_t dequant, uint16_t *eob_ptr);
 
-// Only used for reference. The optimized versions can handle HBD.
-void vpx_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                             const int16_t *zbin_ptr, const int16_t *round_ptr,
-                             const int16_t *quant_ptr,
-                             const int16_t *quant_shift_ptr,
-                             tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-                             const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                             const int16_t *scan, const int16_t *iscan);
-
-void vpx_highbd_quantize_b_32x32_c(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr,
-    const int16_t *round_ptr, const int16_t *quant_ptr,
-    const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
-    tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
-    const int16_t *scan, const int16_t *iscan);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"
