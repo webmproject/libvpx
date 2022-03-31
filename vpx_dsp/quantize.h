@@ -37,8 +37,7 @@ void vpx_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
                                   tran_low_t *qcoeff_ptr,
                                   tran_low_t *dqcoeff_ptr,
                                   const int16_t dequant, uint16_t *eob_ptr);
-
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif
 
 #ifdef __cplusplus
 }  // extern "C"
