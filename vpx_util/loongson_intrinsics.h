@@ -39,8 +39,8 @@
  * MICRO version: Comment changes or implementation changes.
  */
 #define LSOM_VERSION_MAJOR 1
-#define LSOM_VERSION_MINOR 0
-#define LSOM_VERSION_MICRO 5
+#define LSOM_VERSION_MINOR 2
+#define LSOM_VERSION_MICRO 1
 
 #define DUP2_ARG1(_INS, _IN0, _IN1, _OUT0, _OUT1) \
   {                                               \
@@ -90,8 +90,8 @@
  *               Return Type - halfword
  * Details     : Signed byte elements from in_h are multiplied by
  *               signed byte elements from in_l, and then added adjacent to
- *               each other to get results with the twice size of input.
- *               Then the results plus to signed half-word elements from in_c.
+ *               each other to get a result twice the size of input. Then
+ *               the results are added to signed half-word elements from in_c.
  * Example     : out = __lsx_vdp2add_h_b(in_c, in_h, in_l)
  *        in_c : 1,2,3,4, 1,2,3,4
  *        in_h : 1,2,3,4, 5,6,7,8, 1,2,3,4, 5,6,7,8
@@ -116,9 +116,9 @@ static inline __m128i __lsx_vdp2add_h_b(__m128i in_c, __m128i in_h,
  *               Return Type - halfword
  * Details     : Unsigned byte elements from in_h are multiplied by
  *               unsigned byte elements from in_l, and then added adjacent to
- *               each other to get results with the twice size of input.
- *               The results plus to signed half-word elements from in_c.
- * Example     : out = __lsx_vdp2add_h_b(in_c, in_h, in_l)
+ *               each other to get a result twice the size of input.
+ *               The results are added to signed half-word elements from in_c.
+ * Example     : out = __lsx_vdp2add_h_bu(in_c, in_h, in_l)
  *        in_c : 1,2,3,4, 1,2,3,4
  *        in_h : 1,2,3,4, 5,6,7,8, 1,2,3,4, 5,6,7,8
  *        in_l : 8,7,6,5, 4,3,2,1, 8,7,6,5, 4,3,2,1
@@ -136,14 +136,40 @@ static inline __m128i __lsx_vdp2add_h_bu(__m128i in_c, __m128i in_h,
 
 /*
  * =============================================================================
+ * Description : Dot product & addition of byte vector elements
+ * Arguments   : Inputs  - in_c, in_h, in_l
+ *               Outputs - out
+ *               Return Type - halfword
+ * Details     : Unsigned byte elements from in_h are multiplied by
+ *               signed byte elements from in_l, and then added adjacent to
+ *               each other to get a result twice the size of input.
+ *               The results are added to signed half-word elements from in_c.
+ * Example     : out = __lsx_vdp2add_h_bu_b(in_c, in_h, in_l)
+ *        in_c : 1,1,1,1, 1,1,1,1
+ *        in_h : 1,2,3,4, 5,6,7,8, 1,2,3,4, 5,6,7,8
+ *        in_l : -1,-2,-3,-4, -5,-6,-7,-8, 1,2,3,4, 5,6,7,8
+ *         out : -4,-24,-60,-112, 6,26,62,114
+ * =============================================================================
+ */
+static inline __m128i __lsx_vdp2add_h_bu_b(__m128i in_c, __m128i in_h,
+                                           __m128i in_l) {
+  __m128i out;
+
+  out = __lsx_vmaddwev_h_bu_b(in_c, in_h, in_l);
+  out = __lsx_vmaddwod_h_bu_b(out, in_h, in_l);
+  return out;
+}
+
+/*
+ * =============================================================================
  * Description : Dot product & addition of half-word vector elements
  * Arguments   : Inputs  - in_c, in_h, in_l
  *               Outputs - out
  *               Return Type - __m128i
  * Details     : Signed half-word elements from in_h are multiplied by
  *               signed half-word elements from in_l, and then added adjacent to
- *               each other to get results with the twice size of input.
- *               Then the results plus to signed word elements from in_c.
+ *               each other to get a result twice the size of input.
+ *               Then the results are added to signed word elements from in_c.
  * Example     : out = __lsx_vdp2add_h_b(in_c, in_h, in_l)
  *        in_c : 1,2,3,4
  *        in_h : 1,2,3,4, 5,6,7,8
@@ -168,7 +194,7 @@ static inline __m128i __lsx_vdp2add_w_h(__m128i in_c, __m128i in_h,
  *               Return Type - halfword
  * Details     : Signed byte elements from in_h are multiplied by
  *               signed byte elements from in_l, and then added adjacent to
- *               each other to get results with the twice size of input.
+ *               each other to get a result twice the size of input.
  * Example     : out = __lsx_vdp2_h_b(in_h, in_l)
  *        in_h : 1,2,3,4, 5,6,7,8, 1,2,3,4, 5,6,7,8
  *        in_l : 8,7,6,5, 4,3,2,1, 8,7,6,5, 4,3,2,1
@@ -191,7 +217,7 @@ static inline __m128i __lsx_vdp2_h_b(__m128i in_h, __m128i in_l) {
  *               Return Type - halfword
  * Details     : Unsigned byte elements from in_h are multiplied by
  *               unsigned byte elements from in_l, and then added adjacent to
- *               each other to get results with the twice size of input.
+ *               each other to get a result twice the size of input.
  * Example     : out = __lsx_vdp2_h_bu(in_h, in_l)
  *        in_h : 1,2,3,4, 5,6,7,8, 1,2,3,4, 5,6,7,8
  *        in_l : 8,7,6,5, 4,3,2,1, 8,7,6,5, 4,3,2,1
@@ -214,7 +240,7 @@ static inline __m128i __lsx_vdp2_h_bu(__m128i in_h, __m128i in_l) {
  *               Return Type - halfword
  * Details     : Unsigned byte elements from in_h are multiplied by
  *               signed byte elements from in_l, and then added adjacent to
- *               each other to get results with the twice size of input.
+ *               each other to get a result twice the size of input.
  * Example     : out = __lsx_vdp2_h_bu_b(in_h, in_l)
  *        in_h : 1,2,3,4, 5,6,7,8, 1,2,3,4, 5,6,7,8
  *        in_l : 8,7,6,5, 4,3,2,1, 8,7,6,5, 4,3,2,-1
@@ -237,7 +263,7 @@ static inline __m128i __lsx_vdp2_h_bu_b(__m128i in_h, __m128i in_l) {
  *               Return Type - halfword
  * Details     : Signed byte elements from in_h are multiplied by
  *               signed byte elements from in_l, and then added adjacent to
- *               each other to get results with the twice size of input.
+ *               each other to get a result twice the size of input.
  * Example     : out = __lsx_vdp2_w_h(in_h, in_l)
  *        in_h : 1,2,3,4, 5,6,7,8
  *        in_l : 8,7,6,5, 4,3,2,1
@@ -249,6 +275,29 @@ static inline __m128i __lsx_vdp2_w_h(__m128i in_h, __m128i in_l) {
 
   out = __lsx_vmulwev_w_h(in_h, in_l);
   out = __lsx_vmaddwod_w_h(out, in_h, in_l);
+  return out;
+}
+
+/*
+ * =============================================================================
+ * Description : Dot product of byte vector elements
+ * Arguments   : Inputs  - in_h, in_l
+ *               Outputs - out
+ *               Return Type - double
+ * Details     : Signed byte elements from in_h are multiplied by
+ *               signed byte elements from in_l, and then added adjacent to
+ *               each other to get a result twice the size of input.
+ * Example     : out = __lsx_vdp2_d_w(in_h, in_l)
+ *        in_h : 1,2,3,4
+ *        in_l : 8,7,6,5
+ *         out : 22,38
+ * =============================================================================
+ */
+static inline __m128i __lsx_vdp2_d_w(__m128i in_h, __m128i in_l) {
+  __m128i out;
+
+  out = __lsx_vmulwev_d_w(in_h, in_l);
+  out = __lsx_vmaddwod_d_w(out, in_h, in_l);
   return out;
 }
 
@@ -679,6 +728,132 @@ static inline __m128i __lsx_vclip255_w(__m128i _in) {
     _out7 = __lsx_vsub_d(_in0, _in7);                                      \
   }
 
+/*
+ * =============================================================================
+ * Description : Butterfly of 16 input vectors
+ * Arguments   : Inputs  - _in0, _in1, _in2, _in3, ~
+ *               Outputs - _out0, _out1, _out2, _out3, ~
+ * Details     : Butterfly operation
+ * Example     :
+ *              _out0 = _in0 + _in15;
+ *              _out1 = _in1 + _in14;
+ *              _out2 = _in2 + _in13;
+ *              _out3 = _in3 + _in12;
+ *              _out4 = _in4 + _in11;
+ *              _out5 = _in5 + _in10;
+ *              _out6 = _in6 + _in9;
+ *              _out7 = _in7 + _in8;
+ *              _out8 = _in7 - _in8;
+ *              _out9 = _in6 - _in9;
+ *              _out10 = _in5 - _in10;
+ *              _out11 = _in4 - _in11;
+ *              _out12 = _in3 - _in12;
+ *              _out13 = _in2 - _in13;
+ *              _out14 = _in1 - _in14;
+ *              _out15 = _in0 - _in15;
+ * =============================================================================
+ */
+
+#define LSX_BUTTERFLY_16_B(_in0, _in1, _in2, _in3, _in4, _in5, _in6, _in7,     \
+                           _in8, _in9, _in10, _in11, _in12, _in13, _in14,      \
+                           _in15, _out0, _out1, _out2, _out3, _out4, _out5,    \
+                           _out6, _out7, _out8, _out9, _out10, _out11, _out12, \
+                           _out13, _out14, _out15)                             \
+  {                                                                            \
+    _out0 = __lsx_vadd_b(_in0, _in15);                                         \
+    _out1 = __lsx_vadd_b(_in1, _in14);                                         \
+    _out2 = __lsx_vadd_b(_in2, _in13);                                         \
+    _out3 = __lsx_vadd_b(_in3, _in12);                                         \
+    _out4 = __lsx_vadd_b(_in4, _in11);                                         \
+    _out5 = __lsx_vadd_b(_in5, _in10);                                         \
+    _out6 = __lsx_vadd_b(_in6, _in9);                                          \
+    _out7 = __lsx_vadd_b(_in7, _in8);                                          \
+                                                                               \
+    _out8 = __lsx_vsub_b(_in7, _in8);                                          \
+    _out9 = __lsx_vsub_b(_in6, _in9);                                          \
+    _out10 = __lsx_vsub_b(_in5, _in10);                                        \
+    _out11 = __lsx_vsub_b(_in4, _in11);                                        \
+    _out12 = __lsx_vsub_b(_in3, _in12);                                        \
+    _out13 = __lsx_vsub_b(_in2, _in13);                                        \
+    _out14 = __lsx_vsub_b(_in1, _in14);                                        \
+    _out15 = __lsx_vsub_b(_in0, _in15);                                        \
+  }
+
+#define LSX_BUTTERFLY_16_H(_in0, _in1, _in2, _in3, _in4, _in5, _in6, _in7,     \
+                           _in8, _in9, _in10, _in11, _in12, _in13, _in14,      \
+                           _in15, _out0, _out1, _out2, _out3, _out4, _out5,    \
+                           _out6, _out7, _out8, _out9, _out10, _out11, _out12, \
+                           _out13, _out14, _out15)                             \
+  {                                                                            \
+    _out0 = __lsx_vadd_h(_in0, _in15);                                         \
+    _out1 = __lsx_vadd_h(_in1, _in14);                                         \
+    _out2 = __lsx_vadd_h(_in2, _in13);                                         \
+    _out3 = __lsx_vadd_h(_in3, _in12);                                         \
+    _out4 = __lsx_vadd_h(_in4, _in11);                                         \
+    _out5 = __lsx_vadd_h(_in5, _in10);                                         \
+    _out6 = __lsx_vadd_h(_in6, _in9);                                          \
+    _out7 = __lsx_vadd_h(_in7, _in8);                                          \
+                                                                               \
+    _out8 = __lsx_vsub_h(_in7, _in8);                                          \
+    _out9 = __lsx_vsub_h(_in6, _in9);                                          \
+    _out10 = __lsx_vsub_h(_in5, _in10);                                        \
+    _out11 = __lsx_vsub_h(_in4, _in11);                                        \
+    _out12 = __lsx_vsub_h(_in3, _in12);                                        \
+    _out13 = __lsx_vsub_h(_in2, _in13);                                        \
+    _out14 = __lsx_vsub_h(_in1, _in14);                                        \
+    _out15 = __lsx_vsub_h(_in0, _in15);                                        \
+  }
+
+#define LSX_BUTTERFLY_16_W(_in0, _in1, _in2, _in3, _in4, _in5, _in6, _in7,     \
+                           _in8, _in9, _in10, _in11, _in12, _in13, _in14,      \
+                           _in15, _out0, _out1, _out2, _out3, _out4, _out5,    \
+                           _out6, _out7, _out8, _out9, _out10, _out11, _out12, \
+                           _out13, _out14, _out15)                             \
+  {                                                                            \
+    _out0 = __lsx_vadd_w(_in0, _in15);                                         \
+    _out1 = __lsx_vadd_w(_in1, _in14);                                         \
+    _out2 = __lsx_vadd_w(_in2, _in13);                                         \
+    _out3 = __lsx_vadd_w(_in3, _in12);                                         \
+    _out4 = __lsx_vadd_w(_in4, _in11);                                         \
+    _out5 = __lsx_vadd_w(_in5, _in10);                                         \
+    _out6 = __lsx_vadd_w(_in6, _in9);                                          \
+    _out7 = __lsx_vadd_w(_in7, _in8);                                          \
+                                                                               \
+    _out8 = __lsx_vsub_w(_in7, _in8);                                          \
+    _out9 = __lsx_vsub_w(_in6, _in9);                                          \
+    _out10 = __lsx_vsub_w(_in5, _in10);                                        \
+    _out11 = __lsx_vsub_w(_in4, _in11);                                        \
+    _out12 = __lsx_vsub_w(_in3, _in12);                                        \
+    _out13 = __lsx_vsub_w(_in2, _in13);                                        \
+    _out14 = __lsx_vsub_w(_in1, _in14);                                        \
+    _out15 = __lsx_vsub_w(_in0, _in15);                                        \
+  }
+
+#define LSX_BUTTERFLY_16_D(_in0, _in1, _in2, _in3, _in4, _in5, _in6, _in7,     \
+                           _in8, _in9, _in10, _in11, _in12, _in13, _in14,      \
+                           _in15, _out0, _out1, _out2, _out3, _out4, _out5,    \
+                           _out6, _out7, _out8, _out9, _out10, _out11, _out12, \
+                           _out13, _out14, _out15)                             \
+  {                                                                            \
+    _out0 = __lsx_vadd_d(_in0, _in15);                                         \
+    _out1 = __lsx_vadd_d(_in1, _in14);                                         \
+    _out2 = __lsx_vadd_d(_in2, _in13);                                         \
+    _out3 = __lsx_vadd_d(_in3, _in12);                                         \
+    _out4 = __lsx_vadd_d(_in4, _in11);                                         \
+    _out5 = __lsx_vadd_d(_in5, _in10);                                         \
+    _out6 = __lsx_vadd_d(_in6, _in9);                                          \
+    _out7 = __lsx_vadd_d(_in7, _in8);                                          \
+                                                                               \
+    _out8 = __lsx_vsub_d(_in7, _in8);                                          \
+    _out9 = __lsx_vsub_d(_in6, _in9);                                          \
+    _out10 = __lsx_vsub_d(_in5, _in10);                                        \
+    _out11 = __lsx_vsub_d(_in4, _in11);                                        \
+    _out12 = __lsx_vsub_d(_in3, _in12);                                        \
+    _out13 = __lsx_vsub_d(_in2, _in13);                                        \
+    _out14 = __lsx_vsub_d(_in1, _in14);                                        \
+    _out15 = __lsx_vsub_d(_in0, _in15);                                        \
+  }
+
 #endif  // LSX
 
 #ifdef __loongarch_asx
@@ -692,7 +867,7 @@ static inline __m128i __lsx_vclip255_w(__m128i _in) {
  * Details     : Unsigned byte elements from in_h are multiplied with
  *               unsigned byte elements from in_l producing a result
  *               twice the size of input i.e. signed halfword.
- *               Then this multiplied results of adjacent odd-even elements
+ *               Then these multiplied results of adjacent odd-even elements
  *               are added to the out vector
  * Example     : See out = __lasx_xvdp2_w_h(in_h, in_l)
  * =============================================================================
@@ -714,7 +889,7 @@ static inline __m256i __lasx_xvdp2_h_bu(__m256i in_h, __m256i in_l) {
  * Details     : Signed byte elements from in_h are multiplied with
  *               signed byte elements from in_l producing a result
  *               twice the size of input i.e. signed halfword.
- *               Then this multiplication results of adjacent odd-even elements
+ *               Then these multiplication results of adjacent odd-even elements
  *               are added to the out vector
  * Example     : See out = __lasx_xvdp2_w_h(in_h, in_l)
  * =============================================================================
@@ -736,7 +911,7 @@ static inline __m256i __lasx_xvdp2_h_b(__m256i in_h, __m256i in_l) {
  * Details     : Signed halfword elements from in_h are multiplied with
  *               signed halfword elements from in_l producing a result
  *               twice the size of input i.e. signed word.
- *               Then this multiplied results of adjacent odd-even elements
+ *               Then these multiplied results of adjacent odd-even elements
  *               are added to the out vector.
  * Example     : out = __lasx_xvdp2_w_h(in_h, in_l)
  *        in_h : 1,2,3,4, 5,6,7,8, 1,2,3,4, 5,6,7,8
@@ -761,7 +936,7 @@ static inline __m256i __lasx_xvdp2_w_h(__m256i in_h, __m256i in_l) {
  * Details     : Signed word elements from in_h are multiplied with
  *               signed word elements from in_l producing a result
  *               twice the size of input i.e. signed double-word.
- *               Then this multiplied results of adjacent odd-even elements
+ *               Then these multiplied results of adjacent odd-even elements
  *               are added to the out vector.
  * Example     : See out = __lasx_xvdp2_w_h(in_h, in_l)
  * =============================================================================
@@ -805,7 +980,7 @@ static inline __m256i __lasx_xvdp2_w_hu_h(__m256i in_h, __m256i in_l) {
  * Details     : Signed byte elements from in_h are multiplied with
  *               signed byte elements from in_l producing a result
  *               twice the size of input i.e. signed halfword.
- *               Then this multiplied results of adjacent odd-even elements
+ *               Then these multiplied results of adjacent odd-even elements
  *               are added to the in_c vector.
  * Example     : See out = __lasx_xvdp2add_w_h(in_c, in_h, in_l)
  * =============================================================================
@@ -816,6 +991,52 @@ static inline __m256i __lasx_xvdp2add_h_b(__m256i in_c, __m256i in_h,
 
   out = __lasx_xvmaddwev_h_b(in_c, in_h, in_l);
   out = __lasx_xvmaddwod_h_b(out, in_h, in_l);
+  return out;
+}
+
+/*
+ * =============================================================================
+ * Description : Dot product & addition of byte vector elements
+ * Arguments   : Inputs - in_h, in_l
+ *               Output - out
+ *               Return Type - halfword
+ * Details     : Unsigned byte elements from in_h are multiplied with
+ *               unsigned byte elements from in_l producing a result
+ *               twice the size of input i.e. signed halfword.
+ *               Then these multiplied results of adjacent odd-even elements
+ *               are added to the in_c vector.
+ * Example     : See out = __lasx_xvdp2add_w_h(in_c, in_h, in_l)
+ * =============================================================================
+ */
+static inline __m256i __lasx_xvdp2add_h_bu(__m256i in_c, __m256i in_h,
+                                           __m256i in_l) {
+  __m256i out;
+
+  out = __lasx_xvmaddwev_h_bu(in_c, in_h, in_l);
+  out = __lasx_xvmaddwod_h_bu(out, in_h, in_l);
+  return out;
+}
+
+/*
+ * =============================================================================
+ * Description : Dot product & addition of byte vector elements
+ * Arguments   : Inputs - in_h, in_l
+ *               Output - out
+ *               Return Type - halfword
+ * Details     : Unsigned byte elements from in_h are multiplied with
+ *               signed byte elements from in_l producing a result
+ *               twice the size of input i.e. signed halfword.
+ *               Then these multiplied results of adjacent odd-even elements
+ *               are added to the in_c vector.
+ * Example     : See out = __lasx_xvdp2add_w_h(in_c, in_h, in_l)
+ * =============================================================================
+ */
+static inline __m256i __lasx_xvdp2add_h_bu_b(__m256i in_c, __m256i in_h,
+                                             __m256i in_l) {
+  __m256i out;
+
+  out = __lasx_xvmaddwev_h_bu_b(in_c, in_h, in_l);
+  out = __lasx_xvmaddwod_h_bu_b(out, in_h, in_l);
   return out;
 }
 
@@ -955,7 +1176,7 @@ static inline __m256i __lasx_xvdp2sub_w_h(__m256i in_c, __m256i in_h,
  * Details     : Signed halfword elements from in_h are multiplied with
  *               signed halfword elements from in_l producing a result
  *               four times the size of input i.e. signed doubleword.
- *               Then this multiplication results of four adjacent elements
+ *               Then these multiplication results of four adjacent elements
  *               are added together and stored to the out vector.
  * Example     : out = __lasx_xvdp4_d_h(in_h, in_l)
  *        in_h :  3,1,3,0, 0,0,0,1, 0,0,1,-1, 0,0,0,1
