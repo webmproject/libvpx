@@ -30,7 +30,6 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/msvc.h"
 #include "vpx_ports/vpx_timer.h"
-#include "vpx_dsp/quantize.h"
 
 using libvpx_test::ACMRandom;
 using libvpx_test::Buffer;
@@ -465,12 +464,22 @@ using std::make_tuple;
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_SUITE_P(
     SSE2, VP9QuantizeTest,
-    ::testing::Values(make_tuple(&vpx_quantize_b_sse2, &vpx_quantize_b_c,
-                                 VPX_BITS_8, 16, false),
-                      make_tuple(&vpx_quantize_b_sse2, &vpx_highbd_quantize_b_c,
-                                 VPX_BITS_10, 16, false),
-                      make_tuple(&vpx_quantize_b_sse2, &vpx_highbd_quantize_b_c,
-                                 VPX_BITS_12, 16, false)));
+    ::testing::Values(
+        make_tuple(&vpx_quantize_b_sse2, &vpx_quantize_b_c, VPX_BITS_8, 16,
+                   false),
+        make_tuple(&vpx_highbd_quantize_b_sse2, &vpx_highbd_quantize_b_c,
+                   VPX_BITS_8, 16, false),
+        make_tuple(&vpx_highbd_quantize_b_sse2, &vpx_highbd_quantize_b_c,
+                   VPX_BITS_10, 16, false),
+        make_tuple(&vpx_highbd_quantize_b_sse2, &vpx_highbd_quantize_b_c,
+                   VPX_BITS_12, 16, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_sse2,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_8, 32, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_sse2,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_10, 32, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_sse2,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_12, 32, false)));
+
 #else
 INSTANTIATE_TEST_SUITE_P(
     SSE2, VP9QuantizeTest,
@@ -510,24 +519,6 @@ INSTANTIATE_TEST_SUITE_P(
 #endif  // HAVE_SSSE3
 
 #if HAVE_AVX
-#if CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_SUITE_P(
-    AVX, VP9QuantizeTest,
-    ::testing::Values(
-        make_tuple(&vpx_quantize_b_avx, &vpx_quantize_b_c, VPX_BITS_8, 16,
-                   false),
-        make_tuple(&vpx_quantize_b_avx, &vpx_highbd_quantize_b_c, VPX_BITS_10,
-                   16, false),
-        make_tuple(&vpx_quantize_b_avx, &vpx_highbd_quantize_b_c, VPX_BITS_12,
-                   16, false),
-        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_highbd_quantize_b_32x32_c,
-                   VPX_BITS_8, 32, false),
-        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_highbd_quantize_b_32x32_c,
-                   VPX_BITS_10, 32, false),
-        make_tuple(&vpx_quantize_b_32x32_avx, &vpx_highbd_quantize_b_32x32_c,
-                   VPX_BITS_12, 32, false)));
-
-#else
 INSTANTIATE_TEST_SUITE_P(AVX, VP9QuantizeTest,
                          ::testing::Values(make_tuple(&vpx_quantize_b_avx,
                                                       &vpx_quantize_b_c,
@@ -535,7 +526,6 @@ INSTANTIATE_TEST_SUITE_P(AVX, VP9QuantizeTest,
                                            make_tuple(&vpx_quantize_b_32x32_avx,
                                                       &vpx_quantize_b_32x32_c,
                                                       VPX_BITS_8, 32, false)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_AVX
 
 #if VPX_ARCH_X86_64 && HAVE_AVX2
