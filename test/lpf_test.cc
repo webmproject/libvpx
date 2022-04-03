@@ -697,17 +697,23 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     LSX, Loop8Test6Param,
     ::testing::Values(
+        make_tuple(&vpx_lpf_horizontal_4_lsx, &vpx_lpf_horizontal_4_c, 8),
         make_tuple(&vpx_lpf_horizontal_8_lsx, &vpx_lpf_horizontal_8_c, 8),
         make_tuple(&vpx_lpf_horizontal_16_dual_lsx,
                    &vpx_lpf_horizontal_16_dual_c, 8),
+        make_tuple(&vpx_lpf_vertical_4_lsx, &vpx_lpf_vertical_4_c, 8),
         make_tuple(&vpx_lpf_vertical_8_lsx, &vpx_lpf_vertical_8_c, 8),
         make_tuple(&vpx_lpf_vertical_16_dual_lsx, &vpx_lpf_vertical_16_dual_c,
                    8)));
 
 INSTANTIATE_TEST_SUITE_P(
     LSX, Loop8Test9Param,
-    ::testing::Values(make_tuple(&vpx_lpf_horizontal_8_dual_lsx,
+    ::testing::Values(make_tuple(&vpx_lpf_horizontal_4_dual_lsx,
+                                 &vpx_lpf_horizontal_4_dual_c, 8),
+                      make_tuple(&vpx_lpf_horizontal_8_dual_lsx,
                                  &vpx_lpf_horizontal_8_dual_c, 8),
+                      make_tuple(&vpx_lpf_vertical_4_dual_lsx,
+                                 &vpx_lpf_vertical_4_dual_c, 8),
                       make_tuple(&vpx_lpf_vertical_8_dual_lsx,
                                  &vpx_lpf_vertical_8_dual_c, 8)));
 #endif  // HAVE_LSX && (!CONFIG_VP9_HIGHBITDEPTH)
