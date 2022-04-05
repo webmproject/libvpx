@@ -2143,6 +2143,7 @@ static vp9_extracfg get_extra_cfg() {
 VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
                                         vpx_rational_t frame_rate,
                                         int target_bitrate, int encode_speed,
+                                        int target_level,
                                         vpx_enc_pass enc_pass) {
   /* This function will generate the same VP9EncoderConfig used by the
    * vpxenc command given below.
@@ -2154,6 +2155,7 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
    * FPS:     frame_rate
    * BITRATE: target_bitrate
    * CPU_USED:encode_speed
+   * TARGET_LEVEL: target_level
    *
    * INPUT, OUTPUT, LIMIT will not affect VP9EncoderConfig
    *
@@ -2166,6 +2168,7 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
    * FPS=30/1
    * LIMIT=150
    * CPU_USED=0
+   * TARGET_LEVEL=0
    * ./vpxenc --limit=$LIMIT --width=$WIDTH --height=$HEIGHT --fps=$FPS
    * --lag-in-frames=25 \
    *  --codec=vp9 --good --cpu-used=CPU_USED --threads=0 --profile=0 \
@@ -2174,7 +2177,7 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
    *  --minsection-pct=0 --maxsection-pct=150 --arnr-maxframes=7 --psnr \
    *  --arnr-strength=5 --sharpness=0 --undershoot-pct=100 --overshoot-pct=100 \
    *  --frame-parallel=0 --tile-columns=0 --cpu-used=0 --end-usage=vbr \
-   *  --target-bitrate=$BITRATE -o $OUTPUT $INPUT
+   *  --target-bitrate=$BITRATE --target-level=0 -o $OUTPUT $INPUT
    */
 
   VP9EncoderConfig oxcf;
@@ -2192,6 +2195,7 @@ VP9EncoderConfig vp9_get_encoder_config(int frame_width, int frame_height,
   oxcf.frame_parallel_decoding_mode = 0;
   oxcf.two_pass_vbrmax_section = 150;
   oxcf.speed = abs(encode_speed);
+  oxcf.target_level = target_level;
   return oxcf;
 }
 
