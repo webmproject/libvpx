@@ -236,6 +236,7 @@ DSP_SRCS-$(HAVE_NEON)   += arm/fwd_txfm_neon.c
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.h
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_txfm_msa.c
 DSP_SRCS-$(HAVE_LSX)    += loongarch/fwd_txfm_lsx.h
+DSP_SRCS-$(HAVE_LSX)    += loongarch/fwd_txfm_lsx.c
 
 ifneq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_MSA)    += mips/fwd_dct32x32_msa.c

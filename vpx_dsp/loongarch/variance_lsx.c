@@ -37,8 +37,49 @@
     sub = __lsx_vadd_h(sub, res_l1_m);                                    \
   }
 
+#define VARIANCE_WxH(sse, diff, shift) \
+  (sse) - (((uint32_t)(diff) * (diff)) >> (shift))
+
 #define VARIANCE_LARGE_WxH(sse, diff, shift) \
   (sse) - (((int64_t)(diff) * (diff)) >> (shift))
+
+static uint32_t sse_diff_16width_lsx(const uint8_t *src_ptr, int32_t src_stride,
+                                     const uint8_t *ref_ptr, int32_t ref_stride,
+                                     int32_t height, int32_t *diff) {
+  int32_t ht_cnt = (height >> 2);
+  __m128i src, ref, vec;
+  __m128i avg = __lsx_vldi(0);
+  __m128i var = avg;
+
+  for (; ht_cnt--;) {
+    src = __lsx_vld(src_ptr, 0);
+    src_ptr += src_stride;
+    ref = __lsx_vld(ref_ptr, 0);
+    ref_ptr += ref_stride;
+    CALC_MSE_AVG_B(src, ref, var, avg);
+
+    src = __lsx_vld(src_ptr, 0);
+    src_ptr += src_stride;
+    ref = __lsx_vld(ref_ptr, 0);
+    ref_ptr += ref_stride;
+    CALC_MSE_AVG_B(src, ref, var, avg);
+    src = __lsx_vld(src_ptr, 0);
+    src_ptr += src_stride;
+    ref = __lsx_vld(ref_ptr, 0);
+    ref_ptr += ref_stride;
+    CALC_MSE_AVG_B(src, ref, var, avg);
+
+    src = __lsx_vld(src_ptr, 0);
+    src_ptr += src_stride;
+    ref = __lsx_vld(ref_ptr, 0);
+    ref_ptr += ref_stride;
+    CALC_MSE_AVG_B(src, ref, var, avg);
+  }
+  vec = __lsx_vhaddw_w_h(avg, avg);
+  *diff = HADD_SW_S32(vec);
+
+  return HADD_SW_S32(var);
+}
 
 static uint32_t sse_diff_32width_lsx(const uint8_t *src_ptr, int32_t src_stride,
                                      const uint8_t *ref_ptr, int32_t ref_stride,
@@ -133,8 +174,10 @@ static uint32_t sse_diff_64x64_lsx(const uint8_t *src_ptr, int32_t src_stride,
   return HADD_SW_S32(var);
 }
 
-#define VARIANCE_32Wx32H(sse, diff) VARIANCE_LARGE_WxH(sse, diff, 10);
-#define VARIANCE_64Wx64H(sse, diff) VARIANCE_LARGE_WxH(sse, diff, 12);
+#define VARIANCE_16Wx16H(sse, diff) VARIANCE_WxH(sse, diff, 8)
+
+#define VARIANCE_32Wx32H(sse, diff) VARIANCE_LARGE_WxH(sse, diff, 10)
+#define VARIANCE_64Wx64H(sse, diff) VARIANCE_LARGE_WxH(sse, diff, 12)
 
 #define VPX_VARIANCE_WDXHT_LSX(wd, ht)                                         \
   uint32_t vpx_variance##wd##x##ht##_lsx(                                      \
@@ -148,6 +191,7 @@ static uint32_t sse_diff_64x64_lsx(const uint8_t *src_ptr, int32_t src_stride,
     return VARIANCE_##wd##Wx##ht##H(*sse, diff);                               \
   }
 
+VPX_VARIANCE_WDXHT_LSX(16, 16)
 VPX_VARIANCE_WDXHT_LSX(32, 32)
 
 uint32_t vpx_variance64x64_lsx(const uint8_t *src, int32_t src_stride,
@@ -158,4 +202,10 @@ uint32_t vpx_variance64x64_lsx(const uint8_t *src, int32_t src_stride,
   *sse = sse_diff_64x64_lsx(src, src_stride, ref, ref_stride, &diff);
 
   return VARIANCE_64Wx64H(*sse, diff);
+}
+
+void vpx_get16x16var_lsx(const uint8_t *src, int32_t src_stride,
+                         const uint8_t *ref, int32_t ref_stride, uint32_t *sse,
+                         int32_t *sum) {
+  *sse = sse_diff_16width_lsx(src, src_stride, ref, ref_stride, 16, sum);
 }

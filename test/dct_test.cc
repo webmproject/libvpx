@@ -586,6 +586,21 @@ INSTANTIATE_TEST_SUITE_P(VSX, TransDCT,
                                                       VPX_BITS_8)));
 #endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH &&
 
+#if HAVE_LSX && !CONFIG_VP9_HIGHBITDEPTH
+static const FuncInfo dct_lsx_func_info[2] = {
+  { &fdct_wrapper<vpx_fdct16x16_lsx>, &idct_wrapper<vpx_idct16x16_256_add_c>,
+    16, 1 },
+  { &fdct_wrapper<vpx_fdct32x32_lsx>, &idct_wrapper<vpx_idct32x32_1024_add_lsx>,
+    32, 1 }
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    LSX, TransDCT,
+    ::testing::Combine(::testing::Range(0, 2),
+                       ::testing::Values(dct_lsx_func_info),
+                       ::testing::Values(0), ::testing::Values(VPX_BITS_8)));
+#endif  // HAVE_LSX && !CONFIG_VP9_HIGHBITDEPTH
+
 #endif  // !CONFIG_EMULATE_HARDWARE
 
 /* -------------------------------------------------------------------------- */
@@ -756,4 +771,5 @@ INSTANTIATE_TEST_SUITE_P(VSX, TransWHT,
                          ::testing::Values(make_tuple(0, &wht_vsx_func_info, 0,
                                                       VPX_BITS_8)));
 #endif  // HAVE_VSX && !CONFIG_EMULATE_HARDWARE
+
 }  // namespace

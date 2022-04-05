@@ -585,7 +585,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct8x8_1 sse2 neon msa/;
 
   add_proto qw/void vpx_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct16x16 neon sse2 msa/;
+  specialize qw/vpx_fdct16x16 neon sse2 msa lsx/;
 
   add_proto qw/void vpx_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct16x16_1 sse2 neon msa/;
@@ -1099,7 +1099,7 @@ add_proto qw/unsigned int vpx_variance16x32/, "const uint8_t *src_ptr, int src_s
   specialize qw/vpx_variance16x32 sse2 avx2 neon msa mmi vsx/;
 
 add_proto qw/unsigned int vpx_variance16x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_variance16x16 sse2 avx2 neon msa mmi vsx/;
+  specialize qw/vpx_variance16x16 sse2 avx2 neon msa mmi vsx lsx/;
 
 add_proto qw/unsigned int vpx_variance16x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
   specialize qw/vpx_variance16x8 sse2 avx2 neon msa mmi vsx/;
@@ -1123,7 +1123,7 @@ add_proto qw/unsigned int vpx_variance4x4/, "const uint8_t *src_ptr, int src_str
 # Specialty Variance
 #
 add_proto qw/void vpx_get16x16var/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-  specialize qw/vpx_get16x16var sse2 avx2 neon msa vsx/;
+  specialize qw/vpx_get16x16var sse2 avx2 neon msa vsx lsx/;
 
 add_proto qw/void vpx_get8x8var/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
   specialize qw/vpx_get8x8var sse2 neon msa vsx/;
