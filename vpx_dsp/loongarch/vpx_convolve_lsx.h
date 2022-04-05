@@ -14,6 +14,17 @@
 #include "vpx_util/loongson_intrinsics.h"
 #include "vpx_dsp/vpx_filter.h"
 
+#define LSX_LD_4(_src, _stride, _src0, _src1, _src2, _src3) \
+  {                                                         \
+    _src0 = __lsx_vld(_src, 0);                             \
+    _src += _stride;                                        \
+    _src1 = __lsx_vld(_src, 0);                             \
+    _src += _stride;                                        \
+    _src2 = __lsx_vld(_src, 0);                             \
+    _src += _stride;                                        \
+    _src3 = __lsx_vld(_src, 0);                             \
+  }
+
 #define FILT_8TAP_DPADD_S_H(_reg0, _reg1, _reg2, _reg3, _filter0, _filter1, \
                             _filter2, _filter3)                             \
   ({                                                                        \
@@ -113,5 +124,20 @@
                                                          \
     tmp1_m;                                              \
   })
+
+#define PCKEV_AVG_ST4_D(in0, in1, in2, in3, dst0, dst1, pdst, stride)      \
+  {                                                                        \
+    __m128i tmp0_m, tmp1_m;                                                \
+                                                                           \
+    DUP2_ARG2(__lsx_vpickev_b, in1, in0, in3, in2, tmp0_m, tmp1_m);        \
+    DUP2_ARG2(__lsx_vavgr_bu, tmp0_m, dst0, tmp1_m, dst1, tmp0_m, tmp1_m); \
+    __lsx_vstelm_d(tmp0_m, pdst, 0, 0);                                    \
+    pdst += stride;                                                        \
+    __lsx_vstelm_d(tmp0_m, pdst, 0, 1);                                    \
+    pdst += stride;                                                        \
+    __lsx_vstelm_d(tmp1_m, pdst, 0, 0);                                    \
+    pdst += stride;                                                        \
+    __lsx_vstelm_d(tmp1_m, pdst, 0, 1);                                    \
+  }
 
 #endif  // VPX_VPX_DSP_LOONGARCH_VPX_CONVOLVE_LSX_H_

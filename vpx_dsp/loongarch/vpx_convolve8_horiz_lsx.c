@@ -12,17 +12,6 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/loongarch/vpx_convolve_lsx.h"
 
-#define LSX_LD_4(_src, _stride, _src0, _src1, _src2, _src3) \
-  {                                                         \
-    _src0 = __lsx_vld(_src, 0);                             \
-    _src += _stride;                                        \
-    _src1 = __lsx_vld(_src, 0);                             \
-    _src += _stride;                                        \
-    _src2 = __lsx_vld(_src, 0);                             \
-    _src += _stride;                                        \
-    _src3 = __lsx_vld(_src, 0);                             \
-  }
-
 static const uint8_t mc_filt_mask_arr[16 * 3] = {
   /* 8 width cases */
   0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8,
