@@ -401,6 +401,7 @@ DSP_SRCS-$(HAVE_MSA)    += mips/sub_pixel_variance_msa.c
 
 DSP_SRCS-$(HAVE_LSX)    += loongarch/variance_lsx.c
 DSP_SRCS-$(HAVE_LSX)    += loongarch/sub_pixel_variance_lsx.c
+DSP_SRCS-$(HAVE_LSX)    += loongarch/avg_pred_lsx.c
 
 DSP_SRCS-$(HAVE_MMI)    += mips/variance_mmi.c
 

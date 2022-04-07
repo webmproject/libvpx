@@ -836,7 +836,7 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
 }  # CONFIG_VP9_ENCODER
 
 add_proto qw/unsigned int vpx_sad64x64_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad64x64_avg neon avx2 msa sse2 vsx mmi/;
+specialize qw/vpx_sad64x64_avg neon avx2 msa sse2 vsx mmi lsx/;
 
 add_proto qw/unsigned int vpx_sad64x32_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vpx_sad64x32_avg neon avx2 msa sse2 vsx mmi/;
@@ -845,7 +845,7 @@ add_proto qw/unsigned int vpx_sad32x64_avg/, "const uint8_t *src_ptr, int src_st
 specialize qw/vpx_sad32x64_avg neon avx2 msa sse2 vsx mmi/;
 
 add_proto qw/unsigned int vpx_sad32x32_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
-specialize qw/vpx_sad32x32_avg neon avx2 msa sse2 vsx mmi/;
+specialize qw/vpx_sad32x32_avg neon avx2 msa sse2 vsx mmi lsx/;
 
 add_proto qw/unsigned int vpx_sad32x16_avg/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vpx_sad32x16_avg neon avx2 msa sse2 vsx mmi/;
@@ -1147,7 +1147,7 @@ add_proto qw/unsigned int vpx_get4x4sse_cs/, "const unsigned char *src_ptr, int 
   specialize qw/vpx_get4x4sse_cs neon msa vsx/;
 
 add_proto qw/void vpx_comp_avg_pred/, "uint8_t *comp_pred, const uint8_t *pred, int width, int height, const uint8_t *ref, int ref_stride";
-  specialize qw/vpx_comp_avg_pred neon sse2 vsx/;
+  specialize qw/vpx_comp_avg_pred neon sse2 vsx lsx/;
 
 #
 # Subpixel Variance
