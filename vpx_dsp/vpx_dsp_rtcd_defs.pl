@@ -754,7 +754,7 @@ add_proto qw/unsigned int vpx_sad16x32/, "const uint8_t *src_ptr, int src_stride
 specialize qw/vpx_sad16x32 neon msa sse2 vsx mmi/;
 
 add_proto qw/unsigned int vpx_sad16x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad16x16 neon msa sse2 vsx mmi/;
+specialize qw/vpx_sad16x16 neon msa sse2 vsx mmi lsx/;
 
 add_proto qw/unsigned int vpx_sad16x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vpx_sad16x8 neon msa sse2 vsx mmi/;
@@ -1162,7 +1162,7 @@ add_proto qw/uint32_t vpx_sub_pixel_variance32x64/, "const uint8_t *src_ptr, int
   specialize qw/vpx_sub_pixel_variance32x64 neon msa mmi sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance32x32/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
-  specialize qw/vpx_sub_pixel_variance32x32 avx2 neon msa mmi sse2 ssse3/;
+  specialize qw/vpx_sub_pixel_variance32x32 avx2 neon msa mmi sse2 ssse3 lsx/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance32x16/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
   specialize qw/vpx_sub_pixel_variance32x16 neon msa mmi sse2 ssse3/;

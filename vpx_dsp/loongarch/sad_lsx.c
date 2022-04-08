@@ -46,6 +46,33 @@
     sum_m;                              \
   })
 
+static uint32_t sad_16width_lsx(const uint8_t *src, int32_t src_stride,
+                                const uint8_t *ref, int32_t ref_stride,
+                                int32_t height) {
+  int32_t ht_cnt = (height >> 2);
+  __m128i src0, src1, ref0, ref1, sad_tmp;
+  __m128i sad = __lsx_vldi(0);
+  int32_t src_stride2 = src_stride << 1;
+  int32_t ref_stride2 = ref_stride << 1;
+
+  for (; ht_cnt--;) {
+    DUP2_ARG2(__lsx_vld, src, 0, ref, 0, src0, ref0);
+    DUP2_ARG2(__lsx_vldx, src, src_stride, ref, ref_stride, src1, ref1);
+    src += src_stride2;
+    ref += ref_stride2;
+    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad = __lsx_vadd_h(sad, sad_tmp);
+
+    DUP2_ARG2(__lsx_vld, src, 0, ref, 0, src0, ref0);
+    DUP2_ARG2(__lsx_vldx, src, src_stride, ref, ref_stride, src1, ref1);
+    src += src_stride2;
+    ref += ref_stride2;
+    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad = __lsx_vadd_h(sad, sad_tmp);
+  }
+  return HADD_UH_U32(sad);
+}
+
 static uint32_t sad_32width_lsx(const uint8_t *src, int32_t src_stride,
                                 const uint8_t *ref, int32_t ref_stride,
                                 int32_t height) {
@@ -328,6 +355,12 @@ static void sad_64width_x4d_lsx(const uint8_t *src, int32_t src_stride,
   sad_array[3] = HADD_UW_U32(sad);
 }
 
+#define VPX_SAD_16xHEIGHT_LSX(height)                                         \
+  uint32_t vpx_sad16x##height##_lsx(const uint8_t *src, int32_t src_stride,   \
+                                    const uint8_t *ref, int32_t ref_stride) { \
+    return sad_16width_lsx(src, src_stride, ref, ref_stride, height);         \
+  }
+
 #define VPX_SAD_32xHT_LSX(height)                                             \
   uint32_t vpx_sad32x##height##_lsx(const uint8_t *src, int32_t src_stride,   \
                                     const uint8_t *ref, int32_t ref_stride) { \
@@ -369,7 +402,7 @@ SAD64
 
 SAD32
 
-#define SAD16 VPX_SAD_16xHTx4D_LSX(16)
+#define SAD16 VPX_SAD_16xHEIGHT_LSX(16) VPX_SAD_16xHTx4D_LSX(16)
 
 SAD16
 

@@ -1135,6 +1135,7 @@ INSTANTIATE_TEST_SUITE_P(MMI, SADx4Test, ::testing::ValuesIn(x4d_mmi_tests));
 const SadMxNParam lsx_tests[] = {
   SadMxNParam(64, 64, &vpx_sad64x64_lsx),
   SadMxNParam(32, 32, &vpx_sad32x32_lsx),
+  SadMxNParam(16, 16, &vpx_sad16x16_lsx),
 };
 INSTANTIATE_TEST_SUITE_P(LSX, SADTest, ::testing::ValuesIn(lsx_tests));
 
