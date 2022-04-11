@@ -196,7 +196,9 @@ static void show_histogram(const struct hist_bucket *bucket, int buckets,
   int width1, width2;
   int i;
 
+  if (!buckets) return;
   assert(bucket != NULL);
+  assert(buckets > 0);
 
   switch ((int)(log(bucket[buckets - 1].high) / log(10)) + 1) {
     case 1:
