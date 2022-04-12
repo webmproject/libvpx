@@ -1147,8 +1147,11 @@ INSTANTIATE_TEST_SUITE_P(LSX, SADavgTest, ::testing::ValuesIn(avg_lsx_tests));
 
 const SadMxNx4Param x4d_lsx_tests[] = {
   SadMxNx4Param(64, 64, &vpx_sad64x64x4d_lsx),
+  SadMxNx4Param(64, 32, &vpx_sad64x32x4d_lsx),
+  SadMxNx4Param(32, 64, &vpx_sad32x64x4d_lsx),
   SadMxNx4Param(32, 32, &vpx_sad32x32x4d_lsx),
   SadMxNx4Param(16, 16, &vpx_sad16x16x4d_lsx),
+  SadMxNx4Param(8, 8, &vpx_sad8x8x4d_lsx),
 };
 INSTANTIATE_TEST_SUITE_P(LSX, SADx4Test, ::testing::ValuesIn(x4d_lsx_tests));
 #endif  // HAVE_LSX

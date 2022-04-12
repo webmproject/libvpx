@@ -165,6 +165,81 @@ static uint32_t sad_64width_lsx(const uint8_t *src, int32_t src_stride,
   return sad;
 }
 
+static void sad_8width_x4d_lsx(const uint8_t *src_ptr, int32_t src_stride,
+                               const uint8_t *const aref_ptr[],
+                               int32_t ref_stride, int32_t height,
+                               uint32_t *sad_array) {
+  int32_t ht_cnt = (height >> 2);
+  uint8_t *ref0_ptr, *ref1_ptr, *ref2_ptr, *ref3_ptr;
+  __m128i src0, src1, src2, src3, sad_tmp;
+  __m128i ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7;
+  __m128i ref8, ref9, ref10, ref11, ref12, ref13, ref14, ref15;
+  __m128i sad0 = __lsx_vldi(0);
+  __m128i sad1 = sad0;
+  __m128i sad2 = sad0;
+  __m128i sad3 = sad0;
+  int32_t src_stride2 = src_stride << 1;
+  int32_t src_stride3 = src_stride2 + src_stride;
+  int32_t src_stride4 = src_stride2 << 1;
+  int32_t ref_stride2 = ref_stride << 1;
+  int32_t ref_stride3 = ref_stride2 + ref_stride;
+  int32_t ref_stride4 = ref_stride2 << 1;
+
+  ref0_ptr = aref_ptr[0];
+  ref1_ptr = aref_ptr[1];
+  ref2_ptr = aref_ptr[2];
+  ref3_ptr = aref_ptr[3];
+
+  for (; ht_cnt--;) {
+    src0 = __lsx_vld(src_ptr, 0);
+    DUP2_ARG2(__lsx_vldx, src_ptr, src_stride, src_ptr, src_stride2, src1,
+              src2);
+    src3 = __lsx_vldx(src_ptr, src_stride3);
+    src_ptr += src_stride4;
+    ref0 = __lsx_vld(ref0_ptr, 0);
+    DUP2_ARG2(__lsx_vldx, ref0_ptr, ref_stride, ref0_ptr, ref_stride2, ref1,
+              ref2);
+    ref3 = __lsx_vldx(ref0_ptr, ref_stride3);
+    ref0_ptr += ref_stride4;
+    ref4 = __lsx_vld(ref1_ptr, 0);
+    DUP2_ARG2(__lsx_vldx, ref1_ptr, ref_stride, ref1_ptr, ref_stride2, ref5,
+              ref6);
+    ref7 = __lsx_vldx(ref1_ptr, ref_stride3);
+    ref1_ptr += ref_stride4;
+    ref8 = __lsx_vld(ref2_ptr, 0);
+    DUP2_ARG2(__lsx_vldx, ref2_ptr, ref_stride, ref2_ptr, ref_stride2, ref9,
+              ref10);
+    ref11 = __lsx_vldx(ref2_ptr, ref_stride3);
+    ref2_ptr += ref_stride4;
+    ref12 = __lsx_vld(ref3_ptr, 0);
+    DUP2_ARG2(__lsx_vldx, ref3_ptr, ref_stride, ref3_ptr, ref_stride2, ref13,
+              ref14);
+    ref15 = __lsx_vldx(ref3_ptr, ref_stride3);
+    ref3_ptr += ref_stride4;
+
+    DUP2_ARG2(__lsx_vpickev_d, src1, src0, src3, src2, src0, src1);
+    DUP2_ARG2(__lsx_vpickev_d, ref1, ref0, ref3, ref2, ref0, ref1);
+    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad0 = __lsx_vadd_h(sad0, sad_tmp);
+
+    DUP2_ARG2(__lsx_vpickev_d, ref5, ref4, ref7, ref6, ref0, ref1);
+    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad1 = __lsx_vadd_h(sad1, sad_tmp);
+
+    DUP2_ARG2(__lsx_vpickev_d, ref9, ref8, ref11, ref10, ref0, ref1);
+    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad2 = __lsx_vadd_h(sad2, sad_tmp);
+
+    DUP2_ARG2(__lsx_vpickev_d, ref13, ref12, ref15, ref14, ref0, ref1);
+    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad3 = __lsx_vadd_h(sad3, sad_tmp);
+  }
+  sad_array[0] = HADD_UH_U32(sad0);
+  sad_array[1] = HADD_UH_U32(sad1);
+  sad_array[2] = HADD_UH_U32(sad2);
+  sad_array[3] = HADD_UH_U32(sad3);
+}
+
 static void sad_16width_x4d_lsx(const uint8_t *src_ptr, int32_t src_stride,
                                 const uint8_t *const aref_ptr[],
                                 int32_t ref_stride, int32_t height,
@@ -527,6 +602,13 @@ static uint32_t avgsad_64width_lsx(const uint8_t *src, int32_t src_stride,
     return sad_64width_lsx(src, src_stride, ref, ref_stride, height);         \
   }
 
+#define VPX_SAD_8xHTx4D_LSX(height)                                       \
+  void vpx_sad8x##height##x4d_lsx(const uint8_t *src, int32_t src_stride, \
+                                  const uint8_t *const refs[4],           \
+                                  int32_t ref_stride, uint32_t sads[4]) { \
+    sad_8width_x4d_lsx(src, src_stride, refs, ref_stride, height, sads);  \
+  }
+
 #define VPX_SAD_16xHTx4D_LSX(height)                                       \
   void vpx_sad16x##height##x4d_lsx(const uint8_t *src, int32_t src_stride, \
                                    const uint8_t *const refs[],            \
@@ -564,13 +646,15 @@ static uint32_t avgsad_64width_lsx(const uint8_t *src, int32_t src_stride,
                               second_pred);                             \
   }
 
-#define SAD64 \
-  VPX_SAD_64xHT_LSX(64) VPX_SAD_64xHTx4D_LSX(64) VPX_AVGSAD_64xHT_LSX(64)
+#define SAD64                                                             \
+  VPX_SAD_64xHT_LSX(64) VPX_SAD_64xHTx4D_LSX(64) VPX_SAD_64xHTx4D_LSX(32) \
+      VPX_AVGSAD_64xHT_LSX(64)
 
 SAD64
 
-#define SAD32 \
-  VPX_SAD_32xHT_LSX(32) VPX_SAD_32xHTx4D_LSX(32) VPX_AVGSAD_32xHT_LSX(32)
+#define SAD32                                                             \
+  VPX_SAD_32xHT_LSX(32) VPX_SAD_32xHTx4D_LSX(32) VPX_SAD_32xHTx4D_LSX(64) \
+      VPX_AVGSAD_32xHT_LSX(32)
 
 SAD32
 
@@ -578,6 +662,11 @@ SAD32
 
 SAD16
 
+#define SAD8 VPX_SAD_8xHTx4D_LSX(8)
+
+SAD8
+
 #undef SAD64
 #undef SAD32
 #undef SAD16
+#undef SAD8
