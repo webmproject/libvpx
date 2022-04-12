@@ -11,6 +11,20 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/loongarch/fwd_txfm_lsx.h"
 
+#define LSX_TRANSPOSE4x4_H(_in0, _in1, _in2, _in3, _out0, _out1, _out2, _out3) \
+  {                                                                            \
+    __m128i _s0, _s1, _s2, _s3, _t0, _t1, _t2, _t3;                            \
+                                                                               \
+    DUP2_ARG2(__lsx_vilvl_h, _in2, _in0, _in3, _in1, _s0, _s1);                \
+    DUP2_ARG2(__lsx_vilvh_h, _in2, _in0, _in3, _in1, _s2, _s3);                \
+    _t0 = __lsx_vilvl_h(_s1, _s0);                                             \
+    _t1 = __lsx_vilvh_h(_s1, _s0);                                             \
+    _t2 = __lsx_vilvl_h(_s3, _s2);                                             \
+    _t3 = __lsx_vilvh_h(_s3, _s2);                                             \
+    DUP2_ARG2(__lsx_vpickev_d, _t2, _t0, _t3, _t1, _out0, _out2);              \
+    DUP2_ARG2(__lsx_vpickod_d, _t2, _t0, _t3, _t1, _out1, _out3);              \
+  }
+
 #if !CONFIG_VP9_HIGHBITDEPTH
 void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,
                         int32_t src_stride) {
@@ -238,6 +252,84 @@ void fdct16x8_1d_row(int16_t *input, int16_t *output) {
   __lsx_vst(in6, output, 176);
   __lsx_vst(tmp7, output, 208);
   __lsx_vst(in7, output, 240);
+}
+
+void vpx_fdct4x4_lsx(const int16_t *input, int16_t *output,
+                     int32_t src_stride) {
+  __m128i in0, in1, in2, in3;
+
+  int32_t src_stride2 = src_stride << 1;
+  int32_t src_stride4 = src_stride2 << 1;
+  int32_t src_stride6 = src_stride4 + src_stride2;
+
+  in0 = __lsx_vld(input, 0);
+  DUP2_ARG2(__lsx_vldx, input, src_stride2, input, src_stride4, in1, in2);
+  in3 = __lsx_vldx(input, src_stride6);
+
+  /* fdct4 pre-process */
+  {
+    __m128i vec, mask;
+    __m128i zero = __lsx_vldi(0);
+
+    mask = __lsx_vinsgr2vr_b(zero, 1, 0);
+    DUP4_ARG2(__lsx_vslli_h, in0, 4, in1, 4, in2, 4, in3, 4, in0, in1, in2,
+              in3);
+    vec = __lsx_vseqi_h(in0, 0);
+    vec = __lsx_vxori_b(vec, 255);
+    vec = __lsx_vand_v(mask, vec);
+    in0 = __lsx_vadd_h(in0, vec);
+  }
+
+  VP9_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
+  LSX_TRANSPOSE4x4_H(in0, in1, in2, in3, in0, in1, in2, in3);
+  VP9_FDCT4(in0, in1, in2, in3, in0, in1, in2, in3);
+  LSX_TRANSPOSE4x4_H(in0, in1, in2, in3, in0, in1, in2, in3);
+  DUP4_ARG2(__lsx_vaddi_hu, in0, 1, in1, 1, in2, 1, in3, 1, in0, in1, in2, in3);
+  DUP4_ARG2(__lsx_vsrai_h, in0, 2, in1, 2, in2, 2, in3, 2, in0, in1, in2, in3);
+  DUP2_ARG2(__lsx_vpickev_d, in1, in0, in3, in2, in0, in2);
+  __lsx_vst(in0, output, 0);
+  __lsx_vst(in2, output, 16);
+}
+
+void vpx_fdct8x8_lsx(const int16_t *input, int16_t *output,
+                     int32_t src_stride) {
+  __m128i in0, in1, in2, in3, in4, in5, in6, in7;
+  int32_t src_stride2 = src_stride << 1;
+  int32_t src_stride4 = src_stride2 << 1;
+  int32_t src_stride6 = src_stride4 + src_stride2;
+  int16_t *input_tmp = (int16_t *)input;
+
+  in0 = __lsx_vld(input_tmp, 0);
+  DUP2_ARG2(__lsx_vldx, input_tmp, src_stride2, input_tmp, src_stride4, in1,
+            in2);
+  in3 = __lsx_vldx(input_tmp, src_stride6);
+  input_tmp += src_stride4;
+  in4 = __lsx_vld(input_tmp, 0);
+  DUP2_ARG2(__lsx_vldx, input_tmp, src_stride2, input_tmp, src_stride4, in5,
+            in6);
+  in7 = __lsx_vldx(input_tmp, src_stride6);
+
+  DUP4_ARG2(__lsx_vslli_h, in0, 2, in1, 2, in2, 2, in3, 2, in0, in1, in2, in3);
+  DUP4_ARG2(__lsx_vslli_h, in4, 2, in5, 2, in6, 2, in7, 2, in4, in5, in6, in7);
+
+  VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3, in4,
+            in5, in6, in7);
+  LSX_TRANSPOSE8x8_H(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
+                     in4, in5, in6, in7);
+  VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3, in4,
+            in5, in6, in7);
+  LSX_TRANSPOSE8x8_H(in0, in1, in2, in3, in4, in5, in6, in7, in0, in1, in2, in3,
+                     in4, in5, in6, in7);
+  SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7);
+
+  __lsx_vst(in0, output, 0);
+  __lsx_vst(in1, output, 16);
+  __lsx_vst(in2, output, 32);
+  __lsx_vst(in3, output, 48);
+  __lsx_vst(in4, output, 64);
+  __lsx_vst(in5, output, 80);
+  __lsx_vst(in6, output, 96);
+  __lsx_vst(in7, output, 112);
 }
 
 void vpx_fdct16x16_lsx(const int16_t *input, int16_t *output,

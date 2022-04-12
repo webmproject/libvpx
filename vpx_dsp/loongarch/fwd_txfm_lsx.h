@@ -14,6 +14,105 @@
 #include "vpx_dsp/loongarch/txfm_macros_lsx.h"
 #include "vpx_dsp/txfm_common.h"
 
+#define VP9_FDCT4(in0, in1, in2, in3, out0, out1, out2, out3)                 \
+  {                                                                           \
+    __m128i cnst0_m, cnst1_m, cnst2_m, cnst3_m;                               \
+    __m128i vec0_m, vec1_m, vec2_m, vec3_m;                                   \
+    __m128i vec4_m, vec5_m, vec6_m, vec7_m;                                   \
+    __m128i coeff_m = { 0x187e3b21d2bf2d41, 0x000000000000c4df };             \
+                                                                              \
+    LSX_BUTTERFLY_4_H(in0, in1, in2, in3, vec0_m, vec1_m, vec2_m, vec3_m);    \
+    DUP2_ARG2(__lsx_vilvl_h, vec1_m, vec0_m, vec3_m, vec2_m, vec0_m, vec2_m); \
+    DUP2_ARG2(__lsx_vreplvei_h, coeff_m, 0, coeff_m, 1, cnst0_m, cnst1_m);    \
+    cnst1_m = __lsx_vpackev_h(cnst1_m, cnst0_m);                              \
+    vec5_m = __lsx_vdp2_w_h(vec0_m, cnst1_m);                                 \
+    DUP2_ARG2(__lsx_vreplvei_h, coeff_m, 4, coeff_m, 3, cnst2_m, cnst3_m);    \
+    cnst2_m = __lsx_vpackev_h(cnst3_m, cnst2_m);                              \
+    vec7_m = __lsx_vdp2_w_h(vec2_m, cnst2_m);                                 \
+                                                                              \
+    vec4_m = __lsx_vdp2_w_h(vec0_m, cnst0_m);                                 \
+    cnst2_m = __lsx_vreplvei_h(coeff_m, 2);                                   \
+    cnst2_m = __lsx_vpackev_h(cnst2_m, cnst3_m);                              \
+    vec6_m = __lsx_vdp2_w_h(vec2_m, cnst2_m);                                 \
+                                                                              \
+    DUP4_ARG3(__lsx_vssrarni_h_w, vec4_m, vec4_m, DCT_CONST_BITS, vec5_m,     \
+              vec5_m, DCT_CONST_BITS, vec6_m, vec6_m, DCT_CONST_BITS, vec7_m, \
+              vec7_m, DCT_CONST_BITS, out0, out2, out1, out3);                \
+  }
+
+#define VP9_FDCT8(in0, in1, in2, in3, in4, in5, in6, in7, out0, out1, out2, \
+                  out3, out4, out5, out6, out7)                             \
+  {                                                                         \
+    __m128i s0_m, s1_m, s2_m, s3_m, s4_m, s5_m, s6_m;                       \
+    __m128i s7_m, x0_m, x1_m, x2_m, x3_m;                                   \
+    __m128i coeff_m = { 0x187e3b21d2bf2d41, 0x238e35370c7c3ec5 };           \
+                                                                            \
+    /* FDCT stage1 */                                                       \
+    LSX_BUTTERFLY_8_H(in0, in1, in2, in3, in4, in5, in6, in7, s0_m, s1_m,   \
+                      s2_m, s3_m, s4_m, s5_m, s6_m, s7_m);                  \
+    LSX_BUTTERFLY_4_H(s0_m, s1_m, s2_m, s3_m, x0_m, x1_m, x2_m, x3_m);      \
+    DUP2_ARG2(__lsx_vilvh_h, x1_m, x0_m, x3_m, x2_m, s0_m, s2_m);           \
+    DUP2_ARG2(__lsx_vilvl_h, x1_m, x0_m, x3_m, x2_m, s1_m, s3_m);           \
+    DUP2_ARG2(__lsx_vreplvei_h, coeff_m, 0, coeff_m, 1, x0_m, x1_m);        \
+    x1_m = __lsx_vpackev_h(x1_m, x0_m);                                     \
+    DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m, out4);                          \
+                                                                            \
+    DUP2_ARG2(__lsx_vreplvei_h, coeff_m, 2, coeff_m, 3, x2_m, x3_m);        \
+    x2_m = __lsx_vneg_h(x2_m);                                              \
+    x2_m = __lsx_vpackev_h(x3_m, x2_m);                                     \
+    DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m, out6);                          \
+                                                                            \
+    DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m, out0);                          \
+    x2_m = __lsx_vreplvei_h(coeff_m, 2);                                    \
+    x2_m = __lsx_vpackev_h(x2_m, x3_m);                                     \
+    DOT_SHIFT_RIGHT_PCK_H(s2_m, s3_m, x2_m, out2);                          \
+                                                                            \
+    /* stage2 */                                                            \
+    s1_m = __lsx_vilvl_h(s5_m, s6_m);                                       \
+    s0_m = __lsx_vilvh_h(s5_m, s6_m);                                       \
+                                                                            \
+    DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x0_m, s6_m);                          \
+    DOT_SHIFT_RIGHT_PCK_H(s0_m, s1_m, x1_m, s5_m);                          \
+                                                                            \
+    /* stage3 */                                                            \
+    LSX_BUTTERFLY_4_H(s4_m, s7_m, s6_m, s5_m, x0_m, x3_m, x2_m, x1_m);      \
+                                                                            \
+    /* stage4 */                                                            \
+    DUP2_ARG2(__lsx_vilvh_h, x3_m, x0_m, x2_m, x1_m, s4_m, s6_m);           \
+    DUP2_ARG2(__lsx_vilvl_h, x3_m, x0_m, x2_m, x1_m, s5_m, s7_m);           \
+                                                                            \
+    DUP2_ARG2(__lsx_vreplvei_h, coeff_m, 4, coeff_m, 5, x0_m, x1_m);        \
+    x1_m = __lsx_vpackev_h(x0_m, x1_m);                                     \
+    DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x1_m, out1);                          \
+                                                                            \
+    DUP2_ARG2(__lsx_vreplvei_h, coeff_m, 6, coeff_m, 7, x2_m, x3_m);        \
+    x2_m = __lsx_vpackev_h(x3_m, x2_m);                                     \
+    DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m, out5);                          \
+                                                                            \
+    x1_m = __lsx_vreplvei_h(coeff_m, 5);                                    \
+    x0_m = __lsx_vneg_h(x0_m);                                              \
+    x0_m = __lsx_vpackev_h(x1_m, x0_m);                                     \
+    DOT_SHIFT_RIGHT_PCK_H(s4_m, s5_m, x0_m, out7);                          \
+    x2_m = __lsx_vreplvei_h(coeff_m, 6);                                    \
+    x3_m = __lsx_vneg_h(x3_m);                                              \
+    x2_m = __lsx_vpackev_h(x2_m, x3_m);                                     \
+    DOT_SHIFT_RIGHT_PCK_H(s6_m, s7_m, x2_m, out3);                          \
+  }
+
+#define SRLI_AVE_S_4V_H(in0, in1, in2, in3, in4, in5, in6, in7)             \
+  {                                                                         \
+    __m128i vec0_m, vec1_m, vec2_m, vec3_m, vec4_m, vec5_m, vec6_m, vec7_m; \
+                                                                            \
+    DUP4_ARG2(__lsx_vsrli_h, in0, 15, in1, 15, in2, 15, in3, 15, vec0_m,    \
+              vec1_m, vec2_m, vec3_m);                                      \
+    DUP4_ARG2(__lsx_vsrli_h, in4, 15, in5, 15, in6, 15, in7, 15, vec4_m,    \
+              vec5_m, vec6_m, vec7_m);                                      \
+    DUP4_ARG2(__lsx_vavg_h, vec0_m, in0, vec1_m, in1, vec2_m, in2, vec3_m,  \
+              in3, in0, in1, in2, in3);                                     \
+    DUP4_ARG2(__lsx_vavg_h, vec4_m, in4, vec5_m, in5, vec6_m, in6, vec7_m,  \
+              in7, in4, in5, in6, in7);                                     \
+  }
+
 #define FDCT32_POSTPROC_2V_POS_H(vec0, vec1) \
   {                                          \
     __m128i tp0_m, tp1_m;                    \

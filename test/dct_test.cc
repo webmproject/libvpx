@@ -587,7 +587,9 @@ INSTANTIATE_TEST_SUITE_P(VSX, TransDCT,
 #endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH &&
 
 #if HAVE_LSX && !CONFIG_VP9_HIGHBITDEPTH
-static const FuncInfo dct_lsx_func_info[2] = {
+static const FuncInfo dct_lsx_func_info[4] = {
+  { &fdct_wrapper<vpx_fdct4x4_lsx>, &idct_wrapper<vpx_idct4x4_16_add_c>, 4, 1 },
+  { &fdct_wrapper<vpx_fdct8x8_lsx>, &idct_wrapper<vpx_idct8x8_64_add_c>, 8, 1 },
   { &fdct_wrapper<vpx_fdct16x16_lsx>, &idct_wrapper<vpx_idct16x16_256_add_c>,
     16, 1 },
   { &fdct_wrapper<vpx_fdct32x32_lsx>, &idct_wrapper<vpx_idct32x32_1024_add_lsx>,
@@ -596,7 +598,7 @@ static const FuncInfo dct_lsx_func_info[2] = {
 
 INSTANTIATE_TEST_SUITE_P(
     LSX, TransDCT,
-    ::testing::Combine(::testing::Range(0, 2),
+    ::testing::Combine(::testing::Range(0, 4),
                        ::testing::Values(dct_lsx_func_info),
                        ::testing::Values(0), ::testing::Values(VPX_BITS_8)));
 #endif  // HAVE_LSX && !CONFIG_VP9_HIGHBITDEPTH
