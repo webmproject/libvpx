@@ -91,4 +91,26 @@
               DCT_CONST_BITS, out2, out3);                                    \
   }
 
+#define VP9_ADDBLK_ST8x4_UB(dst, _stride, _stride2, _stride3, in0, in1, in2,   \
+                            in3)                                               \
+  {                                                                            \
+    __m128i dst0_m, dst1_m, dst2_m, dst3_m;                                    \
+    __m128i tmp0_m, tmp1_m;                                                    \
+    __m128i res0_m, res1_m, res2_m, res3_m;                                    \
+                                                                               \
+    dst0_m = __lsx_vld(dst, 0);                                                \
+    DUP2_ARG2(__lsx_vldx, dst, _stride, dst, _stride2, dst1_m, dst2_m);        \
+    dst3_m = __lsx_vldx(dst, _stride3);                                        \
+    DUP4_ARG2(__lsx_vsllwil_hu_bu, dst0_m, 0, dst1_m, 0, dst2_m, 0, dst3_m, 0, \
+              res0_m, res1_m, res2_m, res3_m);                                 \
+    DUP4_ARG2(__lsx_vadd_h, res0_m, in0, res1_m, in1, res2_m, in2, res3_m,     \
+              in3, res0_m, res1_m, res2_m, res3_m);                            \
+    DUP2_ARG3(__lsx_vssrarni_bu_h, res1_m, res0_m, 0, res3_m, res2_m, 0,       \
+              tmp0_m, tmp1_m);                                                 \
+    __lsx_vstelm_d(tmp0_m, dst, 0, 0);                                         \
+    __lsx_vstelm_d(tmp0_m, dst + _stride, 0, 1);                               \
+    __lsx_vstelm_d(tmp1_m, dst + _stride2, 0, 0);                              \
+    __lsx_vstelm_d(tmp1_m, dst + _stride3, 0, 1);                              \
+  }
+
 #endif  // VPX_VPX_DSP_LOONGARCH_FWD_TXFM_LSX_H_
