@@ -460,7 +460,7 @@ static void vp9_apply_temporal_filter_luma(
 
   if (block_width == 16) {
     // Special Case: The blockwidth is 16 and we are operating on a row of 16
-    // chroma pixels. In this case, we can't use the usualy left-midle-right
+    // chroma pixels. In this case, we can't use the usual left-middle-right
     // pattern. We also don't support splitting now.
     neighbors_first = LUMA_LEFT_COLUMN_NEIGHBORS;
     neighbors_second = LUMA_RIGHT_COLUMN_NEIGHBORS;
@@ -553,7 +553,7 @@ static void vp9_apply_temporal_filter_chroma_8(
   // Loop variable
   unsigned int h;
 
-  // Initilize weight
+  // Initialize weight
   if (blk_fw) {
     weight = _mm_setr_epi16(blk_fw[0], blk_fw[0], blk_fw[0], blk_fw[0],
                             blk_fw[1], blk_fw[1], blk_fw[1], blk_fw[1]);
@@ -827,12 +827,12 @@ void vp9_apply_temporal_filter_sse4_1(
   assert(
       (use_whole_blk || (blk_fw[1] >= 0 && blk_fw[2] >= 0 && blk_fw[3] >= 0)) &&
       "subblock filter weight must be positive");
-  assert(blk_fw[0] <= 2 && "sublock filter weight must be less than 2");
+  assert(blk_fw[0] <= 2 && "subblock filter weight must be less than 2");
   assert(
       (use_whole_blk || (blk_fw[1] <= 2 && blk_fw[2] <= 2 && blk_fw[3] <= 2)) &&
       "subblock filter weight must be less than 2");
 
-  // Precompute the difference sqaured
+  // Precompute the difference squared
   for (row = 0; row < block_height; row++) {
     for (blk_col = 0; blk_col < block_width; blk_col += 16) {
       store_dist_16(y_src_ptr + blk_col, y_pre_ptr + blk_col,
