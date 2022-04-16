@@ -591,10 +591,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_fdct16x16_1 sse2 neon msa/;
 
   add_proto qw/void vpx_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct32x32 neon sse2 avx2 msa/;
+  specialize qw/vpx_fdct32x32 neon sse2 avx2 msa lsx/;
 
   add_proto qw/void vpx_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vpx_fdct32x32_rd sse2 avx2 neon msa vsx/;
+  specialize qw/vpx_fdct32x32_rd sse2 avx2 neon msa vsx lsx/;
 
   add_proto qw/void vpx_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vpx_fdct32x32_1 sse2 neon msa/;
@@ -652,12 +652,12 @@ if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
     $vpx_idct16x16_38_add_msa=vpx_idct16x16_256_add_msa;
     specialize qw/vpx_idct16x16_10_add dspr2 msa/;
     specialize qw/vpx_idct16x16_1_add dspr2 msa/;
-    specialize qw/vpx_idct32x32_1024_add dspr2 msa/;
+    specialize qw/vpx_idct32x32_1024_add dspr2 msa lsx/;
     specialize qw/vpx_idct32x32_135_add dspr2 msa/;
     $vpx_idct32x32_135_add_dspr2=vpx_idct32x32_1024_add_dspr2;
     $vpx_idct32x32_135_add_msa=vpx_idct32x32_1024_add_msa;
-    specialize qw/vpx_idct32x32_34_add dspr2 msa/;
-    specialize qw/vpx_idct32x32_1_add dspr2 msa/;
+    specialize qw/vpx_idct32x32_34_add dspr2 msa lsx/;
+    specialize qw/vpx_idct32x32_1_add dspr2 msa lsx/;
     specialize qw/vpx_iwht4x4_16_add msa/;
     specialize qw/vpx_iwht4x4_1_add msa/;
   } # !CONFIG_VP9_HIGHBITDEPTH
