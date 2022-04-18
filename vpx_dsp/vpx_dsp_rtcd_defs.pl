@@ -368,7 +368,7 @@ if (vpx_config("CONFIG_VP9") eq "yes") {
 # Sub Pixel Filters
 #
 add_proto qw/void vpx_convolve_copy/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve_copy neon dspr2 msa sse2 vsx/;
+specialize qw/vpx_convolve_copy neon dspr2 msa sse2 vsx lsx/;
 
 add_proto qw/void vpx_convolve_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
 specialize qw/vpx_convolve_avg neon dspr2 msa sse2 vsx mmi lsx/;
@@ -389,7 +389,7 @@ add_proto qw/void vpx_convolve8_avg_horiz/, "const uint8_t *src, ptrdiff_t src_s
 specialize qw/vpx_convolve8_avg_horiz sse2 ssse3 avx2 neon dspr2 msa vsx mmi lsx/;
 
 add_proto qw/void vpx_convolve8_avg_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
-specialize qw/vpx_convolve8_avg_vert sse2 ssse3 avx2 neon dspr2 msa vsx mmi/;
+specialize qw/vpx_convolve8_avg_vert sse2 ssse3 avx2 neon dspr2 msa vsx mmi lsx/;
 
 add_proto qw/void vpx_scaled_2d/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
 specialize qw/vpx_scaled_2d ssse3 neon msa/;
@@ -656,6 +656,7 @@ if (vpx_config("CONFIG_EMULATE_HARDWARE") ne "yes") {
     specialize qw/vpx_idct32x32_135_add dspr2 msa/;
     $vpx_idct32x32_135_add_dspr2=vpx_idct32x32_1024_add_dspr2;
     $vpx_idct32x32_135_add_msa=vpx_idct32x32_1024_add_msa;
+    $vpx_idct32x32_135_add_lsx=vpx_idct32x32_1024_add_lsx;
     specialize qw/vpx_idct32x32_34_add dspr2 msa lsx/;
     specialize qw/vpx_idct32x32_1_add dspr2 msa lsx/;
     specialize qw/vpx_iwht4x4_16_add msa/;
