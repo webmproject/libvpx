@@ -448,7 +448,7 @@ add_proto qw/void vpx_lpf_vertical_8/, "uint8_t *s, int pitch, const uint8_t *bl
 specialize qw/vpx_lpf_vertical_8 sse2 neon dspr2 msa lsx/;
 
 add_proto qw/void vpx_lpf_vertical_8_dual/, "uint8_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1";
-specialize qw/vpx_lpf_vertical_8_dual sse2 neon dspr2 msa/;
+specialize qw/vpx_lpf_vertical_8_dual sse2 neon dspr2 msa lsx/;
 
 add_proto qw/void vpx_lpf_vertical_4/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
 specialize qw/vpx_lpf_vertical_4 sse2 neon dspr2 msa/;
@@ -466,7 +466,7 @@ add_proto qw/void vpx_lpf_horizontal_8/, "uint8_t *s, int pitch, const uint8_t *
 specialize qw/vpx_lpf_horizontal_8 sse2 neon dspr2 msa lsx/;
 
 add_proto qw/void vpx_lpf_horizontal_8_dual/, "uint8_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1";
-specialize qw/vpx_lpf_horizontal_8_dual sse2 neon dspr2 msa/;
+specialize qw/vpx_lpf_horizontal_8_dual sse2 neon dspr2 msa lsx/;
 
 add_proto qw/void vpx_lpf_horizontal_4/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
 specialize qw/vpx_lpf_horizontal_4 sse2 neon dspr2 msa/;
