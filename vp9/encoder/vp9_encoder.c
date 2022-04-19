@@ -1379,21 +1379,22 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
 #endif
 }
 
-static int alloc_context_buffers_ext(VP9_COMP *cpi) {
+static void alloc_context_buffers_ext(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int mi_size = cm->mi_cols * cm->mi_rows;
 
-  cpi->mbmi_ext_base = vpx_calloc(mi_size, sizeof(*cpi->mbmi_ext_base));
-  if (!cpi->mbmi_ext_base) return 1;
-
-  return 0;
+  CHECK_MEM_ERROR(cm, cpi->mbmi_ext_base,
+                  vpx_calloc(mi_size, sizeof(*cpi->mbmi_ext_base)));
 }
 
 static void alloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   int sb_rows;
 
-  vp9_alloc_context_buffers(cm, cm->width, cm->height);
+  if (vp9_alloc_context_buffers(cm, cm->width, cm->height)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate context buffers");
+  }
 
   alloc_context_buffers_ext(cpi);
 
