@@ -1129,7 +1129,7 @@ add_proto qw/void vpx_get8x8var/, "const uint8_t *src_ptr, int src_stride, const
   specialize qw/vpx_get8x8var sse2 neon msa vsx/;
 
 add_proto qw/unsigned int vpx_mse16x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_mse16x16 sse2 avx2 neon msa mmi vsx/;
+  specialize qw/vpx_mse16x16 sse2 avx2 neon msa mmi vsx lsx/;
 
 add_proto qw/unsigned int vpx_mse16x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
   specialize qw/vpx_mse16x8 sse2 avx2 msa mmi vsx/;
@@ -1171,7 +1171,7 @@ add_proto qw/uint32_t vpx_sub_pixel_variance16x32/, "const uint8_t *src_ptr, int
   specialize qw/vpx_sub_pixel_variance16x32 neon msa mmi sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance16x16/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
-  specialize qw/vpx_sub_pixel_variance16x16 neon msa mmi sse2 ssse3/;
+  specialize qw/vpx_sub_pixel_variance16x16 neon msa mmi sse2 ssse3 lsx/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance16x8/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
   specialize qw/vpx_sub_pixel_variance16x8 neon msa mmi sse2 ssse3/;
@@ -1180,7 +1180,7 @@ add_proto qw/uint32_t vpx_sub_pixel_variance8x16/, "const uint8_t *src_ptr, int 
   specialize qw/vpx_sub_pixel_variance8x16 neon msa mmi sse2 ssse3/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance8x8/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
-  specialize qw/vpx_sub_pixel_variance8x8 neon msa mmi sse2 ssse3/;
+  specialize qw/vpx_sub_pixel_variance8x8 neon msa mmi sse2 ssse3 lsx/;
 
 add_proto qw/uint32_t vpx_sub_pixel_variance8x4/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse";
   specialize qw/vpx_sub_pixel_variance8x4 neon msa mmi sse2 ssse3/;

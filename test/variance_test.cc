@@ -1651,6 +1651,9 @@ INSTANTIATE_TEST_SUITE_P(
 #endif  // HAVE_MMI
 
 #if HAVE_LSX
+INSTANTIATE_TEST_SUITE_P(LSX, VpxMseTest,
+                         ::testing::Values(MseParams(4, 4, &vpx_mse16x16_lsx)));
+
 INSTANTIATE_TEST_SUITE_P(
     LSX, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_lsx),
@@ -1658,9 +1661,12 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(4, 4, &vpx_variance16x16_lsx),
                       VarianceParams(3, 3, &vpx_variance8x8_lsx)));
 
-INSTANTIATE_TEST_SUITE_P(LSX, VpxSubpelVarianceTest,
-                         ::testing::Values(SubpelVarianceParams(
-                             5, 5, &vpx_sub_pixel_variance32x32_lsx, 0)));
+INSTANTIATE_TEST_SUITE_P(
+    LSX, VpxSubpelVarianceTest,
+    ::testing::Values(
+        SubpelVarianceParams(3, 3, &vpx_sub_pixel_variance8x8_lsx, 0),
+        SubpelVarianceParams(4, 4, &vpx_sub_pixel_variance16x16_lsx, 0),
+        SubpelVarianceParams(5, 5, &vpx_sub_pixel_variance32x32_lsx, 0)));
 
 INSTANTIATE_TEST_SUITE_P(LSX, VpxSubpelAvgVarianceTest,
                          ::testing::Values(SubpelAvgVarianceParams(

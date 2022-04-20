@@ -10,46 +10,16 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
-#include "vpx_util/loongson_intrinsics.h"
+#include "vpx_dsp/loongarch/variance_lsx.h"
 #include "vpx_dsp/variance.h"
-
-#define HADD_SW_S32(in0, in1)                  \
-  do {                                         \
-    __m128i res0_m;                            \
-                                               \
-    res0_m = __lsx_vhaddw_d_w(in0, in0);       \
-    res0_m = __lsx_vhaddw_q_d(res0_m, res0_m); \
-    in1 = __lsx_vpickve2gr_w(res0_m, 0);       \
-  } while (0)
-
-#define HORIZ_2TAP_FILT_UH(in0, in1, mask, coeff, shift, in2) \
-  do {                                                        \
-    __m128i tmp0_m, tmp1_m;                                   \
-                                                              \
-    tmp0_m = __lsx_vshuf_b(in1, in0, mask);                   \
-    tmp1_m = __lsx_vdp2_h_bu(tmp0_m, coeff);                  \
-    in2 = __lsx_vsrari_h(tmp1_m, shift);                      \
-  } while (0)
-
-#define CALC_MSE_AVG_B(src, ref, var, sub)                                \
-  {                                                                       \
-    __m128i src_l0_m, src_l1_m;                                           \
-    __m128i res_l0_m, res_l1_m;                                           \
-                                                                          \
-    src_l0_m = __lsx_vilvl_b(src, ref);                                   \
-    src_l1_m = __lsx_vilvh_b(src, ref);                                   \
-    DUP2_ARG2(__lsx_vhsubw_hu_bu, src_l0_m, src_l0_m, src_l1_m, src_l1_m, \
-              res_l0_m, res_l1_m);                                        \
-    var = __lsx_vdp2add_w_h(var, res_l0_m, res_l0_m);                     \
-    var = __lsx_vdp2add_w_h(var, res_l1_m, res_l1_m);                     \
-    sub = __lsx_vadd_h(sub, res_l0_m);                                    \
-    sub = __lsx_vadd_h(sub, res_l1_m);                                    \
-  }
 
 static const uint8_t bilinear_filters_lsx[8][2] = {
   { 128, 0 }, { 112, 16 }, { 96, 32 }, { 80, 48 },
   { 64, 64 }, { 48, 80 },  { 32, 96 }, { 16, 112 },
 };
+
+#define VARIANCE_WxH(sse, diff, shift) \
+  (sse) - (((uint32_t)(diff) * (diff)) >> (shift))
 
 #define VARIANCE_LARGE_WxH(sse, diff, shift) \
   (sse) - (((int64_t)(diff) * (diff)) >> (shift))
@@ -59,8 +29,7 @@ static uint32_t avg_sse_diff_64x64_lsx(const uint8_t *src_ptr,
                                        const uint8_t *ref_ptr,
                                        int32_t ref_stride,
                                        const uint8_t *sec_pred, int32_t *diff) {
-  int32_t ht_cnt = 32;
-  uint32_t res;
+  int32_t res, ht_cnt = 32;
   __m128i src0, src1, src2, src3, ref0, ref1, ref2, ref3;
   __m128i pred0, pred1, pred2, pred3, vec, vec_tmp;
   __m128i avg0, avg1, avg2, avg3;
@@ -119,11 +88,58 @@ static uint32_t avg_sse_diff_64x64_lsx(const uint8_t *src_ptr,
   return res;
 }
 
+static uint32_t sub_pixel_sse_diff_8width_h_lsx(
+    const uint8_t *src, int32_t src_stride, const uint8_t *dst,
+    int32_t dst_stride, const uint8_t *filter, int32_t height, int32_t *diff) {
+  uint32_t loop_cnt = (height >> 2);
+  int32_t res;
+  __m128i src0, src1, src2, src3, ref0, ref1, ref2, ref3;
+  __m128i vec0, vec1, vec2, vec3, filt0, out, vec;
+  __m128i mask = { 0x0403030202010100, 0x0807070606050504 };
+  __m128i avg = __lsx_vldi(0);
+  __m128i var = avg;
+  int32_t src_stride2 = src_stride << 1;
+  int32_t src_stride3 = src_stride2 + src_stride;
+  int32_t src_stride4 = src_stride2 << 1;
+  int32_t dst_stride2 = dst_stride << 1;
+  int32_t dst_stride3 = dst_stride2 + dst_stride;
+  int32_t dst_stride4 = dst_stride2 << 1;
+
+  filt0 = __lsx_vldrepl_h(filter, 0);
+  for (; loop_cnt--;) {
+    src0 = __lsx_vld(src, 0);
+    DUP2_ARG2(__lsx_vldx, src, src_stride, src, src_stride2, src1, src2);
+    src3 = __lsx_vldx(src, src_stride3);
+    src += src_stride4;
+    ref0 = __lsx_vld(dst, 0);
+    DUP2_ARG2(__lsx_vldx, dst, dst_stride, dst, dst_stride2, ref1, ref2);
+    ref3 = __lsx_vldx(dst, dst_stride3);
+    dst += dst_stride4;
+
+    DUP2_ARG2(__lsx_vpickev_d, ref1, ref0, ref3, ref2, ref0, ref1);
+    DUP2_ARG3(__lsx_vshuf_b, src0, src0, mask, src1, src1, mask, vec0, vec1);
+    DUP2_ARG3(__lsx_vshuf_b, src2, src2, mask, src3, src3, mask, vec2, vec3);
+    DUP4_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, vec2, filt0, vec3,
+              filt0, vec0, vec1, vec2, vec3);
+    DUP4_ARG3(__lsx_vssrarni_bu_h, vec0, vec0, FILTER_BITS, vec1, vec1,
+              FILTER_BITS, vec2, vec2, FILTER_BITS, vec3, vec3, FILTER_BITS,
+              src0, src1, src2, src3);
+    out = __lsx_vpackev_d(src1, src0);
+    CALC_MSE_AVG_B(out, ref0, var, avg);
+    out = __lsx_vpackev_d(src3, src2);
+    CALC_MSE_AVG_B(out, ref1, var, avg);
+  }
+  vec = __lsx_vhaddw_w_h(avg, avg);
+  HADD_SW_S32(vec, *diff);
+  HADD_SW_S32(var, res);
+  return res;
+}
+
 static uint32_t sub_pixel_sse_diff_16width_h_lsx(
     const uint8_t *src, int32_t src_stride, const uint8_t *dst,
     int32_t dst_stride, const uint8_t *filter, int32_t height, int32_t *diff) {
   uint32_t loop_cnt = (height >> 2);
-  uint32_t res;
+  int32_t res;
   __m128i src0, src1, src2, src3, src4, src5, src6, src7;
   __m128i dst0, dst1, dst2, dst3, filt0;
   __m128i vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
@@ -172,7 +188,6 @@ static uint32_t sub_pixel_sse_diff_16width_h_lsx(
   vec = __lsx_vhaddw_w_h(avg, avg);
   HADD_SW_S32(vec, *diff);
   HADD_SW_S32(var, res);
-
   return res;
 }
 
@@ -195,11 +210,59 @@ static uint32_t sub_pixel_sse_diff_32width_h_lsx(
   return sse;
 }
 
+static uint32_t sub_pixel_sse_diff_8width_v_lsx(
+    const uint8_t *src, int32_t src_stride, const uint8_t *dst,
+    int32_t dst_stride, const uint8_t *filter, int32_t height, int32_t *diff) {
+  uint32_t loop_cnt = (height >> 2);
+  int32_t res;
+  __m128i ref0, ref1, ref2, ref3, src0, src1, src2, src3, src4;
+  __m128i vec, vec0, vec1, vec2, vec3, tmp0, tmp1, tmp2, tmp3, filt0;
+  __m128i avg = __lsx_vldi(0);
+  __m128i var = avg;
+  int32_t src_stride2 = src_stride << 1;
+  int32_t src_stride3 = src_stride2 + src_stride;
+  int32_t src_stride4 = src_stride2 << 1;
+  int32_t dst_stride2 = dst_stride << 1;
+  int32_t dst_stride3 = dst_stride2 + dst_stride;
+  int32_t dst_stride4 = dst_stride2 << 1;
+
+  filt0 = __lsx_vldrepl_h(filter, 0);
+  src0 = __lsx_vld(src, 0);
+  src += src_stride;
+
+  for (; loop_cnt--;) {
+    src1 = __lsx_vld(src, 0);
+    DUP2_ARG2(__lsx_vldx, src, src_stride, src, src_stride2, src2, src3);
+    src4 = __lsx_vldx(src, src_stride3);
+    src += src_stride4;
+    ref0 = __lsx_vld(dst, 0);
+    DUP2_ARG2(__lsx_vldx, dst, dst_stride, dst, dst_stride2, ref1, ref2);
+    ref3 = __lsx_vldx(dst, dst_stride3);
+    dst += dst_stride4;
+
+    DUP2_ARG2(__lsx_vpickev_d, ref1, ref0, ref3, ref2, ref0, ref1);
+    DUP4_ARG2(__lsx_vilvl_b, src1, src0, src2, src1, src3, src2, src4, src3,
+              vec0, vec1, vec2, vec3);
+    DUP4_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, vec2, filt0, vec3,
+              filt0, tmp0, tmp1, tmp2, tmp3);
+    DUP2_ARG3(__lsx_vssrarni_bu_h, tmp1, tmp0, FILTER_BITS, tmp3, tmp2,
+              FILTER_BITS, src0, src1);
+    CALC_MSE_AVG_B(src0, ref0, var, avg);
+    CALC_MSE_AVG_B(src1, ref1, var, avg);
+
+    src0 = src4;
+  }
+  vec = __lsx_vhaddw_w_h(avg, avg);
+  HADD_SW_S32(vec, *diff);
+  HADD_SW_S32(var, res);
+  return res;
+}
+
 static uint32_t sub_pixel_sse_diff_16width_v_lsx(
     const uint8_t *src, int32_t src_stride, const uint8_t *dst,
     int32_t dst_stride, const uint8_t *filter, int32_t height, int32_t *diff) {
   uint32_t loop_cnt = (height >> 2);
-  uint32_t res;
+  int32_t res;
   __m128i ref0, ref1, ref2, ref3, src0, src1, src2, src3, src4;
   __m128i out0, out1, out2, out3, tmp0, tmp1, filt0, vec;
   __m128i vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
@@ -252,7 +315,6 @@ static uint32_t sub_pixel_sse_diff_16width_v_lsx(
   vec = __lsx_vhaddw_w_h(avg, avg);
   HADD_SW_S32(vec, *diff);
   HADD_SW_S32(var, res);
-
   return res;
 }
 
@@ -275,12 +337,70 @@ static uint32_t sub_pixel_sse_diff_32width_v_lsx(
   return sse;
 }
 
+static uint32_t sub_pixel_sse_diff_8width_hv_lsx(
+    const uint8_t *src, int32_t src_stride, const uint8_t *dst,
+    int32_t dst_stride, const uint8_t *filter_horiz, const uint8_t *filter_vert,
+    int32_t height, int32_t *diff) {
+  uint32_t loop_cnt = (height >> 2);
+  int32_t res;
+  __m128i ref0, ref1, ref2, ref3, src0, src1, src2, src3, src4, out0, out1;
+  __m128i hz_out0, hz_out1, tmp0, tmp1, tmp2, tmp3, vec, vec0, filt_hz, filt_vt;
+  __m128i mask = { 0x0403030202010100, 0x0807070606050504 };
+  __m128i avg = __lsx_vldi(0);
+  __m128i var = avg;
+
+  filt_hz = __lsx_vldrepl_h(filter_horiz, 0);
+  filt_vt = __lsx_vldrepl_h(filter_vert, 0);
+
+  src0 = __lsx_vld(src, 0);
+  src += src_stride;
+  HORIZ_2TAP_FILT_UH(src0, src0, mask, filt_hz, FILTER_BITS, hz_out0);
+
+  for (; loop_cnt--;) {
+    DUP2_ARG2(__lsx_vld, src, 0, dst, 0, src1, ref0);
+    src += src_stride;
+    dst += dst_stride;
+    DUP2_ARG2(__lsx_vld, src, 0, dst, 0, src2, ref1);
+    src += src_stride;
+    dst += dst_stride;
+    DUP2_ARG2(__lsx_vld, src, 0, dst, 0, src3, ref2);
+    src += src_stride;
+    dst += dst_stride;
+    DUP2_ARG2(__lsx_vld, src, 0, dst, 0, src4, ref3);
+    src += src_stride;
+    dst += dst_stride;
+
+    DUP2_ARG2(__lsx_vpickev_d, ref1, ref0, ref3, ref2, ref0, ref1);
+    HORIZ_2TAP_FILT_UH(src1, src1, mask, filt_hz, FILTER_BITS, hz_out1);
+    vec0 = __lsx_vpackev_b(hz_out1, hz_out0);
+    tmp0 = __lsx_vdp2_h_bu(vec0, filt_vt);
+    HORIZ_2TAP_FILT_UH(src2, src2, mask, filt_hz, FILTER_BITS, hz_out0);
+    vec0 = __lsx_vpackev_b(hz_out0, hz_out1);
+    tmp1 = __lsx_vdp2_h_bu(vec0, filt_vt);
+
+    HORIZ_2TAP_FILT_UH(src3, src3, mask, filt_hz, FILTER_BITS, hz_out1);
+    vec0 = __lsx_vpackev_b(hz_out1, hz_out0);
+    tmp2 = __lsx_vdp2_h_bu(vec0, filt_vt);
+    HORIZ_2TAP_FILT_UH(src4, src4, mask, filt_hz, FILTER_BITS, hz_out0);
+    vec0 = __lsx_vpackev_b(hz_out0, hz_out1);
+    tmp3 = __lsx_vdp2_h_bu(vec0, filt_vt);
+    DUP2_ARG3(__lsx_vssrarni_bu_h, tmp1, tmp0, FILTER_BITS, tmp3, tmp2,
+              FILTER_BITS, out0, out1);
+    CALC_MSE_AVG_B(out0, ref0, var, avg);
+    CALC_MSE_AVG_B(out1, ref1, var, avg);
+  }
+  vec = __lsx_vhaddw_w_h(avg, avg);
+  HADD_SW_S32(vec, *diff);
+  HADD_SW_S32(var, res);
+  return res;
+}
+
 static uint32_t sub_pixel_sse_diff_16width_hv_lsx(
     const uint8_t *src, int32_t src_stride, const uint8_t *dst,
     int32_t dst_stride, const uint8_t *filter_horiz, const uint8_t *filter_vert,
     int32_t height, int32_t *diff) {
   uint32_t loop_cnt = (height >> 2);
-  uint32_t res;
+  int32_t res;
   __m128i src0, src1, src2, src3, src4, src5, src6, src7;
   __m128i ref0, ref1, ref2, ref3, filt_hz, filt_vt, vec0, vec1;
   __m128i hz_out0, hz_out1, hz_out2, hz_out3, tmp0, tmp1, vec;
@@ -378,7 +498,7 @@ static uint32_t subpel_avg_ssediff_16w_h_lsx(
     int32_t dst_stride, const uint8_t *sec_pred, const uint8_t *filter,
     int32_t height, int32_t *diff, int32_t width) {
   uint32_t loop_cnt = (height >> 2);
-  uint32_t res;
+  int32_t res;
   __m128i src0, src1, src2, src3, src4, src5, src6, src7;
   __m128i dst0, dst1, dst2, dst3, tmp0, tmp1, tmp2, tmp3;
   __m128i pred0, pred1, pred2, pred3, filt0, vec;
@@ -450,7 +570,7 @@ static uint32_t subpel_avg_ssediff_16w_v_lsx(
     int32_t dst_stride, const uint8_t *sec_pred, const uint8_t *filter,
     int32_t height, int32_t *diff, int32_t width) {
   uint32_t loop_cnt = (height >> 2);
-  uint32_t res;
+  int32_t res;
   __m128i ref0, ref1, ref2, ref3, pred0, pred1, pred2, pred3;
   __m128i src0, src1, src2, src3, src4, out0, out1, out2, out3;
   __m128i vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7;
@@ -527,7 +647,7 @@ static uint32_t subpel_avg_ssediff_16w_hv_lsx(
     int32_t dst_stride, const uint8_t *sec_pred, const uint8_t *filter_horiz,
     const uint8_t *filter_vert, int32_t height, int32_t *diff, int32_t width) {
   uint32_t loop_cnt = (height >> 2);
-  uint32_t res;
+  int32_t res;
   __m128i src0, src1, src2, src3, src4, src5, src6, src7;
   __m128i ref0, ref1, ref2, ref3, pred0, pred1, pred2, pred3;
   __m128i hz_out0, hz_out1, hz_out2, hz_out3, tmp0, tmp1;
@@ -674,6 +794,8 @@ static uint32_t sub_pixel_avg_sse_diff_64width_hv_lsx(
   return sse;
 }
 
+#define VARIANCE_8Wx8H(sse, diff) VARIANCE_WxH(sse, diff, 6)
+#define VARIANCE_16Wx16H(sse, diff) VARIANCE_WxH(sse, diff, 8)
 #define VARIANCE_32Wx32H(sse, diff) VARIANCE_LARGE_WxH(sse, diff, 10)
 #define VARIANCE_64Wx64H(sse, diff) VARIANCE_LARGE_WxH(sse, diff, 12)
 
@@ -712,6 +834,8 @@ static uint32_t sub_pixel_avg_sse_diff_64width_hv_lsx(
     return var;                                                               \
   }
 
+VPX_SUB_PIXEL_VARIANCE_WDXHT_LSX(8, 8)
+VPX_SUB_PIXEL_VARIANCE_WDXHT_LSX(16, 16)
 VPX_SUB_PIXEL_VARIANCE_WDXHT_LSX(32, 32)
 
 #define VPX_SUB_PIXEL_AVG_VARIANCE64XHEIGHT_LSX(ht)                           \
