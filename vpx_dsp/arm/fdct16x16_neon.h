@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_VPX_DSP_ARM_FDCT16x16_NEON_H_
-#define VPX_VPX_DSP_ARM_FDCT16x16_NEON_H_
+#ifndef VPX_VPX_DSP_ARM_FDCT16X16_NEON_H_
+#define VPX_VPX_DSP_ARM_FDCT16X16_NEON_H_
 
 #include <arm_neon.h>
 
@@ -324,4 +324,4 @@ static void vpx_fdct16x16_body(const int16x8_t *in /*[16]*/,
                       &out[11]);
 }
 
-#endif  // VPX_VPX_DSP_ARM_FDCT16x16_NEON_H_
+#endif  // VPX_VPX_DSP_ARM_FDCT16X16_NEON_H_
