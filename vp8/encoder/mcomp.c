@@ -1129,7 +1129,7 @@ int vp8_diamond_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
          mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
 }
 
-#if HAVE_SSE2 || HAVE_MSA
+#if HAVE_SSE2 || HAVE_MSA || HAVE_LSX
 int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                              int_mv *best_mv, int search_param, int sad_per_bit,
                              int *num00, vp8_variance_fn_ptr_t *fn_ptr,
@@ -1278,7 +1278,7 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   return fn_ptr->vf(what, what_stride, best_address, in_what_stride, &thissad) +
          mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
 }
-#endif  // HAVE_SSE2 || HAVE_MSA
+#endif  // HAVE_SSE2 || HAVE_MSA || HAVE_LSX
 
 int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                         int sad_per_bit, int distance,

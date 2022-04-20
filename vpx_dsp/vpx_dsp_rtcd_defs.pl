@@ -763,7 +763,7 @@ add_proto qw/unsigned int vpx_sad8x16/, "const uint8_t *src_ptr, int src_stride,
 specialize qw/vpx_sad8x16 neon msa sse2 vsx mmi/;
 
 add_proto qw/unsigned int vpx_sad8x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-specialize qw/vpx_sad8x8 neon msa sse2 vsx mmi/;
+specialize qw/vpx_sad8x8 neon msa sse2 vsx mmi lsx/;
 
 add_proto qw/unsigned int vpx_sad8x4/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vpx_sad8x4 neon msa sse2 vsx mmi/;

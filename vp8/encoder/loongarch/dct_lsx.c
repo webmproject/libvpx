@@ -97,3 +97,65 @@ void vp8_short_fdct4x4_lsx(int16_t *input, int16_t *output, int32_t pitch) {
   __lsx_vst(in0, output, 0);
   __lsx_vst(in2, output, 16);
 }
+
+void vp8_short_fdct8x4_lsx(int16_t *input, int16_t *output, int32_t pitch) {
+  __m128i in0, in1, in2, in3, temp0, temp1, tmp0, tmp1;
+  __m128i const0, const1, const2, vec0_w, vec1_w, vec2_w, vec3_w;
+  __m128i coeff = { 0x38a4eb1814e808a9, 0x659061a82ee01d4c };
+  __m128i zero = __lsx_vldi(0);
+  int32_t pitch2 = pitch << 1;
+  int32_t pitch3 = pitch2 + pitch;
+
+  in0 = __lsx_vld(input, 0);
+  DUP2_ARG2(__lsx_vldx, input, pitch, input, pitch2, in1, in2);
+  in3 = __lsx_vldx(input, pitch3);
+  LSX_TRANSPOSE4x4_H(in0, in1, in2, in3, in0, in1, in2, in3);
+
+  LSX_BUTTERFLY_4_H(in0, in1, in2, in3, temp0, temp1, in1, in3);
+  DUP4_ARG2(__lsx_vslli_h, temp0, 3, temp1, 3, in1, 3, in3, 3, temp0, temp1,
+            in1, in3);
+  in0 = __lsx_vadd_h(temp0, temp1);
+  in2 = __lsx_vsub_h(temp0, temp1);
+  SET_DOTP_VALUES(coeff, 0, 1, 2, const1, const2);
+  temp0 = __lsx_vreplvei_h(coeff, 3);
+  vec1_w = __lsx_vpackev_h(zero, temp0);
+  coeff = __lsx_vilvh_h(zero, coeff);
+  vec3_w = __lsx_vreplvei_w(coeff, 0);
+  tmp1 = __lsx_vilvl_h(in3, in1);
+  tmp0 = __lsx_vilvh_h(in3, in1);
+  vec0_w = vec1_w;
+  vec2_w = vec3_w;
+  DUP4_ARG3(__lsx_vdp2add_w_h, vec0_w, tmp1, const1, vec1_w, tmp0, const1,
+            vec2_w, tmp1, const2, vec3_w, tmp0, const2, vec0_w, vec1_w, vec2_w,
+            vec3_w);
+  DUP2_ARG3(__lsx_vsrani_h_w, vec1_w, vec0_w, 12, vec3_w, vec2_w, 12, in1, in3);
+  LSX_TRANSPOSE4x4_H(in0, in1, in2, in3, in0, in1, in2, in3);
+
+  LSX_BUTTERFLY_4_H(in0, in1, in2, in3, temp0, temp1, in1, in3);
+  in0 = __lsx_vadd_h(temp0, temp1);
+  in0 = __lsx_vaddi_hu(in0, 7);
+  in2 = __lsx_vsub_h(temp0, temp1);
+  in2 = __lsx_vaddi_hu(in2, 7);
+  in0 = __lsx_vsrai_h(in0, 4);
+  in2 = __lsx_vsrai_h(in2, 4);
+  DUP2_ARG2(__lsx_vreplvei_w, coeff, 2, coeff, 3, vec3_w, vec1_w);
+  vec3_w = __lsx_vadd_w(vec3_w, vec1_w);
+  vec1_w = __lsx_vreplvei_w(coeff, 1);
+  const0 = RET_1_IF_NZERO_H(in3);
+  tmp1 = __lsx_vilvl_h(in3, in1);
+  tmp0 = __lsx_vilvh_h(in3, in1);
+  vec0_w = vec1_w;
+  vec2_w = vec3_w;
+  DUP4_ARG3(__lsx_vdp2add_w_h, vec0_w, tmp1, const1, vec1_w, tmp0, const1,
+            vec2_w, tmp1, const2, vec3_w, tmp0, const2, vec0_w, vec1_w, vec2_w,
+            vec3_w);
+  DUP2_ARG3(__lsx_vsrani_h_w, vec1_w, vec0_w, 16, vec3_w, vec2_w, 16, in1, in3);
+  in1 = __lsx_vadd_h(in1, const0);
+  DUP2_ARG2(__lsx_vpickev_d, in1, in0, in3, in2, temp0, temp1);
+  __lsx_vst(temp0, output, 0);
+  __lsx_vst(temp1, output, 16);
+
+  DUP2_ARG2(__lsx_vpickod_d, in1, in0, in3, in2, in0, in2);
+  __lsx_vst(in0, output, 32);
+  __lsx_vst(in2, output, 48);
+}

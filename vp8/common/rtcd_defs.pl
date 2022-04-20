@@ -187,7 +187,7 @@ add_proto qw/void vp8_short_fdct4x4/, "short *input, short *output, int pitch";
 specialize qw/vp8_short_fdct4x4 sse2 neon msa mmi lsx/;
 
 add_proto qw/void vp8_short_fdct8x4/, "short *input, short *output, int pitch";
-specialize qw/vp8_short_fdct8x4 sse2 neon msa mmi/;
+specialize qw/vp8_short_fdct8x4 sse2 neon msa mmi lsx/;
 
 add_proto qw/void vp8_short_walsh4x4/, "short *input, short *output, int pitch";
 specialize qw/vp8_short_walsh4x4 sse2 neon msa mmi/;
@@ -222,9 +222,10 @@ $vp8_refining_search_sad_sse2=vp8_refining_search_sadx4;
 $vp8_refining_search_sad_msa=vp8_refining_search_sadx4;
 
 add_proto qw/int vp8_diamond_search_sad/, "struct macroblock *x, struct block *b, struct blockd *d, union int_mv *ref_mv, union int_mv *best_mv, int search_param, int sad_per_bit, int *num00, struct variance_vtable *fn_ptr, int *mvcost[2], union int_mv *center_mv";
-specialize qw/vp8_diamond_search_sad sse2 msa/;
+specialize qw/vp8_diamond_search_sad sse2 msa lsx/;
 $vp8_diamond_search_sad_sse2=vp8_diamond_search_sadx4;
 $vp8_diamond_search_sad_msa=vp8_diamond_search_sadx4;
+$vp8_diamond_search_sad_lsx=vp8_diamond_search_sadx4;
 
 #
 # Alt-ref Noise Reduction (ARNR)

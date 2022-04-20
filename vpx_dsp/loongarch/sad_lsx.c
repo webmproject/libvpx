@@ -57,6 +57,34 @@
     sum_m;                                     \
   })
 
+static uint32_t sad_8width_lsx(const uint8_t *src, int32_t src_stride,
+                               const uint8_t *ref, int32_t ref_stride,
+                               int32_t height) {
+  int32_t ht_cnt;
+  __m128i src0, src1, src2, src3, ref0, ref1, ref2, ref3, sad_tmp;
+  __m128i sad = __lsx_vldi(0);
+
+  for (ht_cnt = (height >> 2); ht_cnt--;) {
+    DUP2_ARG2(__lsx_vld, src, 0, ref, 0, src0, ref0);
+    src += src_stride;
+    ref += ref_stride;
+    DUP2_ARG2(__lsx_vld, src, 0, ref, 0, src1, ref1);
+    src += src_stride;
+    ref += ref_stride;
+    DUP2_ARG2(__lsx_vld, src, 0, ref, 0, src2, ref2);
+    src += src_stride;
+    ref += ref_stride;
+    DUP2_ARG2(__lsx_vld, src, 0, ref, 0, src3, ref3);
+    src += src_stride;
+    ref += ref_stride;
+    DUP4_ARG2(__lsx_vpickev_d, src1, src0, src3, src2, ref1, ref0, ref3, ref2,
+              src0, src1, ref0, ref1);
+    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad = __lsx_vadd_h(sad, sad_tmp);
+  }
+  return HADD_UH_U32(sad);
+}
+
 static uint32_t sad_16width_lsx(const uint8_t *src, int32_t src_stride,
                                 const uint8_t *ref, int32_t ref_stride,
                                 int32_t height) {
@@ -584,6 +612,12 @@ static uint32_t avgsad_64width_lsx(const uint8_t *src, int32_t src_stride,
   return HADD_SW_S32(sad);
 }
 
+#define VPX_SAD_8xHT_LSX(height)                                             \
+  uint32_t vpx_sad8x##height##_lsx(const uint8_t *src, int32_t src_stride,   \
+                                   const uint8_t *ref, int32_t ref_stride) { \
+    return sad_8width_lsx(src, src_stride, ref, ref_stride, height);         \
+  }
+
 #define VPX_SAD_16xHT_LSX(height)                                             \
   uint32_t vpx_sad16x##height##_lsx(const uint8_t *src, int32_t src_stride,   \
                                     const uint8_t *ref, int32_t ref_stride) { \
@@ -662,7 +696,7 @@ SAD32
 
 SAD16
 
-#define SAD8 VPX_SAD_8xHTx4D_LSX(8)
+#define SAD8 VPX_SAD_8xHT_LSX(8) VPX_SAD_8xHTx4D_LSX(8)
 
 SAD8
 
