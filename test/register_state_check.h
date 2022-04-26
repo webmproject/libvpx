@@ -35,6 +35,7 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+#include <intrin.h>
 #include <windows.h>
 #include <winnt.h>
 
@@ -81,10 +82,13 @@ class RegisterStateCheck {
   CONTEXT pre_context_;
 };
 
-#define ASM_REGISTER_STATE_CHECK(statement)    \
-  do {                                         \
-    libvpx_test::RegisterStateCheck reg_check; \
-    statement;                                 \
+#define ASM_REGISTER_STATE_CHECK(statement)      \
+  do {                                           \
+    {                                            \
+      libvpx_test::RegisterStateCheck reg_check; \
+      statement;                                 \
+    }                                            \
+    _ReadWriteBarrier();                         \
   } while (false)
 
 }  // namespace libvpx_test
@@ -121,11 +125,22 @@ class RegisterStateCheck {
   int64_t pre_store_[8];
 };
 
+#if defined(__GNUC__)
+#define ASM_REGISTER_STATE_CHECK(statement)      \
+  do {                                           \
+    {                                            \
+      libvpx_test::RegisterStateCheck reg_check; \
+      statement;                                 \
+    }                                            \
+    __asm__ volatile("" ::: "memory");           \
+  } while (false)
+#else
 #define ASM_REGISTER_STATE_CHECK(statement)    \
   do {                                         \
     libvpx_test::RegisterStateCheck reg_check; \
     statement;                                 \
   } while (false)
+#endif
 
 }  // namespace libvpx_test
 
@@ -169,10 +184,13 @@ class RegisterStateCheckMMX {
   uint16_t pre_fpu_env_[14];
 };
 
-#define API_REGISTER_STATE_CHECK(statement)       \
-  do {                                            \
-    libvpx_test::RegisterStateCheckMMX reg_check; \
-    ASM_REGISTER_STATE_CHECK(statement);          \
+#define API_REGISTER_STATE_CHECK(statement)         \
+  do {                                              \
+    {                                               \
+      libvpx_test::RegisterStateCheckMMX reg_check; \
+      ASM_REGISTER_STATE_CHECK(statement);          \
+    }                                               \
+    __asm__ volatile("" ::: "memory");              \
   } while (false)
 
 }  // namespace libvpx_test
