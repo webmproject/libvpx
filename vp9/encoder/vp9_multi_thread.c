@@ -36,7 +36,7 @@ void *vp9_enc_grp_get_next_job(MultiThreadHandle *multi_thread_ctxt,
   pthread_mutex_lock(mutex_handle);
 #endif
   next = job_queue_hdl->next;
-  if (NULL != next) {
+  if (next != NULL) {
     JobQueue *job_queue = (JobQueue *)next;
     job_info = &job_queue->job_info;
     // Update the next job in the queue
@@ -84,8 +84,8 @@ void vp9_row_mt_mem_alloc(VP9_COMP *cpi) {
   multi_thread_ctxt->allocated_tile_rows = tile_rows;
   multi_thread_ctxt->allocated_vert_unit_rows = jobs_per_tile_col;
 
-  multi_thread_ctxt->job_queue =
-      (JobQueue *)vpx_memalign(32, total_jobs * sizeof(JobQueue));
+  CHECK_MEM_ERROR(cm, multi_thread_ctxt->job_queue,
+                  (JobQueue *)vpx_memalign(32, total_jobs * sizeof(JobQueue)));
 
 #if CONFIG_MULTITHREAD
   // Create mutex for each tile
