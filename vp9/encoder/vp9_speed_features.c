@@ -652,8 +652,10 @@ static void set_rt_speed_feature_framesize_independent(
       if (cpi->content_state_sb_fd == NULL &&
           (!cpi->use_svc ||
            svc->spatial_layer_id == svc->number_spatial_layers - 1)) {
-        cpi->content_state_sb_fd = (uint8_t *)vpx_calloc(
-            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1), sizeof(uint8_t));
+        CHECK_MEM_ERROR(cm, cpi->content_state_sb_fd,
+                        (uint8_t *)vpx_calloc(
+                            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
+                            sizeof(uint8_t)));
       }
     }
     if (cpi->oxcf.rc_mode == VPX_CBR && content != VP9E_CONTENT_SCREEN) {
@@ -804,14 +806,17 @@ static void set_rt_speed_feature_framesize_independent(
       sf->partition_search_type = FIXED_PARTITION;
       sf->always_this_block_size = BLOCK_64X64;
     }
-    if (cpi->count_arf_frame_usage == NULL)
-      cpi->count_arf_frame_usage =
+    if (cpi->count_arf_frame_usage == NULL) {
+      CHECK_MEM_ERROR(
+          cm, cpi->count_arf_frame_usage,
           (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
-                                sizeof(*cpi->count_arf_frame_usage));
+                                sizeof(*cpi->count_arf_frame_usage)));
+    }
     if (cpi->count_lastgolden_frame_usage == NULL)
-      cpi->count_lastgolden_frame_usage =
+      CHECK_MEM_ERROR(
+          cm, cpi->count_lastgolden_frame_usage,
           (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
-                                sizeof(*cpi->count_lastgolden_frame_usage));
+                                sizeof(*cpi->count_lastgolden_frame_usage)));
   }
   if (svc->previous_frame_is_intra_only) {
     sf->partition_search_type = FIXED_PARTITION;
