@@ -178,6 +178,7 @@ Status vp9_alloc_motion_field_info(MotionFieldInfo *motion_field_info,
   motion_field_info->frame_num = frame_num;
   motion_field_info->motion_field_array =
       vpx_calloc(frame_num, sizeof(*motion_field_info->motion_field_array));
+  if (!motion_field_info->motion_field_array) return STATUS_FAILED;
   for (frame_idx = 0; frame_idx < frame_num; ++frame_idx) {
     for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
       for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
