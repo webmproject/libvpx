@@ -423,6 +423,7 @@ void vp9_get_smooth_motion_field(const MV *search_mf,
   int row, col;
   int bw = 4 << b_width_log2_lookup[bsize];
   int bh = 4 << b_height_log2_lookup[bsize];
+  if (!(input && output)) goto fail;
   // copy search results to input buffer
   for (idx = 0; idx < rows * cols; ++idx) {
     input[idx].row = (float)search_mf[idx].row / bh;
@@ -451,6 +452,7 @@ void vp9_get_smooth_motion_field(const MV *search_mf,
     smooth_mf[idx].row = (int)(input[idx].row * bh);
     smooth_mf[idx].col = (int)(input[idx].col * bw);
   }
+fail:
   free(input);
   free(output);
 }
