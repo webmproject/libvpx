@@ -58,9 +58,10 @@ void vp9_row_mt_alloc_rd_thresh(VP9_COMP *const cpi,
       (mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2) + 1;
   int i;
 
-  this_tile->row_base_thresh_freq_fact =
+  CHECK_MEM_ERROR(
+      cm, this_tile->row_base_thresh_freq_fact,
       (int *)vpx_calloc(sb_rows * BLOCK_SIZES * MAX_MODES,
-                        sizeof(*(this_tile->row_base_thresh_freq_fact)));
+                        sizeof(*(this_tile->row_base_thresh_freq_fact))));
   for (i = 0; i < sb_rows * BLOCK_SIZES * MAX_MODES; i++)
     this_tile->row_base_thresh_freq_fact[i] = RD_THRESH_INIT_FACT;
 }
