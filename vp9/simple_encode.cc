@@ -110,6 +110,7 @@ static VP9_COMP *init_encoder(const VP9EncoderConfig *oxcf,
                               vpx_img_fmt_t img_fmt) {
   VP9_COMP *cpi;
   BufferPool *buffer_pool = (BufferPool *)vpx_calloc(1, sizeof(*buffer_pool));
+  if (!buffer_pool) return NULL;
   vp9_initialize_enc();
   cpi = vp9_create_compressor(oxcf, buffer_pool);
   vp9_update_compressor_with_img_fmt(cpi, img_fmt);
