@@ -361,6 +361,8 @@ static void parse_command_line(int argc, const char **argv_,
   if (app_input->input_ctx.file_type == FILE_TYPE_Y4M) {
     enc_cfg->g_w = app_input->input_ctx.width;
     enc_cfg->g_h = app_input->input_ctx.height;
+    enc_cfg->g_timebase.den = app_input->input_ctx.framerate.numerator;
+    enc_cfg->g_timebase.num = app_input->input_ctx.framerate.denominator;
   }
 
   if (enc_cfg->g_w < 16 || enc_cfg->g_w % 2 || enc_cfg->g_h < 16 ||
