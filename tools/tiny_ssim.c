@@ -453,6 +453,10 @@ int main(int argc, char *argv[]) {
       psnry = realloc(psnry, allocated_frames * sizeof(*psnry));
       psnru = realloc(psnru, allocated_frames * sizeof(*psnru));
       psnrv = realloc(psnrv, allocated_frames * sizeof(*psnrv));
+      if (!(ssimy && ssimu && ssimv && psnry && psnru && psnrv)) {
+        fprintf(stderr, "Error allocating SSIM/PSNR data.\n");
+        exit(EXIT_FAILURE);
+      }
     }
     psnr_and_ssim(ssimy[n_frames], psnry[n_frames], y[0], y[1], w, h);
     psnr_and_ssim(ssimu[n_frames], psnru[n_frames], u[0], u[1], (w + 1) / 2,
