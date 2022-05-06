@@ -32,7 +32,15 @@ extern "C" {
  * This interface provides the capability to decode VP8 streams.
  * @{
  */
+
+/*!\brief A single instance of the VP8 decoder.
+ *\deprecated This access mechanism is provided for backwards compatibility;
+ * prefer vpx_codec_vp8_dx().
+ */
 extern vpx_codec_iface_t vpx_codec_vp8_dx_algo;
+
+/*!\brief The interface to the VP8 decoder.
+ */
 extern vpx_codec_iface_t *vpx_codec_vp8_dx(void);
 /*!@} - end algorithm interface member group*/
 
@@ -41,7 +49,15 @@ extern vpx_codec_iface_t *vpx_codec_vp8_dx(void);
  * This interface provides the capability to decode VP9 streams.
  * @{
  */
+
+/*!\brief A single instance of the VP9 decoder.
+ *\deprecated This access mechanism is provided for backwards compatibility;
+ * prefer vpx_codec_vp9_dx().
+ */
 extern vpx_codec_iface_t vpx_codec_vp9_dx_algo;
+
+/*!\brief The interface to the VP9 decoder.
+ */
 extern vpx_codec_iface_t *vpx_codec_vp9_dx(void);
 /*!@} - end algorithm interface member group*/
 

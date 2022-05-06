@@ -33,7 +33,15 @@ extern "C" {
  * This interface provides the capability to encode raw VP8 streams.
  * @{
  */
+
+/*!\brief A single instance of the VP8 encoder.
+ *\deprecated This access mechanism is provided for backwards compatibility;
+ * prefer vpx_codec_vp8_cx().
+ */
 extern vpx_codec_iface_t vpx_codec_vp8_cx_algo;
+
+/*!\brief The interface to the VP8 encoder.
+ */
 extern vpx_codec_iface_t *vpx_codec_vp8_cx(void);
 /*!@} - end algorithm interface member group*/
 
@@ -42,7 +50,15 @@ extern vpx_codec_iface_t *vpx_codec_vp8_cx(void);
  * This interface provides the capability to encode raw VP9 streams.
  * @{
  */
+
+/*!\brief A single instance of the VP9 encoder.
+ *\deprecated This access mechanism is provided for backwards compatibility;
+ * prefer vpx_codec_vp9_cx().
+ */
 extern vpx_codec_iface_t vpx_codec_vp9_cx_algo;
+
+/*!\brief The interface to the VP9 encoder.
+ */
 extern vpx_codec_iface_t *vpx_codec_vp9_cx(void);
 /*!@} - end algorithm interface member group*/
 
