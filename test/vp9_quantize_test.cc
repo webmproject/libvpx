@@ -568,6 +568,16 @@ INSTANTIATE_TEST_SUITE_P(
                                  VPX_BITS_8, 32, true)));
 #endif  // HAVE_VSX && !CONFIG_VP9_HIGHBITDEPTH
 
+#if HAVE_LSX && !CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_SUITE_P(LSX, VP9QuantizeTest,
+                         ::testing::Values(make_tuple(&vpx_quantize_b_lsx,
+                                                      &vpx_quantize_b_c,
+                                                      VPX_BITS_8, 16, false),
+                                           make_tuple(&vpx_quantize_b_32x32_lsx,
+                                                      &vpx_quantize_b_32x32_c,
+                                                      VPX_BITS_8, 32, false)));
+#endif  // HAVE_LSX && !CONFIG_VP9_HIGHBITDEPTH
+
 // Only useful to compare "Speed" test results.
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_C, VP9QuantizeTest,
