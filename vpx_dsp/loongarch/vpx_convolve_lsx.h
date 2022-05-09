@@ -125,19 +125,18 @@
     tmp1_m;                                              \
   })
 
-#define PCKEV_AVG_ST4_D(in0, in1, in2, in3, dst0, dst1, pdst, stride)      \
-  {                                                                        \
-    __m128i tmp0_m, tmp1_m;                                                \
-                                                                           \
-    DUP2_ARG2(__lsx_vpickev_b, in1, in0, in3, in2, tmp0_m, tmp1_m);        \
-    DUP2_ARG2(__lsx_vavgr_bu, tmp0_m, dst0, tmp1_m, dst1, tmp0_m, tmp1_m); \
-    __lsx_vstelm_d(tmp0_m, pdst, 0, 0);                                    \
-    pdst += stride;                                                        \
-    __lsx_vstelm_d(tmp0_m, pdst, 0, 1);                                    \
-    pdst += stride;                                                        \
-    __lsx_vstelm_d(tmp1_m, pdst, 0, 0);                                    \
-    pdst += stride;                                                        \
-    __lsx_vstelm_d(tmp1_m, pdst, 0, 1);                                    \
+#define AVG_ST4_D(in0, in1, dst0, dst1, pdst, stride)                \
+  {                                                                  \
+    __m128i tmp0_m, tmp1_m;                                          \
+                                                                     \
+    DUP2_ARG2(__lsx_vavgr_bu, in0, dst0, in1, dst1, tmp0_m, tmp1_m); \
+    __lsx_vstelm_d(tmp0_m, pdst, 0, 0);                              \
+    pdst += stride;                                                  \
+    __lsx_vstelm_d(tmp0_m, pdst, 0, 1);                              \
+    pdst += stride;                                                  \
+    __lsx_vstelm_d(tmp1_m, pdst, 0, 0);                              \
+    pdst += stride;                                                  \
+    __lsx_vstelm_d(tmp1_m, pdst, 0, 1);                              \
   }
 
 #endif  // VPX_VPX_DSP_LOONGARCH_VPX_CONVOLVE_LSX_H_

@@ -198,7 +198,7 @@ static void sad_8width_x4d_lsx(const uint8_t *src_ptr, int32_t src_stride,
                                int32_t ref_stride, int32_t height,
                                uint32_t *sad_array) {
   int32_t ht_cnt = (height >> 2);
-  uint8_t *ref0_ptr, *ref1_ptr, *ref2_ptr, *ref3_ptr;
+  const uint8_t *ref0_ptr, *ref1_ptr, *ref2_ptr, *ref3_ptr;
   __m128i src0, src1, src2, src3, sad_tmp;
   __m128i ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7;
   __m128i ref8, ref9, ref10, ref11, ref12, ref13, ref14, ref15;

@@ -13,36 +13,29 @@
 
 #include "vpx_util/loongson_intrinsics.h"
 
-#define DOTP_CONST_PAIR(reg0, reg1, cnst0, cnst1, out0, out1) \
-  {                                                           \
-    __m128i s0_m, s1_m, s2_m, s3_m, s4_m, s5_m;               \
-    __m128i k0_m, k1_m, k2_m, k3_m;                           \
-    __m128i zero = __lsx_vldi(0);                             \
-                                                              \
-    k0_m = __lsx_vreplgr2vr_h(cnst0);                         \
-    k1_m = __lsx_vreplgr2vr_h(cnst1);                         \
-    k2_m = __lsx_vpackev_h(k1_m, k0_m);                       \
-    k0_m = __lsx_vpackev_h(zero, k0_m);                       \
-    k1_m = __lsx_vpackev_h(k1_m, zero);                       \
-                                                              \
-    s5_m = __lsx_vilvl_h(reg1, reg0);                         \
-    s4_m = __lsx_vilvh_h(reg1, reg0);                         \
-    s3_m = __lsx_vilvl_h(reg0, reg1);                         \
-    s2_m = __lsx_vilvh_h(reg0, reg1);                         \
-                                                              \
-    s1_m = __lsx_vdp2_w_h(s5_m, k0_m);                        \
-    s0_m = __lsx_vdp2_w_h(s4_m, k0_m);                        \
-    k3_m = __lsx_vdp2_w_h(s5_m, k1_m);                        \
-    s1_m = __lsx_vsub_w(s1_m, k3_m);                          \
-    k3_m = __lsx_vdp2_w_h(s4_m, k1_m);                        \
-    s0_m = __lsx_vsub_w(s0_m, k3_m);                          \
-                                                              \
-    out0 = __lsx_vssrarni_h_w(s0_m, s1_m, DCT_CONST_BITS);    \
-                                                              \
-    s1_m = __lsx_vdp2_w_h(s3_m, k2_m);                        \
-    s0_m = __lsx_vdp2_w_h(s2_m, k2_m);                        \
-    out1 = __lsx_vssrarni_h_w(s0_m, s1_m, DCT_CONST_BITS);    \
-  }
+#define DOTP_CONST_PAIR(reg0, reg1, cnst0, cnst1, out0, out1)         \
+  do {                                                                \
+    __m128i s0_m, s1_m, s2_m, s3_m, s4_m, s5_m;                       \
+    __m128i k0_m, k1_m, k2_m, k3_m;                                   \
+                                                                      \
+    k0_m = __lsx_vreplgr2vr_h(cnst0);                                 \
+    k1_m = __lsx_vreplgr2vr_h(cnst1);                                 \
+    k2_m = __lsx_vpackev_h(k1_m, k0_m);                               \
+                                                                      \
+    DUP2_ARG2(__lsx_vilvl_h, reg1, reg0, reg0, reg1, s5_m, s3_m);     \
+    DUP2_ARG2(__lsx_vilvh_h, reg1, reg0, reg0, reg1, s4_m, s2_m);     \
+                                                                      \
+    DUP2_ARG2(__lsx_vmulwev_w_h, s5_m, k0_m, s4_m, k0_m, s1_m, s0_m); \
+    k3_m = __lsx_vmulwod_w_h(s5_m, k1_m);                             \
+    s1_m = __lsx_vsub_w(s1_m, k3_m);                                  \
+    k3_m = __lsx_vmulwod_w_h(s4_m, k1_m);                             \
+    s0_m = __lsx_vsub_w(s0_m, k3_m);                                  \
+                                                                      \
+    out0 = __lsx_vssrarni_h_w(s0_m, s1_m, DCT_CONST_BITS);            \
+                                                                      \
+    DUP2_ARG2(__lsx_vdp2_w_h, s3_m, k2_m, s2_m, k2_m, s1_m, s0_m);    \
+    out1 = __lsx_vssrarni_h_w(s0_m, s1_m, DCT_CONST_BITS);            \
+  } while (0)
 
 #define DOT_SHIFT_RIGHT_PCK_H(in0, in1, in2, in3)                \
   do {                                                           \

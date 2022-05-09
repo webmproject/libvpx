@@ -15,7 +15,6 @@
 static void copy_width8_lsx(const uint8_t *src, int32_t src_stride,
                             uint8_t *dst, int32_t dst_stride, int32_t height) {
   int32_t cnt;
-  uint64_t out0, out1, out2, out3, out4, out5, out6, out7;
   __m128i src0, src1, src2, src3, src4, src5, src6, src7;
   int32_t src_stride2 = src_stride << 1;
   int32_t src_stride3 = src_stride2 + src_stride;

@@ -361,13 +361,12 @@ static void common_vt_2t_4x4_lsx(const uint8_t *src, int32_t src_stride,
                                  uint8_t *dst, int32_t dst_stride,
                                  int8_t *filter) {
   __m128i src0, src1, src2, src3, src4;
-  __m128i src10_l, src32_l, src21_l, src43_l, src2110, src4332;
+  __m128i vec0, vec1, vec2, vec3, vec4, vec5;
   __m128i filt0, tmp0, tmp1;
 
   int32_t src_stride2 = src_stride << 1;
   int32_t src_stride3 = src_stride2 + src_stride;
   int32_t src_stride4 = src_stride2 << 1;
-
   int32_t dst_stride2 = dst_stride << 1;
   int32_t dst_stride3 = dst_stride2 + dst_stride;
 
@@ -378,37 +377,33 @@ static void common_vt_2t_4x4_lsx(const uint8_t *src, int32_t src_stride,
             src, src_stride4, src1, src2, src3, src4);
   src += (src_stride4 + src_stride);
 
-  DUP4_ARG2(__lsx_vilvl_b, src1, src0, src2, src1, src3, src2, src4, src3,
-            src10_l, src21_l, src32_l, src43_l);
-  DUP2_ARG2(__lsx_vilvl_d, src21_l, src10_l, src43_l, src32_l, src2110,
-            src4332);
-  DUP2_ARG2(__lsx_vdp2_h_bu, src2110, filt0, src4332, filt0, tmp0, tmp1);
-  DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
-  src2110 = __lsx_vpickev_b(tmp1, tmp0);
+  DUP4_ARG2(__lsx_vilvl_b, src1, src0, src2, src1, src3, src2, src4, src3, vec0,
+            vec1, vec2, vec3);
+  DUP2_ARG2(__lsx_vilvl_d, vec1, vec0, vec3, vec2, vec4, vec5);
+  DUP2_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, tmp0, tmp1);
+  tmp0 = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
 
-  __lsx_vstelm_w(src2110, dst, 0, 0);
-  __lsx_vstelm_w(src2110, dst + dst_stride, 0, 1);
-  __lsx_vstelm_w(src2110, dst + dst_stride2, 0, 2);
-  __lsx_vstelm_w(src2110, dst + dst_stride3, 0, 3);
+  __lsx_vstelm_w(tmp0, dst, 0, 0);
+  __lsx_vstelm_w(tmp0, dst + dst_stride, 0, 1);
+  __lsx_vstelm_w(tmp0, dst + dst_stride2, 0, 2);
+  __lsx_vstelm_w(tmp0, dst + dst_stride3, 0, 3);
 }
 
 static void common_vt_2t_4x8_lsx(const uint8_t *src, int32_t src_stride,
                                  uint8_t *dst, int32_t dst_stride,
                                  int8_t *filter) {
   __m128i src0, src1, src2, src3, src4, src5, src6, src7, src8;
-  __m128i src10_l, src32_l, src54_l, src76_l, src21_l, src43_l;
-  __m128i src65_l, src87_l, src2110, src4332, src6554, src8776;
+  __m128i vec0, vec1, vec2, vec3, vec4, vec5;
+  __m128i vec6, vec7, vec8, vec9, vec10, vec11;
   __m128i tmp0, tmp1, tmp2, tmp3;
   __m128i filt0;
 
   int32_t src_stride2 = src_stride << 1;
   int32_t src_stride3 = src_stride2 + src_stride;
   int32_t src_stride4 = src_stride2 << 1;
-
   int32_t dst_stride2 = dst_stride << 1;
   int32_t dst_stride3 = dst_stride2 + dst_stride;
   int32_t dst_stride4 = dst_stride2 << 1;
-
   uint8_t *dst_tmp1 = dst + dst_stride4;
 
   filt0 = __lsx_vldrepl_h(filter, 0);
@@ -420,27 +415,27 @@ static void common_vt_2t_4x8_lsx(const uint8_t *src, int32_t src_stride,
             src, src_stride4, src5, src6, src7, src8);
   src += (src_stride4 + src_stride);
 
-  DUP4_ARG2(__lsx_vilvl_b, src1, src0, src2, src1, src3, src2, src4, src3,
-            src10_l, src21_l, src32_l, src43_l);
-  DUP4_ARG2(__lsx_vilvl_b, src5, src4, src6, src5, src7, src6, src8, src7,
-            src54_l, src65_l, src76_l, src87_l);
-  DUP4_ARG2(__lsx_vilvl_d, src21_l, src10_l, src43_l, src32_l, src65_l, src54_l,
-            src87_l, src76_l, src2110, src4332, src6554, src8776);
-  DUP4_ARG2(__lsx_vdp2_h_bu, src2110, filt0, src4332, filt0, src6554, filt0,
-            src8776, filt0, tmp0, tmp1, tmp2, tmp3);
-  DUP4_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp2,
-            FILTER_BITS, tmp3, FILTER_BITS, tmp0, tmp1, tmp2, tmp3);
-  DUP2_ARG2(__lsx_vpickev_b, tmp1, tmp0, tmp3, tmp2, src2110, src4332);
+  DUP4_ARG2(__lsx_vilvl_b, src1, src0, src2, src1, src3, src2, src4, src3, vec0,
+            vec1, vec2, vec3);
+  DUP4_ARG2(__lsx_vilvl_b, src5, src4, src6, src5, src7, src6, src8, src7, vec4,
+            vec5, vec6, vec7);
+  DUP4_ARG2(__lsx_vilvl_d, vec1, vec0, vec3, vec2, vec5, vec4, vec7, vec6, vec8,
+            vec9, vec10, vec11);
 
-  __lsx_vstelm_w(src2110, dst, 0, 0);
-  __lsx_vstelm_w(src2110, dst + dst_stride, 0, 1);
-  __lsx_vstelm_w(src2110, dst + dst_stride2, 0, 2);
-  __lsx_vstelm_w(src2110, dst + dst_stride3, 0, 3);
+  DUP4_ARG2(__lsx_vdp2_h_bu, vec8, filt0, vec9, filt0, vec10, filt0, vec11,
+            filt0, tmp0, tmp1, tmp2, tmp3);
+  DUP2_ARG3(__lsx_vssrarni_bu_h, tmp1, tmp0, FILTER_BITS, tmp3, tmp2,
+            FILTER_BITS, tmp0, tmp1);
 
-  __lsx_vstelm_w(src4332, dst_tmp1, 0, 0);
-  __lsx_vstelm_w(src4332, dst_tmp1 + dst_stride, 0, 1);
-  __lsx_vstelm_w(src4332, dst_tmp1 + dst_stride2, 0, 2);
-  __lsx_vstelm_w(src4332, dst_tmp1 + dst_stride3, 0, 3);
+  __lsx_vstelm_w(tmp0, dst, 0, 0);
+  __lsx_vstelm_w(tmp0, dst + dst_stride, 0, 1);
+  __lsx_vstelm_w(tmp0, dst + dst_stride2, 0, 2);
+  __lsx_vstelm_w(tmp0, dst + dst_stride3, 0, 3);
+
+  __lsx_vstelm_w(tmp1, dst_tmp1, 0, 0);
+  __lsx_vstelm_w(tmp1, dst_tmp1 + dst_stride, 0, 1);
+  __lsx_vstelm_w(tmp1, dst_tmp1 + dst_stride2, 0, 2);
+  __lsx_vstelm_w(tmp1, dst_tmp1 + dst_stride3, 0, 3);
 }
 
 static void common_vt_2t_4w_lsx(const uint8_t *src, int32_t src_stride,
@@ -457,17 +452,14 @@ static void common_vt_2t_8x4_lsx(const uint8_t *src, int32_t src_stride,
                                  uint8_t *dst, int32_t dst_stride,
                                  int8_t *filter) {
   __m128i src0, src1, src2, src3, src4, vec0, vec1, vec2, vec3, filt0;
-  __m128i out0, out1;
-  __m128i tmp0, tmp1, tmp2, tmp3;
+  __m128i out0, out1, tmp0, tmp1, tmp2, tmp3;
 
   int32_t src_stride2 = src_stride << 1;
   int32_t src_stride3 = src_stride2 + src_stride;
   int32_t src_stride4 = src_stride2 << 1;
-
   int32_t dst_stride2 = dst_stride << 1;
   int32_t dst_stride3 = dst_stride2 + dst_stride;
 
-  /* rearranging filter_y */
   filt0 = __lsx_vldrepl_h(filter, 0);
 
   src0 = __lsx_vld(src, 0);
@@ -478,9 +470,8 @@ static void common_vt_2t_8x4_lsx(const uint8_t *src, int32_t src_stride,
             vec1, vec2, vec3);
   DUP4_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, vec2, filt0, vec3, filt0,
             tmp0, tmp1, tmp2, tmp3);
-  DUP4_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp2,
-            FILTER_BITS, tmp3, FILTER_BITS, tmp0, tmp1, tmp2, tmp3);
-  DUP2_ARG2(__lsx_vpickev_b, tmp1, tmp0, tmp3, tmp2, out0, out1);
+  DUP2_ARG3(__lsx_vssrarni_bu_h, tmp1, tmp0, FILTER_BITS, tmp3, tmp2,
+            FILTER_BITS, out0, out1);
 
   __lsx_vstelm_d(out0, dst, 0, 0);
   __lsx_vstelm_d(out0, dst + dst_stride, 0, 1);
@@ -494,13 +485,11 @@ static void common_vt_2t_8x8mult_lsx(const uint8_t *src, int32_t src_stride,
   uint32_t loop_cnt = (height >> 3);
   __m128i src0, src1, src2, src3, src4, src5, src6, src7, src8;
   __m128i vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7, filt0;
-  __m128i out0, out1;
-  __m128i tmp0, tmp1, tmp2, tmp3;
+  __m128i out0, out1, tmp0, tmp1, tmp2, tmp3;
 
   int32_t src_stride2 = src_stride << 1;
   int32_t src_stride3 = src_stride2 + src_stride;
   int32_t src_stride4 = src_stride2 << 1;
-
   int32_t dst_stride2 = dst_stride << 1;
   int32_t dst_stride3 = dst_stride2 + dst_stride;
   int32_t dst_stride4 = dst_stride2 << 1;
@@ -525,9 +514,9 @@ static void common_vt_2t_8x8mult_lsx(const uint8_t *src, int32_t src_stride,
               vec4, vec5, vec6, vec7);
     DUP4_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, vec2, filt0, vec3,
               filt0, tmp0, tmp1, tmp2, tmp3);
-    DUP4_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp2,
-              FILTER_BITS, tmp3, FILTER_BITS, tmp0, tmp1, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vpickev_b, tmp1, tmp0, tmp3, tmp2, out0, out1);
+    DUP2_ARG3(__lsx_vssrarni_bu_h, tmp1, tmp0, FILTER_BITS, tmp3, tmp2,
+              FILTER_BITS, out0, out1);
+
     __lsx_vstelm_d(out0, dst, 0, 0);
     __lsx_vstelm_d(out0, dst + dst_stride, 0, 1);
     __lsx_vstelm_d(out1, dst + dst_stride2, 0, 0);
@@ -536,9 +525,9 @@ static void common_vt_2t_8x8mult_lsx(const uint8_t *src, int32_t src_stride,
 
     DUP4_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, vec6, filt0, vec7,
               filt0, tmp0, tmp1, tmp2, tmp3);
-    DUP4_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp2,
-              FILTER_BITS, tmp3, FILTER_BITS, tmp0, tmp1, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vpickev_b, tmp1, tmp0, tmp3, tmp2, out0, out1);
+    DUP2_ARG3(__lsx_vssrarni_bu_h, tmp1, tmp0, FILTER_BITS, tmp3, tmp2,
+              FILTER_BITS, out0, out1);
+
     __lsx_vstelm_d(out0, dst, 0, 0);
     __lsx_vstelm_d(out0, dst + dst_stride, 0, 1);
     __lsx_vstelm_d(out1, dst + dst_stride2, 0, 0);
@@ -559,29 +548,17 @@ static void common_vt_2t_8w_lsx(const uint8_t *src, int32_t src_stride,
   }
 }
 
-static void common_vt_2t_16w_lsx(const uint8_t *src, ptrdiff_t src_stride,
-                                 uint8_t *dst, ptrdiff_t dst_stride,
-                                 const InterpKernel *filter, int y0_q4,
-                                 int y_step_q4, int w, int height) {
+static void common_vt_2t_16w_lsx(const uint8_t *src, int32_t src_stride,
+                                 uint8_t *dst, int32_t dst_stride,
+                                 int8_t *filter, int32_t height) {
   uint32_t loop_cnt = (height >> 2);
-  __m128i src0, src1, src2, src3, src4;
+  __m128i src0, src1, src2, src3, src4, tmp, tmp0, tmp1;
   __m128i vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7, filt0;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4;
   int32_t src_stride2 = src_stride << 1;
   int32_t src_stride3 = src_stride2 + src_stride;
   int32_t src_stride4 = src_stride2 << 1;
 
-  const int16_t *const filter_y = filter[y0_q4];
-  int8_t cnt, filt_ver[8];
-
-  assert(y_step_q4 == 16);
-  assert(((const int32_t *)filter_y)[1] != 0x800000);
-
-  for (cnt = 8; cnt--;) {
-    filt_ver[cnt] = filter_y[cnt];
-  }
-
-  filt0 = __lsx_vldrepl_h(&filt_ver[3], 0);
+  filt0 = __lsx_vldrepl_h(filter, 0);
 
   src0 = __lsx_vld(src, 0);
   src += src_stride;
@@ -595,29 +572,25 @@ static void common_vt_2t_16w_lsx(const uint8_t *src, ptrdiff_t src_stride,
     DUP2_ARG2(__lsx_vilvl_b, src1, src0, src2, src1, vec0, vec2);
     DUP2_ARG2(__lsx_vilvh_b, src1, src0, src2, src1, vec1, vec3);
     DUP2_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, tmp0, tmp1);
-    DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
-    tmp4 = __lsx_vpickev_b(tmp1, tmp0);
-    __lsx_vst(tmp4, dst, 0);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vst(tmp, dst, 0);
     dst += dst_stride;
 
     DUP2_ARG2(__lsx_vilvl_b, src3, src2, src4, src3, vec4, vec6);
     DUP2_ARG2(__lsx_vilvh_b, src3, src2, src4, src3, vec5, vec7);
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vsrari_h, tmp2, FILTER_BITS, tmp3, FILTER_BITS, tmp2, tmp3);
-    tmp4 = __lsx_vpickev_b(tmp3, tmp2);
-    __lsx_vst(tmp4, dst, 0);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vst(tmp, dst, 0);
     dst += dst_stride;
 
     DUP2_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, tmp0, tmp1);
-    DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
-    tmp4 = __lsx_vpickev_b(tmp1, tmp0);
-    __lsx_vst(tmp4, dst, 0);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vst(tmp, dst, 0);
     dst += dst_stride;
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vsrari_h, tmp2, FILTER_BITS, tmp3, FILTER_BITS, tmp2, tmp3);
-    tmp4 = __lsx_vpickev_b(tmp3, tmp2);
-    __lsx_vst(tmp4, dst, 0);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vst(tmp, dst, 0);
     dst += dst_stride;
 
     src0 = src4;
@@ -630,20 +603,18 @@ static void common_vt_2t_32w_lsx(const uint8_t *src, int32_t src_stride,
   uint32_t loop_cnt = (height >> 2);
   __m128i src0, src1, src2, src3, src4, src5, src6, src7, src8, src9;
   __m128i vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7, filt0;
-  __m128i tmp0, tmp1, tmp2, tmp3, tmp4;
+  __m128i tmp, tmp0, tmp1;
 
   int32_t src_stride2 = src_stride << 1;
   int32_t src_stride3 = src_stride2 + src_stride;
   int32_t src_stride4 = src_stride2 << 1;
-
   int32_t dst_stride2 = dst_stride << 1;
   int32_t dst_stride3 = dst_stride2 + dst_stride;
-
   uint8_t *src_tmp;
+
   filt0 = __lsx_vldrepl_h(filter, 0);
 
-  src0 = __lsx_vld(src, 0);
-  src5 = __lsx_vld(src, 16);
+  DUP2_ARG2(__lsx_vld, src, 0, src, 16, src0, src5);
   src += src_stride;
   src_tmp = src + 16;
 
@@ -658,53 +629,45 @@ static void common_vt_2t_32w_lsx(const uint8_t *src, int32_t src_stride,
     src_tmp += src_stride4;
 
     DUP2_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, tmp0, tmp1);
-    DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
-    tmp4 = __lsx_vpickev_b(tmp1, tmp0);
-    __lsx_vst(tmp4, dst, 0);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vst(tmp, dst, 0);
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vsrari_h, tmp2, FILTER_BITS, tmp3, FILTER_BITS, tmp2, tmp3);
-    tmp4 = __lsx_vpickev_b(tmp3, tmp2);
-    __lsx_vstx(tmp4, dst, dst_stride);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vstx(tmp, dst, dst_stride);
 
     DUP2_ARG2(__lsx_vilvl_b, src3, src2, src4, src3, vec4, vec6);
     DUP2_ARG2(__lsx_vilvh_b, src3, src2, src4, src3, vec5, vec7);
     DUP2_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, tmp0, tmp1);
-    DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
-    tmp4 = __lsx_vpickev_b(tmp1, tmp0);
-    __lsx_vstx(tmp4, dst, dst_stride2);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vstx(tmp, dst, dst_stride2);
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vsrari_h, tmp2, FILTER_BITS, tmp3, FILTER_BITS, tmp2, tmp3);
-    tmp4 = __lsx_vpickev_b(tmp3, tmp2);
-    __lsx_vstx(tmp4, dst, dst_stride3);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vstx(tmp, dst, dst_stride3);
 
     DUP2_ARG2(__lsx_vilvl_b, src6, src5, src7, src6, vec0, vec2);
     DUP2_ARG2(__lsx_vilvh_b, src6, src5, src7, src6, vec1, vec3);
     DUP2_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, tmp0, tmp1);
-    DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
-    tmp4 = __lsx_vpickev_b(tmp1, tmp0);
-    __lsx_vst(tmp4, dst, 16);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
+    __lsx_vst(tmp, dst, 16);
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vsrari_h, tmp2, FILTER_BITS, tmp3, FILTER_BITS, tmp2, tmp3);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     dst += dst_stride;
-    tmp4 = __lsx_vpickev_b(tmp3, tmp2);
-    __lsx_vst(tmp4, dst, 16);
+    __lsx_vst(tmp, dst, 16);
 
     DUP2_ARG2(__lsx_vilvl_b, src8, src7, src9, src8, vec4, vec6);
     DUP2_ARG2(__lsx_vilvh_b, src8, src7, src9, src8, vec5, vec7);
     DUP2_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, tmp0, tmp1);
-    DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     dst += dst_stride;
-    tmp4 = __lsx_vpickev_b(tmp1, tmp0);
-    __lsx_vst(tmp4, dst, 16);
+    __lsx_vst(tmp, dst, 16);
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vsrari_h, tmp2, FILTER_BITS, tmp3, FILTER_BITS, tmp2, tmp3);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     dst += dst_stride;
-    tmp4 = __lsx_vpickev_b(tmp3, tmp2);
-    __lsx_vst(tmp4, dst, 16);
+    __lsx_vst(tmp, dst, 16);
 
     dst += dst_stride;
 
@@ -719,7 +682,7 @@ static void common_vt_2t_64w_lsx(const uint8_t *src, int32_t src_stride,
   uint32_t loop_cnt = (height >> 1);
   __m128i src0, src1, src2, src3, src4, src5, src6, src7, src8, src9, src10;
   __m128i src11, vec0, vec1, vec2, vec3, vec4, vec5, vec6, vec7, filt0;
-  __m128i tmp, tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
+  __m128i tmp, tmp0, tmp1;
 
   int32_t src_stride2 = src_stride << 1;
   int32_t dst_stride2 = dst_stride << 1;
@@ -743,49 +706,41 @@ static void common_vt_2t_64w_lsx(const uint8_t *src, int32_t src_stride,
     DUP2_ARG2(__lsx_vilvl_b, src1, src0, src2, src1, vec0, vec2);
     DUP2_ARG2(__lsx_vilvh_b, src1, src0, src2, src1, vec1, vec3);
     DUP2_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, tmp0, tmp1);
-    DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
-    tmp = __lsx_vpickev_b(tmp1, tmp0);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     __lsx_vst(tmp, dst, 0);
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vsrari_h, tmp2, FILTER_BITS, tmp3, FILTER_BITS, tmp2, tmp3);
-    tmp = __lsx_vpickev_b(tmp3, tmp2);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     __lsx_vst(tmp, dst_tmp1, 0);
 
     DUP2_ARG2(__lsx_vilvl_b, src4, src3, src5, src4, vec4, vec6);
     DUP2_ARG2(__lsx_vilvh_b, src4, src3, src5, src4, vec5, vec7);
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, tmp4, tmp5);
-    DUP2_ARG2(__lsx_vsrari_h, tmp4, FILTER_BITS, tmp5, FILTER_BITS, tmp4, tmp5);
-    tmp = __lsx_vpickev_b(tmp5, tmp4);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     __lsx_vst(tmp, dst, 16);
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp6, tmp7);
-    DUP2_ARG2(__lsx_vsrari_h, tmp6, FILTER_BITS, tmp7, FILTER_BITS, tmp6, tmp7);
-    tmp = __lsx_vpickev_b(tmp7, tmp6);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     __lsx_vst(tmp, dst_tmp1, 16);
 
     DUP2_ARG2(__lsx_vilvl_b, src7, src6, src8, src7, vec0, vec2);
     DUP2_ARG2(__lsx_vilvh_b, src7, src6, src8, src7, vec1, vec3);
     DUP2_ARG2(__lsx_vdp2_h_bu, vec0, filt0, vec1, filt0, tmp0, tmp1);
-    DUP2_ARG2(__lsx_vsrari_h, tmp0, FILTER_BITS, tmp1, FILTER_BITS, tmp0, tmp1);
-    tmp = __lsx_vpickev_b(tmp1, tmp0);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     __lsx_vst(tmp, dst, 32);
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp2, tmp3);
-    DUP2_ARG2(__lsx_vsrari_h, tmp2, FILTER_BITS, tmp3, FILTER_BITS, tmp2, tmp3);
-    tmp = __lsx_vpickev_b(tmp3, tmp2);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec2, filt0, vec3, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     __lsx_vst(tmp, dst_tmp1, 32);
 
     DUP2_ARG2(__lsx_vilvl_b, src10, src9, src11, src10, vec4, vec6);
     DUP2_ARG2(__lsx_vilvh_b, src10, src9, src11, src10, vec5, vec7);
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, tmp4, tmp5);
-    DUP2_ARG2(__lsx_vsrari_h, tmp4, FILTER_BITS, tmp5, FILTER_BITS, tmp4, tmp5);
-    tmp = __lsx_vpickev_b(tmp5, tmp4);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec4, filt0, vec5, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     __lsx_vst(tmp, dst, 48);
 
-    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp6, tmp7);
-    DUP2_ARG2(__lsx_vsrari_h, tmp6, FILTER_BITS, tmp7, FILTER_BITS, tmp6, tmp7);
-    tmp = __lsx_vpickev_b(tmp7, tmp6);
+    DUP2_ARG2(__lsx_vdp2_h_bu, vec6, filt0, vec7, filt0, tmp0, tmp1);
+    tmp = __lsx_vssrarni_bu_h(tmp1, tmp0, FILTER_BITS);
     __lsx_vst(tmp, dst_tmp1, 48);
     dst += dst_stride2;
     dst_tmp1 += dst_stride2;
@@ -823,8 +778,8 @@ void vpx_convolve8_vert_lsx(const uint8_t *src, ptrdiff_t src_stride,
                             &filt_ver[3], h);
         break;
       case 16:
-        common_vt_2t_16w_lsx(src, src_stride, dst, dst_stride, filter, y0_q4,
-                             y_step_q4, w, h);
+        common_vt_2t_16w_lsx(src, (int32_t)src_stride, dst, (int32_t)dst_stride,
+                             &filt_ver[3], h);
         break;
       case 32:
         common_vt_2t_32w_lsx(src, (int32_t)src_stride, dst, (int32_t)dst_stride,
