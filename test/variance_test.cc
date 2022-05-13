@@ -1655,10 +1655,15 @@ INSTANTIATE_TEST_SUITE_P(
     LSX, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_lsx),
                       VarianceParams(5, 5, &vpx_variance32x32_lsx),
-                      VarianceParams(4, 4, &vpx_variance16x16_lsx)));
+                      VarianceParams(4, 4, &vpx_variance16x16_lsx),
+                      VarianceParams(3, 3, &vpx_variance8x8_lsx)));
 
 INSTANTIATE_TEST_SUITE_P(LSX, VpxSubpelVarianceTest,
                          ::testing::Values(SubpelVarianceParams(
                              5, 5, &vpx_sub_pixel_variance32x32_lsx, 0)));
+
+INSTANTIATE_TEST_SUITE_P(LSX, VpxSubpelAvgVarianceTest,
+                         ::testing::Values(SubpelAvgVarianceParams(
+                             6, 6, &vpx_sub_pixel_avg_variance64x64_lsx, 0)));
 #endif
 }  // namespace

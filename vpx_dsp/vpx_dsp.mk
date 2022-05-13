@@ -339,6 +339,7 @@ DSP_SRCS-$(HAVE_AVX2)  += x86/avg_intrin_avx2.c
 DSP_SRCS-$(HAVE_NEON)  += arm/avg_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/hadamard_neon.c
 DSP_SRCS-$(HAVE_MSA)   += mips/avg_msa.c
+DSP_SRCS-$(HAVE_LSX)   += loongarch/avg_lsx.c
 ifeq ($(VPX_ARCH_X86_64),yes)
 DSP_SRCS-$(HAVE_SSSE3) += x86/avg_ssse3_x86_64.asm
 endif
@@ -438,6 +439,9 @@ DSP_SRCS-$(HAVE_VSX)  += ppc/bitdepth_conversion_vsx.h
 # X86 utilities
 DSP_SRCS-$(HAVE_SSE2) += x86/mem_sse2.h
 DSP_SRCS-$(HAVE_SSE2) += x86/transpose_sse2.h
+
+# LSX utilities
+DSP_SRCS-$(HAVE_LSX)  += loongarch/bitdepth_conversion_lsx.h
 
 DSP_SRCS-no += $(DSP_SRCS_REMOVE-yes)
 
