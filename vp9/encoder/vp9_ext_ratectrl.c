@@ -143,7 +143,7 @@ vpx_codec_err_t vp9_extrc_get_encodeframe_decision(
   if (ext_ratectrl == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
-  if (ext_ratectrl->ready) {
+  if (ext_ratectrl->ready && ext_ratectrl->funcs.rc_type == VPX_RC_QP) {
     vpx_rc_status_t rc_status;
     vpx_rc_encodeframe_info_t encode_frame_info;
     encode_frame_info.show_index = show_index;
@@ -172,7 +172,7 @@ vpx_codec_err_t vp9_extrc_update_encodeframe_result(
   if (ext_ratectrl == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
-  if (ext_ratectrl->ready) {
+  if (ext_ratectrl->ready && ext_ratectrl->funcs.rc_type == VPX_RC_QP) {
     PSNR_STATS psnr;
     vpx_rc_status_t rc_status;
     vpx_rc_encodeframe_result_t encode_frame_result;

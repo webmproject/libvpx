@@ -25,7 +25,15 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures.
  */
-#define VPX_EXT_RATECTRL_ABI_VERSION (1)
+#define VPX_EXT_RATECTRL_ABI_VERSION (2)
+
+/*!\brief The control type of the inference API.
+ * In VPX_RC_QP mode, the external rate control model determines the
+ * quantization parameter (QP) for each frame.
+ * In VPX_RC_GOP mode, the external rate control model determines the
+ * group of picture (GOP) of the video sequence.
+ */
+typedef enum vpx_rc_type { VPX_RC_QP = 0, VPX_RC_GOP = 1 } vpx_rc_type_t;
 
 /*!\brief Abstract rate control model handler
  *
@@ -327,6 +335,10 @@ typedef vpx_rc_status_t (*vpx_rc_delete_model_cb_fn_t)(
  * VP9E_SET_EXTERNAL_RATE_CONTROL.
  */
 typedef struct vpx_rc_funcs {
+  /*!
+   * The rate control type of this API.
+   */
+  vpx_rc_type_t rc_type;
   /*!
    * Create an external rate control model.
    */
