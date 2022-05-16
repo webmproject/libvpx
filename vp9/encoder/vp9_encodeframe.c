@@ -217,8 +217,8 @@ static void set_segment_index(VP9_COMP *cpi, MACROBLOCK *const x, int mi_row,
       break;
   }
 
-  // Set segment index from ROI map if it's enabled.
-  if (cpi->roi.enabled)
+  // Set segment index if ROI map or active_map is enabled.
+  if (cpi->roi.enabled || cpi->active_map.enabled)
     mi->segment_id = get_segment_id(cm, map, bsize, mi_row, mi_col);
 
   vp9_init_plane_quantizers(cpi, x);
@@ -2499,7 +2499,8 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
   *(xd->mi[0]) = ctx->mic;
   *(x->mbmi_ext) = ctx->mbmi_ext;
 
-  if (seg->enabled && (cpi->oxcf.aq_mode != NO_AQ || cpi->roi.enabled)) {
+  if (seg->enabled && (cpi->oxcf.aq_mode != NO_AQ || cpi->roi.enabled ||
+                       cpi->active_map.enabled)) {
     // Setting segmentation map for cyclic_refresh.
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
         cpi->cyclic_refresh->content_mode) {
