@@ -12,7 +12,7 @@
 #include "vpx_dsp/loongarch/fwd_txfm_lsx.h"
 
 #define LSX_TRANSPOSE4x4_H(_in0, _in1, _in2, _in3, _out0, _out1, _out2, _out3) \
-  {                                                                            \
+  do {                                                                         \
     __m128i _s0, _s1, _s2, _s3, _t0, _t1, _t2, _t3;                            \
                                                                                \
     DUP2_ARG2(__lsx_vilvl_h, _in2, _in0, _in3, _in1, _s0, _s1);                \
@@ -23,7 +23,7 @@
     _t3 = __lsx_vilvh_h(_s3, _s2);                                             \
     DUP2_ARG2(__lsx_vpickev_d, _t2, _t0, _t3, _t1, _out0, _out2);              \
     DUP2_ARG2(__lsx_vpickod_d, _t2, _t0, _t3, _t1, _out1, _out3);              \
-  }
+  } while (0)
 
 #if !CONFIG_VP9_HIGHBITDEPTH
 void fdct8x16_1d_column(const int16_t *input, int16_t *tmp_ptr,

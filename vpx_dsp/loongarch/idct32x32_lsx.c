@@ -12,10 +12,10 @@
 #include "vpx_dsp/loongarch/fwd_txfm_lsx.h"
 
 #define UNPCK_UB_SH(_in, _out0, _out1)   \
-  {                                      \
+  do {                                   \
     _out0 = __lsx_vsllwil_hu_bu(_in, 0); \
     _out1 = __lsx_vexth_hu_bu(_in);      \
-  }
+  } while (0)
 
 static void idct32x8_row_transpose_store(const int16_t *input,
                                          int16_t *tmp_buf) {

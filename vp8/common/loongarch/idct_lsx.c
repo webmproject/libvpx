@@ -16,47 +16,44 @@ static const int32_t cospi8sqrt2minus1 = 20091;
 static const int32_t sinpi8sqrt2 = 35468;
 
 #define TRANSPOSE8X4_SH_SH(in0, in1, in2, in3, out0, out1, out2, out3)    \
-  {                                                                       \
+  do {                                                                    \
     __m128i tmp0_m, tmp1_m, tmp2_m, tmp3_m;                               \
                                                                           \
     DUP2_ARG2(__lsx_vilvl_h, in1, in0, in3, in2, tmp0_m, tmp1_m);         \
     DUP2_ARG2(__lsx_vilvh_h, in1, in0, in3, in2, tmp2_m, tmp3_m);         \
     DUP2_ARG2(__lsx_vilvl_w, tmp1_m, tmp0_m, tmp3_m, tmp2_m, out0, out2); \
     DUP2_ARG2(__lsx_vilvh_w, tmp1_m, tmp0_m, tmp3_m, tmp2_m, out1, out3); \
-  }
+  } while (0)
 
 #define TRANSPOSE_TWO_4x4_H(in0, in1, in2, in3, out0, out1, out2, out3) \
-  {                                                                     \
+  do {                                                                  \
     __m128i s4_m, s5_m, s6_m, s7_m;                                     \
                                                                         \
     TRANSPOSE8X4_SH_SH(in0, in1, in2, in3, s4_m, s5_m, s6_m, s7_m);     \
     DUP2_ARG2(__lsx_vilvl_d, s6_m, s4_m, s7_m, s5_m, out0, out2);       \
     out1 = __lsx_vilvh_d(s6_m, s4_m);                                   \
     out3 = __lsx_vilvh_d(s7_m, s5_m);                                   \
-  }
+  } while (0)
 
-#define EXPAND_TO_H_MULTIPLY_SINPI8SQRT2_PCK_TO_W(in)         \
-  ({                                                          \
-    __m128i out_m;                                            \
+#define EXPAND_TO_H_MULTIPLY_SINPI8SQRT2_PCK_TO_W(in0, in1)   \
+  do {                                                        \
     __m128i zero_m = __lsx_vldi(0);                           \
     __m128i tmp1_m, tmp2_m;                                   \
     __m128i sinpi8_sqrt2_m = __lsx_vreplgr2vr_w(sinpi8sqrt2); \
                                                               \
-    tmp1_m = __lsx_vilvl_h(in, zero_m);                       \
-    tmp2_m = __lsx_vilvh_h(in, zero_m);                       \
+    tmp1_m = __lsx_vilvl_h(in0, zero_m);                      \
+    tmp2_m = __lsx_vilvh_h(in0, zero_m);                      \
     tmp1_m = __lsx_vsrai_w(tmp1_m, 16);                       \
     tmp2_m = __lsx_vsrai_w(tmp2_m, 16);                       \
     tmp1_m = __lsx_vmul_w(tmp1_m, sinpi8_sqrt2_m);            \
     tmp1_m = __lsx_vsrai_w(tmp1_m, 16);                       \
     tmp2_m = __lsx_vmul_w(tmp2_m, sinpi8_sqrt2_m);            \
     tmp2_m = __lsx_vsrai_w(tmp2_m, 16);                       \
-    out_m = __lsx_vpickev_h(tmp2_m, tmp1_m);                  \
-                                                              \
-    out_m;                                                    \
-  })
+    in1 = __lsx_vpickev_h(tmp2_m, tmp1_m);                    \
+  } while (0)
 
 #define VP8_IDCT_1D_H(in0, in1, in2, in3, out0, out1, out2, out3)      \
-  {                                                                    \
+  do {                                                                 \
     __m128i a1_m, b1_m, c1_m, d1_m;                                    \
     __m128i c_tmp1_m, c_tmp2_m;                                        \
     __m128i d_tmp1_m, d_tmp2_m;                                        \
@@ -65,7 +62,7 @@ static const int32_t sinpi8sqrt2 = 35468;
     const_cospi8sqrt2minus1_m = __lsx_vreplgr2vr_h(cospi8sqrt2minus1); \
     a1_m = __lsx_vadd_h(in0, in2);                                     \
     b1_m = __lsx_vsub_h(in0, in2);                                     \
-    c_tmp1_m = EXPAND_TO_H_MULTIPLY_SINPI8SQRT2_PCK_TO_W(in1);         \
+    EXPAND_TO_H_MULTIPLY_SINPI8SQRT2_PCK_TO_W(in1, c_tmp1_m);          \
                                                                        \
     c_tmp2_m = __lsx_vmuh_h(in3, const_cospi8sqrt2minus1_m);           \
     c_tmp2_m = __lsx_vslli_h(c_tmp2_m, 1);                             \
@@ -77,13 +74,13 @@ static const int32_t sinpi8sqrt2 = 35468;
     d_tmp1_m = __lsx_vslli_h(d_tmp1_m, 1);                             \
     d_tmp1_m = __lsx_vsrai_h(d_tmp1_m, 1);                             \
     d_tmp1_m = __lsx_vadd_h(in1, d_tmp1_m);                            \
-    d_tmp2_m = EXPAND_TO_H_MULTIPLY_SINPI8SQRT2_PCK_TO_W(in3);         \
+    EXPAND_TO_H_MULTIPLY_SINPI8SQRT2_PCK_TO_W(in3, d_tmp2_m);          \
     d1_m = __lsx_vadd_h(d_tmp1_m, d_tmp2_m);                           \
     LSX_BUTTERFLY_4_H(a1_m, b1_m, c1_m, d1_m, out0, out1, out2, out3); \
-  }
+  } while (0)
 
 #define VP8_IDCT_1D_W(in0, in1, in2, in3, out0, out1, out2, out3)      \
-  {                                                                    \
+  do {                                                                 \
     __m128i a1_m, b1_m, c1_m, d1_m;                                    \
     __m128i c_tmp1_m, c_tmp2_m, d_tmp1_m, d_tmp2_m;                    \
     __m128i const_cospi8sqrt2minus1_m, sinpi8_sqrt2_m;                 \
@@ -105,13 +102,13 @@ static const int32_t sinpi8sqrt2 = 35468;
     d_tmp2_m = __lsx_vsrai_w(d_tmp2_m, 16);                            \
     d1_m = __lsx_vadd_w(d_tmp1_m, d_tmp2_m);                           \
     LSX_BUTTERFLY_4_W(a1_m, b1_m, c1_m, d1_m, out0, out1, out2, out3); \
-  }
+  } while (0)
 
 #define UNPCK_SH_SW(in, out0, out1)  \
-  {                                  \
+  do {                               \
     out0 = __lsx_vsllwil_w_h(in, 0); \
     out1 = __lsx_vexth_w_h(in);      \
-  }
+  } while (0)
 
 static void idct4x4_addconst_lsx(int16_t in_dc, uint8_t *pred,
                                  int32_t pred_stride, uint8_t *dest,

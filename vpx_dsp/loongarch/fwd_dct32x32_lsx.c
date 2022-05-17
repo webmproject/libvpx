@@ -13,10 +13,10 @@
 #include "vpx_dsp/fwd_txfm.h"
 
 #define UNPCK_SH_SW(in, out0, out1)  \
-  {                                  \
+  do {                               \
     out0 = __lsx_vsllwil_w_h(in, 0); \
     out1 = __lsx_vexth_w_h(in);      \
-  }
+  } while (0)
 
 static void fdct8x32_1d_column_load_butterfly(const int16_t *input,
                                               int32_t src_stride,

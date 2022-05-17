@@ -15,7 +15,7 @@
 
 #define LSX_LD_8(_src, _stride, _stride2, _stride3, _stride4, _in0, _in1, \
                  _in2, _in3, _in4, _in5, _in6, _in7)                      \
-  {                                                                       \
+  do {                                                                    \
     _in0 = __lsx_vld(_src, 0);                                            \
     _in1 = __lsx_vldx(_src, _stride);                                     \
     _in2 = __lsx_vldx(_src, _stride2);                                    \
@@ -25,11 +25,11 @@
     _in5 = __lsx_vldx(_src, _stride);                                     \
     _in6 = __lsx_vldx(_src, _stride2);                                    \
     _in7 = __lsx_vldx(_src, _stride3);                                    \
-  }
+  } while (0)
 
 #define LSX_ST_8(_dst0, _dst1, _dst2, _dst3, _dst4, _dst5, _dst6, _dst7, _dst, \
                  _stride, _stride2, _stride3, _stride4)                        \
-  {                                                                            \
+  do {                                                                         \
     __lsx_vst(_dst0, _dst, 0);                                                 \
     __lsx_vstx(_dst1, _dst, _stride);                                          \
     __lsx_vstx(_dst2, _dst, _stride2);                                         \
@@ -39,7 +39,7 @@
     __lsx_vstx(_dst5, _dst, _stride);                                          \
     __lsx_vstx(_dst6, _dst, _stride2);                                         \
     __lsx_vstx(_dst7, _dst, _stride3);                                         \
-  }
+  } while (0)
 
 static int32_t hz_lpf_t4_and_t8_16w(uint8_t *dst, int32_t stride,
                                     uint8_t *filter48,

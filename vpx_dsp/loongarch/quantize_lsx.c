@@ -12,79 +12,83 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_util/loongson_intrinsics.h"
 
-#define CALCULATE_QCOEFF(coeff, coeff_abs, round, quant, shift, cmp_mask) \
-  ({                                                                      \
-    __m128i rounded, qcoeff;                                              \
-                                                                          \
-    rounded = __lsx_vsadd_h(coeff_abs, round);                            \
-    qcoeff = __lsx_vmuh_h(rounded, quant);                                \
-    qcoeff = __lsx_vadd_h(rounded, qcoeff);                               \
-    qcoeff = __lsx_vmuh_h(qcoeff, shift);                                 \
-    qcoeff = __lsx_vsigncov_h(coeff, qcoeff);                             \
-    qcoeff = __lsx_vand_v(qcoeff, cmp_mask);                              \
-                                                                          \
-    qcoeff;                                                               \
-  })
+static INLINE __m128i calculate_qcoeff(__m128i coeff, __m128i coeff_abs,
+                                       __m128i round, __m128i quant,
+                                       __m128i shift, __m128i cmp_mask) {
+  __m128i rounded, qcoeff;
 
-#define CALCULATE_DQCOEFF_AND_STORE(qcoeff, dequant, dqcoeff) \
-  {                                                           \
-    __m128i dqcoeff16 = __lsx_vmul_h(qcoeff, dequant);        \
-    __lsx_vst(dqcoeff16, dqcoeff, 0);                         \
-  }
+  rounded = __lsx_vsadd_h(coeff_abs, round);
+  qcoeff = __lsx_vmuh_h(rounded, quant);
+  qcoeff = __lsx_vadd_h(rounded, qcoeff);
+  qcoeff = __lsx_vmuh_h(qcoeff, shift);
+  qcoeff = __lsx_vsigncov_h(coeff, qcoeff);
+  qcoeff = __lsx_vand_v(qcoeff, cmp_mask);
 
-#define CALCULATE_DQCOEFF_AND_STORE_32x32(qcoeff, dequant, dqcoeff) \
-  {                                                                 \
-    __m128i low, high, dqcoeff32_0, dqcoeff32_1, res;               \
-    __m128i zero = __lsx_vldi(0);                                   \
-    __m128i coeff = __lsx_vabsd_h(qcoeff, zero);                    \
-                                                                    \
-    __m128i sign_0 = __lsx_vilvl_h(qcoeff, zero);                   \
-    __m128i sign_1 = __lsx_vilvh_h(qcoeff, zero);                   \
-                                                                    \
-    low = __lsx_vmul_h(coeff, dequant);                             \
-    high = __lsx_vmuh_h(coeff, dequant);                            \
-    dqcoeff32_0 = __lsx_vilvl_h(high, low);                         \
-    dqcoeff32_1 = __lsx_vilvh_h(high, low);                         \
-                                                                    \
-    dqcoeff32_0 = __lsx_vsrai_w(dqcoeff32_0, 1);                    \
-    dqcoeff32_1 = __lsx_vsrai_w(dqcoeff32_1, 1);                    \
-    dqcoeff32_0 = __lsx_vsigncov_w(sign_0, dqcoeff32_0);            \
-    dqcoeff32_1 = __lsx_vsigncov_w(sign_1, dqcoeff32_1);            \
-    res = __lsx_vpickev_h(dqcoeff32_1, dqcoeff32_0);                \
-    __lsx_vst(res, dqcoeff, 0);                                     \
-  }
+  return qcoeff;
+}
 
-#define SCAN_FOR_EOB(coeff0, coeff1, zbin_mask0, zbin_mask1, scan, index, \
-                     zero)                                                \
-  ({                                                                      \
-    __m128i zero_coeff0 = __lsx_vseq_h(coeff0, zero);                     \
-    __m128i zero_coeff1 = __lsx_vseq_h(coeff1, zero);                     \
-    __m128i scan0 = __lsx_vld(scan + index, 0);                           \
-    __m128i scan1 = __lsx_vld(scan + index + 8, 0);                       \
-    __m128i eob0, eob1, eob_max;                                          \
-                                                                          \
-    scan0 = __lsx_vsub_h(scan0, zbin_mask0);                              \
-    scan1 = __lsx_vsub_h(scan1, zbin_mask1);                              \
-    eob0 = __lsx_vandn_v(zero_coeff0, scan0);                             \
-    eob1 = __lsx_vandn_v(zero_coeff1, scan1);                             \
-    eob_max = __lsx_vmax_h(eob0, eob1);                                   \
-    eob_max;                                                              \
-  })
+static INLINE void calculate_dqcoeff_and_store(__m128i qcoeff, __m128i dequant,
+                                               int16_t *dqcoeff) {
+  __m128i dqcoeff16 = __lsx_vmul_h(qcoeff, dequant);
+  __lsx_vst(dqcoeff16, dqcoeff, 0);
+}
 
-#define ACCUMULATE_EOB(eob)                   \
-  ({                                          \
-    __m128i eob_shuffled;                     \
-    int16_t res_m;                            \
-                                              \
-    eob_shuffled = __lsx_vshuf4i_w(eob, 0xe); \
-    eob = __lsx_vmax_h(eob, eob_shuffled);    \
-    eob_shuffled = __lsx_vshuf4i_h(eob, 0xe); \
-    eob = __lsx_vmax_h(eob, eob_shuffled);    \
-    eob_shuffled = __lsx_vshuf4i_h(eob, 0x1); \
-    eob = __lsx_vmax_h(eob, eob_shuffled);    \
-    res_m = __lsx_vpickve2gr_h(eob, 1);       \
-    res_m;                                    \
-  })
+static INLINE void calculate_dqcoeff_and_store_32x32(__m128i qcoeff,
+                                                     __m128i dequant,
+                                                     int16_t *dqcoeff) {
+  // Un-sign to bias rounding like C.
+  __m128i low, high, dqcoeff32_0, dqcoeff32_1, res;
+  __m128i zero = __lsx_vldi(0);
+  __m128i coeff = __lsx_vabsd_h(qcoeff, zero);
+
+  const __m128i sign_0 = __lsx_vilvl_h(qcoeff, zero);
+  const __m128i sign_1 = __lsx_vilvh_h(qcoeff, zero);
+
+  low = __lsx_vmul_h(coeff, dequant);
+  high = __lsx_vmuh_h(coeff, dequant);
+  dqcoeff32_0 = __lsx_vilvl_h(high, low);
+  dqcoeff32_1 = __lsx_vilvh_h(high, low);
+
+  // "Divide" by 2.
+  dqcoeff32_0 = __lsx_vsrai_w(dqcoeff32_0, 1);
+  dqcoeff32_1 = __lsx_vsrai_w(dqcoeff32_1, 1);
+  dqcoeff32_0 = __lsx_vsigncov_w(sign_0, dqcoeff32_0);
+  dqcoeff32_1 = __lsx_vsigncov_w(sign_1, dqcoeff32_1);
+  res = __lsx_vpickev_h(dqcoeff32_1, dqcoeff32_0);
+  __lsx_vst(res, dqcoeff, 0);
+}
+
+static INLINE __m128i scan_for_eob(__m128i coeff0, __m128i coeff1,
+                                   __m128i zbin_mask0, __m128i zbin_mask1,
+                                   const int16_t *scan, int index,
+                                   __m128i zero) {
+  const __m128i zero_coeff0 = __lsx_vseq_h(coeff0, zero);
+  const __m128i zero_coeff1 = __lsx_vseq_h(coeff1, zero);
+  __m128i scan0 = __lsx_vld(scan + index, 0);
+  __m128i scan1 = __lsx_vld(scan + index + 8, 0);
+  __m128i eob0, eob1;
+
+  scan0 = __lsx_vsub_h(scan0, zbin_mask0);
+  scan1 = __lsx_vsub_h(scan1, zbin_mask1);
+  eob0 = __lsx_vandn_v(zero_coeff0, scan0);
+  eob1 = __lsx_vandn_v(zero_coeff1, scan1);
+  return __lsx_vmax_h(eob0, eob1);
+}
+
+static INLINE int16_t accumulate_eob(__m128i eob) {
+  __m128i eob_shuffled;
+  int16_t res_m;
+
+  eob_shuffled = __lsx_vshuf4i_w(eob, 0xe);
+  eob = __lsx_vmax_h(eob, eob_shuffled);
+  eob_shuffled = __lsx_vshuf4i_h(eob, 0xe);
+  eob = __lsx_vmax_h(eob, eob_shuffled);
+  eob_shuffled = __lsx_vshuf4i_h(eob, 0x1);
+  eob = __lsx_vmax_h(eob, eob_shuffled);
+  res_m = __lsx_vpickve2gr_h(eob, 1);
+
+  return res_m;
+}
 
 #if !CONFIG_VP9_HIGHBITDEPTH
 void vpx_quantize_b_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
@@ -120,21 +124,21 @@ void vpx_quantize_b_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
   cmp_mask1 = __lsx_vsle_h(zbin, qcoeff1);
 
   qcoeff0 =
-      CALCULATE_QCOEFF(coeff0, qcoeff0, round, quant, quant_shift, cmp_mask0);
+      calculate_qcoeff(coeff0, qcoeff0, round, quant, quant_shift, cmp_mask0);
   round = __lsx_vilvh_d(round, round);
   quant = __lsx_vilvh_d(quant, quant);
   quant_shift = __lsx_vilvh_d(quant_shift, quant_shift);
   qcoeff1 =
-      CALCULATE_QCOEFF(coeff1, qcoeff1, round, quant, quant_shift, cmp_mask1);
+      calculate_qcoeff(coeff1, qcoeff1, round, quant, quant_shift, cmp_mask1);
 
   __lsx_vst(qcoeff0, qcoeff_ptr, 0);
   __lsx_vst(qcoeff1, qcoeff_ptr, 16);
 
-  CALCULATE_DQCOEFF_AND_STORE(qcoeff0, dequant, dqcoeff_ptr);
+  calculate_dqcoeff_and_store(qcoeff0, dequant, dqcoeff_ptr);
   dequant = __lsx_vilvh_d(dequant, dequant);
-  CALCULATE_DQCOEFF_AND_STORE(qcoeff1, dequant, dqcoeff_ptr + 8);
+  calculate_dqcoeff_and_store(qcoeff1, dequant, dqcoeff_ptr + 8);
 
-  eob = SCAN_FOR_EOB(qcoeff0, qcoeff1, cmp_mask0, cmp_mask1, iscan, 0, zero);
+  eob = scan_for_eob(qcoeff0, qcoeff1, cmp_mask0, cmp_mask1, iscan, 0, zero);
   // AC only loop.
   while (index < n_coeffs) {
     coeff0 = __lsx_vld(coeff_ptr + index, 0);
@@ -147,24 +151,24 @@ void vpx_quantize_b_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
     cmp_mask1 = __lsx_vsle_h(zbin, qcoeff1);
 
     qcoeff0 =
-        CALCULATE_QCOEFF(coeff0, qcoeff0, round, quant, quant_shift, cmp_mask0);
+        calculate_qcoeff(coeff0, qcoeff0, round, quant, quant_shift, cmp_mask0);
     qcoeff1 =
-        CALCULATE_QCOEFF(coeff1, qcoeff1, round, quant, quant_shift, cmp_mask1);
+        calculate_qcoeff(coeff1, qcoeff1, round, quant, quant_shift, cmp_mask1);
 
     __lsx_vst(qcoeff0, qcoeff_ptr + index, 0);
     __lsx_vst(qcoeff1, qcoeff_ptr + index + 8, 0);
 
-    CALCULATE_DQCOEFF_AND_STORE(qcoeff0, dequant, dqcoeff_ptr + index);
-    CALCULATE_DQCOEFF_AND_STORE(qcoeff1, dequant, dqcoeff_ptr + index + 8);
+    calculate_dqcoeff_and_store(qcoeff0, dequant, dqcoeff_ptr + index);
+    calculate_dqcoeff_and_store(qcoeff1, dequant, dqcoeff_ptr + index + 8);
 
-    eob0 = SCAN_FOR_EOB(qcoeff0, qcoeff1, cmp_mask0, cmp_mask1, iscan, index,
+    eob0 = scan_for_eob(qcoeff0, qcoeff1, cmp_mask0, cmp_mask1, iscan, index,
                         zero);
     eob = __lsx_vmax_h(eob, eob0);
 
     index += 16;
   }
 
-  *eob_ptr = ACCUMULATE_EOB(eob);
+  *eob_ptr = accumulate_eob(eob);
 }
 
 void vpx_quantize_b_32x32_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
@@ -204,20 +208,20 @@ void vpx_quantize_b_32x32_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
   cmp_mask1 = __lsx_vsle_h(zbin, qcoeff1);
 
   qcoeff0 =
-      CALCULATE_QCOEFF(coeff0, qcoeff0, round, quant, quant_shift, cmp_mask0);
+      calculate_qcoeff(coeff0, qcoeff0, round, quant, quant_shift, cmp_mask0);
   // remove DC in quant_shift, quant, quant_shift
   round = __lsx_vilvh_d(round, round);
   quant = __lsx_vilvh_d(quant, quant);
   quant_shift = __lsx_vilvh_d(quant_shift, quant_shift);
   qcoeff1 =
-      CALCULATE_QCOEFF(coeff1, qcoeff1, round, quant, quant_shift, cmp_mask1);
+      calculate_qcoeff(coeff1, qcoeff1, round, quant, quant_shift, cmp_mask1);
   __lsx_vst(qcoeff0, qcoeff_ptr, 0);
   __lsx_vst(qcoeff1, qcoeff_ptr, 16);
 
-  CALCULATE_DQCOEFF_AND_STORE_32x32(qcoeff0, dequant, dqcoeff_ptr);
+  calculate_dqcoeff_and_store_32x32(qcoeff0, dequant, dqcoeff_ptr);
   dequant = __lsx_vilvh_d(dequant, dequant);
-  CALCULATE_DQCOEFF_AND_STORE_32x32(qcoeff1, dequant, dqcoeff_ptr + 8);
-  eob = SCAN_FOR_EOB(qcoeff0, qcoeff1, cmp_mask0, cmp_mask1, iscan, 0, zero);
+  calculate_dqcoeff_and_store_32x32(qcoeff1, dequant, dqcoeff_ptr + 8);
+  eob = scan_for_eob(qcoeff0, qcoeff1, cmp_mask0, cmp_mask1, iscan, 0, zero);
   // AC only loop.
   for (index = 16; index < 32 * 32; index += 16) {
     coeff0 = __lsx_vld(coeff_ptr + index, 0);
@@ -230,20 +234,20 @@ void vpx_quantize_b_32x32_lsx(const int16_t *coeff_ptr, intptr_t n_coeffs,
     cmp_mask1 = __lsx_vsle_h(zbin, qcoeff1);
 
     qcoeff0 =
-        CALCULATE_QCOEFF(coeff0, qcoeff0, round, quant, quant_shift, cmp_mask0);
+        calculate_qcoeff(coeff0, qcoeff0, round, quant, quant_shift, cmp_mask0);
     qcoeff1 =
-        CALCULATE_QCOEFF(coeff1, qcoeff1, round, quant, quant_shift, cmp_mask1);
+        calculate_qcoeff(coeff1, qcoeff1, round, quant, quant_shift, cmp_mask1);
     __lsx_vst(qcoeff0, qcoeff_ptr + index, 0);
     __lsx_vst(qcoeff1, qcoeff_ptr + index + 8, 0);
 
-    CALCULATE_DQCOEFF_AND_STORE_32x32(qcoeff0, dequant, dqcoeff_ptr + index);
-    CALCULATE_DQCOEFF_AND_STORE_32x32(qcoeff1, dequant,
+    calculate_dqcoeff_and_store_32x32(qcoeff0, dequant, dqcoeff_ptr + index);
+    calculate_dqcoeff_and_store_32x32(qcoeff1, dequant,
                                       dqcoeff_ptr + 8 + index);
-    eob0 = SCAN_FOR_EOB(qcoeff0, qcoeff1, cmp_mask0, cmp_mask1, iscan, index,
+    eob0 = scan_for_eob(qcoeff0, qcoeff1, cmp_mask0, cmp_mask1, iscan, index,
                         zero);
     eob = __lsx_vmax_h(eob, eob0);
   }
 
-  *eob_ptr = ACCUMULATE_EOB(eob);
+  *eob_ptr = accumulate_eob(eob);
 }
-#endif  // !CONFIG_VP9_HIGHBITDEPTH
+#endif

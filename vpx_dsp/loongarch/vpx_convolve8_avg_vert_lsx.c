@@ -68,9 +68,9 @@ static void common_vt_8t_and_aver_dst_4w_lsx(const uint8_t *src,
               tmp0, tmp1, tmp2, tmp3);
     DUP2_ARG2(__lsx_vilvl_d, tmp1, tmp0, tmp3, tmp2, reg3, reg4);
     DUP2_ARG2(__lsx_vxori_b, reg3, 128, reg4, 128, reg3, reg4);
-    out0 = FILT_8TAP_DPADD_S_H(reg0, reg1, reg2, reg3, filter0, filter1,
+    out0 = filt_8tap_dpadd_s_h(reg0, reg1, reg2, reg3, filter0, filter1,
                                filter2, filter3);
-    out1 = FILT_8TAP_DPADD_S_H(reg1, reg2, reg3, reg4, filter0, filter1,
+    out1 = filt_8tap_dpadd_s_h(reg1, reg2, reg3, reg4, filter0, filter1,
                                filter2, filter3);
     out0 = __lsx_vssrarni_b_h(out1, out0, 7);
     out0 = __lsx_vxori_b(out0, 128);
@@ -146,13 +146,13 @@ static void common_vt_8t_and_aver_dst_8w_lsx(const uint8_t *src,
               src8, src9, src10);
     DUP4_ARG2(__lsx_vilvl_b, src7, src6, src8, src7, src9, src8, src10, src9,
               tmp0, tmp1, tmp2, tmp3);
-    out0 = FILT_8TAP_DPADD_S_H(reg0, reg1, reg2, tmp0, filter0, filter1,
+    out0 = filt_8tap_dpadd_s_h(reg0, reg1, reg2, tmp0, filter0, filter1,
                                filter2, filter3);
-    out1 = FILT_8TAP_DPADD_S_H(reg3, reg4, reg5, tmp1, filter0, filter1,
+    out1 = filt_8tap_dpadd_s_h(reg3, reg4, reg5, tmp1, filter0, filter1,
                                filter2, filter3);
-    out2 = FILT_8TAP_DPADD_S_H(reg1, reg2, tmp0, tmp2, filter0, filter1,
+    out2 = filt_8tap_dpadd_s_h(reg1, reg2, tmp0, tmp2, filter0, filter1,
                                filter2, filter3);
-    out3 = FILT_8TAP_DPADD_S_H(reg4, reg5, tmp1, tmp3, filter0, filter1,
+    out3 = filt_8tap_dpadd_s_h(reg4, reg5, tmp1, tmp3, filter0, filter1,
                                filter2, filter3);
     DUP2_ARG3(__lsx_vssrarni_b_h, out1, out0, 7, out3, out2, 7, out0, out1);
     DUP2_ARG2(__lsx_vxori_b, out0, 128, out1, 128, out0, out1);
@@ -231,13 +231,13 @@ static void common_vt_8t_and_aver_dst_16w_mult_lsx(
                 src0, src1, src2, src3);
       DUP4_ARG2(__lsx_vilvh_b, src7, src6, src8, src7, src9, src8, src10, src9,
                 src4, src5, src7, src8);
-      tmp0 = FILT_8TAP_DPADD_S_H(reg0, reg1, reg2, src0, filter0, filter1,
+      tmp0 = filt_8tap_dpadd_s_h(reg0, reg1, reg2, src0, filter0, filter1,
                                  filter2, filter3);
-      tmp1 = FILT_8TAP_DPADD_S_H(reg3, reg4, reg5, src1, filter0, filter1,
+      tmp1 = filt_8tap_dpadd_s_h(reg3, reg4, reg5, src1, filter0, filter1,
                                  filter2, filter3);
-      tmp2 = FILT_8TAP_DPADD_S_H(reg6, reg7, reg8, src4, filter0, filter1,
+      tmp2 = filt_8tap_dpadd_s_h(reg6, reg7, reg8, src4, filter0, filter1,
                                  filter2, filter3);
-      tmp3 = FILT_8TAP_DPADD_S_H(reg9, reg10, reg11, src5, filter0, filter1,
+      tmp3 = filt_8tap_dpadd_s_h(reg9, reg10, reg11, src5, filter0, filter1,
                                  filter2, filter3);
       DUP2_ARG3(__lsx_vssrarni_b_h, tmp2, tmp0, 7, tmp3, tmp1, 7, tmp0, tmp1);
       DUP2_ARG2(__lsx_vxori_b, tmp0, 128, tmp1, 128, tmp0, tmp1);
@@ -246,13 +246,13 @@ static void common_vt_8t_and_aver_dst_16w_mult_lsx(
       DUP2_ARG2(__lsx_vavgr_bu, tmp0, tmp2, tmp1, tmp3, tmp0, tmp1);
       __lsx_vst(tmp0, dst_reg, 0);
       __lsx_vstx(tmp1, dst_reg, dst_stride);
-      tmp0 = FILT_8TAP_DPADD_S_H(reg1, reg2, src0, src2, filter0, filter1,
+      tmp0 = filt_8tap_dpadd_s_h(reg1, reg2, src0, src2, filter0, filter1,
                                  filter2, filter3);
-      tmp1 = FILT_8TAP_DPADD_S_H(reg4, reg5, src1, src3, filter0, filter1,
+      tmp1 = filt_8tap_dpadd_s_h(reg4, reg5, src1, src3, filter0, filter1,
                                  filter2, filter3);
-      tmp2 = FILT_8TAP_DPADD_S_H(reg7, reg8, src4, src7, filter0, filter1,
+      tmp2 = filt_8tap_dpadd_s_h(reg7, reg8, src4, src7, filter0, filter1,
                                  filter2, filter3);
-      tmp3 = FILT_8TAP_DPADD_S_H(reg10, reg11, src5, src8, filter0, filter1,
+      tmp3 = filt_8tap_dpadd_s_h(reg10, reg11, src5, src8, filter0, filter1,
                                  filter2, filter3);
       DUP2_ARG3(__lsx_vssrarni_b_h, tmp2, tmp0, 7, tmp3, tmp1, 7, tmp0, tmp1);
       DUP2_ARG2(__lsx_vxori_b, tmp0, 128, tmp1, 128, tmp0, tmp1);

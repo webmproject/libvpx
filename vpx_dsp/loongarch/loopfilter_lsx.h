@@ -16,7 +16,7 @@
 #define LPF_MASK_HEV(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \
                      limit_in, b_limit_in, thresh_in, hev_out, mask_out,     \
                      flat_out)                                               \
-  {                                                                          \
+  do {                                                                       \
     __m128i p3_asub_p2_m, p2_asub_p1_m, p1_asub_p0_m, q1_asub_q0_m;          \
     __m128i p1_asub_q1_m, p0_asub_q0_m, q3_asub_q2_m, q2_asub_q1_m;          \
                                                                              \
@@ -47,10 +47,10 @@
                                                                              \
     mask_out = __lsx_vslt_bu(limit_in, mask_out);                            \
     mask_out = __lsx_vxori_b(mask_out, 0xff);                                \
-  }
+  } while (0)
 
 #define VP9_FLAT4(p3_in, p2_in, p0_in, q0_in, q2_in, q3_in, flat_out)          \
-  {                                                                            \
+  do {                                                                         \
     __m128i p2_asub_p0, q2_asub_q0, p3_asub_p0, q3_asub_q0;                    \
     __m128i flat4_tmp = __lsx_vldi(1);                                         \
                                                                                \
@@ -64,11 +64,11 @@
     flat_out = __lsx_vslt_bu(flat4_tmp, flat_out);                             \
     flat_out = __lsx_vxori_b(flat_out, 0xff);                                  \
     flat_out = flat_out & (mask);                                              \
-  }
+  } while (0)
 
 #define VP9_FLAT5(p7_in, p6_in, p5_in, p4_in, p0_in, q0_in, q4_in, q5_in,      \
                   q6_in, q7_in, flat_in, flat2_out)                            \
-  {                                                                            \
+  do {                                                                         \
     __m128i flat5_tmp = __lsx_vldi(1);                                         \
     __m128i p4_asub_p0, q4_asub_q0, p5_asub_p0, q5_asub_q0;                    \
     __m128i p6_asub_p0, q6_asub_q0, p7_asub_p0, q7_asub_q0;                    \
@@ -87,11 +87,11 @@
     flat2_out = __lsx_vslt_bu(flat5_tmp, flat2_out);                           \
     flat2_out = __lsx_vxori_b(flat2_out, 0xff);                                \
     flat2_out = flat2_out & flat_in;                                           \
-  }
+  } while (0)
 
 #define VP9_LPF_FILTER4_4W(p1_in, p0_in, q0_in, q1_in, mask, hev, p1_out,  \
                            p0_out, q0_out, q1_out)                         \
-  {                                                                        \
+  do {                                                                     \
     __m128i p1_m, p0_m, q0_m, q1_m, filt, q0_sub_p0, t1, t2;               \
     const __m128i cnst4b = __lsx_vldi(4);                                  \
     const __m128i cnst3b = __lsx_vldi(3);                                  \
@@ -118,12 +118,12 @@
     q1_m = __lsx_vssub_b(q1_m, filt);                                      \
     p1_m = __lsx_vsadd_b(p1_m, filt);                                      \
     DUP2_ARG2(__lsx_vxori_b, q1_m, 0x80, p1_m, 0x80, q1_out, p1_out);      \
-  }
+  } while (0)
 
 #define VP9_FILTER8(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \
                     p2_filt8_out, p1_filt8_out, p0_filt8_out, q0_filt8_out, \
                     q1_filt8_out, q2_filt8_out)                             \
-  {                                                                         \
+  do {                                                                      \
     __m128i tmp_filt8_0, tmp_filt8_1, tmp_filt8_2;                          \
                                                                             \
     tmp_filt8_2 = __lsx_vadd_h(p2_in, p1_in);                               \
@@ -162,6 +162,6 @@
     tmp_filt8_0 = __lsx_vadd_h(q1_in, q3_in);                               \
     tmp_filt8_1 = __lsx_vadd_h(tmp_filt8_0, tmp_filt8_1);                   \
     q1_filt8_out = __lsx_vsrari_h(tmp_filt8_1, 3);                          \
-  }
+  } while (0)
 
 #endif  // VPX_VPX_DSP_LOONGARCH_LOOPFILTER_LSX_H_

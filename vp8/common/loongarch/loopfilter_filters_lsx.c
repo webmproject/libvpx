@@ -14,7 +14,7 @@
 #include "vpx_util/loongson_intrinsics.h"
 
 #define VP8_LPF_FILTER4_4W(p1, p0, q0, q1, mask, hev)        \
-  {                                                          \
+  do {                                                       \
     __m128i p1_m, p0_m, q0_m, q1_m, filt, q0_sub_p0, t1, t2; \
     const __m128i cnst4b = __lsx_vldi(4);                    \
     const __m128i cnst3b = __lsx_vldi(3);                    \
@@ -46,10 +46,10 @@
     q1 = __lsx_vxori_b(q1_m, 0x80);                          \
     p1_m = __lsx_vsadd_b(p1_m, filt);                        \
     p1 = __lsx_vxori_b(p1_m, 0x80);                          \
-  }
+  } while (0)
 
 #define VP8_MBFILTER(p2, p1, p0, q0, q1, q2, mask, hev) \
-  {                                                     \
+  do {                                                  \
     __m128i p2_m, p1_m, p0_m, q2_m, q1_m, q0_m;         \
     __m128i u, filt, t1, t2, filt_sign, q0_sub_p0;      \
     __m128i filt_r, filt_l;                             \
@@ -113,12 +113,12 @@
     p0_m = __lsx_vsadd_b(p0_m, u);                      \
     q0 = __lsx_vxori_b(q0_m, 0x80);                     \
     p0 = __lsx_vxori_b(p0_m, 0x80);                     \
-  }
+  } while (0)
 
 #define LPF_MASK_HEV(p3_in, p2_in, p1_in, p0_in, q0_in, q1_in, q2_in, q3_in, \
                      limit_in, b_limit_in, thresh_in, hev_out, mask_out,     \
                      flat_out)                                               \
-  {                                                                          \
+  do {                                                                       \
     __m128i p3_asub_p2_m, p2_asub_p1_m, p1_asub_p0_m, q1_asub_q0_m;          \
     __m128i p1_asub_q1_m, p0_asub_q0_m, q3_asub_q2_m, q2_asub_q1_m;          \
                                                                              \
@@ -143,13 +143,13 @@
     mask_out = __lsx_vmax_bu(q2_asub_q1_m, mask_out);                        \
     mask_out = __lsx_vslt_bu(limit_in, mask_out);                            \
     mask_out = __lsx_vxori_b(mask_out, 0xff);                                \
-  }
+  } while (0)
 
 #define VP8_ST6x1_B(in0, in0_idx, in1, in1_idx, pdst, stride) \
-  {                                                           \
+  do {                                                        \
     __lsx_vstelm_w(in0, pdst, 0, in0_idx);                    \
     __lsx_vstelm_h(in1, pdst + stride, 0, in1_idx);           \
-  }
+  } while (0)
 
 static void loop_filter_horizontal_4_dual_lsx(uint8_t *src, int32_t pitch,
                                               const uint8_t *b_limit0_ptr,

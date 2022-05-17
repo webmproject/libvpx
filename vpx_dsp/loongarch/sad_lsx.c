@@ -8,59 +8,63 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_util/loongson_intrinsics.h"
 
-#define SAD_UB2_UH(in0, in1, ref0, ref1)           \
-  ({                                               \
-    __m128i diff0_m, diff1_m, sad_m0;              \
-    __m128i sad_m = __lsx_vldi(0);                 \
-                                                   \
-    diff0_m = __lsx_vabsd_bu(in0, ref0);           \
-    diff1_m = __lsx_vabsd_bu(in1, ref1);           \
-                                                   \
-    sad_m0 = __lsx_vhaddw_hu_bu(diff0_m, diff0_m); \
-    sad_m = __lsx_vadd_h(sad_m, sad_m0);           \
-    sad_m0 = __lsx_vhaddw_hu_bu(diff1_m, diff1_m); \
-    sad_m = __lsx_vadd_h(sad_m, sad_m0);           \
-                                                   \
-    sad_m;                                         \
-  })
+static INLINE __m128i sad_ub2_uh(__m128i in0, __m128i in1, __m128i ref0,
+                                 __m128i ref1) {
+  __m128i diff0_m, diff1_m, sad_m0;
+  __m128i sad_m = __lsx_vldi(0);
 
-#define HADD_UW_U32(in)                          \
-  ({                                             \
-    __m128i res0_m;                              \
-    uint32_t sum_m;                              \
-    res0_m = __lsx_vhaddw_du_wu(in, in);         \
-    res0_m = __lsx_vhaddw_qu_du(res0_m, res0_m); \
-    sum_m = __lsx_vpickve2gr_w(res0_m, 0);       \
-    sum_m;                                       \
-  })
+  diff0_m = __lsx_vabsd_bu(in0, ref0);
+  diff1_m = __lsx_vabsd_bu(in1, ref1);
 
-#define HADD_UH_U32(in)                 \
-  ({                                    \
-    __m128i res_m;                      \
-    uint32_t sum_m;                     \
-    res_m = __lsx_vhaddw_wu_hu(in, in); \
-    sum_m = HADD_UW_U32(res_m);         \
-    sum_m;                              \
-  })
+  sad_m0 = __lsx_vhaddw_hu_bu(diff0_m, diff0_m);
+  sad_m = __lsx_vadd_h(sad_m, sad_m0);
+  sad_m0 = __lsx_vhaddw_hu_bu(diff1_m, diff1_m);
+  sad_m = __lsx_vadd_h(sad_m, sad_m0);
 
-#define HADD_SW_S32(in)                        \
-  ({                                           \
-    __m128i res0_m;                            \
-    int32_t sum_m;                             \
-                                               \
-    res0_m = __lsx_vhaddw_d_w(in, in);         \
-    res0_m = __lsx_vhaddw_q_d(res0_m, res0_m); \
-    sum_m = __lsx_vpickve2gr_w(res0_m, 0);     \
-    sum_m;                                     \
-  })
+  return sad_m;
+}
+
+static INLINE uint32_t hadd_uw_u32(__m128i in) {
+  __m128i res0_m;
+  uint32_t sum_m;
+
+  res0_m = __lsx_vhaddw_du_wu(in, in);
+  res0_m = __lsx_vhaddw_qu_du(res0_m, res0_m);
+  sum_m = __lsx_vpickve2gr_w(res0_m, 0);
+
+  return sum_m;
+}
+
+static INLINE uint32_t hadd_uh_u32(__m128i in) {
+  __m128i res_m;
+  uint32_t sum_m;
+
+  res_m = __lsx_vhaddw_wu_hu(in, in);
+  sum_m = hadd_uw_u32(res_m);
+
+  return sum_m;
+}
+
+static INLINE int32_t hadd_sw_s32(__m128i in) {
+  __m128i res0_m;
+  int32_t sum_m;
+
+  res0_m = __lsx_vhaddw_d_w(in, in);
+  res0_m = __lsx_vhaddw_q_d(res0_m, res0_m);
+  sum_m = __lsx_vpickve2gr_w(res0_m, 0);
+
+  return sum_m;
+}
 
 static uint32_t sad_8width_lsx(const uint8_t *src, int32_t src_stride,
                                const uint8_t *ref, int32_t ref_stride,
                                int32_t height) {
   int32_t ht_cnt;
+  uint32_t res;
   __m128i src0, src1, src2, src3, ref0, ref1, ref2, ref3, sad_tmp;
   __m128i sad = __lsx_vldi(0);
 
@@ -79,16 +83,18 @@ static uint32_t sad_8width_lsx(const uint8_t *src, int32_t src_stride,
     ref += ref_stride;
     DUP4_ARG2(__lsx_vpickev_d, src1, src0, src3, src2, ref1, ref0, ref3, ref2,
               src0, src1, ref0, ref1);
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad = __lsx_vadd_h(sad, sad_tmp);
   }
-  return HADD_UH_U32(sad);
+  res = hadd_uh_u32(sad);
+  return res;
 }
 
 static uint32_t sad_16width_lsx(const uint8_t *src, int32_t src_stride,
                                 const uint8_t *ref, int32_t ref_stride,
                                 int32_t height) {
   int32_t ht_cnt = (height >> 2);
+  uint32_t res;
   __m128i src0, src1, ref0, ref1, sad_tmp;
   __m128i sad = __lsx_vldi(0);
   int32_t src_stride2 = src_stride << 1;
@@ -99,23 +105,26 @@ static uint32_t sad_16width_lsx(const uint8_t *src, int32_t src_stride,
     DUP2_ARG2(__lsx_vldx, src, src_stride, ref, ref_stride, src1, ref1);
     src += src_stride2;
     ref += ref_stride2;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad = __lsx_vadd_h(sad, sad_tmp);
 
     DUP2_ARG2(__lsx_vld, src, 0, ref, 0, src0, ref0);
     DUP2_ARG2(__lsx_vldx, src, src_stride, ref, ref_stride, src1, ref1);
     src += src_stride2;
     ref += ref_stride2;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad = __lsx_vadd_h(sad, sad_tmp);
   }
-  return HADD_UH_U32(sad);
+
+  res = hadd_uh_u32(sad);
+  return res;
 }
 
 static uint32_t sad_32width_lsx(const uint8_t *src, int32_t src_stride,
                                 const uint8_t *ref, int32_t ref_stride,
                                 int32_t height) {
   int32_t ht_cnt = (height >> 2);
+  uint32_t res;
   __m128i src0, src1, ref0, ref1;
   __m128i sad_tmp;
   __m128i sad = __lsx_vldi(0);
@@ -125,31 +134,32 @@ static uint32_t sad_32width_lsx(const uint8_t *src, int32_t src_stride,
     src += src_stride;
     DUP2_ARG2(__lsx_vld, ref, 0, ref, 16, ref0, ref1);
     ref += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad = __lsx_vadd_h(sad, sad_tmp);
 
     DUP2_ARG2(__lsx_vld, src, 0, src, 16, src0, src1);
     src += src_stride;
     DUP2_ARG2(__lsx_vld, ref, 0, ref, 16, ref0, ref1);
     ref += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad = __lsx_vadd_h(sad, sad_tmp);
 
     DUP2_ARG2(__lsx_vld, src, 0, src, 16, src0, src1);
     src += src_stride;
     DUP2_ARG2(__lsx_vld, ref, 0, ref, 16, ref0, ref1);
     ref += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad = __lsx_vadd_h(sad, sad_tmp);
 
     DUP2_ARG2(__lsx_vld, src, 0, src, 16, src0, src1);
     src += src_stride;
     DUP2_ARG2(__lsx_vld, ref, 0, ref, 16, ref0, ref1);
     ref += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad = __lsx_vadd_h(sad, sad_tmp);
   }
-  return HADD_UH_U32(sad);
+  res = hadd_uh_u32(sad);
+  return res;
 }
 
 static uint32_t sad_64width_lsx(const uint8_t *src, int32_t src_stride,
@@ -170,9 +180,9 @@ static uint32_t sad_64width_lsx(const uint8_t *src, int32_t src_stride,
     DUP4_ARG2(__lsx_vld, ref, 0, ref, 16, ref, 32, ref, 48, ref0, ref1, ref2,
               ref3);
     ref += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad0 = __lsx_vadd_h(sad0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, ref2, ref3);
+    sad_tmp = sad_ub2_uh(src2, src3, ref2, ref3);
     sad1 = __lsx_vadd_h(sad1, sad_tmp);
 
     DUP4_ARG2(__lsx_vld, src, 0, src, 16, src, 32, src, 48, src0, src1, src2,
@@ -181,14 +191,14 @@ static uint32_t sad_64width_lsx(const uint8_t *src, int32_t src_stride,
     DUP4_ARG2(__lsx_vld, ref, 0, ref, 16, ref, 32, ref, 48, ref0, ref1, ref2,
               ref3);
     ref += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad0 = __lsx_vadd_h(sad0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, ref2, ref3);
+    sad_tmp = sad_ub2_uh(src2, src3, ref2, ref3);
     sad1 = __lsx_vadd_h(sad1, sad_tmp);
   }
 
-  sad = HADD_UH_U32(sad0);
-  sad += HADD_UH_U32(sad1);
+  sad = hadd_uh_u32(sad0);
+  sad += hadd_uh_u32(sad1);
 
   return sad;
 }
@@ -247,25 +257,25 @@ static void sad_8width_x4d_lsx(const uint8_t *src_ptr, int32_t src_stride,
 
     DUP2_ARG2(__lsx_vpickev_d, src1, src0, src3, src2, src0, src1);
     DUP2_ARG2(__lsx_vpickev_d, ref1, ref0, ref3, ref2, ref0, ref1);
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad0 = __lsx_vadd_h(sad0, sad_tmp);
 
     DUP2_ARG2(__lsx_vpickev_d, ref5, ref4, ref7, ref6, ref0, ref1);
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad1 = __lsx_vadd_h(sad1, sad_tmp);
 
     DUP2_ARG2(__lsx_vpickev_d, ref9, ref8, ref11, ref10, ref0, ref1);
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad2 = __lsx_vadd_h(sad2, sad_tmp);
 
     DUP2_ARG2(__lsx_vpickev_d, ref13, ref12, ref15, ref14, ref0, ref1);
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad3 = __lsx_vadd_h(sad3, sad_tmp);
   }
-  sad_array[0] = HADD_UH_U32(sad0);
-  sad_array[1] = HADD_UH_U32(sad1);
-  sad_array[2] = HADD_UH_U32(sad2);
-  sad_array[3] = HADD_UH_U32(sad3);
+  sad_array[0] = hadd_uh_u32(sad0);
+  sad_array[1] = hadd_uh_u32(sad1);
+  sad_array[2] = hadd_uh_u32(sad2);
+  sad_array[3] = hadd_uh_u32(sad3);
 }
 
 static void sad_16width_x4d_lsx(const uint8_t *src_ptr, int32_t src_stride,
@@ -334,10 +344,10 @@ static void sad_16width_x4d_lsx(const uint8_t *src_ptr, int32_t src_stride,
     sad_tmp = __lsx_vhaddw_hu_bu(diff, diff);
     sad3 = __lsx_vadd_h(sad3, sad_tmp);
   }
-  sad_array[0] = HADD_UH_U32(sad0);
-  sad_array[1] = HADD_UH_U32(sad1);
-  sad_array[2] = HADD_UH_U32(sad2);
-  sad_array[3] = HADD_UH_U32(sad3);
+  sad_array[0] = hadd_uh_u32(sad0);
+  sad_array[1] = hadd_uh_u32(sad1);
+  sad_array[2] = hadd_uh_u32(sad2);
+  sad_array[3] = hadd_uh_u32(sad3);
 }
 
 static void sad_32width_x4d_lsx(const uint8_t *src, int32_t src_stride,
@@ -363,28 +373,28 @@ static void sad_32width_x4d_lsx(const uint8_t *src, int32_t src_stride,
 
     DUP2_ARG2(__lsx_vld, ref0_ptr, 0, ref0_ptr, 16, ref0, ref1);
     ref0_ptr += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad0 = __lsx_vadd_h(sad0, sad_tmp);
 
     DUP2_ARG2(__lsx_vld, ref1_ptr, 0, ref1_ptr, 16, ref0, ref1);
     ref1_ptr += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad1 = __lsx_vadd_h(sad1, sad_tmp);
 
     DUP2_ARG2(__lsx_vld, ref2_ptr, 0, ref2_ptr, 16, ref0, ref1);
     ref2_ptr += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad2 = __lsx_vadd_h(sad2, sad_tmp);
 
     DUP2_ARG2(__lsx_vld, ref3_ptr, 0, ref3_ptr, 16, ref0, ref1);
     ref3_ptr += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad3 = __lsx_vadd_h(sad3, sad_tmp);
   }
-  sad_array[0] = HADD_UH_U32(sad0);
-  sad_array[1] = HADD_UH_U32(sad1);
-  sad_array[2] = HADD_UH_U32(sad2);
-  sad_array[3] = HADD_UH_U32(sad3);
+  sad_array[0] = hadd_uh_u32(sad0);
+  sad_array[1] = hadd_uh_u32(sad1);
+  sad_array[2] = hadd_uh_u32(sad2);
+  sad_array[3] = hadd_uh_u32(sad3);
 }
 
 static void sad_64width_x4d_lsx(const uint8_t *src, int32_t src_stride,
@@ -419,60 +429,60 @@ static void sad_64width_x4d_lsx(const uint8_t *src, int32_t src_stride,
     DUP4_ARG2(__lsx_vld, ref0_ptr, 0, ref0_ptr, 16, ref0_ptr, 32, ref0_ptr, 48,
               ref0, ref1, ref2, ref3);
     ref0_ptr += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad0_0 = __lsx_vadd_h(sad0_0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, ref2, ref3);
+    sad_tmp = sad_ub2_uh(src2, src3, ref2, ref3);
     sad0_1 = __lsx_vadd_h(sad0_1, sad_tmp);
 
     DUP4_ARG2(__lsx_vld, ref1_ptr, 0, ref1_ptr, 16, ref1_ptr, 32, ref1_ptr, 48,
               ref0, ref1, ref2, ref3);
     ref1_ptr += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad1_0 = __lsx_vadd_h(sad1_0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, ref2, ref3);
+    sad_tmp = sad_ub2_uh(src2, src3, ref2, ref3);
     sad1_1 = __lsx_vadd_h(sad1_1, sad_tmp);
 
     DUP4_ARG2(__lsx_vld, ref2_ptr, 0, ref2_ptr, 16, ref2_ptr, 32, ref2_ptr, 48,
               ref0, ref1, ref2, ref3);
     ref2_ptr += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad2_0 = __lsx_vadd_h(sad2_0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, ref2, ref3);
+    sad_tmp = sad_ub2_uh(src2, src3, ref2, ref3);
     sad2_1 = __lsx_vadd_h(sad2_1, sad_tmp);
 
     DUP4_ARG2(__lsx_vld, ref3_ptr, 0, ref3_ptr, 16, ref3_ptr, 32, ref3_ptr, 48,
               ref0, ref1, ref2, ref3);
     ref3_ptr += ref_stride;
-    sad_tmp = SAD_UB2_UH(src0, src1, ref0, ref1);
+    sad_tmp = sad_ub2_uh(src0, src1, ref0, ref1);
     sad3_0 = __lsx_vadd_h(sad3_0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, ref2, ref3);
+    sad_tmp = sad_ub2_uh(src2, src3, ref2, ref3);
     sad3_1 = __lsx_vadd_h(sad3_1, sad_tmp);
   }
   sad = __lsx_vhaddw_wu_hu(sad0_0, sad0_0);
   sad_tmp = __lsx_vhaddw_wu_hu(sad0_1, sad0_1);
   sad = __lsx_vadd_w(sad, sad_tmp);
-  sad_array[0] = HADD_UW_U32(sad);
+  sad_array[0] = hadd_uw_u32(sad);
 
   sad = __lsx_vhaddw_wu_hu(sad1_0, sad1_0);
   sad_tmp = __lsx_vhaddw_wu_hu(sad1_1, sad1_1);
   sad = __lsx_vadd_w(sad, sad_tmp);
-  sad_array[1] = HADD_UW_U32(sad);
+  sad_array[1] = hadd_uw_u32(sad);
 
   sad = __lsx_vhaddw_wu_hu(sad2_0, sad2_0);
   sad_tmp = __lsx_vhaddw_wu_hu(sad2_1, sad2_1);
   sad = __lsx_vadd_w(sad, sad_tmp);
-  sad_array[2] = HADD_UW_U32(sad);
+  sad_array[2] = hadd_uw_u32(sad);
 
   sad = __lsx_vhaddw_wu_hu(sad3_0, sad3_0);
   sad_tmp = __lsx_vhaddw_wu_hu(sad3_1, sad3_1);
   sad = __lsx_vadd_w(sad, sad_tmp);
-  sad_array[3] = HADD_UW_U32(sad);
+  sad_array[3] = hadd_uw_u32(sad);
 }
 
 static uint32_t avgsad_32width_lsx(const uint8_t *src, int32_t src_stride,
                                    const uint8_t *ref, int32_t ref_stride,
                                    int32_t height, const uint8_t *sec_pred) {
-  int32_t ht_cnt = (height >> 2);
+  int32_t res, ht_cnt = (height >> 2);
   __m128i src0, src1, src2, src3, src4, src5, src6, src7;
   __m128i ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7;
   __m128i pred0, pred1, pred2, pred3, pred4, pred5, pred6, pred7;
@@ -514,26 +524,26 @@ static uint32_t avgsad_32width_lsx(const uint8_t *src, int32_t src_stride,
     sec_pred += 128;
 
     DUP2_ARG2(__lsx_vavgr_bu, pred0, ref0, pred1, ref1, comp0, comp1);
-    sad_tmp = SAD_UB2_UH(src0, src1, comp0, comp1);
+    sad_tmp = sad_ub2_uh(src0, src1, comp0, comp1);
     sad = __lsx_vadd_h(sad, sad_tmp);
     DUP2_ARG2(__lsx_vavgr_bu, pred2, ref2, pred3, ref3, comp0, comp1);
-    sad_tmp = SAD_UB2_UH(src2, src3, comp0, comp1);
+    sad_tmp = sad_ub2_uh(src2, src3, comp0, comp1);
     sad = __lsx_vadd_h(sad, sad_tmp);
     DUP2_ARG2(__lsx_vavgr_bu, pred4, ref4, pred5, ref5, comp0, comp1);
-    sad_tmp = SAD_UB2_UH(src4, src5, comp0, comp1);
+    sad_tmp = sad_ub2_uh(src4, src5, comp0, comp1);
     sad = __lsx_vadd_h(sad, sad_tmp);
     DUP2_ARG2(__lsx_vavgr_bu, pred6, ref6, pred7, ref7, comp0, comp1);
-    sad_tmp = SAD_UB2_UH(src6, src7, comp0, comp1);
+    sad_tmp = sad_ub2_uh(src6, src7, comp0, comp1);
     sad = __lsx_vadd_h(sad, sad_tmp);
   }
-
-  return HADD_UH_U32(sad);
+  res = hadd_uh_u32(sad);
+  return res;
 }
 
 static uint32_t avgsad_64width_lsx(const uint8_t *src, int32_t src_stride,
                                    const uint8_t *ref, int32_t ref_stride,
                                    int32_t height, const uint8_t *sec_pred) {
-  int32_t ht_cnt = (height >> 2);
+  int32_t res, ht_cnt = (height >> 2);
   __m128i src0, src1, src2, src3, ref0, ref1, ref2, ref3;
   __m128i comp0, comp1, comp2, comp3, pred0, pred1, pred2, pred3;
   __m128i sad, sad_tmp;
@@ -552,9 +562,9 @@ static uint32_t avgsad_64width_lsx(const uint8_t *src, int32_t src_stride,
     sec_pred += 64;
     DUP4_ARG2(__lsx_vavgr_bu, pred0, ref0, pred1, ref1, pred2, ref2, pred3,
               ref3, comp0, comp1, comp2, comp3);
-    sad_tmp = SAD_UB2_UH(src0, src1, comp0, comp1);
+    sad_tmp = sad_ub2_uh(src0, src1, comp0, comp1);
     sad0 = __lsx_vadd_h(sad0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, comp2, comp3);
+    sad_tmp = sad_ub2_uh(src2, src3, comp2, comp3);
     sad1 = __lsx_vadd_h(sad1, sad_tmp);
 
     DUP4_ARG2(__lsx_vld, src, 0, src, 16, src, 32, src, 48, src0, src1, src2,
@@ -568,9 +578,9 @@ static uint32_t avgsad_64width_lsx(const uint8_t *src, int32_t src_stride,
     sec_pred += 64;
     DUP4_ARG2(__lsx_vavgr_bu, pred0, ref0, pred1, ref1, pred2, ref2, pred3,
               ref3, comp0, comp1, comp2, comp3);
-    sad_tmp = SAD_UB2_UH(src0, src1, comp0, comp1);
+    sad_tmp = sad_ub2_uh(src0, src1, comp0, comp1);
     sad0 = __lsx_vadd_h(sad0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, comp2, comp3);
+    sad_tmp = sad_ub2_uh(src2, src3, comp2, comp3);
     sad1 = __lsx_vadd_h(sad1, sad_tmp);
 
     DUP4_ARG2(__lsx_vld, src, 0, src, 16, src, 32, src, 48, src0, src1, src2,
@@ -584,9 +594,9 @@ static uint32_t avgsad_64width_lsx(const uint8_t *src, int32_t src_stride,
     sec_pred += 64;
     DUP4_ARG2(__lsx_vavgr_bu, pred0, ref0, pred1, ref1, pred2, ref2, pred3,
               ref3, comp0, comp1, comp2, comp3);
-    sad_tmp = SAD_UB2_UH(src0, src1, comp0, comp1);
+    sad_tmp = sad_ub2_uh(src0, src1, comp0, comp1);
     sad0 = __lsx_vadd_h(sad0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, comp2, comp3);
+    sad_tmp = sad_ub2_uh(src2, src3, comp2, comp3);
     sad1 = __lsx_vadd_h(sad1, sad_tmp);
 
     DUP4_ARG2(__lsx_vld, src, 0, src, 16, src, 32, src, 48, src0, src1, src2,
@@ -600,16 +610,17 @@ static uint32_t avgsad_64width_lsx(const uint8_t *src, int32_t src_stride,
     sec_pred += 64;
     DUP4_ARG2(__lsx_vavgr_bu, pred0, ref0, pred1, ref1, pred2, ref2, pred3,
               ref3, comp0, comp1, comp2, comp3);
-    sad_tmp = SAD_UB2_UH(src0, src1, comp0, comp1);
+    sad_tmp = sad_ub2_uh(src0, src1, comp0, comp1);
     sad0 = __lsx_vadd_h(sad0, sad_tmp);
-    sad_tmp = SAD_UB2_UH(src2, src3, comp2, comp3);
+    sad_tmp = sad_ub2_uh(src2, src3, comp2, comp3);
     sad1 = __lsx_vadd_h(sad1, sad_tmp);
   }
   sad = __lsx_vhaddw_wu_hu(sad0, sad0);
   sad_tmp = __lsx_vhaddw_wu_hu(sad1, sad1);
   sad = __lsx_vadd_w(sad, sad_tmp);
 
-  return HADD_SW_S32(sad);
+  res = hadd_sw_s32(sad);
+  return res;
 }
 
 #define VPX_SAD_8xHT_LSX(height)                                             \
