@@ -118,6 +118,19 @@ static INLINE uint8x8_t convolve8_8_sdot(uint8x16_t samples,
 
 #if defined(__aarch64__) && defined(__ARM_FEATURE_MATMUL_INT8)
 
+static INLINE int32x4_t convolve8_4_usdot_partial(const uint8x16_t samples_lo,
+                                                  const uint8x16_t samples_hi,
+                                                  const int8x8_t filters) {
+  /* Sample permutation is performed by the caller. */
+  int32x4_t sum;
+
+  sum = vusdotq_lane_s32(vdupq_n_s32(0), samples_lo, filters, 0);
+  sum = vusdotq_lane_s32(sum, samples_hi, filters, 1);
+
+  /* Narrowing and packing is performed by the caller. */
+  return sum;
+}
+
 static INLINE int32x4_t convolve8_4_usdot(uint8x16_t samples,
                                           const int8x8_t filters,
                                           const uint8x16x2_t permute_tbl) {
@@ -136,6 +149,27 @@ static INLINE int32x4_t convolve8_4_usdot(uint8x16_t samples,
 
   /* Narrowing and packing is performed by the caller. */
   return sum;
+}
+
+static INLINE uint8x8_t convolve8_8_usdot_partial(const uint8x16_t samples0_lo,
+                                                  const uint8x16_t samples0_hi,
+                                                  const uint8x16_t samples1_lo,
+                                                  const uint8x16_t samples1_hi,
+                                                  const int8x8_t filters) {
+  /* Sample permutation is performed by the caller. */
+  int32x4_t sum0, sum1;
+  int16x8_t sum;
+
+  /* First 4 output values. */
+  sum0 = vusdotq_lane_s32(vdupq_n_s32(0), samples0_lo, filters, 0);
+  sum0 = vusdotq_lane_s32(sum0, samples0_hi, filters, 1);
+  /* Second 4 output values. */
+  sum1 = vusdotq_lane_s32(vdupq_n_s32(0), samples1_lo, filters, 0);
+  sum1 = vusdotq_lane_s32(sum1, samples1_hi, filters, 1);
+
+  /* Narrow and re-pack. */
+  sum = vcombine_s16(vqmovn_s32(sum0), vqmovn_s32(sum1));
+  return vqrshrun_n_s16(sum, 7);
 }
 
 static INLINE uint8x8_t convolve8_8_usdot(uint8x16_t samples,
