@@ -31,7 +31,9 @@
 // instructions. This optimization is much faster in speed unit test, but slowed
 // down the whole decoder by 5%.
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__aarch64__) && \
+    (defined(__ARM_FEATURE_DOTPROD) || defined(__ARM_FEATURE_MATMUL_INT8))
+
 DECLARE_ALIGNED(16, static const uint8_t, dot_prod_permute_tbl[48]) = {
   0, 1, 2,  3,  1, 2,  3,  4,  2,  3,  4,  5,  3,  4,  5,  6,
   4, 5, 6,  7,  5, 6,  7,  8,  6,  7,  8,  9,  7,  8,  9,  10,
@@ -96,6 +98,175 @@ static INLINE void transpose_concat_8x4(int8x8_t *a0, int8x8_t *a1,
   *b1 = vqtbl2q_s8(samples, permute_tbl.val[1]);
 }
 
+#if defined(__ARM_FEATURE_MATMUL_INT8)
+
+void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
+                              uint8_t *dst, ptrdiff_t dst_stride,
+                              const InterpKernel *filter, int x0_q4,
+                              int x_step_q4, int y0_q4, int y_step_q4, int w,
+                              int h) {
+  const int8x8_t filters = vmovn_s16(vld1q_s16(filter[x0_q4]));
+  uint8x16_t s0, s1, s2, s3;
+
+  assert(!((intptr_t)dst & 3));
+  assert(!(dst_stride & 3));
+  assert(x_step_q4 == 16);
+
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
+
+  src -= 3;
+
+  if (w == 4) {
+    const uint8x16x2_t permute_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
+    do {
+      int32x4_t t0, t1, t2, t3;
+      int16x8_t t01, t23;
+      uint8x8_t d01, d23;
+
+      load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
+
+      t0 = convolve8_4_usdot(s0, filters, permute_tbl);
+      t1 = convolve8_4_usdot(s1, filters, permute_tbl);
+      t2 = convolve8_4_usdot(s2, filters, permute_tbl);
+      t3 = convolve8_4_usdot(s3, filters, permute_tbl);
+      t01 = vcombine_s16(vqmovn_s32(t0), vqmovn_s32(t1));
+      t23 = vcombine_s16(vqmovn_s32(t2), vqmovn_s32(t3));
+      d01 = vqrshrun_n_s16(t01, 7);
+      d23 = vqrshrun_n_s16(t23, 7);
+
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
+
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 0);
+  } else {
+    const uint8x16x3_t permute_tbl = vld1q_u8_x3(dot_prod_permute_tbl);
+    const uint8_t *s;
+    uint8_t *d;
+    int width;
+    uint8x8_t d0, d1, d2, d3;
+
+    do {
+      width = w;
+      s = src;
+      d = dst;
+      do {
+        load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
+
+        d0 = convolve8_8_usdot(s0, filters, permute_tbl);
+        d1 = convolve8_8_usdot(s1, filters, permute_tbl);
+        d2 = convolve8_8_usdot(s2, filters, permute_tbl);
+        d3 = convolve8_8_usdot(s3, filters, permute_tbl);
+
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
+
+        s += 8;
+        d += 8;
+        width -= 8;
+      } while (width > 0);
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 0);
+  }
+}
+
+void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
+                                  uint8_t *dst, ptrdiff_t dst_stride,
+                                  const InterpKernel *filter, int x0_q4,
+                                  int x_step_q4, int y0_q4, int y_step_q4,
+                                  int w, int h) {
+  const int8x8_t filters = vmovn_s16(vld1q_s16(filter[x0_q4]));
+  uint8x16_t s0, s1, s2, s3;
+
+  assert(!((intptr_t)dst & 3));
+  assert(!(dst_stride & 3));
+  assert(x_step_q4 == 16);
+
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
+
+  src -= 3;
+
+  if (w == 4) {
+    const uint8x16x2_t permute_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
+    do {
+      int32x4_t t0, t1, t2, t3;
+      int16x8_t t01, t23;
+      uint8x8_t d01, d23, dd01, dd23;
+      dd01 = vdup_n_u8(0);
+      dd23 = vdup_n_u8(0);
+
+      load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
+
+      t0 = convolve8_4_usdot(s0, filters, permute_tbl);
+      t1 = convolve8_4_usdot(s1, filters, permute_tbl);
+      t2 = convolve8_4_usdot(s2, filters, permute_tbl);
+      t3 = convolve8_4_usdot(s3, filters, permute_tbl);
+      t01 = vcombine_s16(vqmovn_s32(t0), vqmovn_s32(t1));
+      t23 = vcombine_s16(vqmovn_s32(t2), vqmovn_s32(t3));
+      d01 = vqrshrun_n_s16(t01, 7);
+      d23 = vqrshrun_n_s16(t23, 7);
+
+      dd01 = load_u8(dst + 0 * dst_stride, dst_stride);
+      dd23 = load_u8(dst + 2 * dst_stride, dst_stride);
+
+      d01 = vrhadd_u8(d01, dd01);
+      d23 = vrhadd_u8(d23, dd23);
+
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
+
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 0);
+  } else {
+    const uint8x16x3_t permute_tbl = vld1q_u8_x3(dot_prod_permute_tbl);
+    const uint8_t *s;
+    uint8_t *d;
+    int width;
+    uint8x8_t d0, d1, d2, d3, dd0, dd1, dd2, dd3;
+
+    do {
+      width = w;
+      s = src;
+      d = dst;
+      do {
+        load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
+
+        d0 = convolve8_8_usdot(s0, filters, permute_tbl);
+        d1 = convolve8_8_usdot(s1, filters, permute_tbl);
+        d2 = convolve8_8_usdot(s2, filters, permute_tbl);
+        d3 = convolve8_8_usdot(s3, filters, permute_tbl);
+
+        load_u8_8x4(d, dst_stride, &dd0, &dd1, &dd2, &dd3);
+
+        d0 = vrhadd_u8(d0, dd0);
+        d1 = vrhadd_u8(d1, dd1);
+        d2 = vrhadd_u8(d2, dd2);
+        d3 = vrhadd_u8(d3, dd3);
+
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
+
+        s += 8;
+        d += 8;
+        width -= 8;
+      } while (width > 0);
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 0);
+  }
+}
+
+#else  // !defined(__ARM_FEATURE_MATMUL_INT8)
+
 void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const InterpKernel *filter, int x0_q4,
@@ -126,10 +297,10 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
 
       load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
 
-      t0 = convolve8_4_dot(s0, filters, correction, range_limit, permute_tbl);
-      t1 = convolve8_4_dot(s1, filters, correction, range_limit, permute_tbl);
-      t2 = convolve8_4_dot(s2, filters, correction, range_limit, permute_tbl);
-      t3 = convolve8_4_dot(s3, filters, correction, range_limit, permute_tbl);
+      t0 = convolve8_4_sdot(s0, filters, correction, range_limit, permute_tbl);
+      t1 = convolve8_4_sdot(s1, filters, correction, range_limit, permute_tbl);
+      t2 = convolve8_4_sdot(s2, filters, correction, range_limit, permute_tbl);
+      t3 = convolve8_4_sdot(s3, filters, correction, range_limit, permute_tbl);
       t01 = vcombine_s16(vqmovn_s32(t0), vqmovn_s32(t1));
       t23 = vcombine_s16(vqmovn_s32(t2), vqmovn_s32(t3));
       d01 = vqrshrun_n_s16(t01, 7);
@@ -156,10 +327,14 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       do {
         load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
 
-        d0 = convolve8_8_dot(s0, filters, correction, range_limit, permute_tbl);
-        d1 = convolve8_8_dot(s1, filters, correction, range_limit, permute_tbl);
-        d2 = convolve8_8_dot(s2, filters, correction, range_limit, permute_tbl);
-        d3 = convolve8_8_dot(s3, filters, correction, range_limit, permute_tbl);
+        d0 =
+            convolve8_8_sdot(s0, filters, correction, range_limit, permute_tbl);
+        d1 =
+            convolve8_8_sdot(s1, filters, correction, range_limit, permute_tbl);
+        d2 =
+            convolve8_8_sdot(s2, filters, correction, range_limit, permute_tbl);
+        d3 =
+            convolve8_8_sdot(s3, filters, correction, range_limit, permute_tbl);
 
         store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
 
@@ -206,10 +381,10 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
 
       load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
 
-      t0 = convolve8_4_dot(s0, filters, correction, range_limit, permute_tbl);
-      t1 = convolve8_4_dot(s1, filters, correction, range_limit, permute_tbl);
-      t2 = convolve8_4_dot(s2, filters, correction, range_limit, permute_tbl);
-      t3 = convolve8_4_dot(s3, filters, correction, range_limit, permute_tbl);
+      t0 = convolve8_4_sdot(s0, filters, correction, range_limit, permute_tbl);
+      t1 = convolve8_4_sdot(s1, filters, correction, range_limit, permute_tbl);
+      t2 = convolve8_4_sdot(s2, filters, correction, range_limit, permute_tbl);
+      t3 = convolve8_4_sdot(s3, filters, correction, range_limit, permute_tbl);
       t01 = vcombine_s16(vqmovn_s32(t0), vqmovn_s32(t1));
       t23 = vcombine_s16(vqmovn_s32(t2), vqmovn_s32(t3));
       d01 = vqrshrun_n_s16(t01, 7);
@@ -242,10 +417,14 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       do {
         load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
 
-        d0 = convolve8_8_dot(s0, filters, correction, range_limit, permute_tbl);
-        d1 = convolve8_8_dot(s1, filters, correction, range_limit, permute_tbl);
-        d2 = convolve8_8_dot(s2, filters, correction, range_limit, permute_tbl);
-        d3 = convolve8_8_dot(s3, filters, correction, range_limit, permute_tbl);
+        d0 =
+            convolve8_8_sdot(s0, filters, correction, range_limit, permute_tbl);
+        d1 =
+            convolve8_8_sdot(s1, filters, correction, range_limit, permute_tbl);
+        d2 =
+            convolve8_8_sdot(s2, filters, correction, range_limit, permute_tbl);
+        d3 =
+            convolve8_8_sdot(s3, filters, correction, range_limit, permute_tbl);
 
         load_u8_8x4(d, dst_stride, &dd0, &dd1, &dd2, &dd3);
 
@@ -266,6 +445,8 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
     } while (h > 0);
   }
 }
+
+#endif  // defined(__ARM_FEATURE_MATMUL_INT8)
 
 void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
@@ -342,10 +523,10 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       s5678 = vqtbl2q_s8(samples_LUT, merge_block_tbl.val[1]);
       s6789 = vqtbl2q_s8(samples_LUT, merge_block_tbl.val[2]);
 
-      d0 = convolve8_4_dot_partial(s0123, s4567, correction, filters);
-      d1 = convolve8_4_dot_partial(s1234, s5678, correction, filters);
-      d2 = convolve8_4_dot_partial(s2345, s6789, correction, filters);
-      d3 = convolve8_4_dot_partial(s3456, s78910, correction, filters);
+      d0 = convolve8_4_sdot_partial(s0123, s4567, correction, filters);
+      d1 = convolve8_4_sdot_partial(s1234, s5678, correction, filters);
+      d2 = convolve8_4_sdot_partial(s2345, s6789, correction, filters);
+      d3 = convolve8_4_sdot_partial(s3456, s78910, correction, filters);
       d01 = vqrshrun_n_s16(vcombine_s16(vqmovn_s32(d0), vqmovn_s32(d1)), 7);
       d23 = vqrshrun_n_s16(vcombine_s16(vqmovn_s32(d2), vqmovn_s32(d3)), 7);
 
@@ -437,14 +618,14 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
         s5678_hi = vqtbl2q_s8(samples_LUT, merge_block_tbl.val[1]);
         s6789_hi = vqtbl2q_s8(samples_LUT, merge_block_tbl.val[2]);
 
-        d0 = convolve8_8_dot_partial(s0123_lo, s4567_lo, s0123_hi, s4567_hi,
-                                     correction, filters);
-        d1 = convolve8_8_dot_partial(s1234_lo, s5678_lo, s1234_hi, s5678_hi,
-                                     correction, filters);
-        d2 = convolve8_8_dot_partial(s2345_lo, s6789_lo, s2345_hi, s6789_hi,
-                                     correction, filters);
-        d3 = convolve8_8_dot_partial(s3456_lo, s78910_lo, s3456_hi, s78910_hi,
-                                     correction, filters);
+        d0 = convolve8_8_sdot_partial(s0123_lo, s4567_lo, s0123_hi, s4567_hi,
+                                      correction, filters);
+        d1 = convolve8_8_sdot_partial(s1234_lo, s5678_lo, s1234_hi, s5678_hi,
+                                      correction, filters);
+        d2 = convolve8_8_sdot_partial(s2345_lo, s6789_lo, s2345_hi, s6789_hi,
+                                      correction, filters);
+        d3 = convolve8_8_sdot_partial(s3456_lo, s78910_lo, s3456_hi, s78910_hi,
+                                      correction, filters);
 
         store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
 
@@ -545,10 +726,10 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       s5678 = vqtbl2q_s8(samples_LUT, merge_block_tbl.val[1]);
       s6789 = vqtbl2q_s8(samples_LUT, merge_block_tbl.val[2]);
 
-      d0 = convolve8_4_dot_partial(s0123, s4567, correction, filters);
-      d1 = convolve8_4_dot_partial(s1234, s5678, correction, filters);
-      d2 = convolve8_4_dot_partial(s2345, s6789, correction, filters);
-      d3 = convolve8_4_dot_partial(s3456, s78910, correction, filters);
+      d0 = convolve8_4_sdot_partial(s0123, s4567, correction, filters);
+      d1 = convolve8_4_sdot_partial(s1234, s5678, correction, filters);
+      d2 = convolve8_4_sdot_partial(s2345, s6789, correction, filters);
+      d3 = convolve8_4_sdot_partial(s3456, s78910, correction, filters);
       d01 = vqrshrun_n_s16(vcombine_s16(vqmovn_s32(d0), vqmovn_s32(d1)), 7);
       d23 = vqrshrun_n_s16(vcombine_s16(vqmovn_s32(d2), vqmovn_s32(d3)), 7);
 
@@ -646,14 +827,14 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
         s5678_hi = vqtbl2q_s8(samples_LUT, merge_block_tbl.val[1]);
         s6789_hi = vqtbl2q_s8(samples_LUT, merge_block_tbl.val[2]);
 
-        d0 = convolve8_8_dot_partial(s0123_lo, s4567_lo, s0123_hi, s4567_hi,
-                                     correction, filters);
-        d1 = convolve8_8_dot_partial(s1234_lo, s5678_lo, s1234_hi, s5678_hi,
-                                     correction, filters);
-        d2 = convolve8_8_dot_partial(s2345_lo, s6789_lo, s2345_hi, s6789_hi,
-                                     correction, filters);
-        d3 = convolve8_8_dot_partial(s3456_lo, s78910_lo, s3456_hi, s78910_hi,
-                                     correction, filters);
+        d0 = convolve8_8_sdot_partial(s0123_lo, s4567_lo, s0123_hi, s4567_hi,
+                                      correction, filters);
+        d1 = convolve8_8_sdot_partial(s1234_lo, s5678_lo, s1234_hi, s5678_hi,
+                                      correction, filters);
+        d2 = convolve8_8_sdot_partial(s2345_lo, s6789_lo, s2345_hi, s6789_hi,
+                                      correction, filters);
+        d3 = convolve8_8_sdot_partial(s3456_lo, s78910_lo, s3456_hi, s78910_hi,
+                                      correction, filters);
 
         load_u8_8x4(d, dst_stride, &dd0, &dd1, &dd2, &dd3);
 
@@ -686,7 +867,9 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-#else  // !(defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD))
+#else  // !(defined(__aarch64__) &&
+       //   (defined(__ARM_FEATURE_DOTPROD) ||
+       //    defined(__ARM_FEATURE_MATMUL_INT8)))
 
 void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
@@ -1528,4 +1711,6 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#endif  // #if defined(__aarch64__) &&
+        //     (defined(__ARM_FEATURE_DOTPROD) ||
+        //      defined(__ARM_FEATURE_MATMUL_INT8))
