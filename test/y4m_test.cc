@@ -196,6 +196,7 @@ static const char kY4MRegularHeader[] =
 
 TEST(Y4MHeaderTest, RegularHeader) {
   libvpx_test::TempOutFile f;
+  ASSERT_NE(f.file(), nullptr);
   fwrite(kY4MRegularHeader, 1, sizeof(kY4MRegularHeader), f.file());
   fflush(f.file());
   EXPECT_EQ(0, fseek(f.file(), 0, 0));
@@ -222,6 +223,7 @@ static const char kY4MLongHeader[] =
 
 TEST(Y4MHeaderTest, LongHeader) {
   libvpx_test::TempOutFile f;
+  ASSERT_NE(f.file(), nullptr);
   fwrite(kY4MLongHeader, 1, sizeof(kY4MLongHeader), f.file());
   fflush(f.file());
   EXPECT_EQ(fseek(f.file(), 0, 0), 0);
