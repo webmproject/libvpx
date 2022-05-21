@@ -20,8 +20,14 @@
 #endif
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <memory>
 #include <string>
+
 #include "test/acm_random.h"
+#if !defined(_WIN32)
+#include "third_party/googletest/src/include/gtest/gtest.h"
+#endif
 #include "vpx/vpx_encoder.h"
 
 namespace libvpx_test {
@@ -72,7 +78,23 @@ static FILE *GetTempOutFile(std::string *file_name) {
   }
   return NULL;
 #else
-  return tmpfile();
+  std::string temp_dir = testing::TempDir();
+  if (temp_dir.empty()) return NULL;
+  // Versions of testing::TempDir() prior to release-1.11.0-214-g5e6a5336 may
+  // use the value of an environment variable without checking for a trailing
+  // path delimiter.
+  if (temp_dir[temp_dir.size() - 1] != '/') temp_dir += '/';
+  const char name_template[] = "libvpxtest.XXXXXX";
+  std::unique_ptr<char[]> temp_file_name(
+      new char[temp_dir.size() + sizeof(name_template)]);
+  if (temp_file_name == nullptr) return NULL;
+  memcpy(temp_file_name.get(), temp_dir.data(), temp_dir.size());
+  memcpy(temp_file_name.get() + temp_dir.size(), name_template,
+         sizeof(name_template));
+  const int fd = mkstemp(temp_file_name.get());
+  if (fd == -1) return NULL;
+  *file_name = temp_file_name.get();
+  return fdopen(fd, "wb+");
 #endif
 }
 
