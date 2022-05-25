@@ -494,20 +494,7 @@ if ($opts{arch} eq 'x86') {
   @ALL_ARCHS = filter(qw/vsx/);
   ppc;
 } elsif ($opts{arch} =~ /loongarch/ ) {
-  @ALL_ARCHS = filter("$opts{arch}");
-  open CONFIG_FILE, $opts{config} or
-    die "Error opening config file '$opts{config}': $!\n";
-  while (<CONFIG_FILE>) {
-    if (/HAVE_LSX=yes/) {
-      @ALL_ARCHS = filter("$opts{arch}", qw/lsx/);
-      last;
-    }
-    if (/HAVE_LASX=yes/) {
-      @ALL_ARCHS = filter("$opts{arch}", qw/lasx/);
-      last;
-    }
-  }
-  close CONFIG_FILE;
+  @ALL_ARCHS = filter(qw/lsx lasx/);
   loongarch;
 } else {
   unoptimized;

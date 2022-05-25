@@ -55,7 +55,6 @@ static int32_t hz_lpf_t4_and_t8_16w(uint8_t *dst, int32_t stride,
   __m128i q0_filt8_l, q1_filt8_l, q2_filt8_l;
   __m128i p2_filt8_h, p1_filt8_h, p0_filt8_h;
   __m128i q0_filt8_h, q1_filt8_h, q2_filt8_h;
-  __m128i zero = __lsx_vldi(0);
 
   int32_t stride2 = stride << 1;
   int32_t stride3 = stride2 + stride;
@@ -69,9 +68,9 @@ static int32_t hz_lpf_t4_and_t8_16w(uint8_t *dst, int32_t stride,
   DUP2_ARG2(__lsx_vldx, dst, stride, dst, stride2, q1, q2);
   q3 = __lsx_vldx(dst, stride3);
 
-  thresh = __lsx_vreplgr2vr_b(*thresh_ptr);
-  b_limit = __lsx_vreplgr2vr_b(*b_limit_ptr);
-  limit = __lsx_vreplgr2vr_b(*limit_ptr);
+  thresh = __lsx_vldrepl_b(thresh_ptr, 0);
+  b_limit = __lsx_vldrepl_b(b_limit_ptr, 0);
+  limit = __lsx_vldrepl_b(limit_ptr, 0);
   /* mask and hev */
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
@@ -87,18 +86,16 @@ static int32_t hz_lpf_t4_and_t8_16w(uint8_t *dst, int32_t stride,
     return 1;
   }
 
-  DUP4_ARG2(__lsx_vilvl_b, zero, p3, zero, p2, zero, p1, zero, p0, p3_l, p2_l,
-            p1_l, p0_l);
-  DUP4_ARG2(__lsx_vilvl_b, zero, q0, zero, q1, zero, q2, zero, q3, q0_l, q1_l,
-            q2_l, q3_l);
+  DUP4_ARG2(__lsx_vsllwil_hu_bu, p3, 0, p2, 0, p1, 0, p0, 0, p3_l, p2_l, p1_l,
+            p0_l);
+  DUP4_ARG2(__lsx_vsllwil_hu_bu, q0, 0, q1, 0, q2, 0, q3, 0, q0_l, q1_l, q2_l,
+            q3_l);
 
   VP9_FILTER8(p3_l, p2_l, p1_l, p0_l, q0_l, q1_l, q2_l, q3_l, p2_filt8_l,
               p1_filt8_l, p0_filt8_l, q0_filt8_l, q1_filt8_l, q2_filt8_l);
 
-  DUP4_ARG2(__lsx_vilvh_b, zero, p3, zero, p2, zero, p1, zero, p0, p3_h, p2_h,
-            p1_h, p0_h);
-  DUP4_ARG2(__lsx_vilvh_b, zero, q0, zero, q1, zero, q2, zero, q3, q0_h, q1_h,
-            q2_h, q3_h);
+  DUP4_ARG1(__lsx_vexth_hu_bu, p3, p2, p1, p0, p3_h, p2_h, p1_h, p0_h);
+  DUP4_ARG1(__lsx_vexth_hu_bu, q0, q1, q2, q3, q0_h, q1_h, q2_h, q3_h);
   VP9_FILTER8(p3_h, p2_h, p1_h, p0_h, q0_h, q1_h, q2_h, q3_h, p2_filt8_h,
               p1_filt8_h, p0_filt8_h, q0_filt8_h, q1_filt8_h, q2_filt8_h);
 
@@ -135,7 +132,6 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
   uint8_t *dst_tmp1 = dst + stride4;
 
   __m128i flat, flat2, filter8;
-  __m128i zero = __lsx_vldi(0);
   __m128i p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7;
   __m128i out_h, out_l;
   v8u16 p7_l_in, p6_l_in, p5_l_in, p4_l_in;
@@ -180,16 +176,15 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
   } else {
     dst = dst_tmp0 - stride3;
 
-    p7_l_in = (v8u16)__lsx_vilvl_b(zero, p7);
-    p6_l_in = (v8u16)__lsx_vilvl_b(zero, p6);
-    p5_l_in = (v8u16)__lsx_vilvl_b(zero, p5);
-    p4_l_in = (v8u16)__lsx_vilvl_b(zero, p4);
-    p3_l_in = (v8u16)__lsx_vilvl_b(zero, p3);
-    p2_l_in = (v8u16)__lsx_vilvl_b(zero, p2);
-    p1_l_in = (v8u16)__lsx_vilvl_b(zero, p1);
-    p0_l_in = (v8u16)__lsx_vilvl_b(zero, p0);
-
-    q0_l_in = (v8u16)__lsx_vilvl_b(zero, q0);
+    p7_l_in = (v8u16)__lsx_vsllwil_hu_bu(p7, 0);
+    p6_l_in = (v8u16)__lsx_vsllwil_hu_bu(p6, 0);
+    p5_l_in = (v8u16)__lsx_vsllwil_hu_bu(p5, 0);
+    p4_l_in = (v8u16)__lsx_vsllwil_hu_bu(p4, 0);
+    p3_l_in = (v8u16)__lsx_vsllwil_hu_bu(p3, 0);
+    p2_l_in = (v8u16)__lsx_vsllwil_hu_bu(p2, 0);
+    p1_l_in = (v8u16)__lsx_vsllwil_hu_bu(p1, 0);
+    p0_l_in = (v8u16)__lsx_vsllwil_hu_bu(p0, 0);
+    q0_l_in = (v8u16)__lsx_vsllwil_hu_bu(q0, 0);
 
     tmp0_l = p7_l_in << 3;
     tmp0_l -= p7_l_in;
@@ -205,16 +200,15 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
 
     out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
 
-    p7_h_in = (v8u16)__lsx_vilvh_b(zero, p7);
-    p6_h_in = (v8u16)__lsx_vilvh_b(zero, p6);
-    p5_h_in = (v8u16)__lsx_vilvh_b(zero, p5);
-    p4_h_in = (v8u16)__lsx_vilvh_b(zero, p4);
-
-    p3_h_in = (v8u16)__lsx_vilvh_b(zero, p3);
-    p2_h_in = (v8u16)__lsx_vilvh_b(zero, p2);
-    p1_h_in = (v8u16)__lsx_vilvh_b(zero, p1);
-    p0_h_in = (v8u16)__lsx_vilvh_b(zero, p0);
-    q0_h_in = (v8u16)__lsx_vilvh_b(zero, q0);
+    p7_h_in = (v8u16)__lsx_vexth_hu_bu(p7);
+    p6_h_in = (v8u16)__lsx_vexth_hu_bu(p6);
+    p5_h_in = (v8u16)__lsx_vexth_hu_bu(p5);
+    p4_h_in = (v8u16)__lsx_vexth_hu_bu(p4);
+    p3_h_in = (v8u16)__lsx_vexth_hu_bu(p3);
+    p2_h_in = (v8u16)__lsx_vexth_hu_bu(p2);
+    p1_h_in = (v8u16)__lsx_vexth_hu_bu(p1);
+    p0_h_in = (v8u16)__lsx_vexth_hu_bu(p0);
+    q0_h_in = (v8u16)__lsx_vexth_hu_bu(q0);
 
     tmp0_h = p7_h_in << 3;
     tmp0_h -= p7_h_in;
@@ -236,14 +230,14 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     dst += stride;
 
     /* p5 */
-    q1_l_in = (v8u16)__lsx_vilvl_b(zero, q1);
+    q1_l_in = (v8u16)__lsx_vsllwil_hu_bu(q1, 0);
     tmp0_l = p5_l_in - p6_l_in;
     tmp0_l += q1_l_in;
     tmp0_l -= p7_l_in;
     tmp1_l += tmp0_l;
     out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
 
-    q1_h_in = (v8u16)__lsx_vilvh_b(zero, q1);
+    q1_h_in = (v8u16)__lsx_vexth_hu_bu(q1);
     tmp0_h = p5_h_in - p6_h_in;
     tmp0_h += q1_h_in;
     tmp0_h -= p7_h_in;
@@ -256,14 +250,14 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     dst += stride;
 
     /* p4 */
-    q2_l_in = (v8u16)__lsx_vilvl_b(zero, q2);
+    q2_l_in = (v8u16)__lsx_vsllwil_hu_bu(q2, 0);
     tmp0_l = p4_l_in - p5_l_in;
     tmp0_l += q2_l_in;
     tmp0_l -= p7_l_in;
     tmp1_l += tmp0_l;
     out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
 
-    q2_h_in = (v8u16)__lsx_vilvh_b(zero, q2);
+    q2_h_in = (v8u16)__lsx_vexth_hu_bu(q2);
     tmp0_h = p4_h_in - p5_h_in;
     tmp0_h += q2_h_in;
     tmp0_h -= p7_h_in;
@@ -276,14 +270,14 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     dst += stride;
 
     /* p3 */
-    q3_l_in = (v8u16)__lsx_vilvl_b(zero, q3);
+    q3_l_in = (v8u16)__lsx_vsllwil_hu_bu(q3, 0);
     tmp0_l = p3_l_in - p4_l_in;
     tmp0_l += q3_l_in;
     tmp0_l -= p7_l_in;
     tmp1_l += tmp0_l;
     out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
 
-    q3_h_in = (v8u16)__lsx_vilvh_b(zero, q3);
+    q3_h_in = (v8u16)__lsx_vexth_hu_bu(q3);
     tmp0_h = p3_h_in - p4_h_in;
     tmp0_h += q3_h_in;
     tmp0_h -= p7_h_in;
@@ -296,7 +290,7 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     dst += stride;
 
     /* p2 */
-    q4_l_in = (v8u16)__lsx_vilvl_b(zero, q4);
+    q4_l_in = (v8u16)__lsx_vsllwil_hu_bu(q4, 0);
     filter8 = __lsx_vld(filter48, 0);
     tmp0_l = p2_l_in - p3_l_in;
     tmp0_l += q4_l_in;
@@ -304,7 +298,7 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     tmp1_l += tmp0_l;
     out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
 
-    q4_h_in = (v8u16)__lsx_vilvh_b(zero, q4);
+    q4_h_in = (v8u16)__lsx_vexth_hu_bu(q4);
     tmp0_h = p2_h_in - p3_h_in;
     tmp0_h += q4_h_in;
     tmp0_h -= p7_h_in;
@@ -317,7 +311,7 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     dst += stride;
 
     /* p1 */
-    q5_l_in = (v8u16)__lsx_vilvl_b(zero, q5);
+    q5_l_in = (v8u16)__lsx_vsllwil_hu_bu(q5, 0);
     filter8 = __lsx_vld(filter48, 16);
     tmp0_l = p1_l_in - p2_l_in;
     tmp0_l += q5_l_in;
@@ -325,7 +319,7 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     tmp1_l += tmp0_l;
     out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
 
-    q5_h_in = (v8u16)__lsx_vilvh_b(zero, q5);
+    q5_h_in = (v8u16)__lsx_vexth_hu_bu(q5);
     tmp0_h = p1_h_in - p2_h_in;
     tmp0_h += q5_h_in;
     tmp0_h -= p7_h_in;
@@ -338,7 +332,7 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     dst += stride;
 
     /* p0 */
-    q6_l_in = (v8u16)__lsx_vilvl_b(zero, q6);
+    q6_l_in = (v8u16)__lsx_vsllwil_hu_bu(q6, 0);
     filter8 = __lsx_vld(filter48, 32);
     tmp0_l = p0_l_in - p1_l_in;
     tmp0_l += q6_l_in;
@@ -346,7 +340,7 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     tmp1_l += tmp0_l;
     out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
 
-    q6_h_in = (v8u16)__lsx_vilvh_b(zero, q6);
+    q6_h_in = (v8u16)__lsx_vexth_hu_bu(q6);
     tmp0_h = p0_h_in - p1_h_in;
     tmp0_h += q6_h_in;
     tmp0_h -= p7_h_in;
@@ -359,7 +353,7 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     dst += stride;
 
     /* q0 */
-    q7_l_in = (v8u16)__lsx_vilvl_b(zero, q7);
+    q7_l_in = (v8u16)__lsx_vsllwil_hu_bu(q7, 0);
     filter8 = __lsx_vld(filter48, 48);
     tmp0_l = q7_l_in - p0_l_in;
     tmp0_l += q0_l_in;
@@ -367,7 +361,7 @@ static void hz_lpf_t16_16w(uint8_t *dst, int32_t stride, uint8_t *filter48) {
     tmp1_l += tmp0_l;
     out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
 
-    q7_h_in = (v8u16)__lsx_vilvh_b(zero, q7);
+    q7_h_in = (v8u16)__lsx_vexth_hu_bu(q7);
     tmp0_h = q7_h_in - p0_h_in;
     tmp0_h += q0_h_in;
     tmp0_h -= p7_h_in;
@@ -534,9 +528,9 @@ static void mb_lpf_horizontal_edge(uint8_t *dst, int32_t stride,
     DUP2_ARG2(__lsx_vldx, dst, stride, dst, stride2, q1, q2);
     q3 = __lsx_vldx(dst, stride3);
 
-    thresh = __lsx_vreplgr2vr_b(*thresh_ptr);
-    b_limit = __lsx_vreplgr2vr_b(*b_limit_ptr);
-    limit = __lsx_vreplgr2vr_b(*limit_ptr);
+    thresh = __lsx_vldrepl_b(thresh_ptr, 0);
+    b_limit = __lsx_vldrepl_b(b_limit_ptr, 0);
+    limit = __lsx_vldrepl_b(limit_ptr, 0);
 
     /* filter_mask* */
     LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
@@ -850,15 +844,14 @@ static int32_t vt_lpf_t4_and_t8_16w(uint8_t *dst, uint8_t *filter48,
   __m128i p2_filt8_h, p1_filt8_h, p0_filt8_h;
   __m128i q0_filt8_h, q1_filt8_h, q2_filt8_h;
   __m128i vec0, vec1, vec2, vec3, vec4, vec5;
-  __m128i zero = __lsx_vldi(0);
 
   /* load vector elements */
   DUP4_ARG2(__lsx_vld, dst, -64, dst, -48, dst, -32, dst, -16, p3, p2, p1, p0);
   DUP4_ARG2(__lsx_vld, dst, 0, dst, 16, dst, 32, dst, 48, q0, q1, q2, q3);
 
-  thresh = __lsx_vreplgr2vr_b(*thresh_ptr);
-  b_limit = __lsx_vreplgr2vr_b(*b_limit_ptr);
-  limit = __lsx_vreplgr2vr_b(*limit_ptr);
+  thresh = __lsx_vldrepl_b(thresh_ptr, 0);
+  b_limit = __lsx_vldrepl_b(b_limit_ptr, 0);
+  limit = __lsx_vldrepl_b(limit_ptr, 0);
 
   /* mask and hev */
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
@@ -901,16 +894,14 @@ static int32_t vt_lpf_t4_and_t8_16w(uint8_t *dst, uint8_t *filter48,
     return 1;
   }
 
-  DUP4_ARG2(__lsx_vilvl_b, zero, p3, zero, p2, zero, p1, zero, p0, p3_l, p2_l,
-            p1_l, p0_l);
-  DUP4_ARG2(__lsx_vilvl_b, zero, q0, zero, q1, zero, q2, zero, q3, q0_l, q1_l,
-            q2_l, q3_l);
+  DUP4_ARG2(__lsx_vsllwil_hu_bu, p3, 0, p2, 0, p1, 0, p0, 0, p3_l, p2_l, p1_l,
+            p0_l);
+  DUP4_ARG2(__lsx_vsllwil_hu_bu, q0, 0, q1, 0, q2, 0, q3, 0, q0_l, q1_l, q2_l,
+            q3_l);
   VP9_FILTER8(p3_l, p2_l, p1_l, p0_l, q0_l, q1_l, q2_l, q3_l, p2_filt8_l,
               p1_filt8_l, p0_filt8_l, q0_filt8_l, q1_filt8_l, q2_filt8_l);
-  DUP4_ARG2(__lsx_vilvh_b, zero, p3, zero, p2, zero, p1, zero, p0, p3_h, p2_h,
-            p1_h, p0_h);
-  DUP4_ARG2(__lsx_vilvh_b, zero, q0, zero, q1, zero, q2, zero, q3, q0_h, q1_h,
-            q2_h, q3_h);
+  DUP4_ARG1(__lsx_vexth_hu_bu, p3, p2, p1, p0, p3_h, p2_h, p1_h, p0_h);
+  DUP4_ARG1(__lsx_vexth_hu_bu, q0, q1, q2, q3, q0_h, q1_h, q2_h, q3_h);
   VP9_FILTER8(p3_h, p2_h, p1_h, p0_h, q0_h, q1_h, q2_h, q3_h, p2_filt8_h,
               p1_filt8_h, p0_filt8_h, q0_filt8_h, q1_filt8_h, q2_filt8_h);
 
@@ -942,7 +933,6 @@ static int32_t vt_lpf_t4_and_t8_16w(uint8_t *dst, uint8_t *filter48,
 
 static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
                               uint8_t *filter48) {
-  __m128i zero = __lsx_vldi(0);
   __m128i flat, flat2, filter8;
   __m128i p7, p6, p5, p4, p3, p2, p1, p0, q0, q1, q2, q3, q4, q5, q6, q7;
   __m128i out_l, out_h;
@@ -1038,15 +1028,15 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
 
   dst -= 7 * 16;
 
-  p7_l_in = (v8u16)__lsx_vilvl_b(zero, p7);
-  p6_l_in = (v8u16)__lsx_vilvl_b(zero, p6);
-  p5_l_in = (v8u16)__lsx_vilvl_b(zero, p5);
-  p4_l_in = (v8u16)__lsx_vilvl_b(zero, p4);
-  p3_l_in = (v8u16)__lsx_vilvl_b(zero, p3);
-  p2_l_in = (v8u16)__lsx_vilvl_b(zero, p2);
-  p1_l_in = (v8u16)__lsx_vilvl_b(zero, p1);
-  p0_l_in = (v8u16)__lsx_vilvl_b(zero, p0);
-  q0_l_in = (v8u16)__lsx_vilvl_b(zero, q0);
+  p7_l_in = (v8u16)__lsx_vsllwil_hu_bu(p7, 0);
+  p6_l_in = (v8u16)__lsx_vsllwil_hu_bu(p6, 0);
+  p5_l_in = (v8u16)__lsx_vsllwil_hu_bu(p5, 0);
+  p4_l_in = (v8u16)__lsx_vsllwil_hu_bu(p4, 0);
+  p3_l_in = (v8u16)__lsx_vsllwil_hu_bu(p3, 0);
+  p2_l_in = (v8u16)__lsx_vsllwil_hu_bu(p2, 0);
+  p1_l_in = (v8u16)__lsx_vsllwil_hu_bu(p1, 0);
+  p0_l_in = (v8u16)__lsx_vsllwil_hu_bu(p0, 0);
+  q0_l_in = (v8u16)__lsx_vsllwil_hu_bu(q0, 0);
 
   tmp0_l = p7_l_in << 3;
   tmp0_l -= p7_l_in;
@@ -1060,15 +1050,15 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
   tmp1_l += p0_l_in;
   tmp1_l += tmp0_l;
   out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
-  p7_h_in = (v8u16)__lsx_vilvh_b(zero, p7);
-  p6_h_in = (v8u16)__lsx_vilvh_b(zero, p6);
-  p5_h_in = (v8u16)__lsx_vilvh_b(zero, p5);
-  p4_h_in = (v8u16)__lsx_vilvh_b(zero, p4);
-  p3_h_in = (v8u16)__lsx_vilvh_b(zero, p3);
-  p2_h_in = (v8u16)__lsx_vilvh_b(zero, p2);
-  p1_h_in = (v8u16)__lsx_vilvh_b(zero, p1);
-  p0_h_in = (v8u16)__lsx_vilvh_b(zero, p0);
-  q0_h_in = (v8u16)__lsx_vilvh_b(zero, q0);
+  p7_h_in = (v8u16)__lsx_vexth_hu_bu(p7);
+  p6_h_in = (v8u16)__lsx_vexth_hu_bu(p6);
+  p5_h_in = (v8u16)__lsx_vexth_hu_bu(p5);
+  p4_h_in = (v8u16)__lsx_vexth_hu_bu(p4);
+  p3_h_in = (v8u16)__lsx_vexth_hu_bu(p3);
+  p2_h_in = (v8u16)__lsx_vexth_hu_bu(p2);
+  p1_h_in = (v8u16)__lsx_vexth_hu_bu(p1);
+  p0_h_in = (v8u16)__lsx_vexth_hu_bu(p0);
+  q0_h_in = (v8u16)__lsx_vexth_hu_bu(q0);
 
   tmp0_h = p7_h_in << 3;
   tmp0_h -= p7_h_in;
@@ -1088,13 +1078,13 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
   __lsx_vst(p6, dst, 0);
 
   /* p5 */
-  q1_l_in = (v8u16)__lsx_vilvl_b(zero, q1);
+  q1_l_in = (v8u16)__lsx_vsllwil_hu_bu(q1, 0);
   tmp0_l = p5_l_in - p6_l_in;
   tmp0_l += q1_l_in;
   tmp0_l -= p7_l_in;
   tmp1_l += tmp0_l;
   out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
-  q1_h_in = (v8u16)__lsx_vilvh_b(zero, q1);
+  q1_h_in = (v8u16)__lsx_vexth_hu_bu(q1);
   tmp0_h = p5_h_in - p6_h_in;
   tmp0_h += q1_h_in;
   tmp0_h -= p7_h_in;
@@ -1105,13 +1095,13 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
   __lsx_vst(p5, dst, 16);
 
   /* p4 */
-  q2_l_in = (v8u16)__lsx_vilvl_b(zero, q2);
+  q2_l_in = (v8u16)__lsx_vsllwil_hu_bu(q2, 0);
   tmp0_l = p4_l_in - p5_l_in;
   tmp0_l += q2_l_in;
   tmp0_l -= p7_l_in;
   tmp1_l += tmp0_l;
   out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
-  q2_h_in = (v8u16)__lsx_vilvh_b(zero, q2);
+  q2_h_in = (v8u16)__lsx_vexth_hu_bu(q2);
   tmp0_h = p4_h_in - p5_h_in;
   tmp0_h += q2_h_in;
   tmp0_h -= p7_h_in;
@@ -1122,13 +1112,13 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
   __lsx_vst(p4, dst, 16 * 2);
 
   /* p3 */
-  q3_l_in = (v8u16)__lsx_vilvl_b(zero, q3);
+  q3_l_in = (v8u16)__lsx_vsllwil_hu_bu(q3, 0);
   tmp0_l = p3_l_in - p4_l_in;
   tmp0_l += q3_l_in;
   tmp0_l -= p7_l_in;
   tmp1_l += tmp0_l;
   out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
-  q3_h_in = (v8u16)__lsx_vilvh_b(zero, q3);
+  q3_h_in = (v8u16)__lsx_vexth_hu_bu(q3);
   tmp0_h = p3_h_in - p4_h_in;
   tmp0_h += q3_h_in;
   tmp0_h -= p7_h_in;
@@ -1139,14 +1129,14 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
   __lsx_vst(p3, dst, 16 * 3);
 
   /* p2 */
-  q4_l_in = (v8u16)__lsx_vilvl_b(zero, q4);
+  q4_l_in = (v8u16)__lsx_vsllwil_hu_bu(q4, 0);
   filter8 = __lsx_vld(filter48, 0);
   tmp0_l = p2_l_in - p3_l_in;
   tmp0_l += q4_l_in;
   tmp0_l -= p7_l_in;
   tmp1_l += tmp0_l;
   out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
-  q4_h_in = (v8u16)__lsx_vilvh_b(zero, q4);
+  q4_h_in = (v8u16)__lsx_vexth_hu_bu(q4);
   tmp0_h = p2_h_in - p3_h_in;
   tmp0_h += q4_h_in;
   tmp0_h -= p7_h_in;
@@ -1157,14 +1147,14 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
   __lsx_vst(filter8, dst, 16 * 4);
 
   /* p1 */
-  q5_l_in = (v8u16)__lsx_vilvl_b(zero, q5);
+  q5_l_in = (v8u16)__lsx_vsllwil_hu_bu(q5, 0);
   filter8 = __lsx_vld(filter48, 16);
   tmp0_l = p1_l_in - p2_l_in;
   tmp0_l += q5_l_in;
   tmp0_l -= p7_l_in;
   tmp1_l += tmp0_l;
   out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
-  q5_h_in = (v8u16)__lsx_vilvh_b(zero, q5);
+  q5_h_in = (v8u16)__lsx_vexth_hu_bu(q5);
   tmp0_h = p1_h_in - p2_h_in;
   tmp0_h += q5_h_in;
   tmp0_h -= p7_h_in;
@@ -1175,14 +1165,14 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
   __lsx_vst(filter8, dst, 16 * 5);
 
   /* p0 */
-  q6_l_in = (v8u16)__lsx_vilvl_b(zero, q6);
+  q6_l_in = (v8u16)__lsx_vsllwil_hu_bu(q6, 0);
   filter8 = __lsx_vld(filter48, 32);
   tmp0_l = p0_l_in - p1_l_in;
   tmp0_l += q6_l_in;
   tmp0_l -= p7_l_in;
   tmp1_l += tmp0_l;
   out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
-  q6_h_in = (v8u16)__lsx_vilvh_b(zero, q6);
+  q6_h_in = (v8u16)__lsx_vexth_hu_bu(q6);
   tmp0_h = p0_h_in - p1_h_in;
   tmp0_h += q6_h_in;
   tmp0_h -= p7_h_in;
@@ -1193,14 +1183,14 @@ static int32_t vt_lpf_t16_16w(uint8_t *dst, uint8_t *dst_org, int32_t stride,
   __lsx_vst(filter8, dst, 16 * 6);
 
   /* q0 */
-  q7_l_in = (v8u16)__lsx_vilvl_b(zero, q7);
+  q7_l_in = (v8u16)__lsx_vsllwil_hu_bu(q7, 0);
   filter8 = __lsx_vld(filter48, 48);
   tmp0_l = q7_l_in - p0_l_in;
   tmp0_l += q0_l_in;
   tmp0_l -= p7_l_in;
   tmp1_l += tmp0_l;
   out_l = __lsx_vsrari_h((__m128i)tmp1_l, 4);
-  q7_h_in = (v8u16)__lsx_vilvh_b(zero, q7);
+  q7_h_in = (v8u16)__lsx_vexth_hu_bu(q7);
   tmp0_h = q7_h_in - p0_h_in;
   tmp0_h += q0_h_in;
   tmp0_h -= p7_h_in;

@@ -27,9 +27,9 @@ void vpx_lpf_horizontal_4_lsx(uint8_t *src, int32_t pitch,
   DUP2_ARG2(__lsx_vldx, src, pitch, src, pitch2, q1, q2);
   q3 = __lsx_vldx(src, pitch3);
 
-  thresh = __lsx_vreplgr2vr_b(*thresh_ptr);
-  b_limit = __lsx_vreplgr2vr_b(*b_limit_ptr);
-  limit = __lsx_vreplgr2vr_b(*limit_ptr);
+  thresh = __lsx_vldrepl_b(thresh_ptr, 0);
+  b_limit = __lsx_vldrepl_b(b_limit_ptr, 0);
+  limit = __lsx_vldrepl_b(limit_ptr, 0);
 
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit, b_limit, thresh, hev,
                mask, flat);
@@ -60,16 +60,16 @@ void vpx_lpf_horizontal_4_dual_lsx(uint8_t *src, int32_t pitch,
   DUP2_ARG2(__lsx_vldx, src, pitch, src, pitch2, q1, q2);
   q3 = __lsx_vldx(src, pitch3);
 
-  thresh0 = __lsx_vreplgr2vr_b(*thresh0_ptr);
-  thresh1 = __lsx_vreplgr2vr_b(*thresh1_ptr);
+  thresh0 = __lsx_vldrepl_b(thresh0_ptr, 0);
+  thresh1 = __lsx_vldrepl_b(thresh1_ptr, 0);
   thresh0 = __lsx_vilvl_d(thresh1, thresh0);
 
-  b_limit0 = __lsx_vreplgr2vr_b(*b_limit0_ptr);
-  b_limit1 = __lsx_vreplgr2vr_b(*b_limit1_ptr);
+  b_limit0 = __lsx_vldrepl_b(b_limit0_ptr, 0);
+  b_limit1 = __lsx_vldrepl_b(b_limit1_ptr, 0);
   b_limit0 = __lsx_vilvl_d(b_limit1, b_limit0);
 
-  limit0 = __lsx_vreplgr2vr_b(*limit0_ptr);
-  limit1 = __lsx_vreplgr2vr_b(*limit1_ptr);
+  limit0 = __lsx_vldrepl_b(limit0_ptr, 0);
+  limit1 = __lsx_vldrepl_b(limit1_ptr, 0);
   limit0 = __lsx_vilvl_d(limit1, limit0);
 
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit0, b_limit0, thresh0, hev,
@@ -102,9 +102,9 @@ void vpx_lpf_vertical_4_lsx(uint8_t *src, int32_t pitch,
   DUP2_ARG2(__lsx_vldx, src_tmp, pitch, src_tmp, pitch2, q1, q2);
   q3 = __lsx_vldx(src_tmp, pitch3);
 
-  thresh = __lsx_vreplgr2vr_b(*thresh_ptr);
-  b_limit = __lsx_vreplgr2vr_b(*b_limit_ptr);
-  limit = __lsx_vreplgr2vr_b(*limit_ptr);
+  thresh = __lsx_vldrepl_b(thresh_ptr, 0);
+  b_limit = __lsx_vldrepl_b(b_limit_ptr, 0);
+  limit = __lsx_vldrepl_b(limit_ptr, 0);
 
   LSX_TRANSPOSE8x8_B(p3, p2, p1, p0, q0, q1, q2, q3, p3, p2, p1, p0, q0, q1, q2,
                      q3);
@@ -169,16 +169,16 @@ void vpx_lpf_vertical_4_dual_lsx(uint8_t *src, int32_t pitch,
                       row9, row10, row11, row12, row13, row14, row15, p3, p2,
                       p1, p0, q0, q1, q2, q3);
 
-  thresh0 = __lsx_vreplgr2vr_b(*thresh0_ptr);
-  thresh1 = __lsx_vreplgr2vr_b(*thresh1_ptr);
+  thresh0 = __lsx_vldrepl_b(thresh0_ptr, 0);
+  thresh1 = __lsx_vldrepl_b(thresh1_ptr, 0);
   thresh0 = __lsx_vilvl_d(thresh1, thresh0);
 
-  b_limit0 = __lsx_vreplgr2vr_b(*b_limit0_ptr);
-  b_limit1 = __lsx_vreplgr2vr_b(*b_limit1_ptr);
+  b_limit0 = __lsx_vldrepl_b(b_limit0_ptr, 0);
+  b_limit1 = __lsx_vldrepl_b(b_limit1_ptr, 0);
   b_limit0 = __lsx_vilvl_d(b_limit1, b_limit0);
 
-  limit0 = __lsx_vreplgr2vr_b(*limit0_ptr);
-  limit1 = __lsx_vreplgr2vr_b(*limit1_ptr);
+  limit0 = __lsx_vldrepl_b(limit0_ptr, 0);
+  limit1 = __lsx_vldrepl_b(limit1_ptr, 0);
   limit0 = __lsx_vilvl_d(limit1, limit0);
 
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit0, b_limit0, thresh0, hev,

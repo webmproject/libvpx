@@ -172,16 +172,16 @@ static void loop_filter_horizontal_4_dual_lsx(uint8_t *src, int32_t pitch,
   DUP2_ARG2(__lsx_vldx, src, pitch, src, pitch_x2, q1, q2);
   q3 = __lsx_vldx(src, pitch_x3);
 
-  thresh0 = __lsx_vreplgr2vr_b(*thresh0_ptr);
-  thresh1 = __lsx_vreplgr2vr_b(*thresh1_ptr);
+  thresh0 = __lsx_vldrepl_b(thresh0_ptr, 0);
+  thresh1 = __lsx_vldrepl_b(thresh1_ptr, 0);
   thresh0 = __lsx_vilvl_d(thresh1, thresh0);
 
-  b_limit0 = __lsx_vreplgr2vr_b(*b_limit0_ptr);
-  b_limit1 = __lsx_vreplgr2vr_b(*b_limit1_ptr);
+  b_limit0 = __lsx_vldrepl_b(b_limit0_ptr, 0);
+  b_limit1 = __lsx_vldrepl_b(b_limit1_ptr, 0);
   b_limit0 = __lsx_vilvl_d(b_limit1, b_limit0);
 
-  limit0 = __lsx_vreplgr2vr_b(*limit0_ptr);
-  limit1 = __lsx_vreplgr2vr_b(*limit1_ptr);
+  limit0 = __lsx_vldrepl_b(limit0_ptr, 0);
+  limit1 = __lsx_vldrepl_b(limit1_ptr, 0);
   limit0 = __lsx_vilvl_d(limit1, limit0);
 
   LPF_MASK_HEV(p3, p2, p1, p0, q0, q1, q2, q3, limit0, b_limit0, thresh0, hev,
