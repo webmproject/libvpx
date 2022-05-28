@@ -49,7 +49,7 @@ enum TestMode {
 class CxDataIterator {
  public:
   explicit CxDataIterator(vpx_codec_ctx_t *encoder)
-      : encoder_(encoder), iter_(NULL) {}
+      : encoder_(encoder), iter_(nullptr) {}
 
   const vpx_codec_cx_pkt_t *Next() {
     return vpx_codec_get_cx_data(encoder_, &iter_);

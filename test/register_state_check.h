@@ -56,7 +56,7 @@ class RegisterStateCheck {
  private:
   static bool StoreRegisters(CONTEXT *const context) {
     const HANDLE this_thread = GetCurrentThread();
-    EXPECT_TRUE(this_thread != NULL);
+    EXPECT_NE(this_thread, nullptr);
     context->ContextFlags = CONTEXT_FLOATING_POINT;
     const bool context_saved = GetThreadContext(this_thread, context) == TRUE;
     EXPECT_TRUE(context_saved) << "GetLastError: " << GetLastError();
