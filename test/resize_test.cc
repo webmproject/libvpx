@@ -578,6 +578,8 @@ TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
   }
 }
 
+// TODO(https://crbug.com/webm/1642): This causes a segfault in
+// init_encode_frame_mb_context().
 TEST_P(ResizeRealtimeTest, DISABLED_TestExternalResizeSmallerWidthBiggerSize) {
   ResizingVideoSource video;
   video.flag_codec_ = true;
