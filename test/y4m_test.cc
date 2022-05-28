@@ -202,7 +202,7 @@ TEST(Y4MHeaderTest, RegularHeader) {
   EXPECT_EQ(0, fseek(f.file(), 0, 0));
 
   y4m_input y4m;
-  EXPECT_EQ(y4m_input_open(&y4m, f.file(), /*skip_buffer=*/NULL,
+  EXPECT_EQ(y4m_input_open(&y4m, f.file(), /*skip_buffer=*/nullptr,
                            /*num_skip=*/0, /*only_420=*/0),
             0);
   EXPECT_EQ(y4m.pic_w, 4);
@@ -229,7 +229,7 @@ TEST(Y4MHeaderTest, LongHeader) {
   EXPECT_EQ(fseek(f.file(), 0, 0), 0);
 
   y4m_input y4m;
-  EXPECT_EQ(y4m_input_open(&y4m, f.file(), /*skip_buffer=*/NULL,
+  EXPECT_EQ(y4m_input_open(&y4m, f.file(), /*skip_buffer=*/nullptr,
                            /*num_skip=*/0, /*only_420=*/0),
             0);
   EXPECT_EQ(y4m.pic_w, 4);
