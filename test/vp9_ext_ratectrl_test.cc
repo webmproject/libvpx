@@ -176,6 +176,7 @@ class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
                           ::libvpx_test::Encoder *encoder) override {
     if (video->frame() == 0) {
       vpx_rc_funcs_t rc_funcs;
+      rc_funcs.rc_type = VPX_RC_QP;
       rc_funcs.create_model = rc_create_model;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats;
       rc_funcs.get_encodeframe_decision = rc_get_encodeframe_decision;
