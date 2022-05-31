@@ -25,7 +25,7 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures.
  */
-#define VPX_EXT_RATECTRL_ABI_VERSION (3)
+#define VPX_EXT_RATECTRL_ABI_VERSION (4)
 
 /*!\brief The control type of the inference API.
  * In VPX_RC_QP mode, the external rate control model determines the
@@ -33,7 +33,7 @@ extern "C" {
  * In VPX_RC_GOP mode, the external rate control model determines the
  * group of picture (GOP) of the video sequence.
  */
-typedef enum vpx_rc_type { VPX_RC_QP = 0, VPX_RC_GOP = 1 } vpx_rc_type_t;
+typedef enum vpx_rc_type { VPX_RC_QP = 1, VPX_RC_GOP = 2 } vpx_rc_type_t;
 
 /*!\brief Abstract rate control model handler
  *
@@ -270,18 +270,54 @@ typedef struct vpx_rc_config {
  * help make GOP decisions.
  */
 typedef struct vpx_rc_gop_info {
-  int min_gf_interval;      /**< mininum allowed gf interval */
-  int max_gf_interval;      /**< maximum allowed gf interval */
-  int allow_alt_ref;        /**< whether to allow the use of alt ref */
-  int is_key_frame;         /**< is the current frame a key frame */
-  int last_gop_use_alt_ref; /**< does the last gop use alt ref or not */
-  int frames_since_key;     /**< current frame distance to the last keyframe */
-  int frames_to_key;        /**< current frame distance to the next keyframe */
-  int lag_in_frames;        /**< number of lookahead source frames */
-  int show_index;           /**< display index of this frame, starts from zero*/
-  int coding_index;         /**< coding index of this frame, starts from zero*/
-  int gop_id; /**< the id of the current gop, starts from zero, resets to zero
-                 when a keyframe is set*/
+  /*!
+   * Minimum allowed gf interval, fixed for the whole clip.
+   */
+  int min_gf_interval;
+  /*!
+   * Maximum allowed gf interval, fixed for the whole clip.
+   */
+  int max_gf_interval;
+  /*!
+   * Whether to allow the use of alt ref, can be changed per gop.
+   */
+  int allow_alt_ref;
+  /*!
+   * Is the current frame a key frame.
+   */
+  int is_key_frame;
+  /*!
+   * Does the previous gop use alt ref or not.
+   */
+  int last_gop_use_alt_ref;
+  /*!
+   * Current frame distance to the last keyframe, e.g., if Nth frame is a key,
+   * then the value of the N+1 th frame is 1.
+   */
+  int frames_since_key;
+  /*!
+   * Current frame distance to the next keyframe, e.g. if Nth frame is a key,
+   * then the value of frame N - 1 is 1.
+   */
+  int frames_to_key;
+  /*!
+   * Number of lookahead source frames.
+   */
+  int lag_in_frames;
+  /*!
+   * Display index (temporal stamp) of this frame in the whole clip,
+   * starts from zero.
+   */
+  int show_index;
+  /*!
+   * Coding index of this frame in the whole clip, starts from zero.
+   */
+  int coding_index;
+  /*!
+   * The index of the current gop, starts from zero, resets to zero
+   * when a keyframe is set.
+   */
+  int gop_index;
 } vpx_rc_gop_info_t;
 
 /*!\brief The decision made by the external rate control model to set the

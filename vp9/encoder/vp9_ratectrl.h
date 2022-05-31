@@ -212,9 +212,9 @@ typedef struct {
   // VBR.
   int constrain_gf_key_freq_onepass_vbr;
 
-  // The id of the current GOP. Start from zero.
+  // The index of the current GOP. Start from zero.
   // When a key frame is inserted, it resets to zero.
-  int gop_id;
+  int gop_index;
 } RATE_CONTROL;
 
 struct VP9_COMP;

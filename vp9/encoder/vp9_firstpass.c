@@ -2714,9 +2714,9 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   // frame in which case it will already have been done.
   if (is_key_frame == 0) {
     vp9_zero(twopass->gf_group);
-    ++rc->gop_id;
+    ++rc->gop_index;
   } else {
-    rc->gop_id = 0;
+    rc->gop_index = 0;
   }
 
   vpx_clear_system_state();
@@ -2772,7 +2772,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     gop_info.lag_in_frames = cpi->oxcf.lag_in_frames;
     gop_info.show_index = cm->current_video_frame;
     gop_info.coding_index = cm->current_frame_coding_index;
-    gop_info.gop_id = rc->gop_id;
+    gop_info.gop_index = rc->gop_index;
 
     codec_status = vp9_extrc_get_gop_decision(&cpi->ext_ratectrl, &gop_info,
                                               &gop_decision);
