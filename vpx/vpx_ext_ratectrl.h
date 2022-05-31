@@ -25,7 +25,7 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures.
  */
-#define VPX_EXT_RATECTRL_ABI_VERSION (2)
+#define VPX_EXT_RATECTRL_ABI_VERSION (3)
 
 /*!\brief The control type of the inference API.
  * In VPX_RC_QP mode, the external rate control model determines the
@@ -266,6 +266,32 @@ typedef struct vpx_rc_config {
   int frame_rate_den; /**< denominator of frame rate */
 } vpx_rc_config_t;
 
+/*!\brief Information passed to the external rate control model to
+ * help make GOP decisions.
+ */
+typedef struct vpx_rc_gop_info {
+  int min_gf_interval;      /**< mininum allowed gf interval */
+  int max_gf_interval;      /**< maximum allowed gf interval */
+  int allow_alt_ref;        /**< whether to allow the use of alt ref */
+  int is_key_frame;         /**< is the current frame a key frame */
+  int last_gop_use_alt_ref; /**< does the last gop use alt ref or not */
+  int frames_since_key;     /**< current frame distance to the last keyframe */
+  int frames_to_key;        /**< current frame distance to the next keyframe */
+  int lag_in_frames;        /**< number of lookahead source frames */
+  int show_index;           /**< display index of this frame, starts from zero*/
+  int coding_index;         /**< coding index of this frame, starts from zero*/
+  int gop_id; /**< the id of the current gop, starts from zero, resets to zero
+                 when a keyframe is set*/
+} vpx_rc_gop_info_t;
+
+/*!\brief The decision made by the external rate control model to set the
+ * group of picture.
+ */
+typedef struct vpx_rc_gop_decision {
+  int gop_coding_frames; /**< The number of frames of this GOP */
+  int use_alt_ref;       /**< Whether to use alt ref for this GOP */
+} vpx_rc_gop_decision_t;
+
 /*!\brief Create an external rate control model callback prototype
  *
  * This callback is invoked by the encoder to create an external rate control
@@ -318,6 +344,19 @@ typedef vpx_rc_status_t (*vpx_rc_update_encodeframe_result_cb_fn_t)(
     vpx_rc_model_t rate_ctrl_model,
     const vpx_rc_encodeframe_result_t *encode_frame_result);
 
+/*!\brief Get the GOP structure from the external rate control model.
+ *
+ * This callback is invoked by the encoder to get GOP decisions from
+ * the external rate control model.
+ *
+ * \param[in]  rate_ctrl_model  rate control model
+ * \param[in]  gop_info         information collected from the encoder
+ * \param[out] gop_decision     GOP decision from the model
+ */
+typedef vpx_rc_status_t (*vpx_rc_get_gop_decision_cb_fn_t)(
+    vpx_rc_model_t rate_ctrl_model, const vpx_rc_gop_info_t *gop_info,
+    vpx_rc_gop_decision_t *gop_decision);
+
 /*!\brief Delete the external rate control model callback prototype
  *
  * This callback is invoked by the encoder to delete the external rate control
@@ -355,6 +394,10 @@ typedef struct vpx_rc_funcs {
    * Update encodeframe result to the external rate control model.
    */
   vpx_rc_update_encodeframe_result_cb_fn_t update_encodeframe_result;
+  /*!
+   * Get GOP decisions from the external rate control model.
+   */
+  vpx_rc_get_gop_decision_cb_fn_t get_gop_decision;
   /*!
    * Delete the external rate control model.
    */

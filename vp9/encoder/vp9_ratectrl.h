@@ -211,6 +211,10 @@ typedef struct {
   // Flag to constrain golden frame interval on key frame frequency for 1 pass
   // VBR.
   int constrain_gf_key_freq_onepass_vbr;
+
+  // The id of the current GOP. Start from zero.
+  // When a key frame is inserted, it resets to zero.
+  int gop_id;
 } RATE_CONTROL;
 
 struct VP9_COMP;
