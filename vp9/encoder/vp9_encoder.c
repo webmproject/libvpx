@@ -2057,7 +2057,10 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
       cpi->external_resize = 0;
     } else if (cm->mi_alloc_size == new_mi_size &&
                (cpi->oxcf.width > last_w || cpi->oxcf.height > last_h)) {
-      vp9_alloc_loop_filter(cm);
+      if (vp9_alloc_loop_filter(cm)) {
+        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate loop filter data");
+      }
     }
   }
 
