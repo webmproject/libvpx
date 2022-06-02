@@ -3470,7 +3470,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
   }
 
   mode_skip_mask[INTRA_FRAME] |=
-      ~(sf->intra_y_mode_mask[max_txsize_lookup[bsize]]);
+      (uint16_t) ~(sf->intra_y_mode_mask[max_txsize_lookup[bsize]]);
 
   for (i = 0; i <= LAST_NEW_MV_INDEX; ++i) mode_threshold[i] = 0;
 
