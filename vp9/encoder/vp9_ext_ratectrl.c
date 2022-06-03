@@ -143,7 +143,7 @@ vpx_codec_err_t vp9_extrc_get_encodeframe_decision(
   if (ext_ratectrl == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
-  if (ext_ratectrl->ready && ext_ratectrl->funcs.rc_type == VPX_RC_QP) {
+  if (ext_ratectrl->ready && (ext_ratectrl->funcs.rc_type & VPX_RC_QP) != 0) {
     vpx_rc_status_t rc_status;
     vpx_rc_encodeframe_info_t encode_frame_info;
     encode_frame_info.show_index = show_index;
@@ -204,7 +204,7 @@ vpx_codec_err_t vp9_extrc_get_gop_decision(
     vpx_rc_gop_decision_t *gop_decision) {
   vpx_rc_status_t rc_status;
   if (ext_ratectrl == NULL || !ext_ratectrl->ready ||
-      ext_ratectrl->funcs.rc_type != VPX_RC_GOP) {
+      (ext_ratectrl->funcs.rc_type & VPX_RC_GOP) == 0) {
     return VPX_CODEC_INVALID_PARAM;
   }
   rc_status = ext_ratectrl->funcs.get_gop_decision(ext_ratectrl->model,

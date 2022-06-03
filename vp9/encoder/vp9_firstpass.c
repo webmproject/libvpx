@@ -2758,7 +2758,7 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   // are overwritten. Specifically, |gop_coding_frames| and |use_alt_ref|
   // will be overwritten.
   if (cpi->ext_ratectrl.ready &&
-      cpi->ext_ratectrl.funcs.rc_type == VPX_RC_GOP) {
+      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_GOP) != 0) {
     vpx_codec_err_t codec_status;
     vpx_rc_gop_decision_t gop_decision;
     vpx_rc_gop_info_t gop_info;

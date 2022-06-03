@@ -32,8 +32,14 @@ extern "C" {
  * quantization parameter (QP) for each frame.
  * In VPX_RC_GOP mode, the external rate control model determines the
  * group of picture (GOP) of the video sequence.
+ * In VPX_RC_GOP_QP mode, the external rate control model determines
+ * both the QP and the GOP.
  */
-typedef enum vpx_rc_type { VPX_RC_QP = 1, VPX_RC_GOP = 2 } vpx_rc_type_t;
+typedef enum vpx_rc_type {
+  VPX_RC_QP = 1 << 0,
+  VPX_RC_GOP = 1 << 1,
+  VPX_RC_GOP_QP = VPX_RC_QP | VPX_RC_GOP
+} vpx_rc_type_t;
 
 /*!\brief Abstract rate control model handler
  *

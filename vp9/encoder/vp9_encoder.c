@@ -4492,7 +4492,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
     }
 #endif  // CONFIG_RATE_CTRL
     if (cpi->ext_ratectrl.ready && !ext_rc_recode &&
-        cpi->ext_ratectrl.funcs.rc_type == VPX_RC_QP) {
+        (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0) {
       vpx_codec_err_t codec_status;
       const GF_GROUP *gf_group = &cpi->twopass.gf_group;
       vpx_rc_encodeframe_decision_t encode_frame_decision;
@@ -4553,7 +4553,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
     }
 
     if (cpi->ext_ratectrl.ready &&
-        cpi->ext_ratectrl.funcs.rc_type == VPX_RC_QP) {
+        (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0) {
       last_q_attempt = q;
       // In general, for the external rate control, we take the qindex provided
       // as input and encode the frame with this qindex faithfully. However,
