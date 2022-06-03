@@ -21,9 +21,9 @@ all: .DEFAULT
 clean:: .DEFAULT
 exampletest: .DEFAULT
 install:: .DEFAULT
-test:: .DEFAULT
-test-no-data-check:: .DEFAULT
-testdata:: .DEFAULT
+test: .DEFAULT
+test-no-data-check: .DEFAULT
+testdata: .DEFAULT
 utiltest: .DEFAULT
 exampletest-no-data-check utiltest-no-data-check: .DEFAULT
 test_%: .DEFAULT ;
@@ -111,13 +111,13 @@ exampletest:
 .PHONY: install
 install::
 .PHONY: test
-test::
+test:
 .PHONY: testdata
-testdata::
+testdata:
 .PHONY: utiltest
 utiltest:
 .PHONY: test-no-data-check exampletest-no-data-check utiltest-no-data-check
-test-no-data-check::
+test-no-data-check:
 exampletest-no-data-check utiltest-no-data-check:
 
 # Force to realign stack always on OS/2
@@ -465,6 +465,6 @@ INSTALL_TARGETS += .install-docs .install-srcs .install-libs .install-bins
 all: $(BUILD_TARGETS)
 install:: $(INSTALL_TARGETS)
 dist: $(INSTALL_TARGETS)
-test::
+test:
 
 .SUFFIXES:  # Delete default suffix rules

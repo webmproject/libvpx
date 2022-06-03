@@ -536,7 +536,7 @@ $(LIBVPX_TEST_DATA): $(SRC_PATH_BARE)/test/test-data.sha1
 	  esac \
 	)
 
-testdata:: $(LIBVPX_TEST_DATA)
+testdata: $(LIBVPX_TEST_DATA)
 	$(qexec)[ -x "$$(which sha1sum)" ] && sha1sum=sha1sum;\
           [ -x "$$(which shasum)" ] && sha1sum=shasum;\
           [ -x "$$(which sha1)" ] && sha1sum=sha1;\
@@ -709,15 +709,15 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(TEST_INTRA_PRED_SPEED_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(RC_INTERFACE_TEST_SRCS)
 
 define test_shard_template
-test:: test_shard.$(1)
-test-no-data-check:: test_shard_ndc.$(1)
+test: test_shard.$(1)
+test-no-data-check: test_shard_ndc.$(1)
 test_shard.$(1) test_shard_ndc.$(1): $(LIBVPX_TEST_BIN)
 	@set -e; \
 	 export GTEST_SHARD_INDEX=$(1); \
 	 export GTEST_TOTAL_SHARDS=$(2); \
 	 $(LIBVPX_TEST_BIN)
 test_shard.$(1): testdata
-.PHONY: test_shard.$(1)
+.PHONY: test_shard.$(1) test_shard_ndc.$(1)
 endef
 
 NUM_SHARDS := 10
