@@ -186,6 +186,81 @@ vpx_rc_status_t rc_get_encodeframe_decision(
   return VPX_RC_OK;
 }
 
+vpx_rc_status_t rc_get_encodeframe_decision_gop(
+    vpx_rc_model_t rate_ctrl_model,
+    const vpx_rc_encodeframe_info_t *encode_frame_info,
+    vpx_rc_encodeframe_decision_t *frame_decision) {
+  ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
+  EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
+  EXPECT_LT(encode_frame_info->show_index, kFrameNumGOP);
+  EXPECT_EQ(encode_frame_info->coding_index, toy_rate_ctrl->coding_index);
+
+  if (encode_frame_info->coding_index == 0) {
+    EXPECT_EQ(encode_frame_info->show_index, 0);
+    EXPECT_EQ(encode_frame_info->gop_index, 0);
+    EXPECT_EQ(encode_frame_info->frame_type, 0 /*kFrameTypeKey*/);
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
+              0);  // kRefFrameTypeLast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[1],
+              0);  // kRefFrameTypePast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[2],
+              0);  // kRefFrameTypeFuture
+  }
+
+  if (encode_frame_info->coding_index == 1) {
+    EXPECT_EQ(encode_frame_info->show_index, 1);
+    EXPECT_EQ(encode_frame_info->gop_index, 1);
+    EXPECT_EQ(encode_frame_info->frame_type, 1 /*kFrameTypeInter*/);
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
+              1);  // kRefFrameTypeLast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[1],
+              0);  // kRefFrameTypePast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[2],
+              0);  // kRefFrameTypeFuture
+    EXPECT_EQ(encode_frame_info->ref_frame_coding_indexes[0],
+              0);  // kRefFrameTypeLast
+  }
+
+  if (encode_frame_info->coding_index == 2) {
+    EXPECT_EQ(encode_frame_info->show_index, 2);
+    EXPECT_EQ(encode_frame_info->gop_index, 0);
+    EXPECT_EQ(encode_frame_info->frame_type, 0 /*kFrameTypeKey*/);
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[0],
+              0);  // kRefFrameTypeLast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[1],
+              0);  // kRefFrameTypePast
+    EXPECT_EQ(encode_frame_info->ref_frame_valid_list[2],
+              0);  // kRefFrameTypeFuture
+  }
+
+  if (encode_frame_info->coding_index == 3 ||
+      encode_frame_info->coding_index == 12 ||
+      encode_frame_info->coding_index == 21) {
+    EXPECT_EQ(encode_frame_info->frame_type, 2 /*kFrameTypeAltRef*/);
+    EXPECT_EQ(encode_frame_info->gop_index, 1);
+  }
+
+  if (encode_frame_info->coding_index == 11 ||
+      encode_frame_info->coding_index == 20 ||
+      encode_frame_info->coding_index == 29) {
+    EXPECT_EQ(encode_frame_info->frame_type, 3 /*kFrameTypeOverlay*/);
+    EXPECT_EQ(encode_frame_info->gop_index, 0);
+  }
+
+  if (encode_frame_info->coding_index >= 30) {
+    EXPECT_EQ(encode_frame_info->frame_type, 1 /*kFrameTypeInter*/);
+  }
+
+  // When the model recommends an invalid q, valid range [0, 255],
+  // the encoder will ignore it and use the default q selected
+  // by libvpx rate control strategy.
+  frame_decision->q_index = VPX_DEFAULT_Q;
+  frame_decision->max_frame_size = 0;
+
+  toy_rate_ctrl->coding_index += 1;
+  return VPX_RC_OK;
+}
+
 vpx_rc_status_t rc_get_gop_decision(vpx_rc_model_t rate_ctrl_model,
                                     const vpx_rc_gop_info_t *gop_info,
                                     vpx_rc_gop_decision_t *gop_decision) {
@@ -216,7 +291,6 @@ vpx_rc_status_t rc_get_gop_decision(vpx_rc_model_t rate_ctrl_model,
       gop_decision->gop_coding_frames - gop_decision->use_alt_ref;
   toy_rate_ctrl->show_index +=
       gop_decision->gop_coding_frames - gop_decision->use_alt_ref;
-  toy_rate_ctrl->coding_index += gop_decision->gop_coding_frames;
   ++toy_rate_ctrl->gop_global_index;
   return VPX_RC_OK;
 }
@@ -319,9 +393,10 @@ class ExtRateCtrlTestGOP : public ::libvpx_test::EncoderTest,
       encoder->Control(VP9E_SET_MAX_GF_INTERVAL, kDefaultMaxGfInterval);
 
       vpx_rc_funcs_t rc_funcs;
-      rc_funcs.rc_type = VPX_RC_GOP;
+      rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop;
+      rc_funcs.get_encodeframe_decision = rc_get_encodeframe_decision_gop;
       rc_funcs.get_gop_decision = rc_get_gop_decision;
       rc_funcs.update_encodeframe_result = rc_update_encodeframe_result_gop;
       rc_funcs.delete_model = rc_delete_model;

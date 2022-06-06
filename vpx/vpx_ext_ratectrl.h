@@ -48,10 +48,19 @@ typedef enum vpx_rc_type {
  */
 typedef void *vpx_rc_model_t;
 
+/*!\brief A reserved value for the q index.
+ * If the external rate control model returns this value,
+ * the encoder will use the default q selected by libvpx's rate control
+ * system.
+ */
+#define VPX_DEFAULT_Q -1
+
 /*!\brief Encode frame decision made by the external rate control model
  *
  * The encoder will receive the decision from the external rate control model
  * through get_encodeframe_decision() defined in vpx_rc_funcs_t.
+ *
+ * If q_index = VPX_DEFAULT_Q, the encoder will use libvpx's default q.
  *
  * If max_frame_size = 0, the encoding ignores max frame size limit.
  * If max_frame_size = -1, the encoding uses VP9's max frame size as the limit.
