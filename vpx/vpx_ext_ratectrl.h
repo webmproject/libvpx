@@ -81,7 +81,7 @@ typedef struct vpx_rc_encodeframe_info {
   int show_index;   /**< display index, starts from zero*/
   int coding_index; /**< coding index, starts from zero*/
   /*!
-   * index in group of picture, starts from zero.
+   * index of the current frame in this group of picture, starts from zero.
    */
   int gop_index;
   int ref_frame_coding_indexes[3]; /**< three reference frames' coding indices*/
@@ -323,7 +323,7 @@ typedef struct vpx_rc_gop_info {
    * The index of the current gop, starts from zero, resets to zero
    * when a keyframe is set.
    */
-  int gop_index;
+  int gop_global_index;
 } vpx_rc_gop_info_t;
 
 /*!\brief The decision made by the external rate control model to set the

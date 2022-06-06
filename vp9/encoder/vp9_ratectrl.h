@@ -214,7 +214,7 @@ typedef struct {
 
   // The index of the current GOP. Start from zero.
   // When a key frame is inserted, it resets to zero.
-  int gop_index;
+  int gop_global_index;
 } RATE_CONTROL;
 
 struct VP9_COMP;

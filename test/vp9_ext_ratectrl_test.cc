@@ -44,7 +44,7 @@ struct ToyRateCtrl {
   int magic_number;
   int coding_index;
 
-  int gop_index;
+  int gop_global_index;
   int frames_since_key;
   int show_index;
 };
@@ -73,7 +73,7 @@ vpx_rc_status_t rc_create_model_gop(void *priv,
   ToyRateCtrl *toy_rate_ctrl = new (std::nothrow) ToyRateCtrl;
   if (toy_rate_ctrl == nullptr) return VPX_RC_ERROR;
   toy_rate_ctrl->magic_number = kModelMagicNumber;
-  toy_rate_ctrl->gop_index = 0;
+  toy_rate_ctrl->gop_global_index = 0;
   toy_rate_ctrl->frames_since_key = 0;
   toy_rate_ctrl->show_index = 0;
   toy_rate_ctrl->coding_index = 0;
@@ -198,13 +198,13 @@ vpx_rc_status_t rc_get_gop_decision(vpx_rc_model_t rate_ctrl_model,
   if (gop_info->is_key_frame) {
     EXPECT_EQ(gop_info->last_gop_use_alt_ref, 0);
     EXPECT_EQ(gop_info->frames_since_key, 0);
-    EXPECT_EQ(gop_info->gop_index, 0);
-    toy_rate_ctrl->gop_index = 0;
+    EXPECT_EQ(gop_info->gop_global_index, 0);
+    toy_rate_ctrl->gop_global_index = 0;
     toy_rate_ctrl->frames_since_key = 0;
   } else {
     EXPECT_EQ(gop_info->last_gop_use_alt_ref, 1);
   }
-  EXPECT_EQ(gop_info->gop_index, toy_rate_ctrl->gop_index);
+  EXPECT_EQ(gop_info->gop_global_index, toy_rate_ctrl->gop_global_index);
   EXPECT_EQ(gop_info->frames_since_key, toy_rate_ctrl->frames_since_key);
   EXPECT_EQ(gop_info->show_index, toy_rate_ctrl->show_index);
   EXPECT_EQ(gop_info->coding_index, toy_rate_ctrl->coding_index);
@@ -217,7 +217,7 @@ vpx_rc_status_t rc_get_gop_decision(vpx_rc_model_t rate_ctrl_model,
   toy_rate_ctrl->show_index +=
       gop_decision->gop_coding_frames - gop_decision->use_alt_ref;
   toy_rate_ctrl->coding_index += gop_decision->gop_coding_frames;
-  ++toy_rate_ctrl->gop_index;
+  ++toy_rate_ctrl->gop_global_index;
   return VPX_RC_OK;
 }
 
