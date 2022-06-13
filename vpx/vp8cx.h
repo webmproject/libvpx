@@ -516,7 +516,7 @@ enum vp8e_enc_control_id {
    *
    * Supported in codecs: VP9
    */
-  VP9E_SET_MIN_GF_INTERVAL,
+  VP9E_SET_MIN_GF_INTERVAL = 48,
 
   /*!\brief Codec control function to set minimum interval between GF/ARF frames
    *
