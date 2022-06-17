@@ -5856,9 +5856,12 @@ void vp9_encode_sb_row(VP9_COMP *cpi, ThreadData *td, int tile_row,
   get_start_tok(cpi, tile_row, tile_col, mi_row, &tok);
   cpi->tplist[tile_row][tile_col][tile_sb_row].start = tok;
 
+#if CONFIG_REALTIME_ONLY
+  assert(cpi->sf.use_nonrd_pick_mode);
+  encode_nonrd_sb_row(cpi, td, this_tile, mi_row, &tok);
+#else
   if (cpi->sf.use_nonrd_pick_mode)
     encode_nonrd_sb_row(cpi, td, this_tile, mi_row, &tok);
-#if !CONFIG_REALTIME_ONLY
   else
     encode_rd_sb_row(cpi, td, this_tile, mi_row, &tok);
 #endif
