@@ -35,17 +35,19 @@ class RealtimeTest
   }
 
   void BeginPassHook(unsigned int /*pass*/) override {
+#if !CONFIG_REALTIME_ONLY
     // TODO(tomfinegan): We're changing the pass value here to make sure
     // we get frames when real time mode is combined with |g_pass| set to
     // VPX_RC_FIRST_PASS. This is necessary because EncoderTest::RunLoop() sets
     // the pass value based on the mode passed into EncoderTest::SetMode(),
     // which overrides the one specified in SetUp() above.
     cfg_.g_pass = VPX_RC_FIRST_PASS;
+#endif
   }
 
   void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                           ::libvpx_test::Encoder *encoder) override {
-    if (video->frame() == 0) {
+    if (video->frame() == 0 && set_cpu_used_) {
       encoder->Control(VP8E_SET_CPUUSED, 8);
     }
   }
@@ -70,15 +72,23 @@ class RealtimeTest
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   }
 
+  void TestEncode() {
+    ::libvpx_test::RandomVideoSource video;
+    video.SetSize(kVideoSourceWidth, kVideoSourceHeight);
+    video.set_limit(kFramesToEncode);
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    EXPECT_EQ(kFramesToEncode, frame_packets_);
+  }
+
   int frame_packets_;
+  bool set_cpu_used_ = true;
 };
 
-TEST_P(RealtimeTest, RealtimeFirstPassProducesFrames) {
-  ::libvpx_test::RandomVideoSource video;
-  video.SetSize(kVideoSourceWidth, kVideoSourceHeight);
-  video.set_limit(kFramesToEncode);
-  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  EXPECT_EQ(kFramesToEncode, frame_packets_);
+TEST_P(RealtimeTest, RealtimeFirstPassProducesFrames) { TestEncode(); }
+
+TEST_P(RealtimeTest, RealtimeDefaultCpuUsed) {
+  set_cpu_used_ = false;
+  TestEncode();
 }
 
 TEST_P(RealtimeTest, IntegerOverflow) { TestIntegerOverflow(2048, 2048); }

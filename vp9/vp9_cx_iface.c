@@ -65,7 +65,11 @@ typedef struct vp9_extracfg {
 } vp9_extracfg;
 
 static struct vp9_extracfg default_extra_cfg = {
-  0,                     // cpu_used
+#if CONFIG_REALTIME_ONLY
+  5,  // cpu_used
+#else
+  0,  // cpu_used
+#endif
   1,                     // enable_auto_alt_ref
   0,                     // noise_sensitivity
   0,                     // sharpness
