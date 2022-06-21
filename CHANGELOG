@@ -15,6 +15,9 @@
 
     libwebm is updated to libwebm-1.0.0.28-20-g206d268.
 
+    Allow SimpleEncode environment to take target level as input to match
+    the level conformance in vp9.
+
   - Enhancement:
     Numerous improvements on checking memory allocations.
     Optimizations for Loongarch.
