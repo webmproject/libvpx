@@ -25,7 +25,7 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures.
  */
-#define VPX_EXT_RATECTRL_ABI_VERSION (4)
+#define VPX_EXT_RATECTRL_ABI_VERSION (5)
 
 /*!\brief The control type of the inference API.
  * In VPX_RC_QP mode, the external rate control model determines the
@@ -287,12 +287,26 @@ typedef struct vpx_rc_config {
 typedef struct vpx_rc_gop_info {
   /*!
    * Minimum allowed gf interval, fixed for the whole clip.
+   * Note that it will be modified to match vp9's level constraints
+   * in the encoder.
+   * The level constraint is defined in vp9_encoder.c:
+   * const Vp9LevelSpec vp9_level_defs[VP9_LEVELS].
    */
   int min_gf_interval;
   /*!
    * Maximum allowed gf interval, fixed for the whole clip.
    */
   int max_gf_interval;
+  /*!
+   * Minimum allowed gf interval for the current GOP, determined
+   * by the encoder.
+   */
+  int active_min_gf_interval;
+  /*!
+   * Maximum allowed gf interval for the current GOP, determined
+   * by the encoder.
+   */
+  int active_max_gf_interval;
   /*!
    * Whether to allow the use of alt ref, can be changed per gop.
    */

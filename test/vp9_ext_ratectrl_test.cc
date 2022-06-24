@@ -33,8 +33,7 @@ constexpr int kFixedGOPSize = 9;
 constexpr int kMaxLagInFrames = 25;
 constexpr int kDefaultMinGfInterval = 4;
 constexpr int kDefaultMaxGfInterval = 16;
-// The two pass rate control does not respect the input
-// min_gf_interval and max_gf_interval.
+// The active gf interval might change for each GOP
 // See function "get_active_gf_inverval_range".
 // The numbers below are from manual inspection.
 constexpr int kReadMinGfInterval = 5;
@@ -267,8 +266,10 @@ vpx_rc_status_t rc_get_gop_decision(vpx_rc_model_t rate_ctrl_model,
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
   EXPECT_EQ(gop_info->lag_in_frames, kMaxLagInFrames);
-  EXPECT_EQ(gop_info->min_gf_interval, kReadMinGfInterval);
-  EXPECT_EQ(gop_info->max_gf_interval, kReadMaxGfInterval);
+  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval);
+  EXPECT_EQ(gop_info->max_gf_interval, kDefaultMaxGfInterval);
+  EXPECT_EQ(gop_info->active_min_gf_interval, kReadMinGfInterval);
+  EXPECT_EQ(gop_info->active_max_gf_interval, kReadMaxGfInterval);
   EXPECT_EQ(gop_info->allow_alt_ref, 1);
   if (gop_info->is_key_frame) {
     EXPECT_EQ(gop_info->last_gop_use_alt_ref, 0);

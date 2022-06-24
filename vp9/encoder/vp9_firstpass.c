@@ -2762,8 +2762,10 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
     vpx_codec_err_t codec_status;
     vpx_rc_gop_decision_t gop_decision;
     vpx_rc_gop_info_t gop_info;
-    gop_info.min_gf_interval = active_gf_interval.min;
-    gop_info.max_gf_interval = active_gf_interval.max;
+    gop_info.min_gf_interval = rc->min_gf_interval;
+    gop_info.max_gf_interval = rc->max_gf_interval;
+    gop_info.active_min_gf_interval = active_gf_interval.min;
+    gop_info.active_max_gf_interval = active_gf_interval.max;
     gop_info.allow_alt_ref = allow_alt_ref;
     gop_info.is_key_frame = is_key_frame;
     gop_info.last_gop_use_alt_ref = rc->source_alt_ref_active;
