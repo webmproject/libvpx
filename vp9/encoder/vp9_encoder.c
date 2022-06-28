@@ -8155,9 +8155,11 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
                          unsigned int height) {
   VP9_COMMON *cm = &cpi->common;
 #if CONFIG_VP9_HIGHBITDEPTH
-  update_initial_width(cpi, cm->use_highbitdepth, 1, 1);
+  update_initial_width(cpi, cm->use_highbitdepth, cpi->common.subsampling_x,
+                       cpi->common.subsampling_y);
 #else
-  update_initial_width(cpi, 0, 1, 1);
+  update_initial_width(cpi, 0, cpi->common.subsampling_x,
+                       cpi->common.subsampling_y);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
