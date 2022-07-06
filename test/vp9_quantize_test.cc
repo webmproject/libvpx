@@ -241,14 +241,16 @@ void VP9QuantizeTest::Speed(bool is_median) {
         for (int j = 0; j < 8; ++j) zbin_ptr_[j] = 50;
         coeff_.Set(&rnd, -500, 500);
       }
+
+      const char *type =
+          (i == 0) ? "Bypass calculations " : "Full calculations ";
+      char block_size[16];
+      snprintf(block_size, sizeof(block_size), "%dx%d", 4 << sz, 4 << sz);
+      char title[100];
+      snprintf(title, sizeof(title), "%25s %8s ", type, block_size);
+
       if (is_median) {
         RunNTimes(10000000 / count_);
-        const char *type =
-            (i == 0) ? "Bypass calculations " : "Full calculations ";
-        char block_size[16];
-        snprintf(block_size, sizeof(block_size), "%dx%d", 4 << sz, 4 << sz);
-        char title[100];
-        snprintf(title, sizeof(title), "%25s %8s ", type, block_size);
         PrintMedian(title);
       } else {
         Buffer<tran_low_t> ref_qcoeff =
@@ -284,8 +286,9 @@ void VP9QuantizeTest::Speed(bool is_median) {
             static_cast<int>(vpx_usec_timer_elapsed(&timer));
         const int simd_elapsed_time =
             static_cast<int>(vpx_usec_timer_elapsed(&simd_timer));
-        printf("c_time = %d \t simd_time = %d \t Gain = %f \n", elapsed_time,
-               simd_elapsed_time, ((float)elapsed_time / simd_elapsed_time));
+        printf("%s c_time = %d \t simd_time = %d \t Gain = %f \n", title,
+               elapsed_time, simd_elapsed_time,
+               ((float)elapsed_time / simd_elapsed_time));
       }
     }
   }
@@ -575,7 +578,9 @@ INSTANTIATE_TEST_SUITE_P(
     AVX2, VP9QuantizeTest,
     ::testing::Values(make_tuple(&QuantFPWrapper<vp9_quantize_fp_avx2>,
                                  &QuantFPWrapper<quantize_fp_nz_c>, VPX_BITS_8,
-                                 16, true)));
+                                 16, true),
+                      make_tuple(&vpx_quantize_b_avx2, &vpx_quantize_b_c,
+                                 VPX_BITS_8, 16, false)));
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
