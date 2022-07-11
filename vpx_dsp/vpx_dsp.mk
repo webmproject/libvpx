@@ -326,6 +326,7 @@ DSP_SRCS-$(HAVE_SSE2)   += x86/quantize_sse2.h
 DSP_SRCS-$(HAVE_SSSE3)  += x86/quantize_ssse3.c
 DSP_SRCS-$(HAVE_SSSE3)  += x86/quantize_ssse3.h
 DSP_SRCS-$(HAVE_AVX)    += x86/quantize_avx.c
+DSP_SRCS-$(HAVE_AVX2)   += x86/quantize_avx2.c
 DSP_SRCS-$(HAVE_NEON)   += arm/quantize_neon.c
 DSP_SRCS-$(HAVE_VSX)    += ppc/quantize_vsx.c
 DSP_SRCS-$(HAVE_LSX)    += loongarch/quantize_lsx.c
