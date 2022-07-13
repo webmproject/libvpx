@@ -99,7 +99,7 @@ int vp9_diamond_search_sad_neon(const MACROBLOCK *x,
 
   const int_mv fcenter_mv =
       pack_int_mv(center_mv->row >> 3, center_mv->col >> 3);
-  const int16x8_t vfcmv = vdupq_n_s16(fcenter_mv.as_int);
+  const int16x8_t vfcmv = vreinterpretq_s16_s32(vdupq_n_s32(fcenter_mv.as_int));
 
   const int ref_row = clamp(ref_mv->row, minmv.as_mv.row, maxmv.as_mv.row);
   const int ref_col = clamp(ref_mv->col, minmv.as_mv.col, maxmv.as_mv.col);
