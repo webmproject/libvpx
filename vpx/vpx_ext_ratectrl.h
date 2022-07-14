@@ -308,7 +308,9 @@ typedef struct vpx_rc_gop_info {
    */
   int active_max_gf_interval;
   /*!
-   * Whether to allow the use of alt ref, can be changed per gop.
+   * Whether to allow the use of alt ref, determined by the encoder.
+   * It is fixed for the entire encode.
+   * See function "is_altref_enabled" in vp9_encoder.h.
    */
   int allow_alt_ref;
   /*!
