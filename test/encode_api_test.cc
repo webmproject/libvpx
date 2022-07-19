@@ -336,7 +336,7 @@ TEST(EncodeAPI, ConfigChangeThreadCount) {
   for (const auto *iface : kCodecIfaces) {
     SCOPED_TRACE(vpx_codec_iface_name(iface));
     for (int i = 0; i < (IsVP9(iface) ? 2 : 1); ++i) {
-      vpx_codec_enc_cfg_t cfg;
+      vpx_codec_enc_cfg_t cfg = {};
       struct Encoder {
         ~Encoder() { EXPECT_EQ(vpx_codec_destroy(&ctx), VPX_CODEC_OK); }
         vpx_codec_ctx_t ctx = {};
