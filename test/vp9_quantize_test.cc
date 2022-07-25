@@ -580,7 +580,10 @@ INSTANTIATE_TEST_SUITE_P(
                                  &QuantFPWrapper<quantize_fp_nz_c>, VPX_BITS_8,
                                  16, true),
                       make_tuple(&vpx_quantize_b_avx2, &vpx_quantize_b_c,
-                                 VPX_BITS_8, 16, false)));
+                                 VPX_BITS_8, 16, false),
+                      make_tuple(&vpx_quantize_b_32x32_avx2,
+                                 &vpx_quantize_b_32x32_c, VPX_BITS_8, 32,
+                                 false)));
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
