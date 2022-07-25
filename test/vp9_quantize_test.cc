@@ -583,7 +583,13 @@ INSTANTIATE_TEST_SUITE_P(
         make_tuple(&vpx_highbd_quantize_b_avx2, &vpx_highbd_quantize_b_c,
                    VPX_BITS_10, 16, false),
         make_tuple(&vpx_highbd_quantize_b_avx2, &vpx_highbd_quantize_b_c,
-                   VPX_BITS_12, 16, false)));
+                   VPX_BITS_12, 16, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_avx2,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_8, 32, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_avx2,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_10, 32, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_avx2,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_12, 32, false)));
 #else
 INSTANTIATE_TEST_SUITE_P(
     AVX2, VP9QuantizeTest,
