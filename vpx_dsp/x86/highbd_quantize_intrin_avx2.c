@@ -167,3 +167,89 @@ void vpx_highbd_quantize_b_avx2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
   *eob_ptr = get_max_eob(eob);
 }
+
+static VPX_FORCE_INLINE __m256i mm256_mul_shift_epi32_logscale(const __m256i *x,
+                                                               const __m256i *y,
+                                                               int log_scale) {
+  __m256i prod_lo = _mm256_mul_epi32(*x, *y);
+  __m256i prod_hi = _mm256_srli_epi64(*x, 32);
+  const __m256i mult_hi = _mm256_srli_epi64(*y, 32);
+  const __m256i mask = _mm256_set_epi32(0, -1, 0, -1, 0, -1, 0, -1);
+  prod_hi = _mm256_mul_epi32(prod_hi, mult_hi);
+  prod_lo = _mm256_srli_epi64(prod_lo, 16 - log_scale);
+  prod_lo = _mm256_and_si256(prod_lo, mask);
+  prod_hi = _mm256_srli_epi64(prod_hi, 16 - log_scale);
+  prod_hi = _mm256_slli_epi64(prod_hi, 32);
+  return _mm256_or_si256(prod_lo, prod_hi);
+}
+
+static VPX_FORCE_INLINE void quantize_b_32x32(
+    const __m256i *qp, const tran_low_t *coeff_ptr, const int16_t *iscan_ptr,
+    tran_low_t *qcoeff, tran_low_t *dqcoeff, __m256i *eob) {
+  const __m256i coeff = _mm256_loadu_si256((const __m256i *)coeff_ptr);
+  const __m256i abs_coeff = _mm256_abs_epi32(coeff);
+  const __m256i zbin_mask = _mm256_cmpgt_epi32(abs_coeff, qp[0]);
+
+  if (_mm256_movemask_epi8(zbin_mask) == 0) {
+    const __m256i zero = _mm256_setzero_si256();
+    _mm256_storeu_si256((__m256i *)qcoeff, zero);
+    _mm256_storeu_si256((__m256i *)dqcoeff, zero);
+    return;
+  }
+
+  {
+    const __m256i tmp_rnd =
+        _mm256_and_si256(_mm256_add_epi32(abs_coeff, qp[1]), zbin_mask);
+    // const int64_t tmp2 = ((tmpw * quant_ptr[rc != 0]) >> 16) + tmpw;
+    const __m256i tmp = mm256_mul_shift_epi32_logscale(&tmp_rnd, &qp[2], 0);
+    const __m256i tmp2 = _mm256_add_epi32(tmp, tmp_rnd);
+    // const int abs_qcoeff = (int)((tmp2 * quant_shift_ptr[rc != 0]) >> 15);
+    const __m256i abs_q = mm256_mul_shift_epi32_logscale(&tmp2, &qp[4], 1);
+    const __m256i abs_dq =
+        _mm256_srli_epi32(_mm256_mullo_epi32(abs_q, qp[3]), 1);
+    const __m256i nz_mask = _mm256_cmpgt_epi32(abs_q, _mm256_setzero_si256());
+    const __m256i q = _mm256_sign_epi32(abs_q, coeff);
+    const __m256i dq = _mm256_sign_epi32(abs_dq, coeff);
+
+    _mm256_storeu_si256((__m256i *)qcoeff, q);
+    _mm256_storeu_si256((__m256i *)dqcoeff, dq);
+
+    *eob = get_max_lane_eob(iscan_ptr, *eob, nz_mask);
+  }
+}
+
+void vpx_highbd_quantize_b_32x32_avx2(
+    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr,
+    const int16_t *round_ptr, const int16_t *quant_ptr,
+    const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr,
+    tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
+    const int16_t *scan, const int16_t *iscan) {
+  const unsigned int step = 8;
+  __m256i eob = _mm256_setzero_si256();
+  __m256i qp[5];
+  (void)scan;
+
+  init_qp(zbin_ptr, round_ptr, quant_ptr, dequant_ptr, quant_shift_ptr, qp, 1);
+
+  quantize_b_32x32(qp, coeff_ptr, iscan, qcoeff_ptr, dqcoeff_ptr, &eob);
+
+  coeff_ptr += step;
+  qcoeff_ptr += step;
+  dqcoeff_ptr += step;
+  iscan += step;
+  n_coeffs -= step;
+
+  update_qp(qp);
+
+  while (n_coeffs > 0) {
+    quantize_b_32x32(qp, coeff_ptr, iscan, qcoeff_ptr, dqcoeff_ptr, &eob);
+
+    coeff_ptr += step;
+    qcoeff_ptr += step;
+    dqcoeff_ptr += step;
+    iscan += step;
+    n_coeffs -= step;
+  }
+
+  *eob_ptr = get_max_eob(eob);
+}
