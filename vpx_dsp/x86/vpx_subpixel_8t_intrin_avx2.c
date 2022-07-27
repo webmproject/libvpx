@@ -798,7 +798,7 @@ static void vpx_filter_block1d4_h4_avx2(const uint8_t *src_ptr,
 
     // Pack to 8-bits
     dst = _mm_packus_epi16(dst, _mm_setzero_si128());
-    *((uint32_t *)(dst_ptr)) = _mm_cvtsi128_si32(dst);
+    *((int *)(dst_ptr)) = _mm_cvtsi128_si32(dst);
   }
 }
 
