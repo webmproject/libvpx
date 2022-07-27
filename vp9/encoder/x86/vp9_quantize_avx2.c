@@ -138,3 +138,124 @@ void vp9_quantize_fp_avx2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
   *eob_ptr = get_max_eob(eob_max);
 }
+
+// Enable this flag when matching the optimized code to
+// vp9_quantize_fp_32x32_c(). Disabled, the optimized code will match the
+// existing ssse3 code and quantize_fp_32x32_nz_c().
+//
+// #define MATCH_VP9_QUANTIZE_FP_32X32_C
+
+#ifndef MATCH_VP9_QUANTIZE_FP_32X32_C
+static VPX_FORCE_INLINE void quantize_fp_32x32_16_no_nzflag(
+    const __m256i *round, const __m256i *quant, const __m256i *dequant,
+    const __m256i *thr, const tran_low_t *coeff_ptr, const int16_t *iscan_ptr,
+    tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, __m256i *eob_max) {
+  const __m256i coeff = load_tran_low(coeff_ptr);
+  const __m256i abs_coeff = _mm256_abs_epi16(coeff);
+  const __m256i tmp_rnd = _mm256_adds_epi16(abs_coeff, *round);
+  const __m256i abs_qcoeff = _mm256_mulhi_epi16(tmp_rnd, *quant);
+  const __m256i qcoeff = _mm256_sign_epi16(abs_qcoeff, coeff);
+  const __m256i abs_dqcoeff =
+      _mm256_srli_epi16(_mm256_mullo_epi16(abs_qcoeff, *dequant), 1);
+  const __m256i dqcoeff = _mm256_sign_epi16(abs_dqcoeff, coeff);
+  const __m256i nz_mask =
+      _mm256_cmpgt_epi16(abs_qcoeff, _mm256_setzero_si256());
+  store_tran_low(qcoeff, qcoeff_ptr);
+  store_tran_low(dqcoeff, dqcoeff_ptr);
+
+  *eob_max = get_max_lane_eob(iscan_ptr, *eob_max, nz_mask);
+  (void)thr;
+}
+#endif
+
+static VPX_FORCE_INLINE void quantize_fp_32x32_16(
+    const __m256i *round, const __m256i *quant, const __m256i *dequant,
+    const __m256i *thr, const tran_low_t *coeff_ptr, const int16_t *iscan_ptr,
+    tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, __m256i *eob_max) {
+  const __m256i coeff = load_tran_low(coeff_ptr);
+  const __m256i abs_coeff = _mm256_abs_epi16(coeff);
+  const __m256i thr_mask = _mm256_cmpgt_epi16(abs_coeff, *thr);
+  const int32_t nzflag = _mm256_movemask_epi8(thr_mask);
+
+  if (nzflag) {
+#ifdef MATCH_VP9_QUANTIZE_FP_32X32_C
+    const __m256i tmp_rnd =
+        _mm256_and_si256(_mm256_adds_epi16(abs_coeff, *round), thr_mask);
+#else
+    const __m256i tmp_rnd = _mm256_adds_epi16(abs_coeff, *round);
+#endif
+    const __m256i abs_qcoeff = _mm256_mulhi_epi16(tmp_rnd, *quant);
+    const __m256i qcoeff = _mm256_sign_epi16(abs_qcoeff, coeff);
+    const __m256i abs_dqcoeff =
+        _mm256_srli_epi16(_mm256_mullo_epi16(abs_qcoeff, *dequant), 1);
+    const __m256i dqcoeff = _mm256_sign_epi16(abs_dqcoeff, coeff);
+    const __m256i nz_mask =
+        _mm256_cmpgt_epi16(abs_qcoeff, _mm256_setzero_si256());
+    store_tran_low(qcoeff, qcoeff_ptr);
+    store_tran_low(dqcoeff, dqcoeff_ptr);
+
+    *eob_max = get_max_lane_eob(iscan_ptr, *eob_max, nz_mask);
+  } else {
+    store_zero_tran_low(qcoeff_ptr);
+    store_zero_tran_low(dqcoeff_ptr);
+  }
+}
+
+void vp9_quantize_fp_32x32_avx2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+                                const int16_t *round_ptr,
+                                const int16_t *quant_ptr,
+                                tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                                const int16_t *dequant_ptr, uint16_t *eob_ptr,
+                                const int16_t *scan, const int16_t *iscan) {
+  __m256i round, quant, dequant, thr;
+  __m256i eob_max = _mm256_setzero_si256();
+  (void)scan;
+
+  coeff_ptr += n_coeffs;
+  iscan += n_coeffs;
+  qcoeff_ptr += n_coeffs;
+  dqcoeff_ptr += n_coeffs;
+  n_coeffs = -n_coeffs;
+
+  // Setup global values
+  load_fp_values_avx2(round_ptr, &round, quant_ptr, &quant, dequant_ptr,
+                      &dequant);
+  thr = _mm256_srli_epi16(dequant, 2);
+  quant = _mm256_slli_epi16(quant, 1);
+  {
+    const __m256i rnd = _mm256_set1_epi16((int16_t)1);
+    round = _mm256_add_epi16(round, rnd);
+    round = _mm256_srai_epi16(round, 1);
+  }
+
+#ifdef MATCH_VP9_QUANTIZE_FP_32X32_C
+  // Subtracting 1 here eliminates a _mm256_cmpeq_epi16() instruction when
+  // calculating the zbin mask.
+  thr = _mm256_sub_epi16(thr, _mm256_set1_epi16(1));
+  quantize_fp_32x32_16(&round, &quant, &dequant, &thr, coeff_ptr + n_coeffs,
+                       iscan + n_coeffs, qcoeff_ptr + n_coeffs,
+                       dqcoeff_ptr + n_coeffs, &eob_max);
+#else
+  quantize_fp_32x32_16_no_nzflag(
+      &round, &quant, &dequant, &thr, coeff_ptr + n_coeffs, iscan + n_coeffs,
+      qcoeff_ptr + n_coeffs, dqcoeff_ptr + n_coeffs, &eob_max);
+#endif
+
+  n_coeffs += 8 * 2;
+
+  // remove dc constants
+  dequant = _mm256_permute2x128_si256(dequant, dequant, 0x31);
+  quant = _mm256_permute2x128_si256(quant, quant, 0x31);
+  round = _mm256_permute2x128_si256(round, round, 0x31);
+  thr = _mm256_permute2x128_si256(thr, thr, 0x31);
+
+  // AC only loop
+  while (n_coeffs < 0) {
+    quantize_fp_32x32_16(&round, &quant, &dequant, &thr, coeff_ptr + n_coeffs,
+                         iscan + n_coeffs, qcoeff_ptr + n_coeffs,
+                         dqcoeff_ptr + n_coeffs, &eob_max);
+    n_coeffs += 8 * 2;
+  }
+
+  *eob_ptr = get_max_eob(eob_max);
+}
