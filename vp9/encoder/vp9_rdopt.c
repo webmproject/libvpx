@@ -3242,6 +3242,7 @@ int vp9_active_h_edge(VP9_COMP *cpi, int mi_row, int mi_step) {
   // For two pass account for any formatting bars detected.
   if (cpi->oxcf.pass == 2) {
     TWO_PASS *twopass = &cpi->twopass;
+    vpx_clear_system_state();
 
     // The inactive region is specified in MBs not mi units.
     // The image edge is in the following MB row.
@@ -3269,6 +3270,7 @@ int vp9_active_v_edge(VP9_COMP *cpi, int mi_col, int mi_step) {
   // For two pass account for any formatting bars detected.
   if (cpi->oxcf.pass == 2) {
     TWO_PASS *twopass = &cpi->twopass;
+    vpx_clear_system_state();
 
     // The inactive region is specified in MBs not mi units.
     // The image edge is in the following MB row.
