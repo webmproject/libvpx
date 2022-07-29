@@ -170,8 +170,8 @@ static vpx_codec_err_t update_error_state(
 static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
                                        const vpx_codec_enc_cfg_t *cfg,
                                        const struct vp9_extracfg *extra_cfg) {
-  RANGE_CHECK(cfg, g_w, 1, 65535);  // 16 bits available
-  RANGE_CHECK(cfg, g_h, 1, 65535);  // 16 bits available
+  RANGE_CHECK(cfg, g_w, 1, 65536);  // 16 bits available
+  RANGE_CHECK(cfg, g_h, 1, 65536);  // 16 bits available
   RANGE_CHECK(cfg, g_timebase.den, 1, 1000000000);
   RANGE_CHECK(cfg, g_timebase.num, 1, 1000000000);
   RANGE_CHECK_HI(cfg, g_profile, 3);
