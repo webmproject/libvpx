@@ -19,7 +19,7 @@
 static INLINE unsigned int add32x4_sse2(__m128i val) {
   val = _mm_add_epi32(val, _mm_srli_si128(val, 8));
   val = _mm_add_epi32(val, _mm_srli_si128(val, 4));
-  return _mm_cvtsi128_si32(val);
+  return (unsigned int)_mm_cvtsi128_si32(val);
 }
 
 unsigned int vpx_get_mb_ss_sse2(const int16_t *src_ptr) {

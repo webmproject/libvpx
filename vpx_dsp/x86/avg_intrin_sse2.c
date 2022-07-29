@@ -164,7 +164,7 @@ unsigned int vpx_highbd_avg_8x8_sse2(const uint8_t *s8, int p) {
   s0 = _mm_add_epi32(s0, s1);
   s0 = _mm_add_epi32(s0, _mm_srli_si128(s0, 8));
   s0 = _mm_add_epi32(s0, _mm_srli_si128(s0, 4));
-  avg = _mm_cvtsi128_si32(s0);
+  avg = (unsigned int)_mm_cvtsi128_si32(s0);
 
   return (avg + 32) >> 6;
 }
