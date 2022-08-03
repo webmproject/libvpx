@@ -366,4 +366,75 @@ void vp9_highbd_quantize_fp_avx2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 
   *eob_ptr = get_max_eob(eob_max);
 }
+
+static VPX_FORCE_INLINE void highbd_quantize_fp_32x32(
+    const __m256i *round, const __m256i *quant, const __m256i *dequant,
+    const __m256i *thr, const tran_low_t *coeff_ptr, const int16_t *iscan_ptr,
+    tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, __m256i *eob) {
+  const __m256i coeff = _mm256_loadu_si256((const __m256i *)coeff_ptr);
+  const __m256i abs_coeff = _mm256_abs_epi32(coeff);
+  const __m256i thr_mask = _mm256_cmpgt_epi32(abs_coeff, *thr);
+  const __m256i tmp_rnd =
+      _mm256_and_si256(_mm256_add_epi32(abs_coeff, *round), thr_mask);
+  const __m256i abs_q = mm256_mul_shift_epi32_logscale(&tmp_rnd, quant, 0);
+  const __m256i abs_dq =
+      _mm256_srli_epi32(_mm256_mullo_epi32(abs_q, *dequant), 1);
+  const __m256i q = _mm256_sign_epi32(abs_q, coeff);
+  const __m256i dq = _mm256_sign_epi32(abs_dq, coeff);
+  const __m256i nz_mask = _mm256_cmpgt_epi32(abs_q, _mm256_setzero_si256());
+
+  _mm256_storeu_si256((__m256i *)qcoeff_ptr, q);
+  _mm256_storeu_si256((__m256i *)dqcoeff_ptr, dq);
+
+  *eob = highbd_get_max_lane_eob(iscan_ptr, *eob, nz_mask);
+}
+
+void vp9_highbd_quantize_fp_32x32_avx2(
+    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *round_ptr,
+    const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+    const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan,
+    const int16_t *iscan) {
+  const int step = 8;
+  __m256i round, quant, dequant, thr;
+  __m256i eob_max = _mm256_setzero_si256();
+  (void)scan;
+
+  coeff_ptr += n_coeffs;
+  iscan += n_coeffs;
+  qcoeff_ptr += n_coeffs;
+  dqcoeff_ptr += n_coeffs;
+  n_coeffs = -n_coeffs;
+
+  // Setup global values
+  highbd_load_fp_values(round_ptr, &round, quant_ptr, &quant, dequant_ptr,
+                        &dequant);
+  thr = _mm256_srli_epi32(dequant, 2);
+  // Subtracting 1 here eliminates a _mm256_cmpeq_epi32() instruction when
+  // calculating the zbin mask.
+  thr = _mm256_sub_epi32(thr, _mm256_set1_epi32(1));
+  quant = _mm256_slli_epi32(quant, 1);
+  round = _mm256_srai_epi32(_mm256_add_epi32(round, _mm256_set1_epi32(1)), 1);
+
+  highbd_quantize_fp_32x32(&round, &quant, &dequant, &thr, coeff_ptr + n_coeffs,
+                           iscan + n_coeffs, qcoeff_ptr + n_coeffs,
+                           dqcoeff_ptr + n_coeffs, &eob_max);
+
+  n_coeffs += step;
+
+  // remove dc constants
+  dequant = _mm256_permute2x128_si256(dequant, dequant, 0x31);
+  quant = _mm256_permute2x128_si256(quant, quant, 0x31);
+  round = _mm256_permute2x128_si256(round, round, 0x31);
+  thr = _mm256_permute2x128_si256(thr, thr, 0x31);
+
+  // AC only loop
+  while (n_coeffs < 0) {
+    highbd_quantize_fp_32x32(
+        &round, &quant, &dequant, &thr, coeff_ptr + n_coeffs, iscan + n_coeffs,
+        qcoeff_ptr + n_coeffs, dqcoeff_ptr + n_coeffs, &eob_max);
+    n_coeffs += step;
+  }
+
+  *eob_ptr = get_max_eob(eob_max);
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
