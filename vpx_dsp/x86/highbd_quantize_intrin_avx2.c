@@ -94,7 +94,11 @@ static VPX_FORCE_INLINE uint16_t get_max_eob(__m256i eob) {
   eob = _mm256_max_epi16(eob, eob_s);
   eob_s = _mm256_shufflelo_epi16(eob, 1);
   eob = _mm256_max_epi16(eob, eob_s);
+#if defined(_MSC_VER) && (_MSC_VER < 1910)
+  return _mm_cvtsi128_si32(_mm256_extracti128_si256(eob, 0)) & 0xffff;
+#else
   return (uint16_t)_mm256_extract_epi16(eob, 0);
+#endif
 }
 
 static VPX_FORCE_INLINE void quantize(const __m256i *qp,
