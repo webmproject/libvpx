@@ -2589,8 +2589,7 @@ void vp9_rc_set_gf_interval_range(const VP9_COMP *const cpi,
             vp9_level_defs[i].max_luma_picture_breadth >= pic_breadth) {
           if (rc->min_gf_interval <=
               (int)vp9_level_defs[i].min_altref_distance) {
-            rc->min_gf_interval =
-                (int)vp9_level_defs[i].min_altref_distance + 1;
+            rc->min_gf_interval = (int)vp9_level_defs[i].min_altref_distance;
             rc->max_gf_interval =
                 VPXMAX(rc->max_gf_interval, rc->min_gf_interval);
           }

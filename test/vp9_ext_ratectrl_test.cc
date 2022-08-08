@@ -497,7 +497,7 @@ vpx_rc_status_t rc_get_gop_decision_short(vpx_rc_model_t rate_ctrl_model,
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
   EXPECT_EQ(gop_info->lag_in_frames, kMaxLagInFrames - 1);
-  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval + 1);
+  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval);
   EXPECT_EQ(gop_info->max_gf_interval, kDefaultMaxGfInterval);
   EXPECT_EQ(gop_info->allow_alt_ref, 1);
   if (gop_info->is_key_frame) {
@@ -571,7 +571,7 @@ vpx_rc_status_t rc_get_gop_decision_short_no_arf(
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
   EXPECT_EQ(gop_info->lag_in_frames, kMaxLagInFrames - 1);
-  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval + 1);
+  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval);
   EXPECT_EQ(gop_info->max_gf_interval, kDefaultMaxGfInterval);
   EXPECT_EQ(gop_info->allow_alt_ref, 1);
   if (gop_info->is_key_frame) {
@@ -800,7 +800,7 @@ class ExtRateCtrlTestGOPShortOverlay
     if (video->frame() == 0) {
       encoder->Control(VP9E_SET_MIN_GF_INTERVAL, kDefaultMinGfInterval);
       encoder->Control(VP9E_SET_MAX_GF_INTERVAL, kDefaultMaxGfInterval);
-      encoder->Control(VP9E_SET_TARGET_LEVEL, vp9::LEVEL_UNKNOWN);
+      encoder->Control(VP9E_SET_TARGET_LEVEL, vp9::LEVEL_AUTO);
 
       vpx_rc_funcs_t rc_funcs;
       rc_funcs.rc_type = VPX_RC_GOP_QP;
