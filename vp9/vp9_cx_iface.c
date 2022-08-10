@@ -1357,8 +1357,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     unsigned int lib_flags = 0;
     YV12_BUFFER_CONFIG sd;
     int64_t dst_time_stamp = timebase_units_to_ticks(timestamp_ratio, pts);
-    int64_t dst_end_time_stamp =
-        timebase_units_to_ticks(timestamp_ratio, pts + duration);
     size_t size, cx_data_sz;
     unsigned char *cx_data;
 
@@ -1369,6 +1367,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR) cpi->b_calculate_psnr = 1;
 
     if (img != NULL) {
+      const int64_t dst_end_time_stamp =
+          timebase_units_to_ticks(timestamp_ratio, pts + duration);
       res = image2yuvconfig(img, &sd);
 
       // Store the original flags in to the frame buffer. Will extract the
@@ -1405,6 +1405,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       // compute first pass stats
       if (img) {
         int ret;
+        int64_t dst_end_time_stamp;
         vpx_codec_cx_pkt_t fps_pkt;
         ENCODE_FRAME_RESULT encode_frame_result;
         vp9_init_encode_frame_result(&encode_frame_result);
@@ -1430,6 +1431,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 #endif  // !CONFIG_REALTIME_ONLY
     } else {
       ENCODE_FRAME_RESULT encode_frame_result;
+      int64_t dst_end_time_stamp;
       vp9_init_encode_frame_result(&encode_frame_result);
       while (cx_data_sz >= ctx->cx_data_sz / 2 &&
              -1 != vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
