@@ -620,14 +620,23 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     NEON, VP9QuantizeTest,
     ::testing::Values(
+        make_tuple(&vpx_highbd_quantize_b_neon, &vpx_highbd_quantize_b_c,
+                   VPX_BITS_8, 16, false),
+        make_tuple(&vpx_highbd_quantize_b_neon, &vpx_highbd_quantize_b_c,
+                   VPX_BITS_10, 16, false),
+        make_tuple(&vpx_highbd_quantize_b_neon, &vpx_highbd_quantize_b_c,
+                   VPX_BITS_12, 16, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_neon,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_8, 32, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_neon,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_10, 32, false),
+        make_tuple(&vpx_highbd_quantize_b_32x32_neon,
+                   &vpx_highbd_quantize_b_32x32_c, VPX_BITS_12, 32, false),
         make_tuple(&QuantFPWrapper<vp9_quantize_fp_neon>,
-                   &QuantFPWrapper<quantize_fp_nz_c>, VPX_BITS_8, 16, true),
-        make_tuple(&QuantFPWrapper<vp9_highbd_quantize_fp_neon>,
-                   &QuantFPWrapper<vp9_highbd_quantize_fp_c>, VPX_BITS_12, 16,
-                   true),
-        make_tuple(&QuantFPWrapper<vp9_highbd_quantize_fp_32x32_neon>,
-                   &QuantFPWrapper<vp9_highbd_quantize_fp_32x32_c>, VPX_BITS_12,
-                   32, true)));
+                   &QuantFPWrapper<vp9_quantize_fp_c>, VPX_BITS_8, 16, true),
+        make_tuple(&QuantFPWrapper<vp9_quantize_fp_32x32_neon>,
+                   &QuantFPWrapper<vp9_quantize_fp_32x32_c>, VPX_BITS_8, 32,
+                   true)));
 #else
 INSTANTIATE_TEST_SUITE_P(
     NEON, VP9QuantizeTest,
