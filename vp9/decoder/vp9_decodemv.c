@@ -426,7 +426,9 @@ static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
       zero_mv_pair(mv);
       break;
     }
-    default: { return 0; }
+    default: {
+      return 0;
+    }
   }
   return ret;
 }

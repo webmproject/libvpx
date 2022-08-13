@@ -4202,11 +4202,10 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
       }
 
       /* Clamp cpi->zbin_over_quant */
-      cpi->mb.zbin_over_quant = (cpi->mb.zbin_over_quant < zbin_oq_low)
-                                    ? zbin_oq_low
-                                    : (cpi->mb.zbin_over_quant > zbin_oq_high)
-                                          ? zbin_oq_high
-                                          : cpi->mb.zbin_over_quant;
+      cpi->mb.zbin_over_quant =
+          (cpi->mb.zbin_over_quant < zbin_oq_low)    ? zbin_oq_low
+          : (cpi->mb.zbin_over_quant > zbin_oq_high) ? zbin_oq_high
+                                                     : cpi->mb.zbin_over_quant;
 
       Loop = Q != last_q;
     } else {
