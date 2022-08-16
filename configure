@@ -666,6 +666,11 @@ process_toolchain() {
           check_add_cxxflags -Wno-psabi
         fi
 
+        # Enforce C++11 compatibility.
+        check_add_cxxflags -Wc++14-extensions
+        check_add_cxxflags -Wc++17-extensions
+        check_add_cxxflags -Wc++20-extensions
+
         # disable some warnings specific to libyuv.
         check_cxxflags -Wno-missing-declarations \
           && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-missing-declarations"
