@@ -199,7 +199,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_highbd_quantize_fp avx2 neon/;
 
   add_proto qw/void vp9_highbd_quantize_fp_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *round_ptr, const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan" ;
-  specialize qw/vp9_highbd_quantize_fp_32x32 avx2/;
+  specialize qw/vp9_highbd_quantize_fp_32x32 avx2 neon/;
 
   # fdct functions
   add_proto qw/void vp9_highbd_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
