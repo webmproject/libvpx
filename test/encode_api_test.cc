@@ -233,8 +233,8 @@ TEST(EncodeAPI, SetRoi) {
     roi.roi_map = roi_map;
     // VP8 only. This value isn't range checked.
     roi.static_threshold[1] = 1000;
-    roi.static_threshold[2] = INT_MIN;
-    roi.static_threshold[3] = INT_MAX;
+    roi.static_threshold[2] = UINT_MAX / 2 + 1;
+    roi.static_threshold[3] = UINT_MAX;
 
     for (const auto delta : { -63, -1, 0, 1, 63 }) {
       for (int i = 0; i < 8; ++i) {
