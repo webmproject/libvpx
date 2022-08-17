@@ -315,4 +315,96 @@ void vp9_highbd_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
 
   *eob_ptr = get_max_eob(v_eobmax);
 }
+
+static VPX_FORCE_INLINE uint16x4_t
+highbd_quantize_fp_32x32_4(const tran_low_t *coeff_ptr, tran_low_t *qcoeff_ptr,
+                           tran_low_t *dqcoeff_ptr, int32x4_t v_quant_s32,
+                           int32x4_t v_dequant_s32, int32x4_t v_round_s32) {
+  const int32x4_t v_coeff = vld1q_s32(coeff_ptr);
+  const int32x4_t v_coeff_sign =
+      vreinterpretq_s32_u32(vcltq_s32(v_coeff, vdupq_n_s32(0)));
+  const int32x4_t v_abs_coeff = vabsq_s32(v_coeff);
+  // ((abs_coeff << (1 + log_scale)) >= dequant_ptr[rc01])
+  const int32x4_t v_abs_coeff_scaled = vshlq_n_s32(v_abs_coeff, 2);
+  const uint32x4_t v_mask = vcgeq_s32(v_abs_coeff_scaled, v_dequant_s32);
+  // const int64_t tmp = vmask ? (int64_t)abs_coeff + log_scaled_round : 0
+  const int32x4_t v_tmp = vandq_s32(vaddq_s32(v_abs_coeff, v_round_s32),
+                                    vreinterpretq_s32_u32(v_mask));
+  //  const int abs_qcoeff = (int)((tmp * quant) >> (16 - log_scale));
+  const int32x4_t v_abs_qcoeff =
+      vqdmulhq_s32(vshlq_n_s32(v_tmp, 1), v_quant_s32);
+  //  qcoeff_ptr[rc] = (tran_low_t)((abs_qcoeff ^ coeff_sign) - coeff_sign);
+  const int32x4_t v_qcoeff =
+      vsubq_s32(veorq_s32(v_abs_qcoeff, v_coeff_sign), v_coeff_sign);
+  // vshlq_s32 will shift right if shift value is negative.
+  const int32x4_t v_abs_dqcoeff =
+      vshrq_n_s32(vmulq_s32(v_abs_qcoeff, v_dequant_s32), 1);
+  //  dqcoeff_ptr[rc] = (tran_low_t)((abs_dqcoeff ^ coeff_sign) - coeff_sign);
+  const int32x4_t v_dqcoeff =
+      vsubq_s32(veorq_s32(v_abs_dqcoeff, v_coeff_sign), v_coeff_sign);
+
+  vst1q_s32(qcoeff_ptr, v_qcoeff);
+  vst1q_s32(dqcoeff_ptr, v_dqcoeff);
+
+  // Packed nz_qcoeff_mask. Used to find eob.
+  return vmovn_u32(vceqq_s32(v_abs_qcoeff, vdupq_n_s32(0)));
+}
+
+void vp9_highbd_quantize_fp_32x32_neon(
+    const tran_low_t *coeff_ptr, intptr_t count, const int16_t *round_ptr,
+    const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+    const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan,
+    const int16_t *iscan) {
+  const int16x4_t v_quant = vld1_s16(quant_ptr);
+  const int16x4_t v_dequant = vld1_s16(dequant_ptr);
+  const int16x4_t v_zero = vdup_n_s16(0);
+  const int16x4_t v_round =
+      vqrdmulh_n_s16(vld1_s16(round_ptr), (int16_t)(1 << 14));
+  int32x4_t v_round_s32 = vaddl_s16(v_round, v_zero);
+  int32x4_t v_quant_s32 = vshlq_n_s32(vaddl_s16(v_quant, v_zero), 15);
+  int32x4_t v_dequant_s32 = vaddl_s16(v_dequant, v_zero);
+  uint16x4_t v_mask_lo, v_mask_hi;
+  int16x8_t v_eobmax = vdupq_n_s16(-1);
+
+  (void)scan;
+
+  // DC and first 3 AC
+  v_mask_lo =
+      highbd_quantize_fp_32x32_4(coeff_ptr, qcoeff_ptr, dqcoeff_ptr,
+                                 v_quant_s32, v_dequant_s32, v_round_s32);
+
+  // overwrite the DC constants with AC constants
+  v_round_s32 = vdupq_lane_s32(vget_low_s32(v_round_s32), 1);
+  v_quant_s32 = vdupq_lane_s32(vget_low_s32(v_quant_s32), 1);
+  v_dequant_s32 = vdupq_lane_s32(vget_low_s32(v_dequant_s32), 1);
+
+  // 4 more AC
+  v_mask_hi =
+      highbd_quantize_fp_32x32_4(coeff_ptr + 4, qcoeff_ptr + 4, dqcoeff_ptr + 4,
+                                 v_quant_s32, v_dequant_s32, v_round_s32);
+
+  // Find the max lane eob for the first 8 coeffs.
+  v_eobmax =
+      get_max_lane_eob(iscan, v_eobmax, vcombine_u16(v_mask_lo, v_mask_hi));
+
+  count -= 8;
+  do {
+    coeff_ptr += 8;
+    qcoeff_ptr += 8;
+    dqcoeff_ptr += 8;
+    iscan += 8;
+    v_mask_lo =
+        highbd_quantize_fp_32x32_4(coeff_ptr, qcoeff_ptr, dqcoeff_ptr,
+                                   v_quant_s32, v_dequant_s32, v_round_s32);
+    v_mask_hi = highbd_quantize_fp_32x32_4(coeff_ptr + 4, qcoeff_ptr + 4,
+                                           dqcoeff_ptr + 4, v_quant_s32,
+                                           v_dequant_s32, v_round_s32);
+    // Find the max lane eob for 8 coeffs.
+    v_eobmax =
+        get_max_lane_eob(iscan, v_eobmax, vcombine_u16(v_mask_lo, v_mask_hi));
+    count -= 8;
+  } while (count);
+
+  *eob_ptr = get_max_eob(v_eobmax);
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
