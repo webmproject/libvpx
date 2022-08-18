@@ -1112,7 +1112,7 @@ static INLINE int rd_less_than_thresh_row_mt(int64_t best_rd, int thresh,
 }
 
 static INLINE void update_thresh_freq_fact_row_mt(
-    VP9_COMP *cpi, TileDataEnc *tile_data, int source_variance,
+    VP9_COMP *cpi, TileDataEnc *tile_data, unsigned int source_variance,
     int thresh_freq_fact_idx, MV_REFERENCE_FRAME ref_frame,
     THR_MODES best_mode_idx, PREDICTION_MODE mode) {
   THR_MODES thr_mode_idx = mode_idx[ref_frame][mode_offset(mode)];
