@@ -483,7 +483,7 @@ typedef struct VP8_COMP {
 
   unsigned char *segmentation_map;
   signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
-  int segment_encode_breakout[MAX_MB_SEGMENTS];
+  unsigned int segment_encode_breakout[MAX_MB_SEGMENTS];
 
   unsigned char *active_map;
   unsigned int active_map_enabled;
