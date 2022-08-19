@@ -392,6 +392,7 @@ DSP_SRCS-$(HAVE_LSX)    += loongarch/subtract_lsx.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad4d_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad_sse2.asm
+DSP_SRCS-$(HAVE_NEON) += arm/highbd_sad_neon.c
 endif  # CONFIG_VP9_HIGHBITDEPTH
 
 endif  # CONFIG_ENCODERS
