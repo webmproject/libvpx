@@ -333,6 +333,7 @@ DSP_SRCS-$(HAVE_LSX)    += loongarch/quantize_lsx.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_quantize_intrin_sse2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/highbd_quantize_intrin_avx2.c
+DSP_SRCS-$(HAVE_NEON)   += arm/highbd_quantize_neon.c
 endif
 
 # avg
