@@ -755,7 +755,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
         if (!assign_mv(cm, xd, b_mode, mi->bmi[j].as_mv, best_ref_mvs,
                        best_sub8x8, is_compound, allow_hp, r)) {
           xd->corrupted |= 1;
-          break;
+          return;
         }
 
         if (num_4x4_h == 2) mi->bmi[j + 2] = mi->bmi[j];
