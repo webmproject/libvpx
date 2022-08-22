@@ -1627,9 +1627,9 @@ static int search_new_mv(VP9_COMP *cpi, MACROBLOCK *x,
         return -1;
 
       // Exit NEWMV search if base_mv_sse is large.
-      if (sf->base_mv_aggressive && base_mv_sse > (best_sse_sofar << scale))
+      if (sf->base_mv_aggressive && (base_mv_sse >> scale) > best_sse_sofar)
         return -1;
-      if (base_mv_sse < (best_sse_sofar << 1)) {
+      if ((base_mv_sse >> 1) < best_sse_sofar) {
         // Base layer mv is good.
         // Exit NEWMV search if the base_mv is (0, 0) and sse is low, since
         // (0, 0) mode is already tested.
