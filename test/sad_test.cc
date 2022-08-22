@@ -517,14 +517,12 @@ TEST_P(SADx4Test, DISABLED_Speed) {
   uint32_t reference_sad[4];
   DECLARE_ALIGNED(kDataAlignment, uint32_t, exp_sad[4]);
   vpx_usec_timer timer;
-
-  memset(reference_sad, 0, sizeof(reference_sad));
-  SADs(exp_sad);
+  for (int block = 0; block < 4; ++block) {
+    reference_sad[block] = ReferenceSAD(GetBlockRefOffset(block));
+  }
   vpx_usec_timer_start(&timer);
   for (int i = 0; i < kCountSpeedTestBlock; ++i) {
-    for (int block = 0; block < 4; ++block) {
-      reference_sad[block] = ReferenceSAD(GetBlockRefOffset(block));
-    }
+    SADs(exp_sad);
   }
   vpx_usec_timer_mark(&timer);
   for (int block = 0; block < 4; ++block) {
