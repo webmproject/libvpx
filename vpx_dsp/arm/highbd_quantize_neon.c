@@ -9,7 +9,6 @@
  */
 
 #include <arm_neon.h>
-#include <assert.h>
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
