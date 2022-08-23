@@ -271,6 +271,7 @@ class RcInterfaceSvcTest : public ::libvpx_test::EncoderTest,
       svc_params_.max_quantizers[i] = 56;
       svc_params_.min_quantizers[i] = 2;
       svc_params_.speed_per_layer[i] = 7;
+      svc_params_.loopfilter_ctrl[i] = LOOPFILTER_ALL;
     }
     cfg_.rc_end_usage = VPX_CBR;
     cfg_.g_lag_in_frames = 0;
