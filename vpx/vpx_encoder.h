@@ -136,7 +136,8 @@ typedef uint32_t vpx_codec_er_flags_t;
 /*!\brief The frame partitions are independently decodable by the bool decoder,
  * meaning that partitions can be decoded even though earlier partitions have
  * been lost. Note that intra prediction is still done over the partition
- * boundary. */
+ * boundary.
+ * \note This is only supported by VP8.*/
 #define VPX_ERROR_RESILIENT_PARTITIONS 0x2u
 
 /*!\brief Encoder output packet variants
