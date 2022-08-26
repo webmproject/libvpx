@@ -137,7 +137,7 @@ static int extrc_get_frame_type(FRAME_UPDATE_TYPE update_type) {
 
 vpx_codec_err_t vp9_extrc_get_encodeframe_decision(
     EXT_RATECTRL *ext_ratectrl, int show_index, int coding_index, int gop_index,
-    FRAME_UPDATE_TYPE update_type,
+    FRAME_UPDATE_TYPE update_type, const int gop_size, const int use_alt_ref,
     RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES], int ref_frame_flags,
     vpx_rc_encodeframe_decision_t *encode_frame_decision) {
   if (ext_ratectrl == NULL) {
@@ -150,6 +150,8 @@ vpx_codec_err_t vp9_extrc_get_encodeframe_decision(
     encode_frame_info.coding_index = coding_index;
     encode_frame_info.gop_index = gop_index;
     encode_frame_info.frame_type = extrc_get_frame_type(update_type);
+    encode_frame_info.gop_size = gop_size;
+    encode_frame_info.use_alt_ref = use_alt_ref;
 
     vp9_get_ref_frame_info(update_type, ref_frame_flags, ref_frame_bufs,
                            encode_frame_info.ref_frame_coding_indexes,

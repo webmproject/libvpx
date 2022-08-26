@@ -4501,11 +4501,17 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES];
       const RefCntBuffer *curr_frame_buf =
           get_ref_cnt_buffer(cm, cm->new_fb_idx);
+      // index 0 of a gf group is always KEY/OVERLAY/GOLDEN.
+      // index 1 refers to the first encoding frame in a gf group.
+      // Therefore if it is ARF_UPDATE, it means this gf group uses alt ref.
+      // See function define_gf_group_structure().
+      const int use_alt_ref = gf_group->update_type[1] == ARF_UPDATE;
       get_ref_frame_bufs(cpi, ref_frame_bufs);
       codec_status = vp9_extrc_get_encodeframe_decision(
           &cpi->ext_ratectrl, curr_frame_buf->frame_index,
           cm->current_frame_coding_index, gf_group->index, update_type,
-          ref_frame_bufs, ref_frame_flags, &encode_frame_decision);
+          gf_group->gf_group_size, use_alt_ref, ref_frame_bufs, ref_frame_flags,
+          &encode_frame_decision);
       if (codec_status != VPX_CODEC_OK) {
         vpx_internal_error(&cm->error, codec_status,
                            "vp9_extrc_get_encodeframe_decision() failed");
