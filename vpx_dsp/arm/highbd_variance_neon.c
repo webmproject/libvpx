@@ -233,14 +233,12 @@ static INLINE void highbd_var_filter_block2d_bil_first_pass(
   if (output_width >= 8) {
     for (i = 0; i < output_height; ++i) {
       for (j = 0; j < output_width; j += 8) {
-        uint32x4_t sum1_u32;
-        uint32x4_t sum2_u32;
-        uint16x4_t out1_u16;
-        uint16x4_t out2_u16;
         const uint16x8_t src1_u16 = vld1q_u16(&src_ptr[j]);
         const uint16x8_t src2_u16 = vld1q_u16(&src_ptr[j + pixel_step]);
-        sum1_u32 = vmull_u16(filter1_u16, vget_low_u16(src1_u16));
-        sum2_u32 = vmull_u16(filter1_u16, vget_high_u16(src1_u16));
+        uint32x4_t sum1_u32 = vmull_u16(filter1_u16, vget_low_u16(src1_u16));
+        uint32x4_t sum2_u32 = vmull_u16(filter1_u16, vget_high_u16(src1_u16));
+        uint16x4_t out1_u16;
+        uint16x4_t out2_u16;
         sum1_u32 = vmlal_u16(sum1_u32, filter2_u16, vget_low_u16(src2_u16));
         sum2_u32 = vmlal_u16(sum2_u32, filter2_u16, vget_high_u16(src2_u16));
         out1_u16 = vshrn_n_u32(vaddq_u32(sum1_u32, round_u32), FILTER_BITS);
@@ -255,11 +253,10 @@ static INLINE void highbd_var_filter_block2d_bil_first_pass(
     assert(output_width >= 4);
     for (i = 0; i < output_height; ++i) {
       for (j = 0; j < output_width; j += 4) {
-        uint32x4_t sum_u32;
-        uint16x4_t out_u16;
         const uint16x4_t src1_u16 = vld1_u16(&src_ptr[j]);
         const uint16x4_t src2_u16 = vld1_u16(&src_ptr[j + pixel_step]);
-        sum_u32 = vmull_u16(filter1_u16, src1_u16);
+        uint32x4_t sum_u32 = vmull_u16(filter1_u16, src1_u16);
+        uint16x4_t out_u16;
         sum_u32 = vmlal_u16(sum_u32, filter2_u16, src2_u16);
         out_u16 = vshrn_n_u32(vaddq_u32(sum_u32, round_u32), FILTER_BITS);
         vst1_u16(&output_ptr[j], out_u16);
@@ -285,14 +282,12 @@ static INLINE void highbd_var_filter_block2d_bil_second_pass(
   if (output_width >= 8) {
     for (i = 0; i < output_height; ++i) {
       for (j = 0; j < output_width; j += 8) {
-        uint32x4_t sum1_u32;
-        uint32x4_t sum2_u32;
-        uint16x4_t out1_u16;
-        uint16x4_t out2_u16;
         const uint16x8_t src1_u16 = vld1q_u16(&src_ptr[j]);
         const uint16x8_t src2_u16 = vld1q_u16(&src_ptr[j + pixel_step]);
-        sum1_u32 = vmull_u16(filter1_u16, vget_low_u16(src1_u16));
-        sum2_u32 = vmull_u16(filter1_u16, vget_high_u16(src1_u16));
+        uint32x4_t sum1_u32 = vmull_u16(filter1_u16, vget_low_u16(src1_u16));
+        uint32x4_t sum2_u32 = vmull_u16(filter1_u16, vget_high_u16(src1_u16));
+        uint16x4_t out1_u16;
+        uint16x4_t out2_u16;
         sum1_u32 = vmlal_u16(sum1_u32, filter2_u16, vget_low_u16(src2_u16));
         sum2_u32 = vmlal_u16(sum2_u32, filter2_u16, vget_high_u16(src2_u16));
         out1_u16 = vshrn_n_u32(vaddq_u32(sum1_u32, round_u32), FILTER_BITS);
@@ -307,11 +302,10 @@ static INLINE void highbd_var_filter_block2d_bil_second_pass(
     assert(output_width >= 4);
     for (i = 0; i < output_height; ++i) {
       for (j = 0; j < output_width; j += 4) {
-        uint32x4_t sum_u32;
-        uint16x4_t out_u16;
         const uint16x4_t src1_u16 = vld1_u16(&src_ptr[j]);
         const uint16x4_t src2_u16 = vld1_u16(&src_ptr[j + pixel_step]);
-        sum_u32 = vmull_u16(filter1_u16, src1_u16);
+        uint32x4_t sum_u32 = vmull_u16(filter1_u16, src1_u16);
+        uint16x4_t out_u16;
         sum_u32 = vmlal_u16(sum_u32, filter2_u16, src2_u16);
         out_u16 = vshrn_n_u32(vaddq_u32(sum_u32, round_u32), FILTER_BITS);
         vst1_u16(&output_ptr[j], out_u16);
