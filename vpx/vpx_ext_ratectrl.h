@@ -100,6 +100,14 @@ typedef struct vpx_rc_encodeframe_info {
    * 1: Valid
    */
   int ref_frame_valid_list[3];
+  /*!
+   * The length of the current GOP.
+   */
+  int gop_size;
+  /*!
+   * Whether the current GOP uses an alt ref.
+   */
+  int use_alt_ref;
 } vpx_rc_encodeframe_info_t;
 
 /*!\brief Frame coding result
