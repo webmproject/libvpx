@@ -199,7 +199,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
     ++tot_frame_number_;
   }
 
-  virtual void EndPassHook(void) {
+  virtual void EndPassHook() {
     for (int layer = 0; layer < static_cast<int>(cfg_.ts_number_layers);
          ++layer) {
       duration_ = (last_pts_ + 1) * timebase_;

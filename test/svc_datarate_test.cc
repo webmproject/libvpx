@@ -571,7 +571,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     }
   }
 
-  virtual void EndPassHook(void) {
+  virtual void EndPassHook() {
     if (change_bitrate_) last_pts_ = last_pts_ - last_pts_ref_;
     duration_ = (last_pts_ + 1) * timebase_;
     for (int sl = 0; sl < number_spatial_layers_; ++sl) {
