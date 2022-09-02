@@ -111,7 +111,7 @@ static void variance_neon_w8x2(const uint8_t *src_ptr, int src_stride,
   *sse = horizontal_add_uint32x2(vadd_u32(sse_lo_u32, sse_hi_u32));
 }
 
-#else
+#else  // !(defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD))
 
 // The variance helper functions use int16_t for sum. 8 values are accumulated
 // and then added (at which point they expand up to int32_t). To avoid overflow,
@@ -254,7 +254,7 @@ static void variance_neon_w8x2(const uint8_t *src_ptr, int src_stride,
       vreinterpretq_u32_s32(vaddq_s32(sse_lo_s32, sse_hi_s32)));
 }
 
-#endif
+#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
 
 void vpx_get8x8var_neon(const uint8_t *src_ptr, int src_stride,
                         const uint8_t *ref_ptr, int ref_stride,
@@ -421,7 +421,7 @@ unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
   return vget_lane_u32(sse, 0);
 }
 
-#else
+#else  // !(defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD))
 
 unsigned int vpx_mse16x16_neon(const unsigned char *src_ptr, int src_stride,
                                const unsigned char *ref_ptr, int ref_stride,
@@ -518,4 +518,4 @@ unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
   return horizontal_add_uint32x4(vreinterpretq_u32_s32(sse));
 }
 
-#endif
+#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)

@@ -72,8 +72,7 @@ static INLINE void load_u8_16x8(const uint8_t *s, const ptrdiff_t p,
   *s7 = vld1q_u8(s);
 }
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD) && \
-    (__ARM_FEATURE_DOTPROD == 1)
+#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
 
 static INLINE int32x4_t convolve8_4_dot_partial(const int8x16_t samples_lo,
                                                 const int8x16_t samples_hi,
@@ -171,7 +170,7 @@ static INLINE uint8x8_t convolve8_8_dot(uint8x16_t samples,
   return vqrshrun_n_s16(sum, 7);
 }
 
-#endif
+#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
 
 static INLINE int16x4_t convolve8_4(const int16x4_t s0, const int16x4_t s1,
                                     const int16x4_t s2, const int16x4_t s3,
