@@ -20,9 +20,9 @@
 static INLINE uint8x8_t load_unaligned_2_buffers(const void *const buf0,
                                                  const void *const buf1) {
   uint32_t a;
-  uint32x2_t aa = vdup_n_u32(0);
+  uint32x2_t aa;
   memcpy(&a, buf0, 4);
-  aa = vset_lane_u32(a, aa, 0);
+  aa = vdup_n_u32(a);
   memcpy(&a, buf1, 4);
   aa = vset_lane_u32(a, aa, 1);
   return vreinterpret_u8_u32(aa);
