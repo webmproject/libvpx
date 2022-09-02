@@ -21,7 +21,7 @@ uint32_t vpx_sad4x4_neon(const uint8_t *src_ptr, int src_stride,
                          const uint8_t *ref_ptr, int ref_stride) {
   const uint8x16_t src_u8 = load_unaligned_u8q(src_ptr, src_stride);
   const uint8x16_t ref_u8 = load_unaligned_u8q(ref_ptr, ref_stride);
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__ARM_FEATURE_DOTPROD)
   const uint8x16_t sad_u8 = vabdq_u8(src_u8, ref_u8);
   const uint32x4_t dp = vdotq_u32(vdupq_n_u32(0), sad_u8, vdupq_n_u8(1));
   return horizontal_add_uint32x4(dp);
@@ -39,7 +39,7 @@ uint32_t vpx_sad4x4_avg_neon(const uint8_t *src_ptr, int src_stride,
   const uint8x16_t ref_u8 = load_unaligned_u8q(ref_ptr, ref_stride);
   const uint8x16_t second_pred_u8 = vld1q_u8(second_pred);
   const uint8x16_t avg = vrhaddq_u8(ref_u8, second_pred_u8);
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__ARM_FEATURE_DOTPROD)
   const uint8x16_t sad_u8 = vabdq_u8(src_u8, avg);
   const uint32x4_t prod = vdotq_u32(vdupq_n_u32(0), sad_u8, vdupq_n_u8(1));
   return horizontal_add_uint32x4(prod);
@@ -52,7 +52,7 @@ uint32_t vpx_sad4x4_avg_neon(const uint8_t *src_ptr, int src_stride,
 
 uint32_t vpx_sad4x8_neon(const uint8_t *src_ptr, int src_stride,
                          const uint8_t *ref_ptr, int ref_stride) {
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__ARM_FEATURE_DOTPROD)
   uint32x4_t prod = vdupq_n_u32(0);
   const uint8x16_t ones = vdupq_n_u8(1);
   const uint8x16_t src1_u8 = load_unaligned_u8q(src_ptr, src_stride);
@@ -85,7 +85,7 @@ uint32_t vpx_sad4x8_neon(const uint8_t *src_ptr, int src_stride,
 uint32_t vpx_sad4x8_avg_neon(const uint8_t *src_ptr, int src_stride,
                              const uint8_t *ref_ptr, int ref_stride,
                              const uint8_t *second_pred) {
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__ARM_FEATURE_DOTPROD)
   uint32x4_t prod = vdupq_n_u32(0);
   const uint8x16_t ones = vdupq_n_u8(1);
   const uint8x16_t src1_u8 = load_unaligned_u8q(src_ptr, src_stride);
@@ -122,7 +122,7 @@ uint32_t vpx_sad4x8_avg_neon(const uint8_t *src_ptr, int src_stride,
 #endif
 }
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__ARM_FEATURE_DOTPROD)
 static INLINE uint32x2_t sad8x(const uint8_t *src_ptr, int src_stride,
                                const uint8_t *ref_ptr, int ref_stride,
                                const int height) {
@@ -177,7 +177,7 @@ static INLINE uint32x2_t sad8x_avg(const uint8_t *src_ptr, int src_stride,
     return horizontal_add_uint32x2(prod);                                    \
   }
 
-#else  // !(defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD))
+#else  // !defined(__ARM_FEATURE_DOTPROD)
 static INLINE uint16x8_t sad8x(const uint8_t *src_ptr, int src_stride,
                                const uint8_t *ref_ptr, int ref_stride,
                                const int height) {
@@ -228,13 +228,13 @@ static INLINE uint16x8_t sad8x_avg(const uint8_t *src_ptr, int src_stride,
         sad8x_avg(src_ptr, src_stride, ref_ptr, ref_stride, second_pred, n);   \
     return horizontal_add_uint16x8(abs);                                       \
   }
-#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#endif  // defined(__ARM_FEATURE_DOTPROD)
 
 SAD8XN(4)
 SAD8XN(8)
 SAD8XN(16)
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__ARM_FEATURE_DOTPROD)
 static INLINE uint32x4_t sad16x(const uint8_t *src_ptr, int src_stride,
                                 const uint8_t *ref_ptr, int ref_stride,
                                 const int height) {
@@ -288,7 +288,7 @@ static INLINE uint32x4_t sad16x_avg(const uint8_t *src_ptr, int src_stride,
         sad16x_avg(src_ptr, src_stride, ref_ptr, ref_stride, second_pred, n); \
     return horizontal_add_uint32x4(prod);                                     \
   }
-#else  // !(defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD))
+#else  // !defined(__ARM_FEATURE_DOTPROD)
 static INLINE uint16x8_t sad16x(const uint8_t *src_ptr, int src_stride,
                                 const uint8_t *ref_ptr, int ref_stride,
                                 const int height) {
@@ -342,13 +342,13 @@ static INLINE uint16x8_t sad16x_avg(const uint8_t *src_ptr, int src_stride,
         sad16x_avg(src_ptr, src_stride, ref_ptr, ref_stride, second_pred, n); \
     return horizontal_add_uint16x8(abs);                                      \
   }
-#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#endif  // defined(__ARM_FEATURE_DOTPROD)
 
 SAD16XN(8)
 SAD16XN(16)
 SAD16XN(32)
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__ARM_FEATURE_DOTPROD)
 static INLINE uint32x4_t sad32x(const uint8_t *src_ptr, int src_stride,
                                 const uint8_t *ref_ptr, int ref_stride,
                                 const int height) {
@@ -413,7 +413,7 @@ static INLINE uint32x4_t sad32x_avg(const uint8_t *src_ptr, int src_stride,
     return horizontal_add_uint32x4(prod);                                     \
   }
 
-#else  // !(defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD))
+#else  // defined(__ARM_FEATURE_DOTPROD)
 static INLINE uint16x8_t sad32x(const uint8_t *src_ptr, int src_stride,
                                 const uint8_t *ref_ptr, int ref_stride,
                                 const int height) {
@@ -477,13 +477,13 @@ static INLINE uint16x8_t sad32x_avg(const uint8_t *src_ptr, int src_stride,
         sad32x_avg(src_ptr, src_stride, ref_ptr, ref_stride, second_pred, n); \
     return horizontal_add_uint16x8(abs);                                      \
   }
-#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#endif  // defined(__ARM_FEATURE_DOTPROD)
 
 SAD32XN(16)
 SAD32XN(32)
 SAD32XN(64)
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#if defined(__ARM_FEATURE_DOTPROD)
 static INLINE uint32x4_t sad64x(const uint8_t *src_ptr, int src_stride,
                                 const uint8_t *ref_ptr, int ref_stride,
                                 const int height) {
@@ -551,7 +551,7 @@ static INLINE uint32x4_t sad64x_avg(const uint8_t *src_ptr, int src_stride,
   }
   return prod;
 }
-#else   // !(defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD))
+#else   // !defined(__ARM_FEATURE_DOTPROD)
 static INLINE uint32x4_t sad64x(const uint8_t *src_ptr, int src_stride,
                                 const uint8_t *ref_ptr, int ref_stride,
                                 const int height) {
@@ -629,7 +629,7 @@ static INLINE uint32x4_t sad64x_avg(const uint8_t *src_ptr, int src_stride,
     return vpadalq_u16(sum, abs_1);
   }
 }
-#endif  // defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD)
+#endif  // defined(__ARM_FEATURE_DOTPROD)
 
 #define SAD64XN(n)                                                            \
   uint32_t vpx_sad64x##n##_neon(const uint8_t *src_ptr, int src_stride,       \
