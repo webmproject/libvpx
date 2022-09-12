@@ -393,6 +393,7 @@ ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad4d_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad_sse2.asm
 DSP_SRCS-$(HAVE_NEON) += arm/highbd_sad_neon.c
+DSP_SRCS-$(HAVE_AVX2) += x86/highbd_sad4d_avx2.c
 endif  # CONFIG_VP9_HIGHBITDEPTH
 
 endif  # CONFIG_ENCODERS

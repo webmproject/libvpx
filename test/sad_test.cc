@@ -1079,6 +1079,17 @@ INSTANTIATE_TEST_SUITE_P(AVX2, SADavgTest, ::testing::ValuesIn(avg_avx2_tests));
 const SadMxNx4Param x4d_avx2_tests[] = {
   SadMxNx4Param(64, 64, &vpx_sad64x64x4d_avx2),
   SadMxNx4Param(32, 32, &vpx_sad32x32x4d_avx2),
+#if CONFIG_VP9_HIGHBITDEPTH
+  SadMxNx4Param(16, 32, &vpx_highbd_sad16x32x4d_avx2, 8),
+  SadMxNx4Param(16, 16, &vpx_highbd_sad16x16x4d_avx2, 8),
+  SadMxNx4Param(16, 8, &vpx_highbd_sad16x8x4d_avx2, 8),
+  SadMxNx4Param(16, 32, &vpx_highbd_sad16x32x4d_avx2, 10),
+  SadMxNx4Param(16, 16, &vpx_highbd_sad16x16x4d_avx2, 10),
+  SadMxNx4Param(16, 8, &vpx_highbd_sad16x8x4d_avx2, 10),
+  SadMxNx4Param(16, 32, &vpx_highbd_sad16x32x4d_avx2, 12),
+  SadMxNx4Param(16, 16, &vpx_highbd_sad16x16x4d_avx2, 12),
+  SadMxNx4Param(16, 8, &vpx_highbd_sad16x8x4d_avx2, 12),
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 };
 INSTANTIATE_TEST_SUITE_P(AVX2, SADx4Test, ::testing::ValuesIn(x4d_avx2_tests));
 
