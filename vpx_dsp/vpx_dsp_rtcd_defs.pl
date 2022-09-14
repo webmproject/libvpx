@@ -1033,10 +1033,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Multi-block SAD, comparing a reference to N independent blocks
   #
   add_proto qw/void vpx_highbd_sad64x64x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]";
-  specialize qw/vpx_highbd_sad64x64x4d sse2 neon/;
+  specialize qw/vpx_highbd_sad64x64x4d sse2 neon avx2/;
 
   add_proto qw/void vpx_highbd_sad64x32x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]";
-  specialize qw/vpx_highbd_sad64x32x4d sse2 neon/;
+  specialize qw/vpx_highbd_sad64x32x4d sse2 neon avx2/;
 
   add_proto qw/void vpx_highbd_sad32x64x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_array[4], int ref_stride, uint32_t sad_array[4]";
   specialize qw/vpx_highbd_sad32x64x4d sse2 neon avx2/;
