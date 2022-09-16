@@ -99,9 +99,6 @@ void vp9_quantize_fp_sse2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       nzero_coeff1 = _mm_cmpeq_epi16(zero_coeff1, zero);
       iscan0 = _mm_load_si128((const __m128i *)(iscan + n_coeffs));
       iscan1 = _mm_load_si128((const __m128i *)(iscan + n_coeffs) + 1);
-      // Add one to convert from indices to counts
-      iscan0 = _mm_sub_epi16(iscan0, nzero_coeff0);
-      iscan1 = _mm_sub_epi16(iscan1, nzero_coeff1);
       eob = _mm_and_si128(iscan0, nzero_coeff0);
       eob1 = _mm_and_si128(iscan1, nzero_coeff1);
       eob = _mm_max_epi16(eob, eob1);
@@ -174,9 +171,6 @@ void vp9_quantize_fp_sse2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       nzero_coeff1 = _mm_cmpeq_epi16(zero_coeff1, zero);
       iscan0 = _mm_load_si128((const __m128i *)(iscan + n_coeffs));
       iscan1 = _mm_load_si128((const __m128i *)(iscan + n_coeffs) + 1);
-      // Add one to convert from indices to counts
-      iscan0 = _mm_sub_epi16(iscan0, nzero_coeff0);
-      iscan1 = _mm_sub_epi16(iscan1, nzero_coeff1);
       eob0 = _mm_and_si128(iscan0, nzero_coeff0);
       eob1 = _mm_and_si128(iscan1, nzero_coeff1);
       eob0 = _mm_max_epi16(eob0, eob1);

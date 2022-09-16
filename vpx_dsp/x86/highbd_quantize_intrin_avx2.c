@@ -80,8 +80,7 @@ static VPX_FORCE_INLINE __m256i get_max_lane_eob(const int16_t *iscan_ptr,
       _mm256_permute4x64_epi64(packed_nz_mask, 0xD8);
   const __m256i iscan =
       _mm256_castsi128_si256(_mm_loadu_si128((const __m128i *)iscan_ptr));
-  const __m256i iscan_plus1 = _mm256_sub_epi16(iscan, packed_nz_mask_perm);
-  const __m256i nz_iscan = _mm256_and_si256(iscan_plus1, packed_nz_mask_perm);
+  const __m256i nz_iscan = _mm256_and_si256(iscan, packed_nz_mask_perm);
   return _mm256_max_epi16(eobmax, nz_iscan);
 }
 

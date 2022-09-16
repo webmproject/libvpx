@@ -91,8 +91,6 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, round, quant, \
   pcmpeqw                        m13, m5                   ; m13 = c[i] == 0
   mova                            m6, [  r5q+ncoeffq*2+ 0] ; m6 = scan[i]
   mova                           m11, [  r5q+ncoeffq*2+16] ; m11 = scan[i]
-  psubw                           m6, m7                   ; m6 = scan[i] + 1
-  psubw                          m11, m7                   ; m11 = scan[i] + 1
   pandn                           m8, m6                   ; m8 = max(eob)
   pandn                          m13, m11                  ; m13 = max(eob)
   pmaxsw                          m8, m13
@@ -141,8 +139,6 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, round, quant, \
   pcmpeqw                        m13, m5                   ; m13 = c[i] == 0
   mova                            m6, [  r5q+ncoeffq*2+ 0] ; m6 = scan[i]
   mova                           m11, [  r5q+ncoeffq*2+16] ; m11 = scan[i]
-  psubw                           m6, m7                   ; m6 = scan[i] + 1
-  psubw                          m11, m7                   ; m11 = scan[i] + 1
   pandn                          m14, m6                   ; m14 = max(eob)
   pandn                          m13, m11                  ; m13 = max(eob)
   pmaxsw                          m8, m14

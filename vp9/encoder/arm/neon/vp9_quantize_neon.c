@@ -45,9 +45,7 @@ static VPX_FORCE_INLINE int16x8_t get_max_lane_eob(const int16_t *iscan_ptr,
                                                    int16x8_t v_eobmax,
                                                    uint16x8_t v_nz_mask) {
   const int16x8_t v_iscan = vld1q_s16(&iscan_ptr[0]);
-  const int16x8_t v_iscan_plus1 = vaddq_s16(v_iscan, vdupq_n_s16(1));
-  const int16x8_t v_nz_iscan =
-      vbslq_s16(v_nz_mask, vdupq_n_s16(0), v_iscan_plus1);
+  const int16x8_t v_nz_iscan = vbslq_s16(v_nz_mask, vdupq_n_s16(0), v_iscan);
   return vmaxq_s16(v_eobmax, v_nz_iscan);
 }
 

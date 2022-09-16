@@ -127,16 +127,13 @@ quantize_b_16(const tran_low_t *coeff_ptr, tran_low_t *qcoeff_ptr,
 static VPX_FORCE_INLINE __m256i get_max_lane_eob(const int16_t *iscan,
                                                  __m256i v_eobmax,
                                                  __m256i v_mask) {
-  const __m256i v_iscan = _mm256_loadu_si256((const __m256i *)iscan);
 #if CONFIG_VP9_HIGHBITDEPTH
-  // typedef int32_t tran_low_t;
-  const __m256i v_iscan_perm = _mm256_permute4x64_epi64(v_iscan, 0xD8);
-  const __m256i v_iscan_plus1 = _mm256_sub_epi16(v_iscan_perm, v_mask);
+  const __m256i v_iscan = _mm256_permute4x64_epi64(
+      _mm256_loadu_si256((const __m256i *)iscan), 0xD8);
 #else
-  // typedef int16_t tran_low_t;
-  const __m256i v_iscan_plus1 = _mm256_sub_epi16(v_iscan, v_mask);
+  const __m256i v_iscan = _mm256_loadu_si256((const __m256i *)iscan);
 #endif
-  const __m256i v_nz_iscan = _mm256_and_si256(v_iscan_plus1, v_mask);
+  const __m256i v_nz_iscan = _mm256_and_si256(v_iscan, v_mask);
   return _mm256_max_epi16(v_eobmax, v_nz_iscan);
 }
 

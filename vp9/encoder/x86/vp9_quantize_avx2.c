@@ -43,16 +43,13 @@ static VPX_FORCE_INLINE void load_fp_values_avx2(
 static VPX_FORCE_INLINE __m256i get_max_lane_eob(const int16_t *iscan,
                                                  __m256i v_eobmax,
                                                  __m256i v_mask) {
-  const __m256i v_iscan = _mm256_loadu_si256((const __m256i *)iscan);
 #if CONFIG_VP9_HIGHBITDEPTH
-  // typedef int32_t tran_low_t;
-  const __m256i v_iscan_perm = _mm256_permute4x64_epi64(v_iscan, 0xD8);
-  const __m256i v_iscan_plus1 = _mm256_sub_epi16(v_iscan_perm, v_mask);
+  const __m256i v_iscan = _mm256_permute4x64_epi64(
+      _mm256_loadu_si256((const __m256i *)iscan), 0xD8);
 #else
-  // typedef int16_t tran_low_t;
-  const __m256i v_iscan_plus1 = _mm256_sub_epi16(v_iscan, v_mask);
+  const __m256i v_iscan = _mm256_loadu_si256((const __m256i *)iscan);
 #endif
-  const __m256i v_nz_iscan = _mm256_and_si256(v_iscan_plus1, v_mask);
+  const __m256i v_nz_iscan = _mm256_and_si256(v_iscan, v_mask);
   return _mm256_max_epi16(v_eobmax, v_nz_iscan);
 }
 
@@ -303,8 +300,7 @@ static VPX_FORCE_INLINE __m256i highbd_get_max_lane_eob(
       _mm256_permute4x64_epi64(packed_nz_mask, 0xD8);
   const __m256i iscan =
       _mm256_castsi128_si256(_mm_loadu_si128((const __m128i *)iscan_ptr));
-  const __m256i iscan_plus1 = _mm256_sub_epi16(iscan, packed_nz_mask_perm);
-  const __m256i nz_iscan = _mm256_and_si256(iscan_plus1, packed_nz_mask_perm);
+  const __m256i nz_iscan = _mm256_and_si256(iscan, packed_nz_mask_perm);
   return _mm256_max_epi16(eobmax, nz_iscan);
 }
 
