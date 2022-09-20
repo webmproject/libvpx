@@ -11,7 +11,9 @@
 #ifndef VPX_VP8_ENCODER_ONYX_INT_H_
 #define VPX_VP8_ENCODER_ONYX_INT_H_
 
+#include <assert.h>
 #include <stdio.h>
+
 #include "vpx_config.h"
 #include "vp8/common/onyx.h"
 #include "treewriter.h"
@@ -730,6 +732,7 @@ void vp8_set_speed_features(VP8_COMP *cpi);
 #if CONFIG_DEBUG
 #define CHECK_MEM_ERROR(lval, expr)                                         \
   do {                                                                      \
+    assert(cpi->common.error.setjmp);                                       \
     (lval) = (expr);                                                        \
     if (!(lval))                                                            \
       vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,           \
@@ -739,6 +742,7 @@ void vp8_set_speed_features(VP8_COMP *cpi);
 #else
 #define CHECK_MEM_ERROR(lval, expr)                               \
   do {                                                            \
+    assert(cpi->common.error.setjmp);                             \
     (lval) = (expr);                                              \
     if (!(lval))                                                  \
       vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR, \
