@@ -29,6 +29,15 @@ static INLINE void load_b_values(const int16_t *zbin_ptr, __m128i *zbin,
   *shift = _mm_load_si128((const __m128i *)shift_ptr);
 }
 
+static INLINE void load_fp_values(const int16_t *round_ptr, __m128i *round,
+                                  const int16_t *quant_ptr, __m128i *quant,
+                                  const int16_t *dequant_ptr,
+                                  __m128i *dequant) {
+  *round = _mm_load_si128((const __m128i *)round_ptr);
+  *quant = _mm_load_si128((const __m128i *)quant_ptr);
+  *dequant = _mm_load_si128((const __m128i *)dequant_ptr);
+}
+
 // With ssse3 and later abs() and sign() are preferred.
 static INLINE __m128i invert_sign_sse2(__m128i a, __m128i sign) {
   a = _mm_xor_si128(a, sign);
