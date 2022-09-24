@@ -512,6 +512,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         make_tuple(&vpx_quantize_b_sse2, &vpx_quantize_b_c, VPX_BITS_8, 16,
                    false),
+        make_tuple(&QuantFPWrapper<vp9_quantize_fp_sse2>,
+                   &QuantFPWrapper<quantize_fp_nz_c>, VPX_BITS_8, 16, true),
         make_tuple(&vpx_highbd_quantize_b_sse2, &vpx_highbd_quantize_b_c,
                    VPX_BITS_8, 16, false),
         make_tuple(&vpx_highbd_quantize_b_sse2, &vpx_highbd_quantize_b_c,
