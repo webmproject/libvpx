@@ -4367,7 +4367,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
   int frame_over_shoot_limit;
   int frame_under_shoot_limit;
   int q = 0, q_low = 0, q_high = 0;
-  int last_q_attempt = 0;
   int enable_acl;
 #ifdef AGGRESSIVE_VBR
   int qrange_adj = 1;
@@ -4381,8 +4380,18 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
   // Maximal frame size allowed by the external rate control.
   // case: 0, we ignore the max frame size limit, and encode with the qindex
   // passed in by the external rate control model.
-  // case: -1, we take VP9's decision for the max frame size.
+  // If the external qindex is VPX_DEFAULT_Q, libvpx will pick a qindex
+  // and may recode if undershoot/overshoot is seen.
+  // If the external qindex is not VPX_DEFAULT_Q, we force no recode.
+  // case: -1, we take libvpx's decision for the max frame size, as well as
+  // the recode decision.
+  // Otherwise: if a specific size is given, libvpx's recode decision
+  // will respect the given size.
   int ext_rc_max_frame_size = 0;
+  // Use VP9's decision of qindex. This flag is in use only in external rate
+  // control model to help determine whether to recode when
+  // |ext_rc_max_frame_size| is 0.
+  int ext_rc_use_default_q = 1;
   const int orig_rc_max_frame_bandwidth = rc->max_frame_bandwidth;
 
 #if CONFIG_RATE_CTRL
@@ -4520,8 +4529,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       // libvpx's default q.
       if (encode_frame_decision.q_index != VPX_DEFAULT_Q) {
         q = encode_frame_decision.q_index;
-        ext_rc_max_frame_size = encode_frame_decision.max_frame_size;
+        ext_rc_use_default_q = 0;
       }
+      ext_rc_max_frame_size = encode_frame_decision.max_frame_size;
     }
 
     vp9_set_quantizer(cpi, q);
@@ -4564,7 +4574,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
 
     if (cpi->ext_ratectrl.ready &&
         (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0) {
-      last_q_attempt = q;
       // In general, for the external rate control, we take the qindex provided
       // as input and encode the frame with this qindex faithfully. However,
       // in some extreme scenarios, the provided qindex leads to a massive
@@ -4572,20 +4581,13 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
       // to pick a new qindex and recode the frame. We return the new qindex
       // through the API to the external model.
       if (ext_rc_max_frame_size == 0) {
-        break;
+        if (!ext_rc_use_default_q) break;
       } else if (ext_rc_max_frame_size == -1) {
-        if (rc->projected_frame_size < rc->max_frame_bandwidth) {
-          break;
-        }
+        // Do nothing, fall back to libvpx's recode decision.
       } else {
-        if (rc->projected_frame_size < ext_rc_max_frame_size) {
-          break;
-        }
+        // Change the max frame size, used in libvpx's recode decision.
+        rc->max_frame_bandwidth = ext_rc_max_frame_size;
       }
-      rc->max_frame_bandwidth = ext_rc_max_frame_size;
-      // If the current frame size exceeds the ext_rc_max_frame_size,
-      // we adjust the worst qindex to meet the frame size constraint.
-      q_high = 255;
       ext_rc_recode = 1;
     }
 #if CONFIG_RATE_CTRL
@@ -4787,23 +4789,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
     if (rc->is_src_frame_alt_ref &&
         rc->projected_frame_size < rc->max_frame_bandwidth)
       loop = 0;
-
-    // Special handling of external max frame size constraint
-    if (ext_rc_recode) {
-      // If the largest q is not able to meet the max frame size limit,
-      // do nothing.
-      if (rc->projected_frame_size > ext_rc_max_frame_size &&
-          last_q_attempt == 255) {
-        break;
-      }
-      // If VP9's q selection leads to a smaller q, we force it to use
-      // a larger q to better approximate the external max frame size
-      // constraint.
-      if (rc->projected_frame_size > ext_rc_max_frame_size &&
-          q <= last_q_attempt) {
-        q = VPXMIN(255, last_q_attempt + 1);
-      }
-    }
 
     if (loop) {
       ++loop_count;
