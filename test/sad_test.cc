@@ -1064,6 +1064,17 @@ const SadMxNParam avx2_tests[] = {
   SadMxNParam(32, 64, &vpx_sad32x64_avx2),
   SadMxNParam(32, 32, &vpx_sad32x32_avx2),
   SadMxNParam(32, 16, &vpx_sad32x16_avx2),
+#if CONFIG_VP9_HIGHBITDEPTH
+  SadMxNParam(16, 32, &vpx_highbd_sad16x32_avx2, 8),
+  SadMxNParam(16, 16, &vpx_highbd_sad16x16_avx2, 8),
+  SadMxNParam(16, 8, &vpx_highbd_sad16x8_avx2, 8),
+  SadMxNParam(16, 32, &vpx_highbd_sad16x32_avx2, 10),
+  SadMxNParam(16, 16, &vpx_highbd_sad16x16_avx2, 10),
+  SadMxNParam(16, 8, &vpx_highbd_sad16x8_avx2, 10),
+  SadMxNParam(16, 32, &vpx_highbd_sad16x32_avx2, 12),
+  SadMxNParam(16, 16, &vpx_highbd_sad16x16_avx2, 12),
+  SadMxNParam(16, 8, &vpx_highbd_sad16x8_avx2, 12),
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 };
 INSTANTIATE_TEST_SUITE_P(AVX2, SADTest, ::testing::ValuesIn(avx2_tests));
 
