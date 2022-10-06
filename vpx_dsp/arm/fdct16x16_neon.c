@@ -35,13 +35,13 @@ void vpx_fdct16x16_neon(const int16_t *input, tran_low_t *output, int stride) {
   int16x8_t temp3[16];
 
   // Left half.
-  load(input, stride, temp0);
-  cross_input(temp0, temp1, 0);
+  load_cross(input, stride, temp0);
+  scale_input(temp0, temp1);
   vpx_fdct16x16_body(temp1, temp0);
 
   // Right half.
-  load(input + 8, stride, temp1);
-  cross_input(temp1, temp2, 0);
+  load_cross(input + 8, stride, temp1);
+  scale_input(temp1, temp2);
   vpx_fdct16x16_body(temp2, temp1);
 
   // Transpose top left and top right quarters into one contiguous location to
@@ -49,7 +49,7 @@ void vpx_fdct16x16_neon(const int16_t *input, tran_low_t *output, int stride) {
   transpose_s16_8x8_new(&temp0[0], &temp2[0]);
   transpose_s16_8x8_new(&temp1[0], &temp2[8]);
   partial_round_shift(temp2);
-  cross_input(temp2, temp3, 1);
+  cross_input(temp2, temp3);
   vpx_fdct16x16_body(temp3, temp2);
   transpose_s16_8x8(&temp2[0], &temp2[1], &temp2[2], &temp2[3], &temp2[4],
                     &temp2[5], &temp2[6], &temp2[7]);
@@ -65,7 +65,7 @@ void vpx_fdct16x16_neon(const int16_t *input, tran_low_t *output, int stride) {
   transpose_s16_8x8(&temp1[8], &temp1[9], &temp1[10], &temp1[11], &temp1[12],
                     &temp1[13], &temp1[14], &temp1[15]);
   partial_round_shift(temp1);
-  cross_input(temp1, temp0, 1);
+  cross_input(temp1, temp0);
   vpx_fdct16x16_body(temp0, temp1);
   transpose_s16_8x8(&temp1[0], &temp1[1], &temp1[2], &temp1[3], &temp1[4],
                     &temp1[5], &temp1[6], &temp1[7]);

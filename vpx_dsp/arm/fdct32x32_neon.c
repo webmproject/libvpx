@@ -15,6 +15,7 @@
 #include "vpx_dsp/txfm_common.h"
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/transpose_neon.h"
+#include "vpx_dsp/arm/fdct_neon.h"
 
 // Most gcc 4.9 distributions outside of Android do not generate correct code
 // for this function.
@@ -193,54 +194,6 @@ static INLINE void store(tran_low_t *a, const int16x8_t *b) {
 }
 
 #undef STORE_S16
-
-// fdct_round_shift((a +/- b) * c)
-static INLINE void butterfly_one_coeff(const int16x8_t a, const int16x8_t b,
-                                       const tran_high_t constant,
-                                       int16x8_t *add, int16x8_t *sub) {
-  const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), constant);
-  const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), constant);
-  const int32x4_t sum0 = vmlal_n_s16(a0, vget_low_s16(b), constant);
-  const int32x4_t sum1 = vmlal_n_s16(a1, vget_high_s16(b), constant);
-  const int32x4_t diff0 = vmlsl_n_s16(a0, vget_low_s16(b), constant);
-  const int32x4_t diff1 = vmlsl_n_s16(a1, vget_high_s16(b), constant);
-  const int16x4_t rounded0 = vqrshrn_n_s32(sum0, DCT_CONST_BITS);
-  const int16x4_t rounded1 = vqrshrn_n_s32(sum1, DCT_CONST_BITS);
-  const int16x4_t rounded2 = vqrshrn_n_s32(diff0, DCT_CONST_BITS);
-  const int16x4_t rounded3 = vqrshrn_n_s32(diff1, DCT_CONST_BITS);
-  *add = vcombine_s16(rounded0, rounded1);
-  *sub = vcombine_s16(rounded2, rounded3);
-}
-
-// fdct_round_shift(a * c0 +/- b * c1)
-static INLINE void butterfly_two_coeff(const int16x8_t a, const int16x8_t b,
-                                       const tran_coef_t constant0,
-                                       const tran_coef_t constant1,
-                                       int16x8_t *add, int16x8_t *sub) {
-  const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), constant0);
-  const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), constant0);
-  const int32x4_t a2 = vmull_n_s16(vget_low_s16(a), constant1);
-  const int32x4_t a3 = vmull_n_s16(vget_high_s16(a), constant1);
-  const int32x4_t sum0 = vmlal_n_s16(a2, vget_low_s16(b), constant0);
-  const int32x4_t sum1 = vmlal_n_s16(a3, vget_high_s16(b), constant0);
-  const int32x4_t diff0 = vmlsl_n_s16(a0, vget_low_s16(b), constant1);
-  const int32x4_t diff1 = vmlsl_n_s16(a1, vget_high_s16(b), constant1);
-  const int16x4_t rounded0 = vqrshrn_n_s32(sum0, DCT_CONST_BITS);
-  const int16x4_t rounded1 = vqrshrn_n_s32(sum1, DCT_CONST_BITS);
-  const int16x4_t rounded2 = vqrshrn_n_s32(diff0, DCT_CONST_BITS);
-  const int16x4_t rounded3 = vqrshrn_n_s32(diff1, DCT_CONST_BITS);
-  *add = vcombine_s16(rounded0, rounded1);
-  *sub = vcombine_s16(rounded2, rounded3);
-}
-
-// Add 2 if positive, 1 if negative, and shift by 2.
-// In practice, subtract the sign bit, then shift with rounding.
-static INLINE int16x8_t sub_round_shift(const int16x8_t a) {
-  const uint16x8_t a_u16 = vreinterpretq_u16_s16(a);
-  const uint16x8_t a_sign_u16 = vshrq_n_u16(a_u16, 15);
-  const int16x8_t a_sign_s16 = vreinterpretq_s16_u16(a_sign_u16);
-  return vrshrq_n_s16(vsubq_s16(a, a_sign_s16), 2);
-}
 
 static void dct_body_first_pass(const int16x8_t *in, int16x8_t *out) {
   int16x8_t a[32];
@@ -562,23 +515,6 @@ static void dct_body_first_pass(const int16x8_t *in, int16x8_t *out) {
     b##_hi[b_index] = vsubq_s32(a##_hi[left_index], a##_hi[right_index]); \
   } while (0)
 
-// Like butterfly_one_coeff, but don't narrow results.
-static INLINE void butterfly_one_coeff_s16_s32(
-    const int16x8_t a, const int16x8_t b, const tran_high_t constant,
-    int32x4_t *add_lo, int32x4_t *add_hi, int32x4_t *sub_lo,
-    int32x4_t *sub_hi) {
-  const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), constant);
-  const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), constant);
-  const int32x4_t sum0 = vmlal_n_s16(a0, vget_low_s16(b), constant);
-  const int32x4_t sum1 = vmlal_n_s16(a1, vget_high_s16(b), constant);
-  const int32x4_t diff0 = vmlsl_n_s16(a0, vget_low_s16(b), constant);
-  const int32x4_t diff1 = vmlsl_n_s16(a1, vget_high_s16(b), constant);
-  *add_lo = vrshrq_n_s32(sum0, DCT_CONST_BITS);
-  *add_hi = vrshrq_n_s32(sum1, DCT_CONST_BITS);
-  *sub_lo = vrshrq_n_s32(diff0, DCT_CONST_BITS);
-  *sub_hi = vrshrq_n_s32(diff1, DCT_CONST_BITS);
-}
-
 #define BUTTERFLY_ONE_S16_S32(a, left_index, right_index, constant, b,   \
                               add_index, sub_index)                      \
   do {                                                                   \
@@ -586,23 +522,6 @@ static INLINE void butterfly_one_coeff_s16_s32(
                                 &b##_lo[add_index], &b##_hi[add_index],  \
                                 &b##_lo[sub_index], &b##_hi[sub_index]); \
   } while (0)
-
-// Like butterfly_one_coeff, but with s32.
-static INLINE void butterfly_one_coeff_s32(
-    const int32x4_t a_lo, const int32x4_t a_hi, const int32x4_t b_lo,
-    const int32x4_t b_hi, const int32_t constant, int32x4_t *add_lo,
-    int32x4_t *add_hi, int32x4_t *sub_lo, int32x4_t *sub_hi) {
-  const int32x4_t a_lo_0 = vmulq_n_s32(a_lo, constant);
-  const int32x4_t a_hi_0 = vmulq_n_s32(a_hi, constant);
-  const int32x4_t sum0 = vmlaq_n_s32(a_lo_0, b_lo, constant);
-  const int32x4_t sum1 = vmlaq_n_s32(a_hi_0, b_hi, constant);
-  const int32x4_t diff0 = vmlsq_n_s32(a_lo_0, b_lo, constant);
-  const int32x4_t diff1 = vmlsq_n_s32(a_hi_0, b_hi, constant);
-  *add_lo = vrshrq_n_s32(sum0, DCT_CONST_BITS);
-  *add_hi = vrshrq_n_s32(sum1, DCT_CONST_BITS);
-  *sub_lo = vrshrq_n_s32(diff0, DCT_CONST_BITS);
-  *sub_hi = vrshrq_n_s32(diff1, DCT_CONST_BITS);
-}
 
 #define BUTTERFLY_ONE_S32(a, left_index, right_index, constant, b, add_index, \
                           sub_index)                                          \
@@ -613,26 +532,6 @@ static INLINE void butterfly_one_coeff_s32(
                             &b##_lo[sub_index], &b##_hi[sub_index]);          \
   } while (0)
 
-// Like butterfly_two_coeff, but with s32.
-static INLINE void butterfly_two_coeff_s32(
-    const int32x4_t a_lo, const int32x4_t a_hi, const int32x4_t b_lo,
-    const int32x4_t b_hi, const int32_t constant0, const int32_t constant1,
-    int32x4_t *add_lo, int32x4_t *add_hi, int32x4_t *sub_lo,
-    int32x4_t *sub_hi) {
-  const int32x4_t a0 = vmulq_n_s32(a_lo, constant0);
-  const int32x4_t a1 = vmulq_n_s32(a_hi, constant0);
-  const int32x4_t a2 = vmulq_n_s32(a_lo, constant1);
-  const int32x4_t a3 = vmulq_n_s32(a_hi, constant1);
-  const int32x4_t sum0 = vmlaq_n_s32(a2, b_lo, constant0);
-  const int32x4_t sum1 = vmlaq_n_s32(a3, b_hi, constant0);
-  const int32x4_t diff0 = vmlsq_n_s32(a0, b_lo, constant1);
-  const int32x4_t diff1 = vmlsq_n_s32(a1, b_hi, constant1);
-  *add_lo = vrshrq_n_s32(sum0, DCT_CONST_BITS);
-  *add_hi = vrshrq_n_s32(sum1, DCT_CONST_BITS);
-  *sub_lo = vrshrq_n_s32(diff0, DCT_CONST_BITS);
-  *sub_hi = vrshrq_n_s32(diff1, DCT_CONST_BITS);
-}
-
 #define BUTTERFLY_TWO_S32(a, left_index, right_index, left_constant,           \
                           right_constant, b, add_index, sub_index)             \
   do {                                                                         \
@@ -642,24 +541,6 @@ static INLINE void butterfly_two_coeff_s32(
                             &b##_hi[add_index], &b##_lo[sub_index],            \
                             &b##_hi[sub_index]);                               \
   } while (0)
-
-// Add 1 if positive, 2 if negative, and shift by 2.
-// In practice, add 1, then add the sign bit, then shift without rounding.
-static INLINE int16x8_t add_round_shift_s32(const int32x4_t a_lo,
-                                            const int32x4_t a_hi) {
-  const int32x4_t one = vdupq_n_s32(1);
-  const uint32x4_t a_lo_u32 = vreinterpretq_u32_s32(a_lo);
-  const uint32x4_t a_lo_sign_u32 = vshrq_n_u32(a_lo_u32, 31);
-  const int32x4_t a_lo_sign_s32 = vreinterpretq_s32_u32(a_lo_sign_u32);
-  const int16x4_t b_lo =
-      vshrn_n_s32(vqaddq_s32(vqaddq_s32(a_lo, a_lo_sign_s32), one), 2);
-  const uint32x4_t a_hi_u32 = vreinterpretq_u32_s32(a_hi);
-  const uint32x4_t a_hi_sign_u32 = vshrq_n_u32(a_hi_u32, 31);
-  const int32x4_t a_hi_sign_s32 = vreinterpretq_s32_u32(a_hi_sign_u32);
-  const int16x4_t b_hi =
-      vshrn_n_s32(vqaddq_s32(vqaddq_s32(a_hi, a_hi_sign_s32), one), 2);
-  return vcombine_s16(b_lo, b_hi);
-}
 
 static void dct_body_second_pass(const int16x8_t *in, int16x8_t *out) {
   int16x8_t a[32];
@@ -967,16 +848,6 @@ static void dct_body_second_pass(const int16x8_t *in, int16x8_t *out) {
   out[3] = add_round_shift_s32(d_lo[3], d_hi[3]);
 }
 
-// Add 1 if positive, 2 if negative, and shift by 2.
-// In practice, add 1, then add the sign bit, then shift without rounding.
-static INLINE int16x8_t add_round_shift_s16(const int16x8_t a) {
-  const int16x8_t one = vdupq_n_s16(1);
-  const uint16x8_t a_u16 = vreinterpretq_u16_s16(a);
-  const uint16x8_t a_sign_u16 = vshrq_n_u16(a_u16, 15);
-  const int16x8_t a_sign_s16 = vreinterpretq_s16_u16(a_sign_u16);
-  return vshrq_n_s16(vaddq_s16(vaddq_s16(a, a_sign_s16), one), 2);
-}
-
 static void dct_body_second_pass_rd(const int16x8_t *in, int16x8_t *out) {
   int16x8_t a[32];
   int16x8_t b[32];
@@ -1279,42 +1150,6 @@ static void dct_body_second_pass_rd(const int16x8_t *in, int16x8_t *out) {
 #undef BUTTERFLY_ONE_S32
 #undef BUTTERFLY_TWO_S32
 
-// Transpose 8x8 to a new location. Don't use transpose_neon.h because those
-// are all in-place.
-// TODO(johannkoenig): share with other fdcts.
-static INLINE void transpose_8x8(const int16x8_t *a, int16x8_t *b) {
-  // Swap 16 bit elements.
-  const int16x8x2_t c0 = vtrnq_s16(a[0], a[1]);
-  const int16x8x2_t c1 = vtrnq_s16(a[2], a[3]);
-  const int16x8x2_t c2 = vtrnq_s16(a[4], a[5]);
-  const int16x8x2_t c3 = vtrnq_s16(a[6], a[7]);
-
-  // Swap 32 bit elements.
-  const int32x4x2_t d0 = vtrnq_s32(vreinterpretq_s32_s16(c0.val[0]),
-                                   vreinterpretq_s32_s16(c1.val[0]));
-  const int32x4x2_t d1 = vtrnq_s32(vreinterpretq_s32_s16(c0.val[1]),
-                                   vreinterpretq_s32_s16(c1.val[1]));
-  const int32x4x2_t d2 = vtrnq_s32(vreinterpretq_s32_s16(c2.val[0]),
-                                   vreinterpretq_s32_s16(c3.val[0]));
-  const int32x4x2_t d3 = vtrnq_s32(vreinterpretq_s32_s16(c2.val[1]),
-                                   vreinterpretq_s32_s16(c3.val[1]));
-
-  // Swap 64 bit elements
-  const int16x8x2_t e0 = vpx_vtrnq_s64_to_s16(d0.val[0], d2.val[0]);
-  const int16x8x2_t e1 = vpx_vtrnq_s64_to_s16(d1.val[0], d3.val[0]);
-  const int16x8x2_t e2 = vpx_vtrnq_s64_to_s16(d0.val[1], d2.val[1]);
-  const int16x8x2_t e3 = vpx_vtrnq_s64_to_s16(d1.val[1], d3.val[1]);
-
-  b[0] = e0.val[0];
-  b[1] = e1.val[0];
-  b[2] = e2.val[0];
-  b[3] = e3.val[0];
-  b[4] = e0.val[1];
-  b[5] = e1.val[1];
-  b[6] = e2.val[1];
-  b[7] = e3.val[1];
-}
-
 void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   int16x8_t temp0[32];
   int16x8_t temp1[32];
@@ -1337,10 +1172,10 @@ void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   dct_body_first_pass(temp0, temp4);
 
   // Generate the top row by munging the first set of 8 from each one together.
-  transpose_8x8(&temp1[0], &temp0[0]);
-  transpose_8x8(&temp2[0], &temp0[8]);
-  transpose_8x8(&temp3[0], &temp0[16]);
-  transpose_8x8(&temp4[0], &temp0[24]);
+  transpose_s16_8x8_new(&temp1[0], &temp0[0]);
+  transpose_s16_8x8_new(&temp2[0], &temp0[8]);
+  transpose_s16_8x8_new(&temp3[0], &temp0[16]);
+  transpose_s16_8x8_new(&temp4[0], &temp0[24]);
 
   dct_body_second_pass(temp0, temp5);
 
@@ -1355,10 +1190,10 @@ void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   store(output, temp5);
 
   // Second row of 8x32.
-  transpose_8x8(&temp1[8], &temp0[0]);
-  transpose_8x8(&temp2[8], &temp0[8]);
-  transpose_8x8(&temp3[8], &temp0[16]);
-  transpose_8x8(&temp4[8], &temp0[24]);
+  transpose_s16_8x8_new(&temp1[8], &temp0[0]);
+  transpose_s16_8x8_new(&temp2[8], &temp0[8]);
+  transpose_s16_8x8_new(&temp3[8], &temp0[16]);
+  transpose_s16_8x8_new(&temp4[8], &temp0[24]);
 
   dct_body_second_pass(temp0, temp5);
 
@@ -1373,10 +1208,10 @@ void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   store(output + 8 * 32, temp5);
 
   // Third row of 8x32
-  transpose_8x8(&temp1[16], &temp0[0]);
-  transpose_8x8(&temp2[16], &temp0[8]);
-  transpose_8x8(&temp3[16], &temp0[16]);
-  transpose_8x8(&temp4[16], &temp0[24]);
+  transpose_s16_8x8_new(&temp1[16], &temp0[0]);
+  transpose_s16_8x8_new(&temp2[16], &temp0[8]);
+  transpose_s16_8x8_new(&temp3[16], &temp0[16]);
+  transpose_s16_8x8_new(&temp4[16], &temp0[24]);
 
   dct_body_second_pass(temp0, temp5);
 
@@ -1391,10 +1226,10 @@ void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   store(output + 16 * 32, temp5);
 
   // Final row of 8x32.
-  transpose_8x8(&temp1[24], &temp0[0]);
-  transpose_8x8(&temp2[24], &temp0[8]);
-  transpose_8x8(&temp3[24], &temp0[16]);
-  transpose_8x8(&temp4[24], &temp0[24]);
+  transpose_s16_8x8_new(&temp1[24], &temp0[0]);
+  transpose_s16_8x8_new(&temp2[24], &temp0[8]);
+  transpose_s16_8x8_new(&temp3[24], &temp0[16]);
+  transpose_s16_8x8_new(&temp4[24], &temp0[24]);
 
   dct_body_second_pass(temp0, temp5);
 
@@ -1432,10 +1267,10 @@ void vpx_fdct32x32_rd_neon(const int16_t *input, tran_low_t *output,
   dct_body_first_pass(temp0, temp4);
 
   // Generate the top row by munging the first set of 8 from each one together.
-  transpose_8x8(&temp1[0], &temp0[0]);
-  transpose_8x8(&temp2[0], &temp0[8]);
-  transpose_8x8(&temp3[0], &temp0[16]);
-  transpose_8x8(&temp4[0], &temp0[24]);
+  transpose_s16_8x8_new(&temp1[0], &temp0[0]);
+  transpose_s16_8x8_new(&temp2[0], &temp0[8]);
+  transpose_s16_8x8_new(&temp3[0], &temp0[16]);
+  transpose_s16_8x8_new(&temp4[0], &temp0[24]);
 
   dct_body_second_pass_rd(temp0, temp5);
 
@@ -1450,10 +1285,10 @@ void vpx_fdct32x32_rd_neon(const int16_t *input, tran_low_t *output,
   store(output, temp5);
 
   // Second row of 8x32.
-  transpose_8x8(&temp1[8], &temp0[0]);
-  transpose_8x8(&temp2[8], &temp0[8]);
-  transpose_8x8(&temp3[8], &temp0[16]);
-  transpose_8x8(&temp4[8], &temp0[24]);
+  transpose_s16_8x8_new(&temp1[8], &temp0[0]);
+  transpose_s16_8x8_new(&temp2[8], &temp0[8]);
+  transpose_s16_8x8_new(&temp3[8], &temp0[16]);
+  transpose_s16_8x8_new(&temp4[8], &temp0[24]);
 
   dct_body_second_pass_rd(temp0, temp5);
 
@@ -1468,10 +1303,10 @@ void vpx_fdct32x32_rd_neon(const int16_t *input, tran_low_t *output,
   store(output + 8 * 32, temp5);
 
   // Third row of 8x32
-  transpose_8x8(&temp1[16], &temp0[0]);
-  transpose_8x8(&temp2[16], &temp0[8]);
-  transpose_8x8(&temp3[16], &temp0[16]);
-  transpose_8x8(&temp4[16], &temp0[24]);
+  transpose_s16_8x8_new(&temp1[16], &temp0[0]);
+  transpose_s16_8x8_new(&temp2[16], &temp0[8]);
+  transpose_s16_8x8_new(&temp3[16], &temp0[16]);
+  transpose_s16_8x8_new(&temp4[16], &temp0[24]);
 
   dct_body_second_pass_rd(temp0, temp5);
 
@@ -1486,10 +1321,10 @@ void vpx_fdct32x32_rd_neon(const int16_t *input, tran_low_t *output,
   store(output + 16 * 32, temp5);
 
   // Final row of 8x32.
-  transpose_8x8(&temp1[24], &temp0[0]);
-  transpose_8x8(&temp2[24], &temp0[8]);
-  transpose_8x8(&temp3[24], &temp0[16]);
-  transpose_8x8(&temp4[24], &temp0[24]);
+  transpose_s16_8x8_new(&temp1[24], &temp0[0]);
+  transpose_s16_8x8_new(&temp2[24], &temp0[8]);
+  transpose_s16_8x8_new(&temp3[24], &temp0[16]);
+  transpose_s16_8x8_new(&temp4[24], &temp0[24]);
 
   dct_body_second_pass_rd(temp0, temp5);
 

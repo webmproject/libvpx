@@ -13,6 +13,136 @@
 
 #include <arm_neon.h>
 
+// fdct_round_shift((a +/- b) * c)
+static INLINE void butterfly_one_coeff(const int16x8_t a, const int16x8_t b,
+                                       const tran_high_t constant,
+                                       int16x8_t *add, int16x8_t *sub) {
+  const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), constant);
+  const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), constant);
+  const int32x4_t sum0 = vmlal_n_s16(a0, vget_low_s16(b), constant);
+  const int32x4_t sum1 = vmlal_n_s16(a1, vget_high_s16(b), constant);
+  const int32x4_t diff0 = vmlsl_n_s16(a0, vget_low_s16(b), constant);
+  const int32x4_t diff1 = vmlsl_n_s16(a1, vget_high_s16(b), constant);
+  const int16x4_t rounded0 = vqrshrn_n_s32(sum0, DCT_CONST_BITS);
+  const int16x4_t rounded1 = vqrshrn_n_s32(sum1, DCT_CONST_BITS);
+  const int16x4_t rounded2 = vqrshrn_n_s32(diff0, DCT_CONST_BITS);
+  const int16x4_t rounded3 = vqrshrn_n_s32(diff1, DCT_CONST_BITS);
+  *add = vcombine_s16(rounded0, rounded1);
+  *sub = vcombine_s16(rounded2, rounded3);
+}
+
+// fdct_round_shift(a * c0 +/- b * c1)
+static INLINE void butterfly_two_coeff(const int16x8_t a, const int16x8_t b,
+                                       const tran_coef_t constant0,
+                                       const tran_coef_t constant1,
+                                       int16x8_t *add, int16x8_t *sub) {
+  const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), constant0);
+  const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), constant0);
+  const int32x4_t a2 = vmull_n_s16(vget_low_s16(a), constant1);
+  const int32x4_t a3 = vmull_n_s16(vget_high_s16(a), constant1);
+  const int32x4_t sum0 = vmlal_n_s16(a2, vget_low_s16(b), constant0);
+  const int32x4_t sum1 = vmlal_n_s16(a3, vget_high_s16(b), constant0);
+  const int32x4_t diff0 = vmlsl_n_s16(a0, vget_low_s16(b), constant1);
+  const int32x4_t diff1 = vmlsl_n_s16(a1, vget_high_s16(b), constant1);
+  const int16x4_t rounded0 = vqrshrn_n_s32(sum0, DCT_CONST_BITS);
+  const int16x4_t rounded1 = vqrshrn_n_s32(sum1, DCT_CONST_BITS);
+  const int16x4_t rounded2 = vqrshrn_n_s32(diff0, DCT_CONST_BITS);
+  const int16x4_t rounded3 = vqrshrn_n_s32(diff1, DCT_CONST_BITS);
+  *add = vcombine_s16(rounded0, rounded1);
+  *sub = vcombine_s16(rounded2, rounded3);
+}
+
+// Add 2 if positive, 1 if negative, and shift by 2.
+// In practice, subtract the sign bit, then shift with rounding.
+static INLINE int16x8_t sub_round_shift(const int16x8_t a) {
+  const uint16x8_t a_u16 = vreinterpretq_u16_s16(a);
+  const uint16x8_t a_sign_u16 = vshrq_n_u16(a_u16, 15);
+  const int16x8_t a_sign_s16 = vreinterpretq_s16_u16(a_sign_u16);
+  return vrshrq_n_s16(vsubq_s16(a, a_sign_s16), 2);
+}
+
+// Like butterfly_one_coeff, but don't narrow results.
+static INLINE void butterfly_one_coeff_s16_s32(
+    const int16x8_t a, const int16x8_t b, const tran_high_t constant,
+    int32x4_t *add_lo, int32x4_t *add_hi, int32x4_t *sub_lo,
+    int32x4_t *sub_hi) {
+  const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), constant);
+  const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), constant);
+  const int32x4_t sum0 = vmlal_n_s16(a0, vget_low_s16(b), constant);
+  const int32x4_t sum1 = vmlal_n_s16(a1, vget_high_s16(b), constant);
+  const int32x4_t diff0 = vmlsl_n_s16(a0, vget_low_s16(b), constant);
+  const int32x4_t diff1 = vmlsl_n_s16(a1, vget_high_s16(b), constant);
+  *add_lo = vrshrq_n_s32(sum0, DCT_CONST_BITS);
+  *add_hi = vrshrq_n_s32(sum1, DCT_CONST_BITS);
+  *sub_lo = vrshrq_n_s32(diff0, DCT_CONST_BITS);
+  *sub_hi = vrshrq_n_s32(diff1, DCT_CONST_BITS);
+}
+
+// Like butterfly_one_coeff, but with s32.
+static INLINE void butterfly_one_coeff_s32(
+    const int32x4_t a_lo, const int32x4_t a_hi, const int32x4_t b_lo,
+    const int32x4_t b_hi, const int32_t constant, int32x4_t *add_lo,
+    int32x4_t *add_hi, int32x4_t *sub_lo, int32x4_t *sub_hi) {
+  const int32x4_t a_lo_0 = vmulq_n_s32(a_lo, constant);
+  const int32x4_t a_hi_0 = vmulq_n_s32(a_hi, constant);
+  const int32x4_t sum0 = vmlaq_n_s32(a_lo_0, b_lo, constant);
+  const int32x4_t sum1 = vmlaq_n_s32(a_hi_0, b_hi, constant);
+  const int32x4_t diff0 = vmlsq_n_s32(a_lo_0, b_lo, constant);
+  const int32x4_t diff1 = vmlsq_n_s32(a_hi_0, b_hi, constant);
+  *add_lo = vrshrq_n_s32(sum0, DCT_CONST_BITS);
+  *add_hi = vrshrq_n_s32(sum1, DCT_CONST_BITS);
+  *sub_lo = vrshrq_n_s32(diff0, DCT_CONST_BITS);
+  *sub_hi = vrshrq_n_s32(diff1, DCT_CONST_BITS);
+}
+
+// Like butterfly_two_coeff, but with s32.
+static INLINE void butterfly_two_coeff_s32(
+    const int32x4_t a_lo, const int32x4_t a_hi, const int32x4_t b_lo,
+    const int32x4_t b_hi, const int32_t constant0, const int32_t constant1,
+    int32x4_t *add_lo, int32x4_t *add_hi, int32x4_t *sub_lo,
+    int32x4_t *sub_hi) {
+  const int32x4_t a0 = vmulq_n_s32(a_lo, constant0);
+  const int32x4_t a1 = vmulq_n_s32(a_hi, constant0);
+  const int32x4_t a2 = vmulq_n_s32(a_lo, constant1);
+  const int32x4_t a3 = vmulq_n_s32(a_hi, constant1);
+  const int32x4_t sum0 = vmlaq_n_s32(a2, b_lo, constant0);
+  const int32x4_t sum1 = vmlaq_n_s32(a3, b_hi, constant0);
+  const int32x4_t diff0 = vmlsq_n_s32(a0, b_lo, constant1);
+  const int32x4_t diff1 = vmlsq_n_s32(a1, b_hi, constant1);
+  *add_lo = vrshrq_n_s32(sum0, DCT_CONST_BITS);
+  *add_hi = vrshrq_n_s32(sum1, DCT_CONST_BITS);
+  *sub_lo = vrshrq_n_s32(diff0, DCT_CONST_BITS);
+  *sub_hi = vrshrq_n_s32(diff1, DCT_CONST_BITS);
+}
+
+// Add 1 if positive, 2 if negative, and shift by 2.
+// In practice, add 1, then add the sign bit, then shift without rounding.
+static INLINE int16x8_t add_round_shift_s16(const int16x8_t a) {
+  const int16x8_t one = vdupq_n_s16(1);
+  const uint16x8_t a_u16 = vreinterpretq_u16_s16(a);
+  const uint16x8_t a_sign_u16 = vshrq_n_u16(a_u16, 15);
+  const int16x8_t a_sign_s16 = vreinterpretq_s16_u16(a_sign_u16);
+  return vshrq_n_s16(vaddq_s16(vaddq_s16(a, a_sign_s16), one), 2);
+}
+
+// Add 1 if positive, 2 if negative, and shift by 2.
+// In practice, add 1, then add the sign bit, then shift without rounding.
+static INLINE int16x8_t add_round_shift_s32(const int32x4_t a_lo,
+                                            const int32x4_t a_hi) {
+  const int32x4_t one = vdupq_n_s32(1);
+  const uint32x4_t a_lo_u32 = vreinterpretq_u32_s32(a_lo);
+  const uint32x4_t a_lo_sign_u32 = vshrq_n_u32(a_lo_u32, 31);
+  const int32x4_t a_lo_sign_s32 = vreinterpretq_s32_u32(a_lo_sign_u32);
+  const int16x4_t b_lo =
+      vshrn_n_s32(vqaddq_s32(vqaddq_s32(a_lo, a_lo_sign_s32), one), 2);
+  const uint32x4_t a_hi_u32 = vreinterpretq_u32_s32(a_hi);
+  const uint32x4_t a_hi_sign_u32 = vshrq_n_u32(a_hi_u32, 31);
+  const int32x4_t a_hi_sign_s32 = vreinterpretq_s32_u32(a_hi_sign_u32);
+  const int16x4_t b_hi =
+      vshrn_n_s32(vqaddq_s32(vqaddq_s32(a_hi, a_hi_sign_s32), one), 2);
+  return vcombine_s16(b_lo, b_hi);
+}
+
 static INLINE void vpx_fdct4x4_pass1_neon(int16x4_t *in) {
   const int16x8_t input_01 = vcombine_s16(in[0], in[1]);
   const int16x8_t input_32 = vcombine_s16(in[3], in[2]);

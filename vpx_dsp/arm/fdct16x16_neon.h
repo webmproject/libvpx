@@ -13,6 +13,8 @@
 
 #include <arm_neon.h>
 
+#include "fdct_neon.h"
+
 static INLINE void load(const int16_t *a, int stride, int16x8_t *b /*[16]*/) {
   b[0] = vld1q_s16(a);
   a += stride;
@@ -72,45 +74,67 @@ static INLINE void store(tran_low_t *a, const int16x8_t *b /*[8]*/) {
 // To maybe reduce register usage this could be combined with the load() step to
 // get the first 4 and last 4 values, cross those, then load the middle 8 values
 // and cross them.
+static INLINE void scale_input(const int16x8_t *a /*[16]*/,
+                               int16x8_t *b /*[16]*/) {
+  b[0] = vshlq_n_s16(a[0], 2);
+  b[1] = vshlq_n_s16(a[1], 2);
+  b[2] = vshlq_n_s16(a[2], 2);
+  b[3] = vshlq_n_s16(a[3], 2);
+  b[4] = vshlq_n_s16(a[4], 2);
+  b[5] = vshlq_n_s16(a[5], 2);
+  b[6] = vshlq_n_s16(a[6], 2);
+  b[7] = vshlq_n_s16(a[7], 2);
+
+  b[8] = vshlq_n_s16(a[8], 2);
+  b[9] = vshlq_n_s16(a[9], 2);
+  b[10] = vshlq_n_s16(a[10], 2);
+  b[11] = vshlq_n_s16(a[11], 2);
+  b[12] = vshlq_n_s16(a[12], 2);
+  b[13] = vshlq_n_s16(a[13], 2);
+  b[14] = vshlq_n_s16(a[14], 2);
+  b[15] = vshlq_n_s16(a[15], 2);
+}
+
 static INLINE void cross_input(const int16x8_t *a /*[16]*/,
-                               int16x8_t *b /*[16]*/, const int pass) {
-  if (pass == 0) {
-    b[0] = vshlq_n_s16(vaddq_s16(a[0], a[15]), 2);
-    b[1] = vshlq_n_s16(vaddq_s16(a[1], a[14]), 2);
-    b[2] = vshlq_n_s16(vaddq_s16(a[2], a[13]), 2);
-    b[3] = vshlq_n_s16(vaddq_s16(a[3], a[12]), 2);
-    b[4] = vshlq_n_s16(vaddq_s16(a[4], a[11]), 2);
-    b[5] = vshlq_n_s16(vaddq_s16(a[5], a[10]), 2);
-    b[6] = vshlq_n_s16(vaddq_s16(a[6], a[9]), 2);
-    b[7] = vshlq_n_s16(vaddq_s16(a[7], a[8]), 2);
+                               int16x8_t *b /*[16]*/) {
+  b[0] = vaddq_s16(a[0], a[15]);
+  b[1] = vaddq_s16(a[1], a[14]);
+  b[2] = vaddq_s16(a[2], a[13]);
+  b[3] = vaddq_s16(a[3], a[12]);
+  b[4] = vaddq_s16(a[4], a[11]);
+  b[5] = vaddq_s16(a[5], a[10]);
+  b[6] = vaddq_s16(a[6], a[9]);
+  b[7] = vaddq_s16(a[7], a[8]);
 
-    b[8] = vshlq_n_s16(vsubq_s16(a[7], a[8]), 2);
-    b[9] = vshlq_n_s16(vsubq_s16(a[6], a[9]), 2);
-    b[10] = vshlq_n_s16(vsubq_s16(a[5], a[10]), 2);
-    b[11] = vshlq_n_s16(vsubq_s16(a[4], a[11]), 2);
-    b[12] = vshlq_n_s16(vsubq_s16(a[3], a[12]), 2);
-    b[13] = vshlq_n_s16(vsubq_s16(a[2], a[13]), 2);
-    b[14] = vshlq_n_s16(vsubq_s16(a[1], a[14]), 2);
-    b[15] = vshlq_n_s16(vsubq_s16(a[0], a[15]), 2);
-  } else {
-    b[0] = vaddq_s16(a[0], a[15]);
-    b[1] = vaddq_s16(a[1], a[14]);
-    b[2] = vaddq_s16(a[2], a[13]);
-    b[3] = vaddq_s16(a[3], a[12]);
-    b[4] = vaddq_s16(a[4], a[11]);
-    b[5] = vaddq_s16(a[5], a[10]);
-    b[6] = vaddq_s16(a[6], a[9]);
-    b[7] = vaddq_s16(a[7], a[8]);
+  b[8] = vsubq_s16(a[7], a[8]);
+  b[9] = vsubq_s16(a[6], a[9]);
+  b[10] = vsubq_s16(a[5], a[10]);
+  b[11] = vsubq_s16(a[4], a[11]);
+  b[12] = vsubq_s16(a[3], a[12]);
+  b[13] = vsubq_s16(a[2], a[13]);
+  b[14] = vsubq_s16(a[1], a[14]);
+  b[15] = vsubq_s16(a[0], a[15]);
+}
 
-    b[8] = vsubq_s16(a[7], a[8]);
-    b[9] = vsubq_s16(a[6], a[9]);
-    b[10] = vsubq_s16(a[5], a[10]);
-    b[11] = vsubq_s16(a[4], a[11]);
-    b[12] = vsubq_s16(a[3], a[12]);
-    b[13] = vsubq_s16(a[2], a[13]);
-    b[14] = vsubq_s16(a[1], a[14]);
-    b[15] = vsubq_s16(a[0], a[15]);
-  }
+static INLINE void load_cross(const int16_t *a, int stride,
+                              int16x8_t *b /*[16]*/) {
+  b[0] = vaddq_s16(vld1q_s16(a + 0 * stride), vld1q_s16(a + 15 * stride));
+  b[1] = vaddq_s16(vld1q_s16(a + 1 * stride), vld1q_s16(a + 14 * stride));
+  b[2] = vaddq_s16(vld1q_s16(a + 2 * stride), vld1q_s16(a + 13 * stride));
+  b[3] = vaddq_s16(vld1q_s16(a + 3 * stride), vld1q_s16(a + 12 * stride));
+  b[4] = vaddq_s16(vld1q_s16(a + 4 * stride), vld1q_s16(a + 11 * stride));
+  b[5] = vaddq_s16(vld1q_s16(a + 5 * stride), vld1q_s16(a + 10 * stride));
+  b[6] = vaddq_s16(vld1q_s16(a + 6 * stride), vld1q_s16(a + 9 * stride));
+  b[7] = vaddq_s16(vld1q_s16(a + 7 * stride), vld1q_s16(a + 8 * stride));
+
+  b[8] = vsubq_s16(vld1q_s16(a + 7 * stride), vld1q_s16(a + 8 * stride));
+  b[9] = vsubq_s16(vld1q_s16(a + 6 * stride), vld1q_s16(a + 9 * stride));
+  b[10] = vsubq_s16(vld1q_s16(a + 5 * stride), vld1q_s16(a + 10 * stride));
+  b[11] = vsubq_s16(vld1q_s16(a + 4 * stride), vld1q_s16(a + 11 * stride));
+  b[12] = vsubq_s16(vld1q_s16(a + 3 * stride), vld1q_s16(a + 12 * stride));
+  b[13] = vsubq_s16(vld1q_s16(a + 2 * stride), vld1q_s16(a + 13 * stride));
+  b[14] = vsubq_s16(vld1q_s16(a + 1 * stride), vld1q_s16(a + 14 * stride));
+  b[15] = vsubq_s16(vld1q_s16(a + 0 * stride), vld1q_s16(a + 15 * stride));
 }
 
 // Quarter round at the beginning of the second pass. Can't use vrshr (rounding)
@@ -133,45 +157,6 @@ static INLINE void partial_round_shift(int16x8_t *a /*[16]*/) {
   a[13] = vshrq_n_s16(vaddq_s16(a[13], one), 2);
   a[14] = vshrq_n_s16(vaddq_s16(a[14], one), 2);
   a[15] = vshrq_n_s16(vaddq_s16(a[15], one), 2);
-}
-
-// fdct_round_shift((a +/- b) * c)
-static INLINE void butterfly_one_coeff(const int16x8_t a, const int16x8_t b,
-                                       const tran_high_t c, int16x8_t *add,
-                                       int16x8_t *sub) {
-  const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), c);
-  const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), c);
-  const int32x4_t sum0 = vmlal_n_s16(a0, vget_low_s16(b), c);
-  const int32x4_t sum1 = vmlal_n_s16(a1, vget_high_s16(b), c);
-  const int32x4_t diff0 = vmlsl_n_s16(a0, vget_low_s16(b), c);
-  const int32x4_t diff1 = vmlsl_n_s16(a1, vget_high_s16(b), c);
-  const int16x4_t rounded0 = vqrshrn_n_s32(sum0, 14);
-  const int16x4_t rounded1 = vqrshrn_n_s32(sum1, 14);
-  const int16x4_t rounded2 = vqrshrn_n_s32(diff0, 14);
-  const int16x4_t rounded3 = vqrshrn_n_s32(diff1, 14);
-  *add = vcombine_s16(rounded0, rounded1);
-  *sub = vcombine_s16(rounded2, rounded3);
-}
-
-// fdct_round_shift(a * c0 +/- b * c1)
-static INLINE void butterfly_two_coeff(const int16x8_t a, const int16x8_t b,
-                                       const tran_coef_t c0,
-                                       const tran_coef_t c1, int16x8_t *add,
-                                       int16x8_t *sub) {
-  const int32x4_t a0 = vmull_n_s16(vget_low_s16(a), c0);
-  const int32x4_t a1 = vmull_n_s16(vget_high_s16(a), c0);
-  const int32x4_t a2 = vmull_n_s16(vget_low_s16(a), c1);
-  const int32x4_t a3 = vmull_n_s16(vget_high_s16(a), c1);
-  const int32x4_t sum0 = vmlal_n_s16(a2, vget_low_s16(b), c0);
-  const int32x4_t sum1 = vmlal_n_s16(a3, vget_high_s16(b), c0);
-  const int32x4_t diff0 = vmlsl_n_s16(a0, vget_low_s16(b), c1);
-  const int32x4_t diff1 = vmlsl_n_s16(a1, vget_high_s16(b), c1);
-  const int16x4_t rounded0 = vqrshrn_n_s32(sum0, 14);
-  const int16x4_t rounded1 = vqrshrn_n_s32(sum1, 14);
-  const int16x4_t rounded2 = vqrshrn_n_s32(diff0, 14);
-  const int16x4_t rounded3 = vqrshrn_n_s32(diff1, 14);
-  *add = vcombine_s16(rounded0, rounded1);
-  *sub = vcombine_s16(rounded2, rounded3);
 }
 
 // Main body of fdct16x16.
