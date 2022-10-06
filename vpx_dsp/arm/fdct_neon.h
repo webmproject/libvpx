@@ -340,4 +340,78 @@ static INLINE void vpx_fdct8x8_pass1_neon(int16x8_t *in) {
     // 07 17 27 37 47 57 67 77
   }
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE void highbd_butterfly_one_coeff_s32(const int32x4_t a,
+                                                  const int32x4_t b,
+                                                  const tran_high_t c,
+                                                  int32x4_t *add,
+                                                  int32x4_t *sub) {
+  const int32x2_t a_lo = vget_low_s32(a);
+  const int32x2_t a_hi = vget_high_s32(a);
+  const int32x2_t b_lo = vget_low_s32(b);
+  const int32x2_t b_hi = vget_high_s32(b);
+
+  const int64x2_t a64_lo = vmull_n_s32(a_lo, c);
+  const int64x2_t a64_hi = vmull_n_s32(a_hi, c);
+
+  const int64x2_t sum_lo = vmlal_n_s32(a64_lo, b_lo, c);
+  const int64x2_t sum_hi = vmlal_n_s32(a64_hi, b_hi, c);
+  const int64x2_t diff_lo = vmlsl_n_s32(a64_lo, b_lo, c);
+  const int64x2_t diff_hi = vmlsl_n_s32(a64_hi, b_hi, c);
+
+  *add = vcombine_s32(vrshrn_n_s64(sum_lo, DCT_CONST_BITS),
+                      vrshrn_n_s64(sum_hi, DCT_CONST_BITS));
+  *sub = vcombine_s32(vrshrn_n_s64(diff_lo, DCT_CONST_BITS),
+                      vrshrn_n_s64(diff_hi, DCT_CONST_BITS));
+}
+
+static INLINE void highbd_butterfly_two_coeff_s32(
+    const int32x4_t a, const int32x4_t b, const tran_coef_t c0,
+    const tran_coef_t c1, int32x4_t *add, int32x4_t *sub) {
+  const int32x2_t a_lo = vget_low_s32(a);
+  const int32x2_t a_hi = vget_high_s32(a);
+  const int32x2_t b_lo = vget_low_s32(b);
+  const int32x2_t b_hi = vget_high_s32(b);
+
+  const int64x2_t axc0_64_lo = vmull_n_s32(a_lo, c0);
+  const int64x2_t axc0_64_hi = vmull_n_s32(a_hi, c0);
+  const int64x2_t axc1_64_lo = vmull_n_s32(a_lo, c1);
+  const int64x2_t axc1_64_hi = vmull_n_s32(a_hi, c1);
+
+  const int64x2_t sum_lo = vmlal_n_s32(axc0_64_lo, b_lo, c1);
+  const int64x2_t sum_hi = vmlal_n_s32(axc0_64_hi, b_hi, c1);
+  const int64x2_t diff_lo = vmlsl_n_s32(axc1_64_lo, b_lo, c0);
+  const int64x2_t diff_hi = vmlsl_n_s32(axc1_64_hi, b_hi, c0);
+
+  *add = vcombine_s32(vrshrn_n_s64(sum_lo, DCT_CONST_BITS),
+                      vrshrn_n_s64(sum_hi, DCT_CONST_BITS));
+  *sub = vcombine_s32(vrshrn_n_s64(diff_lo, DCT_CONST_BITS),
+                      vrshrn_n_s64(diff_hi, DCT_CONST_BITS));
+}
+
+static INLINE void vpx_highbd_fdct4x4_pass1_neon(int32x4_t *in) {
+  int32x4_t out[4];
+  // in_0 +/- in_3, in_1 +/- in_2
+  const int32x4_t s_0 = vaddq_s32(in[0], in[3]);
+  const int32x4_t s_1 = vaddq_s32(in[1], in[2]);
+  const int32x4_t s_2 = vsubq_s32(in[1], in[2]);
+  const int32x4_t s_3 = vsubq_s32(in[0], in[3]);
+
+  highbd_butterfly_one_coeff_s32(s_0, s_1, cospi_16_64, &out[0], &out[2]);
+
+  // out[1] = s_3 * cospi_8_64 + s_2 * cospi_24_64
+  // out[3] = s_3 * cospi_24_64 - s_2 * cospi_8_64
+  highbd_butterfly_two_coeff_s32(s_3, s_2, cospi_8_64, cospi_24_64, &out[1],
+                                 &out[3]);
+
+  transpose_s32_4x4(&out[0], &out[1], &out[2], &out[3]);
+
+  in[0] = out[0];
+  in[1] = out[1];
+  in[2] = out[2];
+  in[3] = out[3];
+}
+
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // VPX_VPX_DSP_ARM_FDCT_NEON_H_
