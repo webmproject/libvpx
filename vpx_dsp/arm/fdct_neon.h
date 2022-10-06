@@ -342,6 +342,20 @@ static INLINE void vpx_fdct8x8_pass1_neon(int16x8_t *in) {
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
+static INLINE int32x4_t highbd_add_round_shift_s32(int32x4_t x) {
+  const int32x2_t x_lo = vget_low_s32(x);
+  const int32x2_t x_hi = vget_high_s32(x);
+  const int64x2_t x64_lo = vmovl_s32(x_lo);
+  const int64x2_t x64_hi = vmovl_s32(x_hi);
+
+  const int64x2_t sign_lo = (int64x2_t)vshrq_n_u64((uint64x2_t)x64_lo, 63);
+  const int64x2_t sign_hi = (int64x2_t)vshrq_n_u64((uint64x2_t)x64_hi, 63);
+
+  const int64x2_t sum_lo = vaddq_s64(x64_lo, sign_lo);
+  const int64x2_t sum_hi = vaddq_s64(x64_hi, sign_hi);
+  return vcombine_s32(vshrn_n_s64(sum_lo, 1), vshrn_n_s64(sum_hi, 1));
+}
+
 static INLINE void highbd_butterfly_one_coeff_s32(const int32x4_t a,
                                                   const int32x4_t b,
                                                   const tran_high_t c,
@@ -411,6 +425,136 @@ static INLINE void vpx_highbd_fdct4x4_pass1_neon(int32x4_t *in) {
   in[1] = out[1];
   in[2] = out[2];
   in[3] = out[3];
+}
+
+static INLINE void vpx_highbd_fdct8x8_pass1_notranspose_neon(int32x4_t *left,
+                                                             int32x4_t *right) {
+  int32x4_t sl[8], sr[8], xl[4], xr[4], tl[4], tr[4];
+
+  sl[0] = vaddq_s32(left[0], left[7]);
+  sl[1] = vaddq_s32(left[1], left[6]);
+  sl[2] = vaddq_s32(left[2], left[5]);
+  sl[3] = vaddq_s32(left[3], left[4]);
+  sl[4] = vsubq_s32(left[3], left[4]);
+  sl[5] = vsubq_s32(left[2], left[5]);
+  sl[6] = vsubq_s32(left[1], left[6]);
+  sl[7] = vsubq_s32(left[0], left[7]);
+  sr[0] = vaddq_s32(right[0], right[7]);
+  sr[1] = vaddq_s32(right[1], right[6]);
+  sr[2] = vaddq_s32(right[2], right[5]);
+  sr[3] = vaddq_s32(right[3], right[4]);
+  sr[4] = vsubq_s32(right[3], right[4]);
+  sr[5] = vsubq_s32(right[2], right[5]);
+  sr[6] = vsubq_s32(right[1], right[6]);
+  sr[7] = vsubq_s32(right[0], right[7]);
+
+  // fdct4(step, step);
+  // x0 = s0 + s3;
+  xl[0] = vaddq_s32(sl[0], sl[3]);
+  xr[0] = vaddq_s32(sr[0], sr[3]);
+  // x1 = s1 + s2;
+  xl[1] = vaddq_s32(sl[1], sl[2]);
+  xr[1] = vaddq_s32(sr[1], sr[2]);
+  // x2 = s1 - s2;
+  xl[2] = vsubq_s32(sl[1], sl[2]);
+  xr[2] = vsubq_s32(sr[1], sr[2]);
+  // x3 = s0 - s3;
+  xl[3] = vsubq_s32(sl[0], sl[3]);
+  xr[3] = vsubq_s32(sr[0], sr[3]);
+
+  // fdct4(step, step);
+  // t0 = (x0 + x1) * cospi_16_64;
+  // t1 = (x0 - x1) * cospi_16_64;
+  // out[0] = (tran_low_t)fdct_round_shift(t0);
+  // out[4] = (tran_low_t)fdct_round_shift(t1);
+  highbd_butterfly_one_coeff_s32(xl[0], xl[1], cospi_16_64, &left[0], &left[4]);
+  highbd_butterfly_one_coeff_s32(xr[0], xr[1], cospi_16_64, &right[0],
+                                 &right[4]);
+  // t2 = x2 * cospi_24_64 + x3 * cospi_8_64;
+  // t3 = -x2 * cospi_8_64 + x3 * cospi_24_64;
+  // out[2] = (tran_low_t)fdct_round_shift(t2);
+  // out[6] = (tran_low_t)fdct_round_shift(t3);
+  highbd_butterfly_two_coeff_s32(xl[3], xl[2], cospi_8_64, cospi_24_64,
+                                 &left[2], &left[6]);
+  highbd_butterfly_two_coeff_s32(xr[3], xr[2], cospi_8_64, cospi_24_64,
+                                 &right[2], &right[6]);
+
+  // Stage 2
+  // t0 = (s6 - s5) * cospi_16_64;
+  highbd_butterfly_one_coeff_s32(sl[6], sl[5], cospi_16_64, &tl[1], &tl[0]);
+  highbd_butterfly_one_coeff_s32(sr[6], sr[5], cospi_16_64, &tr[1], &tr[0]);
+
+  // Stage 3
+  xl[0] = vaddq_s32(sl[4], tl[0]);
+  xr[0] = vaddq_s32(sr[4], tr[0]);
+  xl[1] = vsubq_s32(sl[4], tl[0]);
+  xr[1] = vsubq_s32(sr[4], tr[0]);
+  xl[2] = vsubq_s32(sl[7], tl[1]);
+  xr[2] = vsubq_s32(sr[7], tr[1]);
+  xl[3] = vaddq_s32(sl[7], tl[1]);
+  xr[3] = vaddq_s32(sr[7], tr[1]);
+
+  // Stage 4
+  // t0 = x0 * cospi_28_64 + x3 * cospi_4_64;
+  // out[1] = (tran_low_t)fdct_round_shift(t0);
+  // t3 = x3 * cospi_28_64 + x0 * -cospi_4_64;
+  // out[7] = (tran_low_t)fdct_round_shift(t3);
+  highbd_butterfly_two_coeff_s32(xl[3], xl[0], cospi_4_64, cospi_28_64,
+                                 &left[1], &left[7]);
+  highbd_butterfly_two_coeff_s32(xr[3], xr[0], cospi_4_64, cospi_28_64,
+                                 &right[1], &right[7]);
+
+  // t1 = x1 * cospi_12_64 + x2 * cospi_20_64;
+  // out[5] = (tran_low_t)fdct_round_shift(t1);
+  // t2 = x2 * cospi_12_64 + x1 * -cospi_20_64;
+  // out[3] = (tran_low_t)fdct_round_shift(t2);
+  highbd_butterfly_two_coeff_s32(xl[2], xl[1], cospi_20_64, cospi_12_64,
+                                 &left[5], &left[3]);
+  highbd_butterfly_two_coeff_s32(xr[2], xr[1], cospi_20_64, cospi_12_64,
+                                 &right[5], &right[3]);
+}
+
+static INLINE void vpx_highbd_fdct8x8_pass1_neon(int32x4_t *left,
+                                                 int32x4_t *right) {
+  int32x4x2_t out[8];
+  vpx_highbd_fdct8x8_pass1_notranspose_neon(left, right);
+
+  out[0].val[0] = left[0];
+  out[0].val[1] = right[0];
+  out[1].val[0] = left[1];
+  out[1].val[1] = right[1];
+  out[2].val[0] = left[2];
+  out[2].val[1] = right[2];
+  out[3].val[0] = left[3];
+  out[3].val[1] = right[3];
+  out[4].val[0] = left[4];
+  out[4].val[1] = right[4];
+  out[5].val[0] = left[5];
+  out[5].val[1] = right[5];
+  out[6].val[0] = left[6];
+  out[6].val[1] = right[6];
+  out[7].val[0] = left[7];
+  out[7].val[1] = right[7];
+
+  transpose_s32_8x8(&out[0], &out[1], &out[2], &out[3], &out[4], &out[5],
+                    &out[6], &out[7]);
+
+  left[0] = out[0].val[0];
+  right[0] = out[0].val[1];
+  left[1] = out[1].val[0];
+  right[1] = out[1].val[1];
+  left[2] = out[2].val[0];
+  right[2] = out[2].val[1];
+  left[3] = out[3].val[0];
+  right[3] = out[3].val[1];
+  left[4] = out[4].val[0];
+  right[4] = out[4].val[1];
+  left[5] = out[5].val[0];
+  right[5] = out[5].val[1];
+  left[6] = out[6].val[0];
+  right[6] = out[6].val[1];
+  left[7] = out[7].val[0];
+  right[7] = out[7].val[1];
 }
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH

@@ -543,12 +543,12 @@ INSTANTIATE_TEST_SUITE_P(AVX2, TransDCT,
 static const FuncInfo dct_neon_func_info[] = {
   { &fdct_wrapper<vpx_highbd_fdct4x4_neon>,
     &highbd_idct_wrapper<vpx_highbd_idct4x4_16_add_neon>, 4, 2 },
-  /*  { &fdct_wrapper<vpx_highbd_fdct8x8_neon>,
-      &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_neon>, 8, 2 },
-    { &fdct_wrapper<vpx_highbd_fdct16x16_neon>,
-     &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_neon>, 16, 2 },
-    { &fdct_wrapper<vpx_highbd_fdct32x32_neon>,
-      &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_neon>, 32, 2 },*/
+  { &fdct_wrapper<vpx_highbd_fdct8x8_neon>,
+    &highbd_idct_wrapper<vpx_highbd_idct8x8_64_add_neon>, 8, 2 },
+  /*    { &fdct_wrapper<vpx_highbd_fdct16x16_neon>,
+       &highbd_idct_wrapper<vpx_highbd_idct16x16_256_add_neon>, 16, 2 },
+      { &fdct_wrapper<vpx_highbd_fdct32x32_neon>,
+        &highbd_idct_wrapper<vpx_highbd_idct32x32_1024_add_neon>, 32, 2 },*/
 };
 #else
 static const FuncInfo dct_neon_func_info[4] = {

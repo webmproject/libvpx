@@ -66,3 +66,81 @@ void vpx_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
     store_s16q_to_tran_low(final_output + 7 * 8, in[7]);
   }
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+
+void vpx_highbd_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
+                             int stride) {
+  int i;
+
+  // input[M * stride] * 16
+  int32x4_t left[8], right[8];
+  int16x8_t in[8];
+  in[0] = vld1q_s16(input + 0 * stride);
+  in[1] = vld1q_s16(input + 1 * stride);
+  in[2] = vld1q_s16(input + 2 * stride);
+  in[3] = vld1q_s16(input + 3 * stride);
+  in[4] = vld1q_s16(input + 4 * stride);
+  in[5] = vld1q_s16(input + 5 * stride);
+  in[6] = vld1q_s16(input + 6 * stride);
+  in[7] = vld1q_s16(input + 7 * stride);
+
+  left[0] = vshll_n_s16(vget_low_s16(in[0]), 2);
+  left[1] = vshll_n_s16(vget_low_s16(in[1]), 2);
+  left[2] = vshll_n_s16(vget_low_s16(in[2]), 2);
+  left[3] = vshll_n_s16(vget_low_s16(in[3]), 2);
+  left[4] = vshll_n_s16(vget_low_s16(in[4]), 2);
+  left[5] = vshll_n_s16(vget_low_s16(in[5]), 2);
+  left[6] = vshll_n_s16(vget_low_s16(in[6]), 2);
+  left[7] = vshll_n_s16(vget_low_s16(in[7]), 2);
+  right[0] = vshll_n_s16(vget_high_s16(in[0]), 2);
+  right[1] = vshll_n_s16(vget_high_s16(in[1]), 2);
+  right[2] = vshll_n_s16(vget_high_s16(in[2]), 2);
+  right[3] = vshll_n_s16(vget_high_s16(in[3]), 2);
+  right[4] = vshll_n_s16(vget_high_s16(in[4]), 2);
+  right[5] = vshll_n_s16(vget_high_s16(in[5]), 2);
+  right[6] = vshll_n_s16(vget_high_s16(in[6]), 2);
+  right[7] = vshll_n_s16(vget_high_s16(in[7]), 2);
+
+  for (i = 0; i < 2; ++i) {
+    vpx_highbd_fdct8x8_pass1_neon(left, right);
+  }
+  {
+    left[0] = highbd_add_round_shift_s32(left[0]);
+    left[1] = highbd_add_round_shift_s32(left[1]);
+    left[2] = highbd_add_round_shift_s32(left[2]);
+    left[3] = highbd_add_round_shift_s32(left[3]);
+    left[4] = highbd_add_round_shift_s32(left[4]);
+    left[5] = highbd_add_round_shift_s32(left[5]);
+    left[6] = highbd_add_round_shift_s32(left[6]);
+    left[7] = highbd_add_round_shift_s32(left[7]);
+    right[0] = highbd_add_round_shift_s32(right[0]);
+    right[1] = highbd_add_round_shift_s32(right[1]);
+    right[2] = highbd_add_round_shift_s32(right[2]);
+    right[3] = highbd_add_round_shift_s32(right[3]);
+    right[4] = highbd_add_round_shift_s32(right[4]);
+    right[5] = highbd_add_round_shift_s32(right[5]);
+    right[6] = highbd_add_round_shift_s32(right[6]);
+    right[7] = highbd_add_round_shift_s32(right[7]);
+
+    // store results
+    vst1q_s32(final_output, left[0]);
+    vst1q_s32(final_output + 4, right[0]);
+    vst1q_s32(final_output + 8, left[1]);
+    vst1q_s32(final_output + 12, right[1]);
+    vst1q_s32(final_output + 16, left[2]);
+    vst1q_s32(final_output + 20, right[2]);
+    vst1q_s32(final_output + 24, left[3]);
+    vst1q_s32(final_output + 28, right[3]);
+    vst1q_s32(final_output + 32, left[4]);
+    vst1q_s32(final_output + 36, right[4]);
+    vst1q_s32(final_output + 40, left[5]);
+    vst1q_s32(final_output + 44, right[5]);
+    vst1q_s32(final_output + 48, left[6]);
+    vst1q_s32(final_output + 52, right[6]);
+    vst1q_s32(final_output + 56, left[7]);
+    vst1q_s32(final_output + 60, right[7]);
+  }
+}
+
+#endif  // CONFIG_VP9_HIGHBITDEPTH
