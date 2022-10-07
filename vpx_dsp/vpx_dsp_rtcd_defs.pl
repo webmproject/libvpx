@@ -941,10 +941,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Single block SAD
   #
   add_proto qw/unsigned int vpx_highbd_sad64x64/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-  specialize qw/vpx_highbd_sad64x64 sse2 neon/;
+  specialize qw/vpx_highbd_sad64x64 sse2 neon avx2/;
 
   add_proto qw/unsigned int vpx_highbd_sad64x32/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
-  specialize qw/vpx_highbd_sad64x32 sse2 neon/;
+  specialize qw/vpx_highbd_sad64x32 sse2 neon avx2/;
 
   add_proto qw/unsigned int vpx_highbd_sad32x64/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride";
   specialize qw/vpx_highbd_sad32x64 sse2 neon avx2/;
