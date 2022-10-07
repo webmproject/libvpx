@@ -74,5 +74,58 @@ void vpx_fdct16x16_neon(const int16_t *input, tran_low_t *output, int stride) {
   store(output, temp1);
   store(output + 8, temp1 + 8);
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+
+void vpx_highbd_fdct16x16_neon(const int16_t *input, tran_low_t *output,
+                               int stride) {
+  int16x8_t temp0[16];
+  int32x4_t left1[16], left2[16], left3[16], left4[16], right1[16], right2[16],
+      right3[16], right4[16];
+
+  // Left half.
+  load_cross(input, stride, temp0);
+  highbd_scale_input(temp0, left1, right1);
+  vpx_highbd_fdct16x16_body(left1, right1);
+
+  // right half.
+  load_cross(input + 8, stride, temp0);
+  highbd_scale_input(temp0, left2, right2);
+  vpx_highbd_fdct16x16_body(left2, right2);
+
+  // Transpose top left and top right quarters into one contiguous location to
+  // process to the top half.
+
+  transpose_s32_8x8_2(left1, right1, left3, right3);
+  transpose_s32_8x8_2(left2, right2, left3 + 8, right3 + 8);
+  transpose_s32_8x8_2(left1 + 8, right1 + 8, left4, right4);
+  transpose_s32_8x8_2(left2 + 8, right2 + 8, left4 + 8, right4 + 8);
+
+  highbd_partial_round_shift(left3, right3);
+  highbd_cross_input(left3, right3, left1, right1);
+  vpx_highbd_fdct16x16_body(left1, right1);
+
+  // Transpose bottom left and bottom right quarters into one contiguous
+  // location to process to the bottom half.
+
+  highbd_partial_round_shift(left4, right4);
+  highbd_cross_input(left4, right4, left2, right2);
+  vpx_highbd_fdct16x16_body(left2, right2);
+
+  transpose_s32_8x8_2(left1, right1, left3, right3);
+  transpose_s32_8x8_2(left2, right2, left3 + 8, right3 + 8);
+  transpose_s32_8x8_2(left1 + 8, right1 + 8, left4, right4);
+  transpose_s32_8x8_2(left2 + 8, right2 + 8, left4 + 8, right4 + 8);
+  store16_s32(output, left3);
+  output += 4;
+  store16_s32(output, right3);
+  output += 4;
+
+  store16_s32(output, left4);
+  output += 4;
+  store16_s32(output, right4);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 #endif  // !defined(__clang__) && !defined(__ANDROID__) && defined(__GNUC__) &&
         // __GNUC__ == 4 && __GNUC_MINOR__ == 9 && __GNUC_PATCHLEVEL__ < 4
