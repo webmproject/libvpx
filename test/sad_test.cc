@@ -317,7 +317,7 @@ class SADTest : public AbstractBench, public SADTestBase<SadMxNParam> {
   }
 };
 
-class SADavgTest : public SADTestBase<SadMxNAvgParam> {
+class SADavgTest : public AbstractBench, public SADTestBase<SadMxNAvgParam> {
  public:
   SADavgTest() : SADTestBase(GetParam()) {}
 
@@ -337,6 +337,11 @@ class SADavgTest : public SADTestBase<SadMxNAvgParam> {
     const unsigned int exp_sad = SAD_avg(0);
 
     ASSERT_EQ(reference_sad, exp_sad);
+  }
+
+  void Run() {
+    params_.func(source_data_, source_stride_, reference_data_,
+                 reference_stride_, second_pred_);
   }
 };
 
@@ -435,6 +440,19 @@ TEST_P(SADavgTest, ShortSrc) {
   FillRandom(second_pred_, params_.width);
   CheckSAD();
   source_stride_ = tmp_stride;
+}
+
+TEST_P(SADavgTest, DISABLED_Speed) {
+  const int kCountSpeedTestBlock = 50000000 / (params_.width * params_.height);
+  FillRandom(source_data_, source_stride_);
+  FillRandom(reference_data_, reference_stride_);
+  FillRandom(second_pred_, params_.width);
+
+  RunNTimes(kCountSpeedTestBlock);
+
+  char title[16];
+  snprintf(title, sizeof(title), "%dx%d", params_.width, params_.height);
+  PrintMedian(title);
 }
 
 TEST_P(SADx4Test, MaxRef) {
