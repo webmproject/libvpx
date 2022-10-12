@@ -1119,6 +1119,17 @@ const SadMxNAvgParam avg_avx2_tests[] = {
   SadMxNAvgParam(32, 64, &vpx_sad32x64_avg_avx2),
   SadMxNAvgParam(32, 32, &vpx_sad32x32_avg_avx2),
   SadMxNAvgParam(32, 16, &vpx_sad32x16_avg_avx2),
+#if CONFIG_VP9_HIGHBITDEPTH
+  SadMxNAvgParam(16, 32, &vpx_highbd_sad16x32_avg_avx2, 8),
+  SadMxNAvgParam(16, 16, &vpx_highbd_sad16x16_avg_avx2, 8),
+  SadMxNAvgParam(16, 8, &vpx_highbd_sad16x8_avg_avx2, 8),
+  SadMxNAvgParam(16, 32, &vpx_highbd_sad16x32_avg_avx2, 10),
+  SadMxNAvgParam(16, 16, &vpx_highbd_sad16x16_avg_avx2, 10),
+  SadMxNAvgParam(16, 8, &vpx_highbd_sad16x8_avg_avx2, 10),
+  SadMxNAvgParam(16, 32, &vpx_highbd_sad16x32_avg_avx2, 12),
+  SadMxNAvgParam(16, 16, &vpx_highbd_sad16x16_avg_avx2, 12),
+  SadMxNAvgParam(16, 8, &vpx_highbd_sad16x8_avg_avx2, 12),
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 };
 INSTANTIATE_TEST_SUITE_P(AVX2, SADavgTest, ::testing::ValuesIn(avg_avx2_tests));
 
