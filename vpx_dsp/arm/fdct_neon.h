@@ -358,7 +358,7 @@ static INLINE int32x4_t highbd_add_round_shift_s32(int32x4_t x) {
 
 static INLINE void highbd_butterfly_one_coeff_s32(const int32x4_t a,
                                                   const int32x4_t b,
-                                                  const tran_high_t c,
+                                                  const tran_coef_t c,
                                                   int32x4_t *add,
                                                   int32x4_t *sub) {
   const int32x2_t a_lo = vget_low_s32(a);
