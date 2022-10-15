@@ -713,6 +713,8 @@ void vp8_initialize_enc(void);
 
 void vp8_alloc_compressor_data(VP8_COMP *cpi);
 int vp8_reverse_trans(int x);
+void vp8_reset_temporal_layer_change(VP8_COMP *cpi, VP8_CONFIG *oxcf,
+                                     const int prev_num_layers);
 void vp8_init_temporal_layer_context(VP8_COMP *cpi, VP8_CONFIG *oxcf,
                                      const int layer,
                                      double prev_layer_framerate);
