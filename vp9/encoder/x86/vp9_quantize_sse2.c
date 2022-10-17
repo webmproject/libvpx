@@ -89,6 +89,7 @@ void vp9_quantize_fp_sse2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
              _mm_movemask_epi8(_mm_cmpgt_epi16(qcoeff1, thr));
 
     if (nzflag) {
+      __m128i eob0;
       qcoeff0 = _mm_adds_epi16(qcoeff0, round);
       qcoeff1 = _mm_adds_epi16(qcoeff1, round);
       qcoeff0 = _mm_mulhi_epi16(qcoeff0, quant);
@@ -101,11 +102,14 @@ void vp9_quantize_fp_sse2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       store_tran_low(qcoeff0, qcoeff_ptr + index);
       store_tran_low(qcoeff1, qcoeff_ptr + index + 8);
 
-      coeff0 = _mm_mullo_epi16(qcoeff0, dequant);
-      coeff1 = _mm_mullo_epi16(qcoeff1, dequant);
+      qcoeff0 = _mm_mullo_epi16(qcoeff0, dequant);
+      qcoeff1 = _mm_mullo_epi16(qcoeff1, dequant);
 
-      store_tran_low(coeff0, dqcoeff_ptr + index);
-      store_tran_low(coeff1, dqcoeff_ptr + index + 8);
+      store_tran_low(qcoeff0, dqcoeff_ptr + index);
+      store_tran_low(qcoeff1, dqcoeff_ptr + index + 8);
+
+      eob0 = scan_for_eob(&qcoeff0, &qcoeff1, iscan, index, zero);
+      eob = _mm_max_epi16(eob, eob0);
     } else {
       store_zero_tran_low(qcoeff_ptr + index);
       store_zero_tran_low(qcoeff_ptr + index + 8);
@@ -114,10 +118,6 @@ void vp9_quantize_fp_sse2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
       store_zero_tran_low(dqcoeff_ptr + index + 8);
     }
 
-    if (nzflag) {
-      const __m128i eob0 = scan_for_eob(&coeff0, &coeff1, iscan, index, zero);
-      eob = _mm_max_epi16(eob, eob0);
-    }
     index += 16;
   }
 
