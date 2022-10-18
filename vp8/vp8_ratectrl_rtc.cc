@@ -163,20 +163,24 @@ void VP8RateControlRTC::UpdateRateControl(
   cm->MBs = cm->mb_rows * cm->mb_cols;
   cm->mode_info_stride = cm->mb_cols + 1;
 
-  oxcf->starting_buffer_level =
-      rescale((int)oxcf->starting_buffer_level, oxcf->target_bandwidth, 1000);
-  /* Set or reset optimal and maximum buffer levels. */
-  if (oxcf->optimal_buffer_level == 0) {
-    oxcf->optimal_buffer_level = oxcf->target_bandwidth / 8;
-  } else {
-    oxcf->optimal_buffer_level =
-        rescale((int)oxcf->optimal_buffer_level, oxcf->target_bandwidth, 1000);
-  }
-  if (oxcf->maximum_buffer_size == 0) {
-    oxcf->maximum_buffer_size = oxcf->target_bandwidth / 8;
-  } else {
-    oxcf->maximum_buffer_size =
-        rescale((int)oxcf->maximum_buffer_size, oxcf->target_bandwidth, 1000);
+  // For temporal layers: starting/maximum/optimal_buffer_level is already set
+  // via vp8_init_temporal_layer_context() or vp8_reset_temporal_layer_change().
+  if (oxcf->number_of_layers <= 1 && prev_number_of_layers <= 1) {
+    oxcf->starting_buffer_level =
+        rescale((int)oxcf->starting_buffer_level, oxcf->target_bandwidth, 1000);
+    /* Set or reset optimal and maximum buffer levels. */
+    if (oxcf->optimal_buffer_level == 0) {
+      oxcf->optimal_buffer_level = oxcf->target_bandwidth / 8;
+    } else {
+      oxcf->optimal_buffer_level = rescale((int)oxcf->optimal_buffer_level,
+                                           oxcf->target_bandwidth, 1000);
+    }
+    if (oxcf->maximum_buffer_size == 0) {
+      oxcf->maximum_buffer_size = oxcf->target_bandwidth / 8;
+    } else {
+      oxcf->maximum_buffer_size =
+          rescale((int)oxcf->maximum_buffer_size, oxcf->target_bandwidth, 1000);
+    }
   }
 
   if (cpi_->bits_off_target > oxcf->maximum_buffer_size) {
