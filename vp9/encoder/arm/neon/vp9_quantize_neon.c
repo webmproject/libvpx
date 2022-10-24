@@ -257,7 +257,7 @@ highbd_quantize_fp_4(const tran_low_t *coeff_ptr, tran_low_t *qcoeff_ptr,
   return vmovn_u32(vceqq_s32(v_abs_qcoeff, vdupq_n_s32(0)));
 }
 
-void vp9_highbd_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
+void vp9_highbd_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                                  const int16_t *round_ptr,
                                  const int16_t *quant_ptr,
                                  tran_low_t *qcoeff_ptr,
@@ -294,7 +294,7 @@ void vp9_highbd_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
   v_eobmax =
       get_max_lane_eob(iscan, v_eobmax, vcombine_u16(v_mask_lo, v_mask_hi));
 
-  count -= 8;
+  n_coeffs -= 8;
   do {
     coeff_ptr += 8;
     qcoeff_ptr += 8;
@@ -308,8 +308,8 @@ void vp9_highbd_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
     // Find the max lane eob for 8 coeffs.
     v_eobmax =
         get_max_lane_eob(iscan, v_eobmax, vcombine_u16(v_mask_lo, v_mask_hi));
-    count -= 8;
-  } while (count);
+    n_coeffs -= 8;
+  } while (n_coeffs);
 
   *eob_ptr = get_max_eob(v_eobmax);
 }
@@ -349,7 +349,7 @@ highbd_quantize_fp_32x32_4(const tran_low_t *coeff_ptr, tran_low_t *qcoeff_ptr,
 }
 
 void vp9_highbd_quantize_fp_32x32_neon(
-    const tran_low_t *coeff_ptr, intptr_t count, const int16_t *round_ptr,
+    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *round_ptr,
     const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
     const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan,
     const int16_t *iscan) {
@@ -385,7 +385,7 @@ void vp9_highbd_quantize_fp_32x32_neon(
   v_eobmax =
       get_max_lane_eob(iscan, v_eobmax, vcombine_u16(v_mask_lo, v_mask_hi));
 
-  count -= 8;
+  n_coeffs -= 8;
   do {
     coeff_ptr += 8;
     qcoeff_ptr += 8;
@@ -400,8 +400,8 @@ void vp9_highbd_quantize_fp_32x32_neon(
     // Find the max lane eob for 8 coeffs.
     v_eobmax =
         get_max_lane_eob(iscan, v_eobmax, vcombine_u16(v_mask_lo, v_mask_hi));
-    count -= 8;
-  } while (count);
+    n_coeffs -= 8;
+  } while (n_coeffs);
 
   *eob_ptr = get_max_eob(v_eobmax);
 }
