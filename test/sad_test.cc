@@ -311,7 +311,7 @@ class SADTest : public AbstractBench, public SADTestBase<SadMxNParam> {
     ASSERT_EQ(reference_sad, exp_sad);
   }
 
-  void Run() {
+  void Run() override {
     params_.func(source_data_, source_stride_, reference_data_,
                  reference_stride_);
   }
@@ -339,7 +339,7 @@ class SADavgTest : public AbstractBench, public SADTestBase<SadMxNAvgParam> {
     ASSERT_EQ(reference_sad, exp_sad);
   }
 
-  void Run() {
+  void Run() override {
     params_.func(source_data_, source_stride_, reference_data_,
                  reference_stride_, second_pred_);
   }
