@@ -52,10 +52,10 @@ static VPX_FORCE_INLINE void highbd_sad64xH(__m256i *sums_16,
 
 #define HIGHBD_SAD64XN(n)                                                    \
   unsigned int vpx_highbd_sad64x##n##_avx2(                                  \
-      const uint8_t *src8_ptr, int src_stride, const uint8_t *ref8_ptr,      \
+      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr,        \
       int ref_stride) {                                                      \
-    const uint16_t *src = CONVERT_TO_SHORTPTR(src8_ptr);                     \
-    uint16_t *ref = CONVERT_TO_SHORTPTR(ref8_ptr);                           \
+    const uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                      \
+    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                            \
     __m256i sums_32 = _mm256_setzero_si256();                                \
     int i;                                                                   \
                                                                              \
@@ -109,10 +109,10 @@ static VPX_FORCE_INLINE void highbd_sad32xH(__m256i *sums_16,
 
 #define HIGHBD_SAD32XN(n)                                                    \
   unsigned int vpx_highbd_sad32x##n##_avx2(                                  \
-      const uint8_t *src8_ptr, int src_stride, const uint8_t *ref8_ptr,      \
+      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr,        \
       int ref_stride) {                                                      \
-    const uint16_t *src = CONVERT_TO_SHORTPTR(src8_ptr);                     \
-    uint16_t *ref = CONVERT_TO_SHORTPTR(ref8_ptr);                           \
+    const uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                      \
+    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                            \
     __m256i sums_32 = _mm256_setzero_si256();                                \
     int i;                                                                   \
                                                                              \
@@ -167,10 +167,10 @@ static VPX_FORCE_INLINE void highbd_sad16xH(__m256i *sums_16,
   }
 }
 
-unsigned int vpx_highbd_sad16x32_avx2(const uint8_t *src8_ptr, int src_stride,
-                                      const uint8_t *ref8_ptr, int ref_stride) {
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8_ptr);
-  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8_ptr);
+unsigned int vpx_highbd_sad16x32_avx2(const uint8_t *src_ptr, int src_stride,
+                                      const uint8_t *ref_ptr, int ref_stride) {
+  const uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);
+  uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);
   __m256i sums_32 = _mm256_setzero_si256();
   int i;
 
@@ -192,10 +192,10 @@ unsigned int vpx_highbd_sad16x32_avx2(const uint8_t *src8_ptr, int src_stride,
   return calc_final(sums_32);
 }
 
-unsigned int vpx_highbd_sad16x16_avx2(const uint8_t *src8_ptr, int src_stride,
-                                      const uint8_t *ref8_ptr, int ref_stride) {
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8_ptr);
-  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8_ptr);
+unsigned int vpx_highbd_sad16x16_avx2(const uint8_t *src_ptr, int src_stride,
+                                      const uint8_t *ref_ptr, int ref_stride) {
+  const uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);
+  uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);
   __m256i sums_16 = _mm256_setzero_si256();
 
   highbd_sad16xH(&sums_16, src, src_stride, ref, ref_stride, 16);
@@ -208,10 +208,10 @@ unsigned int vpx_highbd_sad16x16_avx2(const uint8_t *src8_ptr, int src_stride,
   }
 }
 
-unsigned int vpx_highbd_sad16x8_avx2(const uint8_t *src8_ptr, int src_stride,
-                                     const uint8_t *ref8_ptr, int ref_stride) {
-  const uint16_t *src = CONVERT_TO_SHORTPTR(src8_ptr);
-  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8_ptr);
+unsigned int vpx_highbd_sad16x8_avx2(const uint8_t *src_ptr, int src_stride,
+                                     const uint8_t *ref_ptr, int ref_stride) {
+  const uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);
+  uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);
   __m256i sums_16 = _mm256_setzero_si256();
 
   highbd_sad16xH(&sums_16, src, src_stride, ref, ref_stride, 8);
