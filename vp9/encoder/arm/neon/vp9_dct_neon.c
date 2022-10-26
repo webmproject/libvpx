@@ -18,6 +18,8 @@
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/transpose_neon.h"
 #include "vpx_dsp/arm/fdct_neon.h"
+#include "vpx_dsp/arm/fdct4x4_neon.h"
+#include "vpx_dsp/arm/fdct8x8_neon.h"
 
 static INLINE void load_buffer_4x4(const int16_t *input, int16x8_t *in,
                                    int stride) {
@@ -130,12 +132,14 @@ void vp9_fht4x4_neon(const int16_t *input, tran_low_t *output, int stride,
     case ADST_DCT:
       load_buffer_4x4(input, in, stride);
       fadst4x4_neon(in);
-      vpx_fdct4x4_pass1_neon((int16x4_t *)in);
+      // pass1 variant is not accurate enough
+      vpx_fdct4x4_pass2_neon((int16x4_t *)in);
       write_buffer_4x4(output, in);
       break;
     case DCT_ADST:
       load_buffer_4x4(input, in, stride);
-      vpx_fdct4x4_pass1_neon((int16x4_t *)in);
+      // pass1 variant is not accurate enough
+      vpx_fdct4x4_pass2_neon((int16x4_t *)in);
       fadst4x4_neon(in);
       write_buffer_4x4(output, in);
       break;
@@ -488,13 +492,15 @@ void vp9_fht8x8_neon(const int16_t *input, tran_low_t *output, int stride,
     case ADST_DCT:
       load_buffer_8x8(input, in, stride);
       fadst8x8_neon(in);
-      vpx_fdct8x8_pass1_neon(in);
+      // pass1 variant is not accurate enough
+      vpx_fdct8x8_pass2_neon(in);
       right_shift_8x8(in, 1);
       write_buffer_8x8(output, in, 8);
       break;
     case DCT_ADST:
       load_buffer_8x8(input, in, stride);
-      vpx_fdct8x8_pass1_neon(in);
+      // pass1 variant is not accurate enough
+      vpx_fdct8x8_pass2_neon(in);
       fadst8x8_neon(in);
       right_shift_8x8(in, 1);
       write_buffer_8x8(output, in, 8);
@@ -559,7 +565,8 @@ static void fdct16_8col(int16x8_t *in) {
   i[6] = vaddq_s16(in[6], in[9]);
   i[7] = vaddq_s16(in[7], in[8]);
 
-  vpx_fdct8x8_pass1_neon(i);
+  // pass1 variant is not accurate enough
+  vpx_fdct8x8_pass2_neon(i);
   transpose_s16_8x8(&i[0], &i[1], &i[2], &i[3], &i[4], &i[5], &i[6], &i[7]);
 
   // step 2

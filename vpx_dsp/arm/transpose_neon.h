@@ -821,6 +821,51 @@ static INLINE void transpose_s32_8x8(int32x4x2_t *a0, int32x4x2_t *a1,
   a7->val[1] = c7.val[1];
 }
 
+// Helper transpose function for highbd FDCT variants
+static INLINE void transpose_s32_8x8_2(int32x4_t *left /*[8]*/,
+                                       int32x4_t *right /*[8]*/,
+                                       int32x4_t *out_left /*[8]*/,
+                                       int32x4_t *out_right /*[8]*/) {
+  int32x4x2_t out[8];
+
+  out[0].val[0] = left[0];
+  out[0].val[1] = right[0];
+  out[1].val[0] = left[1];
+  out[1].val[1] = right[1];
+  out[2].val[0] = left[2];
+  out[2].val[1] = right[2];
+  out[3].val[0] = left[3];
+  out[3].val[1] = right[3];
+  out[4].val[0] = left[4];
+  out[4].val[1] = right[4];
+  out[5].val[0] = left[5];
+  out[5].val[1] = right[5];
+  out[6].val[0] = left[6];
+  out[6].val[1] = right[6];
+  out[7].val[0] = left[7];
+  out[7].val[1] = right[7];
+
+  transpose_s32_8x8(&out[0], &out[1], &out[2], &out[3], &out[4], &out[5],
+                    &out[6], &out[7]);
+
+  out_left[0] = out[0].val[0];
+  out_left[1] = out[1].val[0];
+  out_left[2] = out[2].val[0];
+  out_left[3] = out[3].val[0];
+  out_left[4] = out[4].val[0];
+  out_left[5] = out[5].val[0];
+  out_left[6] = out[6].val[0];
+  out_left[7] = out[7].val[0];
+  out_right[0] = out[0].val[1];
+  out_right[1] = out[1].val[1];
+  out_right[2] = out[2].val[1];
+  out_right[3] = out[3].val[1];
+  out_right[4] = out[4].val[1];
+  out_right[5] = out[5].val[1];
+  out_right[6] = out[6].val[1];
+  out_right[7] = out[7].val[1];
+}
+
 static INLINE void transpose_u8_16x8(
     const uint8x16_t i0, const uint8x16_t i1, const uint8x16_t i2,
     const uint8x16_t i3, const uint8x16_t i4, const uint8x16_t i5,
