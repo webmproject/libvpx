@@ -355,4 +355,13 @@ static INLINE int16x8_t sub_round_shift_s16(const int16x8_t a) {
   return vrshrq_n_s16(vsubq_s16(a, a_sign_s16), 2);
 }
 
+// Add 2 if positive, 1 if negative, and shift by 2.
+// In practice, subtract the sign bit, then shift with rounding.
+static INLINE int32x4_t sub_round_shift_s32(const int32x4_t a) {
+  const uint32x4_t a_u32 = vreinterpretq_u32_s32(a);
+  const uint32x4_t a_sign_u32 = vshrq_n_u32(a_u32, 31);
+  const int32x4_t a_sign_s32 = vreinterpretq_s32_u32(a_sign_u32);
+  return vrshrq_n_s32(vsubq_s32(a, a_sign_s32), 2);
+}
+
 #endif  // VPX_VPX_DSP_ARM_FDCT_NEON_H_

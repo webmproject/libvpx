@@ -143,7 +143,7 @@ static INLINE void scale_input(const int16x8_t *in /*32*/,
   out[31] = vshlq_n_s16(in[31], 2);
 }
 
-static void dct_body_first_pass(const int16x8_t *in, int16x8_t *out) {
+static INLINE void dct_body_first_pass(const int16x8_t *in, int16x8_t *out) {
   int16x8_t a[32];
   int16x8_t b[32];
 
@@ -494,7 +494,7 @@ static void dct_body_first_pass(const int16x8_t *in, int16x8_t *out) {
                             &b##_hi[sub_index]);                               \
   } while (0)
 
-static void dct_body_second_pass(const int16x8_t *in, int16x8_t *out) {
+static INLINE void dct_body_second_pass(const int16x8_t *in, int16x8_t *out) {
   int16x8_t a[32];
   int16x8_t b[32];
   int32x4_t c_lo[32];
@@ -800,7 +800,8 @@ static void dct_body_second_pass(const int16x8_t *in, int16x8_t *out) {
   out[3] = add_round_shift_s32_narrow(d_lo[3], d_hi[3]);
 }
 
-static void dct_body_second_pass_rd(const int16x8_t *in, int16x8_t *out) {
+static INLINE void dct_body_second_pass_rd(const int16x8_t *in,
+                                           int16x8_t *out) {
   int16x8_t a[32];
   int16x8_t b[32];
 
@@ -1101,5 +1102,1818 @@ static void dct_body_second_pass_rd(const int16x8_t *in, int16x8_t *out) {
 #undef BUTTERFLY_ONE_S16_S32
 #undef BUTTERFLY_ONE_S32
 #undef BUTTERFLY_TWO_S32
+
+#if CONFIG_VP9_HIGHBITDEPTH
+
+// Store 32 32x4 vectors, assuming stride == 32.
+static INLINE void store32x32_s32(
+    tran_low_t *a, const int32x4_t *l1 /*[16]*/, const int32x4_t *r1 /*[16]*/,
+    const int32x4_t *l2 /*[16]*/, const int32x4_t *r2 /*[16]*/,
+    const int32x4_t *l3 /*[16]*/, const int32x4_t *r3 /*[16]*/,
+    const int32x4_t *l4 /*[16]*/, const int32x4_t *r4 /*[16]*/) {
+  int i;
+  for (i = 0; i < 32; i++) {
+    vst1q_s32(a, l1[i]);
+    vst1q_s32(a + 4, r1[i]);
+    vst1q_s32(a + 8, l2[i]);
+    vst1q_s32(a + 12, r2[i]);
+    vst1q_s32(a + 16, l3[i]);
+    vst1q_s32(a + 20, r3[i]);
+    vst1q_s32(a + 24, l4[i]);
+    vst1q_s32(a + 28, r4[i]);
+    a += 32;
+  }
+}
+
+static INLINE void highbd_scale_input(const int16x8_t *a /*[32]*/,
+                                      int32x4_t *left /*[32]*/,
+                                      int32x4_t *right /* [32] */) {
+  left[0] = vshll_n_s16(vget_low_s16(a[0]), 2);
+  left[1] = vshll_n_s16(vget_low_s16(a[1]), 2);
+  left[2] = vshll_n_s16(vget_low_s16(a[2]), 2);
+  left[3] = vshll_n_s16(vget_low_s16(a[3]), 2);
+  left[4] = vshll_n_s16(vget_low_s16(a[4]), 2);
+  left[5] = vshll_n_s16(vget_low_s16(a[5]), 2);
+  left[6] = vshll_n_s16(vget_low_s16(a[6]), 2);
+  left[7] = vshll_n_s16(vget_low_s16(a[7]), 2);
+  left[8] = vshll_n_s16(vget_low_s16(a[8]), 2);
+  left[9] = vshll_n_s16(vget_low_s16(a[9]), 2);
+  left[10] = vshll_n_s16(vget_low_s16(a[10]), 2);
+  left[11] = vshll_n_s16(vget_low_s16(a[11]), 2);
+  left[12] = vshll_n_s16(vget_low_s16(a[12]), 2);
+  left[13] = vshll_n_s16(vget_low_s16(a[13]), 2);
+  left[14] = vshll_n_s16(vget_low_s16(a[14]), 2);
+  left[15] = vshll_n_s16(vget_low_s16(a[15]), 2);
+  left[16] = vshll_n_s16(vget_low_s16(a[16]), 2);
+  left[17] = vshll_n_s16(vget_low_s16(a[17]), 2);
+  left[18] = vshll_n_s16(vget_low_s16(a[18]), 2);
+  left[19] = vshll_n_s16(vget_low_s16(a[19]), 2);
+  left[20] = vshll_n_s16(vget_low_s16(a[20]), 2);
+  left[21] = vshll_n_s16(vget_low_s16(a[21]), 2);
+  left[22] = vshll_n_s16(vget_low_s16(a[22]), 2);
+  left[23] = vshll_n_s16(vget_low_s16(a[23]), 2);
+  left[24] = vshll_n_s16(vget_low_s16(a[24]), 2);
+  left[25] = vshll_n_s16(vget_low_s16(a[25]), 2);
+  left[26] = vshll_n_s16(vget_low_s16(a[26]), 2);
+  left[27] = vshll_n_s16(vget_low_s16(a[27]), 2);
+  left[28] = vshll_n_s16(vget_low_s16(a[28]), 2);
+  left[29] = vshll_n_s16(vget_low_s16(a[29]), 2);
+  left[30] = vshll_n_s16(vget_low_s16(a[30]), 2);
+  left[31] = vshll_n_s16(vget_low_s16(a[31]), 2);
+
+  right[0] = vshll_n_s16(vget_high_s16(a[0]), 2);
+  right[1] = vshll_n_s16(vget_high_s16(a[1]), 2);
+  right[2] = vshll_n_s16(vget_high_s16(a[2]), 2);
+  right[3] = vshll_n_s16(vget_high_s16(a[3]), 2);
+  right[4] = vshll_n_s16(vget_high_s16(a[4]), 2);
+  right[5] = vshll_n_s16(vget_high_s16(a[5]), 2);
+  right[6] = vshll_n_s16(vget_high_s16(a[6]), 2);
+  right[7] = vshll_n_s16(vget_high_s16(a[7]), 2);
+  right[8] = vshll_n_s16(vget_high_s16(a[8]), 2);
+  right[9] = vshll_n_s16(vget_high_s16(a[9]), 2);
+  right[10] = vshll_n_s16(vget_high_s16(a[10]), 2);
+  right[11] = vshll_n_s16(vget_high_s16(a[11]), 2);
+  right[12] = vshll_n_s16(vget_high_s16(a[12]), 2);
+  right[13] = vshll_n_s16(vget_high_s16(a[13]), 2);
+  right[14] = vshll_n_s16(vget_high_s16(a[14]), 2);
+  right[15] = vshll_n_s16(vget_high_s16(a[15]), 2);
+  right[16] = vshll_n_s16(vget_high_s16(a[16]), 2);
+  right[17] = vshll_n_s16(vget_high_s16(a[17]), 2);
+  right[18] = vshll_n_s16(vget_high_s16(a[18]), 2);
+  right[19] = vshll_n_s16(vget_high_s16(a[19]), 2);
+  right[20] = vshll_n_s16(vget_high_s16(a[20]), 2);
+  right[21] = vshll_n_s16(vget_high_s16(a[21]), 2);
+  right[22] = vshll_n_s16(vget_high_s16(a[22]), 2);
+  right[23] = vshll_n_s16(vget_high_s16(a[23]), 2);
+  right[24] = vshll_n_s16(vget_high_s16(a[24]), 2);
+  right[25] = vshll_n_s16(vget_high_s16(a[25]), 2);
+  right[26] = vshll_n_s16(vget_high_s16(a[26]), 2);
+  right[27] = vshll_n_s16(vget_high_s16(a[27]), 2);
+  right[28] = vshll_n_s16(vget_high_s16(a[28]), 2);
+  right[29] = vshll_n_s16(vget_high_s16(a[29]), 2);
+  right[30] = vshll_n_s16(vget_high_s16(a[30]), 2);
+  right[31] = vshll_n_s16(vget_high_s16(a[31]), 2);
+}
+
+static INLINE void highbd_cross_input(const int32x4_t *a_left /*[32]*/,
+                                      int32x4_t *a_right /*[32]*/,
+                                      int32x4_t *b_left /*[32]*/,
+                                      int32x4_t *b_right /*[32]*/) {
+  // Stage 1. Done as part of the load for the first pass.
+  b_left[0] = vaddq_s32(a_left[0], a_left[31]);
+  b_left[1] = vaddq_s32(a_left[1], a_left[30]);
+  b_left[2] = vaddq_s32(a_left[2], a_left[29]);
+  b_left[3] = vaddq_s32(a_left[3], a_left[28]);
+  b_left[4] = vaddq_s32(a_left[4], a_left[27]);
+  b_left[5] = vaddq_s32(a_left[5], a_left[26]);
+  b_left[6] = vaddq_s32(a_left[6], a_left[25]);
+  b_left[7] = vaddq_s32(a_left[7], a_left[24]);
+  b_left[8] = vaddq_s32(a_left[8], a_left[23]);
+  b_left[9] = vaddq_s32(a_left[9], a_left[22]);
+  b_left[10] = vaddq_s32(a_left[10], a_left[21]);
+  b_left[11] = vaddq_s32(a_left[11], a_left[20]);
+  b_left[12] = vaddq_s32(a_left[12], a_left[19]);
+  b_left[13] = vaddq_s32(a_left[13], a_left[18]);
+  b_left[14] = vaddq_s32(a_left[14], a_left[17]);
+  b_left[15] = vaddq_s32(a_left[15], a_left[16]);
+
+  b_right[0] = vaddq_s32(a_right[0], a_right[31]);
+  b_right[1] = vaddq_s32(a_right[1], a_right[30]);
+  b_right[2] = vaddq_s32(a_right[2], a_right[29]);
+  b_right[3] = vaddq_s32(a_right[3], a_right[28]);
+  b_right[4] = vaddq_s32(a_right[4], a_right[27]);
+  b_right[5] = vaddq_s32(a_right[5], a_right[26]);
+  b_right[6] = vaddq_s32(a_right[6], a_right[25]);
+  b_right[7] = vaddq_s32(a_right[7], a_right[24]);
+  b_right[8] = vaddq_s32(a_right[8], a_right[23]);
+  b_right[9] = vaddq_s32(a_right[9], a_right[22]);
+  b_right[10] = vaddq_s32(a_right[10], a_right[21]);
+  b_right[11] = vaddq_s32(a_right[11], a_right[20]);
+  b_right[12] = vaddq_s32(a_right[12], a_right[19]);
+  b_right[13] = vaddq_s32(a_right[13], a_right[18]);
+  b_right[14] = vaddq_s32(a_right[14], a_right[17]);
+  b_right[15] = vaddq_s32(a_right[15], a_right[16]);
+
+  b_left[16] = vsubq_s32(a_left[15], a_left[16]);
+  b_left[17] = vsubq_s32(a_left[14], a_left[17]);
+  b_left[18] = vsubq_s32(a_left[13], a_left[18]);
+  b_left[19] = vsubq_s32(a_left[12], a_left[19]);
+  b_left[20] = vsubq_s32(a_left[11], a_left[20]);
+  b_left[21] = vsubq_s32(a_left[10], a_left[21]);
+  b_left[22] = vsubq_s32(a_left[9], a_left[22]);
+  b_left[23] = vsubq_s32(a_left[8], a_left[23]);
+  b_left[24] = vsubq_s32(a_left[7], a_left[24]);
+  b_left[25] = vsubq_s32(a_left[6], a_left[25]);
+  b_left[26] = vsubq_s32(a_left[5], a_left[26]);
+  b_left[27] = vsubq_s32(a_left[4], a_left[27]);
+  b_left[28] = vsubq_s32(a_left[3], a_left[28]);
+  b_left[29] = vsubq_s32(a_left[2], a_left[29]);
+  b_left[30] = vsubq_s32(a_left[1], a_left[30]);
+  b_left[31] = vsubq_s32(a_left[0], a_left[31]);
+
+  b_right[16] = vsubq_s32(a_right[15], a_right[16]);
+  b_right[17] = vsubq_s32(a_right[14], a_right[17]);
+  b_right[18] = vsubq_s32(a_right[13], a_right[18]);
+  b_right[19] = vsubq_s32(a_right[12], a_right[19]);
+  b_right[20] = vsubq_s32(a_right[11], a_right[20]);
+  b_right[21] = vsubq_s32(a_right[10], a_right[21]);
+  b_right[22] = vsubq_s32(a_right[9], a_right[22]);
+  b_right[23] = vsubq_s32(a_right[8], a_right[23]);
+  b_right[24] = vsubq_s32(a_right[7], a_right[24]);
+  b_right[25] = vsubq_s32(a_right[6], a_right[25]);
+  b_right[26] = vsubq_s32(a_right[5], a_right[26]);
+  b_right[27] = vsubq_s32(a_right[4], a_right[27]);
+  b_right[28] = vsubq_s32(a_right[3], a_right[28]);
+  b_right[29] = vsubq_s32(a_right[2], a_right[29]);
+  b_right[30] = vsubq_s32(a_right[1], a_right[30]);
+  b_right[31] = vsubq_s32(a_right[0], a_right[31]);
+}
+
+static INLINE void highbd_partial_add_round_shift(int32x4_t *left /*[32]*/,
+                                                  int32x4_t *right /* [32] */) {
+  // Also compute partial rounding shift:
+  // output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
+
+  left[0] = add_round_shift_s32(left[0]);
+  left[1] = add_round_shift_s32(left[1]);
+  left[2] = add_round_shift_s32(left[2]);
+  left[3] = add_round_shift_s32(left[3]);
+  left[4] = add_round_shift_s32(left[4]);
+  left[5] = add_round_shift_s32(left[5]);
+  left[6] = add_round_shift_s32(left[6]);
+  left[7] = add_round_shift_s32(left[7]);
+  left[8] = add_round_shift_s32(left[8]);
+  left[9] = add_round_shift_s32(left[9]);
+  left[10] = add_round_shift_s32(left[10]);
+  left[11] = add_round_shift_s32(left[11]);
+  left[12] = add_round_shift_s32(left[12]);
+  left[13] = add_round_shift_s32(left[13]);
+  left[14] = add_round_shift_s32(left[14]);
+  left[15] = add_round_shift_s32(left[15]);
+  left[16] = add_round_shift_s32(left[16]);
+  left[17] = add_round_shift_s32(left[17]);
+  left[18] = add_round_shift_s32(left[18]);
+  left[19] = add_round_shift_s32(left[19]);
+  left[20] = add_round_shift_s32(left[20]);
+  left[21] = add_round_shift_s32(left[21]);
+  left[22] = add_round_shift_s32(left[22]);
+  left[23] = add_round_shift_s32(left[23]);
+  left[24] = add_round_shift_s32(left[24]);
+  left[25] = add_round_shift_s32(left[25]);
+  left[26] = add_round_shift_s32(left[26]);
+  left[27] = add_round_shift_s32(left[27]);
+  left[28] = add_round_shift_s32(left[28]);
+  left[29] = add_round_shift_s32(left[29]);
+  left[30] = add_round_shift_s32(left[30]);
+  left[31] = add_round_shift_s32(left[31]);
+
+  right[0] = add_round_shift_s32(right[0]);
+  right[1] = add_round_shift_s32(right[1]);
+  right[2] = add_round_shift_s32(right[2]);
+  right[3] = add_round_shift_s32(right[3]);
+  right[4] = add_round_shift_s32(right[4]);
+  right[5] = add_round_shift_s32(right[5]);
+  right[6] = add_round_shift_s32(right[6]);
+  right[7] = add_round_shift_s32(right[7]);
+  right[8] = add_round_shift_s32(right[8]);
+  right[9] = add_round_shift_s32(right[9]);
+  right[10] = add_round_shift_s32(right[10]);
+  right[11] = add_round_shift_s32(right[11]);
+  right[12] = add_round_shift_s32(right[12]);
+  right[13] = add_round_shift_s32(right[13]);
+  right[14] = add_round_shift_s32(right[14]);
+  right[15] = add_round_shift_s32(right[15]);
+  right[16] = add_round_shift_s32(right[16]);
+  right[17] = add_round_shift_s32(right[17]);
+  right[18] = add_round_shift_s32(right[18]);
+  right[19] = add_round_shift_s32(right[19]);
+  right[20] = add_round_shift_s32(right[20]);
+  right[21] = add_round_shift_s32(right[21]);
+  right[22] = add_round_shift_s32(right[22]);
+  right[23] = add_round_shift_s32(right[23]);
+  right[24] = add_round_shift_s32(right[24]);
+  right[25] = add_round_shift_s32(right[25]);
+  right[26] = add_round_shift_s32(right[26]);
+  right[27] = add_round_shift_s32(right[27]);
+  right[28] = add_round_shift_s32(right[28]);
+  right[29] = add_round_shift_s32(right[29]);
+  right[30] = add_round_shift_s32(right[30]);
+  right[31] = add_round_shift_s32(right[31]);
+}
+
+static INLINE void highbd_partial_sub_round_shift(int32x4_t *left /*[32]*/,
+                                                  int32x4_t *right /* [32] */) {
+  // Also compute partial rounding shift:
+  // output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
+
+  left[0] = sub_round_shift_s32(left[0]);
+  left[1] = sub_round_shift_s32(left[1]);
+  left[2] = sub_round_shift_s32(left[2]);
+  left[3] = sub_round_shift_s32(left[3]);
+  left[4] = sub_round_shift_s32(left[4]);
+  left[5] = sub_round_shift_s32(left[5]);
+  left[6] = sub_round_shift_s32(left[6]);
+  left[7] = sub_round_shift_s32(left[7]);
+  left[8] = sub_round_shift_s32(left[8]);
+  left[9] = sub_round_shift_s32(left[9]);
+  left[10] = sub_round_shift_s32(left[10]);
+  left[11] = sub_round_shift_s32(left[11]);
+  left[12] = sub_round_shift_s32(left[12]);
+  left[13] = sub_round_shift_s32(left[13]);
+  left[14] = sub_round_shift_s32(left[14]);
+  left[15] = sub_round_shift_s32(left[15]);
+  left[16] = sub_round_shift_s32(left[16]);
+  left[17] = sub_round_shift_s32(left[17]);
+  left[18] = sub_round_shift_s32(left[18]);
+  left[19] = sub_round_shift_s32(left[19]);
+  left[20] = sub_round_shift_s32(left[20]);
+  left[21] = sub_round_shift_s32(left[21]);
+  left[22] = sub_round_shift_s32(left[22]);
+  left[23] = sub_round_shift_s32(left[23]);
+  left[24] = sub_round_shift_s32(left[24]);
+  left[25] = sub_round_shift_s32(left[25]);
+  left[26] = sub_round_shift_s32(left[26]);
+  left[27] = sub_round_shift_s32(left[27]);
+  left[28] = sub_round_shift_s32(left[28]);
+  left[29] = sub_round_shift_s32(left[29]);
+  left[30] = sub_round_shift_s32(left[30]);
+  left[31] = sub_round_shift_s32(left[31]);
+
+  right[0] = sub_round_shift_s32(right[0]);
+  right[1] = sub_round_shift_s32(right[1]);
+  right[2] = sub_round_shift_s32(right[2]);
+  right[3] = sub_round_shift_s32(right[3]);
+  right[4] = sub_round_shift_s32(right[4]);
+  right[5] = sub_round_shift_s32(right[5]);
+  right[6] = sub_round_shift_s32(right[6]);
+  right[7] = sub_round_shift_s32(right[7]);
+  right[8] = sub_round_shift_s32(right[8]);
+  right[9] = sub_round_shift_s32(right[9]);
+  right[10] = sub_round_shift_s32(right[10]);
+  right[11] = sub_round_shift_s32(right[11]);
+  right[12] = sub_round_shift_s32(right[12]);
+  right[13] = sub_round_shift_s32(right[13]);
+  right[14] = sub_round_shift_s32(right[14]);
+  right[15] = sub_round_shift_s32(right[15]);
+  right[16] = sub_round_shift_s32(right[16]);
+  right[17] = sub_round_shift_s32(right[17]);
+  right[18] = sub_round_shift_s32(right[18]);
+  right[19] = sub_round_shift_s32(right[19]);
+  right[20] = sub_round_shift_s32(right[20]);
+  right[21] = sub_round_shift_s32(right[21]);
+  right[22] = sub_round_shift_s32(right[22]);
+  right[23] = sub_round_shift_s32(right[23]);
+  right[24] = sub_round_shift_s32(right[24]);
+  right[25] = sub_round_shift_s32(right[25]);
+  right[26] = sub_round_shift_s32(right[26]);
+  right[27] = sub_round_shift_s32(right[27]);
+  right[28] = sub_round_shift_s32(right[28]);
+  right[29] = sub_round_shift_s32(right[29]);
+  right[30] = sub_round_shift_s32(right[30]);
+  right[31] = sub_round_shift_s32(right[31]);
+}
+
+static INLINE void highbd_dct8x32_body_first_pass(int32x4_t *left /*32*/,
+                                                  int32x4_t *right /*32*/) {
+  int32x4_t al[32], ar[32];
+  int32x4_t bl[32], br[32];
+
+  // Stage 1: Done as part of the load.
+
+  // Stage 2.
+  // Mini cross. X the first 16 values and the middle 8 of the second half.
+  al[0] = vaddq_s32(left[0], left[15]);
+  ar[0] = vaddq_s32(right[0], right[15]);
+  al[1] = vaddq_s32(left[1], left[14]);
+  ar[1] = vaddq_s32(right[1], right[14]);
+  al[2] = vaddq_s32(left[2], left[13]);
+  ar[2] = vaddq_s32(right[2], right[13]);
+  al[3] = vaddq_s32(left[3], left[12]);
+  ar[3] = vaddq_s32(right[3], right[12]);
+  al[4] = vaddq_s32(left[4], left[11]);
+  ar[4] = vaddq_s32(right[4], right[11]);
+  al[5] = vaddq_s32(left[5], left[10]);
+  ar[5] = vaddq_s32(right[5], right[10]);
+  al[6] = vaddq_s32(left[6], left[9]);
+  ar[6] = vaddq_s32(right[6], right[9]);
+  al[7] = vaddq_s32(left[7], left[8]);
+  ar[7] = vaddq_s32(right[7], right[8]);
+
+  al[8] = vsubq_s32(left[7], left[8]);
+  ar[8] = vsubq_s32(right[7], right[8]);
+  al[9] = vsubq_s32(left[6], left[9]);
+  ar[9] = vsubq_s32(right[6], right[9]);
+  al[10] = vsubq_s32(left[5], left[10]);
+  ar[10] = vsubq_s32(right[5], right[10]);
+  al[11] = vsubq_s32(left[4], left[11]);
+  ar[11] = vsubq_s32(right[4], right[11]);
+  al[12] = vsubq_s32(left[3], left[12]);
+  ar[12] = vsubq_s32(right[3], right[12]);
+  al[13] = vsubq_s32(left[2], left[13]);
+  ar[13] = vsubq_s32(right[2], right[13]);
+  al[14] = vsubq_s32(left[1], left[14]);
+  ar[14] = vsubq_s32(right[1], right[14]);
+  al[15] = vsubq_s32(left[0], left[15]);
+  ar[15] = vsubq_s32(right[0], right[15]);
+
+  al[16] = left[16];
+  ar[16] = right[16];
+  al[17] = left[17];
+  ar[17] = right[17];
+  al[18] = left[18];
+  ar[18] = right[18];
+  al[19] = left[19];
+  ar[19] = right[19];
+
+  butterfly_one_coeff_s32_fast(left[27], right[27], left[20], right[20],
+                               cospi_16_64, &al[27], &ar[27], &al[20], &ar[20]);
+  butterfly_one_coeff_s32_fast(left[26], right[26], left[21], right[21],
+                               cospi_16_64, &al[26], &ar[26], &al[21], &ar[21]);
+  butterfly_one_coeff_s32_fast(left[25], right[25], left[22], right[22],
+                               cospi_16_64, &al[25], &ar[25], &al[22], &ar[22]);
+  butterfly_one_coeff_s32_fast(left[24], right[24], left[23], right[23],
+                               cospi_16_64, &al[24], &ar[24], &al[23], &ar[23]);
+
+  al[28] = left[28];
+  ar[28] = right[28];
+  al[29] = left[29];
+  ar[29] = right[29];
+  al[30] = left[30];
+  ar[30] = right[30];
+  al[31] = left[31];
+  ar[31] = right[31];
+
+  // Stage 3.
+  bl[0] = vaddq_s32(al[0], al[7]);
+  br[0] = vaddq_s32(ar[0], ar[7]);
+  bl[1] = vaddq_s32(al[1], al[6]);
+  br[1] = vaddq_s32(ar[1], ar[6]);
+  bl[2] = vaddq_s32(al[2], al[5]);
+  br[2] = vaddq_s32(ar[2], ar[5]);
+  bl[3] = vaddq_s32(al[3], al[4]);
+  br[3] = vaddq_s32(ar[3], ar[4]);
+
+  bl[4] = vsubq_s32(al[3], al[4]);
+  br[4] = vsubq_s32(ar[3], ar[4]);
+  bl[5] = vsubq_s32(al[2], al[5]);
+  br[5] = vsubq_s32(ar[2], ar[5]);
+  bl[6] = vsubq_s32(al[1], al[6]);
+  br[6] = vsubq_s32(ar[1], ar[6]);
+  bl[7] = vsubq_s32(al[0], al[7]);
+  br[7] = vsubq_s32(ar[0], ar[7]);
+
+  bl[8] = al[8];
+  br[8] = ar[8];
+  bl[9] = al[9];
+  br[9] = ar[9];
+
+  butterfly_one_coeff_s32_fast(al[13], ar[13], al[10], ar[10], cospi_16_64,
+                               &bl[13], &br[13], &bl[10], &br[10]);
+  butterfly_one_coeff_s32_fast(al[12], ar[12], al[11], ar[11], cospi_16_64,
+                               &bl[12], &br[12], &bl[11], &br[11]);
+
+  bl[14] = al[14];
+  br[14] = ar[14];
+  bl[15] = al[15];
+  br[15] = ar[15];
+
+  bl[16] = vaddq_s32(left[16], al[23]);
+  br[16] = vaddq_s32(right[16], ar[23]);
+  bl[17] = vaddq_s32(left[17], al[22]);
+  br[17] = vaddq_s32(right[17], ar[22]);
+  bl[18] = vaddq_s32(left[18], al[21]);
+  br[18] = vaddq_s32(right[18], ar[21]);
+  bl[19] = vaddq_s32(left[19], al[20]);
+  br[19] = vaddq_s32(right[19], ar[20]);
+
+  bl[20] = vsubq_s32(left[19], al[20]);
+  br[20] = vsubq_s32(right[19], ar[20]);
+  bl[21] = vsubq_s32(left[18], al[21]);
+  br[21] = vsubq_s32(right[18], ar[21]);
+  bl[22] = vsubq_s32(left[17], al[22]);
+  br[22] = vsubq_s32(right[17], ar[22]);
+  bl[23] = vsubq_s32(left[16], al[23]);
+  br[23] = vsubq_s32(right[16], ar[23]);
+
+  bl[24] = vsubq_s32(left[31], al[24]);
+  br[24] = vsubq_s32(right[31], ar[24]);
+  bl[25] = vsubq_s32(left[30], al[25]);
+  br[25] = vsubq_s32(right[30], ar[25]);
+  bl[26] = vsubq_s32(left[29], al[26]);
+  br[26] = vsubq_s32(right[29], ar[26]);
+  bl[27] = vsubq_s32(left[28], al[27]);
+  br[27] = vsubq_s32(right[28], ar[27]);
+
+  bl[28] = vaddq_s32(left[28], al[27]);
+  br[28] = vaddq_s32(right[28], ar[27]);
+  bl[29] = vaddq_s32(left[29], al[26]);
+  br[29] = vaddq_s32(right[29], ar[26]);
+  bl[30] = vaddq_s32(left[30], al[25]);
+  br[30] = vaddq_s32(right[30], ar[25]);
+  bl[31] = vaddq_s32(left[31], al[24]);
+  br[31] = vaddq_s32(right[31], ar[24]);
+
+  // Stage 4.
+  al[0] = vaddq_s32(bl[0], bl[3]);
+  ar[0] = vaddq_s32(br[0], br[3]);
+  al[1] = vaddq_s32(bl[1], bl[2]);
+  ar[1] = vaddq_s32(br[1], br[2]);
+  al[2] = vsubq_s32(bl[1], bl[2]);
+  ar[2] = vsubq_s32(br[1], br[2]);
+  al[3] = vsubq_s32(bl[0], bl[3]);
+  ar[3] = vsubq_s32(br[0], br[3]);
+
+  al[4] = bl[4];
+  ar[4] = br[4];
+
+  butterfly_one_coeff_s32_fast(bl[6], br[6], bl[5], br[5], cospi_16_64, &al[6],
+                               &ar[6], &al[5], &ar[5]);
+
+  al[7] = bl[7];
+  ar[7] = br[7];
+
+  al[8] = vaddq_s32(bl[8], bl[11]);
+  ar[8] = vaddq_s32(br[8], br[11]);
+  al[9] = vaddq_s32(bl[9], bl[10]);
+  ar[9] = vaddq_s32(br[9], br[10]);
+  al[10] = vsubq_s32(bl[9], bl[10]);
+  ar[10] = vsubq_s32(br[9], br[10]);
+  al[11] = vsubq_s32(bl[8], bl[11]);
+  ar[11] = vsubq_s32(br[8], br[11]);
+  al[12] = vsubq_s32(bl[15], bl[12]);
+  ar[12] = vsubq_s32(br[15], br[12]);
+  al[13] = vsubq_s32(bl[14], bl[13]);
+  ar[13] = vsubq_s32(br[14], br[13]);
+  al[14] = vaddq_s32(bl[14], bl[13]);
+  ar[14] = vaddq_s32(br[14], br[13]);
+  al[15] = vaddq_s32(bl[15], bl[12]);
+  ar[15] = vaddq_s32(br[15], br[12]);
+
+  al[16] = bl[16];
+  ar[16] = br[16];
+  al[17] = bl[17];
+  ar[17] = br[17];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[29], br[29], bl[18], br[18], cospi_8_64,
+                                     cospi_24_64, &al[29], &ar[29], &al[18],
+                                     &ar[18]);
+  butterfly_two_coeff_s32_s64_narrow(bl[28], br[28], bl[19], br[19], cospi_8_64,
+                                     cospi_24_64, &al[28], &ar[28], &al[19],
+                                     &ar[19]);
+  butterfly_two_coeff_s32_s64_narrow(bl[27], br[27], bl[20], br[20],
+                                     cospi_24_64, -cospi_8_64, &al[27], &ar[27],
+                                     &al[20], &ar[20]);
+  butterfly_two_coeff_s32_s64_narrow(bl[26], br[26], bl[21], br[21],
+                                     cospi_24_64, -cospi_8_64, &al[26], &ar[26],
+                                     &al[21], &ar[21]);
+
+  al[22] = bl[22];
+  ar[22] = br[22];
+  al[23] = bl[23];
+  ar[23] = br[23];
+  al[24] = bl[24];
+  ar[24] = br[24];
+  al[25] = bl[25];
+  ar[25] = br[25];
+
+  al[30] = bl[30];
+  ar[30] = br[30];
+  al[31] = bl[31];
+  ar[31] = br[31];
+
+  // Stage 5.
+  butterfly_one_coeff_s32_fast(al[0], ar[0], al[1], ar[1], cospi_16_64, &bl[0],
+                               &br[0], &bl[1], &br[1]);
+  butterfly_two_coeff_s32_s64_narrow(al[3], ar[3], al[2], ar[2], cospi_8_64,
+                                     cospi_24_64, &bl[2], &br[2], &bl[3],
+                                     &br[3]);
+
+  bl[4] = vaddq_s32(al[4], al[5]);
+  br[4] = vaddq_s32(ar[4], ar[5]);
+  bl[5] = vsubq_s32(al[4], al[5]);
+  br[5] = vsubq_s32(ar[4], ar[5]);
+  bl[6] = vsubq_s32(al[7], al[6]);
+  br[6] = vsubq_s32(ar[7], ar[6]);
+  bl[7] = vaddq_s32(al[7], al[6]);
+  br[7] = vaddq_s32(ar[7], ar[6]);
+
+  bl[8] = al[8];
+  br[8] = ar[8];
+
+  butterfly_two_coeff_s32_s64_narrow(al[14], ar[14], al[9], ar[9], cospi_8_64,
+                                     cospi_24_64, &bl[14], &br[14], &bl[9],
+                                     &br[9]);
+  butterfly_two_coeff_s32_s64_narrow(al[13], ar[13], al[10], ar[10],
+                                     cospi_24_64, -cospi_8_64, &bl[13], &br[13],
+                                     &bl[10], &br[10]);
+
+  bl[11] = al[11];
+  br[11] = ar[11];
+  bl[12] = al[12];
+  br[12] = ar[12];
+
+  bl[15] = al[15];
+  br[15] = ar[15];
+
+  bl[16] = vaddq_s32(al[19], al[16]);
+  br[16] = vaddq_s32(ar[19], ar[16]);
+  bl[17] = vaddq_s32(al[18], al[17]);
+  br[17] = vaddq_s32(ar[18], ar[17]);
+  bl[18] = vsubq_s32(al[17], al[18]);
+  br[18] = vsubq_s32(ar[17], ar[18]);
+  bl[19] = vsubq_s32(al[16], al[19]);
+  br[19] = vsubq_s32(ar[16], ar[19]);
+  bl[20] = vsubq_s32(al[23], al[20]);
+  br[20] = vsubq_s32(ar[23], ar[20]);
+  bl[21] = vsubq_s32(al[22], al[21]);
+  br[21] = vsubq_s32(ar[22], ar[21]);
+  bl[22] = vaddq_s32(al[21], al[22]);
+  br[22] = vaddq_s32(ar[21], ar[22]);
+  bl[23] = vaddq_s32(al[20], al[23]);
+  br[23] = vaddq_s32(ar[20], ar[23]);
+  bl[24] = vaddq_s32(al[27], al[24]);
+  br[24] = vaddq_s32(ar[27], ar[24]);
+  bl[25] = vaddq_s32(al[26], al[25]);
+  br[25] = vaddq_s32(ar[26], ar[25]);
+  bl[26] = vsubq_s32(al[25], al[26]);
+  br[26] = vsubq_s32(ar[25], ar[26]);
+  bl[27] = vsubq_s32(al[24], al[27]);
+  br[27] = vsubq_s32(ar[24], ar[27]);
+  bl[28] = vsubq_s32(al[31], al[28]);
+  br[28] = vsubq_s32(ar[31], ar[28]);
+  bl[29] = vsubq_s32(al[30], al[29]);
+  br[29] = vsubq_s32(ar[30], ar[29]);
+  bl[30] = vaddq_s32(al[29], al[30]);
+  br[30] = vaddq_s32(ar[29], ar[30]);
+  bl[31] = vaddq_s32(al[28], al[31]);
+  br[31] = vaddq_s32(ar[28], ar[31]);
+
+  // Stage 6.
+  al[0] = bl[0];
+  ar[0] = br[0];
+  al[1] = bl[1];
+  ar[1] = br[1];
+  al[2] = bl[2];
+  ar[2] = br[2];
+  al[3] = bl[3];
+  ar[3] = br[3];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[7], br[7], bl[4], br[4], cospi_4_64,
+                                     cospi_28_64, &al[4], &ar[4], &al[7],
+                                     &ar[7]);
+  butterfly_two_coeff_s32_s64_narrow(bl[6], br[6], bl[5], br[5], cospi_20_64,
+                                     cospi_12_64, &al[5], &ar[5], &al[6],
+                                     &ar[6]);
+
+  al[8] = vaddq_s32(bl[8], bl[9]);
+  ar[8] = vaddq_s32(br[8], br[9]);
+  al[9] = vsubq_s32(bl[8], bl[9]);
+  ar[9] = vsubq_s32(br[8], br[9]);
+  al[10] = vsubq_s32(bl[11], bl[10]);
+  ar[10] = vsubq_s32(br[11], br[10]);
+  al[11] = vaddq_s32(bl[11], bl[10]);
+  ar[11] = vaddq_s32(br[11], br[10]);
+  al[12] = vaddq_s32(bl[12], bl[13]);
+  ar[12] = vaddq_s32(br[12], br[13]);
+  al[13] = vsubq_s32(bl[12], bl[13]);
+  ar[13] = vsubq_s32(br[12], br[13]);
+  al[14] = vsubq_s32(bl[15], bl[14]);
+  ar[14] = vsubq_s32(br[15], br[14]);
+  al[15] = vaddq_s32(bl[15], bl[14]);
+  ar[15] = vaddq_s32(br[15], br[14]);
+
+  al[16] = bl[16];
+  ar[16] = br[16];
+  al[19] = bl[19];
+  ar[19] = br[19];
+  al[20] = bl[20];
+  ar[20] = br[20];
+  al[23] = bl[23];
+  ar[23] = br[23];
+  al[24] = bl[24];
+  ar[24] = br[24];
+  al[27] = bl[27];
+  ar[27] = br[27];
+  al[28] = bl[28];
+  ar[28] = br[28];
+  al[31] = bl[31];
+  ar[31] = br[31];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[30], br[30], bl[17], br[17], cospi_4_64,
+                                     cospi_28_64, &al[30], &ar[30], &al[17],
+                                     &ar[17]);
+  butterfly_two_coeff_s32_s64_narrow(bl[29], br[29], bl[18], br[18],
+                                     cospi_28_64, -cospi_4_64, &al[29], &ar[29],
+                                     &al[18], &ar[18]);
+  butterfly_two_coeff_s32_s64_narrow(bl[26], br[26], bl[21], br[21],
+                                     cospi_20_64, cospi_12_64, &al[26], &ar[26],
+                                     &al[21], &ar[21]);
+  butterfly_two_coeff_s32_s64_narrow(bl[25], br[25], bl[22], br[22],
+                                     cospi_12_64, -cospi_20_64, &al[25],
+                                     &ar[25], &al[22], &ar[22]);
+
+  // Stage 7.
+  bl[0] = al[0];
+  br[0] = ar[0];
+  bl[1] = al[1];
+  br[1] = ar[1];
+  bl[2] = al[2];
+  br[2] = ar[2];
+  bl[3] = al[3];
+  br[3] = ar[3];
+  bl[4] = al[4];
+  br[4] = ar[4];
+  bl[5] = al[5];
+  br[5] = ar[5];
+  bl[6] = al[6];
+  br[6] = ar[6];
+  bl[7] = al[7];
+  br[7] = ar[7];
+
+  butterfly_two_coeff_s32_s64_narrow(al[15], ar[15], al[8], ar[8], cospi_2_64,
+                                     cospi_30_64, &bl[8], &br[8], &bl[15],
+                                     &br[15]);
+  butterfly_two_coeff_s32_s64_narrow(al[14], ar[14], al[9], ar[9], cospi_18_64,
+                                     cospi_14_64, &bl[9], &br[9], &bl[14],
+                                     &br[14]);
+  butterfly_two_coeff_s32_s64_narrow(al[13], ar[13], al[10], ar[10],
+                                     cospi_10_64, cospi_22_64, &bl[10], &br[10],
+                                     &bl[13], &br[13]);
+  butterfly_two_coeff_s32_s64_narrow(al[12], ar[12], al[11], ar[11],
+                                     cospi_26_64, cospi_6_64, &bl[11], &br[11],
+                                     &bl[12], &br[12]);
+
+  bl[16] = vaddq_s32(al[16], al[17]);
+  br[16] = vaddq_s32(ar[16], ar[17]);
+  bl[17] = vsubq_s32(al[16], al[17]);
+  br[17] = vsubq_s32(ar[16], ar[17]);
+  bl[18] = vsubq_s32(al[19], al[18]);
+  br[18] = vsubq_s32(ar[19], ar[18]);
+  bl[19] = vaddq_s32(al[19], al[18]);
+  br[19] = vaddq_s32(ar[19], ar[18]);
+  bl[20] = vaddq_s32(al[20], al[21]);
+  br[20] = vaddq_s32(ar[20], ar[21]);
+  bl[21] = vsubq_s32(al[20], al[21]);
+  br[21] = vsubq_s32(ar[20], ar[21]);
+  bl[22] = vsubq_s32(al[23], al[22]);
+  br[22] = vsubq_s32(ar[23], ar[22]);
+  bl[23] = vaddq_s32(al[23], al[22]);
+  br[23] = vaddq_s32(ar[23], ar[22]);
+  bl[24] = vaddq_s32(al[24], al[25]);
+  br[24] = vaddq_s32(ar[24], ar[25]);
+  bl[25] = vsubq_s32(al[24], al[25]);
+  br[25] = vsubq_s32(ar[24], ar[25]);
+  bl[26] = vsubq_s32(al[27], al[26]);
+  br[26] = vsubq_s32(ar[27], ar[26]);
+  bl[27] = vaddq_s32(al[27], al[26]);
+  br[27] = vaddq_s32(ar[27], ar[26]);
+  bl[28] = vaddq_s32(al[28], al[29]);
+  br[28] = vaddq_s32(ar[28], ar[29]);
+  bl[29] = vsubq_s32(al[28], al[29]);
+  br[29] = vsubq_s32(ar[28], ar[29]);
+  bl[30] = vsubq_s32(al[31], al[30]);
+  br[30] = vsubq_s32(ar[31], ar[30]);
+  bl[31] = vaddq_s32(al[31], al[30]);
+  br[31] = vaddq_s32(ar[31], ar[30]);
+
+  // Final stage.
+
+  left[0] = bl[0];
+  right[0] = br[0];
+  left[16] = bl[1];
+  right[16] = br[1];
+  left[8] = bl[2];
+  right[8] = br[2];
+  left[24] = bl[3];
+  right[24] = br[3];
+  left[4] = bl[4];
+  right[4] = br[4];
+  left[20] = bl[5];
+  right[20] = br[5];
+  left[12] = bl[6];
+  right[12] = br[6];
+  left[28] = bl[7];
+  right[28] = br[7];
+  left[2] = bl[8];
+  right[2] = br[8];
+  left[18] = bl[9];
+  right[18] = br[9];
+  left[10] = bl[10];
+  right[10] = br[10];
+  left[26] = bl[11];
+  right[26] = br[11];
+  left[6] = bl[12];
+  right[6] = br[12];
+  left[22] = bl[13];
+  right[22] = br[13];
+  left[14] = bl[14];
+  right[14] = br[14];
+  left[30] = bl[15];
+  right[30] = br[15];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[31], br[31], bl[16], br[16], cospi_1_64,
+                                     cospi_31_64, &al[1], &ar[1], &al[31],
+                                     &ar[31]);
+  left[1] = al[1];
+  right[1] = ar[1];
+  left[31] = al[31];
+  right[31] = ar[31];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[30], br[30], bl[17], br[17],
+                                     cospi_17_64, cospi_15_64, &al[17], &ar[17],
+                                     &al[15], &ar[15]);
+  left[17] = al[17];
+  right[17] = ar[17];
+  left[15] = al[15];
+  right[15] = ar[15];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[29], br[29], bl[18], br[18], cospi_9_64,
+                                     cospi_23_64, &al[9], &ar[9], &al[23],
+                                     &ar[23]);
+  left[9] = al[9];
+  right[9] = ar[9];
+  left[23] = al[23];
+  right[23] = ar[23];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[28], br[28], bl[19], br[19],
+                                     cospi_25_64, cospi_7_64, &al[25], &ar[25],
+                                     &al[7], &ar[7]);
+  left[25] = al[25];
+  right[25] = ar[25];
+  left[7] = al[7];
+  right[7] = ar[7];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[27], br[27], bl[20], br[20], cospi_5_64,
+                                     cospi_27_64, &al[5], &ar[5], &al[27],
+                                     &ar[27]);
+  left[5] = al[5];
+  right[5] = ar[5];
+  left[27] = al[27];
+  right[27] = ar[27];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[26], br[26], bl[21], br[21],
+                                     cospi_21_64, cospi_11_64, &al[21], &ar[21],
+                                     &al[11], &ar[11]);
+  left[21] = al[21];
+  right[21] = ar[21];
+  left[11] = al[11];
+  right[11] = ar[11];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[25], br[25], bl[22], br[22],
+                                     cospi_13_64, cospi_19_64, &al[13], &ar[13],
+                                     &al[19], &ar[19]);
+  left[13] = al[13];
+  right[13] = ar[13];
+  left[19] = al[19];
+  right[19] = ar[19];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[24], br[24], bl[23], br[23],
+                                     cospi_29_64, cospi_3_64, &al[29], &ar[29],
+                                     &al[3], &ar[3]);
+  left[29] = al[29];
+  right[29] = ar[29];
+  left[3] = al[3];
+  right[3] = ar[3];
+}
+
+static INLINE void highbd_dct8x32_body_second_pass(int32x4_t *left /*32*/,
+                                                   int32x4_t *right /*32*/) {
+  int32x4_t al[32], ar[32];
+  int32x4_t bl[32], br[32];
+
+  // Stage 1: Done as part of the load.
+
+  // Stage 2.
+  // Mini cross. X the first 16 values and the middle 8 of the second half.
+  al[0] = vaddq_s32(left[0], left[15]);
+  ar[0] = vaddq_s32(right[0], right[15]);
+  al[1] = vaddq_s32(left[1], left[14]);
+  ar[1] = vaddq_s32(right[1], right[14]);
+  al[2] = vaddq_s32(left[2], left[13]);
+  ar[2] = vaddq_s32(right[2], right[13]);
+  al[3] = vaddq_s32(left[3], left[12]);
+  ar[3] = vaddq_s32(right[3], right[12]);
+  al[4] = vaddq_s32(left[4], left[11]);
+  ar[4] = vaddq_s32(right[4], right[11]);
+  al[5] = vaddq_s32(left[5], left[10]);
+  ar[5] = vaddq_s32(right[5], right[10]);
+  al[6] = vaddq_s32(left[6], left[9]);
+  ar[6] = vaddq_s32(right[6], right[9]);
+  al[7] = vaddq_s32(left[7], left[8]);
+  ar[7] = vaddq_s32(right[7], right[8]);
+
+  al[8] = vsubq_s32(left[7], left[8]);
+  ar[8] = vsubq_s32(right[7], right[8]);
+  al[9] = vsubq_s32(left[6], left[9]);
+  ar[9] = vsubq_s32(right[6], right[9]);
+  al[10] = vsubq_s32(left[5], left[10]);
+  ar[10] = vsubq_s32(right[5], right[10]);
+  al[11] = vsubq_s32(left[4], left[11]);
+  ar[11] = vsubq_s32(right[4], right[11]);
+  al[12] = vsubq_s32(left[3], left[12]);
+  ar[12] = vsubq_s32(right[3], right[12]);
+  al[13] = vsubq_s32(left[2], left[13]);
+  ar[13] = vsubq_s32(right[2], right[13]);
+  al[14] = vsubq_s32(left[1], left[14]);
+  ar[14] = vsubq_s32(right[1], right[14]);
+  al[15] = vsubq_s32(left[0], left[15]);
+  ar[15] = vsubq_s32(right[0], right[15]);
+
+  al[16] = left[16];
+  ar[16] = right[16];
+  al[17] = left[17];
+  ar[17] = right[17];
+  al[18] = left[18];
+  ar[18] = right[18];
+  al[19] = left[19];
+  ar[19] = right[19];
+
+  butterfly_one_coeff_s32_fast(left[27], right[27], left[20], right[20],
+                               cospi_16_64, &al[27], &ar[27], &al[20], &ar[20]);
+  butterfly_one_coeff_s32_fast(left[26], right[26], left[21], right[21],
+                               cospi_16_64, &al[26], &ar[26], &al[21], &ar[21]);
+  butterfly_one_coeff_s32_fast(left[25], right[25], left[22], right[22],
+                               cospi_16_64, &al[25], &ar[25], &al[22], &ar[22]);
+  butterfly_one_coeff_s32_fast(left[24], right[24], left[23], right[23],
+                               cospi_16_64, &al[24], &ar[24], &al[23], &ar[23]);
+
+  al[28] = left[28];
+  ar[28] = right[28];
+  al[29] = left[29];
+  ar[29] = right[29];
+  al[30] = left[30];
+  ar[30] = right[30];
+  al[31] = left[31];
+  ar[31] = right[31];
+
+  // Stage 3.
+  bl[0] = vaddq_s32(al[0], al[7]);
+  br[0] = vaddq_s32(ar[0], ar[7]);
+  bl[1] = vaddq_s32(al[1], al[6]);
+  br[1] = vaddq_s32(ar[1], ar[6]);
+  bl[2] = vaddq_s32(al[2], al[5]);
+  br[2] = vaddq_s32(ar[2], ar[5]);
+  bl[3] = vaddq_s32(al[3], al[4]);
+  br[3] = vaddq_s32(ar[3], ar[4]);
+
+  bl[4] = vsubq_s32(al[3], al[4]);
+  br[4] = vsubq_s32(ar[3], ar[4]);
+  bl[5] = vsubq_s32(al[2], al[5]);
+  br[5] = vsubq_s32(ar[2], ar[5]);
+  bl[6] = vsubq_s32(al[1], al[6]);
+  br[6] = vsubq_s32(ar[1], ar[6]);
+  bl[7] = vsubq_s32(al[0], al[7]);
+  br[7] = vsubq_s32(ar[0], ar[7]);
+
+  bl[8] = al[8];
+  br[8] = ar[8];
+  bl[9] = al[9];
+  br[9] = ar[9];
+
+  butterfly_one_coeff_s32_fast(al[13], ar[13], al[10], ar[10], cospi_16_64,
+                               &bl[13], &br[13], &bl[10], &br[10]);
+  butterfly_one_coeff_s32_fast(al[12], ar[12], al[11], ar[11], cospi_16_64,
+                               &bl[12], &br[12], &bl[11], &br[11]);
+
+  bl[14] = al[14];
+  br[14] = ar[14];
+  bl[15] = al[15];
+  br[15] = ar[15];
+
+  bl[16] = vaddq_s32(left[16], al[23]);
+  br[16] = vaddq_s32(right[16], ar[23]);
+  bl[17] = vaddq_s32(left[17], al[22]);
+  br[17] = vaddq_s32(right[17], ar[22]);
+  bl[18] = vaddq_s32(left[18], al[21]);
+  br[18] = vaddq_s32(right[18], ar[21]);
+  bl[19] = vaddq_s32(left[19], al[20]);
+  br[19] = vaddq_s32(right[19], ar[20]);
+
+  bl[20] = vsubq_s32(left[19], al[20]);
+  br[20] = vsubq_s32(right[19], ar[20]);
+  bl[21] = vsubq_s32(left[18], al[21]);
+  br[21] = vsubq_s32(right[18], ar[21]);
+  bl[22] = vsubq_s32(left[17], al[22]);
+  br[22] = vsubq_s32(right[17], ar[22]);
+  bl[23] = vsubq_s32(left[16], al[23]);
+  br[23] = vsubq_s32(right[16], ar[23]);
+
+  bl[24] = vsubq_s32(left[31], al[24]);
+  br[24] = vsubq_s32(right[31], ar[24]);
+  bl[25] = vsubq_s32(left[30], al[25]);
+  br[25] = vsubq_s32(right[30], ar[25]);
+  bl[26] = vsubq_s32(left[29], al[26]);
+  br[26] = vsubq_s32(right[29], ar[26]);
+  bl[27] = vsubq_s32(left[28], al[27]);
+  br[27] = vsubq_s32(right[28], ar[27]);
+
+  bl[28] = vaddq_s32(left[28], al[27]);
+  br[28] = vaddq_s32(right[28], ar[27]);
+  bl[29] = vaddq_s32(left[29], al[26]);
+  br[29] = vaddq_s32(right[29], ar[26]);
+  bl[30] = vaddq_s32(left[30], al[25]);
+  br[30] = vaddq_s32(right[30], ar[25]);
+  bl[31] = vaddq_s32(left[31], al[24]);
+  br[31] = vaddq_s32(right[31], ar[24]);
+
+  // Stage 4.
+  al[0] = vaddq_s32(bl[0], bl[3]);
+  ar[0] = vaddq_s32(br[0], br[3]);
+  al[1] = vaddq_s32(bl[1], bl[2]);
+  ar[1] = vaddq_s32(br[1], br[2]);
+  al[2] = vsubq_s32(bl[1], bl[2]);
+  ar[2] = vsubq_s32(br[1], br[2]);
+  al[3] = vsubq_s32(bl[0], bl[3]);
+  ar[3] = vsubq_s32(br[0], br[3]);
+
+  al[4] = bl[4];
+  ar[4] = br[4];
+
+  butterfly_one_coeff_s32_fast(bl[6], br[6], bl[5], br[5], cospi_16_64, &al[6],
+                               &ar[6], &al[5], &ar[5]);
+
+  al[7] = bl[7];
+  ar[7] = br[7];
+
+  al[8] = vaddq_s32(bl[8], bl[11]);
+  ar[8] = vaddq_s32(br[8], br[11]);
+  al[9] = vaddq_s32(bl[9], bl[10]);
+  ar[9] = vaddq_s32(br[9], br[10]);
+  al[10] = vsubq_s32(bl[9], bl[10]);
+  ar[10] = vsubq_s32(br[9], br[10]);
+  al[11] = vsubq_s32(bl[8], bl[11]);
+  ar[11] = vsubq_s32(br[8], br[11]);
+  al[12] = vsubq_s32(bl[15], bl[12]);
+  ar[12] = vsubq_s32(br[15], br[12]);
+  al[13] = vsubq_s32(bl[14], bl[13]);
+  ar[13] = vsubq_s32(br[14], br[13]);
+  al[14] = vaddq_s32(bl[14], bl[13]);
+  ar[14] = vaddq_s32(br[14], br[13]);
+  al[15] = vaddq_s32(bl[15], bl[12]);
+  ar[15] = vaddq_s32(br[15], br[12]);
+
+  al[16] = bl[16];
+  ar[16] = br[16];
+  al[17] = bl[17];
+  ar[17] = br[17];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[29], br[29], bl[18], br[18], cospi_8_64,
+                                     cospi_24_64, &al[29], &ar[29], &al[18],
+                                     &ar[18]);
+  butterfly_two_coeff_s32_s64_narrow(bl[28], br[28], bl[19], br[19], cospi_8_64,
+                                     cospi_24_64, &al[28], &ar[28], &al[19],
+                                     &ar[19]);
+  butterfly_two_coeff_s32_s64_narrow(bl[27], br[27], bl[20], br[20],
+                                     cospi_24_64, -cospi_8_64, &al[27], &ar[27],
+                                     &al[20], &ar[20]);
+  butterfly_two_coeff_s32_s64_narrow(bl[26], br[26], bl[21], br[21],
+                                     cospi_24_64, -cospi_8_64, &al[26], &ar[26],
+                                     &al[21], &ar[21]);
+
+  al[22] = bl[22];
+  ar[22] = br[22];
+  al[23] = bl[23];
+  ar[23] = br[23];
+  al[24] = bl[24];
+  ar[24] = br[24];
+  al[25] = bl[25];
+  ar[25] = br[25];
+
+  al[30] = bl[30];
+  ar[30] = br[30];
+  al[31] = bl[31];
+  ar[31] = br[31];
+
+  // Stage 5.
+  butterfly_one_coeff_s32_fast(al[0], ar[0], al[1], ar[1], cospi_16_64, &bl[0],
+                               &br[0], &bl[1], &br[1]);
+  butterfly_two_coeff_s32_s64_narrow(al[3], ar[3], al[2], ar[2], cospi_8_64,
+                                     cospi_24_64, &bl[2], &br[2], &bl[3],
+                                     &br[3]);
+
+  bl[4] = vaddq_s32(al[4], al[5]);
+  br[4] = vaddq_s32(ar[4], ar[5]);
+  bl[5] = vsubq_s32(al[4], al[5]);
+  br[5] = vsubq_s32(ar[4], ar[5]);
+  bl[6] = vsubq_s32(al[7], al[6]);
+  br[6] = vsubq_s32(ar[7], ar[6]);
+  bl[7] = vaddq_s32(al[7], al[6]);
+  br[7] = vaddq_s32(ar[7], ar[6]);
+
+  bl[8] = al[8];
+  br[8] = ar[8];
+
+  butterfly_two_coeff_s32_s64_narrow(al[14], ar[14], al[9], ar[9], cospi_8_64,
+                                     cospi_24_64, &bl[14], &br[14], &bl[9],
+                                     &br[9]);
+  butterfly_two_coeff_s32_s64_narrow(al[13], ar[13], al[10], ar[10],
+                                     cospi_24_64, -cospi_8_64, &bl[13], &br[13],
+                                     &bl[10], &br[10]);
+
+  bl[11] = al[11];
+  br[11] = ar[11];
+  bl[12] = al[12];
+  br[12] = ar[12];
+
+  bl[15] = al[15];
+  br[15] = ar[15];
+
+  bl[16] = vaddq_s32(al[19], al[16]);
+  br[16] = vaddq_s32(ar[19], ar[16]);
+  bl[17] = vaddq_s32(al[18], al[17]);
+  br[17] = vaddq_s32(ar[18], ar[17]);
+  bl[18] = vsubq_s32(al[17], al[18]);
+  br[18] = vsubq_s32(ar[17], ar[18]);
+  bl[19] = vsubq_s32(al[16], al[19]);
+  br[19] = vsubq_s32(ar[16], ar[19]);
+  bl[20] = vsubq_s32(al[23], al[20]);
+  br[20] = vsubq_s32(ar[23], ar[20]);
+  bl[21] = vsubq_s32(al[22], al[21]);
+  br[21] = vsubq_s32(ar[22], ar[21]);
+  bl[22] = vaddq_s32(al[21], al[22]);
+  br[22] = vaddq_s32(ar[21], ar[22]);
+  bl[23] = vaddq_s32(al[20], al[23]);
+  br[23] = vaddq_s32(ar[20], ar[23]);
+  bl[24] = vaddq_s32(al[27], al[24]);
+  br[24] = vaddq_s32(ar[27], ar[24]);
+  bl[25] = vaddq_s32(al[26], al[25]);
+  br[25] = vaddq_s32(ar[26], ar[25]);
+  bl[26] = vsubq_s32(al[25], al[26]);
+  br[26] = vsubq_s32(ar[25], ar[26]);
+  bl[27] = vsubq_s32(al[24], al[27]);
+  br[27] = vsubq_s32(ar[24], ar[27]);
+  bl[28] = vsubq_s32(al[31], al[28]);
+  br[28] = vsubq_s32(ar[31], ar[28]);
+  bl[29] = vsubq_s32(al[30], al[29]);
+  br[29] = vsubq_s32(ar[30], ar[29]);
+  bl[30] = vaddq_s32(al[29], al[30]);
+  br[30] = vaddq_s32(ar[29], ar[30]);
+  bl[31] = vaddq_s32(al[28], al[31]);
+  br[31] = vaddq_s32(ar[28], ar[31]);
+
+  // Stage 6.
+  al[0] = bl[0];
+  ar[0] = br[0];
+  al[1] = bl[1];
+  ar[1] = br[1];
+  al[2] = bl[2];
+  ar[2] = br[2];
+  al[3] = bl[3];
+  ar[3] = br[3];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[7], br[7], bl[4], br[4], cospi_4_64,
+                                     cospi_28_64, &al[4], &ar[4], &al[7],
+                                     &ar[7]);
+  butterfly_two_coeff_s32_s64_narrow(bl[6], br[6], bl[5], br[5], cospi_20_64,
+                                     cospi_12_64, &al[5], &ar[5], &al[6],
+                                     &ar[6]);
+
+  al[8] = vaddq_s32(bl[8], bl[9]);
+  ar[8] = vaddq_s32(br[8], br[9]);
+  al[9] = vsubq_s32(bl[8], bl[9]);
+  ar[9] = vsubq_s32(br[8], br[9]);
+  al[10] = vsubq_s32(bl[11], bl[10]);
+  ar[10] = vsubq_s32(br[11], br[10]);
+  al[11] = vaddq_s32(bl[11], bl[10]);
+  ar[11] = vaddq_s32(br[11], br[10]);
+  al[12] = vaddq_s32(bl[12], bl[13]);
+  ar[12] = vaddq_s32(br[12], br[13]);
+  al[13] = vsubq_s32(bl[12], bl[13]);
+  ar[13] = vsubq_s32(br[12], br[13]);
+  al[14] = vsubq_s32(bl[15], bl[14]);
+  ar[14] = vsubq_s32(br[15], br[14]);
+  al[15] = vaddq_s32(bl[15], bl[14]);
+  ar[15] = vaddq_s32(br[15], br[14]);
+
+  al[16] = bl[16];
+  ar[16] = br[16];
+  al[19] = bl[19];
+  ar[19] = br[19];
+  al[20] = bl[20];
+  ar[20] = br[20];
+  al[23] = bl[23];
+  ar[23] = br[23];
+  al[24] = bl[24];
+  ar[24] = br[24];
+  al[27] = bl[27];
+  ar[27] = br[27];
+  al[28] = bl[28];
+  ar[28] = br[28];
+  al[31] = bl[31];
+  ar[31] = br[31];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[30], br[30], bl[17], br[17], cospi_4_64,
+                                     cospi_28_64, &al[30], &ar[30], &al[17],
+                                     &ar[17]);
+  butterfly_two_coeff_s32_s64_narrow(bl[29], br[29], bl[18], br[18],
+                                     cospi_28_64, -cospi_4_64, &al[29], &ar[29],
+                                     &al[18], &ar[18]);
+  butterfly_two_coeff_s32_s64_narrow(bl[26], br[26], bl[21], br[21],
+                                     cospi_20_64, cospi_12_64, &al[26], &ar[26],
+                                     &al[21], &ar[21]);
+  butterfly_two_coeff_s32_s64_narrow(bl[25], br[25], bl[22], br[22],
+                                     cospi_12_64, -cospi_20_64, &al[25],
+                                     &ar[25], &al[22], &ar[22]);
+
+  // Stage 7.
+  bl[0] = al[0];
+  br[0] = ar[0];
+  bl[1] = al[1];
+  br[1] = ar[1];
+  bl[2] = al[2];
+  br[2] = ar[2];
+  bl[3] = al[3];
+  br[3] = ar[3];
+  bl[4] = al[4];
+  br[4] = ar[4];
+  bl[5] = al[5];
+  br[5] = ar[5];
+  bl[6] = al[6];
+  br[6] = ar[6];
+  bl[7] = al[7];
+  br[7] = ar[7];
+
+  butterfly_two_coeff_s32_s64_narrow(al[15], ar[15], al[8], ar[8], cospi_2_64,
+                                     cospi_30_64, &bl[8], &br[8], &bl[15],
+                                     &br[15]);
+  butterfly_two_coeff_s32_s64_narrow(al[14], ar[14], al[9], ar[9], cospi_18_64,
+                                     cospi_14_64, &bl[9], &br[9], &bl[14],
+                                     &br[14]);
+  butterfly_two_coeff_s32_s64_narrow(al[13], ar[13], al[10], ar[10],
+                                     cospi_10_64, cospi_22_64, &bl[10], &br[10],
+                                     &bl[13], &br[13]);
+  butterfly_two_coeff_s32_s64_narrow(al[12], ar[12], al[11], ar[11],
+                                     cospi_26_64, cospi_6_64, &bl[11], &br[11],
+                                     &bl[12], &br[12]);
+
+  bl[16] = vaddq_s32(al[16], al[17]);
+  br[16] = vaddq_s32(ar[16], ar[17]);
+  bl[17] = vsubq_s32(al[16], al[17]);
+  br[17] = vsubq_s32(ar[16], ar[17]);
+  bl[18] = vsubq_s32(al[19], al[18]);
+  br[18] = vsubq_s32(ar[19], ar[18]);
+  bl[19] = vaddq_s32(al[19], al[18]);
+  br[19] = vaddq_s32(ar[19], ar[18]);
+  bl[20] = vaddq_s32(al[20], al[21]);
+  br[20] = vaddq_s32(ar[20], ar[21]);
+  bl[21] = vsubq_s32(al[20], al[21]);
+  br[21] = vsubq_s32(ar[20], ar[21]);
+  bl[22] = vsubq_s32(al[23], al[22]);
+  br[22] = vsubq_s32(ar[23], ar[22]);
+  bl[23] = vaddq_s32(al[23], al[22]);
+  br[23] = vaddq_s32(ar[23], ar[22]);
+  bl[24] = vaddq_s32(al[24], al[25]);
+  br[24] = vaddq_s32(ar[24], ar[25]);
+  bl[25] = vsubq_s32(al[24], al[25]);
+  br[25] = vsubq_s32(ar[24], ar[25]);
+  bl[26] = vsubq_s32(al[27], al[26]);
+  br[26] = vsubq_s32(ar[27], ar[26]);
+  bl[27] = vaddq_s32(al[27], al[26]);
+  br[27] = vaddq_s32(ar[27], ar[26]);
+  bl[28] = vaddq_s32(al[28], al[29]);
+  br[28] = vaddq_s32(ar[28], ar[29]);
+  bl[29] = vsubq_s32(al[28], al[29]);
+  br[29] = vsubq_s32(ar[28], ar[29]);
+  bl[30] = vsubq_s32(al[31], al[30]);
+  br[30] = vsubq_s32(ar[31], ar[30]);
+  bl[31] = vaddq_s32(al[31], al[30]);
+  br[31] = vaddq_s32(ar[31], ar[30]);
+
+  // Final stage.
+
+  left[0] = bl[0];
+  right[0] = br[0];
+  left[16] = bl[1];
+  right[16] = br[1];
+  left[8] = bl[2];
+  right[8] = br[2];
+  left[24] = bl[3];
+  right[24] = br[3];
+  left[4] = bl[4];
+  right[4] = br[4];
+  left[20] = bl[5];
+  right[20] = br[5];
+  left[12] = bl[6];
+  right[12] = br[6];
+  left[28] = bl[7];
+  right[28] = br[7];
+  left[2] = bl[8];
+  right[2] = br[8];
+  left[18] = bl[9];
+  right[18] = br[9];
+  left[10] = bl[10];
+  right[10] = br[10];
+  left[26] = bl[11];
+  right[26] = br[11];
+  left[6] = bl[12];
+  right[6] = br[12];
+  left[22] = bl[13];
+  right[22] = br[13];
+  left[14] = bl[14];
+  right[14] = br[14];
+  left[30] = bl[15];
+  right[30] = br[15];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[31], br[31], bl[16], br[16], cospi_1_64,
+                                     cospi_31_64, &al[1], &ar[1], &al[31],
+                                     &ar[31]);
+  left[1] = al[1];
+  right[1] = ar[1];
+  left[31] = al[31];
+  right[31] = ar[31];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[30], br[30], bl[17], br[17],
+                                     cospi_17_64, cospi_15_64, &al[17], &ar[17],
+                                     &al[15], &ar[15]);
+  left[17] = al[17];
+  right[17] = ar[17];
+  left[15] = al[15];
+  right[15] = ar[15];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[29], br[29], bl[18], br[18], cospi_9_64,
+                                     cospi_23_64, &al[9], &ar[9], &al[23],
+                                     &ar[23]);
+  left[9] = al[9];
+  right[9] = ar[9];
+  left[23] = al[23];
+  right[23] = ar[23];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[28], br[28], bl[19], br[19],
+                                     cospi_25_64, cospi_7_64, &al[25], &ar[25],
+                                     &al[7], &ar[7]);
+  left[25] = al[25];
+  right[25] = ar[25];
+  left[7] = al[7];
+  right[7] = ar[7];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[27], br[27], bl[20], br[20], cospi_5_64,
+                                     cospi_27_64, &al[5], &ar[5], &al[27],
+                                     &ar[27]);
+  left[5] = al[5];
+  right[5] = ar[5];
+  left[27] = al[27];
+  right[27] = ar[27];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[26], br[26], bl[21], br[21],
+                                     cospi_21_64, cospi_11_64, &al[21], &ar[21],
+                                     &al[11], &ar[11]);
+  left[21] = al[21];
+  right[21] = ar[21];
+  left[11] = al[11];
+  right[11] = ar[11];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[25], br[25], bl[22], br[22],
+                                     cospi_13_64, cospi_19_64, &al[13], &ar[13],
+                                     &al[19], &ar[19]);
+  left[13] = al[13];
+  right[13] = ar[13];
+  left[19] = al[19];
+  right[19] = ar[19];
+
+  butterfly_two_coeff_s32_s64_narrow(bl[24], br[24], bl[23], br[23],
+                                     cospi_29_64, cospi_3_64, &al[29], &ar[29],
+                                     &al[3], &ar[3]);
+  left[29] = al[29];
+  right[29] = ar[29];
+  left[3] = al[3];
+  right[3] = ar[3];
+}
+
+static INLINE void highbd_dct8x32_body_second_pass_rd(int32x4_t *left /*32*/,
+                                                      int32x4_t *right /*32*/) {
+  int32x4_t al[32], ar[32];
+  int32x4_t bl[32], br[32];
+
+  // Stage 1: Done as part of the load.
+
+  // Stage 2.
+  // For the "rd" version, all the values are rounded down after stage 2 to keep
+  // the values in 16 bits.
+  al[0] = add_round_shift_s32(vaddq_s32(left[0], left[15]));
+  ar[0] = add_round_shift_s32(vaddq_s32(right[0], right[15]));
+  al[1] = add_round_shift_s32(vaddq_s32(left[1], left[14]));
+  ar[1] = add_round_shift_s32(vaddq_s32(right[1], right[14]));
+  al[2] = add_round_shift_s32(vaddq_s32(left[2], left[13]));
+  ar[2] = add_round_shift_s32(vaddq_s32(right[2], right[13]));
+  al[3] = add_round_shift_s32(vaddq_s32(left[3], left[12]));
+  ar[3] = add_round_shift_s32(vaddq_s32(right[3], right[12]));
+  al[4] = add_round_shift_s32(vaddq_s32(left[4], left[11]));
+  ar[4] = add_round_shift_s32(vaddq_s32(right[4], right[11]));
+  al[5] = add_round_shift_s32(vaddq_s32(left[5], left[10]));
+  ar[5] = add_round_shift_s32(vaddq_s32(right[5], right[10]));
+  al[6] = add_round_shift_s32(vaddq_s32(left[6], left[9]));
+  ar[6] = add_round_shift_s32(vaddq_s32(right[6], right[9]));
+  al[7] = add_round_shift_s32(vaddq_s32(left[7], left[8]));
+  ar[7] = add_round_shift_s32(vaddq_s32(right[7], right[8]));
+
+  al[8] = add_round_shift_s32(vsubq_s32(left[7], left[8]));
+  ar[8] = add_round_shift_s32(vsubq_s32(right[7], right[8]));
+  al[9] = add_round_shift_s32(vsubq_s32(left[6], left[9]));
+  ar[9] = add_round_shift_s32(vsubq_s32(right[6], right[9]));
+  al[10] = add_round_shift_s32(vsubq_s32(left[5], left[10]));
+  ar[10] = add_round_shift_s32(vsubq_s32(right[5], right[10]));
+  al[11] = add_round_shift_s32(vsubq_s32(left[4], left[11]));
+  ar[11] = add_round_shift_s32(vsubq_s32(right[4], right[11]));
+  al[12] = add_round_shift_s32(vsubq_s32(left[3], left[12]));
+  ar[12] = add_round_shift_s32(vsubq_s32(right[3], right[12]));
+  al[13] = add_round_shift_s32(vsubq_s32(left[2], left[13]));
+  ar[13] = add_round_shift_s32(vsubq_s32(right[2], right[13]));
+  al[14] = add_round_shift_s32(vsubq_s32(left[1], left[14]));
+  ar[14] = add_round_shift_s32(vsubq_s32(right[1], right[14]));
+  al[15] = add_round_shift_s32(vsubq_s32(left[0], left[15]));
+  ar[15] = add_round_shift_s32(vsubq_s32(right[0], right[15]));
+
+  al[16] = add_round_shift_s32(left[16]);
+  ar[16] = add_round_shift_s32(right[16]);
+  al[17] = add_round_shift_s32(left[17]);
+  ar[17] = add_round_shift_s32(right[17]);
+  al[18] = add_round_shift_s32(left[18]);
+  ar[18] = add_round_shift_s32(right[18]);
+  al[19] = add_round_shift_s32(left[19]);
+  ar[19] = add_round_shift_s32(right[19]);
+
+  butterfly_one_coeff_s32_fast(left[27], right[27], left[20], right[20],
+                               cospi_16_64, &al[27], &ar[27], &al[20], &ar[20]);
+  butterfly_one_coeff_s32_fast(left[26], right[26], left[21], right[21],
+                               cospi_16_64, &al[26], &ar[26], &al[21], &ar[21]);
+  butterfly_one_coeff_s32_fast(left[25], right[25], left[22], right[22],
+                               cospi_16_64, &al[25], &ar[25], &al[22], &ar[22]);
+  butterfly_one_coeff_s32_fast(left[24], right[24], left[23], right[23],
+                               cospi_16_64, &al[24], &ar[24], &al[23], &ar[23]);
+
+  al[20] = add_round_shift_s32(al[20]);
+  ar[20] = add_round_shift_s32(ar[20]);
+  al[21] = add_round_shift_s32(al[21]);
+  ar[21] = add_round_shift_s32(ar[21]);
+  al[22] = add_round_shift_s32(al[22]);
+  ar[22] = add_round_shift_s32(ar[22]);
+  al[23] = add_round_shift_s32(al[23]);
+  ar[23] = add_round_shift_s32(ar[23]);
+  al[24] = add_round_shift_s32(al[24]);
+  ar[24] = add_round_shift_s32(ar[24]);
+  al[25] = add_round_shift_s32(al[25]);
+  ar[25] = add_round_shift_s32(ar[25]);
+  al[26] = add_round_shift_s32(al[26]);
+  ar[26] = add_round_shift_s32(ar[26]);
+  al[27] = add_round_shift_s32(al[27]);
+  ar[27] = add_round_shift_s32(ar[27]);
+
+  al[28] = add_round_shift_s32(left[28]);
+  ar[28] = add_round_shift_s32(right[28]);
+  al[29] = add_round_shift_s32(left[29]);
+  ar[29] = add_round_shift_s32(right[29]);
+  al[30] = add_round_shift_s32(left[30]);
+  ar[30] = add_round_shift_s32(right[30]);
+  al[31] = add_round_shift_s32(left[31]);
+  ar[31] = add_round_shift_s32(right[31]);
+
+  // Stage 3.
+  bl[0] = vaddq_s32(al[0], al[7]);
+  br[0] = vaddq_s32(ar[0], ar[7]);
+  bl[1] = vaddq_s32(al[1], al[6]);
+  br[1] = vaddq_s32(ar[1], ar[6]);
+  bl[2] = vaddq_s32(al[2], al[5]);
+  br[2] = vaddq_s32(ar[2], ar[5]);
+  bl[3] = vaddq_s32(al[3], al[4]);
+  br[3] = vaddq_s32(ar[3], ar[4]);
+
+  bl[4] = vsubq_s32(al[3], al[4]);
+  br[4] = vsubq_s32(ar[3], ar[4]);
+  bl[5] = vsubq_s32(al[2], al[5]);
+  br[5] = vsubq_s32(ar[2], ar[5]);
+  bl[6] = vsubq_s32(al[1], al[6]);
+  br[6] = vsubq_s32(ar[1], ar[6]);
+  bl[7] = vsubq_s32(al[0], al[7]);
+  br[7] = vsubq_s32(ar[0], ar[7]);
+
+  bl[8] = al[8];
+  br[8] = ar[8];
+  bl[9] = al[9];
+  br[9] = ar[9];
+
+  butterfly_one_coeff_s32_fast(al[13], ar[13], al[10], ar[10], cospi_16_64,
+                               &bl[13], &br[13], &bl[10], &br[10]);
+  butterfly_one_coeff_s32_fast(al[12], ar[12], al[11], ar[11], cospi_16_64,
+                               &bl[12], &br[12], &bl[11], &br[11]);
+
+  bl[14] = al[14];
+  br[14] = ar[14];
+  bl[15] = al[15];
+  br[15] = ar[15];
+
+  bl[16] = vaddq_s32(al[16], al[23]);
+  br[16] = vaddq_s32(ar[16], ar[23]);
+  bl[17] = vaddq_s32(al[17], al[22]);
+  br[17] = vaddq_s32(ar[17], ar[22]);
+  bl[18] = vaddq_s32(al[18], al[21]);
+  br[18] = vaddq_s32(ar[18], ar[21]);
+  bl[19] = vaddq_s32(al[19], al[20]);
+  br[19] = vaddq_s32(ar[19], ar[20]);
+
+  bl[20] = vsubq_s32(al[19], al[20]);
+  br[20] = vsubq_s32(ar[19], ar[20]);
+  bl[21] = vsubq_s32(al[18], al[21]);
+  br[21] = vsubq_s32(ar[18], ar[21]);
+  bl[22] = vsubq_s32(al[17], al[22]);
+  br[22] = vsubq_s32(ar[17], ar[22]);
+  bl[23] = vsubq_s32(al[16], al[23]);
+  br[23] = vsubq_s32(ar[16], ar[23]);
+
+  bl[24] = vsubq_s32(al[31], al[24]);
+  br[24] = vsubq_s32(ar[31], ar[24]);
+  bl[25] = vsubq_s32(al[30], al[25]);
+  br[25] = vsubq_s32(ar[30], ar[25]);
+  bl[26] = vsubq_s32(al[29], al[26]);
+  br[26] = vsubq_s32(ar[29], ar[26]);
+  bl[27] = vsubq_s32(al[28], al[27]);
+  br[27] = vsubq_s32(ar[28], ar[27]);
+
+  bl[28] = vaddq_s32(al[28], al[27]);
+  br[28] = vaddq_s32(ar[28], ar[27]);
+  bl[29] = vaddq_s32(al[29], al[26]);
+  br[29] = vaddq_s32(ar[29], ar[26]);
+  bl[30] = vaddq_s32(al[30], al[25]);
+  br[30] = vaddq_s32(ar[30], ar[25]);
+  bl[31] = vaddq_s32(al[31], al[24]);
+  br[31] = vaddq_s32(ar[31], ar[24]);
+
+  // Stage 4.
+  al[0] = vaddq_s32(bl[0], bl[3]);
+  ar[0] = vaddq_s32(br[0], br[3]);
+  al[1] = vaddq_s32(bl[1], bl[2]);
+  ar[1] = vaddq_s32(br[1], br[2]);
+  al[2] = vsubq_s32(bl[1], bl[2]);
+  ar[2] = vsubq_s32(br[1], br[2]);
+  al[3] = vsubq_s32(bl[0], bl[3]);
+  ar[3] = vsubq_s32(br[0], br[3]);
+
+  al[4] = bl[4];
+  ar[4] = br[4];
+
+  butterfly_one_coeff_s32_fast(bl[6], br[6], bl[5], br[5], cospi_16_64, &al[6],
+                               &ar[6], &al[5], &ar[5]);
+
+  al[7] = bl[7];
+  ar[7] = br[7];
+
+  al[8] = vaddq_s32(bl[8], bl[11]);
+  ar[8] = vaddq_s32(br[8], br[11]);
+  al[9] = vaddq_s32(bl[9], bl[10]);
+  ar[9] = vaddq_s32(br[9], br[10]);
+  al[10] = vsubq_s32(bl[9], bl[10]);
+  ar[10] = vsubq_s32(br[9], br[10]);
+  al[11] = vsubq_s32(bl[8], bl[11]);
+  ar[11] = vsubq_s32(br[8], br[11]);
+  al[12] = vsubq_s32(bl[15], bl[12]);
+  ar[12] = vsubq_s32(br[15], br[12]);
+  al[13] = vsubq_s32(bl[14], bl[13]);
+  ar[13] = vsubq_s32(br[14], br[13]);
+  al[14] = vaddq_s32(bl[14], bl[13]);
+  ar[14] = vaddq_s32(br[14], br[13]);
+  al[15] = vaddq_s32(bl[15], bl[12]);
+  ar[15] = vaddq_s32(br[15], br[12]);
+
+  al[16] = bl[16];
+  ar[16] = br[16];
+  al[17] = bl[17];
+  ar[17] = br[17];
+
+  butterfly_two_coeff_s32(bl[29], br[29], bl[18], br[18], cospi_8_64,
+                          cospi_24_64, &al[29], &ar[29], &al[18], &ar[18]);
+  butterfly_two_coeff_s32(bl[28], br[28], bl[19], br[19], cospi_8_64,
+                          cospi_24_64, &al[28], &ar[28], &al[19], &ar[19]);
+  butterfly_two_coeff_s32(bl[27], br[27], bl[20], br[20], cospi_24_64,
+                          -cospi_8_64, &al[27], &ar[27], &al[20], &ar[20]);
+  butterfly_two_coeff_s32(bl[26], br[26], bl[21], br[21], cospi_24_64,
+                          -cospi_8_64, &al[26], &ar[26], &al[21], &ar[21]);
+
+  al[22] = bl[22];
+  ar[22] = br[22];
+  al[23] = bl[23];
+  ar[23] = br[23];
+  al[24] = bl[24];
+  ar[24] = br[24];
+  al[25] = bl[25];
+  ar[25] = br[25];
+
+  al[30] = bl[30];
+  ar[30] = br[30];
+  al[31] = bl[31];
+  ar[31] = br[31];
+
+  // Stage 5.
+  butterfly_one_coeff_s32_fast(al[0], ar[0], al[1], ar[1], cospi_16_64, &bl[0],
+                               &br[0], &bl[1], &br[1]);
+  butterfly_two_coeff_s32(al[3], ar[3], al[2], ar[2], cospi_8_64, cospi_24_64,
+                          &bl[2], &br[2], &bl[3], &br[3]);
+
+  bl[4] = vaddq_s32(al[4], al[5]);
+  br[4] = vaddq_s32(ar[4], ar[5]);
+  bl[5] = vsubq_s32(al[4], al[5]);
+  br[5] = vsubq_s32(ar[4], ar[5]);
+  bl[6] = vsubq_s32(al[7], al[6]);
+  br[6] = vsubq_s32(ar[7], ar[6]);
+  bl[7] = vaddq_s32(al[7], al[6]);
+  br[7] = vaddq_s32(ar[7], ar[6]);
+
+  bl[8] = al[8];
+  br[8] = ar[8];
+
+  butterfly_two_coeff_s32(al[14], ar[14], al[9], ar[9], cospi_8_64, cospi_24_64,
+                          &bl[14], &br[14], &bl[9], &br[9]);
+  butterfly_two_coeff_s32(al[13], ar[13], al[10], ar[10], cospi_24_64,
+                          -cospi_8_64, &bl[13], &br[13], &bl[10], &br[10]);
+
+  bl[11] = al[11];
+  br[11] = ar[11];
+  bl[12] = al[12];
+  br[12] = ar[12];
+
+  bl[15] = al[15];
+  br[15] = ar[15];
+
+  bl[16] = vaddq_s32(al[19], al[16]);
+  br[16] = vaddq_s32(ar[19], ar[16]);
+  bl[17] = vaddq_s32(al[18], al[17]);
+  br[17] = vaddq_s32(ar[18], ar[17]);
+  bl[18] = vsubq_s32(al[17], al[18]);
+  br[18] = vsubq_s32(ar[17], ar[18]);
+  bl[19] = vsubq_s32(al[16], al[19]);
+  br[19] = vsubq_s32(ar[16], ar[19]);
+  bl[20] = vsubq_s32(al[23], al[20]);
+  br[20] = vsubq_s32(ar[23], ar[20]);
+  bl[21] = vsubq_s32(al[22], al[21]);
+  br[21] = vsubq_s32(ar[22], ar[21]);
+  bl[22] = vaddq_s32(al[21], al[22]);
+  br[22] = vaddq_s32(ar[21], ar[22]);
+  bl[23] = vaddq_s32(al[20], al[23]);
+  br[23] = vaddq_s32(ar[20], ar[23]);
+  bl[24] = vaddq_s32(al[27], al[24]);
+  br[24] = vaddq_s32(ar[27], ar[24]);
+  bl[25] = vaddq_s32(al[26], al[25]);
+  br[25] = vaddq_s32(ar[26], ar[25]);
+  bl[26] = vsubq_s32(al[25], al[26]);
+  br[26] = vsubq_s32(ar[25], ar[26]);
+  bl[27] = vsubq_s32(al[24], al[27]);
+  br[27] = vsubq_s32(ar[24], ar[27]);
+  bl[28] = vsubq_s32(al[31], al[28]);
+  br[28] = vsubq_s32(ar[31], ar[28]);
+  bl[29] = vsubq_s32(al[30], al[29]);
+  br[29] = vsubq_s32(ar[30], ar[29]);
+  bl[30] = vaddq_s32(al[29], al[30]);
+  br[30] = vaddq_s32(ar[29], ar[30]);
+  bl[31] = vaddq_s32(al[28], al[31]);
+  br[31] = vaddq_s32(ar[28], ar[31]);
+
+  // Stage 6.
+  al[0] = bl[0];
+  ar[0] = br[0];
+  al[1] = bl[1];
+  ar[1] = br[1];
+  al[2] = bl[2];
+  ar[2] = br[2];
+  al[3] = bl[3];
+  ar[3] = br[3];
+
+  butterfly_two_coeff_s32(bl[7], br[7], bl[4], br[4], cospi_4_64, cospi_28_64,
+                          &al[4], &ar[4], &al[7], &ar[7]);
+  butterfly_two_coeff_s32(bl[6], br[6], bl[5], br[5], cospi_20_64, cospi_12_64,
+                          &al[5], &ar[5], &al[6], &ar[6]);
+
+  al[8] = vaddq_s32(bl[8], bl[9]);
+  ar[8] = vaddq_s32(br[8], br[9]);
+  al[9] = vsubq_s32(bl[8], bl[9]);
+  ar[9] = vsubq_s32(br[8], br[9]);
+  al[10] = vsubq_s32(bl[11], bl[10]);
+  ar[10] = vsubq_s32(br[11], br[10]);
+  al[11] = vaddq_s32(bl[11], bl[10]);
+  ar[11] = vaddq_s32(br[11], br[10]);
+  al[12] = vaddq_s32(bl[12], bl[13]);
+  ar[12] = vaddq_s32(br[12], br[13]);
+  al[13] = vsubq_s32(bl[12], bl[13]);
+  ar[13] = vsubq_s32(br[12], br[13]);
+  al[14] = vsubq_s32(bl[15], bl[14]);
+  ar[14] = vsubq_s32(br[15], br[14]);
+  al[15] = vaddq_s32(bl[15], bl[14]);
+  ar[15] = vaddq_s32(br[15], br[14]);
+
+  al[16] = bl[16];
+  ar[16] = br[16];
+  al[19] = bl[19];
+  ar[19] = br[19];
+  al[20] = bl[20];
+  ar[20] = br[20];
+  al[23] = bl[23];
+  ar[23] = br[23];
+  al[24] = bl[24];
+  ar[24] = br[24];
+  al[27] = bl[27];
+  ar[27] = br[27];
+  al[28] = bl[28];
+  ar[28] = br[28];
+  al[31] = bl[31];
+  ar[31] = br[31];
+
+  butterfly_two_coeff_s32(bl[30], br[30], bl[17], br[17], cospi_4_64,
+                          cospi_28_64, &al[30], &ar[30], &al[17], &ar[17]);
+  butterfly_two_coeff_s32(bl[29], br[29], bl[18], br[18], cospi_28_64,
+                          -cospi_4_64, &al[29], &ar[29], &al[18], &ar[18]);
+  butterfly_two_coeff_s32(bl[26], br[26], bl[21], br[21], cospi_20_64,
+                          cospi_12_64, &al[26], &ar[26], &al[21], &ar[21]);
+  butterfly_two_coeff_s32(bl[25], br[25], bl[22], br[22], cospi_12_64,
+                          -cospi_20_64, &al[25], &ar[25], &al[22], &ar[22]);
+
+  // Stage 7.
+  bl[0] = al[0];
+  br[0] = ar[0];
+  bl[1] = al[1];
+  br[1] = ar[1];
+  bl[2] = al[2];
+  br[2] = ar[2];
+  bl[3] = al[3];
+  br[3] = ar[3];
+  bl[4] = al[4];
+  br[4] = ar[4];
+  bl[5] = al[5];
+  br[5] = ar[5];
+  bl[6] = al[6];
+  br[6] = ar[6];
+  bl[7] = al[7];
+  br[7] = ar[7];
+
+  butterfly_two_coeff_s32(al[15], ar[15], al[8], ar[8], cospi_2_64, cospi_30_64,
+                          &bl[8], &br[8], &bl[15], &br[15]);
+  butterfly_two_coeff_s32(al[14], ar[14], al[9], ar[9], cospi_18_64,
+                          cospi_14_64, &bl[9], &br[9], &bl[14], &br[14]);
+  butterfly_two_coeff_s32(al[13], ar[13], al[10], ar[10], cospi_10_64,
+                          cospi_22_64, &bl[10], &br[10], &bl[13], &br[13]);
+  butterfly_two_coeff_s32(al[12], ar[12], al[11], ar[11], cospi_26_64,
+                          cospi_6_64, &bl[11], &br[11], &bl[12], &br[12]);
+
+  bl[16] = vaddq_s32(al[16], al[17]);
+  br[16] = vaddq_s32(ar[16], ar[17]);
+  bl[17] = vsubq_s32(al[16], al[17]);
+  br[17] = vsubq_s32(ar[16], ar[17]);
+  bl[18] = vsubq_s32(al[19], al[18]);
+  br[18] = vsubq_s32(ar[19], ar[18]);
+  bl[19] = vaddq_s32(al[19], al[18]);
+  br[19] = vaddq_s32(ar[19], ar[18]);
+  bl[20] = vaddq_s32(al[20], al[21]);
+  br[20] = vaddq_s32(ar[20], ar[21]);
+  bl[21] = vsubq_s32(al[20], al[21]);
+  br[21] = vsubq_s32(ar[20], ar[21]);
+  bl[22] = vsubq_s32(al[23], al[22]);
+  br[22] = vsubq_s32(ar[23], ar[22]);
+  bl[23] = vaddq_s32(al[23], al[22]);
+  br[23] = vaddq_s32(ar[23], ar[22]);
+  bl[24] = vaddq_s32(al[24], al[25]);
+  br[24] = vaddq_s32(ar[24], ar[25]);
+  bl[25] = vsubq_s32(al[24], al[25]);
+  br[25] = vsubq_s32(ar[24], ar[25]);
+  bl[26] = vsubq_s32(al[27], al[26]);
+  br[26] = vsubq_s32(ar[27], ar[26]);
+  bl[27] = vaddq_s32(al[27], al[26]);
+  br[27] = vaddq_s32(ar[27], ar[26]);
+  bl[28] = vaddq_s32(al[28], al[29]);
+  br[28] = vaddq_s32(ar[28], ar[29]);
+  bl[29] = vsubq_s32(al[28], al[29]);
+  br[29] = vsubq_s32(ar[28], ar[29]);
+  bl[30] = vsubq_s32(al[31], al[30]);
+  br[30] = vsubq_s32(ar[31], ar[30]);
+  bl[31] = vaddq_s32(al[31], al[30]);
+  br[31] = vaddq_s32(ar[31], ar[30]);
+
+  // Final stage.
+  left[0] = bl[0];
+  right[0] = br[0];
+  left[16] = bl[1];
+  right[16] = br[1];
+  left[8] = bl[2];
+  right[8] = br[2];
+  left[24] = bl[3];
+  right[24] = br[3];
+  left[4] = bl[4];
+  right[4] = br[4];
+  left[20] = bl[5];
+  right[20] = br[5];
+  left[12] = bl[6];
+  right[12] = br[6];
+  left[28] = bl[7];
+  right[28] = br[7];
+  left[2] = bl[8];
+  right[2] = br[8];
+  left[18] = bl[9];
+  right[18] = br[9];
+  left[10] = bl[10];
+  right[10] = br[10];
+  left[26] = bl[11];
+  right[26] = br[11];
+  left[6] = bl[12];
+  right[6] = br[12];
+  left[22] = bl[13];
+  right[22] = br[13];
+  left[14] = bl[14];
+  right[14] = br[14];
+  left[30] = bl[15];
+  right[30] = br[15];
+
+  butterfly_two_coeff_s32(bl[31], br[31], bl[16], br[16], cospi_1_64,
+                          cospi_31_64, &al[1], &ar[1], &al[31], &ar[31]);
+  left[1] = al[1];
+  right[1] = ar[1];
+  left[31] = al[31];
+  right[31] = ar[31];
+
+  butterfly_two_coeff_s32(bl[30], br[30], bl[17], br[17], cospi_17_64,
+                          cospi_15_64, &al[17], &ar[17], &al[15], &ar[15]);
+  left[17] = al[17];
+  right[17] = ar[17];
+  left[15] = al[15];
+  right[15] = ar[15];
+
+  butterfly_two_coeff_s32(bl[29], br[29], bl[18], br[18], cospi_9_64,
+                          cospi_23_64, &al[9], &ar[9], &al[23], &ar[23]);
+  left[9] = al[9];
+  right[9] = ar[9];
+  left[23] = al[23];
+  right[23] = ar[23];
+
+  butterfly_two_coeff_s32(bl[28], br[28], bl[19], br[19], cospi_25_64,
+                          cospi_7_64, &al[25], &ar[25], &al[7], &ar[7]);
+  left[25] = al[25];
+  right[25] = ar[25];
+  left[7] = al[7];
+  right[7] = ar[7];
+
+  butterfly_two_coeff_s32(bl[27], br[27], bl[20], br[20], cospi_5_64,
+                          cospi_27_64, &al[5], &ar[5], &al[27], &ar[27]);
+  left[5] = al[5];
+  right[5] = ar[5];
+  left[27] = al[27];
+  right[27] = ar[27];
+
+  butterfly_two_coeff_s32(bl[26], br[26], bl[21], br[21], cospi_21_64,
+                          cospi_11_64, &al[21], &ar[21], &al[11], &ar[11]);
+  left[21] = al[21];
+  right[21] = ar[21];
+  left[11] = al[11];
+  right[11] = ar[11];
+
+  butterfly_two_coeff_s32(bl[25], br[25], bl[22], br[22], cospi_13_64,
+                          cospi_19_64, &al[13], &ar[13], &al[19], &ar[19]);
+  left[13] = al[13];
+  right[13] = ar[13];
+  left[19] = al[19];
+  right[19] = ar[19];
+
+  butterfly_two_coeff_s32(bl[24], br[24], bl[23], br[23], cospi_29_64,
+                          cospi_3_64, &al[29], &ar[29], &al[3], &ar[3]);
+  left[29] = al[29];
+  right[29] = ar[29];
+  left[3] = al[3];
+  right[3] = ar[3];
+}
+
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #endif  // VPX_VPX_DSP_ARM_FDCT32X32_NEON_H_
