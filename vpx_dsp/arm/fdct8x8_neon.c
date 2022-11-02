@@ -17,10 +17,10 @@
 #include "vpx_dsp/arm/idct_neon.h"
 #include "vpx_dsp/arm/fdct_neon.h"
 #include "vpx_dsp/arm/mem_neon.h"
+#include "vpx_dsp/arm/fdct8x8_neon.h"
 
 void vpx_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
                       int stride) {
-  int i;
   // stage 1
   int16x8_t in[8];
   in[0] = vshlq_n_s16(vld1q_s16(&input[0 * stride]), 2);
@@ -31,9 +31,9 @@ void vpx_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
   in[5] = vshlq_n_s16(vld1q_s16(&input[5 * stride]), 2);
   in[6] = vshlq_n_s16(vld1q_s16(&input[6 * stride]), 2);
   in[7] = vshlq_n_s16(vld1q_s16(&input[7 * stride]), 2);
-  for (i = 0; i < 2; ++i) {
-    vpx_fdct8x8_pass1_neon(in);
-  }  // for
+
+  vpx_fdct8x8_pass1_neon(in);
+  vpx_fdct8x8_pass2_neon(in);
   {
     // from vpx_dct_sse2.c
     // Post-condition (division by two)
@@ -71,8 +71,6 @@ void vpx_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
 
 void vpx_highbd_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
                              int stride) {
-  int i;
-
   // input[M * stride] * 16
   int32x4_t left[8], right[8];
   int16x8_t in[8];
@@ -102,26 +100,25 @@ void vpx_highbd_fdct8x8_neon(const int16_t *input, tran_low_t *final_output,
   right[6] = vshll_n_s16(vget_high_s16(in[6]), 2);
   right[7] = vshll_n_s16(vget_high_s16(in[7]), 2);
 
-  for (i = 0; i < 2; ++i) {
-    vpx_highbd_fdct8x8_pass1_neon(left, right);
-  }
+  vpx_highbd_fdct8x8_pass1_neon(left, right);
+  vpx_highbd_fdct8x8_pass2_neon(left, right);
   {
-    left[0] = highbd_add_round_shift_s32(left[0]);
-    left[1] = highbd_add_round_shift_s32(left[1]);
-    left[2] = highbd_add_round_shift_s32(left[2]);
-    left[3] = highbd_add_round_shift_s32(left[3]);
-    left[4] = highbd_add_round_shift_s32(left[4]);
-    left[5] = highbd_add_round_shift_s32(left[5]);
-    left[6] = highbd_add_round_shift_s32(left[6]);
-    left[7] = highbd_add_round_shift_s32(left[7]);
-    right[0] = highbd_add_round_shift_s32(right[0]);
-    right[1] = highbd_add_round_shift_s32(right[1]);
-    right[2] = highbd_add_round_shift_s32(right[2]);
-    right[3] = highbd_add_round_shift_s32(right[3]);
-    right[4] = highbd_add_round_shift_s32(right[4]);
-    right[5] = highbd_add_round_shift_s32(right[5]);
-    right[6] = highbd_add_round_shift_s32(right[6]);
-    right[7] = highbd_add_round_shift_s32(right[7]);
+    left[0] = add_round_shift_half_s32(left[0]);
+    left[1] = add_round_shift_half_s32(left[1]);
+    left[2] = add_round_shift_half_s32(left[2]);
+    left[3] = add_round_shift_half_s32(left[3]);
+    left[4] = add_round_shift_half_s32(left[4]);
+    left[5] = add_round_shift_half_s32(left[5]);
+    left[6] = add_round_shift_half_s32(left[6]);
+    left[7] = add_round_shift_half_s32(left[7]);
+    right[0] = add_round_shift_half_s32(right[0]);
+    right[1] = add_round_shift_half_s32(right[1]);
+    right[2] = add_round_shift_half_s32(right[2]);
+    right[3] = add_round_shift_half_s32(right[3]);
+    right[4] = add_round_shift_half_s32(right[4]);
+    right[5] = add_round_shift_half_s32(right[5]);
+    right[6] = add_round_shift_half_s32(right[6]);
+    right[7] = add_round_shift_half_s32(right[7]);
 
     // store results
     vst1q_s32(final_output, left[0]);

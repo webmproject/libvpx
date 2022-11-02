@@ -18,10 +18,10 @@
 #include "vpx_dsp/arm/fdct_neon.h"
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/transpose_neon.h"
+#include "vpx_dsp/arm/fdct4x4_neon.h"
 
 void vpx_fdct4x4_neon(const int16_t *input, tran_low_t *final_output,
                       int stride) {
-  int i;
   // input[M * stride] * 16
   int16x4_t in[4];
   in[0] = vshl_n_s16(vld1_s16(input + 0 * stride), 4);
@@ -34,9 +34,8 @@ void vpx_fdct4x4_neon(const int16_t *input, tran_low_t *final_output,
     const int16x4_t one = vreinterpret_s16_s64(vdup_n_s64(1));
     in[0] = vadd_s16(in[0], one);
   }
-  for (i = 0; i < 2; ++i) {
-    vpx_fdct4x4_pass1_neon(in);
-  }
+  vpx_fdct4x4_pass1_neon(in);
+  vpx_fdct4x4_pass2_neon(in);
   {
     // Not quite a rounding shift. Only add 1 despite shifting by 2.
     const int16x8_t one = vdupq_n_s16(1);
@@ -53,7 +52,6 @@ void vpx_fdct4x4_neon(const int16_t *input, tran_low_t *final_output,
 
 void vpx_highbd_fdct4x4_neon(const int16_t *input, tran_low_t *final_output,
                              int stride) {
-  int i;
   static const int32x4_t const_1000 = { 1, 0, 0, 0 };
   const int32x4_t const_one = vdupq_n_s32(1);
 
@@ -69,9 +67,8 @@ void vpx_highbd_fdct4x4_neon(const int16_t *input, tran_low_t *final_output,
     in[0] = vaddq_s32(in[0], const_1000);
   }
 
-  for (i = 0; i < 2; ++i) {
-    vpx_highbd_fdct4x4_pass1_neon(in);
-  }
+  vpx_highbd_fdct4x4_pass1_neon(in);
+  vpx_highbd_fdct4x4_pass1_neon(in);
   {
     // Not quite a rounding shift. Only add 1 despite shifting by 2.
     in[0] = vshrq_n_s32(vaddq_s32(in[0], const_one), 2);
