@@ -14,6 +14,7 @@
 #include "vpx_dsp/quantize.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vp9/encoder/vp9_block.h"
 
 void vpx_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs,
                      const int16_t *round_ptr, const int16_t quant,
@@ -208,19 +209,21 @@ void vpx_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 }
 #endif
 
-void vpx_quantize_b_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                            const int16_t *zbin_ptr, const int16_t *round_ptr,
-                            const int16_t *quant_ptr,
-                            const int16_t *quant_shift_ptr,
+void vpx_quantize_b_32x32_c(const tran_low_t *coeff_ptr,
+                            const struct macroblock_plane *const mb_plane,
                             tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                             const int16_t *dequant_ptr, uint16_t *eob_ptr,
                             const int16_t *scan, const int16_t *iscan) {
-  const int zbins[2] = { ROUND_POWER_OF_TWO(zbin_ptr[0], 1),
-                         ROUND_POWER_OF_TWO(zbin_ptr[1], 1) };
+  const int n_coeffs = 32 * 32;
+  const int zbins[2] = { ROUND_POWER_OF_TWO(mb_plane->zbin[0], 1),
+                         ROUND_POWER_OF_TWO(mb_plane->zbin[1], 1) };
   const int nzbins[2] = { zbins[0] * -1, zbins[1] * -1 };
+  const int16_t *round_ptr = mb_plane->round;
+  const int16_t *quant_ptr = mb_plane->quant;
+  const int16_t *quant_shift_ptr = mb_plane->quant_shift;
 
   int idx = 0;
-  int idx_arr[1024];
+  int idx_arr[32 * 32 /* n_coeffs */];
   int i, eob = -1;
   (void)iscan;
 

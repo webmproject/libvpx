@@ -542,8 +542,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
   switch (tx_size) {
     case TX_32X32:
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
-      vpx_quantize_b_32x32(coeff, 1024, p->zbin, p->round, p->quant,
-                           p->quant_shift, qcoeff, dqcoeff, pd->dequant, eob,
+      vpx_quantize_b_32x32(coeff, p, qcoeff, dqcoeff, pd->dequant, eob,
                            scan_order->scan, scan_order->iscan);
       break;
     case TX_16X16:
@@ -948,8 +947,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
         vpx_subtract_block(32, 32, src_diff, diff_stride, src, src_stride, dst,
                            dst_stride);
         fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
-        vpx_quantize_b_32x32(coeff, 1024, p->zbin, p->round, p->quant,
-                             p->quant_shift, qcoeff, dqcoeff, pd->dequant, eob,
+        vpx_quantize_b_32x32(coeff, p, qcoeff, dqcoeff, pd->dequant, eob,
                              scan_order->scan, scan_order->iscan);
       }
       if (args->enable_coeff_opt && !x->skip_recode) {
