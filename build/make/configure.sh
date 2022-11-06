@@ -1511,7 +1511,7 @@ EOF
 
     # Try to find which inline keywords are supported
     check_cc <<EOF && INLINE="inline"
-static inline function() {}
+static inline int function(void) {}
 EOF
 
   # Almost every platform uses pthreads.
