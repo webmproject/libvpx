@@ -23,25 +23,25 @@
 
 static INLINE void load_buffer_4x4(const int16_t *input, int16x8_t *in,
                                    int stride) {
-  // { 0, 1, 1, 1, 1, 1, 1, 1 };
-  const int16x8_t nonzero_bias_a = vextq_s16(vdupq_n_s16(0), vdupq_n_s16(1), 7);
-  // { 1, 0, 0, 0, 0, 0, 0, 0 };
-  const int16x8_t nonzero_bias_b = vextq_s16(vdupq_n_s16(1), vdupq_n_s16(0), 7);
-  int16x8_t mask;
+  // { 0, 1, 1, 1 };
+  const int16x4_t nonzero_bias_a = vext_s16(vdup_n_s16(0), vdup_n_s16(1), 3);
+  // { 1, 0, 0, 0 };
+  const int16x4_t nonzero_bias_b = vext_s16(vdup_n_s16(1), vdup_n_s16(0), 3);
+  int16x4_t mask;
 
   int16x4_t input_0 = vshl_n_s16(vld1_s16(input + 0 * stride), 4);
   int16x4_t input_1 = vshl_n_s16(vld1_s16(input + 1 * stride), 4);
   int16x4_t input_2 = vshl_n_s16(vld1_s16(input + 2 * stride), 4);
   int16x4_t input_3 = vshl_n_s16(vld1_s16(input + 3 * stride), 4);
 
-  in[0] = vcombine_s16(input_0, input_1);
-  in[1] = vcombine_s16(input_2, input_3);
-
   // Copy the SSE method, use a mask to avoid an 'if' branch here to increase by
   // one non-zero first elements
-  mask = vreinterpretq_s16_u16(vceqq_s16(in[0], nonzero_bias_a));
-  in[0] = vaddq_s16(in[0], mask);
-  in[0] = vaddq_s16(in[0], nonzero_bias_b);
+  mask = vreinterpret_s16_u16(vceq_s16(input_0, nonzero_bias_a));
+  input_0 = vadd_s16(input_0, mask);
+  input_0 = vadd_s16(input_0, nonzero_bias_b);
+
+  in[0] = vcombine_s16(input_0, input_1);
+  in[1] = vcombine_s16(input_2, input_3);
 }
 
 static INLINE void write_buffer_4x4(tran_low_t *output, int16x8_t *res) {
@@ -55,72 +55,54 @@ static INLINE void write_buffer_4x4(tran_low_t *output, int16x8_t *res) {
 }
 
 static INLINE void fadst4x4_neon(int16x8_t *in) {
-  int32x4_t u0, u1, u2, u3;
-  int16x4_t out_0, out_1, out_2, out_3;
-  const int32x4_t k__DCT_CONST_ROUNDING = vdupq_n_s32(DCT_CONST_ROUNDING);
+  int32x4_t u[4], t[4];
+  int16x4_t s[4], out[4];
 
-  const int16x4_t s0 = vget_low_s16(in[0]);   // | x_00 | x_01 | x_02 | x_03 |
-  const int16x4_t s1 = vget_high_s16(in[0]);  // | x_10 | x_11 | x_12 | x_13 |
-  const int16x4_t s2 = vget_low_s16(in[1]);   // | x_20 | x_21 | x_22 | x_23 |
-  const int16x4_t s3 = vget_high_s16(in[1]);  // | x_30 | x_31 | x_32 | x_33 |
+  s[0] = vget_low_s16(in[0]);   // | x_00 | x_01 | x_02 | x_03 |
+  s[1] = vget_high_s16(in[0]);  // | x_10 | x_11 | x_12 | x_13 |
+  s[2] = vget_low_s16(in[1]);   // | x_20 | x_21 | x_22 | x_23 |
+  s[3] = vget_high_s16(in[1]);  // | x_30 | x_31 | x_32 | x_33 |
 
-  // s0 * sinpi_1_9, s0 * sinpi_4_9
   // Must expand all elements to s32. See 'needs32' comment in fwd_txfm.c.
-  const int32x4_t s0s1_9 = vmull_n_s16(s0, sinpi_1_9);
-  const int32x4_t s0s4_9 = vmull_n_s16(s0, sinpi_4_9);
-  // s1 * sinpi_1_9, s1 * sinpi_2_9
-  const int32x4_t s1s1_9 = vmull_n_s16(s1, sinpi_1_9);
-  const int32x4_t s1s2_9 = vmull_n_s16(s1, sinpi_2_9);
-  // s2 * sinpi_3_9
-  const int32x4_t s2s3_9 = vmull_n_s16(s2, sinpi_3_9);
-  // s3 * sinpi_2_9, s3 * sinpi_4_9
-  const int32x4_t s3s2_9 = vmull_n_s16(s3, sinpi_2_9);
-  const int32x4_t s3s4_9 = vmull_n_s16(s3, sinpi_4_9);
+  // t0 = s0 * sinpi_1_9 + s1 * sinpi_2_9 + s3 * sinpi_4_9
+  t[0] = vmull_n_s16(s[0], sinpi_1_9);
+  t[0] = vmlal_n_s16(t[0], s[1], sinpi_2_9);
+  t[0] = vmlal_n_s16(t[0], s[3], sinpi_4_9);
 
-  // (s0 + s1) * sinpi_3_9
-  const int32x4_t s0_p_s1 = vaddl_s16(s0, s1);
-  const int32x4_t s0_p_s1_m_s3 = vsubw_s16(s0_p_s1, s3);
+  // t1 = (s0 + s1) * sinpi_3_9 - s3 * sinpi_3_9
+  t[1] = vmull_n_s16(s[0], sinpi_3_9);
+  t[1] = vmlal_n_s16(t[1], s[1], sinpi_3_9);
+  t[1] = vmlsl_n_s16(t[1], s[3], sinpi_3_9);
 
-  // s_0 * sinpi_1_9 + s_1 * sinpi_2_9
-  // s_0 * sinpi_4_9 - s_1 * sinpi_1_9
-  const int32x4_t s0s1_9_p_s1s2_9 = vaddq_s32(s0s1_9, s1s2_9);
-  const int32x4_t s0s4_9_m_s1s1_9 = vsubq_s32(s0s4_9, s1s1_9);
-  /*
-   * t0 = s0s1_9 + s1s2_9 + s3s4_9
-   * t1 = (s0 + s1) * sinpi_3_9 - s3 * sinpi_3_9
-   * t2 = s0s4_9 - s1s1_9 + s3s2_9
-   * t3 = s2s3_9
-   */
-  const int32x4_t t0 = vaddq_s32(s0s1_9_p_s1s2_9, s3s4_9);
-  const int32x4_t t1 = vmulq_n_s32(s0_p_s1_m_s3, sinpi_3_9);
-  const int32x4_t t2 = vaddq_s32(s0s4_9_m_s1s1_9, s3s2_9);
-  const int32x4_t t3 = s2s3_9;
+  // t2 = s0 * sinpi_4_9 - s1* sinpi_1_9 + s3 * sinpi_2_9
+  t[2] = vmull_n_s16(s[0], sinpi_4_9);
+  t[2] = vmlsl_n_s16(t[2], s[1], sinpi_1_9);
+  t[2] = vmlal_n_s16(t[2], s[3], sinpi_2_9);
+
+  // t3 = s2 * sinpi_3_9
+  t[3] = vmull_n_s16(s[2], sinpi_3_9);
+
   /*
    * u0 = t0 + t3
    * u1 = t1
    * u2 = t2 - t3
    * u3 = t2 - t0 + t3
    */
-  u0 = vaddq_s32(t0, t3);
-  u1 = t1;
-  u2 = vsubq_s32(t2, t3);
-  u3 = vaddq_s32(vsubq_s32(t2, t0), t3);
+  u[0] = vaddq_s32(t[0], t[3]);
+  u[1] = t[1];
+  u[2] = vsubq_s32(t[2], t[3]);
+  u[3] = vaddq_s32(vsubq_s32(t[2], t[0]), t[3]);
 
   // fdct_round_shift
-  u0 = vaddq_s32(u0, k__DCT_CONST_ROUNDING);
-  u1 = vaddq_s32(u1, k__DCT_CONST_ROUNDING);
-  u2 = vaddq_s32(u2, k__DCT_CONST_ROUNDING);
-  u3 = vaddq_s32(u3, k__DCT_CONST_ROUNDING);
+  out[0] = vrshrn_n_s32(u[0], DCT_CONST_BITS);
+  out[1] = vrshrn_n_s32(u[1], DCT_CONST_BITS);
+  out[2] = vrshrn_n_s32(u[2], DCT_CONST_BITS);
+  out[3] = vrshrn_n_s32(u[3], DCT_CONST_BITS);
 
-  out_0 = vshrn_n_s32(u0, DCT_CONST_BITS);
-  out_1 = vshrn_n_s32(u1, DCT_CONST_BITS);
-  out_2 = vshrn_n_s32(u2, DCT_CONST_BITS);
-  out_3 = vshrn_n_s32(u3, DCT_CONST_BITS);
+  transpose_s16_4x4d(&out[0], &out[1], &out[2], &out[3]);
 
-  transpose_s16_4x4d(&out_0, &out_1, &out_2, &out_3);
-
-  in[0] = vcombine_s16(out_0, out_1);
-  in[1] = vcombine_s16(out_2, out_3);
+  in[0] = vcombine_s16(out[0], out[1]);
+  in[1] = vcombine_s16(out[2], out[3]);
 }
 
 void vp9_fht4x4_neon(const int16_t *input, tran_low_t *output, int stride,
@@ -239,245 +221,158 @@ static INLINE void write_buffer_8x8(tran_low_t *output, int16x8_t *res,
 }
 
 static INLINE void fadst8x8_neon(int16x8_t *in) {
-  int16x4_t x0_lo, x0_hi, x1_lo, x1_hi, x2_lo, x2_hi, x3_lo, x3_hi, x4_lo,
-      x4_hi, x5_lo, x5_hi, x6_lo, x6_hi, x7_lo, x7_hi;
-  int32x4_t s0_lo, s0_hi, s1_lo, s1_hi, s2_lo, s2_hi, s3_lo, s3_hi, s4_lo,
-      s4_hi, s5_lo, s5_hi, s6_lo, s6_hi, s7_lo, s7_hi;
-  int32x4_t t0_lo, t0_hi, t1_lo, t1_hi, t2_lo, t2_hi, t3_lo, t3_hi, t4_lo,
-      t4_hi, t5_lo, t5_hi, t6_lo, t6_hi, t7_lo, t7_hi;
-  const int32x4_t k__DCT_CONST_ROUNDING = vdupq_n_s32(DCT_CONST_ROUNDING);
+  int16x4_t x_lo[8], x_hi[8];
+  int32x4_t s_lo[8], s_hi[8];
+  int32x4_t t_lo[8], t_hi[8];
 
-  x0_lo = vget_low_s16(in[7]);
-  x0_hi = vget_high_s16(in[7]);
-  x1_lo = vget_low_s16(in[0]);
-  x1_hi = vget_high_s16(in[0]);
-  x2_lo = vget_low_s16(in[5]);
-  x2_hi = vget_high_s16(in[5]);
-  x3_lo = vget_low_s16(in[2]);
-  x3_hi = vget_high_s16(in[2]);
-  x4_lo = vget_low_s16(in[3]);
-  x4_hi = vget_high_s16(in[3]);
-  x5_lo = vget_low_s16(in[4]);
-  x5_hi = vget_high_s16(in[4]);
-  x6_lo = vget_low_s16(in[1]);
-  x6_hi = vget_high_s16(in[1]);
-  x7_lo = vget_low_s16(in[6]);
-  x7_hi = vget_high_s16(in[6]);
+  x_lo[0] = vget_low_s16(in[7]);
+  x_hi[0] = vget_high_s16(in[7]);
+  x_lo[1] = vget_low_s16(in[0]);
+  x_hi[1] = vget_high_s16(in[0]);
+  x_lo[2] = vget_low_s16(in[5]);
+  x_hi[2] = vget_high_s16(in[5]);
+  x_lo[3] = vget_low_s16(in[2]);
+  x_hi[3] = vget_high_s16(in[2]);
+  x_lo[4] = vget_low_s16(in[3]);
+  x_hi[4] = vget_high_s16(in[3]);
+  x_lo[5] = vget_low_s16(in[4]);
+  x_hi[5] = vget_high_s16(in[4]);
+  x_lo[6] = vget_low_s16(in[1]);
+  x_hi[6] = vget_high_s16(in[1]);
+  x_lo[7] = vget_low_s16(in[6]);
+  x_hi[7] = vget_high_s16(in[6]);
 
   // stage 1
   // s0 = cospi_2_64 * x0 + cospi_30_64 * x1;
-  s0_lo = vaddq_s32(vmull_n_s16(x0_lo, cospi_2_64),
-                    vmull_n_s16(x1_lo, cospi_30_64));
-  s0_hi = vaddq_s32(vmull_n_s16(x0_hi, cospi_2_64),
-                    vmull_n_s16(x1_hi, cospi_30_64));
   // s1 = cospi_30_64 * x0 - cospi_2_64 * x1;
-  s1_lo = vsubq_s32(vmull_n_s16(x0_lo, cospi_30_64),
-                    vmull_n_s16(x1_lo, cospi_2_64));
-  s1_hi = vsubq_s32(vmull_n_s16(x0_hi, cospi_30_64),
-                    vmull_n_s16(x1_hi, cospi_2_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[0], x_hi[0], x_lo[1], x_hi[1],
+                                      cospi_2_64, cospi_30_64, &s_lo[0],
+                                      &s_hi[0], &s_lo[1], &s_hi[1]);
+
   // s2 = cospi_10_64 * x2 + cospi_22_64 * x3;
-  s2_lo = vaddq_s32(vmull_n_s16(x2_lo, cospi_10_64),
-                    vmull_n_s16(x3_lo, cospi_22_64));
-  s2_hi = vaddq_s32(vmull_n_s16(x2_hi, cospi_10_64),
-                    vmull_n_s16(x3_hi, cospi_22_64));
   // s3 = cospi_22_64 * x2 - cospi_10_64 * x3;
-  s3_lo = vsubq_s32(vmull_n_s16(x2_lo, cospi_22_64),
-                    vmull_n_s16(x3_lo, cospi_10_64));
-  s3_hi = vsubq_s32(vmull_n_s16(x2_hi, cospi_22_64),
-                    vmull_n_s16(x3_hi, cospi_10_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[2], x_hi[2], x_lo[3], x_hi[3],
+                                      cospi_10_64, cospi_22_64, &s_lo[2],
+                                      &s_hi[2], &s_lo[3], &s_hi[3]);
+
   // s4 = cospi_18_64 * x4 + cospi_14_64 * x5;
-  s4_lo = vaddq_s32(vmull_n_s16(x4_lo, cospi_18_64),
-                    vmull_n_s16(x5_lo, cospi_14_64));
-  s4_hi = vaddq_s32(vmull_n_s16(x4_hi, cospi_18_64),
-                    vmull_n_s16(x5_hi, cospi_14_64));
   // s5 = cospi_14_64 * x4 - cospi_18_64 * x5;
-  s5_lo = vsubq_s32(vmull_n_s16(x4_lo, cospi_14_64),
-                    vmull_n_s16(x5_lo, cospi_18_64));
-  s5_hi = vsubq_s32(vmull_n_s16(x4_hi, cospi_14_64),
-                    vmull_n_s16(x5_hi, cospi_18_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[4], x_hi[4], x_lo[5], x_hi[5],
+                                      cospi_18_64, cospi_14_64, &s_lo[4],
+                                      &s_hi[4], &s_lo[5], &s_hi[5]);
+
   // s6 = cospi_26_64 * x6 + cospi_6_64 * x7;
-  s6_lo = vaddq_s32(vmull_n_s16(x6_lo, cospi_26_64),
-                    vmull_n_s16(x7_lo, cospi_6_64));
-  s6_hi = vaddq_s32(vmull_n_s16(x6_hi, cospi_26_64),
-                    vmull_n_s16(x7_hi, cospi_6_64));
   // s7 = cospi_6_64 * x6 - cospi_26_64 * x7;
-  s7_lo = vsubq_s32(vmull_n_s16(x6_lo, cospi_6_64),
-                    vmull_n_s16(x7_lo, cospi_26_64));
-  s7_hi = vsubq_s32(vmull_n_s16(x6_hi, cospi_6_64),
-                    vmull_n_s16(x7_hi, cospi_26_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[6], x_hi[6], x_lo[7], x_hi[7],
+                                      cospi_26_64, cospi_6_64, &s_lo[6],
+                                      &s_hi[6], &s_lo[7], &s_hi[7]);
 
   // fdct_round_shift
-  t0_lo = vaddq_s32(s0_lo, s4_lo);
-  t0_hi = vaddq_s32(s0_hi, s4_hi);
-  t1_lo = vaddq_s32(s1_lo, s5_lo);
-  t1_hi = vaddq_s32(s1_hi, s5_hi);
-  t2_lo = vaddq_s32(s2_lo, s6_lo);
-  t2_hi = vaddq_s32(s2_hi, s6_hi);
-  t3_lo = vaddq_s32(s3_lo, s7_lo);
-  t3_hi = vaddq_s32(s3_hi, s7_hi);
-  t4_lo = vsubq_s32(s0_lo, s4_lo);
-  t4_hi = vsubq_s32(s0_hi, s4_hi);
-  t5_lo = vsubq_s32(s1_lo, s5_lo);
-  t5_hi = vsubq_s32(s1_hi, s5_hi);
-  t6_lo = vsubq_s32(s2_lo, s6_lo);
-  t6_hi = vsubq_s32(s2_hi, s6_hi);
-  t7_lo = vsubq_s32(s3_lo, s7_lo);
-  t7_hi = vsubq_s32(s3_hi, s7_hi);
-
-  t0_lo = vaddq_s32(t0_lo, k__DCT_CONST_ROUNDING);
-  t0_hi = vaddq_s32(t0_hi, k__DCT_CONST_ROUNDING);
-  t1_lo = vaddq_s32(t1_lo, k__DCT_CONST_ROUNDING);
-  t1_hi = vaddq_s32(t1_hi, k__DCT_CONST_ROUNDING);
-  t2_lo = vaddq_s32(t2_lo, k__DCT_CONST_ROUNDING);
-  t2_hi = vaddq_s32(t2_hi, k__DCT_CONST_ROUNDING);
-  t3_lo = vaddq_s32(t3_lo, k__DCT_CONST_ROUNDING);
-  t3_hi = vaddq_s32(t3_hi, k__DCT_CONST_ROUNDING);
-  t4_lo = vaddq_s32(t4_lo, k__DCT_CONST_ROUNDING);
-  t4_hi = vaddq_s32(t4_hi, k__DCT_CONST_ROUNDING);
-  t5_lo = vaddq_s32(t5_lo, k__DCT_CONST_ROUNDING);
-  t5_hi = vaddq_s32(t5_hi, k__DCT_CONST_ROUNDING);
-  t6_lo = vaddq_s32(t6_lo, k__DCT_CONST_ROUNDING);
-  t6_hi = vaddq_s32(t6_hi, k__DCT_CONST_ROUNDING);
-  t7_lo = vaddq_s32(t7_lo, k__DCT_CONST_ROUNDING);
-  t7_hi = vaddq_s32(t7_hi, k__DCT_CONST_ROUNDING);
-
-  t0_lo = vshrq_n_s32(t0_lo, DCT_CONST_BITS);
-  t0_hi = vshrq_n_s32(t0_hi, DCT_CONST_BITS);
-  t1_lo = vshrq_n_s32(t1_lo, DCT_CONST_BITS);
-  t1_hi = vshrq_n_s32(t1_hi, DCT_CONST_BITS);
-  t2_lo = vshrq_n_s32(t2_lo, DCT_CONST_BITS);
-  t2_hi = vshrq_n_s32(t2_hi, DCT_CONST_BITS);
-  t3_lo = vshrq_n_s32(t3_lo, DCT_CONST_BITS);
-  t3_hi = vshrq_n_s32(t3_hi, DCT_CONST_BITS);
-  t4_lo = vshrq_n_s32(t4_lo, DCT_CONST_BITS);
-  t4_hi = vshrq_n_s32(t4_hi, DCT_CONST_BITS);
-  t5_lo = vshrq_n_s32(t5_lo, DCT_CONST_BITS);
-  t5_hi = vshrq_n_s32(t5_hi, DCT_CONST_BITS);
-  t6_lo = vshrq_n_s32(t6_lo, DCT_CONST_BITS);
-  t6_hi = vshrq_n_s32(t6_hi, DCT_CONST_BITS);
-  t7_lo = vshrq_n_s32(t7_lo, DCT_CONST_BITS);
-  t7_hi = vshrq_n_s32(t7_hi, DCT_CONST_BITS);
+  t_lo[0] = vrshrq_n_s32(vaddq_s32(s_lo[0], s_lo[4]), DCT_CONST_BITS);
+  t_hi[0] = vrshrq_n_s32(vaddq_s32(s_hi[0], s_hi[4]), DCT_CONST_BITS);
+  t_lo[1] = vrshrq_n_s32(vaddq_s32(s_lo[1], s_lo[5]), DCT_CONST_BITS);
+  t_hi[1] = vrshrq_n_s32(vaddq_s32(s_hi[1], s_hi[5]), DCT_CONST_BITS);
+  t_lo[2] = vrshrq_n_s32(vaddq_s32(s_lo[2], s_lo[6]), DCT_CONST_BITS);
+  t_hi[2] = vrshrq_n_s32(vaddq_s32(s_hi[2], s_hi[6]), DCT_CONST_BITS);
+  t_lo[3] = vrshrq_n_s32(vaddq_s32(s_lo[3], s_lo[7]), DCT_CONST_BITS);
+  t_hi[3] = vrshrq_n_s32(vaddq_s32(s_hi[3], s_hi[7]), DCT_CONST_BITS);
+  t_lo[4] = vrshrq_n_s32(vsubq_s32(s_lo[0], s_lo[4]), DCT_CONST_BITS);
+  t_hi[4] = vrshrq_n_s32(vsubq_s32(s_hi[0], s_hi[4]), DCT_CONST_BITS);
+  t_lo[5] = vrshrq_n_s32(vsubq_s32(s_lo[1], s_lo[5]), DCT_CONST_BITS);
+  t_hi[5] = vrshrq_n_s32(vsubq_s32(s_hi[1], s_hi[5]), DCT_CONST_BITS);
+  t_lo[6] = vrshrq_n_s32(vsubq_s32(s_lo[2], s_lo[6]), DCT_CONST_BITS);
+  t_hi[6] = vrshrq_n_s32(vsubq_s32(s_hi[2], s_hi[6]), DCT_CONST_BITS);
+  t_lo[7] = vrshrq_n_s32(vsubq_s32(s_lo[3], s_lo[7]), DCT_CONST_BITS);
+  t_hi[7] = vrshrq_n_s32(vsubq_s32(s_hi[3], s_hi[7]), DCT_CONST_BITS);
 
   // stage 2
-  s0_lo = t0_lo;
-  s0_hi = t0_hi;
-  s1_lo = t1_lo;
-  s1_hi = t1_hi;
-  s2_lo = t2_lo;
-  s2_hi = t2_hi;
-  s3_lo = t3_lo;
-  s3_hi = t3_hi;
-  s4_lo = vaddq_s32(vmulq_n_s32(t4_lo, cospi_8_64),
-                    vmulq_n_s32(t5_lo, cospi_24_64));
-  s4_hi = vaddq_s32(vmulq_n_s32(t4_hi, cospi_8_64),
-                    vmulq_n_s32(t5_hi, cospi_24_64));
-  s5_lo = vsubq_s32(vmulq_n_s32(t4_lo, cospi_24_64),
-                    vmulq_n_s32(t5_lo, cospi_8_64));
-  s5_hi = vsubq_s32(vmulq_n_s32(t4_hi, cospi_24_64),
-                    vmulq_n_s32(t5_hi, cospi_8_64));
-  s6_lo = vaddq_s32(vmulq_n_s32(t6_lo, -cospi_24_64),
-                    vmulq_n_s32(t7_lo, cospi_8_64));
-  s6_hi = vaddq_s32(vmulq_n_s32(t6_hi, -cospi_24_64),
-                    vmulq_n_s32(t7_hi, cospi_8_64));
-  s7_lo = vaddq_s32(vmulq_n_s32(t6_lo, cospi_8_64),
-                    vmulq_n_s32(t7_lo, cospi_24_64));
-  s7_hi = vaddq_s32(vmulq_n_s32(t6_hi, cospi_8_64),
-                    vmulq_n_s32(t7_hi, cospi_24_64));
+  s_lo[0] = t_lo[0];
+  s_hi[0] = t_hi[0];
+  s_lo[1] = t_lo[1];
+  s_hi[1] = t_hi[1];
+  s_lo[2] = t_lo[2];
+  s_hi[2] = t_hi[2];
+  s_lo[3] = t_lo[3];
+  s_hi[3] = t_hi[3];
+  // s4 = cospi_8_64 * x4 + cospi_24_64 * x5;
+  // s5 = cospi_24_64 * x4 - cospi_8_64 * x5;
+  butterfly_two_coeff_s32_noround(t_lo[4], t_hi[4], t_lo[5], t_hi[5],
+                                  cospi_8_64, cospi_24_64, &s_lo[4], &s_hi[4],
+                                  &s_lo[5], &s_hi[5]);
 
-  // s0 + s2
-  t0_lo = vaddq_s32(s0_lo, s2_lo);
-  t0_hi = vaddq_s32(s0_hi, s2_hi);
-  // s1 + s3
-  t1_lo = vaddq_s32(s1_lo, s3_lo);
-  t1_hi = vaddq_s32(s1_hi, s3_hi);
-  // s0 - s2
-  t2_lo = vsubq_s32(s0_lo, s2_lo);
-  t2_hi = vsubq_s32(s0_hi, s2_hi);
-  // s1 - s3
-  t3_lo = vsubq_s32(s1_lo, s3_lo);
-  t3_hi = vsubq_s32(s1_hi, s3_hi);
-  // s4 + s6
-  t4_lo = vaddq_s32(s4_lo, s6_lo);
-  t4_hi = vaddq_s32(s4_hi, s6_hi);
-  // s5 + s7
-  t5_lo = vaddq_s32(s5_lo, s7_lo);
-  t5_hi = vaddq_s32(s5_hi, s7_hi);
-  // s4 - s6
-  t6_lo = vsubq_s32(s4_lo, s6_lo);
-  t6_hi = vsubq_s32(s4_hi, s6_hi);
-  // s5 - s7
-  t7_lo = vsubq_s32(s5_lo, s7_lo);
-  t7_hi = vsubq_s32(s5_hi, s7_hi);
+  // s6 = -cospi_24_64 * x6 + cospi_8_64 * x7;
+  // s7 = cospi_8_64 * x6 + cospi_24_64 * x7;
+  butterfly_two_coeff_s32_noround(t_lo[6], t_hi[6], t_lo[7], t_hi[7],
+                                  -cospi_24_64, cospi_8_64, &s_lo[6], &s_hi[6],
+                                  &s_lo[7], &s_hi[7]);
 
   // fdct_round_shift
-  t4_lo = vaddq_s32(t4_lo, k__DCT_CONST_ROUNDING);
-  t4_hi = vaddq_s32(t4_hi, k__DCT_CONST_ROUNDING);
-  t5_lo = vaddq_s32(t5_lo, k__DCT_CONST_ROUNDING);
-  t5_hi = vaddq_s32(t5_hi, k__DCT_CONST_ROUNDING);
-  t6_lo = vaddq_s32(t6_lo, k__DCT_CONST_ROUNDING);
-  t6_hi = vaddq_s32(t6_hi, k__DCT_CONST_ROUNDING);
-  t7_lo = vaddq_s32(t7_lo, k__DCT_CONST_ROUNDING);
-  t7_hi = vaddq_s32(t7_hi, k__DCT_CONST_ROUNDING);
-  t4_lo = vshrq_n_s32(t4_lo, DCT_CONST_BITS);
-  t4_hi = vshrq_n_s32(t4_hi, DCT_CONST_BITS);
-  t5_lo = vshrq_n_s32(t5_lo, DCT_CONST_BITS);
-  t5_hi = vshrq_n_s32(t5_hi, DCT_CONST_BITS);
-  t6_lo = vshrq_n_s32(t6_lo, DCT_CONST_BITS);
-  t6_hi = vshrq_n_s32(t6_hi, DCT_CONST_BITS);
-  t7_lo = vshrq_n_s32(t7_lo, DCT_CONST_BITS);
-  t7_hi = vshrq_n_s32(t7_hi, DCT_CONST_BITS);
+  // s0 + s2
+  t_lo[0] = vaddq_s32(s_lo[0], s_lo[2]);
+  t_hi[0] = vaddq_s32(s_hi[0], s_hi[2]);
+  // s1 + s3
+  t_lo[1] = vaddq_s32(s_lo[1], s_lo[3]);
+  t_hi[1] = vaddq_s32(s_hi[1], s_hi[3]);
+  // s0 - s2
+  t_lo[2] = vsubq_s32(s_lo[0], s_lo[2]);
+  t_hi[2] = vsubq_s32(s_hi[0], s_hi[2]);
+  // s1 - s3
+  t_lo[3] = vsubq_s32(s_lo[1], s_lo[3]);
+  t_hi[3] = vsubq_s32(s_hi[1], s_hi[3]);
+  // s4 + s6
+  t_lo[4] = vrshrq_n_s32(vaddq_s32(s_lo[4], s_lo[6]), DCT_CONST_BITS);
+  t_hi[4] = vrshrq_n_s32(vaddq_s32(s_hi[4], s_hi[6]), DCT_CONST_BITS);
+  // s5 + s7
+  t_lo[5] = vrshrq_n_s32(vaddq_s32(s_lo[5], s_lo[7]), DCT_CONST_BITS);
+  t_hi[5] = vrshrq_n_s32(vaddq_s32(s_hi[5], s_hi[7]), DCT_CONST_BITS);
+  // s4 - s6
+  t_lo[6] = vrshrq_n_s32(vsubq_s32(s_lo[4], s_lo[6]), DCT_CONST_BITS);
+  t_hi[6] = vrshrq_n_s32(vsubq_s32(s_hi[4], s_hi[6]), DCT_CONST_BITS);
+  // s5 - s7
+  t_lo[7] = vrshrq_n_s32(vsubq_s32(s_lo[5], s_lo[7]), DCT_CONST_BITS);
+  t_hi[7] = vrshrq_n_s32(vsubq_s32(s_hi[5], s_hi[7]), DCT_CONST_BITS);
 
   // stage 3
   // cospi_16_64 * (x2 + x3)
-  s2_lo = vmulq_n_s32(vaddq_s32(t2_lo, t3_lo), cospi_16_64);
-  s2_hi = vmulq_n_s32(vaddq_s32(t2_hi, t3_hi), cospi_16_64);
   // cospi_16_64 * (x2 - x3)
-  s3_lo = vmulq_n_s32(vsubq_s32(t2_lo, t3_lo), cospi_16_64);
-  s3_hi = vmulq_n_s32(vsubq_s32(t2_hi, t3_hi), cospi_16_64);
+  butterfly_one_coeff_s32_noround(t_lo[2], t_hi[2], t_lo[3], t_hi[3],
+                                  cospi_16_64, &s_lo[2], &s_hi[2], &s_lo[3],
+                                  &s_hi[3]);
+
   // cospi_16_64 * (x6 + x7)
-  s6_lo = vmulq_n_s32(vaddq_s32(t6_lo, t7_lo), cospi_16_64);
-  s6_hi = vmulq_n_s32(vaddq_s32(t6_hi, t7_hi), cospi_16_64);
   // cospi_16_64 * (x2 - x3)
-  s7_lo = vmulq_n_s32(vsubq_s32(t6_lo, t7_lo), cospi_16_64);
-  s7_hi = vmulq_n_s32(vsubq_s32(t6_hi, t7_hi), cospi_16_64);
+  butterfly_one_coeff_s32_noround(t_lo[6], t_hi[6], t_lo[7], t_hi[7],
+                                  cospi_16_64, &s_lo[6], &s_hi[6], &s_lo[7],
+                                  &s_hi[7]);
 
   // final fdct_round_shift
-  t2_lo = vaddq_s32(s2_lo, k__DCT_CONST_ROUNDING);
-  t2_hi = vaddq_s32(s2_hi, k__DCT_CONST_ROUNDING);
-  t3_lo = vaddq_s32(s3_lo, k__DCT_CONST_ROUNDING);
-  t3_hi = vaddq_s32(s3_hi, k__DCT_CONST_ROUNDING);
-  t6_lo = vaddq_s32(s6_lo, k__DCT_CONST_ROUNDING);
-  t6_hi = vaddq_s32(s6_hi, k__DCT_CONST_ROUNDING);
-  t7_lo = vaddq_s32(s7_lo, k__DCT_CONST_ROUNDING);
-  t7_hi = vaddq_s32(s7_hi, k__DCT_CONST_ROUNDING);
-
-  x2_lo = vshrn_n_s32(t2_lo, DCT_CONST_BITS);
-  x2_hi = vshrn_n_s32(t2_hi, DCT_CONST_BITS);
-  x3_lo = vshrn_n_s32(t3_lo, DCT_CONST_BITS);
-  x3_hi = vshrn_n_s32(t3_hi, DCT_CONST_BITS);
-  x6_lo = vshrn_n_s32(t6_lo, DCT_CONST_BITS);
-  x6_hi = vshrn_n_s32(t6_hi, DCT_CONST_BITS);
-  x7_lo = vshrn_n_s32(t7_lo, DCT_CONST_BITS);
-  x7_hi = vshrn_n_s32(t7_hi, DCT_CONST_BITS);
+  x_lo[2] = vrshrn_n_s32(s_lo[2], DCT_CONST_BITS);
+  x_hi[2] = vrshrn_n_s32(s_hi[2], DCT_CONST_BITS);
+  x_lo[3] = vrshrn_n_s32(s_lo[3], DCT_CONST_BITS);
+  x_hi[3] = vrshrn_n_s32(s_hi[3], DCT_CONST_BITS);
+  x_lo[6] = vrshrn_n_s32(s_lo[6], DCT_CONST_BITS);
+  x_hi[6] = vrshrn_n_s32(s_hi[6], DCT_CONST_BITS);
+  x_lo[7] = vrshrn_n_s32(s_lo[7], DCT_CONST_BITS);
+  x_hi[7] = vrshrn_n_s32(s_hi[7], DCT_CONST_BITS);
 
   // x0, x1, x4, x5 narrow down to 16-bits directly
-  x0_lo = vmovn_s32(t0_lo);
-  x0_hi = vmovn_s32(t0_hi);
-  x1_lo = vmovn_s32(t1_lo);
-  x1_hi = vmovn_s32(t1_hi);
-  x4_lo = vmovn_s32(t4_lo);
-  x4_hi = vmovn_s32(t4_hi);
-  x5_lo = vmovn_s32(t5_lo);
-  x5_hi = vmovn_s32(t5_hi);
+  x_lo[0] = vmovn_s32(t_lo[0]);
+  x_hi[0] = vmovn_s32(t_hi[0]);
+  x_lo[1] = vmovn_s32(t_lo[1]);
+  x_hi[1] = vmovn_s32(t_hi[1]);
+  x_lo[4] = vmovn_s32(t_lo[4]);
+  x_hi[4] = vmovn_s32(t_hi[4]);
+  x_lo[5] = vmovn_s32(t_lo[5]);
+  x_hi[5] = vmovn_s32(t_hi[5]);
 
-  in[0] = vcombine_s16(x0_lo, x0_hi);
-  in[1] = vnegq_s16(vcombine_s16(x4_lo, x4_hi));
-  in[2] = vcombine_s16(x6_lo, x6_hi);
-  in[3] = vnegq_s16(vcombine_s16(x2_lo, x2_hi));
-  in[4] = vcombine_s16(x3_lo, x3_hi);
-  in[5] = vnegq_s16(vcombine_s16(x7_lo, x7_hi));
-  in[6] = vcombine_s16(x5_lo, x5_hi);
-  in[7] = vnegq_s16(vcombine_s16(x1_lo, x1_hi));
+  in[0] = vcombine_s16(x_lo[0], x_hi[0]);
+  in[1] = vnegq_s16(vcombine_s16(x_lo[4], x_hi[4]));
+  in[2] = vcombine_s16(x_lo[6], x_hi[6]);
+  in[3] = vnegq_s16(vcombine_s16(x_lo[2], x_hi[2]));
+  in[4] = vcombine_s16(x_lo[3], x_hi[3]);
+  in[5] = vnegq_s16(vcombine_s16(x_lo[7], x_hi[7]));
+  in[6] = vcombine_s16(x_lo[5], x_hi[5]);
+  in[7] = vnegq_s16(vcombine_s16(x_lo[1], x_hi[1]));
 
   transpose_s16_8x8(&in[0], &in[1], &in[2], &in[3], &in[4], &in[5], &in[6],
                     &in[7]);
@@ -553,7 +448,6 @@ static void fdct16_8col(int16x8_t *in) {
   int16x8_t i[8], s1[8], s2[8], s3[8], t[8];
   int16x4_t t_lo[8], t_hi[8];
   int32x4_t u_lo[8], u_hi[8];
-  const int32x4_t k__DCT_CONST_ROUNDING = vdupq_n_s32(DCT_CONST_ROUNDING);
 
   // stage 1
   i[0] = vaddq_s16(in[0], in[15]);
@@ -602,23 +496,14 @@ static void fdct16_8col(int16x8_t *in) {
   u_lo[5] = vmull_n_s16(t_lo[5], cospi_16_64);
   u_hi[5] = vmull_n_s16(t_hi[5], cospi_16_64);
 
-  u_lo[2] = vaddq_s32(u_lo[2], k__DCT_CONST_ROUNDING);
-  u_hi[2] = vaddq_s32(u_hi[2], k__DCT_CONST_ROUNDING);
-  u_lo[3] = vaddq_s32(u_lo[3], k__DCT_CONST_ROUNDING);
-  u_hi[3] = vaddq_s32(u_hi[3], k__DCT_CONST_ROUNDING);
-  u_lo[4] = vaddq_s32(u_lo[4], k__DCT_CONST_ROUNDING);
-  u_hi[4] = vaddq_s32(u_hi[4], k__DCT_CONST_ROUNDING);
-  u_lo[5] = vaddq_s32(u_lo[5], k__DCT_CONST_ROUNDING);
-  u_hi[5] = vaddq_s32(u_hi[5], k__DCT_CONST_ROUNDING);
-
-  t_lo[2] = vshrn_n_s32(u_lo[2], DCT_CONST_BITS);
-  t_hi[2] = vshrn_n_s32(u_hi[2], DCT_CONST_BITS);
-  t_lo[3] = vshrn_n_s32(u_lo[3], DCT_CONST_BITS);
-  t_hi[3] = vshrn_n_s32(u_hi[3], DCT_CONST_BITS);
-  t_lo[4] = vshrn_n_s32(u_lo[4], DCT_CONST_BITS);
-  t_hi[4] = vshrn_n_s32(u_hi[4], DCT_CONST_BITS);
-  t_lo[5] = vshrn_n_s32(u_lo[5], DCT_CONST_BITS);
-  t_hi[5] = vshrn_n_s32(u_hi[5], DCT_CONST_BITS);
+  t_lo[2] = vrshrn_n_s32(u_lo[2], DCT_CONST_BITS);
+  t_hi[2] = vrshrn_n_s32(u_hi[2], DCT_CONST_BITS);
+  t_lo[3] = vrshrn_n_s32(u_lo[3], DCT_CONST_BITS);
+  t_hi[3] = vrshrn_n_s32(u_hi[3], DCT_CONST_BITS);
+  t_lo[4] = vrshrn_n_s32(u_lo[4], DCT_CONST_BITS);
+  t_hi[4] = vrshrn_n_s32(u_hi[4], DCT_CONST_BITS);
+  t_lo[5] = vrshrn_n_s32(u_lo[5], DCT_CONST_BITS);
+  t_hi[5] = vrshrn_n_s32(u_hi[5], DCT_CONST_BITS);
 
   s2[2] = vcombine_s16(t_lo[2], t_hi[2]);
   s2[3] = vcombine_s16(t_lo[3], t_hi[3]);
@@ -653,40 +538,26 @@ static void fdct16_8col(int16x8_t *in) {
   t_lo[7] = vget_low_s16(s3[7]);
   t_hi[7] = vget_high_s16(s3[7]);
 
-  u_lo[1] = vaddq_s32(vmull_n_s16(t_lo[1], -cospi_8_64),
-                      vmull_n_s16(t_lo[6], cospi_24_64));
-  u_hi[1] = vaddq_s32(vmull_n_s16(t_hi[1], -cospi_8_64),
-                      vmull_n_s16(t_hi[6], cospi_24_64));
-  u_lo[2] = vaddq_s32(vmull_n_s16(t_lo[2], cospi_24_64),
-                      vmull_n_s16(t_lo[5], cospi_8_64));
-  u_hi[2] = vaddq_s32(vmull_n_s16(t_hi[2], cospi_24_64),
-                      vmull_n_s16(t_hi[5], cospi_8_64));
-  u_lo[5] = vaddq_s32(vmull_n_s16(t_lo[2], cospi_8_64),
-                      vmull_n_s16(t_lo[5], -cospi_24_64));
-  u_hi[5] = vaddq_s32(vmull_n_s16(t_hi[2], cospi_8_64),
-                      vmull_n_s16(t_hi[5], -cospi_24_64));
-  u_lo[6] = vaddq_s32(vmull_n_s16(t_lo[1], cospi_24_64),
-                      vmull_n_s16(t_lo[6], cospi_8_64));
-  u_hi[6] = vaddq_s32(vmull_n_s16(t_hi[1], cospi_24_64),
-                      vmull_n_s16(t_hi[6], cospi_8_64));
+  // u[1] = -cospi_8_64 * t[1] + cospi_24_64 * t[6]
+  // u[6] = cospi_24_64 * t[1] + cospi_8_64 * t[6]
+  butterfly_two_coeff_s16_s32_noround(t_lo[1], t_hi[1], t_lo[6], t_hi[6],
+                                      -cospi_8_64, cospi_24_64, &u_lo[1],
+                                      &u_hi[1], &u_lo[6], &u_hi[6]);
 
-  u_lo[1] = vaddq_s32(u_lo[1], k__DCT_CONST_ROUNDING);
-  u_hi[1] = vaddq_s32(u_hi[1], k__DCT_CONST_ROUNDING);
-  u_lo[2] = vaddq_s32(u_lo[2], k__DCT_CONST_ROUNDING);
-  u_hi[2] = vaddq_s32(u_hi[2], k__DCT_CONST_ROUNDING);
-  u_lo[5] = vaddq_s32(u_lo[5], k__DCT_CONST_ROUNDING);
-  u_hi[5] = vaddq_s32(u_hi[5], k__DCT_CONST_ROUNDING);
-  u_lo[6] = vaddq_s32(u_lo[6], k__DCT_CONST_ROUNDING);
-  u_hi[6] = vaddq_s32(u_hi[6], k__DCT_CONST_ROUNDING);
+  // u[5] = -cospi_24_64 * t[5] + cospi_8_64 * t[2]
+  // u[2] = cospi_8_64 * t[5]   + cospi_24_64 * t[2]
+  butterfly_two_coeff_s16_s32_noround(t_lo[5], t_hi[5], t_lo[2], t_hi[2],
+                                      -cospi_24_64, cospi_8_64, &u_lo[5],
+                                      &u_hi[5], &u_lo[2], &u_hi[2]);
 
-  t_lo[1] = vshrn_n_s32(u_lo[1], DCT_CONST_BITS);
-  t_hi[1] = vshrn_n_s32(u_hi[1], DCT_CONST_BITS);
-  t_lo[2] = vshrn_n_s32(u_lo[2], DCT_CONST_BITS);
-  t_hi[2] = vshrn_n_s32(u_hi[2], DCT_CONST_BITS);
-  t_lo[5] = vshrn_n_s32(u_lo[5], DCT_CONST_BITS);
-  t_hi[5] = vshrn_n_s32(u_hi[5], DCT_CONST_BITS);
-  t_lo[6] = vshrn_n_s32(u_lo[6], DCT_CONST_BITS);
-  t_hi[6] = vshrn_n_s32(u_hi[6], DCT_CONST_BITS);
+  t_lo[1] = vrshrn_n_s32(u_lo[1], DCT_CONST_BITS);
+  t_hi[1] = vrshrn_n_s32(u_hi[1], DCT_CONST_BITS);
+  t_lo[2] = vrshrn_n_s32(u_lo[2], DCT_CONST_BITS);
+  t_hi[2] = vrshrn_n_s32(u_hi[2], DCT_CONST_BITS);
+  t_lo[5] = vrshrn_n_s32(u_lo[5], DCT_CONST_BITS);
+  t_hi[5] = vrshrn_n_s32(u_hi[5], DCT_CONST_BITS);
+  t_lo[6] = vrshrn_n_s32(u_lo[6], DCT_CONST_BITS);
+  t_hi[6] = vrshrn_n_s32(u_hi[6], DCT_CONST_BITS);
 
   s2[1] = vcombine_s16(t_lo[1], t_hi[1]);
   s2[2] = vcombine_s16(t_lo[2], t_hi[2]);
@@ -721,88 +592,47 @@ static void fdct16_8col(int16x8_t *in) {
   t_lo[7] = vget_low_s16(s1[7]);
   t_hi[7] = vget_high_s16(s1[7]);
 
-  // step1[0] * cospi_30_64 + step1[7] * cospi_2_64;
-  u_lo[0] = vaddq_s32(vmull_n_s16(t_lo[0], cospi_30_64),
-                      vmull_n_s16(t_lo[7], cospi_2_64));
-  u_hi[0] = vaddq_s32(vmull_n_s16(t_hi[0], cospi_30_64),
-                      vmull_n_s16(t_hi[7], cospi_2_64));
+  // u[0] = step1[7] * cospi_2_64 + step1[0] * cospi_30_64
+  // u[7] = step1[7] * cospi_30_64 - step1[0] * cospi_2_64
+  butterfly_two_coeff_s16_s32_noround(t_lo[7], t_hi[7], t_lo[0], t_hi[0],
+                                      cospi_2_64, cospi_30_64, &u_lo[0],
+                                      &u_hi[0], &u_lo[7], &u_hi[7]);
 
-  // step1[1] * cospi_14_64 + step1[6] * cospi_18_64;
-  u_lo[1] = vaddq_s32(vmull_n_s16(t_lo[1], cospi_14_64),
-                      vmull_n_s16(t_lo[6], cospi_18_64));
-  u_hi[1] = vaddq_s32(vmull_n_s16(t_hi[1], cospi_14_64),
-                      vmull_n_s16(t_hi[6], cospi_18_64));
+  // u[1] = step1[6] * cospi_18_64 + step1[1] * cospi_14_64
+  // u[6] = step1[6] * cospi_14_64 - step1[1] * cospi_18_64
+  butterfly_two_coeff_s16_s32_noround(t_lo[6], t_hi[6], t_lo[1], t_hi[1],
+                                      cospi_18_64, cospi_14_64, &u_lo[1],
+                                      &u_hi[1], &u_lo[6], &u_hi[6]);
 
-  // step1[2] * cospi_22_64 + step1[5] * cospi_10_64;
-  u_lo[2] = vaddq_s32(vmull_n_s16(t_lo[2], cospi_22_64),
-                      vmull_n_s16(t_lo[5], cospi_10_64));
-  u_hi[2] = vaddq_s32(vmull_n_s16(t_hi[2], cospi_22_64),
-                      vmull_n_s16(t_hi[5], cospi_10_64));
+  // u[2] = step1[5] * cospi_10_64 + step1[2] * cospi_22_64
+  // u[5] = step1[5] * cospi_22_64 - step1[2] * cospi_10_64
+  butterfly_two_coeff_s16_s32_noround(t_lo[5], t_hi[5], t_lo[2], t_hi[2],
+                                      cospi_10_64, cospi_22_64, &u_lo[2],
+                                      &u_hi[2], &u_lo[5], &u_hi[5]);
 
-  // step1[3] * cospi_6_64 + step1[4] * cospi_26_64;
-  u_lo[3] = vaddq_s32(vmull_n_s16(t_lo[3], cospi_6_64),
-                      vmull_n_s16(t_lo[4], cospi_26_64));
-  u_hi[3] = vaddq_s32(vmull_n_s16(t_hi[3], cospi_6_64),
-                      vmull_n_s16(t_hi[4], cospi_26_64));
-
-  // step1[3] * -cospi_26_64 + step1[4] * cospi_6_64;
-  u_lo[4] = vaddq_s32(vmull_n_s16(t_lo[3], -cospi_26_64),
-                      vmull_n_s16(t_lo[4], cospi_6_64));
-  u_hi[4] = vaddq_s32(vmull_n_s16(t_hi[3], -cospi_26_64),
-                      vmull_n_s16(t_hi[4], cospi_6_64));
-
-  // step1[2] * -cospi_10_64 + step1[5] * cospi_22_64;
-  u_lo[5] = vaddq_s32(vmull_n_s16(t_lo[2], -cospi_10_64),
-                      vmull_n_s16(t_lo[5], cospi_22_64));
-  u_hi[5] = vaddq_s32(vmull_n_s16(t_hi[2], -cospi_10_64),
-                      vmull_n_s16(t_hi[5], cospi_22_64));
-
-  // step1[1] * -cospi_18_64 + step1[6] * cospi_14_64;
-  u_lo[6] = vaddq_s32(vmull_n_s16(t_lo[1], -cospi_18_64),
-                      vmull_n_s16(t_lo[6], cospi_14_64));
-  u_hi[6] = vaddq_s32(vmull_n_s16(t_hi[1], -cospi_18_64),
-                      vmull_n_s16(t_hi[6], cospi_14_64));
-
-  // step1[0] * -cospi_2_64 + step1[7] * cospi_30_64;
-  u_lo[7] = vaddq_s32(vmull_n_s16(t_lo[0], -cospi_2_64),
-                      vmull_n_s16(t_lo[7], cospi_30_64));
-  u_hi[7] = vaddq_s32(vmull_n_s16(t_hi[0], -cospi_2_64),
-                      vmull_n_s16(t_hi[7], cospi_30_64));
+  // u[3] = step1[4] * cospi_26_64 + step1[3] * cospi_6_64
+  // u[4] = step1[4] * cospi_6_64  - step1[3] * cospi_26_64
+  butterfly_two_coeff_s16_s32_noround(t_lo[4], t_hi[4], t_lo[3], t_hi[3],
+                                      cospi_26_64, cospi_6_64, &u_lo[3],
+                                      &u_hi[3], &u_lo[4], &u_hi[4]);
 
   // final fdct_round_shift
-  u_lo[0] = vaddq_s32(u_lo[0], k__DCT_CONST_ROUNDING);
-  u_hi[0] = vaddq_s32(u_hi[0], k__DCT_CONST_ROUNDING);
-  u_lo[1] = vaddq_s32(u_lo[1], k__DCT_CONST_ROUNDING);
-  u_hi[1] = vaddq_s32(u_hi[1], k__DCT_CONST_ROUNDING);
-  u_lo[2] = vaddq_s32(u_lo[2], k__DCT_CONST_ROUNDING);
-  u_hi[2] = vaddq_s32(u_hi[2], k__DCT_CONST_ROUNDING);
-  u_lo[3] = vaddq_s32(u_lo[3], k__DCT_CONST_ROUNDING);
-  u_hi[3] = vaddq_s32(u_hi[3], k__DCT_CONST_ROUNDING);
-  u_lo[4] = vaddq_s32(u_lo[4], k__DCT_CONST_ROUNDING);
-  u_hi[4] = vaddq_s32(u_hi[4], k__DCT_CONST_ROUNDING);
-  u_lo[5] = vaddq_s32(u_lo[5], k__DCT_CONST_ROUNDING);
-  u_hi[5] = vaddq_s32(u_hi[5], k__DCT_CONST_ROUNDING);
-  u_lo[6] = vaddq_s32(u_lo[6], k__DCT_CONST_ROUNDING);
-  u_hi[6] = vaddq_s32(u_hi[6], k__DCT_CONST_ROUNDING);
-  u_lo[7] = vaddq_s32(u_lo[7], k__DCT_CONST_ROUNDING);
-  u_hi[7] = vaddq_s32(u_hi[7], k__DCT_CONST_ROUNDING);
-
-  t_lo[0] = vshrn_n_s32(u_lo[0], DCT_CONST_BITS);
-  t_hi[0] = vshrn_n_s32(u_hi[0], DCT_CONST_BITS);
-  t_lo[1] = vshrn_n_s32(u_lo[1], DCT_CONST_BITS);
-  t_hi[1] = vshrn_n_s32(u_hi[1], DCT_CONST_BITS);
-  t_lo[2] = vshrn_n_s32(u_lo[2], DCT_CONST_BITS);
-  t_hi[2] = vshrn_n_s32(u_hi[2], DCT_CONST_BITS);
-  t_lo[3] = vshrn_n_s32(u_lo[3], DCT_CONST_BITS);
-  t_hi[3] = vshrn_n_s32(u_hi[3], DCT_CONST_BITS);
-  t_lo[4] = vshrn_n_s32(u_lo[4], DCT_CONST_BITS);
-  t_hi[4] = vshrn_n_s32(u_hi[4], DCT_CONST_BITS);
-  t_lo[5] = vshrn_n_s32(u_lo[5], DCT_CONST_BITS);
-  t_hi[5] = vshrn_n_s32(u_hi[5], DCT_CONST_BITS);
-  t_lo[6] = vshrn_n_s32(u_lo[6], DCT_CONST_BITS);
-  t_hi[6] = vshrn_n_s32(u_hi[6], DCT_CONST_BITS);
-  t_lo[7] = vshrn_n_s32(u_lo[7], DCT_CONST_BITS);
-  t_hi[7] = vshrn_n_s32(u_hi[7], DCT_CONST_BITS);
+  t_lo[0] = vrshrn_n_s32(u_lo[0], DCT_CONST_BITS);
+  t_hi[0] = vrshrn_n_s32(u_hi[0], DCT_CONST_BITS);
+  t_lo[1] = vrshrn_n_s32(u_lo[1], DCT_CONST_BITS);
+  t_hi[1] = vrshrn_n_s32(u_hi[1], DCT_CONST_BITS);
+  t_lo[2] = vrshrn_n_s32(u_lo[2], DCT_CONST_BITS);
+  t_hi[2] = vrshrn_n_s32(u_hi[2], DCT_CONST_BITS);
+  t_lo[3] = vrshrn_n_s32(u_lo[3], DCT_CONST_BITS);
+  t_hi[3] = vrshrn_n_s32(u_hi[3], DCT_CONST_BITS);
+  t_lo[4] = vrshrn_n_s32(u_lo[4], DCT_CONST_BITS);
+  t_hi[4] = vrshrn_n_s32(u_hi[4], DCT_CONST_BITS);
+  t_lo[5] = vrshrn_n_s32(u_lo[5], DCT_CONST_BITS);
+  t_hi[5] = vrshrn_n_s32(u_hi[5], DCT_CONST_BITS);
+  t_lo[6] = vrshrn_n_s32(u_lo[6], DCT_CONST_BITS);
+  t_hi[6] = vrshrn_n_s32(u_hi[6], DCT_CONST_BITS);
+  t_lo[7] = vrshrn_n_s32(u_lo[7], DCT_CONST_BITS);
+  t_hi[7] = vrshrn_n_s32(u_hi[7], DCT_CONST_BITS);
 
   in[0] = i[0];
   in[2] = i[1];
@@ -827,7 +657,6 @@ static void fadst16_8col(int16x8_t *in) {
   int16x4_t x_lo[16], x_hi[16];
   int32x4_t s_lo[16], s_hi[16];
   int32x4_t t_lo[16], t_hi[16];
-  const int32x4_t k__DCT_CONST_ROUNDING = vdupq_n_s32(DCT_CONST_ROUNDING);
 
   x_lo[0] = vget_low_s16(in[15]);
   x_hi[0] = vget_high_s16(in[15]);
@@ -864,185 +693,79 @@ static void fadst16_8col(int16x8_t *in) {
 
   // stage 1
   // s0 = cospi_1_64 * x0 + cospi_31_64 * x1;
-  s_lo[0] = vaddq_s32(vmull_n_s16(x_lo[0], cospi_1_64),
-                      vmull_n_s16(x_lo[1], cospi_31_64));
-  s_hi[0] = vaddq_s32(vmull_n_s16(x_hi[0], cospi_1_64),
-                      vmull_n_s16(x_hi[1], cospi_31_64));
   // s1 = cospi_31_64 * x0 - cospi_1_64 * x1;
-  s_lo[1] = vsubq_s32(vmull_n_s16(x_lo[0], cospi_31_64),
-                      vmull_n_s16(x_lo[1], cospi_1_64));
-  s_hi[1] = vsubq_s32(vmull_n_s16(x_hi[0], cospi_31_64),
-                      vmull_n_s16(x_hi[1], cospi_1_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[0], x_hi[0], x_lo[1], x_hi[1],
+                                      cospi_1_64, cospi_31_64, &s_lo[0],
+                                      &s_hi[0], &s_lo[1], &s_hi[1]);
   // s2 = cospi_5_64 * x2 + cospi_27_64 * x3;
-  s_lo[2] = vaddq_s32(vmull_n_s16(x_lo[2], cospi_5_64),
-                      vmull_n_s16(x_lo[3], cospi_27_64));
-  s_hi[2] = vaddq_s32(vmull_n_s16(x_hi[2], cospi_5_64),
-                      vmull_n_s16(x_hi[3], cospi_27_64));
   // s3 = cospi_27_64 * x2 - cospi_5_64 * x3;
-  s_lo[3] = vsubq_s32(vmull_n_s16(x_lo[2], cospi_27_64),
-                      vmull_n_s16(x_lo[3], cospi_5_64));
-  s_hi[3] = vsubq_s32(vmull_n_s16(x_hi[2], cospi_27_64),
-                      vmull_n_s16(x_hi[3], cospi_5_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[2], x_hi[2], x_lo[3], x_hi[3],
+                                      cospi_5_64, cospi_27_64, &s_lo[2],
+                                      &s_hi[2], &s_lo[3], &s_hi[3]);
   // s4 = cospi_9_64 * x4 + cospi_23_64 * x5;
-  s_lo[4] = vaddq_s32(vmull_n_s16(x_lo[4], cospi_9_64),
-                      vmull_n_s16(x_lo[5], cospi_23_64));
-  s_hi[4] = vaddq_s32(vmull_n_s16(x_hi[4], cospi_9_64),
-                      vmull_n_s16(x_hi[5], cospi_23_64));
   // s5 = cospi_23_64 * x4 - cospi_9_64 * x5;
-  s_lo[5] = vsubq_s32(vmull_n_s16(x_lo[4], cospi_23_64),
-                      vmull_n_s16(x_lo[5], cospi_9_64));
-  s_hi[5] = vsubq_s32(vmull_n_s16(x_hi[4], cospi_23_64),
-                      vmull_n_s16(x_hi[5], cospi_9_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[4], x_hi[4], x_lo[5], x_hi[5],
+                                      cospi_9_64, cospi_23_64, &s_lo[4],
+                                      &s_hi[4], &s_lo[5], &s_hi[5]);
   // s6 = cospi_13_64 * x6 + cospi_19_64 * x7;
-  s_lo[6] = vaddq_s32(vmull_n_s16(x_lo[6], cospi_13_64),
-                      vmull_n_s16(x_lo[7], cospi_19_64));
-  s_hi[6] = vaddq_s32(vmull_n_s16(x_hi[6], cospi_13_64),
-                      vmull_n_s16(x_hi[7], cospi_19_64));
   // s7 = cospi_19_64 * x6 - cospi_13_64 * x7;
-  s_lo[7] = vsubq_s32(vmull_n_s16(x_lo[6], cospi_19_64),
-                      vmull_n_s16(x_lo[7], cospi_13_64));
-  s_hi[7] = vsubq_s32(vmull_n_s16(x_hi[6], cospi_19_64),
-                      vmull_n_s16(x_hi[7], cospi_13_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[6], x_hi[6], x_lo[7], x_hi[7],
+                                      cospi_13_64, cospi_19_64, &s_lo[6],
+                                      &s_hi[6], &s_lo[7], &s_hi[7]);
   // s8 = cospi_17_64 * x8 + cospi_15_64 * x9;
-  s_lo[8] = vaddq_s32(vmull_n_s16(x_lo[8], cospi_17_64),
-                      vmull_n_s16(x_lo[9], cospi_15_64));
-  s_hi[8] = vaddq_s32(vmull_n_s16(x_hi[8], cospi_17_64),
-                      vmull_n_s16(x_hi[9], cospi_15_64));
   // s9 = cospi_15_64 * x8 - cospi_17_64 * x9;
-  s_lo[9] = vsubq_s32(vmull_n_s16(x_lo[8], cospi_15_64),
-                      vmull_n_s16(x_lo[9], cospi_17_64));
-  s_hi[9] = vsubq_s32(vmull_n_s16(x_hi[8], cospi_15_64),
-                      vmull_n_s16(x_hi[9], cospi_17_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[8], x_hi[8], x_lo[9], x_hi[9],
+                                      cospi_17_64, cospi_15_64, &s_lo[8],
+                                      &s_hi[8], &s_lo[9], &s_hi[9]);
   // s10 = cospi_21_64 * x10 + cospi_11_64 * x11;
-  s_lo[10] = vaddq_s32(vmull_n_s16(x_lo[10], cospi_21_64),
-                       vmull_n_s16(x_lo[11], cospi_11_64));
-  s_hi[10] = vaddq_s32(vmull_n_s16(x_hi[10], cospi_21_64),
-                       vmull_n_s16(x_hi[11], cospi_11_64));
   // s11 = cospi_11_64 * x10 - cospi_21_64 * x11;
-  s_lo[11] = vsubq_s32(vmull_n_s16(x_lo[10], cospi_11_64),
-                       vmull_n_s16(x_lo[11], cospi_21_64));
-  s_hi[11] = vsubq_s32(vmull_n_s16(x_hi[10], cospi_11_64),
-                       vmull_n_s16(x_hi[11], cospi_21_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[10], x_hi[10], x_lo[11], x_hi[11],
+                                      cospi_21_64, cospi_11_64, &s_lo[10],
+                                      &s_hi[10], &s_lo[11], &s_hi[11]);
   // s12 = cospi_25_64 * x12 + cospi_7_64 * x13;
-  s_lo[12] = vaddq_s32(vmull_n_s16(x_lo[12], cospi_25_64),
-                       vmull_n_s16(x_lo[13], cospi_7_64));
-  s_hi[12] = vaddq_s32(vmull_n_s16(x_hi[12], cospi_25_64),
-                       vmull_n_s16(x_hi[13], cospi_7_64));
   // s13 = cospi_7_64 * x12 - cospi_25_64 * x13;
-  s_lo[13] = vsubq_s32(vmull_n_s16(x_lo[12], cospi_7_64),
-                       vmull_n_s16(x_lo[13], cospi_25_64));
-  s_hi[13] = vsubq_s32(vmull_n_s16(x_hi[12], cospi_7_64),
-                       vmull_n_s16(x_hi[13], cospi_25_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[12], x_hi[12], x_lo[13], x_hi[13],
+                                      cospi_25_64, cospi_7_64, &s_lo[12],
+                                      &s_hi[12], &s_lo[13], &s_hi[13]);
   // s14 = cospi_29_64 * x14 + cospi_3_64 * x15;
-  s_lo[14] = vaddq_s32(vmull_n_s16(x_lo[14], cospi_29_64),
-                       vmull_n_s16(x_lo[15], cospi_3_64));
-  s_hi[14] = vaddq_s32(vmull_n_s16(x_hi[14], cospi_29_64),
-                       vmull_n_s16(x_hi[15], cospi_3_64));
   // s15 = cospi_3_64 * x14 - cospi_29_64 * x15;
-  s_lo[15] = vsubq_s32(vmull_n_s16(x_lo[14], cospi_3_64),
-                       vmull_n_s16(x_lo[15], cospi_29_64));
-  s_hi[15] = vsubq_s32(vmull_n_s16(x_hi[14], cospi_3_64),
-                       vmull_n_s16(x_hi[15], cospi_29_64));
+  butterfly_two_coeff_s16_s32_noround(x_lo[14], x_hi[14], x_lo[15], x_hi[15],
+                                      cospi_29_64, cospi_3_64, &s_lo[14],
+                                      &s_hi[14], &s_lo[15], &s_hi[15]);
 
   // fdct_round_shift
-  t_lo[0] = vaddq_s32(s_lo[0], s_lo[8]);
-  t_hi[0] = vaddq_s32(s_hi[0], s_hi[8]);
-  t_lo[1] = vaddq_s32(s_lo[1], s_lo[9]);
-  t_hi[1] = vaddq_s32(s_hi[1], s_hi[9]);
-  t_lo[2] = vaddq_s32(s_lo[2], s_lo[10]);
-  t_hi[2] = vaddq_s32(s_hi[2], s_hi[10]);
-  t_lo[3] = vaddq_s32(s_lo[3], s_lo[11]);
-  t_hi[3] = vaddq_s32(s_hi[3], s_hi[11]);
-  t_lo[4] = vaddq_s32(s_lo[4], s_lo[12]);
-  t_hi[4] = vaddq_s32(s_hi[4], s_hi[12]);
-  t_lo[5] = vaddq_s32(s_lo[5], s_lo[13]);
-  t_hi[5] = vaddq_s32(s_hi[5], s_hi[13]);
-  t_lo[6] = vaddq_s32(s_lo[6], s_lo[14]);
-  t_hi[6] = vaddq_s32(s_hi[6], s_hi[14]);
-  t_lo[7] = vaddq_s32(s_lo[7], s_lo[15]);
-  t_hi[7] = vaddq_s32(s_hi[7], s_hi[15]);
-  t_lo[8] = vsubq_s32(s_lo[0], s_lo[8]);
-  t_hi[8] = vsubq_s32(s_hi[0], s_hi[8]);
-  t_lo[9] = vsubq_s32(s_lo[1], s_lo[9]);
-  t_hi[9] = vsubq_s32(s_hi[1], s_hi[9]);
-  t_lo[10] = vsubq_s32(s_lo[2], s_lo[10]);
-  t_hi[10] = vsubq_s32(s_hi[2], s_hi[10]);
-  t_lo[11] = vsubq_s32(s_lo[3], s_lo[11]);
-  t_hi[11] = vsubq_s32(s_hi[3], s_hi[11]);
-  t_lo[12] = vsubq_s32(s_lo[4], s_lo[12]);
-  t_hi[12] = vsubq_s32(s_hi[4], s_hi[12]);
-  t_lo[13] = vsubq_s32(s_lo[5], s_lo[13]);
-  t_hi[13] = vsubq_s32(s_hi[5], s_hi[13]);
-  t_lo[14] = vsubq_s32(s_lo[6], s_lo[14]);
-  t_hi[14] = vsubq_s32(s_hi[6], s_hi[14]);
-  t_lo[15] = vsubq_s32(s_lo[7], s_lo[15]);
-  t_hi[15] = vsubq_s32(s_hi[7], s_hi[15]);
-
-  t_lo[0] = vaddq_s32(t_lo[0], k__DCT_CONST_ROUNDING);
-  t_hi[0] = vaddq_s32(t_hi[0], k__DCT_CONST_ROUNDING);
-  t_lo[1] = vaddq_s32(t_lo[1], k__DCT_CONST_ROUNDING);
-  t_hi[1] = vaddq_s32(t_hi[1], k__DCT_CONST_ROUNDING);
-  t_lo[2] = vaddq_s32(t_lo[2], k__DCT_CONST_ROUNDING);
-  t_hi[2] = vaddq_s32(t_hi[2], k__DCT_CONST_ROUNDING);
-  t_lo[3] = vaddq_s32(t_lo[3], k__DCT_CONST_ROUNDING);
-  t_hi[3] = vaddq_s32(t_hi[3], k__DCT_CONST_ROUNDING);
-  t_lo[4] = vaddq_s32(t_lo[4], k__DCT_CONST_ROUNDING);
-  t_hi[4] = vaddq_s32(t_hi[4], k__DCT_CONST_ROUNDING);
-  t_lo[5] = vaddq_s32(t_lo[5], k__DCT_CONST_ROUNDING);
-  t_hi[5] = vaddq_s32(t_hi[5], k__DCT_CONST_ROUNDING);
-  t_lo[6] = vaddq_s32(t_lo[6], k__DCT_CONST_ROUNDING);
-  t_hi[6] = vaddq_s32(t_hi[6], k__DCT_CONST_ROUNDING);
-  t_lo[7] = vaddq_s32(t_lo[7], k__DCT_CONST_ROUNDING);
-  t_hi[7] = vaddq_s32(t_hi[7], k__DCT_CONST_ROUNDING);
-  t_lo[8] = vaddq_s32(t_lo[8], k__DCT_CONST_ROUNDING);
-  t_hi[8] = vaddq_s32(t_hi[8], k__DCT_CONST_ROUNDING);
-  t_lo[9] = vaddq_s32(t_lo[9], k__DCT_CONST_ROUNDING);
-  t_hi[9] = vaddq_s32(t_hi[9], k__DCT_CONST_ROUNDING);
-  t_lo[10] = vaddq_s32(t_lo[10], k__DCT_CONST_ROUNDING);
-  t_hi[10] = vaddq_s32(t_hi[10], k__DCT_CONST_ROUNDING);
-  t_lo[11] = vaddq_s32(t_lo[11], k__DCT_CONST_ROUNDING);
-  t_hi[11] = vaddq_s32(t_hi[11], k__DCT_CONST_ROUNDING);
-  t_lo[12] = vaddq_s32(t_lo[12], k__DCT_CONST_ROUNDING);
-  t_hi[12] = vaddq_s32(t_hi[12], k__DCT_CONST_ROUNDING);
-  t_lo[13] = vaddq_s32(t_lo[13], k__DCT_CONST_ROUNDING);
-  t_hi[13] = vaddq_s32(t_hi[13], k__DCT_CONST_ROUNDING);
-  t_lo[14] = vaddq_s32(t_lo[14], k__DCT_CONST_ROUNDING);
-  t_hi[14] = vaddq_s32(t_hi[14], k__DCT_CONST_ROUNDING);
-  t_lo[15] = vaddq_s32(t_lo[15], k__DCT_CONST_ROUNDING);
-  t_hi[15] = vaddq_s32(t_hi[15], k__DCT_CONST_ROUNDING);
-
-  t_lo[0] = vshrq_n_s32(t_lo[0], DCT_CONST_BITS);
-  t_hi[0] = vshrq_n_s32(t_hi[0], DCT_CONST_BITS);
-  t_lo[1] = vshrq_n_s32(t_lo[1], DCT_CONST_BITS);
-  t_hi[1] = vshrq_n_s32(t_hi[1], DCT_CONST_BITS);
-  t_lo[2] = vshrq_n_s32(t_lo[2], DCT_CONST_BITS);
-  t_hi[2] = vshrq_n_s32(t_hi[2], DCT_CONST_BITS);
-  t_lo[3] = vshrq_n_s32(t_lo[3], DCT_CONST_BITS);
-  t_hi[3] = vshrq_n_s32(t_hi[3], DCT_CONST_BITS);
-  t_lo[4] = vshrq_n_s32(t_lo[4], DCT_CONST_BITS);
-  t_hi[4] = vshrq_n_s32(t_hi[4], DCT_CONST_BITS);
-  t_lo[5] = vshrq_n_s32(t_lo[5], DCT_CONST_BITS);
-  t_hi[5] = vshrq_n_s32(t_hi[5], DCT_CONST_BITS);
-  t_lo[6] = vshrq_n_s32(t_lo[6], DCT_CONST_BITS);
-  t_hi[6] = vshrq_n_s32(t_hi[6], DCT_CONST_BITS);
-  t_lo[7] = vshrq_n_s32(t_lo[7], DCT_CONST_BITS);
-  t_hi[7] = vshrq_n_s32(t_hi[7], DCT_CONST_BITS);
-  t_lo[8] = vshrq_n_s32(t_lo[8], DCT_CONST_BITS);
-  t_hi[8] = vshrq_n_s32(t_hi[8], DCT_CONST_BITS);
-  t_lo[9] = vshrq_n_s32(t_lo[9], DCT_CONST_BITS);
-  t_hi[9] = vshrq_n_s32(t_hi[9], DCT_CONST_BITS);
-  t_lo[10] = vshrq_n_s32(t_lo[10], DCT_CONST_BITS);
-  t_hi[10] = vshrq_n_s32(t_hi[10], DCT_CONST_BITS);
-  t_lo[11] = vshrq_n_s32(t_lo[11], DCT_CONST_BITS);
-  t_hi[11] = vshrq_n_s32(t_hi[11], DCT_CONST_BITS);
-  t_lo[12] = vshrq_n_s32(t_lo[12], DCT_CONST_BITS);
-  t_hi[12] = vshrq_n_s32(t_hi[12], DCT_CONST_BITS);
-  t_lo[13] = vshrq_n_s32(t_lo[13], DCT_CONST_BITS);
-  t_hi[13] = vshrq_n_s32(t_hi[13], DCT_CONST_BITS);
-  t_lo[14] = vshrq_n_s32(t_lo[14], DCT_CONST_BITS);
-  t_hi[14] = vshrq_n_s32(t_hi[14], DCT_CONST_BITS);
-  t_lo[15] = vshrq_n_s32(t_lo[15], DCT_CONST_BITS);
-  t_hi[15] = vshrq_n_s32(t_hi[15], DCT_CONST_BITS);
+  t_lo[0] = vrshrq_n_s32(vaddq_s32(s_lo[0], s_lo[8]), DCT_CONST_BITS);
+  t_hi[0] = vrshrq_n_s32(vaddq_s32(s_hi[0], s_hi[8]), DCT_CONST_BITS);
+  t_lo[1] = vrshrq_n_s32(vaddq_s32(s_lo[1], s_lo[9]), DCT_CONST_BITS);
+  t_hi[1] = vrshrq_n_s32(vaddq_s32(s_hi[1], s_hi[9]), DCT_CONST_BITS);
+  t_lo[2] = vrshrq_n_s32(vaddq_s32(s_lo[2], s_lo[10]), DCT_CONST_BITS);
+  t_hi[2] = vrshrq_n_s32(vaddq_s32(s_hi[2], s_hi[10]), DCT_CONST_BITS);
+  t_lo[3] = vrshrq_n_s32(vaddq_s32(s_lo[3], s_lo[11]), DCT_CONST_BITS);
+  t_hi[3] = vrshrq_n_s32(vaddq_s32(s_hi[3], s_hi[11]), DCT_CONST_BITS);
+  t_lo[4] = vrshrq_n_s32(vaddq_s32(s_lo[4], s_lo[12]), DCT_CONST_BITS);
+  t_hi[4] = vrshrq_n_s32(vaddq_s32(s_hi[4], s_hi[12]), DCT_CONST_BITS);
+  t_lo[5] = vrshrq_n_s32(vaddq_s32(s_lo[5], s_lo[13]), DCT_CONST_BITS);
+  t_hi[5] = vrshrq_n_s32(vaddq_s32(s_hi[5], s_hi[13]), DCT_CONST_BITS);
+  t_lo[6] = vrshrq_n_s32(vaddq_s32(s_lo[6], s_lo[14]), DCT_CONST_BITS);
+  t_hi[6] = vrshrq_n_s32(vaddq_s32(s_hi[6], s_hi[14]), DCT_CONST_BITS);
+  t_lo[7] = vrshrq_n_s32(vaddq_s32(s_lo[7], s_lo[15]), DCT_CONST_BITS);
+  t_hi[7] = vrshrq_n_s32(vaddq_s32(s_hi[7], s_hi[15]), DCT_CONST_BITS);
+  t_lo[8] = vrshrq_n_s32(vsubq_s32(s_lo[0], s_lo[8]), DCT_CONST_BITS);
+  t_hi[8] = vrshrq_n_s32(vsubq_s32(s_hi[0], s_hi[8]), DCT_CONST_BITS);
+  t_lo[9] = vrshrq_n_s32(vsubq_s32(s_lo[1], s_lo[9]), DCT_CONST_BITS);
+  t_hi[9] = vrshrq_n_s32(vsubq_s32(s_hi[1], s_hi[9]), DCT_CONST_BITS);
+  t_lo[10] = vrshrq_n_s32(vsubq_s32(s_lo[2], s_lo[10]), DCT_CONST_BITS);
+  t_hi[10] = vrshrq_n_s32(vsubq_s32(s_hi[2], s_hi[10]), DCT_CONST_BITS);
+  t_lo[11] = vrshrq_n_s32(vsubq_s32(s_lo[3], s_lo[11]), DCT_CONST_BITS);
+  t_hi[11] = vrshrq_n_s32(vsubq_s32(s_hi[3], s_hi[11]), DCT_CONST_BITS);
+  t_lo[12] = vrshrq_n_s32(vsubq_s32(s_lo[4], s_lo[12]), DCT_CONST_BITS);
+  t_hi[12] = vrshrq_n_s32(vsubq_s32(s_hi[4], s_hi[12]), DCT_CONST_BITS);
+  t_lo[13] = vrshrq_n_s32(vsubq_s32(s_lo[5], s_lo[13]), DCT_CONST_BITS);
+  t_hi[13] = vrshrq_n_s32(vsubq_s32(s_hi[5], s_hi[13]), DCT_CONST_BITS);
+  t_lo[14] = vrshrq_n_s32(vsubq_s32(s_lo[6], s_lo[14]), DCT_CONST_BITS);
+  t_hi[14] = vrshrq_n_s32(vsubq_s32(s_hi[6], s_hi[14]), DCT_CONST_BITS);
+  t_lo[15] = vrshrq_n_s32(vsubq_s32(s_lo[7], s_lo[15]), DCT_CONST_BITS);
+  t_hi[15] = vrshrq_n_s32(vsubq_s32(s_hi[7], s_hi[15]), DCT_CONST_BITS);
 
   // stage 2
   s_lo[0] = t_lo[0];
@@ -1062,45 +785,25 @@ static void fadst16_8col(int16x8_t *in) {
   s_lo[7] = t_lo[7];
   s_hi[7] = t_hi[7];
   // s8 = x8 * cospi_4_64 + x9 * cospi_28_64;
-  s_lo[8] = vaddq_s32(vmulq_n_s32(t_lo[8], cospi_4_64),
-                      vmulq_n_s32(t_lo[9], cospi_28_64));
-  s_hi[8] = vaddq_s32(vmulq_n_s32(t_hi[8], cospi_4_64),
-                      vmulq_n_s32(t_hi[9], cospi_28_64));
   // s9 = x8 * cospi_28_64 - x9 * cospi_4_64;
-  s_lo[9] = vsubq_s32(vmulq_n_s32(t_lo[8], cospi_28_64),
-                      vmulq_n_s32(t_lo[9], cospi_4_64));
-  s_hi[9] = vsubq_s32(vmulq_n_s32(t_hi[8], cospi_28_64),
-                      vmulq_n_s32(t_hi[9], cospi_4_64));
+  butterfly_two_coeff_s32_noround(t_lo[8], t_hi[8], t_lo[9], t_hi[9],
+                                  cospi_4_64, cospi_28_64, &s_lo[8], &s_hi[8],
+                                  &s_lo[9], &s_hi[9]);
   // s10 = x10 * cospi_20_64 + x11 * cospi_12_64;
-  s_lo[10] = vaddq_s32(vmulq_n_s32(t_lo[10], cospi_20_64),
-                       vmulq_n_s32(t_lo[11], cospi_12_64));
-  s_hi[10] = vaddq_s32(vmulq_n_s32(t_hi[10], cospi_20_64),
-                       vmulq_n_s32(t_hi[11], cospi_12_64));
   // s11 = x10 * cospi_12_64 - x11 * cospi_20_64;
-  s_lo[11] = vsubq_s32(vmulq_n_s32(t_lo[10], cospi_12_64),
-                       vmulq_n_s32(t_lo[11], cospi_20_64));
-  s_hi[11] = vsubq_s32(vmulq_n_s32(t_hi[10], cospi_12_64),
-                       vmulq_n_s32(t_hi[11], cospi_20_64));
+  butterfly_two_coeff_s32_noround(t_lo[10], t_hi[10], t_lo[11], t_hi[11],
+                                  cospi_20_64, cospi_12_64, &s_lo[10],
+                                  &s_hi[10], &s_lo[11], &s_hi[11]);
   // s12 = -x12 * cospi_28_64 + x13 * cospi_4_64;
-  s_lo[12] = vaddq_s32(vmulq_n_s32(t_lo[12], -cospi_28_64),
-                       vmulq_n_s32(t_lo[13], cospi_4_64));
-  s_hi[12] = vaddq_s32(vmulq_n_s32(t_hi[12], -cospi_28_64),
-                       vmulq_n_s32(t_hi[13], cospi_4_64));
   // s13 = x12 * cospi_4_64 + x13 * cospi_28_64;
-  s_lo[13] = vaddq_s32(vmulq_n_s32(t_lo[12], cospi_4_64),
-                       vmulq_n_s32(t_lo[13], cospi_28_64));
-  s_hi[13] = vaddq_s32(vmulq_n_s32(t_hi[12], cospi_4_64),
-                       vmulq_n_s32(t_hi[13], cospi_28_64));
+  butterfly_two_coeff_s32_noround(t_lo[13], t_hi[13], t_lo[12], t_hi[12],
+                                  cospi_28_64, cospi_4_64, &s_lo[13], &s_hi[13],
+                                  &s_lo[12], &s_hi[12]);
   // s14 = -x14 * cospi_12_64 + x15 * cospi_20_64;
-  s_lo[14] = vaddq_s32(vmulq_n_s32(t_lo[14], -cospi_12_64),
-                       vmulq_n_s32(t_lo[15], cospi_20_64));
-  s_hi[14] = vaddq_s32(vmulq_n_s32(t_hi[14], -cospi_12_64),
-                       vmulq_n_s32(t_hi[15], cospi_20_64));
   // s15 = x14 * cospi_20_64 + x15 * cospi_12_64;
-  s_lo[15] = vaddq_s32(vmulq_n_s32(t_lo[14], cospi_20_64),
-                       vmulq_n_s32(t_lo[15], cospi_12_64));
-  s_hi[15] = vaddq_s32(vmulq_n_s32(t_hi[14], cospi_20_64),
-                       vmulq_n_s32(t_hi[15], cospi_12_64));
+  butterfly_two_coeff_s32_noround(t_lo[15], t_hi[15], t_lo[14], t_hi[14],
+                                  cospi_12_64, cospi_20_64, &s_lo[15],
+                                  &s_hi[15], &s_lo[14], &s_hi[14]);
 
   // s0 + s4
   t_lo[0] = vaddq_s32(s_lo[0], s_lo[4]);
@@ -1151,38 +854,22 @@ static void fadst16_8col(int16x8_t *in) {
   t_lo[15] = vsubq_s32(s_lo[11], s_lo[15]);
   t_hi[15] = vsubq_s32(s_hi[11], s_hi[15]);
 
-  t_lo[8] = vaddq_s32(t_lo[8], k__DCT_CONST_ROUNDING);
-  t_hi[8] = vaddq_s32(t_hi[8], k__DCT_CONST_ROUNDING);
-  t_lo[9] = vaddq_s32(t_lo[9], k__DCT_CONST_ROUNDING);
-  t_hi[9] = vaddq_s32(t_hi[9], k__DCT_CONST_ROUNDING);
-  t_lo[10] = vaddq_s32(t_lo[10], k__DCT_CONST_ROUNDING);
-  t_hi[10] = vaddq_s32(t_hi[10], k__DCT_CONST_ROUNDING);
-  t_lo[11] = vaddq_s32(t_lo[11], k__DCT_CONST_ROUNDING);
-  t_hi[11] = vaddq_s32(t_hi[11], k__DCT_CONST_ROUNDING);
-  t_lo[12] = vaddq_s32(t_lo[12], k__DCT_CONST_ROUNDING);
-  t_hi[12] = vaddq_s32(t_hi[12], k__DCT_CONST_ROUNDING);
-  t_lo[13] = vaddq_s32(t_lo[13], k__DCT_CONST_ROUNDING);
-  t_hi[13] = vaddq_s32(t_hi[13], k__DCT_CONST_ROUNDING);
-  t_lo[14] = vaddq_s32(t_lo[14], k__DCT_CONST_ROUNDING);
-  t_hi[14] = vaddq_s32(t_hi[14], k__DCT_CONST_ROUNDING);
-  t_lo[15] = vaddq_s32(t_lo[15], k__DCT_CONST_ROUNDING);
-  t_hi[15] = vaddq_s32(t_hi[15], k__DCT_CONST_ROUNDING);
-  t_lo[8] = vshrq_n_s32(t_lo[8], DCT_CONST_BITS);
-  t_hi[8] = vshrq_n_s32(t_hi[8], DCT_CONST_BITS);
-  t_lo[9] = vshrq_n_s32(t_lo[9], DCT_CONST_BITS);
-  t_hi[9] = vshrq_n_s32(t_hi[9], DCT_CONST_BITS);
-  t_lo[10] = vshrq_n_s32(t_lo[10], DCT_CONST_BITS);
-  t_hi[10] = vshrq_n_s32(t_hi[10], DCT_CONST_BITS);
-  t_lo[11] = vshrq_n_s32(t_lo[11], DCT_CONST_BITS);
-  t_hi[11] = vshrq_n_s32(t_hi[11], DCT_CONST_BITS);
-  t_lo[12] = vshrq_n_s32(t_lo[12], DCT_CONST_BITS);
-  t_hi[12] = vshrq_n_s32(t_hi[12], DCT_CONST_BITS);
-  t_lo[13] = vshrq_n_s32(t_lo[13], DCT_CONST_BITS);
-  t_hi[13] = vshrq_n_s32(t_hi[13], DCT_CONST_BITS);
-  t_lo[14] = vshrq_n_s32(t_lo[14], DCT_CONST_BITS);
-  t_hi[14] = vshrq_n_s32(t_hi[14], DCT_CONST_BITS);
-  t_lo[15] = vshrq_n_s32(t_lo[15], DCT_CONST_BITS);
-  t_hi[15] = vshrq_n_s32(t_hi[15], DCT_CONST_BITS);
+  t_lo[8] = vrshrq_n_s32(t_lo[8], DCT_CONST_BITS);
+  t_hi[8] = vrshrq_n_s32(t_hi[8], DCT_CONST_BITS);
+  t_lo[9] = vrshrq_n_s32(t_lo[9], DCT_CONST_BITS);
+  t_hi[9] = vrshrq_n_s32(t_hi[9], DCT_CONST_BITS);
+  t_lo[10] = vrshrq_n_s32(t_lo[10], DCT_CONST_BITS);
+  t_hi[10] = vrshrq_n_s32(t_hi[10], DCT_CONST_BITS);
+  t_lo[11] = vrshrq_n_s32(t_lo[11], DCT_CONST_BITS);
+  t_hi[11] = vrshrq_n_s32(t_hi[11], DCT_CONST_BITS);
+  t_lo[12] = vrshrq_n_s32(t_lo[12], DCT_CONST_BITS);
+  t_hi[12] = vrshrq_n_s32(t_hi[12], DCT_CONST_BITS);
+  t_lo[13] = vrshrq_n_s32(t_lo[13], DCT_CONST_BITS);
+  t_hi[13] = vrshrq_n_s32(t_hi[13], DCT_CONST_BITS);
+  t_lo[14] = vrshrq_n_s32(t_lo[14], DCT_CONST_BITS);
+  t_hi[14] = vrshrq_n_s32(t_hi[14], DCT_CONST_BITS);
+  t_lo[15] = vrshrq_n_s32(t_lo[15], DCT_CONST_BITS);
+  t_hi[15] = vrshrq_n_s32(t_hi[15], DCT_CONST_BITS);
 
   // stage 3
   s_lo[0] = t_lo[0];
@@ -1194,25 +881,15 @@ static void fadst16_8col(int16x8_t *in) {
   s_lo[3] = t_lo[3];
   s_hi[3] = t_hi[3];
   // s4 = x4 * cospi_8_64 + x5 * cospi_24_64;
-  s_lo[4] = vaddq_s32(vmulq_n_s32(t_lo[4], cospi_8_64),
-                      vmulq_n_s32(t_lo[5], cospi_24_64));
-  s_hi[4] = vaddq_s32(vmulq_n_s32(t_hi[4], cospi_8_64),
-                      vmulq_n_s32(t_hi[5], cospi_24_64));
   // s5 = x4 * cospi_24_64 - x5 * cospi_8_64;
-  s_lo[5] = vaddq_s32(vmulq_n_s32(t_lo[4], cospi_24_64),
-                      vmulq_n_s32(t_lo[5], -cospi_8_64));
-  s_hi[5] = vaddq_s32(vmulq_n_s32(t_hi[4], cospi_24_64),
-                      vmulq_n_s32(t_hi[5], -cospi_8_64));
+  butterfly_two_coeff_s32_noround(t_lo[4], t_hi[4], t_lo[5], t_hi[5],
+                                  cospi_8_64, cospi_24_64, &s_lo[4], &s_hi[4],
+                                  &s_lo[5], &s_hi[5]);
   // s6 = -x6 * cospi_24_64 + x7 * cospi_8_64;
-  s_lo[6] = vaddq_s32(vmulq_n_s32(t_lo[6], -cospi_24_64),
-                      vmulq_n_s32(t_lo[7], cospi_8_64));
-  s_hi[6] = vaddq_s32(vmulq_n_s32(t_hi[6], -cospi_24_64),
-                      vmulq_n_s32(t_hi[7], cospi_8_64));
   // s7 = x6 * cospi_8_64 + x7 * cospi_24_64;
-  s_lo[7] = vaddq_s32(vmulq_n_s32(t_lo[6], cospi_8_64),
-                      vmulq_n_s32(t_lo[7], cospi_24_64));
-  s_hi[7] = vaddq_s32(vmulq_n_s32(t_hi[6], cospi_8_64),
-                      vmulq_n_s32(t_hi[7], cospi_24_64));
+  butterfly_two_coeff_s32_noround(t_lo[7], t_hi[7], t_lo[6], t_hi[6],
+                                  cospi_24_64, cospi_8_64, &s_lo[7], &s_hi[7],
+                                  &s_lo[6], &s_hi[6]);
   s_lo[8] = t_lo[8];
   s_hi[8] = t_hi[8];
   s_lo[9] = t_lo[9];
@@ -1222,25 +899,15 @@ static void fadst16_8col(int16x8_t *in) {
   s_lo[11] = t_lo[11];
   s_hi[11] = t_hi[11];
   // s12 = x12 * cospi_8_64 + x13 * cospi_24_64;
-  s_lo[12] = vaddq_s32(vmulq_n_s32(t_lo[12], cospi_8_64),
-                       vmulq_n_s32(t_lo[13], cospi_24_64));
-  s_hi[12] = vaddq_s32(vmulq_n_s32(t_hi[12], cospi_8_64),
-                       vmulq_n_s32(t_hi[13], cospi_24_64));
   // s13 = x12 * cospi_24_64 - x13 * cospi_8_64;
-  s_lo[13] = vaddq_s32(vmulq_n_s32(t_lo[12], cospi_24_64),
-                       vmulq_n_s32(t_lo[13], -cospi_8_64));
-  s_hi[13] = vaddq_s32(vmulq_n_s32(t_hi[12], cospi_24_64),
-                       vmulq_n_s32(t_hi[13], -cospi_8_64));
+  butterfly_two_coeff_s32_noround(t_lo[12], t_hi[12], t_lo[13], t_hi[13],
+                                  cospi_8_64, cospi_24_64, &s_lo[12], &s_hi[12],
+                                  &s_lo[13], &s_hi[13]);
   // s14 = -x14 * cospi_24_64 + x15 * cospi_8_64;
-  s_lo[14] = vaddq_s32(vmulq_n_s32(t_lo[14], -cospi_24_64),
-                       vmulq_n_s32(t_lo[15], cospi_8_64));
-  s_hi[14] = vaddq_s32(vmulq_n_s32(t_hi[14], -cospi_24_64),
-                       vmulq_n_s32(t_hi[15], cospi_8_64));
   // s15 = x14 * cospi_8_64 + x15 * cospi_24_64;
-  s_lo[15] = vaddq_s32(vmulq_n_s32(t_lo[14], cospi_8_64),
-                       vmulq_n_s32(t_lo[15], cospi_24_64));
-  s_hi[15] = vaddq_s32(vmulq_n_s32(t_hi[14], cospi_8_64),
-                       vmulq_n_s32(t_hi[15], cospi_24_64));
+  butterfly_two_coeff_s32_noround(t_lo[15], t_hi[15], t_lo[14], t_hi[14],
+                                  cospi_24_64, cospi_8_64, &s_lo[15], &s_hi[15],
+                                  &s_lo[14], &s_hi[14]);
 
   // s0 + s4
   t_lo[0] = vaddq_s32(s_lo[0], s_lo[2]);
@@ -1291,99 +958,62 @@ static void fadst16_8col(int16x8_t *in) {
   t_lo[15] = vsubq_s32(s_lo[13], s_lo[15]);
   t_hi[15] = vsubq_s32(s_hi[13], s_hi[15]);
 
-  t_lo[4] = vaddq_s32(t_lo[4], k__DCT_CONST_ROUNDING);
-  t_hi[4] = vaddq_s32(t_hi[4], k__DCT_CONST_ROUNDING);
-  t_lo[5] = vaddq_s32(t_lo[5], k__DCT_CONST_ROUNDING);
-  t_hi[5] = vaddq_s32(t_hi[5], k__DCT_CONST_ROUNDING);
-  t_lo[6] = vaddq_s32(t_lo[6], k__DCT_CONST_ROUNDING);
-  t_hi[6] = vaddq_s32(t_hi[6], k__DCT_CONST_ROUNDING);
-  t_lo[7] = vaddq_s32(t_lo[7], k__DCT_CONST_ROUNDING);
-  t_hi[7] = vaddq_s32(t_hi[7], k__DCT_CONST_ROUNDING);
-  t_lo[12] = vaddq_s32(t_lo[12], k__DCT_CONST_ROUNDING);
-  t_hi[12] = vaddq_s32(t_hi[12], k__DCT_CONST_ROUNDING);
-  t_lo[13] = vaddq_s32(t_lo[13], k__DCT_CONST_ROUNDING);
-  t_hi[13] = vaddq_s32(t_hi[13], k__DCT_CONST_ROUNDING);
-  t_lo[14] = vaddq_s32(t_lo[14], k__DCT_CONST_ROUNDING);
-  t_hi[14] = vaddq_s32(t_hi[14], k__DCT_CONST_ROUNDING);
-  t_lo[15] = vaddq_s32(t_lo[15], k__DCT_CONST_ROUNDING);
-  t_hi[15] = vaddq_s32(t_hi[15], k__DCT_CONST_ROUNDING);
-  t_lo[4] = vshrq_n_s32(t_lo[4], DCT_CONST_BITS);
-  t_hi[4] = vshrq_n_s32(t_hi[4], DCT_CONST_BITS);
-  t_lo[5] = vshrq_n_s32(t_lo[5], DCT_CONST_BITS);
-  t_hi[5] = vshrq_n_s32(t_hi[5], DCT_CONST_BITS);
-  t_lo[6] = vshrq_n_s32(t_lo[6], DCT_CONST_BITS);
-  t_hi[6] = vshrq_n_s32(t_hi[6], DCT_CONST_BITS);
-  t_lo[7] = vshrq_n_s32(t_lo[7], DCT_CONST_BITS);
-  t_hi[7] = vshrq_n_s32(t_hi[7], DCT_CONST_BITS);
-  t_lo[12] = vshrq_n_s32(t_lo[12], DCT_CONST_BITS);
-  t_hi[12] = vshrq_n_s32(t_hi[12], DCT_CONST_BITS);
-  t_lo[13] = vshrq_n_s32(t_lo[13], DCT_CONST_BITS);
-  t_hi[13] = vshrq_n_s32(t_hi[13], DCT_CONST_BITS);
-  t_lo[14] = vshrq_n_s32(t_lo[14], DCT_CONST_BITS);
-  t_hi[14] = vshrq_n_s32(t_hi[14], DCT_CONST_BITS);
-  t_lo[15] = vshrq_n_s32(t_lo[15], DCT_CONST_BITS);
-  t_hi[15] = vshrq_n_s32(t_hi[15], DCT_CONST_BITS);
+  t_lo[4] = vrshrq_n_s32(t_lo[4], DCT_CONST_BITS);
+  t_hi[4] = vrshrq_n_s32(t_hi[4], DCT_CONST_BITS);
+  t_lo[5] = vrshrq_n_s32(t_lo[5], DCT_CONST_BITS);
+  t_hi[5] = vrshrq_n_s32(t_hi[5], DCT_CONST_BITS);
+  t_lo[6] = vrshrq_n_s32(t_lo[6], DCT_CONST_BITS);
+  t_hi[6] = vrshrq_n_s32(t_hi[6], DCT_CONST_BITS);
+  t_lo[7] = vrshrq_n_s32(t_lo[7], DCT_CONST_BITS);
+  t_hi[7] = vrshrq_n_s32(t_hi[7], DCT_CONST_BITS);
+  t_lo[12] = vrshrq_n_s32(t_lo[12], DCT_CONST_BITS);
+  t_hi[12] = vrshrq_n_s32(t_hi[12], DCT_CONST_BITS);
+  t_lo[13] = vrshrq_n_s32(t_lo[13], DCT_CONST_BITS);
+  t_hi[13] = vrshrq_n_s32(t_hi[13], DCT_CONST_BITS);
+  t_lo[14] = vrshrq_n_s32(t_lo[14], DCT_CONST_BITS);
+  t_hi[14] = vrshrq_n_s32(t_hi[14], DCT_CONST_BITS);
+  t_lo[15] = vrshrq_n_s32(t_lo[15], DCT_CONST_BITS);
+  t_hi[15] = vrshrq_n_s32(t_hi[15], DCT_CONST_BITS);
 
   // stage 4
   // s2 = (-cospi_16_64) * (x2 + x3);
-  s_lo[2] = vmulq_n_s32(vaddq_s32(t_lo[2], t_lo[3]), -cospi_16_64);
-  s_hi[2] = vmulq_n_s32(vaddq_s32(t_hi[2], t_hi[3]), -cospi_16_64);
   // s3 = cospi_16_64 * (x2 - x3);
-  s_lo[3] = vmulq_n_s32(vsubq_s32(t_lo[2], t_lo[3]), cospi_16_64);
-  s_hi[3] = vmulq_n_s32(vsubq_s32(t_hi[2], t_hi[3]), cospi_16_64);
+  butterfly_one_coeff_s32_noround(t_lo[3], t_hi[3], t_lo[2], t_hi[2],
+                                  -cospi_16_64, &s_lo[2], &s_hi[2], &s_lo[3],
+                                  &s_hi[3]);
   // s6 = cospi_16_64 * (x6 + x7);
-  s_lo[6] = vmulq_n_s32(vaddq_s32(t_lo[6], t_lo[7]), cospi_16_64);
-  s_hi[6] = vmulq_n_s32(vaddq_s32(t_hi[6], t_hi[7]), cospi_16_64);
   // s7 = cospi_16_64 * (-x6 + x7);
-  s_lo[7] = vmulq_n_s32(vsubq_s32(t_lo[7], t_lo[6]), cospi_16_64);
-  s_hi[7] = vmulq_n_s32(vsubq_s32(t_hi[7], t_hi[6]), cospi_16_64);
+  butterfly_one_coeff_s32_noround(t_lo[7], t_hi[7], t_lo[6], t_hi[6],
+                                  cospi_16_64, &s_lo[6], &s_hi[6], &s_lo[7],
+                                  &s_hi[7]);
   // s10 = cospi_16_64 * (x10 + x11);
-  s_lo[10] = vmulq_n_s32(vaddq_s32(t_lo[10], t_lo[11]), cospi_16_64);
-  s_hi[10] = vmulq_n_s32(vaddq_s32(t_hi[10], t_hi[11]), cospi_16_64);
   // s11 = cospi_16_64 * (-x10 + x11);
-  s_lo[11] = vmulq_n_s32(vsubq_s32(t_lo[11], t_lo[10]), cospi_16_64);
-  s_hi[11] = vmulq_n_s32(vsubq_s32(t_hi[11], t_hi[10]), cospi_16_64);
+  butterfly_one_coeff_s32_noround(t_lo[11], t_hi[11], t_lo[10], t_hi[10],
+                                  cospi_16_64, &s_lo[10], &s_hi[10], &s_lo[11],
+                                  &s_hi[11]);
   // s14 = (-cospi_16_64) * (x14 + x15);
-  s_lo[14] = vmulq_n_s32(vaddq_s32(t_lo[14], t_lo[15]), -cospi_16_64);
-  s_hi[14] = vmulq_n_s32(vaddq_s32(t_hi[14], t_hi[15]), -cospi_16_64);
   // s15 = cospi_16_64 * (x14 - x15);
-  s_lo[15] = vmulq_n_s32(vsubq_s32(t_lo[14], t_lo[15]), cospi_16_64);
-  s_hi[15] = vmulq_n_s32(vsubq_s32(t_hi[14], t_hi[15]), cospi_16_64);
+  butterfly_one_coeff_s32_noround(t_lo[15], t_hi[15], t_lo[14], t_hi[14],
+                                  -cospi_16_64, &s_lo[14], &s_hi[14], &s_lo[15],
+                                  &s_hi[15]);
 
   // final fdct_round_shift
-  t_lo[2] = vaddq_s32(s_lo[2], k__DCT_CONST_ROUNDING);
-  t_hi[2] = vaddq_s32(s_hi[2], k__DCT_CONST_ROUNDING);
-  t_lo[3] = vaddq_s32(s_lo[3], k__DCT_CONST_ROUNDING);
-  t_hi[3] = vaddq_s32(s_hi[3], k__DCT_CONST_ROUNDING);
-  t_lo[6] = vaddq_s32(s_lo[6], k__DCT_CONST_ROUNDING);
-  t_hi[6] = vaddq_s32(s_hi[6], k__DCT_CONST_ROUNDING);
-  t_lo[7] = vaddq_s32(s_lo[7], k__DCT_CONST_ROUNDING);
-  t_hi[7] = vaddq_s32(s_hi[7], k__DCT_CONST_ROUNDING);
-  t_lo[10] = vaddq_s32(s_lo[10], k__DCT_CONST_ROUNDING);
-  t_hi[10] = vaddq_s32(s_hi[10], k__DCT_CONST_ROUNDING);
-  t_lo[11] = vaddq_s32(s_lo[11], k__DCT_CONST_ROUNDING);
-  t_hi[11] = vaddq_s32(s_hi[11], k__DCT_CONST_ROUNDING);
-  t_lo[14] = vaddq_s32(s_lo[14], k__DCT_CONST_ROUNDING);
-  t_hi[14] = vaddq_s32(s_hi[14], k__DCT_CONST_ROUNDING);
-  t_lo[15] = vaddq_s32(s_lo[15], k__DCT_CONST_ROUNDING);
-  t_hi[15] = vaddq_s32(s_hi[15], k__DCT_CONST_ROUNDING);
-
-  x_lo[2] = vshrn_n_s32(t_lo[2], DCT_CONST_BITS);
-  x_hi[2] = vshrn_n_s32(t_hi[2], DCT_CONST_BITS);
-  x_lo[3] = vshrn_n_s32(t_lo[3], DCT_CONST_BITS);
-  x_hi[3] = vshrn_n_s32(t_hi[3], DCT_CONST_BITS);
-  x_lo[6] = vshrn_n_s32(t_lo[6], DCT_CONST_BITS);
-  x_hi[6] = vshrn_n_s32(t_hi[6], DCT_CONST_BITS);
-  x_lo[7] = vshrn_n_s32(t_lo[7], DCT_CONST_BITS);
-  x_hi[7] = vshrn_n_s32(t_hi[7], DCT_CONST_BITS);
-  x_lo[10] = vshrn_n_s32(t_lo[10], DCT_CONST_BITS);
-  x_hi[10] = vshrn_n_s32(t_hi[10], DCT_CONST_BITS);
-  x_lo[11] = vshrn_n_s32(t_lo[11], DCT_CONST_BITS);
-  x_hi[11] = vshrn_n_s32(t_hi[11], DCT_CONST_BITS);
-  x_lo[14] = vshrn_n_s32(t_lo[14], DCT_CONST_BITS);
-  x_hi[14] = vshrn_n_s32(t_hi[14], DCT_CONST_BITS);
-  x_lo[15] = vshrn_n_s32(t_lo[15], DCT_CONST_BITS);
-  x_hi[15] = vshrn_n_s32(t_hi[15], DCT_CONST_BITS);
+  x_lo[2] = vrshrn_n_s32(s_lo[2], DCT_CONST_BITS);
+  x_hi[2] = vrshrn_n_s32(s_hi[2], DCT_CONST_BITS);
+  x_lo[3] = vrshrn_n_s32(s_lo[3], DCT_CONST_BITS);
+  x_hi[3] = vrshrn_n_s32(s_hi[3], DCT_CONST_BITS);
+  x_lo[6] = vrshrn_n_s32(s_lo[6], DCT_CONST_BITS);
+  x_hi[6] = vrshrn_n_s32(s_hi[6], DCT_CONST_BITS);
+  x_lo[7] = vrshrn_n_s32(s_lo[7], DCT_CONST_BITS);
+  x_hi[7] = vrshrn_n_s32(s_hi[7], DCT_CONST_BITS);
+  x_lo[10] = vrshrn_n_s32(s_lo[10], DCT_CONST_BITS);
+  x_hi[10] = vrshrn_n_s32(s_hi[10], DCT_CONST_BITS);
+  x_lo[11] = vrshrn_n_s32(s_lo[11], DCT_CONST_BITS);
+  x_hi[11] = vrshrn_n_s32(s_hi[11], DCT_CONST_BITS);
+  x_lo[14] = vrshrn_n_s32(s_lo[14], DCT_CONST_BITS);
+  x_hi[14] = vrshrn_n_s32(s_hi[14], DCT_CONST_BITS);
+  x_lo[15] = vrshrn_n_s32(s_lo[15], DCT_CONST_BITS);
+  x_hi[15] = vrshrn_n_s32(s_hi[15], DCT_CONST_BITS);
 
   // x0, x1, x4, x5, x8, x9, x12, x13 narrow down to 16-bits directly
   x_lo[0] = vmovn_s32(t_lo[0]);
@@ -1465,3 +1095,137 @@ void vp9_fht16x16_neon(const int16_t *input, tran_low_t *output, int stride,
       break;
   }
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+
+static INLINE void highbd_load_buffer_4x4(const int16_t *input,
+                                          int32x4_t *in /*[4]*/, int stride) {
+  // { 0, 1, 1, 1 };
+  const int32x4_t nonzero_bias_a = vextq_s32(vdupq_n_s32(0), vdupq_n_s32(1), 3);
+  // { 1, 0, 0, 0 };
+  const int32x4_t nonzero_bias_b = vextq_s32(vdupq_n_s32(1), vdupq_n_s32(0), 3);
+  int32x4_t mask;
+
+  in[0] = vshll_n_s16(vld1_s16(input + 0 * stride), 4);
+  in[1] = vshll_n_s16(vld1_s16(input + 1 * stride), 4);
+  in[2] = vshll_n_s16(vld1_s16(input + 2 * stride), 4);
+  in[3] = vshll_n_s16(vld1_s16(input + 3 * stride), 4);
+
+  // Copy the SSE method, use a mask to avoid an 'if' branch here to increase by
+  // one non-zero first elements
+  mask = vreinterpretq_s32_u32(vceqq_s32(in[0], nonzero_bias_a));
+  in[0] = vaddq_s32(in[0], mask);
+  in[0] = vaddq_s32(in[0], nonzero_bias_b);
+}
+
+static INLINE void highbd_write_buffer_4x4(tran_low_t *output, int32x4_t *res) {
+  const int32x4_t one = vdupq_n_s32(1);
+  res[0] = vshrq_n_s32(vaddq_s32(res[0], one), 2);
+  res[1] = vshrq_n_s32(vaddq_s32(res[1], one), 2);
+  res[2] = vshrq_n_s32(vaddq_s32(res[2], one), 2);
+  res[3] = vshrq_n_s32(vaddq_s32(res[3], one), 2);
+  vst1q_s32(output + 0 * 4, res[0]);
+  vst1q_s32(output + 1 * 4, res[1]);
+  vst1q_s32(output + 2 * 4, res[2]);
+  vst1q_s32(output + 3 * 4, res[3]);
+}
+
+static INLINE void highbd_fadst4x4_neon(int32x4_t *in /*[4]*/) {
+  int32x2_t s_lo[4], s_hi[4];
+  int64x2_t u_lo[4], u_hi[4], t_lo[4], t_hi[4];
+
+  s_lo[0] = vget_low_s32(in[0]);
+  s_hi[0] = vget_high_s32(in[0]);
+  s_lo[1] = vget_low_s32(in[1]);
+  s_hi[1] = vget_high_s32(in[1]);
+  s_lo[2] = vget_low_s32(in[2]);
+  s_hi[2] = vget_high_s32(in[2]);
+  s_lo[3] = vget_low_s32(in[3]);
+  s_hi[3] = vget_high_s32(in[3]);
+
+  // t0 = s0 * sinpi_1_9 + s1 * sinpi_2_9 + s3 * sinpi_4_9
+  t_lo[0] = vmull_n_s32(s_lo[0], sinpi_1_9);
+  t_lo[0] = vmlal_n_s32(t_lo[0], s_lo[1], sinpi_2_9);
+  t_lo[0] = vmlal_n_s32(t_lo[0], s_lo[3], sinpi_4_9);
+  t_hi[0] = vmull_n_s32(s_hi[0], sinpi_1_9);
+  t_hi[0] = vmlal_n_s32(t_hi[0], s_hi[1], sinpi_2_9);
+  t_hi[0] = vmlal_n_s32(t_hi[0], s_hi[3], sinpi_4_9);
+
+  // t1 = (s0 + s1) * sinpi_3_9 - s3 * sinpi_3_9
+  t_lo[1] = vmull_n_s32(s_lo[0], sinpi_3_9);
+  t_lo[1] = vmlal_n_s32(t_lo[1], s_lo[1], sinpi_3_9);
+  t_lo[1] = vmlsl_n_s32(t_lo[1], s_lo[3], sinpi_3_9);
+  t_hi[1] = vmull_n_s32(s_hi[0], sinpi_3_9);
+  t_hi[1] = vmlal_n_s32(t_hi[1], s_hi[1], sinpi_3_9);
+  t_hi[1] = vmlsl_n_s32(t_hi[1], s_hi[3], sinpi_3_9);
+
+  // t2 = s0 * sinpi_4_9 - s1* sinpi_1_9 + s3 * sinpi_2_9
+  t_lo[2] = vmull_n_s32(s_lo[0], sinpi_4_9);
+  t_lo[2] = vmlsl_n_s32(t_lo[2], s_lo[1], sinpi_1_9);
+  t_lo[2] = vmlal_n_s32(t_lo[2], s_lo[3], sinpi_2_9);
+  t_hi[2] = vmull_n_s32(s_hi[0], sinpi_4_9);
+  t_hi[2] = vmlsl_n_s32(t_hi[2], s_hi[1], sinpi_1_9);
+  t_hi[2] = vmlal_n_s32(t_hi[2], s_hi[3], sinpi_2_9);
+
+  // t3 = s2 * sinpi_3_9
+  t_lo[3] = vmull_n_s32(s_lo[2], sinpi_3_9);
+  t_hi[3] = vmull_n_s32(s_hi[2], sinpi_3_9);
+
+  /*
+   * u0 = t0 + t3
+   * u1 = t1
+   * u2 = t2 - t3
+   * u3 = t2 - t0 + t3
+   */
+  u_lo[0] = vaddq_s64(t_lo[0], t_lo[3]);
+  u_hi[0] = vaddq_s64(t_hi[0], t_hi[3]);
+  u_lo[1] = t_lo[1];
+  u_hi[1] = t_hi[1];
+  u_lo[2] = vsubq_s64(t_lo[2], t_lo[3]);
+  u_hi[2] = vsubq_s64(t_hi[2], t_hi[3]);
+  u_lo[3] = vaddq_s64(vsubq_s64(t_lo[2], t_lo[0]), t_lo[3]);
+  u_hi[3] = vaddq_s64(vsubq_s64(t_hi[2], t_hi[0]), t_hi[3]);
+
+  // fdct_round_shift
+  in[0] = vcombine_s32(vrshrn_n_s64(u_lo[0], DCT_CONST_BITS),
+                       vrshrn_n_s64(u_hi[0], DCT_CONST_BITS));
+  in[1] = vcombine_s32(vrshrn_n_s64(u_lo[1], DCT_CONST_BITS),
+                       vrshrn_n_s64(u_hi[1], DCT_CONST_BITS));
+  in[2] = vcombine_s32(vrshrn_n_s64(u_lo[2], DCT_CONST_BITS),
+                       vrshrn_n_s64(u_hi[2], DCT_CONST_BITS));
+  in[3] = vcombine_s32(vrshrn_n_s64(u_lo[3], DCT_CONST_BITS),
+                       vrshrn_n_s64(u_hi[3], DCT_CONST_BITS));
+
+  transpose_s32_4x4(&in[0], &in[1], &in[2], &in[3]);
+}
+
+void vp9_highbd_fht4x4_neon(const int16_t *input, tran_low_t *output,
+                            int stride, int tx_type) {
+  int32x4_t in[4];
+  // int i;
+
+  switch (tx_type) {
+    case DCT_DCT: vpx_highbd_fdct4x4_neon(input, output, stride); break;
+    case ADST_DCT:
+      highbd_load_buffer_4x4(input, in, stride);
+      highbd_fadst4x4_neon(in);
+      vpx_highbd_fdct4x4_pass1_neon(in);
+      highbd_write_buffer_4x4(output, in);
+      break;
+    case DCT_ADST:
+      highbd_load_buffer_4x4(input, in, stride);
+      vpx_highbd_fdct4x4_pass1_neon(in);
+      highbd_fadst4x4_neon(in);
+      highbd_write_buffer_4x4(output, in);
+      break;
+    default:
+      assert(tx_type == ADST_ADST);
+      highbd_load_buffer_4x4(input, in, stride);
+      highbd_fadst4x4_neon(in);
+      highbd_fadst4x4_neon(in);
+      highbd_write_buffer_4x4(output, in);
+      break;
+  }
+}
+
+#endif  // CONFIG_VP9_HIGHBITDEPTH
