@@ -99,7 +99,8 @@ class VP9RateControlRTC {
   bool GetSegmentationData(VP9SegmentationData *segmentation_data) const;
   void ComputeQP(const VP9FrameParamsQpRTC &frame_params);
   // Feedback to rate control with the size of current encoded frame
-  void PostEncodeUpdate(uint64_t encoded_frame_size);
+  void PostEncodeUpdate(uint64_t encoded_frame_size,
+                        const VP9FrameParamsQpRTC &frame_params);
 
  private:
   VP9RateControlRTC() {}
