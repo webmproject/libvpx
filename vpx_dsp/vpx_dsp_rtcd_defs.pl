@@ -722,17 +722,17 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 # Quantization
 #
 if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
-  add_proto qw/void vpx_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+  add_proto qw/void vpx_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const struct macroblock_plane * const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder * const scan_order";
   specialize qw/vpx_quantize_b neon sse2 ssse3 avx avx2 vsx lsx/;
 
-  add_proto qw/void vpx_quantize_b_32x32/, "const tran_low_t *coeff_ptr, const struct macroblock_plane * mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *scan_order";
+  add_proto qw/void vpx_quantize_b_32x32/, "const tran_low_t *coeff_ptr, const struct macroblock_plane * const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder * const scan_order";
   specialize qw/vpx_quantize_b_32x32 neon ssse3 avx avx2 vsx lsx/;
 
   if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
-    add_proto qw/void vpx_highbd_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+    add_proto qw/void vpx_highbd_quantize_b/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, const struct macroblock_plane * const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder * const scan_order";
     specialize qw/vpx_highbd_quantize_b neon sse2 avx2/;
 
-    add_proto qw/void vpx_highbd_quantize_b_32x32/, "const tran_low_t *coeff_ptr, const struct macroblock_plane * mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder *scan_order";
+    add_proto qw/void vpx_highbd_quantize_b_32x32/, "const tran_low_t *coeff_ptr, const struct macroblock_plane * const mb_plane, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const struct ScanOrder * const scan_order";
     specialize qw/vpx_highbd_quantize_b_32x32 neon sse2 avx2/;
   }  # CONFIG_VP9_HIGHBITDEPTH
 }  # CONFIG_VP9_ENCODER
