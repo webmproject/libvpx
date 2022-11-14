@@ -13,6 +13,7 @@
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
+#include "vp9/common/vp9_scan.h"
 #include "vp9/encoder/vp9_block.h"
 
 static VPX_FORCE_INLINE void load_b_values_avx2(
@@ -255,11 +256,11 @@ void vpx_quantize_b_32x32_avx2(const tran_low_t *coeff_ptr,
                                const struct macroblock_plane *const mb_plane,
                                tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                                const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                               const int16_t *scan, const int16_t *iscan) {
+                               const struct scan_order *const scan_order) {
   __m256i v_zbin, v_round, v_quant, v_dequant, v_quant_shift;
   __m256i v_eobmax = _mm256_setzero_si256();
   intptr_t count;
-  (void)scan;
+  const int16_t *iscan = scan_order->iscan;
 
   load_b_values_avx2(mb_plane->zbin, &v_zbin, mb_plane->round, &v_round,
                      mb_plane->quant, &v_quant, dequant_ptr, &v_dequant,

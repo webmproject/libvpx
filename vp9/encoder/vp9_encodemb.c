@@ -512,7 +512,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
       case TX_32X32:
         highbd_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
         vpx_highbd_quantize_b_32x32(coeff, p, qcoeff, dqcoeff, pd->dequant, eob,
-                                    scan_order->scan, scan_order->iscan);
+                                    scan_order);
         break;
       case TX_16X16:
         vpx_highbd_fdct16x16(src_diff, coeff, diff_stride);
@@ -542,7 +542,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
     case TX_32X32:
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
       vpx_quantize_b_32x32(coeff, p, qcoeff, dqcoeff, pd->dequant, eob,
-                           scan_order->scan, scan_order->iscan);
+                           scan_order);
       break;
     case TX_16X16:
       vpx_fdct16x16(src_diff, coeff, diff_stride);
@@ -856,7 +856,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                     src_stride, dst, dst_stride, xd->bd);
           highbd_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
           vpx_highbd_quantize_b_32x32(coeff, p, qcoeff, dqcoeff, pd->dequant,
-                                      eob, scan_order->scan, scan_order->iscan);
+                                      eob, scan_order);
         }
         if (args->enable_coeff_opt && !x->skip_recode) {
           *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
@@ -946,7 +946,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                            dst_stride);
         fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
         vpx_quantize_b_32x32(coeff, p, qcoeff, dqcoeff, pd->dequant, eob,
-                             scan_order->scan, scan_order->iscan);
+                             scan_order);
       }
       if (args->enable_coeff_opt && !x->skip_recode) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
