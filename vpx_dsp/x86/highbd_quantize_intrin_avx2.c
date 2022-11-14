@@ -11,6 +11,7 @@
 #include <immintrin.h>
 
 #include "./vpx_dsp_rtcd.h"
+#include "vp9/common/vp9_scan.h"
 #include "vp9/encoder/vp9_block.h"
 
 static VPX_FORCE_INLINE void init_one_qp(const __m128i *p, __m256i *qp) {
@@ -225,12 +226,12 @@ static VPX_FORCE_INLINE void quantize_b_32x32(
 void vpx_highbd_quantize_b_32x32_avx2(
     const tran_low_t *coeff_ptr, const struct macroblock_plane *const mb_plane,
     tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-    uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan) {
+    uint16_t *eob_ptr, const struct scan_order *const scan_order) {
   const unsigned int step = 8;
   intptr_t n_coeffs = 32 * 32;
+  const int16_t *iscan = scan_order->iscan;
   __m256i eob = _mm256_setzero_si256();
   __m256i qp[5];
-  (void)scan;
 
   init_qp(mb_plane->zbin, mb_plane->round, mb_plane->quant, dequant_ptr,
           mb_plane->quant_shift, qp, 1);
