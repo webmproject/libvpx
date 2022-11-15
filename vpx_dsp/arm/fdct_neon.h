@@ -134,6 +134,24 @@ static INLINE void butterfly_one_coeff_s16_s32_narrow(
 // Variant that performs fast vqrdmulhq_s32 operation on full vector
 // more accurate does 32-bit processing, takes and returns 32-bit values,
 // high/low
+static INLINE void butterfly_one_coeff_s32_noround(
+    const int32x4_t a_lo, const int32x4_t a_hi, const int32x4_t b_lo,
+    const int32x4_t b_hi, const tran_coef_t constant, int32x4_t *add_lo,
+    int32x4_t *add_hi, int32x4_t *sub_lo, int32x4_t *sub_hi) {
+  const int32x4_t a1 = vmulq_n_s32(a_lo, constant);
+  const int32x4_t a2 = vmulq_n_s32(a_hi, constant);
+  const int32x4_t a3 = vmulq_n_s32(a_lo, constant);
+  const int32x4_t a4 = vmulq_n_s32(a_hi, constant);
+  *add_lo = vmlaq_n_s32(a1, b_lo, constant);
+  *add_hi = vmlaq_n_s32(a2, b_hi, constant);
+  *sub_lo = vmlsq_n_s32(a3, b_lo, constant);
+  *sub_hi = vmlsq_n_s32(a4, b_hi, constant);
+}
+
+// fdct_round_shift((a +/- b) * c)
+// Variant that performs fast vqrdmulhq_s32 operation on full vector
+// more accurate does 32-bit processing, takes and returns 32-bit values,
+// high/low
 static INLINE void butterfly_one_coeff_s32_fast_half(const int32x4_t a,
                                                      const int32x4_t b,
                                                      const tran_coef_t constant,
@@ -232,6 +250,44 @@ static INLINE void butterfly_two_coeff_s32_s64_narrow(
                          vrshrn_n_s64(diff[1], DCT_CONST_BITS));
   *sub_hi = vcombine_s32(vrshrn_n_s64(diff[2], DCT_CONST_BITS),
                          vrshrn_n_s64(diff[3], DCT_CONST_BITS));
+}
+
+// fdct_round_shift(a * c1 +/- b * c2)
+// Original Variant that performs normal implementation on full vector
+// more accurate does 32-bit processing, takes and returns 32-bit values
+// returns narrowed results
+static INLINE void butterfly_two_coeff_s16_s32_noround(
+    const int16x4_t a_lo, const int16x4_t a_hi, const int16x4_t b_lo,
+    const int16x4_t b_hi, const tran_coef_t constant1,
+    const tran_coef_t constant2, int32x4_t *add_lo, int32x4_t *add_hi,
+    int32x4_t *sub_lo, int32x4_t *sub_hi) {
+  const int32x4_t a1 = vmull_n_s16(a_lo, constant1);
+  const int32x4_t a2 = vmull_n_s16(a_hi, constant1);
+  const int32x4_t a3 = vmull_n_s16(a_lo, constant2);
+  const int32x4_t a4 = vmull_n_s16(a_hi, constant2);
+  *add_lo = vmlal_n_s16(a1, b_lo, constant2);
+  *add_hi = vmlal_n_s16(a2, b_hi, constant2);
+  *sub_lo = vmlsl_n_s16(a3, b_lo, constant1);
+  *sub_hi = vmlsl_n_s16(a4, b_hi, constant1);
+}
+
+// fdct_round_shift(a * c1 +/- b * c2)
+// Original Variant that performs normal implementation on full vector
+// more accurate does 32-bit processing, takes and returns 32-bit values
+// returns narrowed results
+static INLINE void butterfly_two_coeff_s32_noround(
+    const int32x4_t a_lo, const int32x4_t a_hi, const int32x4_t b_lo,
+    const int32x4_t b_hi, const tran_coef_t constant1,
+    const tran_coef_t constant2, int32x4_t *add_lo, int32x4_t *add_hi,
+    int32x4_t *sub_lo, int32x4_t *sub_hi) {
+  const int32x4_t a1 = vmulq_n_s32(a_lo, constant1);
+  const int32x4_t a2 = vmulq_n_s32(a_hi, constant1);
+  const int32x4_t a3 = vmulq_n_s32(a_lo, constant2);
+  const int32x4_t a4 = vmulq_n_s32(a_hi, constant2);
+  *add_lo = vmlaq_n_s32(a1, b_lo, constant2);
+  *add_hi = vmlaq_n_s32(a2, b_hi, constant2);
+  *sub_lo = vmlsq_n_s32(a3, b_lo, constant1);
+  *sub_hi = vmlsq_n_s32(a4, b_hi, constant1);
 }
 
 // fdct_round_shift(a * c1 +/- b * c2)
