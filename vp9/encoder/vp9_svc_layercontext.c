@@ -290,7 +290,7 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
 }
 
 static LAYER_CONTEXT *get_layer_context(VP9_COMP *const cpi) {
-  if (is_one_pass_cbr_svc(cpi))
+  if (is_one_pass_svc(cpi))
     return &cpi->svc.layer_context[cpi->svc.spatial_layer_id *
                                        cpi->svc.number_temporal_layers +
                                    cpi->svc.temporal_layer_id];
@@ -354,7 +354,7 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   cpi->alt_ref_source = lc->alt_ref_source;
   // Check if it is one_pass_cbr_svc mode and lc->speed > 0 (real-time mode
   // does not use speed = 0).
-  if (is_one_pass_cbr_svc(cpi) && lc->speed > 0) {
+  if (is_one_pass_svc(cpi) && lc->speed > 0) {
     cpi->oxcf.speed = lc->speed;
   }
   cpi->loopfilter_ctrl = lc->loopfilter_ctrl;
@@ -754,7 +754,7 @@ void vp9_copy_flags_ref_update_idx(VP9_COMP *const cpi) {
   svc->reference_altref[sl] = (uint8_t)(cpi->ref_frame_flags & VP9_ALT_FLAG);
 }
 
-int vp9_one_pass_cbr_svc_start_layer(VP9_COMP *const cpi) {
+int vp9_one_pass_svc_start_layer(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   SVC *const svc = &cpi->svc;
   LAYER_CONTEXT *lc = NULL;

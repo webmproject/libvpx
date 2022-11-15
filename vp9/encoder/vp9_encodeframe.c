@@ -1299,7 +1299,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   // the reference (base layer frame) is key frame (i.e., is_key_frame == 1).
   int is_key_frame =
       (frame_is_intra_only(cm) ||
-       (is_one_pass_cbr_svc(cpi) &&
+       (is_one_pass_svc(cpi) &&
         cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame));
   // Always use 4x4 partition for key frame.
   const int use_4x4_partition = frame_is_intra_only(cm);
@@ -1406,7 +1406,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
 
     assert(yv12 != NULL);
 
-    if (!(is_one_pass_cbr_svc(cpi) && cpi->svc.spatial_layer_id) ||
+    if (!(is_one_pass_svc(cpi) && cpi->svc.spatial_layer_id) ||
         cpi->svc.use_gf_temporal_ref_current_layer) {
       // For now, GOLDEN will not be used for non-zero spatial layers, since
       // it may not be a temporal reference.
@@ -5381,7 +5381,7 @@ static void get_estimated_pred(VP9_COMP *cpi, const TileInfo *const tile,
 
     assert(yv12 != NULL);
 
-    if (!(is_one_pass_cbr_svc(cpi) && cpi->svc.spatial_layer_id) ||
+    if (!(is_one_pass_svc(cpi) && cpi->svc.spatial_layer_id) ||
         cpi->svc.use_gf_temporal_ref_current_layer) {
       // For now, GOLDEN will not be used for non-zero spatial layers, since
       // it may not be a temporal reference.
