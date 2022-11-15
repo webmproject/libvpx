@@ -1527,9 +1527,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
           cx_data += size;
           cx_data_sz -= size;
-          if (is_one_pass_cbr_svc(cpi) &&
-              (cpi->svc.spatial_layer_id ==
-               cpi->svc.number_spatial_layers - 1)) {
+          if (is_one_pass_svc(cpi) && (cpi->svc.spatial_layer_id ==
+                                       cpi->svc.number_spatial_layers - 1)) {
             // Encoded all spatial layers; exit loop.
             break;
           }

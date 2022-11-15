@@ -1305,7 +1305,7 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(
 
 void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
 
-static INLINE int is_one_pass_cbr_svc(const struct VP9_COMP *const cpi) {
+static INLINE int is_one_pass_svc(const struct VP9_COMP *const cpi) {
   return (cpi->use_svc && cpi->oxcf.pass == 0);
 }
 

@@ -558,7 +558,7 @@ void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
     cr->percent_refresh = 10;
     cr->rate_ratio_qdelta = 1.5;
     cr->rate_boost_fac = 10;
-    if (cpi->refresh_golden_frame == 1) {
+    if (cpi->refresh_golden_frame == 1 && !cpi->use_svc) {
       cr->percent_refresh = 0;
       cr->rate_ratio_qdelta = 1.0;
     }

@@ -1333,7 +1333,7 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
   // For 1 pass cbr: allocate scaled_frame that may be used as an intermediate
   // buffer for a 2 stage down-sampling: two stages of 1:2 down-sampling for a
   // target of 1/4x1/4. number_spatial_layers must be greater than 2.
-  if (is_one_pass_cbr_svc(cpi) && !cpi->svc.scaled_temp_is_alloc &&
+  if (is_one_pass_svc(cpi) && !cpi->svc.scaled_temp_is_alloc &&
       cpi->svc.number_spatial_layers > 2) {
     cpi->svc.scaled_temp_is_alloc = 1;
     if (vpx_realloc_frame_buffer(
@@ -1511,7 +1511,7 @@ static void init_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   // Temporal scalability.
   cpi->svc.number_temporal_layers = oxcf->ts_number_layers;
 
-  if ((cpi->svc.number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) ||
+  if ((cpi->svc.number_temporal_layers > 1) ||
       ((cpi->svc.number_temporal_layers > 1 ||
         cpi->svc.number_spatial_layers > 1) &&
        cpi->oxcf.pass != 1)) {
@@ -2077,7 +2077,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     rc->rc_2_frame = 0;
   }
 
-  if ((cpi->svc.number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) ||
+  if ((cpi->svc.number_temporal_layers > 1) ||
       ((cpi->svc.number_temporal_layers > 1 ||
         cpi->svc.number_spatial_layers > 1) &&
        cpi->oxcf.pass != 1)) {
@@ -3263,7 +3263,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   vp9_denoiser_update_ref_frame(cpi);
 #endif
 
-  if (is_one_pass_cbr_svc(cpi)) vp9_svc_update_ref_frame(cpi);
+  if (is_one_pass_svc(cpi)) vp9_svc_update_ref_frame(cpi);
 }
 
 static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
@@ -3857,11 +3857,11 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   int q = 0, bottom_index = 0, top_index = 0;
   int no_drop_scene_change = 0;
   const INTERP_FILTER filter_scaler =
-      (is_one_pass_cbr_svc(cpi))
+      (is_one_pass_svc(cpi))
           ? svc->downsample_filter_type[svc->spatial_layer_id]
           : EIGHTTAP;
   const int phase_scaler =
-      (is_one_pass_cbr_svc(cpi))
+      (is_one_pass_svc(cpi))
           ? svc->downsample_filter_phase[svc->spatial_layer_id]
           : 0;
 
@@ -3882,7 +3882,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   set_frame_size(cpi);
 
-  if (is_one_pass_cbr_svc(cpi) &&
+  if (is_one_pass_svc(cpi) &&
       cpi->un_scaled_source->y_width == cm->width << 2 &&
       cpi->un_scaled_source->y_height == cm->height << 2 &&
       svc->scaled_temp.y_width == cm->width << 1 &&
@@ -3896,7 +3896,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
         cm, cpi->un_scaled_source, &cpi->scaled_source, &svc->scaled_temp,
         filter_scaler, phase_scaler, filter_scaler2, phase_scaler2);
     svc->scaled_one_half = 1;
-  } else if (is_one_pass_cbr_svc(cpi) &&
+  } else if (is_one_pass_svc(cpi) &&
              cpi->un_scaled_source->y_width == cm->width << 1 &&
              cpi->un_scaled_source->y_height == cm->height << 1 &&
              svc->scaled_one_half) {
@@ -3911,7 +3911,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   }
 #ifdef OUTPUT_YUV_SVC_SRC
   // Write out at most 3 spatial layers.
-  if (is_one_pass_cbr_svc(cpi) && svc->spatial_layer_id < 3) {
+  if (is_one_pass_svc(cpi) && svc->spatial_layer_id < 3) {
     vpx_write_yuv_frame(yuv_svc_src[svc->spatial_layer_id], cpi->Source);
   }
 #endif
@@ -4020,14 +4020,14 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     if (vp9_rc_drop_frame(cpi)) return 0;
   }
 
-  // For 1 pass CBR SVC, only ZEROMV is allowed for spatial reference frame
+  // For 1 pass SVC, only ZEROMV is allowed for spatial reference frame
   // when svc->force_zero_mode_spatial_ref = 1. Under those conditions we can
   // avoid this frame-level upsampling (for non intra_only frames).
   // For SVC single_layer mode, dynamic resize is allowed and we need to
   // scale references for this case.
   if (frame_is_intra_only(cm) == 0 &&
       ((svc->single_layer_svc && cpi->oxcf.resize_mode == RESIZE_DYNAMIC) ||
-       !(is_one_pass_cbr_svc(cpi) && svc->force_zero_mode_spatial_ref))) {
+       !(is_one_pass_svc(cpi) && svc->force_zero_mode_spatial_ref))) {
     vp9_scale_references(cpi);
   }
 
@@ -7613,8 +7613,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   const int gf_group_index = cpi->twopass.gf_group.index;
   int i;
 
-  if (is_one_pass_cbr_svc(cpi)) {
-    vp9_one_pass_cbr_svc_start_layer(cpi);
+  if (is_one_pass_svc(cpi)) {
+    vp9_one_pass_svc_start_layer(cpi);
   }
 
   vpx_usec_timer_start(&cmptimer);
@@ -7634,7 +7634,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // Normal defaults
   cm->reset_frame_context = 0;
   cm->refresh_frame_context = 1;
-  if (!is_one_pass_cbr_svc(cpi)) {
+  if (!is_one_pass_svc(cpi)) {
     cpi->refresh_last_frame = 1;
     cpi->refresh_golden_frame = 0;
     cpi->refresh_alt_ref_frame = 0;
@@ -7767,7 +7767,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       adjust_frame_rate(cpi, source);
   }
 
-  if (is_one_pass_cbr_svc(cpi)) {
+  if (is_one_pass_svc(cpi)) {
     vp9_update_temporal_layer_framerate(cpi);
     vp9_restore_layer_context(cpi);
   }
@@ -7901,9 +7901,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   // Save layer specific state.
-  if (is_one_pass_cbr_svc(cpi) || ((cpi->svc.number_temporal_layers > 1 ||
-                                    cpi->svc.number_spatial_layers > 1) &&
-                                   oxcf->pass == 2)) {
+  if (is_one_pass_svc(cpi) || ((cpi->svc.number_temporal_layers > 1 ||
+                                cpi->svc.number_spatial_layers > 1) &&
+                               oxcf->pass == 2)) {
     vp9_save_layer_context(cpi);
   }
 
@@ -8077,7 +8077,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #endif
 
-  if (is_one_pass_cbr_svc(cpi)) {
+  if (is_one_pass_svc(cpi)) {
     if (cm->show_frame) {
       ++cpi->svc.spatial_layer_to_encode;
       if (cpi->svc.spatial_layer_to_encode >= cpi->svc.number_spatial_layers)
