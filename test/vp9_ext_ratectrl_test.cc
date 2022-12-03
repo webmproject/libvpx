@@ -41,6 +41,7 @@ constexpr int kDefaultMaxGfInterval = 16;
 constexpr int kReadMinGfInterval = 5;
 constexpr int kReadMaxGfInterval = 13;
 const char kTestFileName[] = "bus_352x288_420_f20_b8.yuv";
+const double kPsnrThreshold = 30.50;
 
 struct ToyRateCtrl {
   int magic_number;
@@ -642,6 +643,19 @@ vpx_rc_status_t rc_update_encodeframe_result_gop_short(
   return VPX_RC_OK;
 }
 
+vpx_rc_status_t rc_get_default_frame_rdmult(
+    vpx_rc_model_t rate_ctrl_model,
+    const vpx_rc_encodeframe_info_t *encode_frame_info, int *rdmult) {
+  const ToyRateCtrl *toy_rate_ctrl =
+      static_cast<ToyRateCtrl *>(rate_ctrl_model);
+  EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
+  EXPECT_LT(encode_frame_info->show_index, kFrameNumGOPShort);
+  EXPECT_EQ(encode_frame_info->coding_index, toy_rate_ctrl->coding_index);
+
+  *rdmult = VPX_DEFAULT_RDMULT;
+  return VPX_RC_OK;
+}
+
 vpx_rc_status_t rc_delete_model(vpx_rc_model_t rate_ctrl_model) {
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
@@ -878,6 +892,73 @@ TEST_F(ExtRateCtrlTestGOPShortNoARF, EncodeTest) {
 
   ASSERT_NE(video, nullptr);
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
+}
+
+class ExtRateCtrlTestRdmult : public ::libvpx_test::EncoderTest,
+                              public ::testing::Test {
+ protected:
+  ExtRateCtrlTestRdmult() : EncoderTest(&::libvpx_test::kVP9) {}
+
+  ~ExtRateCtrlTestRdmult() override = default;
+
+  void SetUp() override {
+    InitializeConfig();
+    SetMode(::libvpx_test::kTwoPassGood);
+  }
+
+  void BeginPassHook(unsigned int) override {
+    psnr_ = 0.0;
+    nframes_ = 0;
+  }
+
+  void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) override {
+    psnr_ += pkt->data.psnr.psnr[0];
+    nframes_++;
+  }
+
+  void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                          ::libvpx_test::Encoder *encoder) override {
+    if (video->frame() == 0) {
+      vpx_rc_funcs_t rc_funcs;
+      rc_funcs.rc_type = VPX_RC_GOP_QP_RDMULT;
+      rc_funcs.create_model = rc_create_model_gop_short;
+      rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
+      rc_funcs.get_encodeframe_decision = rc_get_encodeframe_decision_gop_short;
+      rc_funcs.get_gop_decision = rc_get_gop_decision_short;
+      rc_funcs.update_encodeframe_result =
+          rc_update_encodeframe_result_gop_short;
+      rc_funcs.get_frame_rdmult = rc_get_default_frame_rdmult;
+      rc_funcs.delete_model = rc_delete_model;
+      rc_funcs.priv = reinterpret_cast<void *>(PrivMagicNumber);
+      encoder->Control(VP9E_SET_EXTERNAL_RATE_CONTROL, &rc_funcs);
+    }
+  }
+
+  double GetAveragePsnr() const {
+    if (nframes_) return psnr_ / nframes_;
+    return 0.0;
+  }
+
+ private:
+  double psnr_;
+  unsigned int nframes_;
+};
+
+TEST_F(ExtRateCtrlTestRdmult, DefaultRdmult) {
+  cfg_.rc_target_bitrate = 500;
+  cfg_.g_lag_in_frames = kMaxLagInFrames - 1;
+  cfg_.rc_end_usage = VPX_VBR;
+  init_flags_ = VPX_CODEC_USE_PSNR;
+
+  std::unique_ptr<libvpx_test::VideoSource> video;
+  video.reset(new (std::nothrow) libvpx_test::YUVVideoSource(
+      kTestFileName, VPX_IMG_FMT_I420, 352, 288, 30, 1, 0, kFrameNumGOPShort));
+
+  ASSERT_NE(video, nullptr);
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
+
+  const double psnr = GetAveragePsnr();
+  EXPECT_GT(psnr, kPsnrThreshold);
 }
 
 }  // namespace

@@ -5515,6 +5515,32 @@ static void encode_frame_to_data_rate(
     save_encode_params(cpi);
   }
 #endif
+  if (cpi->ext_ratectrl.ready &&
+      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_RDMULT) != 0) {
+    vpx_codec_err_t codec_status;
+    const GF_GROUP *gf_group = &cpi->twopass.gf_group;
+    FRAME_UPDATE_TYPE update_type = gf_group->update_type[gf_group->index];
+    const int ref_frame_flags = get_ref_frame_flags(cpi);
+    RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES];
+    const RefCntBuffer *curr_frame_buf = get_ref_cnt_buffer(cm, cm->new_fb_idx);
+    // index 0 of a gf group is always KEY/OVERLAY/GOLDEN.
+    // index 1 refers to the first encoding frame in a gf group.
+    // Therefore if it is ARF_UPDATE, it means this gf group uses alt ref.
+    // See function define_gf_group_structure().
+    const int use_alt_ref = gf_group->update_type[1] == ARF_UPDATE;
+    int ext_rdmult = VPX_DEFAULT_RDMULT;
+    get_ref_frame_bufs(cpi, ref_frame_bufs);
+    codec_status = vp9_extrc_get_frame_rdmult(
+        &cpi->ext_ratectrl, curr_frame_buf->frame_index,
+        cm->current_frame_coding_index, gf_group->index, update_type,
+        gf_group->gf_group_size, use_alt_ref, ref_frame_bufs, ref_frame_flags,
+        &ext_rdmult);
+    if (codec_status != VPX_CODEC_OK) {
+      vpx_internal_error(&cm->error, codec_status,
+                         "vp9_extrc_get_frame_rdmult() failed");
+    }
+    cpi->ext_ratectrl.ext_rdmult = ext_rdmult;
+  }
 
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {
     if (!encode_without_recode_loop(cpi, size, dest)) return;
