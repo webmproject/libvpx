@@ -179,8 +179,8 @@ class RcInterfaceSvcTest : public ::libvpx_test::EncoderTest,
       encoder->Control(VP9E_SET_SVC, 1);
       encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);
     }
-
-    frame_params_.frame_type = video->frame() == 0 ? KEY_FRAME : INTER_FRAME;
+    frame_params_.frame_type =
+        video->frame() % key_interval_ == 0 ? KEY_FRAME : INTER_FRAME;
     encoder_exit_ = video->frame() == kNumFrames;
     current_superframe_ = video->frame();
   }
@@ -214,6 +214,21 @@ class RcInterfaceSvcTest : public ::libvpx_test::EncoderTest,
 
   void RunSvc() {
     SetConfigSvc();
+    // kNumFrames = 300, so no key frames in this test.
+    key_interval_ = 10000;
+    rc_api_ = libvpx::VP9RateControlRTC::Create(rc_cfg_);
+    SetEncoderSvc();
+
+    ::libvpx_test::I420VideoSource video("desktop_office1.1280_720-020.yuv",
+                                         1280, 720, 30, 1, 0, kNumFrames);
+
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  }
+
+  void RunSvcPeriodicKey() {
+    SetConfigSvc();
+    // kNumFrames = 300, so 3 key frames in this test.
+    key_interval_ = 100;
     rc_api_ = libvpx::VP9RateControlRTC::Create(rc_cfg_);
     SetEncoderSvc();
 
@@ -297,6 +312,9 @@ class RcInterfaceSvcTest : public ::libvpx_test::EncoderTest,
     cfg_.layer_target_bitrate[6] = 450;
     cfg_.layer_target_bitrate[7] = 630;
     cfg_.layer_target_bitrate[8] = 900;
+
+    cfg_.kf_min_dist = key_interval_;
+    cfg_.kf_max_dist = key_interval_;
   }
 
   void SetConfigSvc() {
@@ -355,6 +373,7 @@ class RcInterfaceSvcTest : public ::libvpx_test::EncoderTest,
   bool encoder_exit_;
   int current_superframe_;
   uint32_t sizes_[8];
+  int key_interval_;
 };
 
 TEST_P(RcInterfaceTest, OneLayer) { RunOneLayer(); }
@@ -362,6 +381,8 @@ TEST_P(RcInterfaceTest, OneLayer) { RunOneLayer(); }
 TEST_P(RcInterfaceTest, OneLayerVBRPeriodicKey) { RunOneLayerVBRPeriodicKey(); }
 
 TEST_P(RcInterfaceSvcTest, Svc) { RunSvc(); }
+
+TEST_P(RcInterfaceSvcTest, SvcPeriodicKey) { RunSvcPeriodicKey(); }
 
 VP9_INSTANTIATE_TEST_SUITE(RcInterfaceTest, ::testing::Values(0, 3),
                            ::testing::Values(VPX_CBR, VPX_VBR));
