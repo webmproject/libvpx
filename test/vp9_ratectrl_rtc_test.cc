@@ -181,11 +181,6 @@ class RcInterfaceSvcTest : public ::libvpx_test::EncoderTest,
     }
 
     frame_params_.frame_type = video->frame() == 0 ? KEY_FRAME : INTER_FRAME;
-    if (rc_cfg_.rc_mode == VPX_CBR && frame_params_.frame_type == INTER_FRAME) {
-      // Disable golden frame update.
-      frame_flags_ |= VP8_EFLAG_NO_UPD_GF;
-      frame_flags_ |= VP8_EFLAG_NO_UPD_ARF;
-    }
     encoder_exit_ = video->frame() == kNumFrames;
     current_superframe_ = video->frame();
   }
