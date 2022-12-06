@@ -308,5 +308,14 @@ INSTANTIATE_TEST_SUITE_P(
                        ::testing::Values(&vpx_highbd_subtract_block_c),
                        ::testing::Values(&vpx_highbd_subtract_block_c)));
 
+#if HAVE_AVX2
+INSTANTIATE_TEST_SUITE_P(
+    AVX2, VPXHBDSubtractBlockTest,
+    ::testing::Combine(::testing::ValuesIn(kValidBlockSize),
+                       ::testing::Values(12),
+                       ::testing::Values(&vpx_highbd_subtract_block_avx2),
+                       ::testing::Values(&vpx_highbd_subtract_block_c)));
+#endif  // HAVE_AVX2
+
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace vp9

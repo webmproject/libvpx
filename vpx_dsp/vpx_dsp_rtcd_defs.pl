@@ -939,7 +939,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Block subtraction
   #
   add_proto qw/void vpx_highbd_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src8_ptr, ptrdiff_t src_stride, const uint8_t *pred8_ptr, ptrdiff_t pred_stride, int bd";
-  specialize qw/vpx_highbd_subtract_block neon/;
+  specialize qw/vpx_highbd_subtract_block neon avx2/;
 
   #
   # Single block SAD
