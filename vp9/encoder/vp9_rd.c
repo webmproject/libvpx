@@ -244,6 +244,12 @@ int vp9_compute_rd_mult_based_on_qindex(const VP9_COMP *cpi, int qindex) {
   // largest dc_quant is 21387, therefore rdmult should fit in int32_t
   int rdmult = q * q;
 
+  if (cpi->ext_ratectrl.ready &&
+      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_RDMULT) != 0 &&
+      cpi->ext_ratectrl.ext_rdmult != VPX_DEFAULT_RDMULT) {
+    return cpi->ext_ratectrl.ext_rdmult;
+  }
+
   // Make sure this function is floating point safe.
   vpx_clear_system_state();
 
@@ -287,6 +293,11 @@ static int modulate_rdmult(const VP9_COMP *cpi, int rdmult) {
 
 int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   int rdmult = vp9_compute_rd_mult_based_on_qindex(cpi, qindex);
+  if (cpi->ext_ratectrl.ready &&
+      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_RDMULT) != 0 &&
+      cpi->ext_ratectrl.ext_rdmult != VPX_DEFAULT_RDMULT) {
+    return cpi->ext_ratectrl.ext_rdmult;
+  }
   return modulate_rdmult(cpi, rdmult);
 }
 
