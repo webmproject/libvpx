@@ -185,7 +185,7 @@ void AvgPredTest<bitdepth, Pixel>::TestSpeed() {
 
         vpx_usec_timer timer;
         vpx_usec_timer_start(&timer);
-        for (int i = 0; i < 10000000 / (width * height); ++i) {
+        for (int i = 0; i < 100000000 / (width * height); ++i) {
           avg_pred_func_((uint8_t *)avg.TopLeftPixel(),
                          (uint8_t *)pred.TopLeftPixel(), width, height,
                          (uint8_t *)ref.TopLeftPixel(), ref.stride());
@@ -253,6 +253,12 @@ TEST_P(AvgPredTestHBD, DISABLED_Speed) { TestSpeed(); }
 INSTANTIATE_TEST_SUITE_P(
     C, AvgPredTestHBD,
     ::testing::Values(&highbd_wrapper<vpx_highbd_comp_avg_pred_c>));
+
+#if HAVE_SSE2
+INSTANTIATE_TEST_SUITE_P(
+    SSE2, AvgPredTestHBD,
+    ::testing::Values(&highbd_wrapper<vpx_highbd_comp_avg_pred_sse2>));
+#endif  // HAVE_SSE2
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }  // namespace
