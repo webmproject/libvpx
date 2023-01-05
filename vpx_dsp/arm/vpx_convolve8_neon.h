@@ -176,9 +176,7 @@ static INLINE int16x4_t convolve8_4(const int16x4_t s0, const int16x4_t s1,
                                     const int16x4_t s2, const int16x4_t s3,
                                     const int16x4_t s4, const int16x4_t s5,
                                     const int16x4_t s6, const int16x4_t s7,
-                                    const int16x8_t filters,
-                                    const int16x4_t filter3,
-                                    const int16x4_t filter4) {
+                                    const int16x8_t filters) {
   const int16x4_t filters_lo = vget_low_s16(filters);
   const int16x4_t filters_hi = vget_high_s16(filters);
   int16x4_t sum;
@@ -189,8 +187,8 @@ static INLINE int16x4_t convolve8_4(const int16x4_t s0, const int16x4_t s1,
   sum = vmla_lane_s16(sum, s5, filters_hi, 1);
   sum = vmla_lane_s16(sum, s6, filters_hi, 2);
   sum = vmla_lane_s16(sum, s7, filters_hi, 3);
-  sum = vqadd_s16(sum, vmul_s16(s3, filter3));
-  sum = vqadd_s16(sum, vmul_s16(s4, filter4));
+  sum = vqadd_s16(sum, vmul_lane_s16(s3, filters_lo, 3));
+  sum = vqadd_s16(sum, vmul_lane_s16(s4, filters_hi, 0));
   return sum;
 }
 
@@ -198,9 +196,7 @@ static INLINE uint8x8_t convolve8_8(const int16x8_t s0, const int16x8_t s1,
                                     const int16x8_t s2, const int16x8_t s3,
                                     const int16x8_t s4, const int16x8_t s5,
                                     const int16x8_t s6, const int16x8_t s7,
-                                    const int16x8_t filters,
-                                    const int16x8_t filter3,
-                                    const int16x8_t filter4) {
+                                    const int16x8_t filters) {
   const int16x4_t filters_lo = vget_low_s16(filters);
   const int16x4_t filters_hi = vget_high_s16(filters);
   int16x8_t sum;
@@ -211,15 +207,13 @@ static INLINE uint8x8_t convolve8_8(const int16x8_t s0, const int16x8_t s1,
   sum = vmlaq_lane_s16(sum, s5, filters_hi, 1);
   sum = vmlaq_lane_s16(sum, s6, filters_hi, 2);
   sum = vmlaq_lane_s16(sum, s7, filters_hi, 3);
-  sum = vqaddq_s16(sum, vmulq_s16(s3, filter3));
-  sum = vqaddq_s16(sum, vmulq_s16(s4, filter4));
+  sum = vqaddq_s16(sum, vmulq_lane_s16(s3, filters_lo, 3));
+  sum = vqaddq_s16(sum, vmulq_lane_s16(s4, filters_hi, 0));
   return vqrshrun_n_s16(sum, 7);
 }
 
 static INLINE uint8x8_t scale_filter_8(const uint8x8_t *const s,
                                        const int16x8_t filters) {
-  const int16x8_t filter3 = vdupq_lane_s16(vget_low_s16(filters), 3);
-  const int16x8_t filter4 = vdupq_lane_s16(vget_high_s16(filters), 0);
   int16x8_t ss[8];
 
   ss[0] = vreinterpretq_s16_u16(vmovl_u8(s[0]));
@@ -232,7 +226,7 @@ static INLINE uint8x8_t scale_filter_8(const uint8x8_t *const s,
   ss[7] = vreinterpretq_s16_u16(vmovl_u8(s[7]));
 
   return convolve8_8(ss[0], ss[1], ss[2], ss[3], ss[4], ss[5], ss[6], ss[7],
-                     filters, filter3, filter4);
+                     filters);
 }
 
 #endif  // VPX_VPX_DSP_ARM_VPX_CONVOLVE8_NEON_H_
