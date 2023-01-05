@@ -124,33 +124,22 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       int16x8_t t01, t23;
       uint8x8_t d01, d23;
 
-      s0 = vld1q_u8(src);
-      src += src_stride;
-      s1 = vld1q_u8(src);
-      src += src_stride;
-      s2 = vld1q_u8(src);
-      src += src_stride;
-      s3 = vld1q_u8(src);
-      src += src_stride;
+      load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
 
       t0 = convolve8_4_dot(s0, filters, correction, range_limit, permute_tbl);
       t1 = convolve8_4_dot(s1, filters, correction, range_limit, permute_tbl);
       t2 = convolve8_4_dot(s2, filters, correction, range_limit, permute_tbl);
       t3 = convolve8_4_dot(s3, filters, correction, range_limit, permute_tbl);
-
       t01 = vcombine_s16(vqmovn_s32(t0), vqmovn_s32(t1));
       t23 = vcombine_s16(vqmovn_s32(t2), vqmovn_s32(t3));
       d01 = vqrshrun_n_s16(t01, 7);
       d23 = vqrshrun_n_s16(t23, 7);
 
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 0);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 1);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 0);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 1);
-      dst += dst_stride;
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
+
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
       h -= 4;
     } while (h > 0);
   } else {
@@ -165,20 +154,14 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       s = src;
       d = dst;
       do {
-        s0 = vld1q_u8(s + 0 * src_stride);
-        s1 = vld1q_u8(s + 1 * src_stride);
-        s2 = vld1q_u8(s + 2 * src_stride);
-        s3 = vld1q_u8(s + 3 * src_stride);
+        load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
 
         d0 = convolve8_8_dot(s0, filters, correction, range_limit, permute_tbl);
         d1 = convolve8_8_dot(s1, filters, correction, range_limit, permute_tbl);
         d2 = convolve8_8_dot(s2, filters, correction, range_limit, permute_tbl);
         d3 = convolve8_8_dot(s3, filters, correction, range_limit, permute_tbl);
 
-        vst1_u8(d + 0 * dst_stride, d0);
-        vst1_u8(d + 1 * dst_stride, d1);
-        vst1_u8(d + 2 * dst_stride, d2);
-        vst1_u8(d + 3 * dst_stride, d3);
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
 
         s += 8;
         d += 8;
@@ -221,20 +204,12 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       dd01 = vdup_n_u8(0);
       dd23 = vdup_n_u8(0);
 
-      s0 = vld1q_u8(src);
-      src += src_stride;
-      s1 = vld1q_u8(src);
-      src += src_stride;
-      s2 = vld1q_u8(src);
-      src += src_stride;
-      s3 = vld1q_u8(src);
-      src += src_stride;
+      load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
 
       t0 = convolve8_4_dot(s0, filters, correction, range_limit, permute_tbl);
       t1 = convolve8_4_dot(s1, filters, correction, range_limit, permute_tbl);
       t2 = convolve8_4_dot(s2, filters, correction, range_limit, permute_tbl);
       t3 = convolve8_4_dot(s3, filters, correction, range_limit, permute_tbl);
-
       t01 = vcombine_s16(vqmovn_s32(t0), vqmovn_s32(t1));
       t23 = vcombine_s16(vqmovn_s32(t2), vqmovn_s32(t3));
       d01 = vqrshrun_n_s16(t01, 7);
@@ -242,17 +217,15 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
 
       dd01 = load_u8(dst + 0 * dst_stride, dst_stride);
       dd23 = load_u8(dst + 2 * dst_stride, dst_stride);
+
       d01 = vrhadd_u8(d01, dd01);
       d23 = vrhadd_u8(d23, dd23);
 
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 0);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 1);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 0);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 1);
-      dst += dst_stride;
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
+
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
       h -= 4;
     } while (h > 0);
   } else {
@@ -267,29 +240,21 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       s = src;
       d = dst;
       do {
-        s0 = vld1q_u8(s + 0 * src_stride);
-        s1 = vld1q_u8(s + 1 * src_stride);
-        s2 = vld1q_u8(s + 2 * src_stride);
-        s3 = vld1q_u8(s + 3 * src_stride);
+        load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
 
         d0 = convolve8_8_dot(s0, filters, correction, range_limit, permute_tbl);
         d1 = convolve8_8_dot(s1, filters, correction, range_limit, permute_tbl);
         d2 = convolve8_8_dot(s2, filters, correction, range_limit, permute_tbl);
         d3 = convolve8_8_dot(s3, filters, correction, range_limit, permute_tbl);
 
-        dd0 = vld1_u8(d + 0 * dst_stride);
-        dd1 = vld1_u8(d + 1 * dst_stride);
-        dd2 = vld1_u8(d + 2 * dst_stride);
-        dd3 = vld1_u8(d + 3 * dst_stride);
+        load_u8_8x4(d, dst_stride, &dd0, &dd1, &dd2, &dd3);
+
         d0 = vrhadd_u8(d0, dd0);
         d1 = vrhadd_u8(d1, dd1);
         d2 = vrhadd_u8(d2, dd2);
         d3 = vrhadd_u8(d3, dd3);
 
-        vst1_u8(d + 0 * dst_stride, d0);
-        vst1_u8(d + 1 * dst_stride, d1);
-        vst1_u8(d + 2 * dst_stride, d2);
-        vst1_u8(d + 3 * dst_stride, d3);
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
 
         s += 8;
         d += 8;
@@ -332,14 +297,8 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
     int32x4_t d0, d1, d2, d3;
     uint8x8_t d01, d23;
 
-    load_u8_8x4(src, src_stride, &t0, &t1, &t2, &t3);
-    src += 4 * src_stride;
-    t4 = vld1_u8(src);
-    src += src_stride;
-    t5 = vld1_u8(src);
-    src += src_stride;
-    t6 = vld1_u8(src);
-    src += src_stride;
+    load_u8_8x7(src, src_stride, &t0, &t1, &t2, &t3, &t4, &t5, &t6);
+    src += 7 * src_stride;
 
     /* Clamp sample range to [-128, 127] for 8-bit signed dot product. */
     s0 = vreinterpret_s8_u8(vsub_u8(t0, range_limit));
@@ -387,18 +346,11 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       d1 = convolve8_4_dot_partial(s1234, s5678, correction, filters);
       d2 = convolve8_4_dot_partial(s2345, s6789, correction, filters);
       d3 = convolve8_4_dot_partial(s3456, s78910, correction, filters);
-
       d01 = vqrshrun_n_s16(vcombine_s16(vqmovn_s32(d0), vqmovn_s32(d1)), 7);
       d23 = vqrshrun_n_s16(vcombine_s16(vqmovn_s32(d2), vqmovn_s32(d3)), 7);
 
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 0);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 1);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 0);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 1);
-      dst += dst_stride;
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
 
       /* Prepare block for next iteration - re-using as much as possible. */
       /* Shuffle everything up four rows. */
@@ -408,6 +360,7 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       s3456 = s78910;
 
       src += 4 * src_stride;
+      dst += 4 * dst_stride;
       h -= 4;
     } while (h > 0);
   } else {
@@ -425,14 +378,8 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       s = src;
       d = dst;
 
-      load_u8_8x4(s, src_stride, &t0, &t1, &t2, &t3);
-      s += 4 * src_stride;
-      t4 = vld1_u8(s);
-      s += src_stride;
-      t5 = vld1_u8(s);
-      s += src_stride;
-      t6 = vld1_u8(s);
-      s += src_stride;
+      load_u8_8x7(s, src_stride, &t0, &t1, &t2, &t3, &t4, &t5, &t6);
+      s += 7 * src_stride;
 
       /* Clamp sample range to [-128, 127] for 8-bit signed dot product. */
       s0 = vreinterpret_s8_u8(vsub_u8(t0, range_limit));
@@ -498,10 +445,8 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
                                      correction, filters);
         d3 = convolve8_8_dot_partial(s3456_lo, s78910_lo, s3456_hi, s78910_hi,
                                      correction, filters);
-        vst1_u8(d + 0 * dst_stride, d0);
-        vst1_u8(d + 1 * dst_stride, d1);
-        vst1_u8(d + 2 * dst_stride, d2);
-        vst1_u8(d + 3 * dst_stride, d3);
+
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
 
         /* Prepare block for next iteration - re-using as much as possible. */
         /* Shuffle everything up four rows. */
@@ -555,14 +500,8 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
     int32x4_t d0, d1, d2, d3;
     uint8x8_t d01, d23, dd01, dd23;
 
-    load_u8_8x4(src, src_stride, &t0, &t1, &t2, &t3);
-    src += 4 * src_stride;
-    t4 = vld1_u8(src);
-    src += src_stride;
-    t5 = vld1_u8(src);
-    src += src_stride;
-    t6 = vld1_u8(src);
-    src += src_stride;
+    load_u8_8x7(src, src_stride, &t0, &t1, &t2, &t3, &t4, &t5, &t6);
+    src += 7 * src_stride;
 
     /* Clamp sample range to [-128, 127] for 8-bit signed dot product. */
     s0 = vreinterpret_s8_u8(vsub_u8(t0, range_limit));
@@ -610,23 +549,17 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       d1 = convolve8_4_dot_partial(s1234, s5678, correction, filters);
       d2 = convolve8_4_dot_partial(s2345, s6789, correction, filters);
       d3 = convolve8_4_dot_partial(s3456, s78910, correction, filters);
-
       d01 = vqrshrun_n_s16(vcombine_s16(vqmovn_s32(d0), vqmovn_s32(d1)), 7);
       d23 = vqrshrun_n_s16(vcombine_s16(vqmovn_s32(d2), vqmovn_s32(d3)), 7);
 
       dd01 = load_u8(dst + 0 * dst_stride, dst_stride);
       dd23 = load_u8(dst + 2 * dst_stride, dst_stride);
+
       d01 = vrhadd_u8(d01, dd01);
       d23 = vrhadd_u8(d23, dd23);
 
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 0);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d01), 1);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 0);
-      dst += dst_stride;
-      vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d23), 1);
-      dst += dst_stride;
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
 
       /* Prepare block for next iteration - re-using as much as possible. */
       /* Shuffle everything up four rows. */
@@ -636,6 +569,7 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       s3456 = s78910;
 
       src += 4 * src_stride;
+      dst += 4 * dst_stride;
       h -= 4;
     } while (h > 0);
   } else {
@@ -653,14 +587,8 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
       s = src;
       d = dst;
 
-      load_u8_8x4(s, src_stride, &t0, &t1, &t2, &t3);
-      s += 4 * src_stride;
-      t4 = vld1_u8(s);
-      s += src_stride;
-      t5 = vld1_u8(s);
-      s += src_stride;
-      t6 = vld1_u8(s);
-      s += src_stride;
+      load_u8_8x7(s, src_stride, &t0, &t1, &t2, &t3, &t4, &t5, &t6);
+      s += 7 * src_stride;
 
       /* Clamp sample range to [-128, 127] for 8-bit signed dot product. */
       s0 = vreinterpret_s8_u8(vsub_u8(t0, range_limit));
@@ -727,19 +655,14 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
         d3 = convolve8_8_dot_partial(s3456_lo, s78910_lo, s3456_hi, s78910_hi,
                                      correction, filters);
 
-        dd0 = vld1_u8(d + 0 * dst_stride);
-        dd1 = vld1_u8(d + 1 * dst_stride);
-        dd2 = vld1_u8(d + 2 * dst_stride);
-        dd3 = vld1_u8(d + 3 * dst_stride);
+        load_u8_8x4(d, dst_stride, &dd0, &dd1, &dd2, &dd3);
+
         d0 = vrhadd_u8(d0, dd0);
         d1 = vrhadd_u8(d1, dd1);
         d2 = vrhadd_u8(d2, dd2);
         d3 = vrhadd_u8(d3, dd3);
 
-        vst1_u8(d + 0 * dst_stride, d0);
-        vst1_u8(d + 1 * dst_stride, d1);
-        vst1_u8(d + 2 * dst_stride, d2);
-        vst1_u8(d + 3 * dst_stride, d3);
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
 
         /* Prepare block for next iteration - re-using as much as possible. */
         /* Shuffle everything up four rows. */
@@ -764,28 +687,6 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
 }
 
 #else  // !(defined(__aarch64__) && defined(__ARM_FEATURE_DOTPROD))
-
-static INLINE void store_u8_8x8(uint8_t *s, const ptrdiff_t p,
-                                const uint8x8_t s0, const uint8x8_t s1,
-                                const uint8x8_t s2, const uint8x8_t s3,
-                                const uint8x8_t s4, const uint8x8_t s5,
-                                const uint8x8_t s6, const uint8x8_t s7) {
-  vst1_u8(s, s0);
-  s += p;
-  vst1_u8(s, s1);
-  s += p;
-  vst1_u8(s, s2);
-  s += p;
-  vst1_u8(s, s3);
-  s += p;
-  vst1_u8(s, s4);
-  s += p;
-  vst1_u8(s, s5);
-  s += p;
-  vst1_u8(s, s6);
-  s += p;
-  vst1_u8(s, s7);
-}
 
 void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
