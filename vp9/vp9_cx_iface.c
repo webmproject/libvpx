@@ -1014,6 +1014,7 @@ static vpx_codec_err_t ctrl_set_aq_mode(vpx_codec_alg_priv_t *ctx,
                                         va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.aq_mode = CAST(VP9E_SET_AQ_MODE, args);
+  if (ctx->cpi->fixed_qp_onepass) extra_cfg.aq_mode = 0;
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1951,6 +1952,24 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_quantizer_one_pass(vpx_codec_alg_priv_t *ctx,
+                                                   va_list args) {
+  VP9_COMP *const cpi = ctx->cpi;
+  const int qp = va_arg(args, int);
+  vpx_codec_enc_cfg_t *cfg = &ctx->cfg;
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  vpx_codec_err_t res;
+
+  if (qp < 0 || qp > 63) return VPX_CODEC_INVALID_PARAM;
+
+  cfg->rc_min_quantizer = cfg->rc_max_quantizer = qp;
+  extra_cfg.aq_mode = 0;
+  cpi->fixed_qp_onepass = 1;
+
+  res = update_extra_cfg(ctx, &extra_cfg);
+  return res;
+}
+
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP8_COPY_REFERENCE, ctrl_copy_reference },
 
@@ -2005,6 +2024,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_DISABLE_LOOPFILTER, ctrl_set_disable_loopfilter },
   { VP9E_SET_RTC_EXTERNAL_RATECTRL, ctrl_set_rtc_external_ratectrl },
   { VP9E_SET_EXTERNAL_RATE_CONTROL, ctrl_set_external_rate_control },
+  { VP9E_SET_QUANTIZER_ONE_PASS, ctrl_set_quantizer_one_pass },
 
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },
