@@ -499,14 +499,21 @@ template <typename FunctionType>
 void MainTestClass<FunctionType>::RefTestMse() {
   for (int i = 0; i < 10; ++i) {
     for (int j = 0; j < block_size(); ++j) {
-      src_[j] = rnd_.Rand8();
-      ref_[j] = rnd_.Rand8();
+      if (!use_high_bit_depth()) {
+        src_[j] = rnd_.Rand8();
+        ref_[j] = rnd_.Rand8();
+#if CONFIG_VP9_HIGHBITDEPTH
+      } else {
+        CONVERT_TO_SHORTPTR(src_)[j] = rnd_.Rand16() & mask();
+        CONVERT_TO_SHORTPTR(ref_)[j] = rnd_.Rand16() & mask();
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+      }
     }
     unsigned int sse1, sse2;
     const int stride = width();
     ASM_REGISTER_STATE_CHECK(params_.func(src_, stride, ref_, stride, &sse1));
     variance_ref(src_, ref_, params_.log2width, params_.log2height, stride,
-                 stride, &sse2, false, VPX_BITS_8);
+                 stride, &sse2, use_high_bit_depth(), params_.bit_depth);
     EXPECT_EQ(sse1, sse2);
   }
 }
@@ -530,8 +537,15 @@ void MainTestClass<FunctionType>::RefTestSse() {
 
 template <typename FunctionType>
 void MainTestClass<FunctionType>::MaxTestMse() {
-  memset(src_, 255, block_size());
-  memset(ref_, 0, block_size());
+  if (!use_high_bit_depth()) {
+    memset(src_, 255, block_size());
+    memset(ref_, 0, block_size());
+#if CONFIG_VP9_HIGHBITDEPTH
+  } else {
+    vpx_memset16(CONVERT_TO_SHORTPTR(src_), 255 << byte_shift(), block_size());
+    vpx_memset16(CONVERT_TO_SHORTPTR(ref_), 0, block_size());
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
   unsigned int sse;
   ASM_REGISTER_STATE_CHECK(params_.func(src_, width(), ref_, width(), &sse));
   const unsigned int expected = block_size() * 255 * 255;
@@ -854,25 +868,24 @@ TEST_P(VpxHBDSubpelVarianceTest, Ref) { RefTest(); }
 TEST_P(VpxHBDSubpelVarianceTest, ExtremeRef) { ExtremeRefTest(); }
 TEST_P(VpxHBDSubpelAvgVarianceTest, Ref) { RefTest(); }
 
-/* TODO(debargha): This test does not support the highbd version
 typedef MainTestClass<vpx_variance_fn_t> VpxHBDMseTest;
 TEST_P(VpxHBDMseTest, RefMse) { RefTestMse(); }
 TEST_P(VpxHBDMseTest, MaxMse) { MaxTestMse(); }
 INSTANTIATE_TEST_SUITE_P(
     C, VpxHBDMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_c),
-                      MseParams(4, 4, &vpx_highbd_12_mse16x8_c),
-                      MseParams(4, 4, &vpx_highbd_12_mse8x16_c),
-                      MseParams(4, 4, &vpx_highbd_12_mse8x8_c),
-                      MseParams(4, 4, &vpx_highbd_10_mse16x16_c),
-                      MseParams(4, 4, &vpx_highbd_10_mse16x8_c),
-                      MseParams(4, 4, &vpx_highbd_10_mse8x16_c),
-                      MseParams(4, 4, &vpx_highbd_10_mse8x8_c),
-                      MseParams(4, 4, &vpx_highbd_8_mse16x16_c),
-                      MseParams(4, 4, &vpx_highbd_8_mse16x8_c),
-                      MseParams(4, 4, &vpx_highbd_8_mse8x16_c),
-                      MseParams(4, 4, &vpx_highbd_8_mse8x8_c)));
-*/
+    ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_c, VPX_BITS_12),
+                      MseParams(4, 3, &vpx_highbd_12_mse16x8_c, VPX_BITS_12),
+                      MseParams(3, 4, &vpx_highbd_12_mse8x16_c, VPX_BITS_12),
+                      MseParams(3, 3, &vpx_highbd_12_mse8x8_c, VPX_BITS_12),
+                      MseParams(4, 4, &vpx_highbd_10_mse16x16_c, VPX_BITS_10),
+                      MseParams(4, 3, &vpx_highbd_10_mse16x8_c, VPX_BITS_10),
+                      MseParams(3, 4, &vpx_highbd_10_mse8x16_c, VPX_BITS_10),
+                      MseParams(3, 3, &vpx_highbd_10_mse8x8_c, VPX_BITS_10),
+                      MseParams(4, 4, &vpx_highbd_8_mse16x16_c, VPX_BITS_8),
+                      MseParams(4, 3, &vpx_highbd_8_mse16x8_c, VPX_BITS_8),
+                      MseParams(3, 4, &vpx_highbd_8_mse8x16_c, VPX_BITS_8),
+                      MseParams(3, 3, &vpx_highbd_8_mse8x8_c, VPX_BITS_8)));
+
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(VpxHBDMseTest);
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1138,22 +1151,15 @@ INSTANTIATE_TEST_SUITE_P(
         SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_sse2, 0)));
 
 #if CONFIG_VP9_HIGHBITDEPTH
-/* TODO(debargha): This test does not support the highbd version
 INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxHBDMseTest,
-    ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_sse2),
-                      MseParams(4, 3, &vpx_highbd_12_mse16x8_sse2),
-                      MseParams(3, 4, &vpx_highbd_12_mse8x16_sse2),
-                      MseParams(3, 3, &vpx_highbd_12_mse8x8_sse2),
-                      MseParams(4, 4, &vpx_highbd_10_mse16x16_sse2),
-                      MseParams(4, 3, &vpx_highbd_10_mse16x8_sse2),
-                      MseParams(3, 4, &vpx_highbd_10_mse8x16_sse2),
-                      MseParams(3, 3, &vpx_highbd_10_mse8x8_sse2),
-                      MseParams(4, 4, &vpx_highbd_8_mse16x16_sse2),
-                      MseParams(4, 3, &vpx_highbd_8_mse16x8_sse2),
-                      MseParams(3, 4, &vpx_highbd_8_mse8x16_sse2),
-                      MseParams(3, 3, &vpx_highbd_8_mse8x8_sse2)));
-*/
+    ::testing::Values(
+        MseParams(4, 4, &vpx_highbd_12_mse16x16_sse2, VPX_BITS_12),
+        MseParams(3, 3, &vpx_highbd_12_mse8x8_sse2, VPX_BITS_12),
+        MseParams(4, 4, &vpx_highbd_10_mse16x16_sse2, VPX_BITS_10),
+        MseParams(3, 3, &vpx_highbd_10_mse8x8_sse2, VPX_BITS_10),
+        MseParams(4, 4, &vpx_highbd_8_mse16x16_sse2, VPX_BITS_8),
+        MseParams(3, 3, &vpx_highbd_8_mse8x8_sse2, VPX_BITS_8)));
 
 INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxHBDVarianceTest,
