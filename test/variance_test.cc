@@ -488,8 +488,8 @@ void MainTestClass<VarianceFunctionType>::SpeedTest() {
   }
   vpx_usec_timer_mark(&timer);
   const int elapsed_time = static_cast<int>(vpx_usec_timer_elapsed(&timer));
-  printf("Variance %dx%d time: %5d ms\n", width(), height(),
-         elapsed_time / 1000);
+  printf("Variance %dx%d %dbpp time: %5d ms\n", width(), height(),
+         params_.bit_depth, elapsed_time / 1000);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -871,6 +871,7 @@ TEST_P(VpxHBDSubpelAvgVarianceTest, Ref) { RefTest(); }
 typedef MainTestClass<vpx_variance_fn_t> VpxHBDMseTest;
 TEST_P(VpxHBDMseTest, RefMse) { RefTestMse(); }
 TEST_P(VpxHBDMseTest, MaxMse) { MaxTestMse(); }
+TEST_P(VpxHBDMseTest, DISABLED_Speed) { SpeedTest(); }
 INSTANTIATE_TEST_SUITE_P(
     C, VpxHBDMseTest,
     ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_c, VPX_BITS_12),
