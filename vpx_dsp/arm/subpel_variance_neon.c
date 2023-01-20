@@ -335,6 +335,66 @@ static void avg_pred_var_filter_block2d_bil_w64(
                                         filter_offset, second_pred);
 }
 
+// Combine averaging subpel filter with vpx_comp_avg_pred.
+static void avg_pred_var_filter_block2d_avg(const uint8_t *src_ptr,
+                                            uint8_t *dst_ptr, int src_stride,
+                                            int pixel_step, int dst_width,
+                                            int dst_height,
+                                            const uint8_t *second_pred) {
+  int i = dst_height;
+
+  // We only specialize on the filter values for large block sizes (>= 16x16.)
+  assert(dst_width >= 16 && dst_width % 16 == 0);
+
+  do {
+    int j = 0;
+    do {
+      uint8x16_t s0 = vld1q_u8(src_ptr + j);
+      uint8x16_t s1 = vld1q_u8(src_ptr + j + pixel_step);
+      uint8x16_t avg = vrhaddq_u8(s0, s1);
+
+      uint8x16_t p = vld1q_u8(second_pred);
+      avg = vrhaddq_u8(avg, p);
+
+      vst1q_u8(dst_ptr + j, avg);
+
+      j += 16;
+      second_pred += 16;
+    } while (j < dst_width);
+
+    src_ptr += src_stride;
+    dst_ptr += dst_width;
+  } while (--i != 0);
+}
+
+// Implementation of vpx_comp_avg_pred for blocks having width >= 16.
+static void avg_pred(const uint8_t *src_ptr, uint8_t *dst_ptr, int src_stride,
+                     int dst_width, int dst_height,
+                     const uint8_t *second_pred) {
+  int i = dst_height;
+
+  // We only specialize on the filter values for large block sizes (>= 16x16.)
+  assert(dst_width >= 16 && dst_width % 16 == 0);
+
+  do {
+    int j = 0;
+    do {
+      uint8x16_t s = vld1q_u8(src_ptr + j);
+      uint8x16_t p = vld1q_u8(second_pred);
+
+      uint8x16_t avg = vrhaddq_u8(s, p);
+
+      vst1q_u8(dst_ptr + j, avg);
+
+      j += 16;
+      second_pred += 16;
+    } while (j < dst_width);
+
+    src_ptr += src_stride;
+    dst_ptr += dst_width;
+  } while (--i != 0);
+}
+
 #define SUBPEL_AVG_VARIANCE_WXH_NEON(w, h, padding)                         \
   unsigned int vpx_sub_pixel_avg_variance##w##x##h##_neon(                  \
       const uint8_t *src, int source_stride, int xoffset, int yoffset,      \
@@ -349,6 +409,66 @@ static void avg_pred_var_filter_block2d_bil_w64(
     return vpx_variance##w##x##h(tmp1, w, ref, ref_stride, sse);            \
   }
 
+#define SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(w, h, padding)                \
+  unsigned int vpx_sub_pixel_avg_variance##w##x##h##_neon(                     \
+      const uint8_t *src, int source_stride, int xoffset, int yoffset,         \
+      const uint8_t *ref, int ref_stride, unsigned int *sse,                   \
+      const uint8_t *second_pred) {                                            \
+    if (xoffset == 0) {                                                        \
+      uint8_t tmp[w * h];                                                      \
+      if (yoffset == 0) {                                                      \
+        avg_pred(src, tmp, source_stride, w, h, second_pred);                  \
+        return vpx_variance##w##x##h##_neon(tmp, w, ref, ref_stride, sse);     \
+      } else if (yoffset == 4) {                                               \
+        avg_pred_var_filter_block2d_avg(src, tmp, source_stride,               \
+                                        source_stride, w, h, second_pred);     \
+        return vpx_variance##w##x##h##_neon(tmp, w, ref, ref_stride, sse);     \
+      } else {                                                                 \
+        avg_pred_var_filter_block2d_bil_w##w(                                  \
+            src, tmp, source_stride, source_stride, h, yoffset, second_pred);  \
+        return vpx_variance##w##x##h##_neon(tmp, w, ref, ref_stride, sse);     \
+      }                                                                        \
+    } else if (xoffset == 4) {                                                 \
+      uint8_t tmp0[w * (h + padding)];                                         \
+      if (yoffset == 0) {                                                      \
+        avg_pred_var_filter_block2d_avg(src, tmp0, source_stride, 1, w, h,     \
+                                        second_pred);                          \
+        return vpx_variance##w##x##h##_neon(tmp0, w, ref, ref_stride, sse);    \
+      } else if (yoffset == 4) {                                               \
+        uint8_t tmp1[w * (h + padding)];                                       \
+        var_filter_block2d_avg(src, tmp0, source_stride, 1, w, (h + padding)); \
+        avg_pred_var_filter_block2d_avg(tmp0, tmp1, w, w, w, h, second_pred);  \
+        return vpx_variance##w##x##h##_neon(tmp1, w, ref, ref_stride, sse);    \
+      } else {                                                                 \
+        uint8_t tmp1[w * (h + padding)];                                       \
+        var_filter_block2d_avg(src, tmp0, source_stride, 1, w, (h + padding)); \
+        avg_pred_var_filter_block2d_bil_w##w(tmp0, tmp1, w, w, h, yoffset,     \
+                                             second_pred);                     \
+        return vpx_variance##w##x##h##_neon(tmp1, w, ref, ref_stride, sse);    \
+      }                                                                        \
+    } else {                                                                   \
+      uint8_t tmp0[w * (h + padding)];                                         \
+      if (yoffset == 0) {                                                      \
+        avg_pred_var_filter_block2d_bil_w##w(src, tmp0, source_stride, 1, h,   \
+                                             xoffset, second_pred);            \
+        return vpx_variance##w##x##h##_neon(tmp0, w, ref, ref_stride, sse);    \
+      } else if (yoffset == 4) {                                               \
+        uint8_t tmp1[w * h];                                                   \
+        var_filter_block2d_bil_w##w(src, tmp0, source_stride, 1,               \
+                                    (h + padding), xoffset);                   \
+        avg_pred_var_filter_block2d_avg(tmp0, tmp1, w, w, w, h, second_pred);  \
+        return vpx_variance##w##x##h##_neon(tmp1, w, ref, ref_stride, sse);    \
+      } else {                                                                 \
+        uint8_t tmp1[w * h];                                                   \
+        var_filter_block2d_bil_w##w(src, tmp0, source_stride, 1,               \
+                                    (h + padding), xoffset);                   \
+        avg_pred_var_filter_block2d_bil_w##w(tmp0, tmp1, w, w, h, yoffset,     \
+                                             second_pred);                     \
+        return vpx_variance##w##x##h##_neon(tmp1, w, ref, ref_stride, sse);    \
+      }                                                                        \
+    }                                                                          \
+  }
+
 // 4x<h> blocks are processed two rows at a time, so require an extra row of
 // padding.
 SUBPEL_AVG_VARIANCE_WXH_NEON(4, 4, 2)
@@ -358,13 +478,13 @@ SUBPEL_AVG_VARIANCE_WXH_NEON(8, 4, 1)
 SUBPEL_AVG_VARIANCE_WXH_NEON(8, 8, 1)
 SUBPEL_AVG_VARIANCE_WXH_NEON(8, 16, 1)
 
-SUBPEL_AVG_VARIANCE_WXH_NEON(16, 8, 1)
-SUBPEL_AVG_VARIANCE_WXH_NEON(16, 16, 1)
-SUBPEL_AVG_VARIANCE_WXH_NEON(16, 32, 1)
+SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(16, 8, 1)
+SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(16, 16, 1)
+SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(16, 32, 1)
 
-SUBPEL_AVG_VARIANCE_WXH_NEON(32, 16, 1)
-SUBPEL_AVG_VARIANCE_WXH_NEON(32, 32, 1)
-SUBPEL_AVG_VARIANCE_WXH_NEON(32, 64, 1)
+SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(32, 16, 1)
+SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(32, 32, 1)
+SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(32, 64, 1)
 
-SUBPEL_AVG_VARIANCE_WXH_NEON(64, 32, 1)
-SUBPEL_AVG_VARIANCE_WXH_NEON(64, 64, 1)
+SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(64, 32, 1)
+SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(64, 64, 1)
