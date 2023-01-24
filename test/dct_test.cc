@@ -671,7 +671,11 @@ static const FuncInfo ht_neon_func_info[] = {
     4, 2 },
   { &vp9_highbd_fht8x8_c, &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>, 8,
     2 },
+  { &vp9_highbd_fht8x8_neon, &highbd_iht_wrapper<vp9_highbd_iht8x8_64_add_neon>,
+    8, 2 },
   { &vp9_highbd_fht16x16_c,
+    &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_neon>, 16, 2 },
+  { &vp9_highbd_fht16x16_neon,
     &highbd_iht_wrapper<vp9_highbd_iht16x16_256_add_neon>, 16, 2 },
 #endif
   { &vp9_fht4x4_c, &iht_wrapper<vp9_iht4x4_16_add_neon>, 4, 1 },

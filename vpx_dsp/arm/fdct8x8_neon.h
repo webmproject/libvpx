@@ -293,88 +293,14 @@ static INLINE void vpx_highbd_fdct8x8_pass2_notranspose_neon(int32x4_t *left,
 
 static INLINE void vpx_highbd_fdct8x8_pass1_neon(int32x4_t *left,
                                                  int32x4_t *right) {
-  int32x4x2_t out[8];
   vpx_highbd_fdct8x8_pass1_notranspose_neon(left, right);
-
-  out[0].val[0] = left[0];
-  out[0].val[1] = right[0];
-  out[1].val[0] = left[1];
-  out[1].val[1] = right[1];
-  out[2].val[0] = left[2];
-  out[2].val[1] = right[2];
-  out[3].val[0] = left[3];
-  out[3].val[1] = right[3];
-  out[4].val[0] = left[4];
-  out[4].val[1] = right[4];
-  out[5].val[0] = left[5];
-  out[5].val[1] = right[5];
-  out[6].val[0] = left[6];
-  out[6].val[1] = right[6];
-  out[7].val[0] = left[7];
-  out[7].val[1] = right[7];
-
-  transpose_s32_8x8(&out[0], &out[1], &out[2], &out[3], &out[4], &out[5],
-                    &out[6], &out[7]);
-
-  left[0] = out[0].val[0];
-  right[0] = out[0].val[1];
-  left[1] = out[1].val[0];
-  right[1] = out[1].val[1];
-  left[2] = out[2].val[0];
-  right[2] = out[2].val[1];
-  left[3] = out[3].val[0];
-  right[3] = out[3].val[1];
-  left[4] = out[4].val[0];
-  right[4] = out[4].val[1];
-  left[5] = out[5].val[0];
-  right[5] = out[5].val[1];
-  left[6] = out[6].val[0];
-  right[6] = out[6].val[1];
-  left[7] = out[7].val[0];
-  right[7] = out[7].val[1];
+  transpose_s32_8x8_2(left, right, left, right);
 }
 
 static INLINE void vpx_highbd_fdct8x8_pass2_neon(int32x4_t *left,
                                                  int32x4_t *right) {
-  int32x4x2_t out[8];
   vpx_highbd_fdct8x8_pass2_notranspose_neon(left, right);
-
-  out[0].val[0] = left[0];
-  out[0].val[1] = right[0];
-  out[1].val[0] = left[1];
-  out[1].val[1] = right[1];
-  out[2].val[0] = left[2];
-  out[2].val[1] = right[2];
-  out[3].val[0] = left[3];
-  out[3].val[1] = right[3];
-  out[4].val[0] = left[4];
-  out[4].val[1] = right[4];
-  out[5].val[0] = left[5];
-  out[5].val[1] = right[5];
-  out[6].val[0] = left[6];
-  out[6].val[1] = right[6];
-  out[7].val[0] = left[7];
-  out[7].val[1] = right[7];
-
-  transpose_s32_8x8(&out[0], &out[1], &out[2], &out[3], &out[4], &out[5],
-                    &out[6], &out[7]);
-
-  left[0] = out[0].val[0];
-  right[0] = out[0].val[1];
-  left[1] = out[1].val[0];
-  right[1] = out[1].val[1];
-  left[2] = out[2].val[0];
-  right[2] = out[2].val[1];
-  left[3] = out[3].val[0];
-  right[3] = out[3].val[1];
-  left[4] = out[4].val[0];
-  right[4] = out[4].val[1];
-  left[5] = out[5].val[0];
-  right[5] = out[5].val[1];
-  left[6] = out[6].val[0];
-  right[6] = out[6].val[1];
-  left[7] = out[7].val[0];
-  right[7] = out[7].val[1];
+  transpose_s32_8x8_2(left, right, left, right);
 }
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH
