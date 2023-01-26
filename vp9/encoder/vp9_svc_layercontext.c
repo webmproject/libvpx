@@ -894,6 +894,10 @@ int vp9_one_pass_svc_start_layer(VP9_COMP *const cpi) {
     RATE_CONTROL *const lrc = &lc->rc;
     lrc->worst_quality = vp9_quantizer_to_qindex(lc->max_q);
     lrc->best_quality = vp9_quantizer_to_qindex(lc->min_q);
+    if (cpi->fixed_qp_onepass) {
+      lrc->worst_quality = cpi->rc.worst_quality;
+      lrc->best_quality = cpi->rc.best_quality;
+    }
   }
 
   if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC && svc->single_layer_svc == 1 &&
