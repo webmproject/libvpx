@@ -866,6 +866,68 @@ static INLINE void transpose_s32_8x8_2(int32x4_t *left /*[8]*/,
   out_right[7] = out[7].val[1];
 }
 
+static INLINE void transpose_s32_16x16(int32x4_t *left1, int32x4_t *right1,
+                                       int32x4_t *left2, int32x4_t *right2) {
+  int32x4_t tl[16], tr[16];
+
+  // transpose the 4 8x8 quadrants separately but first swap quadrants 2 and 3.
+  tl[0] = left1[8];
+  tl[1] = left1[9];
+  tl[2] = left1[10];
+  tl[3] = left1[11];
+  tl[4] = left1[12];
+  tl[5] = left1[13];
+  tl[6] = left1[14];
+  tl[7] = left1[15];
+  tr[0] = right1[8];
+  tr[1] = right1[9];
+  tr[2] = right1[10];
+  tr[3] = right1[11];
+  tr[4] = right1[12];
+  tr[5] = right1[13];
+  tr[6] = right1[14];
+  tr[7] = right1[15];
+
+  left1[8] = left2[0];
+  left1[9] = left2[1];
+  left1[10] = left2[2];
+  left1[11] = left2[3];
+  left1[12] = left2[4];
+  left1[13] = left2[5];
+  left1[14] = left2[6];
+  left1[15] = left2[7];
+  right1[8] = right2[0];
+  right1[9] = right2[1];
+  right1[10] = right2[2];
+  right1[11] = right2[3];
+  right1[12] = right2[4];
+  right1[13] = right2[5];
+  right1[14] = right2[6];
+  right1[15] = right2[7];
+
+  left2[0] = tl[0];
+  left2[1] = tl[1];
+  left2[2] = tl[2];
+  left2[3] = tl[3];
+  left2[4] = tl[4];
+  left2[5] = tl[5];
+  left2[6] = tl[6];
+  left2[7] = tl[7];
+  right2[0] = tr[0];
+  right2[1] = tr[1];
+  right2[2] = tr[2];
+  right2[3] = tr[3];
+  right2[4] = tr[4];
+  right2[5] = tr[5];
+  right2[6] = tr[6];
+  right2[7] = tr[7];
+
+  transpose_s32_8x8_2(left1, right1, left1, right1);
+  transpose_s32_8x8_2(left2, right2, left2, right2);
+  transpose_s32_8x8_2(left1 + 8, right1 + 8, left1 + 8, right1 + 8);
+  transpose_s32_8x8_2(left2 + 8, right2 + 8, left2 + 8, right2 + 8);
+}
+
 static INLINE void transpose_u8_16x8(
     const uint8x16_t i0, const uint8x16_t i1, const uint8x16_t i2,
     const uint8x16_t i3, const uint8x16_t i4, const uint8x16_t i5,
