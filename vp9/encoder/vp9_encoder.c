@@ -4415,6 +4415,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
                                        (cpi->twopass.gf_group.index == 1)
                                  : 0;
 
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  printf("\n Encoding a frame: \n");
+#endif
   do {
     vpx_clear_system_state();
 
@@ -4802,6 +4805,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
 
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF)
       if (loop) restore_coding_context(cpi);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    if (loop) printf("\n Recoding:");
+#endif
   } while (loop);
 
   rc->max_frame_bandwidth = orig_rc_max_frame_bandwidth;
@@ -5549,8 +5555,14 @@ static void encode_frame_to_data_rate(
 #if !CONFIG_REALTIME_ONLY
 #if CONFIG_RATE_CTRL
     encode_with_recode_loop(cpi, size, dest, &encode_frame_result->rq_history);
-#else   // CONFIG_RATE_CTRL
+#else  // CONFIG_RATE_CTRL
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    start_timing(cpi, encode_with_recode_loop_time);
+#endif
     encode_with_recode_loop(cpi, size, dest);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    end_timing(cpi, encode_with_recode_loop_time);
+#endif
 #endif  // CONFIG_RATE_CTRL
 #endif  // !CONFIG_REALTIME_ONLY
   }
@@ -5609,13 +5621,25 @@ static void encode_frame_to_data_rate(
   cm->frame_to_show->render_width = cm->render_width;
   cm->frame_to_show->render_height = cm->render_height;
 
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  start_timing(cpi, loopfilter_frame_time);
+#endif
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  end_timing(cpi, loopfilter_frame_time);
+#endif
 
   if (cpi->rc.use_post_encode_drop) save_coding_context(cpi);
 
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  start_timing(cpi, vp9_pack_bitstream_time);
+#endif
   // build the bitstream
   vp9_pack_bitstream(cpi, dest, size);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  end_timing(cpi, vp9_pack_bitstream_time);
+#endif
 
   if (cpi->ext_ratectrl.ready) {
     const RefCntBuffer *coded_frame_buf =
@@ -7640,6 +7664,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   const int gf_group_index = cpi->twopass.gf_group.index;
   int i;
 
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  if (oxcf->pass == 2) start_timing(cpi, vp9_get_compressed_data_time);
+#endif
+
   if (is_one_pass_svc(cpi)) {
     vp9_one_pass_svc_start_layer(cpi);
   }
@@ -7704,9 +7732,15 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         int not_last_frame = (cpi->lookahead->sz - arf_src_index > 1);
         not_last_frame |= ALT_REF_AQ_APPLY_TO_LAST_FRAME;
 
+#if CONFIG_COLLECT_COMPONENT_TIMING
+        start_timing(cpi, vp9_temporal_filter_time);
+#endif
         // Produce the filtered ARF frame.
         vp9_temporal_filter(cpi, arf_src_index);
         vpx_extend_frame_borders(&cpi->alt_ref_buffer);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+        end_timing(cpi, vp9_temporal_filter_time);
+#endif
 
         // for small bitrates segmentation overhead usually
         // eats all bitrate gain from enabling delta quantizers
@@ -7820,7 +7854,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if !CONFIG_REALTIME_ONLY
   if ((oxcf->pass == 2) && !cpi->use_svc) {
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    start_timing(cpi, vp9_rc_get_second_pass_params_time);
+#endif
     vp9_rc_get_second_pass_params(cpi);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    end_timing(cpi, vp9_rc_get_second_pass_params_time);
+#endif
   } else if (oxcf->pass == 1) {
     set_frame_size(cpi);
   }
@@ -7860,6 +7900,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 #endif  // CONFIG_NON_GREEDY_MV
 
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  start_timing(cpi, setup_tpl_stats_time);
+#endif
   if (gf_group_index == 1 &&
       cpi->twopass.gf_group.update_type[gf_group_index] == ARF_UPDATE &&
       cpi->sf.enable_tpl_model) {
@@ -7867,6 +7910,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     vp9_estimate_qp_gop(cpi);
     setup_tpl_stats(cpi);
   }
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  end_timing(cpi, setup_tpl_stats_time);
+#endif
 
 #if CONFIG_BITSTREAM_DEBUG
   assert(cpi->oxcf.max_threads == 0 &&
@@ -7903,8 +7949,15 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->td.mb.inv_txfm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi, source);
   } else if (oxcf->pass == 2 && !cpi->use_svc) {
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    // Accumulate 2nd pass time in 2-pass case.
+    start_timing(cpi, Pass2Encode_time);
+#endif
     Pass2Encode(cpi, size, dest, frame_flags, encode_frame_result);
     vp9_twopass_postencode_update(cpi);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    end_timing(cpi, Pass2Encode_time);
+#endif
   } else if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
   } else {
@@ -8105,6 +8158,41 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     }
   }
 
+#endif
+
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  if (oxcf->pass == 2) end_timing(cpi, vp9_get_compressed_data_time);
+
+  // Print out timing information.
+  // Note: Use "cpi->frame_component_time[0] > 100 us" to avoid showing of
+  // show_existing_frame and lag-in-frames.
+  //  if (cpi->frame_component_time[0] > 100)
+  if (oxcf->pass == 2) {
+    uint64_t frame_total = 0, total = 0;
+    int i;
+
+    fprintf(stderr,
+            "\n Frame number: %d, Frame type: %s, Show Frame: %d, Q: %d\n",
+            cm->current_video_frame, get_frame_type_enum(cm->frame_type),
+            cm->show_frame, cm->base_qindex);
+    for (i = 0; i < kTimingComponents; i++) {
+      cpi->component_time[i] += cpi->frame_component_time[i];
+      // Use vp9_get_compressed_data_time (i = 0) as the total time.
+      if (i == 0) {
+        frame_total = cpi->frame_component_time[0];
+        total = cpi->component_time[0];
+      }
+      fprintf(stderr,
+              " %50s:  %15" PRId64 " us [%6.2f%%] (total: %15" PRId64
+              " us [%6.2f%%])\n",
+              get_component_name(i), cpi->frame_component_time[i],
+              (float)((float)cpi->frame_component_time[i] * 100.0 /
+                      (float)frame_total),
+              cpi->component_time[i],
+              (float)((float)cpi->component_time[i] * 100.0 / (float)total));
+      cpi->frame_component_time[i] = 0;
+    }
+  }
 #endif
 
   if (is_one_pass_svc(cpi)) {
