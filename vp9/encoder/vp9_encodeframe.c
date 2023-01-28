@@ -1980,6 +1980,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
   int64_t best_rd = INT64_MAX;
 
   vpx_clear_system_state();
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  start_timing(cpi, rd_pick_sb_modes_time);
+#endif
 
   // Use the lower precision, but faster, 32x32 fdct for mode selection.
   x->use_lp32x32fdct = 1;
@@ -2047,15 +2050,27 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
     vp9_rd_pick_intra_mode_sb(cpi, x, rd_cost, bsize, ctx, best_rd);
   } else {
     if (bsize >= BLOCK_8X8) {
+#if CONFIG_COLLECT_COMPONENT_TIMING
+      start_timing(cpi, vp9_rd_pick_inter_mode_sb_time);
+#endif
       if (segfeature_active(&cm->seg, mi->segment_id, SEG_LVL_SKIP))
         vp9_rd_pick_inter_mode_sb_seg_skip(cpi, tile_data, x, rd_cost, bsize,
                                            ctx, best_rd);
       else
         vp9_rd_pick_inter_mode_sb(cpi, tile_data, x, mi_row, mi_col, rd_cost,
                                   bsize, ctx, best_rd);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+      end_timing(cpi, vp9_rd_pick_inter_mode_sb_time);
+#endif
     } else {
+#if CONFIG_COLLECT_COMPONENT_TIMING
+      start_timing(cpi, vp9_rd_pick_inter_mode_sub8x8_time);
+#endif
       vp9_rd_pick_inter_mode_sub8x8(cpi, tile_data, x, mi_row, mi_col, rd_cost,
                                     bsize, ctx, best_rd);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+      end_timing(cpi, vp9_rd_pick_inter_mode_sub8x8_time);
+#endif
     }
   }
 
@@ -2078,6 +2093,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
 
   ctx->rate = rd_cost->rate;
   ctx->dist = rd_cost->dist;
+#if CONFIG_COLLECT_COMPONENT_TIMING
+  end_timing(cpi, rd_pick_sb_modes_time);
+#endif
 }
 #endif  // !CONFIG_REALTIME_ONLY
 
@@ -4411,8 +4429,14 @@ static int rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   if (should_encode_sb && pc_tree->index != 3) {
     int output_enabled = (bsize == BLOCK_64X64);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    start_timing(cpi, encode_sb_time);
+#endif
     encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
               pc_tree);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    end_timing(cpi, encode_sb_time);
+#endif
 #if CONFIG_RATE_CTRL
     if (oxcf->use_simple_encode_api) {
       // Store partition, motion vector of the superblock.
@@ -4539,8 +4563,15 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
                                 &x->min_partition_size, &x->max_partition_size);
       }
       td->pc_root->none.rdcost = 0;
+
+#if CONFIG_COLLECT_COMPONENT_TIMING
+      start_timing(cpi, rd_pick_partition_time);
+#endif
       rd_pick_partition(cpi, td, tile_data, tp, mi_row, mi_col, BLOCK_64X64,
                         &dummy_rdc, dummy_rdc, td->pc_root);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+      end_timing(cpi, rd_pick_partition_time);
+#endif
     }
     (*(cpi->row_mt_sync_write_ptr))(&tile_data->row_mt_sync, sb_row,
                                     sb_col_in_tile, num_sb_cols);
@@ -6283,7 +6314,13 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     if (cm->interp_filter == SWITCHABLE)
       cm->interp_filter = get_interp_filter(filter_thrs, is_alt_ref);
 
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    start_timing(cpi, encode_frame_internal_time);
+#endif
     encode_frame_internal(cpi);
+#if CONFIG_COLLECT_COMPONENT_TIMING
+    end_timing(cpi, encode_frame_internal_time);
+#endif
 
     for (i = 0; i < REFERENCE_MODES; ++i)
       mode_thrs[i] = (mode_thrs[i] + rdc->comp_pred_diff[i] / cm->MBs) / 2;
