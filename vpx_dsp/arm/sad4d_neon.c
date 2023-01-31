@@ -285,35 +285,16 @@ static INLINE void sad4xhx4d_neon(const uint8_t *src, int src_stride,
 
   int i = 0;
   do {
-    uint32x2_t s, r0, r1, r2, r3;
-    uint32_t s_lo, s_hi, r0_lo, r0_hi, r1_lo, r1_hi, r2_lo, r2_hi, r3_lo, r3_hi;
+    uint8x8_t s = load_unaligned_u8(src + i * src_stride, src_stride);
+    uint8x8_t r0 = load_unaligned_u8(ref[0] + i * ref_stride, ref_stride);
+    uint8x8_t r1 = load_unaligned_u8(ref[1] + i * ref_stride, ref_stride);
+    uint8x8_t r2 = load_unaligned_u8(ref[2] + i * ref_stride, ref_stride);
+    uint8x8_t r3 = load_unaligned_u8(ref[3] + i * ref_stride, ref_stride);
 
-    memcpy(&s_lo, src + i * src_stride, 4);
-    memcpy(&r0_lo, ref[0] + i * ref_stride, 4);
-    memcpy(&r1_lo, ref[1] + i * ref_stride, 4);
-    memcpy(&r2_lo, ref[2] + i * ref_stride, 4);
-    memcpy(&r3_lo, ref[3] + i * ref_stride, 4);
-    s = vdup_n_u32(s_lo);
-    r0 = vdup_n_u32(r0_lo);
-    r1 = vdup_n_u32(r1_lo);
-    r2 = vdup_n_u32(r2_lo);
-    r3 = vdup_n_u32(r3_lo);
-
-    memcpy(&s_hi, src + (i + 1) * src_stride, 4);
-    memcpy(&r0_hi, ref[0] + (i + 1) * ref_stride, 4);
-    memcpy(&r1_hi, ref[1] + (i + 1) * ref_stride, 4);
-    memcpy(&r2_hi, ref[2] + (i + 1) * ref_stride, 4);
-    memcpy(&r3_hi, ref[3] + (i + 1) * ref_stride, 4);
-    s = vset_lane_u32(s_hi, s, 1);
-    r0 = vset_lane_u32(r0_hi, r0, 1);
-    r1 = vset_lane_u32(r1_hi, r1, 1);
-    r2 = vset_lane_u32(r2_hi, r2, 1);
-    r3 = vset_lane_u32(r3_hi, r3, 1);
-
-    sad8_neon(vreinterpret_u8_u32(s), vreinterpret_u8_u32(r0), &sum[0]);
-    sad8_neon(vreinterpret_u8_u32(s), vreinterpret_u8_u32(r1), &sum[1]);
-    sad8_neon(vreinterpret_u8_u32(s), vreinterpret_u8_u32(r2), &sum[2]);
-    sad8_neon(vreinterpret_u8_u32(s), vreinterpret_u8_u32(r3), &sum[3]);
+    sad8_neon(s, r0, &sum[0]);
+    sad8_neon(s, r1, &sum[1]);
+    sad8_neon(s, r2, &sum[2]);
+    sad8_neon(s, r3, &sum[3]);
 
     i += 2;
   } while (i < h);
