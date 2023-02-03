@@ -46,7 +46,7 @@ specialize qw/vpx_d45_predictor_4x4 neon sse2/;
 add_proto qw/void vpx_d45e_predictor_4x4/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 
 add_proto qw/void vpx_d63_predictor_4x4/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d63_predictor_4x4 ssse3/;
+specialize qw/vpx_d63_predictor_4x4 neon ssse3/;
 
 add_proto qw/void vpx_d63e_predictor_4x4/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 
@@ -94,7 +94,7 @@ specialize qw/vpx_d45_predictor_8x8 neon sse2/;
 
 add_proto qw/void vpx_d63_predictor_8x8/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 # TODO(crbug.com/webm/1522): Re-enable vsx implementation.
-specialize qw/vpx_d63_predictor_8x8 ssse3/;
+specialize qw/vpx_d63_predictor_8x8 neon ssse3/;
 
 add_proto qw/void vpx_h_predictor_8x8/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 # TODO(crbug.com/webm/1522): Re-enable vsx implementation.
@@ -135,7 +135,7 @@ add_proto qw/void vpx_d45_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, con
 specialize qw/vpx_d45_predictor_16x16 neon ssse3 vsx/;
 
 add_proto qw/void vpx_d63_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d63_predictor_16x16 ssse3 vsx/;
+specialize qw/vpx_d63_predictor_16x16 neon ssse3 vsx/;
 
 add_proto qw/void vpx_h_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_h_predictor_16x16 neon dspr2 msa sse2 vsx/;
@@ -173,7 +173,7 @@ add_proto qw/void vpx_d45_predictor_32x32/, "uint8_t *dst, ptrdiff_t stride, con
 specialize qw/vpx_d45_predictor_32x32 neon ssse3 vsx/;
 
 add_proto qw/void vpx_d63_predictor_32x32/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d63_predictor_32x32 ssse3 vsx/;
+specialize qw/vpx_d63_predictor_32x32 neon ssse3 vsx/;
 
 add_proto qw/void vpx_h_predictor_32x32/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_h_predictor_32x32 neon msa sse2 vsx/;
