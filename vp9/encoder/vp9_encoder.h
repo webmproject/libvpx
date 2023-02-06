@@ -91,13 +91,6 @@ typedef enum {
 } ENCODE_BREAKOUT_TYPE;
 
 typedef enum {
-  NORMAL = 0,
-  FOURFIVE = 1,
-  THREEFIVE = 2,
-  ONETWO = 3
-} VPX_SCALING;
-
-typedef enum {
   // Good Quality Fast Encoding. The encoder balances quality with the amount of
   // time it takes to encode the output. Speed setting controls how fast.
   GOOD,
@@ -1236,8 +1229,8 @@ int vp9_set_active_map(VP9_COMP *cpi, unsigned char *new_map_16x16, int rows,
 int vp9_get_active_map(VP9_COMP *cpi, unsigned char *new_map_16x16, int rows,
                        int cols);
 
-int vp9_set_internal_size(VP9_COMP *cpi, VPX_SCALING horiz_mode,
-                          VPX_SCALING vert_mode);
+int vp9_set_internal_size(VP9_COMP *cpi, VPX_SCALING_MODE horiz_mode,
+                          VPX_SCALING_MODE vert_mode);
 
 int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
                          unsigned int height);

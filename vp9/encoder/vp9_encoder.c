@@ -502,22 +502,22 @@ static const char *level_fail_messages[TARGET_LEVEL_FAIL_IDS] = {
   "Too many reference buffers are used."
 };
 
-static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
+static INLINE void Scale2Ratio(VPX_SCALING_MODE mode, int *hr, int *hs) {
   switch (mode) {
-    case NORMAL:
+    case VP8E_NORMAL:
       *hr = 1;
       *hs = 1;
       break;
-    case FOURFIVE:
+    case VP8E_FOURFIVE:
       *hr = 4;
       *hs = 5;
       break;
-    case THREEFIVE:
+    case VP8E_THREEFIVE:
       *hr = 3;
       *hs = 5;
       break;
     default:
-      assert(mode == ONETWO);
+      assert(mode == VP8E_ONETWO);
       *hr = 1;
       *hs = 2;
       break;
@@ -8237,12 +8237,12 @@ int vp9_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
   }
 }
 
-int vp9_set_internal_size(VP9_COMP *cpi, VPX_SCALING horiz_mode,
-                          VPX_SCALING vert_mode) {
+int vp9_set_internal_size(VP9_COMP *cpi, VPX_SCALING_MODE horiz_mode,
+                          VPX_SCALING_MODE vert_mode) {
   VP9_COMMON *cm = &cpi->common;
   int hr = 0, hs = 0, vr = 0, vs = 0;
 
-  if (horiz_mode > ONETWO || vert_mode > ONETWO) return -1;
+  if (horiz_mode > VP8E_ONETWO || vert_mode > VP8E_ONETWO) return -1;
 
   Scale2Ratio(horiz_mode, &hr, &hs);
   Scale2Ratio(vert_mode, &vr, &vs);
