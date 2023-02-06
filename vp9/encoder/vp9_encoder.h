@@ -1474,6 +1474,19 @@ int vp9_get_psnr(const VP9_COMP *cpi, PSNR_STATS *psnr);
 
 #define LAYER_IDS_TO_IDX(sl, tl, num_tl) ((sl) * (num_tl) + (tl))
 
+static INLINE void alloc_frame_mvs(VP9_COMMON *const cm, int buffer_idx) {
+  RefCntBuffer *const new_fb_ptr = &cm->buffer_pool->frame_bufs[buffer_idx];
+  if (new_fb_ptr->mvs == NULL || new_fb_ptr->mi_rows < cm->mi_rows ||
+      new_fb_ptr->mi_cols < cm->mi_cols) {
+    vpx_free(new_fb_ptr->mvs);
+    CHECK_MEM_ERROR(cm, new_fb_ptr->mvs,
+                    (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
+                                         sizeof(*new_fb_ptr->mvs)));
+    new_fb_ptr->mi_rows = cm->mi_rows;
+    new_fb_ptr->mi_cols = cm->mi_cols;
+  }
+}
+
 #if CONFIG_COLLECT_COMPONENT_TIMING
 static INLINE void start_timing(VP9_COMP *cpi, int component) {
   vpx_usec_timer_start(&cpi->component_timer[component]);
