@@ -17,21 +17,6 @@
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/sum_neon.h"
 
-static INLINE uint32x4_t horizontal_add_4d_u32(uint32x4_t sum[4]) {
-#if defined(__aarch64__)
-  uint32x4_t res01 = vpaddq_u32(sum[0], sum[1]);
-  uint32x4_t res23 = vpaddq_u32(sum[2], sum[3]);
-  return vpaddq_u32(res01, res23);
-#else
-  uint32x4_t res = vdupq_n_u32(0);
-  res = vsetq_lane_u32(horizontal_add_uint32x4(sum[0]), res, 0);
-  res = vsetq_lane_u32(horizontal_add_uint32x4(sum[1]), res, 1);
-  res = vsetq_lane_u32(horizontal_add_uint32x4(sum[2]), res, 2);
-  res = vsetq_lane_u32(horizontal_add_uint32x4(sum[3]), res, 3);
-  return res;
-#endif
-}
-
 static INLINE void highbd_sad4xhx4d_neon(const uint8_t *src_ptr, int src_stride,
                                          const uint8_t *const ref_ptr[4],
                                          int ref_stride, uint32_t res[4],
@@ -60,7 +45,7 @@ static INLINE void highbd_sad4xhx4d_neon(const uint8_t *src_ptr, int src_stride,
 
   } while (++i < h);
 
-  vst1q_u32(res, horizontal_add_4d_u32(sum));
+  vst1q_u32(res, horizontal_add_4d_uint32x4(sum));
 }
 
 static INLINE void sad8_neon(uint16x8_t src, uint16x8_t ref,
@@ -93,7 +78,7 @@ static INLINE void highbd_sad8xhx4d_neon(const uint8_t *src_ptr, int src_stride,
 
   } while (++i < h);
 
-  vst1q_u32(res, horizontal_add_4d_u32(sum));
+  vst1q_u32(res, horizontal_add_4d_uint32x4(sum));
 }
 
 static INLINE void highbd_sad16xhx4d_neon(const uint8_t *src_ptr,
@@ -136,7 +121,7 @@ static INLINE void highbd_sad16xhx4d_neon(const uint8_t *src_ptr,
   sum[2] = vaddq_u32(sum_lo[2], sum_hi[2]);
   sum[3] = vaddq_u32(sum_lo[3], sum_hi[3]);
 
-  vst1q_u32(res, horizontal_add_4d_u32(sum));
+  vst1q_u32(res, horizontal_add_4d_uint32x4(sum));
 }
 
 static INLINE void highbd_sadwxhx4d_neon(const uint8_t *src_ptr, int src_stride,
@@ -203,7 +188,7 @@ static INLINE void highbd_sadwxhx4d_neon(const uint8_t *src_ptr, int src_stride,
   sum[2] = vaddq_u32(sum_lo[2], sum_hi[2]);
   sum[3] = vaddq_u32(sum_lo[3], sum_hi[3]);
 
-  vst1q_u32(res, horizontal_add_4d_u32(sum));
+  vst1q_u32(res, horizontal_add_4d_uint32x4(sum));
 }
 
 static INLINE void highbd_sad64xhx4d_neon(const uint8_t *src_ptr,
