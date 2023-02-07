@@ -209,15 +209,18 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   const int boosted = frame_is_boosted(cpi);
   int i;
 
-  sf->tx_size_search_breakout = 1;
+  sf->adaptive_pred_interp_filter = 1;
   sf->adaptive_rd_thresh = 1;
   sf->adaptive_rd_thresh_row_mt = 0;
   sf->allow_skip_recode = 1;
   sf->less_rectangular_check = 1;
-  sf->use_square_partition_only = !boosted;
+  sf->mv.auto_mv_step_size = 1;
   sf->prune_ref_frame_for_rect_partitions = 1;
-  sf->rd_ml_partition.var_pruning = 1;
+  sf->temporal_filter_search_method = NSTEP;
+  sf->tx_size_search_breakout = 1;
+  sf->use_square_partition_only = !boosted;
 
+  sf->rd_ml_partition.var_pruning = 1;
   sf->rd_ml_partition.prune_rect_thresh[0] = -1;
   sf->rd_ml_partition.prune_rect_thresh[1] = 350;
   sf->rd_ml_partition.prune_rect_thresh[2] = 325;
@@ -238,7 +241,6 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   }
 
   if (speed >= 1) {
-    sf->temporal_filter_search_method = NSTEP;
     sf->rd_ml_partition.var_pruning = !boosted;
     sf->rd_ml_partition.prune_rect_thresh[1] = 225;
     sf->rd_ml_partition.prune_rect_thresh[2] = 225;
@@ -263,11 +265,9 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->less_rectangular_check = 1;
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
-    sf->mv.auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
     sf->mv.subpel_search_level = 1;
     if (cpi->oxcf.content != VP9E_CONTENT_FILM) sf->mode_skip_start = 10;
-    sf->adaptive_pred_interp_filter = 1;
     sf->allow_acl = 0;
 
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
