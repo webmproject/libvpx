@@ -120,70 +120,175 @@ static void highbd_var_filter_block2d_bil_w64(const uint16_t *src_ptr,
                                       64, dst_height, filter_offset);
 }
 
-#define HBD_SUBPEL_VARIANCE_WXH_NEON(w, h, padding)                          \
-  unsigned int vpx_highbd_8_sub_pixel_variance##w##x##h##_neon(              \
-      const uint8_t *src, int src_stride, int xoffset, int yoffset,          \
-      const uint8_t *ref, int ref_stride, uint32_t *sse) {                   \
-    uint16_t tmp0[w * (h + padding)];                                        \
-    uint16_t tmp1[w * h];                                                    \
-    uint16_t *src_ptr = CONVERT_TO_SHORTPTR(src);                            \
-                                                                             \
-    highbd_var_filter_block2d_bil_w##w(src_ptr, tmp0, src_stride, 1,         \
-                                       (h + padding), xoffset);              \
-    highbd_var_filter_block2d_bil_w##w(tmp0, tmp1, w, w, h, yoffset);        \
-                                                                             \
-    return vpx_highbd_8_variance##w##x##h(CONVERT_TO_BYTEPTR(tmp1), w, ref,  \
-                                          ref_stride, sse);                  \
-  }                                                                          \
-                                                                             \
-  unsigned int vpx_highbd_10_sub_pixel_variance##w##x##h##_neon(             \
-      const uint8_t *src, int src_stride, int xoffset, int yoffset,          \
-      const uint8_t *ref, int ref_stride, uint32_t *sse) {                   \
-    uint16_t tmp0[w * (h + padding)];                                        \
-    uint16_t tmp1[w * h];                                                    \
-    uint16_t *src_ptr = CONVERT_TO_SHORTPTR(src);                            \
-                                                                             \
-    highbd_var_filter_block2d_bil_w##w(src_ptr, tmp0, src_stride, 1,         \
-                                       (h + padding), xoffset);              \
-    highbd_var_filter_block2d_bil_w##w(tmp0, tmp1, w, w, h, yoffset);        \
-                                                                             \
-    return vpx_highbd_10_variance##w##x##h(CONVERT_TO_BYTEPTR(tmp1), w, ref, \
-                                           ref_stride, sse);                 \
-  }                                                                          \
-  unsigned int vpx_highbd_12_sub_pixel_variance##w##x##h##_neon(             \
-      const uint8_t *src, int src_stride, int xoffset, int yoffset,          \
-      const uint8_t *ref, int ref_stride, uint32_t *sse) {                   \
-    uint16_t tmp0[w * (h + padding)];                                        \
-    uint16_t tmp1[w * h];                                                    \
-    uint16_t *src_ptr = CONVERT_TO_SHORTPTR(src);                            \
-                                                                             \
-    highbd_var_filter_block2d_bil_w##w(src_ptr, tmp0, src_stride, 1,         \
-                                       (h + padding), xoffset);              \
-    highbd_var_filter_block2d_bil_w##w(tmp0, tmp1, w, w, h, yoffset);        \
-                                                                             \
-    return vpx_highbd_12_variance##w##x##h(CONVERT_TO_BYTEPTR(tmp1), w, ref, \
-                                           ref_stride, sse);                 \
+static void highbd_var_filter_block2d_avg(const uint16_t *src_ptr,
+                                          uint16_t *dst_ptr, int src_stride,
+                                          int pixel_step, int dst_width,
+                                          int dst_height) {
+  int i = dst_height;
+
+  // We only specialize on the filter values for large block sizes (>= 16x16.)
+  assert(dst_width >= 16 && dst_width % 16 == 0);
+
+  do {
+    int j = 0;
+    do {
+      uint16x8_t s0 = vld1q_u16(src_ptr + j);
+      uint16x8_t s1 = vld1q_u16(src_ptr + j + pixel_step);
+      uint16x8_t avg = vrhaddq_u16(s0, s1);
+      vst1q_u16(dst_ptr + j, avg);
+
+      j += 8;
+    } while (j < dst_width);
+
+    src_ptr += src_stride;
+    dst_ptr += dst_width;
+  } while (--i != 0);
+}
+
+#define HBD_SUBPEL_VARIANCE_WXH_NEON(bitdepth, w, h, padding)                  \
+  unsigned int vpx_highbd_##bitdepth##_sub_pixel_variance##w##x##h##_neon(     \
+      const uint8_t *src, int src_stride, int xoffset, int yoffset,            \
+      const uint8_t *ref, int ref_stride, uint32_t *sse) {                     \
+    uint16_t tmp0[w * (h + padding)];                                          \
+    uint16_t tmp1[w * h];                                                      \
+    uint16_t *src_ptr = CONVERT_TO_SHORTPTR(src);                              \
+                                                                               \
+    highbd_var_filter_block2d_bil_w##w(src_ptr, tmp0, src_stride, 1,           \
+                                       (h + padding), xoffset);                \
+    highbd_var_filter_block2d_bil_w##w(tmp0, tmp1, w, w, h, yoffset);          \
+                                                                               \
+    return vpx_highbd_##bitdepth##_variance##w##x##h(CONVERT_TO_BYTEPTR(tmp1), \
+                                                     w, ref, ref_stride, sse); \
+  }
+
+#define HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(bitdepth, w, h, padding)      \
+  unsigned int vpx_highbd_##bitdepth##_sub_pixel_variance##w##x##h##_neon(     \
+      const uint8_t *src, int src_stride, int xoffset, int yoffset,            \
+      const uint8_t *ref, int ref_stride, unsigned int *sse) {                 \
+    uint16_t *src_ptr = CONVERT_TO_SHORTPTR(src);                              \
+                                                                               \
+    if (xoffset == 0) {                                                        \
+      if (yoffset == 0) {                                                      \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(src_ptr), src_stride, ref, ref_stride, sse);    \
+      } else if (yoffset == 4) {                                               \
+        uint16_t tmp[w * h];                                                   \
+        highbd_var_filter_block2d_avg(src_ptr, tmp, src_stride, src_stride, w, \
+                                      h);                                      \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(tmp), w, ref, ref_stride, sse);                 \
+      } else {                                                                 \
+        uint16_t tmp[w * h];                                                   \
+        highbd_var_filter_block2d_bil_w##w(src_ptr, tmp, src_stride,           \
+                                           src_stride, h, yoffset);            \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(tmp), w, ref, ref_stride, sse);                 \
+      }                                                                        \
+    } else if (xoffset == 4) {                                                 \
+      uint16_t tmp0[w * (h + padding)];                                        \
+      if (yoffset == 0) {                                                      \
+        highbd_var_filter_block2d_avg(src_ptr, tmp0, src_stride, 1, w, h);     \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(tmp0), w, ref, ref_stride, sse);                \
+      } else if (yoffset == 4) {                                               \
+        uint16_t tmp1[w * (h + padding)];                                      \
+        highbd_var_filter_block2d_avg(src_ptr, tmp0, src_stride, 1, w,         \
+                                      (h + padding));                          \
+        highbd_var_filter_block2d_avg(tmp0, tmp1, w, w, w, h);                 \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(tmp1), w, ref, ref_stride, sse);                \
+      } else {                                                                 \
+        uint16_t tmp1[w * (h + padding)];                                      \
+        highbd_var_filter_block2d_avg(src_ptr, tmp0, src_stride, 1, w,         \
+                                      (h + padding));                          \
+        highbd_var_filter_block2d_bil_w##w(tmp0, tmp1, w, w, h, yoffset);      \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(tmp1), w, ref, ref_stride, sse);                \
+      }                                                                        \
+    } else {                                                                   \
+      uint16_t tmp0[w * (h + padding)];                                        \
+      if (yoffset == 0) {                                                      \
+        highbd_var_filter_block2d_bil_w##w(src_ptr, tmp0, src_stride, 1, h,    \
+                                           xoffset);                           \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(tmp0), w, ref, ref_stride, sse);                \
+      } else if (yoffset == 4) {                                               \
+        uint16_t tmp1[w * h];                                                  \
+        highbd_var_filter_block2d_bil_w##w(src_ptr, tmp0, src_stride, 1,       \
+                                           (h + padding), xoffset);            \
+        highbd_var_filter_block2d_avg(tmp0, tmp1, w, w, w, h);                 \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(tmp1), w, ref, ref_stride, sse);                \
+      } else {                                                                 \
+        uint16_t tmp1[w * h];                                                  \
+        highbd_var_filter_block2d_bil_w##w(src_ptr, tmp0, src_stride, 1,       \
+                                           (h + padding), xoffset);            \
+        highbd_var_filter_block2d_bil_w##w(tmp0, tmp1, w, w, h, yoffset);      \
+        return vpx_highbd_##bitdepth##_variance##w##x##h##_neon(               \
+            CONVERT_TO_BYTEPTR(tmp1), w, ref, ref_stride, sse);                \
+      }                                                                        \
+    }                                                                          \
   }
 
 // 4x<h> blocks are processed two rows at a time, so require an extra row of
 // padding.
-HBD_SUBPEL_VARIANCE_WXH_NEON(4, 4, 2)
-HBD_SUBPEL_VARIANCE_WXH_NEON(4, 8, 2)
 
-HBD_SUBPEL_VARIANCE_WXH_NEON(8, 4, 1)
-HBD_SUBPEL_VARIANCE_WXH_NEON(8, 8, 1)
-HBD_SUBPEL_VARIANCE_WXH_NEON(8, 16, 1)
+// 8-bit
+HBD_SUBPEL_VARIANCE_WXH_NEON(8, 4, 4, 2)
+HBD_SUBPEL_VARIANCE_WXH_NEON(8, 4, 8, 2)
 
-HBD_SUBPEL_VARIANCE_WXH_NEON(16, 8, 1)
-HBD_SUBPEL_VARIANCE_WXH_NEON(16, 16, 1)
-HBD_SUBPEL_VARIANCE_WXH_NEON(16, 32, 1)
+HBD_SUBPEL_VARIANCE_WXH_NEON(8, 8, 4, 1)
+HBD_SUBPEL_VARIANCE_WXH_NEON(8, 8, 8, 1)
+HBD_SUBPEL_VARIANCE_WXH_NEON(8, 8, 16, 1)
 
-HBD_SUBPEL_VARIANCE_WXH_NEON(32, 16, 1)
-HBD_SUBPEL_VARIANCE_WXH_NEON(32, 32, 1)
-HBD_SUBPEL_VARIANCE_WXH_NEON(32, 64, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(8, 16, 8, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(8, 16, 16, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(8, 16, 32, 1)
 
-HBD_SUBPEL_VARIANCE_WXH_NEON(64, 32, 1)
-HBD_SUBPEL_VARIANCE_WXH_NEON(64, 64, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(8, 32, 16, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(8, 32, 32, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(8, 32, 64, 1)
+
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(8, 64, 32, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(8, 64, 64, 1)
+
+// 10-bit
+HBD_SUBPEL_VARIANCE_WXH_NEON(10, 4, 4, 2)
+HBD_SUBPEL_VARIANCE_WXH_NEON(10, 4, 8, 2)
+
+HBD_SUBPEL_VARIANCE_WXH_NEON(10, 8, 4, 1)
+HBD_SUBPEL_VARIANCE_WXH_NEON(10, 8, 8, 1)
+HBD_SUBPEL_VARIANCE_WXH_NEON(10, 8, 16, 1)
+
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(10, 16, 8, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(10, 16, 16, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(10, 16, 32, 1)
+
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(10, 32, 16, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(10, 32, 32, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(10, 32, 64, 1)
+
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(10, 64, 32, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(10, 64, 64, 1)
+
+// 12-bit
+HBD_SUBPEL_VARIANCE_WXH_NEON(12, 4, 4, 2)
+HBD_SUBPEL_VARIANCE_WXH_NEON(12, 4, 8, 2)
+
+HBD_SUBPEL_VARIANCE_WXH_NEON(12, 8, 4, 1)
+HBD_SUBPEL_VARIANCE_WXH_NEON(12, 8, 8, 1)
+HBD_SUBPEL_VARIANCE_WXH_NEON(12, 8, 16, 1)
+
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 16, 8, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 16, 16, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 16, 32, 1)
+
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 32, 16, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 32, 32, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 32, 64, 1)
+
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 64, 32, 1)
+HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 64, 64, 1)
 
 // Combine bilinear filter with vpx_highbd_comp_avg_pred for blocks having
 // width 4.
