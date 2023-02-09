@@ -63,7 +63,7 @@ add_proto qw/void vpx_d135_predictor_4x4/, "uint8_t *dst, ptrdiff_t stride, cons
 specialize qw/vpx_d135_predictor_4x4 neon/;
 
 add_proto qw/void vpx_d153_predictor_4x4/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d153_predictor_4x4 ssse3/;
+specialize qw/vpx_d153_predictor_4x4 neon ssse3/;
 
 add_proto qw/void vpx_v_predictor_4x4/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_v_predictor_4x4 neon msa sse2/;
@@ -108,7 +108,7 @@ add_proto qw/void vpx_d135_predictor_8x8/, "uint8_t *dst, ptrdiff_t stride, cons
 specialize qw/vpx_d135_predictor_8x8 neon/;
 
 add_proto qw/void vpx_d153_predictor_8x8/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d153_predictor_8x8 ssse3/;
+specialize qw/vpx_d153_predictor_8x8 neon ssse3/;
 
 add_proto qw/void vpx_v_predictor_8x8/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_v_predictor_8x8 neon msa sse2/;
@@ -149,7 +149,7 @@ add_proto qw/void vpx_d135_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, co
 specialize qw/vpx_d135_predictor_16x16 neon/;
 
 add_proto qw/void vpx_d153_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d153_predictor_16x16 ssse3/;
+specialize qw/vpx_d153_predictor_16x16 neon ssse3/;
 
 add_proto qw/void vpx_v_predictor_16x16/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_v_predictor_16x16 neon msa sse2 vsx/;
@@ -188,7 +188,7 @@ add_proto qw/void vpx_d135_predictor_32x32/, "uint8_t *dst, ptrdiff_t stride, co
 specialize qw/vpx_d135_predictor_32x32 neon/;
 
 add_proto qw/void vpx_d153_predictor_32x32/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vpx_d153_predictor_32x32 ssse3/;
+specialize qw/vpx_d153_predictor_32x32 neon ssse3/;
 
 add_proto qw/void vpx_v_predictor_32x32/, "uint8_t *dst, ptrdiff_t stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vpx_v_predictor_32x32 neon msa sse2 vsx/;
