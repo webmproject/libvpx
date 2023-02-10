@@ -3774,13 +3774,10 @@ static void set_frame_size(VP9_COMP *cpi) {
   set_ref_ptrs(cm, xd, LAST_FRAME, LAST_FRAME);
 }
 
-#if CONFIG_CONSISTENT_RECODE || CONFIG_RATE_CTRL
 static void save_encode_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
-  int tile_col, tile_row;
+  int tile_idx;
   int i, j;
+  TileDataEnc *tile_data;
   RD_OPT *rd_opt = &cpi->rd;
   for (i = 0; i < MAX_REF_FRAMES; i++) {
     for (j = 0; j < REFERENCE_MODES; j++)
@@ -3791,21 +3788,12 @@ static void save_encode_params(VP9_COMP *cpi) {
       rd_opt->filter_threshes_prev[i][j] = rd_opt->filter_threshes[i][j];
   }
 
-  if (cpi->tile_data != NULL) {
-    for (tile_row = 0; tile_row < tile_rows; ++tile_row)
-      for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-        TileDataEnc *tile_data =
-            &cpi->tile_data[tile_row * tile_cols + tile_col];
-        for (i = 0; i < BLOCK_SIZES; ++i) {
-          for (j = 0; j < MAX_MODES; ++j) {
-            tile_data->thresh_freq_fact_prev[i][j] =
-                tile_data->thresh_freq_fact[i][j];
-          }
-        }
-      }
+  for (tile_idx = 0; tile_idx < cpi->allocated_tiles; tile_idx++) {
+    assert(cpi->tile_data);
+    tile_data = &cpi->tile_data[tile_idx];
+    vp9_copy(tile_data->thresh_freq_fact_prev, tile_data->thresh_freq_fact);
   }
 }
-#endif  // CONFIG_CONSISTENT_RECODE || CONFIG_RATE_CTRL
 
 static INLINE void set_raw_source_frame(VP9_COMP *cpi) {
 #ifdef ENABLE_KF_DENOISE
@@ -5484,14 +5472,8 @@ static void encode_frame_to_data_rate(
   memset(cpi->mode_chosen_counts, 0,
          MAX_MODES * sizeof(*cpi->mode_chosen_counts));
 #endif
-#if CONFIG_CONSISTENT_RECODE
   // Backup to ensure consistency between recodes
   save_encode_params(cpi);
-#elif CONFIG_RATE_CTRL
-  if (cpi->oxcf.use_simple_encode_api) {
-    save_encode_params(cpi);
-  }
-#endif
   if (cpi->ext_ratectrl.ready &&
       (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_RDMULT) != 0) {
     vpx_codec_err_t codec_status;
