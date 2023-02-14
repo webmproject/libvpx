@@ -81,6 +81,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
     // Currently, the machine-learning based partition search early termination
     // is only used while VPXMIN(cm->width, cm->height) >= 480 and speed = 0.
     sf->rd_ml_partition.search_early_termination = 1;
+    sf->recode_tolerance_high = 45;
   } else {
     sf->use_square_only_thresh_high = BLOCK_32X32;
   }
@@ -314,7 +315,6 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->disable_filter_search_var_thresh = 100;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
-    sf->recode_tolerance_low = 15;
     sf->recode_tolerance_high = 45;
     sf->enhanced_full_pixel_motion_search = 0;
     sf->prune_ref_frame_for_rect_partitions = 0;
