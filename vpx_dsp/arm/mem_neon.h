@@ -132,9 +132,22 @@ static INLINE uint8x8_t load_unaligned_u8_4x1(const uint8_t *buf) {
   return vreinterpret_u8_u32(a_u32);
 }
 
+// Load 4 contiguous bytes and replicate across a vector when alignment is not
+// guaranteed.
+static INLINE uint8x8_t load_replicate_u8_4x1(const uint8_t *buf) {
+  uint32_t a;
+  memcpy(&a, buf, 4);
+  return vreinterpret_u8_u32(vdup_n_u32(a));
+}
+
 // Store 4 contiguous bytes from the low half of an 8x8 vector.
 static INLINE void store_u8_4x1(uint8_t *buf, uint8x8_t a) {
   vst1_lane_u32((uint32_t *)buf, vreinterpret_u32_u8(a), 0);
+}
+
+// Store 4 contiguous bytes from the high half of an 8x8 vector.
+static INLINE void store_u8_4x1_high(uint8_t *buf, uint8x8_t a) {
+  vst1_lane_u32((uint32_t *)buf, vreinterpret_u32_u8(a), 1);
 }
 
 // Load 2 sets of 4 bytes when alignment is not guaranteed.
