@@ -84,6 +84,9 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
   } else {
     sf->use_square_only_thresh_high = BLOCK_32X32;
   }
+  if (is_720p_or_larger) {
+    sf->alt_ref_search_fp = 1;
+  }
 
   if (!is_1080p_or_larger) {
     sf->rd_ml_partition.search_breakout = 1;
@@ -212,6 +215,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   const int boosted = frame_is_boosted(cpi);
   int i;
 
+  sf->adaptive_interp_filter_search = 1;
   sf->adaptive_pred_interp_filter = 1;
   sf->adaptive_rd_thresh = 1;
   sf->adaptive_rd_thresh_row_mt = 0;
@@ -222,6 +226,9 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   sf->temporal_filter_search_method = NSTEP;
   sf->tx_size_search_breakout = 1;
   sf->use_square_partition_only = !boosted;
+
+  // Reference masking is not supported in dynamic scaling mode.
+  sf->reference_masking = oxcf->resize_mode != RESIZE_DYNAMIC;
 
   sf->rd_ml_partition.var_pruning = 1;
   sf->rd_ml_partition.prune_rect_thresh[0] = -1;
@@ -299,9 +306,6 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->tx_size_search_method =
         frame_is_boosted(cpi) ? USE_FULL_RD : USE_LARGESTALL;
 
-    // Reference masking is not supported in dynamic scaling mode.
-    sf->reference_masking = oxcf->resize_mode != RESIZE_DYNAMIC ? 1 : 0;
-
     sf->mode_search_skip_flags =
         (cm->frame_type == KEY_FRAME)
             ? 0
@@ -347,7 +351,6 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->mode_skip_start = 6;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC;
-    sf->adaptive_interp_filter_search = 1;
 
     if (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION) {
       for (i = 0; i < MAX_MESH_STEP; ++i) {
