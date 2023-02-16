@@ -1862,6 +1862,19 @@ static int check_best_zero_mv(const VP9_COMP *cpi,
   return 1;
 }
 
+static INLINE int skip_iters(const int_mv iter_mvs[][2], int ite, int id) {
+  if (ite >= 2 && iter_mvs[ite - 2][!id].as_int == iter_mvs[ite][!id].as_int) {
+    int_mv cur_fullpel_mv, prev_fullpel_mv;
+    cur_fullpel_mv.as_mv.row = iter_mvs[ite][id].as_mv.row >> 3;
+    cur_fullpel_mv.as_mv.col = iter_mvs[ite][id].as_mv.col >> 3;
+    prev_fullpel_mv.as_mv.row = iter_mvs[ite - 2][id].as_mv.row >> 3;
+    prev_fullpel_mv.as_mv.col = iter_mvs[ite - 2][id].as_mv.col >> 3;
+    if (cur_fullpel_mv.as_int == prev_fullpel_mv.as_int) return 1;
+  }
+  return 0;
+}
+
+#define NUM_ITERS 4
 static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
                                 int_mv *frame_mv, int mi_row, int mi_col,
                                 int_mv single_newmv[MAX_REF_FRAMES],
@@ -1874,6 +1887,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   const int refs[2] = { mi->ref_frame[0],
                         mi->ref_frame[1] < 0 ? 0 : mi->ref_frame[1] };
   int_mv ref_mv[2];
+  int_mv iter_mvs[NUM_ITERS][2];
   int ite, ref;
   const InterpKernel *kernel = vp9_filter_kernels[mi->interp_filter];
   struct scale_factors sf;
@@ -1909,6 +1923,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     }
 
     frame_mv[refs[ref]].as_int = single_newmv[refs[ref]].as_int;
+    iter_mvs[0][ref].as_int = single_newmv[refs[ref]].as_int;
   }
 
 // Since we have scaled the reference frames to match the size of the current
@@ -1923,7 +1938,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 
   // Allow joint search multiple times iteratively for each reference frame
   // and break out of the search loop if it couldn't find a better mv.
-  for (ite = 0; ite < 4; ite++) {
+  for (ite = 0; ite < NUM_ITERS; ite++) {
     struct buf_2d ref_yv12[2];
     uint32_t bestsme = UINT_MAX;
     int sadpb = x->sadperbit16;
@@ -1934,6 +1949,11 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     int id = ite % 2;  // Even iterations search in the first reference frame,
                        // odd iterations search in the second. The predictor
                        // found for the 'other' reference frame is factored in.
+
+    // Skip further iterations of search if in the previous iteration, the
+    // motion vector of the searched ref frame is unchanged, and the other ref
+    // frame's full-pixel mv is unchanged.
+    if (skip_iters(iter_mvs, ite, id)) break;
 
     // Initialized here because of compiler problem in Visual Studio.
     ref_yv12[0] = xd->plane[0].pre[0];
@@ -1999,6 +2019,10 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
       last_besterr[id] = bestsme;
     } else {
       break;
+    }
+    if (ite < NUM_ITERS - 1) {
+      iter_mvs[ite + 1][0].as_int = frame_mv[refs[0]].as_int;
+      iter_mvs[ite + 1][1].as_int = frame_mv[refs[1]].as_int;
     }
   }
 
