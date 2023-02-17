@@ -235,6 +235,7 @@ class RcInterfaceSvcTest : public ::libvpx_test::EncoderTest,
   virtual void PostEncodeFrameHook(::libvpx_test::Encoder *encoder) {
     ::libvpx_test::CxDataIterator iter = encoder->GetCxData();
     for (int sl = 0; sl < rc_cfg_.ss_number_layers; sl++) sizes_[sl] = 0;
+    std::vector<int> rc_qp;
     while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
       ParseSuperframeSizes(static_cast<const uint8_t *>(pkt->data.frame.buf),
                            pkt->data.frame.sz);
@@ -252,14 +253,17 @@ class RcInterfaceSvcTest : public ::libvpx_test::EncoderTest,
           rc_api_->ComputeQP(frame_params_);
           frame_params_.frame_type = libvpx::RcFrameType::kInterFrame;
           rc_api_->PostEncodeUpdate(sizes_[sl]);
+          rc_qp.push_back(rc_api_->GetQP());
         }
       }
     }
     if (!encoder_exit_) {
-      int loopfilter_level, qp;
+      int loopfilter_level;
+      std::vector<int> encoder_qp(VPX_SS_MAX_LAYERS, 0);
       encoder->Control(VP9E_GET_LOOPFILTER_LEVEL, &loopfilter_level);
-      encoder->Control(VP8E_GET_LAST_QUANTIZER, &qp);
-      ASSERT_EQ(rc_api_->GetQP(), qp);
+      encoder->Control(VP9E_GET_LAST_QUANTIZER_SVC_LAYERS, encoder_qp.data());
+      encoder_qp.resize(rc_qp.size());
+      ASSERT_EQ(rc_qp, encoder_qp);
       ASSERT_EQ(rc_api_->GetLoopfilterLevel(), loopfilter_level);
     }
   }
