@@ -102,6 +102,12 @@ static INLINE void store_s16q_to_tran_low(tran_low_t *buf, const int16x8_t a) {
 #endif
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE void store_s32q_to_tran_low(tran_low_t *buf, const int32x4_t a) {
+  vst1q_s32(buf, a);
+}
+#endif
+
 // Propagate type information to the compiler. Without this the compiler may
 // assume the required alignment of uint32_t (4 bytes) and add alignment hints
 // to the memory access.
