@@ -327,7 +327,9 @@ INSTANTIATE_TEST_SUITE_P(
 #if HAVE_NEON
 INSTANTIATE_TEST_SUITE_P(
     NEON, HadamardHighbdTest,
-    ::testing::Values(HadamardFuncWithSize(&vpx_highbd_hadamard_8x8_neon, 8)));
+    ::testing::Values(HadamardFuncWithSize(&vpx_highbd_hadamard_8x8_neon, 8),
+                      HadamardFuncWithSize(&vpx_highbd_hadamard_16x16_neon,
+                                           16)));
 #endif
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH

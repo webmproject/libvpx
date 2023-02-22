@@ -135,3 +135,42 @@ void vpx_highbd_hadamard_8x8_neon(const int16_t *src_diff, ptrdiff_t src_stride,
 
   hadamard_highbd_col4_second_pass(b0, b1, b2, b3, b4, b5, b6, b7, coeff + 32);
 }
+
+void vpx_highbd_hadamard_16x16_neon(const int16_t *src_diff,
+                                    ptrdiff_t src_stride, tran_low_t *coeff) {
+  int i = 0;
+
+  // Rearrange 16x16 to 8x32 and remove stride.
+  // Top left first.
+  vpx_highbd_hadamard_8x8_neon(src_diff, src_stride, coeff);
+  // Top right.
+  vpx_highbd_hadamard_8x8_neon(src_diff + 8, src_stride, coeff + 64);
+  // Bottom left.
+  vpx_highbd_hadamard_8x8_neon(src_diff + 8 * src_stride, src_stride,
+                               coeff + 128);
+  // Bottom right.
+  vpx_highbd_hadamard_8x8_neon(src_diff + 8 * src_stride + 8, src_stride,
+                               coeff + 192);
+
+  do {
+    int32x4_t a0 = load_tran_low_to_s32q(coeff + 4 * i);
+    int32x4_t a1 = load_tran_low_to_s32q(coeff + 4 * i + 64);
+    int32x4_t a2 = load_tran_low_to_s32q(coeff + 4 * i + 128);
+    int32x4_t a3 = load_tran_low_to_s32q(coeff + 4 * i + 192);
+
+    int32x4_t b0 = vhaddq_s32(a0, a1);
+    int32x4_t b1 = vhsubq_s32(a0, a1);
+    int32x4_t b2 = vhaddq_s32(a2, a3);
+    int32x4_t b3 = vhsubq_s32(a2, a3);
+
+    int32x4_t c0 = vaddq_s32(b0, b2);
+    int32x4_t c1 = vaddq_s32(b1, b3);
+    int32x4_t c2 = vsubq_s32(b0, b2);
+    int32x4_t c3 = vsubq_s32(b1, b3);
+
+    store_s32q_to_tran_low(coeff + 4 * i, c0);
+    store_s32q_to_tran_low(coeff + 4 * i + 64, c1);
+    store_s32q_to_tran_low(coeff + 4 * i + 128, c2);
+    store_s32q_to_tran_low(coeff + 4 * i + 192, c3);
+  } while (++i < 16);
+}

@@ -106,6 +106,10 @@ static INLINE void store_s16q_to_tran_low(tran_low_t *buf, const int16x8_t a) {
 static INLINE void store_s32q_to_tran_low(tran_low_t *buf, const int32x4_t a) {
   vst1q_s32(buf, a);
 }
+
+static INLINE int32x4_t load_tran_low_to_s32q(const tran_low_t *buf) {
+  return vld1q_s32(buf);
+}
 #endif
 
 // Propagate type information to the compiler. Without this the compiler may
