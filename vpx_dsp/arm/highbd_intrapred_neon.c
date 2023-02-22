@@ -1178,6 +1178,406 @@ void vpx_highbd_d117_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
 
 // -----------------------------------------------------------------------------
 
+void vpx_highbd_d153_predictor_4x4_neon(uint16_t *dst, ptrdiff_t stride,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
+  // See vpx_highbd_d153_predictor_8x8_neon for details on the implementation.
+  uint16x4_t az, a0, l0az, l0, l1, azl0, d0, d1, d2, d20_lo, d20_hi;
+  (void)bd;
+
+  az = vld1_u16(above - 1);
+  a0 = vld1_u16(above + 0);
+  // [ left[0], above[-1], above[0], above[1] ]
+  l0az = vext_u16(vld1_dup_u16(left), az, 3);
+
+  l0 = vld1_u16(left);
+  // The last lane here is unused, reading left[4] could cause a buffer
+  // over-read, so just fill with a duplicate of left[0] to avoid needing to
+  // materialize a zero:
+  // [ left[1], left[2], left[3], x ]
+  l1 = vext_u16(l0, l0, 1);
+  // [ above[-1], left[0], left[1], left[2] ]
+  azl0 = vext_u16(vld1_dup_u16(above - 1), l0, 3);
+
+  d0 = vrhadd_u16(azl0, l0);
+  d1 = vrhadd_u16(vhadd_u16(l0az, a0), az);
+  d2 = vrhadd_u16(vhadd_u16(azl0, l1), l0);
+
+  d20_lo = vzip_u16(vrev64_u16(d2), vrev64_u16(d0)).val[0];
+  d20_hi = vzip_u16(vrev64_u16(d2), vrev64_u16(d0)).val[1];
+
+  // Incrementally shift more elements from d0/d2 reversed into d1:
+  // stride=0 [ d0[0], d1[0], d1[1], d1[2] ]
+  // stride=1 [ d0[1], d2[0], d0[0], d1[0] ]
+  // stride=2 [ d0[2], d2[1], d0[1], d2[0] ]
+  // stride=3 [ d0[3], d2[2], d0[2], d2[1] ]
+  vst1_u16(dst + 0 * stride, vext_u16(d20_hi, d1, 3));
+  vst1_u16(dst + 1 * stride, vext_u16(d20_hi, d1, 1));
+  vst1_u16(dst + 2 * stride, vext_u16(d20_lo, d20_hi, 3));
+  vst1_u16(dst + 3 * stride, vext_u16(d20_lo, d20_hi, 1));
+}
+
+void vpx_highbd_d153_predictor_8x8_neon(uint16_t *dst, ptrdiff_t stride,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
+  uint16x8_t az, a0, l0az, l0, l1, azl0, d0, d1, d2, d0_rev, d2_rev, d20_lo,
+      d20_hi;
+  (void)bd;
+
+  az = vld1q_u16(above - 1);
+  a0 = vld1q_u16(above + 0);
+  // [ left[0], above[-1], ... , above[5] ]
+  l0az = vextq_u16(vld1q_dup_u16(left), az, 7);
+
+  l0 = vld1q_u16(left);
+  // The last lane here is unused, reading left[8] could cause a buffer
+  // over-read, so just fill with a duplicate of left[0] to avoid needing to
+  // materialize a zero:
+  // [ left[1], ... , left[7], x ]
+  l1 = vextq_u16(l0, l0, 1);
+  // [ above[-1], left[0], ... , left[6] ]
+  azl0 = vextq_u16(vld1q_dup_u16(above - 1), l0, 7);
+
+  // d0[0] = AVG2(above[-1], left[0])
+  // d0[1] = AVG2(left[0], left[1])
+  // ...
+  // d0[7] = AVG2(left[6], left[7])
+  d0 = vrhaddq_u16(azl0, l0);
+
+  // d1[0] = AVG3(left[0], above[-1], above[0])
+  // d1[1] = AVG3(above[-1], above[0], above[1])
+  // ...
+  // d1[7] = AVG3(above[5], above[6], above[7])
+  d1 = vrhaddq_u16(vhaddq_u16(l0az, a0), az);
+
+  // d2[0] = AVG3(above[-1], left[0], left[1])
+  // d2[1] = AVG3(left[0], left[1], left[2])
+  // ...
+  // d2[7] = AVG3(left[6], left[7], left[8])
+  d2 = vrhaddq_u16(vhaddq_u16(azl0, l1), l0);
+
+  // The ext instruction shifts elements in from the end of the vector rather
+  // than the start, so reverse the vectors to put the elements to be shifted
+  // in at the end:
+  d0_rev = vrev64q_u16(vextq_u16(d0, d0, 4));
+  d2_rev = vrev64q_u16(vextq_u16(d2, d2, 4));
+
+  d20_lo = vzipq_u16(d2_rev, d0_rev).val[0];
+  d20_hi = vzipq_u16(d2_rev, d0_rev).val[1];
+
+  // Incrementally shift more elements from d0/d2 reversed into d1:
+  // stride=0 [ d0[0], d1[0], d1[1], d1[2], d1[3], d1[4], d1[5], d1[6] ]
+  // stride=1 [ d0[1], d2[0], d0[0], d1[0], d1[1], d1[2], d1[3], d1[4] ]
+  // stride=2 [ d0[2], d2[1], d0[1], d2[0], d0[0], d1[0], d1[1], d1[2] ]
+  // stride=3 [ d0[3], d2[2], d0[2], d2[1], d0[1], d2[0], d0[0], d1[0] ]
+  // stride=4 [ d0[4], d2[3], d0[3], d2[2], d0[2], d2[1], d0[1], d2[0] ]
+  // stride=5 [ d0[5], d2[4], d0[4], d2[3], d0[3], d2[2], d0[2], d2[1] ]
+  // stride=6 [ d0[6], d2[5], d0[5], d2[4], d0[4], d2[3], d0[3], d2[2] ]
+  // stride=7 [ d0[7], d2[6], d0[6], d2[5], d0[5], d2[4], d0[4], d2[3] ]
+  vst1q_u16(dst + 0 * stride, vextq_u16(d20_hi, d1, 7));
+  vst1q_u16(dst + 1 * stride, vextq_u16(d20_hi, d1, 5));
+  vst1q_u16(dst + 2 * stride, vextq_u16(d20_hi, d1, 3));
+  vst1q_u16(dst + 3 * stride, vextq_u16(d20_hi, d1, 1));
+  vst1q_u16(dst + 4 * stride, vextq_u16(d20_lo, d20_hi, 7));
+  vst1q_u16(dst + 5 * stride, vextq_u16(d20_lo, d20_hi, 5));
+  vst1q_u16(dst + 6 * stride, vextq_u16(d20_lo, d20_hi, 3));
+  vst1q_u16(dst + 7 * stride, vextq_u16(d20_lo, d20_hi, 1));
+}
+
+void vpx_highbd_d153_predictor_16x16_neon(uint16_t *dst, ptrdiff_t stride,
+                                          const uint16_t *above,
+                                          const uint16_t *left, int bd) {
+  // See vpx_highbd_d153_predictor_8x8_neon for details on the implementation.
+  uint16x8_t az, a0, a6, a7, a8, l0az, l0, l1, l7, l8, l9, azl0, d0[2], d1[2],
+      d2[2], d20[4];
+  (void)bd;
+
+  az = vld1q_u16(above - 1);
+  a0 = vld1q_u16(above + 0);
+  a6 = vld1q_u16(above + 6);
+  a7 = vld1q_u16(above + 7);
+  a8 = vld1q_u16(above + 8);
+  // [ left[0], above[-1], ... , above[13] ]
+  l0az = vextq_u16(vld1q_dup_u16(left), az, 7);
+
+  l0 = vld1q_u16(left + 0);
+  l1 = vld1q_u16(left + 1);
+  l7 = vld1q_u16(left + 7);
+  l8 = vld1q_u16(left + 8);
+  // The last lane here is unused, reading left[16] could cause a buffer
+  // over-read, so just fill with a duplicate of left[8] to avoid needing to
+  // materialize a zero:
+  // [ left[9], ... , left[15], x ]
+  l9 = vextq_u16(l8, l8, 1);
+  // [ above[-1], left[0], ... , left[14] ]
+  azl0 = vextq_u16(vld1q_dup_u16(above - 1), l0, 7);
+
+  d0[0] = vrhaddq_u16(azl0, l0);
+  d0[1] = vrhaddq_u16(l7, l8);
+  d1[0] = vrhaddq_u16(vhaddq_u16(l0az, a0), az);
+  d1[1] = vrhaddq_u16(vhaddq_u16(a6, a8), a7);
+  d2[0] = vrhaddq_u16(vhaddq_u16(azl0, l1), l0);
+  d2[1] = vrhaddq_u16(vhaddq_u16(l7, l9), l8);
+
+  d0[0] = vrev64q_u16(vextq_u16(d0[0], d0[0], 4));
+  d0[1] = vrev64q_u16(vextq_u16(d0[1], d0[1], 4));
+  d2[0] = vrev64q_u16(vextq_u16(d2[0], d2[0], 4));
+  d2[1] = vrev64q_u16(vextq_u16(d2[1], d2[1], 4));
+
+  d20[0] = vzipq_u16(d2[1], d0[1]).val[0];
+  d20[1] = vzipq_u16(d2[1], d0[1]).val[1];
+  d20[2] = vzipq_u16(d2[0], d0[0]).val[0];
+  d20[3] = vzipq_u16(d2[0], d0[0]).val[1];
+
+  vst1q_u16(dst + 0 * stride + 0, vextq_u16(d20[3], d1[0], 7));
+  vst1q_u16(dst + 0 * stride + 8, vextq_u16(d1[0], d1[1], 7));
+  vst1q_u16(dst + 1 * stride + 0, vextq_u16(d20[3], d1[0], 5));
+  vst1q_u16(dst + 1 * stride + 8, vextq_u16(d1[0], d1[1], 5));
+  vst1q_u16(dst + 2 * stride + 0, vextq_u16(d20[3], d1[0], 3));
+  vst1q_u16(dst + 2 * stride + 8, vextq_u16(d1[0], d1[1], 3));
+  vst1q_u16(dst + 3 * stride + 0, vextq_u16(d20[3], d1[0], 1));
+  vst1q_u16(dst + 3 * stride + 8, vextq_u16(d1[0], d1[1], 1));
+
+  vst1q_u16(dst + 4 * stride + 0, vextq_u16(d20[2], d20[3], 7));
+  vst1q_u16(dst + 4 * stride + 8, vextq_u16(d20[3], d1[0], 7));
+  vst1q_u16(dst + 5 * stride + 0, vextq_u16(d20[2], d20[3], 5));
+  vst1q_u16(dst + 5 * stride + 8, vextq_u16(d20[3], d1[0], 5));
+  vst1q_u16(dst + 6 * stride + 0, vextq_u16(d20[2], d20[3], 3));
+  vst1q_u16(dst + 6 * stride + 8, vextq_u16(d20[3], d1[0], 3));
+  vst1q_u16(dst + 7 * stride + 0, vextq_u16(d20[2], d20[3], 1));
+  vst1q_u16(dst + 7 * stride + 8, vextq_u16(d20[3], d1[0], 1));
+
+  vst1q_u16(dst + 8 * stride + 0, vextq_u16(d20[1], d20[2], 7));
+  vst1q_u16(dst + 8 * stride + 8, vextq_u16(d20[2], d20[3], 7));
+  vst1q_u16(dst + 9 * stride + 0, vextq_u16(d20[1], d20[2], 5));
+  vst1q_u16(dst + 9 * stride + 8, vextq_u16(d20[2], d20[3], 5));
+  vst1q_u16(dst + 10 * stride + 0, vextq_u16(d20[1], d20[2], 3));
+  vst1q_u16(dst + 10 * stride + 8, vextq_u16(d20[2], d20[3], 3));
+  vst1q_u16(dst + 11 * stride + 0, vextq_u16(d20[1], d20[2], 1));
+  vst1q_u16(dst + 11 * stride + 8, vextq_u16(d20[2], d20[3], 1));
+
+  vst1q_u16(dst + 12 * stride + 0, vextq_u16(d20[0], d20[1], 7));
+  vst1q_u16(dst + 12 * stride + 8, vextq_u16(d20[1], d20[2], 7));
+  vst1q_u16(dst + 13 * stride + 0, vextq_u16(d20[0], d20[1], 5));
+  vst1q_u16(dst + 13 * stride + 8, vextq_u16(d20[1], d20[2], 5));
+  vst1q_u16(dst + 14 * stride + 0, vextq_u16(d20[0], d20[1], 3));
+  vst1q_u16(dst + 14 * stride + 8, vextq_u16(d20[1], d20[2], 3));
+  vst1q_u16(dst + 15 * stride + 0, vextq_u16(d20[0], d20[1], 1));
+  vst1q_u16(dst + 15 * stride + 8, vextq_u16(d20[1], d20[2], 1));
+}
+
+void vpx_highbd_d153_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
+                                          const uint16_t *above,
+                                          const uint16_t *left, int bd) {
+  // See vpx_highbd_d153_predictor_8x8_neon for details on the implementation.
+  uint16x8_t az, a0, a6, a7, a8, a14, a15, a16, a22, a23, a24, l0az, l0, l1, l7,
+      l8, l9, l15, l16, l17, l23, l24, l25, azl0, d0[4], d1[4], d2[4], d20[8];
+  (void)bd;
+
+  az = vld1q_u16(above - 1);
+  a0 = vld1q_u16(above + 0);
+  a6 = vld1q_u16(above + 6);
+  a7 = vld1q_u16(above + 7);
+  a8 = vld1q_u16(above + 8);
+  a14 = vld1q_u16(above + 14);
+  a15 = vld1q_u16(above + 15);
+  a16 = vld1q_u16(above + 16);
+  a22 = vld1q_u16(above + 22);
+  a23 = vld1q_u16(above + 23);
+  a24 = vld1q_u16(above + 24);
+  // [ left[0], above[-1], ... , above[13] ]
+  l0az = vextq_u16(vld1q_dup_u16(left), az, 7);
+
+  l0 = vld1q_u16(left + 0);
+  l1 = vld1q_u16(left + 1);
+  l7 = vld1q_u16(left + 7);
+  l8 = vld1q_u16(left + 8);
+  l9 = vld1q_u16(left + 9);
+  l15 = vld1q_u16(left + 15);
+  l16 = vld1q_u16(left + 16);
+  l17 = vld1q_u16(left + 17);
+  l23 = vld1q_u16(left + 23);
+  l24 = vld1q_u16(left + 24);
+  // The last lane here is unused, reading left[32] could cause a buffer
+  // over-read, so just fill with a duplicate of left[24] to avoid needing to
+  // materialize a zero:
+  // [ left[25], ... , left[31], x ]
+  l25 = vextq_u16(l24, l24, 1);
+  // [ above[-1], left[0], ... , left[14] ]
+  azl0 = vextq_u16(vld1q_dup_u16(above - 1), l0, 7);
+
+  d0[0] = vrhaddq_u16(azl0, l0);
+  d0[1] = vrhaddq_u16(l7, l8);
+  d0[2] = vrhaddq_u16(l15, l16);
+  d0[3] = vrhaddq_u16(l23, l24);
+
+  d1[0] = vrhaddq_u16(vhaddq_u16(l0az, a0), az);
+  d1[1] = vrhaddq_u16(vhaddq_u16(a6, a8), a7);
+  d1[2] = vrhaddq_u16(vhaddq_u16(a14, a16), a15);
+  d1[3] = vrhaddq_u16(vhaddq_u16(a22, a24), a23);
+
+  d2[0] = vrhaddq_u16(vhaddq_u16(azl0, l1), l0);
+  d2[1] = vrhaddq_u16(vhaddq_u16(l7, l9), l8);
+  d2[2] = vrhaddq_u16(vhaddq_u16(l15, l17), l16);
+  d2[3] = vrhaddq_u16(vhaddq_u16(l23, l25), l24);
+
+  d0[0] = vrev64q_u16(vextq_u16(d0[0], d0[0], 4));
+  d0[1] = vrev64q_u16(vextq_u16(d0[1], d0[1], 4));
+  d0[2] = vrev64q_u16(vextq_u16(d0[2], d0[2], 4));
+  d0[3] = vrev64q_u16(vextq_u16(d0[3], d0[3], 4));
+  d2[0] = vrev64q_u16(vextq_u16(d2[0], d2[0], 4));
+  d2[1] = vrev64q_u16(vextq_u16(d2[1], d2[1], 4));
+  d2[2] = vrev64q_u16(vextq_u16(d2[2], d2[2], 4));
+  d2[3] = vrev64q_u16(vextq_u16(d2[3], d2[3], 4));
+
+  d20[0] = vzipq_u16(d2[3], d0[3]).val[0];
+  d20[1] = vzipq_u16(d2[3], d0[3]).val[1];
+  d20[2] = vzipq_u16(d2[2], d0[2]).val[0];
+  d20[3] = vzipq_u16(d2[2], d0[2]).val[1];
+  d20[4] = vzipq_u16(d2[1], d0[1]).val[0];
+  d20[5] = vzipq_u16(d2[1], d0[1]).val[1];
+  d20[6] = vzipq_u16(d2[0], d0[0]).val[0];
+  d20[7] = vzipq_u16(d2[0], d0[0]).val[1];
+
+  vst1q_u16(dst + 0 * stride + 0, vextq_u16(d20[7], d1[0], 7));
+  vst1q_u16(dst + 0 * stride + 8, vextq_u16(d1[0], d1[1], 7));
+  vst1q_u16(dst + 0 * stride + 16, vextq_u16(d1[1], d1[2], 7));
+  vst1q_u16(dst + 0 * stride + 24, vextq_u16(d1[2], d1[3], 7));
+  vst1q_u16(dst + 1 * stride + 0, vextq_u16(d20[7], d1[0], 5));
+  vst1q_u16(dst + 1 * stride + 8, vextq_u16(d1[0], d1[1], 5));
+  vst1q_u16(dst + 1 * stride + 16, vextq_u16(d1[1], d1[2], 5));
+  vst1q_u16(dst + 1 * stride + 24, vextq_u16(d1[2], d1[3], 5));
+  vst1q_u16(dst + 2 * stride + 0, vextq_u16(d20[7], d1[0], 3));
+  vst1q_u16(dst + 2 * stride + 8, vextq_u16(d1[0], d1[1], 3));
+  vst1q_u16(dst + 2 * stride + 16, vextq_u16(d1[1], d1[2], 3));
+  vst1q_u16(dst + 2 * stride + 24, vextq_u16(d1[2], d1[3], 3));
+  vst1q_u16(dst + 3 * stride + 0, vextq_u16(d20[7], d1[0], 1));
+  vst1q_u16(dst + 3 * stride + 8, vextq_u16(d1[0], d1[1], 1));
+  vst1q_u16(dst + 3 * stride + 16, vextq_u16(d1[1], d1[2], 1));
+  vst1q_u16(dst + 3 * stride + 24, vextq_u16(d1[2], d1[3], 1));
+
+  vst1q_u16(dst + 4 * stride + 0, vextq_u16(d20[6], d20[7], 7));
+  vst1q_u16(dst + 4 * stride + 8, vextq_u16(d20[7], d1[0], 7));
+  vst1q_u16(dst + 4 * stride + 16, vextq_u16(d1[0], d1[1], 7));
+  vst1q_u16(dst + 4 * stride + 24, vextq_u16(d1[1], d1[2], 7));
+  vst1q_u16(dst + 5 * stride + 0, vextq_u16(d20[6], d20[7], 5));
+  vst1q_u16(dst + 5 * stride + 8, vextq_u16(d20[7], d1[0], 5));
+  vst1q_u16(dst + 5 * stride + 16, vextq_u16(d1[0], d1[1], 5));
+  vst1q_u16(dst + 5 * stride + 24, vextq_u16(d1[1], d1[2], 5));
+  vst1q_u16(dst + 6 * stride + 0, vextq_u16(d20[6], d20[7], 3));
+  vst1q_u16(dst + 6 * stride + 8, vextq_u16(d20[7], d1[0], 3));
+  vst1q_u16(dst + 6 * stride + 16, vextq_u16(d1[0], d1[1], 3));
+  vst1q_u16(dst + 6 * stride + 24, vextq_u16(d1[1], d1[2], 3));
+  vst1q_u16(dst + 7 * stride + 0, vextq_u16(d20[6], d20[7], 1));
+  vst1q_u16(dst + 7 * stride + 8, vextq_u16(d20[7], d1[0], 1));
+  vst1q_u16(dst + 7 * stride + 16, vextq_u16(d1[0], d1[1], 1));
+  vst1q_u16(dst + 7 * stride + 24, vextq_u16(d1[1], d1[2], 1));
+
+  vst1q_u16(dst + 8 * stride + 0, vextq_u16(d20[5], d20[6], 7));
+  vst1q_u16(dst + 8 * stride + 8, vextq_u16(d20[6], d20[7], 7));
+  vst1q_u16(dst + 8 * stride + 16, vextq_u16(d20[7], d1[0], 7));
+  vst1q_u16(dst + 8 * stride + 24, vextq_u16(d1[0], d1[1], 7));
+  vst1q_u16(dst + 9 * stride + 0, vextq_u16(d20[5], d20[6], 5));
+  vst1q_u16(dst + 9 * stride + 8, vextq_u16(d20[6], d20[7], 5));
+  vst1q_u16(dst + 9 * stride + 16, vextq_u16(d20[7], d1[0], 5));
+  vst1q_u16(dst + 9 * stride + 24, vextq_u16(d1[0], d1[1], 5));
+  vst1q_u16(dst + 10 * stride + 0, vextq_u16(d20[5], d20[6], 3));
+  vst1q_u16(dst + 10 * stride + 8, vextq_u16(d20[6], d20[7], 3));
+  vst1q_u16(dst + 10 * stride + 16, vextq_u16(d20[7], d1[0], 3));
+  vst1q_u16(dst + 10 * stride + 24, vextq_u16(d1[0], d1[1], 3));
+  vst1q_u16(dst + 11 * stride + 0, vextq_u16(d20[5], d20[6], 1));
+  vst1q_u16(dst + 11 * stride + 8, vextq_u16(d20[6], d20[7], 1));
+  vst1q_u16(dst + 11 * stride + 16, vextq_u16(d20[7], d1[0], 1));
+  vst1q_u16(dst + 11 * stride + 24, vextq_u16(d1[0], d1[1], 1));
+
+  vst1q_u16(dst + 12 * stride + 0, vextq_u16(d20[4], d20[5], 7));
+  vst1q_u16(dst + 12 * stride + 8, vextq_u16(d20[5], d20[6], 7));
+  vst1q_u16(dst + 12 * stride + 16, vextq_u16(d20[6], d20[7], 7));
+  vst1q_u16(dst + 12 * stride + 24, vextq_u16(d20[7], d1[0], 7));
+  vst1q_u16(dst + 13 * stride + 0, vextq_u16(d20[4], d20[5], 5));
+  vst1q_u16(dst + 13 * stride + 8, vextq_u16(d20[5], d20[6], 5));
+  vst1q_u16(dst + 13 * stride + 16, vextq_u16(d20[6], d20[7], 5));
+  vst1q_u16(dst + 13 * stride + 24, vextq_u16(d20[7], d1[0], 5));
+  vst1q_u16(dst + 14 * stride + 0, vextq_u16(d20[4], d20[5], 3));
+  vst1q_u16(dst + 14 * stride + 8, vextq_u16(d20[5], d20[6], 3));
+  vst1q_u16(dst + 14 * stride + 16, vextq_u16(d20[6], d20[7], 3));
+  vst1q_u16(dst + 14 * stride + 24, vextq_u16(d20[7], d1[0], 3));
+  vst1q_u16(dst + 15 * stride + 0, vextq_u16(d20[4], d20[5], 1));
+  vst1q_u16(dst + 15 * stride + 8, vextq_u16(d20[5], d20[6], 1));
+  vst1q_u16(dst + 15 * stride + 16, vextq_u16(d20[6], d20[7], 1));
+  vst1q_u16(dst + 15 * stride + 24, vextq_u16(d20[7], d1[0], 1));
+
+  vst1q_u16(dst + 16 * stride + 0, vextq_u16(d20[3], d20[4], 7));
+  vst1q_u16(dst + 16 * stride + 8, vextq_u16(d20[4], d20[5], 7));
+  vst1q_u16(dst + 16 * stride + 16, vextq_u16(d20[5], d20[6], 7));
+  vst1q_u16(dst + 16 * stride + 24, vextq_u16(d20[6], d20[7], 7));
+  vst1q_u16(dst + 17 * stride + 0, vextq_u16(d20[3], d20[4], 5));
+  vst1q_u16(dst + 17 * stride + 8, vextq_u16(d20[4], d20[5], 5));
+  vst1q_u16(dst + 17 * stride + 16, vextq_u16(d20[5], d20[6], 5));
+  vst1q_u16(dst + 17 * stride + 24, vextq_u16(d20[6], d20[7], 5));
+  vst1q_u16(dst + 18 * stride + 0, vextq_u16(d20[3], d20[4], 3));
+  vst1q_u16(dst + 18 * stride + 8, vextq_u16(d20[4], d20[5], 3));
+  vst1q_u16(dst + 18 * stride + 16, vextq_u16(d20[5], d20[6], 3));
+  vst1q_u16(dst + 18 * stride + 24, vextq_u16(d20[6], d20[7], 3));
+  vst1q_u16(dst + 19 * stride + 0, vextq_u16(d20[3], d20[4], 1));
+  vst1q_u16(dst + 19 * stride + 8, vextq_u16(d20[4], d20[5], 1));
+  vst1q_u16(dst + 19 * stride + 16, vextq_u16(d20[5], d20[6], 1));
+  vst1q_u16(dst + 19 * stride + 24, vextq_u16(d20[6], d20[7], 1));
+
+  vst1q_u16(dst + 20 * stride + 0, vextq_u16(d20[2], d20[3], 7));
+  vst1q_u16(dst + 20 * stride + 8, vextq_u16(d20[3], d20[4], 7));
+  vst1q_u16(dst + 20 * stride + 16, vextq_u16(d20[4], d20[5], 7));
+  vst1q_u16(dst + 20 * stride + 24, vextq_u16(d20[5], d20[6], 7));
+  vst1q_u16(dst + 21 * stride + 0, vextq_u16(d20[2], d20[3], 5));
+  vst1q_u16(dst + 21 * stride + 8, vextq_u16(d20[3], d20[4], 5));
+  vst1q_u16(dst + 21 * stride + 16, vextq_u16(d20[4], d20[5], 5));
+  vst1q_u16(dst + 21 * stride + 24, vextq_u16(d20[5], d20[6], 5));
+  vst1q_u16(dst + 22 * stride + 0, vextq_u16(d20[2], d20[3], 3));
+  vst1q_u16(dst + 22 * stride + 8, vextq_u16(d20[3], d20[4], 3));
+  vst1q_u16(dst + 22 * stride + 16, vextq_u16(d20[4], d20[5], 3));
+  vst1q_u16(dst + 22 * stride + 24, vextq_u16(d20[5], d20[6], 3));
+  vst1q_u16(dst + 23 * stride + 0, vextq_u16(d20[2], d20[3], 1));
+  vst1q_u16(dst + 23 * stride + 8, vextq_u16(d20[3], d20[4], 1));
+  vst1q_u16(dst + 23 * stride + 16, vextq_u16(d20[4], d20[5], 1));
+  vst1q_u16(dst + 23 * stride + 24, vextq_u16(d20[5], d20[6], 1));
+
+  vst1q_u16(dst + 24 * stride + 0, vextq_u16(d20[1], d20[2], 7));
+  vst1q_u16(dst + 24 * stride + 8, vextq_u16(d20[2], d20[3], 7));
+  vst1q_u16(dst + 24 * stride + 16, vextq_u16(d20[3], d20[4], 7));
+  vst1q_u16(dst + 24 * stride + 24, vextq_u16(d20[4], d20[5], 7));
+  vst1q_u16(dst + 25 * stride + 0, vextq_u16(d20[1], d20[2], 5));
+  vst1q_u16(dst + 25 * stride + 8, vextq_u16(d20[2], d20[3], 5));
+  vst1q_u16(dst + 25 * stride + 16, vextq_u16(d20[3], d20[4], 5));
+  vst1q_u16(dst + 25 * stride + 24, vextq_u16(d20[4], d20[5], 5));
+  vst1q_u16(dst + 26 * stride + 0, vextq_u16(d20[1], d20[2], 3));
+  vst1q_u16(dst + 26 * stride + 8, vextq_u16(d20[2], d20[3], 3));
+  vst1q_u16(dst + 26 * stride + 16, vextq_u16(d20[3], d20[4], 3));
+  vst1q_u16(dst + 26 * stride + 24, vextq_u16(d20[4], d20[5], 3));
+  vst1q_u16(dst + 27 * stride + 0, vextq_u16(d20[1], d20[2], 1));
+  vst1q_u16(dst + 27 * stride + 8, vextq_u16(d20[2], d20[3], 1));
+  vst1q_u16(dst + 27 * stride + 16, vextq_u16(d20[3], d20[4], 1));
+  vst1q_u16(dst + 27 * stride + 24, vextq_u16(d20[4], d20[5], 1));
+
+  vst1q_u16(dst + 28 * stride + 0, vextq_u16(d20[0], d20[1], 7));
+  vst1q_u16(dst + 28 * stride + 8, vextq_u16(d20[1], d20[2], 7));
+  vst1q_u16(dst + 28 * stride + 16, vextq_u16(d20[2], d20[3], 7));
+  vst1q_u16(dst + 28 * stride + 24, vextq_u16(d20[3], d20[4], 7));
+  vst1q_u16(dst + 29 * stride + 0, vextq_u16(d20[0], d20[1], 5));
+  vst1q_u16(dst + 29 * stride + 8, vextq_u16(d20[1], d20[2], 5));
+  vst1q_u16(dst + 29 * stride + 16, vextq_u16(d20[2], d20[3], 5));
+  vst1q_u16(dst + 29 * stride + 24, vextq_u16(d20[3], d20[4], 5));
+  vst1q_u16(dst + 30 * stride + 0, vextq_u16(d20[0], d20[1], 3));
+  vst1q_u16(dst + 30 * stride + 8, vextq_u16(d20[1], d20[2], 3));
+  vst1q_u16(dst + 30 * stride + 16, vextq_u16(d20[2], d20[3], 3));
+  vst1q_u16(dst + 30 * stride + 24, vextq_u16(d20[3], d20[4], 3));
+  vst1q_u16(dst + 31 * stride + 0, vextq_u16(d20[0], d20[1], 1));
+  vst1q_u16(dst + 31 * stride + 8, vextq_u16(d20[1], d20[2], 1));
+  vst1q_u16(dst + 31 * stride + 16, vextq_u16(d20[2], d20[3], 1));
+  vst1q_u16(dst + 31 * stride + 24, vextq_u16(d20[3], d20[4], 1));
+}
+
+// -----------------------------------------------------------------------------
+
 void vpx_highbd_d135_predictor_4x4_neon(uint16_t *dst, ptrdiff_t stride,
                                         const uint16_t *above,
                                         const uint16_t *left, int bd) {
