@@ -228,6 +228,8 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   sf->tx_size_search_breakout = 1;
   sf->use_square_partition_only = !boosted;
 
+  sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
+
   // Reference masking is not supported in dynamic scaling mode.
   sf->reference_masking = oxcf->resize_mode != RESIZE_DYNAMIC;
 
@@ -281,7 +283,6 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     if (cpi->oxcf.content != VP9E_CONTENT_FILM) sf->mode_skip_start = 10;
     sf->allow_acl = 0;
 
-    sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     if (cpi->oxcf.content != VP9E_CONTENT_FILM) {
       sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
