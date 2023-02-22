@@ -2432,16 +2432,16 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
       (row8x8_remaining >= MI_BLOCK_SIZE)) {
     int i, j;
     int index;
-    diff d32[4];
+    Diff d32[4];
     const int offset = (mi_row >> 1) * cm->mb_cols + (mi_col >> 1);
     int is_larger_better = 0;
     int use32x32 = 0;
     unsigned int thr = cpi->source_var_thresh;
 
-    memset(d32, 0, 4 * sizeof(diff));
+    memset(d32, 0, sizeof(d32));
 
     for (i = 0; i < 4; i++) {
-      diff *d16[4];
+      Diff *d16[4];
 
       for (j = 0; j < 4; j++) {
         int b_mi_row = coord_lookup[i * 4 + j].row;
@@ -5681,12 +5681,12 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
 }
 // end RTC play code
 
-static INLINE uint32_t variance(const diff *const d) {
+static INLINE uint32_t variance(const Diff *const d) {
   return d->sse - (uint32_t)(((int64_t)d->sum * d->sum) >> 8);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE uint32_t variance_highbd(diff *const d) {
+static INLINE uint32_t variance_highbd(Diff *const d) {
   const int64_t var = (int64_t)d->sse - (((int64_t)d->sum * d->sum) >> 8);
   return (var >= 0) ? (uint32_t)var : 0;
 }
@@ -5706,7 +5706,7 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
                          ? (cm->MBs * VAR_HIST_LARGE_CUT_OFF / 100)
                          : (cm->MBs * VAR_HIST_SMALL_CUT_OFF / 100);
   DECLARE_ALIGNED(16, int, hist[VAR_HIST_BINS]);
-  diff *var16 = cpi->source_diff_var;
+  Diff *var16 = cpi->source_diff_var;
 
   int sum = 0;
   int i, j;
@@ -5790,7 +5790,7 @@ static void source_var_based_partition_search_method(VP9_COMP *cpi) {
       if (cpi->source_diff_var) vpx_free(cpi->source_diff_var);
 
       CHECK_MEM_ERROR(cm, cpi->source_diff_var,
-                      vpx_calloc(cm->MBs, sizeof(diff)));
+                      vpx_calloc(cm->MBs, sizeof(cpi->source_diff_var)));
     }
 
     if (!cpi->frames_till_next_var_check)
