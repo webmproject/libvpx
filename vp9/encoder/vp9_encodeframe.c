@@ -349,17 +349,17 @@ typedef struct {
   int32_t sum_error;
   int log2_count;
   int variance;
-} var;
+} Var;
 
 typedef struct {
-  var none;
-  var horz[2];
-  var vert[2];
+  Var none;
+  Var horz[2];
+  Var vert[2];
 } partition_variance;
 
 typedef struct {
   partition_variance part_variances;
-  var split[4];
+  Var split[4];
 } v4x4;
 
 typedef struct {
@@ -384,7 +384,7 @@ typedef struct {
 
 typedef struct {
   partition_variance *part_variances;
-  var *split[4];
+  Var *split[4];
 } variance_node;
 
 typedef enum {
@@ -436,13 +436,13 @@ static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
 }
 
 // Set variance values given sum square error, sum error, count.
-static void fill_variance(uint32_t s2, int32_t s, int c, var *v) {
+static void fill_variance(uint32_t s2, int32_t s, int c, Var *v) {
   v->sum_square_error = s2;
   v->sum_error = s;
   v->log2_count = c;
 }
 
-static void get_variance(var *v) {
+static void get_variance(Var *v) {
   v->variance =
       (int)(256 * (v->sum_square_error -
                    (uint32_t)(((int64_t)v->sum_error * v->sum_error) >>
@@ -450,7 +450,7 @@ static void get_variance(var *v) {
             v->log2_count);
 }
 
-static void sum_2_variances(const var *a, const var *b, var *r) {
+static void sum_2_variances(const Var *a, const Var *b, Var *r) {
   assert(a->log2_count == b->log2_count);
   fill_variance(a->sum_square_error + b->sum_square_error,
                 a->sum_error + b->sum_error, a->log2_count + 1, r);
@@ -1863,8 +1863,8 @@ static void update_state(VP9_COMP *cpi, ThreadData *td, PICK_MODE_CONTEXT *ctx,
       vp9_update_mv_count(td);
 
       if (cm->interp_filter == SWITCHABLE) {
-        const int ctx = get_pred_context_switchable_interp(xd);
-        ++td->counts->switchable_interp[ctx][xdmi->interp_filter];
+        const int ctx_interp = get_pred_context_switchable_interp(xd);
+        ++td->counts->switchable_interp[ctx_interp][xdmi->interp_filter];
       }
     }
 
@@ -2748,10 +2748,10 @@ static void rd_use_partition(VP9_COMP *cpi, ThreadData *td,
       if (last_part_rdc.rate != INT_MAX && bsize >= BLOCK_8X8 &&
           mi_row + (mi_step >> 1) < cm->mi_rows) {
         RD_COST tmp_rdc;
-        PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
+        PICK_MODE_CONTEXT *hctx = &pc_tree->horizontal[0];
         vp9_rd_cost_init(&tmp_rdc);
-        update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
-        encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
+        update_state(cpi, td, hctx, mi_row, mi_col, subsize, 0);
+        encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, hctx);
         pc_tree->horizontal[1].skip_ref_frame_mask = 0;
         rd_pick_sb_modes(cpi, tile_data, x, mi_row + (mi_step >> 1), mi_col,
                          &tmp_rdc, subsize, &pc_tree->horizontal[1], INT_MAX,
@@ -2772,10 +2772,10 @@ static void rd_use_partition(VP9_COMP *cpi, ThreadData *td,
       if (last_part_rdc.rate != INT_MAX && bsize >= BLOCK_8X8 &&
           mi_col + (mi_step >> 1) < cm->mi_cols) {
         RD_COST tmp_rdc;
-        PICK_MODE_CONTEXT *ctx = &pc_tree->vertical[0];
+        PICK_MODE_CONTEXT *vctx = &pc_tree->vertical[0];
         vp9_rd_cost_init(&tmp_rdc);
-        update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
-        encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
+        update_state(cpi, td, vctx, mi_row, mi_col, subsize, 0);
+        encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, vctx);
         pc_tree->vertical[bsize > BLOCK_8X8].skip_ref_frame_mask = 0;
         rd_pick_sb_modes(
             cpi, tile_data, x, mi_row, mi_col + (mi_step >> 1), &tmp_rdc,
@@ -2847,8 +2847,6 @@ static void rd_use_partition(VP9_COMP *cpi, ThreadData *td,
       int x_idx = (i & 1) * (mi_step >> 1);
       int y_idx = (i >> 1) * (mi_step >> 1);
       RD_COST tmp_rdc;
-      ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
-      PARTITION_CONTEXT sl[8], sa[8];
 
       if ((mi_row + y_idx >= cm->mi_rows) || (mi_col + x_idx >= cm->mi_cols))
         continue;
@@ -3479,8 +3477,8 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
                                           int mi_col, int *none, int *split) {
   const VP9_COMMON *const cm = &cpi->common;
   const NN_CONFIG *nn_config = NULL;
+  const MACROBLOCKD *const xd = &x->e_mbd;
 #if CONFIG_VP9_HIGHBITDEPTH
-  MACROBLOCKD *xd = &x->e_mbd;
   DECLARE_ALIGNED(16, uint8_t, pred_buffer[64 * 64 * 2]);
   uint8_t *const pred_buf = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
                                 ? (CONVERT_TO_BYTEPTR(pred_buffer))
@@ -3563,7 +3561,6 @@ static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
       const unsigned int var =
           cpi->fn_ptr[bsize].vf(src, src_stride, pred, pred_stride, &sse);
       const float factor = (var == 0) ? 1.0f : (1.0f / (float)var);
-      const MACROBLOCKD *const xd = &x->e_mbd;
       const int has_above = !!xd->above_mi;
       const int has_left = !!xd->left_mi;
       const BLOCK_SIZE above_bsize = has_above ? xd->above_mi->sb_type : bsize;
@@ -4348,9 +4345,9 @@ static int rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
     if (sum_rdc.rdcost < best_rdc.rdcost && mi_row + mi_step < cm->mi_rows &&
         bsize > BLOCK_8X8) {
-      PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
-      update_state(cpi, td, ctx, mi_row, mi_col, subsize, 0);
-      encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, ctx);
+      PICK_MODE_CONTEXT *hctx = &pc_tree->horizontal[0];
+      update_state(cpi, td, hctx, mi_row, mi_col, subsize, 0);
+      encode_superblock(cpi, td, tp, 0, mi_row, mi_col, subsize, hctx);
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
         pc_tree->horizontal[1].pred_interp_filter = pred_interp_filter;
