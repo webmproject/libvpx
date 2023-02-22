@@ -534,9 +534,6 @@ static void vpx_filter_block1d8_h4_avx2(const uint8_t *src_ptr,
   const ptrdiff_t unrolled_dst_stride = dst_stride << 1;
   int h;
 
-  __m256i src_reg, src_reg_shift_0, src_reg_shift_2;
-  __m256i dst_reg;
-  __m256i tmp_0, tmp_1;
   __m256i idx_shift_0 =
       _mm256_setr_epi8(0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 0, 1, 1,
                        2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8);
@@ -557,9 +554,11 @@ static void vpx_filter_block1d8_h4_avx2(const uint8_t *src_ptr,
 
   for (h = height; h >= 2; h -= 2) {
     // Load the source
-    src_reg = mm256_loadu2_si128(src_ptr, src_ptr + src_stride);
-    src_reg_shift_0 = _mm256_shuffle_epi8(src_reg, idx_shift_0);
-    src_reg_shift_2 = _mm256_shuffle_epi8(src_reg, idx_shift_2);
+    const __m256i src_reg = mm256_loadu2_si128(src_ptr, src_ptr + src_stride);
+    __m256i dst_reg;
+    __m256i tmp_0, tmp_1;
+    const __m256i src_reg_shift_0 = _mm256_shuffle_epi8(src_reg, idx_shift_0);
+    const __m256i src_reg_shift_2 = _mm256_shuffle_epi8(src_reg, idx_shift_2);
 
     // Get the output
     tmp_0 = _mm256_maddubs_epi16(src_reg_shift_0, kernel_reg_23);
@@ -580,9 +579,9 @@ static void vpx_filter_block1d8_h4_avx2(const uint8_t *src_ptr,
 
   // Repeat for the last row if needed
   if (h > 0) {
-    __m128i src_reg = _mm_loadu_si128((const __m128i *)src_ptr);
+    const __m128i src_reg = _mm_loadu_si128((const __m128i *)src_ptr);
     __m128i dst_reg;
-    const __m128i reg_32 = _mm_set1_epi16(32);  // Used for rounding
+    const __m128i reg_32_128 = _mm_set1_epi16(32);  // Used for rounding
     __m128i tmp_0, tmp_1;
 
     __m128i src_reg_shift_0 =
@@ -596,7 +595,7 @@ static void vpx_filter_block1d8_h4_avx2(const uint8_t *src_ptr,
                               _mm256_castsi256_si128(kernel_reg_45));
     dst_reg = _mm_adds_epi16(tmp_0, tmp_1);
 
-    dst_reg = mm_round_epi16_sse2(&dst_reg, &reg_32, 6);
+    dst_reg = mm_round_epi16_sse2(&dst_reg, &reg_32_128, 6);
 
     dst_reg = _mm_packus_epi16(dst_reg, _mm_setzero_si128());
 
@@ -715,8 +714,6 @@ static void vpx_filter_block1d4_h4_avx2(const uint8_t *src_ptr,
   const ptrdiff_t unrolled_src_stride = src_stride << 1;
   const ptrdiff_t unrolled_dst_stride = dst_stride << 1;
 
-  __m256i src_reg, src_reg_shuf;
-  __m256i dst;
   __m256i shuf_idx =
       _mm256_setr_epi8(0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6, 0, 1, 2,
                        3, 1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6);
@@ -733,12 +730,12 @@ static void vpx_filter_block1d4_h4_avx2(const uint8_t *src_ptr,
 
   for (h = height; h > 1; h -= 2) {
     // Load the source
-    src_reg = mm256_loadu2_epi64((const __m128i *)src_ptr,
-                                 (const __m128i *)(src_ptr + src_stride));
-    src_reg_shuf = _mm256_shuffle_epi8(src_reg, shuf_idx);
+    const __m256i src_reg = mm256_loadu2_epi64(
+        (const __m128i *)src_ptr, (const __m128i *)(src_ptr + src_stride));
+    const __m256i src_reg_shuf = _mm256_shuffle_epi8(src_reg, shuf_idx);
 
     // Get the result
-    dst = _mm256_maddubs_epi16(src_reg_shuf, kernel_reg);
+    __m256i dst = _mm256_maddubs_epi16(src_reg_shuf, kernel_reg);
     dst = _mm256_hadds_epi16(dst, _mm256_setzero_si256());
 
     // Round result
@@ -757,7 +754,7 @@ static void vpx_filter_block1d4_h4_avx2(const uint8_t *src_ptr,
 
   if (h > 0) {
     // Load the source
-    const __m128i reg_32 = _mm_set1_epi16(32);  // Used for rounding
+    const __m128i reg_32_128 = _mm_set1_epi16(32);  // Used for rounding
     __m128i src_reg = _mm_loadl_epi64((const __m128i *)src_ptr);
     __m128i src_reg_shuf =
         _mm_shuffle_epi8(src_reg, _mm256_castsi256_si128(shuf_idx));
@@ -768,7 +765,7 @@ static void vpx_filter_block1d4_h4_avx2(const uint8_t *src_ptr,
     dst = _mm_hadds_epi16(dst, _mm_setzero_si128());
 
     // Round result
-    dst = mm_round_epi16_sse2(&dst, &reg_32, 6);
+    dst = mm_round_epi16_sse2(&dst, &reg_32_128, 6);
 
     // Pack to 8-bits
     dst = _mm_packus_epi16(dst, _mm_setzero_si128());
