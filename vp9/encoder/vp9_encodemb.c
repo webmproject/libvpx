@@ -79,7 +79,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   const int shift = (tx_size == TX_32X32);
   const int16_t *const dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
-  const scan_order *const so = get_scan(xd, tx_size, plane_type, block);
+  const ScanOrder *const so = get_scan(xd, tx_size, plane_type, block);
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
   const MODE_INFO *mbmi = xd->mi[0];
@@ -351,7 +351,7 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block, int row, int col,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+  const ScanOrder *const scan_order = &vp9_default_scan_orders[tx_size];
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -496,7 +496,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block, int row, int col,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+  const ScanOrder *const scan_order = &vp9_default_scan_orders[tx_size];
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -816,7 +816,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
   tran_low_t *coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  const scan_order *scan_order;
+  const ScanOrder *scan_order;
   TX_TYPE tx_type = DCT_DCT;
   PREDICTION_MODE mode;
   const int bwl = b_width_log2_lookup[plane_bsize];

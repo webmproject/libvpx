@@ -97,7 +97,7 @@ void vpx_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr, intptr_t count,
 void vpx_highbd_quantize_b_32x32_sse2(
     const tran_low_t *coeff_ptr, const struct macroblock_plane *const mb_plane,
     tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-    uint16_t *eob_ptr, const struct scan_order *const scan_order) {
+    uint16_t *eob_ptr, const struct ScanOrder *const scan_order) {
   __m128i zbins[2];
   __m128i nzbins[2];
   int idx = 0;
