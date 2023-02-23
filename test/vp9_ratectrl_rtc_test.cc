@@ -164,7 +164,7 @@ class RcInterfaceTest
 
 class RcInterfaceSvcTest
     : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<int, int> {
+      public ::libvpx_test::CodecTestWith2Params<int, bool> {
  public:
   RcInterfaceSvcTest()
       : EncoderTest(GET_PARAM(0)), aq_mode_(GET_PARAM(1)), key_interval_(3000),
