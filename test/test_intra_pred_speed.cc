@@ -566,7 +566,7 @@ HIGHBD_INTRA_PRED_TEST(
     vpx_highbd_dc_128_predictor_4x4_neon, vpx_highbd_v_predictor_4x4_neon,
     vpx_highbd_h_predictor_4x4_neon, vpx_highbd_d45_predictor_4x4_neon,
     vpx_highbd_d135_predictor_4x4_neon, vpx_highbd_d117_predictor_4x4_neon,
-    vpx_highbd_d153_predictor_4x4_neon, nullptr,
+    vpx_highbd_d153_predictor_4x4_neon, vpx_highbd_d207_predictor_4x4_neon,
     vpx_highbd_d63_predictor_4x4_neon, vpx_highbd_tm_predictor_4x4_neon)
 HIGHBD_INTRA_PRED_TEST(
     NEON, TestHighbdIntraPred8, vpx_highbd_dc_predictor_8x8_neon,
@@ -574,7 +574,7 @@ HIGHBD_INTRA_PRED_TEST(
     vpx_highbd_dc_128_predictor_8x8_neon, vpx_highbd_v_predictor_8x8_neon,
     vpx_highbd_h_predictor_8x8_neon, vpx_highbd_d45_predictor_8x8_neon,
     vpx_highbd_d135_predictor_8x8_neon, vpx_highbd_d117_predictor_8x8_neon,
-    vpx_highbd_d153_predictor_8x8_neon, nullptr,
+    vpx_highbd_d153_predictor_8x8_neon, vpx_highbd_d207_predictor_8x8_neon,
     vpx_highbd_d63_predictor_8x8_neon, vpx_highbd_tm_predictor_8x8_neon)
 HIGHBD_INTRA_PRED_TEST(
     NEON, TestHighbdIntraPred16, vpx_highbd_dc_predictor_16x16_neon,
@@ -583,7 +583,7 @@ HIGHBD_INTRA_PRED_TEST(
     vpx_highbd_dc_128_predictor_16x16_neon, vpx_highbd_v_predictor_16x16_neon,
     vpx_highbd_h_predictor_16x16_neon, vpx_highbd_d45_predictor_16x16_neon,
     vpx_highbd_d135_predictor_16x16_neon, vpx_highbd_d117_predictor_16x16_neon,
-    vpx_highbd_d153_predictor_16x16_neon, nullptr,
+    vpx_highbd_d153_predictor_16x16_neon, vpx_highbd_d207_predictor_16x16_neon,
     vpx_highbd_d63_predictor_16x16_neon, vpx_highbd_tm_predictor_16x16_neon)
 HIGHBD_INTRA_PRED_TEST(
     NEON, TestHighbdIntraPred32, vpx_highbd_dc_predictor_32x32_neon,
@@ -592,7 +592,7 @@ HIGHBD_INTRA_PRED_TEST(
     vpx_highbd_dc_128_predictor_32x32_neon, vpx_highbd_v_predictor_32x32_neon,
     vpx_highbd_h_predictor_32x32_neon, vpx_highbd_d45_predictor_32x32_neon,
     vpx_highbd_d135_predictor_32x32_neon, vpx_highbd_d117_predictor_32x32_neon,
-    vpx_highbd_d153_predictor_32x32_neon, nullptr,
+    vpx_highbd_d153_predictor_32x32_neon, vpx_highbd_d207_predictor_32x32_neon,
     vpx_highbd_d63_predictor_32x32_neon, vpx_highbd_tm_predictor_32x32_neon)
 #endif  // HAVE_NEON
 
