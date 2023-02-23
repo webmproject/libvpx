@@ -174,3 +174,42 @@ void vpx_highbd_hadamard_16x16_neon(const int16_t *src_diff,
     store_s32q_to_tran_low(coeff + 4 * i + 192, c3);
   } while (++i < 16);
 }
+
+void vpx_highbd_hadamard_32x32_neon(const int16_t *src_diff,
+                                    ptrdiff_t src_stride, tran_low_t *coeff) {
+  int i = 0;
+
+  // Rearrange 32x32 to 16x64 and remove stride.
+  // Top left first.
+  vpx_highbd_hadamard_16x16_neon(src_diff, src_stride, coeff);
+  // Top right.
+  vpx_highbd_hadamard_16x16_neon(src_diff + 16, src_stride, coeff + 256);
+  // Bottom left.
+  vpx_highbd_hadamard_16x16_neon(src_diff + 16 * src_stride, src_stride,
+                                 coeff + 512);
+  // Bottom right.
+  vpx_highbd_hadamard_16x16_neon(src_diff + 16 * src_stride + 16, src_stride,
+                                 coeff + 768);
+
+  do {
+    int32x4_t a0 = load_tran_low_to_s32q(coeff + 4 * i);
+    int32x4_t a1 = load_tran_low_to_s32q(coeff + 4 * i + 256);
+    int32x4_t a2 = load_tran_low_to_s32q(coeff + 4 * i + 512);
+    int32x4_t a3 = load_tran_low_to_s32q(coeff + 4 * i + 768);
+
+    int32x4_t b0 = vhaddq_s32(a0, a1);
+    int32x4_t b1 = vhsubq_s32(a0, a1);
+    int32x4_t b2 = vhaddq_s32(a2, a3);
+    int32x4_t b3 = vhsubq_s32(a2, a3);
+
+    int32x4_t c0 = vhaddq_s32(b0, b2);
+    int32x4_t c1 = vhaddq_s32(b1, b3);
+    int32x4_t c2 = vhsubq_s32(b0, b2);
+    int32x4_t c3 = vhsubq_s32(b1, b3);
+
+    store_s32q_to_tran_low(coeff + 4 * i, c0);
+    store_s32q_to_tran_low(coeff + 4 * i + 256, c1);
+    store_s32q_to_tran_low(coeff + 4 * i + 512, c2);
+    store_s32q_to_tran_low(coeff + 4 * i + 768, c3);
+  } while (++i < 64);
+}
