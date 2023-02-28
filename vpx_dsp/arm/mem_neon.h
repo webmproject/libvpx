@@ -122,6 +122,21 @@ static INLINE void uint32_to_mem(uint8_t *buf, uint32_t a) {
   memcpy(buf, &a, 4);
 }
 
+// Load 4 contiguous bytes when alignment is not guaranteed.
+static INLINE uint8x8_t load_unaligned_u8_4x1(const uint8_t *buf) {
+  uint32_t a;
+  uint32x2_t a_u32;
+  memcpy(&a, buf, 4);
+  a_u32 = vdup_n_u32(0);
+  a_u32 = vset_lane_u32(a, a_u32, 0);
+  return vreinterpret_u8_u32(a_u32);
+}
+
+// Store 4 contiguous bytes from the low half of an 8x8 vector.
+static INLINE void store_u8_4x1(uint8_t *buf, uint8x8_t a) {
+  vst1_lane_u32((uint32_t *)buf, vreinterpret_u32_u8(a), 0);
+}
+
 // Load 2 sets of 4 bytes when alignment is not guaranteed.
 static INLINE uint8x8_t load_unaligned_u8(const uint8_t *buf,
                                           ptrdiff_t stride) {

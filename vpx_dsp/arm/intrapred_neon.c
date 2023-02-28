@@ -12,6 +12,7 @@
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
+#include "mem_neon.h"
 #include "vpx/vpx_integer.h"
 
 //------------------------------------------------------------------------------
@@ -379,6 +380,399 @@ void vpx_d45_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
   vst1q_u8(dst, above_right);
   dst += 16;
   vst1q_u8(dst, row_1);
+}
+
+// -----------------------------------------------------------------------------
+
+void vpx_d63_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+                                const uint8_t *above, const uint8_t *left) {
+  uint8x8_t a0, a1, a2, a3, d0, d1, d2, d3;
+  (void)left;
+
+  a0 = load_unaligned_u8_4x1(above + 0);
+  a1 = load_unaligned_u8_4x1(above + 1);
+  a2 = load_unaligned_u8_4x1(above + 2);
+  a3 = load_unaligned_u8_4x1(above + 3);
+
+  d0 = vrhadd_u8(a0, a1);
+  d1 = vrhadd_u8(vhadd_u8(a0, a2), a1);
+  d2 = vrhadd_u8(a1, a2);
+  d3 = vrhadd_u8(vhadd_u8(a1, a3), a2);
+
+  store_u8_4x1(dst + 0 * stride, d0);
+  store_u8_4x1(dst + 1 * stride, d1);
+  store_u8_4x1(dst + 2 * stride, d2);
+  store_u8_4x1(dst + 3 * stride, d3);
+}
+
+void vpx_d63_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+                                const uint8_t *above, const uint8_t *left) {
+  uint8x8_t a0, a1, a2, a7, d0, d1;
+  (void)left;
+
+  a0 = vld1_u8(above + 0);
+  a1 = vld1_u8(above + 1);
+  a2 = vld1_u8(above + 2);
+  a7 = vld1_dup_u8(above + 7);
+
+  d0 = vrhadd_u8(a0, a1);
+  d1 = vrhadd_u8(vhadd_u8(a0, a2), a1);
+
+  vst1_u8(dst + 0 * stride, d0);
+  vst1_u8(dst + 1 * stride, d1);
+  vst1_u8(dst + 2 * stride, vext_u8(d0, a7, 1));
+  vst1_u8(dst + 3 * stride, vext_u8(d1, a7, 1));
+  vst1_u8(dst + 4 * stride, vext_u8(d0, a7, 2));
+  vst1_u8(dst + 5 * stride, vext_u8(d1, a7, 2));
+  vst1_u8(dst + 6 * stride, vext_u8(d0, a7, 3));
+  vst1_u8(dst + 7 * stride, vext_u8(d1, a7, 3));
+}
+
+void vpx_d63_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+                                  const uint8_t *above, const uint8_t *left) {
+  uint8x16_t a0, a1, a2, a15, d0, d1;
+  (void)left;
+
+  a0 = vld1q_u8(above + 0);
+  a1 = vld1q_u8(above + 1);
+  a2 = vld1q_u8(above + 2);
+  a15 = vld1q_dup_u8(above + 15);
+
+  d0 = vrhaddq_u8(a0, a1);
+  d1 = vrhaddq_u8(vhaddq_u8(a0, a2), a1);
+
+  vst1q_u8(dst + 0 * stride, d0);
+  vst1q_u8(dst + 1 * stride, d1);
+  vst1q_u8(dst + 2 * stride, vextq_u8(d0, a15, 1));
+  vst1q_u8(dst + 3 * stride, vextq_u8(d1, a15, 1));
+  vst1q_u8(dst + 4 * stride, vextq_u8(d0, a15, 2));
+  vst1q_u8(dst + 5 * stride, vextq_u8(d1, a15, 2));
+  vst1q_u8(dst + 6 * stride, vextq_u8(d0, a15, 3));
+  vst1q_u8(dst + 7 * stride, vextq_u8(d1, a15, 3));
+  vst1q_u8(dst + 8 * stride, vextq_u8(d0, a15, 4));
+  vst1q_u8(dst + 9 * stride, vextq_u8(d1, a15, 4));
+  vst1q_u8(dst + 10 * stride, vextq_u8(d0, a15, 5));
+  vst1q_u8(dst + 11 * stride, vextq_u8(d1, a15, 5));
+  vst1q_u8(dst + 12 * stride, vextq_u8(d0, a15, 6));
+  vst1q_u8(dst + 13 * stride, vextq_u8(d1, a15, 6));
+  vst1q_u8(dst + 14 * stride, vextq_u8(d0, a15, 7));
+  vst1q_u8(dst + 15 * stride, vextq_u8(d1, a15, 7));
+}
+
+void vpx_d63_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+                                  const uint8_t *above, const uint8_t *left) {
+  uint8x16_t a0, a1, a2, a16, a17, a18, a31, d0_lo, d0_hi, d1_lo, d1_hi;
+  (void)left;
+
+  a0 = vld1q_u8(above + 0);
+  a1 = vld1q_u8(above + 1);
+  a2 = vld1q_u8(above + 2);
+  a16 = vld1q_u8(above + 16);
+  a17 = vld1q_u8(above + 17);
+  a18 = vld1q_u8(above + 18);
+  a31 = vld1q_dup_u8(above + 31);
+
+  d0_lo = vrhaddq_u8(a0, a1);
+  d0_hi = vrhaddq_u8(a16, a17);
+  d1_lo = vrhaddq_u8(vhaddq_u8(a0, a2), a1);
+  d1_hi = vrhaddq_u8(vhaddq_u8(a16, a18), a17);
+
+  vst1q_u8(dst + 0 * stride + 0, d0_lo);
+  vst1q_u8(dst + 0 * stride + 16, d0_hi);
+  vst1q_u8(dst + 1 * stride + 0, d1_lo);
+  vst1q_u8(dst + 1 * stride + 16, d1_hi);
+  vst1q_u8(dst + 2 * stride + 0, vextq_u8(d0_lo, d0_hi, 1));
+  vst1q_u8(dst + 2 * stride + 16, vextq_u8(d0_hi, a31, 1));
+  vst1q_u8(dst + 3 * stride + 0, vextq_u8(d1_lo, d1_hi, 1));
+  vst1q_u8(dst + 3 * stride + 16, vextq_u8(d1_hi, a31, 1));
+  vst1q_u8(dst + 4 * stride + 0, vextq_u8(d0_lo, d0_hi, 2));
+  vst1q_u8(dst + 4 * stride + 16, vextq_u8(d0_hi, a31, 2));
+  vst1q_u8(dst + 5 * stride + 0, vextq_u8(d1_lo, d1_hi, 2));
+  vst1q_u8(dst + 5 * stride + 16, vextq_u8(d1_hi, a31, 2));
+  vst1q_u8(dst + 6 * stride + 0, vextq_u8(d0_lo, d0_hi, 3));
+  vst1q_u8(dst + 6 * stride + 16, vextq_u8(d0_hi, a31, 3));
+  vst1q_u8(dst + 7 * stride + 0, vextq_u8(d1_lo, d1_hi, 3));
+  vst1q_u8(dst + 7 * stride + 16, vextq_u8(d1_hi, a31, 3));
+  vst1q_u8(dst + 8 * stride + 0, vextq_u8(d0_lo, d0_hi, 4));
+  vst1q_u8(dst + 8 * stride + 16, vextq_u8(d0_hi, a31, 4));
+  vst1q_u8(dst + 9 * stride + 0, vextq_u8(d1_lo, d1_hi, 4));
+  vst1q_u8(dst + 9 * stride + 16, vextq_u8(d1_hi, a31, 4));
+  vst1q_u8(dst + 10 * stride + 0, vextq_u8(d0_lo, d0_hi, 5));
+  vst1q_u8(dst + 10 * stride + 16, vextq_u8(d0_hi, a31, 5));
+  vst1q_u8(dst + 11 * stride + 0, vextq_u8(d1_lo, d1_hi, 5));
+  vst1q_u8(dst + 11 * stride + 16, vextq_u8(d1_hi, a31, 5));
+  vst1q_u8(dst + 12 * stride + 0, vextq_u8(d0_lo, d0_hi, 6));
+  vst1q_u8(dst + 12 * stride + 16, vextq_u8(d0_hi, a31, 6));
+  vst1q_u8(dst + 13 * stride + 0, vextq_u8(d1_lo, d1_hi, 6));
+  vst1q_u8(dst + 13 * stride + 16, vextq_u8(d1_hi, a31, 6));
+  vst1q_u8(dst + 14 * stride + 0, vextq_u8(d0_lo, d0_hi, 7));
+  vst1q_u8(dst + 14 * stride + 16, vextq_u8(d0_hi, a31, 7));
+  vst1q_u8(dst + 15 * stride + 0, vextq_u8(d1_lo, d1_hi, 7));
+  vst1q_u8(dst + 15 * stride + 16, vextq_u8(d1_hi, a31, 7));
+  vst1q_u8(dst + 16 * stride + 0, vextq_u8(d0_lo, d0_hi, 8));
+  vst1q_u8(dst + 16 * stride + 16, vextq_u8(d0_hi, a31, 8));
+  vst1q_u8(dst + 17 * stride + 0, vextq_u8(d1_lo, d1_hi, 8));
+  vst1q_u8(dst + 17 * stride + 16, vextq_u8(d1_hi, a31, 8));
+  vst1q_u8(dst + 18 * stride + 0, vextq_u8(d0_lo, d0_hi, 9));
+  vst1q_u8(dst + 18 * stride + 16, vextq_u8(d0_hi, a31, 9));
+  vst1q_u8(dst + 19 * stride + 0, vextq_u8(d1_lo, d1_hi, 9));
+  vst1q_u8(dst + 19 * stride + 16, vextq_u8(d1_hi, a31, 9));
+  vst1q_u8(dst + 20 * stride + 0, vextq_u8(d0_lo, d0_hi, 10));
+  vst1q_u8(dst + 20 * stride + 16, vextq_u8(d0_hi, a31, 10));
+  vst1q_u8(dst + 21 * stride + 0, vextq_u8(d1_lo, d1_hi, 10));
+  vst1q_u8(dst + 21 * stride + 16, vextq_u8(d1_hi, a31, 10));
+  vst1q_u8(dst + 22 * stride + 0, vextq_u8(d0_lo, d0_hi, 11));
+  vst1q_u8(dst + 22 * stride + 16, vextq_u8(d0_hi, a31, 11));
+  vst1q_u8(dst + 23 * stride + 0, vextq_u8(d1_lo, d1_hi, 11));
+  vst1q_u8(dst + 23 * stride + 16, vextq_u8(d1_hi, a31, 11));
+  vst1q_u8(dst + 24 * stride + 0, vextq_u8(d0_lo, d0_hi, 12));
+  vst1q_u8(dst + 24 * stride + 16, vextq_u8(d0_hi, a31, 12));
+  vst1q_u8(dst + 25 * stride + 0, vextq_u8(d1_lo, d1_hi, 12));
+  vst1q_u8(dst + 25 * stride + 16, vextq_u8(d1_hi, a31, 12));
+  vst1q_u8(dst + 26 * stride + 0, vextq_u8(d0_lo, d0_hi, 13));
+  vst1q_u8(dst + 26 * stride + 16, vextq_u8(d0_hi, a31, 13));
+  vst1q_u8(dst + 27 * stride + 0, vextq_u8(d1_lo, d1_hi, 13));
+  vst1q_u8(dst + 27 * stride + 16, vextq_u8(d1_hi, a31, 13));
+  vst1q_u8(dst + 28 * stride + 0, vextq_u8(d0_lo, d0_hi, 14));
+  vst1q_u8(dst + 28 * stride + 16, vextq_u8(d0_hi, a31, 14));
+  vst1q_u8(dst + 29 * stride + 0, vextq_u8(d1_lo, d1_hi, 14));
+  vst1q_u8(dst + 29 * stride + 16, vextq_u8(d1_hi, a31, 14));
+  vst1q_u8(dst + 30 * stride + 0, vextq_u8(d0_lo, d0_hi, 15));
+  vst1q_u8(dst + 30 * stride + 16, vextq_u8(d0_hi, a31, 15));
+  vst1q_u8(dst + 31 * stride + 0, vextq_u8(d1_lo, d1_hi, 15));
+  vst1q_u8(dst + 31 * stride + 16, vextq_u8(d1_hi, a31, 15));
+}
+
+// -----------------------------------------------------------------------------
+
+void vpx_d117_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
+                                 const uint8_t *above, const uint8_t *left) {
+  // See vpx_d117_predictor_8x8_neon for more details on the implementation.
+  uint8x8_t az, a0, l0az, d0, d1, d2, d3, col0, col1;
+
+  az = load_unaligned_u8_4x1(above - 1);
+  a0 = load_unaligned_u8_4x1(above + 0);
+  // [ left[0], above[-1], above[0], above[1], x, x, x, x ]
+  l0az = vext_u8(vld1_dup_u8(left), az, 7);
+
+  col0 = vdup_n_u8((above[-1] + 2 * left[0] + left[1] + 2) >> 2);
+  col1 = vdup_n_u8((left[0] + 2 * left[1] + left[2] + 2) >> 2);
+
+  d0 = vrhadd_u8(az, a0);
+  d1 = vrhadd_u8(vhadd_u8(l0az, a0), az);
+  d2 = vext_u8(col0, d0, 7);
+  d3 = vext_u8(col1, d1, 7);
+
+  store_u8_4x1(dst + 0 * stride, d0);
+  store_u8_4x1(dst + 1 * stride, d1);
+  store_u8_4x1(dst + 2 * stride, d2);
+  store_u8_4x1(dst + 3 * stride, d3);
+}
+
+void vpx_d117_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
+                                 const uint8_t *above, const uint8_t *left) {
+  uint8x8_t az, a0, l0az, d0, d1, l0, l1, azl0, col0, col0_even, col0_odd;
+
+  az = vld1_u8(above - 1);
+  a0 = vld1_u8(above + 0);
+  // [ left[0], above[-1], ... , above[5] ]
+  l0az = vext_u8(vld1_dup_u8(left), az, 7);
+
+  l0 = vld1_u8(left + 0);
+  l1 = vld1_u8(left + 1);
+  // [ above[-1], left[0], ... , left[6] ]
+  azl0 = vext_u8(vld1_dup_u8(above - 1), l0, 7);
+
+  // d0[0] = AVG2(above[-1], above[0])
+  // d0[1] = AVG2(above[0], above[1])
+  // ...
+  // d0[7] = AVG2(above[6], above[7])
+  d0 = vrhadd_u8(az, a0);
+
+  // d1[0] = AVG3(left[0], above[-1], above[0])
+  // d1[1] = AVG3(above[-1], above[0], above[1])
+  // ...
+  // d1[7] = AVG3(above[5], above[6], above[7])
+  d1 = vrhadd_u8(vhadd_u8(l0az, a0), az);
+
+  // The ext instruction shifts elements in from the end of the vector rather
+  // than the start, so reverse the vector to put the elements to be shifted in
+  // at the end:
+  // col0[7] = AVG3(above[-1], left[0], left[1])
+  // col0[6] = AVG3(left[0], left[1], left[2])
+  // ...
+  // col0[0] = AVG3(left[6], left[7], left[8])
+  col0 = vrev64_u8(vrhadd_u8(vhadd_u8(azl0, l1), l0));
+
+  // We don't care about the first parameter to this uzp since we only ever use
+  // the high three elements, we just use col0 again since it is already
+  // available:
+  // col0_even = [ x, x, x, x, x, col0[3], col0[5], col0[7] ]
+  // col0_odd = [ x, x, x, x, x, col0[2], col0[4], col0[6] ]
+  col0_even = vuzp_u8(col0, col0).val[1];
+  col0_odd = vuzp_u8(col0, col0).val[0];
+
+  // Incrementally shift more elements from col0 into d0/1:
+  // stride=0 [ d0[0],   d0[1],   d0[2],   d0[3], d0[4], d0[5], d0[6], d0[7] ]
+  // stride=1 [ d1[0],   d1[1],   d1[2],   d1[3], d1[4], d1[5], d1[6], d1[7] ]
+  // stride=2 [ col0[7], d0[0],   d0[1],   d0[2], d0[3], d0[4], d0[5], d0[6] ]
+  // stride=3 [ col0[6], d1[0],   d1[1],   d1[2], d1[3], d1[4], d1[5], d1[6] ]
+  // stride=4 [ col0[5], col0[7], d0[0],   d0[1], d0[2], d0[3], d0[4], d0[5] ]
+  // stride=5 [ col0[4], col0[6], d1[0],   d1[1], d1[2], d1[3], d1[4], d1[5] ]
+  // stride=6 [ col0[3], col0[5], col0[7], d0[0], d0[1], d0[2], d0[3], d0[4] ]
+  // stride=7 [ col0[2], col0[4], col0[6], d1[0], d1[1], d1[2], d1[3], d1[4] ]
+  vst1_u8(dst + 0 * stride, d0);
+  vst1_u8(dst + 1 * stride, d1);
+  vst1_u8(dst + 2 * stride, vext_u8(col0_even, d0, 7));
+  vst1_u8(dst + 3 * stride, vext_u8(col0_odd, d1, 7));
+  vst1_u8(dst + 4 * stride, vext_u8(col0_even, d0, 6));
+  vst1_u8(dst + 5 * stride, vext_u8(col0_odd, d1, 6));
+  vst1_u8(dst + 6 * stride, vext_u8(col0_even, d0, 5));
+  vst1_u8(dst + 7 * stride, vext_u8(col0_odd, d1, 5));
+}
+
+void vpx_d117_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
+                                   const uint8_t *above, const uint8_t *left) {
+  // See vpx_d117_predictor_8x8_neon for more details on the implementation.
+  uint8x16_t az, a0, l0az, d0, d1, l0, l1, azl0, col0, col0_even, col0_odd;
+
+  az = vld1q_u8(above - 1);
+  a0 = vld1q_u8(above + 0);
+  // [ left[0], above[-1], ... , above[13] ]
+  l0az = vextq_u8(vld1q_dup_u8(left), az, 15);
+
+  l0 = vld1q_u8(left + 0);
+  l1 = vld1q_u8(left + 1);
+  // [ above[-1], left[0], ... , left[14] ]
+  azl0 = vextq_u8(vld1q_dup_u8(above - 1), l0, 15);
+
+  d0 = vrhaddq_u8(az, a0);
+  d1 = vrhaddq_u8(vhaddq_u8(l0az, a0), az);
+
+  col0 = vrhaddq_u8(vhaddq_u8(azl0, l1), l0);
+  col0 = vrev64q_u8(vextq_u8(col0, col0, 8));
+
+  col0_even = vuzpq_u8(col0, col0).val[1];
+  col0_odd = vuzpq_u8(col0, col0).val[0];
+
+  vst1q_u8(dst + 0 * stride, d0);
+  vst1q_u8(dst + 1 * stride, d1);
+  vst1q_u8(dst + 2 * stride, vextq_u8(col0_even, d0, 15));
+  vst1q_u8(dst + 3 * stride, vextq_u8(col0_odd, d1, 15));
+  vst1q_u8(dst + 4 * stride, vextq_u8(col0_even, d0, 14));
+  vst1q_u8(dst + 5 * stride, vextq_u8(col0_odd, d1, 14));
+  vst1q_u8(dst + 6 * stride, vextq_u8(col0_even, d0, 13));
+  vst1q_u8(dst + 7 * stride, vextq_u8(col0_odd, d1, 13));
+  vst1q_u8(dst + 8 * stride, vextq_u8(col0_even, d0, 12));
+  vst1q_u8(dst + 9 * stride, vextq_u8(col0_odd, d1, 12));
+  vst1q_u8(dst + 10 * stride, vextq_u8(col0_even, d0, 11));
+  vst1q_u8(dst + 11 * stride, vextq_u8(col0_odd, d1, 11));
+  vst1q_u8(dst + 12 * stride, vextq_u8(col0_even, d0, 10));
+  vst1q_u8(dst + 13 * stride, vextq_u8(col0_odd, d1, 10));
+  vst1q_u8(dst + 14 * stride, vextq_u8(col0_even, d0, 9));
+  vst1q_u8(dst + 15 * stride, vextq_u8(col0_odd, d1, 9));
+}
+
+void vpx_d117_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
+                                   const uint8_t *above, const uint8_t *left) {
+  // See vpx_d117_predictor_8x8_neon for more details on the implementation.
+  uint8x16_t az, a0, a14, a15, a16, l0az, d0_lo, d0_hi, d1_lo, d1_hi, l0, l1,
+      l15, l16, l17, azl0, col0_lo, col0_hi, col0_even, col0_odd;
+
+  az = vld1q_u8(above - 1);
+  a0 = vld1q_u8(above + 0);
+  a14 = vld1q_u8(above + 14);
+  a15 = vld1q_u8(above + 15);
+  a16 = vld1q_u8(above + 16);
+  // [ left[0], above[-1], ... , above[13] ]
+  l0az = vextq_u8(vld1q_dup_u8(left), az, 15);
+
+  l0 = vld1q_u8(left + 0);
+  l1 = vld1q_u8(left + 1);
+  l15 = vld1q_u8(left + 15);
+  l16 = vld1q_u8(left + 16);
+  l17 = vld1q_u8(left + 17);
+  // [ above[-1], left[0], ... , left[14] ]
+  azl0 = vextq_u8(vld1q_dup_u8(above - 1), l0, 15);
+
+  d0_lo = vrhaddq_u8(az, a0);
+  d0_hi = vrhaddq_u8(a15, a16);
+  d1_lo = vrhaddq_u8(vhaddq_u8(l0az, a0), az);
+  d1_hi = vrhaddq_u8(vhaddq_u8(a14, a16), a15);
+
+  col0_lo = vrhaddq_u8(vhaddq_u8(azl0, l1), l0);
+  col0_hi = vrhaddq_u8(vhaddq_u8(l15, l17), l16);
+
+  col0_lo = vrev64q_u8(vextq_u8(col0_lo, col0_lo, 8));
+  col0_hi = vrev64q_u8(vextq_u8(col0_hi, col0_hi, 8));
+
+  col0_even = vuzpq_u8(col0_hi, col0_lo).val[1];
+  col0_odd = vuzpq_u8(col0_hi, col0_lo).val[0];
+
+  vst1q_u8(dst + 0 * stride + 0, d0_lo);
+  vst1q_u8(dst + 0 * stride + 16, d0_hi);
+  vst1q_u8(dst + 1 * stride + 0, d1_lo);
+  vst1q_u8(dst + 1 * stride + 16, d1_hi);
+  vst1q_u8(dst + 2 * stride + 0, vextq_u8(col0_even, d0_lo, 15));
+  vst1q_u8(dst + 2 * stride + 16, vextq_u8(d0_lo, d0_hi, 15));
+  vst1q_u8(dst + 3 * stride + 0, vextq_u8(col0_odd, d1_lo, 15));
+  vst1q_u8(dst + 3 * stride + 16, vextq_u8(d1_lo, d1_hi, 15));
+  vst1q_u8(dst + 4 * stride + 0, vextq_u8(col0_even, d0_lo, 14));
+  vst1q_u8(dst + 4 * stride + 16, vextq_u8(d0_lo, d0_hi, 14));
+  vst1q_u8(dst + 5 * stride + 0, vextq_u8(col0_odd, d1_lo, 14));
+  vst1q_u8(dst + 5 * stride + 16, vextq_u8(d1_lo, d1_hi, 14));
+  vst1q_u8(dst + 6 * stride + 0, vextq_u8(col0_even, d0_lo, 13));
+  vst1q_u8(dst + 6 * stride + 16, vextq_u8(d0_lo, d0_hi, 13));
+  vst1q_u8(dst + 7 * stride + 0, vextq_u8(col0_odd, d1_lo, 13));
+  vst1q_u8(dst + 7 * stride + 16, vextq_u8(d1_lo, d1_hi, 13));
+  vst1q_u8(dst + 8 * stride + 0, vextq_u8(col0_even, d0_lo, 12));
+  vst1q_u8(dst + 8 * stride + 16, vextq_u8(d0_lo, d0_hi, 12));
+  vst1q_u8(dst + 9 * stride + 0, vextq_u8(col0_odd, d1_lo, 12));
+  vst1q_u8(dst + 9 * stride + 16, vextq_u8(d1_lo, d1_hi, 12));
+  vst1q_u8(dst + 10 * stride + 0, vextq_u8(col0_even, d0_lo, 11));
+  vst1q_u8(dst + 10 * stride + 16, vextq_u8(d0_lo, d0_hi, 11));
+  vst1q_u8(dst + 11 * stride + 0, vextq_u8(col0_odd, d1_lo, 11));
+  vst1q_u8(dst + 11 * stride + 16, vextq_u8(d1_lo, d1_hi, 11));
+  vst1q_u8(dst + 12 * stride + 0, vextq_u8(col0_even, d0_lo, 10));
+  vst1q_u8(dst + 12 * stride + 16, vextq_u8(d0_lo, d0_hi, 10));
+  vst1q_u8(dst + 13 * stride + 0, vextq_u8(col0_odd, d1_lo, 10));
+  vst1q_u8(dst + 13 * stride + 16, vextq_u8(d1_lo, d1_hi, 10));
+  vst1q_u8(dst + 14 * stride + 0, vextq_u8(col0_even, d0_lo, 9));
+  vst1q_u8(dst + 14 * stride + 16, vextq_u8(d0_lo, d0_hi, 9));
+  vst1q_u8(dst + 15 * stride + 0, vextq_u8(col0_odd, d1_lo, 9));
+  vst1q_u8(dst + 15 * stride + 16, vextq_u8(d1_lo, d1_hi, 9));
+  vst1q_u8(dst + 16 * stride + 0, vextq_u8(col0_even, d0_lo, 8));
+  vst1q_u8(dst + 16 * stride + 16, vextq_u8(d0_lo, d0_hi, 8));
+  vst1q_u8(dst + 17 * stride + 0, vextq_u8(col0_odd, d1_lo, 8));
+  vst1q_u8(dst + 17 * stride + 16, vextq_u8(d1_lo, d1_hi, 8));
+  vst1q_u8(dst + 18 * stride + 0, vextq_u8(col0_even, d0_lo, 7));
+  vst1q_u8(dst + 18 * stride + 16, vextq_u8(d0_lo, d0_hi, 7));
+  vst1q_u8(dst + 19 * stride + 0, vextq_u8(col0_odd, d1_lo, 7));
+  vst1q_u8(dst + 19 * stride + 16, vextq_u8(d1_lo, d1_hi, 7));
+  vst1q_u8(dst + 20 * stride + 0, vextq_u8(col0_even, d0_lo, 6));
+  vst1q_u8(dst + 20 * stride + 16, vextq_u8(d0_lo, d0_hi, 6));
+  vst1q_u8(dst + 21 * stride + 0, vextq_u8(col0_odd, d1_lo, 6));
+  vst1q_u8(dst + 21 * stride + 16, vextq_u8(d1_lo, d1_hi, 6));
+  vst1q_u8(dst + 22 * stride + 0, vextq_u8(col0_even, d0_lo, 5));
+  vst1q_u8(dst + 22 * stride + 16, vextq_u8(d0_lo, d0_hi, 5));
+  vst1q_u8(dst + 23 * stride + 0, vextq_u8(col0_odd, d1_lo, 5));
+  vst1q_u8(dst + 23 * stride + 16, vextq_u8(d1_lo, d1_hi, 5));
+  vst1q_u8(dst + 24 * stride + 0, vextq_u8(col0_even, d0_lo, 4));
+  vst1q_u8(dst + 24 * stride + 16, vextq_u8(d0_lo, d0_hi, 4));
+  vst1q_u8(dst + 25 * stride + 0, vextq_u8(col0_odd, d1_lo, 4));
+  vst1q_u8(dst + 25 * stride + 16, vextq_u8(d1_lo, d1_hi, 4));
+  vst1q_u8(dst + 26 * stride + 0, vextq_u8(col0_even, d0_lo, 3));
+  vst1q_u8(dst + 26 * stride + 16, vextq_u8(d0_lo, d0_hi, 3));
+  vst1q_u8(dst + 27 * stride + 0, vextq_u8(col0_odd, d1_lo, 3));
+  vst1q_u8(dst + 27 * stride + 16, vextq_u8(d1_lo, d1_hi, 3));
+  vst1q_u8(dst + 28 * stride + 0, vextq_u8(col0_even, d0_lo, 2));
+  vst1q_u8(dst + 28 * stride + 16, vextq_u8(d0_lo, d0_hi, 2));
+  vst1q_u8(dst + 29 * stride + 0, vextq_u8(col0_odd, d1_lo, 2));
+  vst1q_u8(dst + 29 * stride + 16, vextq_u8(d1_lo, d1_hi, 2));
+  vst1q_u8(dst + 30 * stride + 0, vextq_u8(col0_even, d0_lo, 1));
+  vst1q_u8(dst + 30 * stride + 16, vextq_u8(d0_lo, d0_hi, 1));
+  vst1q_u8(dst + 31 * stride + 0, vextq_u8(col0_odd, d1_lo, 1));
+  vst1q_u8(dst + 31 * stride + 16, vextq_u8(d1_lo, d1_hi, 1));
 }
 
 // -----------------------------------------------------------------------------
