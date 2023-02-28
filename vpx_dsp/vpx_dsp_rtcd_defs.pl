@@ -1141,13 +1141,13 @@ add_proto qw/unsigned int vpx_mse16x16/, "const uint8_t *src_ptr, int src_stride
   specialize qw/vpx_mse16x16 sse2 avx2 neon msa mmi vsx lsx/;
 
 add_proto qw/unsigned int vpx_mse16x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_mse16x8 sse2 avx2 msa mmi vsx/;
+  specialize qw/vpx_mse16x8 sse2 avx2 neon msa mmi vsx/;
 
 add_proto qw/unsigned int vpx_mse8x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_mse8x16 sse2 msa mmi vsx/;
+  specialize qw/vpx_mse8x16 sse2 neon msa mmi vsx/;
 
 add_proto qw/unsigned int vpx_mse8x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_mse8x8 sse2 msa mmi vsx/;
+  specialize qw/vpx_mse8x8 sse2 neon msa mmi vsx/;
 
 add_proto qw/unsigned int vpx_get_mb_ss/, "const int16_t *";
   specialize qw/vpx_get_mb_ss sse2 msa vsx/;
