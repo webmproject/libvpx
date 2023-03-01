@@ -160,10 +160,12 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx, int m, int n,
 }
 
 #if !CONFIG_REALTIME_ONLY
-static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
-                            MACROBLOCKD *xd, int *out_rate_sum,
-                            int64_t *out_dist_sum, int *skip_txfm_sb,
-                            int64_t *skip_sse_sb) {
+static int model_rd_for_sb_earlyterm(VP9_COMP *cpi, int mi_row, int mi_col,
+                                     BLOCK_SIZE bsize, MACROBLOCK *x,
+                                     MACROBLOCKD *xd, int *out_rate_sum,
+                                     int64_t *out_dist_sum, int *skip_txfm_sb,
+                                     int64_t *skip_sse_sb, int do_earlyterm,
+                                     int64_t best_rd) {
   // Note our transform coeffs are 8 times an orthogonal transform.
   // Hence quantizer step is also 8 times. To get effective quantizer
   // we need to divide by 8 before sending to modeling function.
@@ -176,19 +178,15 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
   int64_t total_sse = 0;
   int skip_flag = 1;
   const int shift = 6;
-  int64_t dist;
   const int dequant_shift =
 #if CONFIG_VP9_HIGHBITDEPTH
       (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) ? xd->bd - 5 :
 #endif  // CONFIG_VP9_HIGHBITDEPTH
                                                     3;
-  unsigned int qstep_vec[MAX_MB_PLANE];
-  unsigned int nlog2_vec[MAX_MB_PLANE];
-  unsigned int sum_sse_vec[MAX_MB_PLANE];
-  int any_zero_sum_sse = 0;
 
   x->pred_sse[ref] = 0;
 
+  // Build prediction signal, compute stats and RD cost on per-plane basis
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     struct macroblock_plane *const p = &x->plane[i];
     struct macroblockd_plane *const pd = &xd->plane[i];
@@ -207,7 +205,14 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
     int idx, idy;
     int lw = b_width_log2_lookup[unit_size] + 2;
     int lh = b_height_log2_lookup[unit_size] + 2;
+    unsigned int qstep;
+    unsigned int nlog2;
+    int64_t dist = 0;
 
+    // Build inter predictor
+    vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, i);
+
+    // Compute useful stats
     for (idy = 0; idy < bh; ++idy) {
       for (idx = 0; idx < bw; ++idx) {
         uint8_t *src = p->src.buf + (idy * p->src.stride << lh) + (idx << lw);
@@ -243,46 +248,36 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize, MACROBLOCK *x,
     }
 
     total_sse += sum_sse;
-    sum_sse_vec[i] = sum_sse;
-    any_zero_sum_sse = any_zero_sum_sse || (sum_sse == 0);
-    qstep_vec[i] = pd->dequant[1] >> dequant_shift;
-    nlog2_vec[i] = num_pels_log2_lookup[bs];
-  }
+    qstep = pd->dequant[1] >> dequant_shift;
+    nlog2 = num_pels_log2_lookup[bs];
 
-  // Fast approximate the modelling function.
-  if (cpi->sf.simple_model_rd_from_var) {
-    for (i = 0; i < MAX_MB_PLANE; ++i) {
+    // Fast approximate the modelling function.
+    if (cpi->sf.simple_model_rd_from_var) {
       int64_t rate;
-      const int64_t square_error = sum_sse_vec[i];
-      int quantizer = qstep_vec[i];
-
-      if (quantizer < 120)
-        rate = (square_error * (280 - quantizer)) >> (16 - VP9_PROB_COST_SHIFT);
+      if (qstep < 120)
+        rate = ((int64_t)sum_sse * (280 - qstep)) >> (16 - VP9_PROB_COST_SHIFT);
       else
         rate = 0;
-      dist = (square_error * quantizer) >> 8;
+      dist = ((int64_t)sum_sse * qstep) >> 8;
       rate_sum += rate;
-      dist_sum += dist;
-    }
-  } else {
-    if (any_zero_sum_sse) {
-      for (i = 0; i < MAX_MB_PLANE; ++i) {
-        int rate;
-        vp9_model_rd_from_var_lapndz(sum_sse_vec[i], nlog2_vec[i], qstep_vec[i],
-                                     &rate, &dist);
-        rate_sum += rate;
-        dist_sum += dist;
-      }
     } else {
-      vp9_model_rd_from_var_lapndz_vec(sum_sse_vec, nlog2_vec, qstep_vec,
-                                       &rate_sum, &dist_sum);
+      int rate;
+      vp9_model_rd_from_var_lapndz(sum_sse, nlog2, qstep, &rate, &dist);
+      rate_sum += rate;
+    }
+    dist_sum += dist;
+    if (do_earlyterm) {
+      if (RDCOST(x->rdmult, x->rddiv, rate_sum,
+                 dist_sum << VP9_DIST_SCALE_LOG2) >= best_rd)
+        return 1;
     }
   }
-
   *skip_txfm_sb = skip_flag;
   *skip_sse_sb = total_sse << VP9_DIST_SCALE_LOG2;
   *out_rate_sum = (int)rate_sum;
   *out_dist_sum = dist_sum << VP9_DIST_SCALE_LOG2;
+
+  return 0;
 }
 #endif  // !CONFIG_REALTIME_ONLY
 
@@ -2964,6 +2959,9 @@ static int64_t handle_inter_mode(
         int64_t rs_rd;
         int tmp_skip_sb = 0;
         int64_t tmp_skip_sse = INT64_MAX;
+        const int enable_earlyterm =
+            cpi->sf.early_term_interp_search_plane_rd && cm->interp_filter != i;
+        int64_t filt_best_rd;
 
         mi->interp_filter = i;
         rs = vp9_get_switchable_rate(cpi, xd);
@@ -2997,9 +2995,16 @@ static int64_t handle_inter_mode(
               xd->plane[j].dst.stride = 64;
             }
           }
-          vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
-          model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum, &tmp_skip_sb,
-                          &tmp_skip_sse);
+          // Compute RD cost with early termination option
+          filt_best_rd =
+              cm->interp_filter == SWITCHABLE ? (best_rd - rs_rd) : best_rd;
+          if (model_rd_for_sb_earlyterm(cpi, mi_row, mi_col, bsize, x, xd,
+                                        &rate_sum, &dist_sum, &tmp_skip_sb,
+                                        &tmp_skip_sse, enable_earlyterm,
+                                        filt_best_rd)) {
+            filter_cache[i] = INT64_MAX;
+            continue;
+          }
 
           rd = RDCOST(x->rdmult, x->rddiv, rate_sum, dist_sum);
           filter_cache[i] = rd;
@@ -3067,9 +3072,9 @@ static int64_t handle_inter_mode(
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear) is indicated at the frame level, or
     // skip condition holds.
-    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
-    model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist, &skip_txfm_sb,
-                    &skip_sse_sb);
+    model_rd_for_sb_earlyterm(cpi, mi_row, mi_col, bsize, x, xd, &tmp_rate,
+                              &tmp_dist, &skip_txfm_sb, &skip_sse_sb,
+                              0 /*do_earlyterm*/, INT64_MAX);
     rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
     memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
     memcpy(bsse, x->bsse, sizeof(bsse));
