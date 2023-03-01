@@ -1508,6 +1508,22 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_SUITE_P(
+    NEON, VpxHBDMseTest,
+    ::testing::Values(
+        MseParams(4, 4, &vpx_highbd_12_mse16x16_neon, VPX_BITS_12),
+        MseParams(4, 3, &vpx_highbd_12_mse16x8_neon, VPX_BITS_12),
+        MseParams(3, 4, &vpx_highbd_12_mse8x16_neon, VPX_BITS_12),
+        MseParams(3, 3, &vpx_highbd_12_mse8x8_neon, VPX_BITS_12),
+        MseParams(4, 4, &vpx_highbd_10_mse16x16_neon, VPX_BITS_10),
+        MseParams(4, 3, &vpx_highbd_10_mse16x8_neon, VPX_BITS_10),
+        MseParams(3, 4, &vpx_highbd_10_mse8x16_neon, VPX_BITS_10),
+        MseParams(3, 3, &vpx_highbd_10_mse8x8_neon, VPX_BITS_10),
+        MseParams(4, 4, &vpx_highbd_8_mse16x16_neon, VPX_BITS_8),
+        MseParams(4, 3, &vpx_highbd_8_mse16x8_neon, VPX_BITS_8),
+        MseParams(3, 4, &vpx_highbd_8_mse8x16_neon, VPX_BITS_8),
+        MseParams(3, 3, &vpx_highbd_8_mse8x8_neon, VPX_BITS_8)));
+
+INSTANTIATE_TEST_SUITE_P(
     NEON, VpxHBDVarianceTest,
     ::testing::Values(
         VarianceParams(6, 6, &vpx_highbd_12_variance64x64_neon, 12),
