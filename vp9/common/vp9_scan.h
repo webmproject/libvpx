@@ -23,7 +23,7 @@ extern "C" {
 
 #define MAX_NEIGHBORS 2
 
-typedef struct scan_order {
+typedef struct {
   const int16_t *scan;
   const int16_t *iscan;
   const int16_t *neighbors;

@@ -42,7 +42,7 @@ typedef void (*QuantizeFunc)(const tran_low_t *coeff, intptr_t count,
                              const macroblock_plane *const mb_plane,
                              tran_low_t *qcoeff, tran_low_t *dqcoeff,
                              const int16_t *dequant, uint16_t *eob,
-                             const struct scan_order *const scan_order);
+                             const int16_t *scan, const int16_t *iscan);
 typedef std::tuple<QuantizeFunc, QuantizeFunc, vpx_bit_depth_t,
                    int /*max_size*/, bool /*is_fp*/>
     QuantizeParam;
@@ -60,10 +60,9 @@ template <QuantizeBaseFunc fn>
 void QuantWrapper(const tran_low_t *coeff, intptr_t count,
                   const macroblock_plane *const mb_plane, tran_low_t *qcoeff,
                   tran_low_t *dqcoeff, const int16_t *dequant, uint16_t *eob,
-                  const struct scan_order *const scan_order) {
+                  const int16_t *scan, const int16_t *iscan) {
   fn(coeff, count, mb_plane->zbin, mb_plane->round, mb_plane->quant,
-     mb_plane->quant_shift, qcoeff, dqcoeff, dequant, eob, scan_order->scan,
-     scan_order->iscan);
+     mb_plane->quant_shift, qcoeff, dqcoeff, dequant, eob, scan, iscan);
 }
 
 // Wrapper for 32x32 version which does not use count
@@ -71,16 +70,16 @@ typedef void (*Quantize32x32Func)(const tran_low_t *coeff,
                                   const macroblock_plane *const mb_plane,
                                   tran_low_t *qcoeff, tran_low_t *dqcoeff,
                                   const int16_t *dequant, uint16_t *eob,
-                                  const struct scan_order *const scan_order);
+                                  const int16_t *scan, const int16_t *iscan);
 
 template <Quantize32x32Func fn>
 void Quant32x32Wrapper(const tran_low_t *coeff, intptr_t count,
                        const macroblock_plane *const mb_plane,
                        tran_low_t *qcoeff, tran_low_t *dqcoeff,
                        const int16_t *dequant, uint16_t *eob,
-                       const struct scan_order *const scan_order) {
+                       const int16_t *scan, const int16_t *iscan) {
   (void)count;
-  fn(coeff, mb_plane, qcoeff, dqcoeff, dequant, eob, scan_order);
+  fn(coeff, mb_plane, qcoeff, dqcoeff, dequant, eob, scan, iscan);
 }
 
 // Wrapper for FP version which does not use zbin or quant_shift.
@@ -94,9 +93,9 @@ template <QuantizeFPFunc fn>
 void QuantFPWrapper(const tran_low_t *coeff, intptr_t count,
                     const macroblock_plane *const mb_plane, tran_low_t *qcoeff,
                     tran_low_t *dqcoeff, const int16_t *dequant, uint16_t *eob,
-                    const struct scan_order *const scan_order) {
+                    const int16_t *scan, const int16_t *iscan) {
   fn(coeff, count, mb_plane->round_fp, mb_plane->quant_fp, qcoeff, dqcoeff,
-     dequant, eob, scan_order->scan, scan_order->iscan);
+     dequant, eob, scan, iscan);
 }
 
 void GenerateHelperArrays(ACMRandom *rnd, int16_t *zbin, int16_t *round,
@@ -226,7 +225,7 @@ class VP9QuantizeTest : public VP9QuantizeBase,
 void VP9QuantizeTest::Run() {
   quantize_op_(coeff_.TopLeftPixel(), count_, &mb_plane_,
                qcoeff_.TopLeftPixel(), dqcoeff_.TopLeftPixel(), dequant_ptr_,
-               &eob_, scan_);
+               &eob_, scan_->scan, scan_->iscan);
 }
 
 void VP9QuantizeTest::Speed(bool is_median) {
@@ -299,7 +298,7 @@ void VP9QuantizeTest::Speed(bool is_median) {
           ref_quantize_op_(coeff_.TopLeftPixel(), count_, &mb_plane_,
                            ref_qcoeff.TopLeftPixel(),
                            ref_dqcoeff.TopLeftPixel(), dequant_ptr_, &ref_eob,
-                           scan_);
+                           scan_->scan, scan_->iscan);
         }
         vpx_usec_timer_mark(&timer);
 
@@ -307,7 +306,7 @@ void VP9QuantizeTest::Speed(bool is_median) {
         for (int n = 0; n < kNumTests; ++n) {
           quantize_op_(coeff_.TopLeftPixel(), count_, &mb_plane_,
                        qcoeff_.TopLeftPixel(), dqcoeff_.TopLeftPixel(),
-                       dequant_ptr_, &eob_, scan_);
+                       dequant_ptr_, &eob_, scan_->scan, scan_->iscan);
         }
         vpx_usec_timer_mark(&simd_timer);
 
@@ -448,11 +447,12 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
                          quant_fp_ptr_);
     ref_quantize_op_(coeff_.TopLeftPixel(), count_, &mb_plane_,
                      ref_qcoeff.TopLeftPixel(), ref_dqcoeff.TopLeftPixel(),
-                     dequant_ptr_, &ref_eob, scan_);
+                     dequant_ptr_, &ref_eob, scan_->scan, scan_->iscan);
 
-    ASM_REGISTER_STATE_CHECK(quantize_op_(
-        coeff_.TopLeftPixel(), count_, &mb_plane_, qcoeff_.TopLeftPixel(),
-        dqcoeff_.TopLeftPixel(), dequant_ptr_, &eob_, scan_));
+    ASM_REGISTER_STATE_CHECK(quantize_op_(coeff_.TopLeftPixel(), count_,
+                                          &mb_plane_, qcoeff_.TopLeftPixel(),
+                                          dqcoeff_.TopLeftPixel(), dequant_ptr_,
+                                          &eob_, scan_->scan, scan_->iscan));
 
     EXPECT_TRUE(qcoeff_.CheckValues(ref_qcoeff));
     EXPECT_TRUE(dqcoeff_.CheckValues(ref_dqcoeff));
@@ -504,11 +504,12 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
                          quant_fp_ptr_);
     ref_quantize_op_(coeff_.TopLeftPixel(), count_, &mb_plane_,
                      ref_qcoeff.TopLeftPixel(), ref_dqcoeff.TopLeftPixel(),
-                     dequant_ptr_, &ref_eob, scan_);
+                     dequant_ptr_, &ref_eob, scan_->scan, scan_->iscan);
 
-    ASM_REGISTER_STATE_CHECK(quantize_op_(
-        coeff_.TopLeftPixel(), count_, &mb_plane_, qcoeff_.TopLeftPixel(),
-        dqcoeff_.TopLeftPixel(), dequant_ptr_, &eob_, scan_));
+    ASM_REGISTER_STATE_CHECK(quantize_op_(coeff_.TopLeftPixel(), count_,
+                                          &mb_plane_, qcoeff_.TopLeftPixel(),
+                                          dqcoeff_.TopLeftPixel(), dequant_ptr_,
+                                          &eob_, scan_->scan, scan_->iscan));
 
     EXPECT_TRUE(qcoeff_.CheckValues(ref_qcoeff));
     EXPECT_TRUE(dqcoeff_.CheckValues(ref_dqcoeff));

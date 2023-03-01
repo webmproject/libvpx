@@ -13,7 +13,6 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/arm/mem_neon.h"
-#include "vp9/common/vp9_scan.h"
 #include "vp9/encoder/vp9_block.h"
 
 static VPX_FORCE_INLINE void highbd_calculate_dqcoeff_and_store(
@@ -228,11 +227,10 @@ static VPX_FORCE_INLINE int16x8_t highbd_quantize_b_32x32_neon(
 void vpx_highbd_quantize_b_32x32_neon(
     const tran_low_t *coeff_ptr, const struct macroblock_plane *const mb_plane,
     tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-    uint16_t *eob_ptr, const struct scan_order *const scan_order) {
+    uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan) {
   const int16x8_t neg_one = vdupq_n_s16(-1);
   uint16x8_t eob_max;
   int i;
-  const int16_t *iscan = scan_order->iscan;
 
   // Only the first element of each vector is DC.
   // High half has identical elements, but we can reconstruct it from the low
@@ -302,4 +300,7 @@ void vpx_highbd_quantize_b_32x32_neon(
     vst1_lane_u16(eob_ptr, eob_max_2, 0);
   }
 #endif  // __aarch64__
+  // Need this here, else the compiler complains about mixing declarations and
+  // code in C90
+  (void)scan;
 }
