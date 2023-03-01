@@ -453,6 +453,332 @@ void vpx_highbd_d45_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
 
 // -----------------------------------------------------------------------------
 
+void vpx_highbd_d63_predictor_4x4_neon(uint16_t *dst, ptrdiff_t stride,
+                                       const uint16_t *above,
+                                       const uint16_t *left, int bd) {
+  uint16x4_t a0, a1, a2, a3, d0, d1, d2, d3;
+  (void)left;
+  (void)bd;
+
+  a0 = vld1_u16(above + 0);
+  a1 = vld1_u16(above + 1);
+  a2 = vld1_u16(above + 2);
+  a3 = vld1_u16(above + 3);
+
+  d0 = vrhadd_u16(a0, a1);
+  d1 = vrhadd_u16(vhadd_u16(a0, a2), a1);
+  d2 = vrhadd_u16(a1, a2);
+  d3 = vrhadd_u16(vhadd_u16(a1, a3), a2);
+
+  // Note that here we are performing a full avg calculation for the final
+  // elements rather than storing a duplicate of above[3], which differs
+  // (correctly) from the general scheme employed by the bs={8,16,32}
+  // implementations in order to match the original C implementation.
+  vst1_u16(dst + 0 * stride, d0);
+  vst1_u16(dst + 1 * stride, d1);
+  vst1_u16(dst + 2 * stride, d2);
+  vst1_u16(dst + 3 * stride, d3);
+}
+
+void vpx_highbd_d63_predictor_8x8_neon(uint16_t *dst, ptrdiff_t stride,
+                                       const uint16_t *above,
+                                       const uint16_t *left, int bd) {
+  uint16x8_t a0, a1, a2, a7, d0, d1, d0_ext, d1_ext;
+  (void)left;
+  (void)bd;
+
+  a0 = vld1q_u16(above + 0);
+  a1 = vld1q_u16(above + 1);
+  a2 = vld1q_u16(above + 2);
+  a7 = vld1q_dup_u16(above + 7);
+
+  d0 = vrhaddq_u16(a0, a1);
+  d1 = vrhaddq_u16(vhaddq_u16(a0, a2), a1);
+
+  // We want to store:
+  // stride=0 [ d0[0], d0[1], d0[2], d0[3], d0[4], d0[5], d0[6], d0[7] ]
+  // stride=1 [ d1[0], d1[1], d1[2], d1[3], d1[4], d1[5], d1[6], d1[7] ]
+  // stride=2 [ d0[1], d0[2], d0[3], d0[4], d0[5], d0[6],  a[7],  a[7] ]
+  // stride=3 [ d1[1], d1[2], d1[3], d1[4], d1[5], d1[6],  a[7],  a[7] ]
+  // stride=4 [ d0[2], d0[3], d0[4], d0[5], d0[6],  a[7],  a[7],  a[7] ]
+  // stride=5 [ d1[2], d1[3], d1[4], d1[5], d1[6],  a[7],  a[7],  a[7] ]
+  // stride=6 [ d0[3], d0[4], d0[5], d0[6],  a[7],  a[7],  a[7],  a[7] ]
+  // stride=7 [ d1[3], d1[4], d1[5], d1[6],  a[7],  a[7],  a[7],  a[7] ]
+  // Note in particular that d0[7] and d1[7] are only ever referenced in the
+  // stride=0 and stride=1 cases respectively, and in later strides are
+  // replaced by a copy of above[7]. These are equivalent if for i>7,
+  // above[i]==above[7], however that is not always the case.
+
+  // Strip out d0[7] and d1[7] so that we can replace it with an additional
+  // copy of above[7], the first vector here doesn't matter so just reuse
+  // d0/d1.
+  d0_ext = vextq_u16(d0, d0, 7);
+  d1_ext = vextq_u16(d1, d1, 7);
+
+  // Shuffle in duplicates of above[7] and store.
+  vst1q_u16(dst + 0 * stride, d0);
+  vst1q_u16(dst + 1 * stride, d1);
+  vst1q_u16(dst + 2 * stride, vextq_u16(d0_ext, a7, 2));
+  vst1q_u16(dst + 3 * stride, vextq_u16(d1_ext, a7, 2));
+  vst1q_u16(dst + 4 * stride, vextq_u16(d0_ext, a7, 3));
+  vst1q_u16(dst + 5 * stride, vextq_u16(d1_ext, a7, 3));
+  vst1q_u16(dst + 6 * stride, vextq_u16(d0_ext, a7, 4));
+  vst1q_u16(dst + 7 * stride, vextq_u16(d1_ext, a7, 4));
+}
+
+void vpx_highbd_d63_predictor_16x16_neon(uint16_t *dst, ptrdiff_t stride,
+                                         const uint16_t *above,
+                                         const uint16_t *left, int bd) {
+  // See vpx_highbd_d63_predictor_8x8_neon for details on the implementation.
+  uint16x8_t a0, a1, a2, a8, a9, a10, a15, d0[2], d1[2], d0_ext, d1_ext;
+  (void)left;
+  (void)bd;
+
+  a0 = vld1q_u16(above + 0);
+  a1 = vld1q_u16(above + 1);
+  a2 = vld1q_u16(above + 2);
+  a8 = vld1q_u16(above + 8);
+  a9 = vld1q_u16(above + 9);
+  a10 = vld1q_u16(above + 10);
+  a15 = vld1q_dup_u16(above + 15);
+
+  d0[0] = vrhaddq_u16(a0, a1);
+  d0[1] = vrhaddq_u16(a8, a9);
+  d1[0] = vrhaddq_u16(vhaddq_u16(a0, a2), a1);
+  d1[1] = vrhaddq_u16(vhaddq_u16(a8, a10), a9);
+
+  // Strip out the final element of d0/d1 so that we can replace it with an
+  // additional copy of above[7], the first vector here doesn't matter so just
+  // reuse the same vector.
+  d0_ext = vextq_u16(d0[1], d0[1], 7);
+  d1_ext = vextq_u16(d1[1], d1[1], 7);
+
+  // Shuffle in duplicates of above[7] and store. Note that cases involving
+  // {d0,d1}_ext require an extra shift to undo the shifting out of the final
+  // element from above.
+  vst1q_u16(dst + 0 * stride + 0, d0[0]);
+  vst1q_u16(dst + 0 * stride + 8, d0[1]);
+  vst1q_u16(dst + 1 * stride + 0, d1[0]);
+  vst1q_u16(dst + 1 * stride + 8, d1[1]);
+  vst1q_u16(dst + 2 * stride + 0, vextq_u16(d0[0], d0[1], 1));
+  vst1q_u16(dst + 2 * stride + 8, vextq_u16(d0_ext, a15, 2));
+  vst1q_u16(dst + 3 * stride + 0, vextq_u16(d1[0], d1[1], 1));
+  vst1q_u16(dst + 3 * stride + 8, vextq_u16(d1_ext, a15, 2));
+  vst1q_u16(dst + 4 * stride + 0, vextq_u16(d0[0], d0[1], 2));
+  vst1q_u16(dst + 4 * stride + 8, vextq_u16(d0_ext, a15, 3));
+  vst1q_u16(dst + 5 * stride + 0, vextq_u16(d1[0], d1[1], 2));
+  vst1q_u16(dst + 5 * stride + 8, vextq_u16(d1_ext, a15, 3));
+  vst1q_u16(dst + 6 * stride + 0, vextq_u16(d0[0], d0[1], 3));
+  vst1q_u16(dst + 6 * stride + 8, vextq_u16(d0_ext, a15, 4));
+  vst1q_u16(dst + 7 * stride + 0, vextq_u16(d1[0], d1[1], 3));
+  vst1q_u16(dst + 7 * stride + 8, vextq_u16(d1_ext, a15, 4));
+  vst1q_u16(dst + 8 * stride + 0, vextq_u16(d0[0], d0[1], 4));
+  vst1q_u16(dst + 8 * stride + 8, vextq_u16(d0_ext, a15, 5));
+  vst1q_u16(dst + 9 * stride + 0, vextq_u16(d1[0], d1[1], 4));
+  vst1q_u16(dst + 9 * stride + 8, vextq_u16(d1_ext, a15, 5));
+  vst1q_u16(dst + 10 * stride + 0, vextq_u16(d0[0], d0[1], 5));
+  vst1q_u16(dst + 10 * stride + 8, vextq_u16(d0_ext, a15, 6));
+  vst1q_u16(dst + 11 * stride + 0, vextq_u16(d1[0], d1[1], 5));
+  vst1q_u16(dst + 11 * stride + 8, vextq_u16(d1_ext, a15, 6));
+  vst1q_u16(dst + 12 * stride + 0, vextq_u16(d0[0], d0[1], 6));
+  vst1q_u16(dst + 12 * stride + 8, vextq_u16(d0_ext, a15, 7));
+  vst1q_u16(dst + 13 * stride + 0, vextq_u16(d1[0], d1[1], 6));
+  vst1q_u16(dst + 13 * stride + 8, vextq_u16(d1_ext, a15, 7));
+  vst1q_u16(dst + 14 * stride + 0, vextq_u16(d0[0], d0[1], 7));
+  vst1q_u16(dst + 14 * stride + 8, a15);
+  vst1q_u16(dst + 15 * stride + 0, vextq_u16(d1[0], d1[1], 7));
+  vst1q_u16(dst + 15 * stride + 8, a15);
+}
+
+void vpx_highbd_d63_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
+                                         const uint16_t *above,
+                                         const uint16_t *left, int bd) {
+  // See vpx_highbd_d63_predictor_8x8_neon for details on the implementation.
+  uint16x8_t a0, a1, a2, a8, a9, a10, a16, a17, a18, a24, a25, a26, a31, d0[4],
+      d1[4], d0_ext, d1_ext;
+  (void)left;
+  (void)bd;
+
+  a0 = vld1q_u16(above + 0);
+  a1 = vld1q_u16(above + 1);
+  a2 = vld1q_u16(above + 2);
+  a8 = vld1q_u16(above + 8);
+  a9 = vld1q_u16(above + 9);
+  a10 = vld1q_u16(above + 10);
+  a16 = vld1q_u16(above + 16);
+  a17 = vld1q_u16(above + 17);
+  a18 = vld1q_u16(above + 18);
+  a24 = vld1q_u16(above + 24);
+  a25 = vld1q_u16(above + 25);
+  a26 = vld1q_u16(above + 26);
+  a31 = vld1q_dup_u16(above + 31);
+
+  d0[0] = vrhaddq_u16(a0, a1);
+  d0[1] = vrhaddq_u16(a8, a9);
+  d0[2] = vrhaddq_u16(a16, a17);
+  d0[3] = vrhaddq_u16(a24, a25);
+  d1[0] = vrhaddq_u16(vhaddq_u16(a0, a2), a1);
+  d1[1] = vrhaddq_u16(vhaddq_u16(a8, a10), a9);
+  d1[2] = vrhaddq_u16(vhaddq_u16(a16, a18), a17);
+  d1[3] = vrhaddq_u16(vhaddq_u16(a24, a26), a25);
+
+  // Strip out the final element of d0/d1 so that we can replace it with an
+  // additional copy of above[7], the first vector here doesn't matter so just
+  // reuse the same vector.
+  d0_ext = vextq_u16(d0[3], d0[3], 7);
+  d1_ext = vextq_u16(d1[3], d1[3], 7);
+
+  // Shuffle in duplicates of above[7] and store. Note that cases involving
+  // {d0,d1}_ext require an extra shift to undo the shifting out of the final
+  // element from above.
+
+  vst1q_u16(dst + 0 * stride + 0, d0[0]);
+  vst1q_u16(dst + 0 * stride + 8, d0[1]);
+  vst1q_u16(dst + 0 * stride + 16, d0[2]);
+  vst1q_u16(dst + 0 * stride + 24, d0[3]);
+  vst1q_u16(dst + 1 * stride + 0, d1[0]);
+  vst1q_u16(dst + 1 * stride + 8, d1[1]);
+  vst1q_u16(dst + 1 * stride + 16, d1[2]);
+  vst1q_u16(dst + 1 * stride + 24, d1[3]);
+
+  vst1q_u16(dst + 2 * stride + 0, vextq_u16(d0[0], d0[1], 1));
+  vst1q_u16(dst + 2 * stride + 8, vextq_u16(d0[1], d0[2], 1));
+  vst1q_u16(dst + 2 * stride + 16, vextq_u16(d0[2], d0[3], 1));
+  vst1q_u16(dst + 2 * stride + 24, vextq_u16(d0_ext, a31, 2));
+  vst1q_u16(dst + 3 * stride + 0, vextq_u16(d1[0], d1[1], 1));
+  vst1q_u16(dst + 3 * stride + 8, vextq_u16(d1[1], d1[2], 1));
+  vst1q_u16(dst + 3 * stride + 16, vextq_u16(d1[2], d1[3], 1));
+  vst1q_u16(dst + 3 * stride + 24, vextq_u16(d1_ext, a31, 2));
+
+  vst1q_u16(dst + 4 * stride + 0, vextq_u16(d0[0], d0[1], 2));
+  vst1q_u16(dst + 4 * stride + 8, vextq_u16(d0[1], d0[2], 2));
+  vst1q_u16(dst + 4 * stride + 16, vextq_u16(d0[2], d0[3], 2));
+  vst1q_u16(dst + 4 * stride + 24, vextq_u16(d0_ext, a31, 3));
+  vst1q_u16(dst + 5 * stride + 0, vextq_u16(d1[0], d1[1], 2));
+  vst1q_u16(dst + 5 * stride + 8, vextq_u16(d1[1], d1[2], 2));
+  vst1q_u16(dst + 5 * stride + 16, vextq_u16(d1[2], d1[3], 2));
+  vst1q_u16(dst + 5 * stride + 24, vextq_u16(d1_ext, a31, 3));
+
+  vst1q_u16(dst + 6 * stride + 0, vextq_u16(d0[0], d0[1], 3));
+  vst1q_u16(dst + 6 * stride + 8, vextq_u16(d0[1], d0[2], 3));
+  vst1q_u16(dst + 6 * stride + 16, vextq_u16(d0[2], d0[3], 3));
+  vst1q_u16(dst + 6 * stride + 24, vextq_u16(d0_ext, a31, 4));
+  vst1q_u16(dst + 7 * stride + 0, vextq_u16(d1[0], d1[1], 3));
+  vst1q_u16(dst + 7 * stride + 8, vextq_u16(d1[1], d1[2], 3));
+  vst1q_u16(dst + 7 * stride + 16, vextq_u16(d1[2], d1[3], 3));
+  vst1q_u16(dst + 7 * stride + 24, vextq_u16(d1_ext, a31, 4));
+
+  vst1q_u16(dst + 8 * stride + 0, vextq_u16(d0[0], d0[1], 4));
+  vst1q_u16(dst + 8 * stride + 8, vextq_u16(d0[1], d0[2], 4));
+  vst1q_u16(dst + 8 * stride + 16, vextq_u16(d0[2], d0[3], 4));
+  vst1q_u16(dst + 8 * stride + 24, vextq_u16(d0_ext, a31, 5));
+  vst1q_u16(dst + 9 * stride + 0, vextq_u16(d1[0], d1[1], 4));
+  vst1q_u16(dst + 9 * stride + 8, vextq_u16(d1[1], d1[2], 4));
+  vst1q_u16(dst + 9 * stride + 16, vextq_u16(d1[2], d1[3], 4));
+  vst1q_u16(dst + 9 * stride + 24, vextq_u16(d1_ext, a31, 5));
+
+  vst1q_u16(dst + 10 * stride + 0, vextq_u16(d0[0], d0[1], 5));
+  vst1q_u16(dst + 10 * stride + 8, vextq_u16(d0[1], d0[2], 5));
+  vst1q_u16(dst + 10 * stride + 16, vextq_u16(d0[2], d0[3], 5));
+  vst1q_u16(dst + 10 * stride + 24, vextq_u16(d0_ext, a31, 6));
+  vst1q_u16(dst + 11 * stride + 0, vextq_u16(d1[0], d1[1], 5));
+  vst1q_u16(dst + 11 * stride + 8, vextq_u16(d1[1], d1[2], 5));
+  vst1q_u16(dst + 11 * stride + 16, vextq_u16(d1[2], d1[3], 5));
+  vst1q_u16(dst + 11 * stride + 24, vextq_u16(d1_ext, a31, 6));
+
+  vst1q_u16(dst + 12 * stride + 0, vextq_u16(d0[0], d0[1], 6));
+  vst1q_u16(dst + 12 * stride + 8, vextq_u16(d0[1], d0[2], 6));
+  vst1q_u16(dst + 12 * stride + 16, vextq_u16(d0[2], d0[3], 6));
+  vst1q_u16(dst + 12 * stride + 24, vextq_u16(d0_ext, a31, 7));
+  vst1q_u16(dst + 13 * stride + 0, vextq_u16(d1[0], d1[1], 6));
+  vst1q_u16(dst + 13 * stride + 8, vextq_u16(d1[1], d1[2], 6));
+  vst1q_u16(dst + 13 * stride + 16, vextq_u16(d1[2], d1[3], 6));
+  vst1q_u16(dst + 13 * stride + 24, vextq_u16(d1_ext, a31, 7));
+
+  vst1q_u16(dst + 14 * stride + 0, vextq_u16(d0[0], d0[1], 7));
+  vst1q_u16(dst + 14 * stride + 8, vextq_u16(d0[1], d0[2], 7));
+  vst1q_u16(dst + 14 * stride + 16, vextq_u16(d0[2], d0[3], 7));
+  vst1q_u16(dst + 14 * stride + 24, a31);
+  vst1q_u16(dst + 15 * stride + 0, vextq_u16(d1[0], d1[1], 7));
+  vst1q_u16(dst + 15 * stride + 8, vextq_u16(d1[1], d1[2], 7));
+  vst1q_u16(dst + 15 * stride + 16, vextq_u16(d1[2], d1[3], 7));
+  vst1q_u16(dst + 15 * stride + 24, a31);
+
+  vst1q_u16(dst + 16 * stride + 0, d0[1]);
+  vst1q_u16(dst + 16 * stride + 8, d0[2]);
+  vst1q_u16(dst + 16 * stride + 16, vextq_u16(d0_ext, a31, 1));
+  vst1q_u16(dst + 16 * stride + 24, a31);
+  vst1q_u16(dst + 17 * stride + 0, d1[1]);
+  vst1q_u16(dst + 17 * stride + 8, d1[2]);
+  vst1q_u16(dst + 17 * stride + 16, vextq_u16(d1_ext, a31, 1));
+  vst1q_u16(dst + 17 * stride + 24, a31);
+
+  vst1q_u16(dst + 18 * stride + 0, vextq_u16(d0[1], d0[2], 1));
+  vst1q_u16(dst + 18 * stride + 8, vextq_u16(d0[2], d0[3], 1));
+  vst1q_u16(dst + 18 * stride + 16, vextq_u16(d0_ext, a31, 2));
+  vst1q_u16(dst + 18 * stride + 24, a31);
+  vst1q_u16(dst + 19 * stride + 0, vextq_u16(d1[1], d1[2], 1));
+  vst1q_u16(dst + 19 * stride + 8, vextq_u16(d1[2], d1[3], 1));
+  vst1q_u16(dst + 19 * stride + 16, vextq_u16(d1_ext, a31, 2));
+  vst1q_u16(dst + 19 * stride + 24, a31);
+
+  vst1q_u16(dst + 20 * stride + 0, vextq_u16(d0[1], d0[2], 2));
+  vst1q_u16(dst + 20 * stride + 8, vextq_u16(d0[2], d0[3], 2));
+  vst1q_u16(dst + 20 * stride + 16, vextq_u16(d0_ext, a31, 3));
+  vst1q_u16(dst + 20 * stride + 24, a31);
+  vst1q_u16(dst + 21 * stride + 0, vextq_u16(d1[1], d1[2], 2));
+  vst1q_u16(dst + 21 * stride + 8, vextq_u16(d1[2], d1[3], 2));
+  vst1q_u16(dst + 21 * stride + 16, vextq_u16(d1_ext, a31, 3));
+  vst1q_u16(dst + 21 * stride + 24, a31);
+
+  vst1q_u16(dst + 22 * stride + 0, vextq_u16(d0[1], d0[2], 3));
+  vst1q_u16(dst + 22 * stride + 8, vextq_u16(d0[2], d0[3], 3));
+  vst1q_u16(dst + 22 * stride + 16, vextq_u16(d0_ext, a31, 4));
+  vst1q_u16(dst + 22 * stride + 24, a31);
+  vst1q_u16(dst + 23 * stride + 0, vextq_u16(d1[1], d1[2], 3));
+  vst1q_u16(dst + 23 * stride + 8, vextq_u16(d1[2], d1[3], 3));
+  vst1q_u16(dst + 23 * stride + 16, vextq_u16(d1_ext, a31, 4));
+  vst1q_u16(dst + 23 * stride + 24, a31);
+
+  vst1q_u16(dst + 24 * stride + 0, vextq_u16(d0[1], d0[2], 4));
+  vst1q_u16(dst + 24 * stride + 8, vextq_u16(d0[2], d0[3], 4));
+  vst1q_u16(dst + 24 * stride + 16, vextq_u16(d0_ext, a31, 5));
+  vst1q_u16(dst + 24 * stride + 24, a31);
+  vst1q_u16(dst + 25 * stride + 0, vextq_u16(d1[1], d1[2], 4));
+  vst1q_u16(dst + 25 * stride + 8, vextq_u16(d1[2], d1[3], 4));
+  vst1q_u16(dst + 25 * stride + 16, vextq_u16(d1_ext, a31, 5));
+  vst1q_u16(dst + 25 * stride + 24, a31);
+
+  vst1q_u16(dst + 26 * stride + 0, vextq_u16(d0[1], d0[2], 5));
+  vst1q_u16(dst + 26 * stride + 8, vextq_u16(d0[2], d0[3], 5));
+  vst1q_u16(dst + 26 * stride + 16, vextq_u16(d0_ext, a31, 6));
+  vst1q_u16(dst + 26 * stride + 24, a31);
+  vst1q_u16(dst + 27 * stride + 0, vextq_u16(d1[1], d1[2], 5));
+  vst1q_u16(dst + 27 * stride + 8, vextq_u16(d1[2], d1[3], 5));
+  vst1q_u16(dst + 27 * stride + 16, vextq_u16(d1_ext, a31, 6));
+  vst1q_u16(dst + 27 * stride + 24, a31);
+
+  vst1q_u16(dst + 28 * stride + 0, vextq_u16(d0[1], d0[2], 6));
+  vst1q_u16(dst + 28 * stride + 8, vextq_u16(d0[2], d0[3], 6));
+  vst1q_u16(dst + 28 * stride + 16, vextq_u16(d0_ext, a31, 7));
+  vst1q_u16(dst + 28 * stride + 24, a31);
+  vst1q_u16(dst + 29 * stride + 0, vextq_u16(d1[1], d1[2], 6));
+  vst1q_u16(dst + 29 * stride + 8, vextq_u16(d1[2], d1[3], 6));
+  vst1q_u16(dst + 29 * stride + 16, vextq_u16(d1_ext, a31, 7));
+  vst1q_u16(dst + 29 * stride + 24, a31);
+
+  vst1q_u16(dst + 30 * stride + 0, vextq_u16(d0[1], d0[2], 7));
+  vst1q_u16(dst + 30 * stride + 8, vextq_u16(d0[2], d0[3], 7));
+  vst1q_u16(dst + 30 * stride + 16, a31);
+  vst1q_u16(dst + 30 * stride + 24, a31);
+  vst1q_u16(dst + 31 * stride + 0, vextq_u16(d1[1], d1[2], 7));
+  vst1q_u16(dst + 31 * stride + 8, vextq_u16(d1[2], d1[3], 7));
+  vst1q_u16(dst + 31 * stride + 16, a31);
+  vst1q_u16(dst + 31 * stride + 24, a31);
+}
+
+// -----------------------------------------------------------------------------
+
 void vpx_highbd_d117_predictor_4x4_neon(uint16_t *dst, ptrdiff_t stride,
                                         const uint16_t *above,
                                         const uint16_t *left, int bd) {
