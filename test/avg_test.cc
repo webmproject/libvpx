@@ -694,16 +694,12 @@ INSTANTIATE_TEST_SUITE_P(NEON, SatdLowbdTest,
                                            make_tuple(256, &vpx_satd_neon),
                                            make_tuple(1024, &vpx_satd_neon)));
 
-// TODO(jianj): Remove the highbitdepth flag once the SIMD functions are
-// in place.
-#if !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_SUITE_P(
     NEON, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_neon),
                       make_tuple(64, &vp9_block_error_fp_neon),
                       make_tuple(256, &vp9_block_error_fp_neon),
                       make_tuple(1024, &vp9_block_error_fp_neon)));
-#endif  // !CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON
 
 #if HAVE_MSA
