@@ -399,7 +399,11 @@ typedef struct SPEED_FEATURES {
   // Adaptive prediction mode search
   int adaptive_mode_search;
 
-  // Chessboard pattern prediction filter type search
+  // Chessboard pattern prediction for interp filter. Aggressiveness increases
+  // with levels.
+  // 0: disable
+  // 1: cb pattern in eval when filter is not switchable
+  // 2: cb pattern prediction for filter search
   int cb_pred_filter_search;
 
   // This variable enables an early termination of interpolation filter eval
