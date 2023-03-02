@@ -246,6 +246,21 @@ typedef enum {
   USE_8_TAPS_SHARP,
 } SUBPEL_SEARCH_TYPE;
 
+typedef enum {
+  // Disable trellis coefficient optimization
+  DISABLE_TRELLIS_OPT,
+  // Enable trellis coefficient optimization
+  ENABLE_TRELLIS_OPT,
+  // Enable trellis coefficient optimization based on source variance of the
+  // prediction block during transform RD
+  ENABLE_TRELLIS_OPT_TX_RD_SRC_VAR,
+} ENABLE_TRELLIS_OPT_METHOD;
+
+typedef struct TRELLIS_OPT_CONTROL {
+  ENABLE_TRELLIS_OPT_METHOD method;
+  double thresh;
+} TRELLIS_OPT_CONTROL;
+
 typedef struct SPEED_FEATURES {
   MV_SPEED_FEATURES mv;
 
@@ -292,8 +307,8 @@ typedef struct SPEED_FEATURES {
   int coeff_prob_appx_step;
 
   // Enable uniform quantizer followed by trellis coefficient optimization
-  int allow_quant_coeff_opt;
-  double quant_opt_thresh;
+  // during transform RD
+  TRELLIS_OPT_CONTROL trellis_opt_tx_rd;
 
   // Enable asymptotic closed-loop encoding decision for key frame and
   // alternate reference frames.

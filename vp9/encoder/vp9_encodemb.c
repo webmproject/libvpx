@@ -26,6 +26,7 @@
 #include "vp9/common/vp9_scan.h"
 
 #include "vp9/encoder/vp9_encodemb.h"
+#include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_tokenize.h"
 
@@ -759,10 +760,19 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize, int mi_row, int mi_col,
   MODE_INFO *mi = xd->mi[0];
   int plane;
 #if CONFIG_MISMATCH_DEBUG
-  struct encode_b_args arg = { x,         1,      NULL,   NULL,
+  struct encode_b_args arg = { x,
+                               1,     // enable_trellis_opt
+                               0.0,   // trellis_opt_thresh
+                               NULL,  // above entropy context
+                               NULL,  // left entropy context
                                &mi->skip, mi_row, mi_col, output_enabled };
 #else
-  struct encode_b_args arg = { x, 1, NULL, NULL, &mi->skip };
+  struct encode_b_args arg = { x,
+                               1,     // enable_trellis_opt
+                               0.0,   // trellis_opt_thresh
+                               NULL,  // above entropy context
+                               NULL,  // left entropy context
+                               &mi->skip };
   (void)mi_row;
   (void)mi_col;
   (void)output_enabled;
@@ -780,9 +790,9 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize, int mi_row, int mi_col,
       const TX_SIZE tx_size = plane ? get_uv_tx_size(mi, pd) : mi->tx_size;
       vp9_get_entropy_contexts(bsize, tx_size, pd, ctx.ta[plane],
                                ctx.tl[plane]);
-      arg.enable_coeff_opt = 1;
+      arg.enable_trellis_opt = 1;
     } else {
-      arg.enable_coeff_opt = 0;
+      arg.enable_trellis_opt = 0;
     }
     arg.ta = ctx.ta[plane];
     arg.tl = ctx.tl[plane];
@@ -814,17 +824,13 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
   uint16_t *eob = &p->eobs[block];
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
+  int enable_trellis_opt = !x->skip_recode;
   ENTROPY_CONTEXT *a = NULL;
   ENTROPY_CONTEXT *l = NULL;
   int entropy_ctx = 0;
   dst = &pd->dst.buf[4 * (row * dst_stride + col)];
   src = &p->src.buf[4 * (row * src_stride + col)];
   src_diff = &p->src_diff[4 * (row * diff_stride + col)];
-  if (args->enable_coeff_opt) {
-    a = &args->ta[col];
-    l = &args->tl[row];
-    entropy_ctx = combine_entropy_contexts(*a, *l);
-  }
 
   if (tx_size == TX_4X4) {
     tx_type = get_tx_type_4x4(get_plane_type(plane), xd, block);
@@ -848,20 +854,42 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
   // skip block condition should be handled before this is called.
   assert(!x->skip_block);
 
+  if (!x->skip_recode) {
+    const int tx_size_in_pixels = (1 << tx_size) << 2;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      vpx_highbd_subtract_block(tx_size_in_pixels, tx_size_in_pixels, src_diff,
+                                diff_stride, src, src_stride, dst, dst_stride,
+                                xd->bd);
+    } else {
+      vpx_subtract_block(tx_size_in_pixels, tx_size_in_pixels, src_diff,
+                         diff_stride, src, src_stride, dst, dst_stride);
+    }
+#else
+    vpx_subtract_block(tx_size_in_pixels, tx_size_in_pixels, src_diff,
+                       diff_stride, src, src_stride, dst, dst_stride);
+#endif
+    enable_trellis_opt = do_trellis_opt(args);
+  }
+
+  if (enable_trellis_opt) {
+    a = &args->ta[col];
+    l = &args->tl[row];
+    entropy_ctx = combine_entropy_contexts(*a, *l);
+  }
+
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     uint16_t *const dst16 = CONVERT_TO_SHORTPTR(dst);
     switch (tx_size) {
       case TX_32X32:
         if (!x->skip_recode) {
-          vpx_highbd_subtract_block(32, 32, src_diff, diff_stride, src,
-                                    src_stride, dst, dst_stride, xd->bd);
           highbd_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
           vpx_highbd_quantize_b_32x32(
               coeff, 1024, p->zbin, p->round, p->quant, p->quant_shift, qcoeff,
               dqcoeff, pd->dequant, eob, scan_order->scan, scan_order->iscan);
         }
-        if (args->enable_coeff_opt && !x->skip_recode) {
+        if (enable_trellis_opt) {
           *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
         }
         if (!x->skip_encode && *eob) {
@@ -870,8 +898,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
         break;
       case TX_16X16:
         if (!x->skip_recode) {
-          vpx_highbd_subtract_block(16, 16, src_diff, diff_stride, src,
-                                    src_stride, dst, dst_stride, xd->bd);
           if (tx_type == DCT_DCT)
             vpx_highbd_fdct16x16(src_diff, coeff, diff_stride);
           else
@@ -880,7 +906,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 p->quant_shift, qcoeff, dqcoeff, pd->dequant,
                                 eob, scan_order->scan, scan_order->iscan);
         }
-        if (args->enable_coeff_opt && !x->skip_recode) {
+        if (enable_trellis_opt) {
           *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
         }
         if (!x->skip_encode && *eob) {
@@ -890,8 +916,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
         break;
       case TX_8X8:
         if (!x->skip_recode) {
-          vpx_highbd_subtract_block(8, 8, src_diff, diff_stride, src,
-                                    src_stride, dst, dst_stride, xd->bd);
           if (tx_type == DCT_DCT)
             vpx_highbd_fdct8x8(src_diff, coeff, diff_stride);
           else
@@ -900,7 +924,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 p->quant_shift, qcoeff, dqcoeff, pd->dequant,
                                 eob, scan_order->scan, scan_order->iscan);
         }
-        if (args->enable_coeff_opt && !x->skip_recode) {
+        if (enable_trellis_opt) {
           *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
         }
         if (!x->skip_encode && *eob) {
@@ -911,8 +935,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
       default:
         assert(tx_size == TX_4X4);
         if (!x->skip_recode) {
-          vpx_highbd_subtract_block(4, 4, src_diff, diff_stride, src,
-                                    src_stride, dst, dst_stride, xd->bd);
           if (tx_type != DCT_DCT)
             vp9_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
           else
@@ -921,7 +943,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                                 p->quant_shift, qcoeff, dqcoeff, pd->dequant,
                                 eob, scan_order->scan, scan_order->iscan);
         }
-        if (args->enable_coeff_opt && !x->skip_recode) {
+        if (enable_trellis_opt) {
           *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
         }
         if (!x->skip_encode && *eob) {
@@ -945,14 +967,12 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
   switch (tx_size) {
     case TX_32X32:
       if (!x->skip_recode) {
-        vpx_subtract_block(32, 32, src_diff, diff_stride, src, src_stride, dst,
-                           dst_stride);
         fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
         vpx_quantize_b_32x32(coeff, 1024, p->zbin, p->round, p->quant,
                              p->quant_shift, qcoeff, dqcoeff, pd->dequant, eob,
                              scan_order->scan, scan_order->iscan);
       }
-      if (args->enable_coeff_opt && !x->skip_recode) {
+      if (enable_trellis_opt) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -960,14 +980,12 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
       break;
     case TX_16X16:
       if (!x->skip_recode) {
-        vpx_subtract_block(16, 16, src_diff, diff_stride, src, src_stride, dst,
-                           dst_stride);
         vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
         vpx_quantize_b(coeff, 256, p->zbin, p->round, p->quant, p->quant_shift,
                        qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (args->enable_coeff_opt && !x->skip_recode) {
+      if (enable_trellis_opt) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -975,14 +993,12 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
       break;
     case TX_8X8:
       if (!x->skip_recode) {
-        vpx_subtract_block(8, 8, src_diff, diff_stride, src, src_stride, dst,
-                           dst_stride);
         vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
         vpx_quantize_b(coeff, 64, p->zbin, p->round, p->quant, p->quant_shift,
                        qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (args->enable_coeff_opt && !x->skip_recode) {
+      if (enable_trellis_opt) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob)
@@ -991,8 +1007,6 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
     default:
       assert(tx_size == TX_4X4);
       if (!x->skip_recode) {
-        vpx_subtract_block(4, 4, src_diff, diff_stride, src, src_stride, dst,
-                           dst_stride);
         if (tx_type != DCT_DCT)
           vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);
         else
@@ -1001,7 +1015,7 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
                        qcoeff, dqcoeff, pd->dequant, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (args->enable_coeff_opt && !x->skip_recode) {
+      if (enable_trellis_opt) {
         *a = *l = vp9_optimize_b(x, plane, block, tx_size, entropy_ctx) > 0;
       }
       if (!x->skip_encode && *eob) {
@@ -1019,28 +1033,39 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
 }
 
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
-                                  int enable_optimize_b) {
+                                  int enable_trellis_opt) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
 #if CONFIG_MISMATCH_DEBUG
   // TODO(angiebird): make mismatch_debug support intra mode
   struct encode_b_args arg = {
-    x, enable_optimize_b, ctx.ta[plane], ctx.tl[plane], &xd->mi[0]->skip, 0, 0,
-    0
+    x,
+    enable_trellis_opt,
+    0.0,  // trellis_opt_thresh
+    ctx.ta[plane],
+    ctx.tl[plane],
+    &xd->mi[0]->skip,
+    0,  // mi_row
+    0,  // mi_col
+    0   // output_enabled
   };
 #else
-  struct encode_b_args arg = { x, enable_optimize_b, ctx.ta[plane],
-                               ctx.tl[plane], &xd->mi[0]->skip };
+  struct encode_b_args arg = { x,
+                               enable_trellis_opt,
+                               0.0,  // trellis_opt_thresh
+                               ctx.ta[plane],
+                               ctx.tl[plane],
+                               &xd->mi[0]->skip };
 #endif
 
-  if (enable_optimize_b && x->optimize &&
+  if (enable_trellis_opt && x->optimize &&
       (!x->skip_recode || !x->skip_optimize)) {
     const struct macroblockd_plane *const pd = &xd->plane[plane];
     const TX_SIZE tx_size =
         plane ? get_uv_tx_size(xd->mi[0], pd) : xd->mi[0]->tx_size;
     vp9_get_entropy_contexts(bsize, tx_size, pd, ctx.ta[plane], ctx.tl[plane]);
   } else {
-    arg.enable_coeff_opt = 0;
+    arg.enable_trellis_opt = 0;
   }
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane,

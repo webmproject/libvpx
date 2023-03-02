@@ -562,7 +562,7 @@ static unsigned pixel_sse(const VP9_COMP *const cpi, const MACROBLOCKD *xd,
   return sse;
 }
 
-// Compute the squares sum squares on all visible 4x4s in the transform block.
+// Compute the sum of squares on all visible 4x4s in the transform block.
 static int64_t sum_squares_visible(const MACROBLOCKD *xd,
                                    const struct macroblockd_plane *const pd,
                                    const int16_t *diff, const int diff_stride,
@@ -749,20 +749,34 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const int dst_stride = pd->dst.stride;
   const uint8_t *dst = &pd->dst.buf[4 * (blk_row * dst_stride + blk_col)];
+  const int enable_trellis_opt = args->cpi->sf.trellis_opt_tx_rd.method;
+  const double trellis_opt_thresh = args->cpi->sf.trellis_opt_tx_rd.thresh;
+#if CONFIG_MISMATCH_DEBUG
+  struct encode_b_args encode_b_arg = {
+    x,
+    enable_trellis_opt,
+    trellis_opt_thresh,
+    args->t_above,
+    args->t_left,
+    &mi->skip,
+    0,  // mi_row
+    0,  // mi_col
+    0   // output_enabled
+  };
+#else
+  struct encode_b_args encode_b_arg = { x,
+                                        enable_trellis_opt,
+                                        trellis_opt_thresh,
+                                        args->t_above,
+                                        args->t_left,
+                                        &mi->skip };
+#endif
 
   if (args->exit_early) return;
 
   if (!is_inter_block(mi)) {
-#if CONFIG_MISMATCH_DEBUG
-    struct encode_b_args intra_arg = {
-      x, x->block_qcoeff_opt, args->t_above, args->t_left, &mi->skip, 0, 0, 0
-    };
-#else
-    struct encode_b_args intra_arg = { x, x->block_qcoeff_opt, args->t_above,
-                                       args->t_left, &mi->skip };
-#endif
     vp9_encode_block_intra(plane, block, blk_row, blk_col, plane_bsize, tx_size,
-                           &intra_arg);
+                           &encode_b_arg);
     if (recon) {
       uint8_t *rec_ptr = &recon->buf[4 * (blk_row * recon->stride + blk_col)];
       copy_block_visible(xd, pd, dst, dst_stride, rec_ptr, recon->stride,
@@ -803,9 +817,10 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 
     if (skip_txfm_flag == SKIP_TXFM_NONE ||
         (recon && skip_txfm_flag == SKIP_TXFM_AC_ONLY)) {
+      const int enable_trellis_opt = do_trellis_opt(&encode_b_arg);
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
-      if (x->block_qcoeff_opt)
+      if (enable_trellis_opt)
         vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
       dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
                  tx_size, &dist, &sse, recon);

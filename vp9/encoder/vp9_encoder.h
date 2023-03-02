@@ -1478,6 +1478,25 @@ static INLINE void alloc_frame_mvs(VP9_COMMON *const cm, int buffer_idx) {
   }
 }
 
+// Check if trellis coefficient optimization of the transform block is enabled.
+static INLINE int do_trellis_opt(void *arg) {
+  const struct encode_b_args *const args = (struct encode_b_args *)arg;
+  const MACROBLOCK *const x = args->x;
+  const int enable_trellis_opt = args->enable_trellis_opt;
+  const double trellis_opt_thresh = args->trellis_opt_thresh;
+
+  switch (enable_trellis_opt) {
+    case DISABLE_TRELLIS_OPT: return 0;
+    case ENABLE_TRELLIS_OPT: return 1;
+    case ENABLE_TRELLIS_OPT_TX_RD_SRC_VAR: {
+      return (trellis_opt_thresh > 0.0)
+                 ? (x->log_block_src_var <= trellis_opt_thresh)
+                 : 1;
+    }
+    default: assert(0 && "Invalid trellis optimization method."); return 1;
+  }
+}
+
 #if CONFIG_COLLECT_COMPONENT_TIMING
 static INLINE void start_timing(VP9_COMP *cpi, int component) {
   vpx_usec_timer_start(&cpi->component_timer[component]);
