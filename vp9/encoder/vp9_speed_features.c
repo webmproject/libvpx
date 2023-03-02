@@ -229,6 +229,10 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   sf->use_square_partition_only = !boosted;
   sf->early_term_interp_search_plane_rd = 1;
   sf->cb_pred_filter_search = 1;
+  sf->trellis_opt_tx_rd.method = sf->optimize_coefficients
+                                     ? ENABLE_TRELLIS_OPT_TX_RD_RESIDUAL_MSE
+                                     : DISABLE_TRELLIS_OPT;
+  sf->trellis_opt_tx_rd.thresh = boosted ? 4.0 : 3.0;
 
   sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
 
