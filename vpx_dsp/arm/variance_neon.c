@@ -433,42 +433,18 @@ static INLINE unsigned int vpx_mse16xh_neon(const unsigned char *src_ptr,
   return *sse;
 }
 
-// TODO(https://crbug.com/webm/1794): enable this after heap overflow is fixed.
-#if 0
 unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
                                    const unsigned char *ref_ptr,
                                    int ref_stride) {
-  uint8x8_t a[4], b[4], abs_diff[4];
-  uint32x2_t sse = vdup_n_u32(0);
+  uint8x16_t s = load_unaligned_u8q(src_ptr, src_stride);
+  uint8x16_t r = load_unaligned_u8q(ref_ptr, ref_stride);
 
-  a[0] = vld1_u8(src_ptr);
-  src_ptr += src_stride;
-  b[0] = vld1_u8(ref_ptr);
-  ref_ptr += ref_stride;
-  a[1] = vld1_u8(src_ptr);
-  src_ptr += src_stride;
-  b[1] = vld1_u8(ref_ptr);
-  ref_ptr += ref_stride;
-  a[2] = vld1_u8(src_ptr);
-  src_ptr += src_stride;
-  b[2] = vld1_u8(ref_ptr);
-  ref_ptr += ref_stride;
-  a[3] = vld1_u8(src_ptr);
-  b[3] = vld1_u8(ref_ptr);
+  uint8x16_t abs_diff = vabdq_u8(s, r);
 
-  abs_diff[0] = vabd_u8(a[0], b[0]);
-  abs_diff[1] = vabd_u8(a[1], b[1]);
-  abs_diff[2] = vabd_u8(a[2], b[2]);
-  abs_diff[3] = vabd_u8(a[3], b[3]);
+  uint32x4_t sse = vdotq_u32(vdupq_n_u32(0), abs_diff, abs_diff);
 
-  sse = vdot_u32(sse, abs_diff[0], abs_diff[0]);
-  sse = vdot_u32(sse, abs_diff[1], abs_diff[1]);
-  sse = vdot_u32(sse, abs_diff[2], abs_diff[2]);
-  sse = vdot_u32(sse, abs_diff[3], abs_diff[3]);
-
-  return vget_lane_u32(sse, 0);
+  return horizontal_add_uint32x4(sse);
 }
-#endif  // 0
 
 #else  // !defined(__ARM_FEATURE_DOTPROD)
 
@@ -535,49 +511,30 @@ static INLINE unsigned int vpx_mse16xh_neon(const unsigned char *src_ptr,
   return *sse;
 }
 
-// TODO(https://crbug.com/webm/1794): enable this after heap overflow is fixed.
-#if 0
 unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
                                    const unsigned char *ref_ptr,
                                    int ref_stride) {
-  uint8x8_t a[4], b[4];
-  int16x4_t diff_lo[4];
-  uint16x8_t diff[4];
-  int32x4_t sse;
+  uint8x8_t s[2], r[2];
+  uint16x8_t abs_diff[2];
+  uint32x4_t sse;
 
-  a[0] = vld1_u8(src_ptr);
-  src_ptr += src_stride;
-  b[0] = vld1_u8(ref_ptr);
-  ref_ptr += ref_stride;
-  a[1] = vld1_u8(src_ptr);
-  src_ptr += src_stride;
-  b[1] = vld1_u8(ref_ptr);
-  ref_ptr += ref_stride;
-  a[2] = vld1_u8(src_ptr);
-  src_ptr += src_stride;
-  b[2] = vld1_u8(ref_ptr);
-  ref_ptr += ref_stride;
-  a[3] = vld1_u8(src_ptr);
-  b[3] = vld1_u8(ref_ptr);
+  s[0] = load_u8(src_ptr, src_stride);
+  r[0] = load_u8(ref_ptr, ref_stride);
+  src_ptr += 2 * src_stride;
+  ref_ptr += 2 * ref_stride;
+  s[1] = load_u8(src_ptr, src_stride);
+  r[1] = load_u8(ref_ptr, ref_stride);
 
-  diff[0] = vsubl_u8(a[0], b[0]);
-  diff[1] = vsubl_u8(a[1], b[1]);
-  diff[2] = vsubl_u8(a[2], b[2]);
-  diff[3] = vsubl_u8(a[3], b[3]);
+  abs_diff[0] = vabdl_u8(s[0], r[0]);
+  abs_diff[1] = vabdl_u8(s[1], r[1]);
 
-  diff_lo[0] = vget_low_s16(vreinterpretq_s16_u16(diff[0]));
-  diff_lo[1] = vget_low_s16(vreinterpretq_s16_u16(diff[1]));
-  diff_lo[2] = vget_low_s16(vreinterpretq_s16_u16(diff[2]));
-  diff_lo[3] = vget_low_s16(vreinterpretq_s16_u16(diff[3]));
+  sse = vmull_u16(vget_low_u16(abs_diff[0]), vget_low_u16(abs_diff[0]));
+  sse = vmlal_u16(sse, vget_high_u16(abs_diff[0]), vget_high_u16(abs_diff[0]));
+  sse = vmlal_u16(sse, vget_low_u16(abs_diff[1]), vget_low_u16(abs_diff[1]));
+  sse = vmlal_u16(sse, vget_high_u16(abs_diff[1]), vget_high_u16(abs_diff[1]));
 
-  sse = vmull_s16(diff_lo[0], diff_lo[0]);
-  sse = vmlal_s16(sse, diff_lo[1], diff_lo[1]);
-  sse = vmlal_s16(sse, diff_lo[2], diff_lo[2]);
-  sse = vmlal_s16(sse, diff_lo[3], diff_lo[3]);
-
-  return horizontal_add_uint32x4(vreinterpretq_u32_s32(sse));
+  return horizontal_add_uint32x4(sse);
 }
-#endif  // 0
 
 #endif  // defined(__ARM_FEATURE_DOTPROD)
 

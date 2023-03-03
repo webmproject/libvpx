@@ -1446,12 +1446,9 @@ INSTANTIATE_TEST_SUITE_P(
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
-// TODO(https://crbug.com/webm/1794): enable this after heap overflow is fixed.
-#if 0
 INSTANTIATE_TEST_SUITE_P(NEON, VpxSseTest,
                          ::testing::Values(SseParams(2, 2,
                                                      &vpx_get4x4sse_cs_neon)));
-#endif
 
 INSTANTIATE_TEST_SUITE_P(NEON, VpxMseTest,
                          ::testing::Values(MseParams(4, 4, &vpx_mse16x16_neon),
