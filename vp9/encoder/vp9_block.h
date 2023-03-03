@@ -34,7 +34,7 @@ struct macroblock_plane {
   struct buf_2d src;
 
   // Quantizer setings
-  DECLARE_ALIGNED(16, int16_t, round_fp[8]);
+  int16_t *round_fp;
   int16_t *quant_fp;
   int16_t *quant;
   int16_t *quant_shift;
