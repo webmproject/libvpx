@@ -433,6 +433,8 @@ static INLINE unsigned int vpx_mse16xh_neon(const unsigned char *src_ptr,
   return *sse;
 }
 
+// TODO(https://crbug.com/webm/1794): enable this after heap overflow is fixed.
+#if 0
 unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
                                    const unsigned char *ref_ptr,
                                    int ref_stride) {
@@ -466,6 +468,7 @@ unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
 
   return vget_lane_u32(sse, 0);
 }
+#endif  // 0
 
 #else  // !defined(__ARM_FEATURE_DOTPROD)
 
@@ -532,6 +535,8 @@ static INLINE unsigned int vpx_mse16xh_neon(const unsigned char *src_ptr,
   return *sse;
 }
 
+// TODO(https://crbug.com/webm/1794): enable this after heap overflow is fixed.
+#if 0
 unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
                                    const unsigned char *ref_ptr,
                                    int ref_stride) {
@@ -572,6 +577,7 @@ unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
 
   return horizontal_add_uint32x4(vreinterpretq_u32_s32(sse));
 }
+#endif  // 0
 
 #endif  // defined(__ARM_FEATURE_DOTPROD)
 
