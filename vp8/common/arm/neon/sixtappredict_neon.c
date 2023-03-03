@@ -1253,6 +1253,9 @@ void vp8_sixtap_predict8x8_neon(unsigned char *src_ptr, int src_pixels_per_line,
   return;
 }
 
+// TODO(https://crbug.com/webm/1795): enable this after buffer overflows are
+// fixed.
+#if 0
 void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
                                   int src_pixels_per_line, int xoffset,
                                   int yoffset, unsigned char *dst_ptr,
@@ -1728,3 +1731,4 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
   }
   return;
 }
+#endif  // 0
