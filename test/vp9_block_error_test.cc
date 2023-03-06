@@ -197,4 +197,12 @@ INSTANTIATE_TEST_SUITE_P(
                                  &BlockError8BitWrapper<vp9_block_error_c>,
                                  VPX_BITS_8)));
 #endif  // HAVE_AVX2
+
+#if HAVE_NEON
+INSTANTIATE_TEST_SUITE_P(
+    NEON, BlockErrorTest,
+    ::testing::Values(make_tuple(&BlockError8BitWrapper<vp9_block_error_neon>,
+                                 &BlockError8BitWrapper<vp9_block_error_c>,
+                                 VPX_BITS_8)));
+#endif
 }  // namespace

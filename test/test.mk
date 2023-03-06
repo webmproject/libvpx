@@ -179,7 +179,7 @@ ifneq ($(CONFIG_REALTIME_ONLY),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += yuv_temporal_filter_test.cc
 endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
-ifneq (, $(filter yes, $(HAVE_SSE2) $(HAVE_AVX2)))
+ifneq (, $(filter yes, $(HAVE_SSE2) $(HAVE_AVX2) $(HAVE_NEON)))
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_block_error_test.cc
 endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_quantize_test.cc
