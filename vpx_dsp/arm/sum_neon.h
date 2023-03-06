@@ -127,4 +127,12 @@ static INLINE uint64_t horizontal_add_int64x2(const int64x2_t a) {
 #endif
 }
 
+static INLINE uint64_t horizontal_add_uint64x2(const uint64x2_t a) {
+#if defined(__aarch64__)
+  return vaddvq_u64(a);
+#else
+  return vgetq_lane_u64(a, 0) + vgetq_lane_u64(a, 1);
+#endif
+}
+
 #endif  // VPX_VPX_DSP_ARM_SUM_NEON_H_
