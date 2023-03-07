@@ -141,10 +141,11 @@ static INLINE void highbd_accumulate_and_store_8(const __m128i sum_first_u32,
   count_u16 = _mm_adds_epu16(count_u16, sum_u16);
   _mm_storeu_si128((__m128i *)count, count_u16);
 
-  pred_u16 = _mm_mullo_epi16(sum_u16, pred_u16);
-
   pred_0_u32 = _mm_cvtepu16_epi32(pred_u16);
   pred_1_u32 = _mm_unpackhi_epi16(pred_u16, zero);
+
+  pred_0_u32 = _mm_mullo_epi32(sum_first_u32, pred_0_u32);
+  pred_1_u32 = _mm_mullo_epi32(sum_second_u32, pred_1_u32);
 
   accum_0_u32 = _mm_loadu_si128((const __m128i *)accumulator);
   accum_1_u32 = _mm_loadu_si128((const __m128i *)(accumulator + 4));
