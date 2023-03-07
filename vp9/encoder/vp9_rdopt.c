@@ -2801,13 +2801,12 @@ static int64_t handle_inter_mode(
   uint8_t skip_txfm[MAX_MB_PLANE << 2] = { 0 };
   int64_t bsse[MAX_MB_PLANE << 2] = { 0 };
 
-  int bsl = mi_width_log2_lookup[bsize];
-  int pred_filter_search =
-      cpi->sf.cb_pred_filter_search
-          ? (((mi_row + mi_col) >> bsl) +
-             get_chessboard_index(cm->current_video_frame)) &
-                0x1
-          : 0;
+  const int bsl = mi_width_log2_lookup[bsize];
+  const int blk_parity = (((mi_row + mi_col) >> bsl) +
+                          get_chessboard_index(cm->current_video_frame)) &
+                         0x1;
+  const int pred_filter_search =
+      (cpi->sf.cb_pred_filter_search >= 2) && blk_parity;
 
   int skip_txfm_sb = 0;
   int64_t skip_sse_sb = INT64_MAX;
@@ -2947,9 +2946,14 @@ static int64_t handle_inter_mode(
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i) filter_cache[i] = INT64_MAX;
 
   if (cm->interp_filter != BILINEAR) {
+    // Use cb pattern for filter eval when filter is not switchable
+    const int enable_interp_search =
+        (cpi->sf.cb_pred_filter_search && cm->interp_filter != SWITCHABLE)
+            ? blk_parity
+            : 1;
     if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
       best_filter = EIGHTTAP;
-    } else if (best_filter == SWITCHABLE) {
+    } else if (best_filter == SWITCHABLE && enable_interp_search) {
       int newbest;
       int tmp_rate_sum = 0;
       int64_t tmp_dist_sum = 0;

@@ -159,7 +159,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
       sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
       sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC;
       sf->alt_ref_search_fp = 1;
-      sf->cb_pred_filter_search = 1;
+      sf->cb_pred_filter_search = 2;
       sf->adaptive_interp_filter_search = 1;
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
     }
@@ -228,6 +228,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   sf->tx_size_search_breakout = 1;
   sf->use_square_partition_only = !boosted;
   sf->early_term_interp_search_plane_rd = 1;
+  sf->cb_pred_filter_search = 1;
 
   sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
 
@@ -346,7 +347,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
     sf->adaptive_pred_interp_filter = 0;
     sf->adaptive_mode_search = 1;
     sf->cb_partition_search = !boosted;
-    sf->cb_pred_filter_search = 1;
+    sf->cb_pred_filter_search = 2;
     sf->alt_ref_search_fp = 1;
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
@@ -639,7 +640,7 @@ static void set_rt_speed_feature_framesize_independent(
       sf->use_altref_onepass = 1;
       sf->use_compound_nonrd_pickmode = 1;
     }
-    if (cm->width * cm->height > 1280 * 720) sf->cb_pred_filter_search = 1;
+    if (cm->width * cm->height > 1280 * 720) sf->cb_pred_filter_search = 2;
     if (!cpi->external_resize) sf->use_source_sad = 1;
   }
 
@@ -729,7 +730,7 @@ static void set_rt_speed_feature_framesize_independent(
     if (cpi->use_svc && svc->use_gf_temporal_ref_current_layer &&
         svc->temporal_layer_id > 0)
       cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
-    if (cm->width * cm->height > 640 * 480) sf->cb_pred_filter_search = 1;
+    if (cm->width * cm->height > 640 * 480) sf->cb_pred_filter_search = 2;
   }
 
   if (speed >= 8) {
@@ -773,7 +774,7 @@ static void set_rt_speed_feature_framesize_independent(
     }
     sf->limit_newmv_early_exit = 0;
     sf->use_simple_block_yrd = 1;
-    if (cm->width * cm->height > 352 * 288) sf->cb_pred_filter_search = 1;
+    if (cm->width * cm->height > 352 * 288) sf->cb_pred_filter_search = 2;
   }
 
   if (speed >= 9) {
@@ -783,7 +784,7 @@ static void set_rt_speed_feature_framesize_independent(
       for (i = 0; i < BLOCK_SIZES; ++i)
         sf->intra_y_mode_bsize_mask[i] = INTRA_DC;
     }
-    sf->cb_pred_filter_search = 1;
+    sf->cb_pred_filter_search = 2;
     sf->mv.enable_adaptive_subpel_force_stop = 1;
     sf->mv.adapt_subpel_force_stop.mv_thresh = 1;
     sf->mv.adapt_subpel_force_stop.force_stop_below = QUARTER_PEL;
