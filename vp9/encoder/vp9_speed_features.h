@@ -402,6 +402,10 @@ typedef struct SPEED_FEATURES {
   // Chessboard pattern prediction filter type search
   int cb_pred_filter_search;
 
+  // This variable enables an early termination of interpolation filter eval
+  // based on the current rd cost after processing each plane
+  int early_term_interp_search_plane_rd;
+
   int cb_partition_search;
 
   int motion_field_mode_search;
