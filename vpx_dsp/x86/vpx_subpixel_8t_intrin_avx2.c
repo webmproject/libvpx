@@ -15,6 +15,7 @@
 #include "vpx_dsp/x86/convolve.h"
 #include "vpx_dsp/x86/convolve_avx2.h"
 #include "vpx_dsp/x86/convolve_sse2.h"
+#include "vpx_dsp/x86/convolve_ssse3.h"
 #include "vpx_ports/mem.h"
 
 // filters for 16_h8
@@ -37,6 +38,31 @@ DECLARE_ALIGNED(32, static const uint8_t, filt4_global_avx2[32]) = {
   6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14,
   6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14
 };
+
+#define CALC_CONVOLVE8_HORZ_ROW                                               \
+  srcReg = xx_loadu2_mi128(src_ptr - 3 + src_pitch, src_ptr - 3);             \
+  s1[0] = _mm256_shuffle_epi8(srcReg, filt[0]);                               \
+  s1[1] = _mm256_shuffle_epi8(srcReg, filt[1]);                               \
+  s1[2] = _mm256_shuffle_epi8(srcReg, filt[2]);                               \
+  s1[3] = _mm256_shuffle_epi8(srcReg, filt[3]);                               \
+  s1[0] = convolve8_16_avx2(s1, f1);                                          \
+  s1[0] = _mm256_packus_epi16(s1[0], s1[0]);                                  \
+  src_ptr += src_stride;                                                      \
+  _mm_storel_epi64((__m128i *)&output_ptr[0], _mm256_castsi256_si128(s1[0])); \
+  output_ptr += output_pitch;                                                 \
+  _mm_storel_epi64((__m128i *)&output_ptr[0],                                 \
+                   _mm256_extractf128_si256(s1[0], 1));                       \
+  output_ptr += output_pitch;
+
+// 0 0 0 0 hi3 hi2 hi1 hi0 | 0 0 0 0 lo3 lo2 lo1 lo0
+static INLINE __m256i xx_loadu2_mi128(const void *hi, const void *lo) {
+  // 0 0 0 0 0 0 0 0 | 0 0 0 0 lo3 lo2 lo1 lo0
+  __m256i a = _mm256_castsi128_si256(_mm_loadu_si128((const __m128i *)(lo)));
+
+  // 0 0 0 0 hi3 hi2 hi1 hi0 | 0 0 0 0 lo3 lo2 lo1 lo0
+  a = _mm256_inserti128_si256(a, _mm_loadu_si128((const __m128i *)(hi)), 1);
+  return a;
+}
 
 static INLINE void vpx_filter_block1d16_h8_x_avx2(
     const uint8_t *src_ptr, ptrdiff_t src_pixels_per_line, uint8_t *output_ptr,
@@ -175,6 +201,59 @@ static void vpx_filter_block1d16_h8_avg_avx2(
     ptrdiff_t dst_stride, uint32_t output_height, const int16_t *filter) {
   vpx_filter_block1d16_h8_x_avx2(src_ptr, src_stride, output_ptr, dst_stride,
                                  output_height, filter, 1);
+}
+
+static void vpx_filter_block1d8_h8_avx2(
+    const uint8_t *src_ptr, ptrdiff_t src_pitch, uint8_t *output_ptr,
+    ptrdiff_t output_pitch, uint32_t output_height, const int16_t *filter) {
+  __m256i filt[4], f1[4], s1[4], srcReg;
+  __m128i f[4], s[4];
+  int y = output_height;
+
+  // Multiply the size of the source stride by two
+  const ptrdiff_t src_stride = src_pitch << 1;
+
+  shuffle_filter_avx2(filter, f1);
+  filt[0] = _mm256_load_si256((__m256i const *)filt1_global_avx2);
+  filt[1] = _mm256_load_si256((__m256i const *)filt2_global_avx2);
+  filt[2] = _mm256_load_si256((__m256i const *)filt3_global_avx2);
+  filt[3] = _mm256_load_si256((__m256i const *)filt4_global_avx2);
+
+  // Process next 4 rows
+  while (y > 3) {
+    CALC_CONVOLVE8_HORZ_ROW
+    CALC_CONVOLVE8_HORZ_ROW
+    y -= 4;
+  }
+
+  // If remaining, then process 2 rows at a time
+  while (y > 1) {
+    CALC_CONVOLVE8_HORZ_ROW
+    y -= 2;
+  }
+
+  // For the remaining height.
+  if (y > 0) {
+    const __m128i srcReg = _mm_loadu_si128((const __m128i *)(src_ptr - 3));
+
+    f[0] = _mm256_castsi256_si128(f1[0]);
+    f[1] = _mm256_castsi256_si128(f1[1]);
+    f[2] = _mm256_castsi256_si128(f1[2]);
+    f[3] = _mm256_castsi256_si128(f1[3]);
+
+    // filter the source buffer
+    s[0] = _mm_shuffle_epi8(srcReg, _mm256_castsi256_si128(filt[0]));
+    s[1] = _mm_shuffle_epi8(srcReg, _mm256_castsi256_si128(filt[1]));
+    s[2] = _mm_shuffle_epi8(srcReg, _mm256_castsi256_si128(filt[2]));
+    s[3] = _mm_shuffle_epi8(srcReg, _mm256_castsi256_si128(filt[3]));
+    s[0] = convolve8_8_ssse3(s, f);
+
+    // Saturate 16bit value to 8bit.
+    s[0] = _mm_packus_epi16(s[0], s[0]);
+
+    // Save only 8 bytes
+    _mm_storel_epi64((__m128i *)&output_ptr[0], s[0]);
+  }
 }
 
 static INLINE void vpx_filter_block1d16_v8_x_avx2(
@@ -870,14 +949,12 @@ filter8_1dfunction vpx_filter_block1d8_v8_intrin_ssse3;
 filter8_1dfunction vpx_filter_block1d8_h8_intrin_ssse3;
 filter8_1dfunction vpx_filter_block1d4_h8_intrin_ssse3;
 #define vpx_filter_block1d8_v8_avx2 vpx_filter_block1d8_v8_intrin_ssse3
-#define vpx_filter_block1d8_h8_avx2 vpx_filter_block1d8_h8_intrin_ssse3
 #define vpx_filter_block1d4_h8_avx2 vpx_filter_block1d4_h8_intrin_ssse3
 #else  // VPX_ARCH_X86
 filter8_1dfunction vpx_filter_block1d8_v8_ssse3;
 filter8_1dfunction vpx_filter_block1d8_h8_ssse3;
 filter8_1dfunction vpx_filter_block1d4_h8_ssse3;
 #define vpx_filter_block1d8_v8_avx2 vpx_filter_block1d8_v8_ssse3
-#define vpx_filter_block1d8_h8_avx2 vpx_filter_block1d8_h8_ssse3
 #define vpx_filter_block1d4_h8_avx2 vpx_filter_block1d4_h8_ssse3
 #endif  // VPX_ARCH_X86_64
 filter8_1dfunction vpx_filter_block1d8_v8_avg_ssse3;
