@@ -743,7 +743,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     }
     if (x->block_tx_domain) {
       dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
-                 tx_size, &dist, &sse, /*recon =*/0, sse_calc_done);
+                 tx_size, &dist, &sse, /*out_recon=*/NULL, sse_calc_done);
     } else {
       const struct macroblock_plane *const p = &x->plane[plane];
       const int src_stride = p->src.stride;
@@ -1396,7 +1396,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
     mic->mode = mode;
 
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion, &s, NULL,
-                    bsize, best_rd, /*recon = */ 0);
+                    bsize, best_rd, /*recon=*/NULL);
 
     if (this_rate_tokenonly == INT_MAX) continue;
 
@@ -1449,7 +1449,7 @@ static int super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
     txfm_rd_in_plane(cpi, x, &pnrate, &pndist, &pnskip, &pnsse, ref_best_rd,
                      plane, bsize, uv_tx_size, cpi->sf.use_fast_coef_costing,
-                     /*recon = */ 0);
+                     /*recon=*/NULL);
     if (pnrate == INT_MAX) {
       is_cost_valid = 0;
       break;
