@@ -119,11 +119,19 @@ static INLINE uint64_t horizontal_long_add_uint32x4(const uint32x4_t a) {
 #endif
 }
 
-static INLINE uint64_t horizontal_add_int64x2(const int64x2_t a) {
+static INLINE int64_t horizontal_add_int64x2(const int64x2_t a) {
 #if defined(__aarch64__)
   return vaddvq_s64(a);
 #else
   return vgetq_lane_s64(a, 0) + vgetq_lane_s64(a, 1);
+#endif
+}
+
+static INLINE uint64_t horizontal_add_uint64x2(const uint64x2_t a) {
+#if defined(__aarch64__)
+  return vaddvq_u64(a);
+#else
+  return vgetq_lane_u64(a, 0) + vgetq_lane_u64(a, 1);
 #endif
 }
 

@@ -167,7 +167,7 @@ static INLINE void highbd_variance_xlarge_neon(
   } while (i < h);
 
   *sum = horizontal_add_int32x4(sum_s32);
-  *sse = horizontal_add_int64x2(sse_s64);
+  *sse = (uint64_t)horizontal_add_int64x2(sse_s64);
 }
 
 static INLINE void highbd_variance_32xh_xlarge_neon(
