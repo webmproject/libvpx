@@ -465,7 +465,11 @@ void vpx_highbd_d117_predictor_4x4_neon(uint16_t *dst, ptrdiff_t stride,
   l0az = vext_u16(vld1_dup_u16(left), az, 3);
 
   l0 = vld1_u16(left + 0);
-  l1 = vld1_u16(left + 1);
+  // The last lane here is unused, reading left[4] could cause a buffer
+  // over-read, so just fill with a duplicate of left[0] to avoid needing to
+  // materialize a zero:
+  // [ left[1], left[2], left[3], x ]
+  l1 = vext_u16(l0, l0, 1);
   // [ above[-1], left[0], left[1], left[2] ]
   azl0 = vext_u16(vld1_dup_u16(above - 1), l0, 3);
 
@@ -494,7 +498,11 @@ void vpx_highbd_d117_predictor_8x8_neon(uint16_t *dst, ptrdiff_t stride,
   l0az = vextq_u16(vld1q_dup_u16(left), az, 7);
 
   l0 = vld1q_u16(left + 0);
-  l1 = vld1q_u16(left + 1);
+  // The last lane here is unused, reading left[8] could cause a buffer
+  // over-read, so just fill with a duplicate of left[0] to avoid needing to
+  // materialize a zero:
+  // [ left[1], ... , left[7], x ]
+  l1 = vextq_u16(l0, l0, 1);
   // [ above[-1], left[0], ..., left[6] ]
   azl0 = vextq_u16(vld1q_dup_u16(above - 1), l0, 7);
 
@@ -565,7 +573,11 @@ void vpx_highbd_d117_predictor_16x16_neon(uint16_t *dst, ptrdiff_t stride,
   l1 = vld1q_u16(left + 1);
   l7 = vld1q_u16(left + 7);
   l8 = vld1q_u16(left + 8);
-  l9 = vld1q_u16(left + 9);
+  // The last lane here is unused, reading left[16] could cause a buffer
+  // over-read, so just fill with a duplicate of left[8] to avoid needing to
+  // materialize a zero:
+  // [ left[9], ... , left[15], x ]
+  l9 = vextq_u16(l8, l8, 1);
   // [ above[-1], left[0], ..., left[6] ]
   azl0 = vextq_u16(vld1q_dup_u16(above - 1), l0, 7);
 
@@ -658,6 +670,11 @@ void vpx_highbd_d117_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
   l23 = vld1q_u16(left + 23);
   l24 = vld1q_u16(left + 24);
   l25 = vld1q_u16(left + 25);
+  // The last lane here is unused, reading left[32] could cause a buffer
+  // over-read, so just fill with a duplicate of left[24] to avoid needing to
+  // materialize a zero:
+  // [ left[25], ... , left[31], x ]
+  l25 = vextq_u16(l24, l24, 1);
   // [ above[-1], left[0], ..., left[6] ]
   azl0 = vextq_u16(vld1q_dup_u16(above - 1), l0, 7);
 
