@@ -344,6 +344,7 @@ DSP_SRCS-$(HAVE_NEON)  += arm/avg_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/hadamard_neon.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_hadamard_neon.c
+DSP_SRCS-$(HAVE_NEON)  += arm/highbd_avg_neon.c
 endif
 DSP_SRCS-$(HAVE_MSA)   += mips/avg_msa.c
 DSP_SRCS-$(HAVE_LSX)   += loongarch/avg_lsx.c

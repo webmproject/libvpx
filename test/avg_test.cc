@@ -694,6 +694,15 @@ INSTANTIATE_TEST_SUITE_P(NEON, SatdLowbdTest,
                                            make_tuple(256, &vpx_satd_neon),
                                            make_tuple(1024, &vpx_satd_neon)));
 
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_SUITE_P(
+    NEON, SatdHighbdTest,
+    ::testing::Values(make_tuple(16, &vpx_highbd_satd_neon),
+                      make_tuple(64, &vpx_highbd_satd_neon),
+                      make_tuple(256, &vpx_highbd_satd_neon),
+                      make_tuple(1024, &vpx_highbd_satd_neon)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 INSTANTIATE_TEST_SUITE_P(
     NEON, BlockErrorTestFP,
     ::testing::Values(make_tuple(16, &vp9_block_error_fp_neon),
