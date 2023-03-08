@@ -210,11 +210,16 @@ void vpx_minmax_8x8_neon(const uint8_t *a, int a_stride, const uint8_t *b,
   const uint8x16_t ab07_max = vmaxq_u8(ab0123_max, ab4567_max);
   const uint8x16_t ab07_min = vminq_u8(ab0123_min, ab4567_min);
 
-  // Split to D and start doing pairwise.
+#if defined(__aarch64__)
+  *min = *max = 0;  // Clear high bits
+  *((uint8_t *)max) = vmaxvq_u8(ab07_max);
+  *((uint8_t *)min) = vminvq_u8(ab07_min);
+#else
+  // Split into 64-bit vectors and execute pairwise min/max.
   uint8x8_t ab_max = vmax_u8(vget_high_u8(ab07_max), vget_low_u8(ab07_max));
   uint8x8_t ab_min = vmin_u8(vget_high_u8(ab07_min), vget_low_u8(ab07_min));
 
-  // Enough runs of vpmax/min propogate the max/min values to every position.
+  // Enough runs of vpmax/min propagate the max/min values to every position.
   ab_max = vpmax_u8(ab_max, ab_max);
   ab_min = vpmin_u8(ab_min, ab_min);
 
@@ -228,4 +233,5 @@ void vpx_minmax_8x8_neon(const uint8_t *a, int a_stride, const uint8_t *b,
   // Store directly to avoid costly neon->gpr transfer.
   vst1_lane_u8((uint8_t *)max, ab_max, 0);
   vst1_lane_u8((uint8_t *)min, ab_min, 0);
+#endif
 }
