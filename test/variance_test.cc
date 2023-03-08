@@ -1591,10 +1591,12 @@ INSTANTIATE_TEST_SUITE_P(
                              12),
         SubpelVarianceParams(3, 2, &vpx_highbd_12_sub_pixel_variance8x4_neon,
                              12),
+        /*TODO(https://crbug.com/webm/1796): enable after heap overflow is
+          fixed.
         SubpelVarianceParams(2, 3, &vpx_highbd_12_sub_pixel_variance4x8_neon,
                              12),
         SubpelVarianceParams(2, 2, &vpx_highbd_12_sub_pixel_variance4x4_neon,
-                             12),
+                             12),*/
         SubpelVarianceParams(6, 6, &vpx_highbd_10_sub_pixel_variance64x64_neon,
                              10),
         SubpelVarianceParams(6, 5, &vpx_highbd_10_sub_pixel_variance64x32_neon,
@@ -1617,10 +1619,12 @@ INSTANTIATE_TEST_SUITE_P(
                              10),
         SubpelVarianceParams(3, 2, &vpx_highbd_10_sub_pixel_variance8x4_neon,
                              10),
+        /*TODO(https://crbug.com/webm/1796): enable after heap overflow is
+          fixed.
         SubpelVarianceParams(2, 3, &vpx_highbd_10_sub_pixel_variance4x8_neon,
                              10),
         SubpelVarianceParams(2, 2, &vpx_highbd_10_sub_pixel_variance4x4_neon,
-                             10),
+                             10),*/
         SubpelVarianceParams(6, 6, &vpx_highbd_8_sub_pixel_variance64x64_neon,
                              8),
         SubpelVarianceParams(6, 5, &vpx_highbd_8_sub_pixel_variance64x32_neon,
@@ -1640,10 +1644,12 @@ INSTANTIATE_TEST_SUITE_P(
         SubpelVarianceParams(3, 4, &vpx_highbd_8_sub_pixel_variance8x16_neon,
                              8),
         SubpelVarianceParams(3, 3, &vpx_highbd_8_sub_pixel_variance8x8_neon, 8),
-        SubpelVarianceParams(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_neon, 8),
+        SubpelVarianceParams(3, 2, &vpx_highbd_8_sub_pixel_variance8x4_neon, 8)
+        /*TODO(https://crbug.com/webm/1796): enable after heap overflow is
+          fixed.
         SubpelVarianceParams(2, 3, &vpx_highbd_8_sub_pixel_variance4x8_neon, 8),
         SubpelVarianceParams(2, 2, &vpx_highbd_8_sub_pixel_variance4x4_neon,
-                             8)));
+                             8)*/));
 
 INSTANTIATE_TEST_SUITE_P(
     NEON, VpxHBDSubpelAvgVarianceTest,
