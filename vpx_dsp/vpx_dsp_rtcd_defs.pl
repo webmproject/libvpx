@@ -1569,9 +1569,13 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_12_sub_pixel_avg_variance8x4 sse2 neon/;
 
   add_proto qw/uint32_t vpx_highbd_12_sub_pixel_avg_variance4x8/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
-  specialize qw/vpx_highbd_12_sub_pixel_avg_variance4x8 neon/;
+  # TODO(https://crbug.com/webm/1796): enable neon after heap overflow is
+  # fixed.
+  # specialize qw/vpx_highbd_12_sub_pixel_avg_variance4x8 neon/;
   add_proto qw/uint32_t vpx_highbd_12_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
-  specialize qw/vpx_highbd_12_sub_pixel_avg_variance4x4 neon/;
+  # TODO(https://crbug.com/webm/1796): enable neon after heap overflow is
+  # fixed.
+  # specialize qw/vpx_highbd_12_sub_pixel_avg_variance4x4 neon/;
 
   add_proto qw/uint32_t vpx_highbd_10_sub_pixel_avg_variance64x64/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
   specialize qw/vpx_highbd_10_sub_pixel_avg_variance64x64 sse2 neon/;
@@ -1607,9 +1611,13 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_10_sub_pixel_avg_variance8x4 sse2 neon/;
 
   add_proto qw/uint32_t vpx_highbd_10_sub_pixel_avg_variance4x8/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
-  specialize qw/vpx_highbd_10_sub_pixel_avg_variance4x8 neon/;
+  # TODO(https://crbug.com/webm/1796): enable neon after heap overflow is
+  # fixed.
+  # specialize qw/vpx_highbd_10_sub_pixel_avg_variance4x8 neon/;
   add_proto qw/uint32_t vpx_highbd_10_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
-  specialize qw/vpx_highbd_10_sub_pixel_avg_variance4x4 neon/;
+  # TODO(https://crbug.com/webm/1796): enable neon after heap overflow is
+  # fixed.
+  # specialize qw/vpx_highbd_10_sub_pixel_avg_variance4x4 neon/;
 
   add_proto qw/uint32_t vpx_highbd_8_sub_pixel_avg_variance64x64/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
   specialize qw/vpx_highbd_8_sub_pixel_avg_variance64x64 sse2 neon/;
@@ -1645,9 +1653,13 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_8_sub_pixel_avg_variance8x4 sse2 neon/;
 
   add_proto qw/uint32_t vpx_highbd_8_sub_pixel_avg_variance4x8/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
-  specialize qw/vpx_highbd_8_sub_pixel_avg_variance4x8 neon/;
+  # TODO(https://crbug.com/webm/1796): enable neon after heap overflow is
+  # fixed.
+  # specialize qw/vpx_highbd_8_sub_pixel_avg_variance4x8 neon/;
   add_proto qw/uint32_t vpx_highbd_8_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int src_stride, int x_offset, int y_offset, const uint8_t *ref_ptr, int ref_stride, uint32_t *sse, const uint8_t *second_pred";
-  specialize qw/vpx_highbd_8_sub_pixel_avg_variance4x4 neon/;
+  # TODO(https://crbug.com/webm/1796): enable neon after heap overflow is
+  # fixed.
+  # specialize qw/vpx_highbd_8_sub_pixel_avg_variance4x4 neon/;
 
 }  # CONFIG_VP9_HIGHBITDEPTH
 
