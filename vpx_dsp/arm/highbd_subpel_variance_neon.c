@@ -37,6 +37,8 @@
 // 15-bit.)
 
 // Process a block exactly 4 wide and a multiple of 2 high.
+// TODO(https://crbug.com/webm/1796): enable after heap overflow is fixed.
+#if 0
 static void highbd_var_filter_block2d_bil_w4(const uint16_t *src_ptr,
                                              uint16_t *dst_ptr, int src_stride,
                                              int pixel_step, int dst_height,
@@ -60,6 +62,7 @@ static void highbd_var_filter_block2d_bil_w4(const uint16_t *src_ptr,
     i -= 2;
   } while (i != 0);
 }
+#endif  // 0
 
 // Process a block which is a multiple of 8 and any height.
 static void highbd_var_filter_block2d_bil_large(const uint16_t *src_ptr,
@@ -295,6 +298,8 @@ HBD_SPECIALIZED_SUBPEL_VARIANCE_WXH_NEON(12, 64, 64, 1)
 
 // Combine bilinear filter with vpx_highbd_comp_avg_pred for blocks having
 // width 4.
+// TODO(https://crbug.com/webm/1796): enable after heap overflow is fixed.
+#if 0
 static void highbd_avg_pred_var_filter_block2d_bil_w4(
     const uint16_t *src_ptr, uint16_t *dst_ptr, int src_stride, int pixel_step,
     int dst_height, int filter_offset, const uint16_t *second_pred) {
@@ -319,6 +324,7 @@ static void highbd_avg_pred_var_filter_block2d_bil_w4(
     i -= 2;
   } while (i != 0);
 }
+#endif  // 0
 
 // Combine bilinear filter with vpx_highbd_comp_avg_pred for large blocks.
 static void highbd_avg_pred_var_filter_block2d_bil_large(
@@ -540,8 +546,9 @@ static void highbd_avg_pred(const uint16_t *src_ptr, uint16_t *dst_ptr,
 // padding.
 
 // 8-bit
-HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(8, 4, 4, 2)
-HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(8, 4, 8, 2)
+// TODO(https://crbug.com/webm/1796): enable after heap overflow is fixed.
+// HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(8, 4, 4, 2)
+// HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(8, 4, 8, 2)
 
 HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(8, 8, 4, 1)
 HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(8, 8, 8, 1)
@@ -559,8 +566,9 @@ HBD_SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(8, 64, 32, 1)
 HBD_SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(8, 64, 64, 1)
 
 // 10-bit
-HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(10, 4, 4, 2)
-HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(10, 4, 8, 2)
+// TODO(https://crbug.com/webm/1796): enable after heap overflow is fixed.
+// HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(10, 4, 4, 2)
+// HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(10, 4, 8, 2)
 
 HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(10, 8, 4, 1)
 HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(10, 8, 8, 1)
@@ -578,8 +586,9 @@ HBD_SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(10, 64, 32, 1)
 HBD_SPECIALIZED_SUBPEL_AVG_VARIANCE_WXH_NEON(10, 64, 64, 1)
 
 // 12-bit
-HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(12, 4, 4, 2)
-HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(12, 4, 8, 2)
+// TODO(https://crbug.com/webm/1796): enable after heap overflow is fixed.
+// HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(12, 4, 4, 2)
+// HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(12, 4, 8, 2)
 
 HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(12, 8, 4, 1)
 HBD_SUBPEL_AVG_VARIANCE_WXH_NEON(12, 8, 8, 1)
