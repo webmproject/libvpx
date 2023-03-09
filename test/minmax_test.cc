@@ -234,6 +234,10 @@ INSTANTIATE_TEST_SUITE_P(SSE2, MinMaxTest,
 #if HAVE_NEON
 INSTANTIATE_TEST_SUITE_P(NEON, MinMaxTest,
                          ::testing::Values(&vpx_minmax_8x8_neon));
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_SUITE_P(NEON, HBDMinMaxTest,
+                         ::testing::Values(&vpx_highbd_minmax_8x8_neon));
+#endif
 #endif
 
 #if HAVE_MSA
