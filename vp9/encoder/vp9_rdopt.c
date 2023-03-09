@@ -160,12 +160,13 @@ static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx, int m, int n,
 }
 
 #if !CONFIG_REALTIME_ONLY
-static int model_rd_for_sb_earlyterm(VP9_COMP *cpi, int mi_row, int mi_col,
-                                     BLOCK_SIZE bsize, MACROBLOCK *x,
-                                     MACROBLOCKD *xd, int *out_rate_sum,
-                                     int64_t *out_dist_sum, int *skip_txfm_sb,
-                                     int64_t *skip_sse_sb, int do_earlyterm,
-                                     int64_t best_rd) {
+// Planewise build inter prediction and compute rdcost with early termination
+// option
+static int build_inter_pred_model_rd_earlyterm(
+    VP9_COMP *cpi, int mi_row, int mi_col, BLOCK_SIZE bsize, MACROBLOCK *x,
+    MACROBLOCKD *xd, int *out_rate_sum, int64_t *out_dist_sum,
+    int *skip_txfm_sb, int64_t *skip_sse_sb, int do_earlyterm,
+    int64_t best_rd) {
   // Note our transform coeffs are 8 times an orthogonal transform.
   // Hence quantizer step is also 8 times. To get effective quantizer
   // we need to divide by 8 before sending to modeling function.
@@ -2999,13 +3000,13 @@ static int64_t handle_inter_mode(
               xd->plane[j].dst.stride = 64;
             }
           }
-          // Compute RD cost with early termination option
+
           filt_best_rd =
               cm->interp_filter == SWITCHABLE ? (best_rd - rs_rd) : best_rd;
-          if (model_rd_for_sb_earlyterm(cpi, mi_row, mi_col, bsize, x, xd,
-                                        &rate_sum, &dist_sum, &tmp_skip_sb,
-                                        &tmp_skip_sse, enable_earlyterm,
-                                        filt_best_rd)) {
+          if (build_inter_pred_model_rd_earlyterm(
+                  cpi, mi_row, mi_col, bsize, x, xd, &rate_sum, &dist_sum,
+                  &tmp_skip_sb, &tmp_skip_sse, enable_earlyterm,
+                  filt_best_rd)) {
             filter_cache[i] = INT64_MAX;
             continue;
           }
@@ -3076,9 +3077,9 @@ static int64_t handle_inter_mode(
     // Handles the special case when a filter that is not in the
     // switchable list (ex. bilinear) is indicated at the frame level, or
     // skip condition holds.
-    model_rd_for_sb_earlyterm(cpi, mi_row, mi_col, bsize, x, xd, &tmp_rate,
-                              &tmp_dist, &skip_txfm_sb, &skip_sse_sb,
-                              0 /*do_earlyterm*/, INT64_MAX);
+    build_inter_pred_model_rd_earlyterm(
+        cpi, mi_row, mi_col, bsize, x, xd, &tmp_rate, &tmp_dist, &skip_txfm_sb,
+        &skip_sse_sb, 0 /*do_earlyterm*/, INT64_MAX);
     rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
     memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
     memcpy(bsse, x->bsse, sizeof(bsse));
