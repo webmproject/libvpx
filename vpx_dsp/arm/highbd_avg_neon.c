@@ -16,6 +16,30 @@
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/sum_neon.h"
 
+uint32_t vpx_highbd_avg_4x4_neon(const uint8_t *a, int a_stride) {
+  const uint16_t *a_ptr = CONVERT_TO_SHORTPTR(a);
+  const uint16x8_t a0 = load_unaligned_u16q(a_ptr + 0 * a_stride, a_stride);
+  const uint16x8_t a1 = load_unaligned_u16q(a_ptr + 2 * a_stride, a_stride);
+  return (horizontal_add_uint16x8(vaddq_u16(a0, a1)) + (1 << 3)) >> 4;
+}
+
+uint32_t vpx_highbd_avg_8x8_neon(const uint8_t *a, int a_stride) {
+  const uint16_t *a_ptr = CONVERT_TO_SHORTPTR(a);
+  uint16x8_t sum, a0, a1, a2, a3, a4, a5, a6, a7;
+
+  load_u16_8x8(a_ptr, a_stride, &a0, &a1, &a2, &a3, &a4, &a5, &a6, &a7);
+
+  sum = vaddq_u16(a0, a1);
+  sum = vaddq_u16(sum, a2);
+  sum = vaddq_u16(sum, a3);
+  sum = vaddq_u16(sum, a4);
+  sum = vaddq_u16(sum, a5);
+  sum = vaddq_u16(sum, a6);
+  sum = vaddq_u16(sum, a7);
+
+  return (horizontal_add_uint16x8(sum) + (1 << 5)) >> 6;
+}
+
 // coeff: 32 bits, dynamic range [-2147483648, 2147483647].
 // length: value range {16, 64, 256, 1024}.
 // satd: 42 bits, dynamic range [-2147483648 * 1024, 2147483647 * 1024]
