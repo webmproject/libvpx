@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/arm/mem_neon.h"
+#include "vp9/encoder/vp9_block.h"
 
 static INLINE void calculate_dqcoeff_and_store(const int16x8_t qcoeff,
                                                const int16x8_t dequant,
@@ -213,11 +214,8 @@ quantize_b_32x32_neon(const tran_low_t *coeff_ptr, tran_low_t *qcoeff_ptr,
 
 // Main difference is that zbin values are halved before comparison and dqcoeff
 // values are divided by 2. zbin is rounded but dqcoeff is not.
-void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                               const int16_t *zbin_ptr,
-                               const int16_t *round_ptr,
-                               const int16_t *quant_ptr,
-                               const int16_t *quant_shift_ptr,
+void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr,
+                               const struct macroblock_plane *const mb_plane,
                                tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                                const int16_t *dequant_ptr, uint16_t *eob_ptr,
                                const int16_t *scan, const int16_t *iscan) {
@@ -226,10 +224,10 @@ void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   int i;
 
   // Only the first element of each vector is DC.
-  int16x8_t zbin = vrshrq_n_s16(vld1q_s16(zbin_ptr), 1);
-  int16x8_t round = vrshrq_n_s16(vld1q_s16(round_ptr), 1);
-  int16x8_t quant = vld1q_s16(quant_ptr);
-  int16x8_t quant_shift = vld1q_s16(quant_shift_ptr);
+  int16x8_t zbin = vrshrq_n_s16(vld1q_s16(mb_plane->zbin), 1);
+  int16x8_t round = vrshrq_n_s16(vld1q_s16(mb_plane->round), 1);
+  int16x8_t quant = vld1q_s16(mb_plane->quant);
+  int16x8_t quant_shift = vld1q_s16(mb_plane->quant_shift);
   int16x8_t dequant = vld1q_s16(dequant_ptr);
 
   // Process first 8 values which include a dc component.
@@ -289,6 +287,5 @@ void vpx_quantize_b_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 #endif  // __aarch64__
   // Need these here, else the compiler complains about mixing declarations and
   // code in C90
-  (void)n_coeffs;
   (void)scan;
 }
