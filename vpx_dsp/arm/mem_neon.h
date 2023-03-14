@@ -164,6 +164,15 @@ static INLINE uint8x8_t load_unaligned_u8(const uint8_t *buf,
   return vreinterpret_u8_u32(a_u32);
 }
 
+// Load 8 bytes when alignment is not guaranteed.
+static INLINE uint16x4_t load_unaligned_u16(const uint16_t *buf) {
+  uint64_t a;
+  uint64x1_t a_u64 = vdup_n_u64(0);
+  memcpy(&a, buf, 8);
+  a_u64 = vset_lane_u64(a, a_u64, 0);
+  return vreinterpret_u16_u64(a_u64);
+}
+
 // Load 2 sets of 8 bytes when alignment is not guaranteed.
 static INLINE uint16x8_t load_unaligned_u16q(const uint16_t *buf,
                                              ptrdiff_t stride) {
