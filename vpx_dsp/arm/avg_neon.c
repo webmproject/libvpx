@@ -46,29 +46,25 @@ uint32_t vpx_avg_8x8_neon(const uint8_t *a, int a_stride) {
 
 // coeff: 16 bits, dynamic range [-32640, 32640].
 // length: value range {16, 64, 256, 1024}.
+// satd: 26 bits, dynamic range [-32640 * 1024, 32640 * 1024]
 int vpx_satd_neon(const tran_low_t *coeff, int length) {
-  const int16x4_t zero = vdup_n_s16(0);
-  int32x4_t accum = vdupq_n_s32(0);
+  int32x4_t sum_s32[2] = { vdupq_n_s32(0), vdupq_n_s32(0) };
 
   do {
-    const int16x8_t src0 = load_tran_low_to_s16q(coeff);
-    const int16x8_t src8 = load_tran_low_to_s16q(coeff + 8);
-    accum = vabal_s16(accum, vget_low_s16(src0), zero);
-    accum = vabal_s16(accum, vget_high_s16(src0), zero);
-    accum = vabal_s16(accum, vget_low_s16(src8), zero);
-    accum = vabal_s16(accum, vget_high_s16(src8), zero);
+    int16x8_t abs0, abs1;
+    const int16x8_t s0 = load_tran_low_to_s16q(coeff);
+    const int16x8_t s1 = load_tran_low_to_s16q(coeff + 8);
+
+    abs0 = vabsq_s16(s0);
+    sum_s32[0] = vpadalq_s16(sum_s32[0], abs0);
+    abs1 = vabsq_s16(s1);
+    sum_s32[1] = vpadalq_s16(sum_s32[1], abs1);
+
     length -= 16;
     coeff += 16;
   } while (length != 0);
 
-  {
-    // satd: 26 bits, dynamic range [-32640 * 1024, 32640 * 1024]
-    const int64x2_t s0 = vpaddlq_s32(accum);  // cascading summation of 'accum'.
-    const int32x2_t s1 = vadd_s32(vreinterpret_s32_s64(vget_low_s64(s0)),
-                                  vreinterpret_s32_s64(vget_high_s64(s0)));
-    const int satd = vget_lane_s32(s1, 0);
-    return satd;
-  }
+  return horizontal_add_int32x4(vaddq_s32(sum_s32[0], sum_s32[1]));
 }
 
 void vpx_int_pro_row_neon(int16_t hbuf[16], uint8_t const *ref,
