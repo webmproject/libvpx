@@ -212,7 +212,7 @@ class RcInterfaceSvcTest
         rc_cfg_.layer_target_bitrate[6] = 0;
         rc_cfg_.layer_target_bitrate[7] = 0;
         rc_cfg_.layer_target_bitrate[8] = 0;
-        rc_api_->UpdateRateControl(rc_cfg_);
+        ASSERT_TRUE(rc_api_->UpdateRateControl(rc_cfg_));
       } else if (video->frame() == 200) {
         // Go down to 1 spatial layer.
         // Update the encoder config.
@@ -226,7 +226,7 @@ class RcInterfaceSvcTest
         rc_cfg_.layer_target_bitrate[3] = 0;
         rc_cfg_.layer_target_bitrate[4] = 0;
         rc_cfg_.layer_target_bitrate[5] = 0;
-        rc_api_->UpdateRateControl(rc_cfg_);
+        ASSERT_TRUE(rc_api_->UpdateRateControl(rc_cfg_));
       } else if (0 && video->frame() == 280) {
         // TODO(marpan): Re-enable this going back up when issue is fixed.
         // Go back up to 3 spatial layers.
@@ -235,7 +235,7 @@ class RcInterfaceSvcTest
         encoder->Config(&cfg_);
         // Update the RC config.
         SetRCConfigSvc(3, 3);
-        rc_api_->UpdateRateControl(rc_cfg_);
+        ASSERT_TRUE(rc_api_->UpdateRateControl(rc_cfg_));
       }
     }
   }
