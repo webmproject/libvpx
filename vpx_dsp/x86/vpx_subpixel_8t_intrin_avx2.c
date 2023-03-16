@@ -39,6 +39,12 @@ DECLARE_ALIGNED(32, static const uint8_t, filt4_global_avx2[32]) = {
   6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14
 };
 
+DECLARE_ALIGNED(32, static const uint8_t, filt_d4_global_avx2[64]) = {
+  0, 1, 2, 3,  1, 2, 3, 4, 2, 3, 4, 5, 3, 4, 5, 6, 0, 1, 2, 3,  1, 2,
+  3, 4, 2, 3,  4, 5, 3, 4, 5, 6, 4, 5, 6, 7, 5, 6, 7, 8, 6, 7,  8, 9,
+  7, 8, 9, 10, 4, 5, 6, 7, 5, 6, 7, 8, 6, 7, 8, 9, 7, 8, 9, 10,
+};
+
 #define CALC_CONVOLVE8_HORZ_ROW                                               \
   srcReg = xx_loadu2_mi128(src_ptr - 3 + src_pitch, src_ptr - 3);             \
   s1[0] = _mm256_shuffle_epi8(srcReg, filt[0]);                               \
@@ -1036,18 +1042,158 @@ static void vpx_filter_block1d8_v8_avx2(
   } while (y > 1);
 }
 
+static void vpx_filter_block1d4_h8_avx2(
+    const uint8_t *src_ptr, ptrdiff_t src_pitch, uint8_t *output_ptr,
+    ptrdiff_t output_pitch, uint32_t output_height, const int16_t *filter) {
+  __m128i filtersReg;
+  __m256i addFilterReg64_256bit;
+  unsigned int y = output_height;
+
+  assert(output_height > 1);
+
+  addFilterReg64_256bit = _mm256_set1_epi16(32);
+
+  // f7 f6 f5 f4 f3 f2 f1 f0 (16 bit)
+  filtersReg = _mm_loadu_si128((const __m128i *)filter);
+
+  // converting the 16 bit (short) to 8 bit (byte) and have the same data
+  // in both lanes of 128 bit register.
+  // f7 f6 f5 f4 f3 f2 f1 f0 || f7 f6 f5 f4 f3 f2 f1 f0 (8 bit each)
+  filtersReg = _mm_packs_epi16(filtersReg, filtersReg);
+
+  {
+    ptrdiff_t src_stride;
+    __m256i filt1Reg, filt2Reg, firstFilters, secondFilters;
+    // have the same data in both lanes of a 256 bit register
+    // f7 f6 f5 f4 f3 f2 f1 f0 f7 f6 f5 f4 f3 f2 f1 f0 | f7 f6 f5 f4 f3 f2 f1 f0
+    // f7 f6 f5 f4 f3 f2 f1 f0 (8bit each)
+    const __m256i filtersReg32 = _mm256_broadcastsi128_si256(filtersReg);
+
+    // duplicate only the first 32 bits
+    // f3 f2 f1 f0|f3 f2 f1 f0|f3 f2 f1 f0|f3 f2 f1 f0 | f3 f2 f1 f0|f3 f2 f1
+    // f0|f3 f2 f1 f0|f3 f2 f1 f0
+    firstFilters = _mm256_shuffle_epi32(filtersReg32, 0);
+    // duplicate only the second 32 bits
+    // f7 f6 f5 f4|f7 f6 f5 f4|f7 f6 f5 f4|f7 f6 f5 f4 | f7 f6 f5 f4|f7 f6 f5
+    // f4|f7 f6 f5 f4|f7 f6 f5 f4
+    secondFilters = _mm256_shuffle_epi32(filtersReg32, 0x55);
+
+    // s6  s5 s4 s3 s5 s4 s3 s2 s4 s3 s2 s1 s3 s2 s1 s0 | s6 s5 s4 s3 s5 s4 s3
+    // s2 s4 s3 s2 s1 s3 s2 s1 s0
+    filt1Reg = _mm256_load_si256((__m256i const *)filt_d4_global_avx2);
+
+    // s10 s9 s8 s7 s9 s8 s7 s6 s8 s7 s6 s5 s7 s6 s5 s4 | s10 s9 s8 s7 s9 s8 s7
+    // s6 s8 s7 s6 s5 s7 s6 s5 s4
+    filt2Reg = _mm256_load_si256((__m256i const *)(filt_d4_global_avx2 + 32));
+
+    // multiple the size of the source and destination stride by two
+    src_stride = src_pitch << 1;
+
+    do {
+      __m256i srcRegFilt32b1_1, srcRegFilt32b2, srcReg32b1;
+      // load the 2 strides of source
+      // r115 r114 ...... r15 r14 r13 r12 r11 r10 | r015 r014 r013 ...... r07
+      // r06 r05 r04 r03 r02 r01 r00
+      srcReg32b1 = xx_loadu2_mi128(src_ptr - 3 + src_pitch, src_ptr - 3);
+
+      // filter the source buffer
+      // r16 r15 r14 r13 r15 r14 r13 r12 r14 r13 r12 r11 r13 r12 r11 r10 | r06
+      // r05 r04 r03 r05 r04 r03 r02 r04 r03 r02 r01 r03 r02 r01 r00
+      srcRegFilt32b1_1 = _mm256_shuffle_epi8(srcReg32b1, filt1Reg);
+
+      // multiply 4 adjacent elements with the filter and add the result
+      // .....|f3*r14+f2*r13|f1*r13+f0*r12|f3*r13+f2*r12|f1*r11+f0*r10||.........
+      // |f1*r03+f0*r02|f3*r04+f2*r03|f1*r02+f0*r01|f3*r03+f2*r02|f1*r01+f0*r00
+      srcRegFilt32b1_1 = _mm256_maddubs_epi16(srcRegFilt32b1_1, firstFilters);
+
+      // filter the source buffer
+      // r110 r19 r18 r17|r19 r18 r17 r16|r18 r17 r16 r15|r17 r16 r15 r14||r010
+      // r09 r08 r07|r09 r08 r07 r06|r08 r07 r06 r05|r07 r06 r05 r04
+      srcRegFilt32b2 = _mm256_shuffle_epi8(srcReg32b1, filt2Reg);
+
+      // multiply 4 adjacent elements with the filter and add the result
+      // r010 r09 r08 r07|r9 r08 r07 r06|r08 r07 r06 r05|r07 r06 r05 r04||r010
+      // r09 r08 r07|r9 r08 r07 r06|r08 r07 r06 r05|r07 r06 r05 r04
+      srcRegFilt32b2 = _mm256_maddubs_epi16(srcRegFilt32b2, secondFilters);
+
+      srcRegFilt32b1_1 =
+          _mm256_add_epi16(srcRegFilt32b1_1, addFilterReg64_256bit);
+      srcRegFilt32b1_1 = _mm256_adds_epi16(srcRegFilt32b1_1, srcRegFilt32b2);
+
+      srcRegFilt32b1_1 =
+          _mm256_hadds_epi16(srcRegFilt32b1_1, _mm256_setzero_si256());
+
+      // 0 0 0 0 R13 R12 R11 R10 || 0 0 0 0 R03 R02 R01 R00 (16bit)
+      srcRegFilt32b1_1 = _mm256_srai_epi16(srcRegFilt32b1_1, 7);
+
+      // 8zeros 0 0 0 0 R13 R12 R11 R10 || 8zeros 0 0 0 0 R03 R02 R01 R00 (8bit)
+      srcRegFilt32b1_1 =
+          _mm256_packus_epi16(srcRegFilt32b1_1, _mm256_setzero_si256());
+
+      src_ptr += src_stride;
+      // save first row 4 values
+      *((int *)&output_ptr[0]) =
+          _mm_cvtsi128_si32(_mm256_castsi256_si128(srcRegFilt32b1_1));
+      output_ptr += output_pitch;
+
+      // save second row 4 values
+      *((int *)&output_ptr[0]) =
+          _mm_cvtsi128_si32(_mm256_extractf128_si256(srcRegFilt32b1_1, 1));
+      output_ptr += output_pitch;
+
+      y = y - 2;
+    } while (y > 1);
+
+    // For remaining height
+    if (y > 0) {
+      __m128i srcReg1, srcRegFilt1_1, addFilterReg64;
+      __m128i srcRegFilt2;
+
+      addFilterReg64 = _mm_set1_epi32((int)0x0400040u);
+
+      srcReg1 = _mm_loadu_si128((const __m128i *)(src_ptr - 3));
+
+      // filter the source buffer
+      srcRegFilt1_1 =
+          _mm_shuffle_epi8(srcReg1, _mm256_castsi256_si128(filt1Reg));
+
+      // multiply 4 adjacent elements with the filter and add the result
+      srcRegFilt1_1 = _mm_maddubs_epi16(srcRegFilt1_1,
+                                        _mm256_castsi256_si128(firstFilters));
+
+      // filter the source buffer
+      srcRegFilt2 = _mm_shuffle_epi8(srcReg1, _mm256_castsi256_si128(filt2Reg));
+
+      // multiply 4 adjacent elements with the filter and add the result
+      srcRegFilt2 =
+          _mm_maddubs_epi16(srcRegFilt2, _mm256_castsi256_si128(secondFilters));
+
+      srcRegFilt1_1 = _mm_adds_epi16(srcRegFilt1_1, srcRegFilt2);
+      srcRegFilt1_1 = _mm_hadds_epi16(srcRegFilt1_1, _mm_setzero_si128());
+      // shift by 6 bit each 16 bit
+      srcRegFilt1_1 = _mm_adds_epi16(srcRegFilt1_1, addFilterReg64);
+      srcRegFilt1_1 = _mm_srai_epi16(srcRegFilt1_1, 7);
+
+      // shrink to 8 bit each 16 bits, the first lane contain the first
+      // convolve result and the second lane contain the second convolve result
+      srcRegFilt1_1 = _mm_packus_epi16(srcRegFilt1_1, _mm_setzero_si128());
+
+      // save 4 bytes
+      *((int *)(output_ptr)) = _mm_cvtsi128_si32(srcRegFilt1_1);
+    }
+  }
+}
+
 #if HAVE_AVX2 && HAVE_SSSE3
 filter8_1dfunction vpx_filter_block1d4_v8_ssse3;
 #if VPX_ARCH_X86_64
 filter8_1dfunction vpx_filter_block1d8_v8_intrin_ssse3;
 filter8_1dfunction vpx_filter_block1d8_h8_intrin_ssse3;
 filter8_1dfunction vpx_filter_block1d4_h8_intrin_ssse3;
-#define vpx_filter_block1d4_h8_avx2 vpx_filter_block1d4_h8_intrin_ssse3
-#else  // VPX_ARCH_X86
+#else   // VPX_ARCH_X86
 filter8_1dfunction vpx_filter_block1d8_v8_ssse3;
 filter8_1dfunction vpx_filter_block1d8_h8_ssse3;
 filter8_1dfunction vpx_filter_block1d4_h8_ssse3;
-#define vpx_filter_block1d4_h8_avx2 vpx_filter_block1d4_h8_ssse3
 #endif  // VPX_ARCH_X86_64
 filter8_1dfunction vpx_filter_block1d8_v8_avg_ssse3;
 filter8_1dfunction vpx_filter_block1d8_h8_avg_ssse3;
