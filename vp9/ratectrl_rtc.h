@@ -44,8 +44,6 @@ struct VP9RateControlRtcConfig : public VpxRateControlRtcConfig {
 
   // Number of spatial layers
   int ss_number_layers;
-  // Number of temporal layers
-  int ts_number_layers;
   int max_quantizers[VPX_MAX_LAYERS];
   int min_quantizers[VPX_MAX_LAYERS];
   int scaling_factor_num[VPX_SS_MAX_LAYERS];
