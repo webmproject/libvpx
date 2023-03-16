@@ -69,22 +69,21 @@ struct VP9SegmentationData {
 // the encoder. To use this interface, you need to link with libvpxrc.a.
 //
 // #include "vp9/ratectrl_rtc.h"
-// VP9RateControlRTC rc_api;
 // VP9RateControlRtcConfig cfg;
 // VP9FrameParamsQpRTC frame_params;
 //
 // YourFunctionToInitializeConfig(cfg);
-// rc_api.InitRateControl(cfg);
+// std::unique_ptr<VP9RateControlRTC> rc_api = VP9RateControlRTC::Create(cfg);
 // // start encoding
 // while (frame_to_encode) {
 //   if (config_changed)
-//     rc_api.UpdateRateControl(cfg);
+//     rc_api->UpdateRateControl(cfg);
 //   YourFunctionToFillFrameParams(frame_params);
-//   rc_api.ComputeQP(frame_params);
-//   YourFunctionToUseQP(rc_api.GetQP());
-//   YourFunctionToUseLoopfilter(rc_api.GetLoopfilterLevel());
+//   rc_api->ComputeQP(frame_params);
+//   YourFunctionToUseQP(rc_api->GetQP());
+//   YourFunctionToUseLoopfilter(rc_api->GetLoopfilterLevel());
 //   // After encoding
-//   rc_api.PostEncode(encoded_frame_size);
+//   rc_api->PostEncode(encoded_frame_size, frame_params);
 // }
 class VP9RateControlRTC {
  public:
