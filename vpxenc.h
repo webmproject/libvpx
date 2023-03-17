@@ -56,6 +56,7 @@ struct VpxEncoderConfig {
   int disable_warnings;
   int disable_warning_prompt;
   int experimental_bitstream;
+  int export_tpl_stats;
 };
 
 #ifdef __cplusplus
