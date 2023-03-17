@@ -136,6 +136,9 @@ void VP9RateControlRTC::UpdateRateControl(
   cpi_->svc.number_spatial_layers = rc_cfg.ss_number_layers;
   cpi_->svc.number_temporal_layers = rc_cfg.ts_number_layers;
   vp9_set_mb_mi(cm, cm->width, cm->height);
+  for (int tl = 0; tl < cpi_->svc.number_temporal_layers; ++tl) {
+    oxcf->ts_rate_decimator[tl] = rc_cfg.ts_rate_decimator[tl];
+  }
   for (int sl = 0; sl < cpi_->svc.number_spatial_layers; ++sl) {
     for (int tl = 0; tl < cpi_->svc.number_temporal_layers; ++tl) {
       const int layer =
@@ -149,7 +152,6 @@ void VP9RateControlRTC::UpdateRateControl(
       lrc->best_quality = vp9_quantizer_to_qindex(rc_cfg.min_quantizers[layer]);
       lc->scaling_factor_num = rc_cfg.scaling_factor_num[sl];
       lc->scaling_factor_den = rc_cfg.scaling_factor_den[sl];
-      oxcf->ts_rate_decimator[tl] = rc_cfg.ts_rate_decimator[tl];
     }
   }
   vp9_set_rc_buffer_sizes(cpi_);
