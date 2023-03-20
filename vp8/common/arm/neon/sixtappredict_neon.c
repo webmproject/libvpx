@@ -1253,9 +1253,6 @@ void vp8_sixtap_predict8x8_neon(unsigned char *src_ptr, int src_pixels_per_line,
   return;
 }
 
-// TODO(https://crbug.com/webm/1795): enable this after buffer overflows are
-// fixed.
-#if 0
 void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
                                   int src_pixels_per_line, int xoffset,
                                   int yoffset, unsigned char *dst_ptr,
@@ -1507,7 +1504,9 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
     src += src_pixels_per_line;
     d12u8 = vld1_u8(src);
     d13u8 = vld1_u8(src + 8);
-    d14u8 = vld1_u8(src + 16);
+    // Only 5 pixels are needed, avoid a potential out of bounds read.
+    d14u8 = vld1_u8(src + 13);
+    d14u8 = vext_u8(d14u8, d14u8, 3);
     src += src_pixels_per_line;
 
     __builtin_prefetch(src);
@@ -1731,4 +1730,3 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
   }
   return;
 }
-#endif  // 0
