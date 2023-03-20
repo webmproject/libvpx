@@ -22,6 +22,8 @@ struct encode_b_args {
   MACROBLOCK *x;
   int enable_trellis_opt;
   double trellis_opt_thresh;
+  int *sse_calc_done;
+  int64_t *sse;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
   int8_t *skip;

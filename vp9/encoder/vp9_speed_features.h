@@ -254,6 +254,9 @@ typedef enum {
   // Enable trellis coefficient optimization based on source variance of the
   // prediction block during transform RD
   ENABLE_TRELLIS_OPT_TX_RD_SRC_VAR,
+  // Enable trellis coefficient optimization based on residual mse of the
+  // transform block during transform RD
+  ENABLE_TRELLIS_OPT_TX_RD_RESIDUAL_MSE,
 } ENABLE_TRELLIS_OPT_METHOD;
 
 typedef struct TRELLIS_OPT_CONTROL {

@@ -458,11 +458,6 @@ static int cost_coeffs(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
   return cost;
 }
 
-static INLINE int num_4x4_to_edge(int plane_4x4_dim, int mb_to_edge_dim,
-                                  int subsampling_dim, int blk_dim) {
-  return plane_4x4_dim + (mb_to_edge_dim >> (5 + subsampling_dim)) - blk_dim;
-}
-
 // Copy all visible 4x4s in the transform block.
 static void copy_block_visible(const MACROBLOCKD *xd,
                                const struct macroblockd_plane *const pd,
@@ -563,47 +558,11 @@ static unsigned pixel_sse(const VP9_COMP *const cpi, const MACROBLOCKD *xd,
   return sse;
 }
 
-// Compute the sum of squares on all visible 4x4s in the transform block.
-static int64_t sum_squares_visible(const MACROBLOCKD *xd,
-                                   const struct macroblockd_plane *const pd,
-                                   const int16_t *diff, const int diff_stride,
-                                   int blk_row, int blk_col,
-                                   const BLOCK_SIZE plane_bsize,
-                                   const BLOCK_SIZE tx_bsize) {
-  int64_t sse;
-  const int plane_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
-  const int plane_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
-  const int tx_4x4_w = num_4x4_blocks_wide_lookup[tx_bsize];
-  const int tx_4x4_h = num_4x4_blocks_high_lookup[tx_bsize];
-  int b4x4s_to_right_edge = num_4x4_to_edge(plane_4x4_w, xd->mb_to_right_edge,
-                                            pd->subsampling_x, blk_col);
-  int b4x4s_to_bottom_edge = num_4x4_to_edge(plane_4x4_h, xd->mb_to_bottom_edge,
-                                             pd->subsampling_y, blk_row);
-  if (tx_bsize == BLOCK_4X4 ||
-      (b4x4s_to_right_edge >= tx_4x4_w && b4x4s_to_bottom_edge >= tx_4x4_h)) {
-    assert(tx_4x4_w == tx_4x4_h);
-    sse = (int64_t)vpx_sum_squares_2d_i16(diff, diff_stride, tx_4x4_w << 2);
-  } else {
-    int r, c;
-    int max_r = VPXMIN(b4x4s_to_bottom_edge, tx_4x4_h);
-    int max_c = VPXMIN(b4x4s_to_right_edge, tx_4x4_w);
-    sse = 0;
-    // if we are in the unrestricted motion border.
-    for (r = 0; r < max_r; ++r) {
-      // Skip visiting the sub blocks that are wholly within the UMV.
-      for (c = 0; c < max_c; ++c) {
-        sse += (int64_t)vpx_sum_squares_2d_i16(
-            diff + r * diff_stride * 4 + c * 4, diff_stride, 4);
-      }
-    }
-  }
-  return sse;
-}
-
 static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
                        BLOCK_SIZE plane_bsize, int block, int blk_row,
                        int blk_col, TX_SIZE tx_size, int64_t *out_dist,
-                       int64_t *out_sse, struct buf_2d *out_recon) {
+                       int64_t *out_sse, struct buf_2d *out_recon,
+                       int sse_calc_done) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -653,8 +612,12 @@ static void dist_block(const VP9_COMP *cpi, MACROBLOCK *x, int plane,
     const tran_low_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
     unsigned int tmp;
 
-    tmp = pixel_sse(cpi, xd, pd, src, src_stride, dst, dst_stride, blk_row,
-                    blk_col, plane_bsize, tx_bsize);
+    if (sse_calc_done) {
+      tmp = (unsigned int)(*out_sse);
+    } else {
+      tmp = pixel_sse(cpi, xd, pd, src, src_stride, dst, dst_stride, blk_row,
+                      blk_col, plane_bsize, tx_bsize);
+    }
     *out_sse = (int64_t)tmp * 16;
     if (out_recon) {
       const int out_recon_idx = 4 * (blk_row * out_recon->stride + blk_col);
@@ -752,25 +715,20 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   const uint8_t *dst = &pd->dst.buf[4 * (blk_row * dst_stride + blk_col)];
   const int enable_trellis_opt = args->cpi->sf.trellis_opt_tx_rd.method;
   const double trellis_opt_thresh = args->cpi->sf.trellis_opt_tx_rd.thresh;
+  int sse_calc_done = 0;
 #if CONFIG_MISMATCH_DEBUG
   struct encode_b_args encode_b_arg = {
-    x,
-    enable_trellis_opt,
-    trellis_opt_thresh,
-    args->t_above,
-    args->t_left,
-    &mi->skip,
+    x,    enable_trellis_opt, trellis_opt_thresh, &sse_calc_done,
+    &sse, args->t_above,      args->t_left,       &mi->skip,
     0,  // mi_row
     0,  // mi_col
     0   // output_enabled
   };
 #else
-  struct encode_b_args encode_b_arg = { x,
-                                        enable_trellis_opt,
-                                        trellis_opt_thresh,
-                                        args->t_above,
-                                        args->t_left,
-                                        &mi->skip };
+  struct encode_b_args encode_b_arg = {
+    x,    enable_trellis_opt, trellis_opt_thresh, &sse_calc_done,
+    &sse, args->t_above,      args->t_left,       &mi->skip
+  };
 #endif
 
   if (args->exit_early) return;
@@ -785,16 +743,21 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     }
     if (x->block_tx_domain) {
       dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
-                 tx_size, &dist, &sse, /*recon =*/0);
+                 tx_size, &dist, &sse, /*recon =*/0, sse_calc_done);
     } else {
       const struct macroblock_plane *const p = &x->plane[plane];
       const int src_stride = p->src.stride;
-      const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
       const uint8_t *src = &p->src.buf[4 * (blk_row * src_stride + blk_col)];
-      const int16_t *diff = &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
       unsigned int tmp;
-      sse = sum_squares_visible(xd, pd, diff, diff_stride, blk_row, blk_col,
-                                plane_bsize, tx_bsize);
+      if (!sse_calc_done) {
+        const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+        const int16_t *diff =
+            &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
+        int visible_width, visible_height;
+        sse = sum_squares_visible(xd, pd, diff, diff_stride, blk_row, blk_col,
+                                  plane_bsize, tx_bsize, &visible_width,
+                                  &visible_height);
+      }
 #if CONFIG_VP9_HIGHBITDEPTH
       if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) && (xd->bd > 8))
         sse = ROUND64_POWER_OF_TWO(sse, (xd->bd - 8) * 2);
@@ -818,13 +781,19 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
 
     if (skip_txfm_flag == SKIP_TXFM_NONE ||
         (recon && skip_txfm_flag == SKIP_TXFM_AC_ONLY)) {
-      const int enable_trellis_opt = do_trellis_opt(&encode_b_arg);
+      const struct macroblock_plane *const p = &x->plane[plane];
+      const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+      const int16_t *const diff =
+          &p->src_diff[4 * (blk_row * diff_stride + blk_col)];
+      const int enable_trellis_opt =
+          do_trellis_opt(pd, diff, diff_stride, blk_row, blk_col, plane_bsize,
+                         tx_size, &encode_b_arg);
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
       if (enable_trellis_opt)
         vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
       dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
-                 tx_size, &dist, &sse, recon);
+                 tx_size, &dist, &sse, recon, sse_calc_done);
     } else if (skip_txfm_flag == SKIP_TXFM_AC_ONLY) {
       // compute DC coefficient
       tran_low_t *const coeff = BLOCK_OFFSET(x->plane[plane].coeff, block);

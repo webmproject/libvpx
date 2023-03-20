@@ -761,6 +761,8 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize, int mi_row, int mi_col,
   struct encode_b_args arg = { x,
                                1,     // enable_trellis_opt
                                0.0,   // trellis_opt_thresh
+                               NULL,  // &sse_calc_done
+                               NULL,  // &sse
                                NULL,  // above entropy context
                                NULL,  // left entropy context
                                &mi->skip, mi_row, mi_col, output_enabled };
@@ -768,6 +770,8 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize, int mi_row, int mi_col,
   struct encode_b_args arg = { x,
                                1,     // enable_trellis_opt
                                0.0,   // trellis_opt_thresh
+                               NULL,  // &sse_calc_done
+                               NULL,  // &sse
                                NULL,  // above entropy context
                                NULL,  // left entropy context
                                &mi->skip };
@@ -867,7 +871,8 @@ void vp9_encode_block_intra(int plane, int block, int row, int col,
     vpx_subtract_block(tx_size_in_pixels, tx_size_in_pixels, src_diff,
                        diff_stride, src, src_stride, dst, dst_stride);
 #endif
-    enable_trellis_opt = do_trellis_opt(args);
+    enable_trellis_opt = do_trellis_opt(pd, src_diff, diff_stride, row, col,
+                                        plane_bsize, tx_size, args);
   }
 
   if (enable_trellis_opt) {
@@ -1037,7 +1042,9 @@ void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
   struct encode_b_args arg = {
     x,
     enable_trellis_opt,
-    0.0,  // trellis_opt_thresh
+    0.0,   // trellis_opt_thresh
+    NULL,  // &sse_calc_done
+    NULL,  // &sse
     ctx.ta[plane],
     ctx.tl[plane],
     &xd->mi[0]->skip,
@@ -1048,7 +1055,9 @@ void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane,
 #else
   struct encode_b_args arg = { x,
                                enable_trellis_opt,
-                               0.0,  // trellis_opt_thresh
+                               0.0,   // trellis_opt_thresh
+                               NULL,  // &sse_calc_done
+                               NULL,  // &sse
                                ctx.ta[plane],
                                ctx.tl[plane],
                                &xd->mi[0]->skip };
