@@ -781,7 +781,6 @@ void vp8_sixtap_predict8x4_neon(unsigned char *src_ptr, int src_pixels_per_line,
   vst1_u8(dst_ptr, d8u8);
   dst_ptr += dst_pitch;
   vst1_u8(dst_ptr, d9u8);
-  return;
 }
 
 void vp8_sixtap_predict8x8_neon(unsigned char *src_ptr, int src_pixels_per_line,
@@ -1250,7 +1249,6 @@ void vp8_sixtap_predict8x8_neon(unsigned char *src_ptr, int src_pixels_per_line,
     vst1_u8(dst_ptr, d9u8);
     dst_ptr += dst_pitch;
   }
-  return;
 }
 
 void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
@@ -1728,5 +1726,4 @@ void vp8_sixtap_predict16x16_neon(unsigned char *src_ptr,
       dst += dst_pitch;
     }
   }
-  return;
 }
