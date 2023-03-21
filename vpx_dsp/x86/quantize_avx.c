@@ -19,6 +19,8 @@
 #include "vpx_dsp/x86/bitdepth_conversion_sse2.h"
 #include "vpx_dsp/x86/quantize_sse2.h"
 #include "vpx_dsp/x86/quantize_ssse3.h"
+#include "vp9/common/vp9_scan.h"
+#include "vp9/encoder/vp9_block.h"
 
 void vpx_quantize_b_avx(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                         const int16_t *zbin_ptr, const int16_t *round_ptr,
@@ -144,10 +146,11 @@ void vpx_quantize_b_32x32_avx(const tran_low_t *coeff_ptr,
                               const struct macroblock_plane *const mb_plane,
                               tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                               const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                              const int16_t *scan, const int16_t *iscan) {
+                              const struct scan_order *const scan_order) {
   const __m128i zero = _mm_setzero_si128();
   const __m256i big_zero = _mm256_setzero_si256();
   int index;
+  const int16_t *iscan = scan_order->iscan;
 
   __m128i zbin, round, quant, dequant, shift;
   __m128i coeff0, coeff1;
@@ -155,8 +158,6 @@ void vpx_quantize_b_32x32_avx(const tran_low_t *coeff_ptr,
   __m128i cmp_mask0, cmp_mask1;
   __m128i all_zero;
   __m128i eob = zero, eob0;
-
-  (void)scan;
 
   load_b_values32x32(mb_plane, &zbin, &round, &quant, dequant_ptr, &dequant,
                      &shift);

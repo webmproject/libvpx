@@ -15,6 +15,7 @@
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "vp9/common/vp9_scan.h"
 #include "vp9/encoder/vp9_block.h"
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -96,16 +97,16 @@ void vpx_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr, intptr_t count,
 void vpx_highbd_quantize_b_32x32_sse2(
     const tran_low_t *coeff_ptr, const struct macroblock_plane *const mb_plane,
     tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr,
-    uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan) {
+    uint16_t *eob_ptr, const struct scan_order *const scan_order) {
   __m128i zbins[2];
   __m128i nzbins[2];
   int idx = 0;
   int idx_arr[1024];
   int i, eob = 0;
   const intptr_t n_coeffs = 32 * 32;
+  const int16_t *iscan = scan_order->iscan;
   const int zbin0_tmp = ROUND_POWER_OF_TWO(mb_plane->zbin[0], 1);
   const int zbin1_tmp = ROUND_POWER_OF_TWO(mb_plane->zbin[1], 1);
-  (void)scan;
 
   zbins[0] = _mm_set_epi32(zbin1_tmp, zbin1_tmp, zbin1_tmp, zbin0_tmp);
   zbins[1] = _mm_set1_epi32(zbin1_tmp);
