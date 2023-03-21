@@ -307,9 +307,7 @@ INSTANTIATE_TEST_SUITE_P(
 #if HAVE_NEON
 INSTANTIATE_TEST_SUITE_P(
     NEON, SixtapPredictTest,
-    ::testing::Values(/*TODO(https://crbug.com/webm/1795): enable this after
-                        buffer overflows are fixed.
-                      make_tuple(16, 16, &vp8_sixtap_predict16x16_neon),*/
+    ::testing::Values(make_tuple(16, 16, &vp8_sixtap_predict16x16_neon),
                       make_tuple(8, 8, &vp8_sixtap_predict8x8_neon),
                       make_tuple(8, 4, &vp8_sixtap_predict8x4_neon),
                       make_tuple(4, 4, &vp8_sixtap_predict4x4_neon)));
