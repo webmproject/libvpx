@@ -1788,28 +1788,6 @@ static vpx_codec_err_t ctrl_get_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t ctrl_get_tpl_stats(vpx_codec_alg_priv_t *ctx,
-                                          va_list args) {
-  VP9_COMP *const cpi = ctx->cpi;
-  VP9_COMMON *const cm = &cpi->common;
-  TplDepFrame **data = va_arg(args, TplDepFrame **);
-  int i;
-  *data = vpx_calloc(MAX_ARF_GOP_SIZE, sizeof(TplDepFrame));
-  for (i = 0; i < MAX_ARF_GOP_SIZE; i++) {
-    const int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-    const int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
-    const int copy_size = mi_cols * mi_rows * sizeof(*(*data)[i].tpl_stats_ptr);
-    (*data)[i] = cpi->tpl_stats[i];
-    (*data)[i].tpl_stats_ptr = NULL;
-    (*data)[i].tpl_stats_ptr =
-        vpx_calloc(mi_rows * mi_cols, sizeof(*(*data)[i].tpl_stats_ptr));
-    memcpy((*data)[i].tpl_stats_ptr, cpi->tpl_stats[i].tpl_stats_ptr,
-           copy_size);
-  }
-
-  return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t ctrl_set_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
                                                      va_list args) {
   VP9_COMP *const cpi = ctx->cpi;
@@ -2057,7 +2035,6 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_GET_ACTIVEMAP, ctrl_get_active_map },
   { VP9E_GET_LEVEL, ctrl_get_level },
   { VP9E_GET_SVC_REF_FRAME_CONFIG, ctrl_get_svc_ref_frame_config },
-  { VP9E_GET_TPL_STATS, ctrl_get_tpl_stats },
 
   { -1, NULL },
 };
