@@ -2166,30 +2166,36 @@ void vpx_highbd_v_predictor_8x8_neon(uint16_t *dst, ptrdiff_t stride,
 void vpx_highbd_v_predictor_16x16_neon(uint16_t *dst, ptrdiff_t stride,
                                        const uint16_t *above,
                                        const uint16_t *left, int bd) {
-  const uint16x8x2_t row = vld2q_u16(above);
+  const uint16x8_t row0 = vld1q_u16(above + 0);
+  const uint16x8_t row1 = vld1q_u16(above + 8);
   int i;
   (void)left;
   (void)bd;
 
-  for (i = 0; i < 16; i++, dst += stride) {
-    vst2q_u16(dst, row);
+  for (i = 0; i < 16; i++) {
+    vst1q_u16(dst + 0, row0);
+    vst1q_u16(dst + 8, row1);
+    dst += stride;
   }
 }
 
 void vpx_highbd_v_predictor_32x32_neon(uint16_t *dst, ptrdiff_t stride,
                                        const uint16_t *above,
                                        const uint16_t *left, int bd) {
-  const uint16x8x2_t row0 = vld2q_u16(above);
-  const uint16x8x2_t row1 = vld2q_u16(above + 16);
+  const uint16x8_t row0 = vld1q_u16(above + 0);
+  const uint16x8_t row1 = vld1q_u16(above + 8);
+  const uint16x8_t row2 = vld1q_u16(above + 16);
+  const uint16x8_t row3 = vld1q_u16(above + 24);
   int i;
   (void)left;
   (void)bd;
 
   for (i = 0; i < 32; i++) {
-    vst2q_u16(dst, row0);
-    dst += 16;
-    vst2q_u16(dst, row1);
-    dst += stride - 16;
+    vst1q_u16(dst + 0, row0);
+    vst1q_u16(dst + 8, row1);
+    vst1q_u16(dst + 16, row2);
+    vst1q_u16(dst + 24, row3);
+    dst += stride;
   }
 }
 
