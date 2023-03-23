@@ -995,10 +995,10 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Avg
   #
   add_proto qw/unsigned int vpx_highbd_avg_8x8/, "const uint8_t *s8, int p";
-  specialize qw/vpx_highbd_avg_8x8 sse2/;
+  specialize qw/vpx_highbd_avg_8x8 sse2 neon/;
 
   add_proto qw/unsigned int vpx_highbd_avg_4x4/, "const uint8_t *s8, int p";
-  specialize qw/vpx_highbd_avg_4x4 sse2/;
+  specialize qw/vpx_highbd_avg_4x4 sse2 neon/;
 
   add_proto qw/void vpx_highbd_minmax_8x8/, "const uint8_t *s8, int p, const uint8_t *d8, int dp, int *min, int *max";
   specialize qw/vpx_highbd_minmax_8x8 neon/;
