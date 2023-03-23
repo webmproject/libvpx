@@ -877,7 +877,7 @@ typedef struct vpx_svc_parameters {
 
 /*!\brief Initialize an encoder instance
  *
- * Initializes a encoder context using the given interface. Applications
+ * Initializes an encoder context using the given interface. Applications
  * should call the vpx_codec_enc_init convenience macro instead of this
  * function directly, to ensure that the ABI version number parameter
  * is properly initialized.
@@ -885,6 +885,9 @@ typedef struct vpx_svc_parameters {
  * If the library was configured with --disable-multithread, this call
  * is not thread safe and should be guarded with a lock if being used
  * in a multithreaded context.
+ *
+ * If vpx_codec_enc_init_ver() fails, it is not necessary to call
+ * vpx_codec_destroy() on the encoder context.
  *
  * \param[in]    ctx     Pointer to this instance's context.
  * \param[in]    iface   Pointer to the algorithm interface to use.
