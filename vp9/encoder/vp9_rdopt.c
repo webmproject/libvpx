@@ -77,7 +77,7 @@ struct rdcost_block_args {
   int64_t best_rd;
   int exit_early;
   int use_fast_coef_costing;
-  const scan_order *so;
+  const ScanOrder *so;
   uint8_t skippable;
   struct buf_2d *this_recon;
 };
@@ -1129,7 +1129,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
           vpx_highbd_subtract_block(4, 4, src_diff, 8, src, src_stride, dst,
                                     dst_stride, xd->bd);
           if (xd->lossless) {
-            const scan_order *so = &vp9_default_scan_orders[TX_4X4];
+            const ScanOrder *so = &vp9_default_scan_orders[TX_4X4];
             const int coeff_ctx =
                 combine_entropy_contexts(tempa[idx], templ[idy]);
             vp9_highbd_fwht4x4(src_diff, coeff, 8);
@@ -1146,7 +1146,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
           } else {
             int64_t unused;
             const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
-            const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
+            const ScanOrder *so = &vp9_scan_orders[TX_4X4][tx_type];
             const int coeff_ctx =
                 combine_entropy_contexts(tempa[idx], templ[idy]);
             if (tx_type == DCT_DCT)
@@ -1236,7 +1236,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
         vpx_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
 
         if (xd->lossless) {
-          const scan_order *so = &vp9_default_scan_orders[TX_4X4];
+          const ScanOrder *so = &vp9_default_scan_orders[TX_4X4];
           const int coeff_ctx =
               combine_entropy_contexts(tempa[idx], templ[idy]);
           vp9_fwht4x4(src_diff, coeff, 8);
@@ -1253,7 +1253,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
         } else {
           int64_t unused;
           const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
-          const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
+          const ScanOrder *so = &vp9_scan_orders[TX_4X4][tx_type];
           const int coeff_ctx =
               combine_entropy_contexts(tempa[idx], templ[idy]);
           vp9_fht4x4(src_diff, coeff, 8, tx_type);
@@ -1632,7 +1632,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi, MACROBLOCK *x,
       &pd->dst.buf[vp9_raster_block_offset(BLOCK_8X8, i, pd->dst.stride)];
   int64_t thisdistortion = 0, thissse = 0;
   int thisrate = 0, ref;
-  const scan_order *so = &vp9_default_scan_orders[TX_4X4];
+  const ScanOrder *so = &vp9_default_scan_orders[TX_4X4];
   const int is_compound = has_second_ref(mi);
   const InterpKernel *kernel = vp9_filter_kernels[mi->interp_filter];
 

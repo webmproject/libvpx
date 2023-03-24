@@ -42,7 +42,7 @@ typedef void (*QuantizeFunc)(const tran_low_t *coeff, intptr_t count,
                              const macroblock_plane *const mb_plane,
                              tran_low_t *qcoeff, tran_low_t *dqcoeff,
                              const int16_t *dequant, uint16_t *eob,
-                             const struct scan_order *const scan_order);
+                             const struct ScanOrder *const scan_order);
 typedef std::tuple<QuantizeFunc, QuantizeFunc, vpx_bit_depth_t,
                    int /*max_size*/, bool /*is_fp*/>
     QuantizeParam;
@@ -60,7 +60,7 @@ template <QuantizeBaseFunc fn>
 void QuantWrapper(const tran_low_t *coeff, intptr_t count,
                   const macroblock_plane *const mb_plane, tran_low_t *qcoeff,
                   tran_low_t *dqcoeff, const int16_t *dequant, uint16_t *eob,
-                  const struct scan_order *const scan_order) {
+                  const struct ScanOrder *const scan_order) {
   fn(coeff, count, mb_plane->zbin, mb_plane->round, mb_plane->quant,
      mb_plane->quant_shift, qcoeff, dqcoeff, dequant, eob, scan_order->scan,
      scan_order->iscan);
@@ -71,14 +71,14 @@ typedef void (*Quantize32x32Func)(const tran_low_t *coeff,
                                   const macroblock_plane *const mb_plane,
                                   tran_low_t *qcoeff, tran_low_t *dqcoeff,
                                   const int16_t *dequant, uint16_t *eob,
-                                  const struct scan_order *const scan_order);
+                                  const struct ScanOrder *const scan_order);
 
 template <Quantize32x32Func fn>
 void Quant32x32Wrapper(const tran_low_t *coeff, intptr_t count,
                        const macroblock_plane *const mb_plane,
                        tran_low_t *qcoeff, tran_low_t *dqcoeff,
                        const int16_t *dequant, uint16_t *eob,
-                       const struct scan_order *const scan_order) {
+                       const struct ScanOrder *const scan_order) {
   (void)count;
   fn(coeff, mb_plane, qcoeff, dqcoeff, dequant, eob, scan_order);
 }
@@ -94,7 +94,7 @@ template <QuantizeFPFunc fn>
 void QuantFPWrapper(const tran_low_t *coeff, intptr_t count,
                     const macroblock_plane *const mb_plane, tran_low_t *qcoeff,
                     tran_low_t *dqcoeff, const int16_t *dequant, uint16_t *eob,
-                    const struct scan_order *const scan_order) {
+                    const struct ScanOrder *const scan_order) {
   fn(coeff, count, mb_plane->round_fp, mb_plane->quant_fp, qcoeff, dqcoeff,
      dequant, eob, scan_order->scan, scan_order->iscan);
 }
@@ -213,7 +213,7 @@ class VP9QuantizeBase : public AbstractBench {
   int16_t *r_ptr_;
   int16_t *q_ptr_;
   int count_;
-  const scan_order *scan_;
+  const ScanOrder *scan_;
   uint16_t eob_;
 };
 
