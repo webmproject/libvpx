@@ -323,7 +323,9 @@ const char *vpx_codec_error(const vpx_codec_ctx_t *ctx);
 /*!\brief Retrieve detailed error information for codec context
  *
  * Returns a human readable string providing detailed information about
- * the last error.
+ * the last error. The returned string is only valid until the next
+ * vpx_codec_* function call (except vpx_codec_error and
+ * vpx_codec_error_detail) on the codec context.
  *
  * \param[in]    ctx     Pointer to this instance's context.
  *
