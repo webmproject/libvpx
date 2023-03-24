@@ -768,6 +768,8 @@ static void first_pass_stat_calc(VP9_COMP *cpi, FIRSTPASS_STATS *fps,
       fp_acc_data->brightness_factor / (double)num_mbs;
   fps->weight = fp_acc_data->intra_factor * fp_acc_data->brightness_factor;
 
+  fps->is_forced_key_frame = cpi->frame_flags & FRAMEFLAGS_KEY;
+
   fps->frame = cm->current_video_frame;
   fps->spatial_layer_id = cpi->svc.spatial_layer_id;
 
@@ -3065,6 +3067,10 @@ static int test_candidate_kf(const FIRST_PASS_INFO *first_pass_info,
       fps_get_frame_stats(first_pass_info, show_idx + 1);
   int is_viable_kf = 0;
   double pcnt_intra = 1.0 - this_frame->pcnt_inter;
+
+  if(this_frame->is_forced_key_frame) {
+    return 1;
+  }
 
   // Does the frame satisfy the primary criteria of a key frame?
   // See above for an explanation of the test criteria.

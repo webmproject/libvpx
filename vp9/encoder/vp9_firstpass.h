@@ -84,6 +84,7 @@ typedef struct {
   double duration;
   double count;
   int64_t spatial_layer_id;
+  int is_forced_key_frame;
 } FIRSTPASS_STATS;
 
 typedef enum {
