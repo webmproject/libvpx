@@ -607,10 +607,10 @@ bool ContentEncoding::Write(IMkvWriter* writer) const {
   return true;
 }
 
-uint64_t ContentEncoding::EncodingSize(uint64_t compresion_size,
+uint64_t ContentEncoding::EncodingSize(uint64_t compression_size,
                                        uint64_t encryption_size) const {
   // TODO(fgalligan): Add support for compression settings.
-  if (compresion_size != 0)
+  if (compression_size != 0)
     return 0;
 
   uint64_t encoding_size = 0;
