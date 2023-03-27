@@ -16,6 +16,49 @@
 #include "./vpx_config.h"
 #include "vpx/vpx_integer.h"
 
+static INLINE uint16_t horizontal_add_uint8x4(const uint8x8_t a) {
+#if defined(__aarch64__)
+  return vaddlv_u8(a);
+#else
+  const uint16x4_t b = vpaddl_u8(a);
+  const uint16x4_t c = vpadd_u16(b, b);
+  return vget_lane_u16(c, 0);
+#endif
+}
+
+static INLINE uint16_t horizontal_add_uint8x8(const uint8x8_t a) {
+#if defined(__aarch64__)
+  return vaddlv_u8(a);
+#else
+  const uint16x4_t b = vpaddl_u8(a);
+  const uint16x4_t c = vpadd_u16(b, b);
+  const uint16x4_t d = vpadd_u16(c, c);
+  return vget_lane_u16(d, 0);
+#endif
+}
+
+static INLINE uint16_t horizontal_add_uint8x16(const uint8x16_t a) {
+#if defined(__aarch64__)
+  return vaddlvq_u8(a);
+#else
+  const uint16x8_t b = vpaddlq_u8(a);
+  const uint16x4_t c = vadd_u16(vget_low_u16(b), vget_high_u16(b));
+  const uint16x4_t d = vpadd_u16(c, c);
+  const uint16x4_t e = vpadd_u16(d, d);
+  return vget_lane_u16(e, 0);
+#endif
+}
+
+static INLINE uint16_t horizontal_add_uint16x4(const uint16x4_t a) {
+#if defined(__aarch64__)
+  return vaddv_u16(a);
+#else
+  const uint16x4_t b = vpadd_u16(a, a);
+  const uint16x4_t c = vpadd_u16(b, b);
+  return vget_lane_u16(c, 0);
+#endif
+}
+
 static INLINE int32_t horizontal_add_int16x8(const int16x8_t a) {
 #if defined(__aarch64__)
   return vaddlvq_s16(a);
