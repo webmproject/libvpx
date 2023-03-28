@@ -866,22 +866,14 @@ void vpx_d135_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
   const uint8x8_t L3210 = vrev64_u8(L0123);
   const uint8x8_t L3210XA012 = vext_u8(L3210, XA0123, 4);
   const uint8x8_t L210XA0123 = vext_u8(L3210, XA0123, 5);
-  const uint8x8_t L10XA0123_ =
-      vreinterpret_u8_u64(vshr_n_u64(vreinterpret_u64_u8(L210XA0123), 8));
+  const uint8x8_t L10XA0123_ = vext_u8(L210XA0123, L210XA0123, 1);
   const uint8x8_t avg1 = vhadd_u8(L10XA0123_, L3210XA012);
   const uint8x8_t avg2 = vrhadd_u8(avg1, L210XA0123);
-  const uint64x1_t avg2_u64 = vreinterpret_u64_u8(avg2);
-  const uint32x2_t r3 = vreinterpret_u32_u8(avg2);
-  const uint32x2_t r2 = vreinterpret_u32_u64(vshr_n_u64(avg2_u64, 8));
-  const uint32x2_t r1 = vreinterpret_u32_u64(vshr_n_u64(avg2_u64, 16));
-  const uint32x2_t r0 = vreinterpret_u32_u64(vshr_n_u64(avg2_u64, 24));
-  vst1_lane_u32((uint32_t *)dst, r0, 0);
-  dst += stride;
-  vst1_lane_u32((uint32_t *)dst, r1, 0);
-  dst += stride;
-  vst1_lane_u32((uint32_t *)dst, r2, 0);
-  dst += stride;
-  vst1_lane_u32((uint32_t *)dst, r3, 0);
+
+  store_u8_4x1(dst + 0 * stride, vext_u8(avg2, avg2, 3));
+  store_u8_4x1(dst + 1 * stride, vext_u8(avg2, avg2, 2));
+  store_u8_4x1(dst + 2 * stride, vext_u8(avg2, avg2, 1));
+  store_u8_4x1(dst + 3 * stride, avg2);
 }
 
 void vpx_d135_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
@@ -898,31 +890,15 @@ void vpx_d135_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   const uint8x16_t L543210XA01234567_ = vcombine_u8(L543210XA0, A1234567_);
   const uint8x16_t avg = vhaddq_u8(L76543210XA0123456, L543210XA01234567_);
   const uint8x16_t row = vrhaddq_u8(avg, L6543210XA01234567);
-  const uint8x8_t row_0 = vget_low_u8(row);
-  const uint8x8_t row_1 = vget_high_u8(row);
-  const uint8x8_t r0 = vext_u8(row_0, row_1, 7);
-  const uint8x8_t r1 = vext_u8(row_0, row_1, 6);
-  const uint8x8_t r2 = vext_u8(row_0, row_1, 5);
-  const uint8x8_t r3 = vext_u8(row_0, row_1, 4);
-  const uint8x8_t r4 = vext_u8(row_0, row_1, 3);
-  const uint8x8_t r5 = vext_u8(row_0, row_1, 2);
-  const uint8x8_t r6 = vext_u8(row_0, row_1, 1);
 
-  vst1_u8(dst, r0);
-  dst += stride;
-  vst1_u8(dst, r1);
-  dst += stride;
-  vst1_u8(dst, r2);
-  dst += stride;
-  vst1_u8(dst, r3);
-  dst += stride;
-  vst1_u8(dst, r4);
-  dst += stride;
-  vst1_u8(dst, r5);
-  dst += stride;
-  vst1_u8(dst, r6);
-  dst += stride;
-  vst1_u8(dst, row_0);
+  vst1_u8(dst + 0 * stride, vget_low_u8(vextq_u8(row, row, 7)));
+  vst1_u8(dst + 1 * stride, vget_low_u8(vextq_u8(row, row, 6)));
+  vst1_u8(dst + 2 * stride, vget_low_u8(vextq_u8(row, row, 5)));
+  vst1_u8(dst + 3 * stride, vget_low_u8(vextq_u8(row, row, 4)));
+  vst1_u8(dst + 4 * stride, vget_low_u8(vextq_u8(row, row, 3)));
+  vst1_u8(dst + 5 * stride, vget_low_u8(vextq_u8(row, row, 2)));
+  vst1_u8(dst + 6 * stride, vget_low_u8(vextq_u8(row, row, 1)));
+  vst1_u8(dst + 7 * stride, vget_low_u8(row));
 }
 
 static INLINE void d135_store_16x8(
@@ -965,6 +941,7 @@ void vpx_d135_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
   const uint8x16_t avg_1 = vhaddq_u8(XA0123456789abcde, A123456789abcdef_);
   const uint8x16_t row_0 = vrhaddq_u8(avg_0, Ledcba9876543210X);
   const uint8x16_t row_1 = vrhaddq_u8(avg_1, A0123456789abcdef);
+
   const uint8x16_t r_0 = vextq_u8(row_0, row_1, 15);
   const uint8x16_t r_1 = vextq_u8(row_0, row_1, 14);
   const uint8x16_t r_2 = vextq_u8(row_0, row_1, 13);
@@ -972,7 +949,7 @@ void vpx_d135_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
   const uint8x16_t r_4 = vextq_u8(row_0, row_1, 11);
   const uint8x16_t r_5 = vextq_u8(row_0, row_1, 10);
   const uint8x16_t r_6 = vextq_u8(row_0, row_1, 9);
-  const uint8x16_t r_7 = vcombine_u8(vget_high_u8(row_0), vget_low_u8(row_1));
+  const uint8x16_t r_7 = vextq_u8(row_0, row_1, 8);
   const uint8x16_t r_8 = vextq_u8(row_0, row_1, 7);
   const uint8x16_t r_9 = vextq_u8(row_0, row_1, 6);
   const uint8x16_t r_a = vextq_u8(row_0, row_1, 5);
