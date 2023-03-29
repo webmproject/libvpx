@@ -318,7 +318,7 @@ const char *vpx_codec_err_to_string(vpx_codec_err_t err);
  * \param[in]    ctx     Pointer to this instance's context.
  *
  */
-const char *vpx_codec_error(vpx_codec_ctx_t *ctx);
+const char *vpx_codec_error(const vpx_codec_ctx_t *ctx);
 
 /*!\brief Retrieve detailed error information for codec context
  *
@@ -330,7 +330,7 @@ const char *vpx_codec_error(vpx_codec_ctx_t *ctx);
  * \retval NULL
  *     No detailed information is available.
  */
-const char *vpx_codec_error_detail(vpx_codec_ctx_t *ctx);
+const char *vpx_codec_error_detail(const vpx_codec_ctx_t *ctx);
 
 /* REQUIRED FUNCTIONS
  *
