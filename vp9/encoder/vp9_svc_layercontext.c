@@ -254,7 +254,9 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
 
       lc->target_bandwidth = oxcf->layer_target_bitrate[layer];
 
-      bitrate_alloc = (float)lc->target_bandwidth / target_bandwidth;
+      if (target_bandwidth != 0) {
+        bitrate_alloc = (float)lc->target_bandwidth / target_bandwidth;
+      }
       // Update buffer-related quantities.
       lrc->starting_buffer_level =
           (int64_t)(rc->starting_buffer_level * bitrate_alloc);
