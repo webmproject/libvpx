@@ -83,6 +83,23 @@ static INLINE uint32_t horizontal_add_uint16x8(const uint16x8_t a) {
 #endif
 }
 
+static INLINE uint32x4_t horizontal_add_4d_uint16x8(const uint16x8_t sum[4]) {
+#if defined(__aarch64__)
+  const uint16x8_t a0 = vpaddq_u16(sum[0], sum[1]);
+  const uint16x8_t a1 = vpaddq_u16(sum[2], sum[3]);
+  const uint16x8_t b0 = vpaddq_u16(a0, a1);
+  return vpaddlq_u16(b0);
+#else
+  const uint16x4_t a0 = vadd_u16(vget_low_u16(sum[0]), vget_high_u16(sum[0]));
+  const uint16x4_t a1 = vadd_u16(vget_low_u16(sum[1]), vget_high_u16(sum[1]));
+  const uint16x4_t a2 = vadd_u16(vget_low_u16(sum[2]), vget_high_u16(sum[2]));
+  const uint16x4_t a3 = vadd_u16(vget_low_u16(sum[3]), vget_high_u16(sum[3]));
+  const uint16x4_t b0 = vpadd_u16(a0, a1);
+  const uint16x4_t b1 = vpadd_u16(a2, a3);
+  return vpaddlq_u16(vcombine_u16(b0, b1));
+#endif
+}
+
 static INLINE uint32_t horizontal_long_add_uint16x8(const uint16x8_t vec_lo,
                                                     const uint16x8_t vec_hi) {
 #if defined(__aarch64__)

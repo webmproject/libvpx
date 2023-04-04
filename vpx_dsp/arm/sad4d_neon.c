@@ -270,10 +270,7 @@ static INLINE void sad8xhx4d_neon(const uint8_t *src, int src_stride,
     i++;
   } while (i < h);
 
-  res[0] = horizontal_add_uint16x8(sum[0]);
-  res[1] = horizontal_add_uint16x8(sum[1]);
-  res[2] = horizontal_add_uint16x8(sum[2]);
-  res[3] = horizontal_add_uint16x8(sum[3]);
+  vst1q_u32(res, horizontal_add_4d_uint16x8(sum));
 }
 
 static INLINE void sad4xhx4d_neon(const uint8_t *src, int src_stride,
@@ -298,10 +295,7 @@ static INLINE void sad4xhx4d_neon(const uint8_t *src, int src_stride,
     i += 2;
   } while (i < h);
 
-  res[0] = horizontal_add_uint16x8(sum[0]);
-  res[1] = horizontal_add_uint16x8(sum[1]);
-  res[2] = horizontal_add_uint16x8(sum[2]);
-  res[3] = horizontal_add_uint16x8(sum[3]);
+  vst1q_u32(res, horizontal_add_4d_uint16x8(sum));
 }
 
 #define SAD_WXH_4D_NEON(w, h)                                                  \
