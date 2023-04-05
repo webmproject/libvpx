@@ -49,7 +49,7 @@ int vp9_diamond_search_sad_neon(const MACROBLOCK *x,
                                 const search_site_config *cfg, MV *ref_mv,
                                 uint32_t start_mv_sad, MV *best_mv,
                                 int search_param, int sad_per_bit, int *num00,
-                                const vp9_variance_fn_ptr_t *fn_ptr,
+                                const vp9_sad_fn_ptr_t *sad_fn_ptr,
                                 const MV *center_mv) {
   static const uint32_t data[4] = { 0, 1, 2, 3 };
   const uint32x4_t v_idx_d = vld1q_u32((const uint32_t *)data);
@@ -188,8 +188,8 @@ int vp9_diamond_search_sad_neon(const MACROBLOCK *x,
 #endif
       }
 
-      fn_ptr->sdx4df(what, what_stride, (const uint8_t **)&v_blocka[0],
-                     in_what_stride, (uint32_t *)&v_sad_d);
+      sad_fn_ptr->sdx4df(what, what_stride, (const uint8_t **)&v_blocka[0],
+                         in_what_stride, (uint32_t *)&v_sad_d);
 
       // Look up the component cost of the residual motion vector
       {

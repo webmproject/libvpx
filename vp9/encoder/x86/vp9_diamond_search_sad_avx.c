@@ -51,7 +51,7 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
                                const search_site_config *cfg, MV *ref_mv,
                                uint32_t start_mv_sad, MV *best_mv,
                                int search_param, int sad_per_bit, int *num00,
-                               const vp9_variance_fn_ptr_t *fn_ptr,
+                               const vp9_sad_fn_ptr_t *sad_fn_ptr,
                                const MV *center_mv) {
   const int_mv maxmv = pack_int_mv(x->mv_limits.row_max, x->mv_limits.col_max);
   const __m128i v_max_mv_w = _mm_set1_epi32((int)maxmv.as_int);
@@ -167,8 +167,8 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
 #endif
       }
 
-      fn_ptr->sdx4df(what, what_stride, (const uint8_t **)&v_blocka[0],
-                     in_what_stride, (uint32_t *)&v_sad_d);
+      sad_fn_ptr->sdx4df(what, what_stride, (const uint8_t **)&v_blocka[0],
+                         in_what_stride, (uint32_t *)&v_sad_d);
 
       // Look up the component cost of the residual motion vector
       {

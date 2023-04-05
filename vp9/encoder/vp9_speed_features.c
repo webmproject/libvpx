@@ -223,6 +223,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   sf->allow_skip_recode = 1;
   sf->less_rectangular_check = 1;
   sf->mv.auto_mv_step_size = 1;
+  sf->mv.use_downsampled_sad = 1;
   sf->prune_ref_frame_for_rect_partitions = 1;
   sf->temporal_filter_search_method = NSTEP;
   sf->tx_size_search_breakout = 1;
@@ -919,6 +920,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi, int speed) {
   sf->coeff_prob_appx_step = 1;
   sf->mv.auto_mv_step_size = 0;
   sf->mv.fullpel_search_step_param = 6;
+  sf->mv.use_downsampled_sad = 0;
   sf->comp_inter_joint_search_thresh = BLOCK_4X4;
   sf->tx_size_search_method = USE_FULL_RD;
   sf->use_lp32x32fdct = 0;
