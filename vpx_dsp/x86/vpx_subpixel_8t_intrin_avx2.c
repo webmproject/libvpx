@@ -240,7 +240,7 @@ static void vpx_filter_block1d8_h8_avx2(
 
   // For the remaining height.
   if (y > 0) {
-    const __m128i srcReg = _mm_loadu_si128((const __m128i *)(src_ptr - 3));
+    const __m128i src_reg_128 = _mm_loadu_si128((const __m128i *)(src_ptr - 3));
 
     f[0] = _mm256_castsi256_si128(f1[0]);
     f[1] = _mm256_castsi256_si128(f1[1]);
@@ -248,10 +248,10 @@ static void vpx_filter_block1d8_h8_avx2(
     f[3] = _mm256_castsi256_si128(f1[3]);
 
     // filter the source buffer
-    s[0] = _mm_shuffle_epi8(srcReg, _mm256_castsi256_si128(filt[0]));
-    s[1] = _mm_shuffle_epi8(srcReg, _mm256_castsi256_si128(filt[1]));
-    s[2] = _mm_shuffle_epi8(srcReg, _mm256_castsi256_si128(filt[2]));
-    s[3] = _mm_shuffle_epi8(srcReg, _mm256_castsi256_si128(filt[3]));
+    s[0] = _mm_shuffle_epi8(src_reg_128, _mm256_castsi256_si128(filt[0]));
+    s[1] = _mm_shuffle_epi8(src_reg_128, _mm256_castsi256_si128(filt[1]));
+    s[2] = _mm_shuffle_epi8(src_reg_128, _mm256_castsi256_si128(filt[2]));
+    s[3] = _mm_shuffle_epi8(src_reg_128, _mm256_castsi256_si128(filt[3]));
     s[0] = convolve8_8_ssse3(s, f);
 
     // Saturate 16bit value to 8bit.
