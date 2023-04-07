@@ -117,6 +117,31 @@ static INLINE uint32_t horizontal_long_add_uint16x8(const uint16x8_t vec_lo,
 #endif
 }
 
+static INLINE uint32x4_t horizontal_long_add_4d_uint16x8(
+    const uint16x8_t sum_lo[4], const uint16x8_t sum_hi[4]) {
+  const uint32x4_t a0 = vpaddlq_u16(sum_lo[0]);
+  const uint32x4_t a1 = vpaddlq_u16(sum_lo[1]);
+  const uint32x4_t a2 = vpaddlq_u16(sum_lo[2]);
+  const uint32x4_t a3 = vpaddlq_u16(sum_lo[3]);
+  const uint32x4_t b0 = vpadalq_u16(a0, sum_hi[0]);
+  const uint32x4_t b1 = vpadalq_u16(a1, sum_hi[1]);
+  const uint32x4_t b2 = vpadalq_u16(a2, sum_hi[2]);
+  const uint32x4_t b3 = vpadalq_u16(a3, sum_hi[3]);
+#if defined(__aarch64__)
+  const uint32x4_t c0 = vpaddq_u32(b0, b1);
+  const uint32x4_t c1 = vpaddq_u32(b2, b3);
+  return vpaddq_u32(c0, c1);
+#else
+  const uint32x2_t c0 = vadd_u32(vget_low_u32(b0), vget_high_u32(b0));
+  const uint32x2_t c1 = vadd_u32(vget_low_u32(b1), vget_high_u32(b1));
+  const uint32x2_t c2 = vadd_u32(vget_low_u32(b2), vget_high_u32(b2));
+  const uint32x2_t c3 = vadd_u32(vget_low_u32(b3), vget_high_u32(b3));
+  const uint32x2_t d0 = vpadd_u32(c0, c1);
+  const uint32x2_t d1 = vpadd_u32(c2, c3);
+  return vcombine_u32(d0, d1);
+#endif
+}
+
 static INLINE int32_t horizontal_add_int32x2(const int32x2_t a) {
 #if defined(__aarch64__)
   return vaddv_s32(a);
