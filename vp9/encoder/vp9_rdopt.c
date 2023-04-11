@@ -2967,8 +2967,14 @@ static int64_t handle_inter_mode(
     // rate.
     if (skip_single_mode_based_on_mode_rate(mode_mv, single_mode_rate,
                                             this_mode, refs[0], *rate2,
-                                            best_mode_index))
+                                            best_mode_index)) {
+      // Check when the single inter mode is pruned, NEARESTMV or NEWMV modes
+      // are not early terminated. This ensures all single modes are not getting
+      // skipped when the speed feature is enabled.
+      assert(single_mode_rate[INTER_OFFSET(NEARESTMV)] != INT_MAX ||
+             single_mode_rate[INTER_OFFSET(NEWMV)] != INT_MAX);
       return INT64_MAX;
+    }
   }
   if (RDCOST(x->rdmult, x->rddiv, *rate2, 0) > ref_best_rd &&
       mi->mode != NEARESTMV)
