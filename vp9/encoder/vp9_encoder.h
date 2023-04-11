@@ -1479,6 +1479,40 @@ static INLINE void alloc_frame_mvs(VP9_COMMON *const cm, int buffer_idx) {
   }
 }
 
+static INLINE int mv_cost(const MV *mv, const int *joint_cost,
+                          int *const comp_cost[2]) {
+  assert(mv->row >= -MV_MAX && mv->row < MV_MAX);
+  assert(mv->col >= -MV_MAX && mv->col < MV_MAX);
+  return joint_cost[vp9_get_mv_joint(mv)] + comp_cost[0][mv->row] +
+         comp_cost[1][mv->col];
+}
+
+static INLINE int mvsad_err_cost(const MACROBLOCK *x, const MV *mv,
+                                 const MV *ref, int sad_per_bit) {
+  MV diff;
+  diff.row = mv->row - ref->row;
+  diff.col = mv->col - ref->col;
+  return ROUND_POWER_OF_TWO(
+      (unsigned)mv_cost(&diff, x->nmvjointsadcost, x->nmvsadcost) * sad_per_bit,
+      VP9_PROB_COST_SHIFT);
+}
+
+static INLINE uint32_t get_start_mv_sad(const MACROBLOCK *x, const MV *mvp_full,
+                                        const MV *ref_mv_full,
+                                        vpx_sad_fn_t sad_fn_ptr, int sadpb) {
+  const int src_buf_stride = x->plane[0].src.stride;
+  const uint8_t *const src_buf = x->plane[0].src.buf;
+  const MACROBLOCKD *const xd = &x->e_mbd;
+  const int pred_buf_stride = xd->plane[0].pre[0].stride;
+  const uint8_t *const pred_buf =
+      xd->plane[0].pre[0].buf + mvp_full->row * pred_buf_stride + mvp_full->col;
+  uint32_t start_mv_sad =
+      sad_fn_ptr(src_buf, src_buf_stride, pred_buf, pred_buf_stride);
+  start_mv_sad += mvsad_err_cost(x, mvp_full, ref_mv_full, sadpb);
+
+  return start_mv_sad;
+}
+
 static INLINE int num_4x4_to_edge(int plane_4x4_dim, int mb_to_edge_dim,
                                   int subsampling_dim, int blk_dim) {
   return plane_4x4_dim + (mb_to_edge_dim >> (5 + subsampling_dim)) - blk_dim;
