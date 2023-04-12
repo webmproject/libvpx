@@ -396,7 +396,6 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   }
 
   if (speed >= 5) {
-    int i;
     sf->optimize_coefficients = 0;
     sf->mv.search_method = HEX;
     sf->disable_filter_search_var_thresh = 500;
