@@ -1129,6 +1129,24 @@ const SadMxNParam neon_tests[] = {
 };
 INSTANTIATE_TEST_SUITE_P(NEON, SADTest, ::testing::ValuesIn(neon_tests));
 
+const SadSkipMxNParam skip_neon_tests[] = {
+  SadSkipMxNParam(64, 64, &vpx_sad_skip_64x64_neon),
+  SadSkipMxNParam(64, 32, &vpx_sad_skip_64x32_neon),
+  SadSkipMxNParam(32, 64, &vpx_sad_skip_32x64_neon),
+  SadSkipMxNParam(32, 32, &vpx_sad_skip_32x32_neon),
+  SadSkipMxNParam(32, 16, &vpx_sad_skip_32x16_neon),
+  SadSkipMxNParam(16, 32, &vpx_sad_skip_16x32_neon),
+  SadSkipMxNParam(16, 16, &vpx_sad_skip_16x16_neon),
+  SadSkipMxNParam(16, 8, &vpx_sad_skip_16x8_neon),
+  SadSkipMxNParam(8, 16, &vpx_sad_skip_8x16_neon),
+  SadSkipMxNParam(8, 8, &vpx_sad_skip_8x8_neon),
+  SadSkipMxNParam(8, 4, &vpx_sad_skip_8x4_neon),
+  SadSkipMxNParam(4, 8, &vpx_sad_skip_4x8_neon),
+  SadSkipMxNParam(4, 4, &vpx_sad_skip_4x4_neon)
+};
+INSTANTIATE_TEST_SUITE_P(NEON, SADSkipTest,
+                         ::testing::ValuesIn(skip_neon_tests));
+
 const SadMxNAvgParam avg_neon_tests[] = {
   SadMxNAvgParam(64, 64, &vpx_sad64x64_avg_neon),
   SadMxNAvgParam(64, 32, &vpx_sad64x32_avg_neon),
