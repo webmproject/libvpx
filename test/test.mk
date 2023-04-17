@@ -85,6 +85,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_skip_loopfilter_test.cc
+$(BUILD_PFX)third_party/libwebm/%.cc.o: CXXFLAGS += $(LIBWEBM_CXXFLAGS)
 endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += decode_api_test.cc

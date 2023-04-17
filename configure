@@ -649,6 +649,7 @@ process_toolchain() {
         check_add_cflags -Wimplicit-function-declaration
         check_add_cflags -Wmissing-declarations
         check_add_cflags -Wmissing-prototypes
+        check_add_cflags -Wshadow
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunreachable-code-loop-increment
         check_add_cflags -Wunused
@@ -679,13 +680,16 @@ process_toolchain() {
         check_add_cxxflags -Wc++17-extensions
         check_add_cxxflags -Wc++20-extensions
 
-        # disable some warnings specific to libyuv.
+        # disable some warnings specific to libyuv / libwebm.
         check_cxxflags -Wno-missing-declarations \
           && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-missing-declarations"
         check_cxxflags -Wno-missing-prototypes \
           && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-missing-prototypes"
         check_cxxflags -Wno-pass-failed \
           && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-pass-failed"
+        check_cxxflags -Wno-shadow \
+          && LIBWEBM_CXXFLAGS="${LIBWEBM_CXXFLAGS} -Wno-shadow" \
+          && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-shadow"
         check_cxxflags -Wno-unused-parameter \
           && LIBYUV_CXXFLAGS="${LIBYUV_CXXFLAGS} -Wno-unused-parameter"
     fi
