@@ -2109,7 +2109,6 @@ void vp8_remove_compressor(VP8_COMP **comp) {
       double time_encoded =
           (cpi->last_end_time_stamp_seen - cpi->first_time_stamp_ever) /
           10000000.000;
-      double dr = (double)cpi->bytes * 8.0 / 1000.0 / time_encoded;
 
       if (cpi->b_calculate_psnr) {
         if (cpi->oxcf.number_of_layers > 1) {
@@ -2138,6 +2137,7 @@ void vp8_remove_compressor(VP8_COMP **comp) {
                     total_psnr2, total_ssim);
           }
         } else {
+          double dr = (double)cpi->bytes * 8.0 / 1000.0 / time_encoded;
           double samples =
               3.0 / 2 * cpi->count * cpi->common.Width * cpi->common.Height;
           double total_psnr =
