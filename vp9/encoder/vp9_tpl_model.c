@@ -1089,10 +1089,6 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int64_t recon_error, sse;
-#if CONFIG_NON_GREEDY_MV
-  int square_block_idx;
-  int rf_idx;
-#endif
 
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1133,21 +1129,25 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   vp9_frame_init_quantizer(cpi);
 
 #if CONFIG_NON_GREEDY_MV
-  for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
-       ++square_block_idx) {
-    BLOCK_SIZE square_bsize = square_block_idx_to_bsize(square_block_idx);
-    build_motion_field(cpi, frame_idx, ref_frame, square_bsize);
-  }
-  for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
-    int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
-    if (ref_frame_idx != -1) {
-      MotionField *motion_field = vp9_motion_field_info_get_motion_field(
-          &cpi->motion_field_info, frame_idx, rf_idx, bsize);
-      predict_mv_mode_arr(cpi, x, gf_picture, motion_field, frame_idx,
-                          tpl_frame, rf_idx, bsize);
+  {
+    int square_block_idx;
+    int rf_idx;
+    for (square_block_idx = 0; square_block_idx < SQUARE_BLOCK_SIZES;
+         ++square_block_idx) {
+      BLOCK_SIZE square_bsize = square_block_idx_to_bsize(square_block_idx);
+      build_motion_field(cpi, frame_idx, ref_frame, square_bsize);
+    }
+    for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
+      int ref_frame_idx = gf_picture[frame_idx].ref_frame[rf_idx];
+      if (ref_frame_idx != -1) {
+        MotionField *motion_field = vp9_motion_field_info_get_motion_field(
+            &cpi->motion_field_info, frame_idx, rf_idx, bsize);
+        predict_mv_mode_arr(cpi, x, gf_picture, motion_field, frame_idx,
+                            tpl_frame, rf_idx, bsize);
+      }
     }
   }
-#endif
+#endif  // CONFIG_NON_GREEDY_MV
 
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
