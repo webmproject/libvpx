@@ -157,9 +157,13 @@ static void init_tpl_stats(VP9_COMP *cpi) {
   int frame_idx;
   for (frame_idx = 0; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+    TplFrameStats *tpl_frame_stats = &cpi->tpl_frame_stats[frame_idx];
     memset(tpl_frame->tpl_stats_ptr, 0,
            tpl_frame->height * tpl_frame->width *
                sizeof(*tpl_frame->tpl_stats_ptr));
+    memset(tpl_frame_stats->block_stats_list, 0,
+           tpl_frame->height * tpl_frame->width *
+               sizeof(*tpl_frame_stats->block_stats_list));
     tpl_frame->is_valid = 0;
   }
 }
@@ -351,6 +355,27 @@ static void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
       tpl_ptr->mc_flow = mc_flow;
       tpl_ptr->mc_ref_cost = mc_ref_cost;
       tpl_ptr->mc_dep_cost = tpl_ptr->intra_cost + tpl_ptr->mc_flow;
+    }
+  }
+}
+
+static void tpl_store_before_propagation(TplBlockStats *tpl_block_stats,
+                                         TplDepStats *tpl_stats, int mi_row,
+                                         int mi_col, BLOCK_SIZE bsize,
+                                         int stride) {
+  const int mi_height = num_8x8_blocks_high_lookup[bsize];
+  const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  const TplDepStats *src_stats = &tpl_stats[mi_row * stride + mi_col];
+  int idx, idy;
+
+  for (idy = 0; idy < mi_height; ++idy) {
+    for (idx = 0; idx < mi_width; ++idx) {
+      TplBlockStats *tpl_block_stats_ptr =
+          &tpl_block_stats[(mi_row + idy) * stride + mi_col + idx];
+      tpl_block_stats_ptr->inter_cost = src_stats->inter_cost;
+      tpl_block_stats_ptr->intra_cost = src_stats->intra_cost;
+      tpl_block_stats_ptr->mv = src_stats->mv;
+      tpl_block_stats_ptr->ref_frame_index = src_stats->ref_frame_index;
     }
   }
 }
@@ -1062,6 +1087,8 @@ static void build_motion_field(
 static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
                               int frame_idx, BLOCK_SIZE bsize) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
+  TplFrameStats *tpl_frame_stats_before_propagation =
+      &cpi->tpl_frame_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
   YV12_BUFFER_CONFIG *ref_frame[MAX_INTER_REF_FRAMES] = { NULL, NULL, NULL };
 
@@ -1157,6 +1184,10 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
       // Motion flow dependency dispenser.
       tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
                       tpl_frame->stride);
+
+      tpl_store_before_propagation(
+          tpl_frame_stats_before_propagation->block_stats_list,
+          tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize, tpl_frame->stride);
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
@@ -1294,6 +1325,11 @@ void vp9_init_tpl_buffer(VP9_COMP *cpi) {
     CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
                     vpx_calloc(mi_rows * mi_cols,
                                sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
+    vpx_free(cpi->tpl_frame_stats[frame].block_stats_list);
+    CHECK_MEM_ERROR(
+        cm, cpi->tpl_frame_stats[frame].block_stats_list,
+        vpx_calloc(mi_rows * mi_cols,
+                   sizeof(*cpi->tpl_frame_stats[frame].block_stats_list)));
     cpi->tpl_stats[frame].is_valid = 0;
     cpi->tpl_stats[frame].width = mi_cols;
     cpi->tpl_stats[frame].height = mi_rows;
@@ -1324,6 +1360,7 @@ void vp9_free_tpl_buffer(VP9_COMP *cpi) {
 #endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
     cpi->tpl_stats[frame].is_valid = 0;
+    vpx_free(cpi->tpl_frame_stats[frame].block_stats_list);
   }
 }
 
