@@ -362,8 +362,7 @@ static void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
 static void tpl_store_before_propagation(TplBlockStats *tpl_block_stats,
                                          TplDepStats *tpl_stats, int mi_row,
                                          int mi_col, BLOCK_SIZE bsize,
-                                         int stride, int64_t recon_error,
-                                         int64_t rate_cost) {
+                                         int stride) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const TplDepStats *src_stats = &tpl_stats[mi_row * stride + mi_col];
@@ -375,8 +374,6 @@ static void tpl_store_before_propagation(TplBlockStats *tpl_block_stats,
           &tpl_block_stats[(mi_row + idy) * stride + mi_col + idx];
       tpl_block_stats_ptr->inter_cost = src_stats->inter_cost;
       tpl_block_stats_ptr->intra_cost = src_stats->intra_cost;
-      tpl_block_stats_ptr->recrf_dist = recon_error << TPL_DEP_COST_SCALE_LOG2;
-      tpl_block_stats_ptr->recrf_rate = rate_cost;
       tpl_block_stats_ptr->mv = src_stats->mv;
       tpl_block_stats_ptr->ref_frame_index = src_stats->ref_frame_index;
     }
@@ -458,11 +455,12 @@ static void tpl_model_update(TplDepFrame *tpl_frame, TplDepStats *tpl_stats,
 static void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
                                tran_low_t *qcoeff, tran_low_t *dqcoeff,
                                TX_SIZE tx_size, int64_t *recon_error,
-                               int64_t *sse, uint16_t *eob) {
+                               int64_t *sse) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   const ScanOrder *const scan_order = &vp9_default_scan_orders[tx_size];
+  uint16_t eob;
   int pix_num = 1 << num_pels_log2_lookup[txsize_to_bsize[tx_size]];
   const int shift = tx_size == TX_32X32 ? 0 : 2;
 
@@ -472,16 +470,16 @@ static void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp9_highbd_quantize_fp_32x32(coeff, pix_num, p->round_fp, p->quant_fp,
-                                 qcoeff, dqcoeff, pd->dequant, eob,
+                                 qcoeff, dqcoeff, pd->dequant, &eob,
                                  scan_order->scan, scan_order->iscan);
   } else {
     vp9_quantize_fp_32x32(coeff, pix_num, p->round_fp, p->quant_fp, qcoeff,
-                          dqcoeff, pd->dequant, eob, scan_order->scan,
+                          dqcoeff, pd->dequant, &eob, scan_order->scan,
                           scan_order->iscan);
   }
 #else
   vp9_quantize_fp_32x32(coeff, pix_num, p->round_fp, p->quant_fp, qcoeff,
-                        dqcoeff, pd->dequant, eob, scan_order->scan,
+                        dqcoeff, pd->dequant, &eob, scan_order->scan,
                         scan_order->iscan);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -525,19 +523,6 @@ static void set_mv_limits(const VP9_COMMON *cm, MACROBLOCK *x, int mi_row,
       ((cm->mi_cols - 1 - mi_col) * MI_SIZE) + (17 - 2 * VP9_INTERP_EXTEND);
 }
 
-static int rate_estimator(const tran_low_t *qcoeff, int eob, TX_SIZE tx_size) {
-  const ScanOrder *const scan_order = &vp9_scan_orders[tx_size][DCT_DCT];
-  int rate_cost = 1;
-  int idx;
-  assert((1 << num_pels_log2_lookup[txsize_to_bsize[tx_size]]) >= eob);
-  for (idx = 0; idx < eob; ++idx) {
-    unsigned int abs_level = abs(qcoeff[scan_order->scan[idx]]);
-    rate_cost += get_msb(abs_level + 1) + 1 + (abs_level > 0);
-  }
-
-  return (rate_cost << VP9_PROB_COST_SHIFT);
-}
-
 static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                             struct scale_factors *sf, GF_PICTURE *gf_picture,
                             int frame_idx, TplDepFrame *tpl_frame,
@@ -545,8 +530,7 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                             tran_low_t *qcoeff, tran_low_t *dqcoeff, int mi_row,
                             int mi_col, BLOCK_SIZE bsize, TX_SIZE tx_size,
                             YV12_BUFFER_CONFIG *ref_frame[], uint8_t *predictor,
-                            int64_t *recon_error, int64_t *rate_cost,
-                            int64_t *sse) {
+                            int64_t *recon_error, int64_t *sse) {
   VP9_COMMON *cm = &cpi->common;
   ThreadData *td = &cpi->td;
 
@@ -569,7 +553,6 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   TplDepStats *tpl_stats =
       &tpl_frame->tpl_stats_ptr[mi_row * tpl_frame->stride + mi_col];
-  uint16_t eob = 0;
 
   xd->mb_to_top_edge = -((mi_row * MI_SIZE) * 8);
   xd->mb_to_bottom_edge = ((cm->mi_rows - 1 - mi_row) * MI_SIZE) * 8;
@@ -623,8 +606,6 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
 
   for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
     int_mv mv;
-    int64_t this_recon_error = 0;
-    int64_t this_rate = 0;
 #if CONFIG_NON_GREEDY_MV
     MotionField *motion_field;
 #endif
@@ -676,17 +657,12 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
     inter_cost = vpx_satd(coeff, pix_num);
 #endif
 
-    get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size, &this_recon_error,
-                       sse, &eob);
-
-    this_rate = rate_estimator(qcoeff, eob, tx_size);
-    *rate_cost += this_rate;
-    *recon_error += this_recon_error;
-
     if (inter_cost < best_inter_cost) {
       best_rf_idx = rf_idx;
       best_inter_cost = inter_cost;
       best_mv.as_int = mv.as_int;
+      get_quantize_error(x, 0, coeff, qcoeff, dqcoeff, tx_size, recon_error,
+                         sse);
     }
   }
   best_intra_cost = VPXMAX(best_intra_cost, 1);
@@ -1139,6 +1115,7 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   const TX_SIZE tx_size = max_txsize_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
+  int64_t recon_error, sse;
 
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1201,21 +1178,16 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-      int64_t recon_error = 0;
-      int64_t rate_cost = 0;
-      int64_t sse = 0;
       mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, tpl_frame,
                       src_diff, coeff, qcoeff, dqcoeff, mi_row, mi_col, bsize,
-                      tx_size, ref_frame, predictor, &recon_error, &rate_cost,
-                      &sse);
+                      tx_size, ref_frame, predictor, &recon_error, &sse);
       // Motion flow dependency dispenser.
       tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
                       tpl_frame->stride);
 
       tpl_store_before_propagation(
           tpl_frame_stats_before_propagation->block_stats_list,
-          tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize, tpl_frame->stride,
-          recon_error, rate_cost);
+          tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize, tpl_frame->stride);
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
