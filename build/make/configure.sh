@@ -842,6 +842,10 @@ process_common_toolchain() {
 
   # Enable the architecture family
   case ${tgt_isa} in
+    arm64 | armv8)
+      enable_feature arm
+      enable_feature aarch64
+      ;;
     arm*)
       enable_feature arm
       ;;
