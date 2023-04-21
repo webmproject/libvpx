@@ -2622,7 +2622,10 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
 #if CONFIG_NON_GREEDY_MV
   cpi->tpl_ready = 0;
 #endif  // CONFIG_NON_GREEDY_MV
-  for (i = 0; i < MAX_ARF_GOP_SIZE; ++i) cpi->tpl_stats[i].tpl_stats_ptr = NULL;
+  for (i = 0; i < MAX_ARF_GOP_SIZE; ++i) {
+    cpi->tpl_stats[i].tpl_stats_ptr = NULL;
+    cpi->tpl_frame_stats[i].block_stats_list = NULL;
+  }
 
   // Allocate memory to store variances for a frame.
   CHECK_MEM_ERROR(cm, cpi->source_diff_var,
