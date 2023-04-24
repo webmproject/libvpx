@@ -244,6 +244,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
   sf->trellis_opt_tx_rd.thresh = boosted ? 4.0 : 3.0;
 
   sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
+  sf->comp_inter_joint_search_iter_level = 1;
 
   // Reference masking is not supported in dynamic scaling mode.
   sf->reference_masking = oxcf->resize_mode != RESIZE_DYNAMIC;
@@ -331,7 +332,7 @@ static void set_good_speed_feature_framesize_independent(VP9_COMP *cpi,
             : FLAG_SKIP_INTRA_DIRMISMATCH | FLAG_SKIP_INTRA_BESTINTER |
                   FLAG_SKIP_COMP_BESTINTRA | FLAG_SKIP_INTRA_LOWVAR;
     sf->disable_filter_search_var_thresh = 100;
-    sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
+    sf->comp_inter_joint_search_iter_level = 2;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->recode_tolerance_high = 45;
     sf->enhanced_full_pixel_motion_search = 0;
@@ -530,7 +531,7 @@ static void set_rt_speed_feature_framesize_independent(
     }
 
     sf->disable_filter_search_var_thresh = 50;
-    sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
+    sf->comp_inter_joint_search_iter_level = 2;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
     sf->adjust_partitioning_from_last_frame = 1;
@@ -928,7 +929,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi, int speed) {
   sf->mv.auto_mv_step_size = 0;
   sf->mv.fullpel_search_step_param = 6;
   sf->mv.use_downsampled_sad = 0;
-  sf->comp_inter_joint_search_thresh = BLOCK_4X4;
+  sf->comp_inter_joint_search_iter_level = 0;
   sf->tx_size_search_method = USE_FULL_RD;
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;

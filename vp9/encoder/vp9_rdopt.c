@@ -1898,11 +1898,22 @@ static INLINE int skip_single_mode_based_on_mode_rate(
   return 0;
 }
 
-#define NUM_ITERS 4
+#define MAX_JOINT_MV_SEARCH_ITERS 4
+static INLINE int get_joint_search_iters(int sf_level, BLOCK_SIZE bsize) {
+  int num_iters = MAX_JOINT_MV_SEARCH_ITERS;  // sf_level = 0
+  if (sf_level >= 2)
+    num_iters = 0;
+  else if (sf_level >= 1)
+    num_iters = bsize < BLOCK_8X8
+                    ? 0
+                    : (bsize <= BLOCK_16X16 ? 2 : MAX_JOINT_MV_SEARCH_ITERS);
+  return num_iters;
+}
+
 static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
                                 int_mv *frame_mv, int mi_row, int mi_col,
                                 int_mv single_newmv[MAX_REF_FRAMES],
-                                int *rate_mv) {
+                                int *rate_mv, int num_iters) {
   const VP9_COMMON *const cm = &cpi->common;
   const int pw = 4 * num_4x4_blocks_wide_lookup[bsize];
   const int ph = 4 * num_4x4_blocks_high_lookup[bsize];
@@ -1911,7 +1922,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
   const int refs[2] = { mi->ref_frame[0],
                         mi->ref_frame[1] < 0 ? 0 : mi->ref_frame[1] };
   int_mv ref_mv[2];
-  int_mv iter_mvs[NUM_ITERS][2];
+  int_mv iter_mvs[MAX_JOINT_MV_SEARCH_ITERS][2];
   int ite, ref;
   const InterpKernel *kernel = vp9_filter_kernels[mi->interp_filter];
   struct scale_factors sf;
@@ -1931,6 +1942,9 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 #else
   DECLARE_ALIGNED(16, uint8_t, second_pred[64 * 64]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  // Check number of iterations do not exceed the max
+  assert(num_iters <= MAX_JOINT_MV_SEARCH_ITERS);
 
   for (ref = 0; ref < 2; ++ref) {
     ref_mv[ref] = x->mbmi_ext->ref_mvs[refs[ref]][0];
@@ -1962,7 +1976,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 
   // Allow joint search multiple times iteratively for each reference frame
   // and break out of the search loop if it couldn't find a better mv.
-  for (ite = 0; ite < NUM_ITERS; ite++) {
+  for (ite = 0; ite < num_iters; ite++) {
     struct buf_2d ref_yv12[2];
     uint32_t bestsme = UINT_MAX;
     int sadpb = x->sadperbit16;
@@ -2044,7 +2058,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
     } else {
       break;
     }
-    if (ite < NUM_ITERS - 1) {
+    if (ite < num_iters - 1) {
       iter_mvs[ite + 1][0].as_int = frame_mv[refs[0]].as_int;
       iter_mvs[ite + 1][1].as_int = frame_mv[refs[1]].as_int;
     }
@@ -2250,12 +2264,16 @@ static int64_t rd_pick_best_sub8x8_mode(
 
         if (has_second_rf && this_mode == NEWMV &&
             mi->interp_filter == EIGHTTAP) {
+          // Decide number of joint motion search iterations
+          const int num_joint_search_iters = get_joint_search_iters(
+              cpi->sf.comp_inter_joint_search_iter_level, bsize);
           // adjust src pointers
           mi_buf_shift(x, block);
-          if (sf->comp_inter_joint_search_thresh <= bsize) {
+          if (num_joint_search_iters) {
             int rate_mv;
             joint_motion_search(cpi, x, bsize, frame_mv[this_mode], mi_row,
-                                mi_col, seg_mvs[block], &rate_mv);
+                                mi_col, seg_mvs[block], &rate_mv,
+                                num_joint_search_iters);
             seg_mvs[block][mi->ref_frame[0]].as_int =
                 frame_mv[this_mode][mi->ref_frame[0]].as_int;
             seg_mvs[block][mi->ref_frame[1]].as_int =
@@ -2878,16 +2896,20 @@ static int64_t handle_inter_mode(
   if (this_mode == NEWMV) {
     int rate_mv;
     if (is_comp_pred) {
+      // Decide number of joint motion search iterations
+      const int num_joint_search_iters = get_joint_search_iters(
+          cpi->sf.comp_inter_joint_search_iter_level, bsize);
+
       // Initialize mv using single prediction mode result.
       frame_mv[refs[0]].as_int = single_newmv[refs[0]].as_int;
       frame_mv[refs[1]].as_int = single_newmv[refs[1]].as_int;
 
-      if (cpi->sf.comp_inter_joint_search_thresh <= bsize) {
+      if (num_joint_search_iters) {
 #if CONFIG_COLLECT_COMPONENT_TIMING
         start_timing(cpi, joint_motion_search_time);
 #endif
         joint_motion_search(cpi, x, bsize, frame_mv, mi_row, mi_col,
-                            single_newmv, &rate_mv);
+                            single_newmv, &rate_mv, num_joint_search_iters);
 #if CONFIG_COLLECT_COMPONENT_TIMING
         end_timing(cpi, joint_motion_search_time);
 #endif
