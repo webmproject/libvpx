@@ -233,8 +233,9 @@ int vp9_diamond_search_sad_avx(const MACROBLOCK *x,
         if (UNLIKELY(local_best_sad == 0xffff)) {
           __m128i v_loval_d, v_hival_d, v_loidx_d, v_hiidx_d, v_sel_d;
 
-          v_loval_d = v_sad_d;
-          v_loidx_d = _mm_set_epi32(3, 2, 1, 0);
+          v_loval_d = _mm_shuffle_epi32(v_sad_d, 0xd8);
+          v_loidx_d = _mm_set_epi32(3, 1, 2, 0);
+
           v_hival_d = _mm_srli_si128(v_loval_d, 8);
           v_hiidx_d = _mm_srli_si128(v_loidx_d, 8);
 
