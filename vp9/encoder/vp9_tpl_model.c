@@ -40,9 +40,6 @@ static void init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   memset(recon_frame_index, -1, sizeof(recon_frame_index));
   stack_init(arf_index_stack, MAX_ARF_LAYERS);
 
-  // TODO(jingning): To be used later for gf frame type parsing.
-  (void)gf_group;
-
   for (i = 0; i < FRAME_BUFFERS; ++i) {
     if (frame_bufs[i].ref_count == 0) {
       alloc_frame_mvs(cm, i);
