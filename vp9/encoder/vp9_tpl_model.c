@@ -374,7 +374,8 @@ static void tpl_store_before_propagation(TplBlockStats *tpl_block_stats,
       tpl_block_stats_ptr->intra_cost = src_stats->intra_cost;
       tpl_block_stats_ptr->recrf_dist = recon_error << TPL_DEP_COST_SCALE_LOG2;
       tpl_block_stats_ptr->recrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
-      tpl_block_stats_ptr->mv = src_stats->mv;
+      tpl_block_stats_ptr->mv_r = src_stats->mv.as_mv.row;
+      tpl_block_stats_ptr->mv_c = src_stats->mv.as_mv.col;
       tpl_block_stats_ptr->ref_frame_index = src_stats->ref_frame_index;
     }
   }

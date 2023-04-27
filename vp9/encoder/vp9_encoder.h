@@ -324,22 +324,6 @@ typedef struct TplDepFrame {
 #endif
 } TplDepFrame;
 
-// Used to store the stats before propagation.
-typedef struct TplBlockStats {
-  int64_t intra_cost;
-  int64_t inter_cost;
-  int_mv mv;
-  int64_t recrf_rate;
-  int64_t recrf_dist;
-  int ref_frame_index;
-} TplBlockStats;
-
-typedef struct TplFrameStats {
-  int frame_width;
-  int frame_height;
-  TplBlockStats *block_stats_list;
-} TplFrameStats;
-
 #define TPL_DEP_COST_SCALE_LOG2 4
 
 // TODO(jingning) All spatially adaptive variables should go to TileDataEnc.
