@@ -1134,6 +1134,8 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
 
+  tpl_frame_stats_before_propagation->frame_width = cm->width;
+  tpl_frame_stats_before_propagation->frame_height = cm->height;
   // Setup scaling factor
 #if CONFIG_VP9_HIGHBITDEPTH
   vp9_setup_scale_factors_for_frame(

@@ -1788,6 +1788,23 @@ static vpx_codec_err_t ctrl_get_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_get_tpl_stats(vpx_codec_alg_priv_t *ctx,
+                                          va_list args) {
+  VP9_COMP *const cpi = ctx->cpi;
+  TplFrameStats *data = va_arg(args, TplFrameStats *);
+  int i;
+  if (data == NULL) {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+  for (i = 0; i < MAX_ARF_GOP_SIZE; i++) {
+    data[i].frame_width = cpi->tpl_frame_stats[i].frame_width;
+    data[i].frame_height = cpi->tpl_frame_stats[i].frame_height;
+    data[i].block_stats_list = cpi->tpl_frame_stats[i].block_stats_list;
+  }
+
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t ctrl_set_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
                                                      va_list args) {
   VP9_COMP *const cpi = ctx->cpi;
@@ -2035,6 +2052,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_GET_ACTIVEMAP, ctrl_get_active_map },
   { VP9E_GET_LEVEL, ctrl_get_level },
   { VP9E_GET_SVC_REF_FRAME_CONFIG, ctrl_get_svc_ref_frame_config },
+  { VP9E_GET_TPL_STATS, ctrl_get_tpl_stats },
 
   { -1, NULL },
 };
