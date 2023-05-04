@@ -114,7 +114,7 @@ void vpx_highbd_minmax_8x8_neon(const uint8_t *a, int a_stride,
   const uint16x8_t min4567 = vminq_u16(min45, min67);
   const uint16x8_t min07 = vminq_u16(min0123, min4567);
 
-#if defined(__aarch64__)
+#if VPX_ARCH_AARCH64
   *min = *max = 0;  // Clear high bits
   *((uint16_t *)max) = vmaxvq_u16(max07);
   *((uint16_t *)min) = vminvq_u16(min07);
