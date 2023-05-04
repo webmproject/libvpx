@@ -267,7 +267,7 @@ typedef struct VpxTplBlockStats {
 typedef struct VpxTplFrameStats {
   int frame_width;  /**< Frame width */
   int frame_height; /**< Frame height */
-  // Size of the list can be calculated from frame_width and frame_height.
+  int num_blocks;   /**< Number of blocks. Size of block_stats_list */
   VpxTplBlockStats *block_stats_list; /**< List of tpl stats for each block */
 } VpxTplFrameStats;
 

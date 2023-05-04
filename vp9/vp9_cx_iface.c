@@ -1799,6 +1799,7 @@ static vpx_codec_err_t ctrl_get_tpl_stats(vpx_codec_alg_priv_t *ctx,
   for (i = 0; i < MAX_ARF_GOP_SIZE; i++) {
     data[i].frame_width = cpi->tpl_frame_stats[i].frame_width;
     data[i].frame_height = cpi->tpl_frame_stats[i].frame_height;
+    data[i].num_blocks = cpi->tpl_frame_stats[i].num_blocks;
     data[i].block_stats_list = cpi->tpl_frame_stats[i].block_stats_list;
   }
 
