@@ -13,9 +13,12 @@
 #include <initializer_list>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "test/codec_factory.h"
+#include "test/encode_test_driver.h"
+#include "test/i420_video_source.h"
+#include "test/video_source.h"
 
 #include "./vpx_config.h"
-#include "test/video_source.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 
@@ -359,5 +362,80 @@ TEST(EncodeAPI, ConfigChangeThreadCount) {
     }
   }
 }
+
+#if CONFIG_VP9_ENCODER
+class EncodeApiGetTplStatsTest
+    : public ::libvpx_test::EncoderTest,
+      public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {
+ public:
+  EncodeApiGetTplStatsTest() : EncoderTest(GetParam()) {}
+  ~EncodeApiGetTplStatsTest() override {}
+
+ protected:
+  void SetUp() override {
+    InitializeConfig();
+    SetMode(::libvpx_test::kTwoPassGood);
+  }
+
+  void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                          ::libvpx_test::Encoder *encoder) override {
+    if (video->frame() == 0) {
+      encoder->Control(VP9E_SET_TPL, 1);
+    }
+  }
+
+  vpx_codec_err_t AllocateTplList(TplFrameStats **data) {
+    // Allocate MAX_ARF_GOP_SIZE * sizeof(TplFrameStats) that will be filled
+    // by VP9E_GET_TPL_STATS
+    *data = static_cast<TplFrameStats *>(calloc(50, sizeof(TplFrameStats)));
+    if (*data == nullptr) return VPX_CODEC_MEM_ERROR;
+    return VPX_CODEC_OK;
+  }
+
+  void PostEncodeFrameHook(::libvpx_test::Encoder *encoder) override {
+    ::libvpx_test::CxDataIterator iter = encoder->GetCxData();
+    while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
+      switch (pkt->kind) {
+        case VPX_CODEC_CX_FRAME_PKT: {
+          TplFrameStats *tpl_stats = NULL;
+          EXPECT_EQ(AllocateTplList(&tpl_stats), VPX_CODEC_OK);
+          encoder->Control(VP9E_GET_TPL_STATS, tpl_stats);
+          bool stats_not_all_zero = false;
+          for (unsigned int i = 0; i < cfg_.g_lag_in_frames; i++) {
+            if (tpl_stats[i].frame_width != 0) {
+              ASSERT_EQ(tpl_stats[i].frame_width, width_);
+              ASSERT_EQ(tpl_stats[i].frame_height, height_);
+              ASSERT_NE(tpl_stats[i].block_stats_list, nullptr);
+              stats_not_all_zero = true;
+            }
+          }
+          ASSERT_TRUE(stats_not_all_zero);
+          // Free the memory right away now as this is only a test.
+          free(tpl_stats);
+          break;
+        }
+        default: break;
+      }
+    }
+  }
+
+  int width_;
+  int height_;
+};
+
+TEST_P(EncodeApiGetTplStatsTest, GetTplStats) {
+  cfg_.g_lag_in_frames = 25;
+  width_ = 352;
+  height_ = 288;
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", width_,
+                                       height_, 30, 1, 0, 150);
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    VP9, EncodeApiGetTplStatsTest,
+    ::testing::Values(
+        static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)));
+#endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
