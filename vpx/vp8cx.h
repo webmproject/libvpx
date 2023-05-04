@@ -771,7 +771,7 @@ enum vp8e_enc_control_id {
   /*!\brief Codec control to get TPL stats for the current GOP.
    *
    * Allocation and free of memory of size MAX_ARF_GOP_SIZE (50) *
-   * sizeof(TplFrameStats) should be done by applications.
+   * sizeof(VpxTplFrameStats) should be done by applications.
    *
    * VPX_CODEC_INVALID_PARAM will be returned if the pointer passed in is NULL.
    *
