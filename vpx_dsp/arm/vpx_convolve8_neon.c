@@ -57,6 +57,111 @@ DECLARE_ALIGNED(16, static const uint8_t, dot_prod_merge_block_tbl[48]) = {
 
 #if defined(__ARM_FEATURE_MATMUL_INT8)
 
+void vpx_convolve8_2d_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
+                                 uint8_t *dst, ptrdiff_t dst_stride,
+                                 const InterpKernel *filter, int x0_q4,
+                                 int x_step_q4, int y0_q4, int y_step_q4, int w,
+                                 int h) {
+  const int8x8_t filters = vmovn_s16(vld1q_s16(filter[x0_q4]));
+  uint8x16_t s0, s1, s2, s3;
+
+  assert((intptr_t)dst % 4 == 0);
+  assert(dst_stride % 4 == 0);
+  assert(x_step_q4 == 16);
+  assert(h % 4 == 3);
+
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
+
+  src -= 3;
+
+  if (w == 4) {
+    const uint8x16x2_t perm_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
+    int16x4_t d0, d1, d2, d3;
+    uint8x8_t d01, d23;
+
+    do {
+      load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
+
+      d0 = convolve8_4_usdot(s0, filters, perm_tbl);
+      d1 = convolve8_4_usdot(s1, filters, perm_tbl);
+      d2 = convolve8_4_usdot(s2, filters, perm_tbl);
+      d3 = convolve8_4_usdot(s3, filters, perm_tbl);
+      d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS);
+      d23 = vqrshrun_n_s16(vcombine_s16(d2, d3), FILTER_BITS);
+
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
+
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 3);
+
+    /* Process final three rows (h % 4 == 3). See vpx_convolve_neon.c for
+     * further details on possible values of block height. */
+    load_u8_16x3(src, src_stride, &s0, &s1, &s2);
+
+    d0 = convolve8_4_usdot(s0, filters, perm_tbl);
+    d1 = convolve8_4_usdot(s1, filters, perm_tbl);
+    d2 = convolve8_4_usdot(s2, filters, perm_tbl);
+    d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS);
+    d23 = vqrshrun_n_s16(vcombine_s16(d2, vdup_n_s16(0)), FILTER_BITS);
+
+    store_u8(dst + 0 * dst_stride, dst_stride, d01);
+    store_u8_4x1(dst + 2 * dst_stride, d23);
+  } else {
+    const uint8x16x3_t perm_tbl = vld1q_u8_x3(dot_prod_permute_tbl);
+    const uint8_t *s;
+    uint8_t *d;
+    int width;
+    uint8x8_t d0, d1, d2, d3;
+
+    do {
+      width = w;
+      s = src;
+      d = dst;
+      do {
+        load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
+
+        d0 = convolve8_8_usdot(s0, filters, perm_tbl);
+        d1 = convolve8_8_usdot(s1, filters, perm_tbl);
+        d2 = convolve8_8_usdot(s2, filters, perm_tbl);
+        d3 = convolve8_8_usdot(s3, filters, perm_tbl);
+
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
+
+        s += 8;
+        d += 8;
+        width -= 8;
+      } while (width > 0);
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 3);
+
+    /* Process final three rows (h % 4 == 3). See vpx_convolve_neon.c for
+     * further details on possible values of block height. */
+    width = w;
+    s = src;
+    d = dst;
+    do {
+      load_u8_16x3(s, src_stride, &s0, &s1, &s2);
+
+      d0 = convolve8_8_usdot(s0, filters, perm_tbl);
+      d1 = convolve8_8_usdot(s1, filters, perm_tbl);
+      d2 = convolve8_8_usdot(s2, filters, perm_tbl);
+
+      store_u8_8x3(d, dst_stride, d0, d1, d2);
+
+      s += 8;
+      d += 8;
+      width -= 8;
+    } while (width > 0);
+  }
+}
+
 void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const InterpKernel *filter, int x0_q4,
@@ -96,7 +201,7 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       src += 4 * src_stride;
       dst += 4 * dst_stride;
       h -= 4;
-    } while (h > 0);
+    } while (h != 0);
   } else {
     const uint8x16x3_t perm_tbl = vld1q_u8_x3(dot_prod_permute_tbl);
     const uint8_t *s;
@@ -125,7 +230,7 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       src += 4 * src_stride;
       dst += 4 * dst_stride;
       h -= 4;
-    } while (h > 0);
+    } while (h != 0);
   }
 }
 
@@ -611,6 +716,114 @@ void vpx_convolve8_avg_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
 
 #else  // !defined(__ARM_FEATURE_MATMUL_INT8)
 
+void vpx_convolve8_2d_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
+                                 uint8_t *dst, ptrdiff_t dst_stride,
+                                 const InterpKernel *filter, int x0_q4,
+                                 int x_step_q4, int y0_q4, int y_step_q4, int w,
+                                 int h) {
+  const int8x8_t filters = vmovn_s16(vld1q_s16(filter[x0_q4]));
+  const int16x8_t correct_tmp = vmulq_n_s16(vld1q_s16(filter[x0_q4]), 128);
+  const int32x4_t correction = vdupq_n_s32((int32_t)vaddvq_s16(correct_tmp));
+  const uint8x16_t range_limit = vdupq_n_u8(128);
+  uint8x16_t s0, s1, s2, s3;
+
+  assert((intptr_t)dst % 4 == 0);
+  assert(dst_stride % 4 == 0);
+  assert(x_step_q4 == 16);
+  assert(h % 4 == 3);
+
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
+
+  src -= 3;
+
+  if (w == 4) {
+    const uint8x16x2_t perm_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
+    int16x4_t d0, d1, d2, d3;
+    uint8x8_t d01, d23;
+
+    do {
+      load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
+
+      d0 = convolve8_4_sdot(s0, filters, correction, range_limit, perm_tbl);
+      d1 = convolve8_4_sdot(s1, filters, correction, range_limit, perm_tbl);
+      d2 = convolve8_4_sdot(s2, filters, correction, range_limit, perm_tbl);
+      d3 = convolve8_4_sdot(s3, filters, correction, range_limit, perm_tbl);
+      d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS);
+      d23 = vqrshrun_n_s16(vcombine_s16(d2, d3), FILTER_BITS);
+
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
+
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 3);
+
+    /* Process final three rows (h % 4 == 3). See vpx_convolve_neon.c for
+     * further details on possible values of block height. */
+    load_u8_16x3(src, src_stride, &s0, &s1, &s2);
+
+    d0 = convolve8_4_sdot(s0, filters, correction, range_limit, perm_tbl);
+    d1 = convolve8_4_sdot(s1, filters, correction, range_limit, perm_tbl);
+    d2 = convolve8_4_sdot(s2, filters, correction, range_limit, perm_tbl);
+    d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS);
+    d23 = vqrshrun_n_s16(vcombine_s16(d2, vdup_n_s16(0)), FILTER_BITS);
+
+    store_u8(dst + 0 * dst_stride, dst_stride, d01);
+    store_u8_4x1(dst + 2 * dst_stride, d23);
+  } else {
+    const uint8x16x3_t perm_tbl = vld1q_u8_x3(dot_prod_permute_tbl);
+    const uint8_t *s;
+    uint8_t *d;
+    int width;
+    uint8x8_t d0, d1, d2, d3;
+
+    do {
+      width = w;
+      s = src;
+      d = dst;
+      do {
+        load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
+
+        d0 = convolve8_8_sdot(s0, filters, correction, range_limit, perm_tbl);
+        d1 = convolve8_8_sdot(s1, filters, correction, range_limit, perm_tbl);
+        d2 = convolve8_8_sdot(s2, filters, correction, range_limit, perm_tbl);
+        d3 = convolve8_8_sdot(s3, filters, correction, range_limit, perm_tbl);
+
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
+
+        s += 8;
+        d += 8;
+        width -= 8;
+      } while (width != 0);
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h > 3);
+
+    /* Process final three rows (h % 4 == 3). See vpx_convolve_neon.c for
+     * further details on possible values of block height. */
+    width = w;
+    s = src;
+    d = dst;
+    do {
+      load_u8_16x3(s, src_stride, &s0, &s1, &s2);
+
+      d0 = convolve8_8_sdot(s0, filters, correction, range_limit, perm_tbl);
+      d1 = convolve8_8_sdot(s1, filters, correction, range_limit, perm_tbl);
+      d2 = convolve8_8_sdot(s2, filters, correction, range_limit, perm_tbl);
+
+      store_u8_8x3(d, dst_stride, d0, d1, d2);
+
+      s += 8;
+      d += 8;
+      width -= 8;
+    } while (width != 0);
+  }
+}
+
 void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const InterpKernel *filter, int x0_q4,
@@ -653,7 +866,7 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       src += 4 * src_stride;
       dst += 4 * dst_stride;
       h -= 4;
-    } while (h > 0);
+    } while (h != 0);
   } else {
     const uint8x16x3_t perm_tbl = vld1q_u8_x3(dot_prod_permute_tbl);
     const uint8_t *s;
@@ -682,7 +895,7 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
       src += 4 * src_stride;
       dst += 4 * dst_stride;
       h -= 4;
-    } while (h > 0);
+    } while (h != 0);
   }
 }
 
