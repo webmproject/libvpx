@@ -384,10 +384,11 @@ class EncodeApiGetTplStatsTest
     }
   }
 
-  vpx_codec_err_t AllocateTplList(TplFrameStats **data) {
-    // Allocate MAX_ARF_GOP_SIZE * sizeof(TplFrameStats) that will be filled
+  vpx_codec_err_t AllocateTplList(VpxTplFrameStats **data) {
+    // Allocate MAX_ARF_GOP_SIZE * sizeof(VpxTplFrameStats) that will be filled
     // by VP9E_GET_TPL_STATS
-    *data = static_cast<TplFrameStats *>(calloc(50, sizeof(TplFrameStats)));
+    *data =
+        static_cast<VpxTplFrameStats *>(calloc(50, sizeof(VpxTplFrameStats)));
     if (*data == nullptr) return VPX_CODEC_MEM_ERROR;
     return VPX_CODEC_OK;
   }
@@ -397,7 +398,7 @@ class EncodeApiGetTplStatsTest
     while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
       switch (pkt->kind) {
         case VPX_CODEC_CX_FRAME_PKT: {
-          TplFrameStats *tpl_stats = NULL;
+          VpxTplFrameStats *tpl_stats = NULL;
           EXPECT_EQ(AllocateTplList(&tpl_stats), VPX_CODEC_OK);
           encoder->Control(VP9E_GET_TPL_STATS, tpl_stats);
           bool stats_not_all_zero = false;

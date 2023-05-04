@@ -154,7 +154,7 @@ static void init_tpl_stats(VP9_COMP *cpi) {
   int frame_idx;
   for (frame_idx = 0; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-    TplFrameStats *tpl_frame_stats = &cpi->tpl_frame_stats[frame_idx];
+    VpxTplFrameStats *tpl_frame_stats = &cpi->tpl_frame_stats[frame_idx];
     memset(tpl_frame->tpl_stats_ptr, 0,
            tpl_frame->height * tpl_frame->width *
                sizeof(*tpl_frame->tpl_stats_ptr));
@@ -356,7 +356,7 @@ static void tpl_model_store(TplDepStats *tpl_stats, int mi_row, int mi_col,
   }
 }
 
-static void tpl_store_before_propagation(TplBlockStats *tpl_block_stats,
+static void tpl_store_before_propagation(VpxTplBlockStats *tpl_block_stats,
                                          TplDepStats *tpl_stats, int mi_row,
                                          int mi_col, BLOCK_SIZE bsize,
                                          int stride, int64_t recon_error,
@@ -368,7 +368,7 @@ static void tpl_store_before_propagation(TplBlockStats *tpl_block_stats,
 
   for (idy = 0; idy < mi_height; ++idy) {
     for (idx = 0; idx < mi_width; ++idx) {
-      TplBlockStats *tpl_block_stats_ptr =
+      VpxTplBlockStats *tpl_block_stats_ptr =
           &tpl_block_stats[(mi_row + idy) * stride + mi_col + idx];
       tpl_block_stats_ptr->inter_cost = src_stats->inter_cost;
       tpl_block_stats_ptr->intra_cost = src_stats->intra_cost;
@@ -1105,7 +1105,7 @@ static void build_motion_field(
 static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
                               int frame_idx, BLOCK_SIZE bsize) {
   TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-  TplFrameStats *tpl_frame_stats_before_propagation =
+  VpxTplFrameStats *tpl_frame_stats_before_propagation =
       &cpi->tpl_frame_stats[frame_idx];
   YV12_BUFFER_CONFIG *this_frame = gf_picture[frame_idx].frame;
   YV12_BUFFER_CONFIG *ref_frame[MAX_INTER_REF_FRAMES] = { NULL, NULL, NULL };

@@ -1791,7 +1791,7 @@ static vpx_codec_err_t ctrl_get_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t ctrl_get_tpl_stats(vpx_codec_alg_priv_t *ctx,
                                           va_list args) {
   VP9_COMP *const cpi = ctx->cpi;
-  TplFrameStats *data = va_arg(args, TplFrameStats *);
+  VpxTplFrameStats *data = va_arg(args, VpxTplFrameStats *);
   int i;
   if (data == NULL) {
     return VPX_CODEC_INVALID_PARAM;
