@@ -1354,6 +1354,7 @@ void vp9_init_tpl_buffer(VP9_COMP *cpi) {
         cm, cpi->tpl_frame_stats[frame].block_stats_list,
         vpx_calloc(mi_rows * mi_cols,
                    sizeof(*cpi->tpl_frame_stats[frame].block_stats_list)));
+    cpi->tpl_frame_stats[frame].num_blocks = mi_rows * mi_cols;
     cpi->tpl_stats[frame].is_valid = 0;
     cpi->tpl_stats[frame].width = mi_cols;
     cpi->tpl_stats[frame].height = mi_rows;

@@ -406,6 +406,7 @@ class EncodeApiGetTplStatsTest
             if (tpl_stats[i].frame_width != 0) {
               ASSERT_EQ(tpl_stats[i].frame_width, width_);
               ASSERT_EQ(tpl_stats[i].frame_height, height_);
+              ASSERT_GT(tpl_stats[i].num_blocks, 0);
               ASSERT_NE(tpl_stats[i].block_stats_list, nullptr);
               stats_not_all_zero = true;
             }
