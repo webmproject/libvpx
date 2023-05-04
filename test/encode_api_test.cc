@@ -384,12 +384,15 @@ class EncodeApiGetTplStatsTest
     }
   }
 
-  vpx_codec_err_t AllocateTplList(VpxTplFrameStats **data) {
-    // Allocate MAX_ARF_GOP_SIZE * sizeof(VpxTplFrameStats) that will be filled
-    // by VP9E_GET_TPL_STATS
-    *data =
+  vpx_codec_err_t AllocateTplList(VpxTplGopStats *data) {
+    // Allocate MAX_ARF_GOP_SIZE (50) * sizeof(VpxTplFrameStats) that will be
+    // filled by VP9E_GET_TPL_STATS.
+    // MAX_ARF_GOP_SIZE is used here because the test doesn't know the size of
+    // each GOP before getting TPL stats from the encoder.
+    data->size = 50;
+    data->frame_stats_list =
         static_cast<VpxTplFrameStats *>(calloc(50, sizeof(VpxTplFrameStats)));
-    if (*data == nullptr) return VPX_CODEC_MEM_ERROR;
+    if (data->frame_stats_list == nullptr) return VPX_CODEC_MEM_ERROR;
     return VPX_CODEC_OK;
   }
 
@@ -398,22 +401,23 @@ class EncodeApiGetTplStatsTest
     while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
       switch (pkt->kind) {
         case VPX_CODEC_CX_FRAME_PKT: {
-          VpxTplFrameStats *tpl_stats = NULL;
+          VpxTplGopStats tpl_stats;
           EXPECT_EQ(AllocateTplList(&tpl_stats), VPX_CODEC_OK);
-          encoder->Control(VP9E_GET_TPL_STATS, tpl_stats);
+          encoder->Control(VP9E_GET_TPL_STATS, &tpl_stats);
           bool stats_not_all_zero = false;
-          for (unsigned int i = 0; i < cfg_.g_lag_in_frames; i++) {
-            if (tpl_stats[i].frame_width != 0) {
-              ASSERT_EQ(tpl_stats[i].frame_width, width_);
-              ASSERT_EQ(tpl_stats[i].frame_height, height_);
-              ASSERT_GT(tpl_stats[i].num_blocks, 0);
-              ASSERT_NE(tpl_stats[i].block_stats_list, nullptr);
+          for (int i = 0; i < tpl_stats.size; i++) {
+            VpxTplFrameStats *frame_stats_list = tpl_stats.frame_stats_list;
+            if (frame_stats_list[i].frame_width != 0) {
+              ASSERT_EQ(frame_stats_list[i].frame_width, width_);
+              ASSERT_EQ(frame_stats_list[i].frame_height, height_);
+              ASSERT_GT(frame_stats_list[i].num_blocks, 0);
+              ASSERT_NE(frame_stats_list[i].block_stats_list, nullptr);
               stats_not_all_zero = true;
             }
           }
           ASSERT_TRUE(stats_not_all_zero);
           // Free the memory right away now as this is only a test.
-          free(tpl_stats);
+          free(tpl_stats.frame_stats_list);
           break;
         }
         default: break;
@@ -430,7 +434,7 @@ TEST_P(EncodeApiGetTplStatsTest, GetTplStats) {
   width_ = 352;
   height_ = 288;
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", width_,
-                                       height_, 30, 1, 0, 150);
+                                       height_, 30, 1, 0, 50);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 

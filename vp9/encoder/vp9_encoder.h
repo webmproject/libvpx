@@ -745,7 +745,7 @@ typedef struct VP9_COMP {
   BLOCK_SIZE tpl_bsize;
   TplDepFrame tpl_stats[MAX_ARF_GOP_SIZE];
   // Used to store TPL stats before propagation
-  VpxTplFrameStats tpl_frame_stats[MAX_ARF_GOP_SIZE];
+  VpxTplGopStats tpl_gop_stats;
   YV12_BUFFER_CONFIG *tpl_recon_frames[REF_FRAMES];
   EncFrameBuf enc_frame_buf[REF_FRAMES];
 #if CONFIG_MULTITHREAD
