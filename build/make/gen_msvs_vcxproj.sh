@@ -141,7 +141,17 @@ for opt in "$@"; do
     case "$opt" in
         --help|-h) show_help
         ;;
-        --target=*) target="${optval}"
+        --target=*)
+            target="${optval}"
+            platform_toolset=$(echo ${target} | awk 'BEGIN{FS="-"}{print $4}')
+            case "$platform_toolset" in
+                clangcl) platform_toolset="ClangCl"
+                ;;
+                "")
+                ;;
+                *) die Unrecognized Visual Studio Platform Toolset in $opt
+                ;;
+            esac
         ;;
         --out=*) outfile="$optval"
         ;;
@@ -335,17 +345,21 @@ generate_vcxproj() {
             else
                 tag_content ConfigurationType StaticLibrary
             fi
-            if [ "$vs_ver" = "14" ]; then
-                tag_content PlatformToolset v140
-            fi
-            if [ "$vs_ver" = "15" ]; then
-                tag_content PlatformToolset v141
-            fi
-            if [ "$vs_ver" = "16" ]; then
-                tag_content PlatformToolset v142
-            fi
-            if [ "$vs_ver" = "17" ]; then
-                tag_content PlatformToolset v143
+            if [ -n "$platform_toolset" ]; then
+                tag_content PlatformToolset "$platform_toolset"
+            else
+                if [ "$vs_ver" = "14" ]; then
+                    tag_content PlatformToolset v140
+                fi
+                if [ "$vs_ver" = "15" ]; then
+                    tag_content PlatformToolset v141
+                fi
+                if [ "$vs_ver" = "16" ]; then
+                    tag_content PlatformToolset v142
+                fi
+                if [ "$vs_ver" = "17" ]; then
+                    tag_content PlatformToolset v143
+                fi
             fi
             tag_content CharacterSet Unicode
             if [ "$config" = "Release" ]; then
