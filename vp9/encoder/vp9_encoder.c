@@ -4443,10 +4443,13 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
   const int orig_rc_max_frame_bandwidth = rc->max_frame_bandwidth;
 
 #if CONFIG_RATE_CTRL
-  const FRAME_UPDATE_TYPE update_type =
-      cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index];
-  const ENCODE_FRAME_TYPE frame_type = get_encode_frame_type(update_type);
-  RATE_QSTEP_MODEL *rq_model = &cpi->rq_model[frame_type];
+  RATE_QSTEP_MODEL *rq_model;
+  {
+    const FRAME_UPDATE_TYPE update_type =
+        cpi->twopass.gf_group.update_type[cpi->twopass.gf_group.index];
+    const ENCODE_FRAME_TYPE frame_type = get_encode_frame_type(update_type);
+    rq_model = &cpi->rq_model[frame_type];
+  }
   init_rq_history(rq_history);
 #endif  // CONFIG_RATE_CTRL
 
