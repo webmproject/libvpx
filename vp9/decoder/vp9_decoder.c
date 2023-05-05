@@ -87,7 +87,7 @@ void vp9_dec_alloc_row_mt_mem(RowMTWorkerData *row_mt_worker_data,
   row_mt_worker_data->num_sbs = num_sbs;
   for (plane = 0; plane < 3; ++plane) {
     CHECK_MEM_ERROR(cm, row_mt_worker_data->dqcoeff[plane],
-                    vpx_memalign(16, dqcoeff_size));
+                    vpx_memalign(32, dqcoeff_size));
     memset(row_mt_worker_data->dqcoeff[plane], 0, dqcoeff_size);
     CHECK_MEM_ERROR(cm, row_mt_worker_data->eob[plane],
                     vpx_calloc(num_sbs << EOBS_PER_SB_LOG2,
