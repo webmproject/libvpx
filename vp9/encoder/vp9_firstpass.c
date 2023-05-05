@@ -1422,7 +1422,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
   if (cpi->row_mt_bit_exact && cpi->twopass.fp_mb_float_stats == NULL)
     CHECK_MEM_ERROR(
-        cm, cpi->twopass.fp_mb_float_stats,
+        &cm->error, cpi->twopass.fp_mb_float_stats,
         vpx_calloc(cm->MBs * sizeof(*cpi->twopass.fp_mb_float_stats), 1));
 
   {

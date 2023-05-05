@@ -1060,7 +1060,7 @@ static INLINE void partition_info_init(struct VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int unit_width = get_num_unit_4x4(cpi->frame_info.frame_width);
   const int unit_height = get_num_unit_4x4(cpi->frame_info.frame_height);
-  CHECK_MEM_ERROR(cm, cpi->partition_info,
+  CHECK_MEM_ERROR(&cm->error, cpi->partition_info,
                   (PARTITION_INFO *)vpx_calloc(unit_width * unit_height,
                                                sizeof(PARTITION_INFO)));
   memset(cpi->partition_info, 0,
@@ -1088,7 +1088,7 @@ static INLINE void motion_vector_info_init(struct VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int unit_width = get_num_unit_4x4(cpi->frame_info.frame_width);
   const int unit_height = get_num_unit_4x4(cpi->frame_info.frame_height);
-  CHECK_MEM_ERROR(cm, cpi->motion_vector_info,
+  CHECK_MEM_ERROR(&cm->error, cpi->motion_vector_info,
                   (MOTION_VECTOR_INFO *)vpx_calloc(unit_width * unit_height,
                                                    sizeof(MOTION_VECTOR_INFO)));
   memset(cpi->motion_vector_info, 0,
@@ -1107,7 +1107,7 @@ static INLINE void free_motion_vector_info(struct VP9_COMP *cpi) {
 static INLINE void tpl_stats_info_init(struct VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   CHECK_MEM_ERROR(
-      cm, cpi->tpl_stats_info,
+      &cm->error, cpi->tpl_stats_info,
       (TplDepStats *)vpx_calloc(MAX_LAG_BUFFERS, sizeof(TplDepStats)));
   memset(cpi->tpl_stats_info, 0, MAX_LAG_BUFFERS * sizeof(TplDepStats));
 }
@@ -1126,7 +1126,7 @@ static INLINE void fp_motion_vector_info_init(struct VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int unit_width = get_num_unit_16x16(cpi->frame_info.frame_width);
   const int unit_height = get_num_unit_16x16(cpi->frame_info.frame_height);
-  CHECK_MEM_ERROR(cm, cpi->fp_motion_vector_info,
+  CHECK_MEM_ERROR(&cm->error, cpi->fp_motion_vector_info,
                   (MOTION_VECTOR_INFO *)vpx_calloc(unit_width * unit_height,
                                                    sizeof(MOTION_VECTOR_INFO)));
 }
@@ -1475,7 +1475,7 @@ static INLINE void alloc_frame_mvs(VP9_COMMON *const cm, int buffer_idx) {
   if (new_fb_ptr->mvs == NULL || new_fb_ptr->mi_rows < cm->mi_rows ||
       new_fb_ptr->mi_cols < cm->mi_cols) {
     vpx_free(new_fb_ptr->mvs);
-    CHECK_MEM_ERROR(cm, new_fb_ptr->mvs,
+    CHECK_MEM_ERROR(&cm->error, new_fb_ptr->mvs,
                     (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
                                          sizeof(*new_fb_ptr->mvs)));
     new_fb_ptr->mi_rows = cm->mi_rows;
