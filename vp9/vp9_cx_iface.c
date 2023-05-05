@@ -129,6 +129,8 @@ struct vpx_codec_alg_priv {
   BufferPool *buffer_pool;
 };
 
+// Called by encoder_set_config() and encoder_encode() only. Must not be called
+// by encoder_init().
 static vpx_codec_err_t update_error_state(
     vpx_codec_alg_priv_t *ctx, const struct vpx_internal_error_info *error) {
   const vpx_codec_err_t res = error->error_code;

@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "./vp9_rtcd.h"
 #include "./vpx_config.h"
@@ -2872,6 +2873,10 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   }
 
   vp9_extrc_delete(&cpi->ext_ratectrl);
+
+  // Help detect use after free of the error detail string.
+  memset(cm->error.detail, 'A', sizeof(cm->error.detail) - 1);
+  cm->error.detail[sizeof(cm->error.detail) - 1] = '\0';
 
   vp9_remove_common(cm);
   vp9_free_ref_frame_buffers(cm->buffer_pool);
