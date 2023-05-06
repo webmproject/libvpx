@@ -81,8 +81,6 @@ ifeq ($(CONFIG_LIBYUV),yes)
   $(BUILD_PFX)third_party/libyuv/%.cc.o: CXXFLAGS += ${LIBYUV_CXXFLAGS}
 endif
 ifeq ($(CONFIG_WEBM_IO),yes)
-  vpxdec.SRCS                 += $(LIBWEBM_COMMON_SRCS)
-  vpxdec.SRCS                 += $(LIBWEBM_MUXER_SRCS)
   vpxdec.SRCS                 += $(LIBWEBM_PARSER_SRCS)
   vpxdec.SRCS                 += webmdec.cc webmdec.h
 endif
