@@ -269,6 +269,10 @@ case "$target" in
     ;;
     arm64*)
         platforms[0]="ARM64"
+        # As of Visual Studio 2022 17.5.5, clang-cl does not support ARM64EC.
+        if [ "$vs_ver" -ge 17 -a "$platform_toolset" != "ClangCl" ]; then
+            platforms[1]="ARM64EC"
+        fi
         asm_Debug_cmdline="armasm64 -nologo -oldit &quot;%(FullPath)&quot;"
         asm_Release_cmdline="armasm64 -nologo -oldit &quot;%(FullPath)&quot;"
     ;;
