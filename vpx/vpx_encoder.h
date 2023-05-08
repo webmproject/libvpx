@@ -271,6 +271,12 @@ typedef struct VpxTplFrameStats {
   VpxTplBlockStats *block_stats_list; /**< List of tpl stats for each block */
 } VpxTplFrameStats;
 
+/*!\brief Temporal dependency model stats for each GOP before propagation */
+typedef struct VpxTplGopStats {
+  int size; /**< GOP size, also the size of frame_stats_list. */
+  VpxTplFrameStats *frame_stats_list; /**< List of tpl stats for each frame */
+} VpxTplGopStats;
+
 /*!\brief Encoded Frame Flags
  *
  * This type indicates a bitfield to be passed to vpx_codec_encode(), defining
