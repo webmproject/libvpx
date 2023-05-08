@@ -1321,7 +1321,7 @@ add_proto qw/unsigned int vpx_get4x4sse_cs/, "const unsigned char *src_ptr, int 
   specialize qw/vpx_get4x4sse_cs neon msa vsx/;
 
 add_proto qw/void vpx_comp_avg_pred/, "uint8_t *comp_pred, const uint8_t *pred, int width, int height, const uint8_t *ref, int ref_stride";
-  specialize qw/vpx_comp_avg_pred neon sse2 vsx lsx/;
+  specialize qw/vpx_comp_avg_pred neon sse2 avx2 vsx lsx/;
 
 #
 # Subpixel Variance

@@ -1937,10 +1937,10 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bsize,
 
 // Prediction buffer from second frame.
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, second_pred_alloc_16[64 * 64]);
+  DECLARE_ALIGNED(32, uint16_t, second_pred_alloc_16[64 * 64]);
   uint8_t *second_pred;
 #else
-  DECLARE_ALIGNED(16, uint8_t, second_pred[64 * 64]);
+  DECLARE_ALIGNED(32, uint8_t, second_pred[64 * 64]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Check number of iterations do not exceed the max
