@@ -1320,7 +1320,7 @@ void vp9_init_tpl_buffer(VP9_COMP *cpi) {
 
   vpx_free(cpi->select_mv_arr);
   CHECK_MEM_ERROR(
-      cm, cpi->select_mv_arr,
+      &cm->error, cpi->select_mv_arr,
       vpx_calloc(mi_rows * mi_cols * 4, sizeof(*cpi->select_mv_arr)));
 #endif
 
@@ -1335,23 +1335,23 @@ void vp9_init_tpl_buffer(VP9_COMP *cpi) {
     for (rf_idx = 0; rf_idx < MAX_INTER_REF_FRAMES; ++rf_idx) {
       vpx_free(cpi->tpl_stats[frame].mv_mode_arr[rf_idx]);
       CHECK_MEM_ERROR(
-          cm, cpi->tpl_stats[frame].mv_mode_arr[rf_idx],
+          &cm->error, cpi->tpl_stats[frame].mv_mode_arr[rf_idx],
           vpx_calloc(mi_rows * mi_cols * 4,
                      sizeof(*cpi->tpl_stats[frame].mv_mode_arr[rf_idx])));
       vpx_free(cpi->tpl_stats[frame].rd_diff_arr[rf_idx]);
       CHECK_MEM_ERROR(
-          cm, cpi->tpl_stats[frame].rd_diff_arr[rf_idx],
+          &cm->error, cpi->tpl_stats[frame].rd_diff_arr[rf_idx],
           vpx_calloc(mi_rows * mi_cols * 4,
                      sizeof(*cpi->tpl_stats[frame].rd_diff_arr[rf_idx])));
     }
 #endif
     vpx_free(cpi->tpl_stats[frame].tpl_stats_ptr);
-    CHECK_MEM_ERROR(cm, cpi->tpl_stats[frame].tpl_stats_ptr,
+    CHECK_MEM_ERROR(&cm->error, cpi->tpl_stats[frame].tpl_stats_ptr,
                     vpx_calloc(mi_rows * mi_cols,
                                sizeof(*cpi->tpl_stats[frame].tpl_stats_ptr)));
     vpx_free(cpi->tpl_frame_stats[frame].block_stats_list);
     CHECK_MEM_ERROR(
-        cm, cpi->tpl_frame_stats[frame].block_stats_list,
+        &cm->error, cpi->tpl_frame_stats[frame].block_stats_list,
         vpx_calloc(mi_rows * mi_cols,
                    sizeof(*cpi->tpl_frame_stats[frame].block_stats_list)));
     cpi->tpl_frame_stats[frame].num_blocks = mi_rows * mi_cols;

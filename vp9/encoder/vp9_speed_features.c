@@ -676,7 +676,7 @@ static void set_rt_speed_feature_framesize_independent(
       if (cpi->content_state_sb_fd == NULL &&
           (!cpi->use_svc ||
            svc->spatial_layer_id == svc->number_spatial_layers - 1)) {
-        CHECK_MEM_ERROR(cm, cpi->content_state_sb_fd,
+        CHECK_MEM_ERROR(&cm->error, cpi->content_state_sb_fd,
                         (uint8_t *)vpx_calloc(
                             (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
                             sizeof(uint8_t)));
@@ -832,13 +832,13 @@ static void set_rt_speed_feature_framesize_independent(
     }
     if (cpi->count_arf_frame_usage == NULL) {
       CHECK_MEM_ERROR(
-          cm, cpi->count_arf_frame_usage,
+          &cm->error, cpi->count_arf_frame_usage,
           (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
                                 sizeof(*cpi->count_arf_frame_usage)));
     }
     if (cpi->count_lastgolden_frame_usage == NULL)
       CHECK_MEM_ERROR(
-          cm, cpi->count_lastgolden_frame_usage,
+          &cm->error, cpi->count_lastgolden_frame_usage,
           (uint8_t *)vpx_calloc((cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
                                 sizeof(*cpi->count_lastgolden_frame_usage)));
   }

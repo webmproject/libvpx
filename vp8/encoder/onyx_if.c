@@ -1169,7 +1169,8 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
 #else
     unsigned int tokens = cm->mb_rows * cm->mb_cols * 24 * 16;
 #endif
-    CHECK_MEM_ERROR(cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
+    CHECK_MEM_ERROR(&cpi->common.error, cpi->tok,
+                    vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
 
   /* Data used for real time vc mode to see if gf needs refreshing */
@@ -1178,37 +1179,39 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
   /* Structures used to monitor GF usage */
   vpx_free(cpi->gf_active_flags);
   CHECK_MEM_ERROR(
-      cpi->gf_active_flags,
+      &cpi->common.error, cpi->gf_active_flags,
       vpx_calloc(sizeof(*cpi->gf_active_flags), cm->mb_rows * cm->mb_cols));
   cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
   vpx_free(cpi->mb_activity_map);
   CHECK_MEM_ERROR(
-      cpi->mb_activity_map,
+      &cpi->common.error, cpi->mb_activity_map,
       vpx_calloc(sizeof(*cpi->mb_activity_map), cm->mb_rows * cm->mb_cols));
 
   /* allocate memory for storing last frame's MVs for MV prediction. */
   vpx_free(cpi->lfmv);
-  CHECK_MEM_ERROR(cpi->lfmv, vpx_calloc((cm->mb_rows + 2) * (cm->mb_cols + 2),
-                                        sizeof(*cpi->lfmv)));
+  CHECK_MEM_ERROR(
+      &cpi->common.error, cpi->lfmv,
+      vpx_calloc((cm->mb_rows + 2) * (cm->mb_cols + 2), sizeof(*cpi->lfmv)));
   vpx_free(cpi->lf_ref_frame_sign_bias);
-  CHECK_MEM_ERROR(cpi->lf_ref_frame_sign_bias,
+  CHECK_MEM_ERROR(&cpi->common.error, cpi->lf_ref_frame_sign_bias,
                   vpx_calloc((cm->mb_rows + 2) * (cm->mb_cols + 2),
                              sizeof(*cpi->lf_ref_frame_sign_bias)));
   vpx_free(cpi->lf_ref_frame);
-  CHECK_MEM_ERROR(cpi->lf_ref_frame,
+  CHECK_MEM_ERROR(&cpi->common.error, cpi->lf_ref_frame,
                   vpx_calloc((cm->mb_rows + 2) * (cm->mb_cols + 2),
                              sizeof(*cpi->lf_ref_frame)));
 
   /* Create the encoder segmentation map and set all entries to 0 */
   vpx_free(cpi->segmentation_map);
   CHECK_MEM_ERROR(
-      cpi->segmentation_map,
+      &cpi->common.error, cpi->segmentation_map,
       vpx_calloc(cm->mb_rows * cm->mb_cols, sizeof(*cpi->segmentation_map)));
   cpi->cyclic_refresh_mode_index = 0;
   vpx_free(cpi->active_map);
-  CHECK_MEM_ERROR(cpi->active_map, vpx_calloc(cm->mb_rows * cm->mb_cols,
-                                              sizeof(*cpi->active_map)));
+  CHECK_MEM_ERROR(
+      &cpi->common.error, cpi->active_map,
+      vpx_calloc(cm->mb_rows * cm->mb_cols, sizeof(*cpi->active_map)));
   memset(cpi->active_map, 1, (cm->mb_rows * cm->mb_cols));
 
 #if CONFIG_MULTITHREAD
@@ -1226,7 +1229,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
     int i;
 
     vpx_free(cpi->mt_current_mb_col);
-    CHECK_MEM_ERROR(cpi->mt_current_mb_col,
+    CHECK_MEM_ERROR(&cpi->common.error, cpi->mt_current_mb_col,
                     vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cm->mb_rows));
     for (i = 0; i < cm->mb_rows; ++i)
       vpx_atomic_init(&cpi->mt_current_mb_col[i], 0);
@@ -1235,7 +1238,8 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
 #endif
 
   vpx_free(cpi->tplist);
-  CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cm->mb_rows));
+  CHECK_MEM_ERROR(&cpi->common.error, cpi->tplist,
+                  vpx_malloc(sizeof(TOKENLIST) * cm->mb_rows));
 
 #if CONFIG_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
@@ -1773,8 +1777,9 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
 
   cpi->common.error.setjmp = 1;
 
-  CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site),
-                                         (MAX_MVSEARCH_STEPS * 8) + 1));
+  CHECK_MEM_ERROR(
+      &cpi->common.error, cpi->mb.ss,
+      vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
 
   vp8_create_common(&cpi->common);
 
@@ -1879,18 +1884,19 @@ struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
   }
 
   if (cpi->cyclic_refresh_mode_enabled) {
-    CHECK_MEM_ERROR(cpi->cyclic_refresh_map,
+    CHECK_MEM_ERROR(&cpi->common.error, cpi->cyclic_refresh_map,
                     vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
   } else {
     cpi->cyclic_refresh_map = (signed char *)NULL;
   }
 
-  CHECK_MEM_ERROR(cpi->skin_map, vpx_calloc(cm->mb_rows * cm->mb_cols,
-                                            sizeof(cpi->skin_map[0])));
+  CHECK_MEM_ERROR(
+      &cpi->common.error, cpi->skin_map,
+      vpx_calloc(cm->mb_rows * cm->mb_cols, sizeof(cpi->skin_map[0])));
 
-  CHECK_MEM_ERROR(cpi->consec_zero_last,
+  CHECK_MEM_ERROR(&cpi->common.error, cpi->consec_zero_last,
                   vpx_calloc(cm->mb_rows * cm->mb_cols, 1));
-  CHECK_MEM_ERROR(cpi->consec_zero_last_mvbias,
+  CHECK_MEM_ERROR(&cpi->common.error, cpi->consec_zero_last_mvbias,
                   vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
 
   /*Initialize the feed-forward activity masking.*/
