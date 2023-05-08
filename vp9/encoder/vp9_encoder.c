@@ -681,9 +681,10 @@ VP9_LEVEL vp9_get_level(const Vp9LevelSpec *const level_spec) {
   return (i == VP9_LEVELS) ? LEVEL_UNKNOWN : vp9_level_defs[i].level;
 }
 
-int vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
-                    unsigned int cols, int delta_q[8], int delta_lf[8],
-                    int skip[8], int ref_frame[8]) {
+vpx_codec_err_t vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map,
+                                unsigned int rows, unsigned int cols,
+                                int delta_q[8], int delta_lf[8], int skip[8],
+                                int ref_frame[8]) {
   VP9_COMMON *cm = &cpi->common;
   vpx_roi_map_t *roi = &cpi->roi;
   const int range = 63;
@@ -694,13 +695,13 @@ int vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
 
   // Check number of rows and columns match
   if (frame_rows != (int)rows || frame_cols != (int)cols) {
-    return -1;
+    return VPX_CODEC_INVALID_PARAM;
   }
 
   if (!check_seg_range(delta_q, range) || !check_seg_range(delta_lf, range) ||
       !check_seg_range(ref_frame, ref_frame_range) ||
       !check_seg_range(skip, skip_range))
-    return -1;
+    return VPX_CODEC_INVALID_PARAM;
 
   // Also disable segmentation if no deltas are specified.
   if (!map ||
@@ -714,14 +715,15 @@ int vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
         ref_frame[6] == -1 && ref_frame[7] == -1))) {
     vp9_disable_segmentation(&cm->seg);
     cpi->roi.enabled = 0;
-    return 0;
+    return VPX_CODEC_OK;
   }
 
   if (roi->roi_map) {
     vpx_free(roi->roi_map);
     roi->roi_map = NULL;
   }
-  CHECK_MEM_ERROR(cm, roi->roi_map, vpx_malloc(rows * cols));
+  roi->roi_map = vpx_malloc(rows * cols);
+  if (!roi->roi_map) return VPX_CODEC_MEM_ERROR;
 
   // Copy to ROI structure in the compressor.
   memcpy(roi->roi_map, map, rows * cols);
@@ -733,7 +735,7 @@ int vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
   roi->rows = rows;
   roi->cols = cols;
 
-  return 0;
+  return VPX_CODEC_OK;
 }
 
 int vp9_set_active_map(VP9_COMP *cpi, unsigned char *new_map_16x16, int rows,
