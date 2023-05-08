@@ -2193,8 +2193,6 @@ static int tile_worker_hook(void *arg1, void *arg2) {
 
   volatile int mi_row = 0;
   volatile int n = tile_data->buf_start;
-  tile_data->error_info.setjmp = 1;
-
   if (setjmp(tile_data->error_info.jmp)) {
     tile_data->error_info.setjmp = 0;
     tile_data->xd.corrupted = 1;
@@ -2207,6 +2205,7 @@ static int tile_worker_hook(void *arg1, void *arg2) {
     }
     return 0;
   }
+  tile_data->error_info.setjmp = 1;
 
   tile_data->xd.corrupted = 0;
 

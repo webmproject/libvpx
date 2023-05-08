@@ -815,6 +815,7 @@ static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
     assert(codec_err != VPX_CODEC_OK);
     return codec_err;
   }
+  ctx->cpi->common.error.setjmp = 1;
 
   ctx->cfg = *cfg;
   set_encoder_config(&ctx->oxcf, &ctx->cfg, &ctx->extra_cfg);
