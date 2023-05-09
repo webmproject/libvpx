@@ -297,7 +297,7 @@ static unsigned int setup_center_error(
       besterr =
           vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, src, src_stride, sse1);
     } else {
-      DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
+      DECLARE_ALIGNED(32, uint8_t, comp_pred[64 * 64]);
       vpx_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
       besterr = vfp->vf(comp_pred, w, src, src_stride, sse1);
     }
@@ -312,7 +312,7 @@ static unsigned int setup_center_error(
   uint32_t besterr;
   (void)xd;
   if (second_pred != NULL) {
-    DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
+    DECLARE_ALIGNED(32, uint8_t, comp_pred[64 * 64]);
     vpx_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
     besterr = vfp->vf(comp_pred, w, src, src_stride, sse1);
   } else {
@@ -635,7 +635,7 @@ static int accurate_sub_pel_search(
     vp9_build_inter_predictor(pre_address, y_stride, pred, w, this_mv, sf, w, h,
                               0, kernel, MV_PRECISION_Q3, 0, 0);
     if (second_pred != NULL) {
-      DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
+      DECLARE_ALIGNED(32, uint8_t, comp_pred[64 * 64]);
       vpx_comp_avg_pred(comp_pred, second_pred, w, h, pred, w);
       besterr = vfp->vf(comp_pred, w, src_address, src_stride, sse);
     } else {
@@ -654,7 +654,7 @@ static int accurate_sub_pel_search(
   vp9_build_inter_predictor(pre_address, y_stride, pred, w, this_mv, sf, w, h,
                             0, kernel, MV_PRECISION_Q3, 0, 0);
   if (second_pred != NULL) {
-    DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
+    DECLARE_ALIGNED(32, uint8_t, comp_pred[64 * 64]);
     vpx_comp_avg_pred(comp_pred, second_pred, w, h, pred, w);
     besterr = vfp->vf(comp_pred, w, src_address, src_stride, sse);
   } else {
