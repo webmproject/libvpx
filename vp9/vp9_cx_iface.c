@@ -29,6 +29,8 @@
 #include "vp9/vp9_cx_iface.h"
 #include "vp9/vp9_iface_common.h"
 
+#include "vpx/vpx_tpl.h"
+
 typedef struct vp9_extracfg {
   int cpu_used;  // available cpu percentage in 1/16
   unsigned int enable_auto_alt_ref;

@@ -19,7 +19,7 @@
 #if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 #include "vpx/vp8cx.h"
 #endif
-#include "vpx/vpx_encoder.h"
+#include "vpx/vpx_tpl.h"
 
 namespace libvpx_test {
 
