@@ -20,7 +20,7 @@
 
 #include "./vpx_config.h"
 #include "vpx/vp8cx.h"
-#include "vpx/vpx_encoder.h"
+#include "vpx/vpx_tpl.h"
 
 namespace {
 
