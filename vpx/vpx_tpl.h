@@ -15,6 +15,8 @@
 #ifndef VPX_VPX_VPX_TPL_H_
 #define VPX_VPX_VPX_TPL_H_
 
+#include <stdio.h>
+
 #include "./vpx_integer.h"
 
 #ifdef __cplusplus
@@ -29,7 +31,7 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures
  */
-#define VPX_TPL_ABI_VERSION (0) /**<\hideinitializer*/
+#define VPX_TPL_ABI_VERSION (1) /**<\hideinitializer*/
 
 /*!\brief Temporal dependency model stats for each block before propagation */
 typedef struct VpxTplBlockStats {
@@ -55,6 +57,40 @@ typedef struct VpxTplGopStats {
   int size; /**< GOP size, also the size of frame_stats_list. */
   VpxTplFrameStats *frame_stats_list; /**< List of tpl stats for each frame */
 } VpxTplGopStats;
+
+/*!\brief Write VpxTplGopStats to file
+ *
+ * Accepts an opened file handle and writes \p tpl_gop_stats.
+ *
+ * \param[in]    tpl_file       A FILE pointer that's already been opened.
+ * \param[in]    tpl_gop_stats  VpxTplGopStats that contains TPL stats for the
+ *                              whole GOP.
+ *
+ * \return VPX_CODEC_OK if TPL stats are successfully written.
+ */
+vpx_codec_err_t vpx_write_tpl_gop_stats(FILE *tpl_file,
+                                        const VpxTplGopStats *tpl_gop_stats);
+
+/*!\brief Read VpxTplGopStats from file
+ *
+ * Accepts an opened file handle and reads TPL stats and stores them into
+ * \p tpl_gop_stats. Allocates memory for TPL stats.
+ *
+ * \param[in]     tpl_file       A FILE pointer that's already been opened.
+ * \param[out]    tpl_gop_stats  VpxTplGopStats that contains TPL stats for the
+ *                               whole GOP.
+ *
+ * \return VPX_CODEC_OK if TPL stats are successfully read from file.
+ */
+vpx_codec_err_t vpx_read_tpl_gop_stats(FILE *tpl_file,
+                                       VpxTplGopStats *tpl_gop_stats);
+
+/*!\brief Free the memory allocated for VpxTplGopStats
+ *
+ * \param[in]    tpl_gop_stats  VpxTplGopStats that contains TPL stats for the
+ *                              whole GOP.
+ */
+void vpx_free_tpl_gop_stats(VpxTplGopStats *tpl_gop_stats);
 
 #ifdef __cplusplus
 }  // extern "C"

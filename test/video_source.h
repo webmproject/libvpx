@@ -64,7 +64,7 @@ inline FILE *OpenTestDataFile(const std::string &file_name) {
   return fopen(path_to_source.c_str(), "rb");
 }
 
-static FILE *GetTempOutFile(std::string *file_name) {
+static FILE *GetTempOutFile(std::string *file_name, const char *io_mode) {
   file_name->clear();
 #if defined(_WIN32)
   char fname[MAX_PATH];
@@ -73,7 +73,7 @@ static FILE *GetTempOutFile(std::string *file_name) {
     // Assume for now that the filename generated is unique per process
     if (GetTempFileNameA(tmppath, "lvx", 0, fname)) {
       file_name->assign(fname);
-      return fopen(fname, "wb+");
+      return fopen(fname, io_mode);
     }
   }
   return nullptr;
@@ -94,13 +94,16 @@ static FILE *GetTempOutFile(std::string *file_name) {
   const int fd = mkstemp(temp_file_name.get());
   if (fd == -1) return nullptr;
   *file_name = temp_file_name.get();
-  return fdopen(fd, "wb+");
+  return fdopen(fd, io_mode);
 #endif
 }
 
 class TempOutFile {
  public:
-  TempOutFile() { file_ = GetTempOutFile(&file_name_); }
+  TempOutFile() { file_ = GetTempOutFile(&file_name_, "wb+"); }
+  TempOutFile(const char *io_mode) {
+    file_ = GetTempOutFile(&file_name_, io_mode);
+  }
   ~TempOutFile() {
     CloseFile();
     if (!file_name_.empty()) {
