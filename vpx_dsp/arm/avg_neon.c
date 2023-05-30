@@ -121,17 +121,17 @@ void vpx_int_pro_row_neon(int16_t hbuf[16], uint8_t const *ref,
 }
 
 int16_t vpx_int_pro_col_neon(uint8_t const *ref, const int width) {
+  uint16x8_t sum;
   int i;
-  uint16x8_t vec_sum = vdupq_n_u16(0);
 
-  for (i = 0; i < width; i += 16) {
-    const uint8x16_t vec_row = vld1q_u8(ref);
-    vec_sum = vaddw_u8(vec_sum, vget_low_u8(vec_row));
-    vec_sum = vaddw_u8(vec_sum, vget_high_u8(vec_row));
-    ref += 16;
+  assert(width >= 16 && width % 16 == 0);
+
+  sum = vpaddlq_u8(vld1q_u8(ref));
+  for (i = 16; i < width; i += 16) {
+    sum = vpadalq_u8(sum, vld1q_u8(ref + i));
   }
 
-  return (int16_t)horizontal_add_uint16x8(vec_sum);
+  return (int16_t)horizontal_add_uint16x8(sum);
 }
 
 // ref, src = [0, 510] - max diff = 16-bits
