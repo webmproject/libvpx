@@ -131,7 +131,6 @@ static int extrc_get_frame_type(FRAME_UPDATE_TYPE update_type) {
     default:
       fprintf(stderr, "Unsupported update_type %d\n", update_type);
       abort();
-      return 1;
   }
 }
 

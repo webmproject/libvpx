@@ -76,7 +76,7 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
       case TX_8X8: size_ = 8; break;
       case TX_16X16: size_ = 16; break;
       case TX_32X32: size_ = 32; break;
-      default: FAIL() << "Wrong Size!"; break;
+      default: FAIL() << "Wrong Size!";
     }
 
     // Randomize stride_ to a value less than or equal to 1024

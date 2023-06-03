@@ -364,7 +364,6 @@ static vpx_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
         case BLOCK_8X16: return vpx_highbd_8_mse8x16;
         default: return vpx_highbd_8_mse16x16;
       }
-      break;
     case 10:
       switch (bsize) {
         case BLOCK_8X8: return vpx_highbd_10_mse8x8;
@@ -372,7 +371,6 @@ static vpx_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
         case BLOCK_8X16: return vpx_highbd_10_mse8x16;
         default: return vpx_highbd_10_mse16x16;
       }
-      break;
     case 12:
       switch (bsize) {
         case BLOCK_8X8: return vpx_highbd_12_mse8x8;
@@ -380,7 +378,6 @@ static vpx_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
         case BLOCK_8X16: return vpx_highbd_12_mse8x16;
         default: return vpx_highbd_12_mse16x16;
       }
-      break;
   }
 }
 
@@ -1508,7 +1505,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   }
 
   // Use this to see what the first pass reconstruction looks like.
-  if (0) {
+  if (/*DISABLES CODE*/ (0)) {
     char filename[512];
     FILE *recon_file;
     snprintf(filename, sizeof(filename), "enc%04d.yuv",

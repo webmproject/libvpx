@@ -333,23 +333,16 @@ static void separate_arf_mbs(VP9_COMP *cpi) {
     }
   }
 
-  // Only bother with segmentation if over 10% of the MBs in static segment
-  // if ( ncnt[1] && (ncnt[0] / ncnt[1] < 10) )
-  if (1) {
-    // Note % of blocks that are marked as static
-    if (cm->MBs)
-      cpi->static_mb_pct = (ncnt[1] * 100) / (cm->mi_rows * cm->mi_cols);
+  // Note % of blocks that are marked as static
+  if (cm->MBs)
+    cpi->static_mb_pct = (ncnt[1] * 100) / (cm->mi_rows * cm->mi_cols);
 
-    // This error case should not be reachable as this function should
-    // never be called with the common data structure uninitialized.
-    else
-      cpi->static_mb_pct = 0;
-
-    vp9_enable_segmentation(&cm->seg);
-  } else {
+  // This error case should not be reachable as this function should
+  // never be called with the common data structure uninitialized.
+  else
     cpi->static_mb_pct = 0;
-    vp9_disable_segmentation(&cm->seg);
-  }
+
+  vp9_enable_segmentation(&cm->seg);
 
   // Free localy allocated storage
   vpx_free(arf_not_zz);
