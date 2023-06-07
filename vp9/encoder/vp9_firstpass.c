@@ -607,10 +607,10 @@ static int get_smooth_intra_threshold(VP9_COMMON *cm) {
 #define KERNEL_SIZE 3
 
 // Baseline Kernal weights for first pass noise metric
-static uint8_t fp_dn_kernal_3[KERNEL_SIZE * KERNEL_SIZE] = { 1, 2, 1, 2, 4,
+static uint8_t fp_dn_kernel_3[KERNEL_SIZE * KERNEL_SIZE] = { 1, 2, 1, 2, 4,
                                                              2, 1, 2, 1 };
 
-// Estimate noise at a single point based on the impace of a spatial kernal
+// Estimate noise at a single point based on the impace of a spatial kernel
 // on the point value
 static int fp_estimate_point_noise(uint8_t *src_ptr, const int stride) {
   int sum_weight = 0;
@@ -620,23 +620,23 @@ static int fp_estimate_point_noise(uint8_t *src_ptr, const int stride) {
   int diff;
   int dn_diff;
   uint8_t *tmp_ptr;
-  uint8_t *kernal_ptr;
+  uint8_t *kernel_ptr;
   uint8_t dn_val;
   uint8_t centre_val = *src_ptr;
 
-  kernal_ptr = fp_dn_kernal_3;
+  kernel_ptr = fp_dn_kernel_3;
 
-  // Apply the kernal
+  // Apply the kernel
   tmp_ptr = src_ptr - stride - 1;
   for (i = 0; i < KERNEL_SIZE; ++i) {
     for (j = 0; j < KERNEL_SIZE; ++j) {
       diff = abs((int)centre_val - (int)tmp_ptr[j]);
       max_diff = VPXMAX(max_diff, diff);
       if (diff <= FP_DN_THRESH) {
-        sum_weight += *kernal_ptr;
-        sum_val += (int)tmp_ptr[j] * (int)*kernal_ptr;
+        sum_weight += *kernel_ptr;
+        sum_val += (int)tmp_ptr[j] * (int)*kernel_ptr;
       }
-      ++kernal_ptr;
+      ++kernel_ptr;
     }
     tmp_ptr += stride;
   }
@@ -662,13 +662,13 @@ static int fp_highbd_estimate_point_noise(uint8_t *src_ptr, const int stride) {
   int dn_diff;
   uint8_t *tmp_ptr;
   uint16_t *tmp_ptr16;
-  uint8_t *kernal_ptr;
+  uint8_t *kernel_ptr;
   uint16_t dn_val;
   uint16_t centre_val = *CONVERT_TO_SHORTPTR(src_ptr);
 
-  kernal_ptr = fp_dn_kernal_3;
+  kernel_ptr = fp_dn_kernel_3;
 
-  // Apply the kernal
+  // Apply the kernel
   tmp_ptr = src_ptr - stride - 1;
   for (i = 0; i < KERNEL_SIZE; ++i) {
     tmp_ptr16 = CONVERT_TO_SHORTPTR(tmp_ptr);
@@ -676,10 +676,10 @@ static int fp_highbd_estimate_point_noise(uint8_t *src_ptr, const int stride) {
       diff = abs((int)centre_val - (int)tmp_ptr16[j]);
       max_diff = VPXMAX(max_diff, diff);
       if (diff <= FP_DN_THRESH) {
-        sum_weight += *kernal_ptr;
-        sum_val += (int)tmp_ptr16[j] * (int)*kernal_ptr;
+        sum_weight += *kernel_ptr;
+        sum_val += (int)tmp_ptr16[j] * (int)*kernel_ptr;
       }
-      ++kernal_ptr;
+      ++kernel_ptr;
     }
     tmp_ptr += stride;
   }

@@ -2251,7 +2251,7 @@ void vp8_remove_compressor(VP8_COMP **comp) {
 #if 0
         {
             printf("\n_pick_loop_filter_level:%d\n", cpi->time_pick_lpf / 1000);
-            printf("\n_frames recive_data encod_mb_row compress_frame  Total\n");
+            printf("\n_frames receive_data encod_mb_row compress_frame  Total\n");
             printf("%6d %10ld %10ld %10ld %10ld\n", cpi->common.current_video_frame, cpi->time_receive_data / 1000, cpi->time_encode_mb_row / 1000, cpi->time_compress_data / 1000, (cpi->time_receive_data + cpi->time_compress_data) / 1000);
         }
 #endif
