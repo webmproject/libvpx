@@ -299,7 +299,7 @@ static REFERENCE_MODE read_block_reference_mode(VP9_COMMON *cm,
   }
 }
 
-// Read the referncence frame
+// Read the reference frame
 static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                             vpx_reader *r, int segment_id,
                             MV_REFERENCE_FRAME ref_frame[2]) {

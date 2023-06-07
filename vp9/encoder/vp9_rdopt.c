@@ -2183,7 +2183,7 @@ static int64_t rd_pick_best_sub8x8_mode(
           int cost_list[5];
           const MvLimits tmp_mv_limits = x->mv_limits;
 
-          /* Is the best so far sufficiently good that we cant justify doing
+          /* Is the best so far sufficiently good that we can't justify doing
            * and new motion search. */
           if (best_rd < label_mv_thresh) break;
 

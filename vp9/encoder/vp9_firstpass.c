@@ -606,7 +606,7 @@ static int get_smooth_intra_threshold(VP9_COMMON *cm) {
 #define FP_MAX_DN_THRESH 24
 #define KERNEL_SIZE 3
 
-// Baseline Kernal weights for first pass noise metric
+// Baseline Kernel weights for first pass noise metric
 static uint8_t fp_dn_kernel_3[KERNEL_SIZE * KERNEL_SIZE] = { 1, 2, 1, 2, 4,
                                                              2, 1, 2, 1 };
 
@@ -1458,7 +1458,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     accumulate_stats(&twopass->total_stats, &fps);
   }
 
-  // Copy the previous Last Frame back into gf and and arf buffers if
+  // Copy the previous Last Frame back into gf and arf buffers if
   // the prediction is good enough... but also don't allow it to lag too far.
   if ((twopass->sr_update_lag > 3) ||
       ((cm->current_video_frame > 0) &&
@@ -1675,7 +1675,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
   // Scan the first pass file and calculate a modified score for each
   // frame that is used to distribute bits. The modified score is assumed
-  // to provide a linear basis for bit allocation. I.e a frame A with a score
+  // to provide a linear basis for bit allocation. I.e., a frame A with a score
   // that is double that of frame B will be allocated 2x as many bits.
   {
     double modified_score_total = 0.0;
@@ -3053,7 +3053,7 @@ static int intra_step_transition(const FIRSTPASS_STATS *this_frame,
 #define MIN_INTRA_LEVEL 0.25
 // Threshold for use of the lagging second reference frame. Scene cuts do not
 // usually have a high second ref usage.
-#define SECOND_REF_USEAGE_THRESH 0.2
+#define SECOND_REF_USAGE_THRESH 0.2
 // Hard threshold where the first pass chooses intra for almost all blocks.
 // In such a case even if the frame is not a scene cut coding a key frame
 // may be a good option.
@@ -3083,7 +3083,7 @@ static int test_candidate_kf(const FIRST_PASS_INFO *first_pass_info,
   detect_flash_from_frame_stats(next_frame);
   if (!detect_flash_from_frame_stats(this_frame) &&
       !detect_flash_from_frame_stats(next_frame) &&
-      (this_frame->pcnt_second_ref < SECOND_REF_USEAGE_THRESH) &&
+      (this_frame->pcnt_second_ref < SECOND_REF_USAGE_THRESH) &&
       ((this_frame->pcnt_inter < VERY_LOW_INTER_THRESH) ||
        (slide_transition(this_frame, last_frame, next_frame)) ||
        (intra_step_transition(this_frame, last_frame, next_frame)) ||
@@ -3361,7 +3361,7 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
 
       // The second (lagging) ref error is not valid immediately after
       // a key frame because either the lag has not built up (in the case of
-      // the first key frame or it points to a refernce before the new key
+      // the first key frame or it points to a reference before the new key
       // frame.
       if (i < 2) sr_accumulator = 0.0;
       frame_boost =

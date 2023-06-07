@@ -953,7 +953,7 @@ static INLINE int is_mv_in(const MvLimits *mv_limits, const MV *mv) {
   }
 
 #define MAX_PATTERN_SCALES 11
-#define MAX_PATTERN_CANDIDATES 8  // max number of canddiates per scale
+#define MAX_PATTERN_CANDIDATES 8  // max number of candidates per scale
 #define PATTERN_CANDIDATES_REF 3  // number of refinement candidates
 
 // Calculate and return a sad+mvcost list around an integer best pel.
@@ -1034,7 +1034,7 @@ static int vp9_pattern_search(
                      in_what->stride) +
             mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
 
-  // Search all possible scales upto the search param around the center point
+  // Search all possible scales up to the search param around the center point
   // pick the scale of the point that is best as the starting scale of
   // further steps around it.
   if (do_init_search) {
@@ -1208,7 +1208,7 @@ static int vp9_pattern_search_sad(
                      in_what->stride) +
             mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
 
-  // Search all possible scales upto the search param around the center point
+  // Search all possible scales up to the search param around the center point
   // pick the scale of the point that is best as the starting scale of
   // further steps around it.
   if (do_init_search) {

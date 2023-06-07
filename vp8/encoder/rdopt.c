@@ -1021,7 +1021,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
         BLOCK *c;
         BLOCKD *e;
 
-        /* Is the best so far sufficiently good that we cant justify
+        /* Is the best so far sufficiently good that we can't justify
          * doing a new motion search.
          */
         if (best_label_rd < label_mv_thresh) break;
