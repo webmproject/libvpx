@@ -1706,7 +1706,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
           const int y16_idx = ((j >> 1) << 1);
           // For inter frames: if variance4x4downsample[] == 1 for this 16x16
           // block, then the variance is based on 4x4 down-sampling, so use vt2
-          // in set_vt_partioning(), otherwise use vt.
+          // in set_vt_partitioning(), otherwise use vt.
           v16x16 *vtemp = (!is_key_frame && variance4x4downsample[i2 + j] == 1)
                               ? &vt2[i2 + j]
                               : &vt.split[i].split[j];
@@ -3470,11 +3470,11 @@ static void simple_motion_search(const VP9_COMP *const cpi, MACROBLOCK *const x,
 // Features used: QP; spatial block size contexts; variance of prediction
 // residue after simple_motion_search.
 #define FEATURES 12
-static void ml_predict_var_rd_paritioning(const VP9_COMP *const cpi,
-                                          MACROBLOCK *const x,
-                                          PC_TREE *const pc_tree,
-                                          BLOCK_SIZE bsize, int mi_row,
-                                          int mi_col, int *none, int *split) {
+static void ml_predict_var_rd_partitioning(const VP9_COMP *const cpi,
+                                           MACROBLOCK *const x,
+                                           PC_TREE *const pc_tree,
+                                           BLOCK_SIZE bsize, int mi_row,
+                                           int mi_col, int *none, int *split) {
   const VP9_COMMON *const cm = &cpi->common;
   const NN_CONFIG *nn_config = NULL;
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -4092,8 +4092,8 @@ static int rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
         mi_row + num_8x8_blocks_high_lookup[bsize] <= cm->mi_rows &&
         mi_col + num_8x8_blocks_wide_lookup[bsize] <= cm->mi_cols;
     if (do_rd_ml_partition_var_pruning) {
-      ml_predict_var_rd_paritioning(cpi, x, pc_tree, bsize, mi_row, mi_col,
-                                    &partition_none_allowed, &do_split);
+      ml_predict_var_rd_partitioning(cpi, x, pc_tree, bsize, mi_row, mi_col,
+                                     &partition_none_allowed, &do_split);
     } else {
       vp9_zero(pc_tree->mv);
     }
@@ -4820,9 +4820,9 @@ static void pred_pixel_ready_reset(PC_TREE *pc_tree, BLOCK_SIZE bsize) {
 
 #define FEATURES 6
 #define LABELS 2
-static int ml_predict_var_paritioning(VP9_COMP *cpi, MACROBLOCK *x,
-                                      BLOCK_SIZE bsize, int mi_row,
-                                      int mi_col) {
+static int ml_predict_var_partitioning(VP9_COMP *cpi, MACROBLOCK *x,
+                                       BLOCK_SIZE bsize, int mi_row,
+                                       int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   const NN_CONFIG *nn_config = NULL;
 
@@ -4954,7 +4954,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     if (partition_none_allowed || do_split) do_rect = 0;
     if (partition_none_allowed && do_split) {
       const int ml_predicted_partition =
-          ml_predict_var_paritioning(cpi, x, bsize, mi_row, mi_col);
+          ml_predict_var_partitioning(cpi, x, bsize, mi_row, mi_col);
       if (ml_predicted_partition == PARTITION_NONE) do_split = 0;
       if (ml_predicted_partition == PARTITION_SPLIT) partition_none_allowed = 0;
     }
@@ -5633,7 +5633,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
         if ((cpi->oxcf.rc_mode == VPX_VBR && cpi->rc.high_source_sad &&
              cpi->oxcf.speed < 6 && !frame_is_intra_only(cm) &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
-          // Use lower max_partition_size for low resoultions.
+          // Use lower max_partition_size for low resolutions.
           if (cm->width <= 352 && cm->height <= 288)
             x->max_partition_size = BLOCK_32X32;
           else

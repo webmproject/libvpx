@@ -139,7 +139,7 @@ static int compute_context_model_thresh(const VP9_COMP *const cpi) {
   // frame context probability model is less than a certain threshold.
   // The first component is the most critical part to guarantee adaptivity.
   // Other parameters are estimated based on normal setting of hd resolution
-  // parameters. e.g frame_size = 1920x1080, bitrate = 8000, qindex_factor < 50
+  // parameters. e.g. frame_size = 1920x1080, bitrate = 8000, qindex_factor < 50
   const int thresh =
       ((FRAME_SIZE_FACTOR * frame_size - FRAME_RATE_FACTOR * bitrate) *
        qindex_factor) >>
@@ -2836,7 +2836,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #if 0
     {
       printf("\n_pick_loop_filter_level:%d\n", cpi->time_pick_lpf / 1000);
-      printf("\n_frames recive_data encod_mb_row compress_frame  Total\n");
+      printf("\n_frames receive_data encod_mb_row compress_frame  Total\n");
       printf("%6d %10ld %10ld %10ld %10ld\n", cpi->common.current_video_frame,
              cpi->time_receive_data / 1000, cpi->time_encode_sb_row / 1000,
              cpi->time_compress_data / 1000,
@@ -5020,8 +5020,8 @@ static int setup_interp_filter_search_mask(VP9_COMP *cpi) {
 
 #ifdef ENABLE_KF_DENOISE
 // Baseline kernel weights for denoise
-static uint8_t dn_kernal_3[9] = { 1, 2, 1, 2, 4, 2, 1, 2, 1 };
-static uint8_t dn_kernal_5[25] = { 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 4,
+static uint8_t dn_kernel_3[9] = { 1, 2, 1, 2, 4, 2, 1, 2, 1 };
+static uint8_t dn_kernel_5[25] = { 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 4,
                                    2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1 };
 
 static INLINE void add_denoise_point(int centre_val, int data_val, int thresh,
@@ -5038,17 +5038,17 @@ static void spatial_denoise_point(uint8_t *src_ptr, const int stride,
   int sum_weight = 0;
   int sum_val = 0;
   int thresh = strength;
-  int kernal_size = 5;
+  int kernel_size = 5;
   int half_k_size = 2;
   int i, j;
   int max_diff = 0;
   uint8_t *tmp_ptr;
-  uint8_t *kernal_ptr;
+  uint8_t *kernel_ptr;
 
   // Find the maximum deviation from the source point in the locale.
   tmp_ptr = src_ptr - (stride * (half_k_size + 1)) - (half_k_size + 1);
-  for (i = 0; i < kernal_size + 2; ++i) {
-    for (j = 0; j < kernal_size + 2; ++j) {
+  for (i = 0; i < kernel_size + 2; ++i) {
+    for (j = 0; j < kernel_size + 2; ++j) {
       max_diff = VPXMAX(max_diff, abs((int)*src_ptr - (int)tmp_ptr[j]));
     }
     tmp_ptr += stride;
@@ -5056,19 +5056,19 @@ static void spatial_denoise_point(uint8_t *src_ptr, const int stride,
 
   // Select the kernel size.
   if (max_diff > (strength + (strength >> 1))) {
-    kernal_size = 3;
+    kernel_size = 3;
     half_k_size = 1;
     thresh = thresh >> 1;
   }
-  kernal_ptr = (kernal_size == 3) ? dn_kernal_3 : dn_kernal_5;
+  kernel_ptr = (kernel_size == 3) ? dn_kernel_3 : dn_kernel_5;
 
   // Apply the kernel
   tmp_ptr = src_ptr - (stride * half_k_size) - half_k_size;
-  for (i = 0; i < kernal_size; ++i) {
-    for (j = 0; j < kernal_size; ++j) {
-      add_denoise_point((int)*src_ptr, (int)tmp_ptr[j], thresh, *kernal_ptr,
+  for (i = 0; i < kernel_size; ++i) {
+    for (j = 0; j < kernel_size; ++j) {
+      add_denoise_point((int)*src_ptr, (int)tmp_ptr[j], thresh, *kernel_ptr,
                         &sum_val, &sum_weight);
-      ++kernal_ptr;
+      ++kernel_ptr;
     }
     tmp_ptr += stride;
   }
@@ -5083,17 +5083,17 @@ static void highbd_spatial_denoise_point(uint16_t *src_ptr, const int stride,
   int sum_weight = 0;
   int sum_val = 0;
   int thresh = strength;
-  int kernal_size = 5;
+  int kernel_size = 5;
   int half_k_size = 2;
   int i, j;
   int max_diff = 0;
   uint16_t *tmp_ptr;
-  uint8_t *kernal_ptr;
+  uint8_t *kernel_ptr;
 
   // Find the maximum deviation from the source point in the locale.
   tmp_ptr = src_ptr - (stride * (half_k_size + 1)) - (half_k_size + 1);
-  for (i = 0; i < kernal_size + 2; ++i) {
-    for (j = 0; j < kernal_size + 2; ++j) {
+  for (i = 0; i < kernel_size + 2; ++i) {
+    for (j = 0; j < kernel_size + 2; ++j) {
       max_diff = VPXMAX(max_diff, abs((int)src_ptr - (int)tmp_ptr[j]));
     }
     tmp_ptr += stride;
@@ -5101,19 +5101,19 @@ static void highbd_spatial_denoise_point(uint16_t *src_ptr, const int stride,
 
   // Select the kernel size.
   if (max_diff > (strength + (strength >> 1))) {
-    kernal_size = 3;
+    kernel_size = 3;
     half_k_size = 1;
     thresh = thresh >> 1;
   }
-  kernal_ptr = (kernal_size == 3) ? dn_kernal_3 : dn_kernal_5;
+  kernel_ptr = (kernel_size == 3) ? dn_kernel_3 : dn_kernel_5;
 
   // Apply the kernel
   tmp_ptr = src_ptr - (stride * half_k_size) - half_k_size;
-  for (i = 0; i < kernal_size; ++i) {
-    for (j = 0; j < kernal_size; ++j) {
-      add_denoise_point((int)*src_ptr, (int)tmp_ptr[j], thresh, *kernal_ptr,
+  for (i = 0; i < kernel_size; ++i) {
+    for (j = 0; j < kernel_size; ++j) {
+      add_denoise_point((int)*src_ptr, (int)tmp_ptr[j], thresh, *kernel_ptr,
                         &sum_val, &sum_weight);
-      ++kernal_ptr;
+      ++kernel_ptr;
     }
     tmp_ptr += stride;
   }
