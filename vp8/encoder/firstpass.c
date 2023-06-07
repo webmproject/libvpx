@@ -412,7 +412,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
   int_mv ref_mv_full;
 
   int tmp_err;
-  int step_param = 3; /* Dont search over full range for first pass */
+  int step_param = 3; /* Don't search over full range for first pass */
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
   int n;
   vp8_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
@@ -1717,9 +1717,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         /* Break at cpi->max_gf_interval unless almost totally static */
         (i >= cpi->max_gf_interval && (decay_accumulator < 0.995)) ||
         (
-            /* Dont break out with a very short interval */
+            /* Don't break out with a very short interval */
             (i > MIN_GF_INTERVAL) &&
-            /* Dont break out very close to a key frame */
+            /* Don't break out very close to a key frame */
             ((cpi->twopass.frames_to_key - i) >= MIN_GF_INTERVAL) &&
             ((boost_score > 20.0) || (next_frame.pcnt_inter < 0.75)) &&
             (!flash_detected) &&
@@ -1765,7 +1765,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (boost_score > max_boost) boost_score = max_boost;
   }
 
-  /* Dont allow conventional gf too near the next kf */
+  /* Don't allow conventional gf too near the next kf */
   if ((cpi->twopass.frames_to_key - i) < MIN_GF_INTERVAL) {
     while (i < cpi->twopass.frames_to_key) {
       i++;
@@ -2082,7 +2082,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       }
     }
 
-    /* Dont allow a negative value for gf_bits */
+    /* Don't allow a negative value for gf_bits */
     if (gf_bits < 0) gf_bits = 0;
 
     /* Add in minimum for a frame */
@@ -3011,7 +3011,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       bits_per_frame =
           (double)(cpi->twopass.kf_group_bits / cpi->twopass.frames_to_key);
 
-      /* Dont turn to resampling in easy sections just because they
+      /* Don't turn to resampling in easy sections just because they
        * have been assigned a small number of bits
        */
       if (bits_per_frame < av_bits_per_frame) {

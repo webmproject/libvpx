@@ -1359,7 +1359,7 @@ static void pick_kf_q_bound_two_pass(const VP9_COMP *cpi, int *bottom_index,
       active_best_quality /= 4;
     }
 
-    // Dont allow the active min to be lossless (q0) unlesss the max q
+    // Don't allow the active min to be lossless (q0) unlesss the max q
     // already indicates lossless.
     active_best_quality =
         VPXMIN(active_worst_quality, VPXMAX(1, active_best_quality));
@@ -2693,7 +2693,7 @@ static void vbr_rate_correction(VP9_COMP *cpi, int *this_frame_target) {
   }
 
   // Fast redistribution of bits arising from massive local undershoot.
-  // Dont do it for kf,arf,gf or overlay frames.
+  // Don't do it for kf,arf,gf or overlay frames.
   if (!frame_is_kf_gf_arf(cpi) && !rc->is_src_frame_alt_ref &&
       rc->vbr_bits_off_target_fast) {
     int one_frame_bits = VPXMAX(rc->avg_frame_bandwidth, *this_frame_target);
