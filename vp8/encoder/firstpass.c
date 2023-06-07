@@ -1786,7 +1786,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   alt_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost, &b_boost);
 #endif
 
-  /* Should we use the alternate refernce frame */
+  /* Should we use the alternate reference frame */
   if (allow_alt_ref && (i >= MIN_GF_INTERVAL) &&
       /* don't use ARF very near next kf */
       (i <= (cpi->twopass.frames_to_key - MIN_GF_INTERVAL)) &&

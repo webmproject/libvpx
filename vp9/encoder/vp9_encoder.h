@@ -846,7 +846,7 @@ typedef struct VP9_COMP {
 
   uint8_t *skin_map;
 
-  // segment threashold for encode breakout
+  // segment threshold for encode breakout
   int segment_encode_breakout[MAX_SEGMENTS];
 
   CYCLIC_REFRESH *cyclic_refresh;
