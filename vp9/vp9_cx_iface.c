@@ -2118,7 +2118,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
         { 0 },     // ts_rate_decimator
         0,         // ts_periodicity
         { 0 },     // ts_layer_id
-        { 0 },     // layer_taget_bitrate
+        { 0 },     // layer_target_bitrate
         0,         // temporal_layering_mode
         0,         // use_vizier_rc_params
         { 1, 1 },  // active_wq_factor

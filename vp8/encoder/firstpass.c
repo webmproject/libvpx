@@ -1537,7 +1537,7 @@ static int calc_arf_boost(VP8_COMP *cpi, int offset, int f_frames, int b_frames,
     /* Calculate the baseline boost number for this frame */
     r = calc_frame_boost(cpi, &this_frame, this_frame_mv_in_out);
 
-    /* We want to discount the the flash frame itself and the recovery
+    /* We want to discount the flash frame itself and the recovery
      * frame that follows as both will have poor scores.
      */
     flash_detected =
@@ -1581,7 +1581,7 @@ static int calc_arf_boost(VP8_COMP *cpi, int offset, int f_frames, int b_frames,
     /* Calculate the baseline boost number for this frame */
     r = calc_frame_boost(cpi, &this_frame, this_frame_mv_in_out);
 
-    /* We want to discount the the flash frame itself and the recovery
+    /* We want to discount the flash frame itself and the recovery
      * frame that follows as both will have poor scores.
      */
     flash_detected =

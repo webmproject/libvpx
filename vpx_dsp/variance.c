@@ -180,7 +180,7 @@ static void var_filter_block2d_bil_second_pass(
   }
 
 /* Identical to the variance call except it does not calculate the
- * sse - sum^2 / w*h and returns sse in addtion to modifying the passed in
+ * sse - sum^2 / w*h and returns sse in addition to modifying the passed in
  * variable.
  */
 #define MSE(W, H)                                                        \
