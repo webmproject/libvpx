@@ -34,7 +34,7 @@ struct macroblock_plane {
   uint16_t *eobs;
   struct buf_2d src;
 
-  // Quantizer setings
+  // Quantizer settings
   int16_t *round_fp;
   int16_t *quant_fp;
   int16_t *quant;

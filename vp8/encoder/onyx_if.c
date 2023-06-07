@@ -4484,7 +4484,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
        * size within range) then use the last frame value - 1. The -1
        * is designed to stop Q and hence the data rate, from
        * progressively falling away during difficult sections, but at
-       * the same time reduce the number of itterations around the
+       * the same time reduce the number of iterations around the
        * recode loop.
        */
       if (Q > cpi->ni_av_qi) cpi->ni_av_qi = Q - 1;
@@ -4731,7 +4731,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   cpi->mb.e_mbd.update_mb_segmentation_data = 0;
   cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
 
-  /* Dont increment frame counters if this was an altref buffer update
+  /* Don't increment frame counters if this was an altref buffer update
    * not a real frame
    */
   if (cm->show_frame) {
@@ -5109,7 +5109,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 
   if (cm->refresh_last_frame) memcpy(&cpi->lfc_n, &cm->fc, sizeof(cm->fc));
 
-  /* if its a dropped frame honor the requests on subsequent frames */
+  /* if it's a dropped frame honor the requests on subsequent frames */
   if (*size > 0) {
     cpi->droppable = !frame_is_reference(cpi);
 

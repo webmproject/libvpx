@@ -1448,7 +1448,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       first_pass_stat_calc(cpi, &fps, &(first_tile_col->fp_data));
     }
 
-    // Dont allow a value of 0 for duration.
+    // Don't allow a value of 0 for duration.
     // (Section duration is also defaulted to minimum of 1.0).
     fps.duration = VPXMAX(1.0, (double)(source->ts_end - source->ts_start));
 
@@ -1701,7 +1701,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
     // Second scan using clamps based on the previous cycle average.
     // This may modify the total and average somewhat but we don't bother with
-    // further itterations.
+    // further iterations.
     modified_score_total = 0.0;
     s = twopass->stats_in;
     while (s < twopass->stats_in_end) {
