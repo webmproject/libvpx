@@ -63,7 +63,7 @@ void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   /* Decide whether to use the default or alternate baseline Q value. */
   if (xd->segmentation_enabled) {
     /* Abs Value */
-    if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA) {
+    if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA) {
       QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
 
       /* Delta Value */
@@ -829,7 +829,7 @@ static void init_frame(VP8D_COMP *pbi) {
 
     /* reset the segment feature data to 0 with delta coding (Default state). */
     memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
-    xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
+    xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
 
     /* reset the mode ref deltasa for loop filter */
     memset(xd->ref_lf_deltas, 0, sizeof(xd->ref_lf_deltas));
@@ -995,7 +995,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     xd->update_mb_segmentation_data = (unsigned char)vp8_read_bit(bc);
 
     if (xd->update_mb_segmentation_data) {
-      xd->mb_segement_abs_delta = (unsigned char)vp8_read_bit(bc);
+      xd->mb_segment_abs_delta = (unsigned char)vp8_read_bit(bc);
 
       memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
 

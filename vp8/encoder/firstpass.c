@@ -1788,7 +1788,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   /* Should we use the alternate refernce frame */
   if (allow_alt_ref && (i >= MIN_GF_INTERVAL) &&
-      /* dont use ARF very near next kf */
+      /* don't use ARF very near next kf */
       (i <= (cpi->twopass.frames_to_key - MIN_GF_INTERVAL)) &&
 #if NEW_BOOST
       ((next_frame.pcnt_inter > 0.75) || (next_frame.pcnt_second_ref > 0.5)) &&
@@ -2123,7 +2123,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     if (cpi->twopass.gf_group_bits < 0) cpi->twopass.gf_group_bits = 0;
 
     /* This condition could fail if there are two kfs very close together
-     * despite (MIN_GF_INTERVAL) and would cause a devide by 0 in the
+     * despite (MIN_GF_INTERVAL) and would cause a divide by 0 in the
      * calculation of cpi->twopass.alt_extra_bits.
      */
     if (cpi->baseline_gf_interval >= 3) {
@@ -2393,7 +2393,7 @@ void vp8_second_pass(VP8_COMP *cpi) {
   }
 
   /* The last few frames of a clip almost always have to few or too many
-   * bits and for the sake of over exact rate control we dont want to make
+   * bits and for the sake of over exact rate control we don't want to make
    * radical adjustments to the allowed quantizer range just to use up a
    * few surplus bits or get beneath the target rate.
    */

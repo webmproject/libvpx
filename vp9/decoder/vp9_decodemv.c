@@ -708,7 +708,7 @@ static void read_inter_block_mode_info(VP9Decoder *const pbi,
     mi->mode = ZEROMV;
     if (bsize < BLOCK_8X8) {
       vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
-                         "Invalid usage of segement feature on small blocks");
+                         "Invalid usage of segment feature on small blocks");
       return;
     }
   } else {

@@ -488,7 +488,7 @@ static void set_segmentation_map(VP8_COMP *cpi,
  */
 static void set_segment_data(VP8_COMP *cpi, signed char *feature_data,
                              unsigned char abs_delta) {
-  cpi->mb.e_mbd.mb_segement_abs_delta = abs_delta;
+  cpi->mb.e_mbd.mb_segment_abs_delta = abs_delta;
   memcpy(cpi->segment_feature_data, feature_data,
          sizeof(cpi->segment_feature_data));
 }
@@ -2751,7 +2751,7 @@ static int decide_key_frame(VP8_COMP *cpi) {
   }
   /* in addition if the following are true and this is not a golden frame
    * then code a key frame Note that on golden frames there often seems
-   * to be a pop in intra useage anyway hence this restriction is
+   * to be a pop in intra usage anyway hence this restriction is
    * designed to prevent spurious key frames. The Intra pop needs to be
    * investigated.
    */
@@ -3637,7 +3637,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
         Q = cpi->avg_frame_qindex;
       }
 
-      /* For constrained quality dont allow Q less than the cq level */
+      /* For constrained quality don't allow Q less than the cq level */
       if ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
           (Q < cpi->cq_target_quality)) {
         Q = cpi->cq_target_quality;
@@ -3664,7 +3664,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     } else {
       cpi->active_best_quality = inter_minq[Q];
 
-      /* For the constant/constrained quality mode we dont want
+      /* For the constant/constrained quality mode we don't want
        * q to fall below the cq level.
        */
       if ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
@@ -3685,7 +3685,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
      * higher quality on the frames to prevent bits just going to waste.
      */
     if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-      /* Note that the use of >= here elliminates the risk of a devide
+      /* Note that the use of >= here elliminates the risk of a divide
        * by 0 error in the else if clause
        */
       if (cpi->buffer_level >= cpi->oxcf.maximum_buffer_size) {
@@ -4322,12 +4322,12 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
   vp8_cal_dissimilarity(cpi);
 #endif
 
-  /* Update the GF useage maps.
+  /* Update the GF usage maps.
    * This is done after completing the compression of a frame when all
    * modes etc. are finalized but before loop filter
    */
   if (cpi->oxcf.number_of_layers == 1) {
-    vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
+    vp8_update_gf_usage_maps(cpi, cm, &cpi->mb);
   }
 
   if (cm->frame_type == KEY_FRAME) cm->refresh_last_frame = 1;

@@ -1700,7 +1700,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     }
 
     // Second scan using clamps based on the previous cycle average.
-    // This may modify the total and average somewhat but we dont bother with
+    // This may modify the total and average somewhat but we don't bother with
     // further itterations.
     modified_score_total = 0.0;
     s = twopass->stats_in;
@@ -1858,7 +1858,7 @@ static int detect_flash_from_frame_stats(const FIRSTPASS_STATS *frame_stats) {
   // brief break in prediction (such as a flash) but subsequent frames
   // are reasonably well predicted by an earlier (pre flash) frame.
   // The recovery after a flash is indicated by a high pcnt_second_ref
-  // useage or a second ref coded error notabley lower than the last
+  // usage or a second ref coded error notabley lower than the last
   // frame coded error.
   if (frame_stats == NULL) {
     return 0;
@@ -2169,7 +2169,7 @@ static double calculate_group_score(VP9_COMP *cpi, double av_score,
   double score_total = 0.0;
   int i = 0;
 
-  // We dont ever want to return a 0 score here.
+  // We don't ever want to return a 0 score here.
   if (frame_count == 0) return 1.0;
 
   while ((i < frame_count) && (s < twopass->stats_in_end)) {
@@ -2597,7 +2597,7 @@ static int get_gop_coding_frame_num(
     if (
         // Don't break out with a very short interval.
         (gop_coding_frames >= active_gf_interval->min) &&
-        // If possible dont break very close to a kf
+        // If possible don't break very close to a kf
         ((rc->frames_to_key - gop_coding_frames) >= rc->min_gf_interval) &&
         (gop_coding_frames & 0x01) && (!flash_detected) &&
         ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
@@ -3031,7 +3031,7 @@ static int intra_step_transition(const FIRSTPASS_STATS *this_frame,
       next_frame->intra_error / DOUBLE_DIVIDE_CHECK(next_frame->coded_error);
 
   // Return true the intra/inter ratio for the current frame is
-  // low but better in the next and previous frame and the relative useage of
+  // low but better in the next and previous frame and the relative usage of
   // intra in the current frame is markedly higher than the last and next frame.
   if ((this_ii_ratio < 2.0) && (last_ii_ratio > 2.25) &&
       (next_ii_ratio > 2.25) && (this_pcnt_intra > (3 * last_pcnt_intra)) &&
@@ -3052,7 +3052,7 @@ static int intra_step_transition(const FIRSTPASS_STATS *this_frame,
 // Minimum % intra coding observed in first pass (1.0 = 100%)
 #define MIN_INTRA_LEVEL 0.25
 // Threshold for use of the lagging second reference frame. Scene cuts do not
-// usually have a high second ref useage.
+// usually have a high second ref usage.
 #define SECOND_REF_USEAGE_THRESH 0.2
 // Hard threshold where the first pass chooses intra for almost all blocks.
 // In such a case even if the frame is not a scene cut coding a key frame
@@ -3391,7 +3391,7 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   twopass->key_frame_section_intra_rating = calculate_section_intra_ratio(
       start_position, twopass->stats_in_end, rc->frames_to_key);
 
-  // Special case for static / slide show content but dont apply
+  // Special case for static / slide show content but don't apply
   // if the kf group is very short.
   if ((zero_motion_accumulator > 0.99) && (rc->frames_to_key > 8)) {
     rc->kf_boost = (int)(twopass->kf_max_total_boost);
@@ -3523,7 +3523,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     vp9_init_vizier_params(twopass, screen_area);
   }
 
-  // If this is an arf frame then we dont want to read the stats file or
+  // If this is an arf frame then we don't want to read the stats file or
   // advance the input pointer as we already have what we need.
   if (gf_group->update_type[gf_group->index] == ARF_UPDATE) {
     int target_rate;

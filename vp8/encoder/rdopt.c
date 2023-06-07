@@ -1979,7 +1979,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         rd.distortion2 += distortion;
 
         /* If even the 'Y' rd value of split is higher than best so far
-         * then dont bother looking at UV
+         * then don't bother looking at UV
          */
         if (tmp_rd < best_mode.yrd) {
           /* Now work out UV cost and add it in */
