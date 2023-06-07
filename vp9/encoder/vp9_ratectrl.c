@@ -1196,7 +1196,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     } else {
       q = rc->avg_frame_qindex[KEY_FRAME];
     }
-    // For constrained quality dont allow Q less than the cq level
+    // For constrained quality don't allow Q less than the cq level
     if (oxcf->rc_mode == VPX_CQ) {
       if (q < cq_level) q = cq_level;
 
@@ -1457,7 +1457,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi, int *bottom_index,
     } else {
       q = active_worst_quality;
     }
-    // For constrained quality dont allow Q less than the cq level
+    // For constrained quality don't allow Q less than the cq level
     if (oxcf->rc_mode == VPX_CQ) {
       if (q < cq_level) q = cq_level;
     }
