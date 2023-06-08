@@ -204,7 +204,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   mi->skip = read_skip(cm, xd, mi->segment_id, r);
   mi->tx_size = read_tx_size(cm, xd, 1, r);
   mi->ref_frame[0] = INTRA_FRAME;
-  mi->ref_frame[1] = NONE;
+  mi->ref_frame[1] = NO_REF_FRAME;
 
   switch (bsize) {
     case BLOCK_4X4:
@@ -309,7 +309,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   if (segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME)) {
     ref_frame[0] = (MV_REFERENCE_FRAME)get_segdata(&cm->seg, segment_id,
                                                    SEG_LVL_REF_FRAME);
-    ref_frame[1] = NONE;
+    ref_frame[1] = NO_REF_FRAME;
   } else {
     const REFERENCE_MODE mode = read_block_reference_mode(cm, xd, r);
     // FIXME(rbultje) I'm pretty sure this breaks segmentation ref frame coding
@@ -333,7 +333,7 @@ static void read_ref_frames(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         ref_frame[0] = LAST_FRAME;
       }
 
-      ref_frame[1] = NONE;
+      ref_frame[1] = NO_REF_FRAME;
     } else {
       assert(0 && "Invalid prediction mode.");
     }
@@ -383,7 +383,7 @@ static void read_intra_block_mode_info(VP9_COMMON *const cm,
   mi->interp_filter = SWITCHABLE_FILTERS;
 
   mi->ref_frame[0] = INTRA_FRAME;
-  mi->ref_frame[1] = NONE;
+  mi->ref_frame[1] = NO_REF_FRAME;
 }
 
 static INLINE int is_mv_valid(const MV *mv) {

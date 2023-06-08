@@ -319,7 +319,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(
   filter_mbd->plane[2].dst.stride =
       denoiser->mc_running_avg_y[denoise_layer_idx].uv_stride;
 
-  set_ref_ptrs(cm, filter_mbd, saved_frame, NONE);
+  set_ref_ptrs(cm, filter_mbd, saved_frame, NO_REF_FRAME);
   vp9_build_inter_predictors_sby(filter_mbd, mi_row, mi_col, bs);
 
   // Restore everything to its original state

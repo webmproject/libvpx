@@ -1264,7 +1264,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
         xd->mi[0]->mv[0].as_mv = mv;
         xd->mi[0]->tx_size = TX_4X4;
         xd->mi[0]->ref_frame[0] = LAST_FRAME;
-        xd->mi[0]->ref_frame[1] = NONE;
+        xd->mi[0]->ref_frame[1] = NO_REF_FRAME;
         vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1, bsize);
         vp9_encode_sby_pass1(x, bsize);
         fp_acc_data->sum_mvr += mv.row;
