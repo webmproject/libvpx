@@ -610,7 +610,7 @@ static int get_smooth_intra_threshold(VP9_COMMON *cm) {
 static uint8_t fp_dn_kernel_3[KERNEL_SIZE * KERNEL_SIZE] = { 1, 2, 1, 2, 4,
                                                              2, 1, 2, 1 };
 
-// Estimate noise at a single point based on the impace of a spatial kernel
+// Estimate noise at a single point based on the impact of a spatial kernel
 // on the point value
 static int fp_estimate_point_noise(uint8_t *src_ptr, const int stride) {
   int sum_weight = 0;
@@ -2038,7 +2038,7 @@ static int compute_arf_boost(const FRAME_INFO *frame_info,
         this_frame, &this_frame_mv_in_out, &mv_in_out_accumulator,
         &abs_mv_in_out_accumulator, &mv_ratio_accumulator);
 
-    // We want to discount the the flash frame itself and the recovery
+    // We want to discount the flash frame itself and the recovery
     // frame that follows as both will have poor scores.
     flash_detected = detect_flash_from_frame_stats(this_frame) ||
                      detect_flash_from_frame_stats(next_frame);
