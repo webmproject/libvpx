@@ -15,7 +15,7 @@
 example_tests=$(ls $(dirname $0)/*.sh)
 
 # List of script names to exclude.
-exclude_list="examples stress tools_common"
+exclude_list="examples stress tools_common vp9_c_vs_simd_encode"
 
 # Filter out the scripts in $exclude_list.
 for word in ${exclude_list}; do
