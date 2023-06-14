@@ -172,7 +172,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") ne "yes") {
 # Motion search
 #
 add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, uint32_t start_mv_sad, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_sad_table *sad_fn_ptr, const struct mv *center_mv";
-specialize qw/vp9_diamond_search_sad avx neon/;
+specialize qw/vp9_diamond_search_sad neon/;
 
 #
 # Apply temporal filter

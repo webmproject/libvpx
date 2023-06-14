@@ -2187,7 +2187,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
  * The following 2 functions ('cal_nmvjointsadcost' and                *
  * 'cal_nmvsadcosts') are used to calculate cost lookup tables         *
  * used by 'vp9_diamond_search_sad'. The C implementation of the       *
- * function is generic, but the AVX intrinsics optimised version       *
+ * function is generic, but the NEON intrinsics optimised version      *
  * relies on the following properties of the computed tables:          *
  * For cal_nmvjointsadcost:                                            *
  *   - mvjointsadcost[1] == mvjointsadcost[2] == mvjointsadcost[3]     *
@@ -2196,7 +2196,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
  *         (Equal costs for both components)                           *
  *   - For all i: mvsadcost[0][i] == mvsadcost[0][-i]                  *
  *         (Cost function is even)                                     *
- * If these do not hold, then the AVX optimised version of the         *
+ * If these do not hold, then the NEON optimised version of the        *
  * 'vp9_diamond_search_sad' function cannot be used as it is, in which *
  * case you can revert to using the C function instead.                *
  ***********************************************************************/
