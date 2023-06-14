@@ -21,12 +21,12 @@
 namespace {
 // FIRSTPASS_STATS struct:
 // {
-//   25 double members;
+//   26 double members;
 //   1 int64_t member;
 // }
 // Whenever FIRSTPASS_STATS struct is modified, the following constants need to
 // be revisited.
-const int kDbl = 25;
+const int kDbl = 26;
 const int kInt = 1;
 const size_t kFirstPassStatsSz = kDbl * sizeof(double) + kInt * sizeof(int64_t);
 
@@ -185,7 +185,7 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   // Compare to check if using or not using row-mt generates close stats.
-  ASSERT_NO_FATAL_FAILURE(compare_fp_stats(&firstpass_stats_, 1000.0));
+  ASSERT_NO_FATAL_FAILURE(compare_fp_stats(&firstpass_stats_, 400.0));
 
   // Test single thread vs multiple threads
   row_mt_mode_ = 1;
@@ -199,7 +199,7 @@ TEST_P(VPxFirstPassEncoderThreadTest, FirstPassStatsTest) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   // Compare to check if single-thread and multi-thread stats are close enough.
-  ASSERT_NO_FATAL_FAILURE(compare_fp_stats(&firstpass_stats_, 1000.0));
+  ASSERT_NO_FATAL_FAILURE(compare_fp_stats(&firstpass_stats_, 400.0));
 
   // Bit exact test in row_mt mode.
   // When row_mt_mode_=1 and using >1 threads, the encoder generates bit exact

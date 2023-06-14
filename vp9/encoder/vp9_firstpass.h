@@ -55,6 +55,7 @@ typedef struct {
   int64_t sum_mvcs;
   int sum_in_vectors;
   int intra_smooth_count;
+  int new_mv_count;
 } FIRSTPASS_DATA;
 
 typedef struct {
@@ -83,6 +84,7 @@ typedef struct {
   double mv_in_out_count;
   double duration;
   double count;
+  double new_mv_count;
   int64_t spatial_layer_id;
 } FIRSTPASS_STATS;
 

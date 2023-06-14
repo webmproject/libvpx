@@ -5832,6 +5832,7 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
         TileDataEnc *tile_data =
             &cpi->tile_data[tile_row * tile_cols + tile_col];
         int i, j;
+        const MV zero_mv = { 0, 0 };
         for (i = 0; i < BLOCK_SIZES; ++i) {
           for (j = 0; j < MAX_MODES; ++j) {
             tile_data->thresh_freq_fact[i][j] = RD_THRESH_INIT_FACT;
@@ -5839,6 +5840,7 @@ void vp9_init_tile_data(VP9_COMP *cpi) {
             tile_data->mode_map[i][j] = j;
           }
         }
+        tile_data->firstpass_top_mv = zero_mv;
 #if CONFIG_MULTITHREAD
         tile_data->row_base_thresh_freq_fact = NULL;
 #endif
