@@ -970,7 +970,7 @@ process_common_toolchain() {
       ;;
   esac
 
-  # Process ARM architecture variants
+  # Process architecture variants
   case ${toolchain} in
     arm*)
       # on arm, isa versions are supersets
