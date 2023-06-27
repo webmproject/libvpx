@@ -306,13 +306,11 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
 
 #if CONFIG_MULTITHREAD
   if (!res && ctx->restart_threads) {
-    struct frame_buffers *fb = &ctx->yv12_frame_buffers;
     VP8D_COMP *pbi = ctx->yv12_frame_buffers.pbi[0];
     VP8_COMMON *const pc = &pbi->common;
     if (setjmp(pbi->common.error.jmp)) {
       pbi->common.error.setjmp = 0;
-      vp8_remove_decoder_instances(fb);
-      vp8_zero(fb->pbi);
+      vp8_decoder_remove_threads(pbi);
       vpx_clear_system_state();
       return VPX_CODEC_ERROR;
     }
