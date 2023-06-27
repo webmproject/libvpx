@@ -350,7 +350,14 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
     }
 
     res = vp8_create_decoder_instances(&ctx->yv12_frame_buffers, &oxcf);
-    if (res == VPX_CODEC_OK) ctx->decoder_init = 1;
+    if (res == VPX_CODEC_OK) {
+      ctx->decoder_init = 1;
+    } else {
+      /* on failure clear the cached resolution to ensure a full
+       * reallocation is attempted on resync. */
+      ctx->si.w = 0;
+      ctx->si.h = 0;
+    }
   }
 
   /* Set these even if already initialized.  The caller may have changed the
