@@ -143,7 +143,6 @@ get_frame_type_from_update_type(FRAME_UPDATE_TYPE update_type) {
     default:
       fprintf(stderr, "Unsupported update_type %d\n", update_type);
       abort();
-      return kFrameTypeInter;
   }
 }
 
