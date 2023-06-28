@@ -137,6 +137,12 @@ class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
     rnd_.Reset(ACMRandom::DeterministicSeed());
   }
 
+  // The Rand() function generates values in the range [-((1 << BitDepth) - 1),
+  // (1 << BitDepth) - 1]. This is because the input to the Hadamard transform
+  // is the residual pixel, which is defined as 'source pixel - predicted
+  // pixel'. Source pixel and predicted pixel take values in the range
+  // [0, (1 << BitDepth) - 1] and thus the residual pixel ranges from
+  // -((1 << BitDepth) - 1) to ((1 << BitDepth) - 1).
   virtual int16_t Rand() = 0;
 
   void ReferenceHadamard(const int16_t *a, int a_stride, tran_low_t *b,
@@ -245,7 +251,12 @@ class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
 
 class HadamardLowbdTest : public HadamardTestBase {
  protected:
-  virtual int16_t Rand() { return rnd_.Rand9Signed(); }
+  // Use values between -255 (0xFF01) and 255 (0x00FF)
+  virtual int16_t Rand() {
+    int16_t src = rnd_.Rand8();
+    int16_t pred = rnd_.Rand8();
+    return src - pred;
+  }
 };
 
 TEST_P(HadamardLowbdTest, CompareReferenceRandom) { CompareReferenceRandom(); }
@@ -323,7 +334,12 @@ INSTANTIATE_TEST_SUITE_P(
 #if CONFIG_VP9_HIGHBITDEPTH
 class HadamardHighbdTest : public HadamardTestBase {
  protected:
-  virtual int16_t Rand() { return rnd_.Rand13Signed(); }
+  // Use values between -4095 (0xF001) and 4095 (0x0FFF)
+  virtual int16_t Rand() {
+    int16_t src = rnd_.Rand12();
+    int16_t pred = rnd_.Rand12();
+    return src - pred;
+  }
 };
 
 TEST_P(HadamardHighbdTest, CompareReferenceRandom) { CompareReferenceRandom(); }
