@@ -821,22 +821,6 @@ void vp8_first_pass(VP8_COMP *cpi) {
     vp8_yv12_copy_frame(lst_yv12, gld_yv12);
   }
 
-  /* use this to see what the first pass reconstruction looks like */
-  if (/*DISABLES CODE*/ (0)) {
-    char filename[512];
-    FILE *recon_file;
-    sprintf(filename, "enc%04d.yuv", (int)cm->current_video_frame);
-
-    if (cm->current_video_frame == 0) {
-      recon_file = fopen(filename, "wb");
-    } else {
-      recon_file = fopen(filename, "ab");
-    }
-
-    (void)fwrite(lst_yv12->buffer_alloc, lst_yv12->frame_size, 1, recon_file);
-    fclose(recon_file);
-  }
-
   cm->current_video_frame++;
 }
 extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
@@ -1038,12 +1022,6 @@ static int estimate_cq(VP8_COMP *cpi, FIRSTPASS_STATS *fpstats,
   double clip_iifactor;
   int overhead_bits_per_mb;
 
-  if (/*DISABLES CODE*/ (0)) {
-    FILE *f = fopen("epmp.stt", "a");
-    fprintf(f, "%10.2f\n", err_per_mb);
-    fclose(f);
-  }
-
   target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20))
                                 ? (512 * section_target_bandwitdh) / num_mbs
                                 : 512 * (section_target_bandwitdh / num_mbs);
@@ -1228,17 +1206,6 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err,
          (Q < (MAXQ * 2))) {
     bits_per_mb_at_this_q = (int)(0.96 * bits_per_mb_at_this_q);
     Q++;
-  }
-
-  if (/*DISABLES CODE*/ (0)) {
-    FILE *f = fopen("estkf_q.stt", "a");
-    fprintf(f, "%8d %8d %8d %8.2f %8.3f %8.2f %8.3f %8.3f %8.3f %8d\n",
-            cpi->common.current_video_frame, bits_per_mb_at_this_q,
-            target_norm_bits_per_mb, err_per_mb, err_correction_factor,
-            current_spend_ratio, group_iiratio, iiratio_correction_factor,
-            (double)cpi->buffer_level / (double)cpi->oxcf.optimal_buffer_level,
-            Q);
-    fclose(f);
   }
 
   return Q;
@@ -3047,16 +3014,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
               (int)((projected_bits_perframe - av_bits_per_frame) *
                     cpi->twopass.frames_to_key));
 
-    if (/*DISABLES CODE*/ (0)) {
-      FILE *f = fopen("Subsamle.stt", "a");
-      fprintf(f, " %8d %8d %8d %8d %12.0f %8d %8d %8d\n",
-              cpi->common.current_video_frame, kf_q, cpi->common.horiz_scale,
-              cpi->common.vert_scale, kf_group_err / cpi->twopass.frames_to_key,
-              (int)(cpi->twopass.kf_group_bits / cpi->twopass.frames_to_key),
-              new_height, new_width);
-      fclose(f);
-    }
-
     /* The trigger for spatial resampling depends on the various
      * parameters such as whether we are streaming (CBR) or VBR.
      */
@@ -3120,17 +3077,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
          */
         kf_q = estimate_kf_group_q(cpi, err_per_frame * effective_size_ratio,
                                    (int)bits_per_frame, group_iiratio);
-
-        if (/*DISABLES CODE*/ (0)) {
-          FILE *f = fopen("Subsamle.stt", "a");
-          fprintf(
-              f, "******** %8d %8d %8d %12.0f %8d %8d %8d\n", kf_q,
-              cpi->common.horiz_scale, cpi->common.vert_scale,
-              kf_group_err / cpi->twopass.frames_to_key,
-              (int)(cpi->twopass.kf_group_bits / cpi->twopass.frames_to_key),
-              new_height, new_width);
-          fclose(f);
-        }
       }
     }
 

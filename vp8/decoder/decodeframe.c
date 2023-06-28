@@ -1167,14 +1167,6 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   if (pbi->ec_active && xd->corrupted) pc->refresh_last_frame = 1;
 #endif
 
-  if (/*DISABLES CODE*/ (0)) {
-    FILE *z = fopen("decodestats.stt", "a");
-    fprintf(z, "%6d F:%d,G:%d,A:%d,L:%d,Q:%d\n", pc->current_video_frame,
-            pc->frame_type, pc->refresh_golden_frame, pc->refresh_alt_ref_frame,
-            pc->refresh_last_frame, pc->base_qindex);
-    fclose(z);
-  }
-
   {
     pbi->independent_partitions = 1;
 
