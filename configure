@@ -679,6 +679,7 @@ process_toolchain() {
         check_add_cxxflags -Wc++14-extensions
         check_add_cxxflags -Wc++17-extensions
         check_add_cxxflags -Wc++20-extensions
+        check_add_cxxflags -Wnon-virtual-dtor
 
         # disable some warnings specific to libyuv / libwebm.
         check_cxxflags -Wno-missing-declarations \
