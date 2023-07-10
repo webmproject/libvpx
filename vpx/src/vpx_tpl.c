@@ -97,11 +97,11 @@ vpx_codec_err_t vpx_read_tpl_gop_stats(FILE *tpl_file,
   return VPX_CODEC_OK;
 }
 
-void vpx_free_tpl_gop_stats(VpxTplGopStats *data) {
+void vpx_free_tpl_gop_stats(VpxTplGopStats *tpl_gop_stats) {
   int frame;
-  if (data == NULL) return;
-  for (frame = 0; frame < data->size; frame++) {
-    vpx_free(data->frame_stats_list[frame].block_stats_list);
+  if (tpl_gop_stats == NULL) return;
+  for (frame = 0; frame < tpl_gop_stats->size; frame++) {
+    vpx_free(tpl_gop_stats->frame_stats_list[frame].block_stats_list);
   }
-  vpx_free(data->frame_stats_list);
+  vpx_free(tpl_gop_stats->frame_stats_list);
 }
