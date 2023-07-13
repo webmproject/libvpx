@@ -2841,9 +2841,8 @@ static int64_t handle_inter_mode(
 #else
   DECLARE_ALIGNED(16, uint8_t, tmp_buf[MAX_MB_PLANE * 64 * 64]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  int pred_exists = 0;
   int intpel_mv;
-  int64_t rd, tmp_rd, best_rd = INT64_MAX;
+  int64_t rd, tmp_rd = INT64_MAX, best_rd = INT64_MAX;
   int best_needs_copy = 0;
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
@@ -3003,7 +3002,6 @@ static int64_t handle_inter_mode(
       mi->mode != NEARESTMV)
     return INT64_MAX;
 
-  pred_exists = 0;
   // Are all MVs integer pel for Y and UV
   intpel_mv = !mv_has_subpel(&mi->mv[0].as_mv);
   if (is_comp_pred) intpel_mv &= !mv_has_subpel(&mi->mv[1].as_mv);
@@ -3111,7 +3109,6 @@ static int64_t handle_inter_mode(
         if ((cm->interp_filter == SWITCHABLE && newbest) ||
             (cm->interp_filter != SWITCHABLE &&
              cm->interp_filter == mi->interp_filter)) {
-          pred_exists = 1;
           tmp_rd = best_rd;
 
           skip_txfm_sb = tmp_skip_sb;
@@ -3131,7 +3128,7 @@ static int64_t handle_inter_mode(
       cm->interp_filter != SWITCHABLE ? cm->interp_filter : best_filter;
   rs = cm->interp_filter == SWITCHABLE ? vp9_get_switchable_rate(cpi, xd) : 0;
 
-  if (pred_exists) {
+  if (tmp_rd != INT64_MAX) {
     if (best_needs_copy) {
       // again temporarily set the buffers to local memory to prevent a memcpy
       for (i = 0; i < MAX_MB_PLANE; i++) {
