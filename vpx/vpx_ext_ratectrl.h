@@ -271,6 +271,10 @@ typedef struct vpx_rc_frame_stats {
    * number of frames whose stats are accumulated.
    */
   double count;
+  /*!
+   * Number of new mv in a frame.
+   */
+  double new_mv_count;
 } vpx_rc_frame_stats_t;
 
 /*!\brief Collection of first pass frame stats

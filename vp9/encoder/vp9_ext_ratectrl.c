@@ -92,6 +92,7 @@ static void gen_rc_firstpass_stats(const FIRSTPASS_STATS *stats,
   rc_frame_stats->mv_in_out_count = stats->mv_in_out_count;
   rc_frame_stats->duration = stats->duration;
   rc_frame_stats->count = stats->count;
+  rc_frame_stats->new_mv_count = stats->new_mv_count;
 }
 
 vpx_codec_err_t vp9_extrc_send_firstpass_stats(
