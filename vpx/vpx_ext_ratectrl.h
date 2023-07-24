@@ -385,13 +385,13 @@ typedef struct vpx_rc_gop_decision {
  * This callback is invoked by the encoder to create an external rate control
  * model.
  *
- * \param[in]  priv               Callback's private data
- * \param[in]  ratectrl_config    Pointer to vpx_rc_config_t
- * \param[out] rate_ctrl_model_pt Pointer to vpx_rc_model_t
+ * \param[in]  priv                Callback's private data
+ * \param[in]  ratectrl_config     Pointer to vpx_rc_config_t
+ * \param[out] rate_ctrl_model_ptr Pointer to vpx_rc_model_t
  */
 typedef vpx_rc_status_t (*vpx_rc_create_model_cb_fn_t)(
     void *priv, const vpx_rc_config_t *ratectrl_config,
-    vpx_rc_model_t *rate_ctrl_model_pt);
+    vpx_rc_model_t *rate_ctrl_model_ptr);
 
 /*!\brief Send first pass stats to the external rate control model callback
  * prototype
