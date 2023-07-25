@@ -136,11 +136,11 @@ class ErrorResilienceTestLarge
         if (error_frames_[i] == nframes_ - 1) {
           std::cout << "             Skipping decoding frame: "
                     << error_frames_[i] << "\n";
-          return 0;
+          return false;
         }
       }
     }
-    return 1;
+    return true;
   }
 
   void MismatchHook(const vpx_image_t *img1, const vpx_image_t *img2) override {

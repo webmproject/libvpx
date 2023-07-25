@@ -227,7 +227,7 @@ class RcInterfaceSvcTest
         rc_cfg_.layer_target_bitrate[4] = 0;
         rc_cfg_.layer_target_bitrate[5] = 0;
         ASSERT_TRUE(rc_api_->UpdateRateControl(rc_cfg_));
-      } else if (/*DISABLES CODE*/ (0) && video->frame() == 280) {
+      } else if (/*DISABLES CODE*/ (false) && video->frame() == 280) {
         // TODO(marpan): Re-enable this going back up when issue is fixed.
         // Go back up to 3 spatial layers.
         // Update the encoder config: use the original bitrates.
