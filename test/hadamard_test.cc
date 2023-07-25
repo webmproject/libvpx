@@ -130,7 +130,7 @@ std::ostream &operator<<(std::ostream &os, const HadamardFuncWithSize &hfs) {
 
 class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
  public:
-  virtual void SetUp() {
+  void SetUp() override {
     h_func_ = GetParam().func;
     bwh_ = GetParam().block_size;
     block_size_ = bwh_ * bwh_;
@@ -252,7 +252,7 @@ class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
 class HadamardLowbdTest : public HadamardTestBase {
  protected:
   // Use values between -255 (0xFF01) and 255 (0x00FF)
-  virtual int16_t Rand() {
+  int16_t Rand() override {
     int16_t src = rnd_.Rand8();
     int16_t pred = rnd_.Rand8();
     return src - pred;
@@ -335,7 +335,7 @@ INSTANTIATE_TEST_SUITE_P(
 class HadamardHighbdTest : public HadamardTestBase {
  protected:
   // Use values between -4095 (0xF001) and 4095 (0x0FFF)
-  virtual int16_t Rand() {
+  int16_t Rand() override {
     int16_t src = rnd_.Rand12();
     int16_t pred = rnd_.Rand12();
     return src - pred;

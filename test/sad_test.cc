@@ -73,7 +73,7 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
  public:
   explicit SADTestBase(const ParamType &params) : params_(params) {}
 
-  virtual void SetUp() {
+  void SetUp() override {
     source_data8_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBlockSize));
     reference_data8_ = reinterpret_cast<uint8_t *>(
@@ -108,7 +108,7 @@ class SADTestBase : public ::testing::TestWithParam<ParamType> {
     rnd_.Reset(ACMRandom::DeterministicSeed());
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     vpx_free(source_data8_);
     source_data8_ = nullptr;
     vpx_free(reference_data8_);

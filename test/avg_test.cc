@@ -38,7 +38,7 @@ class AverageTestBase : public ::testing::Test {
       : width_(width), height_(height), source_data_(nullptr),
         source_stride_(0), bit_depth_(8) {}
 
-  virtual void TearDown() {
+  void TearDown() override {
     vpx_free(source_data_);
     source_data_ = nullptr;
     libvpx_test::ClearSystemState();
@@ -49,7 +49,7 @@ class AverageTestBase : public ::testing::Test {
   static const int kDataAlignment = 16;
   static const int kDataBlockSize = 64 * 128;
 
-  virtual void SetUp() {
+  void SetUp() override {
     source_data_ = reinterpret_cast<Pixel *>(
         vpx_memalign(kDataAlignment, kDataBlockSize * sizeof(source_data_[0])));
     ASSERT_NE(source_data_, nullptr);
@@ -169,7 +169,7 @@ class IntProRowTest : public AverageTestBase<uint8_t>,
   }
 
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     source_data_ = reinterpret_cast<uint8_t *>(
         vpx_memalign(kDataAlignment, kDataBlockSize * sizeof(source_data_[0])));
     ASSERT_NE(source_data_, nullptr);
@@ -180,7 +180,7 @@ class IntProRowTest : public AverageTestBase<uint8_t>,
         vpx_memalign(kDataAlignment, sizeof(*hbuf_c_) * 16));
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     vpx_free(source_data_);
     source_data_ = nullptr;
     vpx_free(hbuf_c_);
@@ -238,7 +238,7 @@ typedef std::tuple<int, SatdFunc> SatdTestParam;
 class SatdTest : public ::testing::Test,
                  public ::testing::WithParamInterface<SatdTestParam> {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     satd_size_ = GET_PARAM(0);
     satd_func_ = GET_PARAM(1);
     rnd_.Reset(ACMRandom::DeterministicSeed());
@@ -247,7 +247,7 @@ class SatdTest : public ::testing::Test,
     ASSERT_NE(src_, nullptr);
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     libvpx_test::ClearSystemState();
     vpx_free(src_);
   }
@@ -276,7 +276,7 @@ class SatdTest : public ::testing::Test,
 
 class SatdLowbdTest : public SatdTest {
  protected:
-  virtual void FillRandom() {
+  void FillRandom() override {
     for (int i = 0; i < satd_size_; ++i) {
       const int16_t tmp = rnd_.Rand16Signed();
       src_[i] = (tran_low_t)tmp;
@@ -292,7 +292,7 @@ class BlockErrorTestFP
     : public ::testing::Test,
       public ::testing::WithParamInterface<BlockErrorTestFPParam> {
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     txfm_size_ = GET_PARAM(0);
     block_error_func_ = GET_PARAM(1);
     rnd_.Reset(ACMRandom::DeterministicSeed());
@@ -304,7 +304,7 @@ class BlockErrorTestFP
     ASSERT_NE(dqcoeff_, nullptr);
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     libvpx_test::ClearSystemState();
     vpx_free(coeff_);
     vpx_free(dqcoeff_);
@@ -463,7 +463,7 @@ TEST_P(SatdLowbdTest, DISABLED_Speed) {
 #if CONFIG_VP9_HIGHBITDEPTH
 class SatdHighbdTest : public SatdTest {
  protected:
-  virtual void FillRandom() {
+  void FillRandom() override {
     for (int i = 0; i < satd_size_; ++i) {
       src_[i] = rnd_.Rand20Signed();
     }

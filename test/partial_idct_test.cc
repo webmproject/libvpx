@@ -59,8 +59,8 @@ const int kCountTestBlock = 1000;
 
 class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
  public:
-  virtual ~PartialIDctTest() {}
-  virtual void SetUp() {
+  ~PartialIDctTest() override {}
+  void SetUp() override {
     rnd_.Reset(ACMRandom::DeterministicSeed());
     fwd_txfm_ = GET_PARAM(0);
     full_inv_txfm_ = GET_PARAM(1);
@@ -100,7 +100,7 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
         vpx_memalign(16, pixel_size_ * output_block_size_));
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     vpx_free(input_block_);
     input_block_ = nullptr;
     vpx_free(output_block_);

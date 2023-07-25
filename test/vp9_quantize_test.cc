@@ -174,7 +174,7 @@ class VP9QuantizeBase : public AbstractBench {
     q_ptr_ = (is_fp_) ? quant_fp_ptr_ : quant_ptr_;
   }
 
-  ~VP9QuantizeBase() {
+  ~VP9QuantizeBase() override {
     vpx_free(mb_plane_);
     vpx_free(zbin_ptr_);
     vpx_free(round_fp_ptr_);
@@ -225,7 +225,7 @@ class VP9QuantizeTest : public VP9QuantizeBase,
         quantize_op_(GET_PARAM(0)), ref_quantize_op_(GET_PARAM(1)) {}
 
  protected:
-  virtual void Run();
+  void Run() override;
   void Speed(bool is_median);
   const QuantizeFunc quantize_op_;
   const QuantizeFunc ref_quantize_op_;
