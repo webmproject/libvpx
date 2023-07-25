@@ -53,10 +53,10 @@ class Vp8RcInterfaceTest
  public:
   Vp8RcInterfaceTest()
       : EncoderTest(GET_PARAM(0)), key_interval_(3000), encoder_exit_(false) {}
-  virtual ~Vp8RcInterfaceTest() {}
+  ~Vp8RcInterfaceTest() override {}
 
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     InitializeConfig();
     SetMode(::libvpx_test::kRealTime);
   }
@@ -111,8 +111,8 @@ class Vp8RcInterfaceTest
     return layer_id;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder *encoder) {
+  void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                          ::libvpx_test::Encoder *encoder) override {
     if (rc_cfg_.ts_number_layers > 1) {
       const int layer_id = SetLayerId(video->frame(), cfg_.ts_number_layers);
       const int frame_flags =
@@ -139,7 +139,7 @@ class Vp8RcInterfaceTest
     encoder_exit_ = video->frame() == test_video_.frames;
   }
 
-  virtual void PostEncodeFrameHook(::libvpx_test::Encoder *encoder) {
+  void PostEncodeFrameHook(::libvpx_test::Encoder *encoder) override {
     if (encoder_exit_) {
       return;
     }
@@ -149,7 +149,7 @@ class Vp8RcInterfaceTest
     ASSERT_EQ(rc_api_->GetQP(), qp);
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+  void FramePktHook(const vpx_codec_cx_pkt_t *pkt) override {
     rc_api_->PostEncodeUpdate(pkt->data.frame.sz);
   }
 

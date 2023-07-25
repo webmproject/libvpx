@@ -210,7 +210,7 @@ class SumOfSquaresTest : public ::testing::TestWithParam<SumOfSquaresFunction> {
  public:
   SumOfSquaresTest() : func_(GetParam()) {}
 
-  virtual ~SumOfSquaresTest() { libvpx_test::ClearSystemState(); }
+  ~SumOfSquaresTest() override { libvpx_test::ClearSystemState(); }
 
  protected:
   void ConstTest();
@@ -289,7 +289,7 @@ template <typename FunctionType>
 class MainTestClass
     : public ::testing::TestWithParam<TestParams<FunctionType> > {
  public:
-  virtual void SetUp() {
+  void SetUp() override {
     params_ = this->GetParam();
 
     rnd_.Reset(ACMRandom::DeterministicSeed());
@@ -308,7 +308,7 @@ class MainTestClass
 #endif
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
 #if CONFIG_VP9_HIGHBITDEPTH
     if (use_high_bit_depth()) {
       // TODO(skal): remove!
@@ -568,7 +568,7 @@ template <typename FunctionType>
 class SubpelVarianceTest
     : public ::testing::TestWithParam<TestParams<FunctionType> > {
  public:
-  virtual void SetUp() {
+  void SetUp() override {
     params_ = this->GetParam();
 
     rnd_.Reset(ACMRandom::DeterministicSeed());
@@ -592,7 +592,7 @@ class SubpelVarianceTest
     ASSERT_NE(ref_, nullptr);
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     if (!use_high_bit_depth()) {
       vpx_free(src_);
       vpx_free(sec_);

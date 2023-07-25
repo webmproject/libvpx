@@ -539,9 +539,9 @@ class FwdTrans8x8TestBase {
 class FwdTrans8x8DCT : public FwdTrans8x8TestBase,
                        public ::testing::TestWithParam<Dct8x8Param> {
  public:
-  virtual ~FwdTrans8x8DCT() {}
+  ~FwdTrans8x8DCT() override {}
 
-  virtual void SetUp() {
+  void SetUp() override {
     fwd_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
     tx_type_ = GET_PARAM(2);
@@ -551,13 +551,13 @@ class FwdTrans8x8DCT : public FwdTrans8x8TestBase,
     mask_ = (1 << bit_depth_) - 1;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  void TearDown() override { libvpx_test::ClearSystemState(); }
 
  protected:
-  void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) {
+  void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) override {
     fwd_txfm_(in, out, stride);
   }
-  void RunInvTxfm(tran_low_t *out, uint8_t *dst, int stride) {
+  void RunInvTxfm(tran_low_t *out, uint8_t *dst, int stride) override {
     inv_txfm_(out, dst, stride);
   }
 
@@ -578,9 +578,9 @@ TEST_P(FwdTrans8x8DCT, InvAccuracyCheck) { RunInvAccuracyCheck(); }
 class FwdTrans8x8HT : public FwdTrans8x8TestBase,
                       public ::testing::TestWithParam<Ht8x8Param> {
  public:
-  virtual ~FwdTrans8x8HT() {}
+  ~FwdTrans8x8HT() override {}
 
-  virtual void SetUp() {
+  void SetUp() override {
     fwd_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
     tx_type_ = GET_PARAM(2);
@@ -590,13 +590,13 @@ class FwdTrans8x8HT : public FwdTrans8x8TestBase,
     mask_ = (1 << bit_depth_) - 1;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  void TearDown() override { libvpx_test::ClearSystemState(); }
 
  protected:
-  void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) {
+  void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) override {
     fwd_txfm_(in, out, stride, tx_type_);
   }
-  void RunInvTxfm(tran_low_t *out, uint8_t *dst, int stride) {
+  void RunInvTxfm(tran_low_t *out, uint8_t *dst, int stride) override {
     inv_txfm_(out, dst, stride, tx_type_);
   }
 
@@ -614,9 +614,9 @@ TEST_P(FwdTrans8x8HT, ExtremalCheck) { RunExtremalCheck(); }
 class InvTrans8x8DCT : public FwdTrans8x8TestBase,
                        public ::testing::TestWithParam<Idct8x8Param> {
  public:
-  virtual ~InvTrans8x8DCT() {}
+  ~InvTrans8x8DCT() override {}
 
-  virtual void SetUp() {
+  void SetUp() override {
     ref_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
     thresh_ = GET_PARAM(2);
@@ -625,13 +625,14 @@ class InvTrans8x8DCT : public FwdTrans8x8TestBase,
     mask_ = (1 << bit_depth_) - 1;
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  void TearDown() override { libvpx_test::ClearSystemState(); }
 
  protected:
-  void RunInvTxfm(tran_low_t *out, uint8_t *dst, int stride) {
+  void RunInvTxfm(tran_low_t *out, uint8_t *dst, int stride) override {
     inv_txfm_(out, dst, stride);
   }
-  void RunFwdTxfm(int16_t * /*out*/, tran_low_t * /*dst*/, int /*stride*/) {}
+  void RunFwdTxfm(int16_t * /*out*/, tran_low_t * /*dst*/,
+                  int /*stride*/) override {}
 
   IdctFunc ref_txfm_;
   IdctFunc inv_txfm_;

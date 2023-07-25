@@ -49,7 +49,7 @@ using AvgPredFunc = void (*)(uint8_t *a, const uint8_t *b, int w, int h,
 template <int bitdepth, typename Pixel>
 class AvgPredTest : public ::testing::TestWithParam<AvgPredFunc> {
  public:
-  virtual void SetUp() {
+  void SetUp() override {
     avg_pred_func_ = GetParam();
     rnd_.Reset(ACMRandom::DeterministicSeed());
   }

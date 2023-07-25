@@ -96,7 +96,7 @@ class IntraPredTest : public ::testing::TestWithParam<PredParam> {
   }
 
  protected:
-  virtual void SetUp() {
+  void SetUp() override {
     params_ = this->GetParam();
     stride_ = params_.block_size * 3;
     mask_ = (1 << params_.bit_depth) - 1;

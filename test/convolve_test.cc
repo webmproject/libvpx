@@ -361,7 +361,7 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
 #endif
   }
 
-  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+  void TearDown() override { libvpx_test::ClearSystemState(); }
 
   static void TearDownTestSuite() {
     vpx_free(input_ - 1);
@@ -403,7 +403,7 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
             i % kOuterBlockSize >= (BorderLeft() + Width()));
   }
 
-  virtual void SetUp() {
+  void SetUp() override {
     UUT_ = GET_PARAM(2);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (UUT_->use_highbd_ != 0) {

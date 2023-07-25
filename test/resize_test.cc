@@ -247,10 +247,10 @@ class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
   }
   bool flag_codec_;
   bool smaller_width_larger_size_;
-  virtual ~ResizingVideoSource() {}
+  ~ResizingVideoSource() override {}
 
  protected:
-  virtual void Next() {
+  void Next() override {
     ++frame_;
     unsigned int width = 0;
     unsigned int height = 0;
@@ -267,14 +267,14 @@ class ResizeTest
  protected:
   ResizeTest() : EncoderTest(GET_PARAM(0)) {}
 
-  virtual ~ResizeTest() {}
+  ~ResizeTest() override {}
 
-  virtual void SetUp() {
+  void SetUp() override {
     InitializeConfig();
     SetMode(GET_PARAM(1));
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+  void FramePktHook(const vpx_codec_cx_pkt_t *pkt) override {
     ASSERT_NE(static_cast<int>(pkt->data.frame.width[0]), 0);
     ASSERT_NE(static_cast<int>(pkt->data.frame.height[0]), 0);
     encode_frame_width_.push_back(pkt->data.frame.width[0]);
@@ -289,8 +289,8 @@ class ResizeTest
     return encode_frame_height_[idx];
   }
 
-  virtual void DecompressedFrameHook(const vpx_image_t &img,
-                                     vpx_codec_pts_t pts) {
+  void DecompressedFrameHook(const vpx_image_t &img,
+                             vpx_codec_pts_t pts) override {
     frame_info_list_.push_back(FrameInfo(pts, img.d_w, img.d_h));
   }
 
@@ -336,15 +336,15 @@ class ResizeInternalTest : public ResizeTest {
   ResizeInternalTest() : ResizeTest(), frame0_psnr_(0.0) {}
 #endif
 
-  virtual ~ResizeInternalTest() {}
+  ~ResizeInternalTest() override {}
 
-  virtual void BeginPassHook(unsigned int /*pass*/) {
+  void BeginPassHook(unsigned int /*pass*/) override {
 #if WRITE_COMPRESSED_STREAM
     outfile_ = fopen("vp90-2-05-resize.ivf", "wb");
 #endif
   }
 
-  virtual void EndPassHook() {
+  void EndPassHook() override {
 #if WRITE_COMPRESSED_STREAM
     if (outfile_) {
       if (!fseek(outfile_, 0, SEEK_SET))
@@ -355,8 +355,8 @@ class ResizeInternalTest : public ResizeTest {
 #endif
   }
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  libvpx_test::Encoder *encoder) {
+  void PreEncodeFrameHook(libvpx_test::VideoSource *video,
+                          libvpx_test::Encoder *encoder) override {
     if (change_config_) {
       int new_q = 60;
       if (video->frame() == 0) {
@@ -381,7 +381,7 @@ class ResizeInternalTest : public ResizeTest {
     }
   }
 
-  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
+  void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) override {
     if (frame0_psnr_ == 0.) frame0_psnr_ = pkt->data.psnr.psnr[0];
     EXPECT_NEAR(pkt->data.psnr.psnr[0], frame0_psnr_, 2.0);
   }
@@ -450,10 +450,10 @@ class ResizeRealtimeTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   ResizeRealtimeTest() : EncoderTest(GET_PARAM(0)) {}
-  virtual ~ResizeRealtimeTest() {}
+  ~ResizeRealtimeTest() override {}
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  libvpx_test::Encoder *encoder) {
+  void PreEncodeFrameHook(libvpx_test::VideoSource *video,
+                          libvpx_test::Encoder *encoder) override {
     if (video->frame() == 0) {
       encoder->Control(VP9E_SET_AQ_MODE, 3);
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
@@ -466,24 +466,24 @@ class ResizeRealtimeTest
     }
   }
 
-  virtual void SetUp() {
+  void SetUp() override {
     InitializeConfig();
     SetMode(GET_PARAM(1));
     set_cpu_used_ = GET_PARAM(2);
   }
 
-  virtual void DecompressedFrameHook(const vpx_image_t &img,
-                                     vpx_codec_pts_t pts) {
+  void DecompressedFrameHook(const vpx_image_t &img,
+                             vpx_codec_pts_t pts) override {
     frame_info_list_.push_back(FrameInfo(pts, img.d_w, img.d_h));
   }
 
-  virtual void MismatchHook(const vpx_image_t *img1, const vpx_image_t *img2) {
+  void MismatchHook(const vpx_image_t *img1, const vpx_image_t *img2) override {
     double mismatch_psnr = compute_psnr(img1, img2);
     mismatch_psnr_ += mismatch_psnr;
     ++mismatch_nframes_;
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
+  void FramePktHook(const vpx_codec_cx_pkt_t *pkt) override {
     ASSERT_NE(static_cast<int>(pkt->data.frame.width[0]), 0);
     ASSERT_NE(static_cast<int>(pkt->data.frame.height[0]), 0);
     encode_frame_width_.push_back(pkt->data.frame.width[0]);
@@ -693,15 +693,15 @@ class ResizeCspTest : public ResizeTest {
   ResizeCspTest() : ResizeTest(), frame0_psnr_(0.0) {}
 #endif
 
-  virtual ~ResizeCspTest() {}
+  ~ResizeCspTest() override {}
 
-  virtual void BeginPassHook(unsigned int /*pass*/) {
+  void BeginPassHook(unsigned int /*pass*/) override {
 #if WRITE_COMPRESSED_STREAM
     outfile_ = fopen("vp91-2-05-cspchape.ivf", "wb");
 #endif
   }
 
-  virtual void EndPassHook() {
+  void EndPassHook() override {
 #if WRITE_COMPRESSED_STREAM
     if (outfile_) {
       if (!fseek(outfile_, 0, SEEK_SET))
@@ -712,8 +712,8 @@ class ResizeCspTest : public ResizeTest {
 #endif
   }
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
-                                  libvpx_test::Encoder *encoder) {
+  void PreEncodeFrameHook(libvpx_test::VideoSource *video,
+                          libvpx_test::Encoder *encoder) override {
     if (CspForFrameNumber(video->frame()) != VPX_IMG_FMT_I420 &&
         cfg_.g_profile != 1) {
       cfg_.g_profile = 1;
@@ -726,7 +726,7 @@ class ResizeCspTest : public ResizeTest {
     }
   }
 
-  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
+  void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) override {
     if (frame0_psnr_ == 0.) frame0_psnr_ = pkt->data.psnr.psnr[0];
     EXPECT_NEAR(pkt->data.psnr.psnr[0], frame0_psnr_, 2.0);
   }
@@ -758,10 +758,10 @@ class ResizingCspVideoSource : public ::libvpx_test::DummyVideoSource {
     limit_ = 30;
   }
 
-  virtual ~ResizingCspVideoSource() {}
+  ~ResizingCspVideoSource() override {}
 
  protected:
-  virtual void Next() {
+  void Next() override {
     ++frame_;
     SetImageFormat(CspForFrameNumber(frame_));
     FillFrame();
