@@ -116,7 +116,7 @@ class VP9NewEncodeDecodePerfTest
  protected:
   VP9NewEncodeDecodePerfTest()
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)), speed_(0),
-        outfile_(0), out_frames_(0) {}
+        outfile_(nullptr), out_frames_(0) {}
 
   ~VP9NewEncodeDecodePerfTest() override = default;
 
