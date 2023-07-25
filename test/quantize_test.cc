@@ -33,9 +33,9 @@ namespace {
 const int kNumBlocks = 25;
 const int kNumBlockEntries = 16;
 
-typedef void (*VP8Quantize)(BLOCK *b, BLOCKD *d);
+using VP8Quantize = void (*)(BLOCK *b, BLOCKD *d);
 
-typedef std::tuple<VP8Quantize, VP8Quantize> VP8QuantizeParam;
+using VP8QuantizeParam = std::tuple<VP8Quantize, VP8Quantize>;
 
 using libvpx_test::ACMRandom;
 using std::make_tuple;

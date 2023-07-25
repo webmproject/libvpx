@@ -38,32 +38,32 @@ struct TestParams {
   Function func;
 };
 
-typedef unsigned int (*SadMxNFunc)(const uint8_t *src_ptr, int src_stride,
-                                   const uint8_t *ref_ptr, int ref_stride);
-typedef TestParams<SadMxNFunc> SadMxNParam;
+using SadMxNFunc = unsigned int (*)(const uint8_t *src_ptr, int src_stride,
+                                    const uint8_t *ref_ptr, int ref_stride);
+using SadMxNParam = TestParams<SadMxNFunc>;
 
-typedef unsigned int (*SadSkipMxNFunc)(const uint8_t *src_ptr, int src_stride,
-                                       const uint8_t *ref_ptr, int ref_stride);
-typedef TestParams<SadSkipMxNFunc> SadSkipMxNParam;
+using SadSkipMxNFunc = unsigned int (*)(const uint8_t *src_ptr, int src_stride,
+                                        const uint8_t *ref_ptr, int ref_stride);
+using SadSkipMxNParam = TestParams<SadSkipMxNFunc>;
 
-typedef unsigned int (*SadMxNAvgFunc)(const uint8_t *src_ptr, int src_stride,
-                                      const uint8_t *ref_ptr, int ref_stride,
-                                      const uint8_t *second_pred);
-typedef TestParams<SadMxNAvgFunc> SadMxNAvgParam;
+using SadMxNAvgFunc = unsigned int (*)(const uint8_t *src_ptr, int src_stride,
+                                       const uint8_t *ref_ptr, int ref_stride,
+                                       const uint8_t *second_pred);
+using SadMxNAvgParam = TestParams<SadMxNAvgFunc>;
 
-typedef void (*SadMxNx4Func)(const uint8_t *src_ptr, int src_stride,
-                             const uint8_t *const ref_ptr[], int ref_stride,
-                             unsigned int *sad_array);
-typedef TestParams<SadMxNx4Func> SadMxNx4Param;
+using SadMxNx4Func = void (*)(const uint8_t *src_ptr, int src_stride,
+                              const uint8_t *const ref_ptr[], int ref_stride,
+                              unsigned int *sad_array);
+using SadMxNx4Param = TestParams<SadMxNx4Func>;
 
-typedef void (*SadSkipMxNx4Func)(const uint8_t *src_ptr, int src_stride,
-                                 const uint8_t *const ref_ptr[], int ref_stride,
-                                 unsigned int *sad_array);
-typedef TestParams<SadSkipMxNx4Func> SadSkipMxNx4Param;
+using SadSkipMxNx4Func = void (*)(const uint8_t *src_ptr, int src_stride,
+                                  const uint8_t *const ref_ptr[],
+                                  int ref_stride, unsigned int *sad_array);
+using SadSkipMxNx4Param = TestParams<SadSkipMxNx4Func>;
 
-typedef void (*SadMxNx8Func)(const uint8_t *src_ptr, int src_stride,
-                             const uint8_t *ref_ptr, int ref_stride,
-                             unsigned int *sad_array);
+using SadMxNx8Func = void (*)(const uint8_t *src_ptr, int src_stride,
+                              const uint8_t *ref_ptr, int ref_stride,
+                              unsigned int *sad_array);
 
 using libvpx_test::ACMRandom;
 

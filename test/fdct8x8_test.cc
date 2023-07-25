@@ -38,16 +38,16 @@ const double kPi = 3.141592653589793238462643383279502884;
 const int kSignBiasMaxDiff255 = 1500;
 const int kSignBiasMaxDiff15 = 10000;
 
-typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);
-typedef void (*IdctFunc)(const tran_low_t *in, uint8_t *out, int stride);
-typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
-                        int tx_type);
-typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
-                        int tx_type);
+using FdctFunc = void (*)(const int16_t *in, tran_low_t *out, int stride);
+using IdctFunc = void (*)(const tran_low_t *in, uint8_t *out, int stride);
+using FhtFunc = void (*)(const int16_t *in, tran_low_t *out, int stride,
+                         int tx_type);
+using IhtFunc = void (*)(const tran_low_t *in, uint8_t *out, int stride,
+                         int tx_type);
 
-typedef std::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t> Dct8x8Param;
-typedef std::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t> Ht8x8Param;
-typedef std::tuple<IdctFunc, IdctFunc, int, vpx_bit_depth_t> Idct8x8Param;
+using Dct8x8Param = std::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t>;
+using Ht8x8Param = std::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t>;
+using Idct8x8Param = std::tuple<IdctFunc, IdctFunc, int, vpx_bit_depth_t>;
 
 void reference_8x8_dct_1d(const double in[8], double out[8]) {
   const double kInvSqrt2 = 0.707106781186547524400844362104;
