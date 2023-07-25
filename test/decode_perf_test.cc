@@ -118,7 +118,7 @@ class VP9NewEncodeDecodePerfTest
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)), speed_(0),
         outfile_(0), out_frames_(0) {}
 
-  ~VP9NewEncodeDecodePerfTest() override {}
+  ~VP9NewEncodeDecodePerfTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

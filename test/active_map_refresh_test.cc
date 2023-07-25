@@ -62,7 +62,7 @@ class ActiveMapRefreshTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   ActiveMapRefreshTest() : EncoderTest(GET_PARAM(0)) {}
-  ~ActiveMapRefreshTest() override {}
+  ~ActiveMapRefreshTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

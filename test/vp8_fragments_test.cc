@@ -17,7 +17,7 @@ class VP8FragmentsTest : public ::libvpx_test::EncoderTest,
                          public ::testing::Test {
  protected:
   VP8FragmentsTest() : EncoderTest(&::libvpx_test::kVP8) {}
-  ~VP8FragmentsTest() override {}
+  ~VP8FragmentsTest() override = default;
 
   void SetUp() override {
     const unsigned long init_flags =  // NOLINT(runtime/int)

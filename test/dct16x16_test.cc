@@ -310,7 +310,7 @@ void idct16x16_10_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
 
 class Trans16x16TestBase {
  public:
-  virtual ~Trans16x16TestBase() {}
+  virtual ~Trans16x16TestBase() = default;
 
  protected:
   virtual void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) = 0;
@@ -728,7 +728,7 @@ class Trans16x16TestBase {
 class Trans16x16DCT : public Trans16x16TestBase,
                       public ::testing::TestWithParam<Dct16x16Param> {
  public:
-  ~Trans16x16DCT() override {}
+  ~Trans16x16DCT() override = default;
 
   void SetUp() override {
     fwd_txfm_ = GET_PARAM(0);
@@ -782,7 +782,7 @@ TEST_P(Trans16x16DCT, DISABLED_Speed) { RunSpeedTest(); }
 class Trans16x16HT : public Trans16x16TestBase,
                      public ::testing::TestWithParam<Ht16x16Param> {
  public:
-  ~Trans16x16HT() override {}
+  ~Trans16x16HT() override = default;
 
   void SetUp() override {
     fwd_txfm_ = GET_PARAM(0);
@@ -832,7 +832,7 @@ TEST_P(Trans16x16HT, QuantCheck) {
 class InvTrans16x16DCT : public Trans16x16TestBase,
                          public ::testing::TestWithParam<Idct16x16Param> {
  public:
-  ~InvTrans16x16DCT() override {}
+  ~InvTrans16x16DCT() override = default;
 
   void SetUp() override {
     ref_txfm_ = GET_PARAM(0);

@@ -89,7 +89,7 @@ void idct32x32_12(const tran_low_t *in, uint8_t *out, int stride) {
 class Trans32x32Test : public AbstractBench,
                        public ::testing::TestWithParam<Trans32x32Param> {
  public:
-  ~Trans32x32Test() override {}
+  ~Trans32x32Test() override = default;
   void SetUp() override {
     fwd_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);
@@ -321,7 +321,7 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
 
 class InvTrans32x32Test : public ::testing::TestWithParam<InvTrans32x32Param> {
  public:
-  ~InvTrans32x32Test() override {}
+  ~InvTrans32x32Test() override = default;
   void SetUp() override {
     ref_txfm_ = GET_PARAM(0);
     inv_txfm_ = GET_PARAM(1);

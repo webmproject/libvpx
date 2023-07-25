@@ -33,7 +33,7 @@ class AddNoiseTest : public ::testing::Test,
                      public ::testing::WithParamInterface<AddNoiseTestFPParam> {
  public:
   void TearDown() override { libvpx_test::ClearSystemState(); }
-  ~AddNoiseTest() override {}
+  ~AddNoiseTest() override = default;
 };
 
 double stddev6(char a, char b, char c, char d, char e, char f) {

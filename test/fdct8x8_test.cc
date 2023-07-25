@@ -143,7 +143,7 @@ void idct8x8_64_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
 #endif
 class FwdTrans8x8TestBase {
  public:
-  virtual ~FwdTrans8x8TestBase() {}
+  virtual ~FwdTrans8x8TestBase() = default;
 
  protected:
   virtual void RunFwdTxfm(int16_t *in, tran_low_t *out, int stride) = 0;
@@ -539,7 +539,7 @@ class FwdTrans8x8TestBase {
 class FwdTrans8x8DCT : public FwdTrans8x8TestBase,
                        public ::testing::TestWithParam<Dct8x8Param> {
  public:
-  ~FwdTrans8x8DCT() override {}
+  ~FwdTrans8x8DCT() override = default;
 
   void SetUp() override {
     fwd_txfm_ = GET_PARAM(0);
@@ -578,7 +578,7 @@ TEST_P(FwdTrans8x8DCT, InvAccuracyCheck) { RunInvAccuracyCheck(); }
 class FwdTrans8x8HT : public FwdTrans8x8TestBase,
                       public ::testing::TestWithParam<Ht8x8Param> {
  public:
-  ~FwdTrans8x8HT() override {}
+  ~FwdTrans8x8HT() override = default;
 
   void SetUp() override {
     fwd_txfm_ = GET_PARAM(0);
@@ -614,7 +614,7 @@ TEST_P(FwdTrans8x8HT, ExtremalCheck) { RunExtremalCheck(); }
 class InvTrans8x8DCT : public FwdTrans8x8TestBase,
                        public ::testing::TestWithParam<Idct8x8Param> {
  public:
-  ~InvTrans8x8DCT() override {}
+  ~InvTrans8x8DCT() override = default;
 
   void SetUp() override {
     ref_txfm_ = GET_PARAM(0);

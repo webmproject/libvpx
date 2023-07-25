@@ -50,7 +50,7 @@ class CQTest : public ::libvpx_test::EncoderTest,
     init_flags_ = VPX_CODEC_USE_PSNR;
   }
 
-  ~CQTest() override {}
+  ~CQTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

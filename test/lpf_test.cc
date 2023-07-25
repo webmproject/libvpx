@@ -129,7 +129,7 @@ uint8_t GetHevThresh(ACMRandom *rnd) {
 
 class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
  public:
-  ~Loop8Test6Param() override {}
+  ~Loop8Test6Param() override = default;
   void SetUp() override {
     loopfilter_op_ = GET_PARAM(0);
     ref_loopfilter_op_ = GET_PARAM(1);
@@ -151,7 +151,7 @@ GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(Loop8Test6Param);
     (HAVE_DSPR2 || HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH)
 class Loop8Test9Param : public ::testing::TestWithParam<dualloop8_param_t> {
  public:
-  ~Loop8Test9Param() override {}
+  ~Loop8Test9Param() override = default;
   void SetUp() override {
     loopfilter_op_ = GET_PARAM(0);
     ref_loopfilter_op_ = GET_PARAM(1);

@@ -22,7 +22,7 @@ class BordersTest
       public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   BordersTest() : EncoderTest(GET_PARAM(0)) {}
-  ~BordersTest() override {}
+  ~BordersTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

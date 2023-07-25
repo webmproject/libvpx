@@ -53,7 +53,7 @@ int64_t BlockError8BitWrapper(const tran_low_t *coeff,
 
 class BlockErrorTest : public ::testing::TestWithParam<BlockErrorParam> {
  public:
-  ~BlockErrorTest() override {}
+  ~BlockErrorTest() override = default;
   void SetUp() override {
     error_block_op_ = GET_PARAM(0);
     ref_error_block_op_ = GET_PARAM(1);

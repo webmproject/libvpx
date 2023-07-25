@@ -24,7 +24,7 @@ class AltRefTest : public ::libvpx_test::EncoderTest,
                    public ::libvpx_test::CodecTestWithParam<int> {
  protected:
   AltRefTest() : EncoderTest(GET_PARAM(0)), altref_count_(0) {}
-  ~AltRefTest() override {}
+  ~AltRefTest() override = default;
 
   void SetUp() override {
     InitializeConfig();
@@ -75,7 +75,7 @@ class AltRefForcedKeyTestLarge
   AltRefForcedKeyTestLarge()
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
         cpu_used_(GET_PARAM(2)), forced_kf_frame_num_(1), frame_num_(0) {}
-  ~AltRefForcedKeyTestLarge() override {}
+  ~AltRefForcedKeyTestLarge() override = default;
 
   void SetUp() override {
     InitializeConfig();

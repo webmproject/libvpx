@@ -24,7 +24,7 @@ class DatarateTestLarge
  public:
   DatarateTestLarge() : EncoderTest(GET_PARAM(0)) {}
 
-  ~DatarateTestLarge() override {}
+  ~DatarateTestLarge() override = default;
 
  protected:
   void SetUp() override {
@@ -301,7 +301,7 @@ TEST_P(DatarateTestLarge, DropFramesMultiThreads) {
 
 class DatarateTestRealTime : public DatarateTestLarge {
  public:
-  ~DatarateTestRealTime() override {}
+  ~DatarateTestRealTime() override = default;
 };
 
 #if CONFIG_TEMPORAL_DENOISING

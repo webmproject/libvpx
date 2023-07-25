@@ -42,7 +42,7 @@ class VP9DenoiserTest
     : public ::testing::Test,
       public ::testing::WithParamInterface<VP9DenoiserTestParam> {
  public:
-  ~VP9DenoiserTest() override {}
+  ~VP9DenoiserTest() override = default;
 
   void SetUp() override { bs_ = GET_PARAM(1); }
 

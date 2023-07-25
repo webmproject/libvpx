@@ -62,7 +62,7 @@ class VpxEncoderParmsGetToDecoder
   VpxEncoderParmsGetToDecoder()
       : EncoderTest(GET_PARAM(0)), encode_parms(GET_PARAM(1)) {}
 
-  ~VpxEncoderParmsGetToDecoder() override {}
+  ~VpxEncoderParmsGetToDecoder() override = default;
 
   void SetUp() override {
     InitializeConfig();

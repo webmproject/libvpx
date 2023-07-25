@@ -20,7 +20,7 @@ class AltRefAqSegmentTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   AltRefAqSegmentTest() : EncoderTest(GET_PARAM(0)) {}
-  ~AltRefAqSegmentTest() override {}
+  ~AltRefAqSegmentTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

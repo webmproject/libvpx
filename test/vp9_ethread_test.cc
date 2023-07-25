@@ -233,7 +233,7 @@ class VPxEncoderThreadTest
     psnr_ = 0.0;
     nframes_ = 0;
   }
-  ~VPxEncoderThreadTest() override {}
+  ~VPxEncoderThreadTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

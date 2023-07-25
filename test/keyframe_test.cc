@@ -22,7 +22,7 @@ class KeyframeTest
       public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   KeyframeTest() : EncoderTest(GET_PARAM(0)) {}
-  ~KeyframeTest() override {}
+  ~KeyframeTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

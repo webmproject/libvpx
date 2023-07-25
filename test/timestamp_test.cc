@@ -67,7 +67,7 @@ class TimestampTest
       public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   TimestampTest() : EncoderTest(GET_PARAM(0)) {}
-  ~TimestampTest() override {}
+  ~TimestampTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

@@ -20,7 +20,7 @@ class AqSegmentTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   AqSegmentTest() : EncoderTest(GET_PARAM(0)) {}
-  ~AqSegmentTest() override {}
+  ~AqSegmentTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

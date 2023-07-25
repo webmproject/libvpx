@@ -79,7 +79,7 @@ class VP9FrameSizeTestsLarge : public ::libvpx_test::EncoderTest,
  protected:
   VP9FrameSizeTestsLarge()
       : EncoderTest(&::libvpx_test::kVP9), expected_res_(VPX_CODEC_OK) {}
-  ~VP9FrameSizeTestsLarge() override {}
+  ~VP9FrameSizeTestsLarge() override = default;
 
   void SetUp() override {
     InitializeConfig();

@@ -45,7 +45,7 @@ class ScalePartitionOnePassCbrSvc
   }
 
  protected:
-  ~ScalePartitionOnePassCbrSvc() override {}
+  ~ScalePartitionOnePassCbrSvc() override = default;
 
   void SetUp() override {
     InitializeConfig();
@@ -129,7 +129,7 @@ class SyncFrameOnePassCbrSvc : public OnePassCbrSvc,
   }
 
  protected:
-  ~SyncFrameOnePassCbrSvc() override {}
+  ~SyncFrameOnePassCbrSvc() override = default;
 
   void SetUp() override {
     InitializeConfig();
@@ -657,7 +657,7 @@ class LoopfilterOnePassCbrSvc : public OnePassCbrSvc,
   }
 
  protected:
-  ~LoopfilterOnePassCbrSvc() override {}
+  ~LoopfilterOnePassCbrSvc() override = default;
 
   void SetUp() override {
     InitializeConfig();

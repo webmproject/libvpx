@@ -89,7 +89,7 @@ class EndToEndTestAdaptiveRDThresh
       : EncoderTest(GET_PARAM(0)), cpu_used_start_(GET_PARAM(1)),
         cpu_used_end_(GET_PARAM(2)) {}
 
-  ~EndToEndTestAdaptiveRDThresh() override {}
+  ~EndToEndTestAdaptiveRDThresh() override = default;
 
   void SetUp() override {
     InitializeConfig();
@@ -131,7 +131,7 @@ class EndToEndTestLarge
     denoiser_on_ = 0;
   }
 
-  ~EndToEndTestLarge() override {}
+  ~EndToEndTestLarge() override = default;
 
   void SetUp() override {
     InitializeConfig();
@@ -207,7 +207,7 @@ class EndToEndTestLoopFilterThreading
   EndToEndTestLoopFilterThreading()
       : EncoderTest(GET_PARAM(0)), use_loop_filter_opt_(GET_PARAM(1)) {}
 
-  ~EndToEndTestLoopFilterThreading() override {}
+  ~EndToEndTestLoopFilterThreading() override = default;
 
   void SetUp() override {
     InitializeConfig();

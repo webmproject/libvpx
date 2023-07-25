@@ -59,7 +59,7 @@ const int kCountTestBlock = 1000;
 
 class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
  public:
-  ~PartialIDctTest() override {}
+  ~PartialIDctTest() override = default;
   void SetUp() override {
     rnd_.Reset(ACMRandom::DeterministicSeed());
     fwd_txfm_ = GET_PARAM(0);

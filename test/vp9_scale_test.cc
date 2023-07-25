@@ -33,7 +33,7 @@ typedef void (*ScaleFrameFunc)(const YV12_BUFFER_CONFIG *src,
 class ScaleTest : public VpxScaleBase,
                   public ::testing::TestWithParam<ScaleFrameFunc> {
  public:
-  ~ScaleTest() override {}
+  ~ScaleTest() override = default;
 
  protected:
   void SetUp() override { scale_fn_ = GetParam(); }

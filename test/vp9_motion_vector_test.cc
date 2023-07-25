@@ -42,7 +42,7 @@ class MotionVectorTestLarge
       : EncoderTest(GET_PARAM(0)), encoding_mode_(GET_PARAM(1)),
         cpu_used_(GET_PARAM(2)), mv_test_mode_(GET_PARAM(3)) {}
 
-  ~MotionVectorTestLarge() override {}
+  ~MotionVectorTestLarge() override = default;
 
   void SetUp() override {
     InitializeConfig();

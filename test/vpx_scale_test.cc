@@ -38,7 +38,7 @@ class ExtendBorderTest
     : public VpxScaleBase,
       public ::testing::TestWithParam<ExtendFrameBorderFunc> {
  public:
-  ~ExtendBorderTest() override {}
+  ~ExtendBorderTest() override = default;
 
  protected:
   void SetUp() override { extend_fn_ = GetParam(); }
@@ -68,7 +68,7 @@ INSTANTIATE_TEST_SUITE_P(C, ExtendBorderTest,
 class CopyFrameTest : public VpxScaleBase,
                       public ::testing::TestWithParam<CopyFrameFunc> {
  public:
-  ~CopyFrameTest() override {}
+  ~CopyFrameTest() override = default;
 
  protected:
   void SetUp() override { copy_frame_fn_ = GetParam(); }

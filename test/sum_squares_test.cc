@@ -33,7 +33,7 @@ typedef std::tuple<SSI16Func, SSI16Func> SumSquaresParam;
 
 class SumSquaresTest : public ::testing::TestWithParam<SumSquaresParam> {
  public:
-  ~SumSquaresTest() override {}
+  ~SumSquaresTest() override = default;
   void SetUp() override {
     ref_func_ = GET_PARAM(0);
     tst_func_ = GET_PARAM(1);

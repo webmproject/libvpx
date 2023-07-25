@@ -43,7 +43,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
   }
 
  protected:
-  ~DatarateOnePassCbrSvc() override {}
+  ~DatarateOnePassCbrSvc() override = default;
 
   virtual void ResetModel() {
     last_pts_ = 0;
@@ -670,7 +670,7 @@ class DatarateOnePassCbrSvcSingleBR
   DatarateOnePassCbrSvcSingleBR() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
     memset(&svc_params_, 0, sizeof(svc_params_));
   }
-  ~DatarateOnePassCbrSvcSingleBR() override {}
+  ~DatarateOnePassCbrSvcSingleBR() override = default;
 
  protected:
   void SetUp() override {
@@ -1160,7 +1160,7 @@ class DatarateOnePassCbrSvcMultiBR
   DatarateOnePassCbrSvcMultiBR() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
     memset(&svc_params_, 0, sizeof(svc_params_));
   }
-  ~DatarateOnePassCbrSvcMultiBR() override {}
+  ~DatarateOnePassCbrSvcMultiBR() override = default;
 
  protected:
   void SetUp() override {
@@ -1243,7 +1243,7 @@ class DatarateOnePassCbrSvcFrameDropMultiBR
       : DatarateOnePassCbrSvc(GET_PARAM(0)) {
     memset(&svc_params_, 0, sizeof(svc_params_));
   }
-  ~DatarateOnePassCbrSvcFrameDropMultiBR() override {}
+  ~DatarateOnePassCbrSvcFrameDropMultiBR() override = default;
 
  protected:
   void SetUp() override {
@@ -1355,7 +1355,7 @@ class DatarateOnePassCbrSvcInterLayerPredSingleBR
       : DatarateOnePassCbrSvc(GET_PARAM(0)) {
     memset(&svc_params_, 0, sizeof(svc_params_));
   }
-  ~DatarateOnePassCbrSvcInterLayerPredSingleBR() override {}
+  ~DatarateOnePassCbrSvcInterLayerPredSingleBR() override = default;
 
  protected:
   void SetUp() override {
@@ -1441,7 +1441,7 @@ class DatarateOnePassCbrSvcDenoiser
   DatarateOnePassCbrSvcDenoiser() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
     memset(&svc_params_, 0, sizeof(svc_params_));
   }
-  ~DatarateOnePassCbrSvcDenoiser() override {}
+  ~DatarateOnePassCbrSvcDenoiser() override = default;
 
  protected:
   void SetUp() override {
@@ -1499,7 +1499,7 @@ class DatarateOnePassCbrSvcSmallKF
   DatarateOnePassCbrSvcSmallKF() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
     memset(&svc_params_, 0, sizeof(svc_params_));
   }
-  ~DatarateOnePassCbrSvcSmallKF() override {}
+  ~DatarateOnePassCbrSvcSmallKF() override = default;
 
  protected:
   void SetUp() override {
@@ -1702,7 +1702,7 @@ class DatarateOnePassCbrSvcPostencodeDrop
   DatarateOnePassCbrSvcPostencodeDrop() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
     memset(&svc_params_, 0, sizeof(svc_params_));
   }
-  ~DatarateOnePassCbrSvcPostencodeDrop() override {}
+  ~DatarateOnePassCbrSvcPostencodeDrop() override = default;
 
  protected:
   void SetUp() override {

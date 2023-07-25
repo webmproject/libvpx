@@ -40,7 +40,7 @@ class RcInterfaceTest
       : EncoderTest(GET_PARAM(0)), aq_mode_(GET_PARAM(1)), key_interval_(3000),
         encoder_exit_(false) {}
 
-  ~RcInterfaceTest() override {}
+  ~RcInterfaceTest() override = default;
 
  protected:
   void SetUp() override {
@@ -170,7 +170,7 @@ class RcInterfaceSvcTest
       : EncoderTest(GET_PARAM(0)), aq_mode_(GET_PARAM(1)), key_interval_(3000),
         dynamic_spatial_layers_(0), inter_layer_pred_off_(GET_PARAM(2)),
         parallel_spatial_layers_(false) {}
-  ~RcInterfaceSvcTest() override {}
+  ~RcInterfaceSvcTest() override = default;
 
  protected:
   void SetUp() override {

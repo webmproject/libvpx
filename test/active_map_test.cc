@@ -26,7 +26,7 @@ class ActiveMapTest
   static const int kHeight = 144;
 
   ActiveMapTest() : EncoderTest(GET_PARAM(0)) {}
-  ~ActiveMapTest() override {}
+  ~ActiveMapTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

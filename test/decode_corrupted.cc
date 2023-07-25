@@ -28,7 +28,7 @@ class DecodeCorruptedFrameTest
   DecodeCorruptedFrameTest() : EncoderTest(GET_PARAM(0)) {}
 
  protected:
-  ~DecodeCorruptedFrameTest() override {}
+  ~DecodeCorruptedFrameTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

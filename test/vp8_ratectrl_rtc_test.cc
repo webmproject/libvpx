@@ -25,7 +25,7 @@
 namespace {
 
 struct Vp8RCTestVideo {
-  Vp8RCTestVideo() {}
+  Vp8RCTestVideo() = default;
   Vp8RCTestVideo(const char *name_, int width_, int height_,
                  unsigned int frames_)
       : name(name_), width(width_), height(height_), frames(frames_) {}
@@ -53,7 +53,7 @@ class Vp8RcInterfaceTest
  public:
   Vp8RcInterfaceTest()
       : EncoderTest(GET_PARAM(0)), key_interval_(3000), encoder_exit_(false) {}
-  ~Vp8RcInterfaceTest() override {}
+  ~Vp8RcInterfaceTest() override = default;
 
  protected:
   void SetUp() override {

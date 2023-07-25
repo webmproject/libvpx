@@ -30,7 +30,7 @@ class ErrorResilienceTestLarge
     Reset();
   }
 
-  ~ErrorResilienceTestLarge() override {}
+  ~ErrorResilienceTestLarge() override = default;
 
   void Reset() {
     error_nframes_ = 0;
@@ -381,7 +381,7 @@ class ErrorResilienceTestLargeCodecControls
     Reset();
   }
 
-  ~ErrorResilienceTestLargeCodecControls() override {}
+  ~ErrorResilienceTestLargeCodecControls() override = default;
 
   void Reset() {
     last_pts_ = 0;

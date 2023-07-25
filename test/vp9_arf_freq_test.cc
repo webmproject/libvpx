@@ -86,7 +86,7 @@ class ArfFreqTest
       : EncoderTest(GET_PARAM(0)), test_video_param_(GET_PARAM(1)),
         test_encode_param_(GET_PARAM(2)), min_arf_requested_(GET_PARAM(3)) {}
 
-  ~ArfFreqTest() override {}
+  ~ArfFreqTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

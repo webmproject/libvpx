@@ -370,7 +370,7 @@ class EncodeApiGetTplStatsTest
       public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {
  public:
   EncodeApiGetTplStatsTest() : EncoderTest(GetParam()), test_io_(false) {}
-  ~EncodeApiGetTplStatsTest() override {}
+  ~EncodeApiGetTplStatsTest() override = default;
 
  protected:
   void SetUp() override {

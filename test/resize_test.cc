@@ -247,7 +247,7 @@ class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
   }
   bool flag_codec_;
   bool smaller_width_larger_size_;
-  ~ResizingVideoSource() override {}
+  ~ResizingVideoSource() override = default;
 
  protected:
   void Next() override {
@@ -267,7 +267,7 @@ class ResizeTest
  protected:
   ResizeTest() : EncoderTest(GET_PARAM(0)) {}
 
-  ~ResizeTest() override {}
+  ~ResizeTest() override = default;
 
   void SetUp() override {
     InitializeConfig();
@@ -336,7 +336,7 @@ class ResizeInternalTest : public ResizeTest {
   ResizeInternalTest() : ResizeTest(), frame0_psnr_(0.0) {}
 #endif
 
-  ~ResizeInternalTest() override {}
+  ~ResizeInternalTest() override = default;
 
   void BeginPassHook(unsigned int /*pass*/) override {
 #if WRITE_COMPRESSED_STREAM
@@ -450,7 +450,7 @@ class ResizeRealtimeTest
       public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   ResizeRealtimeTest() : EncoderTest(GET_PARAM(0)) {}
-  ~ResizeRealtimeTest() override {}
+  ~ResizeRealtimeTest() override = default;
 
   void PreEncodeFrameHook(libvpx_test::VideoSource *video,
                           libvpx_test::Encoder *encoder) override {
@@ -693,7 +693,7 @@ class ResizeCspTest : public ResizeTest {
   ResizeCspTest() : ResizeTest(), frame0_psnr_(0.0) {}
 #endif
 
-  ~ResizeCspTest() override {}
+  ~ResizeCspTest() override = default;
 
   void BeginPassHook(unsigned int /*pass*/) override {
 #if WRITE_COMPRESSED_STREAM
@@ -758,7 +758,7 @@ class ResizingCspVideoSource : public ::libvpx_test::DummyVideoSource {
     limit_ = 30;
   }
 
-  ~ResizingCspVideoSource() override {}
+  ~ResizingCspVideoSource() override = default;
 
  protected:
   void Next() override {

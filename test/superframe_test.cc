@@ -28,7 +28,7 @@ class SuperframeTest
  protected:
   SuperframeTest()
       : EncoderTest(GET_PARAM(0)), modified_buf_(nullptr), last_sf_pts_(0) {}
-  ~SuperframeTest() override {}
+  ~SuperframeTest() override = default;
 
   void SetUp() override {
     InitializeConfig();

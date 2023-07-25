@@ -25,7 +25,7 @@ class DecodeSvcTest : public ::libvpx_test::DecoderTest,
                       public ::libvpx_test::CodecTestWithParam<const char *> {
  protected:
   DecodeSvcTest() : DecoderTest(GET_PARAM(::libvpx_test::kCodecFactoryParam)) {}
-  ~DecodeSvcTest() override {}
+  ~DecodeSvcTest() override = default;
 
   void PreDecodeFrameHook(const libvpx_test::CompressedVideoSource &video,
                           libvpx_test::Decoder *decoder) override {

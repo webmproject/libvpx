@@ -28,7 +28,7 @@ class DatarateTestVP9 : public ::libvpx_test::EncoderTest {
   }
 
  protected:
-  ~DatarateTestVP9() override {}
+  ~DatarateTestVP9() override = default;
 
   virtual void ResetModel() {
     last_pts_ = 0;
@@ -579,7 +579,7 @@ class DatarateTestVP9RealTime : public DatarateTestVP9,
                                 public ::libvpx_test::CodecTestWithParam<int> {
  public:
   DatarateTestVP9RealTime() : DatarateTestVP9(GET_PARAM(0)) {}
-  ~DatarateTestVP9RealTime() override {}
+  ~DatarateTestVP9RealTime() override = default;
 
  protected:
   void SetUp() override {
@@ -731,7 +731,7 @@ class DatarateTestVP9RealTimeDeltaQUV
       public ::libvpx_test::CodecTestWith2Params<int, int> {
  public:
   DatarateTestVP9RealTimeDeltaQUV() : DatarateTestVP9(GET_PARAM(0)) {}
-  ~DatarateTestVP9RealTimeDeltaQUV() override {}
+  ~DatarateTestVP9RealTimeDeltaQUV() override = default;
 
  protected:
   void SetUp() override {
@@ -819,7 +819,7 @@ class DatarateTestVP9FrameQp
       public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {
  public:
   DatarateTestVP9FrameQp() : DatarateTestVP9(GetParam()), frame_(0) {}
-  ~DatarateTestVP9FrameQp() override {}
+  ~DatarateTestVP9FrameQp() override = default;
 
  protected:
   void SetUp() override {
@@ -945,7 +945,7 @@ TEST_P(DatarateTestVP9FrameQp, VP9SetFrameQp3TemporalLayersFixedMode) {
 // Params: speed setting.
 class DatarateTestVP9RealTimeDenoiser : public DatarateTestVP9RealTime {
  public:
-  ~DatarateTestVP9RealTimeDenoiser() override {}
+  ~DatarateTestVP9RealTimeDenoiser() override = default;
 };
 
 // Check basic datarate targeting, for a single bitrate, when denoiser is on.
