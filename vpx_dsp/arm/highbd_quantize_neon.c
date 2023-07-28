@@ -176,9 +176,6 @@ void vpx_highbd_quantize_b_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
     vst1_lane_u16(eob_ptr, eob_max_2, 0);
   }
 #endif  // VPX_ARCH_AARCH64
-  // Need these here, else the compiler complains about mixing declarations and
-  // code in C90
-  (void)n_coeffs;
 }
 
 static VPX_FORCE_INLINE int32x4_t extract_sign_bit(int32x4_t a) {
