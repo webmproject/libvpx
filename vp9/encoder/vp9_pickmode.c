@@ -786,22 +786,19 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *this_rdc,
         switch (tx_size) {
           case TX_16X16:
             vpx_hadamard_16x16(src_diff, diff_stride, coeff);
-            vp9_quantize_fp(coeff, 256, p->round_fp, p->quant_fp, qcoeff,
-                            dqcoeff, pd->dequant, eob, scan_order->scan,
-                            scan_order->iscan);
+            vp9_quantize_fp(coeff, 256, p, qcoeff, dqcoeff, pd->dequant, eob,
+                            scan_order);
             break;
           case TX_8X8:
             vpx_hadamard_8x8(src_diff, diff_stride, coeff);
-            vp9_quantize_fp(coeff, 64, p->round_fp, p->quant_fp, qcoeff,
-                            dqcoeff, pd->dequant, eob, scan_order->scan,
-                            scan_order->iscan);
+            vp9_quantize_fp(coeff, 64, p, qcoeff, dqcoeff, pd->dequant, eob,
+                            scan_order);
             break;
           default:
             assert(tx_size == TX_4X4);
             x->fwd_txfm4x4(src_diff, coeff, diff_stride);
-            vp9_quantize_fp(coeff, 16, p->round_fp, p->quant_fp, qcoeff,
-                            dqcoeff, pd->dequant, eob, scan_order->scan,
-                            scan_order->iscan);
+            vp9_quantize_fp(coeff, 16, p, qcoeff, dqcoeff, pd->dequant, eob,
+                            scan_order);
             break;
         }
         *skippable &= (*eob == 0);

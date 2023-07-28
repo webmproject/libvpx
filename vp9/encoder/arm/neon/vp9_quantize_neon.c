@@ -16,6 +16,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_scan.h"
 #include "vp9/common/vp9_seg_common.h"
 
 #include "vp9/encoder/vp9_encoder.h"
@@ -68,13 +69,11 @@ static VPX_FORCE_INLINE uint16_t get_max_eob(int16x8_t v_eobmax) {
 #endif  // VPX_ARCH_AARCH64
 }
 
-static VPX_FORCE_INLINE void load_fp_values(const int16_t *round_ptr,
-                                            const int16_t *quant_ptr,
-                                            const int16_t *dequant_ptr,
-                                            int16x8_t *round, int16x8_t *quant,
-                                            int16x8_t *dequant) {
-  *round = vld1q_s16(round_ptr);
-  *quant = vld1q_s16(quant_ptr);
+static VPX_FORCE_INLINE void load_fp_values(
+    const struct macroblock_plane *mb_plane, const int16_t *dequant_ptr,
+    int16x8_t *round, int16x8_t *quant, int16x8_t *dequant) {
+  *round = vld1q_s16(mb_plane->round_fp);
+  *quant = vld1q_s16(mb_plane->quant_fp);
   *dequant = vld1q_s16(dequant_ptr);
 }
 
@@ -118,19 +117,18 @@ static VPX_FORCE_INLINE void quantize_fp_8(
 }
 
 void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
-                          const int16_t *round_ptr, const int16_t *quant_ptr,
+                          const struct macroblock_plane *mb_plane,
                           tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                           const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                          const int16_t *scan, const int16_t *iscan) {
+                          const struct ScanOrder *const scan_order) {
   // Quantization pass: All coefficients with index >= zero_flag are
   // skippable. Note: zero_flag can be zero.
   int i;
   int16x8_t v_eobmax = vdupq_n_s16(-1);
   int16x8_t v_round, v_quant, v_dequant;
-  (void)scan;
+  const int16_t *iscan = scan_order->iscan;
 
-  load_fp_values(round_ptr, quant_ptr, dequant_ptr, &v_round, &v_quant,
-                 &v_dequant);
+  load_fp_values(mb_plane, dequant_ptr, &v_round, &v_quant, &v_dequant);
   // process dc and the first seven ac coeffs
   quantize_fp_8(&v_round, &v_quant, &v_dequant, coeff_ptr, iscan, qcoeff_ptr,
                 dqcoeff_ptr, &v_eobmax);
@@ -187,21 +185,20 @@ static VPX_FORCE_INLINE void quantize_fp_32x32_8(
 }
 
 void vp9_quantize_fp_32x32_neon(const tran_low_t *coeff_ptr, intptr_t count,
-                                const int16_t *round_ptr,
-                                const int16_t *quant_ptr,
+                                const struct macroblock_plane *mb_plane,
                                 tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                                 const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                                const int16_t *scan, const int16_t *iscan) {
+                                const struct ScanOrder *const scan_order) {
   int16x8_t eob_max = vdupq_n_s16(-1);
   // ROUND_POWER_OF_TWO(round_ptr[], 1)
-  int16x8_t round = vrshrq_n_s16(vld1q_s16(round_ptr), 1);
-  int16x8_t quant = vld1q_s16(quant_ptr);
+  int16x8_t round = vrshrq_n_s16(vld1q_s16(mb_plane->round_fp), 1);
+  int16x8_t quant = vld1q_s16(mb_plane->quant_fp);
   int16x8_t dequant = vld1q_s16(dequant_ptr);
   // dequant >> 2 is used similar to zbin as a threshold.
   int16x8_t dequant_thresh = vshrq_n_s16(vld1q_s16(dequant_ptr), 2);
   int i;
+  const int16_t *iscan = scan_order->iscan;
 
-  (void)scan;
   (void)count;
 
   // Process dc and the first seven ac coeffs.
@@ -258,23 +255,21 @@ highbd_quantize_fp_4(const tran_low_t *coeff_ptr, tran_low_t *qcoeff_ptr,
 }
 
 void vp9_highbd_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                                 const int16_t *round_ptr,
-                                 const int16_t *quant_ptr,
+                                 const struct macroblock_plane *mb_plane,
                                  tran_low_t *qcoeff_ptr,
                                  tran_low_t *dqcoeff_ptr,
                                  const int16_t *dequant_ptr, uint16_t *eob_ptr,
-                                 const int16_t *scan, const int16_t *iscan) {
+                                 const struct ScanOrder *const scan_order) {
   const int16x4_t v_zero = vdup_n_s16(0);
-  const int16x4_t v_quant = vld1_s16(quant_ptr);
+  const int16x4_t v_quant = vld1_s16(mb_plane->quant_fp);
   const int16x4_t v_dequant = vld1_s16(dequant_ptr);
-  const int16x4_t v_round = vld1_s16(round_ptr);
+  const int16x4_t v_round = vld1_s16(mb_plane->round_fp);
   int32x4_t v_round_s32 = vaddl_s16(v_round, v_zero);
   int32x4_t v_quant_s32 = vshlq_n_s32(vaddl_s16(v_quant, v_zero), 15);
   int32x4_t v_dequant_s32 = vaddl_s16(v_dequant, v_zero);
   uint16x4_t v_mask_lo, v_mask_hi;
   int16x8_t v_eobmax = vdupq_n_s16(-1);
-
-  (void)scan;
+  const int16_t *iscan = scan_order->iscan;
 
   // DC and first 3 AC
   v_mask_lo = highbd_quantize_fp_4(coeff_ptr, qcoeff_ptr, dqcoeff_ptr,
@@ -349,22 +344,21 @@ highbd_quantize_fp_32x32_4(const tran_low_t *coeff_ptr, tran_low_t *qcoeff_ptr,
 }
 
 void vp9_highbd_quantize_fp_32x32_neon(
-    const tran_low_t *coeff_ptr, intptr_t n_coeffs, const int16_t *round_ptr,
-    const int16_t *quant_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-    const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan,
-    const int16_t *iscan) {
-  const int16x4_t v_quant = vld1_s16(quant_ptr);
+    const tran_low_t *coeff_ptr, intptr_t n_coeffs,
+    const struct macroblock_plane *mb_plane, tran_low_t *qcoeff_ptr,
+    tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
+    const struct ScanOrder *const scan_order) {
+  const int16x4_t v_quant = vld1_s16(mb_plane->quant_fp);
   const int16x4_t v_dequant = vld1_s16(dequant_ptr);
   const int16x4_t v_zero = vdup_n_s16(0);
   const int16x4_t v_round =
-      vqrdmulh_n_s16(vld1_s16(round_ptr), (int16_t)(1 << 14));
+      vqrdmulh_n_s16(vld1_s16(mb_plane->round_fp), (int16_t)(1 << 14));
   int32x4_t v_round_s32 = vaddl_s16(v_round, v_zero);
   int32x4_t v_quant_s32 = vshlq_n_s32(vaddl_s16(v_quant, v_zero), 15);
   int32x4_t v_dequant_s32 = vaddl_s16(v_dequant, v_zero);
   uint16x4_t v_mask_lo, v_mask_hi;
   int16x8_t v_eobmax = vdupq_n_s16(-1);
-
-  (void)scan;
+  const int16_t *iscan = scan_order->iscan;
 
   // DC and first 3 AC
   v_mask_lo =

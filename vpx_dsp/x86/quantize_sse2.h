@@ -56,12 +56,12 @@ static INLINE void load_b_values32x32(
   *shift = _mm_slli_epi16(*shift, 1);
 }
 
-static INLINE void load_fp_values(const int16_t *round_ptr, __m128i *round,
-                                  const int16_t *quant_ptr, __m128i *quant,
+static INLINE void load_fp_values(const struct macroblock_plane *mb_plane,
+                                  __m128i *round, __m128i *quant,
                                   const int16_t *dequant_ptr,
                                   __m128i *dequant) {
-  *round = _mm_load_si128((const __m128i *)round_ptr);
-  *quant = _mm_load_si128((const __m128i *)quant_ptr);
+  *round = _mm_load_si128((const __m128i *)mb_plane->round_fp);
+  *quant = _mm_load_si128((const __m128i *)mb_plane->quant_fp);
   *dequant = _mm_load_si128((const __m128i *)dequant_ptr);
 }
 

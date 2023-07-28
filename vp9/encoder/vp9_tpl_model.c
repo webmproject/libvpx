@@ -497,18 +497,15 @@ static void get_quantize_error(MACROBLOCK *x, int plane, tran_low_t *coeff,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_highbd_quantize_fp_32x32(coeff, pix_num, p->round_fp, p->quant_fp,
-                                 qcoeff, dqcoeff, pd->dequant, eob,
-                                 scan_order->scan, scan_order->iscan);
+    vp9_highbd_quantize_fp_32x32(coeff, pix_num, p, qcoeff, dqcoeff,
+                                 pd->dequant, eob, scan_order);
   } else {
-    vp9_quantize_fp_32x32(coeff, pix_num, p->round_fp, p->quant_fp, qcoeff,
-                          dqcoeff, pd->dequant, eob, scan_order->scan,
-                          scan_order->iscan);
+    vp9_quantize_fp_32x32(coeff, pix_num, p, qcoeff, dqcoeff, pd->dequant, eob,
+                          scan_order);
   }
 #else
-  vp9_quantize_fp_32x32(coeff, pix_num, p->round_fp, p->quant_fp, qcoeff,
-                        dqcoeff, pd->dequant, eob, scan_order->scan,
-                        scan_order->iscan);
+  vp9_quantize_fp_32x32(coeff, pix_num, p, qcoeff, dqcoeff, pd->dequant, eob,
+                        scan_order);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   *recon_error = vp9_block_error(coeff, dqcoeff, pix_num, sse) >> shift;
