@@ -1505,6 +1505,15 @@ void vp9_setup_tpl_stats(VP9_COMP *cpi) {
   // Qmode.
   trim_tpl_stats(&cpi->common.error, &cpi->tpl_gop_stats, extended_frame_count);
 
+  if (cpi->ext_ratectrl.ready) {
+    const vpx_codec_err_t codec_status =
+        vp9_extrc_send_tpl_stats(&cpi->ext_ratectrl, &cpi->tpl_gop_stats);
+    if (codec_status != VPX_CODEC_OK) {
+      vpx_internal_error(&cpi->common.error, codec_status,
+                         "vp9_extrc_send_tpl_stats() failed");
+    }
+  }
+
 #if CONFIG_NON_GREEDY_MV
   cpi->tpl_ready = 1;
 #if DUMP_TPL_STATS
