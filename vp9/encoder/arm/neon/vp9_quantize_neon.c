@@ -116,7 +116,7 @@ static VPX_FORCE_INLINE void quantize_fp_8(
   *v_eobmax = get_max_lane_eob(iscan_ptr, *v_eobmax, v_nz_mask);
 }
 
-void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
+void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                           const struct macroblock_plane *mb_plane,
                           tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                           const int16_t *dequant_ptr, uint16_t *eob_ptr,
@@ -135,7 +135,7 @@ void vp9_quantize_fp_neon(const tran_low_t *coeff_ptr, intptr_t count,
 
   // now process the rest of the ac coeffs
   update_fp_values(&v_round, &v_quant, &v_dequant);
-  for (i = 8; i < count; i += 8) {
+  for (i = 8; i < n_coeffs; i += 8) {
     quantize_fp_8(&v_round, &v_quant, &v_dequant, coeff_ptr + i, iscan + i,
                   qcoeff_ptr + i, dqcoeff_ptr + i, &v_eobmax);
   }
@@ -184,7 +184,7 @@ static VPX_FORCE_INLINE void quantize_fp_32x32_8(
   *v_eobmax = get_max_lane_eob(iscan_ptr, *v_eobmax, v_nz_mask);
 }
 
-void vp9_quantize_fp_32x32_neon(const tran_low_t *coeff_ptr, intptr_t count,
+void vp9_quantize_fp_32x32_neon(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                                 const struct macroblock_plane *mb_plane,
                                 tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                                 const int16_t *dequant_ptr, uint16_t *eob_ptr,
@@ -199,7 +199,7 @@ void vp9_quantize_fp_32x32_neon(const tran_low_t *coeff_ptr, intptr_t count,
   int i;
   const int16_t *iscan = scan_order->iscan;
 
-  (void)count;
+  (void)n_coeffs;
 
   // Process dc and the first seven ac coeffs.
   quantize_fp_32x32_8(&round, &quant, &dequant, &dequant_thresh, coeff_ptr,
