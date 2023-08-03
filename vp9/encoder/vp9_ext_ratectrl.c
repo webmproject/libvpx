@@ -119,6 +119,21 @@ vpx_codec_err_t vp9_extrc_send_firstpass_stats(
   return VPX_CODEC_OK;
 }
 
+vpx_codec_err_t vp9_extrc_send_tpl_stats(EXT_RATECTRL *ext_ratectrl,
+                                         const VpxTplGopStats *tpl_gop_stats) {
+  if (ext_ratectrl == NULL) {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+  if (ext_ratectrl->ready && ext_ratectrl->funcs.send_tpl_gop_stats != NULL) {
+    vpx_rc_status_t rc_status = ext_ratectrl->funcs.send_tpl_gop_stats(
+        ext_ratectrl->model, tpl_gop_stats);
+    if (rc_status == VPX_RC_ERROR) {
+      return VPX_CODEC_ERROR;
+    }
+  }
+  return VPX_CODEC_OK;
+}
+
 static int extrc_get_frame_type(FRAME_UPDATE_TYPE update_type) {
   // TODO(angiebird): Add unit test to make sure this function behaves like
   // get_frame_type_from_update_type()

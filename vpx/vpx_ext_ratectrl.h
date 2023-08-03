@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "./vpx_integer.h"
+#include "vpx/vpx_tpl.h"
 
 /*!\brief Current ABI version number
  *
@@ -25,7 +26,7 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures.
  */
-#define VPX_EXT_RATECTRL_ABI_VERSION (6)
+#define VPX_EXT_RATECTRL_ABI_VERSION (7)
 
 /*!\brief The control type of the inference API.
  * In VPX_RC_QP mode, the external rate control model determines the
@@ -410,6 +411,18 @@ typedef vpx_rc_status_t (*vpx_rc_send_firstpass_stats_cb_fn_t)(
     vpx_rc_model_t rate_ctrl_model,
     const vpx_rc_firstpass_stats_t *first_pass_stats);
 
+/*!\brief Send TPL stats for the current GOP to the external rate control model
+ * callback prototype
+ *
+ * This callback is invoked by the encoder to send TPL stats for the GOP to the
+ * external rate control model.
+ *
+ * \param[in]  rate_ctrl_model  rate control model
+ * \param[in]  tpl_gop_stats    TPL stats for current GOP
+ */
+typedef vpx_rc_status_t (*vpx_rc_send_tpl_gop_stats_cb_fn_t)(
+    vpx_rc_model_t rate_ctrl_model, const VpxTplGopStats *tpl_gop_stats);
+
 /*!\brief Receive encode frame decision callback prototype
  *
  * This callback is invoked by the encoder to receive encode frame decision from
@@ -491,6 +504,10 @@ typedef struct vpx_rc_funcs {
    * Send first pass stats to the external rate control model.
    */
   vpx_rc_send_firstpass_stats_cb_fn_t send_firstpass_stats;
+  /*!
+   * Send TPL stats for current GOP to the external rate control model.
+   */
+  vpx_rc_send_tpl_gop_stats_cb_fn_t send_tpl_gop_stats;
   /*!
    * Get encodeframe decision from the external rate control model.
    */

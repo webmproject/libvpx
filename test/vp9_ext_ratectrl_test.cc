@@ -18,6 +18,7 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vp9/simple_encode.h"
 #include "vpx/vpx_ext_ratectrl.h"
+#include "vpx/vpx_tpl.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
 namespace {
@@ -147,6 +148,19 @@ vpx_rc_status_t rc_send_firstpass_stats_gop_short(
   EXPECT_EQ(first_pass_stats->num_frames, kFrameNumGOPShort);
   for (int i = 0; i < first_pass_stats->num_frames; ++i) {
     EXPECT_DOUBLE_EQ(first_pass_stats->frame_stats[i].frame, i);
+  }
+  return VPX_RC_OK;
+}
+
+vpx_rc_status_t rc_send_tpl_gop_stats(vpx_rc_model_t rate_ctrl_model,
+                                      const VpxTplGopStats *tpl_gop_stats) {
+  const ToyRateCtrl *toy_rate_ctrl =
+      static_cast<ToyRateCtrl *>(rate_ctrl_model);
+  EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
+  EXPECT_GT(tpl_gop_stats->size, 0);
+
+  for (int i = 0; i < tpl_gop_stats->size; ++i) {
+    EXPECT_GT(tpl_gop_stats->frame_stats_list[i].num_blocks, 0);
   }
   return VPX_RC_OK;
 }
@@ -679,6 +693,7 @@ class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
                           ::libvpx_test::Encoder *encoder) override {
     if (video->frame() == 0) {
       vpx_rc_funcs_t rc_funcs;
+      memset(&rc_funcs, 0, sizeof(rc_funcs));
       rc_funcs.rc_type = VPX_RC_QP;
       rc_funcs.create_model = rc_create_model;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats;
@@ -722,9 +737,11 @@ class ExtRateCtrlTestGOP : public ::libvpx_test::EncoderTest,
       encoder->Control(VP9E_SET_MAX_GF_INTERVAL, kDefaultMaxGfInterval);
 
       vpx_rc_funcs_t rc_funcs;
+      memset(&rc_funcs, 0, sizeof(rc_funcs));
       rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop;
+      rc_funcs.send_tpl_gop_stats = rc_send_tpl_gop_stats;
       rc_funcs.get_encodeframe_decision = rc_get_encodeframe_decision_gop;
       rc_funcs.get_gop_decision = rc_get_gop_decision;
       rc_funcs.update_encodeframe_result = rc_update_encodeframe_result_gop;
@@ -769,6 +786,7 @@ class ExtRateCtrlTestGOPShort : public ::libvpx_test::EncoderTest,
       encoder->Control(VP9E_SET_TARGET_LEVEL, vp9::LEVEL_AUTO);
 
       vpx_rc_funcs_t rc_funcs;
+      memset(&rc_funcs, 0, sizeof(rc_funcs));
       rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop_short;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
@@ -817,6 +835,7 @@ class ExtRateCtrlTestGOPShortOverlay
       encoder->Control(VP9E_SET_TARGET_LEVEL, vp9::LEVEL_AUTO);
 
       vpx_rc_funcs_t rc_funcs;
+      memset(&rc_funcs, 0, sizeof(rc_funcs));
       rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop_short;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
@@ -866,6 +885,7 @@ class ExtRateCtrlTestGOPShortNoARF
       encoder->Control(VP9E_SET_TARGET_LEVEL, vp9::LEVEL_AUTO);
 
       vpx_rc_funcs_t rc_funcs;
+      memset(&rc_funcs, 0, sizeof(rc_funcs));
       rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop_short;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
@@ -920,6 +940,7 @@ class ExtRateCtrlTestRdmult : public ::libvpx_test::EncoderTest,
                           ::libvpx_test::Encoder *encoder) override {
     if (video->frame() == 0) {
       vpx_rc_funcs_t rc_funcs;
+      memset(&rc_funcs, 0, sizeof(rc_funcs));
       rc_funcs.rc_type = VPX_RC_GOP_QP_RDMULT;
       rc_funcs.create_model = rc_create_model_gop_short;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
