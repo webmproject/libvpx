@@ -18,7 +18,7 @@
 #include <stdio.h>
 
 #include "./vpx_integer.h"
-#include "vpx/vpx_codec.h"
+#include "./vpx_codec.h"
 
 #ifdef __cplusplus
 extern "C" {
