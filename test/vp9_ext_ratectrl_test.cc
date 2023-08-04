@@ -692,8 +692,7 @@ class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
   void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                           ::libvpx_test::Encoder *encoder) override {
     if (video->frame() == 0) {
-      vpx_rc_funcs_t rc_funcs;
-      memset(&rc_funcs, 0, sizeof(rc_funcs));
+      vpx_rc_funcs_t rc_funcs = {};
       rc_funcs.rc_type = VPX_RC_QP;
       rc_funcs.create_model = rc_create_model;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats;
@@ -736,8 +735,7 @@ class ExtRateCtrlTestGOP : public ::libvpx_test::EncoderTest,
       encoder->Control(VP9E_SET_MIN_GF_INTERVAL, kDefaultMinGfInterval);
       encoder->Control(VP9E_SET_MAX_GF_INTERVAL, kDefaultMaxGfInterval);
 
-      vpx_rc_funcs_t rc_funcs;
-      memset(&rc_funcs, 0, sizeof(rc_funcs));
+      vpx_rc_funcs_t rc_funcs = {};
       rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop;
@@ -785,8 +783,7 @@ class ExtRateCtrlTestGOPShort : public ::libvpx_test::EncoderTest,
       encoder->Control(VP9E_SET_MAX_GF_INTERVAL, kDefaultMaxGfInterval);
       encoder->Control(VP9E_SET_TARGET_LEVEL, vp9::LEVEL_AUTO);
 
-      vpx_rc_funcs_t rc_funcs;
-      memset(&rc_funcs, 0, sizeof(rc_funcs));
+      vpx_rc_funcs_t rc_funcs = {};
       rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop_short;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
@@ -834,8 +831,7 @@ class ExtRateCtrlTestGOPShortOverlay
       encoder->Control(VP9E_SET_MAX_GF_INTERVAL, kDefaultMaxGfInterval);
       encoder->Control(VP9E_SET_TARGET_LEVEL, vp9::LEVEL_AUTO);
 
-      vpx_rc_funcs_t rc_funcs;
-      memset(&rc_funcs, 0, sizeof(rc_funcs));
+      vpx_rc_funcs_t rc_funcs = {};
       rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop_short;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
@@ -884,8 +880,7 @@ class ExtRateCtrlTestGOPShortNoARF
       encoder->Control(VP9E_SET_MAX_GF_INTERVAL, kDefaultMaxGfInterval);
       encoder->Control(VP9E_SET_TARGET_LEVEL, vp9::LEVEL_AUTO);
 
-      vpx_rc_funcs_t rc_funcs;
-      memset(&rc_funcs, 0, sizeof(rc_funcs));
+      vpx_rc_funcs_t rc_funcs = {};
       rc_funcs.rc_type = VPX_RC_GOP_QP;
       rc_funcs.create_model = rc_create_model_gop_short;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
@@ -939,8 +934,7 @@ class ExtRateCtrlTestRdmult : public ::libvpx_test::EncoderTest,
   void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                           ::libvpx_test::Encoder *encoder) override {
     if (video->frame() == 0) {
-      vpx_rc_funcs_t rc_funcs;
-      memset(&rc_funcs, 0, sizeof(rc_funcs));
+      vpx_rc_funcs_t rc_funcs = {};
       rc_funcs.rc_type = VPX_RC_GOP_QP_RDMULT;
       rc_funcs.create_model = rc_create_model_gop_short;
       rc_funcs.send_firstpass_stats = rc_send_firstpass_stats_gop_short;
