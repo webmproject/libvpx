@@ -19,6 +19,7 @@
 #include "vp9/common/vp9_scan.h"
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_tpl_model.h"
+#include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vpx_codec.h"
 
 static int init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,

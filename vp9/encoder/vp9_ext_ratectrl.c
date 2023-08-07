@@ -8,11 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <stddef.h>
+
 #include "vp9/encoder/vp9_ext_ratectrl.h"
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/common/vp9_common.h"
 #include "vpx_dsp/psnr.h"
 #include "vpx/vpx_codec.h"
+#include "vpx/vpx_ext_ratectrl.h"
 #include "vpx/vpx_tpl.h"
 
 vpx_codec_err_t vp9_extrc_init(EXT_RATECTRL *ext_ratectrl) {
