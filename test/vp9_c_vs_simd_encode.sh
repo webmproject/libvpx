@@ -266,6 +266,11 @@ vp9_enc_test() {
       return 1
     fi
 
+    # Enable armv8 test for real-time only
+    if [ "${preset}" = "good" ] && [ "${target}" = "armv8-linux-gcc" ]; then
+      continue
+    fi
+
     for cpu in $(seq 0 $max_cpu_used); do
       for clip in ${TEST_CLIPS}; do
         for bitrate in ${TEST_BITRATES}; do
@@ -388,16 +393,14 @@ vp9_c_vs_simd_enc_test () {
     fi
   fi
 
-  ##TODO(BUG=webm:1809): Enable testing for ARM after issues with NEON intrinsic
-  # are resolved.
   # Test ARM
-  #  echo "vp9_test_arm: Started."
-  #  vp9_test_arm
-  #  if [ $? -eq 1 ]; then
-  #    echo "vp9 test for arm: Done, test failed."
-  #  else
-  #    echo "vp9 test for arm: Done, all tests passed."
-  #  fi
+  echo "vp9_test_arm: Started."
+  vp9_test_arm
+  if [ $? -eq 1 ]; then
+    echo "vp9 test for arm: Done, test failed."
+  else
+    echo "vp9 test for arm: Done, all tests passed."
+  fi
 }
 
 # Setup a trap function to clean up build, and output files after tests complete.
