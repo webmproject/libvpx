@@ -32,10 +32,12 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures
  */
-#define VPX_TPL_ABI_VERSION (1) /**<\hideinitializer*/
+#define VPX_TPL_ABI_VERSION (2) /**<\hideinitializer*/
 
 /*!\brief Temporal dependency model stats for each block before propagation */
 typedef struct VpxTplBlockStats {
+  int16_t row;         /**< Pixel row of the top left corner */
+  int16_t col;         /**< Pixel col of the top left corner */
   int64_t intra_cost;  /**< Intra cost */
   int64_t inter_cost;  /**< Inter cost */
   int16_t mv_r;        /**< Motion vector row */

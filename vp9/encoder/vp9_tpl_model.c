@@ -400,6 +400,8 @@ static void tpl_store_before_propagation(VpxTplBlockStats *tpl_block_stats,
     for (idx = 0; idx < mi_width; ++idx) {
       VpxTplBlockStats *tpl_block_stats_ptr =
           &tpl_block_stats[(mi_row + idy) * stride + mi_col + idx];
+      tpl_block_stats_ptr->row = mi_row * 8;
+      tpl_block_stats_ptr->col = mi_col * 8;
       tpl_block_stats_ptr->inter_cost = src_stats->inter_cost;
       tpl_block_stats_ptr->intra_cost = src_stats->intra_cost;
       tpl_block_stats_ptr->recrf_dist = recon_error << TPL_DEP_COST_SCALE_LOG2;
