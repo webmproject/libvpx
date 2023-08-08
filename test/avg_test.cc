@@ -681,19 +681,25 @@ INSTANTIATE_TEST_SUITE_P(
                       make_tuple(16, 16, 5, 4, &vpx_avg_4x4_neon),
                       make_tuple(32, 32, 15, 4, &vpx_avg_4x4_neon)));
 
-INSTANTIATE_TEST_SUITE_P(
-    NEON, IntProRowTest,
-    ::testing::Values(make_tuple(16, &vpx_int_pro_row_neon, &vpx_int_pro_row_c),
-                      make_tuple(32, &vpx_int_pro_row_neon, &vpx_int_pro_row_c),
-                      make_tuple(64, &vpx_int_pro_row_neon,
-                                 &vpx_int_pro_row_c)));
-
-INSTANTIATE_TEST_SUITE_P(
-    NEON, IntProColTest,
-    ::testing::Values(make_tuple(16, &vpx_int_pro_col_neon, &vpx_int_pro_col_c),
-                      make_tuple(32, &vpx_int_pro_col_neon, &vpx_int_pro_col_c),
-                      make_tuple(64, &vpx_int_pro_col_neon,
-                                 &vpx_int_pro_col_c)));
+// Disabled neon optimization since it caused mismatch. See details in:
+// https://bugs.chromium.org/p/webm/issues/detail?id=1809
+// INSTANTIATE_TEST_SUITE_P(
+//    NEON, IntProRowTest,
+//    ::testing::Values(make_tuple(16, &vpx_int_pro_row_neon,
+//    &vpx_int_pro_row_c),
+//                      make_tuple(32, &vpx_int_pro_row_neon,
+//                      &vpx_int_pro_row_c), make_tuple(64,
+//                      &vpx_int_pro_row_neon,
+//                                 &vpx_int_pro_row_c)));
+//
+// INSTANTIATE_TEST_SUITE_P(
+//    NEON, IntProColTest,
+//    ::testing::Values(make_tuple(16, &vpx_int_pro_col_neon,
+//    &vpx_int_pro_col_c),
+//                      make_tuple(32, &vpx_int_pro_col_neon,
+//                      &vpx_int_pro_col_c), make_tuple(64,
+//                      &vpx_int_pro_col_neon,
+//                                 &vpx_int_pro_col_c)));
 
 INSTANTIATE_TEST_SUITE_P(NEON, SatdLowbdTest,
                          ::testing::Values(make_tuple(16, &vpx_satd_neon),
