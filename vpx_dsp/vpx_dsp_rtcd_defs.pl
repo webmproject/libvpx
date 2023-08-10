@@ -876,12 +876,10 @@ if (vpx_config("CONFIG_VP9_ENCODER") eq "yes") {
     specialize qw/vpx_satd avx2 sse2 neon msa/;
   }
 
-  # Disabled neon optimization since it caused mismatch. See details in:
-  # https://bugs.chromium.org/p/webm/issues/detail?id=1809
   add_proto qw/void vpx_int_pro_row/, "int16_t hbuf[16], const uint8_t *ref, const int ref_stride, const int height";
-  specialize qw/vpx_int_pro_row sse2 msa/;
+  specialize qw/vpx_int_pro_row neon sse2 msa/;
   add_proto qw/int16_t vpx_int_pro_col/, "const uint8_t *ref, const int width";
-  specialize qw/vpx_int_pro_col sse2 msa/;
+  specialize qw/vpx_int_pro_col neon sse2 msa/;
 
   add_proto qw/int vpx_vector_var/, "const int16_t *ref, const int16_t *src, const int bwl";
   specialize qw/vpx_vector_var neon sse2 msa/;
