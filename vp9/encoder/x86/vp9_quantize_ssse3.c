@@ -21,7 +21,7 @@
 #include "vp9/encoder/vp9_block.h"
 
 void vp9_quantize_fp_ssse3(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                           const struct macroblock_plane *mb_plane,
+                           const struct macroblock_plane *const mb_plane,
                            tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                            const int16_t *dequant_ptr, uint16_t *eob_ptr,
                            const struct ScanOrder *const scan_order) {
@@ -120,7 +120,7 @@ void vp9_quantize_fp_ssse3(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
 }
 
 void vp9_quantize_fp_32x32_ssse3(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                                 const struct macroblock_plane *mb_plane,
+                                 const struct macroblock_plane *const mb_plane,
                                  tran_low_t *qcoeff_ptr,
                                  tran_low_t *dqcoeff_ptr,
                                  const int16_t *dequant_ptr, uint16_t *eob_ptr,

@@ -102,7 +102,7 @@ static VPX_FORCE_INLINE void quantize_fp_16(
 }
 
 void vp9_quantize_fp_avx2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                          const struct macroblock_plane *mb_plane,
+                          const struct macroblock_plane *const mb_plane,
                           tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                           const int16_t *dequant_ptr, uint16_t *eob_ptr,
                           const struct ScanOrder *const scan_order) {
@@ -206,7 +206,7 @@ static VPX_FORCE_INLINE void quantize_fp_32x32_16(
 }
 
 void vp9_quantize_fp_32x32_avx2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                                const struct macroblock_plane *mb_plane,
+                                const struct macroblock_plane *const mb_plane,
                                 tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                                 const int16_t *dequant_ptr, uint16_t *eob_ptr,
                                 const struct ScanOrder *const scan_order) {
@@ -326,7 +326,7 @@ static VPX_FORCE_INLINE void highbd_quantize_fp(
 }
 
 void vp9_highbd_quantize_fp_avx2(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-                                 const struct macroblock_plane *mb_plane,
+                                 const struct macroblock_plane *const mb_plane,
                                  tran_low_t *qcoeff_ptr,
                                  tran_low_t *dqcoeff_ptr,
                                  const int16_t *dequant_ptr, uint16_t *eob_ptr,
@@ -391,7 +391,7 @@ static VPX_FORCE_INLINE void highbd_quantize_fp_32x32(
 
 void vp9_highbd_quantize_fp_32x32_avx2(
     const tran_low_t *coeff_ptr, intptr_t n_coeffs,
-    const struct macroblock_plane *mb_plane, tran_low_t *qcoeff_ptr,
+    const struct macroblock_plane *const mb_plane, tran_low_t *qcoeff_ptr,
     tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr,
     const struct ScanOrder *const scan_order) {
   const int step = 8;
