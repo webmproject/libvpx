@@ -48,6 +48,13 @@ typedef enum vpx_rc_type {
   VPX_RC_GOP_QP_RDMULT = VPX_RC_QP | VPX_RC_GOP | VPX_RC_RDMULT
 } vpx_rc_type_t;
 
+/*!\brief The rate control mode for the external rate control model.
+ */
+typedef enum vpx_ext_rc_mode {
+  VPX_RC_QMODE = 0,
+  VPX_RC_VBR = 1,
+} vpx_ext_rc_mode_t;
+
 /*!\brief Abstract rate control model handler
  *
  * The encoder will receive the model handler from create_model() defined in
@@ -305,6 +312,13 @@ typedef struct vpx_rc_config {
   int target_bitrate_kbps;
   int frame_rate_num; /**< numerator of frame rate */
   int frame_rate_den; /**< denominator of frame rate */
+  /*!
+   * The following fields are only for external rate control models that support
+   * different rate control modes.
+   */
+  vpx_ext_rc_mode_t rc_mode; /**< Q mode or VBR mode */
+  int overshoot_percent;     /**< for VBR mode only */
+  int undershoot_percent;    /**< for VBR mode only */
 } vpx_rc_config_t;
 
 /*!\brief Information passed to the external rate control model to
