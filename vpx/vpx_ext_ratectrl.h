@@ -53,6 +53,7 @@ typedef enum vpx_rc_type {
 typedef enum vpx_ext_rc_mode {
   VPX_RC_QMODE = 0,
   VPX_RC_VBR = 1,
+  VPX_RC_CQ = 2,
 } vpx_ext_rc_mode_t;
 
 /*!\brief Abstract rate control model handler
