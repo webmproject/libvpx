@@ -1968,9 +1968,10 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
       ratectrl_config.undershoot_percent = oxcf->under_shoot_pct;
     } else if (oxcf->rc_mode == VPX_Q) {
       ratectrl_config.rc_mode = VPX_RC_QMODE;
-    } else {
-      return VPX_CODEC_INVALID_PARAM;
+    } else if (oxcf->rc_mode == VPX_CQ) {
+      ratectrl_config.rc_mode = VPX_RC_CQ;
     }
+
     codec_status = vp9_extrc_create(funcs, ratectrl_config, ext_ratectrl);
     if (codec_status != VPX_CODEC_OK) {
       return codec_status;
