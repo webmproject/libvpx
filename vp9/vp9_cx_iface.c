@@ -1962,17 +1962,15 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
     ratectrl_config.target_bitrate_kbps = (int)(oxcf->target_bandwidth / 1000);
     ratectrl_config.frame_rate_num = oxcf->g_timebase.den;
     ratectrl_config.frame_rate_den = oxcf->g_timebase.num;
+    ratectrl_config.overshoot_percent = oxcf->over_shoot_pct;
+    ratectrl_config.undershoot_percent = oxcf->under_shoot_pct;
 
     if (oxcf->rc_mode == VPX_VBR) {
       ratectrl_config.rc_mode = VPX_RC_VBR;
-      ratectrl_config.overshoot_percent = oxcf->over_shoot_pct;
-      ratectrl_config.undershoot_percent = oxcf->under_shoot_pct;
     } else if (oxcf->rc_mode == VPX_Q) {
       ratectrl_config.rc_mode = VPX_RC_QMODE;
     } else if (oxcf->rc_mode == VPX_CQ) {
       ratectrl_config.rc_mode = VPX_RC_CQ;
-      ratectrl_config.overshoot_percent = oxcf->over_shoot_pct;
-      ratectrl_config.undershoot_percent = oxcf->under_shoot_pct;
     }
 
     codec_status = vp9_extrc_create(funcs, ratectrl_config, ext_ratectrl);
