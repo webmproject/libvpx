@@ -1949,8 +1949,9 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
   // TODO(angiebird): Check the possibility of this flag being set at pass == 1
   if (oxcf->pass == 2) {
     const FRAME_INFO *frame_info = &cpi->frame_info;
-    vpx_rc_config_t ratectrl_config = {};
+    vpx_rc_config_t ratectrl_config;
     vpx_codec_err_t codec_status;
+    memset(&ratectrl_config, 0, sizeof(ratectrl_config));
 
     ratectrl_config.frame_width = frame_info->frame_width;
     ratectrl_config.frame_height = frame_info->frame_height;
