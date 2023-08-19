@@ -374,6 +374,7 @@ DSP_SRCS-$(HAVE_MSA)    += mips/sum_squares_msa.c
 
 DSP_SRCS-$(HAVE_NEON)   += arm/sad4d_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/sad_neon.c
+DSP_SRCS-$(HAVE_NEON_DOTPROD) += arm/sad_neon_dotprod.c
 DSP_SRCS-$(HAVE_NEON)   += arm/subtract_neon.c
 
 DSP_SRCS-$(HAVE_MSA)    += mips/sad_msa.c

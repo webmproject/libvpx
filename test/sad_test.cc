@@ -1129,6 +1129,21 @@ const SadMxNParam neon_tests[] = {
 };
 INSTANTIATE_TEST_SUITE_P(NEON, SADTest, ::testing::ValuesIn(neon_tests));
 
+#if HAVE_NEON_DOTPROD
+const SadMxNParam neon_dotprod_tests[] = {
+  SadMxNParam(64, 64, &vpx_sad64x64_neon_dotprod),
+  SadMxNParam(64, 32, &vpx_sad64x32_neon_dotprod),
+  SadMxNParam(32, 64, &vpx_sad32x64_neon_dotprod),
+  SadMxNParam(32, 32, &vpx_sad32x32_neon_dotprod),
+  SadMxNParam(32, 16, &vpx_sad32x16_neon_dotprod),
+  SadMxNParam(16, 32, &vpx_sad16x32_neon_dotprod),
+  SadMxNParam(16, 16, &vpx_sad16x16_neon_dotprod),
+  SadMxNParam(16, 8, &vpx_sad16x8_neon_dotprod),
+};
+INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, SADTest,
+                         ::testing::ValuesIn(neon_dotprod_tests));
+#endif  // HAVE_NEON_DOTPROD
+
 const SadSkipMxNParam skip_neon_tests[] = {
   SadSkipMxNParam(64, 64, &vpx_sad_skip_64x64_neon),
   SadSkipMxNParam(64, 32, &vpx_sad_skip_64x32_neon),
@@ -1188,6 +1203,21 @@ const SadSkipMxNParam skip_neon_tests[] = {
 INSTANTIATE_TEST_SUITE_P(NEON, SADSkipTest,
                          ::testing::ValuesIn(skip_neon_tests));
 
+#if HAVE_NEON_DOTPROD
+const SadSkipMxNParam skip_neon_dotprod_tests[] = {
+  SadSkipMxNParam(64, 64, &vpx_sad_skip_64x64_neon_dotprod),
+  SadSkipMxNParam(64, 32, &vpx_sad_skip_64x32_neon_dotprod),
+  SadSkipMxNParam(32, 64, &vpx_sad_skip_32x64_neon_dotprod),
+  SadSkipMxNParam(32, 32, &vpx_sad_skip_32x32_neon_dotprod),
+  SadSkipMxNParam(32, 16, &vpx_sad_skip_32x16_neon_dotprod),
+  SadSkipMxNParam(16, 32, &vpx_sad_skip_16x32_neon_dotprod),
+  SadSkipMxNParam(16, 16, &vpx_sad_skip_16x16_neon_dotprod),
+  SadSkipMxNParam(16, 8, &vpx_sad_skip_16x8_neon_dotprod),
+};
+INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, SADSkipTest,
+                         ::testing::ValuesIn(skip_neon_dotprod_tests));
+#endif  // HAVE_NEON_DOTPROD
+
 const SadMxNAvgParam avg_neon_tests[] = {
   SadMxNAvgParam(64, 64, &vpx_sad64x64_avg_neon),
   SadMxNAvgParam(64, 32, &vpx_sad64x32_avg_neon),
@@ -1245,6 +1275,21 @@ const SadMxNAvgParam avg_neon_tests[] = {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 };
 INSTANTIATE_TEST_SUITE_P(NEON, SADavgTest, ::testing::ValuesIn(avg_neon_tests));
+
+#if HAVE_NEON_DOTPROD
+const SadMxNAvgParam avg_neon_dotprod_tests[] = {
+  SadMxNAvgParam(64, 64, &vpx_sad64x64_avg_neon_dotprod),
+  SadMxNAvgParam(64, 32, &vpx_sad64x32_avg_neon_dotprod),
+  SadMxNAvgParam(32, 64, &vpx_sad32x64_avg_neon_dotprod),
+  SadMxNAvgParam(32, 32, &vpx_sad32x32_avg_neon_dotprod),
+  SadMxNAvgParam(32, 16, &vpx_sad32x16_avg_neon_dotprod),
+  SadMxNAvgParam(16, 32, &vpx_sad16x32_avg_neon_dotprod),
+  SadMxNAvgParam(16, 16, &vpx_sad16x16_avg_neon_dotprod),
+  SadMxNAvgParam(16, 8, &vpx_sad16x8_avg_neon_dotprod),
+};
+INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, SADavgTest,
+                         ::testing::ValuesIn(avg_neon_dotprod_tests));
+#endif  // HAVE_NEON_DOTPROD
 
 const SadMxNx4Param x4d_neon_tests[] = {
   SadMxNx4Param(64, 64, &vpx_sad64x64x4d_neon),
