@@ -1346,6 +1346,21 @@ const SadMxNx4Param x4d_neon_tests[] = {
 };
 INSTANTIATE_TEST_SUITE_P(NEON, SADx4Test, ::testing::ValuesIn(x4d_neon_tests));
 
+#if HAVE_NEON_DOTPROD
+const SadMxNx4Param x4d_neon_dotprod_tests[] = {
+  SadMxNx4Param(64, 64, &vpx_sad64x64x4d_neon_dotprod),
+  SadMxNx4Param(64, 32, &vpx_sad64x32x4d_neon_dotprod),
+  SadMxNx4Param(32, 64, &vpx_sad32x64x4d_neon_dotprod),
+  SadMxNx4Param(32, 32, &vpx_sad32x32x4d_neon_dotprod),
+  SadMxNx4Param(32, 16, &vpx_sad32x16x4d_neon_dotprod),
+  SadMxNx4Param(16, 32, &vpx_sad16x32x4d_neon_dotprod),
+  SadMxNx4Param(16, 16, &vpx_sad16x16x4d_neon_dotprod),
+  SadMxNx4Param(16, 8, &vpx_sad16x8x4d_neon_dotprod),
+};
+INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, SADx4Test,
+                         ::testing::ValuesIn(x4d_neon_dotprod_tests));
+#endif  // HAVE_NEON_DOTPROD
+
 const SadSkipMxNx4Param skip_x4d_neon_tests[] = {
   SadSkipMxNx4Param(64, 64, &vpx_sad_skip_64x64x4d_neon),
   SadSkipMxNx4Param(64, 32, &vpx_sad_skip_64x32x4d_neon),
@@ -1401,6 +1416,21 @@ const SadSkipMxNx4Param skip_x4d_neon_tests[] = {
 };
 INSTANTIATE_TEST_SUITE_P(NEON, SADSkipx4Test,
                          ::testing::ValuesIn(skip_x4d_neon_tests));
+
+#if HAVE_NEONE_DOTPROD
+const SadSkipMxNx4Param skip_x4d_neon_dotprod_tests[] = {
+  SadSkipMxNx4Param(64, 64, &vpx_sad_skip_64x64x4d_neon_dotprod),
+  SadSkipMxNx4Param(64, 32, &vpx_sad_skip_64x32x4d_neon_dotprod),
+  SadSkipMxNx4Param(32, 64, &vpx_sad_skip_32x64x4d_neon_dotprod),
+  SadSkipMxNx4Param(32, 32, &vpx_sad_skip_32x32x4d_neon_dotprod),
+  SadSkipMxNx4Param(32, 16, &vpx_sad_skip_32x16x4d_neon_dotprod),
+  SadSkipMxNx4Param(16, 32, &vpx_sad_skip_16x32x4d_neon_dotprod),
+  SadSkipMxNx4Param(16, 16, &vpx_sad_skip_16x16x4d_neon_dotprod),
+  SadSkipMxNx4Param(16, 8, &vpx_sad_skip_16x8x4d_neon_dotprod),
+};
+INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, SADSkipx4Test,
+                         ::testing::ValuesIn(skip_x4d_neon_dotprod_tests));
+#endif  // HAVE_NEON_DOTPROD
 #endif  // HAVE_NEON
 
 //------------------------------------------------------------------------------
