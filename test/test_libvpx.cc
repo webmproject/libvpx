@@ -12,6 +12,9 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 #include "./vpx_config.h"
+#if VPX_ARCH_ARM
+#include "vpx_ports/arm.h"
+#endif
 #if VPX_ARCH_X86 || VPX_ARCH_X86_64
 #include "vpx_ports/x86.h"
 #endif
@@ -26,7 +29,7 @@ extern void vpx_dsp_rtcd();
 extern void vpx_scale_rtcd();
 }
 
-#if VPX_ARCH_X86 || VPX_ARCH_X86_64
+#if (!CONFIG_SHARED && VPX_ARCH_ARM) || VPX_ARCH_X86 || VPX_ARCH_X86_64
 static void append_negative_gtest_filter(const char *str) {
   std::string filter = ::testing::FLAGS_gtest_filter;
   // Negative patterns begin with one '-' followed by a ':' separated list.
@@ -34,10 +37,27 @@ static void append_negative_gtest_filter(const char *str) {
   filter += str;
   ::testing::FLAGS_gtest_filter = filter;
 }
-#endif  // VPX_ARCH_X86 || VPX_ARCH_X86_64
+#endif  // (!CONFIG_SHARED && VPX_ARCH_ARM) || VPX_ARCH_X86 || VPX_ARCH_X86_64
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
+
+#if !CONFIG_SHARED
+#if VPX_ARCH_AARCH64
+  const int caps = arm_cpu_caps();
+  if (!(caps & HAS_NEON_DOTPROD)) {
+    append_negative_gtest_filter(":NEON_DOTPROD.*:NEON_DOTPROD/*");
+  }
+  if (!(caps & HAS_NEON_I8MM)) {
+    append_negative_gtest_filter(":NEON_I8MM.*:NEON_I8MM/*");
+  }
+#elif VPX_ARCH_ARM
+  const int caps = arm_cpu_caps();
+  if (!(caps & HAS_NEON)) {
+    append_negative_gtest_filter(":NEON.*:NEON/*");
+  }
+#endif  // VPX_ARCH_ARM
+#endif  // !CONFIG_SHARED
 
 #if VPX_ARCH_X86 || VPX_ARCH_X86_64
   const int simd_caps = x86_simd_caps();

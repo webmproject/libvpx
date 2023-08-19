@@ -252,6 +252,13 @@ ARCH_LIST="
     ppc
     loongarch
 "
+
+ARCH_EXT_LIST_AARCH64="
+    neon
+    neon_dotprod
+    neon_i8mm
+"
+
 ARCH_EXT_LIST_X86="
     mmx
     sse
@@ -271,8 +278,8 @@ ARCH_EXT_LIST_LOONGSON="
 "
 
 ARCH_EXT_LIST="
-    neon
     neon_asm
+    ${ARCH_EXT_LIST_AARCH64}
 
     mips32
     dspr2

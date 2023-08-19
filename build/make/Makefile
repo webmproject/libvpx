@@ -143,6 +143,12 @@ $(BUILD_PFX)%_avx2.c.o: CFLAGS += -mavx2
 $(BUILD_PFX)%_avx512.c.d: CFLAGS += -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl
 $(BUILD_PFX)%_avx512.c.o: CFLAGS += -mavx512f -mavx512cd -mavx512bw -mavx512dq -mavx512vl
 
+# AARCH64
+$(BUILD_PFX)%_neon_dotprod.c.d: CFLAGS += -march=armv8.2-a+dotprod
+$(BUILD_PFX)%_neon_dotprod.c.o: CFLAGS += -march=armv8.2-a+dotprod
+$(BUILD_PFX)%_neon_i8mm.c.d: CFLAGS += -march=armv8.2-a+dotprod+i8mm
+$(BUILD_PFX)%_neon_i8mm.c.o: CFLAGS += -march=armv8.2-a+dotprod+i8mm
+
 # POWER
 $(BUILD_PFX)%_vsx.c.d: CFLAGS += -maltivec -mvsx
 $(BUILD_PFX)%_vsx.c.o: CFLAGS += -maltivec -mvsx
