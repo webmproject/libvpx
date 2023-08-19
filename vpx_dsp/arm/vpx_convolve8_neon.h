@@ -17,16 +17,14 @@
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_dsp/vpx_filter.h"
 
-#if VPX_ARCH_AARCH64 && \
-    (defined(__ARM_FEATURE_DOTPROD) || defined(__ARM_FEATURE_MATMUL_INT8))
-void vpx_convolve8_2d_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
-                                 uint8_t *dst, ptrdiff_t dst_stride,
-                                 const InterpKernel *filter, int x0_q4,
-                                 int x_step_q4, int y0_q4, int y_step_q4, int w,
-                                 int h);
-#endif
-
 #if VPX_ARCH_AARCH64 && defined(__ARM_FEATURE_DOTPROD)
+
+void vpx_convolve8_2d_horiz_neon_dotprod(const uint8_t *src,
+                                         ptrdiff_t src_stride, uint8_t *dst,
+                                         ptrdiff_t dst_stride,
+                                         const InterpKernel *filter, int x0_q4,
+                                         int x_step_q4, int y0_q4,
+                                         int y_step_q4, int w, int h);
 
 static INLINE int16x4_t convolve8_4_sdot_partial(const int8x16_t samples_lo,
                                                  const int8x16_t samples_hi,
@@ -127,6 +125,12 @@ static INLINE uint8x8_t convolve8_8_sdot(uint8x16_t samples,
 #endif  // VPX_ARCH_AARCH64 && defined(__ARM_FEATURE_DOTPROD)
 
 #if VPX_ARCH_AARCH64 && defined(__ARM_FEATURE_MATMUL_INT8)
+
+void vpx_convolve8_2d_horiz_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
+                                      uint8_t *dst, ptrdiff_t dst_stride,
+                                      const InterpKernel *filter, int x0_q4,
+                                      int x_step_q4, int y0_q4, int y_step_q4,
+                                      int w, int h);
 
 static INLINE int16x4_t convolve8_4_usdot_partial(const uint8x16_t samples_lo,
                                                   const uint8x16_t samples_hi,

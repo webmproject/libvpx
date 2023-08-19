@@ -1423,6 +1423,36 @@ INSTANTIATE_TEST_SUITE_P(NEON, ConvolveTest,
                          ::testing::ValuesIn(kArrayConvolve_neon));
 #endif  // HAVE_NEON
 
+#if HAVE_NEON_DOTPROD
+const ConvolveFunctions convolve8_neon_dotprod(
+    vpx_convolve_copy_c, vpx_convolve_avg_c, vpx_convolve8_horiz_neon_dotprod,
+    vpx_convolve8_avg_horiz_neon_dotprod, vpx_convolve8_vert_neon_dotprod,
+    vpx_convolve8_avg_vert_neon_dotprod, vpx_convolve8_neon_dotprod,
+    vpx_convolve8_avg_neon_dotprod, vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c,
+    vpx_scaled_vert_c, vpx_scaled_avg_vert_c, vpx_scaled_2d_c,
+    vpx_scaled_avg_2d_c, 0);
+
+const ConvolveParam kArrayConvolve_neon_dotprod[] = { ALL_SIZES(
+    convolve8_neon_dotprod) };
+INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve_neon_dotprod));
+#endif  // HAVE_NEON_DOTPROD
+
+#if HAVE_NEON_I8MM
+const ConvolveFunctions convolve8_neon_i8mm(
+    vpx_convolve_copy_c, vpx_convolve_avg_c, vpx_convolve8_horiz_neon_i8mm,
+    vpx_convolve8_avg_horiz_neon_i8mm, vpx_convolve8_vert_neon_i8mm,
+    vpx_convolve8_avg_vert_neon_i8mm, vpx_convolve8_neon_i8mm,
+    vpx_convolve8_avg_neon_i8mm, vpx_scaled_horiz_c, vpx_scaled_avg_horiz_c,
+    vpx_scaled_vert_c, vpx_scaled_avg_vert_c, vpx_scaled_2d_c,
+    vpx_scaled_avg_2d_c, 0);
+
+const ConvolveParam kArrayConvolve_neon_i8mm[] = { ALL_SIZES(
+    convolve8_neon_i8mm) };
+INSTANTIATE_TEST_SUITE_P(NEON_I8MM, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve_neon_i8mm));
+#endif  // HAVE_NEON_I8MM
+
 #if HAVE_DSPR2
 const ConvolveFunctions convolve8_dspr2(
     vpx_convolve_copy_dspr2, vpx_convolve_avg_dspr2, vpx_convolve8_horiz_dspr2,
