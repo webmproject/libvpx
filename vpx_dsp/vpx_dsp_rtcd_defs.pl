@@ -1302,22 +1302,22 @@ add_proto qw/void vpx_get8x8var/, "const uint8_t *src_ptr, int src_stride, const
   specialize qw/vpx_get8x8var sse2 neon neon_dotprod msa vsx/;
 
 add_proto qw/unsigned int vpx_mse16x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_mse16x16 sse2 avx2 neon msa mmi vsx lsx/;
+  specialize qw/vpx_mse16x16 sse2 avx2 neon neon_dotprod msa mmi vsx lsx/;
 
 add_proto qw/unsigned int vpx_mse16x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_mse16x8 sse2 avx2 neon msa mmi vsx/;
+  specialize qw/vpx_mse16x8 sse2 avx2 neon neon_dotprod msa mmi vsx/;
 
 add_proto qw/unsigned int vpx_mse8x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_mse8x16 sse2 neon msa mmi vsx/;
+  specialize qw/vpx_mse8x16 sse2 neon neon_dotprod msa mmi vsx/;
 
 add_proto qw/unsigned int vpx_mse8x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_mse8x8 sse2 neon msa mmi vsx/;
+  specialize qw/vpx_mse8x8 sse2 neon neon_dotprod msa mmi vsx/;
 
 add_proto qw/unsigned int vpx_get_mb_ss/, "const int16_t *";
   specialize qw/vpx_get_mb_ss sse2 msa vsx/;
 
 add_proto qw/unsigned int vpx_get4x4sse_cs/, "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int ref_stride";
-  specialize qw/vpx_get4x4sse_cs neon msa vsx/;
+  specialize qw/vpx_get4x4sse_cs neon neon_dotprod msa vsx/;
 
 add_proto qw/void vpx_comp_avg_pred/, "uint8_t *comp_pred, const uint8_t *pred, int width, int height, const uint8_t *ref, int ref_stride";
   specialize qw/vpx_comp_avg_pred neon sse2 avx2 vsx lsx/;

@@ -1477,6 +1477,17 @@ INSTANTIATE_TEST_SUITE_P(
 
 #if HAVE_NEON_DOTPROD
 INSTANTIATE_TEST_SUITE_P(
+    NEON_DOTPROD, VpxSseTest,
+    ::testing::Values(SseParams(2, 2, &vpx_get4x4sse_cs_neon_dotprod)));
+
+INSTANTIATE_TEST_SUITE_P(
+    NEON_DOTPROD, VpxMseTest,
+    ::testing::Values(MseParams(4, 4, &vpx_mse16x16_neon_dotprod),
+                      MseParams(4, 3, &vpx_mse16x8_neon_dotprod),
+                      MseParams(3, 4, &vpx_mse8x16_neon_dotprod),
+                      MseParams(3, 3, &vpx_mse8x8_neon_dotprod)));
+
+INSTANTIATE_TEST_SUITE_P(
     NEON_DOTPROD, VpxVarianceTest,
     ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_neon_dotprod),
                       VarianceParams(6, 5, &vpx_variance64x32_neon_dotprod),
