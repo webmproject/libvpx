@@ -1475,6 +1475,24 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(2, 3, &vpx_variance4x8_neon),
                       VarianceParams(2, 2, &vpx_variance4x4_neon)));
 
+#if HAVE_NEON_DOTPROD
+INSTANTIATE_TEST_SUITE_P(
+    NEON_DOTPROD, VpxVarianceTest,
+    ::testing::Values(VarianceParams(6, 6, &vpx_variance64x64_neon_dotprod),
+                      VarianceParams(6, 5, &vpx_variance64x32_neon_dotprod),
+                      VarianceParams(5, 6, &vpx_variance32x64_neon_dotprod),
+                      VarianceParams(5, 5, &vpx_variance32x32_neon_dotprod),
+                      VarianceParams(5, 4, &vpx_variance32x16_neon_dotprod),
+                      VarianceParams(4, 5, &vpx_variance16x32_neon_dotprod),
+                      VarianceParams(4, 4, &vpx_variance16x16_neon_dotprod),
+                      VarianceParams(4, 3, &vpx_variance16x8_neon_dotprod),
+                      VarianceParams(3, 4, &vpx_variance8x16_neon_dotprod),
+                      VarianceParams(3, 3, &vpx_variance8x8_neon_dotprod),
+                      VarianceParams(3, 2, &vpx_variance8x4_neon_dotprod),
+                      VarianceParams(2, 3, &vpx_variance4x8_neon_dotprod),
+                      VarianceParams(2, 2, &vpx_variance4x4_neon_dotprod)));
+#endif  // HAVE_NEON_DOTPROD
+
 INSTANTIATE_TEST_SUITE_P(
     NEON, VpxSubpelVarianceTest,
     ::testing::Values(
