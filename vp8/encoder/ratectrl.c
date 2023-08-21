@@ -346,7 +346,8 @@ static void calc_iframe_target_size(VP8_COMP *cpi) {
     /* Minimal target size is |2* per_frame_bandwidth|. */
     if (kf_boost < 16) kf_boost = 16;
 
-    target = ((16 + kf_boost) * cpi->per_frame_bandwidth) >> 4;
+    target = ((uint64_t)(16 + kf_boost) * cpi->per_frame_bandwidth) >> 4;
+    target = VPXMIN(INT_MAX, target);
   }
 
   if (cpi->oxcf.rc_max_intra_bitrate_pct) {
