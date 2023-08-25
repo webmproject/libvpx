@@ -1509,7 +1509,8 @@ void vp9_setup_tpl_stats(VP9_COMP *cpi) {
   // Qmode.
   trim_tpl_stats(&cpi->common.error, &cpi->tpl_gop_stats, extended_frame_count);
 
-  if (cpi->ext_ratectrl.ready) {
+  if (cpi->ext_ratectrl.ready &&
+      cpi->ext_ratectrl.funcs.send_tpl_gop_stats != NULL) {
     const vpx_codec_err_t codec_status =
         vp9_extrc_send_tpl_stats(&cpi->ext_ratectrl, &cpi->tpl_gop_stats);
     if (codec_status != VPX_CODEC_OK) {

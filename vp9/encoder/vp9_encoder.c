@@ -4563,7 +4563,8 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest
     }
 #endif  // CONFIG_RATE_CTRL
     if (cpi->ext_ratectrl.ready && !ext_rc_recode &&
-        (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0) {
+        (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0 &&
+        cpi->ext_ratectrl.funcs.get_encodeframe_decision != NULL) {
       vpx_codec_err_t codec_status;
       const GF_GROUP *gf_group = &cpi->twopass.gf_group;
       vpx_rc_encodeframe_decision_t encode_frame_decision;
@@ -5575,7 +5576,8 @@ static void encode_frame_to_data_rate(
   // Backup to ensure consistency between recodes
   save_encode_params(cpi);
   if (cpi->ext_ratectrl.ready &&
-      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_RDMULT) != 0) {
+      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_RDMULT) != 0 &&
+      cpi->ext_ratectrl.funcs.get_frame_rdmult != NULL) {
     vpx_codec_err_t codec_status;
     const GF_GROUP *gf_group = &cpi->twopass.gf_group;
     FRAME_UPDATE_TYPE update_type = gf_group->update_type[gf_group->index];
@@ -5693,7 +5695,8 @@ static void encode_frame_to_data_rate(
   end_timing(cpi, vp9_pack_bitstream_time);
 #endif
 
-  if (cpi->ext_ratectrl.ready) {
+  if (cpi->ext_ratectrl.ready &&
+      cpi->ext_ratectrl.funcs.update_encodeframe_result != NULL) {
     const RefCntBuffer *coded_frame_buf =
         get_ref_cnt_buffer(cm, cm->new_fb_idx);
     vpx_codec_err_t codec_status = vp9_extrc_update_encodeframe_result(

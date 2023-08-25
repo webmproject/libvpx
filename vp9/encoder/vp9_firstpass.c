@@ -2769,7 +2769,8 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
   // are overwritten. Specifically, |gop_coding_frames| and |use_alt_ref|
   // will be overwritten.
   if (cpi->ext_ratectrl.ready &&
-      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_GOP) != 0) {
+      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_GOP) != 0 &&
+      cpi->ext_ratectrl.funcs.get_gop_decision != NULL) {
     vpx_codec_err_t codec_status;
     vpx_rc_gop_decision_t gop_decision;
     vpx_rc_gop_info_t gop_info;
@@ -3506,7 +3507,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   const int show_idx = cm->current_video_frame;
 
-  if (cpi->common.current_frame_coding_index == 0) {
+  if (cpi->common.current_frame_coding_index == 0 &&
+      cpi->ext_ratectrl.funcs.send_firstpass_stats != NULL) {
     const vpx_codec_err_t codec_status = vp9_extrc_send_firstpass_stats(
         &cpi->ext_ratectrl, &cpi->twopass.first_pass_info);
     if (codec_status != VPX_CODEC_OK) {
