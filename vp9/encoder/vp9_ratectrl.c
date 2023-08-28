@@ -2036,7 +2036,11 @@ int vp9_calc_pframe_target_size_one_pass_vbr(const VP9_COMP *cpi) {
 int vp9_calc_iframe_target_size_one_pass_vbr(const VP9_COMP *cpi) {
   static const int kf_ratio = 25;
   const RATE_CONTROL *rc = &cpi->rc;
-  const int target = rc->avg_frame_bandwidth * kf_ratio;
+  int target = rc->avg_frame_bandwidth;
+  if (target > INT_MAX / kf_ratio)
+    target = INT_MAX;
+  else
+    target = rc->avg_frame_bandwidth * kf_ratio;
   return vp9_rc_clamp_iframe_target_size(cpi, target);
 }
 

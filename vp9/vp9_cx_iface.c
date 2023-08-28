@@ -639,8 +639,12 @@ static vpx_codec_err_t set_encoder_config(
 
   for (sl = 0; sl < oxcf->ss_number_layers; ++sl) {
     for (tl = 0; tl < oxcf->ts_number_layers; ++tl) {
-      oxcf->layer_target_bitrate[sl * oxcf->ts_number_layers + tl] =
-          1000 * cfg->layer_target_bitrate[sl * oxcf->ts_number_layers + tl];
+      const int layer = sl * oxcf->ts_number_layers + tl;
+      if (cfg->layer_target_bitrate[layer] > INT_MAX / 1000)
+        oxcf->layer_target_bitrate[layer] = INT_MAX;
+      else
+        oxcf->layer_target_bitrate[layer] =
+            1000 * cfg->layer_target_bitrate[layer];
     }
   }
   if (oxcf->ss_number_layers == 1 && oxcf->pass != 0) {
