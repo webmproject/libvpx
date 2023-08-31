@@ -357,8 +357,7 @@ HIGHBD_GET_VAR(16)
 static INLINE uint32_t highbd_mse_wxh_neon(const uint16_t *src_ptr,
                                            int src_stride,
                                            const uint16_t *ref_ptr,
-                                           int ref_stride, int w, int h,
-                                           unsigned int *sse) {
+                                           int ref_stride, int w, int h) {
   uint32x4_t sse_u32[2] = { vdupq_n_u32(0), vdupq_n_u32(0) };
 
   int i = h;
@@ -382,8 +381,7 @@ static INLINE uint32_t highbd_mse_wxh_neon(const uint16_t *src_ptr,
     ref_ptr += ref_stride;
   } while (--i != 0);
 
-  *sse = horizontal_add_uint32x4(vaddq_u32(sse_u32[0], sse_u32[1]));
-  return *sse;
+  return horizontal_add_uint32x4(vaddq_u32(sse_u32[0], sse_u32[1]));
 }
 
 #if defined(__ARM_FEATURE_DOTPROD)
@@ -391,8 +389,7 @@ static INLINE uint32_t highbd_mse_wxh_neon(const uint16_t *src_ptr,
 static INLINE uint32_t highbd_mse8_8xh_neon(const uint16_t *src_ptr,
                                             int src_stride,
                                             const uint16_t *ref_ptr,
-                                            int ref_stride, int h,
-                                            unsigned int *sse) {
+                                            int ref_stride, int h) {
   uint32x4_t sse_u32 = vdupq_n_u32(0);
 
   int i = h / 2;
@@ -416,15 +413,13 @@ static INLINE uint32_t highbd_mse8_8xh_neon(const uint16_t *src_ptr,
     sse_u32 = vdotq_u32(sse_u32, diff, diff);
   } while (--i != 0);
 
-  *sse = horizontal_add_uint32x4(sse_u32);
-  return *sse;
+  return horizontal_add_uint32x4(sse_u32);
 }
 
 static INLINE uint32_t highbd_mse8_16xh_neon(const uint16_t *src_ptr,
                                              int src_stride,
                                              const uint16_t *ref_ptr,
-                                             int ref_stride, int h,
-                                             unsigned int *sse) {
+                                             int ref_stride, int h) {
   uint32x4_t sse_u32 = vdupq_n_u32(0);
 
   int i = h;
@@ -447,8 +442,7 @@ static INLINE uint32_t highbd_mse8_16xh_neon(const uint16_t *src_ptr,
     ref_ptr += ref_stride;
   } while (--i != 0);
 
-  *sse = horizontal_add_uint32x4(sse_u32);
-  return *sse;
+  return horizontal_add_uint32x4(sse_u32);
 }
 
 #else  // !defined(__ARM_FEATURE_DOTPROD)
@@ -456,51 +450,47 @@ static INLINE uint32_t highbd_mse8_16xh_neon(const uint16_t *src_ptr,
 static INLINE uint32_t highbd_mse8_8xh_neon(const uint16_t *src_ptr,
                                             int src_stride,
                                             const uint16_t *ref_ptr,
-                                            int ref_stride, int h,
-                                            unsigned int *sse) {
-  return highbd_mse_wxh_neon(src_ptr, src_stride, ref_ptr, ref_stride, 8, h,
-                             sse);
+                                            int ref_stride, int h) {
+  return highbd_mse_wxh_neon(src_ptr, src_stride, ref_ptr, ref_stride, 8, h);
 }
 
 static INLINE uint32_t highbd_mse8_16xh_neon(const uint16_t *src_ptr,
                                              int src_stride,
                                              const uint16_t *ref_ptr,
-                                             int ref_stride, int h,
-                                             unsigned int *sse) {
-  return highbd_mse_wxh_neon(src_ptr, src_stride, ref_ptr, ref_stride, 16, h,
-                             sse);
+                                             int ref_stride, int h) {
+  return highbd_mse_wxh_neon(src_ptr, src_stride, ref_ptr, ref_stride, 16, h);
 }
 
 #endif  // defined(__ARM_FEATURE_DOTPROD)
 
-#define HIGHBD_MSE_WXH_NEON(w, h)                                       \
-  uint32_t vpx_highbd_8_mse##w##x##h##_neon(                            \
-      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr,   \
-      int ref_stride, uint32_t *sse) {                                  \
-    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                       \
-    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                       \
-    highbd_mse8_##w##xh_neon(src, src_stride, ref, ref_stride, h, sse); \
-    return *sse;                                                        \
-  }                                                                     \
-                                                                        \
-  uint32_t vpx_highbd_10_mse##w##x##h##_neon(                           \
-      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr,   \
-      int ref_stride, uint32_t *sse) {                                  \
-    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                       \
-    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                       \
-    highbd_mse_wxh_neon(src, src_stride, ref, ref_stride, w, h, sse);   \
-    *sse = ROUND_POWER_OF_TWO(*sse, 4);                                 \
-    return *sse;                                                        \
-  }                                                                     \
-                                                                        \
-  uint32_t vpx_highbd_12_mse##w##x##h##_neon(                           \
-      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr,   \
-      int ref_stride, uint32_t *sse) {                                  \
-    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                       \
-    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                       \
-    highbd_mse_wxh_neon(src, src_stride, ref, ref_stride, w, h, sse);   \
-    *sse = ROUND_POWER_OF_TWO(*sse, 8);                                 \
-    return *sse;                                                        \
+#define HIGHBD_MSE_WXH_NEON(w, h)                                         \
+  uint32_t vpx_highbd_8_mse##w##x##h##_neon(                              \
+      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr,     \
+      int ref_stride, uint32_t *sse) {                                    \
+    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                         \
+    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                         \
+    *sse = highbd_mse8_##w##xh_neon(src, src_stride, ref, ref_stride, h); \
+    return *sse;                                                          \
+  }                                                                       \
+                                                                          \
+  uint32_t vpx_highbd_10_mse##w##x##h##_neon(                             \
+      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr,     \
+      int ref_stride, uint32_t *sse) {                                    \
+    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                         \
+    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                         \
+    *sse = highbd_mse_wxh_neon(src, src_stride, ref, ref_stride, w, h);   \
+    *sse = ROUND_POWER_OF_TWO(*sse, 4);                                   \
+    return *sse;                                                          \
+  }                                                                       \
+                                                                          \
+  uint32_t vpx_highbd_12_mse##w##x##h##_neon(                             \
+      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr,     \
+      int ref_stride, uint32_t *sse) {                                    \
+    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                         \
+    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                         \
+    *sse = highbd_mse_wxh_neon(src, src_stride, ref, ref_stride, w, h);   \
+    *sse = ROUND_POWER_OF_TWO(*sse, 8);                                   \
+    return *sse;                                                          \
   }
 
 HIGHBD_MSE_WXH_NEON(16, 16)

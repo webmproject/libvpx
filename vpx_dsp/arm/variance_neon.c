@@ -374,8 +374,7 @@ VARIANCE_WXH_NEON(64, 64, 12)
 static INLINE unsigned int vpx_mse8xh_neon(const unsigned char *src_ptr,
                                            int src_stride,
                                            const unsigned char *ref_ptr,
-                                           int ref_stride, int h,
-                                           unsigned int *sse) {
+                                           int ref_stride, int h) {
   uint32x2_t sse_u32[2] = { vdup_n_u32(0), vdup_n_u32(0) };
 
   int i = h / 2;
@@ -398,15 +397,13 @@ static INLINE unsigned int vpx_mse8xh_neon(const unsigned char *src_ptr,
     sse_u32[1] = vdot_u32(sse_u32[1], diff1, diff1);
   } while (--i != 0);
 
-  *sse = horizontal_add_uint32x2(vadd_u32(sse_u32[0], sse_u32[1]));
-  return *sse;
+  return horizontal_add_uint32x2(vadd_u32(sse_u32[0], sse_u32[1]));
 }
 
 static INLINE unsigned int vpx_mse16xh_neon(const unsigned char *src_ptr,
                                             int src_stride,
                                             const unsigned char *ref_ptr,
-                                            int ref_stride, int h,
-                                            unsigned int *sse) {
+                                            int ref_stride, int h) {
   uint32x4_t sse_u32[2] = { vdupq_n_u32(0), vdupq_n_u32(0) };
 
   int i = h / 2;
@@ -429,8 +426,7 @@ static INLINE unsigned int vpx_mse16xh_neon(const unsigned char *src_ptr,
     sse_u32[1] = vdotq_u32(sse_u32[1], diff1, diff1);
   } while (--i != 0);
 
-  *sse = horizontal_add_uint32x4(vaddq_u32(sse_u32[0], sse_u32[1]));
-  return *sse;
+  return horizontal_add_uint32x4(vaddq_u32(sse_u32[0], sse_u32[1]));
 }
 
 unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
@@ -451,8 +447,7 @@ unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
 static INLINE unsigned int vpx_mse8xh_neon(const unsigned char *src_ptr,
                                            int src_stride,
                                            const unsigned char *ref_ptr,
-                                           int ref_stride, int h,
-                                           unsigned int *sse) {
+                                           int ref_stride, int h) {
   uint32x4_t sse_u32[2] = { vdupq_n_u32(0), vdupq_n_u32(0) };
 
   int i = h / 2;
@@ -478,15 +473,13 @@ static INLINE unsigned int vpx_mse8xh_neon(const unsigned char *src_ptr,
     sse_u32[1] = vpadalq_u16(sse_u32[1], sse1);
   } while (--i != 0);
 
-  *sse = horizontal_add_uint32x4(vaddq_u32(sse_u32[0], sse_u32[1]));
-  return *sse;
+  return horizontal_add_uint32x4(vaddq_u32(sse_u32[0], sse_u32[1]));
 }
 
 static INLINE unsigned int vpx_mse16xh_neon(const unsigned char *src_ptr,
                                             int src_stride,
                                             const unsigned char *ref_ptr,
-                                            int ref_stride, int h,
-                                            unsigned int *sse) {
+                                            int ref_stride, int h) {
   uint32x4_t sse_u32[2] = { vdupq_n_u32(0), vdupq_n_u32(0) };
 
   int i = h;
@@ -507,8 +500,7 @@ static INLINE unsigned int vpx_mse16xh_neon(const unsigned char *src_ptr,
     sse_u32[1] = vpadalq_u16(sse_u32[1], sse1);
   } while (--i != 0);
 
-  *sse = horizontal_add_uint32x4(vaddq_u32(sse_u32[0], sse_u32[1]));
-  return *sse;
+  return horizontal_add_uint32x4(vaddq_u32(sse_u32[0], sse_u32[1]));
 }
 
 unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
@@ -538,12 +530,12 @@ unsigned int vpx_get4x4sse_cs_neon(const unsigned char *src_ptr, int src_stride,
 
 #endif  // defined(__ARM_FEATURE_DOTPROD)
 
-#define VPX_MSE_WXH_NEON(w, h)                                              \
-  unsigned int vpx_mse##w##x##h##_neon(                                     \
-      const unsigned char *src_ptr, int src_stride,                         \
-      const unsigned char *ref_ptr, int ref_stride, unsigned int *sse) {    \
-    return vpx_mse##w##xh_neon(src_ptr, src_stride, ref_ptr, ref_stride, h, \
-                               sse);                                        \
+#define VPX_MSE_WXH_NEON(w, h)                                               \
+  unsigned int vpx_mse##w##x##h##_neon(                                      \
+      const unsigned char *src_ptr, int src_stride,                          \
+      const unsigned char *ref_ptr, int ref_stride, unsigned int *sse) {     \
+    *sse = vpx_mse##w##xh_neon(src_ptr, src_stride, ref_ptr, ref_stride, h); \
+    return *sse;                                                             \
   }
 
 VPX_MSE_WXH_NEON(8, 8)
