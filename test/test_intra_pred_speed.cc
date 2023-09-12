@@ -348,6 +348,15 @@ INTRA_PRED_TEST(VSX, TestIntraPred32, vpx_dc_predictor_32x32_vsx,
                 vpx_tm_predictor_32x32_vsx)
 #endif  // HAVE_VSX
 
+#if HAVE_LSX
+INTRA_PRED_TEST(LSX, TestIntraPred8, vpx_dc_predictor_8x8_lsx, nullptr, nullptr,
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                nullptr, nullptr, nullptr)
+INTRA_PRED_TEST(LSX, TestIntraPred16, vpx_dc_predictor_16x16_lsx, nullptr,
+                nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                nullptr, nullptr, nullptr, nullptr)
+#endif  // HAVE_LSX
+
 // -----------------------------------------------------------------------------
 
 #if CONFIG_VP9_HIGHBITDEPTH

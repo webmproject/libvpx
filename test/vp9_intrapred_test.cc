@@ -489,6 +489,15 @@ INSTANTIATE_TEST_SUITE_P(
                                      &vpx_v_predictor_32x32_c, 32, 8)));
 #endif  // HAVE_VSX
 
+#if HAVE_LSX
+INSTANTIATE_TEST_SUITE_P(
+    LSX, VP9IntraPredTest,
+    ::testing::Values(IntraPredParam(&vpx_dc_predictor_8x8_lsx,
+                                     &vpx_dc_predictor_8x8_c, 8, 8),
+                      IntraPredParam(&vpx_dc_predictor_16x16_lsx,
+                                     &vpx_dc_predictor_16x16_c, 16, 8)));
+#endif  // HAVE_LSX
+
 #if CONFIG_VP9_HIGHBITDEPTH
 typedef void (*HighbdIntraPred)(uint16_t *dst, ptrdiff_t stride,
                                 const uint16_t *above, const uint16_t *left,
