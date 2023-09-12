@@ -11,6 +11,7 @@
 #include <arm_neon.h>
 #include <assert.h>
 #include <math.h>
+#include <stdint.h>
 
 #include "./vpx_config.h"
 #include "vpx_mem/vpx_mem.h"

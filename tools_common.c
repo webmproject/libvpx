@@ -24,6 +24,8 @@
 #include "vpx/vp8dx.h"
 #endif
 
+#include "vpx/vpx_codec.h"
+
 #if defined(_WIN32) || defined(__OS2__)
 #include <io.h>
 #include <fcntl.h>

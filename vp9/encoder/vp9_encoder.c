@@ -81,6 +81,8 @@
 #include "vp9/encoder/vp9_tpl_model.h"
 #include "vp9/vp9_cx_iface.h"
 
+#include "vpx/vpx_ext_ratectrl.h"
+
 #define AM_SEGMENT_ID_INACTIVE 7
 #define AM_SEGMENT_ID_ACTIVE 0
 
