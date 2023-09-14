@@ -175,7 +175,8 @@ static void free_tpl_frame_stats_list(VpxTplGopStats *tpl_gop_stats) {
 
 static void init_tpl_stats_before_propagation(
     struct vpx_internal_error_info *error_info, VpxTplGopStats *tpl_gop_stats,
-    TplDepFrame *tpl_stats, int tpl_gop_frames) {
+    TplDepFrame *tpl_stats, int tpl_gop_frames, int frame_width,
+    int frame_height) {
   int frame_idx;
   free_tpl_frame_stats_list(tpl_gop_stats);
   CHECK_MEM_ERROR(
@@ -192,6 +193,8 @@ static void init_tpl_stats_before_propagation(
             sizeof(
                 *tpl_gop_stats->frame_stats_list[frame_idx].block_stats_list)));
     tpl_gop_stats->frame_stats_list[frame_idx].num_blocks = mi_rows * mi_cols;
+    tpl_gop_stats->frame_stats_list[frame_idx].frame_width = frame_width;
+    tpl_gop_stats->frame_stats_list[frame_idx].frame_height = frame_height;
   }
 }
 
@@ -1497,7 +1500,8 @@ void vp9_setup_tpl_stats(VP9_COMP *cpi) {
   init_tpl_stats(cpi);
 
   init_tpl_stats_before_propagation(&cpi->common.error, &cpi->tpl_gop_stats,
-                                    cpi->tpl_stats, tpl_group_frames);
+                                    cpi->tpl_stats, tpl_group_frames,
+                                    cpi->common.width, cpi->common.height);
 
   // Backward propagation from tpl_group_frames to 1.
   for (frame_idx = tpl_group_frames - 1; frame_idx > 0; --frame_idx) {
