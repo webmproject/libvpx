@@ -307,6 +307,8 @@ typedef struct vpx_rc_config {
   int frame_width;      /**< frame width */
   int frame_height;     /**< frame height */
   int show_frame_count; /**< number of visible frames in the video */
+  int max_gf_interval;  /**< max GOP size in number of show frames */
+  int min_gf_interval;  /**< min GOP size in number of show frames */
   /*!
    * Target bitrate in kilobytes per second
    */
