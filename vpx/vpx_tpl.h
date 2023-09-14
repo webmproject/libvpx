@@ -44,7 +44,7 @@ typedef struct VpxTplBlockStats {
   int16_t mv_c;        /**< Motion vector col */
   int64_t recrf_rate;  /**< Rate from reconstructed ref frame */
   int64_t recrf_dist;  /**< Distortion from reconstructed ref frame */
-  int ref_frame_index; /**< Ref frame index */
+  int ref_frame_index; /**< Ref frame index in the ref frame buffer */
 } VpxTplBlockStats;
 
 /*!\brief Temporal dependency model stats for each frame before propagation */

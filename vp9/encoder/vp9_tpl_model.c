@@ -393,7 +393,7 @@ static void tpl_store_before_propagation(VpxTplBlockStats *tpl_block_stats,
                                          TplDepStats *tpl_stats, int mi_row,
                                          int mi_col, BLOCK_SIZE bsize,
                                          int stride, int64_t recon_error,
-                                         int64_t rate_cost) {
+                                         int64_t rate_cost, int ref_frame_idx) {
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const TplDepStats *src_stats = &tpl_stats[mi_row * stride + mi_col];
@@ -411,7 +411,7 @@ static void tpl_store_before_propagation(VpxTplBlockStats *tpl_block_stats,
       tpl_block_stats_ptr->recrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
       tpl_block_stats_ptr->mv_r = src_stats->mv.as_mv.row;
       tpl_block_stats_ptr->mv_c = src_stats->mv.as_mv.col;
-      tpl_block_stats_ptr->ref_frame_index = src_stats->ref_frame_index;
+      tpl_block_stats_ptr->ref_frame_index = ref_frame_idx;
     }
   }
 }
@@ -576,7 +576,7 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
                             int mi_col, BLOCK_SIZE bsize, TX_SIZE tx_size,
                             YV12_BUFFER_CONFIG *ref_frame[], uint8_t *predictor,
                             int64_t *recon_error, int64_t *rate_cost,
-                            int64_t *sse) {
+                            int64_t *sse, int *ref_frame_idx) {
   VP9_COMMON *cm = &cpi->common;
   ThreadData *td = &cpi->td;
 
@@ -723,6 +723,7 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       1, (best_intra_cost << TPL_DEP_COST_SCALE_LOG2) / (mi_height * mi_width));
   tpl_stats->ref_frame_index = gf_picture[frame_idx].ref_frame[best_rf_idx];
   tpl_stats->mv.as_int = best_mv.as_int;
+  *ref_frame_idx = best_rf_idx;
 }
 
 #if CONFIG_NON_GREEDY_MV
@@ -1232,10 +1233,12 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
       int64_t recon_error = 0;
       int64_t rate_cost = 0;
       int64_t sse = 0;
+      // Ref frame index in the ref frame buffer.
+      int ref_frame_idx = -1;
       mode_estimation(cpi, x, xd, &sf, gf_picture, frame_idx, tpl_frame,
                       src_diff, coeff, qcoeff, dqcoeff, mi_row, mi_col, bsize,
                       tx_size, ref_frame, predictor, &recon_error, &rate_cost,
-                      &sse);
+                      &sse, &ref_frame_idx);
       // Motion flow dependency dispenser.
       tpl_model_store(tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize,
                       tpl_frame->stride);
@@ -1243,7 +1246,7 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
       tpl_store_before_propagation(
           tpl_frame_stats_before_propagation->block_stats_list,
           tpl_frame->tpl_stats_ptr, mi_row, mi_col, bsize, tpl_frame->stride,
-          recon_error, rate_cost);
+          recon_error, rate_cost, ref_frame_idx);
 
       tpl_model_update(cpi->tpl_stats, tpl_frame->tpl_stats_ptr, mi_row, mi_col,
                        bsize);
