@@ -14,7 +14,7 @@
 #include "vpx_config.h"
 #include "vpx_ports/arm.h"
 
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 #undef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #undef WIN32_EXTRA_LEAN

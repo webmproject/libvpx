@@ -58,7 +58,7 @@ static int arm_get_cpu_caps(void) {
   return flags;
 }
 
-#elif defined(_MSC_VER)  // end __APPLE__
+#elif defined(_WIN32)  // end __APPLE__
 
 static int arm_get_cpu_caps(void) {
   int flags = 0;
