@@ -366,10 +366,6 @@ TEST(EncodeAPI, ConfigResizeChangeThreadCount) {
 
   for (const auto *iface : kCodecIfaces) {
     SCOPED_TRACE(vpx_codec_iface_name(iface));
-    if (!IsVP9(iface)) {
-      GTEST_SKIP() << "TODO(https://crbug.com/1486441) remove this condition "
-                      "after VP8 is fixed.";
-    }
     for (int i = 0; i < (IsVP9(iface) ? 2 : 1); ++i) {
       vpx_codec_enc_cfg_t cfg = {};
       struct Encoder {
