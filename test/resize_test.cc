@@ -102,11 +102,8 @@ void ScaleForFrameNumber(unsigned int frame, unsigned int initial_w,
     if (frame < 30) {
       return;
     }
-    if (frame < 100) {
-      *w = initial_w * 7 / 10;
-      *h = initial_h * 16 / 10;
-      return;
-    }
+    *w = initial_w * 7 / 10;
+    *h = initial_h * 16 / 10;
     return;
   }
   if (frame < 10) {
@@ -559,9 +556,7 @@ TEST_P(ResizeRealtimeTest, TestExternalResizeWorks) {
   }
 }
 
-// TODO(https://crbug.com/webm/1642): This causes a segfault in
-// init_encode_frame_mb_context().
-TEST_P(ResizeRealtimeTest, DISABLED_TestExternalResizeSmallerWidthBiggerSize) {
+TEST_P(ResizeRealtimeTest, TestExternalResizeSmallerWidthBiggerSize) {
   ResizingVideoSource video;
   video.flag_codec_ = true;
   video.smaller_width_larger_size_ = true;
