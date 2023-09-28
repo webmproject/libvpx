@@ -65,7 +65,7 @@ vp9_enc_tool_path() {
 }
 
 # Environment check: Make sure input and source directories are available.
-vp9_c_vs_simd_enc_verify_environment () {
+vp9_c_vs_simd_enc_verify_environment() {
   if [ ! -e "${YUV_RAW_INPUT}" ]; then
     elog "libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
@@ -376,7 +376,9 @@ vp9_test_arm() {
   fi
 }
 
-vp9_c_vs_simd_enc_test () {
+vp9_c_vs_simd_enc_test() {
+  local save_dir=$(pwd)
+
   # Test Generic
   vp9_test_generic
 
@@ -410,6 +412,8 @@ vp9_c_vs_simd_enc_test () {
   else
     echo "vp9 test for arm: Done, all tests passed."
   fi
+
+  cd ${save_dir}
 }
 
 # Setup a trap function to clean up build, and output files after tests complete.
