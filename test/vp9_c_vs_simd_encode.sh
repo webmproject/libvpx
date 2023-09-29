@@ -277,10 +277,6 @@ vp9_enc_test() {
 
     for cpu in $(seq 0 $max_cpu_used); do
       for clip in ${TEST_CLIPS}; do
-        # TODO(webm:1819): Delete this if statement once issue 1819 is fixed.
-        if [ "${clip}" = "y4m_360p_10bit_input" ] && [ "${target}" = "armv8-linux-gcc" ]; then
-          continue
-        fi
         for bitrate in ${TEST_BITRATES}; do
           eval "${encoder}" $($clip) $($test_params) \
           "--limit=${VP9_ENCODE_C_VS_SIMD_TEST_FRAME_LIMIT}" \
