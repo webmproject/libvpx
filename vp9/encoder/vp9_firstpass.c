@@ -2530,7 +2530,7 @@ static int get_gop_coding_frame_num(
     next_frame = fps_get_frame_stats(first_pass_info,
                                      gf_start_show_idx + gop_coding_frames);
     if (next_frame == NULL) {
-      *end_of_sequence = (gop_coding_frames == 1);
+      *end_of_sequence = gop_coding_frames == 1 && rc->source_alt_ref_active;
       break;
     }
 

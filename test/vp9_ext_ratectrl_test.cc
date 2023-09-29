@@ -338,7 +338,7 @@ vpx_rc_status_t rc_get_encodeframe_decision_gop_short(
     EXPECT_EQ(encode_frame_info->show_index, 3);
     EXPECT_EQ(encode_frame_info->gop_index, 0);
     EXPECT_EQ(encode_frame_info->frame_type, vp9::kFrameTypeGolden);
-    EXPECT_EQ(toy_rate_ctrl->gop_global_index, 1);
+    EXPECT_EQ(toy_rate_ctrl->gop_global_index, 2);
   }
 
   // When the model recommends an invalid q, valid range [0, 255],
