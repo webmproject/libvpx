@@ -881,10 +881,11 @@ static int vp9_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
   if (!cm->prev_mip) return 1;
   cm->mi_alloc_size = mi_size;
 
-  cm->mi_grid_base = (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO *));
+  cm->mi_grid_base =
+      (MODE_INFO **)vpx_calloc(mi_size, sizeof(*cm->mi_grid_base));
   if (!cm->mi_grid_base) return 1;
   cm->prev_mi_grid_base =
-      (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO *));
+      (MODE_INFO **)vpx_calloc(mi_size, sizeof(*cm->prev_mi_grid_base));
   if (!cm->prev_mi_grid_base) return 1;
 
   return 0;
@@ -2165,7 +2166,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     vpx_free(cpi->skin_map);
     CHECK_MEM_ERROR(
         &cm->error, cpi->skin_map,
-        vpx_calloc(cm->mi_rows * cm->mi_cols, sizeof(cpi->skin_map[0])));
+        vpx_calloc(cm->mi_rows * cm->mi_cols, sizeof(*cpi->skin_map)));
 
     free_copy_partition_data(cpi);
     alloc_copy_partition_data(cpi);
@@ -2379,7 +2380,7 @@ void vp9_update_compressor_with_img_fmt(VP9_COMP *cpi, vpx_img_fmt_t img_fmt) {
 VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
   unsigned int i;
-  VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP9_COMP));
+  VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(*cpi));
   VP9_COMMON *volatile const cm = cpi != NULL ? &cpi->common : NULL;
 
   if (!cm) return NULL;
@@ -2428,7 +2429,7 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
 
   CHECK_MEM_ERROR(
       &cm->error, cpi->skin_map,
-      vpx_calloc(cm->mi_rows * cm->mi_cols, sizeof(cpi->skin_map[0])));
+      vpx_calloc(cm->mi_rows * cm->mi_cols, sizeof(*cpi->skin_map)));
 
 #if !CONFIG_REALTIME_ONLY
   CHECK_MEM_ERROR(&cm->error, cpi->alt_ref_aq, vp9_alt_ref_aq_create());
