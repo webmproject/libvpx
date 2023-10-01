@@ -396,7 +396,7 @@ TEST(EncodeAPI, ConfigResizeChangeThreadCount) {
       EXPECT_EQ(vpx_codec_enc_config_set(&enc.ctx, &cfg), VPX_CODEC_OK)
           << vpx_codec_error_detail(&enc.ctx);
 
-      cfg.g_w = 16;
+      cfg.g_w = 1000;
       cfg.g_h = 720;
 
       for (const auto threads : { 1, 4, 8, 6, 2, 1 }) {
