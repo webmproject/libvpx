@@ -270,7 +270,7 @@ static int rescale(int val, int num, int denom) {
   return (int)(llval * llnum / llden);
 }
 
-void vp8_init_temporal_layer_context(VP8_COMP *cpi, VP8_CONFIG *oxcf,
+void vp8_init_temporal_layer_context(VP8_COMP *cpi, const VP8_CONFIG *oxcf,
                                      const int layer,
                                      double prev_layer_framerate) {
   LAYER_CONTEXT *lc = &cpi->layer_context[layer];
@@ -328,7 +328,7 @@ void vp8_init_temporal_layer_context(VP8_COMP *cpi, VP8_CONFIG *oxcf,
 // for any "new" layers. For "existing" layers, let them inherit the parameters
 // from the previous layer state (at the same layer #). In future we may want
 // to better map the previous layer state(s) to the "new" ones.
-void vp8_reset_temporal_layer_change(VP8_COMP *cpi, VP8_CONFIG *oxcf,
+void vp8_reset_temporal_layer_change(VP8_COMP *cpi, const VP8_CONFIG *oxcf,
                                      const int prev_num_layers) {
   int i;
   double prev_layer_framerate = 0;
@@ -1412,7 +1412,7 @@ void vp8_update_layer_contexts(VP8_COMP *cpi) {
   }
 }
 
-void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
+void vp8_change_config(VP8_COMP *cpi, const VP8_CONFIG *oxcf) {
   VP8_COMMON *cm = &cpi->common;
   int last_w, last_h;
   unsigned int prev_number_of_layers;
