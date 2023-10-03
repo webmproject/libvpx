@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2023 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "test/init_vpx_test.h"
-#include "third_party/googletest/src/include/gtest/gtest.h"
+#ifndef TEST_TEST_COMMON_MAIN_H_
+#define TEST_TEST_COMMON_MAIN_H_
 
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  ::libvpx_test::init_vpx_test();
-  return RUN_ALL_TESTS();
+namespace libvpx_test {
+void init_vpx_test();
 }
+
+#endif

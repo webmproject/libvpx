@@ -14,9 +14,11 @@
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
+#include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"
+#include "test/init_vpx_test.h"
 #include "test/md5_helper.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
@@ -607,4 +609,8 @@ HIGHBD_INTRA_PRED_TEST(
 
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#include "test/test_libvpx.cc"
+int main(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  ::libvpx_test::init_vpx_test();
+  return RUN_ALL_TESTS();
+}
