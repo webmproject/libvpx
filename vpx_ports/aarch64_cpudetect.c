@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vpx_config.h"
 #include "arm_cpudetect.h"
 
 #if defined(__APPLE__)

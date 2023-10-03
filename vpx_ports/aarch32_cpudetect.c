@@ -9,6 +9,7 @@
  */
 // Feature detection code for Armv7-A / AArch32.
 
+#include "./vpx_config.h"
 #include "arm_cpudetect.h"
 
 #if !CONFIG_RUNTIME_CPU_DETECT
