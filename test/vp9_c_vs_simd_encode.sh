@@ -18,7 +18,7 @@ PRESETS="good rt"
 TEST_CLIPS="yuv_raw_input y4m_360p_10bit_input yuv_480p_raw_input y4m_720p_input"
 OUT_FILE_SUFFIX=".ivf"
 SCRIPT_DIR=$(dirname "$0")
-LIBVPX_SOURCE_DIR=$(cd ${SCRIPT_DIR}/..; pwd)
+LIBVPX_SOURCE_DIR=$(cd "${SCRIPT_DIR}/.."; pwd)
 
 # Clips used in test.
 YUV_RAW_INPUT="${LIBVPX_TEST_DATA_PATH}/hantro_collage_w352h288.yuv"
@@ -214,14 +214,15 @@ vp9_encode_rt_params() {
   --error-resilient=0"
 }
 
-# Configures for the given target in VPX_TEST_OUTPUT_DIR/build_target_${target}
-# directory.
+# Configures for the given target in the
+# ${VPX_TEST_OUTPUT_DIR}/build_target_${target} directory.
 vp9_enc_build() {
   local target=$1
   local configure="$2"
   local tmp_build_dir=${VPX_TEST_OUTPUT_DIR}/build_target_${target}
-  mkdir -p $tmp_build_dir
-  cd $tmp_build_dir
+  mkdir -p "$tmp_build_dir"
+  local save_dir="$PWD"
+  cd "$tmp_build_dir"
 
   echo "Building target: ${target}"
   local config_args="--disable-install-docs \
@@ -235,6 +236,7 @@ vp9_enc_build() {
   eval "$configure" --target="${target}" "${config_args}" ${devnull}
   eval make -j$(nproc) ${devnull}
   echo "Done building target: ${target}"
+  cd "${save_dir}"
 }
 
 compare_enc_output() {
@@ -258,6 +260,9 @@ vp9_enc_test() {
     return 1
   fi
 
+  local tmp_build_dir=${VPX_TEST_OUTPUT_DIR}/build_target_${target}
+  local save_dir="$PWD"
+  cd "$tmp_build_dir"
   for preset in ${PRESETS}; do
     if [ "${preset}" = "good" ]; then
       local max_cpu_used=5
@@ -267,6 +272,7 @@ vp9_enc_test() {
       local test_params=vp9_encode_rt_params
     else
       elog "Invalid preset"
+      cd "${save_dir}"
       return 1
     fi
 
@@ -287,6 +293,7 @@ vp9_enc_test() {
           if [ "${target}" != "generic-gnu" ]; then
             if ! compare_enc_output ${target} $cpu ${clip} $bitrate ${preset}; then
               # Find the mismatch
+              cd "${save_dir}"
               return 1
             fi
           fi
@@ -294,6 +301,7 @@ vp9_enc_test() {
       done
     done
   done
+  cd "${save_dir}"
 }
 
 vp9_test_generic() {
@@ -373,8 +381,6 @@ vp9_test_arm() {
 }
 
 vp9_c_vs_simd_enc_test() {
-  local save_dir=$(pwd)
-
   # Test Generic
   vp9_test_generic
 
@@ -408,8 +414,6 @@ vp9_c_vs_simd_enc_test() {
   else
     echo "vp9 test for arm: Done, all tests passed."
   fi
-
-  cd ${save_dir}
 }
 
 # Setup a trap function to clean up build, and output files after tests complete.
