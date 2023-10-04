@@ -553,6 +553,8 @@ int vp8cx_create_encoder_threads(VP8_COMP *cpi) {
       /* shutdown other threads */
       vpx_atomic_store_release(&cpi->b_multi_threaded, 0);
       for (--ithread; ithread >= 0; ithread--) {
+        sem_post(&cpi->h_event_start_encoding[ithread]);
+        sem_post(&cpi->h_event_end_encoding[ithread]);
         pthread_join(cpi->h_encoding_thread[ithread], 0);
         sem_destroy(&cpi->h_event_start_encoding[ithread]);
         sem_destroy(&cpi->h_event_end_encoding[ithread]);
@@ -560,10 +562,16 @@ int vp8cx_create_encoder_threads(VP8_COMP *cpi) {
 
       /* free thread related resources */
       vpx_free(cpi->h_event_start_encoding);
+      cpi->h_event_start_encoding = NULL;
       vpx_free(cpi->h_event_end_encoding);
+      cpi->h_event_end_encoding = NULL;
       vpx_free(cpi->h_encoding_thread);
+      cpi->h_encoding_thread = NULL;
       vpx_free(cpi->mb_row_ei);
+      cpi->mb_row_ei = NULL;
       vpx_free(cpi->en_thread_data);
+      cpi->en_thread_data = NULL;
+      cpi->encoding_thread_count = 0;
 
       return -1;
     }
@@ -592,10 +600,16 @@ int vp8cx_create_encoder_threads(VP8_COMP *cpi) {
 
         /* free thread related resources */
         vpx_free(cpi->h_event_start_encoding);
+        cpi->h_event_start_encoding = NULL;
         vpx_free(cpi->h_event_end_encoding);
+        cpi->h_event_end_encoding = NULL;
         vpx_free(cpi->h_encoding_thread);
+        cpi->h_encoding_thread = NULL;
         vpx_free(cpi->mb_row_ei);
+        cpi->mb_row_ei = NULL;
         vpx_free(cpi->en_thread_data);
+        cpi->en_thread_data = NULL;
+        cpi->encoding_thread_count = 0;
 
         return -2;
       }
@@ -627,13 +641,20 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi) {
 
     sem_destroy(&cpi->h_event_end_lpf);
     sem_destroy(&cpi->h_event_start_lpf);
+    cpi->b_lpf_running = 0;
 
     /* free thread related resources */
     vpx_free(cpi->h_event_start_encoding);
+    cpi->h_event_start_encoding = NULL;
     vpx_free(cpi->h_event_end_encoding);
+    cpi->h_event_end_encoding = NULL;
     vpx_free(cpi->h_encoding_thread);
+    cpi->h_encoding_thread = NULL;
     vpx_free(cpi->mb_row_ei);
+    cpi->mb_row_ei = NULL;
     vpx_free(cpi->en_thread_data);
+    cpi->en_thread_data = NULL;
+    cpi->encoding_thread_count = 0;
   }
 }
 #endif
