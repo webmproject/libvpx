@@ -526,6 +526,7 @@ typedef struct VP8_COMP {
 #if CONFIG_MULTITHREAD
   /* multithread data */
   vpx_atomic_int *mt_current_mb_col;
+  int mt_current_mb_col_size;
   int mt_sync_range;
   vpx_atomic_int b_multi_threaded;
   int encoding_thread_count;

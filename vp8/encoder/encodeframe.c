@@ -750,6 +750,15 @@ void vp8_encode_frame(VP8_COMP *cpi) {
       vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei,
                                 cpi->encoding_thread_count);
 
+      if (cpi->mt_current_mb_col_size != cm->mb_rows) {
+        vpx_free(cpi->mt_current_mb_col);
+        cpi->mt_current_mb_col = NULL;
+        cpi->mt_current_mb_col_size = 0;
+        CHECK_MEM_ERROR(
+            &cpi->common.error, cpi->mt_current_mb_col,
+            vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cm->mb_rows));
+        cpi->mt_current_mb_col_size = cm->mb_rows;
+      }
       for (i = 0; i < cm->mb_rows; ++i)
         vpx_atomic_store_release(&cpi->mt_current_mb_col[i], -1);
 

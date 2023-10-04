@@ -644,6 +644,9 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi) {
     cpi->b_lpf_running = 0;
 
     /* free thread related resources */
+    vpx_free(cpi->mt_current_mb_col);
+    cpi->mt_current_mb_col = NULL;
+    cpi->mt_current_mb_col_size = 0;
     vpx_free(cpi->h_event_start_encoding);
     cpi->h_event_start_encoding = NULL;
     vpx_free(cpi->h_event_end_encoding);

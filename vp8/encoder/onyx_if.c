@@ -442,11 +442,6 @@ static void dealloc_compressor_data(VP8_COMP *cpi) {
 
   vpx_free(cpi->mb.pip);
   cpi->mb.pip = 0;
-
-#if CONFIG_MULTITHREAD
-  vpx_free(cpi->mt_current_mb_col);
-  cpi->mt_current_mb_col = NULL;
-#endif
 }
 
 static void enable_segmentation(VP8_COMP *cpi) {
@@ -1224,17 +1219,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi) {
   } else {
     cpi->mt_sync_range = 16;
   }
-
-  if (cpi->oxcf.multi_threaded > 1) {
-    int i;
-
-    vpx_free(cpi->mt_current_mb_col);
-    CHECK_MEM_ERROR(&cpi->common.error, cpi->mt_current_mb_col,
-                    vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cm->mb_rows));
-    for (i = 0; i < cm->mb_rows; ++i)
-      vpx_atomic_init(&cpi->mt_current_mb_col[i], 0);
-  }
-
 #endif
 
   vpx_free(cpi->tplist);
@@ -1447,11 +1431,6 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
   last_h = cpi->oxcf.Height;
   prev_number_of_layers = cpi->oxcf.number_of_layers;
 
-  if (cpi->initial_width) {
-    // TODO(https://crbug.com/1486441): Allow changing thread counts; the
-    // allocation is done once in vp8_create_compressor().
-    oxcf->multi_threaded = cpi->oxcf.multi_threaded;
-  }
   cpi->oxcf = *oxcf;
 
   switch (cpi->oxcf.Mode) {

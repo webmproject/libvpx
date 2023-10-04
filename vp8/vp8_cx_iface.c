@@ -488,6 +488,8 @@ static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t *ctx,
   ctx->cfg = *cfg;
   set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg, NULL);
   vp8_change_config(ctx->cpi, &ctx->oxcf);
+  // TODO(https://crbug.com/1486441): Change thread counts;
+  // vp8cx_create_encoder_threads() is called once in vp8_create_compressor().
   ctx->cpi->common.error.setjmp = 0;
   return VPX_CODEC_OK;
 }
