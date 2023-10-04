@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef TEST_TEST_COMMON_MAIN_H_
-#define TEST_TEST_COMMON_MAIN_H_
+#ifndef TEST_INIT_VPX_TEST_H_
+#define TEST_INIT_VPX_TEST_H_
 
 namespace libvpx_test {
 void init_vpx_test();
 }
 
-#endif
+#endif  // TEST_INIT_VPX_TEST_H_
