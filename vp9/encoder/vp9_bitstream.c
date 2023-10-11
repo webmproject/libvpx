@@ -969,7 +969,7 @@ static void encode_tiles_buffer_alloc(VP9_COMP *const cpi) {
       cpi->num_workers * sizeof(*cpi->vp9_bitstream_worker_data);
   CHECK_MEM_ERROR(&cm->error, cpi->vp9_bitstream_worker_data,
                   vpx_memalign(16, worker_data_size));
-  memset(cpi->vp9_bitstream_worker_data, 0, worker_data_size);
+  bzero(cpi->vp9_bitstream_worker_data, worker_data_size);
   for (i = 1; i < cpi->num_workers; ++i) {
     cpi->vp9_bitstream_worker_data[i].dest_size =
         cpi->oxcf.width * cpi->oxcf.height;
@@ -1003,7 +1003,7 @@ static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr) {
       data->xd = cpi->td.mb.e_mbd;
       data->tile_idx = tile_col;
       data->max_mv_magnitude = cpi->max_mv_magnitude;
-      memset(data->interp_filter_selected, 0,
+      bzero(data->interp_filter_selected,
              sizeof(data->interp_filter_selected[0][0]) * SWITCHABLE);
 
       // First thread can directly write into the output buffer.
@@ -1065,7 +1065,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
 
-  memset(cm->above_seg_context, 0,
+  bzero(cm->above_seg_context,
          sizeof(*cm->above_seg_context) * mi_cols_aligned_to_sb(cm->mi_cols));
 
   // Encoding tiles in parallel is done only for realtime mode now. In other

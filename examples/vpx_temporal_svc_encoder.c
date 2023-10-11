@@ -30,7 +30,7 @@
 
 #define ROI_MAP 0
 
-#define zero(Dest) memset(&(Dest), 0, sizeof(Dest))
+#define zero(Dest) bzero(&(Dest), sizeof(Dest))
 
 static const char *exec_name;
 
@@ -671,8 +671,8 @@ int main(int argc, char **argv) {
   int *prev_mask_map;
 #endif
   zero(rc.layer_target_bitrate);
-  memset(&layer_id, 0, sizeof(vpx_svc_layer_id_t));
-  memset(&input_ctx, 0, sizeof(input_ctx));
+  bzero(&layer_id, sizeof(vpx_svc_layer_id_t));
+  bzero(&input_ctx, sizeof(input_ctx));
   /* Setup default input stream settings */
   input_ctx.framerate.numerator = 30;
   input_ctx.framerate.denominator = 1;
@@ -898,7 +898,7 @@ int main(int argc, char **argv) {
 #endif
   } else if (strncmp(encoder->name, "vp9", 3) == 0) {
     vpx_svc_extra_cfg_t svc_params;
-    memset(&svc_params, 0, sizeof(svc_params));
+    bzero(&svc_params, sizeof(svc_params));
     vpx_codec_control(&codec, VP9E_SET_POSTENCODE_DROP, 0);
     vpx_codec_control(&codec, VP9E_SET_DISABLE_OVERSHOOT_MAXQ_CBR, 0);
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, speed);

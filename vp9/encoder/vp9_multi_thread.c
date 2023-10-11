@@ -249,7 +249,7 @@ void vp9_prepare_job_queue(VP9_COMP *cpi, JOB_TYPE job_type) {
 
   multi_thread_ctxt->jobs_per_tile_col = jobs_per_tile_col;
   // memset the entire job queue buffer to zero
-  memset(job_queue, 0, total_jobs * sizeof(JobQueue));
+  bzero(job_queue, total_jobs * sizeof(JobQueue));
 
   // Job queue preparation
   for (tile_col = 0; tile_col < tile_cols; tile_col++) {

@@ -29,7 +29,7 @@ std::string GetTempFileName() {
       "/libwebm_temp.XXXXXX";
   char* temp_file_name_template =
       new char[temp_file_name_template_str.length() + 1];
-  memset(temp_file_name_template, 0, temp_file_name_template_str.length() + 1);
+  bzero(temp_file_name_template, temp_file_name_template_str.length() + 1);
   temp_file_name_template_str.copy(temp_file_name_template,
                                    temp_file_name_template_str.length(), 0);
   int fd = mkstemp(temp_file_name_template);

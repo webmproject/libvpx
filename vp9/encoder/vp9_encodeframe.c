@@ -458,7 +458,7 @@ static void sum_2_variances(const Var *a, const Var *b, Var *r) {
 
 static void fill_variance_tree(void *data, BLOCK_SIZE bsize) {
   variance_node node;
-  memset(&node, 0, sizeof(node));
+  bzero(&node, sizeof(node));
   tree_to_node(data, bsize, &node);
   sum_2_variances(node.split[0], node.split[1], &node.part_variances->horz[0]);
   sum_2_variances(node.split[2], node.split[3], &node.part_variances->horz[1]);
@@ -1328,7 +1328,7 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->oxcf.speed >= 8 || (cpi->use_svc && cpi->svc.non_reference_frame))
     compute_minmax_variance = 0;
 
-  memset(x->variance_low, 0, sizeof(x->variance_low));
+  bzero(x->variance_low, sizeof(x->variance_low));
 
   if (cpi->sf.use_source_sad && !is_key_frame) {
     int sb_offset2 = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);
@@ -2438,7 +2438,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
     int use32x32 = 0;
     unsigned int thr = cpi->source_var_thresh;
 
-    memset(d32, 0, sizeof(d32));
+    bzero(d32, sizeof(d32));
 
     for (i = 0; i < 4; i++) {
       Diff *d16[4];
@@ -4476,8 +4476,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi, ThreadData *td,
   int sb_col_in_tile;
 
   // Initialize the left context for the new SB row
-  memset(&xd->left_context, 0, sizeof(xd->left_context));
-  memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
+  bzero(&xd->left_context, sizeof(xd->left_context));
+  bzero(xd->left_seg_context, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = mi_col_start, sb_col_in_tile = 0; mi_col < mi_col_end;
@@ -4586,9 +4586,9 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  memset(xd->above_context[0], 0,
+  bzero(xd->above_context[0],
          sizeof(*xd->above_context[0]) * 2 * aligned_mi_cols * MAX_MB_PLANE);
-  memset(xd->above_seg_context, 0,
+  bzero(xd->above_seg_context,
          sizeof(*xd->above_seg_context) * aligned_mi_cols);
 }
 
@@ -5507,8 +5507,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
   int sb_col_in_tile;
 
   // Initialize the left context for the new SB row
-  memset(&xd->left_context, 0, sizeof(xd->left_context));
-  memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
+  bzero(&xd->left_context, sizeof(xd->left_context));
+  bzero(xd->left_seg_context, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = mi_col_start, sb_col_in_tile = 0; mi_col < mi_col_end;
@@ -5705,7 +5705,7 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
   int sum = 0;
   int i, j;
 
-  memset(hist, 0, VAR_HIST_BINS * sizeof(hist[0]));
+  bzero(hist, VAR_HIST_BINS * sizeof(hist[0]));
 
   for (i = 0; i < cm->mb_rows; i++) {
     for (j = 0; j < cm->mb_cols; j++) {
@@ -6441,7 +6441,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                    cpi->sf.allow_skip_recode;
 
   if (!x->skip_recode && !cpi->sf.use_nonrd_pick_mode)
-    memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+    bzero(x->skip_txfm, sizeof(x->skip_txfm));
 
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;

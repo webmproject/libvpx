@@ -242,8 +242,8 @@ static int update_fragments(vpx_codec_alg_priv_t *ctx, const uint8_t *data,
 
   if (ctx->fragments.count == 0) {
     /* New frame, reset fragment pointers and sizes */
-    memset((void *)ctx->fragments.ptrs, 0, sizeof(ctx->fragments.ptrs));
-    memset(ctx->fragments.sizes, 0, sizeof(ctx->fragments.sizes));
+    bzero((void *)ctx->fragments.ptrs, sizeof(ctx->fragments.ptrs));
+    bzero(ctx->fragments.sizes, sizeof(ctx->fragments.sizes));
   }
   if (ctx->fragments.enabled && !(data == NULL && data_sz == 0)) {
     /* Store a pointer to this fragment and return. We haven't

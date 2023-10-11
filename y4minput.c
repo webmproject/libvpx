@@ -1143,7 +1143,7 @@ int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *_img) {
   /*Fill in the frame buffer pointers.
     We don't use vpx_img_wrap() because it forces padding for odd picture
      sizes, which would require a separate fread call for every row.*/
-  memset(_img, 0, sizeof(*_img));
+  bzero(_img, sizeof(*_img));
   /*Y4M has the planes in Y'CbCr order, which libvpx calls Y, U, and V.*/
   _img->fmt = _y4m->vpx_fmt;
   _img->w = _img->d_w = _y4m->pic_w;

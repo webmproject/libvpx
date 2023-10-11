@@ -124,7 +124,7 @@ static int open_input_file(const char *file_name, input_file_t *input, int w,
       input->bit_depth = input->y4m.bit_depth;
       // Y4M alloc's its own buf. Init this to avoid problems if we never
       // read frames.
-      memset(&input->img, 0, sizeof(input->img));
+      bzero(&input->img, sizeof(input->img));
       break;
     case RAW_YUV:
       fseek(input->file, 0, SEEK_SET);
@@ -326,7 +326,7 @@ int main(int argc, char *argv[]) {
   input_file_t in[2];
   double peak = 255.0;
 
-  memset(in, 0, sizeof(in));
+  bzero(in, sizeof(in));
 
   if (argc < 2) {
     fprintf(stderr,

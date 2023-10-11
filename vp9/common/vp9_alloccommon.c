@@ -181,7 +181,7 @@ void vp9_remove_common(VP9_COMMON *cm) {
 void vp9_init_context_buffers(VP9_COMMON *cm) {
   cm->setup_mi(cm);
   if (cm->last_frame_seg_map)
-    memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
+    bzero(cm->last_frame_seg_map, cm->mi_rows * cm->mi_cols);
 }
 
 void vp9_swap_current_and_last_seg_map(VP9_COMMON *cm) {

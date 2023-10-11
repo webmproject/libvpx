@@ -60,8 +60,8 @@ void vp8_regular_quantize_b_c(BLOCK *b, BLOCKD *d) {
   short *dequant_ptr = d->dequant;
   short zbin_oq_value = b->zbin_extra;
 
-  memset(qcoeff_ptr, 0, 32);
-  memset(dqcoeff_ptr, 0, 32);
+  bzero(qcoeff_ptr, 32);
+  bzero(dqcoeff_ptr, 32);
 
   eob = -1;
 

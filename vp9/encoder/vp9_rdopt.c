@@ -2435,8 +2435,8 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
   int seg_ref_active =
       segfeature_active(&cm->seg, segment_id, SEG_LVL_REF_FRAME);
   if (seg_ref_active) {
-    memset(ref_costs_single, 0, MAX_REF_FRAMES * sizeof(*ref_costs_single));
-    memset(ref_costs_comp, 0, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
+    bzero(ref_costs_single, MAX_REF_FRAMES * sizeof(*ref_costs_single));
+    bzero(ref_costs_comp, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
     *comp_mode_p = 128;
   } else {
     vpx_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
@@ -3826,7 +3826,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, TileDataEnc *tile_data,
 #if CONFIG_COLLECT_COMPONENT_TIMING
       start_timing(cpi, intra_mode_search_time);
 #endif
-      memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+      bzero(x->skip_txfm, sizeof(x->skip_txfm));
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL, bsize,
                       best_rd, recon);
 #if CONFIG_COLLECT_COMPONENT_TIMING
@@ -4326,7 +4326,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, TileDataEnc *tile_data,
   const int *const rd_thresh_freq_fact = tile_data->thresh_freq_fact[bsize];
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
-  memset(x->zcoeff_blk[TX_4X4], 0, 4);
+  bzero(x->zcoeff_blk[TX_4X4], 4);
   vp9_zero(best_mbmode);
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i) filter_cache[i] = INT64_MAX;

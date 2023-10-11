@@ -279,9 +279,9 @@ void vp9_apply_temporal_filter_c(
   assert(strength >= 0);
   assert(strength <= 6);
 
-  memset(y_diff_sse, 0, BLK_PELS * sizeof(uint16_t));
-  memset(u_diff_sse, 0, BLK_PELS * sizeof(uint16_t));
-  memset(v_diff_sse, 0, BLK_PELS * sizeof(uint16_t));
+  bzero(y_diff_sse, BLK_PELS * sizeof(uint16_t));
+  bzero(u_diff_sse, BLK_PELS * sizeof(uint16_t));
+  bzero(v_diff_sse, BLK_PELS * sizeof(uint16_t));
 
   // Calculate diff^2 for each pixel of the 16x16 block.
   // TODO(yunqing): the following code needs to be optimized.
@@ -423,9 +423,9 @@ void vp9_highbd_apply_temporal_filter_c(
   int uv_row, uv_col;
   int row_step, col_step;
 
-  memset(y_diff_sse, 0, BLK_PELS * sizeof(uint32_t));
-  memset(u_diff_sse, 0, BLK_PELS * sizeof(uint32_t));
-  memset(v_diff_sse, 0, BLK_PELS * sizeof(uint32_t));
+  bzero(y_diff_sse, BLK_PELS * sizeof(uint32_t));
+  bzero(u_diff_sse, BLK_PELS * sizeof(uint32_t));
+  bzero(v_diff_sse, BLK_PELS * sizeof(uint32_t));
 
   // Get the square diffs
   for (row = 0; row < (int)block_height; row++) {

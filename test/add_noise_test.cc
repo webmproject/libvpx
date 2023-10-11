@@ -83,7 +83,7 @@ TEST_P(AddNoiseTest, CheckNoiseAdded) {
   }
 
   // Initialize pixels in the image to 0 and check for roll under.
-  memset(s, 0, image_size);
+  bzero(s, image_size);
 
   ASM_REGISTER_STATE_CHECK(
       GET_PARAM(1)(s, noise, clamp, clamp, width, height, width));

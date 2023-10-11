@@ -212,7 +212,7 @@ class DummyVideoSource : public VideoSource {
 
  protected:
   virtual void FillFrame() {
-    if (img_) memset(img_->img_data, 0, raw_sz_);
+    if (img_) bzero(img_->img_data, raw_sz_);
   }
 
   void ReallocImage() {
@@ -251,7 +251,7 @@ class RandomVideoSource : public DummyVideoSource {
       if (frame_ % 30 < 15) {
         for (size_t i = 0; i < raw_sz_; ++i) img_->img_data[i] = rnd_.Rand8();
       } else {
-        memset(img_->img_data, 0, raw_sz_);
+        bzero(img_->img_data, raw_sz_);
       }
     }
   }

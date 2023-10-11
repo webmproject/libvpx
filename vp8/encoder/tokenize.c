@@ -459,10 +459,10 @@ void vp8_fix_contexts(MACROBLOCKD *x) {
   /* Clear entropy contexts for Y2 blocks */
   if (x->mode_info_context->mbmi.mode != B_PRED &&
       x->mode_info_context->mbmi.mode != SPLITMV) {
-    memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-    memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    bzero(x->above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    bzero(x->left_context, sizeof(ENTROPY_CONTEXT_PLANES));
   } else {
-    memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
-    memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
+    bzero(x->above_context, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
+    bzero(x->left_context, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
   }
 }

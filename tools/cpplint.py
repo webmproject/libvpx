@@ -4781,7 +4781,7 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
   match = Search(r'memset\s*\(([^,]*),\s*([^,]*),\s*0\s*\)', line)
   if match and not Match(r"^''|-?[0-9]+|0x[0-9A-Fa-f]$", match.group(2)):
     error(filename, linenum, 'runtime/memset', 4,
-          'Did you mean "memset(%s, 0, %s)"?'
+          'Did you mean "bzero(%s, %s)"?'
           % (match.group(1), match.group(2)))
 
   if Search(r'\busing namespace\b', line):

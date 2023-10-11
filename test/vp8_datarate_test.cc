@@ -343,7 +343,7 @@ TEST_P(DatarateTestRealTime, RegionOfInterest) {
 
   // Set ROI parameters
   use_roi_ = true;
-  memset(&roi_, 0, sizeof(roi_));
+  bzero(&roi_, sizeof(roi_));
 
   roi_.rows = (cfg_.g_h + 15) / 16;
   roi_.cols = (cfg_.g_w + 15) / 16;

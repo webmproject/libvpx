@@ -166,7 +166,7 @@ int vp9_lookahead_push(struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
 #endif
     if (larger_dimensions) {
       YV12_BUFFER_CONFIG new_img;
-      memset(&new_img, 0, sizeof(new_img));
+      bzero(&new_img, sizeof(new_img));
       if (vpx_alloc_frame_buffer(&new_img, width, height, subsampling_x,
                                  subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH

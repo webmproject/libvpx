@@ -89,7 +89,7 @@ class Encoder {
   Encoder(vpx_codec_enc_cfg_t cfg, unsigned long deadline,
           const unsigned long init_flags, TwopassStatsStore *stats)
       : cfg_(cfg), deadline_(deadline), init_flags_(init_flags), stats_(stats) {
-    memset(&encoder_, 0, sizeof(encoder_));
+    bzero(&encoder_, sizeof(encoder_));
   }
 
   virtual ~Encoder() { vpx_codec_destroy(&encoder_); }

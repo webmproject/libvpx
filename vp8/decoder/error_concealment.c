@@ -293,7 +293,7 @@ static void estimate_missing_mvs(MB_OVERLAP *overlaps, MODE_INFO *mi,
                                  MODE_INFO *prev_mi, int mb_rows, int mb_cols,
                                  unsigned int first_corrupt) {
   int mb_row, mb_col;
-  memset(overlaps, 0, sizeof(MB_OVERLAP) * mb_rows * mb_cols);
+  bzero(overlaps, sizeof(MB_OVERLAP) * mb_rows * mb_cols);
   /* First calculate the overlaps for all blocks */
   for (mb_row = 0; mb_row < mb_rows; ++mb_row) {
     for (mb_col = 0; mb_col < mb_cols; ++mb_col) {

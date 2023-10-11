@@ -158,7 +158,7 @@ static void init_tpl_stats(VP9_COMP *cpi) {
   int frame_idx;
   for (frame_idx = 0; frame_idx < MAX_ARF_GOP_SIZE; ++frame_idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[frame_idx];
-    memset(tpl_frame->tpl_stats_ptr, 0,
+    bzero(tpl_frame->tpl_stats_ptr,
            tpl_frame->height * tpl_frame->width *
                sizeof(*tpl_frame->tpl_stats_ptr));
     tpl_frame->is_valid = 0;

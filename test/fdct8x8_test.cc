@@ -156,7 +156,7 @@ class FwdTrans8x8TestBase {
     int count_sign_block[64][2];
     const int count_test_block = 100000;
 
-    memset(count_sign_block, 0, sizeof(count_sign_block));
+    bzero(count_sign_block, sizeof(count_sign_block));
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-255, 255].
@@ -187,7 +187,7 @@ class FwdTrans8x8TestBase {
           << " count1: " << count_sign_block[j][1] << " diff: " << diff;
     }
 
-    memset(count_sign_block, 0, sizeof(count_sign_block));
+    bzero(count_sign_block, sizeof(count_sign_block));
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_ / 16, mask_ / 16].

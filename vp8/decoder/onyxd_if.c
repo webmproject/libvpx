@@ -68,7 +68,7 @@ static struct VP8D_COMP *create_decompressor(VP8D_CONFIG *oxcf) {
 
   if (!pbi) return NULL;
 
-  memset(pbi, 0, sizeof(VP8D_COMP));
+  bzero(pbi, sizeof(VP8D_COMP));
 
   if (setjmp(pbi->common.error.jmp)) {
     pbi->common.error.setjmp = 0;

@@ -58,7 +58,7 @@ void reference_minmax(const uint8_t *a, int a_stride, const uint8_t *b,
 TEST_P(MinMaxTest, MinValue) {
   for (int i = 0; i < 64; i++) {
     uint8_t a[64], b[64];
-    memset(a, 0, sizeof(a));
+    bzero(a, sizeof(a));
     memset(b, 255, sizeof(b));
     b[i] = i;  // Set a minimum difference of i.
 
@@ -72,8 +72,8 @@ TEST_P(MinMaxTest, MinValue) {
 TEST_P(MinMaxTest, MaxValue) {
   for (int i = 0; i < 64; i++) {
     uint8_t a[64], b[64];
-    memset(a, 0, sizeof(a));
-    memset(b, 0, sizeof(b));
+    bzero(a, sizeof(a));
+    bzero(b, sizeof(b));
     b[i] = i;  // Set a maximum difference of i.
 
     int min, max;

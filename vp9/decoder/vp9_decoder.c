@@ -51,7 +51,7 @@ static void initialize_dec(void) {
 static void vp9_dec_setup_mi(VP9_COMMON *cm) {
   cm->mi = cm->mip + cm->mi_stride + 1;
   cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
-  memset(cm->mi_grid_base, 0,
+  bzero(cm->mi_grid_base,
          cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
@@ -88,7 +88,7 @@ void vp9_dec_alloc_row_mt_mem(RowMTWorkerData *row_mt_worker_data,
   for (plane = 0; plane < 3; ++plane) {
     CHECK_MEM_ERROR(&cm->error, row_mt_worker_data->dqcoeff[plane],
                     vpx_memalign(32, dqcoeff_size));
-    memset(row_mt_worker_data->dqcoeff[plane], 0, dqcoeff_size);
+    bzero(row_mt_worker_data->dqcoeff[plane], dqcoeff_size);
     CHECK_MEM_ERROR(&cm->error, row_mt_worker_data->eob[plane],
                     vpx_calloc(num_sbs << EOBS_PER_SB_LOG2,
                                sizeof(*row_mt_worker_data->eob[plane])));

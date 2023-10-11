@@ -900,11 +900,11 @@ int main(int argc, const char **argv) {
   int mismatch_seen = 0;
   vpx_codec_ctx_t decoder;
 #endif
-  memset(&svc_ctx, 0, sizeof(svc_ctx));
-  memset(&app_input, 0, sizeof(AppInput));
-  memset(&info, 0, sizeof(VpxVideoInfo));
-  memset(&layer_id, 0, sizeof(vpx_svc_layer_id_t));
-  memset(&rc, 0, sizeof(struct RateControlStats));
+  bzero(&svc_ctx, sizeof(svc_ctx));
+  bzero(&app_input, sizeof(AppInput));
+  bzero(&info, sizeof(VpxVideoInfo));
+  bzero(&layer_id, sizeof(vpx_svc_layer_id_t));
+  bzero(&rc, sizeof(struct RateControlStats));
   exec_name = argv[0];
 
   /* Setup default input stream settings */

@@ -2372,7 +2372,7 @@ int ARGBComputeCumulativeSum(const uint8_t* src_argb,
     ComputeCumulativeSumRow = ComputeCumulativeSumRow_SSE2;
   }
 #endif
-  memset(dst_cumsum, 0, width * sizeof(dst_cumsum[0]) * 4);  // 4 int per pixel.
+  bzero(dst_cumsum, width * sizeof(dst_cumsum[0]) * 4);  // 4 int per pixel.
   for (y = 0; y < height; ++y) {
     ComputeCumulativeSumRow(src_argb, dst_cumsum, previous_cumsum, width);
     previous_cumsum = dst_cumsum;
@@ -2850,7 +2850,7 @@ static int ARGBSobelize(const uint8_t* src_argb,
     ARGBToYJRow(src_argb, row_y1, width);
     row_y1[-1] = row_y1[0];
     memset(row_y1 + width, row_y1[width - 1], 16);
-    memset(row_y2 + width, 0, 16);
+    bzero(row_y2 + width, 16);
 
     for (y = 0; y < height; ++y) {
       // Convert next row of ARGB to G.

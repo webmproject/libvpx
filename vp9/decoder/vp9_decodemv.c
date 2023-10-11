@@ -396,7 +396,7 @@ static INLINE void copy_mv_pair(int_mv *dst, const int_mv *src) {
 }
 
 static INLINE void zero_mv_pair(int_mv *dst) {
-  memset(dst, 0, sizeof(*dst) * 2);
+  bzero(dst, sizeof(*dst) * 2);
 }
 
 static INLINE int assign_mv(VP9_COMMON *cm, MACROBLOCKD *xd,
@@ -499,7 +499,7 @@ static int dec_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   const int early_break = (mode != NEARMV);
 
   // Blank the reference vector list
-  memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
+  bzero(mv_ref_list, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
 
   i = 0;
   if (block >= 0) {

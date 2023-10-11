@@ -71,7 +71,7 @@ static int mv_refs_rt(VP9_COMP *cpi, const VP9_COMMON *cm, const MACROBLOCK *x,
   int const_motion = 0;
 
   // Blank the reference vector list
-  memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
+  bzero(mv_ref_list, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
 
   // The nearest 2 blocks are treated differently
   // if the size < 8x8 we get the mv from the bmi substructure,
@@ -1181,7 +1181,7 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
 
   mi->mv[0].as_int = INVALID_MV;
   mi->uv_mode = DC_PRED;
-  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+  bzero(x->skip_txfm, sizeof(x->skip_txfm));
 
   // Change the limit of this loop to add other intra prediction
   // mode tests.
@@ -1824,7 +1824,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
   }
 
   init_ref_frame_cost(cm, xd, ref_frame_cost);
-  memset(&mode_checked[0][0], 0, MB_MODE_COUNT * MAX_REF_FRAMES);
+  bzero(&mode_checked[0][0], MB_MODE_COUNT * MAX_REF_FRAMES);
 
   if (reuse_inter_pred) {
     int i;

@@ -573,7 +573,7 @@ static int main_loop(int argc, const char **argv_) {
   struct VpxInputContext vpx_input_ctx;
 #if CONFIG_WEBM_IO
   struct WebmInputContext webm_ctx;
-  memset(&(webm_ctx), 0, sizeof(webm_ctx));
+  bzero(&(webm_ctx), sizeof(webm_ctx));
   input.webm_ctx = &webm_ctx;
 #endif
   input.vpx_input_ctx = &vpx_input_ctx;
@@ -586,7 +586,7 @@ static int main_loop(int argc, const char **argv_) {
     return EXIT_FAILURE;
   }
   for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
-    memset(&arg, 0, sizeof(arg));
+    bzero(&arg, sizeof(arg));
     arg.argv_step = 1;
 
     if (arg_match(&arg, &help, argi)) {
@@ -1132,7 +1132,7 @@ int main(int argc, const char **argv_) {
     return EXIT_FAILURE;
   }
   for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
-    memset(&arg, 0, sizeof(arg));
+    bzero(&arg, sizeof(arg));
     arg.argv_step = 1;
 
     if (arg_match(&arg, &looparg, argi)) {

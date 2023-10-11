@@ -607,7 +607,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
       scene_change_detected) {
     // Set segmentation map to 0 and disable.
     unsigned char *const seg_map = cpi->segmentation_map;
-    memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
+    bzero(seg_map, cm->mi_rows * cm->mi_cols);
     vp9_disable_segmentation(&cm->seg);
     if (cm->frame_type == KEY_FRAME || scene_change_detected) {
       memset(cr->last_coded_q_map, MAXQ,
@@ -683,7 +683,7 @@ int vp9_cyclic_refresh_get_rdmult(const CYCLIC_REFRESH *cr) {
 void vp9_cyclic_refresh_reset_resize(VP9_COMP *const cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
-  memset(cr->map, 0, cm->mi_rows * cm->mi_cols);
+  bzero(cr->map, cm->mi_rows * cm->mi_cols);
   memset(cr->last_coded_q_map, MAXQ,
          cm->mi_rows * cm->mi_cols * sizeof(*cr->last_coded_q_map));
   cr->sb_index = 0;

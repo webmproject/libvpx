@@ -344,7 +344,7 @@ static void fs_calc_structure(fs_ctx *_ctx, int _l, int bit_depth) {
   gx_buf = _ctx->col_buf;
   stride = w + 8;
   gy_buf = gx_buf + 8 * stride;
-  memset(gx_buf, 0, 2 * 8 * stride * sizeof(*gx_buf));
+  bzero(gx_buf, 2 * 8 * stride * sizeof(*gx_buf));
   c2 = ssim_c2 * (1 << 4 * _l) * 16 * 104;
   for (j = 0; j < h + 4; j++) {
     if (j < h - 1) {
@@ -363,8 +363,8 @@ static void fs_calc_structure(fs_ctx *_ctx, int _l, int bit_depth) {
         gy_buf[(j & 7) * stride + i + 4] = (uint32_t)gy;
       }
     } else {
-      memset(gx_buf + (j & 7) * stride, 0, stride * sizeof(*gx_buf));
-      memset(gy_buf + (j & 7) * stride, 0, stride * sizeof(*gy_buf));
+      bzero(gx_buf + (j & 7) * stride, stride * sizeof(*gx_buf));
+      bzero(gy_buf + (j & 7) * stride, stride * sizeof(*gy_buf));
     }
     if (j >= 4) {
       int k;

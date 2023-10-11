@@ -639,8 +639,8 @@ static void init_level_info(Vp9LevelInfo *level_info) {
   Vp9LevelStats *const level_stats = &level_info->level_stats;
   Vp9LevelSpec *const level_spec = &level_info->level_spec;
 
-  memset(level_stats, 0, sizeof(*level_stats));
-  memset(level_spec, 0, sizeof(*level_spec));
+  bzero(level_stats, sizeof(*level_stats));
+  bzero(level_spec, sizeof(*level_spec));
   level_spec->level = LEVEL_UNKNOWN;
   level_spec->min_altref_distance = INT_MAX;
 }
@@ -859,18 +859,18 @@ static void setup_frame(VP9_COMP *cpi) {
 static void vp9_enc_setup_mi(VP9_COMMON *cm) {
   int i;
   cm->mi = cm->mip + cm->mi_stride + 1;
-  memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+  bzero(cm->mip, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
   cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
   // Clear top border row
-  memset(cm->prev_mip, 0, sizeof(*cm->prev_mip) * cm->mi_stride);
+  bzero(cm->prev_mip, sizeof(*cm->prev_mip) * cm->mi_stride);
   // Clear left border column
   for (i = 1; i < cm->mi_rows + 1; ++i)
-    memset(&cm->prev_mip[i * cm->mi_stride], 0, sizeof(*cm->prev_mip));
+    bzero(&cm->prev_mip[i * cm->mi_stride], sizeof(*cm->prev_mip));
 
   cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
   cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 
-  memset(cm->mi_grid_base, 0,
+  bzero(cm->mi_grid_base,
          cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
@@ -1067,14 +1067,14 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   for (i = 0; i < MAX_LAG_BUFFERS; ++i) {
     vpx_free_frame_buffer(&cpi->svc.scaled_frames[i]);
   }
-  memset(&cpi->svc.scaled_frames[0], 0,
+  bzero(&cpi->svc.scaled_frames[0],
          MAX_LAG_BUFFERS * sizeof(cpi->svc.scaled_frames[0]));
 
   vpx_free_frame_buffer(&cpi->svc.scaled_temp);
-  memset(&cpi->svc.scaled_temp, 0, sizeof(cpi->svc.scaled_temp));
+  bzero(&cpi->svc.scaled_temp, sizeof(cpi->svc.scaled_temp));
 
   vpx_free_frame_buffer(&cpi->svc.empty_frame.img);
-  memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
+  bzero(&cpi->svc.empty_frame, sizeof(cpi->svc.empty_frame));
 
   vp9_free_svc_cyclic_refresh(cpi);
 }
@@ -1147,7 +1147,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
   // Disable and clear down for KF
   if (cm->frame_type == KEY_FRAME) {
     // Clear down the global segmentation map
-    memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
+    bzero(cpi->segmentation_map, cm->mi_rows * cm->mi_cols);
     seg->update_map = 0;
     seg->update_data = 0;
     cpi->static_mb_pct = 0;
@@ -1160,7 +1160,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
   } else if (cpi->refresh_alt_ref_frame) {
     // If this is an alt ref frame
     // Clear down the global segmentation map
-    memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
+    bzero(cpi->segmentation_map, cm->mi_rows * cm->mi_cols);
     seg->update_map = 0;
     seg->update_data = 0;
     cpi->static_mb_pct = 0;
@@ -1221,7 +1221,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
         vp9_disable_segmentation(seg);
 
-        memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
+        bzero(cpi->segmentation_map, cm->mi_rows * cm->mi_cols);
 
         seg->update_map = 0;
         seg->update_data = 0;
@@ -1443,7 +1443,7 @@ static void update_frame_size(VP9_COMP *cpi) {
   vp9_init_context_buffers(cm);
   vp9_init_macroblockd(cm, xd, NULL);
   cpi->td.mb.mbmi_ext_base = cpi->mbmi_ext_base;
-  memset(cpi->mbmi_ext_base, 0,
+  bzero(cpi->mbmi_ext_base,
          cm->mi_rows * cm->mi_cols * sizeof(*cpi->mbmi_ext_base));
 
   set_tile_limits(cpi);
@@ -4021,7 +4021,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
       cpi->resize_state != ORIG) {
     cpi->compute_source_sad_onepass = 0;
     if (cpi->content_state_sb_fd != NULL)
-      memset(cpi->content_state_sb_fd, 0,
+      bzero(cpi->content_state_sb_fd,
              (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1) *
                  sizeof(*cpi->content_state_sb_fd));
   }
@@ -4047,7 +4047,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     cpi->compute_source_sad_onepass = 0;
 
   if (frame_is_intra_only(cm) || cpi->resize_pending != 0) {
-    memset(cpi->consec_zero_mv, 0,
+    bzero(cpi->consec_zero_mv,
            cm->mi_rows * cm->mi_cols * sizeof(*cpi->consec_zero_mv));
   }
 
@@ -4242,7 +4242,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
       if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
         CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
         unsigned char *const seg_map = cpi->segmentation_map;
-        memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
+        bzero(seg_map, cm->mi_rows * cm->mi_cols);
         memset(cr->last_coded_q_map, MAXQ,
                cm->mi_rows * cm->mi_cols * sizeof(*cr->last_coded_q_map));
         cr->sb_index = 0;
@@ -5363,13 +5363,13 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
   xd->cur_buf = cpi->Source;
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     zero_pred = CONVERT_TO_BYTEPTR(zero_pred16);
-    memset(zero_pred16, 0, sizeof(*zero_pred16) * coeff_count);
+    bzero(zero_pred16, sizeof(*zero_pred16) * coeff_count);
   } else {
     zero_pred = zero_pred8;
-    memset(zero_pred8, 0, sizeof(*zero_pred8) * coeff_count);
+    bzero(zero_pred8, sizeof(*zero_pred8) * coeff_count);
   }
 #else
-  memset(zero_pred, 0, sizeof(*zero_pred) * coeff_count);
+  bzero(zero_pred, sizeof(*zero_pred) * coeff_count);
 #endif
 
   cpi->norm_wiener_variance = 0;
@@ -5596,7 +5596,7 @@ static void encode_frame_to_data_rate(
   vpx_clear_system_state();
 
 #if CONFIG_INTERNAL_STATS
-  memset(cpi->mode_chosen_counts, 0,
+  bzero(cpi->mode_chosen_counts,
          MAX_MODES * sizeof(*cpi->mode_chosen_counts));
 #endif
   // Backup to ensure consistency between recodes

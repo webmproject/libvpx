@@ -111,7 +111,7 @@ class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
   }
 
   void InitMem() {
-    memset(input_block_, 0, sizeof(*input_block_) * input_block_size_);
+    bzero(input_block_, sizeof(*input_block_) * input_block_size_);
     if (pixel_size_ == 1) {
       for (int j = 0; j < output_block_size_; ++j) {
         output_block_[j] = output_block_ref_[j] = rnd_.Rand16() & mask_;
@@ -276,13 +276,13 @@ TEST_P(PartialIDctTest, SingleExtremeCoeff) {
   const int16_t max_coeff = std::numeric_limits<int16_t>::max();
   const int16_t min_coeff = std::numeric_limits<int16_t>::min();
   for (int i = 0; i < last_nonzero_; ++i) {
-    memset(input_block_, 0, sizeof(*input_block_) * input_block_size_);
+    bzero(input_block_, sizeof(*input_block_) * input_block_size_);
     // Run once for min and once for max.
     for (int j = 0; j < 2; ++j) {
       const int coeff = j ? min_coeff : max_coeff;
 
-      memset(output_block_, 0, pixel_size_ * output_block_size_);
-      memset(output_block_ref_, 0, pixel_size_ * output_block_size_);
+      bzero(output_block_, pixel_size_ * output_block_size_);
+      bzero(output_block_ref_, pixel_size_ * output_block_size_);
       input_block_[vp9_default_scan_orders[tx_size_].scan[i]] = coeff;
 
       ASM_REGISTER_STATE_CHECK(

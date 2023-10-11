@@ -39,7 +39,7 @@ int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
     /* buffer_alloc isn't accessed by most functions.  Rather y_buffer,
       u_buffer and v_buffer point to buffer_alloc and are used.  Clear out
       all of this so that a freed pointer isn't inadvertently used */
-    memset(ybf, 0, sizeof(YV12_BUFFER_CONFIG));
+    bzero(ybf, sizeof(YV12_BUFFER_CONFIG));
   } else {
     return -1;
   }
@@ -73,7 +73,7 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width,
       // This memset is needed for fixing the issue of using uninitialized
       // value in msan test. It will cause a perf loss, so only do this for
       // msan test.
-      memset(ybf->buffer_alloc, 0, frame_size);
+      bzero(ybf->buffer_alloc, frame_size);
 #endif
 #endif
       ybf->buffer_alloc_sz = frame_size;
@@ -141,7 +141,7 @@ int vpx_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
     /* buffer_alloc isn't accessed by most functions.  Rather y_buffer,
       u_buffer and v_buffer point to buffer_alloc and are used.  Clear out
       all of this so that a freed pointer isn't inadvertently used */
-    memset(ybf, 0, sizeof(YV12_BUFFER_CONFIG));
+    bzero(ybf, sizeof(YV12_BUFFER_CONFIG));
   } else {
     return -1;
   }
@@ -225,7 +225,7 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
       // This memset is needed for fixing the issue of using uninitialized
       // value in msan test. It will cause a perf loss, so only do this for
       // msan test.
-      memset(ybf->buffer_alloc, 0, (size_t)frame_size);
+      bzero(ybf->buffer_alloc, (size_t)frame_size);
 #endif
 #endif
     } else if (frame_size > ybf->buffer_alloc_sz) {
@@ -242,7 +242,7 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
       // This memset is needed for fixing valgrind error from C loop filter
       // due to access uninitialized memory in frame border. It could be
       // removed if border is totally removed.
-      memset(ybf->buffer_alloc, 0, ybf->buffer_alloc_sz);
+      bzero(ybf->buffer_alloc, ybf->buffer_alloc_sz);
     }
 
     ybf->y_crop_width = width;

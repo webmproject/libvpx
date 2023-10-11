@@ -1305,7 +1305,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
   const vpx_rational64_t *const timestamp_ratio = &ctx->timestamp_ratio;
   size_t data_sz;
   vpx_codec_cx_pkt_t pkt;
-  memset(&pkt, 0, sizeof(pkt));
+  bzero(&pkt, sizeof(pkt));
 
   if (cpi == NULL) return VPX_CODEC_INVALID_PARAM;
 
@@ -1955,7 +1955,7 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
     const FRAME_INFO *frame_info = &cpi->frame_info;
     vpx_rc_config_t ratectrl_config;
     vpx_codec_err_t codec_status;
-    memset(&ratectrl_config, 0, sizeof(ratectrl_config));
+    bzero(&ratectrl_config, sizeof(ratectrl_config));
 
     ratectrl_config.frame_width = frame_info->frame_width;
     ratectrl_config.frame_height = frame_info->frame_height;

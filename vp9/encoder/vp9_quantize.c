@@ -32,8 +32,8 @@ void vp9_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   const int16_t *quant_ptr = mb_plane->quant_fp;
   const int16_t *scan = scan_order->scan;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   // Quantization pass: All coefficients with index >= zero_flag are
   // skippable. Note: zero_flag can be zero.
@@ -66,8 +66,8 @@ void vp9_highbd_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   const int16_t *quant_ptr = mb_plane->quant_fp;
   const int16_t *scan = scan_order->scan;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   // Quantization pass: All coefficients with index >= zero_flag are
   // skippable. Note: zero_flag can be zero.
@@ -98,8 +98,8 @@ void vp9_quantize_fp_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   const int16_t *quant_ptr = mb_plane->quant_fp;
   const int16_t *scan = scan_order->scan;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   for (i = 0; i < n_coeffs; i++) {
     const int rc = scan[i];
@@ -132,8 +132,8 @@ void vp9_highbd_quantize_fp_32x32_c(
   const int16_t *quant_ptr = mb_plane->quant_fp;
   const int16_t *scan = scan_order->scan;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   for (i = 0; i < n_coeffs; i++) {
     int abs_qcoeff = 0;

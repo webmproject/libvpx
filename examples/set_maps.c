@@ -64,7 +64,7 @@ static void set_roi_map(const vpx_codec_enc_cfg_t *cfg,
                         vpx_codec_ctx_t *codec) {
   unsigned int i;
   vpx_roi_map_t roi;
-  memset(&roi, 0, sizeof(roi));
+  bzero(&roi, sizeof(roi));
 
   roi.rows = (cfg->g_h + 15) / 16;
   roi.cols = (cfg->g_w + 15) / 16;
@@ -166,7 +166,7 @@ int main(int argc, char **argv) {
   exec_name = argv[0];
   if (argc != 6) die("Invalid number of arguments");
 
-  memset(&info, 0, sizeof(info));
+  bzero(&info, sizeof(info));
 
   encoder = get_vpx_encoder_by_name(argv[1]);
   if (encoder == NULL) {

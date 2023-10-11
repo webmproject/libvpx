@@ -28,10 +28,10 @@ class OnePassCbrSvc : public ::libvpx_test::EncoderTest {
       : EncoderTest(codec), base_speed_setting_(0), speed_setting_(0),
         superframe_count_(0), temporal_layer_id_(0), number_temporal_layers_(0),
         number_spatial_layers_(0) {
-    memset(&svc_params_, 0, sizeof(svc_params_));
-    memset(bits_in_buffer_model_, 0,
+    bzero(&svc_params_, sizeof(svc_params_));
+    bzero(bits_in_buffer_model_,
            sizeof(bits_in_buffer_model_[0]) * VPX_MAX_LAYERS);
-    memset(layer_target_avg_bandwidth_, 0,
+    bzero(layer_target_avg_bandwidth_,
            sizeof(layer_target_avg_bandwidth_[0]) * VPX_MAX_LAYERS);
   }
 

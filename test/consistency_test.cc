@@ -51,7 +51,7 @@ class ConsistencyTestBase : public ::testing::Test {
     ssim_array_ = new Ssimv[kDataBufferSize / 16];
   }
 
-  static void ClearSsim() { memset(ssim_array_, 0, kDataBufferSize / 16); }
+  static void ClearSsim() { bzero(ssim_array_, kDataBufferSize / 16); }
   static void TearDownTestSuite() {
     vpx_free(source_data_[0]);
     source_data_[0] = nullptr;

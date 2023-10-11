@@ -56,9 +56,9 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     spatial_layer_id_ = 0;
     temporal_layer_id_ = 0;
     update_pattern_ = 0;
-    memset(bits_in_buffer_model_, 0, sizeof(bits_in_buffer_model_));
-    memset(bits_total_, 0, sizeof(bits_total_));
-    memset(layer_target_avg_bandwidth_, 0, sizeof(layer_target_avg_bandwidth_));
+    bzero(bits_in_buffer_model_, sizeof(bits_in_buffer_model_));
+    bzero(bits_total_, sizeof(bits_total_));
+    bzero(layer_target_avg_bandwidth_, sizeof(layer_target_avg_bandwidth_));
     dynamic_drop_layer_ = false;
     single_layer_resize_ = false;
     change_bitrate_ = false;
@@ -299,8 +299,8 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
       CheckLayerRateTargeting(number_spatial_layers_, number_temporal_layers_,
                               0.78, 1.15);
 
-      memset(file_datarate_, 0, sizeof(file_datarate_));
-      memset(bits_total_, 0, sizeof(bits_total_));
+      bzero(file_datarate_, sizeof(file_datarate_));
+      bzero(bits_total_, sizeof(bits_total_));
       int64_t bits_in_buffer_model_tmp[VPX_MAX_LAYERS];
       last_pts_ref_ = last_pts_;
       // Set new target bitarate.
@@ -668,7 +668,7 @@ class DatarateOnePassCbrSvcSingleBR
       public ::libvpx_test::CodecTestWithParam<int> {
  public:
   DatarateOnePassCbrSvcSingleBR() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
-    memset(&svc_params_, 0, sizeof(svc_params_));
+    bzero(&svc_params_, sizeof(svc_params_));
   }
   ~DatarateOnePassCbrSvcSingleBR() override = default;
 
@@ -1158,7 +1158,7 @@ class DatarateOnePassCbrSvcMultiBR
       public ::libvpx_test::CodecTestWith2Params<int, int> {
  public:
   DatarateOnePassCbrSvcMultiBR() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
-    memset(&svc_params_, 0, sizeof(svc_params_));
+    bzero(&svc_params_, sizeof(svc_params_));
   }
   ~DatarateOnePassCbrSvcMultiBR() override = default;
 
@@ -1241,7 +1241,7 @@ class DatarateOnePassCbrSvcFrameDropMultiBR
  public:
   DatarateOnePassCbrSvcFrameDropMultiBR()
       : DatarateOnePassCbrSvc(GET_PARAM(0)) {
-    memset(&svc_params_, 0, sizeof(svc_params_));
+    bzero(&svc_params_, sizeof(svc_params_));
   }
   ~DatarateOnePassCbrSvcFrameDropMultiBR() override = default;
 
@@ -1353,7 +1353,7 @@ class DatarateOnePassCbrSvcInterLayerPredSingleBR
  public:
   DatarateOnePassCbrSvcInterLayerPredSingleBR()
       : DatarateOnePassCbrSvc(GET_PARAM(0)) {
-    memset(&svc_params_, 0, sizeof(svc_params_));
+    bzero(&svc_params_, sizeof(svc_params_));
   }
   ~DatarateOnePassCbrSvcInterLayerPredSingleBR() override = default;
 
@@ -1439,7 +1439,7 @@ class DatarateOnePassCbrSvcDenoiser
       public ::libvpx_test::CodecTestWith4Params<int, int, int, int> {
  public:
   DatarateOnePassCbrSvcDenoiser() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
-    memset(&svc_params_, 0, sizeof(svc_params_));
+    bzero(&svc_params_, sizeof(svc_params_));
   }
   ~DatarateOnePassCbrSvcDenoiser() override = default;
 
@@ -1497,7 +1497,7 @@ class DatarateOnePassCbrSvcSmallKF
       public ::libvpx_test::CodecTestWith2Params<int, int> {
  public:
   DatarateOnePassCbrSvcSmallKF() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
-    memset(&svc_params_, 0, sizeof(svc_params_));
+    bzero(&svc_params_, sizeof(svc_params_));
   }
   ~DatarateOnePassCbrSvcSmallKF() override = default;
 
@@ -1700,7 +1700,7 @@ class DatarateOnePassCbrSvcPostencodeDrop
       public ::libvpx_test::CodecTestWithParam<int> {
  public:
   DatarateOnePassCbrSvcPostencodeDrop() : DatarateOnePassCbrSvc(GET_PARAM(0)) {
-    memset(&svc_params_, 0, sizeof(svc_params_));
+    bzero(&svc_params_, sizeof(svc_params_));
   }
   ~DatarateOnePassCbrSvcPostencodeDrop() override = default;
 

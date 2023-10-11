@@ -33,5 +33,5 @@ void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *dest,
 
   vp8_short_idct4x4llm_c(input, dest, stride, dest, stride);
 
-  memset(input, 0, 32);
+  bzero(input, 32);
 }

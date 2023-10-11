@@ -1205,7 +1205,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
   int i;
   BEST_SEG_INFO bsi;
 
-  memset(&bsi, 0, sizeof(bsi));
+  bzero(&bsi, sizeof(bsi));
 
   bsi.segment_rd = best_rd;
   bsi.ref_mv = best_ref_mv;
@@ -1788,9 +1788,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
   best_mode.rd = INT_MAX;
   best_mode.yrd = INT_MAX;
   best_mode.intra_rd = INT_MAX;
-  memset(mode_mv_sb, 0, sizeof(mode_mv_sb));
-  memset(&best_mode.mbmode, 0, sizeof(best_mode.mbmode));
-  memset(&best_mode.bmodes, 0, sizeof(best_mode.bmodes));
+  bzero(mode_mv_sb, sizeof(mode_mv_sb));
+  bzero(&best_mode.mbmode, sizeof(best_mode.mbmode));
+  bzero(&best_mode.bmodes, sizeof(best_mode.bmodes));
 
   /* Setup search priorities */
   get_reference_search_order(cpi, ref_frame_map);

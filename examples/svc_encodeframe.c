@@ -84,7 +84,7 @@ static SvcInternal_t *get_svc_internal(SvcContext *svc_ctx) {
   if (svc_ctx->internal == NULL) {
     SvcInternal_t *const si = (SvcInternal_t *)malloc(sizeof(*si));
     if (si != NULL) {
-      memset(si, 0, sizeof(*si));
+      bzero(si, sizeof(*si));
     }
     svc_ctx->internal = si;
   }

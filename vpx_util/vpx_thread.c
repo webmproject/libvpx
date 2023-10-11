@@ -77,7 +77,7 @@ static void change_state(VPxWorker *const worker, VPxWorkerStatus new_status) {
 //------------------------------------------------------------------------------
 
 static void init(VPxWorker *const worker) {
-  memset(worker, 0, sizeof(*worker));
+  bzero(worker, sizeof(*worker));
   worker->status_ = NOT_OK;
 }
 
