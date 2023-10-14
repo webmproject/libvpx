@@ -2769,21 +2769,21 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
     int i;
     char filename[255];
 
-    sprintf(filename, "cx\\y%04d.raw", this_frame);
+    snprintf(filename, sizeof(int), "cx\\y%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->y_height; ++i)
         fwrite(frame->y_buffer + i * frame->y_stride, frame->y_width, 1, yframe);
 
     fclose(yframe);
-    sprintf(filename, "cx\\u%04d.raw", this_frame);
+    snprintf(filename, sizeof(int), "cx\\u%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->uv_height; ++i)
         fwrite(frame->u_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
 
     fclose(yframe);
-    sprintf(filename, "cx\\v%04d.raw", this_frame);
+    snprintf(filename, sizeof(int), "cx\\v%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->uv_height; ++i)
@@ -4728,7 +4728,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     {
         char filename[512];
         FILE *recon_file;
-        sprintf(filename, "enc%04d.yuv", (int) cm->current_video_frame);
+        snprintf(filename, sizeof(int), "enc%04d.yuv", (int) cm->current_video_frame);
         recon_file = fopen(filename, "wb");
         fwrite(cm->yv12_fb[cm->lst_fb_idx].buffer_alloc,
                cm->yv12_fb[cm->lst_fb_idx].frame_size, 1, recon_file);
