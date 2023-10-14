@@ -4569,7 +4569,8 @@ int Track::Info::CopyStr(char* Info::*str, Info& dst_) const {
   if (dst == NULL)
     return -1;
 
-  strcpy(dst, src);
+  memcpy(dst, src, len);
+  dst[len] = '\0';
 
   return 0;
 }
