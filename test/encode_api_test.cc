@@ -409,6 +409,29 @@ TEST(EncodeAPI, ConfigResizeChangeThreadCount) {
 }
 
 #if CONFIG_VP9_ENCODER
+TEST(EncodeAPI, ConfigLargeTargetBitrateVp9) {
+  constexpr int kWidth = 16383;
+  constexpr int kHeight = 16383;
+  constexpr auto *iface = &vpx_codec_vp9_cx_algo;
+  SCOPED_TRACE(vpx_codec_iface_name(iface));
+  vpx_codec_enc_cfg_t cfg = {};
+  struct Encoder {
+    ~Encoder() { EXPECT_EQ(vpx_codec_destroy(&ctx), VPX_CODEC_OK); }
+    vpx_codec_ctx_t ctx = {};
+  } enc;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  // The following setting will cause avg_frame_bandwidth in rate control to be
+  // larger than INT_MAX
+  cfg.rc_target_bitrate = INT_MAX;
+  cfg.g_timebase.den = 1;
+  cfg.g_timebase.num = 10;
+  EXPECT_NO_FATAL_FAILURE(InitCodec(*iface, kWidth, kHeight, &enc.ctx, &cfg));
+  EXPECT_NO_FATAL_FAILURE(EncodeWithConfig(cfg, &enc.ctx))
+      << "target bitrate: " << cfg.rc_target_bitrate << " framerate: "
+      << static_cast<double>(cfg.g_timebase.den) / cfg.g_timebase.num;
+}
+
 class EncodeApiGetTplStatsTest
     : public ::libvpx_test::EncoderTest,
       public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {
