@@ -37,6 +37,7 @@ struct VpxRateControlRtcConfig {
     aq_mode = 0;
     layer_target_bitrate[0] = static_cast<int>(target_bandwidth);
     ts_rate_decimator[0] = 1;
+    frame_drop_thresh = 0;
   }
 
   int width;
@@ -60,6 +61,7 @@ struct VpxRateControlRtcConfig {
   // vbr, cbr
   enum vpx_rc_mode rc_mode;
   int aq_mode;
+  int frame_drop_thresh;
 };
 }  // namespace libvpx
 #endif  // VPX_VPX_INTERNAL_VPX_RATECTRL_RTC_H_

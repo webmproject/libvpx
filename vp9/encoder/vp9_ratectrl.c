@@ -260,7 +260,7 @@ void vp9_update_buffer_level_preencode(VP9_COMP *cpi) {
 // for the layered rate control which involves cumulative buffer levels for
 // the temporal layers. Allow for using the timestamp(pts) delta for the
 // framerate when the set_ref_frame_config is used.
-static void update_buffer_level_svc_preencode(VP9_COMP *cpi) {
+void vp9_update_buffer_level_svc_preencode(VP9_COMP *cpi) {
   SVC *const svc = &cpi->svc;
   int i;
   // Set this to 1 to use timestamp delta for "framerate" under
@@ -2445,7 +2445,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     vp9_cyclic_refresh_update_parameters(cpi);
 
   vp9_rc_set_frame_target(cpi, target);
-  if (cm->show_frame) update_buffer_level_svc_preencode(cpi);
+  if (cm->show_frame) vp9_update_buffer_level_svc_preencode(cpi);
 
   if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC && svc->single_layer_svc == 1 &&
       svc->spatial_layer_id == svc->first_spatial_layer_to_encode &&

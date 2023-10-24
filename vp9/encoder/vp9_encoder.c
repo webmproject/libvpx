@@ -5517,26 +5517,7 @@ static void encode_frame_to_data_rate(
   struct segmentation *const seg = &cm->seg;
   TX_SIZE t;
 
-  // SVC: skip encoding of enhancement layer if the layer target bandwidth = 0.
-  // No need to set svc.skip_enhancement_layer if whole superframe will be
-  // dropped.
-  if (cpi->use_svc && cpi->svc.spatial_layer_id > 0 &&
-      cpi->oxcf.target_bandwidth == 0 &&
-      !(cpi->svc.framedrop_mode != LAYER_DROP &&
-        (cpi->svc.framedrop_mode != CONSTRAINED_FROM_ABOVE_DROP ||
-         cpi->svc
-             .force_drop_constrained_from_above[cpi->svc.number_spatial_layers -
-                                                1]) &&
-        cpi->svc.drop_spatial_layer[0])) {
-    cpi->svc.skip_enhancement_layer = 1;
-    vp9_rc_postencode_update_drop_frame(cpi);
-    cpi->ext_refresh_frame_flags_pending = 0;
-    cpi->last_frame_dropped = 1;
-    cpi->svc.last_layer_dropped[cpi->svc.spatial_layer_id] = 1;
-    cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id] = 1;
-    vp9_inc_frame_in_layer(cpi);
-    return;
-  }
+  if (vp9_svc_check_skip_enhancement_layer(cpi)) return;
 
   set_ext_overrides(cpi);
   vpx_clear_system_state();
