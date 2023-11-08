@@ -1416,7 +1416,7 @@ void vp8_change_config(VP8_COMP *cpi, const VP8_CONFIG *oxcf) {
   VP8_COMMON *cm = &cpi->common;
   int last_w, last_h;
   unsigned int prev_number_of_layers;
-  unsigned int raw_target_rate;
+  double raw_target_rate;
 
   if (!cpi) return;
 
@@ -1557,10 +1557,10 @@ void vp8_change_config(VP8_COMP *cpi, const VP8_CONFIG *oxcf) {
     cpi->oxcf.maximum_buffer_size_in_ms = 240000;
   }
 
-  raw_target_rate = (unsigned int)((int64_t)cpi->oxcf.Width * cpi->oxcf.Height *
-                                   8 * 3 * cpi->framerate / 1000);
+  raw_target_rate = ((int64_t)cpi->oxcf.Width * cpi->oxcf.Height * 8 * 3 *
+                     cpi->framerate / 1000.0);
   if (cpi->oxcf.target_bandwidth > raw_target_rate)
-    cpi->oxcf.target_bandwidth = raw_target_rate;
+    cpi->oxcf.target_bandwidth = (unsigned int)raw_target_rate;
   /* Convert target bandwidth from Kbit/s to Bit/s */
   cpi->oxcf.target_bandwidth *= 1000;
 
