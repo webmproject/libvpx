@@ -643,7 +643,6 @@ process_toolchain() {
     if enabled gcc; then
         enabled werror && check_add_cflags -Werror
         check_add_cflags -Wall
-        check_add_cflags -Wdeclaration-after-statement
         check_add_cflags -Wdisabled-optimization
         check_add_cflags -Wextra-semi
         check_add_cflags -Wextra-semi-stmt
@@ -670,9 +669,8 @@ process_toolchain() {
         if enabled mips || [ -z "${INLINE}" ]; then
           enabled extra_warnings || check_add_cflags -Wno-unused-function
         fi
-        # Enforce c89 for c files. Don't be too strict about it though. Allow
-        # gnu extensions like "//" for comments.
-        check_cflags -std=gnu89 && add_cflags_only -std=gnu89
+        # Enforce C99 for C files. Allow GNU extensions.
+        check_cflags -std=gnu99 && add_cflags_only -std=gnu99
         # Avoid this warning for third_party C++ sources. Some reorganization
         # would be needed to apply this only to test/*.cc.
         check_cflags -Wshorten-64-to-32 && add_cflags_only -Wshorten-64-to-32
