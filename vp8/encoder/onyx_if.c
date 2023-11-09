@@ -1290,7 +1290,7 @@ void vp8_new_framerate(VP8_COMP *cpi, double framerate) {
   }
 }
 
-static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf) {
+static void init_config(VP8_COMP *cpi, const VP8_CONFIG *oxcf) {
   VP8_COMMON *cm = &cpi->common;
 
   cpi->oxcf = *oxcf;
@@ -1739,7 +1739,7 @@ static void cal_mvsadcosts(int *mvsadcost[2]) {
   } while (++i <= mvfp_max);
 }
 
-struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf) {
+struct VP8_COMP *vp8_create_compressor(const VP8_CONFIG *oxcf) {
   int i;
 
   VP8_COMP *cpi;

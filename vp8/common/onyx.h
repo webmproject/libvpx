@@ -236,7 +236,7 @@ typedef struct {
 
 void vp8_initialize();
 
-struct VP8_COMP *vp8_create_compressor(VP8_CONFIG *oxcf);
+struct VP8_COMP *vp8_create_compressor(const VP8_CONFIG *oxcf);
 void vp8_remove_compressor(struct VP8_COMP **comp);
 
 void vp8_init_config(struct VP8_COMP *onyx, VP8_CONFIG *oxcf);
