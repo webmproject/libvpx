@@ -215,7 +215,7 @@ enum {
 typedef struct {
   /* Layer configuration */
   double framerate;
-  int target_bandwidth;
+  int target_bandwidth; /* bits per second */
 
   /* Layer specific coding parameters */
   int64_t starting_buffer_level;
@@ -438,7 +438,7 @@ typedef struct VP8_COMP {
   int kf_boost;
   int last_boost;
 
-  int target_bandwidth;
+  int target_bandwidth; /* bits per second */
   struct vpx_codec_pkt_list *output_pkt_list;
 
 #if 0
