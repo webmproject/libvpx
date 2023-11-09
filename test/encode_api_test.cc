@@ -122,6 +122,62 @@ TEST(EncodeAPI, ImageSizeSetting) {
 
   vpx_codec_destroy(&enc);
 }
+
+// Verifies the fix for a float-cast-overflow in vp8_change_config().
+//
+// Causes cpi->framerate to become the largest possible value (10,000,000) in
+// VP8 by setting cfg.g_timebase to 1/10000000 and passing a duration of 1 to
+// vpx_codec_encode().
+TEST(EncodeAPI, HugeFramerateVp8) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_w = 271;
+  cfg.g_h = 1080;
+  cfg.g_timebase.num = 1;
+  // Largest value (VP8's TICKS_PER_SEC) such that frame duration is nonzero (1
+  // tick).
+  cfg.g_timebase.den = 10000000;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_end_usage = VPX_CBR;
+
+  vpx_codec_ctx_t enc;
+  // Before we encode the first frame, cpi->framerate is set to a guess (the
+  // reciprocal of cfg.g_timebase). If this guess doesn't seem reasonable
+  // (> 180), cpi->framerate is set to 30.
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, -12), VPX_CODEC_OK);
+
+  vpx_image_t *const image =
+      vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h, 1);
+  ASSERT_NE(image, nullptr);
+
+  for (unsigned int i = 0; i < image->d_h; ++i) {
+    memset(image->planes[0] + i * image->stride[0], 128, image->d_w);
+  }
+  const unsigned int uv_h = (image->d_h + 1) / 2;
+  const unsigned int uv_w = (image->d_w + 1) / 2;
+  for (unsigned int i = 0; i < uv_h; ++i) {
+    memset(image->planes[1] + i * image->stride[1], 128, uv_w);
+    memset(image->planes[2] + i * image->stride[2], 128, uv_w);
+  }
+
+  // Encode a frame.
+  const unsigned long deadline = VPX_DL_REALTIME;
+  // Up to this point cpi->framerate is 30. Now pass a duration of only 1. This
+  // causes cpi->framerate to become 10,000,000.
+  ASSERT_EQ(vpx_codec_encode(&enc, image, 0, 1, 0, deadline), VPX_CODEC_OK);
+
+  // Change to the same config. Since cpi->framerate is now huge, when it is
+  // used to calculate raw_target_rate (bit rate of uncompressed frames), the
+  // result is likely to overflow an unsigned int.
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif
 
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
