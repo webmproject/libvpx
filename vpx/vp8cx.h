@@ -166,6 +166,7 @@ enum vp8e_enc_control_id {
    *
    * \note Valid range for VP8: -16..16
    * \note Valid range for VP9: -9..9
+   * \note A negative value (-n) is treated as its absolute value (n) in VP9.
    *
    * Supported in codecs: VP8, VP9
    */
