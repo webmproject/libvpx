@@ -21,6 +21,9 @@
 
 #include "./vpx_config.h"
 #include "vpx/vp8cx.h"
+#include "vpx/vpx_codec.h"
+#include "vpx/vpx_encoder.h"
+#include "vpx/vpx_image.h"
 #include "vpx/vpx_tpl.h"
 
 namespace {
@@ -165,10 +168,10 @@ TEST(EncodeAPI, HugeFramerateVp8) {
   }
 
   // Encode a frame.
-  const unsigned long deadline = VPX_DL_REALTIME;
   // Up to this point cpi->framerate is 30. Now pass a duration of only 1. This
   // causes cpi->framerate to become 10,000,000.
-  ASSERT_EQ(vpx_codec_encode(&enc, image, 0, 1, 0, deadline), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_encode(&enc, image, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
 
   // Change to the same config. Since cpi->framerate is now huge, when it is
   // used to calculate raw_target_rate (bit rate of uncompressed frames), the
