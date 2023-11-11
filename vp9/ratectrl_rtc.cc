@@ -131,6 +131,7 @@ bool VP9RateControlRTC::UpdateRateControl(
   oxcf->under_shoot_pct = rc_cfg.undershoot_pct;
   oxcf->over_shoot_pct = rc_cfg.overshoot_pct;
   oxcf->drop_frames_water_mark = rc_cfg.frame_drop_thresh;
+  oxcf->content = rc_cfg.is_screen ? VP9E_CONTENT_SCREEN : VP9E_CONTENT_DEFAULT;
   oxcf->ss_number_layers = rc_cfg.ss_number_layers;
   oxcf->ts_number_layers = rc_cfg.ts_number_layers;
   oxcf->temporal_layering_mode = (VP9E_TEMPORAL_LAYERING_MODE)(

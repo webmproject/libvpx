@@ -680,7 +680,8 @@ static int adjust_q_cbr(const VP9_COMP *cpi, int q) {
     else
       q = qclamp;
   }
-  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN)
+  if (cpi->oxcf.content == VP9E_CONTENT_SCREEN &&
+      cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
     vp9_cyclic_refresh_limit_q(cpi, &q);
   return VPXMAX(VPXMIN(q, cpi->rc.worst_quality), cpi->rc.best_quality);
 }
