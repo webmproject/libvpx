@@ -33,6 +33,11 @@ struct VP8FrameParamsQpRTC {
   int temporal_layer_id;
 };
 
+enum class FrameDropDecision {
+  kOk,    // Frame is encoded.
+  kDrop,  // Frame is dropped.
+};
+
 class VP8RateControlRTC {
  public:
   static std::unique_ptr<VP8RateControlRTC> Create(
@@ -46,7 +51,10 @@ class VP8RateControlRTC {
   // level is calculated from frame qp.
   int GetLoopfilterLevel() const;
   // int GetLoopfilterLevel() const;
-  void ComputeQP(const VP8FrameParamsQpRTC &frame_params);
+  // ComputeQP returns the QP is the frame is not dropped (kOk return),
+  // otherwise it returns kDrop and subsequent GetQP and PostEncodeUpdate
+  // are not to be called.
+  FrameDropDecision ComputeQP(const VP8FrameParamsQpRTC &frame_params);
   // Feedback to rate control with the size of current encoded frame
   void PostEncodeUpdate(uint64_t encoded_frame_size);
 
