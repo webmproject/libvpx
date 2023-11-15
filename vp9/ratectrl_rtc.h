@@ -100,7 +100,7 @@ class VP9RateControlRTC {
   int GetQP() const;
   int GetLoopfilterLevel() const;
   bool GetSegmentationData(VP9SegmentationData *segmentation_data) const;
-  // ComputeQP returns the QP is the frame is not dropped (kOk return),
+  // ComputeQP computes the QP if the frame is not dropped (kOk return),
   // otherwise it returns kDrop and subsequent GetQP and PostEncodeUpdate
   // are not to be called (vp9_rc_postencode_update_drop_frame is already
   // called via ComputeQP if drop is decided).
