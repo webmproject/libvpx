@@ -50,8 +50,7 @@ class VP8RateControlRTC {
   // GetLoopfilterLevel() needs to be called after ComputeQP() since loopfilter
   // level is calculated from frame qp.
   int GetLoopfilterLevel() const;
-  // int GetLoopfilterLevel() const;
-  // ComputeQP returns the QP is the frame is not dropped (kOk return),
+  // ComputeQP computes the QP if the frame is not dropped (kOk return),
   // otherwise it returns kDrop and subsequent GetQP and PostEncodeUpdate
   // are not to be called.
   FrameDropDecision ComputeQP(const VP8FrameParamsQpRTC &frame_params);
