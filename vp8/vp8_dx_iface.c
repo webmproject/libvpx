@@ -20,6 +20,7 @@
 #include "vpx_version.h"
 #include "common/alloccommon.h"
 #include "common/common.h"
+#include "common/onyxc_int.h"
 #include "common/onyxd.h"
 #include "decoder/onyxd_int.h"
 #include "vpx_dsp/vpx_dsp_common.h"
