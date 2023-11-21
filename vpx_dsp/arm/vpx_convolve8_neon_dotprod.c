@@ -149,26 +149,72 @@ void vpx_convolve8_2d_horiz_neon_dotprod(const uint8_t *src,
   }
 }
 
-void vpx_convolve8_horiz_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
-                                      uint8_t *dst, ptrdiff_t dst_stride,
-                                      const InterpKernel *filter, int x0_q4,
-                                      int x_step_q4, int y0_q4, int y_step_q4,
-                                      int w, int h) {
-  const int8x8_t filters = vmovn_s16(vld1q_s16(filter[x0_q4]));
-  const int16x8_t correct_tmp = vmulq_n_s16(vld1q_s16(filter[x0_q4]), 128);
-  const int32x4_t correction = vdupq_n_s32((int32_t)vaddvq_s16(correct_tmp));
-  const uint8x16_t range_limit = vdupq_n_u8(128);
+static INLINE void vpx_convolve_4tap_horiz_neon_dotprod(
+    const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
+    ptrdiff_t dst_stride, int w, int h, const int8x8_t filter,
+    const int32x4_t correction, const uint8x16_t range_limit) {
   uint8x16_t s0, s1, s2, s3;
 
-  assert((intptr_t)dst % 4 == 0);
-  assert(dst_stride % 4 == 0);
-  assert(x_step_q4 == 16);
+  if (w == 4) {
+    const uint8x16_t perm_tbl = vld1q_u8(dot_prod_permute_tbl);
+    do {
+      int16x4_t t0, t1, t2, t3;
+      uint8x8_t d01, d23;
 
-  (void)x_step_q4;
-  (void)y0_q4;
-  (void)y_step_q4;
+      load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
 
-  src -= 3;
+      t0 = convolve4_4_sdot(s0, filter, correction, range_limit, perm_tbl);
+      t1 = convolve4_4_sdot(s1, filter, correction, range_limit, perm_tbl);
+      t2 = convolve4_4_sdot(s2, filter, correction, range_limit, perm_tbl);
+      t3 = convolve4_4_sdot(s3, filter, correction, range_limit, perm_tbl);
+      /* We halved the filter values so -1 from right shift. */
+      d01 = vqrshrun_n_s16(vcombine_s16(t0, t1), FILTER_BITS - 1);
+      d23 = vqrshrun_n_s16(vcombine_s16(t2, t3), FILTER_BITS - 1);
+
+      store_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_u8(dst + 2 * dst_stride, dst_stride, d23);
+
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h != 0);
+  } else {
+    const uint8x16x2_t perm_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
+    const uint8_t *s;
+    uint8_t *d;
+    int width;
+    uint8x8_t d0, d1, d2, d3;
+
+    do {
+      width = w;
+      s = src;
+      d = dst;
+      do {
+        load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
+
+        d0 = convolve4_8_sdot(s0, filter, correction, range_limit, perm_tbl);
+        d1 = convolve4_8_sdot(s1, filter, correction, range_limit, perm_tbl);
+        d2 = convolve4_8_sdot(s2, filter, correction, range_limit, perm_tbl);
+        d3 = convolve4_8_sdot(s3, filter, correction, range_limit, perm_tbl);
+
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
+
+        s += 8;
+        d += 8;
+        width -= 8;
+      } while (width != 0);
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h != 0);
+  }
+}
+
+static INLINE void vpx_convolve_8tap_horiz_neon_dotprod(
+    const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
+    ptrdiff_t dst_stride, int w, int h, const int8x8_t filter,
+    const int32x4_t correction, const uint8x16_t range_limit) {
+  uint8x16_t s0, s1, s2, s3;
 
   if (w == 4) {
     const uint8x16x2_t perm_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
@@ -178,10 +224,10 @@ void vpx_convolve8_horiz_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
 
       load_u8_16x4(src, src_stride, &s0, &s1, &s2, &s3);
 
-      t0 = convolve8_4_sdot(s0, filters, correction, range_limit, perm_tbl);
-      t1 = convolve8_4_sdot(s1, filters, correction, range_limit, perm_tbl);
-      t2 = convolve8_4_sdot(s2, filters, correction, range_limit, perm_tbl);
-      t3 = convolve8_4_sdot(s3, filters, correction, range_limit, perm_tbl);
+      t0 = convolve8_4_sdot(s0, filter, correction, range_limit, perm_tbl);
+      t1 = convolve8_4_sdot(s1, filter, correction, range_limit, perm_tbl);
+      t2 = convolve8_4_sdot(s2, filter, correction, range_limit, perm_tbl);
+      t3 = convolve8_4_sdot(s3, filter, correction, range_limit, perm_tbl);
       d01 = vqrshrun_n_s16(vcombine_s16(t0, t1), FILTER_BITS);
       d23 = vqrshrun_n_s16(vcombine_s16(t2, t3), FILTER_BITS);
 
@@ -206,10 +252,10 @@ void vpx_convolve8_horiz_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
       do {
         load_u8_16x4(s, src_stride, &s0, &s1, &s2, &s3);
 
-        d0 = convolve8_8_sdot(s0, filters, correction, range_limit, perm_tbl);
-        d1 = convolve8_8_sdot(s1, filters, correction, range_limit, perm_tbl);
-        d2 = convolve8_8_sdot(s2, filters, correction, range_limit, perm_tbl);
-        d3 = convolve8_8_sdot(s3, filters, correction, range_limit, perm_tbl);
+        d0 = convolve8_8_sdot(s0, filter, correction, range_limit, perm_tbl);
+        d1 = convolve8_8_sdot(s1, filter, correction, range_limit, perm_tbl);
+        d2 = convolve8_8_sdot(s2, filter, correction, range_limit, perm_tbl);
+        d3 = convolve8_8_sdot(s3, filter, correction, range_limit, perm_tbl);
 
         store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
 
@@ -221,6 +267,43 @@ void vpx_convolve8_horiz_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
       dst += 4 * dst_stride;
       h -= 4;
     } while (h != 0);
+  }
+}
+
+void vpx_convolve8_horiz_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
+                                      uint8_t *dst, ptrdiff_t dst_stride,
+                                      const InterpKernel *filter, int x0_q4,
+                                      int x_step_q4, int y0_q4, int y_step_q4,
+                                      int w, int h) {
+  const int8x8_t x_filter_8tap = vmovn_s16(vld1q_s16(filter[x0_q4]));
+  const int32x4_t correction_8tap =
+      vdupq_n_s32(vaddlvq_s16(vshll_n_s8(x_filter_8tap, FILTER_BITS)));
+  const uint8x16_t range_limit = vdupq_n_u8(128);
+
+  assert((intptr_t)dst % 4 == 0);
+  assert(dst_stride % 4 == 0);
+  assert(x_step_q4 == 16);
+
+  (void)x_step_q4;
+  (void)y0_q4;
+  (void)y_step_q4;
+
+  if (vpx_get_filter_taps(filter[x0_q4]) <= 4) {
+    /* All 4-tap and bilinear filter values are even, so halve them to reduce
+     * intermediate precision requirements. Also slide the filter values so the
+     * the 4 taps exist in the first 4 elements of the vector.
+     */
+    const int8x8_t x_filter_4tap =
+        vext_s8(vshr_n_s8(x_filter_8tap, 1), vdup_n_s8(0), 2);
+    const int32x4_t correction_4tap = vshrq_n_s32(correction_8tap, 1);
+    vpx_convolve_4tap_horiz_neon_dotprod(src - 1, src_stride, dst, dst_stride,
+                                         w, h, x_filter_4tap, correction_4tap,
+                                         range_limit);
+
+  } else {
+    vpx_convolve_8tap_horiz_neon_dotprod(src - 3, src_stride, dst, dst_stride,
+                                         w, h, x_filter_8tap, correction_8tap,
+                                         range_limit);
   }
 }
 
