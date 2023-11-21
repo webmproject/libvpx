@@ -3052,14 +3052,12 @@ static void set_partition_range(VP9_COMMON *cm, MACROBLOCKD *xd, int mi_row,
   min_size = BLOCK_64X64;
   max_size = BLOCK_4X4;
 
-  if (prev_mi) {
-    for (idy = 0; idy < mi_height; ++idy) {
-      for (idx = 0; idx < mi_width; ++idx) {
-        mi = prev_mi[idy * cm->mi_stride + idx];
-        bs = mi ? mi->sb_type : bsize;
-        min_size = VPXMIN(min_size, bs);
-        max_size = VPXMAX(max_size, bs);
-      }
+  for (idy = 0; idy < mi_height; ++idy) {
+    for (idx = 0; idx < mi_width; ++idx) {
+      mi = prev_mi[idy * cm->mi_stride + idx];
+      bs = mi ? mi->sb_type : bsize;
+      min_size = VPXMIN(min_size, bs);
+      max_size = VPXMAX(max_size, bs);
     }
   }
 
@@ -3205,7 +3203,7 @@ static int ml_pruning_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       left_par = 1;
   }
 
-  if (prev_mi) {
+  if (prev_mi[0]) {
     context_size = prev_mi[0]->sb_type;
     if (context_size < bsize)
       last_par = 2;

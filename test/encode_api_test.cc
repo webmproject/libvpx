@@ -496,6 +496,91 @@ TEST(EncodeAPI, ConfigLargeTargetBitrateVp9) {
 }
 #endif  // VPX_ARCH_X86_64 || VPX_ARCH_AARCH64
 
+vpx_image_t *CreateImage(const unsigned int width, const unsigned int height) {
+  vpx_image_t *image =
+      vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, width, height, 1);
+  if (!image) return image;
+
+  for (unsigned int i = 0; i < image->d_h; ++i) {
+    memset(image->planes[0] + i * image->stride[0], 128, image->d_w);
+  }
+  const unsigned int uv_h = (image->d_h + 1) / 2;
+  const unsigned int uv_w = (image->d_w + 1) / 2;
+  for (unsigned int i = 0; i < uv_h; ++i) {
+    memset(image->planes[1] + i * image->stride[1], 128, uv_w);
+    memset(image->planes[2] + i * image->stride[2], 128, uv_w);
+  }
+
+  return image;
+}
+
+// This is a test case from clusterfuzz.
+TEST(EncodeAPI, PrevMiCheckNullptr) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+
+  struct Config {
+    unsigned int thread;
+    unsigned int width;
+    unsigned int height;
+    vpx_rc_mode end_usage;
+    unsigned long deadline;
+  };
+  struct Config init_config = { 0, 1554, 644, VPX_VBR, 1 };
+  unsigned long deadline = init_config.deadline;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
+            VPX_CODEC_OK);
+  cfg.g_threads = init_config.thread;
+  cfg.g_w = init_config.width;
+  cfg.g_h = init_config.height;
+  cfg.g_timebase.num = 1;
+  cfg.g_timebase.den = 1000 * 1000;  // microseconds
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_end_usage = init_config.end_usage;
+  cfg.rc_min_quantizer = 2;
+  cfg.rc_max_quantizer = 58;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 0), VPX_CODEC_OK);
+
+  const vpx_codec_cx_pkt_t *pkt;
+
+  int frame_index = 0;
+  // First step: encode, without forcing KF.
+  vpx_image_t *image = CreateImage(cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+  ASSERT_EQ(vpx_codec_encode(&enc, image, frame_index, 1, 0, deadline),
+            VPX_CODEC_OK);
+  frame_index++;
+  vpx_codec_iter_t iter = nullptr;
+  while ((pkt = vpx_codec_get_cx_data(&enc, &iter)) != nullptr) {
+    ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
+  }
+  vpx_img_free(image);
+  // Second step: change config
+  struct Config encode_config = { 0, 1131, 644, VPX_CBR, 1000000 };
+  cfg.g_threads = encode_config.thread;
+  cfg.g_w = encode_config.width;
+  cfg.g_h = encode_config.height;
+  cfg.rc_end_usage = encode_config.end_usage;
+  deadline = encode_config.deadline;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
+      << vpx_codec_error_detail(&enc);
+  // Third step: encode, without forcing KF
+  image = CreateImage(cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+  ASSERT_EQ(vpx_codec_encode(&enc, image, frame_index, 1, 0, deadline),
+            VPX_CODEC_OK);
+  frame_index++;
+  while ((pkt = vpx_codec_get_cx_data(&enc, &iter)) != nullptr) {
+    ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
+  }
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
 class EncodeApiGetTplStatsTest
     : public ::libvpx_test::EncoderTest,
       public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {
