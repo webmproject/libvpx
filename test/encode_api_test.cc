@@ -667,6 +667,100 @@ TEST(EncodeAPI, MultipleChangeConfigResize) {
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 
+// This is a test case from clusterfuzz: based on b/310663186.
+// Encode set of frames while varying the deadline on the fly from
+// good to realtime to best and back to realtime.
+TEST(EncodeAPI, DynamicDeadlineChange) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+
+  struct Config {
+    unsigned int thread;
+    unsigned int width;
+    unsigned int height;
+    vpx_rc_mode end_usage;
+    unsigned long deadline;
+  };
+
+  // Set initial config, in particular set deadline to GOOD mode.
+  struct Config config = { 0, 1, 1, VPX_VBR, VPX_DL_GOOD_QUALITY };
+  unsigned long deadline = config.deadline;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
+            VPX_CODEC_OK);
+  cfg.g_threads = config.thread;
+  cfg.g_w = config.width;
+  cfg.g_h = config.height;
+  cfg.g_timebase.num = 1;
+  cfg.g_timebase.den = 1000 * 1000;  // microseconds
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_end_usage = config.end_usage;
+  cfg.rc_min_quantizer = 2;
+  cfg.rc_max_quantizer = 58;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  // Use realtime speed: 5 to 9.
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 5), VPX_CODEC_OK);
+  int frame_index = 0;
+
+  // Encode 1st frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
+  frame_index++;
+
+  // Encode 2nd frame, delta frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
+  frame_index++;
+
+  // Change config: change deadline to REALTIME.
+  config = { 0, 1, 1, VPX_VBR, VPX_DL_REALTIME };
+  deadline = config.deadline;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
+      << vpx_codec_error_detail(&enc);
+
+  // Encode 3rd frame with new config, set key frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
+  frame_index++;
+
+  // Encode 4th frame with same config, delta frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
+  frame_index++;
+
+  // Encode 5th frame with same config, key frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
+  frame_index++;
+
+  // Change config: change deadline to BEST.
+  config = { 0, 1, 1, VPX_VBR, VPX_DL_BEST_QUALITY };
+  deadline = config.deadline;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
+      << vpx_codec_error_detail(&enc);
+
+  // Encode 6th frame with new config, set delta frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
+  frame_index++;
+
+  // Change config: change deadline to REALTIME.
+  config = { 0, 1, 1, VPX_VBR, VPX_DL_REALTIME };
+  deadline = config.deadline;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
+      << vpx_codec_error_detail(&enc);
+
+  // Encode 7th frame with new config, set delta frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
+  frame_index++;
+
+  // Encode 8th frame with new config, set key frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
+  frame_index++;
+
+  // Encode 9th frame with new config, set delta frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
+  frame_index++;
+
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
 class EncodeApiGetTplStatsTest
     : public ::libvpx_test::EncoderTest,
       public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {

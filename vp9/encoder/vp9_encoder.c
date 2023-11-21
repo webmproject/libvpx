@@ -5535,6 +5535,11 @@ static void encode_frame_to_data_rate(
     set_ref_sign_bias(cpi);
   }
 
+  // On the very first frame set the deadline_mode_previous_frame to
+  // the current mode.
+  if (cpi->common.current_video_frame == 0)
+    cpi->deadline_mode_previous_frame = cpi->oxcf.mode;
+
   // Set default state for segment based loop filter update flags.
   cm->lf.mode_ref_delta_update = 0;
 
