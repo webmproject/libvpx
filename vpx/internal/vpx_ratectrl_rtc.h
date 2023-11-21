@@ -17,6 +17,11 @@ namespace libvpx {
 
 enum class RcFrameType { kKeyFrame = 0, kInterFrame = 1 };
 
+enum class FrameDropDecision {
+  kOk,    // Frame is encoded.
+  kDrop,  // Frame is dropped.
+};
+
 struct VpxRateControlRtcConfig {
  public:
   VpxRateControlRtcConfig() {

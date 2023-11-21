@@ -64,11 +64,6 @@ struct VP9SegmentationData {
   size_t delta_q_size;
 };
 
-enum class FrameDropDecision {
-  kOk,    // Frame is encoded.
-  kDrop,  // Frame is dropped.
-};
-
 // This interface allows using VP9 real-time rate control without initializing
 // the encoder. To use this interface, you need to link with libvpxrc.a.
 //
