@@ -26,6 +26,33 @@ void vpx_convolve8_2d_horiz_neon_dotprod(const uint8_t *src,
                                          int x_step_q4, int y0_q4,
                                          int y_step_q4, int w, int h);
 
+static INLINE int16x4_t convolve4_4_sdot_partial(const int8x16_t samples,
+                                                 const int32x4_t correction,
+                                                 const int8x8_t filters) {
+  /* Accumulate dot product into 'correction' to account for range clamp. */
+  int32x4_t sum = vdotq_lane_s32(correction, samples, filters, 0);
+
+  /* Further narrowing and packing is performed by the caller. */
+  return vmovn_s32(sum);
+}
+
+static INLINE uint8x8_t convolve4_8_sdot_partial(const int8x16_t samples_lo,
+                                                 const int8x16_t samples_hi,
+                                                 const int32x4_t correction,
+                                                 const int8x8_t filters) {
+  /* Sample range-clamping and permutation are performed by the caller. */
+  /* Accumulate dot product into 'correction' to account for range clamp. */
+  /* First 4 output values. */
+  int32x4_t sum0 = vdotq_lane_s32(correction, samples_lo, filters, 0);
+  /* Second 4 output values. */
+  int32x4_t sum1 = vdotq_lane_s32(correction, samples_hi, filters, 0);
+
+  /* Narrow and re-pack. */
+  int16x8_t sum = vcombine_s16(vmovn_s32(sum0), vmovn_s32(sum1));
+  /* We halved the filter values so -1 from right shift. */
+  return vqrshrun_n_s16(sum, FILTER_BITS - 1);
+}
+
 static INLINE int16x4_t convolve8_4_sdot_partial(const int8x16_t samples_lo,
                                                  const int8x16_t samples_hi,
                                                  const int32x4_t correction,
