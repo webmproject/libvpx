@@ -1301,6 +1301,13 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
       (frame_is_intra_only(cm) ||
        (is_one_pass_svc(cpi) &&
         cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame));
+
+  if (!is_key_frame) {
+    if (cm->frame_refs[LAST_FRAME - 1].sf.x_scale_fp == REF_INVALID_SCALE ||
+        cm->frame_refs[LAST_FRAME - 1].sf.y_scale_fp == REF_INVALID_SCALE)
+      is_key_frame = 1;
+  }
+
   // Always use 4x4 partition for key frame.
   const int use_4x4_partition = frame_is_intra_only(cm);
   const int low_res = (cm->width <= 352 && cm->height <= 288);
