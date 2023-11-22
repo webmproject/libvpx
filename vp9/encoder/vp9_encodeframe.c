@@ -6144,6 +6144,15 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       cpi->rd.r0 = (double)intra_cost_base / mc_dep_cost_base;
   }
 
+  for (MV_REFERENCE_FRAME ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME;
+       ++ref_frame) {
+    if (cpi->ref_frame_flags & ref_frame_to_flag(ref_frame)) {
+      if (cm->frame_refs[ref_frame - 1].sf.x_scale_fp == REF_INVALID_SCALE ||
+          cm->frame_refs[ref_frame - 1].sf.y_scale_fp == REF_INVALID_SCALE)
+        cpi->ref_frame_flags &= ~ref_frame_to_flag(ref_frame);
+    }
+  }
+
   // Frame segmentation
   if (cpi->oxcf.aq_mode == PERCEPTUAL_AQ) build_kmeans_segmentation(cpi);
 
