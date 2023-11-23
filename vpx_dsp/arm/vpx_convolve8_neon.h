@@ -159,6 +159,29 @@ void vpx_convolve8_2d_horiz_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
                                       int x_step_q4, int y0_q4, int y_step_q4,
                                       int w, int h);
 
+static INLINE int16x4_t convolve4_4_usdot_partial(const uint8x16_t samples,
+                                                  const int8x8_t filters) {
+  int32x4_t sum = vusdotq_lane_s32(vdupq_n_s32(0), samples, filters, 0);
+
+  /* Further narrowing and packing is performed by the caller. */
+  return vmovn_s32(sum);
+}
+
+static INLINE uint8x8_t convolve4_8_usdot_partial(const uint8x16_t samples_lo,
+                                                  const uint8x16_t samples_hi,
+                                                  const int8x8_t filters) {
+  /* Sample permutation is performed by the caller. */
+  /* First 4 output values. */
+  int32x4_t sum0 = vusdotq_lane_s32(vdupq_n_s32(0), samples_lo, filters, 0);
+  /* Second 4 output values. */
+  int32x4_t sum1 = vusdotq_lane_s32(vdupq_n_s32(0), samples_hi, filters, 0);
+
+  /* Narrow and re-pack. */
+  int16x8_t sum = vcombine_s16(vmovn_s32(sum0), vmovn_s32(sum1));
+  /* We halved the filter values so -1 from right shift. */
+  return vqrshrun_n_s16(sum, FILTER_BITS - 1);
+}
+
 static INLINE int16x4_t convolve8_4_usdot_partial(const uint8x16_t samples_lo,
                                                   const uint8x16_t samples_hi,
                                                   const int8x8_t filters) {
