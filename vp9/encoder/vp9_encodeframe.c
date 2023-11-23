@@ -4714,6 +4714,8 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, TileDataEnc *tile_data,
 
   set_segment_index(cpi, x, mi_row, mi_col, bsize, 0);
 
+  x->skip_recode = 0;
+
   mi = xd->mi[0];
   mi->sb_type = bsize;
 
