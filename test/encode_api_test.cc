@@ -526,6 +526,25 @@ void VP9Encoder::Encode(bool key_frame) {
   vpx_img_free(image);
 }
 
+TEST(EncodeAPI, Buganizer310340241) {
+  VP9Encoder encoder(-6);
+
+  // Set initial config, in particular set deadline to GOOD mode.
+  encoder.Configure(0, 1, 1, VPX_VBR, VPX_DL_GOOD_QUALITY);
+
+  // Encode 1st frame.
+  encoder.Encode(true);
+
+  // Encode 2nd frame, delta frame.
+  encoder.Encode(false);
+
+  // Change config: change deadline to REALTIME.
+  encoder.Configure(0, 1, 1, VPX_VBR, VPX_DL_REALTIME);
+
+  // Encode 3rd frame with new config, set key frame.
+  encoder.Encode(true);
+}
+
 // This is a test case from clusterfuzz: based on b/311489136.
 // Encode a few frames with multiple change config call
 // with different frame size.
