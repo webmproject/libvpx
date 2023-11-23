@@ -397,9 +397,6 @@ void vpx_convolve8_vert_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
     s4 = vreinterpret_s8_u8(vsub_u8(t4, range_limit));
     s5 = vreinterpret_s8_u8(vsub_u8(t5, range_limit));
     s6 = vreinterpret_s8_u8(vsub_u8(t6, range_limit));
-    s7 = vdup_n_s8(0);
-    s8 = vdup_n_s8(0);
-    s9 = vdup_n_s8(0);
 
     /* This operation combines a conventional transpose and the sample permute
      * (see horizontal case) required before computing the dot product.
@@ -408,9 +405,6 @@ void vpx_convolve8_vert_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
     transpose_concat_4x4(s1, s2, s3, s4, &s1234, tran_concat_tbl);
     transpose_concat_4x4(s2, s3, s4, s5, &s2345, tran_concat_tbl);
     transpose_concat_4x4(s3, s4, s5, s6, &s3456, tran_concat_tbl);
-    transpose_concat_4x4(s4, s5, s6, s7, &s4567, tran_concat_tbl);
-    transpose_concat_4x4(s5, s6, s7, s8, &s5678, tran_concat_tbl);
-    transpose_concat_4x4(s6, s7, s8, s9, &s6789, tran_concat_tbl);
 
     do {
       uint8x8_t t7, t8, t9, t10;
@@ -478,9 +472,6 @@ void vpx_convolve8_vert_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
       s4 = vreinterpret_s8_u8(vsub_u8(t4, range_limit));
       s5 = vreinterpret_s8_u8(vsub_u8(t5, range_limit));
       s6 = vreinterpret_s8_u8(vsub_u8(t6, range_limit));
-      s7 = vdup_n_s8(0);
-      s8 = vdup_n_s8(0);
-      s9 = vdup_n_s8(0);
 
       /* This operation combines a conventional transpose and the sample permute
        * (see horizontal case) required before computing the dot product.
@@ -492,12 +483,6 @@ void vpx_convolve8_vert_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
       transpose_concat_8x4(s2, s3, s4, s5, &s2345_lo, &s2345_hi,
                            tran_concat_tbl);
       transpose_concat_8x4(s3, s4, s5, s6, &s3456_lo, &s3456_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s4, s5, s6, s7, &s4567_lo, &s4567_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s5, s6, s7, s8, &s5678_lo, &s5678_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s6, s7, s8, s9, &s6789_lo, &s6789_hi,
                            tran_concat_tbl);
 
       do {
@@ -601,9 +586,6 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
     s4 = vreinterpret_s8_u8(vsub_u8(t4, range_limit));
     s5 = vreinterpret_s8_u8(vsub_u8(t5, range_limit));
     s6 = vreinterpret_s8_u8(vsub_u8(t6, range_limit));
-    s7 = vdup_n_s8(0);
-    s8 = vdup_n_s8(0);
-    s9 = vdup_n_s8(0);
 
     /* This operation combines a conventional transpose and the sample permute
      * (see horizontal case) required before computing the dot product.
@@ -612,9 +594,6 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
     transpose_concat_4x4(s1, s2, s3, s4, &s1234, tran_concat_tbl);
     transpose_concat_4x4(s2, s3, s4, s5, &s2345, tran_concat_tbl);
     transpose_concat_4x4(s3, s4, s5, s6, &s3456, tran_concat_tbl);
-    transpose_concat_4x4(s4, s5, s6, s7, &s4567, tran_concat_tbl);
-    transpose_concat_4x4(s5, s6, s7, s8, &s5678, tran_concat_tbl);
-    transpose_concat_4x4(s6, s7, s8, s9, &s6789, tran_concat_tbl);
 
     do {
       uint8x8_t t7, t8, t9, t10;
@@ -688,9 +667,6 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
       s4 = vreinterpret_s8_u8(vsub_u8(t4, range_limit));
       s5 = vreinterpret_s8_u8(vsub_u8(t5, range_limit));
       s6 = vreinterpret_s8_u8(vsub_u8(t6, range_limit));
-      s7 = vdup_n_s8(0);
-      s8 = vdup_n_s8(0);
-      s9 = vdup_n_s8(0);
 
       /* This operation combines a conventional transpose and the sample permute
        * (see horizontal case) required before computing the dot product.
@@ -702,12 +678,6 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
       transpose_concat_8x4(s2, s3, s4, s5, &s2345_lo, &s2345_hi,
                            tran_concat_tbl);
       transpose_concat_8x4(s3, s4, s5, s6, &s3456_lo, &s3456_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s4, s5, s6, s7, &s4567_lo, &s4567_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s5, s6, s7, s8, &s5678_lo, &s5678_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s6, s7, s8, s9, &s6789_lo, &s6789_hi,
                            tran_concat_tbl);
 
       do {
