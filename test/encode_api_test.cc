@@ -514,6 +514,22 @@ vpx_image_t *CreateImage(const unsigned int width, const unsigned int height) {
   return image;
 }
 
+void CodecEncodeFrame(vpx_codec_ctx_t *enc, const int width, const int height,
+                      const int frame_index, unsigned int deadline,
+                      const bool is_key) {
+  const vpx_codec_cx_pkt_t *pkt;
+  vpx_image_t *image = CreateImage(width, height);
+  vpx_enc_frame_flags_t frame_flags = is_key ? VPX_EFLAG_FORCE_KF : 0;
+  ASSERT_NE(image, nullptr);
+  ASSERT_EQ(vpx_codec_encode(enc, image, frame_index, 1, frame_flags, deadline),
+            VPX_CODEC_OK);
+  vpx_codec_iter_t iter = nullptr;
+  while ((pkt = vpx_codec_get_cx_data(enc, &iter)) != nullptr) {
+    ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
+  }
+  vpx_img_free(image);
+}
+
 // This is a test case from clusterfuzz.
 TEST(EncodeAPI, PrevMiCheckNullptr) {
   vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
@@ -578,6 +594,76 @@ TEST(EncodeAPI, PrevMiCheckNullptr) {
     ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
   }
   vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
+// This is a test case from clusterfuzz: based on 310477034.
+// Encode a few frames with multiple change config call
+// with different frame size.
+TEST(EncodeAPI, MultipleChangeConfigResize) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+
+  struct Config {
+    unsigned int thread;
+    unsigned int width;
+    unsigned int height;
+    vpx_rc_mode end_usage;
+    unsigned long deadline;
+  };
+
+  // Set initial config.
+  struct Config config = { 3, 41, 1, VPX_VBR, 1 };
+  unsigned long deadline = config.deadline;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
+            VPX_CODEC_OK);
+  cfg.g_threads = config.thread;
+  cfg.g_w = config.width;
+  cfg.g_h = config.height;
+  cfg.g_timebase.num = 1;
+  cfg.g_timebase.den = 1000 * 1000;  // microseconds
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_end_usage = config.end_usage;
+  cfg.rc_min_quantizer = 2;
+  cfg.rc_max_quantizer = 58;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 3), VPX_CODEC_OK);
+  int frame_index = 0;
+
+  // Encode first frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
+  frame_index++;
+
+  // Change config.
+  config = { 16, 31, 1, VPX_VBR, 1000000 };
+  cfg.g_threads = config.thread;
+  cfg.g_w = config.width;
+  cfg.g_h = config.height;
+  cfg.rc_end_usage = config.end_usage;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
+      << vpx_codec_error_detail(&enc);
+
+  // Change config again.
+  config = { 0, 17, 1, VPX_CBR, 1 };
+  cfg.g_threads = config.thread;
+  cfg.g_w = config.width;
+  cfg.g_h = config.height;
+  cfg.rc_end_usage = config.end_usage;
+  deadline = config.deadline;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
+      << vpx_codec_error_detail(&enc);
+
+  // Encode 2nd frame with new config, set delta frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
+  frame_index++;
+
+  // Encode 3rd frame with same config, set delta frame.
+  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
+  frame_index++;
+
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 
