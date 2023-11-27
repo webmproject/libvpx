@@ -215,6 +215,20 @@ static INLINE int16x4_t convolve4_4_usdot_partial(const uint8x16_t samples,
   return vmovn_s32(sum);
 }
 
+static INLINE int16x4_t convolve4_4_usdot(const uint8x16_t samples,
+                                          const int8x8_t filters,
+                                          const uint8x16_t permute_tbl) {
+  /* Permute samples ready for dot product. */
+  /* { 0,  1,  2,  3,  1,  2,  3,  4,  2,  3,  4,  5,  3,  4,  5,  6 } */
+  uint8x16_t permuted_samples = vqtbl1q_u8(samples, permute_tbl);
+
+  int32x4_t sum =
+      vusdotq_lane_s32(vdupq_n_s32(0), permuted_samples, filters, 0);
+
+  /* Further narrowing and packing is performed by the caller. */
+  return vmovn_s32(sum);
+}
+
 static INLINE uint8x8_t convolve4_8_usdot_partial(const uint8x16_t samples_lo,
                                                   const uint8x16_t samples_hi,
                                                   const int8x8_t filters) {
@@ -223,6 +237,30 @@ static INLINE uint8x8_t convolve4_8_usdot_partial(const uint8x16_t samples_lo,
   int32x4_t sum0 = vusdotq_lane_s32(vdupq_n_s32(0), samples_lo, filters, 0);
   /* Second 4 output values. */
   int32x4_t sum1 = vusdotq_lane_s32(vdupq_n_s32(0), samples_hi, filters, 0);
+
+  /* Narrow and re-pack. */
+  int16x8_t sum = vcombine_s16(vmovn_s32(sum0), vmovn_s32(sum1));
+  /* We halved the filter values so -1 from right shift. */
+  return vqrshrun_n_s16(sum, FILTER_BITS - 1);
+}
+
+static INLINE uint8x8_t convolve4_8_usdot(const uint8x16_t samples,
+                                          const int8x8_t filters,
+                                          const uint8x16x2_t permute_tbl) {
+  uint8x16_t permuted_samples[2];
+
+  /* Permute samples ready for dot product. */
+  /* { 0,  1,  2,  3,  1,  2,  3,  4,  2,  3,  4,  5,  3,  4,  5,  6 } */
+  permuted_samples[0] = vqtbl1q_u8(samples, permute_tbl.val[0]);
+  /* { 4,  5,  6,  7,  5,  6,  7,  8,  6,  7,  8,  9,  7,  8,  9, 10 } */
+  permuted_samples[1] = vqtbl1q_u8(samples, permute_tbl.val[1]);
+
+  /* First 4 output values. */
+  int32x4_t sum0 =
+      vusdotq_lane_s32(vdupq_n_s32(0), permuted_samples[0], filters, 0);
+  /* Second 4 output values. */
+  int32x4_t sum1 =
+      vusdotq_lane_s32(vdupq_n_s32(0), permuted_samples[1], filters, 0);
 
   /* Narrow and re-pack. */
   int16x8_t sum = vcombine_s16(vmovn_s32(sum0), vmovn_s32(sum1));
