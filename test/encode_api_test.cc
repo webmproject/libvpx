@@ -514,17 +514,75 @@ vpx_image_t *CreateImage(const unsigned int width, const unsigned int height) {
   return image;
 }
 
-void CodecEncodeFrame(vpx_codec_ctx_t *enc, const int width, const int height,
-                      const int frame_index, unsigned int deadline,
-                      const bool is_key) {
+// Emulates the WebCodecs VideoEncoder interface.
+class VP9Encoder {
+ public:
+  VP9Encoder(int speed) : speed_(speed) {}
+  ~VP9Encoder();
+
+  void Configure(unsigned int threads, unsigned int width, unsigned int height,
+                 vpx_rc_mode end_usage, unsigned long deadline);
+  void Encode(bool key_frame);
+
+ private:
+  const int speed_;
+  bool initialized_ = false;
+  vpx_codec_enc_cfg_t cfg_;
+  vpx_codec_ctx_t enc_;
+  int frame_index_ = 0;
+  unsigned long deadline_ = 0;
+};
+
+VP9Encoder::~VP9Encoder() {
+  if (initialized_) {
+    EXPECT_EQ(vpx_codec_destroy(&enc_), VPX_CODEC_OK);
+  }
+}
+
+void VP9Encoder::Configure(unsigned int threads, unsigned int width,
+                           unsigned int height, vpx_rc_mode end_usage,
+                           unsigned long deadline) {
+  deadline_ = deadline;
+
+  if (!initialized_) {
+    vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg_, /*usage=*/0),
+              VPX_CODEC_OK);
+    cfg_.g_threads = threads;
+    cfg_.g_w = width;
+    cfg_.g_h = height;
+    cfg_.g_timebase.num = 1;
+    cfg_.g_timebase.den = 1000 * 1000;  // microseconds
+    cfg_.g_pass = VPX_RC_ONE_PASS;
+    cfg_.g_lag_in_frames = 0;
+    cfg_.rc_end_usage = end_usage;
+    cfg_.rc_min_quantizer = 2;
+    cfg_.rc_max_quantizer = 58;
+    ASSERT_EQ(vpx_codec_enc_init(&enc_, iface, &cfg_, 0), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc_, VP8E_SET_CPUUSED, speed_), VPX_CODEC_OK);
+    initialized_ = true;
+    return;
+  }
+
+  cfg_.g_threads = threads;
+  cfg_.g_w = width;
+  cfg_.g_h = height;
+  cfg_.rc_end_usage = end_usage;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc_, &cfg_), VPX_CODEC_OK)
+      << vpx_codec_error_detail(&enc_);
+}
+
+void VP9Encoder::Encode(bool key_frame) {
   const vpx_codec_cx_pkt_t *pkt;
-  vpx_image_t *image = CreateImage(width, height);
-  vpx_enc_frame_flags_t frame_flags = is_key ? VPX_EFLAG_FORCE_KF : 0;
+  vpx_image_t *image = CreateImage(cfg_.g_w, cfg_.g_h);
   ASSERT_NE(image, nullptr);
-  ASSERT_EQ(vpx_codec_encode(enc, image, frame_index, 1, frame_flags, deadline),
-            VPX_CODEC_OK);
+  const vpx_enc_frame_flags_t frame_flags = key_frame ? VPX_EFLAG_FORCE_KF : 0;
+  ASSERT_EQ(
+      vpx_codec_encode(&enc_, image, frame_index_, 1, frame_flags, deadline_),
+      VPX_CODEC_OK);
+  frame_index_++;
   vpx_codec_iter_t iter = nullptr;
-  while ((pkt = vpx_codec_get_cx_data(enc, &iter)) != nullptr) {
+  while ((pkt = vpx_codec_get_cx_data(&enc_, &iter)) != nullptr) {
     ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
   }
   vpx_img_free(image);
@@ -532,233 +590,87 @@ void CodecEncodeFrame(vpx_codec_ctx_t *enc, const int width, const int height,
 
 // This is a test case from clusterfuzz.
 TEST(EncodeAPI, PrevMiCheckNullptr) {
-  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
-  vpx_codec_enc_cfg_t cfg;
+  VP9Encoder encoder(0);
+  encoder.Configure(0, 1554, 644, VPX_VBR, VPX_DL_REALTIME);
 
-  struct Config {
-    unsigned int thread;
-    unsigned int width;
-    unsigned int height;
-    vpx_rc_mode end_usage;
-    unsigned long deadline;
-  };
-  struct Config init_config = { 0, 1554, 644, VPX_VBR, 1 };
-  unsigned long deadline = init_config.deadline;
-  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
-            VPX_CODEC_OK);
-  cfg.g_threads = init_config.thread;
-  cfg.g_w = init_config.width;
-  cfg.g_h = init_config.height;
-  cfg.g_timebase.num = 1;
-  cfg.g_timebase.den = 1000 * 1000;  // microseconds
-  cfg.g_pass = VPX_RC_ONE_PASS;
-  cfg.g_lag_in_frames = 0;
-  cfg.rc_end_usage = init_config.end_usage;
-  cfg.rc_min_quantizer = 2;
-  cfg.rc_max_quantizer = 58;
-
-  vpx_codec_ctx_t enc;
-  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
-  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 0), VPX_CODEC_OK);
-
-  const vpx_codec_cx_pkt_t *pkt;
-
-  int frame_index = 0;
   // First step: encode, without forcing KF.
-  vpx_image_t *image = CreateImage(cfg.g_w, cfg.g_h);
-  ASSERT_NE(image, nullptr);
-  ASSERT_EQ(vpx_codec_encode(&enc, image, frame_index, 1, 0, deadline),
-            VPX_CODEC_OK);
-  frame_index++;
-  vpx_codec_iter_t iter = nullptr;
-  while ((pkt = vpx_codec_get_cx_data(&enc, &iter)) != nullptr) {
-    ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
-  }
-  vpx_img_free(image);
+  encoder.Encode(false);
   // Second step: change config
-  struct Config encode_config = { 0, 1131, 644, VPX_CBR, 1000000 };
-  cfg.g_threads = encode_config.thread;
-  cfg.g_w = encode_config.width;
-  cfg.g_h = encode_config.height;
-  cfg.rc_end_usage = encode_config.end_usage;
-  deadline = encode_config.deadline;
-  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
-      << vpx_codec_error_detail(&enc);
+  encoder.Configure(0, 1131, 644, VPX_CBR, VPX_DL_GOOD_QUALITY);
   // Third step: encode, without forcing KF
-  image = CreateImage(cfg.g_w, cfg.g_h);
-  ASSERT_NE(image, nullptr);
-  ASSERT_EQ(vpx_codec_encode(&enc, image, frame_index, 1, 0, deadline),
-            VPX_CODEC_OK);
-  frame_index++;
-  while ((pkt = vpx_codec_get_cx_data(&enc, &iter)) != nullptr) {
-    ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
-  }
-  vpx_img_free(image);
-  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  encoder.Encode(false);
 }
 
 // This is a test case from clusterfuzz: based on 310477034.
 // Encode a few frames with multiple change config call
 // with different frame size.
 TEST(EncodeAPI, MultipleChangeConfigResize) {
-  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
-  vpx_codec_enc_cfg_t cfg;
-
-  struct Config {
-    unsigned int thread;
-    unsigned int width;
-    unsigned int height;
-    vpx_rc_mode end_usage;
-    unsigned long deadline;
-  };
+  VP9Encoder encoder(3);
 
   // Set initial config.
-  struct Config config = { 3, 41, 1, VPX_VBR, 1 };
-  unsigned long deadline = config.deadline;
-  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
-            VPX_CODEC_OK);
-  cfg.g_threads = config.thread;
-  cfg.g_w = config.width;
-  cfg.g_h = config.height;
-  cfg.g_timebase.num = 1;
-  cfg.g_timebase.den = 1000 * 1000;  // microseconds
-  cfg.g_pass = VPX_RC_ONE_PASS;
-  cfg.g_lag_in_frames = 0;
-  cfg.rc_end_usage = config.end_usage;
-  cfg.rc_min_quantizer = 2;
-  cfg.rc_max_quantizer = 58;
-
-  vpx_codec_ctx_t enc;
-  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
-  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 3), VPX_CODEC_OK);
-  int frame_index = 0;
+  encoder.Configure(3, 41, 1, VPX_VBR, VPX_DL_REALTIME);
 
   // Encode first frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
-  frame_index++;
+  encoder.Encode(true);
 
   // Change config.
-  config = { 16, 31, 1, VPX_VBR, 1000000 };
-  cfg.g_threads = config.thread;
-  cfg.g_w = config.width;
-  cfg.g_h = config.height;
-  cfg.rc_end_usage = config.end_usage;
-  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
-      << vpx_codec_error_detail(&enc);
+  encoder.Configure(16, 31, 1, VPX_VBR, VPX_DL_GOOD_QUALITY);
 
   // Change config again.
-  config = { 0, 17, 1, VPX_CBR, 1 };
-  cfg.g_threads = config.thread;
-  cfg.g_w = config.width;
-  cfg.g_h = config.height;
-  cfg.rc_end_usage = config.end_usage;
-  deadline = config.deadline;
-  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
-      << vpx_codec_error_detail(&enc);
+  encoder.Configure(0, 17, 1, VPX_CBR, VPX_DL_REALTIME);
 
   // Encode 2nd frame with new config, set delta frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
-  frame_index++;
+  encoder.Encode(false);
 
   // Encode 3rd frame with same config, set delta frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
-  frame_index++;
-
-  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  encoder.Encode(false);
 }
 
 // This is a test case from clusterfuzz: based on b/310663186.
 // Encode set of frames while varying the deadline on the fly from
 // good to realtime to best and back to realtime.
 TEST(EncodeAPI, DynamicDeadlineChange) {
-  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
-  vpx_codec_enc_cfg_t cfg;
-
-  struct Config {
-    unsigned int thread;
-    unsigned int width;
-    unsigned int height;
-    vpx_rc_mode end_usage;
-    unsigned long deadline;
-  };
+  // Use realtime speed: 5 to 9.
+  VP9Encoder encoder(5);
 
   // Set initial config, in particular set deadline to GOOD mode.
-  struct Config config = { 0, 1, 1, VPX_VBR, VPX_DL_GOOD_QUALITY };
-  unsigned long deadline = config.deadline;
-  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
-            VPX_CODEC_OK);
-  cfg.g_threads = config.thread;
-  cfg.g_w = config.width;
-  cfg.g_h = config.height;
-  cfg.g_timebase.num = 1;
-  cfg.g_timebase.den = 1000 * 1000;  // microseconds
-  cfg.g_pass = VPX_RC_ONE_PASS;
-  cfg.g_lag_in_frames = 0;
-  cfg.rc_end_usage = config.end_usage;
-  cfg.rc_min_quantizer = 2;
-  cfg.rc_max_quantizer = 58;
-
-  vpx_codec_ctx_t enc;
-  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
-  // Use realtime speed: 5 to 9.
-  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 5), VPX_CODEC_OK);
-  int frame_index = 0;
+  encoder.Configure(0, 1, 1, VPX_VBR, VPX_DL_GOOD_QUALITY);
 
   // Encode 1st frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
-  frame_index++;
+  encoder.Encode(true);
 
   // Encode 2nd frame, delta frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
-  frame_index++;
+  encoder.Encode(false);
 
   // Change config: change deadline to REALTIME.
-  config = { 0, 1, 1, VPX_VBR, VPX_DL_REALTIME };
-  deadline = config.deadline;
-  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
-      << vpx_codec_error_detail(&enc);
+  encoder.Configure(0, 1, 1, VPX_VBR, VPX_DL_REALTIME);
 
   // Encode 3rd frame with new config, set key frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
-  frame_index++;
+  encoder.Encode(true);
 
   // Encode 4th frame with same config, delta frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
-  frame_index++;
+  encoder.Encode(false);
 
   // Encode 5th frame with same config, key frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
-  frame_index++;
+  encoder.Encode(true);
 
   // Change config: change deadline to BEST.
-  config = { 0, 1, 1, VPX_VBR, VPX_DL_BEST_QUALITY };
-  deadline = config.deadline;
-  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
-      << vpx_codec_error_detail(&enc);
+  encoder.Configure(0, 1, 1, VPX_VBR, VPX_DL_BEST_QUALITY);
 
   // Encode 6th frame with new config, set delta frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
-  frame_index++;
+  encoder.Encode(false);
 
   // Change config: change deadline to REALTIME.
-  config = { 0, 1, 1, VPX_VBR, VPX_DL_REALTIME };
-  deadline = config.deadline;
-  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
-      << vpx_codec_error_detail(&enc);
+  encoder.Configure(0, 1, 1, VPX_VBR, VPX_DL_REALTIME);
 
   // Encode 7th frame with new config, set delta frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
-  frame_index++;
+  encoder.Encode(false);
 
   // Encode 8th frame with new config, set key frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, true);
-  frame_index++;
+  encoder.Encode(true);
 
   // Encode 9th frame with new config, set delta frame.
-  CodecEncodeFrame(&enc, cfg.g_w, cfg.g_h, frame_index, deadline, false);
-  frame_index++;
-
-  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  encoder.Encode(false);
 }
 
 class EncodeApiGetTplStatsTest
