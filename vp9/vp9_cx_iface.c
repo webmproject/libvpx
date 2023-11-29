@@ -1077,6 +1077,7 @@ static vpx_codec_err_t ctrl_set_rtc_external_ratectrl(vpx_codec_alg_priv_t *ctx,
     cpi->compute_frame_low_motion_onepass = 0;
     cpi->rc.constrain_gf_key_freq_onepass_vbr = 0;
     cpi->cyclic_refresh->content_mode = 0;
+    cpi->disable_scene_detection_rtc_ratectrl = 1;
   }
   return VPX_CODEC_OK;
 }

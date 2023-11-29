@@ -1041,6 +1041,9 @@ typedef struct VP9_COMP {
   // (good/best/realtime).
   MODE deadline_mode_previous_frame;
 
+  // Flag to disable scene detection when rtc rate control library is used.
+  int disable_scene_detection_rtc_ratectrl;
+
 #if CONFIG_COLLECT_COMPONENT_TIMING
   /*!
    * component_time[] are initialized to zero while encoder starts.

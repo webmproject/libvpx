@@ -54,7 +54,11 @@ class RcInterfaceTest
     if (video->frame() == 0) {
       encoder->Control(VP8E_SET_CPUUSED, 7);
       encoder->Control(VP9E_SET_AQ_MODE, aq_mode_);
-      encoder->Control(VP9E_SET_TUNE_CONTENT, 0);
+      if (rc_cfg_.is_screen) {
+        encoder->Control(VP9E_SET_TUNE_CONTENT, VP9E_CONTENT_SCREEN);
+      } else {
+        encoder->Control(VP9E_SET_TUNE_CONTENT, VP9E_CONTENT_DEFAULT);
+      }
       encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 1000);
       encoder->Control(VP9E_SET_RTC_EXTERNAL_RATECTRL, 1);
     }
@@ -91,6 +95,19 @@ class RcInterfaceTest
 
   void RunOneLayer() {
     SetConfig(GET_PARAM(2));
+    rc_api_ = libvpx::VP9RateControlRTC::Create(rc_cfg_);
+    frame_params_.spatial_layer_id = 0;
+    frame_params_.temporal_layer_id = 0;
+
+    ::libvpx_test::I420VideoSource video("desktop_office1.1280_720-020.yuv",
+                                         1280, 720, 30, 1, 0, kNumFrames);
+
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  }
+
+  void RunOneLayerScreen() {
+    SetConfig(GET_PARAM(2));
+    rc_cfg_.is_screen = true;
     rc_api_ = libvpx::VP9RateControlRTC::Create(rc_cfg_);
     frame_params_.spatial_layer_id = 0;
     frame_params_.temporal_layer_id = 0;
@@ -631,6 +648,8 @@ class RcInterfaceSvcTest
 TEST_P(RcInterfaceTest, OneLayer) { RunOneLayer(); }
 
 TEST_P(RcInterfaceTest, OneLayerDropFramesCBR) { RunOneLayerDropFramesCBR(); }
+
+TEST_P(RcInterfaceTest, OneLayerScreen) { RunOneLayerScreen(); }
 
 TEST_P(RcInterfaceTest, OneLayerVBRPeriodicKey) { RunOneLayerVBRPeriodicKey(); }
 
