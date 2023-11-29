@@ -12,7 +12,7 @@
 #include "./vp8_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
-#include "vpx/vpx_codec.h"
+#include "vpx/vpx_encoder.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
 #include "vpx_mem/vpx_mem.h"
@@ -776,7 +776,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
 
 static void pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
                                     unsigned long duration,
-                                    unsigned long deadline) {
+                                    vpx_enc_deadline_t deadline) {
   int new_qc;
 
 #if !(CONFIG_REALTIME_ONLY)
@@ -866,7 +866,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
                                    const vpx_image_t *img, vpx_codec_pts_t pts,
                                    unsigned long duration,
                                    vpx_enc_frame_flags_t enc_flags,
-                                   unsigned long deadline) {
+                                   vpx_enc_deadline_t deadline) {
   volatile vpx_codec_err_t res = VPX_CODEC_OK;
   // Make a copy as volatile to avoid -Wclobbered with longjmp.
   volatile vpx_enc_frame_flags_t flags = enc_flags;

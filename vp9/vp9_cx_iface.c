@@ -1153,7 +1153,7 @@ static vpx_codec_err_t encoder_destroy(vpx_codec_alg_priv_t *ctx) {
 
 static void pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
                                     unsigned long duration,
-                                    unsigned long deadline) {
+                                    vpx_enc_deadline_t deadline) {
   MODE new_mode = BEST;
 
 #if CONFIG_REALTIME_ONLY
@@ -1298,7 +1298,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
                                       vpx_codec_pts_t pts_val,
                                       unsigned long duration,
                                       vpx_enc_frame_flags_t enc_flags,
-                                      unsigned long deadline) {
+                                      vpx_enc_deadline_t deadline) {
   volatile vpx_codec_err_t res = VPX_CODEC_OK;
   volatile vpx_enc_frame_flags_t flags = enc_flags;
   volatile vpx_codec_pts_t pts = pts_val;

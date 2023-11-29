@@ -178,7 +178,7 @@ vpx_image_t *CreateGrayImage(vpx_img_fmt_t fmt, unsigned int w,
 
 // Tests kf_max_dist in one-pass encoding with zero lag.
 void TestKeyframeMaximumInterval(vpx_codec_iface_t *iface,
-                                 unsigned long deadline,
+                                 vpx_enc_deadline_t deadline,
                                  unsigned int kf_max_dist) {
   vpx_codec_enc_cfg_t cfg;
   ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
@@ -241,7 +241,7 @@ TEST(KeyframeIntervalTest, KeyframeMaximumInterval) {
   ifaces.push_back(vpx_codec_vp9_cx());
 #endif
   for (vpx_codec_iface_t *iface : ifaces) {
-    for (unsigned long deadline :
+    for (vpx_enc_deadline_t deadline :
          { VPX_DL_REALTIME, VPX_DL_GOOD_QUALITY, VPX_DL_BEST_QUALITY }) {
       // Test 0 and 1 (both mean all intra), some powers of 2, some multiples
       // of 10, and some prime numbers.
