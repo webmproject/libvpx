@@ -351,6 +351,27 @@ static INLINE uint8x8_t convolve8_8_usdot(uint8x16_t samples,
 
 #endif  // VPX_ARCH_AARCH64 && defined(__ARM_FEATURE_MATMUL_INT8)
 
+static INLINE int16x4_t convolve4_4(const int16x4_t s0, const int16x4_t s1,
+                                    const int16x4_t s2, const int16x4_t s3,
+                                    const int16x4_t filters) {
+  int16x4_t sum = vmul_lane_s16(s0, filters, 0);
+  sum = vmla_lane_s16(sum, s1, filters, 1);
+  sum = vmla_lane_s16(sum, s2, filters, 2);
+  sum = vmla_lane_s16(sum, s3, filters, 3);
+  return sum;
+}
+
+static INLINE uint8x8_t convolve4_8(const int16x8_t s0, const int16x8_t s1,
+                                    const int16x8_t s2, const int16x8_t s3,
+                                    const int16x4_t filters) {
+  int16x8_t sum = vmulq_lane_s16(s0, filters, 0);
+  sum = vmlaq_lane_s16(sum, s1, filters, 1);
+  sum = vmlaq_lane_s16(sum, s2, filters, 2);
+  sum = vmlaq_lane_s16(sum, s3, filters, 3);
+  /* We halved the filter values so -1 from right shift. */
+  return vqrshrun_n_s16(sum, FILTER_BITS - 1);
+}
+
 static INLINE int16x4_t convolve8_4(const int16x4_t s0, const int16x4_t s1,
                                     const int16x4_t s2, const int16x4_t s3,
                                     const int16x4_t s4, const int16x4_t s5,
