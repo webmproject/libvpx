@@ -28,7 +28,7 @@
 
 namespace {
 
-const vpx_codec_iface_t *kCodecIfaces[] = {
+vpx_codec_iface_t *kCodecIfaces[] = {
 #if CONFIG_VP8_ENCODER
   &vpx_codec_vp8_cx_algo,
 #endif
@@ -37,7 +37,7 @@ const vpx_codec_iface_t *kCodecIfaces[] = {
 #endif
 };
 
-bool IsVP9(const vpx_codec_iface_t *iface) {
+bool IsVP9(vpx_codec_iface_t *iface) {
   static const char kVP9Name[] = "WebM Project VP9";
   return strncmp(kVP9Name, vpx_codec_iface_name(iface), sizeof(kVP9Name) - 1) ==
          0;
@@ -259,7 +259,7 @@ TEST(EncodeAPI, MultiResEncode) {
 
 TEST(EncodeAPI, SetRoi) {
   static struct {
-    const vpx_codec_iface_t *iface;
+    vpx_codec_iface_t *iface;
     int ctrl_id;
   } kCodecs[] = {
 #if CONFIG_VP8_ENCODER
@@ -365,7 +365,7 @@ TEST(EncodeAPI, SetRoi) {
   }
 }
 
-void InitCodec(const vpx_codec_iface_t &iface, int width, int height,
+void InitCodec(vpx_codec_iface_t &iface, int width, int height,
                vpx_codec_ctx_t *enc, vpx_codec_enc_cfg_t *cfg) {
   cfg->g_w = width;
   cfg->g_h = height;
