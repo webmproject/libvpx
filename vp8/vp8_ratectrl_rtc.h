@@ -33,11 +33,6 @@ struct VP8FrameParamsQpRTC {
   int temporal_layer_id;
 };
 
-enum class FrameDropDecision {
-  kOk,    // Frame is encoded.
-  kDrop,  // Frame is dropped.
-};
-
 class VP8RateControlRTC {
  public:
   static std::unique_ptr<VP8RateControlRTC> Create(
