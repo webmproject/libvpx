@@ -986,11 +986,11 @@ vpx_fixed_buf_t *vpx_codec_get_global_headers(vpx_codec_ctx_t *ctx);
  */
 typedef unsigned long vpx_enc_deadline_t;
 /*!\brief deadline parameter analogous to VPx REALTIME mode. */
-#define VPX_DL_REALTIME (1)
+#define VPX_DL_REALTIME 1ul
 /*!\brief deadline parameter analogous to  VPx GOOD QUALITY mode. */
-#define VPX_DL_GOOD_QUALITY (1000000)
+#define VPX_DL_GOOD_QUALITY 1000000ul
 /*!\brief deadline parameter analogous to VPx BEST QUALITY mode. */
-#define VPX_DL_BEST_QUALITY (0)
+#define VPX_DL_BEST_QUALITY 0ul
 /*!\brief Encode a frame
  *
  * Encodes a video frame at the given "presentation time." The presentation
