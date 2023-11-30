@@ -198,8 +198,7 @@ typedef const struct vpx_codec_ctrl_fn_map {
 typedef vpx_codec_err_t (*vpx_codec_decode_fn_t)(vpx_codec_alg_priv_t *ctx,
                                                  const uint8_t *data,
                                                  unsigned int data_sz,
-                                                 void *user_priv,
-                                                 long deadline);
+                                                 void *user_priv);
 
 /*!\brief Decoded frames iterator
  *
