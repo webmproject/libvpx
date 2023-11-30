@@ -685,6 +685,65 @@ TEST(EncodeAPI, Buganizer312517065) {
   encoder.Encode(false);
 }
 
+// This is a test case from clusterfuzz: based on b/311489136.
+// Encode a few frames with multiple change config call
+// with different frame size.
+TEST(EncodeAPI, Buganizer311489136) {
+  VP9Encoder encoder(1);
+
+  // Set initial config.
+  encoder.Configure(12, 1678, 620, VPX_VBR, VPX_DL_GOOD_QUALITY);
+
+  // Encode first frame.
+  encoder.Encode(true);
+
+  // Change config.
+  encoder.Configure(3, 1678, 202, VPX_CBR, VPX_DL_GOOD_QUALITY);
+
+  // Encode 2nd frame with new config, set delta frame.
+  encoder.Encode(false);
+
+  // Change config again.
+  encoder.Configure(8, 1037, 476, VPX_CBR, VPX_DL_REALTIME);
+
+  // Encode 3rd frame with new config, set delta frame.
+  encoder.Encode(false);
+
+  // Change config again.
+  encoder.Configure(0, 580, 620, VPX_CBR, VPX_DL_GOOD_QUALITY);
+
+  // Encode 4th frame with same config, set delta frame.
+  encoder.Encode(false);
+}
+
+// This is a test case from clusterfuzz: based on b/312656387.
+// Encode a few frames with multiple change config call
+// with different frame size.
+TEST(EncodeAPI, Buganizer312656387) {
+  VP9Encoder encoder(1);
+
+  // Set initial config.
+  encoder.Configure(16, 1, 1024, VPX_CBR, VPX_DL_REALTIME);
+
+  // Change config.
+  encoder.Configure(15, 1, 1024, VPX_VBR, VPX_DL_REALTIME);
+
+  // Encode first frame.
+  encoder.Encode(true);
+
+  // Change config again.
+  encoder.Configure(14, 1, 595, VPX_VBR, VPX_DL_GOOD_QUALITY);
+
+  // Encode 2nd frame with new config.
+  encoder.Encode(true);
+
+  // Change config again.
+  encoder.Configure(2, 1, 1024, VPX_VBR, VPX_DL_GOOD_QUALITY);
+
+  // Encode 3rd frame with new config, set delta frame.
+  encoder.Encode(false);
+}
+
 class EncodeApiGetTplStatsTest
     : public ::libvpx_test::EncoderTest,
       public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {
