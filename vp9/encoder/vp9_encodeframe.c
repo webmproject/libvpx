@@ -3451,8 +3451,7 @@ static void simple_motion_search(const VP9_COMP *const cpi, MACROBLOCK *const x,
 
   assert(yv12 != NULL);
   if (!yv12) return;
-  vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
-                       &cm->frame_refs[ref - 1].sf);
+  vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col, NULL);
   mi->ref_frame[0] = ref;
   mi->ref_frame[1] = NO_REF_FRAME;
   mi->sb_type = bsize;
