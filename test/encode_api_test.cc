@@ -601,7 +601,7 @@ TEST(EncodeAPI, PrevMiCheckNullptr) {
   encoder.Encode(false);
 }
 
-// This is a test case from clusterfuzz: based on 310477034.
+// This is a test case from clusterfuzz: based on b/310477034.
 // Encode a few frames with multiple change config call
 // with different frame size.
 TEST(EncodeAPI, MultipleChangeConfigResize) {
@@ -670,6 +670,18 @@ TEST(EncodeAPI, DynamicDeadlineChange) {
   encoder.Encode(true);
 
   // Encode 9th frame with new config, set delta frame.
+  encoder.Encode(false);
+}
+
+// This is a test case from clusterfuzz: based on b/312517065.
+TEST(EncodeAPI, Buganizer312517065) {
+  VP9Encoder encoder(4);
+  encoder.Configure(0, 1060, 437, VPX_CBR, VPX_DL_REALTIME);
+  encoder.Encode(true);
+  encoder.Configure(10, 33, 437, VPX_VBR, VPX_DL_GOOD_QUALITY);
+  encoder.Encode(false);
+  encoder.Configure(6, 327, 269, VPX_VBR, VPX_DL_GOOD_QUALITY);
+  encoder.Configure(15, 1060, 437, VPX_CBR, VPX_DL_REALTIME);
   encoder.Encode(false);
 }
 
