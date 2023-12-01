@@ -521,7 +521,7 @@ class VP9Encoder {
   ~VP9Encoder();
 
   void Configure(unsigned int threads, unsigned int width, unsigned int height,
-                 vpx_rc_mode end_usage, unsigned long deadline);
+                 vpx_rc_mode end_usage, vpx_enc_deadline_t deadline);
   void Encode(bool key_frame);
 
  private:
@@ -530,7 +530,7 @@ class VP9Encoder {
   vpx_codec_enc_cfg_t cfg_;
   vpx_codec_ctx_t enc_;
   int frame_index_ = 0;
-  unsigned long deadline_ = 0;
+  vpx_enc_deadline_t deadline_ = 0;
 };
 
 VP9Encoder::~VP9Encoder() {
@@ -541,7 +541,7 @@ VP9Encoder::~VP9Encoder() {
 
 void VP9Encoder::Configure(unsigned int threads, unsigned int width,
                            unsigned int height, vpx_rc_mode end_usage,
-                           unsigned long deadline) {
+                           vpx_enc_deadline_t deadline) {
   deadline_ = deadline;
 
   if (!initialized_) {

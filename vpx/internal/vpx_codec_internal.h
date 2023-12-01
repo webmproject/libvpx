@@ -255,7 +255,7 @@ typedef vpx_codec_err_t (*vpx_codec_encode_fn_t)(vpx_codec_alg_priv_t *ctx,
                                                  vpx_codec_pts_t pts,
                                                  unsigned long duration,
                                                  vpx_enc_frame_flags_t flags,
-                                                 unsigned long deadline);
+                                                 vpx_enc_deadline_t deadline);
 typedef const vpx_codec_cx_pkt_t *(*vpx_codec_get_cx_data_fn_t)(
     vpx_codec_alg_priv_t *ctx, vpx_codec_iter_t *iter);
 
