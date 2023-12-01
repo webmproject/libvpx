@@ -276,7 +276,7 @@ static int update_fragments(vpx_codec_alg_priv_t *ctx, const uint8_t *data,
 
 static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
                                   const uint8_t *data, unsigned int data_sz,
-                                  void *user_priv, long deadline) {
+                                  void *user_priv) {
   volatile vpx_codec_err_t res;
   volatile unsigned int resolution_change = 0;
   volatile unsigned int w, h;
@@ -508,7 +508,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
     pbi->restart_threads = 0;
 #endif
     ctx->user_priv = user_priv;
-    if (vp8dx_receive_compressed_data(pbi, deadline)) {
+    if (vp8dx_receive_compressed_data(pbi)) {
       res = update_error_state(ctx, &pbi->common.error);
     }
 
@@ -529,7 +529,6 @@ static vpx_image_t *vp8_get_frame(vpx_codec_alg_priv_t *ctx,
    */
   if (!(*iter) && ctx->yv12_frame_buffers.pbi[0]) {
     YV12_BUFFER_CONFIG sd;
-    int64_t time_stamp = 0, time_end_stamp = 0;
     vp8_ppflags_t flags;
     vp8_zero(flags);
 
@@ -539,8 +538,7 @@ static vpx_image_t *vp8_get_frame(vpx_codec_alg_priv_t *ctx,
       flags.noise_level = ctx->postproc_cfg.noise_level;
     }
 
-    if (0 == vp8dx_get_raw_frame(ctx->yv12_frame_buffers.pbi[0], &sd,
-                                 &time_stamp, &time_end_stamp, &flags)) {
+    if (0 == vp8dx_get_raw_frame(ctx->yv12_frame_buffers.pbi[0], &sd, &flags)) {
       yuvconfig2image(&ctx->img, &sd, ctx->user_priv);
 
       img = &ctx->img;
