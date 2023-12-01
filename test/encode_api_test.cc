@@ -604,6 +604,25 @@ TEST(EncodeAPI, Buganizer312656387) {
   encoder.Encode(false);
 }
 
+// This is a test case from clusterfuzz: based on b/310329177.
+// Encode a few frames with multiple change config call
+// with different frame size.
+TEST(EncodeAPI, Buganizer310329177) {
+  VP9Encoder encoder(6);
+
+  // Set initial config.
+  encoder.Configure(10, 41, 1, VPX_VBR, VPX_DL_REALTIME);
+
+  // Encode first frame.
+  encoder.Encode(true);
+
+  // Change config.
+  encoder.Configure(16, 1, 1, VPX_VBR, VPX_DL_REALTIME);
+
+  // Encode 2nd frame with new config, set delta frame.
+  encoder.Encode(false);
+}
+
 class EncodeApiGetTplStatsTest
     : public ::libvpx_test::EncoderTest,
       public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {
