@@ -797,10 +797,22 @@ static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
   if (cfg->g_w != ctx->cfg.g_w || cfg->g_h != ctx->cfg.g_h) {
     if (cfg->g_lag_in_frames > 1 || cfg->g_pass != VPX_RC_ONE_PASS)
       ERROR("Cannot change width or height after initialization");
-    if (!valid_ref_frame_size(ctx->cfg.g_w, ctx->cfg.g_h, cfg->g_w, cfg->g_h) ||
+    // Note: function encoder_set_config() is allowed to be called multiple
+    // times. However, when the original frame width or height is less than two
+    // times of the new frame width or height, a forced key frame should be
+    // used. To make sure the correct detection of a forced key frame, we need
+    // to update the frame width and height only when the actual encoding is
+    // performed. cpi->last_coded_width and cpi->last_coded_height are used to
+    // track the actual coded frame size.
+    if ((ctx->cpi->last_coded_width && ctx->cpi->last_coded_height &&
+         !valid_ref_frame_size(ctx->cpi->last_coded_width,
+                               ctx->cpi->last_coded_height, cfg->g_w,
+                               cfg->g_h)) ||
         (ctx->cpi->initial_width && (int)cfg->g_w > ctx->cpi->initial_width) ||
-        (ctx->cpi->initial_height && (int)cfg->g_h > ctx->cpi->initial_height))
+        (ctx->cpi->initial_height &&
+         (int)cfg->g_h > ctx->cpi->initial_height)) {
       force_key = 1;
+    }
   }
 
   // Prevent increasing lag_in_frames. This check is stricter than it needs
@@ -1309,6 +1321,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
   memset(&pkt, 0, sizeof(pkt));
 
   if (cpi == NULL) return VPX_CODEC_INVALID_PARAM;
+
+  cpi->last_coded_width = ctx->oxcf.width;
+  cpi->last_coded_height = ctx->oxcf.height;
 
   if (img != NULL) {
     res = validate_img(ctx, img);
