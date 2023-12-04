@@ -921,6 +921,9 @@ typedef struct VP9_COMP {
                     // number of MBs in the current frame when the frame is
                     // scaled.
 
+  int last_coded_width;
+  int last_coded_height;
+
   int use_svc;
 
   SVC svc;
