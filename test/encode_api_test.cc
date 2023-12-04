@@ -602,8 +602,8 @@ TEST(EncodeAPI, PrevMiCheckNullptr) {
 }
 
 // This is a test case from clusterfuzz: based on b/310477034.
-// Encode a few frames with multiple change config call
-// with different frame size.
+// Encode a few frames with multiple change config calls
+// with different frame sizes.
 TEST(EncodeAPI, MultipleChangeConfigResize) {
   VP9Encoder encoder(3);
 
@@ -705,8 +705,8 @@ TEST(EncodeAPI, Buganizer312517065) {
 }
 
 // This is a test case from clusterfuzz: based on b/311489136.
-// Encode a few frames with multiple change config call
-// with different frame size.
+// Encode a few frames with multiple change config calls
+// with different frame sizes.
 TEST(EncodeAPI, Buganizer311489136) {
   VP9Encoder encoder(1);
 
@@ -736,8 +736,8 @@ TEST(EncodeAPI, Buganizer311489136) {
 }
 
 // This is a test case from clusterfuzz: based on b/312656387.
-// Encode a few frames with multiple change config call
-// with different frame size.
+// Encode a few frames with multiple change config calls
+// with different frame sizes.
 TEST(EncodeAPI, Buganizer312656387) {
   VP9Encoder encoder(1);
 
@@ -764,8 +764,8 @@ TEST(EncodeAPI, Buganizer312656387) {
 }
 
 // This is a test case from clusterfuzz: based on b/310329177.
-// Encode a few frames with multiple change config call
-// with different frame size.
+// Encode a few frames with multiple change config calls
+// with different frame sizes.
 TEST(EncodeAPI, Buganizer310329177) {
   VP9Encoder encoder(6);
 
