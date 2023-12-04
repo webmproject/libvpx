@@ -3888,6 +3888,7 @@ static void set_frame_size(VP9_COMP *cpi) {
   alloc_util_frame_buffers(cpi);
   init_motion_estimation(cpi);
 
+  int has_valid_ref_frame = 0;
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
     const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
@@ -3906,10 +3907,16 @@ static void set_frame_size(VP9_COMP *cpi) {
                                         buf->y_crop_height, cm->width,
                                         cm->height);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+      has_valid_ref_frame |= vp9_is_valid_scale(&ref_buf->sf);
       if (vp9_is_scaled(&ref_buf->sf)) vpx_extend_frame_borders(buf);
     } else {
       ref_buf->buf = NULL;
     }
+  }
+  if (!frame_is_intra_only(cm) && !has_valid_ref_frame) {
+    vpx_internal_error(
+        &cm->error, VPX_CODEC_CORRUPT_FRAME,
+        "Can't find at least one reference frame with valid size");
   }
 
   set_ref_ptrs(cm, xd, LAST_FRAME, LAST_FRAME);
