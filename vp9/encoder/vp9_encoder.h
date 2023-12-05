@@ -1382,6 +1382,14 @@ void vp9_get_ref_frame_info(FRAME_UPDATE_TYPE update_type, int ref_frame_flags,
 
 void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv);
 
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
+                                             YV12_BUFFER_CONFIG *dst, int bd);
+#else
+void vp9_scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
+                                             YV12_BUFFER_CONFIG *dst);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(
     VP9_COMMON *cm, YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled,
     YV12_BUFFER_CONFIG *scaled_temp, INTERP_FILTER filter_type,
