@@ -744,7 +744,7 @@ if (vpx_config("CONFIG_ENCODERS") eq "yes") {
 add_proto qw/void vpx_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
 specialize qw/vpx_subtract_block neon msa mmi sse2 avx2 vsx lsx/;
 
-add_proto qw/int64_t/, "vpx_sse", "const uint8_t *a, int a_stride, const uint8_t *b,int b_stride, int width, int height";
+add_proto qw/int64_t/, "vpx_sse", "const uint8_t *src, int src_stride, const uint8_t *ref, int ref_stride, int width, int height";
 specialize qw/vpx_sse sse4_1 avx2 neon neon_dotprod/;
 
 #

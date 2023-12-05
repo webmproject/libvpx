@@ -763,7 +763,7 @@ TEST(EncodeAPI, ConfigLargeTargetBitrateVp9) {
 // Emulates the WebCodecs VideoEncoder interface.
 class VP9Encoder {
  public:
-  VP9Encoder(int speed) : speed_(speed) {}
+  explicit VP9Encoder(int speed) : speed_(speed) {}
   ~VP9Encoder();
 
   void Configure(unsigned int threads, unsigned int width, unsigned int height,

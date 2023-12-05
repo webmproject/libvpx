@@ -19,6 +19,7 @@
 #include "./vpx_dsp_rtcd.h"
 
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/mem.h"
 
 int64_t vpx_sse_c(const uint8_t *a, int a_stride, const uint8_t *b,
                   int b_stride, int width, int height) {
