@@ -8,8 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <smmintrin.h>
 #include <immintrin.h>
+#include <smmintrin.h>
+#include <stdint.h>
 
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
