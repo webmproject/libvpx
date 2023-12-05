@@ -3077,12 +3077,11 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
 #endif
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
-                                                YV12_BUFFER_CONFIG *dst,
-                                                int bd) {
+void vp9_scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
+                                             YV12_BUFFER_CONFIG *dst, int bd) {
 #else
-static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
-                                                YV12_BUFFER_CONFIG *dst) {
+void vp9_scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
+                                             YV12_BUFFER_CONFIG *dst) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   // TODO(dkovalev): replace YV12_BUFFER_CONFIG with vpx_image_t
   int i;
@@ -3127,6 +3126,23 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int src_h = src->y_crop_height;
   const int dst_w = dst->y_crop_width;
   const int dst_h = dst->y_crop_height;
+
+  // The issue b/311394513 reveals a corner case bug.
+  // For bd = 8, vpx_scaled_2d() requires both x_step_q4 and y_step_q4 are less
+  // than or equal to 64. For bd >= 10, vpx_highbd_convolve8() requires both
+  // x_step_q4 and y_step_q4 are less than or equal to 32. If this condition
+  // isn't met, it needs to call vp9_scale_and_extend_frame_nonnormative() that
+  // supports arbitrary scaling.
+  const int x_step_q4 = 16 * src_w / dst_w;
+  const int y_step_q4 = 16 * src_h / dst_h;
+  const int is_arbitrary_scaling =
+      (bd == 8 && (x_step_q4 > 64 || y_step_q4 > 64)) ||
+      (bd >= 10 && (x_step_q4 > 32 || y_step_q4 > 32));
+  if (is_arbitrary_scaling) {
+    vp9_scale_and_extend_frame_nonnormative(src, dst, bd);
+    return;
+  }
+
   const uint8_t *const srcs[3] = { src->y_buffer, src->u_buffer,
                                    src->v_buffer };
   const int src_strides[3] = { src->y_stride, src->uv_stride, src->uv_stride };
@@ -4990,13 +5006,14 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(
         scale_and_extend_frame(unscaled, scaled, (int)cm->bit_depth,
                                filter_type, phase_scaler);
     else
-      scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
+      vp9_scale_and_extend_frame_nonnormative(unscaled, scaled,
+                                              (int)cm->bit_depth);
 #else
     if (use_normative_scaler && unscaled->y_width <= (scaled->y_width << 1) &&
         unscaled->y_height <= (scaled->y_height << 1))
       vp9_scale_and_extend_frame(unscaled, scaled, filter_type, phase_scaler);
     else
-      scale_and_extend_frame_nonnormative(unscaled, scaled);
+      vp9_scale_and_extend_frame_nonnormative(unscaled, scaled);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     return scaled;
   } else {
