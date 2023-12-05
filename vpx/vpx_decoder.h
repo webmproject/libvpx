@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-#include "./vpx_codec.h"
+#include "./vpx_codec.h"  // IWYU pragma: export
 #include "./vpx_frame_buffer.h"
 
 /*!\brief Current ABI version number
