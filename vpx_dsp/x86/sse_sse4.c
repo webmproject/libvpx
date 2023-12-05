@@ -128,22 +128,6 @@ int64_t vpx_sse_sse4_1(const uint8_t *a, int a_stride, const uint8_t *b,
       } while (y < height);
       sse = summary_all_sse4(&sum);
       break;
-    case 128:
-      do {
-        sse_w16_sse4_1(&sum, a, b);
-        sse_w16_sse4_1(&sum, a + 16 * 1, b + 16 * 1);
-        sse_w16_sse4_1(&sum, a + 16 * 2, b + 16 * 2);
-        sse_w16_sse4_1(&sum, a + 16 * 3, b + 16 * 3);
-        sse_w16_sse4_1(&sum, a + 16 * 4, b + 16 * 4);
-        sse_w16_sse4_1(&sum, a + 16 * 5, b + 16 * 5);
-        sse_w16_sse4_1(&sum, a + 16 * 6, b + 16 * 6);
-        sse_w16_sse4_1(&sum, a + 16 * 7, b + 16 * 7);
-        a += a_stride;
-        b += b_stride;
-        y += 1;
-      } while (y < height);
-      sse = summary_all_sse4(&sum);
-      break;
     default:
       if (width & 0x07) {
         do {
@@ -281,37 +265,6 @@ int64_t vpx_highbd_sse_sse4_1(const uint8_t *a8, int a_stride,
         } while (l < 16 && l < (height - y));
         summary_32_sse4(&sum32, &sum);
         y += 16;
-      } while (y < height);
-      _mm_storel_epi64((__m128i *)&sse,
-                       _mm_add_epi64(sum, _mm_srli_si128(sum, 8)));
-      break;
-    case 128:
-      do {
-        int l = 0;
-        __m128i sum32 = _mm_setzero_si128();
-        do {
-          highbd_sse_w8_sse4_1(&sum32, a, b);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 1, b + 8 * 1);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 2, b + 8 * 2);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 3, b + 8 * 3);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 4, b + 8 * 4);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 5, b + 8 * 5);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 6, b + 8 * 6);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 7, b + 8 * 7);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 8, b + 8 * 8);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 9, b + 8 * 9);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 10, b + 8 * 10);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 11, b + 8 * 11);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 12, b + 8 * 12);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 13, b + 8 * 13);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 14, b + 8 * 14);
-          highbd_sse_w8_sse4_1(&sum32, a + 8 * 15, b + 8 * 15);
-          a += a_stride;
-          b += b_stride;
-          l += 1;
-        } while (l < 8 && l < (height - y));
-        summary_32_sse4(&sum32, &sum);
-        y += 8;
       } while (y < height);
       _mm_storel_epi64((__m128i *)&sse,
                        _mm_add_epi64(sum, _mm_srli_si128(sum, 8)));

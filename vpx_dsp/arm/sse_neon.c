@@ -84,29 +84,6 @@ static INLINE uint32_t sse_wxh_neon(const uint8_t *src, int src_stride,
   return horizontal_add_uint32x4(sse);
 }
 
-static INLINE uint32_t sse_128xh_neon(const uint8_t *src, int src_stride,
-                                      const uint8_t *ref, int ref_stride,
-                                      int height) {
-  uint32x4_t sse[2] = { vdupq_n_u32(0), vdupq_n_u32(0) };
-
-  int i = height;
-  do {
-    sse_16x1_neon(src, ref, &sse[0]);
-    sse_16x1_neon(src + 16, ref + 16, &sse[1]);
-    sse_16x1_neon(src + 32, ref + 32, &sse[0]);
-    sse_16x1_neon(src + 48, ref + 48, &sse[1]);
-    sse_16x1_neon(src + 64, ref + 64, &sse[0]);
-    sse_16x1_neon(src + 80, ref + 80, &sse[1]);
-    sse_16x1_neon(src + 96, ref + 96, &sse[0]);
-    sse_16x1_neon(src + 112, ref + 112, &sse[1]);
-
-    src += src_stride;
-    ref += ref_stride;
-  } while (--i != 0);
-
-  return horizontal_add_uint32x4(vaddq_u32(sse[0], sse[1]));
-}
-
 static INLINE uint32_t sse_64xh_neon(const uint8_t *src, int src_stride,
                                      const uint8_t *ref, int ref_stride,
                                      int height) {
@@ -203,7 +180,6 @@ int64_t vpx_sse_neon(const uint8_t *src, int src_stride, const uint8_t *ref,
     case 16: return sse_16xh_neon(src, src_stride, ref, ref_stride, height);
     case 32: return sse_32xh_neon(src, src_stride, ref, ref_stride, height);
     case 64: return sse_64xh_neon(src, src_stride, ref, ref_stride, height);
-    case 128: return sse_128xh_neon(src, src_stride, ref, ref_stride, height);
     default:
       return sse_wxh_neon(src, src_stride, ref, ref_stride, width, height);
   }

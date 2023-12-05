@@ -168,18 +168,6 @@ int64_t vpx_sse_avx2(const uint8_t *a, int a_stride, const uint8_t *b,
       } while (y < height);
       sse = summary_all_avx2(&sum);
       break;
-    case 128:
-      do {
-        sse_w32_avx2(&sum, a, b);
-        sse_w32_avx2(&sum, a + 32, b + 32);
-        sse_w32_avx2(&sum, a + 64, b + 64);
-        sse_w32_avx2(&sum, a + 96, b + 96);
-        a += a_stride;
-        b += b_stride;
-        y += 1;
-      } while (y < height);
-      sse = summary_all_avx2(&sum);
-      break;
     default:
       if ((width & 0x07) == 0) {
         do {
@@ -330,28 +318,6 @@ int64_t vpx_highbd_sse_avx2(const uint8_t *a8, int a_stride, const uint8_t *b8,
         } while (l < 32 && l < (height - y));
         summary_32_avx2(&sum32, &sum);
         y += 32;
-      } while (y < height);
-      sse = summary_4x64_avx2(sum);
-      break;
-    case 128:
-      do {
-        int l = 0;
-        __m256i sum32 = _mm256_setzero_si256();
-        do {
-          highbd_sse_w16_avx2(&sum32, a, b);
-          highbd_sse_w16_avx2(&sum32, a + 16 * 1, b + 16 * 1);
-          highbd_sse_w16_avx2(&sum32, a + 16 * 2, b + 16 * 2);
-          highbd_sse_w16_avx2(&sum32, a + 16 * 3, b + 16 * 3);
-          highbd_sse_w16_avx2(&sum32, a + 16 * 4, b + 16 * 4);
-          highbd_sse_w16_avx2(&sum32, a + 16 * 5, b + 16 * 5);
-          highbd_sse_w16_avx2(&sum32, a + 16 * 6, b + 16 * 6);
-          highbd_sse_w16_avx2(&sum32, a + 16 * 7, b + 16 * 7);
-          a += a_stride;
-          b += b_stride;
-          l += 1;
-        } while (l < 16 && l < (height - y));
-        summary_32_avx2(&sum32, &sum);
-        y += 16;
       } while (y < height);
       sse = summary_4x64_avx2(sum);
       break;
