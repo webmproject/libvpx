@@ -45,6 +45,7 @@ struct Vp8RCTestVideo {
 const Vp8RCTestVideo kVp8RCTestVectors[] = {
   Vp8RCTestVideo("niklas_640_480_30.yuv", 640, 480, 470),
   Vp8RCTestVideo("desktop_office1.1280_720-020.yuv", 1280, 720, 300),
+  Vp8RCTestVideo("hantro_collage_w352h288.yuv", 352, 288, 100),
 };
 
 class Vp8RcInterfaceTest
@@ -128,6 +129,9 @@ class Vp8RcInterfaceTest
         encoder->Control(VP8E_SET_CPUUSED, -6);
         encoder->Control(VP8E_SET_RTC_EXTERNAL_RATECTRL, 1);
         encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 1000);
+        if (rc_cfg_.is_screen) {
+          encoder->Control(VP8E_SET_SCREEN_CONTENT_MODE, 1);
+        }
       } else if (frame_params_.frame_type == libvpx::RcFrameType::kInterFrame) {
         // Disable golden frame update.
         frame_flags_ |= VP8_EFLAG_NO_UPD_GF;
@@ -161,6 +165,21 @@ class Vp8RcInterfaceTest
     test_video_ = GET_PARAM(2);
     target_bitrate_ = GET_PARAM(1);
     SetConfig();
+    rc_api_ = libvpx::VP8RateControlRTC::Create(rc_cfg_);
+    ASSERT_TRUE(rc_api_->UpdateRateControl(rc_cfg_));
+
+    ::libvpx_test::I420VideoSource video(test_video_.name, test_video_.width,
+                                         test_video_.height, 30, 1, 0,
+                                         test_video_.frames);
+
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  }
+
+  void RunOneLayerScreen() {
+    test_video_ = GET_PARAM(2);
+    target_bitrate_ = GET_PARAM(1);
+    SetConfig();
+    rc_cfg_.is_screen = true;
     rc_api_ = libvpx::VP8RateControlRTC::Create(rc_cfg_);
     ASSERT_TRUE(rc_api_->UpdateRateControl(rc_cfg_));
 
@@ -376,6 +395,8 @@ class Vp8RcInterfaceTest
 };
 
 TEST_P(Vp8RcInterfaceTest, OneLayer) { RunOneLayer(); }
+
+TEST_P(Vp8RcInterfaceTest, OneLayerScreen) { RunOneLayerScreen(); }
 
 TEST_P(Vp8RcInterfaceTest, OneLayerDropFrames) { RunOneLayerDropFrames(); }
 

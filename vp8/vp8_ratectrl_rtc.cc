@@ -141,7 +141,7 @@ bool VP8RateControlRTC::UpdateRateControl(
     cpi_->prior_key_frame_distance[i] =
         static_cast<int>(cpi_->output_framerate);
   }
-
+  oxcf->screen_content_mode = rc_cfg.is_screen;
   if (oxcf->number_of_layers > 1 || prev_number_of_layers > 1) {
     memcpy(oxcf->target_bitrate, rc_cfg.layer_target_bitrate,
            sizeof(rc_cfg.layer_target_bitrate));
