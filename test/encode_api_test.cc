@@ -850,6 +850,19 @@ TEST(EncodeAPI, Buganizer314857577) {
   encoder.Encode(false);
 }
 
+TEST(EncodeAPI, Buganizer312875957PredBufferStride) {
+  VP9Encoder encoder(-1);
+
+  encoder.Configure(12, 1678, 620, VPX_VBR, VPX_DL_REALTIME);
+  encoder.Encode(true);
+  encoder.Encode(false);
+  encoder.Configure(0, 456, 486, VPX_VBR, VPX_DL_REALTIME);
+  encoder.Encode(true);
+  encoder.Configure(0, 1678, 620, VPX_CBR, 1000000);
+  encoder.Encode(false);
+  encoder.Encode(false);
+}
+
 class EncodeApiGetTplStatsTest
     : public ::libvpx_test::EncoderTest,
       public ::testing::TestWithParam<const libvpx_test::CodecFactory *> {
