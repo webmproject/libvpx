@@ -100,7 +100,7 @@ void vp9_scale_and_extend_frame_c(const YV12_BUFFER_CONFIG *src,
     const int x_step_q4 = 16 * src_w / dst_w;
     const int y_step_q4 = 16 * src_h / dst_h;
     if (x_step_q4 > 64 || y_step_q4 > 64) {
-      // This funnction is only called while cm->bit_depth is VPX_BITS_8.
+      // This function is only called while cm->bit_depth is VPX_BITS_8.
 #if CONFIG_VP9_HIGHBITDEPTH
       vp9_scale_and_extend_frame_nonnormative(src, dst, (int)VPX_BITS_8);
 #else
