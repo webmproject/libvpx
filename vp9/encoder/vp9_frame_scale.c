@@ -9,10 +9,12 @@
  */
 
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/encoder/vp9_encoder.h"
+#include "vpx/vpx_codec.h"
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_scale/yv12config.h"
 
