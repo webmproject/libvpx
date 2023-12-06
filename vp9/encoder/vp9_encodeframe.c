@@ -3443,11 +3443,17 @@ static void simple_motion_search(const VP9_COMP *const cpi, MACROBLOCK *const x,
   MV ref_mv_full = { ref_mv.row >> 3, ref_mv.col >> 3 };
   MV best_mv = { 0, 0 };
   int cost_list[5];
+  struct buf_2d backup_pre[MAX_MB_PLANE] = { { 0, 0 } };
 
-  if (scaled_ref_frame)
+  if (scaled_ref_frame) {
     yv12 = scaled_ref_frame;
-  else
+    // As reported in b/311294795, the reference buffer pointer needs to be
+    // saved and restored after the search. Otherwise, it causes problems while
+    // the reference frame scaling happens.
+    for (int i = 0; i < MAX_MB_PLANE; i++) backup_pre[i] = xd->plane[i].pre[0];
+  } else {
     yv12 = get_ref_frame_buffer(cpi, ref);
+  }
 
   assert(yv12 != NULL);
   if (!yv12) return;
@@ -3463,6 +3469,11 @@ static void simple_motion_search(const VP9_COMP *const cpi, MACROBLOCK *const x,
   best_mv.col *= 8;
   x->mv_limits = tmp_mv_limits;
   mi->mv[0].as_mv = best_mv;
+
+  // Restore reference buffer pointer.
+  if (scaled_ref_frame) {
+    for (int i = 0; i < MAX_MB_PLANE; i++) xd->plane[i].pre[0] = backup_pre[i];
+  }
 
   set_ref_ptrs(cm, xd, mi->ref_frame[0], mi->ref_frame[1]);
   xd->plane[0].dst.buf = pred_buf;
