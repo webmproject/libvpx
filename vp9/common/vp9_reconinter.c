@@ -13,11 +13,12 @@
 #include "./vpx_scale_rtcd.h"
 #include "./vpx_config.h"
 
-#include "vpx/vpx_integer.h"
-
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
+
+#include "vpx/vpx_integer.h"
+#include "vpx_scale/yv12config.h"
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp9_highbd_build_inter_predictor(
