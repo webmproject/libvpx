@@ -23,6 +23,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vpx/vp8cx.h"
 #include "vp9/common/vp9_alloccommon.h"
+#include "vp9/common/vp9_scale.h"
 #include "vp9/vp9_cx_iface.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_lookahead.h"
