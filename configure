@@ -316,6 +316,7 @@ CONFIG_LIST="
     install_libs
     install_srcs
     debug
+    profile
     gprof
     gcov
     rvct
@@ -376,6 +377,7 @@ CMDLINE_SELECT="
     install_libs
     install_srcs
     debug
+    profile
     gprof
     gcov
     pic

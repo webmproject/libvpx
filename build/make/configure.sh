@@ -74,6 +74,8 @@ Build options:
   --cpu=CPU                   optimize for a specific cpu rather than a family
   --extra-cflags=ECFLAGS      add ECFLAGS to CFLAGS [$CFLAGS]
   --extra-cxxflags=ECXXFLAGS  add ECXXFLAGS to CXXFLAGS [$CXXFLAGS]
+  --use-profile=PROFILE_FILE
+                              Use PROFILE_FILE for PGO
   ${toggle_extra_warnings}    emit harmless warnings (always non-fatal)
   ${toggle_werror}            treat warnings as errors, if possible
                               (not available with all compilers)
@@ -81,6 +83,7 @@ Build options:
   ${toggle_pic}               turn on/off Position Independent Code
   ${toggle_ccache}            turn on/off compiler cache
   ${toggle_debug}             enable/disable debug mode
+  ${toggle_profile}           enable/disable profiling
   ${toggle_gprof}             enable/disable gprof profiling instrumentation
   ${toggle_gcov}              enable/disable gcov coverage instrumentation
   ${toggle_thumb}             enable/disable building arm assembly in thumb mode
@@ -628,6 +631,9 @@ process_common_cmdline() {
         ;;
       --extra-cxxflags=*)
         extra_cxxflags="${optval}"
+        ;;
+      --use-profile=*)
+        pgo_file=${optval}
         ;;
       --enable-?*|--disable-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
@@ -1503,6 +1509,14 @@ EOF
       ;;
   esac
 
+  # Enable PGO
+  if [ -n "${pgo_file}" ]; then
+   check_add_cflags -fprofile-use=${pgo_file} || \
+     die "-fprofile-use is not supported by compiler"
+   check_add_ldflags -fprofile-use=${pgo_file} || \
+     die "-fprofile-use is not supported by linker"
+  fi
+
   # Try to enable CPU specific tuning
   if [ -n "${tune_cpu}" ]; then
     if [ -n "${tune_cflags}" ]; then
@@ -1523,6 +1537,9 @@ EOF
   else
     check_add_cflags -DNDEBUG
   fi
+  enabled profile &&
+    check_add_cflags -fprofile-generate &&
+    check_add_ldflags -fprofile-generate
 
   enabled gprof && check_add_cflags -pg && check_add_ldflags -pg
   enabled gcov &&
