@@ -930,8 +930,9 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
 
     if (setjmp(ctx->cpi->common.error.jmp)) {
       ctx->cpi->common.error.setjmp = 0;
+      res = update_error_state(ctx, &ctx->cpi->common.error);
       vpx_clear_system_state();
-      return VPX_CODEC_CORRUPT_FRAME;
+      return res;
     }
     ctx->cpi->common.error.setjmp = 1;
 
