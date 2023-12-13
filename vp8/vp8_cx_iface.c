@@ -95,13 +95,16 @@ struct vpx_codec_alg_priv {
   vpx_enc_frame_flags_t control_frame_flags;
 };
 
+// Called by vp8e_set_config() and vp8e_encode() only. Must not be called
+// by vp8e_init() because the `error` paramerer (cpi->common.error) will be
+// destroyed by vpx_codec_enc_init_ver() after vp8e_init() returns an error.
+// See the "IMPORTANT" comment in vpx_codec_enc_init_ver().
 static vpx_codec_err_t update_error_state(
     vpx_codec_alg_priv_t *ctx, const struct vpx_internal_error_info *error) {
-  vpx_codec_err_t res;
+  const vpx_codec_err_t res = error->error_code;
 
-  if ((res = error->error_code)) {
+  if (res != VPX_CODEC_OK)
     ctx->base.err_detail = error->has_detail ? error->detail : NULL;
-  }
 
   return res;
 }

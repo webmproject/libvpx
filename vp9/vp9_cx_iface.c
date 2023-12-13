@@ -133,7 +133,9 @@ struct vpx_codec_alg_priv {
 };
 
 // Called by encoder_set_config() and encoder_encode() only. Must not be called
-// by encoder_init().
+// by encoder_init() because the `error` paramerer (cpi->common.error) will be
+// destroyed by vpx_codec_enc_init_ver() after encoder_init() returns an error.
+// See the "IMPORTANT" comment in vpx_codec_enc_init_ver().
 static vpx_codec_err_t update_error_state(
     vpx_codec_alg_priv_t *ctx, const struct vpx_internal_error_info *error) {
   const vpx_codec_err_t res = error->error_code;
