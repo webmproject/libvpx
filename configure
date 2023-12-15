@@ -677,6 +677,10 @@ process_toolchain() {
         # would be needed to apply this only to test/*.cc.
         check_cflags -Wshorten-64-to-32 && add_cflags_only -Wshorten-64-to-32
 
+        # Do not allow implicit vector type conversions on Clang builds (this
+        # is already the default on GCC builds).
+        check_add_cflags -flax-vector-conversions=none
+
         # Quiet gcc 6 vs 7 abi warnings:
         # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77728
         if enabled arm; then
