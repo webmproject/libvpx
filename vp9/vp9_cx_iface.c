@@ -2005,6 +2005,15 @@ static vpx_codec_err_t ctrl_set_quantizer_one_pass(vpx_codec_alg_priv_t *ctx,
   return res;
 }
 
+static vpx_codec_err_t ctrl_enable_external_rc_tpl(vpx_codec_alg_priv_t *ctx,
+                                                   va_list args) {
+  VP9_COMP *const cpi = ctx->cpi;
+  const int enable_flag = va_arg(args, int);
+  if (enable_flag != 0 && enable_flag != 1) return VPX_CODEC_INVALID_PARAM;
+  cpi->tpl_with_external_rc = enable_flag;
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP8_COPY_REFERENCE, ctrl_copy_reference },
 
@@ -2060,6 +2069,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_RTC_EXTERNAL_RATECTRL, ctrl_set_rtc_external_ratectrl },
   { VP9E_SET_EXTERNAL_RATE_CONTROL, ctrl_set_external_rate_control },
   { VP9E_SET_QUANTIZER_ONE_PASS, ctrl_set_quantizer_one_pass },
+  { VP9E_ENABLE_EXTERNAL_RC_TPL, ctrl_enable_external_rc_tpl },
 
   // Getters
   { VP8E_GET_LAST_QUANTIZER, ctrl_get_quantizer },

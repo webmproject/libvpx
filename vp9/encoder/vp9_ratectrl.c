@@ -1680,9 +1680,41 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
     cpi->twopass.gf_group.index = idx;
     vp9_rc_set_frame_target(cpi, target_rate);
     vp9_configure_buffer_updates(cpi, idx);
-    tpl_frame->base_qindex =
-        rc_pick_q_and_bounds_two_pass(cpi, &bottom_index, &top_index, idx);
-    tpl_frame->base_qindex = VPXMAX(tpl_frame->base_qindex, 1);
+    if (cpi->tpl_with_external_rc) {
+      if (cpi->ext_ratectrl.ready &&
+          (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0 &&
+          cpi->ext_ratectrl.funcs.get_encodeframe_decision != NULL) {
+        VP9_COMMON *cm = &cpi->common;
+        vpx_codec_err_t codec_status;
+        const GF_GROUP *gf_group = &cpi->twopass.gf_group;
+        vpx_rc_encodeframe_decision_t encode_frame_decision;
+        FRAME_UPDATE_TYPE update_type = gf_group->update_type[gf_group->index];
+        RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES];
+        const RefCntBuffer *curr_frame_buf =
+            get_ref_cnt_buffer(cm, cm->new_fb_idx);
+        // index 0 of a gf group is always KEY/OVERLAY/GOLDEN.
+        // index 1 refers to the first encoding frame in a gf group.
+        // Therefore if it is ARF_UPDATE, it means this gf group uses alt ref.
+        // See function define_gf_group_structure().
+        const int use_alt_ref = gf_group->update_type[1] == ARF_UPDATE;
+        const int frame_coding_index = cm->current_frame_coding_index + idx - 1;
+        get_ref_frame_bufs(cpi, ref_frame_bufs);
+        codec_status = vp9_extrc_get_encodeframe_decision(
+            &cpi->ext_ratectrl, curr_frame_buf->frame_index, frame_coding_index,
+            gf_group->index, update_type, gf_group->gf_group_size, use_alt_ref,
+            ref_frame_bufs, 0 /*ref_frame_flags is not used*/,
+            &encode_frame_decision);
+        if (codec_status != VPX_CODEC_OK) {
+          vpx_internal_error(&cm->error, codec_status,
+                             "vp9_extrc_get_encodeframe_decision() failed");
+        }
+        tpl_frame->base_qindex = encode_frame_decision.q_index;
+      }
+    } else {
+      tpl_frame->base_qindex =
+          rc_pick_q_and_bounds_two_pass(cpi, &bottom_index, &top_index, idx);
+      tpl_frame->base_qindex = VPXMAX(tpl_frame->base_qindex, 1);
+    }
   }
   // Reset the actual index and frame update
   cpi->twopass.gf_group.index = gf_index;
