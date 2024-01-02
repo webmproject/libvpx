@@ -22,14 +22,23 @@
 #include "vpx_ports/system_state.h"
 
 #include "vp9/common/vp9_alloccommon.h"
-#include "vp9/encoder/vp9_aq_cyclicrefresh.h"
+#include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_encoder.h"
+#include "vp9/encoder/vp9_ext_ratectrl.h"
+#include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_ratectrl.h"
+
+#include "vpx/vpx_codec.h"
+#include "vpx/vpx_ext_ratectrl.h"
+#include "vpx/internal/vpx_codec_internal.h"
 
 // Max rate per frame for 1080P and below encodes if no level requirement given.
 // For larger formats limit to MAX_MB_RATE bits per MB
