@@ -1690,10 +1690,10 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
     vp9_rc_set_frame_target(cpi, target_rate);
     vp9_configure_buffer_updates(cpi, idx);
     if (cpi->tpl_with_external_rc) {
+      VP9_COMMON *cm = &cpi->common;
       if (cpi->ext_ratectrl.ready &&
           (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0 &&
           cpi->ext_ratectrl.funcs.get_encodeframe_decision != NULL) {
-        VP9_COMMON *cm = &cpi->common;
         vpx_codec_err_t codec_status;
         const GF_GROUP *gf_group = &cpi->twopass.gf_group;
         vpx_rc_encodeframe_decision_t encode_frame_decision;
@@ -1711,13 +1711,16 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
         codec_status = vp9_extrc_get_encodeframe_decision(
             &cpi->ext_ratectrl, curr_frame_buf->frame_index, frame_coding_index,
             gf_group->index, update_type, gf_group->gf_group_size, use_alt_ref,
-            ref_frame_bufs, 0 /*ref_frame_flags is not used*/,
-            &encode_frame_decision);
+            ref_frame_bufs, /*ref_frame_flags=*/0, &encode_frame_decision);
         if (codec_status != VPX_CODEC_OK) {
           vpx_internal_error(&cm->error, codec_status,
                              "vp9_extrc_get_encodeframe_decision() failed");
         }
         tpl_frame->base_qindex = encode_frame_decision.q_index;
+      } else {
+        vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
+                           "The external rate control library is not set "
+                           "properly for TPL pass.");
       }
     } else {
       tpl_frame->base_qindex =
