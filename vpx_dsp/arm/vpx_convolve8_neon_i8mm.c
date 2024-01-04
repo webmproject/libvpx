@@ -1093,24 +1093,25 @@ void vpx_convolve8_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
                              int h) {
   // Given our constraints: w <= 64, h <= 64, taps <= 8 we can reduce the
   // maximum buffer size to 64 * (64 + 7).
-  uint8_t temp[64 * 71];
+  DECLARE_ALIGNED(32, uint8_t, im_block[64 * 71]);
+  const int im_stride = 64;
 
   const int vert_filter_taps = vpx_get_filter_taps(filter[y0_q4]) <= 4 ? 4 : 8;
   // Account for the vertical phase needing vert_filter_taps / 2 - 1 lines prior
   // and vert_filter_taps / 2 lines post.
-  const int intermediate_height = h + vert_filter_taps - 1;
+  const int im_height = h + vert_filter_taps - 1;
   const ptrdiff_t border_offset = vert_filter_taps / 2 - 1;
 
   assert(y_step_q4 == 16);
   assert(x_step_q4 == 16);
 
   vpx_convolve8_2d_horiz_neon_i8mm(src - src_stride * border_offset, src_stride,
-                                   temp, w, filter, x0_q4, x_step_q4, y0_q4,
-                                   y_step_q4, w, intermediate_height);
+                                   im_block, im_stride, filter, x0_q4,
+                                   x_step_q4, y0_q4, y_step_q4, w, im_height);
 
-  vpx_convolve8_vert_neon_i8mm(temp + w * border_offset, w, dst, dst_stride,
-                               filter, x0_q4, x_step_q4, y0_q4, y_step_q4, w,
-                               h);
+  vpx_convolve8_vert_neon_i8mm(im_block + im_stride * border_offset, im_stride,
+                               dst, dst_stride, filter, x0_q4, x_step_q4, y0_q4,
+                               y_step_q4, w, h);
 }
 
 void vpx_convolve8_avg_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
@@ -1118,19 +1119,22 @@ void vpx_convolve8_avg_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
                                  const InterpKernel *filter, int x0_q4,
                                  int x_step_q4, int y0_q4, int y_step_q4, int w,
                                  int h) {
-  uint8_t temp[64 * 71];
+  DECLARE_ALIGNED(32, uint8_t, im_block[64 * 71]);
+  const int im_stride = 64;
 
   // Averaging convolution always uses an 8-tap filter.
   // Account for the vertical phase needing 3 lines prior and 4 lines post.
-  const int intermediate_height = h + 7;
+  const int im_height = h + SUBPEL_TAPS - 1;
+  const ptrdiff_t border_offset = SUBPEL_TAPS / 2 - 1;
 
   assert(y_step_q4 == 16);
   assert(x_step_q4 == 16);
 
-  vpx_convolve8_2d_horiz_neon_i8mm(src - src_stride * 3, src_stride, temp, w,
-                                   filter, x0_q4, x_step_q4, y0_q4, y_step_q4,
-                                   w, intermediate_height);
+  vpx_convolve8_2d_horiz_neon_i8mm(src - src_stride * border_offset, src_stride,
+                                   im_block, im_stride, filter, x0_q4,
+                                   x_step_q4, y0_q4, y_step_q4, w, im_height);
 
-  vpx_convolve8_avg_vert_neon_i8mm(temp + w * 3, w, dst, dst_stride, filter,
-                                   x0_q4, x_step_q4, y0_q4, y_step_q4, w, h);
+  vpx_convolve8_avg_vert_neon_i8mm(im_block + im_stride * border_offset,
+                                   im_stride, dst, dst_stride, filter, x0_q4,
+                                   x_step_q4, y0_q4, y_step_q4, w, h);
 }
