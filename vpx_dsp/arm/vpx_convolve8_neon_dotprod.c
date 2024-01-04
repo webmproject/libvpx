@@ -19,6 +19,9 @@
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
 
+/* Filter values always sum to 128. */
+#define FILTER_SUM 128
+
 DECLARE_ALIGNED(16, static const uint8_t, dot_prod_permute_tbl[48]) = {
   0, 1, 2,  3,  1, 2,  3,  4,  2,  3,  4,  5,  3,  4,  5,  6,
   4, 5, 6,  7,  5, 6,  7,  8,  6,  7,  8,  9,  7,  8,  9,  10,
@@ -331,9 +334,6 @@ static INLINE void vpx_convolve8_2d_horiz_neon_dotprod(
     const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
     ptrdiff_t dst_stride, const InterpKernel *filter, int x0_q4, int x_step_q4,
     int y0_q4, int y_step_q4, int w, int h) {
-  const int8x8_t x_filter_8tap = vmovn_s16(vld1q_s16(filter[x0_q4]));
-  const int32x4_t correction_8tap =
-      vdupq_n_s32(vaddlvq_s16(vshll_n_s8(x_filter_8tap, FILTER_BITS)));
   const uint8x16_t range_limit = vdupq_n_u8(128);
 
   assert((intptr_t)dst % 4 == 0);
@@ -345,18 +345,23 @@ static INLINE void vpx_convolve8_2d_horiz_neon_dotprod(
   (void)y_step_q4;
 
   if (vpx_get_filter_taps(filter[x0_q4]) <= 4) {
-    /* All 4-tap and bilinear filter values are even, so halve them to reduce
-     * intermediate precision requirements. Also slide the filter values so the
-     * the 4 taps exist in the first 4 elements of the vector.
+    /* Load 4-tap filter into first 4 elements of the vector.
+     * All 4-tap and bilinear filter values are even, so halve them to reduce
+     * intermediate precision requirements.
      */
+    const int16x4_t x_filter = vld1_s16(filter[x0_q4] + 2);
     const int8x8_t x_filter_4tap =
-        vext_s8(vshr_n_s8(x_filter_8tap, 1), vdup_n_s8(0), 2);
-    const int32x4_t correction_4tap = vshrq_n_s32(correction_8tap, 1);
+        vshrn_n_s16(vcombine_s16(x_filter, vdup_n_s16(0)), 1);
+    const int32x4_t correction_4tap = vdupq_n_s32((128 * FILTER_SUM) / 2);
+
     vpx_convolve_4tap_2d_horiz_neon_dotprod(src - 1, src_stride, dst,
                                             dst_stride, w, h, x_filter_4tap,
                                             correction_4tap, range_limit);
 
   } else {
+    const int8x8_t x_filter_8tap = vmovn_s16(vld1q_s16(filter[x0_q4]));
+    const int32x4_t correction_8tap = vdupq_n_s32(128 * FILTER_SUM);
+
     vpx_convolve_8tap_2d_horiz_neon_dotprod(src - 3, src_stride, dst,
                                             dst_stride, w, h, x_filter_8tap,
                                             correction_8tap, range_limit);
@@ -489,9 +494,6 @@ void vpx_convolve8_horiz_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
                                       const InterpKernel *filter, int x0_q4,
                                       int x_step_q4, int y0_q4, int y_step_q4,
                                       int w, int h) {
-  const int8x8_t x_filter_8tap = vmovn_s16(vld1q_s16(filter[x0_q4]));
-  const int32x4_t correction_8tap =
-      vdupq_n_s32(vaddlvq_s16(vshll_n_s8(x_filter_8tap, FILTER_BITS)));
   const uint8x16_t range_limit = vdupq_n_u8(128);
 
   assert((intptr_t)dst % 4 == 0);
@@ -503,18 +505,23 @@ void vpx_convolve8_horiz_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
   (void)y_step_q4;
 
   if (vpx_get_filter_taps(filter[x0_q4]) <= 4) {
-    /* All 4-tap and bilinear filter values are even, so halve them to reduce
-     * intermediate precision requirements. Also slide the filter values so the
-     * the 4 taps exist in the first 4 elements of the vector.
+    /* Load 4-tap filter into first 4 elements of the vector.
+     * All 4-tap and bilinear filter values are even, so halve them to reduce
+     * intermediate precision requirements.
      */
+    const int16x4_t x_filter = vld1_s16(filter[x0_q4] + 2);
     const int8x8_t x_filter_4tap =
-        vext_s8(vshr_n_s8(x_filter_8tap, 1), vdup_n_s8(0), 2);
-    const int32x4_t correction_4tap = vshrq_n_s32(correction_8tap, 1);
+        vshrn_n_s16(vcombine_s16(x_filter, vdup_n_s16(0)), 1);
+    const int32x4_t correction_4tap = vdupq_n_s32((128 * FILTER_SUM) / 2);
+
     vpx_convolve_4tap_horiz_neon_dotprod(src - 1, src_stride, dst, dst_stride,
                                          w, h, x_filter_4tap, correction_4tap,
                                          range_limit);
 
   } else {
+    const int8x8_t x_filter_8tap = vmovn_s16(vld1q_s16(filter[x0_q4]));
+    const int32x4_t correction_8tap = vdupq_n_s32(128 * FILTER_SUM);
+
     vpx_convolve_8tap_horiz_neon_dotprod(src - 3, src_stride, dst, dst_stride,
                                          w, h, x_filter_8tap, correction_8tap,
                                          range_limit);
@@ -528,8 +535,7 @@ void vpx_convolve8_avg_horiz_neon_dotprod(const uint8_t *src,
                                           int x_step_q4, int y0_q4,
                                           int y_step_q4, int w, int h) {
   const int8x8_t filters = vmovn_s16(vld1q_s16(filter[x0_q4]));
-  const int16x8_t correct_tmp = vmulq_n_s16(vld1q_s16(filter[x0_q4]), 128);
-  const int32x4_t correction = vdupq_n_s32((int32_t)vaddvq_s16(correct_tmp));
+  const int32x4_t correction = vdupq_n_s32(128 << FILTER_BITS);
   const uint8x16_t range_limit = vdupq_n_u8(128);
   uint8x16_t s0, s1, s2, s3;
 
@@ -1045,9 +1051,6 @@ void vpx_convolve8_vert_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
                                      const InterpKernel *filter, int x0_q4,
                                      int x_step_q4, int y0_q4, int y_step_q4,
                                      int w, int h) {
-  const int8x8_t y_filter_8tap = vmovn_s16(vld1q_s16(filter[y0_q4]));
-  const int32x4_t correction_8tap =
-      vdupq_n_s32(vaddlvq_s16(vshll_n_s8(y_filter_8tap, FILTER_BITS)));
   const uint8x8_t range_limit = vdup_n_u8(128);
 
   assert((intptr_t)dst % 4 == 0);
@@ -1059,17 +1062,22 @@ void vpx_convolve8_vert_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
   (void)y_step_q4;
 
   if (vpx_get_filter_taps(filter[y0_q4]) <= 4) {
-    /* All 4-tap and bilinear filter values are even, so halve them to reduce
-     * intermediate precision requirements. Also slide the filter values so the
-     * the 4 taps exist in the first 4 elements of the vector.
+    /* Load 4-tap filter into first 4 elements of the vector.
+     * All 4-tap and bilinear filter values are even, so halve them to reduce
+     * intermediate precision requirements.
      */
+    const int16x4_t y_filter = vld1_s16(filter[y0_q4] + 2);
     const int8x8_t y_filter_4tap =
-        vext_s8(vshr_n_s8(y_filter_8tap, 1), vdup_n_s8(0), 2);
-    const int32x4_t correction_4tap = vshrq_n_s32(correction_8tap, 1);
+        vshrn_n_s16(vcombine_s16(y_filter, vdup_n_s16(0)), 1);
+    const int32x4_t correction_4tap = vdupq_n_s32((128 * FILTER_SUM) / 2);
+
     vpx_convolve_4tap_vert_neon_dotprod(src - src_stride, src_stride, dst,
                                         dst_stride, w, h, y_filter_4tap,
                                         correction_4tap, range_limit);
   } else {
+    const int8x8_t y_filter_8tap = vmovn_s16(vld1q_s16(filter[y0_q4]));
+    const int32x4_t correction_8tap = vdupq_n_s32(128 * FILTER_SUM);
+
     vpx_convolve_8tap_vert_neon_dotprod(src - 3 * src_stride, src_stride, dst,
                                         dst_stride, w, h, y_filter_8tap,
                                         correction_8tap, range_limit);
@@ -1083,8 +1091,7 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
                                          int x_step_q4, int y0_q4,
                                          int y_step_q4, int w, int h) {
   const int8x8_t filters = vmovn_s16(vld1q_s16(filter[y0_q4]));
-  const int16x8_t correct_tmp = vmulq_n_s16(vld1q_s16(filter[y0_q4]), 128);
-  const int32x4_t correction = vdupq_n_s32((int32_t)vaddvq_s16(correct_tmp));
+  const int32x4_t correction = vdupq_n_s32(128 * FILTER_SUM);
   const uint8x8_t range_limit = vdup_n_u8(128);
   const uint8x16x3_t merge_block_tbl = vld1q_u8_x3(dot_prod_merge_block_tbl);
   uint8x8_t t0, t1, t2, t3, t4, t5, t6;
