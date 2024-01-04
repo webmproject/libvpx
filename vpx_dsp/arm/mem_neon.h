@@ -155,7 +155,6 @@ static INLINE uint8x8_t load_unaligned_u8(const uint8_t *buf,
                                           ptrdiff_t stride) {
   uint32_t a;
   uint32x2_t a_u32;
-  if (stride == 4) return vld1_u8(buf);
   memcpy(&a, buf, 4);
   buf += stride;
   a_u32 = vdup_n_u32(a);
@@ -178,7 +177,6 @@ static INLINE uint16x8_t load_unaligned_u16q(const uint16_t *buf,
                                              ptrdiff_t stride) {
   uint64_t a;
   uint64x2_t a_u64;
-  if (stride == 4) return vld1q_u16(buf);
   memcpy(&a, buf, 8);
   buf += stride;
   a_u64 = vdupq_n_u64(a);
@@ -191,10 +189,6 @@ static INLINE uint16x8_t load_unaligned_u16q(const uint16_t *buf,
 static INLINE void store_unaligned_u8(uint8_t *buf, ptrdiff_t stride,
                                       const uint8x8_t a) {
   const uint32x2_t a_u32 = vreinterpret_u32_u8(a);
-  if (stride == 4) {
-    vst1_u8(buf, a);
-    return;
-  }
   uint32_to_mem(buf, vget_lane_u32(a_u32, 0));
   buf += stride;
   uint32_to_mem(buf, vget_lane_u32(a_u32, 1));
@@ -205,7 +199,6 @@ static INLINE uint8x16_t load_unaligned_u8q(const uint8_t *buf,
                                             ptrdiff_t stride) {
   uint32_t a;
   uint32x4_t a_u32;
-  if (stride == 4) return vld1q_u8(buf);
   memcpy(&a, buf, 4);
   buf += stride;
   a_u32 = vdupq_n_u32(a);
@@ -225,10 +218,6 @@ static INLINE uint8x16_t load_unaligned_u8q(const uint8_t *buf,
 static INLINE void store_unaligned_u8q(uint8_t *buf, ptrdiff_t stride,
                                        const uint8x16_t a) {
   const uint32x4_t a_u32 = vreinterpretq_u32_u8(a);
-  if (stride == 4) {
-    vst1q_u8(buf, a);
-    return;
-  }
   uint32_to_mem(buf, vgetq_lane_u32(a_u32, 0));
   buf += stride;
   uint32_to_mem(buf, vgetq_lane_u32(a_u32, 1));
