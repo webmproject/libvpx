@@ -10,6 +10,11 @@
     Various new features for rate control library for real-time: SVC parallel
     encoding, loopfilter level, support for frame dropping, and screen content.
 
+    New callback function send_tpl_gop_stats for vp9 external rate control
+    library, which can be used to transmit TPL stats for a group of pictures. A
+    public header vpx_tpl.h is added for the definition of TPL stats used in
+    this callback.
+
     libwebm is upgraded to libwebm-1.0.0.29-9-g1930e3c.
 
   - Enhancement:
