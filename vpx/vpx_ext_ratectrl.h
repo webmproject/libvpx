@@ -26,7 +26,7 @@ extern "C" {
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures.
  */
-#define VPX_EXT_RATECTRL_ABI_VERSION (7)
+#define VPX_EXT_RATECTRL_ABI_VERSION (5 + VPX_TPL_ABI_VERSION)
 
 /*!\brief The control type of the inference API.
  * In VPX_RC_QP mode, the external rate control model determines the

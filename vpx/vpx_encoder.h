@@ -31,7 +31,6 @@ extern "C" {
 
 #include "./vpx_codec.h"  // IWYU pragma: export
 #include "./vpx_ext_ratectrl.h"
-#include "./vpx_tpl.h"
 
 /*! Temporal Scalability: Maximum length of the sequence defining frame
  * layer membership
@@ -57,10 +56,15 @@ extern "C" {
  * must be bumped.  Examples include, but are not limited to, changing
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures
+ *
+ * \note
+ * VPX_ENCODER_ABI_VERSION has a VPX_EXT_RATECTRL_ABI_VERSION component
+ * because the VP9E_SET_EXTERNAL_RATE_CONTROL codec control uses
+ * vpx_rc_funcs_t.
  */
-#define VPX_ENCODER_ABI_VERSION                                \
-  (16 + VPX_CODEC_ABI_VERSION + VPX_EXT_RATECTRL_ABI_VERSION + \
-   VPX_TPL_ABI_VERSION) /**<\hideinitializer*/
+#define VPX_ENCODER_ABI_VERSION \
+  (18 + VPX_CODEC_ABI_VERSION + \
+   VPX_EXT_RATECTRL_ABI_VERSION) /**<\hideinitializer*/
 
 /*! \brief Encoder capabilities bitfield
  *
