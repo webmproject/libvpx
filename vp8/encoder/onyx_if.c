@@ -5120,6 +5120,14 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
   vpx_usec_timer_mark(&cmptimer);
   cpi->time_compress_data += vpx_usec_timer_elapsed(&cmptimer);
 
+#if CONFIG_MULTITHREAD
+  /* wait for the lpf thread done */
+  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded) && cpi->b_lpf_running) {
+    sem_wait(&cpi->h_event_end_lpf);
+    cpi->b_lpf_running = 0;
+  }
+#endif
+
   if (cpi->b_calculate_psnr && cpi->pass != 1 && cm->show_frame) {
     generate_psnr_packet(cpi);
   }
@@ -5248,14 +5256,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 #endif
 
   cpi->common.error.setjmp = 0;
-
-#if CONFIG_MULTITHREAD
-  /* wait for the lpf thread done */
-  if (vpx_atomic_load_acquire(&cpi->b_multi_threaded) && cpi->b_lpf_running) {
-    sem_wait(&cpi->h_event_end_lpf);
-    cpi->b_lpf_running = 0;
-  }
-#endif
 
   return 0;
 }
