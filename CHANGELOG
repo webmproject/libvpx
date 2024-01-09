@@ -44,7 +44,7 @@
     Fix mask in vp9_quantize_avx2,highbd_get_max_lane_eob.
     Fix to int overflow in vp9_calc_pframe_target_size_one_pass_cbr.
     Fix to integer overflow in vp8,ratectrl.c.
-    Fix to interger overflow in vp9 svc.
+    Fix to integer overflow in vp9 svc.
     Fix to avg_frame_bandwidth overflow.
     Fix to per frame qp for temporal layers.
     Fix to unsigned integer overflow in sse computation.
