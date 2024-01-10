@@ -499,6 +499,48 @@ TEST(EncodeAPI, ConfigResizeChangeThreadCount) {
   }
 }
 
+TEST(EncodeAPI, ConfigResizeBiggerAfterInit) {
+  for (const auto *iface : kCodecIfaces) {
+    SCOPED_TRACE(vpx_codec_iface_name(iface));
+    vpx_codec_enc_cfg_t cfg;
+    vpx_codec_ctx_t enc;
+
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+    EXPECT_NO_FATAL_FAILURE(InitCodec(*iface, 1, 1, &enc, &cfg));
+
+    cfg.g_w = 1920;
+    cfg.g_h = 1;
+    EXPECT_EQ(vpx_codec_enc_config_set(&enc, &cfg),
+              IsVP9(iface) ? VPX_CODEC_OK : VPX_CODEC_INVALID_PARAM);
+
+    EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  }
+}
+
+TEST(EncodeAPI, ConfigResizeBiggerAfterEncode) {
+  for (const auto *iface : kCodecIfaces) {
+    SCOPED_TRACE(vpx_codec_iface_name(iface));
+    vpx_codec_enc_cfg_t cfg;
+    vpx_codec_ctx_t enc;
+
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+    EXPECT_NO_FATAL_FAILURE(InitCodec(*iface, 1, 1, &enc, &cfg));
+    EXPECT_NO_FATAL_FAILURE(EncodeWithConfig(cfg, &enc));
+
+    cfg.g_w = 1920;
+    cfg.g_h = 1;
+    EXPECT_EQ(vpx_codec_enc_config_set(&enc, &cfg),
+              IsVP9(iface) ? VPX_CODEC_OK : VPX_CODEC_INVALID_PARAM);
+
+    cfg.g_w = 1920;
+    cfg.g_h = 1080;
+    EXPECT_EQ(vpx_codec_enc_config_set(&enc, &cfg),
+              IsVP9(iface) ? VPX_CODEC_OK : VPX_CODEC_INVALID_PARAM);
+
+    EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  }
+}
+
 #if CONFIG_VP9_ENCODER
 // Frame size needed to trigger the overflow exceeds the max buffer allowed on
 // 32-bit systems defined by VPX_MAX_ALLOCABLE_MEMORY
@@ -944,6 +986,13 @@ TEST(EncodeAPI, Buganizer311294795) {
   encoder.Encode(false);
   encoder.Encode(false);
 }
+
+TEST(EncodeAPI, Buganizer317105128) {
+  VP9Encoder encoder(-9);
+  encoder.Configure(0, 1, 1, VPX_CBR, VPX_DL_GOOD_QUALITY);
+  encoder.Configure(16, 1920, 1, VPX_CBR, VPX_DL_REALTIME);
+}
+
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
