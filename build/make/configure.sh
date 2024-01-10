@@ -429,6 +429,24 @@ check_gcc_machine_options() {
   fi
 }
 
+check_neon_sve_bridge_compiles() {
+  if enabled sve; then
+    check_cc -march=armv8.2-a+dotprod+i8mm+sve <<EOF
+#ifndef __ARM_NEON_SVE_BRIDGE
+#error 1
+#endif
+#include <arm_sve.h>
+#include <arm_neon_sve_bridge.h>
+EOF
+    compile_result=$?
+    if [ ${compile_result} -ne 0 ]; then
+      log_echo "  disabling sve: arm_neon_sve_bridge.h not supported by compiler"
+      disable_feature sve
+      RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sve "
+    fi
+  fi
+}
+
 check_gcc_avx512_compiles() {
   if disabled gcc; then
     return
@@ -996,6 +1014,7 @@ EOF
               soft_enable $ext
             fi
           done
+          check_neon_sve_bridge_compiles
           ;;
         armv7|armv7s)
           soft_enable neon
