@@ -213,7 +213,92 @@ TEST(EncodeAPI, RandomPixelsVp8) {
   // Destroy libvpx encoder
   vpx_codec_destroy(&enc);
 }
-#endif
+
+TEST(EncodeAPI, ChangeToL1T3AndSetBitrateVp8) {
+  // Initialize libvpx encoder
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_threads = 1;
+  cfg.g_profile = 0;
+  cfg.g_w = 1;
+  cfg.g_h = 64;
+  cfg.g_bit_depth = VPX_BITS_8;
+  cfg.g_input_bit_depth = 8;
+  cfg.g_timebase.num = 1;
+  cfg.g_timebase.den = 1000000;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_dropframe_thresh = 0;  // Don't drop frames
+  cfg.rc_resize_allowed = 0;
+  cfg.rc_end_usage = VPX_VBR;
+  cfg.rc_target_bitrate = 10;
+  cfg.rc_min_quantizer = 2;
+  cfg.rc_max_quantizer = 58;
+  cfg.kf_mode = VPX_KF_AUTO;
+  cfg.kf_min_dist = 0;
+  cfg.kf_max_dist = 10000;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, -6), VPX_CODEC_OK);
+
+  // Generate random frame data and encode
+  uint8_t img[1 * 64 * 3 / 2];
+  libvpx_test::ACMRandom rng;
+  for (size_t i = 0; i < sizeof(img); ++i) {
+    img[i] = rng.Rand8();
+  }
+  vpx_image_t img_wrapper;
+  ASSERT_EQ(
+      vpx_img_wrap(&img_wrapper, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h, 1, img),
+      &img_wrapper);
+  vpx_enc_frame_flags_t flags = VPX_EFLAG_FORCE_KF;
+  ASSERT_EQ(
+      vpx_codec_encode(&enc, &img_wrapper, 0, 500000, flags, VPX_DL_REALTIME),
+      VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_encode(&enc, nullptr, -1, 0, 0, 0), VPX_CODEC_OK);
+
+  cfg.rc_target_bitrate = 4294967;
+  // Set the scalability mode to L1T3.
+  cfg.ts_number_layers = 3;
+  cfg.ts_periodicity = 4;
+  cfg.ts_layer_id[0] = 0;
+  cfg.ts_layer_id[1] = 2;
+  cfg.ts_layer_id[2] = 1;
+  cfg.ts_layer_id[3] = 2;
+  cfg.ts_rate_decimator[0] = 4;
+  cfg.ts_rate_decimator[1] = 2;
+  cfg.ts_rate_decimator[2] = 1;
+  // Bitrate allocation L0: 50% L1: 20% L2: 30%
+  cfg.layer_target_bitrate[0] = cfg.ts_target_bitrate[0] =
+      50 * cfg.rc_target_bitrate / 100;
+  cfg.layer_target_bitrate[1] = cfg.ts_target_bitrate[1] =
+      70 * cfg.rc_target_bitrate / 100;
+  cfg.layer_target_bitrate[2] = cfg.ts_target_bitrate[2] =
+      cfg.rc_target_bitrate;
+  cfg.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_0212;
+  cfg.g_error_resilient = VPX_ERROR_RESILIENT_DEFAULT;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_TEMPORAL_LAYER_ID, 2),
+            VPX_CODEC_OK);
+
+  constexpr vpx_enc_frame_flags_t VP8_UPDATE_NOTHING =
+      VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_LAST;
+  // Layer 2: only reference last frame, no updates
+  // It only depends on layer 0
+  flags = VP8_UPDATE_NOTHING | VP8_EFLAG_NO_REF_ARF | VP8_EFLAG_NO_REF_GF;
+  ASSERT_EQ(
+      vpx_codec_encode(&enc, &img_wrapper, 0, 500000, flags, VPX_DL_REALTIME),
+      VPX_CODEC_OK);
+
+  // Destroy libvpx encoder
+  vpx_codec_destroy(&enc);
+}
+#endif  // CONFIG_VP8_ENCODER
 
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
 // invalid configuration by setting the temporal layer rate allocation

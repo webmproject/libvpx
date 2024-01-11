@@ -267,7 +267,11 @@ static int rescale(int val, int num, int denom) {
   int64_t llden = denom;
   int64_t llval = val;
 
-  return (int)(llval * llnum / llden);
+  int64_t result = (llval * llnum / llden);
+  if (result <= INT_MAX)
+    return (int)result;
+  else
+    return INT_MAX;
 }
 
 void vp8_init_temporal_layer_context(VP8_COMP *cpi, const VP8_CONFIG *oxcf,
@@ -276,7 +280,10 @@ void vp8_init_temporal_layer_context(VP8_COMP *cpi, const VP8_CONFIG *oxcf,
   LAYER_CONTEXT *lc = &cpi->layer_context[layer];
 
   lc->framerate = cpi->output_framerate / cpi->oxcf.rate_decimator[layer];
-  lc->target_bandwidth = cpi->oxcf.target_bitrate[layer] * 1000;
+  if (cpi->oxcf.target_bitrate[layer] > INT_MAX / 1000)
+    lc->target_bandwidth = INT_MAX;
+  else
+    lc->target_bandwidth = cpi->oxcf.target_bitrate[layer] * 1000;
 
   lc->starting_buffer_level_in_ms = oxcf->starting_buffer_level;
   lc->optimal_buffer_level_in_ms = oxcf->optimal_buffer_level;
@@ -1381,7 +1388,10 @@ void vp8_update_layer_contexts(VP8_COMP *cpi) {
       LAYER_CONTEXT *lc = &cpi->layer_context[i];
 
       lc->framerate = cpi->ref_framerate / oxcf->rate_decimator[i];
-      lc->target_bandwidth = oxcf->target_bitrate[i] * 1000;
+      if (oxcf->target_bitrate[i] > INT_MAX / 1000)
+        lc->target_bandwidth = INT_MAX;
+      else
+        lc->target_bandwidth = oxcf->target_bitrate[i] * 1000;
 
       lc->starting_buffer_level = rescale(
           (int)oxcf->starting_buffer_level_in_ms, lc->target_bandwidth, 1000);
