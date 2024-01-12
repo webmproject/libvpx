@@ -3364,15 +3364,21 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
       cpi->rc.rate_correction_factors[INTER_NORMAL] = rate_correction_factor;
     }
     // For temporal layers, reset the rate control parametes across all
-    // temporal layers. If the first_spatial_layer_to_encode > 0, then this
-    // superframe has skipped lower base layers. So in this case we should also
-    // reset and force max-q for spatial layers < first_spatial_layer_to_encode.
+    // temporal layers, up to current temporal_layer_id.
+    // If the first_spatial_layer_to_encode > 0, then this superframe has
+    // skipped lower base layers. So in this case we should also reset and
+    // force max-q for spatial layers < first_spatial_layer_to_encode.
+    // For the case of no inter-layer prediction on delta frames: reset and
+    // force max-q for all spatial layers, to avoid excessive frame drops.
     if (cpi->use_svc) {
       int tl = 0;
       int sl = 0;
       SVC *svc = &cpi->svc;
-      for (sl = 0; sl < VPXMAX(1, svc->first_spatial_layer_to_encode); ++sl) {
-        for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
+      int num_spatial_layers = VPXMAX(1, svc->first_spatial_layer_to_encode);
+      if (svc->disable_inter_layer_pred != INTER_LAYER_PRED_ON)
+        num_spatial_layers = svc->number_spatial_layers;
+      for (sl = 0; sl < num_spatial_layers; ++sl) {
+        for (tl = 0; tl < svc->temporal_layer_id; ++tl) {
           const int layer =
               LAYER_IDS_TO_IDX(sl, tl, svc->number_temporal_layers);
           LAYER_CONTEXT *lc = &svc->layer_context[layer];
