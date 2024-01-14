@@ -1565,6 +1565,19 @@ INSTANTIATE_TEST_SUITE_P(
         MseParams(3, 3, &vpx_highbd_8_mse8x8_neon_dotprod, VPX_BITS_8)));
 #endif  // HAVE_NEON_DOTPROD
 
+#if HAVE_SVE
+INSTANTIATE_TEST_SUITE_P(
+    SVE, VpxHBDMseTest,
+    ::testing::Values(MseParams(4, 4, &vpx_highbd_12_mse16x16_sve, VPX_BITS_12),
+                      MseParams(4, 3, &vpx_highbd_12_mse16x8_sve, VPX_BITS_12),
+                      MseParams(3, 4, &vpx_highbd_12_mse8x16_sve, VPX_BITS_12),
+                      MseParams(3, 3, &vpx_highbd_12_mse8x8_sve, VPX_BITS_12),
+                      MseParams(4, 4, &vpx_highbd_10_mse16x16_sve, VPX_BITS_10),
+                      MseParams(4, 3, &vpx_highbd_10_mse16x8_sve, VPX_BITS_10),
+                      MseParams(3, 4, &vpx_highbd_10_mse8x16_sve, VPX_BITS_10),
+                      MseParams(3, 3, &vpx_highbd_10_mse8x8_sve, VPX_BITS_10)));
+#endif  // HAVE_SVE
+
 INSTANTIATE_TEST_SUITE_P(
     NEON, VpxHBDVarianceTest,
     ::testing::Values(

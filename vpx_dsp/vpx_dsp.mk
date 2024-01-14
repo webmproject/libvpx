@@ -455,6 +455,7 @@ DSP_SRCS-$(HAVE_NEON)   += arm/highbd_avg_pred_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/highbd_sse_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/highbd_variance_neon.c
 DSP_SRCS-$(HAVE_NEON_DOTPROD)   += arm/highbd_variance_neon_dotprod.c
+DSP_SRCS-$(HAVE_SVE)    += arm/highbd_variance_sve.c
 DSP_SRCS-$(HAVE_NEON)   += arm/highbd_subpel_variance_neon.c
 endif  # CONFIG_VP9_HIGHBITDEPTH
 endif  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
