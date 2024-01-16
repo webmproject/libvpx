@@ -1164,7 +1164,7 @@ void vp9_first_pass_encode_tile_mb_row(VP9_COMP *cpi, ThreadData *td,
         v_fn_ptr.vf = get_block_variance_fn(bsize);
 #if CONFIG_VP9_HIGHBITDEPTH
         if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-          v_fn_ptr.vf = highbd_get_block_variance_fn(bsize, 8);
+          v_fn_ptr.vf = highbd_get_block_variance_fn(bsize, xd->bd);
         }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         this_motion_error =
