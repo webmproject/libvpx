@@ -1555,9 +1555,6 @@ INSTANTIATE_TEST_SUITE_P(
         MseParams(3, 4, &vpx_highbd_8_mse8x16_neon, VPX_BITS_8),
         MseParams(3, 3, &vpx_highbd_8_mse8x8_neon, VPX_BITS_8)));
 
-// TODO(webm:1819): Re-enable when vpx_highbd_8_mse16x16_neon_dotprod, etc. can
-// be used again.
-#if 0
 #if HAVE_NEON_DOTPROD
 INSTANTIATE_TEST_SUITE_P(
     NEON_DOTPROD, VpxHBDMseTest,
@@ -1567,7 +1564,6 @@ INSTANTIATE_TEST_SUITE_P(
         MseParams(3, 4, &vpx_highbd_8_mse8x16_neon_dotprod, VPX_BITS_8),
         MseParams(3, 3, &vpx_highbd_8_mse8x8_neon_dotprod, VPX_BITS_8)));
 #endif  // HAVE_NEON_DOTPROD
-#endif  // 0
 
 INSTANTIATE_TEST_SUITE_P(
     NEON, VpxHBDVarianceTest,
