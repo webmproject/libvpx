@@ -3364,7 +3364,7 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
       cpi->rc.rate_correction_factors[INTER_NORMAL] = rate_correction_factor;
     }
     // For temporal layers, reset the rate control parametes across all
-    // temporal layers, up to current temporal_layer_id.
+    // temporal layers.
     // If the first_spatial_layer_to_encode > 0, then this superframe has
     // skipped lower base layers. So in this case we should also reset and
     // force max-q for spatial layers < first_spatial_layer_to_encode.
@@ -3378,7 +3378,7 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
       if (svc->disable_inter_layer_pred != INTER_LAYER_PRED_ON)
         num_spatial_layers = svc->number_spatial_layers;
       for (sl = 0; sl < num_spatial_layers; ++sl) {
-        for (tl = 0; tl < svc->temporal_layer_id; ++tl) {
+        for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
           const int layer =
               LAYER_IDS_TO_IDX(sl, tl, svc->number_temporal_layers);
           LAYER_CONTEXT *lc = &svc->layer_context[layer];
