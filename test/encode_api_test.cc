@@ -198,16 +198,12 @@ TEST(EncodeAPI, RandomPixelsVp8) {
   ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
 
   // Generate random frame data and encode
-  uint8_t img[1280 * 720 * 3 / 2];
-  libvpx_test::ACMRandom rng;
-  for (size_t i = 0; i < sizeof(img); ++i) {
-    img[i] = rng.Rand8();
-  }
-  vpx_image_t img_wrapper;
-  ASSERT_EQ(
-      vpx_img_wrap(&img_wrapper, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h, 1, img),
-      &img_wrapper);
-  ASSERT_EQ(vpx_codec_encode(&enc, &img_wrapper, 0, 1, 0, VPX_DL_BEST_QUALITY),
+  libvpx_test::RandomVideoSource video;
+  video.SetSize(cfg.g_w, cfg.g_h);
+  video.SetImageFormat(VPX_IMG_FMT_I420);
+  video.Begin();
+  ASSERT_EQ(vpx_codec_encode(&enc, video.img(), video.pts(), video.duration(),
+                             /*flags=*/0, VPX_DL_BEST_QUALITY),
             VPX_CODEC_OK);
 
   // Destroy libvpx encoder
