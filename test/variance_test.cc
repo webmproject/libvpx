@@ -1824,6 +1824,53 @@ INSTANTIATE_TEST_SUITE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON
 
+#if HAVE_SVE
+#if CONFIG_VP9_HIGHBITDEPTH
+INSTANTIATE_TEST_SUITE_P(
+    SVE, VpxHBDVarianceTest,
+    ::testing::Values(
+        VarianceParams(6, 6, &vpx_highbd_12_variance64x64_sve, 12),
+        VarianceParams(6, 5, &vpx_highbd_12_variance64x32_sve, 12),
+        VarianceParams(5, 6, &vpx_highbd_12_variance32x64_sve, 12),
+        VarianceParams(5, 5, &vpx_highbd_12_variance32x32_sve, 12),
+        VarianceParams(5, 4, &vpx_highbd_12_variance32x16_sve, 12),
+        VarianceParams(4, 5, &vpx_highbd_12_variance16x32_sve, 12),
+        VarianceParams(4, 4, &vpx_highbd_12_variance16x16_sve, 12),
+        VarianceParams(4, 3, &vpx_highbd_12_variance16x8_sve, 12),
+        VarianceParams(3, 4, &vpx_highbd_12_variance8x16_sve, 12),
+        VarianceParams(3, 3, &vpx_highbd_12_variance8x8_sve, 12),
+        VarianceParams(3, 2, &vpx_highbd_12_variance8x4_sve, 12),
+        VarianceParams(2, 3, &vpx_highbd_12_variance4x8_sve, 12),
+        VarianceParams(2, 2, &vpx_highbd_12_variance4x4_sve, 12),
+        VarianceParams(6, 6, &vpx_highbd_10_variance64x64_sve, 10),
+        VarianceParams(6, 5, &vpx_highbd_10_variance64x32_sve, 10),
+        VarianceParams(5, 6, &vpx_highbd_10_variance32x64_sve, 10),
+        VarianceParams(5, 5, &vpx_highbd_10_variance32x32_sve, 10),
+        VarianceParams(5, 4, &vpx_highbd_10_variance32x16_sve, 10),
+        VarianceParams(4, 5, &vpx_highbd_10_variance16x32_sve, 10),
+        VarianceParams(4, 4, &vpx_highbd_10_variance16x16_sve, 10),
+        VarianceParams(4, 3, &vpx_highbd_10_variance16x8_sve, 10),
+        VarianceParams(3, 4, &vpx_highbd_10_variance8x16_sve, 10),
+        VarianceParams(3, 3, &vpx_highbd_10_variance8x8_sve, 10),
+        VarianceParams(3, 2, &vpx_highbd_10_variance8x4_sve, 10),
+        VarianceParams(2, 3, &vpx_highbd_10_variance4x8_sve, 10),
+        VarianceParams(2, 2, &vpx_highbd_10_variance4x4_sve, 10),
+        VarianceParams(6, 6, &vpx_highbd_8_variance64x64_sve, 8),
+        VarianceParams(6, 5, &vpx_highbd_8_variance64x32_sve, 8),
+        VarianceParams(5, 6, &vpx_highbd_8_variance32x64_sve, 8),
+        VarianceParams(5, 5, &vpx_highbd_8_variance32x32_sve, 8),
+        VarianceParams(5, 4, &vpx_highbd_8_variance32x16_sve, 8),
+        VarianceParams(4, 5, &vpx_highbd_8_variance16x32_sve, 8),
+        VarianceParams(4, 4, &vpx_highbd_8_variance16x16_sve, 8),
+        VarianceParams(4, 3, &vpx_highbd_8_variance16x8_sve, 8),
+        VarianceParams(3, 4, &vpx_highbd_8_variance8x16_sve, 8),
+        VarianceParams(3, 3, &vpx_highbd_8_variance8x8_sve, 8),
+        VarianceParams(3, 2, &vpx_highbd_8_variance8x4_sve, 8),
+        VarianceParams(2, 3, &vpx_highbd_8_variance4x8_sve, 8),
+        VarianceParams(2, 2, &vpx_highbd_8_variance4x4_sve, 8)));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_SVE
+
 #if HAVE_MSA
 INSTANTIATE_TEST_SUITE_P(MSA, SumOfSquaresTest,
                          ::testing::Values(vpx_get_mb_ss_msa));
