@@ -35,6 +35,7 @@
 #include "vp9/encoder/vp9_ext_ratectrl.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_ratectrl.h"
+#include "vp9/encoder/vp9_svc_layercontext.h"
 
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_ext_ratectrl.h"
