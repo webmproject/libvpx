@@ -470,4 +470,25 @@ static INLINE void load_u16_8x8(const uint16_t *s, const ptrdiff_t p,
   *s7 = vld1q_u16(s);
 }
 
+static INLINE void load_s16_8x8(const int16_t *s, const ptrdiff_t p,
+                                int16x8_t *s0, int16x8_t *s1, int16x8_t *s2,
+                                int16x8_t *s3, int16x8_t *s4, int16x8_t *s5,
+                                int16x8_t *s6, int16x8_t *s7) {
+  *s0 = vld1q_s16(s);
+  s += p;
+  *s1 = vld1q_s16(s);
+  s += p;
+  *s2 = vld1q_s16(s);
+  s += p;
+  *s3 = vld1q_s16(s);
+  s += p;
+  *s4 = vld1q_s16(s);
+  s += p;
+  *s5 = vld1q_s16(s);
+  s += p;
+  *s6 = vld1q_s16(s);
+  s += p;
+  *s7 = vld1q_s16(s);
+}
+
 #endif  // VPX_VPX_DSP_ARM_MEM_NEON_H_
