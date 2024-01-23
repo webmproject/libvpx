@@ -65,7 +65,9 @@ const TestVideoParam kTestVectorsNv12[] = {
 
 // Encoding modes tested
 const libvpx_test::TestMode kEncodingModeVectors[] = {
+#if !CONFIG_REALTIME_ONLY
   ::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
+#endif
   ::libvpx_test::kRealTime
 };
 

@@ -104,6 +104,10 @@ CQTest::BitrateMap CQTest::bitrates_;
 
 TEST_P(CQTest, LinearPSNRIsHigherForCQLevel) {
   const vpx_rational timebase = { 33333333, 1000000000 };
+#if CONFIG_REALTIME_ONlY
+  GTEST_SKIP()
+      << "Non-zero g_lag_in_frames is unsupported with CONFIG_REALTIME_ONLY";
+#else
   cfg_.g_timebase = timebase;
   cfg_.rc_target_bitrate = kCQTargetBitrate;
   cfg_.g_lag_in_frames = 25;
@@ -124,6 +128,7 @@ TEST_P(CQTest, LinearPSNRIsHigherForCQLevel) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double vbr_psnr_lin = GetLinearPSNROverBitrate();
   EXPECT_GE(cq_psnr_lin, vbr_psnr_lin);
+#endif  // CONFIG_REALTIME_ONLY
 }
 
 VP8_INSTANTIATE_TEST_SUITE(CQTest, ::testing::Range(kCQLevelMin, kCQLevelMax,

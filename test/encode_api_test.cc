@@ -847,6 +847,10 @@ TEST(EncodeAPI, PtsOrDurationTooBig) {
 // 32-bit systems defined by VPX_MAX_ALLOCABLE_MEMORY
 #if VPX_ARCH_X86_64 || VPX_ARCH_AARCH64
 TEST(EncodeAPI, ConfigLargeTargetBitrateVp9) {
+#ifdef CHROMIUM
+  GTEST_SKIP() << "Under Chromium's configuration the allocator is unable"
+                  "to provide the space required for the frames below.";
+#else
   constexpr int kWidth = 12383;
   constexpr int kHeight = 8192;
   constexpr auto *iface = &vpx_codec_vp9_cx_algo;
@@ -868,6 +872,7 @@ TEST(EncodeAPI, ConfigLargeTargetBitrateVp9) {
   EXPECT_NO_FATAL_FAILURE(InitCodec(*iface, kWidth, kHeight, &enc.ctx, &cfg))
       << "target bitrate: " << cfg.rc_target_bitrate << " framerate: "
       << static_cast<double>(cfg.g_timebase.den) / cfg.g_timebase.num;
+#endif  // defined(CHROMIUM)
 }
 #endif  // VPX_ARCH_X86_64 || VPX_ARCH_AARCH64
 

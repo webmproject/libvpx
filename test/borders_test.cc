@@ -79,6 +79,11 @@ TEST_P(BordersTest, TestLowBitrate) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
+#if CONFIG_REALTIME_ONLY
+VP9_INSTANTIATE_TEST_SUITE(BordersTest,
+                           ::testing::Values(::libvpx_test::kRealTime));
+#else
 VP9_INSTANTIATE_TEST_SUITE(BordersTest,
                            ::testing::Values(::libvpx_test::kTwoPassGood));
+#endif
 }  // namespace

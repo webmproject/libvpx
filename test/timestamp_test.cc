@@ -94,8 +94,15 @@ TEST_P(TimestampTest, TestVpxRollover) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
+#if CONFIG_REALTIME_ONLY
+VP8_INSTANTIATE_TEST_SUITE(TimestampTest,
+                           ::testing::Values(::libvpx_test::kRealTime));
+VP9_INSTANTIATE_TEST_SUITE(TimestampTest,
+                           ::testing::Values(::libvpx_test::kRealTime));
+#else
 VP8_INSTANTIATE_TEST_SUITE(TimestampTest,
                            ::testing::Values(::libvpx_test::kTwoPassGood));
 VP9_INSTANTIATE_TEST_SUITE(TimestampTest,
                            ::testing::Values(::libvpx_test::kTwoPassGood));
+#endif
 }  // namespace

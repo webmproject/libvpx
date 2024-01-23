@@ -152,7 +152,11 @@ class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
 
   void SetUp() override {
     InitializeConfig();
+#if CONFIG_REALTIME_ONLY
+    SetMode(::libvpx_test::kRealTime);
+#else
     SetMode(::libvpx_test::kTwoPassGood);
+#endif
   }
 
   void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
