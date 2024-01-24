@@ -1295,6 +1295,16 @@ INSTANTIATE_TEST_SUITE_P(
         VarianceParams(3, 3, &vpx_highbd_8_variance8x8_sse2, 8)));
 
 INSTANTIATE_TEST_SUITE_P(
+    SSE2, VpxHBDGetVarianceTest,
+    ::testing::Values(
+        GetVarianceParams(4, 4, &vpx_highbd_12_get16x16var_sse2, 12),
+        GetVarianceParams(3, 3, &vpx_highbd_12_get8x8var_sse2, 12),
+        GetVarianceParams(4, 4, &vpx_highbd_10_get16x16var_sse2, 10),
+        GetVarianceParams(3, 3, &vpx_highbd_10_get8x8var_sse2, 10),
+        GetVarianceParams(4, 4, &vpx_highbd_8_get16x16var_sse2, 8),
+        GetVarianceParams(3, 3, &vpx_highbd_8_get8x8var_sse2, 8)));
+
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxHBDSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_highbd_12_sub_pixel_variance64x64_sse2,
@@ -1735,6 +1745,16 @@ INSTANTIATE_TEST_SUITE_P(
         VarianceParams(3, 2, &vpx_highbd_8_variance8x4_neon, 8),
         VarianceParams(2, 3, &vpx_highbd_8_variance4x8_neon, 8),
         VarianceParams(2, 2, &vpx_highbd_8_variance4x4_neon, 8)));
+
+INSTANTIATE_TEST_SUITE_P(
+    NEON, VpxHBDGetVarianceTest,
+    ::testing::Values(
+        GetVarianceParams(4, 4, &vpx_highbd_12_get16x16var_neon, 12),
+        GetVarianceParams(3, 3, &vpx_highbd_12_get8x8var_neon, 12),
+        GetVarianceParams(4, 4, &vpx_highbd_10_get16x16var_neon, 10),
+        GetVarianceParams(3, 3, &vpx_highbd_10_get8x8var_neon, 10),
+        GetVarianceParams(4, 4, &vpx_highbd_8_get16x16var_neon, 8),
+        GetVarianceParams(3, 3, &vpx_highbd_8_get8x8var_neon, 8)));
 
 INSTANTIATE_TEST_SUITE_P(
     NEON, VpxHBDSubpelVarianceTest,
