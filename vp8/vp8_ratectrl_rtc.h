@@ -53,10 +53,10 @@ class VP8RateControlRTC {
   void PostEncodeUpdate(uint64_t encoded_frame_size);
 
  private:
-  VP8RateControlRTC() {}
+  VP8RateControlRTC() = default;
   bool InitRateControl(const VP8RateControlRtcConfig &cfg);
-  struct VP8_COMP *cpi_;
-  int q_;
+  struct VP8_COMP *cpi_ = nullptr;
+  int q_ = -1;
 };
 
 }  // namespace libvpx

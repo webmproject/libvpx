@@ -105,9 +105,9 @@ class VP9RateControlRTC {
                         const VP9FrameParamsQpRTC &frame_params);
 
  private:
-  VP9RateControlRTC() {}
+  VP9RateControlRTC() = default;
   bool InitRateControl(const VP9RateControlRtcConfig &cfg);
-  struct VP9_COMP *cpi_;
+  struct VP9_COMP *cpi_ = nullptr;
 };
 
 }  // namespace libvpx
