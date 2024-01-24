@@ -299,3 +299,46 @@ HBD_VARIANCE_WXH_SVE(32, 64)
 
 HBD_VARIANCE_WXH_SVE(64, 32)
 HBD_VARIANCE_WXH_SVE(64, 64)
+
+#define HIGHBD_GET_VAR_SVE(s)                                         \
+  void vpx_highbd_8_get##s##x##s##var_sve(                            \
+      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, \
+      int ref_stride, uint32_t *sse, int *sum) {                      \
+    uint64_t sse_long = 0;                                            \
+    int64_t sum_long = 0;                                             \
+    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                     \
+    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                     \
+    highbd_variance_##s##xh_sve(src, src_stride, ref, ref_stride, s,  \
+                                &sse_long, &sum_long);                \
+    *sse = (uint32_t)sse_long;                                        \
+    *sum = (int)sum_long;                                             \
+  }                                                                   \
+                                                                      \
+  void vpx_highbd_10_get##s##x##s##var_sve(                           \
+      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, \
+      int ref_stride, uint32_t *sse, int *sum) {                      \
+    uint64_t sse_long = 0;                                            \
+    int64_t sum_long = 0;                                             \
+    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                     \
+    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                     \
+    highbd_variance_##s##xh_sve(src, src_stride, ref, ref_stride, s,  \
+                                &sse_long, &sum_long);                \
+    *sse = (uint32_t)ROUND_POWER_OF_TWO(sse_long, 4);                 \
+    *sum = (int)ROUND_POWER_OF_TWO(sum_long, 2);                      \
+  }                                                                   \
+                                                                      \
+  void vpx_highbd_12_get##s##x##s##var_sve(                           \
+      const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, \
+      int ref_stride, uint32_t *sse, int *sum) {                      \
+    uint64_t sse_long = 0;                                            \
+    int64_t sum_long = 0;                                             \
+    uint16_t *src = CONVERT_TO_SHORTPTR(src_ptr);                     \
+    uint16_t *ref = CONVERT_TO_SHORTPTR(ref_ptr);                     \
+    highbd_variance_##s##xh_sve(src, src_stride, ref, ref_stride, s,  \
+                                &sse_long, &sum_long);                \
+    *sse = (uint32_t)ROUND_POWER_OF_TWO(sse_long, 8);                 \
+    *sum = (int)ROUND_POWER_OF_TWO(sum_long, 4);                      \
+  }
+
+HIGHBD_GET_VAR_SVE(8)
+HIGHBD_GET_VAR_SVE(16)

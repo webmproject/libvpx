@@ -1756,6 +1756,18 @@ INSTANTIATE_TEST_SUITE_P(
         GetVarianceParams(4, 4, &vpx_highbd_8_get16x16var_neon, 8),
         GetVarianceParams(3, 3, &vpx_highbd_8_get8x8var_neon, 8)));
 
+#if HAVE_SVE
+INSTANTIATE_TEST_SUITE_P(
+    SVE, VpxHBDGetVarianceTest,
+    ::testing::Values(
+        GetVarianceParams(4, 4, &vpx_highbd_12_get16x16var_sve, 12),
+        GetVarianceParams(3, 3, &vpx_highbd_12_get8x8var_sve, 12),
+        GetVarianceParams(4, 4, &vpx_highbd_10_get16x16var_sve, 10),
+        GetVarianceParams(3, 3, &vpx_highbd_10_get8x8var_sve, 10),
+        GetVarianceParams(4, 4, &vpx_highbd_8_get16x16var_sve, 8),
+        GetVarianceParams(3, 3, &vpx_highbd_8_get8x8var_sve, 8)));
+#endif  // HAVE_SVE
+
 INSTANTIATE_TEST_SUITE_P(
     NEON, VpxHBDSubpelVarianceTest,
     ::testing::Values(

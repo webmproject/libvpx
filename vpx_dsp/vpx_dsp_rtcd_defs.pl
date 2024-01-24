@@ -1522,22 +1522,22 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_8_variance4x4 neon sve/;
 
   add_proto qw/void vpx_highbd_8_get16x16var/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-  specialize qw/vpx_highbd_8_get16x16var sse2 neon/;
+  specialize qw/vpx_highbd_8_get16x16var sse2 neon sve/;
 
   add_proto qw/void vpx_highbd_8_get8x8var/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-  specialize qw/vpx_highbd_8_get8x8var sse2 neon/;
+  specialize qw/vpx_highbd_8_get8x8var sse2 neon sve/;
 
   add_proto qw/void vpx_highbd_10_get16x16var/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-  specialize qw/vpx_highbd_10_get16x16var sse2 neon/;
+  specialize qw/vpx_highbd_10_get16x16var sse2 neon sve/;
 
   add_proto qw/void vpx_highbd_10_get8x8var/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-  specialize qw/vpx_highbd_10_get8x8var sse2 neon/;
+  specialize qw/vpx_highbd_10_get8x8var sse2 neon sve/;
 
   add_proto qw/void vpx_highbd_12_get16x16var/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-  specialize qw/vpx_highbd_12_get16x16var sse2 neon/;
+  specialize qw/vpx_highbd_12_get16x16var sse2 neon sve/;
 
   add_proto qw/void vpx_highbd_12_get8x8var/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-  specialize qw/vpx_highbd_12_get8x8var sse2 neon/;
+  specialize qw/vpx_highbd_12_get8x8var sse2 neon sve/;
 
   add_proto qw/unsigned int vpx_highbd_8_mse16x16/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
   specialize qw/vpx_highbd_8_mse16x16 sse2 neon neon_dotprod/;
