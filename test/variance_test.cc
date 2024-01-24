@@ -1207,6 +1207,15 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(2, 2, &vpx_variance4x4_sse2)));
 
 INSTANTIATE_TEST_SUITE_P(
+    SSE2, VpxGetVarianceTest,
+    ::testing::Values(GetVarianceParams(4, 4, &vpx_get16x16var_sse2),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_sse2),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_sse2),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_sse2),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_sse2),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_sse2)));
+
+INSTANTIATE_TEST_SUITE_P(
     SSE2, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_sse2, 0),
@@ -1563,6 +1572,15 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(2, 3, &vpx_variance4x8_neon),
                       VarianceParams(2, 2, &vpx_variance4x4_neon)));
 
+INSTANTIATE_TEST_SUITE_P(
+    NEON, VpxGetVarianceTest,
+    ::testing::Values(GetVarianceParams(4, 4, &vpx_get16x16var_neon),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_neon),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_neon),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_neon),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_neon),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_neon)));
+
 #if HAVE_NEON_DOTPROD
 INSTANTIATE_TEST_SUITE_P(
     NEON_DOTPROD, VpxSseTest,
@@ -1590,6 +1608,15 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(3, 2, &vpx_variance8x4_neon_dotprod),
                       VarianceParams(2, 3, &vpx_variance4x8_neon_dotprod),
                       VarianceParams(2, 2, &vpx_variance4x4_neon_dotprod)));
+
+INSTANTIATE_TEST_SUITE_P(
+    NEON_DOTPROD, VpxGetVarianceTest,
+    ::testing::Values(GetVarianceParams(4, 4, &vpx_get16x16var_neon_dotprod),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_neon_dotprod),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_neon_dotprod),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_neon_dotprod),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_neon_dotprod),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_neon_dotprod)));
 #endif  // HAVE_NEON_DOTPROD
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1990,6 +2017,15 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(2, 2, &vpx_variance4x4_msa)));
 
 INSTANTIATE_TEST_SUITE_P(
+    MSA, VpxGetVarianceTest,
+    ::testing::Values(GetVarianceParams(4, 4, &vpx_get16x16var_msa),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_msa),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_msa),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_msa),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_msa),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_msa)));
+
+INSTANTIATE_TEST_SUITE_P(
     MSA, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(2, 2, &vpx_sub_pixel_variance4x4_msa, 0),
@@ -2052,6 +2088,15 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(3, 2, &vpx_variance8x4_vsx),
                       VarianceParams(2, 3, &vpx_variance4x8_vsx),
                       VarianceParams(2, 2, &vpx_variance4x4_vsx)));
+
+INSTANTIATE_TEST_SUITE_P(
+    VSX, VpxGetVarianceTest,
+    ::testing::Values(GetVarianceParams(4, 4, &vpx_get16x16var_vsx),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_vsx),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_vsx),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_vsx),
+                      GetVarianceParams(4, 4, &vpx_get16x16var_vsx),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_vsx)));
 #endif  // HAVE_VSX
 
 #if HAVE_MMI
