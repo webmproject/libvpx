@@ -3941,6 +3941,35 @@ static INLINE void set_raw_source_frame(VP9_COMP *cpi) {
 #endif
 }
 
+static YV12_BUFFER_CONFIG *svc_twostage_scale(
+    VP9_COMMON *cm, YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled,
+    YV12_BUFFER_CONFIG *scaled_temp, INTERP_FILTER filter_type,
+    int phase_scaler, INTERP_FILTER filter_type2, int phase_scaler2) {
+  if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
+      cm->mi_rows * MI_SIZE != unscaled->y_height) {
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cm->bit_depth == VPX_BITS_8) {
+      vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
+                                 phase_scaler2);
+      vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type,
+                                 phase_scaler);
+    } else {
+      scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth,
+                             filter_type2, phase_scaler2);
+      scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth,
+                             filter_type, phase_scaler);
+    }
+#else
+    vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
+                               phase_scaler2);
+    vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type, phase_scaler);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    return scaled;
+  } else {
+    return unscaled;
+  }
+}
+
 static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
                                       uint8_t *dest) {
   VP9_COMMON *const cm = &cpi->common;
@@ -3983,7 +4012,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     // result will be saved in scaled_temp and might be used later.
     const INTERP_FILTER filter_scaler2 = svc->downsample_filter_type[1];
     const int phase_scaler2 = svc->downsample_filter_phase[1];
-    cpi->Source = vp9_svc_twostage_scale(
+    cpi->Source = svc_twostage_scale(
         cm, cpi->un_scaled_source, &cpi->scaled_source, &svc->scaled_temp,
         filter_scaler, phase_scaler, filter_scaler2, phase_scaler2);
     svc->scaled_one_half = 1;
@@ -4955,35 +4984,6 @@ static void set_ext_overrides(VP9_COMP *cpi) {
     cpi->refresh_last_frame = cpi->ext_refresh_last_frame;
     cpi->refresh_golden_frame = cpi->ext_refresh_golden_frame;
     cpi->refresh_alt_ref_frame = cpi->ext_refresh_alt_ref_frame;
-  }
-}
-
-YV12_BUFFER_CONFIG *vp9_svc_twostage_scale(
-    VP9_COMMON *cm, YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled,
-    YV12_BUFFER_CONFIG *scaled_temp, INTERP_FILTER filter_type,
-    int phase_scaler, INTERP_FILTER filter_type2, int phase_scaler2) {
-  if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
-      cm->mi_rows * MI_SIZE != unscaled->y_height) {
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (cm->bit_depth == VPX_BITS_8) {
-      vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
-                                 phase_scaler2);
-      vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type,
-                                 phase_scaler);
-    } else {
-      scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth,
-                             filter_type2, phase_scaler2);
-      scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth,
-                             filter_type, phase_scaler);
-    }
-#else
-    vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
-                               phase_scaler2);
-    vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type, phase_scaler);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    return scaled;
-  } else {
-    return unscaled;
   }
 }
 
