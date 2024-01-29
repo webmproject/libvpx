@@ -139,9 +139,7 @@ DSP_SRCS-yes += arm/vpx_convolve8_neon.c
 DSP_SRCS-yes += arm/vpx_convolve_avg_neon.c
 DSP_SRCS-yes += arm/vpx_convolve_neon.c
 DSP_SRCS-$(HAVE_NEON_DOTPROD) += arm/vpx_convolve8_neon_dotprod.c
-DSP_SRCS-$(HAVE_NEON_DOTPROD) += arm/vpx_convolve_neon_dotprod.c
 DSP_SRCS-$(HAVE_NEON_I8MM) += arm/vpx_convolve8_neon_i8mm.c
-DSP_SRCS-$(HAVE_NEON_I8MM) += arm/vpx_convolve_neon_i8mm.c
 endif  # HAVE_NEON
 endif  # HAVE_NEON_ASM
 
