@@ -1074,6 +1074,21 @@ TEST(EncodeAPI, Buganizer317105128) {
   encoder.Configure(16, 1920, 1, VPX_CBR, VPX_DL_REALTIME);
 }
 
+TEST(EncodeAPI, Buganizer319964497) {
+  VP9Encoder encoder(7);
+  encoder.Configure(/*threads=*/1, /*width=*/320, /*height=*/240, VPX_VBR,
+                    VPX_DL_REALTIME);
+  encoder.Encode(/*key_frame=*/true);
+  encoder.Encode(/*key_frame=*/true);
+  encoder.Encode(/*key_frame=*/false);
+  encoder.Configure(/*threads=*/1, /*width=*/1, /*height=*/1, VPX_VBR,
+                    VPX_DL_REALTIME);
+  encoder.Encode(/*key_frame=*/false);
+  encoder.Configure(/*threads=*/1, /*width=*/2, /*height=*/2, VPX_CBR,
+                    VPX_DL_REALTIME);
+  encoder.Encode(/*key_frame=*/false);
+}
+
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
