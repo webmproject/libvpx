@@ -3470,7 +3470,6 @@ void vp9_scale_references(VP9_COMP *cpi) {
         continue;
       }
 
-#if CONFIG_VP9_HIGHBITDEPTH
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         RefCntBuffer *new_fb_ptr = NULL;
         int force_scaling = 0;
@@ -3483,6 +3482,7 @@ void vp9_scale_references(VP9_COMP *cpi) {
         new_fb_ptr = &pool->frame_bufs[new_fb];
         if (force_scaling || new_fb_ptr->buf.y_crop_width != cm->width ||
             new_fb_ptr->buf.y_crop_height != cm->height) {
+#if CONFIG_VP9_HIGHBITDEPTH
           if (vpx_realloc_frame_buffer(&new_fb_ptr->buf, cm->width, cm->height,
                                        cm->subsampling_x, cm->subsampling_y,
                                        cm->use_highbitdepth,
@@ -3492,22 +3492,7 @@ void vp9_scale_references(VP9_COMP *cpi) {
                                "Failed to allocate frame buffer");
           scale_and_extend_frame(ref, &new_fb_ptr->buf, (int)cm->bit_depth,
                                  EIGHTTAP, 0);
-          cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
-          alloc_frame_mvs(cm, new_fb);
-        }
 #else
-      if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
-        RefCntBuffer *new_fb_ptr = NULL;
-        int force_scaling = 0;
-        int new_fb = cpi->scaled_ref_idx[ref_frame - 1];
-        if (new_fb == INVALID_IDX) {
-          new_fb = get_free_fb(cm);
-          force_scaling = 1;
-        }
-        if (new_fb == INVALID_IDX) return;
-        new_fb_ptr = &pool->frame_bufs[new_fb];
-        if (force_scaling || new_fb_ptr->buf.y_crop_width != cm->width ||
-            new_fb_ptr->buf.y_crop_height != cm->height) {
           if (vpx_realloc_frame_buffer(&new_fb_ptr->buf, cm->width, cm->height,
                                        cm->subsampling_x, cm->subsampling_y,
                                        VP9_ENC_BORDER_IN_PIXELS,
@@ -3515,10 +3500,10 @@ void vp9_scale_references(VP9_COMP *cpi) {
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate frame buffer");
           vp9_scale_and_extend_frame(ref, &new_fb_ptr->buf, EIGHTTAP, 0);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
           cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
           alloc_frame_mvs(cm, new_fb);
         }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
       } else {
         int buf_idx;
         RefCntBuffer *buf = NULL;
