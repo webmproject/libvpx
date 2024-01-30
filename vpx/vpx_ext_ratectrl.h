@@ -400,6 +400,7 @@ typedef struct vpx_rc_gop_info {
 typedef struct vpx_rc_gop_decision {
   int gop_coding_frames; /**< The number of frames of this GOP */
   int use_alt_ref;       /**< Whether to use alt ref for this GOP */
+  int use_key_frame;     /**< Whether to set key frame for this GOP */
 } vpx_rc_gop_decision_t;
 
 /*!\brief Create an external rate control model callback prototype

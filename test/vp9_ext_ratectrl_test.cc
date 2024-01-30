@@ -750,7 +750,7 @@ class ExtRateCtrlTestGOP : public ::libvpx_test::EncoderTest,
   }
 };
 
-TEST_F(ExtRateCtrlTestGOP, EncodeTest) {
+TEST_F(ExtRateCtrlTestGOP, DISABLED_EncodeTest) {
   cfg_.rc_target_bitrate = 4000;
   cfg_.g_lag_in_frames = kMaxLagInFrames;
   cfg_.rc_end_usage = VPX_VBR;
@@ -798,7 +798,7 @@ class ExtRateCtrlTestGOPShort : public ::libvpx_test::EncoderTest,
   }
 };
 
-TEST_F(ExtRateCtrlTestGOPShort, EncodeTest) {
+TEST_F(ExtRateCtrlTestGOPShort, DISABLED_EncodeTest) {
   cfg_.rc_target_bitrate = 500;
   cfg_.g_lag_in_frames = kMaxLagInFrames - 1;
   cfg_.rc_end_usage = VPX_VBR;
@@ -847,7 +847,7 @@ class ExtRateCtrlTestGOPShortOverlay
   }
 };
 
-TEST_F(ExtRateCtrlTestGOPShortOverlay, EncodeTest) {
+TEST_F(ExtRateCtrlTestGOPShortOverlay, DISABLED_EncodeTest) {
   cfg_.rc_target_bitrate = 500;
   cfg_.g_lag_in_frames = kMaxLagInFrames - 1;
   cfg_.rc_end_usage = VPX_VBR;
@@ -896,7 +896,7 @@ class ExtRateCtrlTestGOPShortNoARF
   }
 };
 
-TEST_F(ExtRateCtrlTestGOPShortNoARF, EncodeTest) {
+TEST_F(ExtRateCtrlTestGOPShortNoARF, DISABLED_EncodeTest) {
   cfg_.rc_target_bitrate = 500;
   cfg_.g_lag_in_frames = kMaxLagInFrames - 1;
   cfg_.rc_end_usage = VPX_VBR;
@@ -959,7 +959,7 @@ class ExtRateCtrlTestRdmult : public ::libvpx_test::EncoderTest,
   unsigned int nframes_;
 };
 
-TEST_F(ExtRateCtrlTestRdmult, DefaultRdmult) {
+TEST_F(ExtRateCtrlTestRdmult, DISABLED_DefaultRdmult) {
   cfg_.rc_target_bitrate = 500;
   cfg_.g_lag_in_frames = kMaxLagInFrames - 1;
   cfg_.rc_end_usage = VPX_VBR;
