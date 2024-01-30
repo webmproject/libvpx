@@ -1707,12 +1707,22 @@ void vp9_estimate_qp_gop(VP9_COMP *cpi) {
         // Therefore if it is ARF_UPDATE, it means this gf group uses alt ref.
         // See function define_gf_group_structure().
         const int use_alt_ref = gf_group->update_type[1] == ARF_UPDATE;
+        const int this_gf_group_contains_key =
+            gf_group->update_type[0] == KF_UPDATE;
         const int frame_coding_index = cm->current_frame_coding_index + idx - 1;
+        // The index in the GF group needs to be treated differently for RC:
+        // - GF group containing key frame: the index starts from 1 for RC
+        // - GF group without key frame: index 0 is OVERLAY/GOLDEN and already
+        //   coded from the previous GF group, so it should starts from
+        //   0, instead of 1, for RC.
+        const int gf_group_index_for_rc =
+            this_gf_group_contains_key ? gf_group->index : gf_group->index - 1;
         get_ref_frame_bufs(cpi, ref_frame_bufs);
         codec_status = vp9_extrc_get_encodeframe_decision(
             &cpi->ext_ratectrl, curr_frame_buf->frame_index, frame_coding_index,
-            gf_group->index, update_type, gf_group->gf_group_size, use_alt_ref,
-            ref_frame_bufs, /*ref_frame_flags=*/0, &encode_frame_decision);
+            gf_group_index_for_rc, update_type, gf_group->gf_group_size,
+            use_alt_ref, ref_frame_bufs, /*ref_frame_flags=*/0,
+            &encode_frame_decision);
         if (codec_status != VPX_CODEC_OK) {
           vpx_internal_error(&cm->error, codec_status,
                              "vp9_extrc_get_encodeframe_decision() failed");
