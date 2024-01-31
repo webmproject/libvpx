@@ -36,11 +36,6 @@ constexpr int kFixedGOPSize = 9;
 constexpr int kMaxLagInFrames = 25;
 constexpr int kDefaultMinGfInterval = 4;
 constexpr int kDefaultMaxGfInterval = 16;
-// The active gf interval might change for each GOP
-// See function "get_active_gf_inverval_range".
-// The numbers below are from manual inspection.
-constexpr int kReadMinGfInterval = 5;
-constexpr int kReadMaxGfInterval = 13;
 const char kTestFileName[] = "bus_352x288_420_f20_b8.yuv";
 const double kPsnrThreshold = 30.4;
 
@@ -467,32 +462,10 @@ vpx_rc_status_t rc_get_encodeframe_decision_gop_short_no_arf(
 }
 
 vpx_rc_status_t rc_get_gop_decision(vpx_rc_model_t rate_ctrl_model,
-                                    const vpx_rc_gop_info_t *gop_info,
                                     vpx_rc_gop_decision_t *gop_decision) {
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
-  EXPECT_EQ(gop_info->lag_in_frames, kMaxLagInFrames);
-  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval);
-  EXPECT_EQ(gop_info->max_gf_interval, kDefaultMaxGfInterval);
-  EXPECT_EQ(gop_info->active_min_gf_interval, kReadMinGfInterval);
-  EXPECT_EQ(gop_info->active_max_gf_interval, kReadMaxGfInterval);
-  EXPECT_EQ(gop_info->allow_alt_ref, 1);
-  if (gop_info->is_key_frame) {
-    EXPECT_EQ(gop_info->last_gop_use_alt_ref, 0);
-    EXPECT_EQ(gop_info->frames_since_key, 0);
-    EXPECT_EQ(gop_info->gop_global_index, 0);
-    toy_rate_ctrl->gop_global_index = 0;
-    toy_rate_ctrl->frames_since_key = 0;
-  } else {
-    EXPECT_EQ(gop_info->last_gop_use_alt_ref, 1);
-  }
-  EXPECT_EQ(gop_info->gop_global_index, toy_rate_ctrl->gop_global_index);
-  EXPECT_EQ(gop_info->frames_since_key, toy_rate_ctrl->frames_since_key);
-  EXPECT_EQ(gop_info->show_index, toy_rate_ctrl->show_index);
-  EXPECT_EQ(gop_info->coding_index, toy_rate_ctrl->coding_index);
-
-  gop_decision->gop_coding_frames =
-      VPXMIN(kFixedGOPSize, gop_info->frames_to_key);
+  gop_decision->gop_coding_frames = kFixedGOPSize;
   gop_decision->use_alt_ref = gop_decision->gop_coding_frames == kFixedGOPSize;
   toy_rate_ctrl->frames_since_key +=
       gop_decision->gop_coding_frames - gop_decision->use_alt_ref;
@@ -507,29 +480,11 @@ vpx_rc_status_t rc_get_gop_decision(vpx_rc_model_t rate_ctrl_model,
 // The first GOP has 3 coding frames, no alt ref.
 // The second GOP has 1 coding frame, no alt ref.
 vpx_rc_status_t rc_get_gop_decision_short(vpx_rc_model_t rate_ctrl_model,
-                                          const vpx_rc_gop_info_t *gop_info,
                                           vpx_rc_gop_decision_t *gop_decision) {
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
-  EXPECT_EQ(gop_info->lag_in_frames, kMaxLagInFrames - 1);
-  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval);
-  EXPECT_EQ(gop_info->max_gf_interval, kDefaultMaxGfInterval);
-  EXPECT_EQ(gop_info->allow_alt_ref, 1);
-  if (gop_info->is_key_frame) {
-    EXPECT_EQ(gop_info->last_gop_use_alt_ref, 0);
-    EXPECT_EQ(gop_info->frames_since_key, 0);
-    EXPECT_EQ(gop_info->gop_global_index, 0);
-    toy_rate_ctrl->gop_global_index = 0;
-    toy_rate_ctrl->frames_since_key = 0;
-  } else {
-    EXPECT_EQ(gop_info->last_gop_use_alt_ref, 0);
-  }
-  EXPECT_EQ(gop_info->gop_global_index, toy_rate_ctrl->gop_global_index);
-  EXPECT_EQ(gop_info->frames_since_key, toy_rate_ctrl->frames_since_key);
-  EXPECT_EQ(gop_info->show_index, toy_rate_ctrl->show_index);
-  EXPECT_EQ(gop_info->coding_index, toy_rate_ctrl->coding_index);
 
-  gop_decision->gop_coding_frames = gop_info->gop_global_index == 0 ? 3 : 1;
+  gop_decision->gop_coding_frames = 1;
   gop_decision->use_alt_ref = 0;
   toy_rate_ctrl->frames_since_key +=
       gop_decision->gop_coding_frames - gop_decision->use_alt_ref;
@@ -545,30 +500,11 @@ vpx_rc_status_t rc_get_gop_decision_short(vpx_rc_model_t rate_ctrl_model,
 // The second GOP only contains the overlay frame of the first GOP's alt ref
 // frame.
 vpx_rc_status_t rc_get_gop_decision_short_overlay(
-    vpx_rc_model_t rate_ctrl_model, const vpx_rc_gop_info_t *gop_info,
-    vpx_rc_gop_decision_t *gop_decision) {
+    vpx_rc_model_t rate_ctrl_model, vpx_rc_gop_decision_t *gop_decision) {
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
-  EXPECT_EQ(gop_info->lag_in_frames, kMaxLagInFrames - 1);
-  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval);
-  EXPECT_EQ(gop_info->max_gf_interval, kDefaultMaxGfInterval);
-  EXPECT_EQ(gop_info->allow_alt_ref, 1);
-  if (gop_info->is_key_frame) {
-    EXPECT_EQ(gop_info->last_gop_use_alt_ref, 0);
-    EXPECT_EQ(gop_info->frames_since_key, 0);
-    EXPECT_EQ(gop_info->gop_global_index, 0);
-    toy_rate_ctrl->gop_global_index = 0;
-    toy_rate_ctrl->frames_since_key = 0;
-  } else {
-    EXPECT_EQ(gop_info->last_gop_use_alt_ref, 1);
-  }
-  EXPECT_EQ(gop_info->gop_global_index, toy_rate_ctrl->gop_global_index);
-  EXPECT_EQ(gop_info->frames_since_key, toy_rate_ctrl->frames_since_key);
-  EXPECT_EQ(gop_info->show_index, toy_rate_ctrl->show_index);
-  EXPECT_EQ(gop_info->coding_index, toy_rate_ctrl->coding_index);
-
-  gop_decision->gop_coding_frames = gop_info->gop_global_index == 0 ? 4 : 1;
-  gop_decision->use_alt_ref = gop_info->is_key_frame ? 1 : 0;
+  gop_decision->gop_coding_frames = 1;
+  gop_decision->use_alt_ref = 1;
   toy_rate_ctrl->frames_since_key +=
       gop_decision->gop_coding_frames - gop_decision->use_alt_ref;
   toy_rate_ctrl->show_index +=
@@ -581,29 +517,11 @@ vpx_rc_status_t rc_get_gop_decision_short_overlay(
 // Test a setting of 1 GOP.
 // The GOP has 4 coding frames. Do not use alt ref.
 vpx_rc_status_t rc_get_gop_decision_short_no_arf(
-    vpx_rc_model_t rate_ctrl_model, const vpx_rc_gop_info_t *gop_info,
-    vpx_rc_gop_decision_t *gop_decision) {
+    vpx_rc_model_t rate_ctrl_model, vpx_rc_gop_decision_t *gop_decision) {
   ToyRateCtrl *toy_rate_ctrl = static_cast<ToyRateCtrl *>(rate_ctrl_model);
   EXPECT_EQ(toy_rate_ctrl->magic_number, kModelMagicNumber);
-  EXPECT_EQ(gop_info->lag_in_frames, kMaxLagInFrames - 1);
-  EXPECT_EQ(gop_info->min_gf_interval, kDefaultMinGfInterval);
-  EXPECT_EQ(gop_info->max_gf_interval, kDefaultMaxGfInterval);
-  EXPECT_EQ(gop_info->allow_alt_ref, 1);
-  if (gop_info->is_key_frame) {
-    EXPECT_EQ(gop_info->last_gop_use_alt_ref, 0);
-    EXPECT_EQ(gop_info->frames_since_key, 0);
-    EXPECT_EQ(gop_info->gop_global_index, 0);
-    toy_rate_ctrl->gop_global_index = 0;
-    toy_rate_ctrl->frames_since_key = 0;
-  } else {
-    EXPECT_EQ(gop_info->last_gop_use_alt_ref, 0);
-  }
-  EXPECT_EQ(gop_info->gop_global_index, toy_rate_ctrl->gop_global_index);
-  EXPECT_EQ(gop_info->frames_since_key, toy_rate_ctrl->frames_since_key);
-  EXPECT_EQ(gop_info->show_index, toy_rate_ctrl->show_index);
-  EXPECT_EQ(gop_info->coding_index, toy_rate_ctrl->coding_index);
 
-  gop_decision->gop_coding_frames = gop_info->gop_global_index == 0 ? 4 : 1;
+  gop_decision->gop_coding_frames = 1;
   gop_decision->use_alt_ref = 0;
   toy_rate_ctrl->frames_since_key +=
       gop_decision->gop_coding_frames - gop_decision->use_alt_ref;

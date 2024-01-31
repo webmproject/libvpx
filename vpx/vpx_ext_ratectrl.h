@@ -473,12 +473,10 @@ typedef vpx_rc_status_t (*vpx_rc_update_encodeframe_result_cb_fn_t)(
  * the external rate control model.
  *
  * \param[in]  rate_ctrl_model  rate control model
- * \param[in]  gop_info         information collected from the encoder
  * \param[out] gop_decision     GOP decision from the model
  */
 typedef vpx_rc_status_t (*vpx_rc_get_gop_decision_cb_fn_t)(
-    vpx_rc_model_t rate_ctrl_model, const vpx_rc_gop_info_t *gop_info,
-    vpx_rc_gop_decision_t *gop_decision);
+    vpx_rc_model_t rate_ctrl_model, vpx_rc_gop_decision_t *gop_decision);
 
 /*!\brief Get the frame rdmult from the external rate control model.
  *

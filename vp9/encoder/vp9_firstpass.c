@@ -3577,9 +3577,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
       rc->frames_till_gf_update_due == 0) {
     vpx_codec_err_t codec_status;
     vpx_rc_gop_decision_t gop_decision;
-    vpx_rc_gop_info_t gop_info;
-    codec_status = vp9_extrc_get_gop_decision(&cpi->ext_ratectrl, &gop_info,
-                                              &gop_decision);
+    codec_status =
+        vp9_extrc_get_gop_decision(&cpi->ext_ratectrl, &gop_decision);
     if (codec_status != VPX_CODEC_OK) {
       vpx_internal_error(&cm->error, codec_status,
                          "vp9_extrc_get_gop_decision() failed");

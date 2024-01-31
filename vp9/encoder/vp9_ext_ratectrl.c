@@ -220,29 +220,14 @@ vpx_codec_err_t vp9_extrc_update_encodeframe_result(
 }
 
 vpx_codec_err_t vp9_extrc_get_gop_decision(
-    EXT_RATECTRL *ext_ratectrl, const vpx_rc_gop_info_t *const gop_info,
-    vpx_rc_gop_decision_t *gop_decision) {
+    EXT_RATECTRL *ext_ratectrl, vpx_rc_gop_decision_t *gop_decision) {
   vpx_rc_status_t rc_status;
   if (ext_ratectrl == NULL || !ext_ratectrl->ready ||
       (ext_ratectrl->funcs.rc_type & VPX_RC_GOP) == 0) {
     return VPX_CODEC_INVALID_PARAM;
   }
-  rc_status = ext_ratectrl->funcs.get_gop_decision(ext_ratectrl->model,
-                                                   gop_info, gop_decision);
-  if (gop_decision->use_alt_ref) {
-    const int arf_constraint =
-        gop_decision->gop_coding_frames >= gop_info->min_gf_interval &&
-        gop_decision->gop_coding_frames < gop_info->lag_in_frames;
-    if (!arf_constraint || !gop_info->allow_alt_ref) return VPX_CODEC_ERROR;
-  }
-  // TODO(chengchen): Take min and max gf interval from the model
-  // and overwrite libvpx's decision so that we can get rid
-  // of one of the checks here.
-  if (gop_decision->gop_coding_frames > gop_info->frames_to_key ||
-      gop_decision->gop_coding_frames - gop_decision->use_alt_ref >
-          gop_info->max_gf_interval) {
-    return VPX_CODEC_ERROR;
-  }
+  rc_status =
+      ext_ratectrl->funcs.get_gop_decision(ext_ratectrl->model, gop_decision);
   if (rc_status == VPX_RC_ERROR) {
     return VPX_CODEC_ERROR;
   }
