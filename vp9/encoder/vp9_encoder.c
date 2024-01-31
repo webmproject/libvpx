@@ -6601,7 +6601,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       cpi->twopass.gf_group.update_type[gf_group_index] == ARF_UPDATE &&
       cpi->sf.enable_tpl_model) {
     vp9_init_tpl_buffer(cpi);
-    vp9_estimate_qp_gop(cpi);
+    vp9_estimate_tpl_qp_gop(cpi);
     vp9_setup_tpl_stats(cpi);
   }
 #if CONFIG_COLLECT_COMPONENT_TIMING
