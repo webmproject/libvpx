@@ -3601,6 +3601,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
       rc->baseline_gf_interval =
           gop_decision.gop_coding_frames - rc->source_alt_ref_pending;
       rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+      define_gf_group_structure(cpi);
     }
   } else {
     // Keyframe and section processing.
