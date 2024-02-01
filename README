@@ -210,6 +210,8 @@ PROFILE GUIDED OPTIMIZATION (PGO)
 
   $ ./libvpx/configure --use-profile=perf.profdata --extra-cflags=-Rpass-missed=loop-vectorize
 
+  For guidance on utilizing PGO files to identify potential optimization opportunities, see: tools/README.pgo.md
+
 SUPPORT
   This library is an open source project supported by its community. Please
   email webm-discuss@webmproject.org for help.
