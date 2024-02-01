@@ -1281,6 +1281,10 @@ static vpx_codec_frame_flags_t get_frame_pkt_flags(const VP9_COMP *cpi,
                            .is_key_frame))
     flags |= VPX_FRAME_IS_KEY;
 
+  if (!cpi->common.show_frame) {
+    flags |= VPX_FRAME_IS_INVISIBLE;
+  }
+
   if (cpi->droppable) flags |= VPX_FRAME_IS_DROPPABLE;
 
   return flags;
