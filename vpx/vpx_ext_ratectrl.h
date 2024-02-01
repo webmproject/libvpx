@@ -81,17 +81,10 @@ typedef void *vpx_rc_model_t;
  *
  * The encoder will receive the decision from the external rate control model
  * through get_encodeframe_decision() defined in vpx_rc_funcs_t.
- *
- * If q_index = VPX_DEFAULT_Q, the encoder will use libvpx's default q.
- *
- * If max_frame_size = 0, the encoding ignores max frame size limit.
- * If max_frame_size = -1, the encoding uses VP9's max frame size as the limit.
- * If the encoded frame size is larger than max_frame_size, the frame is
- * recoded to meet the size limit, following VP9's recoding principles.
  */
 typedef struct vpx_rc_encodeframe_decision {
-  int q_index;        /**< Quantizer step index [0..255]*/
-  int max_frame_size; /**< Maximal frame size allowed to encode a frame*/
+  int q_index; /**< Quantizer step index [0..255]*/
+  int rdmult;  /**< Frame level Lagrangian multiplier*/
 } vpx_rc_encodeframe_decision_t;
 
 /*!\brief Information for the frame to be encoded.
