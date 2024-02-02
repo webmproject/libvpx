@@ -224,11 +224,11 @@ static void inverse_transform_block_inter(MACROBLOCKD *xd, int plane,
     dqcoeff[0] = 0;
   } else {
     if (tx_size <= TX_16X16 && eob <= 10)
-      memset(dqcoeff, 0, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
+      bzero(dqcoeff, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
     else if (tx_size == TX_32X32 && eob <= 34)
-      memset(dqcoeff, 0, 256 * sizeof(dqcoeff[0]));
+      bzero(dqcoeff, 256 * sizeof(dqcoeff[0]));
     else
-      memset(dqcoeff, 0, (16 << (tx_size << 1)) * sizeof(dqcoeff[0]));
+      bzero(dqcoeff, (16 << (tx_size << 1)) * sizeof(dqcoeff[0]));
   }
 }
 
@@ -296,11 +296,11 @@ static void inverse_transform_block_intra(MACROBLOCKD *xd, int plane,
     dqcoeff[0] = 0;
   } else {
     if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
-      memset(dqcoeff, 0, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
+      bzero(dqcoeff, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
     else if (tx_size == TX_32X32 && eob <= 34)
-      memset(dqcoeff, 0, 256 * sizeof(dqcoeff[0]));
+      bzero(dqcoeff, 256 * sizeof(dqcoeff[0]));
     else
-      memset(dqcoeff, 0, (16 << (tx_size << 1)) * sizeof(dqcoeff[0]));
+      bzero(dqcoeff, (16 << (tx_size << 1)) * sizeof(dqcoeff[0]));
   }
 }
 
@@ -784,8 +784,8 @@ static INLINE void dec_reset_skip_context(MACROBLOCKD *xd) {
   int i;
   for (i = 0; i < MAX_MB_PLANE; i++) {
     struct macroblockd_plane *const pd = &xd->plane[i];
-    memset(pd->above_context, 0, sizeof(ENTROPY_CONTEXT) * pd->n4_w);
-    memset(pd->left_context, 0, sizeof(ENTROPY_CONTEXT) * pd->n4_h);
+    bzero(pd->above_context, sizeof(ENTROPY_CONTEXT) * pd->n4_w);
+    bzero(pd->left_context, sizeof(ENTROPY_CONTEXT) * pd->n4_h);
   }
 }
 
@@ -2048,10 +2048,10 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi, const uint8_t *data,
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  memset(cm->above_context, 0,
+  bzero(cm->above_context,
          sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_cols);
 
-  memset(cm->above_seg_context, 0,
+  bzero(cm->above_seg_context,
          sizeof(*cm->above_seg_context) * aligned_cols);
 
   vp9_reset_lfm(cm);
@@ -2313,10 +2313,10 @@ static INLINE void init_mt(VP9Decoder *pbi) {
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  memset(cm->above_context, 0,
+  bzero(cm->above_context,
          sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_mi_cols);
 
-  memset(cm->above_seg_context, 0,
+  bzero(cm->above_seg_context,
          sizeof(*cm->above_seg_context) * aligned_mi_cols);
 
   vp9_reset_lfm(cm);
@@ -2343,7 +2343,7 @@ static const uint8_t *decode_tiles_row_wise_mt(VP9Decoder *pbi,
   assert(tile_rows == 1);
   (void)tile_rows;
 
-  memset(row_mt_worker_data->recon_map, 0,
+  bzero(row_mt_worker_data->recon_map,
          sb_rows * sb_cols * sizeof(*row_mt_worker_data->recon_map));
 
   init_mt(pbi);

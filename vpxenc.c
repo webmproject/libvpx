@@ -727,7 +727,7 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
   if (num_encoder < 1) die("Error: no valid encoder available\n");
 
   /* Initialize default parameters */
-  memset(global, 0, sizeof(*global));
+  bzero(global, sizeof(*global));
   global->codec = get_vpx_encoder_by_index(num_encoder - 1);
   global->passes = 0;
   global->color_type = I420;
@@ -1692,8 +1692,8 @@ int main(int argc, const char **argv_) {
   int stream_cnt = 0;
   int res = 0;
 
-  memset(&input, 0, sizeof(input));
-  memset(&raw, 0, sizeof(raw));
+  bzero(&input, sizeof(input));
+  bzero(&raw, sizeof(raw));
   exec_name = argv_[0];
 
   /* Setup default input stream settings */

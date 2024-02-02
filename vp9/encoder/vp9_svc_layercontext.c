@@ -165,7 +165,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
         lc->counter_encode_maxq_scene_change = 0;
         CHECK_MEM_ERROR(&cm->error, lc->map,
                         vpx_malloc(mi_rows * mi_cols * sizeof(*lc->map)));
-        memset(lc->map, 0, mi_rows * mi_cols);
+        bzero(lc->map, mi_rows * mi_cols);
         last_coded_q_map_size =
             mi_rows * mi_cols * sizeof(*lc->last_coded_q_map);
         CHECK_MEM_ERROR(&cm->error, lc->last_coded_q_map,
@@ -175,7 +175,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
         consec_zero_mv_size = mi_rows * mi_cols * sizeof(*lc->consec_zero_mv);
         CHECK_MEM_ERROR(&cm->error, lc->consec_zero_mv,
                         vpx_malloc(consec_zero_mv_size));
-        memset(lc->consec_zero_mv, 0, consec_zero_mv_size);
+        bzero(lc->consec_zero_mv, consec_zero_mv_size);
       }
     }
   }

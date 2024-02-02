@@ -97,9 +97,9 @@ class RoiMaskBackgroundSkip : public ::libvpx_test::EncoderTest,
     unsigned int i, j;
     roi_.rows = (cfg_.g_h + block_size - 1) / block_size;
     roi_.cols = (cfg_.g_w + block_size - 1) / block_size;
-    memset(&roi_.skip, 0, sizeof(roi_.skip));
-    memset(&roi_.delta_q, 0, sizeof(roi_.delta_q));
-    memset(&roi_.delta_lf, 0, sizeof(roi_.delta_lf));
+    bzero(&roi_.skip, sizeof(roi_.skip));
+    bzero(&roi_.delta_q, sizeof(roi_.delta_q));
+    bzero(&roi_.delta_lf, sizeof(roi_.delta_lf));
     memset(roi_.ref_frame, -1, sizeof(roi_.ref_frame));
     roi_.ref_frame[1] = 1;
     // Use segment 3 for skip.

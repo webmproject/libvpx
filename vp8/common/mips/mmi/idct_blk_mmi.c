@@ -21,7 +21,7 @@ void vp8_dequant_idct_add_y_block_mmi(int16_t *q, int16_t *dq, uint8_t *dst,
         vp8_dequant_idct_add_mmi(q, dq, dst, stride);
       } else {
         vp8_dc_only_idct_add_mmi(q[0] * dq[0], dst, stride, dst, stride);
-        memset(q, 0, 2 * sizeof(q[0]));
+        bzero(q, 2 * sizeof(q[0]));
       }
 
       q += 16;
@@ -42,7 +42,7 @@ void vp8_dequant_idct_add_uv_block_mmi(int16_t *q, int16_t *dq, uint8_t *dst_u,
         vp8_dequant_idct_add_mmi(q, dq, dst_u, stride);
       } else {
         vp8_dc_only_idct_add_mmi(q[0] * dq[0], dst_u, stride, dst_u, stride);
-        memset(q, 0, 2 * sizeof(q[0]));
+        bzero(q, 2 * sizeof(q[0]));
       }
 
       q += 16;
@@ -58,7 +58,7 @@ void vp8_dequant_idct_add_uv_block_mmi(int16_t *q, int16_t *dq, uint8_t *dst_u,
         vp8_dequant_idct_add_mmi(q, dq, dst_v, stride);
       } else {
         vp8_dc_only_idct_add_mmi(q[0] * dq[0], dst_v, stride, dst_v, stride);
-        memset(q, 0, 2 * sizeof(q[0]));
+        bzero(q, 2 * sizeof(q[0]));
       }
 
       q += 16;

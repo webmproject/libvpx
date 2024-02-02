@@ -58,7 +58,7 @@ class QuantizeTestBase {
 
     // The full configuration is necessary to generate the quantization tables.
     VP8_CONFIG vp8_config;
-    memset(&vp8_config, 0, sizeof(vp8_config));
+    bzero(&vp8_config, sizeof(vp8_config));
 
     vp8_comp_ = vp8_create_compressor(&vp8_config);
 

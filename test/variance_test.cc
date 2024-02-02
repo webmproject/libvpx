@@ -484,7 +484,7 @@ void MainTestClass<VarianceFunctionType>::OneQuarterTest() {
   if (!use_high_bit_depth()) {
     memset(src_, 255, block_size());
     memset(ref_, 255, half);
-    memset(ref_ + half, 0, half);
+    bzero(ref_ + half, half);
 #if CONFIG_VP9_HIGHBITDEPTH
   } else {
     vpx_memset16(CONVERT_TO_SHORTPTR(src_), 255 << byte_shift(), block_size());
@@ -505,7 +505,7 @@ void MainTestClass<VarianceFunctionType>::SpeedTest() {
   if (!use_high_bit_depth()) {
     memset(src_, 255, block_size());
     memset(ref_, 255, half);
-    memset(ref_ + half, 0, half);
+    bzero(ref_ + half, half);
 #if CONFIG_VP9_HIGHBITDEPTH
   } else {
     vpx_memset16(CONVERT_TO_SHORTPTR(src_), 255 << byte_shift(), block_size());
@@ -604,7 +604,7 @@ template <typename FunctionType>
 void MainTestClass<FunctionType>::MaxTestMse() {
   if (!use_high_bit_depth()) {
     memset(src_, 255, block_size());
-    memset(ref_, 0, block_size());
+    bzero(ref_, block_size());
 #if CONFIG_VP9_HIGHBITDEPTH
   } else {
     vpx_memset16(CONVERT_TO_SHORTPTR(src_), 255 << byte_shift(), block_size());
@@ -620,7 +620,7 @@ void MainTestClass<FunctionType>::MaxTestMse() {
 template <typename FunctionType>
 void MainTestClass<FunctionType>::MaxTestSse() {
   memset(src_, 255, block_size());
-  memset(ref_, 0, block_size());
+  bzero(ref_, block_size());
   unsigned int var;
   ASM_REGISTER_STATE_CHECK(var = params_.func(src_, width(), ref_, width()));
   const unsigned int expected = block_size() * 255 * 255;
@@ -735,10 +735,10 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::ExtremeRefTest() {
     for (int y = 0; y < 8; ++y) {
       const int half = block_size() / 2;
       if (!use_high_bit_depth()) {
-        memset(src_, 0, half);
+        bzero(src_, half);
         memset(src_ + half, 255, half);
         memset(ref_, 255, half);
-        memset(ref_ + half, 0, half + width() + height() + 1);
+        bzero(ref_ + half, half + width() + height() + 1);
 #if CONFIG_VP9_HIGHBITDEPTH
       } else {
         vpx_memset16(CONVERT_TO_SHORTPTR(src_), mask(), half);

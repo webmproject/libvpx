@@ -45,7 +45,7 @@ vpx_codec_err_t vpx_codec_dec_init_ver(vpx_codec_ctx_t *ctx,
   else if (!(iface->caps & VPX_CODEC_CAP_DECODER))
     res = VPX_CODEC_INCAPABLE;
   else {
-    memset(ctx, 0, sizeof(*ctx));
+    bzero(ctx, sizeof(*ctx));
     ctx->iface = iface;
     ctx->name = iface->name;
     ctx->priv = NULL;

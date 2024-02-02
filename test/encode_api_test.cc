@@ -313,7 +313,7 @@ TEST(EncodeAPI, MultiResEncode) {
     vpx_codec_enc_cfg_t cfg[2];
     vpx_rational_t dsf[2] = { { 2, 1 }, { 2, 1 } };
 
-    memset(enc, 0, sizeof(enc));
+    bzero(enc, sizeof(enc));
 
     for (int i = 0; i < 2; i++) {
       vpx_codec_enc_config_default(iface, &cfg[i], 0);

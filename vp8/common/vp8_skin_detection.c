@@ -77,7 +77,7 @@ void vp8_compute_skin_map(VP8_COMP *const cpi, FILE *yuv_skinmap_file) {
   int offset = 0;
 
   YV12_BUFFER_CONFIG skinmap;
-  memset(&skinmap, 0, sizeof(skinmap));
+  bzero(&skinmap, sizeof(skinmap));
   if (vp8_yv12_alloc_frame_buffer(&skinmap, cm->Width, cm->Height,
                                   VP8BORDERINPIXELS) < 0) {
     vpx_free_frame_buffer(&skinmap);

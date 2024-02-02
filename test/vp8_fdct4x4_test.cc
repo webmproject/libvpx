@@ -91,7 +91,7 @@ TEST_P(FdctTest, SignBiasCheck) {
   int count_sign_block[16][2];
   const int count_test_block = 1000000;
 
-  memset(count_sign_block, 0, sizeof(count_sign_block));
+  bzero(count_sign_block, sizeof(count_sign_block));
 
   for (int i = 0; i < count_test_block; ++i) {
     // Initialize a test block with input range [-255, 255].
@@ -120,7 +120,7 @@ TEST_P(FdctTest, SignBiasCheck) {
   EXPECT_EQ(true, bias_acceptable)
       << "Error: 4x4 FDCT has a sign bias > 1% for input range [-255, 255]";
 
-  memset(count_sign_block, 0, sizeof(count_sign_block));
+  bzero(count_sign_block, sizeof(count_sign_block));
 
   for (int i = 0; i < count_test_block; ++i) {
     // Initialize a test block with input range [-15, 15].

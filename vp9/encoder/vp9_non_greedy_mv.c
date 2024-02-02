@@ -313,7 +313,7 @@ void vp9_motion_field_mi_set_mv(MotionField *motion_field, int mi_row,
 }
 
 void vp9_motion_field_reset_mvs(MotionField *motion_field) {
-  memset(motion_field->set_mv, 0,
+  bzero(motion_field->set_mv,
          motion_field->block_num * sizeof(*motion_field->set_mv));
 }
 

@@ -386,7 +386,7 @@ int main(int argc, char **argv) {
   /* Open file to write out each spatially downsampled input stream. */
   for (i = 0; i < NUM_ENCODERS - 1; i++) {
     // Highest resoln is encoder 0.
-    if (sprintf(filename, "ds%d.yuv", NUM_ENCODERS - i) < 0) {
+    if (snprintf(filename, sizeof(int), "ds%d.yuv", NUM_ENCODERS - i) < 0) {
       return EXIT_FAILURE;
     }
     downsampled_input[i] = fopen(filename, "wb");

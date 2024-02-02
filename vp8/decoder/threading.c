@@ -36,7 +36,7 @@
   do {                                                         \
     CHECK_MEM_ERROR(&pbi->common.error, (p),                   \
                     vpx_memalign((algn), sizeof(*(p)) * (n))); \
-    memset((p), 0, (n) * sizeof(*(p)));                        \
+    bzero((p), (n) * sizeof(*(p)));                        \
   } while (0)
 
 static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd,
@@ -125,14 +125,14 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
        * Better to use the predictor as reconstruction.
        */
       pbi->frame_corrupt_residual = 1;
-      memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
+      bzero(xd->qcoeff, sizeof(xd->qcoeff));
 
       corruption_detected = 1;
 
       /* force idct to be skipped for B_PRED and use the
        * prediction only for reconstruction
        * */
-      memset(xd->eobs, 0, 25);
+      bzero(xd->eobs, 25);
     }
   }
 #endif
@@ -153,7 +153,7 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       int dst_stride = xd->dst.y_stride;
 
       /* clear out residual eob info */
-      if (xd->mode_info_context->mbmi.mb_skip_coeff) memset(xd->eobs, 0, 25);
+      if (xd->mode_info_context->mbmi.mb_skip_coeff) bzero(xd->eobs, 25);
 
       intra_prediction_down_copy(xd, xd->recon_above[0] + 16);
 
@@ -197,7 +197,7 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
           } else {
             vp8_dc_only_idct_add(b->qcoeff[0] * DQC[0], dst, dst_stride, dst,
                                  dst_stride);
-            memset(b->qcoeff, 0, 2 * sizeof(b->qcoeff[0]));
+            bzero(b->qcoeff, 2 * sizeof(b->qcoeff[0]));
           }
         }
       }
@@ -225,11 +225,11 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
           vp8_dequantize_b(b, xd->dequant_y2);
 
           vp8_short_inv_walsh4x4(&b->dqcoeff[0], xd->qcoeff);
-          memset(b->qcoeff, 0, 16 * sizeof(b->qcoeff[0]));
+          bzero(b->qcoeff, 16 * sizeof(b->qcoeff[0]));
         } else {
           b->dqcoeff[0] = b->qcoeff[0] * xd->dequant_y2[0];
           vp8_short_inv_walsh4x4_1(&b->dqcoeff[0], xd->qcoeff);
-          memset(b->qcoeff, 0, 2 * sizeof(b->qcoeff[0]));
+          bzero(b->qcoeff, 2 * sizeof(b->qcoeff[0]));
         }
 
         /* override the dc dequant constant in order to preserve the
@@ -317,7 +317,7 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
     /* reset contexts */
     xd->above_context = pc->above_context;
-    memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    bzero(xd->left_context, sizeof(ENTROPY_CONTEXT_PLANES));
 
     xd->left_available = 0;
 

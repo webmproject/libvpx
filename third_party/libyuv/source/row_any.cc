@@ -36,7 +36,7 @@ extern "C" {
                const uint8_t* v_buf, const uint8_t* a_buf, uint8_t* dst_ptr, \
                const struct YuvConstants* yuvconstants, int width) {         \
     SIMD_ALIGNED(uint8_t temp[64 * 5]);                                      \
-    memset(temp, 0, 64 * 4); /* for msan */                                  \
+    bzero(temp, 64 * 4); /* for msan */                                  \
     int r = width & MASK;                                                    \
     int n = width & ~MASK;                                                   \
     if (n > 0) {                                                             \
@@ -71,7 +71,7 @@ ANY41C(I422AlphaToARGBRow_Any_MSA, I422AlphaToARGBRow_MSA, 1, 0, 4, 7)
   void NAMEANY(const uint8_t* y_buf, const uint8_t* u_buf,          \
                const uint8_t* v_buf, uint8_t* dst_ptr, int width) { \
     SIMD_ALIGNED(uint8_t temp[64 * 4]);                             \
-    memset(temp, 0, 64 * 3); /* for YUY2 and msan */                \
+    bzero(temp, 64 * 3); /* for YUY2 and msan */                \
     int r = width & MASK;                                           \
     int n = width & ~MASK;                                          \
     if (n > 0) {                                                    \
@@ -128,7 +128,7 @@ ANY31(BlendPlaneRow_Any_SSSE3, BlendPlaneRow_SSSE3, 0, 0, 1, 7)
                const uint8_t* v_buf, uint8_t* dst_ptr,               \
                const struct YuvConstants* yuvconstants, int width) { \
     SIMD_ALIGNED(uint8_t temp[128 * 4]);                             \
-    memset(temp, 0, 128 * 3); /* for YUY2 and msan */                \
+    bzero(temp, 128 * 3); /* for YUY2 and msan */                \
     int r = width & MASK;                                            \
     int n = width & ~MASK;                                           \
     if (n > 0) {                                                     \
@@ -213,7 +213,7 @@ ANY31C(I422ToRGB565Row_Any_MSA, I422ToRGB565Row_MSA, 1, 0, 2, 7)
                int width) {                                               \
     SIMD_ALIGNED(T temp[16 * 3]);                                         \
     SIMD_ALIGNED(uint8_t out[64]);                                        \
-    memset(temp, 0, 16 * 3 * SBPP); /* for YUY2 and msan */               \
+    bzero(temp, 16 * 3 * SBPP); /* for YUY2 and msan */               \
     int r = width & MASK;                                                 \
     int n = width & ~MASK;                                                \
     if (n > 0) {                                                          \
@@ -245,7 +245,7 @@ ANY31CT(I210ToAR30Row_Any_AVX2, I210ToAR30Row_AVX2, 1, 0, uint16_t, 2, 4, 15)
   void NAMEANY(const uint8_t* y_buf, const uint8_t* uv_buf, uint8_t* dst_ptr, \
                int width) {                                                   \
     SIMD_ALIGNED(uint8_t temp[64 * 3]);                                       \
-    memset(temp, 0, 64 * 2); /* for msan */                                   \
+    bzero(temp, 64 * 2); /* for msan */                                   \
     int r = width & MASK;                                                     \
     int n = width & ~MASK;                                                    \
     if (n > 0) {                                                              \
@@ -343,7 +343,7 @@ ANY21(SobelXYRow_Any_MSA, SobelXYRow_MSA, 0, 1, 1, 4, 15)
   void NAMEANY(const uint8_t* y_buf, const uint8_t* uv_buf, uint8_t* dst_ptr, \
                const struct YuvConstants* yuvconstants, int width) {          \
     SIMD_ALIGNED(uint8_t temp[128 * 3]);                                      \
-    memset(temp, 0, 128 * 2); /* for msan */                                  \
+    bzero(temp, 128 * 2); /* for msan */                                  \
     int r = width & MASK;                                                     \
     int n = width & ~MASK;                                                    \
     if (n > 0) {                                                              \
@@ -417,7 +417,7 @@ ANY21C(NV12ToRGB565Row_Any_MSA, NV12ToRGB565Row_MSA, 1, 1, 2, 2, 7)
 #define ANY11(NAMEANY, ANY_SIMD, UVSHIFT, SBPP, BPP, MASK)                \
   void NAMEANY(const uint8_t* src_ptr, uint8_t* dst_ptr, int width) {     \
     SIMD_ALIGNED(uint8_t temp[128 * 2]);                                  \
-    memset(temp, 0, 128); /* for YUY2 and msan */                         \
+    bzero(temp, 128); /* for YUY2 and msan */                         \
     int r = width & MASK;                                                 \
     int n = width & ~MASK;                                                \
     if (n > 0) {                                                          \
@@ -687,7 +687,7 @@ ANY11(ARGBExtractAlphaRow_Any_MSA, ARGBExtractAlphaRow_MSA, 0, 4, 1, 15)
 #define ANY11B(NAMEANY, ANY_SIMD, UVSHIFT, SBPP, BPP, MASK)               \
   void NAMEANY(const uint8_t* src_ptr, uint8_t* dst_ptr, int width) {     \
     SIMD_ALIGNED(uint8_t temp[64 * 2]);                                   \
-    memset(temp, 0, 64 * 2); /* for msan */                               \
+    bzero(temp, 64 * 2); /* for msan */                               \
     int r = width & MASK;                                                 \
     int n = width & ~MASK;                                                \
     if (n > 0) {                                                          \
@@ -717,7 +717,7 @@ ANY11B(ARGBCopyYToAlphaRow_Any_SSE2, ARGBCopyYToAlphaRow_SSE2, 0, 1, 4, 7)
 #define ANY11P(NAMEANY, ANY_SIMD, T, SBPP, BPP, MASK)                          \
   void NAMEANY(const uint8_t* src_ptr, uint8_t* dst_ptr, T param, int width) { \
     SIMD_ALIGNED(uint8_t temp[64 * 2]);                                        \
-    memset(temp, 0, 64); /* for msan */                                        \
+    bzero(temp, 64); /* for msan */                                        \
     int r = width & MASK;                                                      \
     int n = width & ~MASK;                                                     \
     if (n > 0) {                                                               \
@@ -779,7 +779,7 @@ ANY11P(ARGBShuffleRow_Any_MSA, ARGBShuffleRow_MSA, const uint8_t*, 4, 4, 7)
   void NAMEANY(const STYPE* src_ptr, DTYPE* dst_ptr, int scale, int width) { \
     SIMD_ALIGNED(STYPE temp[32]);                                            \
     SIMD_ALIGNED(DTYPE out[32]);                                             \
-    memset(temp, 0, 32 * SBPP); /* for msan */                               \
+    bzero(temp, 32 * SBPP); /* for msan */                               \
     int r = width & MASK;                                                    \
     int n = width & ~MASK;                                                   \
     if (n > 0) {                                                             \
@@ -833,7 +833,7 @@ ANY11C(Convert8To16Row_Any_AVX2,
   void NAMEANY(const ST* src_ptr, T* dst_ptr, float param, int width) { \
     SIMD_ALIGNED(ST temp[32]);                                          \
     SIMD_ALIGNED(T out[32]);                                            \
-    memset(temp, 0, SBPP * 32); /* for msan */                          \
+    bzero(temp, SBPP * 32); /* for msan */                          \
     int r = width & MASK;                                               \
     int n = width & ~MASK;                                              \
     if (n > 0) {                                                        \
@@ -883,7 +883,7 @@ ANY11P16(ByteToFloatRow_Any_NEON, ByteToFloatRow_NEON, uint8_t, float, 1, 3, 7)
   void NAMEANY(const uint8_t* src_ptr, uint8_t* dst_ptr,                  \
                const struct YuvConstants* yuvconstants, int width) {      \
     SIMD_ALIGNED(uint8_t temp[128 * 2]);                                  \
-    memset(temp, 0, 128); /* for YUY2 and msan */                         \
+    bzero(temp, 128); /* for YUY2 and msan */                         \
     int r = width & MASK;                                                 \
     int n = width & ~MASK;                                                \
     if (n > 0) {                                                          \
@@ -916,7 +916,7 @@ ANY11C(UYVYToARGBRow_Any_MSA, UYVYToARGBRow_MSA, 1, 4, 4, 7)
   void NAMEANY(uint8_t* dst_ptr, const uint8_t* src_ptr,                     \
                ptrdiff_t src_stride_ptr, int width, int source_y_fraction) { \
     SIMD_ALIGNED(uint8_t temp[64 * 3]);                                      \
-    memset(temp, 0, 64 * 2); /* for msan */                                  \
+    bzero(temp, 64 * 2); /* for msan */                                  \
     int r = width & MASK;                                                    \
     int n = width & ~MASK;                                                   \
     if (n > 0) {                                                             \
@@ -946,7 +946,7 @@ ANY11T(InterpolateRow_Any_MSA, InterpolateRow_MSA, 1, 1, 31)
 #define ANY11M(NAMEANY, ANY_SIMD, BPP, MASK)                              \
   void NAMEANY(const uint8_t* src_ptr, uint8_t* dst_ptr, int width) {     \
     SIMD_ALIGNED(uint8_t temp[64 * 2]);                                   \
-    memset(temp, 0, 64); /* for msan */                                   \
+    bzero(temp, 64); /* for msan */                                   \
     int r = width & MASK;                                                 \
     int n = width & ~MASK;                                                \
     if (n > 0) {                                                          \
@@ -1015,7 +1015,7 @@ ANY1(ARGBSetRow_Any_MSA, ARGBSetRow_MSA, uint32_t, 4, 3)
   void NAMEANY(const uint8_t* src_ptr, uint8_t* dst_u, uint8_t* dst_v,  \
                int width) {                                             \
     SIMD_ALIGNED(uint8_t temp[128 * 3]);                                \
-    memset(temp, 0, 128); /* for msan */                                \
+    bzero(temp, 128); /* for msan */                                \
     int r = width & MASK;                                               \
     int n = width & ~MASK;                                              \
     if (n > 0) {                                                        \
@@ -1067,7 +1067,7 @@ ANY12(UYVYToUV422Row_Any_MSA, UYVYToUV422Row_MSA, 1, 4, 1, 31)
   void NAMEANY(const uint8_t* src_ptr, uint8_t* dst_r, uint8_t* dst_g,     \
                uint8_t* dst_b, int width) {                                \
     SIMD_ALIGNED(uint8_t temp[16 * 6]);                                    \
-    memset(temp, 0, 16 * 3); /* for msan */                                \
+    bzero(temp, 16 * 3); /* for msan */                                \
     int r = width & MASK;                                                  \
     int n = width & ~MASK;                                                 \
     if (n > 0) {                                                           \
@@ -1093,7 +1093,7 @@ ANY13(SplitRGBRow_Any_NEON, SplitRGBRow_NEON, 3, 15)
   void NAMEANY(const uint8_t* src_ptr, int src_stride_ptr, uint8_t* dst_u,   \
                uint8_t* dst_v, int width) {                                  \
     SIMD_ALIGNED(uint8_t temp[128 * 4]);                                     \
-    memset(temp, 0, 128 * 2); /* for msan */                                 \
+    bzero(temp, 128 * 2); /* for msan */                                 \
     int r = width & MASK;                                                    \
     int n = width & ~MASK;                                                   \
     if (n > 0) {                                                             \

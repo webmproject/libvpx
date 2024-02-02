@@ -41,8 +41,8 @@ void vpx_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr, intptr_t count,
   nzbins[0] = _mm_sub_epi32(nzbins[0], zbins[0]);
   nzbins[1] = _mm_sub_epi32(nzbins[1], zbins[1]);
 
-  memset(qcoeff_ptr, 0, count * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, count * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, count * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, count * sizeof(*dqcoeff_ptr));
 
   // Pre-scan pass
   for (i = ((int)count / 4) - 1; i >= 0; i--) {
@@ -115,8 +115,8 @@ void vpx_highbd_quantize_b_32x32_sse2(
   nzbins[0] = _mm_sub_epi32(nzbins[0], zbins[0]);
   nzbins[1] = _mm_sub_epi32(nzbins[1], zbins[1]);
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   // Pre-scan pass
   for (i = 0; i < n_coeffs / 4; i++) {

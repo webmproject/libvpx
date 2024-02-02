@@ -141,7 +141,7 @@ static void compare_fp_stats(vpx_fixed_buf_t *fp_stats, double factor) {
   }
 
   // Reset firstpass_stats_ to 0.
-  memset((uint8_t *)fp_stats->buf, 0, fp_stats->sz);
+  bzero((uint8_t *)fp_stats->buf, fp_stats->sz);
   fp_stats->sz = 0;
 }
 
@@ -163,7 +163,7 @@ static void compare_fp_stats_md5(vpx_fixed_buf_t *fp_stats) {
       << "MD5 checksums don't match";
 
   // Reset firstpass_stats_ to 0.
-  memset((uint8_t *)fp_stats->buf, 0, fp_stats->sz);
+  bzero((uint8_t *)fp_stats->buf, fp_stats->sz);
   fp_stats->sz = 0;
 }
 

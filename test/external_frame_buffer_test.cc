@@ -52,7 +52,7 @@ class ExternalFrameBufferList {
     num_buffers_ = num_buffers;
     ext_fb_list_ = new ExternalFrameBuffer[num_buffers_];
     EXPECT_NE(ext_fb_list_, nullptr);
-    memset(ext_fb_list_, 0, sizeof(ext_fb_list_[0]) * num_buffers_);
+    bzero(ext_fb_list_, sizeof(ext_fb_list_[0]) * num_buffers_);
     return true;
   }
 
@@ -68,7 +68,7 @@ class ExternalFrameBufferList {
     if (ext_fb_list_[idx].size < min_size) {
       delete[] ext_fb_list_[idx].data;
       ext_fb_list_[idx].data = new uint8_t[min_size];
-      memset(ext_fb_list_[idx].data, 0, min_size);
+      bzero(ext_fb_list_[idx].data, min_size);
       ext_fb_list_[idx].size = min_size;
     }
 

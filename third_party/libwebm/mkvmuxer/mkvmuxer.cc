@@ -3174,9 +3174,9 @@ bool Segment::Init(IMkvWriter* ptr_writer) {
   writer_cluster_ = ptr_writer;
   writer_cues_ = ptr_writer;
   writer_header_ = ptr_writer;
-  memset(&track_frames_written_, 0,
+  bzero(&track_frames_written_,
          sizeof(track_frames_written_[0]) * kMaxTrackNumber);
-  memset(&last_track_timestamp_, 0,
+  bzero(&last_track_timestamp_,
          sizeof(last_track_timestamp_[0]) * kMaxTrackNumber);
   return segment_info_.Init();
 }

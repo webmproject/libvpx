@@ -429,7 +429,7 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc) {
     z->zbin_mode_boost_enabled = x->zbin_mode_boost_enabled;
     z->zbin_mode_boost = x->zbin_mode_boost;
 
-    memset(z->error_bins, 0, sizeof(z->error_bins));
+    bzero(z->error_bins, sizeof(z->error_bins));
   }
 }
 
@@ -449,7 +449,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi, MACROBLOCK *x,
     mbd->subpixel_predict16x16 = xd->subpixel_predict16x16;
     mb->gf_active_ptr = x->gf_active_ptr;
 
-    memset(mbr_ei[i].segment_counts, 0, sizeof(mbr_ei[i].segment_counts));
+    bzero(mbr_ei[i].segment_counts, sizeof(mbr_ei[i].segment_counts));
     mbr_ei[i].totalrate = 0;
 
     mb->partition_info = x->pi + x->e_mbd.mode_info_stride * (i + 1);
@@ -519,7 +519,7 @@ int vp8cx_create_encoder_threads(VP8_COMP *cpi) {
                     vpx_malloc(sizeof(sem_t) * th_count));
     CHECK_MEM_ERROR(&cpi->common.error, cpi->mb_row_ei,
                     vpx_memalign(32, sizeof(MB_ROW_COMP) * th_count));
-    memset(cpi->mb_row_ei, 0, sizeof(MB_ROW_COMP) * th_count);
+    bzero(cpi->mb_row_ei, sizeof(MB_ROW_COMP) * th_count);
     CHECK_MEM_ERROR(&cpi->common.error, cpi->en_thread_data,
                     vpx_malloc(sizeof(ENCODETHREAD_DATA) * th_count));
 

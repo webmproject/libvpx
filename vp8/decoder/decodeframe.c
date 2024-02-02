@@ -131,14 +131,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
        * Better to use the predictor as reconstruction.
        */
       pbi->frame_corrupt_residual = 1;
-      memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
+      bzero(xd->qcoeff, sizeof(xd->qcoeff));
 
       corruption_detected = 1;
 
       /* force idct to be skipped for B_PRED and use the
        * prediction only for reconstruction
        * */
-      memset(xd->eobs, 0, 25);
+      bzero(xd->eobs, 25);
     }
   }
 #endif
@@ -159,7 +159,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       int dst_stride = xd->dst.y_stride;
 
       /* clear out residual eob info */
-      if (xd->mode_info_context->mbmi.mb_skip_coeff) memset(xd->eobs, 0, 25);
+      if (xd->mode_info_context->mbmi.mb_skip_coeff) bzero(xd->eobs, 25);
 
       intra_prediction_down_copy(xd, xd->recon_above[0] + 16);
 
@@ -181,7 +181,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
           } else {
             vp8_dc_only_idct_add(b->qcoeff[0] * DQC[0], dst, dst_stride, dst,
                                  dst_stride);
-            memset(b->qcoeff, 0, 2 * sizeof(b->qcoeff[0]));
+            bzero(b->qcoeff, 2 * sizeof(b->qcoeff[0]));
           }
         }
       }
@@ -209,11 +209,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
           vp8_dequantize_b(b, xd->dequant_y2);
 
           vp8_short_inv_walsh4x4(&b->dqcoeff[0], xd->qcoeff);
-          memset(b->qcoeff, 0, 16 * sizeof(b->qcoeff[0]));
+          bzero(b->qcoeff, 16 * sizeof(b->qcoeff[0]));
         } else {
           b->dqcoeff[0] = (short)(b->qcoeff[0] * xd->dequant_y2[0]);
           vp8_short_inv_walsh4x4_1(&b->dqcoeff[0], xd->qcoeff);
-          memset(b->qcoeff, 0, 2 * sizeof(b->qcoeff[0]));
+          bzero(b->qcoeff, 2 * sizeof(b->qcoeff[0]));
         }
 
         /* override the dc dequant constant in order to preserve the
@@ -496,7 +496,7 @@ static void decode_mb_rows(VP8D_COMP *pbi) {
 
     /* reset contexts */
     xd->above_context = pc->above_context;
-    memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    bzero(xd->left_context, sizeof(ENTROPY_CONTEXT_PLANES));
 
     xd->left_available = 0;
 
@@ -828,12 +828,12 @@ static void init_frame(VP8D_COMP *pbi) {
     vp8_default_coef_probs(pc);
 
     /* reset the segment feature data to 0 with delta coding (Default state). */
-    memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
+    bzero(xd->segment_feature_data, sizeof(xd->segment_feature_data));
     xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
 
     /* reset the mode ref deltasa for loop filter */
-    memset(xd->ref_lf_deltas, 0, sizeof(xd->ref_lf_deltas));
-    memset(xd->mode_lf_deltas, 0, sizeof(xd->mode_lf_deltas));
+    bzero(xd->ref_lf_deltas, sizeof(xd->ref_lf_deltas));
+    bzero(xd->mode_lf_deltas, sizeof(xd->mode_lf_deltas));
 
     /* All buffers are implicitly updated on key frames. */
     pc->refresh_golden_frame = 1;
@@ -997,7 +997,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     if (xd->update_mb_segmentation_data) {
       xd->mb_segment_abs_delta = (unsigned char)vp8_read_bit(bc);
 
-      memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
+      bzero(xd->segment_feature_data, sizeof(xd->segment_feature_data));
 
       /* For each segmentation feature (Quant and loop filter level) */
       for (i = 0; i < MB_LVL_MAX; ++i) {
@@ -1190,7 +1190,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   }
 
   /* clear out the coeff buffer */
-  memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
+  bzero(xd->qcoeff, sizeof(xd->qcoeff));
 
   vp8_decode_mode_mvs(pbi);
 
@@ -1203,7 +1203,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   }
 #endif
 
-  memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
+  bzero(pc->above_context, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
   pbi->frame_corrupt_residual = 0;
 
 #if CONFIG_MULTITHREAD

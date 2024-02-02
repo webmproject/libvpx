@@ -101,7 +101,7 @@ void iadst4_c(const tran_low_t *input, tran_low_t *output) {
   tran_low_t x3 = input[3];
 
   if (!(x0 | x1 | x2 | x3)) {
-    memset(output, 0, 4 * sizeof(*output));
+    bzero(output, 4 * sizeof(*output));
     return;
   }
 
@@ -205,7 +205,7 @@ void iadst8_c(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x7 = input[6];
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
-    memset(output, 0, 8 * sizeof(*output));
+    bzero(output, 8 * sizeof(*output));
     return;
   }
 
@@ -408,7 +408,7 @@ void iadst16_c(const tran_low_t *input, tran_low_t *output) {
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8 | x9 | x10 | x11 | x12 |
         x13 | x14 | x15)) {
-    memset(output, 0, 16 * sizeof(*output));
+    bzero(output, 16 * sizeof(*output));
     return;
   }
 
@@ -1192,7 +1192,7 @@ void vpx_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
     if (zero_coeff)
       idct32_c(input, outptr);
     else
-      memset(outptr, 0, sizeof(tran_low_t) * 32);
+      bzero(outptr, sizeof(tran_low_t) * 32);
     input += 32;
     outptr += 32;
   }
@@ -1386,12 +1386,12 @@ void vpx_highbd_iadst4_c(const tran_low_t *input, tran_low_t *output, int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
     assert(0 && "invalid highbd txfm input");
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    memset(output, 0, sizeof(*output) * 4);
+    bzero(output, sizeof(*output) * 4);
     return;
   }
 
   if (!(x0 | x1 | x2 | x3)) {
-    memset(output, 0, 4 * sizeof(*output));
+    bzero(output, 4 * sizeof(*output));
     return;
   }
 
@@ -1428,7 +1428,7 @@ void vpx_highbd_idct4_c(const tran_low_t *input, tran_low_t *output, int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
     assert(0 && "invalid highbd txfm input");
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    memset(output, 0, sizeof(*output) * 4);
+    bzero(output, sizeof(*output) * 4);
     return;
   }
 
@@ -1512,12 +1512,12 @@ void vpx_highbd_iadst8_c(const tran_low_t *input, tran_low_t *output, int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
     assert(0 && "invalid highbd txfm input");
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    memset(output, 0, sizeof(*output) * 8);
+    bzero(output, sizeof(*output) * 8);
     return;
   }
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
-    memset(output, 0, 8 * sizeof(*output));
+    bzero(output, 8 * sizeof(*output));
     return;
   }
 
@@ -1588,7 +1588,7 @@ void vpx_highbd_idct8_c(const tran_low_t *input, tran_low_t *output, int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
     assert(0 && "invalid highbd txfm input");
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    memset(output, 0, sizeof(*output) * 8);
+    bzero(output, sizeof(*output) * 8);
     return;
   }
 
@@ -1730,13 +1730,13 @@ void vpx_highbd_iadst16_c(const tran_low_t *input, tran_low_t *output, int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
     assert(0 && "invalid highbd txfm input");
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    memset(output, 0, sizeof(*output) * 16);
+    bzero(output, sizeof(*output) * 16);
     return;
   }
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8 | x9 | x10 | x11 | x12 |
         x13 | x14 | x15)) {
-    memset(output, 0, 16 * sizeof(*output));
+    bzero(output, 16 * sizeof(*output));
     return;
   }
 
@@ -1891,7 +1891,7 @@ void vpx_highbd_idct16_c(const tran_low_t *input, tran_low_t *output, int bd) {
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
     assert(0 && "invalid highbd txfm input");
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    memset(output, 0, sizeof(*output) * 16);
+    bzero(output, sizeof(*output) * 16);
     return;
   }
 
@@ -2179,7 +2179,7 @@ static void highbd_idct32_c(const tran_low_t *input, tran_low_t *output,
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
     assert(0 && "invalid highbd txfm input");
 #endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
-    memset(output, 0, sizeof(*output) * 32);
+    bzero(output, sizeof(*output) * 32);
     return;
   }
 
@@ -2611,7 +2611,7 @@ void vpx_highbd_idct32x32_1024_add_c(const tran_low_t *input, uint16_t *dest,
     if (zero_coeff)
       highbd_idct32_c(input, outptr, bd);
     else
-      memset(outptr, 0, sizeof(tran_low_t) * 32);
+      bzero(outptr, sizeof(tran_low_t) * 32);
     input += 32;
     outptr += 32;
   }

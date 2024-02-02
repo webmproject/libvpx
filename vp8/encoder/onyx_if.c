@@ -390,11 +390,11 @@ static void setup_features(VP8_COMP *cpi) {
 
   cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 0;
   cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
-  memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
-  memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
-  memset(cpi->mb.e_mbd.last_ref_lf_deltas, 0,
+  bzero(cpi->mb.e_mbd.ref_lf_deltas, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
+  bzero(cpi->mb.e_mbd.mode_lf_deltas, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
+  bzero(cpi->mb.e_mbd.last_ref_lf_deltas,
          sizeof(cpi->mb.e_mbd.ref_lf_deltas));
-  memset(cpi->mb.e_mbd.last_mode_lf_deltas, 0,
+  bzero(cpi->mb.e_mbd.last_mode_lf_deltas,
          sizeof(cpi->mb.e_mbd.mode_lf_deltas));
 
   set_default_lf_deltas(cpi);
@@ -528,7 +528,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment) {
 
   // Set every macroblock to be eligible for update.
   // For key frame this will reset seg map to 0.
-  memset(cpi->segmentation_map, 0, mbs_in_frame);
+  bzero(cpi->segmentation_map, mbs_in_frame);
 
   if (cpi->common.frame_type != KEY_FRAME && block_count > 0) {
     /* Cycle through the macro_block rows */
@@ -660,8 +660,8 @@ static void set_default_lf_deltas(VP8_COMP *cpi) {
   cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 1;
   cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
 
-  memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
-  memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
+  bzero(cpi->mb.e_mbd.ref_lf_deltas, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
+  bzero(cpi->mb.e_mbd.mode_lf_deltas, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
 
   /* Test of ref frame deltas */
   cpi->mb.e_mbd.ref_lf_deltas[INTRA_FRAME] = 2;
@@ -1021,7 +1021,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
       /* This has a big hit on quality. Last resort */
       if (Speed >= 15) sf->half_pixel_search = 0;
 
-      memset(cpi->mb.error_bins, 0, sizeof(cpi->mb.error_bins));
+      bzero(cpi->mb.error_bins, sizeof(cpi->mb.error_bins));
 
   } /* switch */
 
@@ -1761,7 +1761,7 @@ struct VP8_COMP *vp8_create_compressor(const VP8_CONFIG *oxcf) {
 
   cm = &cpi->common;
 
-  memset(cpi, 0, sizeof(VP8_COMP));
+  bzero(cpi, sizeof(VP8_COMP));
 
   if (setjmp(cm->error.jmp)) {
     cpi->common.error.setjmp = 0;
@@ -2780,21 +2780,21 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
     int i;
     char filename[255];
 
-    sprintf(filename, "cx\\y%04d.raw", this_frame);
+    snprintf(filename, sizeof(int), "cx\\y%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->y_height; ++i)
         fwrite(frame->y_buffer + i * frame->y_stride, frame->y_width, 1, yframe);
 
     fclose(yframe);
-    sprintf(filename, "cx\\u%04d.raw", this_frame);
+    snprintf(filename, sizeof(int), "cx\\u%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->uv_height; ++i)
         fwrite(frame->u_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
 
     fclose(yframe);
-    sprintf(filename, "cx\\v%04d.raw", this_frame);
+    snprintf(filename, sizeof(int), "cx\\v%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->uv_height; ++i)
@@ -3512,8 +3512,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     }
 
     // Reset the zero_last counter to 0 on key frame.
-    memset(cpi->consec_zero_last, 0, cm->mb_rows * cm->mb_cols);
-    memset(cpi->consec_zero_last_mvbias, 0,
+    bzero(cpi->consec_zero_last, cm->mb_rows * cm->mb_cols);
+    bzero(cpi->consec_zero_last_mvbias,
            (cpi->common.mb_rows * cpi->common.mb_cols));
   }
 
@@ -3911,8 +3911,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
           }
         }
         // Reset the zero_last counter to 0 on key frame.
-        memset(cpi->consec_zero_last, 0, cm->mb_rows * cm->mb_cols);
-        memset(cpi->consec_zero_last_mvbias, 0,
+        bzero(cpi->consec_zero_last, cm->mb_rows * cm->mb_cols);
+        bzero(cpi->consec_zero_last_mvbias,
                (cpi->common.mb_rows * cpi->common.mb_cols));
         vp8_set_quantizer(cpi, Q);
       }
@@ -4747,7 +4747,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
     {
         char filename[512];
         FILE *recon_file;
-        sprintf(filename, "enc%04d.yuv", (int) cm->current_video_frame);
+        snprintf(filename, sizeof(int), "enc%04d.yuv", (int) cm->current_video_frame);
         recon_file = fopen(filename, "wb");
         fwrite(cm->yv12_fb[cm->lst_fb_idx].buffer_alloc,
                cm->yv12_fb[cm->lst_fb_idx].frame_size, 1, recon_file);

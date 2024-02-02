@@ -27,8 +27,8 @@ void vpx_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int tmp, eob = -1;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   tmp = clamp(abs_coeff + round_ptr[rc != 0], INT16_MIN, INT16_MAX);
   tmp = (tmp * quant) >> 16;
@@ -46,8 +46,8 @@ void vpx_highbd_quantize_dc(const tran_low_t *coeff_ptr, int n_coeffs,
                             const int16_t dequant, uint16_t *eob_ptr) {
   int eob = -1;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   {
     const int coeff = coeff_ptr[0];
@@ -75,8 +75,8 @@ void vpx_quantize_dc_32x32(const tran_low_t *coeff_ptr,
   const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
   int tmp, eob = -1;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   tmp = clamp(abs_coeff + ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1), INT16_MIN,
               INT16_MAX);
@@ -97,8 +97,8 @@ void vpx_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
   const int n_coeffs = 1024;
   int eob = -1;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   {
     const int coeff = coeff_ptr[0];
@@ -128,8 +128,8 @@ void vpx_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   const int16_t *quant_shift_ptr = mb_plane->quant_shift;
   const int16_t *scan = scan_order->scan;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   // Pre-scan pass
   for (i = (int)n_coeffs - 1; i >= 0; i--) {
@@ -178,8 +178,8 @@ void vpx_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
   const int16_t *quant_shift_ptr = mb_plane->quant_shift;
   const int16_t *scan = scan_order->scan;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   // Pre-scan pass
   for (i = (int)n_coeffs - 1; i >= 0; i--) {
@@ -231,8 +231,8 @@ void vpx_quantize_b_32x32_c(const tran_low_t *coeff_ptr,
   int idx_arr[32 * 32 /* n_coeffs */];
   int i, eob = -1;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   // Pre-scan pass
   for (i = 0; i < n_coeffs; i++) {
@@ -292,8 +292,8 @@ void vpx_highbd_quantize_b_32x32_c(
   int idx_arr[1024];
   int i, eob = -1;
 
-  memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
-  memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
+  bzero(qcoeff_ptr, n_coeffs * sizeof(*qcoeff_ptr));
+  bzero(dqcoeff_ptr, n_coeffs * sizeof(*dqcoeff_ptr));
 
   // Pre-scan pass
   for (i = 0; i < n_coeffs; i++) {

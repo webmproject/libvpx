@@ -125,7 +125,7 @@ class SyncFrameOnePassCbrSvc : public OnePassCbrSvc,
         intra_only_test_(false), loopfilter_off_(0), mismatch_nframes_(0),
         num_nonref_frames_(0) {
     SetMode(::libvpx_test::kRealTime);
-    memset(&svc_layer_sync_, 0, sizeof(svc_layer_sync_));
+    bzero(&svc_layer_sync_, sizeof(svc_layer_sync_));
   }
 
  protected:

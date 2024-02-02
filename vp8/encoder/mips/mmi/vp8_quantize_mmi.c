@@ -214,8 +214,8 @@ void vp8_regular_quantize_b_mmi(BLOCK *b, BLOCKD *d) {
   const int16_t zbin_oq_value = b->zbin_extra;
   register double ftmp0 asm("$f0");
 
-  //  memset(qcoeff_ptr, 0, 32);
-  //  memset(dqcoeff_ptr, 0, 32);
+  //  bzero(qcoeff_ptr, 32);
+  //  bzero(dqcoeff_ptr, 32);
   /* clang-format off */
   __asm__ volatile (
     "pxor       %[ftmp0],   %[ftmp0],       %[ftmp0]        \n\t"

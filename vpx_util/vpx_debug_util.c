@@ -99,9 +99,9 @@ void mismatch_move_frame_idx_w(void) {
 void mismatch_reset_frame(int num_planes) {
   int plane;
   for (plane = 0; plane < num_planes; ++plane) {
-    memset(frame_pre[frame_buf_idx_w][plane], 0,
+    bzero(frame_pre[frame_buf_idx_w][plane],
            sizeof(frame_pre[frame_buf_idx_w][plane][0]) * frame_size);
-    memset(frame_tx[frame_buf_idx_w][plane], 0,
+    bzero(frame_tx[frame_buf_idx_w][plane],
            sizeof(frame_tx[frame_buf_idx_w][plane][0]) * frame_size);
   }
 }

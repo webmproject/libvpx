@@ -59,9 +59,9 @@ class PredictTestBase : public AbstractBench,
     dst_c_ = new uint8_t[16 * 16];
     ASSERT_NE(dst_c_, nullptr);
 
-    memset(src_, 0, kSrcSize);
+    bzero(src_, kSrcSize);
     memset(padded_dst_, 128, padded_dst_size_);
-    memset(dst_c_, 0, 16 * 16);
+    bzero(dst_c_, 16 * 16);
   }
 
   void TearDown() override {

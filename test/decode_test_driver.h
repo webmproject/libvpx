@@ -40,12 +40,12 @@ class Decoder {
  public:
   explicit Decoder(vpx_codec_dec_cfg_t cfg)
       : cfg_(cfg), flags_(0), init_done_(false) {
-    memset(&decoder_, 0, sizeof(decoder_));
+    bzero(&decoder_, sizeof(decoder_));
   }
 
   Decoder(vpx_codec_dec_cfg_t cfg, const vpx_codec_flags_t flag)
       : cfg_(cfg), flags_(flag), init_done_(false) {
-    memset(&decoder_, 0, sizeof(decoder_));
+    bzero(&decoder_, sizeof(decoder_));
   }
 
   virtual ~Decoder() { vpx_codec_destroy(&decoder_); }

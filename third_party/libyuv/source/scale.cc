@@ -859,7 +859,7 @@ static void ScalePlaneBox(int src_width,
         y = max_y;
       }
       boxheight = MIN1((y >> 16) - iy);
-      memset(row16, 0, src_width * 2);
+      bzero(row16, src_width * 2);
       for (k = 0; k < boxheight; ++k) {
         ScaleAddRow(src, (uint16_t*)(row16), src_width);
         src += src_stride;
@@ -913,7 +913,7 @@ static void ScalePlaneBox_16(int src_width,
         y = max_y;
       }
       boxheight = MIN1((y >> 16) - iy);
-      memset(row32, 0, src_width * 4);
+      bzero(row32, src_width * 4);
       for (k = 0; k < boxheight; ++k) {
         ScaleAddRow(src, (uint32_t*)(row32), src_width);
         src += src_stride;

@@ -4901,7 +4901,7 @@ void StreamingListener::SocketWriter::MakeConnection() {
       << "MakeConnection() can't be called when there is already a connection.";
 
   addrinfo hints;
-  memset(&hints, 0, sizeof(hints));
+  bzero(&hints, sizeof(hints));
   hints.ai_family = AF_UNSPEC;  // To allow both IPv4 and IPv6 addresses.
   hints.ai_socktype = SOCK_STREAM;
   addrinfo* servinfo = nullptr;

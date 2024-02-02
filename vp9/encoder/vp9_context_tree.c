@@ -73,8 +73,8 @@ static void alloc_tree_contexts(VP9_COMMON *cm, PC_TREE *tree,
     alloc_mode_context(cm, num_4x4_blk / 2, &tree->horizontal[1]);
     alloc_mode_context(cm, num_4x4_blk / 2, &tree->vertical[1]);
   } else {
-    memset(&tree->horizontal[1], 0, sizeof(tree->horizontal[1]));
-    memset(&tree->vertical[1], 0, sizeof(tree->vertical[1]));
+    bzero(&tree->horizontal[1], sizeof(tree->horizontal[1]));
+    bzero(&tree->vertical[1], sizeof(tree->vertical[1]));
   }
 }
 

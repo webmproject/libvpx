@@ -29,7 +29,7 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   const TileInfo *const tile = &xd->tile;
 
   // Blank the reference vector list
-  memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
+  bzero(mv_ref_list, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
 
   // The nearest 2 blocks are treated differently
   // if the size < 8x8 we get the mv from the bmi substructure,

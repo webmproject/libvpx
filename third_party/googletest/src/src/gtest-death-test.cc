@@ -785,7 +785,7 @@ DeathTest::TestRole WindowsDeathTest::AssumeRole() {
 
   // The child process will share the standard handles with the parent.
   STARTUPINFOA startup_info;
-  memset(&startup_info, 0, sizeof(STARTUPINFO));
+  bzero(&startup_info, sizeof(STARTUPINFO));
   startup_info.dwFlags = STARTF_USESTDHANDLES;
   startup_info.hStdInput = ::GetStdHandle(STD_INPUT_HANDLE);
   startup_info.hStdOutput = ::GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1326,7 +1326,7 @@ static pid_t ExecDeathTestSpawnChild(char* const* argv, int close_fd) {
   // it after the call to fork()/clone() is complete.
   struct sigaction saved_sigprof_action;
   struct sigaction ignore_sigprof_action;
-  memset(&ignore_sigprof_action, 0, sizeof(ignore_sigprof_action));
+  bzero(&ignore_sigprof_action, sizeof(ignore_sigprof_action));
   sigemptyset(&ignore_sigprof_action.sa_mask);
   ignore_sigprof_action.sa_handler = SIG_IGN;
   GTEST_DEATH_TEST_CHECK_SYSCALL_(

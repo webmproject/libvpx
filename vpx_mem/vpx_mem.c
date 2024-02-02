@@ -74,7 +74,7 @@ void *vpx_calloc(size_t num, size_t size) {
   if (!check_size_argument_overflow(num, size)) return NULL;
 
   x = vpx_malloc(num * size);
-  if (x) memset(x, 0, num * size);
+  if (x) bzero(x, num * size);
   return x;
 }
 

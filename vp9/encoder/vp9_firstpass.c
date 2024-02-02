@@ -3889,7 +3889,7 @@ void vp9_get_key_frame_map(const VP9EncoderConfig *oxcf,
   // key_frame_map points to an int array with size equal to
   // first_pass_info->num_frames, which is also the number of show frames in the
   // video.
-  memset(key_frame_map, 0,
+  bzero(key_frame_map,
          sizeof(*key_frame_map) * first_pass_info->num_frames);
   while (show_idx < first_pass_info->num_frames) {
     int key_frame_group_size;

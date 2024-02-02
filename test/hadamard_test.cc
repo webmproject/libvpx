@@ -159,11 +159,11 @@ class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
     const int kMaxBlockSize = 32 * 32;
     DECLARE_ALIGNED(16, int16_t, a[kMaxBlockSize]);
     DECLARE_ALIGNED(16, tran_low_t, b[kMaxBlockSize]);
-    memset(a, 0, sizeof(a));
-    memset(b, 0, sizeof(b));
+    bzero(a, sizeof(a));
+    bzero(b, sizeof(b));
 
     tran_low_t b_ref[kMaxBlockSize];
-    memset(b_ref, 0, sizeof(b_ref));
+    bzero(b_ref, sizeof(b_ref));
 
     for (int i = 0; i < block_size_; ++i) a[i] = Rand();
 
@@ -180,10 +180,10 @@ class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
     const int kMaxBlockSize = 32 * 32;
     DECLARE_ALIGNED(16, int16_t, input_extreme_block[kMaxBlockSize]);
     DECLARE_ALIGNED(16, tran_low_t, b[kMaxBlockSize]);
-    memset(b, 0, sizeof(b));
+    bzero(b, sizeof(b));
 
     tran_low_t b_ref[kMaxBlockSize];
-    memset(b_ref, 0, sizeof(b_ref));
+    bzero(b_ref, sizeof(b_ref));
 
     for (int i = 0; i < 2; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
@@ -205,13 +205,13 @@ class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
     const int kMaxBlockSize = 32 * 32;
     DECLARE_ALIGNED(16, int16_t, a[kMaxBlockSize * 8]);
     DECLARE_ALIGNED(16, tran_low_t, b[kMaxBlockSize]);
-    memset(a, 0, sizeof(a));
+    bzero(a, sizeof(a));
     for (int i = 0; i < block_size_ * 8; ++i) a[i] = Rand();
 
     tran_low_t b_ref[kMaxBlockSize];
     for (int i = 8; i < 64; i += 8) {
-      memset(b, 0, sizeof(b));
-      memset(b_ref, 0, sizeof(b_ref));
+      bzero(b, sizeof(b));
+      bzero(b_ref, sizeof(b_ref));
 
       ReferenceHadamard(a, i, b_ref, bwh_);
       ASM_REGISTER_STATE_CHECK(h_func_(a, i, b));
@@ -228,7 +228,7 @@ class HadamardTestBase : public ::testing::TestWithParam<HadamardFuncWithSize> {
     DECLARE_ALIGNED(16, int16_t, input[kMaxBlockSize]);
     DECLARE_ALIGNED(16, tran_low_t, output[kMaxBlockSize]);
     memset(input, 1, sizeof(input));
-    memset(output, 0, sizeof(output));
+    bzero(output, sizeof(output));
 
     vpx_usec_timer timer;
     vpx_usec_timer_start(&timer);

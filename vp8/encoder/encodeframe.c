@@ -617,7 +617,7 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
 
   x->mvc = cm->fc.mvc;
 
-  memset(cm->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
+  bzero(cm->above_context, sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
   /* Special case treatment when GF and ARF are not sensible options
    * for reference
@@ -682,7 +682,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
   const int num_part = (1 << cm->multi_token_partition);
 #endif
 
-  memset(segment_counts, 0, sizeof(segment_counts));
+  bzero(segment_counts, sizeof(segment_counts));
   totalrate = 0;
 
   if (cpi->compressor_speed == 2) {

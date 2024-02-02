@@ -25,7 +25,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
   unsigned int stride_in_bytes;
   unsigned int align;
 
-  if (img != NULL) memset(img, 0, sizeof(vpx_image_t));
+  if (img != NULL) bzero(img, sizeof(vpx_image_t));
 
   if (fmt == VPX_IMG_FMT_NONE) goto fail;
 

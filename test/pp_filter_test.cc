@@ -161,7 +161,7 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
   src_image.Set(&rnd, &ACMRandom::Rand8);
 
   for (int blocks = 0; blocks < block_width_; blocks += 8) {
-    (void)memset(flimits_, 0, sizeof(*flimits_) * flimits_width);
+    (void)bzero(flimits_, sizeof(*flimits_) * flimits_width);
 
     for (int f = 0; f < 255; f++) {
       (void)memset(flimits_ + blocks, f, sizeof(*flimits_) * 8);

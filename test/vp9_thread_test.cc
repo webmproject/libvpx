@@ -183,7 +183,7 @@ string DecodeFile(const string &filename, int num_threads) {
 namespace impl {
 namespace {
 
-void Init(VPxWorker *const worker) { memset(worker, 0, sizeof(*worker)); }
+void Init(VPxWorker *const worker) { bzero(worker, sizeof(*worker)); }
 int Reset(VPxWorker *const /*worker*/) { return 1; }
 int Sync(VPxWorker *const worker) { return !worker->had_error; }
 

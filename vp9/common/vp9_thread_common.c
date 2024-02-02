@@ -256,7 +256,7 @@ void vp9_lpf_mt_init(VP9LfSync *lf_sync, VP9_COMMON *cm, int frame_filter_level,
 
   lf_sync->corrupted = 0;
 
-  memset(lf_sync->num_tiles_done, 0,
+  bzero(lf_sync->num_tiles_done,
          sizeof(*lf_sync->num_tiles_done) * sb_rows);
   cm->lf_row = 0;
 }

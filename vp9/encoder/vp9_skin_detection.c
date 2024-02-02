@@ -139,7 +139,7 @@ void vp9_output_skin_map(VP9_COMP *const cpi, FILE *yuv_skinmap_file) {
   const int fac = y_bsize / 8;
 
   YV12_BUFFER_CONFIG skinmap;
-  memset(&skinmap, 0, sizeof(YV12_BUFFER_CONFIG));
+  bzero(&skinmap, sizeof(YV12_BUFFER_CONFIG));
   if (vpx_alloc_frame_buffer(&skinmap, cm->width, cm->height, cm->subsampling_x,
                              cm->subsampling_y, VP9_ENC_BORDER_IN_PIXELS,
                              cm->byte_alignment)) {

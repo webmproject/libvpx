@@ -48,7 +48,7 @@ TEST(VP8RoiMapTest, ParameterCheck) {
   cpi.common.mb_rows = 240 >> 4;
   cpi.common.mb_cols = 320 >> 4;
   const int mbs = (cpi.common.mb_rows * cpi.common.mb_cols);
-  memset(cpi.segment_feature_data, 0, sizeof(cpi.segment_feature_data));
+  bzero(cpi.segment_feature_data, sizeof(cpi.segment_feature_data));
 
   // Segment map
   cpi.segmentation_map = reinterpret_cast<unsigned char *>(vpx_calloc(mbs, 1));

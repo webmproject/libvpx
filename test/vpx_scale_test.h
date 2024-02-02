@@ -31,7 +31,7 @@ class VpxScaleBase {
 
   void ResetImage(YV12_BUFFER_CONFIG *const img, const int width,
                   const int height) {
-    memset(img, 0, sizeof(*img));
+    bzero(img, sizeof(*img));
     ASSERT_EQ(
         0, vp8_yv12_alloc_frame_buffer(img, width, height, VP8BORDERINPIXELS))
         << "for width: " << width << " height: " << height;
@@ -53,7 +53,7 @@ class VpxScaleBase {
 
   void ResetScaleImage(YV12_BUFFER_CONFIG *const img, const int width,
                        const int height) {
-    memset(img, 0, sizeof(*img));
+    bzero(img, sizeof(*img));
 #if CONFIG_VP9_HIGHBITDEPTH
     ASSERT_EQ(0, vpx_alloc_frame_buffer(img, width, height, 1, 1, 0,
                                         VP9_ENC_BORDER_IN_PIXELS, 0));

@@ -1077,7 +1077,7 @@ static INLINE void partition_info_init(struct VP9_COMP *cpi) {
   CHECK_MEM_ERROR(&cm->error, cpi->partition_info,
                   (PARTITION_INFO *)vpx_calloc(unit_width * unit_height,
                                                sizeof(PARTITION_INFO)));
-  memset(cpi->partition_info, 0,
+  bzero(cpi->partition_info,
          unit_width * unit_height * sizeof(PARTITION_INFO));
 }
 
@@ -1105,7 +1105,7 @@ static INLINE void motion_vector_info_init(struct VP9_COMP *cpi) {
   CHECK_MEM_ERROR(&cm->error, cpi->motion_vector_info,
                   (MOTION_VECTOR_INFO *)vpx_calloc(unit_width * unit_height,
                                                    sizeof(MOTION_VECTOR_INFO)));
-  memset(cpi->motion_vector_info, 0,
+  bzero(cpi->motion_vector_info,
          unit_width * unit_height * sizeof(MOTION_VECTOR_INFO));
 }
 
@@ -1123,7 +1123,7 @@ static INLINE void tpl_stats_info_init(struct VP9_COMP *cpi) {
   CHECK_MEM_ERROR(
       &cm->error, cpi->tpl_stats_info,
       (TplDepStats *)vpx_calloc(MAX_LAG_BUFFERS, sizeof(TplDepStats)));
-  memset(cpi->tpl_stats_info, 0, MAX_LAG_BUFFERS * sizeof(TplDepStats));
+  bzero(cpi->tpl_stats_info, MAX_LAG_BUFFERS * sizeof(TplDepStats));
 }
 
 // Frees memory of the tpl stats information.
