@@ -9,7 +9,7 @@ using a previously created PGO profile file. The report also includes code
 hotness diagnostics:
 
 ```bash
-$ ./libvpx/configure --use-profile=perf.profdata \
+$ ../libvpx/configure --use-profile=perf.profdata \
   --extra-cflags="-fsave-optimization-record -fdiagnostics-show-hotness"
 ```
 
@@ -21,4 +21,4 @@ $ opt-viewer.py --output-dir=out/ --source-dir=libvpx .
 ```
 
 The HTML report displays each code line's relative hotness, cross-referenced
- with the failed compiler optimizations.
+with the failed compiler optimizations.
