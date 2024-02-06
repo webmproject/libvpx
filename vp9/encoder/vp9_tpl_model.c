@@ -18,9 +18,11 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_scan.h"
 #include "vp9/encoder/vp9_encoder.h"
+#include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_tpl_model.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vpx_codec.h"
+#include "vpx/vpx_ext_ratectrl.h"
 
 static int init_gop_frames(VP9_COMP *cpi, GF_PICTURE *gf_picture,
                            const GF_GROUP *gf_group, int *tpl_group_frames) {

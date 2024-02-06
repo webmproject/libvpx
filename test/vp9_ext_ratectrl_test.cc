@@ -12,13 +12,21 @@
 #include <new>
 #include <memory>
 
+#include "./vpx_config.h"
+
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
 #include "test/util.h"
 #include "test/yuv_video_source.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#if CONFIG_VP9_DECODER
+#include "vpx/vp8dx.h"
+#endif
 #include "vp9/simple_encode.h"
+#include "vpx/vpx_codec.h"
+#include "vpx/vpx_encoder.h"
 #include "vpx/vpx_ext_ratectrl.h"
+#include "vpx/vpx_image.h"
 #include "vpx/vpx_tpl.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 
