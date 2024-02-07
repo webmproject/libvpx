@@ -112,6 +112,7 @@ DSP_SRCS-$(HAVE_AVX2)  += x86/highbd_convolve_avx2.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_vpx_convolve_copy_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_vpx_convolve_avg_neon.c
 DSP_SRCS-$(HAVE_NEON)  += arm/highbd_vpx_convolve8_neon.c
+DSP_SRCS-$(HAVE_SVE)   += arm/highbd_vpx_convolve8_sve.c
 endif
 
 DSP_SRCS-$(HAVE_SSE2)  += x86/vpx_convolve_copy_sse2.asm

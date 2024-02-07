@@ -1218,6 +1218,12 @@ WRAP(convolve8_neon, 12)
 WRAP(convolve8_avg_neon, 12)
 #endif  // HAVE_NEON
 
+#if HAVE_SVE
+WRAP(convolve8_horiz_sve, 8)
+WRAP(convolve8_horiz_sve, 10)
+WRAP(convolve8_horiz_sve, 12)
+#endif  // HAVE_SVE
+
 WRAP(convolve_copy_c, 8)
 WRAP(convolve_avg_c, 8)
 WRAP(convolve8_horiz_c, 8)
@@ -1437,6 +1443,40 @@ const ConvolveParam kArrayConvolve_neon_dotprod[] = { ALL_SIZES(
 INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, ConvolveTest,
                          ::testing::ValuesIn(kArrayConvolve_neon_dotprod));
 #endif  // HAVE_NEON_DOTPROD
+
+#if HAVE_SVE
+#if CONFIG_VP9_HIGHBITDEPTH
+const ConvolveFunctions convolve8_sve(
+    wrap_convolve_copy_c_8, wrap_convolve_avg_c_8, wrap_convolve8_horiz_sve_8,
+    wrap_convolve8_avg_horiz_c_8, wrap_convolve8_vert_c_8,
+    wrap_convolve8_avg_vert_c_8, wrap_convolve8_c_8, wrap_convolve8_avg_c_8,
+    wrap_convolve8_horiz_c_8, wrap_convolve8_avg_horiz_c_8,
+    wrap_convolve8_vert_c_8, wrap_convolve8_avg_vert_c_8, wrap_convolve8_c_8,
+    wrap_convolve8_avg_c_8, 8);
+const ConvolveFunctions convolve10_sve(
+    wrap_convolve_copy_c_10, wrap_convolve_avg_c_10,
+    wrap_convolve8_horiz_sve_10, wrap_convolve8_avg_horiz_c_10,
+    wrap_convolve8_vert_c_10, wrap_convolve8_avg_vert_c_10, wrap_convolve8_c_10,
+    wrap_convolve8_avg_c_10, wrap_convolve8_horiz_c_10,
+    wrap_convolve8_avg_horiz_c_10, wrap_convolve8_vert_c_10,
+    wrap_convolve8_avg_vert_c_10, wrap_convolve8_c_10, wrap_convolve8_avg_c_10,
+    10);
+const ConvolveFunctions convolve12_sve(
+    wrap_convolve_copy_c_12, wrap_convolve_avg_c_12,
+    wrap_convolve8_horiz_sve_12, wrap_convolve8_avg_horiz_c_12,
+    wrap_convolve8_vert_c_12, wrap_convolve8_avg_vert_c_12, wrap_convolve8_c_12,
+    wrap_convolve8_avg_c_12, wrap_convolve8_horiz_c_12,
+    wrap_convolve8_avg_horiz_c_12, wrap_convolve8_vert_c_12,
+    wrap_convolve8_avg_vert_c_12, wrap_convolve8_c_12, wrap_convolve8_avg_c_12,
+    12);
+
+const ConvolveParam kArrayConvolve_sve[] = { ALL_SIZES(convolve8_sve),
+                                             ALL_SIZES(convolve10_sve),
+                                             ALL_SIZES(convolve12_sve) };
+INSTANTIATE_TEST_SUITE_P(SVE, ConvolveTest,
+                         ::testing::ValuesIn(kArrayConvolve_sve));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // HAVE_SVE
 
 #if HAVE_NEON_I8MM
 const ConvolveFunctions convolve8_neon_i8mm(
