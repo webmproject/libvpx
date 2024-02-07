@@ -16,6 +16,8 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/transpose_neon.h"
+#include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
 
 static INLINE uint16x4_t
@@ -472,4 +474,66 @@ void vpx_highbd_convolve8_avg_vert_neon(const uint16_t *src,
       w -= 8;
     } while (w != 0);
   }
+}
+
+void vpx_highbd_convolve8_neon(const uint16_t *src, ptrdiff_t src_stride,
+                               uint16_t *dst, ptrdiff_t dst_stride,
+                               const InterpKernel *filter, int x0_q4,
+                               int x_step_q4, int y0_q4, int y_step_q4, int w,
+                               int h, int bd) {
+  // Deriving the maximum number of rows in the intermediate buffer (134):
+  // - Smallest scaling factor is x1/2, which implies y_step_q4 = 32 (since
+  //   y_step_q4 has 1/16 pixel precision.)
+  // - Largest block size is 64x64 pixels.
+  // - 64 rows in the downscaled frame span a distance of (64 - 1) * 32 in the
+  //   original frame (in 1/16 pixel units).
+  // - Must round up because block may be located at sub-pixel position.
+  // - Require an additional SUBPEL_TAPS - 1 rows for the 8-tap filter tails.
+  // - ((64 - 1) * 32 + 15) >> 4 + 8 - 1 = 134.
+  // When calling in frame scaling function, the smallest scaling factor is
+  // x1/4, which implies y_step_q4 = 64. Since w and h are at most 16, the
+  // intermediate buffer is still big enough.
+
+  // +2 rows to make block height divisible by 4.
+  DECLARE_ALIGNED(32, uint16_t, im_block[64 * 136]);
+  const int im_stride = 64;
+  const int im_height =
+      (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
+  const ptrdiff_t border_offset = SUBPEL_TAPS / 2 - 1;
+
+  // Filter starting border_offset rows back. The Neon implementation will
+  // ignore the given height and filter a multiple of 4 lines. Since this goes
+  // into the intermediate buffer, which has lots of extra room and is
+  // subsequently discarded, this is safe if somewhat less than ideal.
+  vpx_highbd_convolve8_horiz_neon(src - src_stride * border_offset, src_stride,
+                                  im_block, im_stride, filter, x0_q4, x_step_q4,
+                                  y0_q4, y_step_q4, w, im_height, bd);
+
+  // Step into the intermediate buffer border_offset rows to get frame data.
+  vpx_highbd_convolve8_vert_neon(im_block + im_stride * border_offset,
+                                 im_stride, dst, dst_stride, filter, x0_q4,
+                                 x_step_q4, y0_q4, y_step_q4, w, h, bd);
+}
+
+void vpx_highbd_convolve8_avg_neon(const uint16_t *src, ptrdiff_t src_stride,
+                                   uint16_t *dst, ptrdiff_t dst_stride,
+                                   const InterpKernel *filter, int x0_q4,
+                                   int x_step_q4, int y0_q4, int y_step_q4,
+                                   int w, int h, int bd) {
+  // See above for buffer size derivation.
+  DECLARE_ALIGNED(32, uint16_t, im_block[64 * 136]);
+  const int im_stride = 64;
+  const int im_height =
+      (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
+  const ptrdiff_t border_offset = SUBPEL_TAPS / 2 - 1;
+
+  // This implementation has the same issues as above. In addition, we only want
+  // to average the values after both passes.
+  vpx_highbd_convolve8_horiz_neon(src - src_stride * border_offset, src_stride,
+                                  im_block, im_stride, filter, x0_q4, x_step_q4,
+                                  y0_q4, y_step_q4, w, im_height, bd);
+
+  vpx_highbd_convolve8_avg_vert_neon(im_block + im_stride * border_offset,
+                                     im_stride, dst, dst_stride, filter, x0_q4,
+                                     x_step_q4, y0_q4, y_step_q4, w, h, bd);
 }
