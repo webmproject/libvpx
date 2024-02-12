@@ -944,32 +944,159 @@ void vpx_convolve8_avg_vert_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
+static INLINE void convolve_4tap_2d_neon_i8mm(const uint8_t *src,
+                                              ptrdiff_t src_stride,
+                                              uint8_t *dst,
+                                              ptrdiff_t dst_stride, int w,
+                                              int h, const int8x8_t x_filter,
+                                              const uint8x8_t y_filter) {
+  // Neon does not have lane-referencing multiply or multiply-accumulate
+  // instructions that operate on vectors of 8-bit elements. This means we have
+  // to duplicate filter taps into a whole vector and use standard multiply /
+  // multiply-accumulate instructions.
+  const uint8x8_t y_filter_taps[4] = { vdup_lane_u8(y_filter, 2),
+                                       vdup_lane_u8(y_filter, 3),
+                                       vdup_lane_u8(y_filter, 4),
+                                       vdup_lane_u8(y_filter, 5) };
+
+  if (w == 4) {
+    const uint8x16_t permute_tbl = vld1q_u8(dot_prod_permute_tbl);
+
+    uint8x16_t h_s0, h_s1, h_s2;
+    load_u8_16x3(src, src_stride, &h_s0, &h_s1, &h_s2);
+
+    int16x4_t t0 = convolve4_4_h(h_s0, x_filter, permute_tbl);
+    int16x4_t t1 = convolve4_4_h(h_s1, x_filter, permute_tbl);
+    int16x4_t t2 = convolve4_4_h(h_s2, x_filter, permute_tbl);
+    // We halved the filter values so -1 from right shift.
+    uint8x8_t v_s01 = vqrshrun_n_s16(vcombine_s16(t0, t1), FILTER_BITS - 1);
+    uint8x8_t v_s12 = vqrshrun_n_s16(vcombine_s16(t1, t2), FILTER_BITS - 1);
+
+    src += 3 * src_stride;
+
+    do {
+      uint8x16_t h_s3, h_s4, h_s5, h_s6;
+      load_u8_16x4(src, src_stride, &h_s3, &h_s4, &h_s5, &h_s6);
+
+      int16x4_t t3 = convolve4_4_h(h_s3, x_filter, permute_tbl);
+      int16x4_t t4 = convolve4_4_h(h_s4, x_filter, permute_tbl);
+      int16x4_t t5 = convolve4_4_h(h_s5, x_filter, permute_tbl);
+      int16x4_t t6 = convolve4_4_h(h_s6, x_filter, permute_tbl);
+      // We halved the filter values so -1 from right shift.
+      uint8x8_t v_s34 = vqrshrun_n_s16(vcombine_s16(t3, t4), FILTER_BITS - 1);
+      uint8x8_t v_s56 = vqrshrun_n_s16(vcombine_s16(t5, t6), FILTER_BITS - 1);
+      uint8x8_t v_s23 = vext_u8(v_s12, v_s34, 4);
+      uint8x8_t v_s45 = vext_u8(v_s34, v_s56, 4);
+
+      uint8x8_t d01 = convolve4_8(v_s01, v_s12, v_s23, v_s34, y_filter_taps);
+      uint8x8_t d23 = convolve4_8(v_s23, v_s34, v_s45, v_s56, y_filter_taps);
+
+      store_unaligned_u8(dst + 0 * dst_stride, dst_stride, d01);
+      store_unaligned_u8(dst + 2 * dst_stride, dst_stride, d23);
+
+      v_s01 = v_s45;
+      v_s12 = v_s56;
+      src += 4 * src_stride;
+      dst += 4 * dst_stride;
+      h -= 4;
+    } while (h != 0);
+  } else {
+    const uint8x16x2_t permute_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
+
+    do {
+      const uint8_t *s = src;
+      uint8_t *d = dst;
+      int height = h;
+
+      uint8x16_t h_s0, h_s1, h_s2;
+      load_u8_16x3(s, src_stride, &h_s0, &h_s1, &h_s2);
+
+      uint8x8_t v_s0 = convolve4_8_h(h_s0, x_filter, permute_tbl);
+      uint8x8_t v_s1 = convolve4_8_h(h_s1, x_filter, permute_tbl);
+      uint8x8_t v_s2 = convolve4_8_h(h_s2, x_filter, permute_tbl);
+
+      s += 3 * src_stride;
+
+      do {
+        uint8x16_t h_s3, h_s4, h_s5, h_s6;
+        load_u8_16x4(s, src_stride, &h_s3, &h_s4, &h_s5, &h_s6);
+
+        uint8x8_t v_s3 = convolve4_8_h(h_s3, x_filter, permute_tbl);
+        uint8x8_t v_s4 = convolve4_8_h(h_s4, x_filter, permute_tbl);
+        uint8x8_t v_s5 = convolve4_8_h(h_s5, x_filter, permute_tbl);
+        uint8x8_t v_s6 = convolve4_8_h(h_s6, x_filter, permute_tbl);
+
+        uint8x8_t d0 = convolve4_8(v_s0, v_s1, v_s2, v_s3, y_filter_taps);
+        uint8x8_t d1 = convolve4_8(v_s1, v_s2, v_s3, v_s4, y_filter_taps);
+        uint8x8_t d2 = convolve4_8(v_s2, v_s3, v_s4, v_s5, y_filter_taps);
+        uint8x8_t d3 = convolve4_8(v_s3, v_s4, v_s5, v_s6, y_filter_taps);
+
+        store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
+
+        v_s0 = v_s4;
+        v_s1 = v_s5;
+        v_s2 = v_s6;
+        s += 4 * src_stride;
+        d += 4 * dst_stride;
+        height -= 4;
+      } while (height != 0);
+      src += 8;
+      dst += 8;
+      w -= 8;
+    } while (w != 0);
+  }
+}
+
 void vpx_convolve8_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
                              const InterpKernel *filter, int x0_q4,
                              int x_step_q4, int y0_q4, int y_step_q4, int w,
                              int h) {
+  assert(x_step_q4 == 16);
+  assert(y_step_q4 == 16);
+
+  (void)x_step_q4;
+  (void)y_step_q4;
+
+  const int x_filter_taps = vpx_get_filter_taps(filter[x0_q4]) <= 4 ? 4 : 8;
+  const int y_filter_taps = vpx_get_filter_taps(filter[y0_q4]) <= 4 ? 4 : 8;
+  // Account for needing filter_taps / 2 - 1 lines prior and filter_taps / 2
+  // lines post both horizontally and vertically.
+  const ptrdiff_t horiz_offset = x_filter_taps / 2 - 1;
+  const ptrdiff_t vert_offset = (y_filter_taps / 2 - 1) * src_stride;
+
+  if (x_filter_taps == 4 && y_filter_taps == 4) {
+    const int16x4_t x_filter = vld1_s16(filter[x0_q4] + 2);
+    const int16x8_t y_filter = vld1q_s16(filter[y0_q4]);
+
+    // 4-tap and bilinear filter values are even, so halve them to reduce
+    // intermediate precision requirements.
+    const int8x8_t x_filter_4tap =
+        vshrn_n_s16(vcombine_s16(x_filter, vdup_n_s16(0)), 1);
+    const uint8x8_t y_filter_4tap =
+        vshrn_n_u16(vreinterpretq_u16_s16(vabsq_s16(y_filter)), 1);
+
+    convolve_4tap_2d_neon_i8mm(src - horiz_offset - vert_offset, src_stride,
+                               dst, dst_stride, w, h, x_filter_4tap,
+                               y_filter_4tap);
+    return;
+  }
+
   // Given our constraints: w <= 64, h <= 64, taps <= 8 we can reduce the
   // maximum buffer size to 64 * (64 + 7).
   DECLARE_ALIGNED(32, uint8_t, im_block[64 * 71]);
   const int im_stride = 64;
+  const int im_height = h + SUBPEL_TAPS - 1;
 
-  const int vert_filter_taps = vpx_get_filter_taps(filter[y0_q4]) <= 4 ? 4 : 8;
-  // Account for the vertical phase needing vert_filter_taps / 2 - 1 lines prior
-  // and vert_filter_taps / 2 lines post.
-  const int im_height = h + vert_filter_taps - 1;
-  const ptrdiff_t border_offset = vert_filter_taps / 2 - 1;
+  const int8x8_t x_filter_8tap = vmovn_s16(vld1q_s16(filter[x0_q4]));
+  const int8x8_t y_filter_8tap = vmovn_s16(vld1q_s16(filter[y0_q4]));
 
-  assert(y_step_q4 == 16);
-  assert(x_step_q4 == 16);
+  vpx_convolve_8tap_2d_horiz_neon_i8mm(src - horiz_offset - vert_offset,
+                                       src_stride, im_block, im_stride, w,
+                                       im_height, x_filter_8tap);
 
-  vpx_convolve8_2d_horiz_neon_i8mm(src - src_stride * border_offset, src_stride,
-                                   im_block, im_stride, filter, x0_q4,
-                                   x_step_q4, y0_q4, y_step_q4, w, im_height);
-
-  vpx_convolve8_vert_neon_i8mm(im_block + im_stride * border_offset, im_stride,
-                               dst, dst_stride, filter, x0_q4, x_step_q4, y0_q4,
-                               y_step_q4, w, h);
+  vpx_convolve_8tap_vert_neon_i8mm(im_block, im_stride, dst, dst_stride, w, h,
+                                   y_filter_8tap);
 }
 
 void vpx_convolve8_avg_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
