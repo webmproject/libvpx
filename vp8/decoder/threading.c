@@ -15,6 +15,7 @@
 #endif
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_util/vpx_pthread.h"
 #include "vp8/common/common.h"
 #include "vp8/common/threading.h"
 #include "vp8/common/loopfilter.h"

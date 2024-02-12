@@ -20,6 +20,7 @@
 #include "tokenize.h"
 #include "vp8/common/onyxc_int.h"
 #include "vpx_dsp/variance.h"
+#include "vpx_util/vpx_pthread.h"
 #include "encodemb.h"
 #include "vp8/encoder/quantize.h"
 #include "vp8/common/entropy.h"

@@ -10,6 +10,7 @@
 #include <stddef.h>
 
 #include "onyx_int.h"
+#include "vpx_util/vpx_pthread.h"
 #include "vp8/common/threading.h"
 #include "vp8/common/common.h"
 #include "vp8/common/extend.h"

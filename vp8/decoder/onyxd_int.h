@@ -14,6 +14,7 @@
 #include <assert.h>
 
 #include "vpx_config.h"
+#include "vpx_util/vpx_pthread.h"
 #include "vp8/common/onyxd.h"
 #include "treereader.h"
 #include "vp8/common/onyxc_int.h"

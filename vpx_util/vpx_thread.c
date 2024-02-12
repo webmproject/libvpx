@@ -20,10 +20,26 @@
 
 #include <assert.h>
 #include <string.h>  // for memset()
+#include "./vpx_config.h"
 #include "./vpx_thread.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_util/vpx_pthread.h"
 
 #if CONFIG_MULTITHREAD
+
+#if defined(_WIN32) && !HAVE_PTHREAD_H
+// _beginthreadex requires __stdcall
+#if defined(__GNUC__) && \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
+#define THREADFN __attribute__((force_align_arg_pointer)) unsigned int __stdcall
+#else
+#define THREADFN unsigned int __stdcall
+#endif
+#define THREAD_EXIT_SUCCESS 0
+#else  // _WIN32
+#define THREADFN void *
+#define THREAD_EXIT_SUCCESS NULL
+#endif
 
 struct VPxWorkerImpl {
   pthread_mutex_t mutex_;
@@ -83,7 +99,7 @@ static THREADFN thread_loop(void *ptr) {
     }
   }
   pthread_mutex_unlock(&worker->impl_->mutex_);
-  return THREAD_RETURN(NULL);  // Thread is finished
+  return THREAD_EXIT_SUCCESS;  // Thread is finished
 }
 
 // main thread state control

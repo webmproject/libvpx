@@ -21,7 +21,7 @@
 #include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_ports/system_state.h"
-
+#include "vpx_util/vpx_pthread.h"
 #if CONFIG_MISMATCH_DEBUG
 #include "vpx_util/vpx_debug_util.h"
 #endif  // CONFIG_MISMATCH_DEBUG

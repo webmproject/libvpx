@@ -17,6 +17,7 @@
 #include "vp9/encoder/vp9_multi_thread.h"
 #include "vp9/encoder/vp9_temporal_filter.h"
 #include "vpx_dsp/vpx_dsp_common.h"
+#include "vpx_util/vpx_pthread.h"
 
 static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
   int i, j, k, l, m, n;

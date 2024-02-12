@@ -111,7 +111,6 @@ extern "C" {
 #define x86_pause_hint()
 #endif
 
-#include "vpx_util/vpx_thread.h"
 #include "vpx_util/vpx_atomics.h"
 
 static INLINE void vp8_atomic_spin_wait(
