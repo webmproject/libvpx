@@ -210,6 +210,7 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
   cm->error.setjmp = 0;
 
   vpx_get_worker_interface()->init(&pbi->lf_worker);
+  pbi->lf_worker.thread_name = "vpx lf worker";
 
   return pbi;
 }

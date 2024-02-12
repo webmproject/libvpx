@@ -2292,6 +2292,7 @@ static INLINE void init_mt(VP9Decoder *pbi) {
       ++pbi->num_tile_workers;
 
       winterface->init(worker);
+      worker->thread_name = "vpx tile worker";
       if (n < num_threads - 1 && !winterface->reset(worker)) {
         do {
           winterface->end(&pbi->tile_workers[pbi->num_tile_workers - 1]);

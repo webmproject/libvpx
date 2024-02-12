@@ -18,6 +18,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/static_assert.h"
 #include "vpx_ports/system_state.h"
+#include "vpx_util/vpx_thread.h"
 #include "vpx_util/vpx_timestamp.h"
 #if CONFIG_MULTITHREAD
 #include "vp8/encoder/ethreading.h"
@@ -148,7 +149,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(cfg, g_profile, 3);
   RANGE_CHECK_HI(cfg, rc_max_quantizer, 63);
   RANGE_CHECK_HI(cfg, rc_min_quantizer, cfg->rc_max_quantizer);
-  RANGE_CHECK_HI(cfg, g_threads, 64);
+  RANGE_CHECK_HI(cfg, g_threads, MAX_NUM_THREADS);
 #if CONFIG_REALTIME_ONLY
   RANGE_CHECK_HI(cfg, g_lag_in_frames, 0);
 #elif CONFIG_MULTI_RES_ENCODING

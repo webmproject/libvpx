@@ -17,7 +17,6 @@ extern "C" {
 
 #define MAX_NUM_TILE_COLS (1 << 6)
 #define MAX_NUM_TILE_ROWS 4
-#define MAX_NUM_THREADS 80
 
 struct VP9_COMP;
 struct ThreadData;
