@@ -181,7 +181,7 @@ static INLINE int16x4_t convolve8_4_h(const uint8x16_t samples,
   sum = vusdotq_lane_s32(sum, permuted_samples[1], filters, 1);
 
   // Further narrowing and packing is performed by the caller.
-  return vqmovn_s32(sum);
+  return vshrn_n_s32(sum, 1);
 }
 
 static INLINE uint8x8_t convolve8_8_h(const uint8x16_t samples,
@@ -205,8 +205,8 @@ static INLINE uint8x8_t convolve8_8_h(const uint8x16_t samples,
   sum1 = vusdotq_lane_s32(sum1, permuted_samples[2], filters, 1);
 
   // Narrow and re-pack.
-  int16x8_t sum = vcombine_s16(vqmovn_s32(sum0), vqmovn_s32(sum1));
-  return vqrshrun_n_s16(sum, FILTER_BITS);
+  int16x8_t sum = vcombine_s16(vshrn_n_s32(sum0, 1), vshrn_n_s32(sum1, 1));
+  return vqrshrun_n_s16(sum, FILTER_BITS - 1);
 }
 
 static INLINE void vpx_convolve_8tap_2d_horiz_neon_i8mm(
@@ -223,8 +223,8 @@ static INLINE void vpx_convolve_8tap_2d_horiz_neon_i8mm(
       int16x4_t d1 = convolve8_4_h(s1, filter, permute_tbl);
       int16x4_t d2 = convolve8_4_h(s2, filter, permute_tbl);
       int16x4_t d3 = convolve8_4_h(s3, filter, permute_tbl);
-      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS);
-      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(d2, d3), FILTER_BITS);
+      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS - 1);
+      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(d2, d3), FILTER_BITS - 1);
 
       store_u8(dst + 0 * dst_stride, dst_stride, d01);
       store_u8(dst + 2 * dst_stride, dst_stride, d23);
@@ -242,9 +242,9 @@ static INLINE void vpx_convolve_8tap_2d_horiz_neon_i8mm(
     int16x4_t d0 = convolve8_4_h(s0, filter, permute_tbl);
     int16x4_t d1 = convolve8_4_h(s1, filter, permute_tbl);
     int16x4_t d2 = convolve8_4_h(s2, filter, permute_tbl);
-    uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS);
+    uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS - 1);
     uint8x8_t d23 =
-        vqrshrun_n_s16(vcombine_s16(d2, vdup_n_s16(0)), FILTER_BITS);
+        vqrshrun_n_s16(vcombine_s16(d2, vdup_n_s16(0)), FILTER_BITS - 1);
 
     store_u8(dst + 0 * dst_stride, dst_stride, d01);
     store_u8_4x1(dst + 2 * dst_stride, d23);
@@ -399,8 +399,8 @@ static INLINE void vpx_convolve_8tap_horiz_neon_i8mm(
       int16x4_t t1 = convolve8_4_h(s1, filter, permute_tbl);
       int16x4_t t2 = convolve8_4_h(s2, filter, permute_tbl);
       int16x4_t t3 = convolve8_4_h(s3, filter, permute_tbl);
-      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(t0, t1), FILTER_BITS);
-      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(t2, t3), FILTER_BITS);
+      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(t0, t1), FILTER_BITS - 1);
+      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(t2, t3), FILTER_BITS - 1);
 
       store_u8(dst + 0 * dst_stride, dst_stride, d01);
       store_u8(dst + 2 * dst_stride, dst_stride, d23);
@@ -499,8 +499,8 @@ void vpx_convolve8_avg_horiz_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
       int16x4_t t1 = convolve8_4_h(s1, filters, permute_tbl);
       int16x4_t t2 = convolve8_4_h(s2, filters, permute_tbl);
       int16x4_t t3 = convolve8_4_h(s3, filters, permute_tbl);
-      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(t0, t1), FILTER_BITS);
-      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(t2, t3), FILTER_BITS);
+      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(t0, t1), FILTER_BITS - 1);
+      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(t2, t3), FILTER_BITS - 1);
 
       uint8x8_t dd01 = load_u8(dst + 0 * dst_stride, dst_stride);
       uint8x8_t dd23 = load_u8(dst + 2 * dst_stride, dst_stride);
@@ -743,7 +743,7 @@ static INLINE int16x4_t convolve8_4_v(const uint8x16_t samples_lo,
   sum = vusdotq_lane_s32(sum, samples_hi, filters, 1);
 
   // Further narrowing and packing is performed by the caller.
-  return vqmovn_s32(sum);
+  return vshrn_n_s32(sum, 1);
 }
 
 static INLINE uint8x8_t convolve8_8_v(const uint8x16_t samples0_lo,
@@ -761,8 +761,8 @@ static INLINE uint8x8_t convolve8_8_v(const uint8x16_t samples0_lo,
   sum1 = vusdotq_lane_s32(sum1, samples1_hi, filters, 1);
 
   // Narrow and re-pack.
-  int16x8_t sum = vcombine_s16(vqmovn_s32(sum0), vqmovn_s32(sum1));
-  return vqrshrun_n_s16(sum, FILTER_BITS);
+  int16x8_t sum = vcombine_s16(vshrn_n_s32(sum0, 1), vshrn_n_s32(sum1, 1));
+  return vqrshrun_n_s16(sum, FILTER_BITS - 1);
 }
 
 static INLINE void vpx_convolve_8tap_vert_neon_i8mm(
@@ -801,8 +801,8 @@ static INLINE void vpx_convolve_8tap_vert_neon_i8mm(
       int16x4_t d1 = convolve8_4_v(s1234, s5678, filter);
       int16x4_t d2 = convolve8_4_v(s2345, s6789, filter);
       int16x4_t d3 = convolve8_4_v(s3456, s78910, filter);
-      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS);
-      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(d2, d3), FILTER_BITS);
+      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS - 1);
+      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(d2, d3), FILTER_BITS - 1);
 
       store_u8(dst + 0 * dst_stride, dst_stride, d01);
       store_u8(dst + 2 * dst_stride, dst_stride, d23);
@@ -977,8 +977,8 @@ void vpx_convolve8_avg_vert_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
       int16x4_t d1 = convolve8_4_v(s1234, s5678, filters);
       int16x4_t d2 = convolve8_4_v(s2345, s6789, filters);
       int16x4_t d3 = convolve8_4_v(s3456, s78910, filters);
-      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS);
-      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(d2, d3), FILTER_BITS);
+      uint8x8_t d01 = vqrshrun_n_s16(vcombine_s16(d0, d1), FILTER_BITS - 1);
+      uint8x8_t d23 = vqrshrun_n_s16(vcombine_s16(d2, d3), FILTER_BITS - 1);
 
       uint8x8_t dd01 = load_u8(dst + 0 * dst_stride, dst_stride);
       uint8x8_t dd23 = load_u8(dst + 2 * dst_stride, dst_stride);
