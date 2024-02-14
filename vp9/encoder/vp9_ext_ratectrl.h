@@ -39,9 +39,7 @@ vpx_codec_err_t vp9_extrc_send_tpl_stats(EXT_RATECTRL *ext_ratectrl,
                                          const VpxTplGopStats *tpl_gop_stats);
 
 vpx_codec_err_t vp9_extrc_get_encodeframe_decision(
-    EXT_RATECTRL *ext_ratectrl, int show_index, int coding_index, int gop_index,
-    FRAME_UPDATE_TYPE update_type, int gop_size, int use_alt_ref,
-    RefCntBuffer *ref_frame_bufs[MAX_INTER_REF_FRAMES], int ref_frame_flags,
+    EXT_RATECTRL *ext_ratectrl, int gop_index,
     vpx_rc_encodeframe_decision_t *encode_frame_decision);
 
 vpx_codec_err_t vp9_extrc_update_encodeframe_result(

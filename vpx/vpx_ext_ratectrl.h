@@ -440,12 +440,11 @@ typedef vpx_rc_status_t (*vpx_rc_send_tpl_gop_stats_cb_fn_t)(
  * the external rate control model.
  *
  * \param[in]  rate_ctrl_model    rate control model
- * \param[in]  encode_frame_info  information of the coding frame
+ * \param[in]  frame_gop_index    index of the frame in current gop
  * \param[out] frame_decision     encode decision of the coding frame
  */
 typedef vpx_rc_status_t (*vpx_rc_get_encodeframe_decision_cb_fn_t)(
-    vpx_rc_model_t rate_ctrl_model,
-    const vpx_rc_encodeframe_info_t *encode_frame_info,
+    vpx_rc_model_t rate_ctrl_model, const int frame_gop_index,
     vpx_rc_encodeframe_decision_t *frame_decision);
 
 /*!\brief Update encode frame result callback prototype

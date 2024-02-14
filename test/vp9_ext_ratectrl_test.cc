@@ -100,13 +100,12 @@ vpx_rc_status_t rc_test_send_tpl_gop_stats(
 }
 
 vpx_rc_status_t rc_test_get_encodeframe_decision(
-    vpx_rc_model_t rate_ctrl_model,
-    const vpx_rc_encodeframe_info_t *encode_frame_info,
+    vpx_rc_model_t rate_ctrl_model, const int frame_gop_index,
     vpx_rc_encodeframe_decision_t *frame_decision) {
   RateControllerForTest *test_controller =
       static_cast<RateControllerForTest *>(rate_ctrl_model);
   frame_decision->q_index =
-      test_controller->CalculateFrameDecision(encode_frame_info->gop_index);
+      test_controller->CalculateFrameDecision(frame_gop_index);
   return VPX_RC_OK;
 }
 
