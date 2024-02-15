@@ -315,6 +315,7 @@ typedef struct vpx_rc_config {
   vpx_ext_rc_mode_t rc_mode; /**< Q mode or VBR mode */
   int overshoot_percent;     /**< for VBR mode only */
   int undershoot_percent;    /**< for VBR mode only */
+  int base_qp;               /**< base QP for leaf frames, 0-255 */
 } vpx_rc_config_t;
 
 /*!\brief Information passed to the external rate control model to
