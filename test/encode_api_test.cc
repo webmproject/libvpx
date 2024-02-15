@@ -44,6 +44,24 @@ bool IsVP9(vpx_codec_iface_t *iface) {
          0;
 }
 
+vpx_image_t *CreateImage(const unsigned int width, const unsigned int height) {
+  vpx_image_t *image =
+      vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, width, height, 1);
+  if (!image) return image;
+
+  for (unsigned int i = 0; i < image->d_h; ++i) {
+    memset(image->planes[0] + i * image->stride[0], 128, image->d_w);
+  }
+  const unsigned int uv_h = (image->d_h + 1) / 2;
+  const unsigned int uv_w = (image->d_w + 1) / 2;
+  for (unsigned int i = 0; i < uv_h; ++i) {
+    memset(image->planes[1] + i * image->stride[1], 128, uv_w);
+    memset(image->planes[2] + i * image->stride[2], 128, uv_w);
+  }
+
+  return image;
+}
+
 TEST(EncodeAPI, InvalidParams) {
   uint8_t buf[1] = { 0 };
   vpx_image_t img;
@@ -293,6 +311,97 @@ TEST(EncodeAPI, ChangeToL1T3AndSetBitrateVp8) {
 
   // Destroy libvpx encoder
   vpx_codec_destroy(&enc);
+}
+
+// Emulates the WebCodecs VideoEncoder interface.
+class VP8Encoder {
+ public:
+  explicit VP8Encoder(int speed) : speed_(speed) {}
+  ~VP8Encoder();
+
+  void Configure(unsigned int threads, unsigned int width, unsigned int height,
+                 vpx_rc_mode end_usage, vpx_enc_deadline_t deadline);
+  void Encode(bool key_frame);
+
+ private:
+  const int speed_;
+  bool initialized_ = false;
+  vpx_codec_enc_cfg_t cfg_;
+  vpx_codec_ctx_t enc_;
+  int frame_index_ = 0;
+  vpx_enc_deadline_t deadline_ = 0;
+};
+
+VP8Encoder::~VP8Encoder() {
+  if (initialized_) {
+    EXPECT_EQ(vpx_codec_destroy(&enc_), VPX_CODEC_OK);
+  }
+}
+
+void VP8Encoder::Configure(unsigned int threads, unsigned int width,
+                           unsigned int height, vpx_rc_mode end_usage,
+                           vpx_enc_deadline_t deadline) {
+  deadline_ = deadline;
+
+  if (!initialized_) {
+    vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg_, /*usage=*/0),
+              VPX_CODEC_OK);
+    cfg_.g_threads = threads;
+    cfg_.g_w = width;
+    cfg_.g_h = height;
+    cfg_.g_timebase.num = 1;
+    cfg_.g_timebase.den = 1000 * 1000;  // microseconds
+    cfg_.g_pass = VPX_RC_ONE_PASS;
+    cfg_.g_lag_in_frames = 0;
+    cfg_.rc_end_usage = end_usage;
+    cfg_.rc_min_quantizer = 2;
+    cfg_.rc_max_quantizer = 58;
+    ASSERT_EQ(vpx_codec_enc_init(&enc_, iface, &cfg_, 0), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc_, VP8E_SET_CPUUSED, speed_), VPX_CODEC_OK);
+    initialized_ = true;
+    return;
+  }
+
+  cfg_.g_threads = threads;
+  cfg_.g_w = width;
+  cfg_.g_h = height;
+  cfg_.rc_end_usage = end_usage;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc_, &cfg_), VPX_CODEC_OK)
+      << vpx_codec_error_detail(&enc_);
+}
+
+void VP8Encoder::Encode(bool key_frame) {
+  const vpx_codec_cx_pkt_t *pkt;
+  vpx_image_t *image = CreateImage(cfg_.g_w, cfg_.g_h);
+  ASSERT_NE(image, nullptr);
+  const vpx_enc_frame_flags_t flags = key_frame ? VPX_EFLAG_FORCE_KF : 0;
+  ASSERT_EQ(vpx_codec_encode(&enc_, image, frame_index_, 1, flags, deadline_),
+            VPX_CODEC_OK);
+  ++frame_index_;
+  vpx_codec_iter_t iter = nullptr;
+  while ((pkt = vpx_codec_get_cx_data(&enc_, &iter)) != nullptr) {
+    ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
+    if (key_frame) {
+      ASSERT_EQ(pkt->data.frame.flags & VPX_FRAME_IS_KEY, VPX_FRAME_IS_KEY);
+    }
+  }
+  vpx_img_free(image);
+}
+
+// This is the reproducer testcase for crbug.com/324459561. However,
+// just running this test is not enough to reproduce the bug. We also
+// need to send signals to the test.
+TEST(EncodeAPI, Chromium324459561) {
+  VP8Encoder encoder(-12);
+
+  encoder.Configure(11, 1685, 652, VPX_CBR, VPX_DL_REALTIME);
+
+  encoder.Encode(true);
+  encoder.Encode(true);
+  encoder.Encode(true);
+
+  encoder.Configure(0, 1685, 1, VPX_VBR, VPX_DL_REALTIME);
 }
 #endif  // CONFIG_VP8_ENCODER
 
@@ -651,24 +760,6 @@ TEST(EncodeAPI, ConfigLargeTargetBitrateVp9) {
 }
 #endif  // VPX_ARCH_X86_64 || VPX_ARCH_AARCH64
 
-vpx_image_t *CreateImage(const unsigned int width, const unsigned int height) {
-  vpx_image_t *image =
-      vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, width, height, 1);
-  if (!image) return image;
-
-  for (unsigned int i = 0; i < image->d_h; ++i) {
-    memset(image->planes[0] + i * image->stride[0], 128, image->d_w);
-  }
-  const unsigned int uv_h = (image->d_h + 1) / 2;
-  const unsigned int uv_w = (image->d_w + 1) / 2;
-  for (unsigned int i = 0; i < uv_h; ++i) {
-    memset(image->planes[1] + i * image->stride[1], 128, uv_w);
-    memset(image->planes[2] + i * image->stride[2], 128, uv_w);
-  }
-
-  return image;
-}
-
 // Emulates the WebCodecs VideoEncoder interface.
 class VP9Encoder {
  public:
@@ -735,7 +826,7 @@ void VP9Encoder::Encode(bool key_frame) {
   ASSERT_EQ(
       vpx_codec_encode(&enc_, image, frame_index_, 1, frame_flags, deadline_),
       VPX_CODEC_OK);
-  frame_index_++;
+  ++frame_index_;
   vpx_codec_iter_t iter = nullptr;
   while ((pkt = vpx_codec_get_cx_data(&enc_, &iter)) != nullptr) {
     ASSERT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
