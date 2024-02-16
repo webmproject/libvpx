@@ -581,7 +581,7 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd,
     sem_post(&pbi->h_event_end_decoding);
 }
 
-static THREAD_FUNCTION thread_decoding_proc(void *p_data) {
+static THREADFN thread_decoding_proc(void *p_data) {
   int ithread = ((DECODETHREAD_DATA *)p_data)->ithread;
   VP8D_COMP *pbi = (VP8D_COMP *)(((DECODETHREAD_DATA *)p_data)->ptr1);
   MB_ROW_DEC *mbrd = (MB_ROW_DEC *)(((DECODETHREAD_DATA *)p_data)->ptr2);
@@ -608,7 +608,7 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data) {
     }
   }
 
-  return 0;
+  return THREAD_EXIT_SUCCESS;
 }
 
 void vp8_decoder_create_threads(VP8D_COMP *pbi) {

@@ -19,35 +19,20 @@ extern "C" {
 
 #if CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD
 
-/* Thread management macros */
 #if defined(_WIN32) && !HAVE_PTHREAD_H
 /* Win32 */
-#include <process.h>
 #include <windows.h>
-#if defined(__GNUC__) && \
-    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
-#define THREAD_FUNCTION \
-  __attribute__((force_align_arg_pointer)) unsigned int __stdcall
 #else
-#define THREAD_FUNCTION unsigned int __stdcall
-#endif
-
-#else
+/* pthreads */
 #ifdef __APPLE__
 #include <mach/mach_init.h>
 #include <mach/semaphore.h>
 #include <mach/task.h>
 #include <time.h>
 #include <unistd.h>
-
 #else
 #include <semaphore.h>
 #endif
-
-#include <pthread.h>
-/* pthreads */
-/* Nearly everything is already defined */
-#define THREAD_FUNCTION void *
 #endif
 
 /* Synchronization macros: Win32 and Pthreads */

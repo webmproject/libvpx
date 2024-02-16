@@ -23,7 +23,7 @@
 extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x,
                                     int ok_to_skip);
 
-static THREAD_FUNCTION thread_loopfilter(void *p_data) {
+static THREADFN thread_loopfilter(void *p_data) {
   VP8_COMP *cpi = (VP8_COMP *)(((LPFTHREAD_DATA *)p_data)->ptr1);
   VP8_COMMON *cm = &cpi->common;
 
@@ -40,10 +40,10 @@ static THREAD_FUNCTION thread_loopfilter(void *p_data) {
     }
   }
 
-  return 0;
+  return THREAD_EXIT_SUCCESS;
 }
 
-static THREAD_FUNCTION thread_encoding_proc(void *p_data) {
+static THREADFN thread_encoding_proc(void *p_data) {
   int ithread = ((ENCODETHREAD_DATA *)p_data)->ithread;
   VP8_COMP *cpi = (VP8_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr1);
   MB_ROW_COMP *mbri = (MB_ROW_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr2);
@@ -313,7 +313,7 @@ static THREAD_FUNCTION thread_encoding_proc(void *p_data) {
   }
 
   /* printf("exit thread %d\n", ithread); */
-  return 0;
+  return THREAD_EXIT_SUCCESS;
 }
 
 static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc) {
