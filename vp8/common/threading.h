@@ -31,18 +31,7 @@ extern "C" {
 #else
 #define THREAD_FUNCTION unsigned int __stdcall
 #endif
-#define THREAD_FUNCTION_RETURN DWORD
-#define THREAD_SPECIFIC_INDEX DWORD
-#define pthread_t HANDLE
-#define pthread_detach(thread) \
-  if (thread != NULL) CloseHandle(thread)
 #define thread_sleep(nms) Sleep(nms)
-#define pthread_cancel(thread) terminate_thread(thread, 0)
-#define ts_key_create(ts_key, destructor) \
-  { ts_key = TlsAlloc(); };
-#define pthread_getspecific(ts_key) TlsGetValue(ts_key)
-#define pthread_setspecific(ts_key, value) TlsSetValue(ts_key, (void *)value)
-#define pthread_self() GetCurrentThreadId()
 
 #else
 #ifdef __APPLE__
@@ -60,16 +49,11 @@ extern "C" {
 /* pthreads */
 /* Nearly everything is already defined */
 #define THREAD_FUNCTION void *
-#define THREAD_FUNCTION_RETURN void *
-#define THREAD_SPECIFIC_INDEX pthread_key_t
-#define ts_key_create(ts_key, destructor) \
-  pthread_key_create(&(ts_key), destructor);
 #endif
 
 /* Synchronization macros: Win32 and Pthreads */
 #if defined(_WIN32) && !HAVE_PTHREAD_H
 #define sem_t HANDLE
-#define pause(voidpara) __asm PAUSE
 #define sem_init(sem, sem_attr1, sem_init_value) \
   (int)((*sem = CreateSemaphore(NULL, 0, 32768, NULL)) == NULL)
 #define sem_wait(sem) \
