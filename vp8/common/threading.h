@@ -31,7 +31,6 @@ extern "C" {
 #else
 #define THREAD_FUNCTION unsigned int __stdcall
 #endif
-#define thread_sleep(nms) Sleep(nms)
 
 #else
 #ifdef __APPLE__
