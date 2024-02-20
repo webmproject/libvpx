@@ -38,4 +38,14 @@ static INLINE int64x2_t vpx_dotq_s16(int64x2_t acc, int16x8_t x, int16x8_t y) {
                                    svset_neonq_s16(svundef_s16(), y)));
 }
 
+#define vpx_dotq_lane_s16(acc, x, y, lane)                            \
+  svget_neonq_s64(svdot_lane_s64(svset_neonq_s64(svundef_s64(), acc), \
+                                 svset_neonq_s16(svundef_s16(), x),   \
+                                 svset_neonq_s16(svundef_s16(), y), lane))
+
+static INLINE uint16x8_t vpx_tbl_u16(uint16x8_t data, uint16x8_t indices) {
+  return svget_neonq_u16(svtbl_u16(svset_neonq_u16(svundef_u16(), data),
+                                   svset_neonq_u16(svundef_u16(), indices)));
+}
+
 #endif  // VPX_VPX_DSP_ARM_VPX_NEON_SVE_BRIDGE_H_
