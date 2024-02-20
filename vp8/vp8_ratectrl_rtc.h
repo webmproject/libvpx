@@ -42,6 +42,9 @@ class VP8RateControlRTC {
   bool UpdateRateControl(const VP8RateControlRtcConfig &rc_cfg);
   // GetQP() needs to be called after ComputeQP() to get the latest QP
   int GetQP() const;
+  // GetUVDeltaQP() needs to be called after ComputeQP() to get the latest
+  // delta QP for UV.
+  UVDeltaQP GetUVDeltaQP() const;
   // GetLoopfilterLevel() needs to be called after ComputeQP() since loopfilter
   // level is calculated from frame qp.
   int GetLoopfilterLevel() const;

@@ -311,6 +311,14 @@ FrameDropDecision VP8RateControlRTC::ComputeQP(
 
 int VP8RateControlRTC::GetQP() const { return q_; }
 
+UVDeltaQP VP8RateControlRTC::GetUVDeltaQP() const {
+  VP8_COMMON *cm = &cpi_->common;
+  UVDeltaQP uv_delta_q;
+  uv_delta_q.uvdc_delta_q = cm->uvdc_delta_q;
+  uv_delta_q.uvac_delta_q = cm->uvac_delta_q;
+  return uv_delta_q;
+}
+
 int VP8RateControlRTC::GetLoopfilterLevel() const {
   VP8_COMMON *cm = &cpi_->common;
   const double qp = q_;
