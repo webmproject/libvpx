@@ -12,9 +12,9 @@
 #include <assert.h>
 
 #include "./vp9_rtcd.h"
-#include "vpx_dsp/arm/dot_neon_sve_bridge.h"
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/sum_neon.h"
+#include "vpx_dsp/arm/vpx_neon_sve_bridge.h"
 
 int64_t vp9_block_error_sve(const tran_low_t *coeff, const tran_low_t *dqcoeff,
                             intptr_t block_size, int64_t *ssz) {

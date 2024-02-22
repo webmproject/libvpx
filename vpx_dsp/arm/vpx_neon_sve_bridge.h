@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VPX_VPX_DSP_ARM_DOT_NEON_SVE_BRIDGE_H_
-#define VPX_VPX_DSP_ARM_DOT_NEON_SVE_BRIDGE_H_
+#ifndef VPX_VPX_DSP_ARM_VPX_NEON_SVE_BRIDGE_H_
+#define VPX_VPX_DSP_ARM_VPX_NEON_SVE_BRIDGE_H_
 
 #include <arm_neon.h>
 #include <arm_sve.h>
@@ -38,4 +38,4 @@ static INLINE int64x2_t vpx_dotq_s16(int64x2_t acc, int16x8_t x, int16x8_t y) {
                                    svset_neonq_s16(svundef_s16(), y)));
 }
 
-#endif  // VPX_VPX_DSP_ARM_DOT_NEON_SVE_BRIDGE_H_
+#endif  // VPX_VPX_DSP_ARM_VPX_NEON_SVE_BRIDGE_H_

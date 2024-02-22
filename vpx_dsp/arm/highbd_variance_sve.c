@@ -13,9 +13,9 @@
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_config.h"
 
-#include "vpx_dsp/arm/dot_neon_sve_bridge.h"
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/sum_neon.h"
+#include "vpx_dsp/arm/vpx_neon_sve_bridge.h"
 #include "vpx_ports/mem.h"
 
 static INLINE uint32_t highbd_mse_wxh_sve(const uint16_t *src_ptr,

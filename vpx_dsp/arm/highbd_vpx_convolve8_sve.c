@@ -15,9 +15,9 @@
 #include "./vpx_dsp_rtcd.h"
 
 #include "vpx/vpx_integer.h"
-#include "vpx_dsp/arm/dot_neon_sve_bridge.h"
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/transpose_neon.h"
+#include "vpx_dsp/arm/vpx_neon_sve_bridge.h"
 
 static INLINE uint16x4_t highbd_convolve8_4(const int16x8_t s[4],
                                             const int16x8_t filter,

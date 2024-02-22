@@ -12,9 +12,9 @@
 #include <assert.h>
 
 #include "./vpx_dsp_rtcd.h"
-#include "vpx_dsp/arm/dot_neon_sve_bridge.h"
 #include "vpx_dsp/arm/mem_neon.h"
 #include "vpx_dsp/arm/sum_neon.h"
+#include "vpx_dsp/arm/vpx_neon_sve_bridge.h"
 
 uint64_t vpx_sum_squares_2d_i16_sve(const int16_t *src, int stride, int size) {
   if (size == 4) {
