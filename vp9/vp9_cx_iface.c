@@ -2220,7 +2220,7 @@ static vpx_codec_enc_cfg_t get_enc_cfg(int frame_width, int frame_height,
   return enc_cfg;
 }
 
-static vp9_extracfg get_extra_cfg() {
+static vp9_extracfg get_extra_cfg(void) {
   vp9_extracfg extra_cfg = default_extra_cfg;
   return extra_cfg;
 }

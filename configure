@@ -660,6 +660,7 @@ process_toolchain() {
         check_add_cflags -Wmissing-declarations
         check_add_cflags -Wmissing-prototypes
         check_add_cflags -Wshadow
+        check_add_cflags -Wstrict-prototypes
         check_add_cflags -Wuninitialized
         check_add_cflags -Wunreachable-code-aggressive
         check_add_cflags -Wunused

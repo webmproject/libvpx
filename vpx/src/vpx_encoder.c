@@ -184,8 +184,8 @@ vpx_codec_err_t vpx_codec_enc_config_default(vpx_codec_iface_t *iface,
   while (0)
 
 #else
-static void FLOATING_POINT_INIT() {}
-static void FLOATING_POINT_RESTORE() {}
+static void FLOATING_POINT_INIT(void) {}
+static void FLOATING_POINT_RESTORE(void) {}
 #endif
 
 vpx_codec_err_t vpx_codec_encode(vpx_codec_ctx_t *ctx, const vpx_image_t *img,

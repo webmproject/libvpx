@@ -34,7 +34,7 @@ typedef void(WINAPI *PGNSI)(LPSYSTEM_INFO);
 #endif
 
 #if CONFIG_MULTITHREAD
-static int get_cpu_count() {
+static int get_cpu_count(void) {
   int core_count = 16;
 
 #if HAVE_UNISTD_H

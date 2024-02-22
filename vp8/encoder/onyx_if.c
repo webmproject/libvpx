@@ -64,7 +64,7 @@
 extern int vp8_update_coef_context(VP8_COMP *cpi);
 #endif
 
-extern unsigned int vp8_get_processor_freq();
+extern unsigned int vp8_get_processor_freq(void);
 
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
