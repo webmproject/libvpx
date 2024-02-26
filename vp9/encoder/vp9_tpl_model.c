@@ -409,6 +409,10 @@ static void tpl_store_before_propagation(VpxTplBlockStats *tpl_block_stats,
       tpl_block_stats_ptr->col = mi_col * 8;
       tpl_block_stats_ptr->inter_cost = src_stats->inter_cost;
       tpl_block_stats_ptr->intra_cost = src_stats->intra_cost;
+      // inter/intra_cost here is calculated with SATD which should be close
+      // enough to be used as inter/intra_pred_error
+      tpl_block_stats_ptr->inter_pred_err = src_stats->inter_cost;
+      tpl_block_stats_ptr->intra_pred_err = src_stats->intra_cost;
       tpl_block_stats_ptr->srcrf_dist = recon_error << TPL_DEP_COST_SCALE_LOG2;
       tpl_block_stats_ptr->srcrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
       tpl_block_stats_ptr->mv_r = src_stats->mv.as_mv.row;
