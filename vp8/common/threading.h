@@ -38,8 +38,8 @@ extern "C" {
 /* Synchronization macros: Win32 and Pthreads */
 #if defined(_WIN32) && !HAVE_PTHREAD_H
 #define sem_t HANDLE
-#define sem_init(sem, sem_attr1, sem_init_value) \
-  (int)((*sem = CreateSemaphore(NULL, 0, 32768, NULL)) == NULL)
+#define sem_init(sem, pshared, value) \
+  (int)((*sem = CreateSemaphore(NULL, value, 32768, NULL)) == NULL)
 #define sem_wait(sem) \
   (int)(WAIT_OBJECT_0 != WaitForSingleObject(*sem, INFINITE))
 #define sem_post(sem) ReleaseSemaphore(*sem, 1, NULL)
@@ -51,9 +51,9 @@ extern "C" {
 
 #ifdef __APPLE__
 #define sem_t semaphore_t
-#define sem_init(X, Y, Z) \
-  semaphore_create(mach_task_self(), X, SYNC_POLICY_FIFO, Z)
-#define sem_wait(sem) (semaphore_wait(*sem))
+#define sem_init(sem, pshared, value) \
+  semaphore_create(mach_task_self(), sem, SYNC_POLICY_FIFO, value)
+#define sem_wait(sem) semaphore_wait(*sem)
 #define sem_post(sem) semaphore_signal(*sem)
 #define sem_destroy(sem) semaphore_destroy(mach_task_self(), *sem)
 #else
