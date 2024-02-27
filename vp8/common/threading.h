@@ -37,28 +37,39 @@ extern "C" {
 
 /* Synchronization macros: Win32 and Pthreads */
 #if defined(_WIN32) && !HAVE_PTHREAD_H
-#define sem_t HANDLE
-#define sem_init(sem, pshared, value) \
+#define vp8_sem_t HANDLE
+#define vp8_sem_init(sem, pshared, value) \
   (int)((*sem = CreateSemaphore(NULL, value, 32768, NULL)) == NULL)
-#define sem_wait(sem) \
+#define vp8_sem_wait(sem) \
   (int)(WAIT_OBJECT_0 != WaitForSingleObject(*sem, INFINITE))
-#define sem_post(sem) ReleaseSemaphore(*sem, 1, NULL)
-#define sem_destroy(sem) \
+#define vp8_sem_post(sem) ReleaseSemaphore(*sem, 1, NULL)
+#define vp8_sem_destroy(sem) \
   if (*sem) ((int)(CloseHandle(*sem)) == TRUE)
 #define thread_sleep(nms) Sleep(nms)
 
 #else
 
 #ifdef __APPLE__
-#define sem_t semaphore_t
-#define sem_init(sem, pshared, value) \
+#define vp8_sem_t semaphore_t
+#define vp8_sem_init(sem, pshared, value) \
   semaphore_create(mach_task_self(), sem, SYNC_POLICY_FIFO, value)
-#define sem_wait(sem) semaphore_wait(*sem)
-#define sem_post(sem) semaphore_signal(*sem)
-#define sem_destroy(sem) semaphore_destroy(mach_task_self(), *sem)
+#define vp8_sem_wait(sem) semaphore_wait(*sem)
+#define vp8_sem_post(sem) semaphore_signal(*sem)
+#define vp8_sem_destroy(sem) semaphore_destroy(mach_task_self(), *sem)
 #else
+#include <errno.h>
 #include <unistd.h>
 #include <sched.h>
+#define vp8_sem_t sem_t
+#define vp8_sem_init sem_init
+static INLINE int vp8_sem_wait(vp8_sem_t *sem) {
+  int ret;
+  while ((ret = sem_wait(sem)) == -1 && errno == EINTR) {
+  }
+  return ret;
+}
+#define vp8_sem_post sem_post
+#define vp8_sem_destroy sem_destroy
 #endif /* __APPLE__ */
 /* Not Windows. Assume pthreads */
 

@@ -95,8 +95,8 @@ typedef struct VP8D_COMP {
   DECODETHREAD_DATA *de_thread_data;
 
   pthread_t *h_decoding_thread;
-  sem_t *h_event_start_decoding;
-  sem_t h_event_end_decoding;
+  vp8_sem_t *h_event_start_decoding;
+  vp8_sem_t h_event_end_decoding;
 /* end of threading data */
 #endif
 

@@ -7,7 +7,6 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include <errno.h>
 #include <stdio.h>
 #include <limits.h>
 
@@ -775,7 +774,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
         vpx_atomic_store_release(&cpi->mt_current_mb_col[i], -1);
 
       for (i = 0; i < cpi->encoding_thread_count; ++i) {
-        sem_post(&cpi->h_event_start_encoding[i]);
+        vp8_sem_post(&cpi->h_event_start_encoding[i]);
       }
 
       for (mb_row = 0; mb_row < cm->mb_rows;
@@ -808,9 +807,7 @@ void vp8_encode_frame(VP8_COMP *cpi) {
       }
       /* Wait for all the threads to finish. */
       for (i = 0; i < cpi->encoding_thread_count; ++i) {
-        errno = 0;
-        while (sem_wait(&cpi->h_event_end_encoding[i]) != 0 && errno == EINTR) {
-        }
+        vp8_sem_wait(&cpi->h_event_end_encoding[i]);
       }
 
       for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
