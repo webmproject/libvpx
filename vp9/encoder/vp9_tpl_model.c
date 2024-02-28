@@ -727,7 +727,9 @@ static void mode_estimation(VP9_COMP *cpi, MACROBLOCK *x, MACROBLOCKD *xd,
       1, (best_inter_cost << TPL_DEP_COST_SCALE_LOG2) / (mi_height * mi_width));
   tpl_stats->intra_cost = VPXMAX(
       1, (best_intra_cost << TPL_DEP_COST_SCALE_LOG2) / (mi_height * mi_width));
-  tpl_stats->ref_frame_index = gf_picture[frame_idx].ref_frame[best_rf_idx];
+  if (best_rf_idx >= 0) {
+    tpl_stats->ref_frame_index = gf_picture[frame_idx].ref_frame[best_rf_idx];
+  }
   tpl_stats->mv.as_int = best_mv.as_int;
   *ref_frame_idx = best_rf_idx;
 }
@@ -1565,12 +1567,16 @@ void vp9_setup_tpl_stats(VP9_COMP *cpi) {
     mc_flow_dispenser(cpi, gf_picture, frame_idx, cpi->tpl_bsize);
   }
 
-  // TPL stats has extra frames from next GOP. Trim those extra frames for
-  // Qmode.
-  trim_tpl_stats(&cpi->common.error, &cpi->tpl_gop_stats, extended_frame_count);
-
   if (cpi->ext_ratectrl.ready &&
       cpi->ext_ratectrl.funcs.send_tpl_gop_stats != NULL) {
+    // Intra search on key frame
+    if (gf_picture[0].update_type == KF_UPDATE) {
+      mc_flow_dispenser(cpi, gf_picture, 0, cpi->tpl_bsize);
+    }
+    // TPL stats has extra frames from next GOP. Trim those extra frames for
+    // Qmode.
+    trim_tpl_stats(&cpi->common.error, &cpi->tpl_gop_stats,
+                   extended_frame_count);
     const vpx_codec_err_t codec_status =
         vp9_extrc_send_tpl_stats(&cpi->ext_ratectrl, &cpi->tpl_gop_stats);
     if (codec_status != VPX_CODEC_OK) {
