@@ -91,11 +91,10 @@ static INLINE uint8x8_t convolve4_8(const uint8x8_t s0, const uint8x8_t s1,
   return vqrshrun_n_s16(vreinterpretq_s16_u16(sum), FILTER_BITS - 1);
 }
 
-static INLINE void vpx_convolve_4tap_vert_neon(const uint8_t *src,
-                                               ptrdiff_t src_stride,
-                                               uint8_t *dst,
-                                               ptrdiff_t dst_stride, int w,
-                                               int h, const int16x8_t filter) {
+static INLINE void convolve_4tap_vert_neon(const uint8_t *src,
+                                           ptrdiff_t src_stride, uint8_t *dst,
+                                           ptrdiff_t dst_stride, int w, int h,
+                                           const int16x8_t filter) {
   // 4-tap and bilinear filter values are even, so halve them to reduce
   // intermediate precision requirements.
   const uint8x8_t y_filter =

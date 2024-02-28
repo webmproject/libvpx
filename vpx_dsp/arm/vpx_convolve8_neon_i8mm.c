@@ -118,9 +118,11 @@ static INLINE uint8x8_t convolve8_8_h(const uint8x16_t samples,
   return vqrshrun_n_s16(sum, FILTER_BITS - 1);
 }
 
-static INLINE void vpx_convolve_4tap_horiz_neon_i8mm(
-    const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
-    ptrdiff_t dst_stride, int w, int h, const int8x8_t filter) {
+static INLINE void convolve_4tap_horiz_neon_i8mm(const uint8_t *src,
+                                                 ptrdiff_t src_stride,
+                                                 uint8_t *dst,
+                                                 ptrdiff_t dst_stride, int w,
+                                                 int h, const int8x8_t filter) {
   if (w == 4) {
     const uint8x16_t permute_tbl = vld1q_u8(dot_prod_permute_tbl);
 
@@ -173,9 +175,11 @@ static INLINE void vpx_convolve_4tap_horiz_neon_i8mm(
   }
 }
 
-static INLINE void vpx_convolve_8tap_horiz_neon_i8mm(
-    const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
-    ptrdiff_t dst_stride, int w, int h, const int8x8_t filter) {
+static INLINE void convolve_8tap_horiz_neon_i8mm(const uint8_t *src,
+                                                 ptrdiff_t src_stride,
+                                                 uint8_t *dst,
+                                                 ptrdiff_t dst_stride, int w,
+                                                 int h, const int8x8_t filter) {
   if (w == 4) {
     const uint8x16x2_t permute_tbl = vld1q_u8_x2(dot_prod_permute_tbl);
 
@@ -248,14 +252,14 @@ void vpx_convolve8_horiz_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
     const int8x8_t x_filter_4tap =
         vshrn_n_s16(vcombine_s16(x_filter, vdup_n_s16(0)), 1);
 
-    vpx_convolve_4tap_horiz_neon_i8mm(src - 1, src_stride, dst, dst_stride, w,
-                                      h, x_filter_4tap);
+    convolve_4tap_horiz_neon_i8mm(src - 1, src_stride, dst, dst_stride, w, h,
+                                  x_filter_4tap);
 
   } else {
     const int8x8_t x_filter_8tap = vmovn_s16(vld1q_s16(filter[x0_q4]));
 
-    vpx_convolve_8tap_horiz_neon_i8mm(src - 3, src_stride, dst, dst_stride, w,
-                                      h, x_filter_8tap);
+    convolve_8tap_horiz_neon_i8mm(src - 3, src_stride, dst, dst_stride, w, h,
+                                  x_filter_8tap);
   }
 }
 
@@ -415,9 +419,11 @@ static INLINE uint8x8_t convolve8_8_v(const uint8x16_t samples0_lo,
   return vqrshrun_n_s16(sum, FILTER_BITS - 1);
 }
 
-static INLINE void vpx_convolve_8tap_vert_neon_i8mm(
-    const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
-    ptrdiff_t dst_stride, int w, int h, const int8x8_t filter) {
+static INLINE void convolve_8tap_vert_neon_i8mm(const uint8_t *src,
+                                                ptrdiff_t src_stride,
+                                                uint8_t *dst,
+                                                ptrdiff_t dst_stride, int w,
+                                                int h, const int8x8_t filter) {
   const uint8x16x3_t merge_block_tbl = vld1q_u8_x3(dot_prod_merge_block_tbl);
   if (w == 4) {
     const uint8x16_t tran_concat_tbl = vld1q_u8(dot_prod_tran_concat_tbl);
@@ -562,13 +568,13 @@ void vpx_convolve8_vert_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
   if (vpx_get_filter_taps(filter[y0_q4]) <= 4) {
     const int16x8_t y_filter = vld1q_s16(filter[y0_q4]);
 
-    vpx_convolve_4tap_vert_neon(src - src_stride, src_stride, dst, dst_stride,
-                                w, h, y_filter);
+    convolve_4tap_vert_neon(src - src_stride, src_stride, dst, dst_stride, w, h,
+                            y_filter);
   } else {
     const int8x8_t y_filter = vmovn_s16(vld1q_s16(filter[y0_q4]));
 
-    vpx_convolve_8tap_vert_neon_i8mm(src - 3 * src_stride, src_stride, dst,
-                                     dst_stride, w, h, y_filter);
+    convolve_8tap_vert_neon_i8mm(src - 3 * src_stride, src_stride, dst,
+                                 dst_stride, w, h, y_filter);
   }
 }
 
@@ -972,8 +978,8 @@ void vpx_convolve8_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,
                                    im_block, im_stride, w, im_height,
                                    x_filter_8tap);
 
-  vpx_convolve_8tap_vert_neon_i8mm(im_block, im_stride, dst, dst_stride, w, h,
-                                   y_filter_8tap);
+  convolve_8tap_vert_neon_i8mm(im_block, im_stride, dst, dst_stride, w, h,
+                               y_filter_8tap);
 }
 
 void vpx_convolve8_avg_neon_i8mm(const uint8_t *src, ptrdiff_t src_stride,

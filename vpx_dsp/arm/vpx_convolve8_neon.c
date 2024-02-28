@@ -20,11 +20,10 @@
 #include "vpx_dsp/vpx_filter.h"
 #include "vpx_ports/mem.h"
 
-static INLINE void vpx_convolve_4tap_horiz_neon(const uint8_t *src,
-                                                ptrdiff_t src_stride,
-                                                uint8_t *dst,
-                                                ptrdiff_t dst_stride, int w,
-                                                int h, const int16x8_t filter) {
+static INLINE void convolve_4tap_horiz_neon(const uint8_t *src,
+                                            ptrdiff_t src_stride, uint8_t *dst,
+                                            ptrdiff_t dst_stride, int w, int h,
+                                            const int16x8_t filter) {
   // 4-tap and bilinear filter values are even, so halve them to reduce
   // intermediate precision requirements.
   const uint8x8_t x_filter =
@@ -91,11 +90,10 @@ static INLINE void vpx_convolve_4tap_horiz_neon(const uint8_t *src,
   }
 }
 
-static INLINE void vpx_convolve_8tap_horiz_neon(const uint8_t *src,
-                                                ptrdiff_t src_stride,
-                                                uint8_t *dst,
-                                                ptrdiff_t dst_stride, int w,
-                                                int h, const int16x8_t filter) {
+static INLINE void convolve_8tap_horiz_neon(const uint8_t *src,
+                                            ptrdiff_t src_stride, uint8_t *dst,
+                                            ptrdiff_t dst_stride, int w, int h,
+                                            const int16x8_t filter) {
   if (h == 4) {
     uint8x8_t t0, t1, t2, t3;
     load_u8_8x4(src, src_stride, &t0, &t1, &t2, &t3);
@@ -267,11 +265,11 @@ void vpx_convolve8_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
   const int16x8_t x_filter = vld1q_s16(filter[x0_q4]);
 
   if (vpx_get_filter_taps(filter[x0_q4]) <= 4) {
-    vpx_convolve_4tap_horiz_neon(src - 1, src_stride, dst, dst_stride, w, h,
-                                 x_filter);
+    convolve_4tap_horiz_neon(src - 1, src_stride, dst, dst_stride, w, h,
+                             x_filter);
   } else {
-    vpx_convolve_8tap_horiz_neon(src - 3, src_stride, dst, dst_stride, w, h,
-                                 x_filter);
+    convolve_8tap_horiz_neon(src - 3, src_stride, dst, dst_stride, w, h,
+                             x_filter);
   }
 }
 
@@ -473,11 +471,10 @@ void vpx_convolve8_avg_horiz_neon(const uint8_t *src, ptrdiff_t src_stride,
   }
 }
 
-static INLINE void vpx_convolve_8tap_vert_neon(const uint8_t *src,
-                                               ptrdiff_t src_stride,
-                                               uint8_t *dst,
-                                               ptrdiff_t dst_stride, int w,
-                                               int h, const int16x8_t filter) {
+static INLINE void convolve_8tap_vert_neon(const uint8_t *src,
+                                           ptrdiff_t src_stride, uint8_t *dst,
+                                           ptrdiff_t dst_stride, int w, int h,
+                                           const int16x8_t filter) {
   if (w == 4) {
     uint8x8_t t0, t1, t2, t3, t4, t5, t6;
     load_u8_8x7(src, src_stride, &t0, &t1, &t2, &t3, &t4, &t5, &t6);
@@ -585,11 +582,11 @@ void vpx_convolve8_vert_neon(const uint8_t *src, ptrdiff_t src_stride,
   const int16x8_t y_filter = vld1q_s16(filter[y0_q4]);
 
   if (vpx_get_filter_taps(filter[y0_q4]) <= 4) {
-    vpx_convolve_4tap_vert_neon(src - src_stride, src_stride, dst, dst_stride,
-                                w, h, y_filter);
+    convolve_4tap_vert_neon(src - src_stride, src_stride, dst, dst_stride, w, h,
+                            y_filter);
   } else {
-    vpx_convolve_8tap_vert_neon(src - 3 * src_stride, src_stride, dst,
-                                dst_stride, w, h, y_filter);
+    convolve_8tap_vert_neon(src - 3 * src_stride, src_stride, dst, dst_stride,
+                            w, h, y_filter);
   }
 }
 
