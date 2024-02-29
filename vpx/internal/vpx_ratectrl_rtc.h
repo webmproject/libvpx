@@ -23,7 +23,6 @@ enum class FrameDropDecision {
 };
 
 struct UVDeltaQP {
- public:
   // For the UV channel: the QP for the dc/ac value is given as
   // GetQP() + uvdc/ac_delta_q, where the uvdc/ac_delta_q are negative numbers.
   int uvdc_delta_q;
@@ -31,7 +30,6 @@ struct UVDeltaQP {
 };
 
 struct VpxRateControlRtcConfig {
- public:
   VpxRateControlRtcConfig() {
     width = 1280;
     height = 720;
