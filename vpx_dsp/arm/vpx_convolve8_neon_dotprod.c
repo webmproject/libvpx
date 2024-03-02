@@ -29,11 +29,6 @@ DECLARE_ALIGNED(16, static const uint8_t, dot_prod_permute_tbl[48]) = {
   8, 9, 10, 11, 9, 10, 11, 12, 10, 11, 12, 13, 11, 12, 13, 14
 };
 
-DECLARE_ALIGNED(16, static const uint8_t, dot_prod_tran_concat_tbl[32]) = {
-  0, 8,  16, 24, 1, 9,  17, 25, 2, 10, 18, 26, 3, 11, 19, 27,
-  4, 12, 20, 28, 5, 13, 21, 29, 6, 14, 22, 30, 7, 15, 23, 31
-};
-
 DECLARE_ALIGNED(16, static const uint8_t, dot_prod_merge_block_tbl[48]) = {
   // Shift left and insert new last column in transposed 4x4 block.
   1, 2, 3, 16, 5, 6, 7, 20, 9, 10, 11, 24, 13, 14, 15, 28,
@@ -366,46 +361,54 @@ void vpx_convolve8_avg_horiz_neon_dotprod(const uint8_t *src,
 }
 
 static INLINE void transpose_concat_4x4(int8x8_t a0, int8x8_t a1, int8x8_t a2,
-                                        int8x8_t a3, int8x16_t *b,
-                                        const uint8x16_t permute_tbl) {
-  /* Transpose 8-bit elements and concatenate result rows as follows:
-   * a0: 00, 01, 02, 03, XX, XX, XX, XX
-   * a1: 10, 11, 12, 13, XX, XX, XX, XX
-   * a2: 20, 21, 22, 23, XX, XX, XX, XX
-   * a3: 30, 31, 32, 33, XX, XX, XX, XX
-   *
-   * b: 00, 10, 20, 30, 01, 11, 21, 31, 02, 12, 22, 32, 03, 13, 23, 33
-   *
-   * The 'permute_tbl' is always 'dot_prod_tran_concat_tbl' above. Passing it
-   * as an argument is preferable to loading it directly from memory as this
-   * inline helper is called many times from the same parent function.
-   */
+                                        int8x8_t a3, int8x16_t *b) {
+  // Transpose 8-bit elements and concatenate result rows as follows:
+  // a0: 00, 01, 02, 03, XX, XX, XX, XX
+  // a1: 10, 11, 12, 13, XX, XX, XX, XX
+  // a2: 20, 21, 22, 23, XX, XX, XX, XX
+  // a3: 30, 31, 32, 33, XX, XX, XX, XX
+  //
+  // b: 00, 10, 20, 30, 01, 11, 21, 31, 02, 12, 22, 32, 03, 13, 23, 33
 
-  int8x16x2_t samples = { { vcombine_s8(a0, a1), vcombine_s8(a2, a3) } };
-  *b = vqtbl2q_s8(samples, permute_tbl);
+  int8x16_t a0q = vcombine_s8(a0, vdup_n_s8(0));
+  int8x16_t a1q = vcombine_s8(a1, vdup_n_s8(0));
+  int8x16_t a2q = vcombine_s8(a2, vdup_n_s8(0));
+  int8x16_t a3q = vcombine_s8(a3, vdup_n_s8(0));
+
+  int8x16_t a01 = vzipq_s8(a0q, a1q).val[0];
+  int8x16_t a23 = vzipq_s8(a2q, a3q).val[0];
+
+  int16x8_t a0123 =
+      vzipq_s16(vreinterpretq_s16_s8(a01), vreinterpretq_s16_s8(a23)).val[0];
+
+  *b = vreinterpretq_s8_s16(a0123);
 }
 
 static INLINE void transpose_concat_8x4(int8x8_t a0, int8x8_t a1, int8x8_t a2,
                                         int8x8_t a3, int8x16_t *b0,
-                                        int8x16_t *b1,
-                                        const uint8x16x2_t permute_tbl) {
-  /* Transpose 8-bit elements and concatenate result rows as follows:
-   * a0: 00, 01, 02, 03, 04, 05, 06, 07
-   * a1: 10, 11, 12, 13, 14, 15, 16, 17
-   * a2: 20, 21, 22, 23, 24, 25, 26, 27
-   * a3: 30, 31, 32, 33, 34, 35, 36, 37
-   *
-   * b0: 00, 10, 20, 30, 01, 11, 21, 31, 02, 12, 22, 32, 03, 13, 23, 33
-   * b1: 04, 14, 24, 34, 05, 15, 25, 35, 06, 16, 26, 36, 07, 17, 27, 37
-   *
-   * The 'permute_tbl' is always 'dot_prod_tran_concat_tbl' above. Passing it
-   * as an argument is preferable to loading it directly from memory as this
-   * inline helper is called many times from the same parent function.
-   */
+                                        int8x16_t *b1) {
+  // Transpose 8-bit elements and concatenate result rows as follows:
+  // a0: 00, 01, 02, 03, 04, 05, 06, 07
+  // a1: 10, 11, 12, 13, 14, 15, 16, 17
+  // a2: 20, 21, 22, 23, 24, 25, 26, 27
+  // a3: 30, 31, 32, 33, 34, 35, 36, 37
+  //
+  // b0: 00, 10, 20, 30, 01, 11, 21, 31, 02, 12, 22, 32, 03, 13, 23, 33
+  // b1: 04, 14, 24, 34, 05, 15, 25, 35, 06, 16, 26, 36, 07, 17, 27, 37
 
-  int8x16x2_t samples = { { vcombine_s8(a0, a1), vcombine_s8(a2, a3) } };
-  *b0 = vqtbl2q_s8(samples, permute_tbl.val[0]);
-  *b1 = vqtbl2q_s8(samples, permute_tbl.val[1]);
+  int8x16_t a0q = vcombine_s8(a0, vdup_n_s8(0));
+  int8x16_t a1q = vcombine_s8(a1, vdup_n_s8(0));
+  int8x16_t a2q = vcombine_s8(a2, vdup_n_s8(0));
+  int8x16_t a3q = vcombine_s8(a3, vdup_n_s8(0));
+
+  int8x16_t a01 = vzipq_s8(a0q, a1q).val[0];
+  int8x16_t a23 = vzipq_s8(a2q, a3q).val[0];
+
+  int16x8x2_t a0123 =
+      vzipq_s16(vreinterpretq_s16_s8(a01), vreinterpretq_s16_s8(a23));
+
+  *b0 = vreinterpretq_s8_s16(a0123.val[0]);
+  *b1 = vreinterpretq_s8_s16(a0123.val[1]);
 }
 
 static INLINE int16x4_t convolve8_4_v(const int8x16_t samples_lo,
@@ -449,8 +452,6 @@ static INLINE void convolve_8tap_vert_neon_dotprod(
   const uint8x16x3_t merge_block_tbl = vld1q_u8_x3(dot_prod_merge_block_tbl);
 
   if (w == 4) {
-    const uint8x16_t tran_concat_tbl = vld1q_u8(dot_prod_tran_concat_tbl);
-
     uint8x8_t t0, t1, t2, t3, t4, t5, t6;
     load_u8_8x7(src, src_stride, &t0, &t1, &t2, &t3, &t4, &t5, &t6);
     src += 7 * src_stride;
@@ -467,10 +468,10 @@ static INLINE void convolve_8tap_vert_neon_dotprod(
     // This operation combines a conventional transpose and the sample permute
     // (see horizontal case) required before computing the dot product.
     int8x16_t s0123, s1234, s2345, s3456;
-    transpose_concat_4x4(s0, s1, s2, s3, &s0123, tran_concat_tbl);
-    transpose_concat_4x4(s1, s2, s3, s4, &s1234, tran_concat_tbl);
-    transpose_concat_4x4(s2, s3, s4, s5, &s2345, tran_concat_tbl);
-    transpose_concat_4x4(s3, s4, s5, s6, &s3456, tran_concat_tbl);
+    transpose_concat_4x4(s0, s1, s2, s3, &s0123);
+    transpose_concat_4x4(s1, s2, s3, s4, &s1234);
+    transpose_concat_4x4(s2, s3, s4, s5, &s2345);
+    transpose_concat_4x4(s3, s4, s5, s6, &s3456);
 
     do {
       uint8x8_t t7, t8, t9, t10;
@@ -482,7 +483,7 @@ static INLINE void convolve_8tap_vert_neon_dotprod(
       int8x8_t s10 = vreinterpret_s8_u8(vsub_u8(t10, vdup_n_u8(128)));
 
       int8x16_t s78910;
-      transpose_concat_4x4(s7, s8, s9, s10, &s78910, tran_concat_tbl);
+      transpose_concat_4x4(s7, s8, s9, s10, &s78910);
 
       // Merge new data into block from previous iteration.
       int8x16x2_t samples_LUT = { { s3456, s78910 } };
@@ -512,8 +513,6 @@ static INLINE void convolve_8tap_vert_neon_dotprod(
       h -= 4;
     } while (h != 0);
   } else {
-    const uint8x16x2_t tran_concat_tbl = vld1q_u8_x2(dot_prod_tran_concat_tbl);
-
     do {
       const uint8_t *s = src;
       uint8_t *d = dst;
@@ -536,14 +535,10 @@ static INLINE void convolve_8tap_vert_neon_dotprod(
       // (see horizontal case) required before computing the dot product.
       int8x16_t s0123_lo, s0123_hi, s1234_lo, s1234_hi, s2345_lo, s2345_hi,
           s3456_lo, s3456_hi;
-      transpose_concat_8x4(s0, s1, s2, s3, &s0123_lo, &s0123_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s1, s2, s3, s4, &s1234_lo, &s1234_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s2, s3, s4, s5, &s2345_lo, &s2345_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s3, s4, s5, s6, &s3456_lo, &s3456_hi,
-                           tran_concat_tbl);
+      transpose_concat_8x4(s0, s1, s2, s3, &s0123_lo, &s0123_hi);
+      transpose_concat_8x4(s1, s2, s3, s4, &s1234_lo, &s1234_hi);
+      transpose_concat_8x4(s2, s3, s4, s5, &s2345_lo, &s2345_hi);
+      transpose_concat_8x4(s3, s4, s5, s6, &s3456_lo, &s3456_hi);
 
       do {
         uint8x8_t t7, t8, t9, t10;
@@ -555,8 +550,7 @@ static INLINE void convolve_8tap_vert_neon_dotprod(
         int8x8_t s10 = vreinterpret_s8_u8(vsub_u8(t10, vdup_n_u8(128)));
 
         int8x16_t s78910_lo, s78910_hi;
-        transpose_concat_8x4(s7, s8, s9, s10, &s78910_lo, &s78910_hi,
-                             tran_concat_tbl);
+        transpose_concat_8x4(s7, s8, s9, s10, &s78910_lo, &s78910_hi);
 
         // Merge new data into block from previous iteration.
         int8x16x2_t samples_LUT = { { s3456_lo, s78910_lo } };
@@ -649,8 +643,6 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
   src -= 3 * src_stride;
 
   if (w == 4) {
-    const uint8x16_t tran_concat_tbl = vld1q_u8(dot_prod_tran_concat_tbl);
-
     uint8x8_t t0, t1, t2, t3, t4, t5, t6;
     load_u8_8x7(src, src_stride, &t0, &t1, &t2, &t3, &t4, &t5, &t6);
     src += 7 * src_stride;
@@ -667,10 +659,10 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
     // This operation combines a conventional transpose and the sample permute
     // (see horizontal case) required before computing the dot product.
     int8x16_t s0123, s1234, s2345, s3456;
-    transpose_concat_4x4(s0, s1, s2, s3, &s0123, tran_concat_tbl);
-    transpose_concat_4x4(s1, s2, s3, s4, &s1234, tran_concat_tbl);
-    transpose_concat_4x4(s2, s3, s4, s5, &s2345, tran_concat_tbl);
-    transpose_concat_4x4(s3, s4, s5, s6, &s3456, tran_concat_tbl);
+    transpose_concat_4x4(s0, s1, s2, s3, &s0123);
+    transpose_concat_4x4(s1, s2, s3, s4, &s1234);
+    transpose_concat_4x4(s2, s3, s4, s5, &s2345);
+    transpose_concat_4x4(s3, s4, s5, s6, &s3456);
 
     do {
       uint8x8_t t7, t8, t9, t10;
@@ -682,7 +674,7 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
       int8x8_t s10 = vreinterpret_s8_u8(vsub_u8(t10, vdup_n_u8(128)));
 
       int8x16_t s78910;
-      transpose_concat_4x4(s7, s8, s9, s10, &s78910, tran_concat_tbl);
+      transpose_concat_4x4(s7, s8, s9, s10, &s78910);
 
       // Merge new data into block from previous iteration.
       int8x16x2_t samples_LUT = { { s3456, s78910 } };
@@ -718,8 +710,6 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
       h -= 4;
     } while (h != 0);
   } else {
-    const uint8x16x2_t tran_concat_tbl = vld1q_u8_x2(dot_prod_tran_concat_tbl);
-
     do {
       const uint8_t *s = src;
       uint8_t *d = dst;
@@ -742,14 +732,10 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
       // (see horizontal case) required before computing the dot product.
       int8x16_t s0123_lo, s0123_hi, s1234_lo, s1234_hi, s2345_lo, s2345_hi,
           s3456_lo, s3456_hi;
-      transpose_concat_8x4(s0, s1, s2, s3, &s0123_lo, &s0123_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s1, s2, s3, s4, &s1234_lo, &s1234_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s2, s3, s4, s5, &s2345_lo, &s2345_hi,
-                           tran_concat_tbl);
-      transpose_concat_8x4(s3, s4, s5, s6, &s3456_lo, &s3456_hi,
-                           tran_concat_tbl);
+      transpose_concat_8x4(s0, s1, s2, s3, &s0123_lo, &s0123_hi);
+      transpose_concat_8x4(s1, s2, s3, s4, &s1234_lo, &s1234_hi);
+      transpose_concat_8x4(s2, s3, s4, s5, &s2345_lo, &s2345_hi);
+      transpose_concat_8x4(s3, s4, s5, s6, &s3456_lo, &s3456_hi);
 
       do {
         uint8x8_t t7, t8, t9, t10;
@@ -761,8 +747,7 @@ void vpx_convolve8_avg_vert_neon_dotprod(const uint8_t *src,
         int8x8_t s10 = vreinterpret_s8_u8(vsub_u8(t10, vdup_n_u8(128)));
 
         int8x16_t s78910_lo, s78910_hi;
-        transpose_concat_8x4(s7, s8, s9, s10, &s78910_lo, &s78910_hi,
-                             tran_concat_tbl);
+        transpose_concat_8x4(s7, s8, s9, s10, &s78910_lo, &s78910_hi);
 
         // Merge new data into block from previous iteration.
         int8x16x2_t samples_LUT = { { s3456_lo, s78910_lo } };
