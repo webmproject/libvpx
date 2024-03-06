@@ -18,6 +18,7 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_scan.h"
 #include "vp9/encoder/vp9_encoder.h"
+#include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_tpl_model.h"
 #include "vpx/internal/vpx_codec_internal.h"
