@@ -103,7 +103,9 @@ static int arm_get_cpu_caps(void) {
 
 static int arm_get_cpu_caps(void) {
   int flags = 0;
+#if HAVE_NEON_DOTPROD || HAVE_SVE
   unsigned long hwcap = getauxval(AT_HWCAP);
+#endif  // HAVE_NEON_DOTPROD || HAVE_SVE
 #if HAVE_NEON_I8MM
   unsigned long hwcap2 = getauxval(AT_HWCAP2);
 #endif  // HAVE_NEON_I8MM
