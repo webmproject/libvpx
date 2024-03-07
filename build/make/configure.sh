@@ -1241,6 +1241,7 @@ EOF
         aarch64_arch_flag_neon_dotprod="arch=armv8.2-a+dotprod"
         aarch64_arch_flag_neon_i8mm="arch=armv8.2-a+dotprod+i8mm"
         aarch64_arch_flag_sve="arch=armv8.2-a+dotprod+i8mm+sve"
+        aarch64_arch_flag_sve2="arch=armv9-a+sve2"
         for ext in ${ARCH_EXT_LIST_AARCH64}; do
           if [ "$disable_exts" = "yes" ]; then
             RTCD_OPTIONS="${RTCD_OPTIONS}--disable-${ext} "
