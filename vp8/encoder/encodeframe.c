@@ -33,6 +33,7 @@
 #include "pickinter.h"
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/invtrans.h"
+#include "vp8/common/threading.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/vpx_timer.h"
