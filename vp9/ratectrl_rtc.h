@@ -13,9 +13,9 @@
 
 #include <climits>
 #include <cstdint>
+#include <cstring>
 #include <memory>
 
-#include "vp9/common/vp9_common.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx/internal/vpx_ratectrl_rtc.h"
 
@@ -25,12 +25,8 @@ namespace libvpx {
 struct VP9RateControlRtcConfig : public VpxRateControlRtcConfig {
   VP9RateControlRtcConfig() {
     ss_number_layers = 1;
-    vp9_zero(max_quantizers);
-    vp9_zero(min_quantizers);
-    vp9_zero(scaling_factor_den);
-    vp9_zero(scaling_factor_num);
-    vp9_zero(layer_target_bitrate);
-    vp9_zero(ts_rate_decimator);
+    memset(layer_target_bitrate, 0, sizeof(layer_target_bitrate));
+    memset(ts_rate_decimator, 0, sizeof(ts_rate_decimator));
     scaling_factor_num[0] = 1;
     scaling_factor_den[0] = 1;
     max_quantizers[0] = max_quantizer;
@@ -40,10 +36,10 @@ struct VP9RateControlRtcConfig : public VpxRateControlRtcConfig {
 
   // Number of spatial layers
   int ss_number_layers;
-  int max_quantizers[VPX_MAX_LAYERS];
-  int min_quantizers[VPX_MAX_LAYERS];
-  int scaling_factor_num[VPX_SS_MAX_LAYERS];
-  int scaling_factor_den[VPX_SS_MAX_LAYERS];
+  int max_quantizers[VPX_MAX_LAYERS] = {};
+  int min_quantizers[VPX_MAX_LAYERS] = {};
+  int scaling_factor_num[VPX_SS_MAX_LAYERS] = {};
+  int scaling_factor_den[VPX_SS_MAX_LAYERS] = {};
   // This is only for SVC for now.
   int max_consec_drop;
 };
