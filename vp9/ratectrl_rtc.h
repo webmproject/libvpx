@@ -11,15 +11,13 @@
 #ifndef VPX_VP9_RATECTRL_RTC_H_
 #define VPX_VP9_RATECTRL_RTC_H_
 
+#include <climits>
 #include <cstdint>
 #include <memory>
 
-#include "vp9/common/vp9_enums.h"
-#include "vp9/vp9_iface_common.h"
-#include "vp9/encoder/vp9_aq_cyclicrefresh.h"
-#include "vp9/vp9_cx_iface.h"
+#include "vp9/common/vp9_common.h"
+#include "vpx/vpx_encoder.h"
 #include "vpx/internal/vpx_ratectrl_rtc.h"
-#include "vpx_mem/vpx_mem.h"
 
 struct VP9_COMP;
 
