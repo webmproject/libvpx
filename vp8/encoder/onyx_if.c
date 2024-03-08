@@ -2005,6 +2005,7 @@ struct VP8_COMP *vp8_create_compressor(const VP8_CONFIG *oxcf) {
 
 #if CONFIG_MULTITHREAD
   if (vp8cx_create_encoder_threads(cpi)) {
+    cpi->common.error.setjmp = 0;
     vp8_remove_compressor(&cpi);
     return 0;
   }
@@ -2058,8 +2059,6 @@ struct VP8_COMP *vp8_create_compressor(const VP8_CONFIG *oxcf) {
 
   vp8_loop_filter_init(cm);
 
-  cpi->common.error.setjmp = 0;
-
 #if CONFIG_MULTI_RES_ENCODING
 
   /* Calculate # of MBs in a row in lower-resolution level image. */
@@ -2085,6 +2084,8 @@ struct VP8_COMP *vp8_create_compressor(const VP8_CONFIG *oxcf) {
   /* setup block ptrs & offsets */
   vp8_setup_block_ptrs(&cpi->mb);
   vp8_setup_block_dptrs(&cpi->mb.e_mbd);
+
+  cpi->common.error.setjmp = 0;
 
   return cpi;
 }
@@ -5265,8 +5266,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 
 #endif
 #endif
-
-  cpi->common.error.setjmp = 0;
 
   return 0;
 }

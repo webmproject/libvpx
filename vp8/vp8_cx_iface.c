@@ -497,7 +497,10 @@ static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t *ctx,
   set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg, NULL);
   vp8_change_config(ctx->cpi, &ctx->oxcf);
 #if CONFIG_MULTITHREAD
-  if (vp8cx_create_encoder_threads(ctx->cpi)) return VPX_CODEC_ERROR;
+  if (vp8cx_create_encoder_threads(ctx->cpi)) {
+    ctx->cpi->common.error.setjmp = 0;
+    return VPX_CODEC_ERROR;
+  }
 #endif
   ctx->cpi->common.error.setjmp = 0;
   return VPX_CODEC_OK;
@@ -981,6 +984,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
           &dst_end_time_stamp, !img);
 
       if (comp_data_state == VPX_CODEC_CORRUPT_FRAME) {
+        ctx->cpi->common.error.setjmp = 0;
         return VPX_CODEC_CORRUPT_FRAME;
       } else if (comp_data_state == -1) {
         break;
