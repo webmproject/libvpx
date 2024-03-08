@@ -895,12 +895,6 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
 
   if (!res) res = validate_config(ctx, &ctx->cfg, &ctx->vp8_cfg, 1);
 
-  if (!ctx->pts_offset_initialized) {
-    ctx->pts_offset = pts_val;
-    ctx->pts_offset_initialized = 1;
-  }
-  pts_val -= ctx->pts_offset;
-
   pick_quickcompress_mode(ctx, duration, deadline);
   vpx_codec_pkt_list_init(&ctx->pkt_list);
 
@@ -952,6 +946,11 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
     /* Convert API flags to internal codec lib flags */
     lib_flags = (flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
 
+    if (!ctx->pts_offset_initialized) {
+      ctx->pts_offset = pts_val;
+      ctx->pts_offset_initialized = 1;
+    }
+    pts_val -= ctx->pts_offset;
     dst_time_stamp =
         pts_val * ctx->timestamp_ratio.num / ctx->timestamp_ratio.den;
     dst_end_time_stamp = (pts_val + (int64_t)duration) *

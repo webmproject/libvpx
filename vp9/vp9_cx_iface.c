@@ -1352,12 +1352,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     }
   }
 
-  if (!ctx->pts_offset_initialized) {
-    ctx->pts_offset = pts;
-    ctx->pts_offset_initialized = 1;
-  }
-  pts -= ctx->pts_offset;
-
   pick_quickcompress_mode(ctx, duration, deadline);
   vpx_codec_pkt_list_init(&ctx->pkt_list);
 
@@ -1390,9 +1384,15 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
   if (res == VPX_CODEC_OK) {
     unsigned int lib_flags = 0;
     YV12_BUFFER_CONFIG sd;
-    int64_t dst_time_stamp = timebase_units_to_ticks(timestamp_ratio, pts);
     size_t size, cx_data_sz;
     unsigned char *cx_data;
+
+    if (!ctx->pts_offset_initialized) {
+      ctx->pts_offset = pts;
+      ctx->pts_offset_initialized = 1;
+    }
+    pts -= ctx->pts_offset;
+    int64_t dst_time_stamp = timebase_units_to_ticks(timestamp_ratio, pts);
 
     cpi->svc.timebase_fac = timebase_units_to_ticks(timestamp_ratio, 1);
     cpi->svc.time_stamp_superframe = dst_time_stamp;
