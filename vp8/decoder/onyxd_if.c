@@ -452,6 +452,7 @@ int vp8_remove_decoder_instances(struct frame_buffers *fb) {
 
   /* decoder instance for single thread mode */
   remove_decompressor(pbi);
+  fb->pbi[0] = NULL;
   return VPX_CODEC_OK;
 }
 
