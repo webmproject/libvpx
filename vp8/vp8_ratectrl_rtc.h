@@ -21,7 +21,6 @@ struct VP8_COMP;
 
 namespace libvpx {
 struct VP8RateControlRtcConfig : public VpxRateControlRtcConfig {
- public:
   VP8RateControlRtcConfig() {
     memset(&layer_target_bitrate, 0, sizeof(layer_target_bitrate));
     memset(&ts_rate_decimator, 0, sizeof(ts_rate_decimator));

@@ -25,7 +25,6 @@ struct VP9_COMP;
 
 namespace libvpx {
 struct VP9RateControlRtcConfig : public VpxRateControlRtcConfig {
- public:
   VP9RateControlRtcConfig() {
     ss_number_layers = 1;
     vp9_zero(max_quantizers);
