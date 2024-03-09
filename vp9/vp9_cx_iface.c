@@ -1432,7 +1432,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       if (cx_data_sz < ctx->cx_data_sz / 2) {
         vpx_internal_error(&cpi->common.error, VPX_CODEC_ERROR,
                            "Compressed data buffer too small");
-        return VPX_CODEC_ERROR;
       }
     }
 
