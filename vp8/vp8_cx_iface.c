@@ -8,6 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "./vpx_config.h"
 #include "./vp8_rtcd.h"
 #include "./vpx_dsp_rtcd.h"
@@ -28,8 +31,6 @@
 #include "vp8/encoder/firstpass.h"
 #include "vp8/common/onyx.h"
 #include "vp8/common/common.h"
-#include <stdlib.h>
-#include <string.h>
 
 struct vp8_extracfg {
   struct vpx_codec_pkt_list *pkt_list;
