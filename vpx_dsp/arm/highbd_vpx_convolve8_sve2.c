@@ -296,3 +296,157 @@ void vpx_highbd_convolve8_vert_sve2(const uint16_t *src, ptrdiff_t src_stride,
                                     dst_stride, w, h, y_filter_8tap, bd);
   }
 }
+
+void vpx_highbd_convolve8_avg_vert_sve2(const uint16_t *src,
+                                        ptrdiff_t src_stride, uint16_t *dst,
+                                        ptrdiff_t dst_stride,
+                                        const InterpKernel *filter, int x0_q4,
+                                        int x_step_q4, int y0_q4, int y_step_q4,
+                                        int w, int h, int bd) {
+  if (y_step_q4 != 16) {
+    vpx_highbd_convolve8_avg_vert_c(src, src_stride, dst, dst_stride, filter,
+                                    x0_q4, x_step_q4, y0_q4, y_step_q4, w, h,
+                                    bd);
+    return;
+  }
+
+  assert((intptr_t)dst % 4 == 0);
+  assert(dst_stride % 4 == 0);
+
+  const int16x8_t filters = vld1q_s16(filter[y0_q4]);
+
+  src -= 3 * src_stride;
+
+  uint16x8x3_t merge_tbl_idx = vld1q_u16_x3(kDotProdMergeBlockTbl);
+
+  // Correct indices by the size of vector length.
+  merge_tbl_idx.val[0] = vaddq_u16(
+      merge_tbl_idx.val[0],
+      vreinterpretq_u16_u64(vdupq_n_u64(svcnth() * 0x0001000000000000ULL)));
+  merge_tbl_idx.val[1] = vaddq_u16(
+      merge_tbl_idx.val[1],
+      vreinterpretq_u16_u64(vdupq_n_u64(svcnth() * 0x0001000100000000ULL)));
+  merge_tbl_idx.val[2] = vaddq_u16(
+      merge_tbl_idx.val[2],
+      vreinterpretq_u16_u64(vdupq_n_u64(svcnth() * 0x0001000100010000ULL)));
+
+  if (w == 4) {
+    const uint16x4_t max = vdup_n_u16((1 << bd) - 1);
+    const int16_t *s = (const int16_t *)src;
+    uint16_t *d = dst;
+
+    int16x4_t s0, s1, s2, s3, s4, s5, s6;
+    load_s16_4x7(s, src_stride, &s0, &s1, &s2, &s3, &s4, &s5, &s6);
+    s += 7 * src_stride;
+
+    int16x8_t s0123[2], s1234[2], s2345[2], s3456[2];
+    transpose_concat_4x4(s0, s1, s2, s3, s0123);
+    transpose_concat_4x4(s1, s2, s3, s4, s1234);
+    transpose_concat_4x4(s2, s3, s4, s5, s2345);
+    transpose_concat_4x4(s3, s4, s5, s6, s3456);
+
+    do {
+      int16x4_t s7, s8, s9, sA;
+
+      load_s16_4x4(s, src_stride, &s7, &s8, &s9, &sA);
+
+      int16x8_t s4567[2], s5678[2], s6789[2], s789A[2];
+      transpose_concat_4x4(s7, s8, s9, sA, s789A);
+
+      vpx_tbl2x2_s16(s3456, s789A, s4567, merge_tbl_idx.val[0]);
+      vpx_tbl2x2_s16(s3456, s789A, s5678, merge_tbl_idx.val[1]);
+      vpx_tbl2x2_s16(s3456, s789A, s6789, merge_tbl_idx.val[2]);
+
+      uint16x4_t d0 = highbd_convolve8_4_v(s0123, s4567, filters, max);
+      uint16x4_t d1 = highbd_convolve8_4_v(s1234, s5678, filters, max);
+      uint16x4_t d2 = highbd_convolve8_4_v(s2345, s6789, filters, max);
+      uint16x4_t d3 = highbd_convolve8_4_v(s3456, s789A, filters, max);
+
+      d0 = vrhadd_u16(d0, vld1_u16(d + 0 * dst_stride));
+      d1 = vrhadd_u16(d1, vld1_u16(d + 1 * dst_stride));
+      d2 = vrhadd_u16(d2, vld1_u16(d + 2 * dst_stride));
+      d3 = vrhadd_u16(d3, vld1_u16(d + 3 * dst_stride));
+
+      store_u16_4x4(d, dst_stride, d0, d1, d2, d3);
+
+      s0123[0] = s4567[0];
+      s0123[1] = s4567[1];
+      s1234[0] = s5678[0];
+      s1234[1] = s5678[1];
+      s2345[0] = s6789[0];
+      s2345[1] = s6789[1];
+      s3456[0] = s789A[0];
+      s3456[1] = s789A[1];
+
+      s += 4 * src_stride;
+      d += 4 * dst_stride;
+      h -= 4;
+    } while (h != 0);
+  } else {
+    const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
+
+    do {
+      const int16_t *s = (const int16_t *)src;
+      uint16_t *d = dst;
+      int height = h;
+
+      int16x8_t s0, s1, s2, s3, s4, s5, s6;
+      load_s16_8x7(s, src_stride, &s0, &s1, &s2, &s3, &s4, &s5, &s6);
+      s += 7 * src_stride;
+
+      int16x8_t s0123[4], s1234[4], s2345[4], s3456[4];
+      transpose_concat_8x4(s0, s1, s2, s3, s0123);
+      transpose_concat_8x4(s1, s2, s3, s4, s1234);
+      transpose_concat_8x4(s2, s3, s4, s5, s2345);
+      transpose_concat_8x4(s3, s4, s5, s6, s3456);
+
+      do {
+        int16x8_t s7, s8, s9, sA;
+        load_s16_8x4(s, src_stride, &s7, &s8, &s9, &sA);
+
+        int16x8_t s4567[4], s5678[5], s6789[4], s789A[4];
+        transpose_concat_8x4(s7, s8, s9, sA, s789A);
+
+        vpx_tbl2x4_s16(s3456, s789A, s4567, merge_tbl_idx.val[0]);
+        vpx_tbl2x4_s16(s3456, s789A, s5678, merge_tbl_idx.val[1]);
+        vpx_tbl2x4_s16(s3456, s789A, s6789, merge_tbl_idx.val[2]);
+
+        uint16x8_t d0 = highbd_convolve8_8_v(s0123, s4567, filters, max);
+        uint16x8_t d1 = highbd_convolve8_8_v(s1234, s5678, filters, max);
+        uint16x8_t d2 = highbd_convolve8_8_v(s2345, s6789, filters, max);
+        uint16x8_t d3 = highbd_convolve8_8_v(s3456, s789A, filters, max);
+
+        d0 = vrhaddq_u16(d0, vld1q_u16(d + 0 * dst_stride));
+        d1 = vrhaddq_u16(d1, vld1q_u16(d + 1 * dst_stride));
+        d2 = vrhaddq_u16(d2, vld1q_u16(d + 2 * dst_stride));
+        d3 = vrhaddq_u16(d3, vld1q_u16(d + 3 * dst_stride));
+
+        store_u16_8x4(d, dst_stride, d0, d1, d2, d3);
+
+        s0123[0] = s4567[0];
+        s0123[1] = s4567[1];
+        s0123[2] = s4567[2];
+        s0123[3] = s4567[3];
+        s1234[0] = s5678[0];
+        s1234[1] = s5678[1];
+        s1234[2] = s5678[2];
+        s1234[3] = s5678[3];
+        s2345[0] = s6789[0];
+        s2345[1] = s6789[1];
+        s2345[2] = s6789[2];
+        s2345[3] = s6789[3];
+        s3456[0] = s789A[0];
+        s3456[1] = s789A[1];
+        s3456[2] = s789A[2];
+        s3456[3] = s789A[3];
+
+        s += 4 * src_stride;
+        d += 4 * dst_stride;
+        height -= 4;
+      } while (height != 0);
+      src += 8;
+      dst += 8;
+      w -= 8;
+    } while (w != 0);
+  }
+}
