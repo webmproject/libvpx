@@ -450,3 +450,50 @@ void vpx_highbd_convolve8_avg_vert_sve2(const uint16_t *src,
     } while (w != 0);
   }
 }
+
+void vpx_highbd_convolve8_sve2(const uint16_t *src, ptrdiff_t src_stride,
+                               uint16_t *dst, ptrdiff_t dst_stride,
+                               const InterpKernel *filter, int x0_q4,
+                               int x_step_q4, int y0_q4, int y_step_q4, int w,
+                               int h, int bd) {
+  if (x_step_q4 != 16 || y_step_q4 != 16) {
+    vpx_highbd_convolve8_c(src, src_stride, dst, dst_stride, filter, x0_q4,
+                           x_step_q4, y0_q4, y_step_q4, w, h, bd);
+    return;
+  }
+
+  // Given our constraints: w <= 64, h <= 64, taps <= 8 we can reduce the
+  // maximum buffer size to 64 * (64 + 7) (+1 row to make it divisible by 4).
+  DECLARE_ALIGNED(32, uint16_t, im_block[64 * 72]);
+  const int im_stride = 64;
+
+  const int horiz_filter_taps = vpx_get_filter_taps(filter[x0_q4]) <= 4 ? 4 : 8;
+  const int vert_filter_taps = vpx_get_filter_taps(filter[y0_q4]) <= 4 ? 4 : 8;
+
+  if (horiz_filter_taps == 4 || vert_filter_taps == 4) {
+    vpx_highbd_convolve8_neon(src, src_stride, dst, dst_stride, filter, x0_q4,
+                              x_step_q4, y0_q4, y_step_q4, w, h, bd);
+    return;
+  }
+
+  // Account for the vertical phase needing vert_filter_taps / 2 - 1 lines prior
+  // and vert_filter_taps / 2 lines post. (+1 to make total divisible by 4.)
+  const int im_height = h + vert_filter_taps;
+  const ptrdiff_t border_offset = vert_filter_taps / 2 - 1;
+
+  assert(y_step_q4 == 16);
+  assert(x_step_q4 == 16);
+
+  // Filter starting border_offset rows back. The SVE implementation will
+  // ignore the given height and filter a multiple of 4 lines. Since this goes
+  // into the temporary buffer which has lots of extra room and is subsequently
+  // discarded this is safe if somewhat less than ideal.
+  vpx_highbd_convolve8_horiz_sve(src - src_stride * border_offset, src_stride,
+                                 im_block, im_stride, filter, x0_q4, x_step_q4,
+                                 y0_q4, y_step_q4, w, im_height, bd);
+
+  // Step into the temporary buffer border_offset rows to get actual frame data.
+  vpx_highbd_convolve8_vert_sve2(im_block + im_stride * border_offset,
+                                 im_stride, dst, dst_stride, filter, x0_q4,
+                                 x_step_q4, y0_q4, y_step_q4, w, h, bd);
+}
