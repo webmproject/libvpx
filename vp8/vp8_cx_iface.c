@@ -923,7 +923,6 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
   /* Initialize the encoder instance on the first frame*/
   if (!res && ctx->cpi) {
     unsigned int lib_flags;
-    YV12_BUFFER_CONFIG sd;
     int64_t dst_time_stamp, dst_end_time_stamp;
     size_t size, cx_data_sz;
     unsigned char *cx_data;
@@ -961,6 +960,8 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t *ctx,
                          ctx->timestamp_ratio.num / ctx->timestamp_ratio.den;
 
     if (img != NULL) {
+      YV12_BUFFER_CONFIG sd;
+
       res = image2yuvconfig(img, &sd);
 
       if (vp8_receive_raw_frame(ctx->cpi, ctx->next_frame_flag | lib_flags, &sd,

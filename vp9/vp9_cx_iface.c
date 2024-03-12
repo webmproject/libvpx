@@ -1383,7 +1383,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
   if (res == VPX_CODEC_OK) {
     unsigned int lib_flags = 0;
-    YV12_BUFFER_CONFIG sd;
     size_t size, cx_data_sz;
     unsigned char *cx_data;
 
@@ -1401,6 +1400,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR) cpi->b_calculate_psnr = 1;
 
     if (img != NULL) {
+      YV12_BUFFER_CONFIG sd;
+
       const int64_t dst_end_time_stamp =
           timebase_units_to_ticks(timestamp_ratio, pts + duration);
       res = image2yuvconfig(img, &sd);
