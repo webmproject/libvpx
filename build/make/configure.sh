@@ -444,8 +444,10 @@ EOF
     compile_result=$?
     if [ ${compile_result} -ne 0 ]; then
       log_echo "  disabling sve: arm_neon_sve_bridge.h not supported by compiler"
+      log_echo "  disabling sve2: arm_neon_sve_bridge.h not supported by compiler"
       disable_feature sve
-      RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sve "
+      disable_feature sve2
+      RTCD_OPTIONS="${RTCD_OPTIONS}--disable-sve --disable-sve2 "
     fi
   fi
 }
@@ -1261,7 +1263,9 @@ EOF
             fi
           fi
         done
-        check_neon_sve_bridge_compiles
+        if enabled sve; then
+          check_neon_sve_bridge_compiles
+        fi
       fi
 
       ;;
