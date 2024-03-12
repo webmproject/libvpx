@@ -1386,21 +1386,22 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     size_t size, cx_data_sz;
     unsigned char *cx_data;
 
-    if (!ctx->pts_offset_initialized) {
-      ctx->pts_offset = pts;
-      ctx->pts_offset_initialized = 1;
-    }
-    pts -= ctx->pts_offset;
-    int64_t dst_time_stamp = timebase_units_to_ticks(timestamp_ratio, pts);
-
-    cpi->svc.timebase_fac = timebase_units_to_ticks(timestamp_ratio, 1);
-    cpi->svc.time_stamp_superframe = dst_time_stamp;
-
     // Set up internal flags
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR) cpi->b_calculate_psnr = 1;
 
     if (img != NULL) {
       YV12_BUFFER_CONFIG sd;
+
+      if (!ctx->pts_offset_initialized) {
+        ctx->pts_offset = pts;
+        ctx->pts_offset_initialized = 1;
+      }
+      pts -= ctx->pts_offset;
+      const int64_t dst_time_stamp =
+          timebase_units_to_ticks(timestamp_ratio, pts);
+
+      cpi->svc.timebase_fac = timebase_units_to_ticks(timestamp_ratio, 1);
+      cpi->svc.time_stamp_superframe = dst_time_stamp;
 
       const int64_t dst_end_time_stamp =
           timebase_units_to_ticks(timestamp_ratio, pts + duration);
@@ -1440,6 +1441,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       // compute first pass stats
       if (img) {
         int ret;
+        int64_t dst_time_stamp;
         int64_t dst_end_time_stamp;
         vpx_codec_cx_pkt_t fps_pkt;
         ENCODE_FRAME_RESULT encode_frame_result;
@@ -1466,6 +1468,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 #endif  // !CONFIG_REALTIME_ONLY
     } else {
       ENCODE_FRAME_RESULT encode_frame_result;
+      int64_t dst_time_stamp;
       int64_t dst_end_time_stamp;
       vp9_init_encode_frame_result(&encode_frame_result);
       while (cx_data_sz >= ctx->cx_data_sz / 2 &&
