@@ -9,7 +9,8 @@
  */
 
 #include "./vpx_config.h"
-#include "arm_cpudetect.h"
+#include "vpx_ports/arm.h"
+#include "vpx_ports/arm_cpudetect.h"
 
 #if defined(__APPLE__)
 #include <sys/sysctl.h>
