@@ -967,7 +967,9 @@ static int encode_tiles_buffer_alloc_size(VP9_COMP *const cpi) {
   const int image_bps =
       (8 + 2 * (8 >> (cm->subsampling_x + cm->subsampling_y))) *
       (1 + (cm->bit_depth > 8));
-  return cpi->oxcf.width * cpi->oxcf.height * image_bps / 8;
+  const int64_t size =
+      (int64_t)cpi->oxcf.width * cpi->oxcf.height * image_bps / 8;
+  return (int)size;
 }
 
 static void encode_tiles_buffer_alloc(VP9_COMP *const cpi) {
