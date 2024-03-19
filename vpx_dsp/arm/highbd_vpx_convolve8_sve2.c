@@ -752,3 +752,37 @@ void vpx_highbd_convolve8_sve2(const uint16_t *src, ptrdiff_t src_stride,
                                  im_stride, dst, dst_stride, filter, x0_q4,
                                  x_step_q4, y0_q4, y_step_q4, w, h, bd);
 }
+
+void vpx_highbd_convolve8_avg_sve2(const uint16_t *src, ptrdiff_t src_stride,
+                                   uint16_t *dst, ptrdiff_t dst_stride,
+                                   const InterpKernel *filter, int x0_q4,
+                                   int x_step_q4, int y0_q4, int y_step_q4,
+                                   int w, int h, int bd) {
+  if (x_step_q4 != 16 || y_step_q4 != 16) {
+    vpx_highbd_convolve8_c(src, src_stride, dst, dst_stride, filter, x0_q4,
+                           x_step_q4, y0_q4, y_step_q4, w, h, bd);
+    return;
+  }
+
+  assert(y_step_q4 == 16);
+  assert(x_step_q4 == 16);
+
+  // Given our constraints: w <= 64, h <= 64, taps <= 8 we can reduce the
+  // maximum buffer size to 64 * (64 + 7).
+  DECLARE_ALIGNED(32, uint16_t, im_block[64 * 71]);
+  const int im_stride = 64;
+
+  // Account for the vertical phase needing SUBPEL_TAPS / 2 - 1 lines prior
+  // and SUBPEL_TAPS / 2 lines post.
+  const int im_height = h + SUBPEL_TAPS - 1;
+  const ptrdiff_t border_offset = SUBPEL_TAPS / 2 - 1;
+
+  highbd_convolve8_2d_horiz_sve2(src - src_stride * border_offset, src_stride,
+                                 im_block, im_stride, filter, x0_q4, x_step_q4,
+                                 y0_q4, y_step_q4, w, im_height, bd);
+
+  // Step into the temporary buffer border_offset rows to get actual frame data.
+  vpx_highbd_convolve8_avg_vert_sve2(im_block + im_stride * border_offset,
+                                     im_stride, dst, dst_stride, filter, x0_q4,
+                                     x_step_q4, y0_q4, y_step_q4, w, h, bd);
+}
