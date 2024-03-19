@@ -28,6 +28,11 @@ extern "C" {
  */
 #define VPX_EXT_RATECTRL_ABI_VERSION (5 + VPX_TPL_ABI_VERSION)
 
+/*!\brief This is correspondent to MAX_STATIC_GF_GROUP_LENGTH defined in
+ * vp9_ratectrl.h
+ */
+#define VPX_RC_MAX_STATIC_GF_GROUP_LENGTH 250
+
 /*!\brief The control type of the inference API.
  * In VPX_RC_QP mode, the external rate control model determines the
  * quantization parameter (QP) for each frame.
@@ -55,6 +60,18 @@ typedef enum vpx_ext_rc_mode {
   VPX_RC_VBR = 1,
   VPX_RC_CQ = 2,
 } vpx_ext_rc_mode_t;
+
+/*!\brief This is correspondent to FRAME_UPDATE_TYPE defined in vp9_firstpass.h.
+ */
+typedef enum vpx_rc_frame_update_type {
+  VPX_RC_KF_UPDATE = 0,
+  VPX_RC_LF_UPDATE = 1,
+  VPX_RC_GF_UPDATE = 2,
+  VPX_RC_ARF_UPDATE = 3,
+  VPX_RC_OVERLAY_UPDATE = 4,
+  VPX_RC_MID_OVERLAY_UPDATE = 5,
+  VPX_RC_USE_BUF_FRAME = 6,
+} vpx_rc_frame_update_type_t;
 
 /*!\brief Abstract rate control model handler
  *
@@ -395,6 +412,12 @@ typedef struct vpx_rc_gop_decision {
   int gop_coding_frames; /**< The number of frames of this GOP */
   int use_alt_ref;       /**< Whether to use alt ref for this GOP */
   int use_key_frame;     /**< Whether to set key frame for this GOP */
+  // Frame type for each frame in this GOP.
+  // This will be populated to |update_type| in GF_GROUP defined in
+  // vp9_firstpass.h
+  vpx_rc_frame_update_type_t update_type[VPX_RC_MAX_STATIC_GF_GROUP_LENGTH + 2];
+  // Ref frame buffer index to be updated for each frame in this GOP.
+  int update_ref_index[VPX_RC_MAX_STATIC_GF_GROUP_LENGTH + 2];
 } vpx_rc_gop_decision_t;
 
 /*!\brief Create an external rate control model callback prototype
