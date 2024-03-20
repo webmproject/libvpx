@@ -33,6 +33,10 @@ extern "C" {
  */
 #define VPX_RC_MAX_STATIC_GF_GROUP_LENGTH 250
 
+/*!\brief Max number of ref frames returned by the external RC. Correspondent to
+ * MAX_REF_FRAMES defined in vp9_blockd.h. */
+#define VPX_RC_MAX_REF_FRAMES 4
+
 /*!\brief The control type of the inference API.
  * In VPX_RC_QP mode, the external rate control model determines the
  * quantization parameter (QP) for each frame.
@@ -72,6 +76,15 @@ typedef enum vpx_rc_frame_update_type {
   VPX_RC_MID_OVERLAY_UPDATE = 5,
   VPX_RC_USE_BUF_FRAME = 6,
 } vpx_rc_frame_update_type_t;
+
+/*!\brief Name for the ref frames returned by the external RC. Correspondent to
+ * the ref frames defined in vp9_blockd.h. */
+typedef enum vpx_rc_ref_name {
+  VPX_RC_INTRA_FRAME = 0,
+  VPX_RC_LAST_FRAME = 1,
+  VPX_RC_GOLDEN_FRAME = 2,
+  VPX_RC_ALTREF_FRAME = 3,
+} vpx_rc_ref_name_t;
 
 /*!\brief Abstract rate control model handler
  *
@@ -335,6 +348,13 @@ typedef struct vpx_rc_config {
   int base_qp;               /**< base QP for leaf frames, 0-255 */
 } vpx_rc_config_t;
 
+/*!\brief Control what ref frame to use and its index.
+ */
+typedef struct vpx_rc_ref_frame {
+  int index[VPX_RC_MAX_REF_FRAMES];
+  vpx_rc_ref_name_t name[VPX_RC_MAX_REF_FRAMES];
+} vpx_rc_ref_frame_t;
+
 /*!\brief The decision made by the external rate control model to set the
  * group of picture.
  */
@@ -348,6 +368,8 @@ typedef struct vpx_rc_gop_decision {
   vpx_rc_frame_update_type_t update_type[VPX_RC_MAX_STATIC_GF_GROUP_LENGTH + 2];
   // Ref frame buffer index to be updated for each frame in this GOP.
   int update_ref_index[VPX_RC_MAX_STATIC_GF_GROUP_LENGTH + 2];
+  // Ref frame list to be used for each frame in this GOP.
+  vpx_rc_ref_frame_t ref_frame_list[VPX_RC_MAX_STATIC_GF_GROUP_LENGTH + 2];
 } vpx_rc_gop_decision_t;
 
 /*!\brief Create an external rate control model callback prototype
