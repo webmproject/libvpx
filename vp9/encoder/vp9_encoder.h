@@ -1221,8 +1221,8 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
                           int64_t end_time);
 
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
-                            size_t *size, uint8_t *dest, int64_t *time_stamp,
-                            int64_t *time_end, int flush,
+                            size_t *size, uint8_t *dest, size_t dest_size,
+                            int64_t *time_stamp, int64_t *time_end, int flush,
                             ENCODE_FRAME_RESULT *encode_frame_result);
 
 int vp9_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
