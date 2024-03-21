@@ -31,9 +31,10 @@ typedef struct vpx_writer {
   int count;
   unsigned int pos;
   uint8_t *buffer;
+  const uint8_t *buffer_end;
 } vpx_writer;
 
-void vpx_start_encode(vpx_writer *br, uint8_t *source);
+void vpx_start_encode(vpx_writer *br, uint8_t *source, size_t size);
 void vpx_stop_encode(vpx_writer *br);
 
 static INLINE VPX_NO_UNSIGNED_SHIFT_CHECK void vpx_write(vpx_writer *br,

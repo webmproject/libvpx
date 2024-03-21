@@ -53,7 +53,7 @@ TEST(VP9, TestBitIO) {
         ACMRandom bit_rnd(random_seed);
         vpx_writer bw;
         uint8_t bw_buffer[kBufferSize];
-        vpx_start_encode(&bw, bw_buffer);
+        vpx_start_encode(&bw, bw_buffer, sizeof(bw_buffer));
 
         int bit = (bit_method == 0) ? 0 : (bit_method == 1) ? 1 : 0;
         for (int i = 0; i < kBitsToTest; ++i) {
