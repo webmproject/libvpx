@@ -9,6 +9,7 @@
  */
 
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <limits.h>
 
@@ -943,7 +944,7 @@ static int encode_tile_worker(void *arg1, void *arg2) {
   VP9BitstreamWorkerData *data = (VP9BitstreamWorkerData *)arg2;
   MACROBLOCKD *const xd = &data->xd;
   const int tile_row = 0;
-  vpx_start_encode(&data->bit_writer, data->dest);
+  vpx_start_encode(&data->bit_writer, data->dest, data->dest_size);
   write_modes(cpi, xd, &cpi->tile_data[data->tile_idx].tile_info,
               &data->bit_writer, tile_row, data->tile_idx,
               &data->max_mv_magnitude, data->interp_filter_selected);
@@ -988,7 +989,8 @@ static void encode_tiles_buffer_alloc(VP9_COMP *const cpi) {
   }
 }
 
-static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr) {
+static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr,
+                              size_t data_size) {
   const VPxWorkerInterface *const winterface = vpx_get_worker_interface();
   VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -1020,8 +1022,13 @@ static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr) {
       if (i == 0) {
         // If this worker happens to be for the last tile, then do not offset it
         // by 4 for the tile size.
-        data->dest =
-            data_ptr + total_size + (tile_col == tile_cols - 1 ? 0 : 4);
+        const size_t offset = total_size + (tile_col == tile_cols - 1 ? 0 : 4);
+        if (data_size < offset) {
+          vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                             "encode_tiles_mt: output buffer full");
+        }
+        data->dest = data_ptr + offset;
+        data->dest_size = data_size - offset;
       }
       worker->data1 = cpi;
       worker->data2 = data;
@@ -1042,7 +1049,10 @@ static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr) {
       uint32_t tile_size;
       int k;
 
-      if (!winterface->sync(worker)) return 0;
+      if (!winterface->sync(worker)) {
+        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                           "encode_tiles_mt: worker had error");
+      }
       tile_size = data->bit_writer.pos;
 
       // Aggregate per-thread bitstream stats.
@@ -1054,10 +1064,18 @@ static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr) {
 
       // Prefix the size of the tile on all but the last.
       if (tile_col != tile_cols || j < i - 1) {
+        if (data_size - total_size < 4) {
+          vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                             "encode_tiles_mt: output buffer full");
+        }
         mem_put_be32(data_ptr + total_size, tile_size);
         total_size += 4;
       }
       if (j > 0) {
+        if (data_size - total_size < tile_size) {
+          vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                             "encode_tiles_mt: output buffer full");
+        }
         memcpy(data_ptr + total_size, data->dest, tile_size);
       }
       total_size += tile_size;
@@ -1066,7 +1084,7 @@ static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr) {
   return total_size;
 }
 
-static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
+static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr, size_t data_size) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   vpx_writer residual_bc;
@@ -1083,17 +1101,23 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   // that it does not make the overall process worse in any case.
   if (cpi->oxcf.mode == REALTIME && cpi->num_workers > 1 && tile_rows == 1 &&
       tile_cols > 1) {
-    return encode_tiles_mt(cpi, data_ptr);
+    return encode_tiles_mt(cpi, data_ptr, data_size);
   }
 
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
       int tile_idx = tile_row * tile_cols + tile_col;
 
+      size_t offset;
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1)
-        vpx_start_encode(&residual_bc, data_ptr + total_size + 4);
+        offset = total_size + 4;
       else
-        vpx_start_encode(&residual_bc, data_ptr + total_size);
+        offset = total_size;
+      if (data_size < offset) {
+        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                           "encode_tiles: output buffer full");
+      }
+      vpx_start_encode(&residual_bc, data_ptr + offset, data_size - offset);
 
       write_modes(cpi, xd, &cpi->tile_data[tile_idx].tile_info, &residual_bc,
                   tile_row, tile_col, &cpi->max_mv_magnitude,
@@ -1281,14 +1305,15 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   write_tile_info(cm, wb);
 }
 
-static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
+static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data,
+                                      size_t data_size) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *counts = cpi->td.counts;
   vpx_writer header_bc;
 
-  vpx_start_encode(&header_bc, data);
+  vpx_start_encode(&header_bc, data, data_size);
 
   if (xd->lossless)
     cm->tx_mode = ONLY_4X4;
@@ -1360,8 +1385,9 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 
 void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
                         size_t *size) {
+  VP9_COMMON *const cm = &cpi->common;
   uint8_t *data = dest;
-  (void)dest_size;
+  size_t data_size = dest_size;
   size_t first_part_size, uncompressed_hdr_size;
   struct vpx_write_bit_buffer wb = { data, 0 };
   struct vpx_write_bit_buffer saved_wb;
@@ -1373,9 +1399,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
   write_uncompressed_header(cpi, &wb);
 
   // Skip the rest coding process if use show existing frame.
-  if (cpi->common.show_existing_frame) {
+  if (cm->show_existing_frame) {
     uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
     data += uncompressed_hdr_size;
+    data_size -= uncompressed_hdr_size;
     *size = data - dest;
     return;
   }
@@ -1385,15 +1412,20 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
 
   uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
   data += uncompressed_hdr_size;
+  data_size -= uncompressed_hdr_size;
 
   vpx_clear_system_state();
 
-  first_part_size = write_compressed_header(cpi, data);
+  first_part_size = write_compressed_header(cpi, data, data_size);
   data += first_part_size;
-  // TODO(jbb): Figure out what to do if first_part_size > 16 bits.
+  data_size -= first_part_size;
+  if (first_part_size > UINT16_MAX) {
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                       "first_part_size > 16 bits");
+  }
   vpx_wb_write_literal(&saved_wb, (int)first_part_size, 16);
 
-  data += encode_tiles(cpi, data);
+  data += encode_tiles(cpi, data, data_size);
 
   *size = data - dest;
 }

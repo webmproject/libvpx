@@ -16,11 +16,12 @@
 #include "vpx_util/vpx_debug_util.h"
 #endif
 
-void vpx_start_encode(vpx_writer *br, uint8_t *source) {
+void vpx_start_encode(vpx_writer *br, uint8_t *source, size_t size) {
   br->lowvalue = 0;
   br->range = 255;
   br->count = -24;
   br->buffer = source;
+  br->buffer_end = source + size;
   br->pos = 0;
   vpx_write_bit(br, 0);
 }
