@@ -1358,8 +1358,10 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   return header_bc.pos;
 }
 
-void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
+void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
+                        size_t *size) {
   uint8_t *data = dest;
+  (void)dest_size;
   size_t first_part_size, uncompressed_hdr_size;
   struct vpx_write_bit_buffer wb = { data, 0 };
   struct vpx_write_bit_buffer saved_wb;

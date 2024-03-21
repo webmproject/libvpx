@@ -1434,8 +1434,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       cx_data += ctx->pending_cx_data_sz;
       cx_data_sz -= ctx->pending_cx_data_sz;
 
-      /* TODO: this is a minimal check, the underlying codec doesn't respect
-       * the buffer size anyway.
+      /* TODO(webm:1844): this is a minimal check, the underlying codec doesn't
+       * respect the buffer size anyway.
        */
       if (cx_data_sz < ctx->cx_data_sz / 2) {
         vpx_internal_error(&cpi->common.error, VPX_CODEC_ERROR,
@@ -1454,9 +1454,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
         ENCODE_FRAME_RESULT encode_frame_result;
         vp9_init_encode_frame_result(&encode_frame_result);
         // TODO(angiebird): Call vp9_first_pass directly
-        ret = vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
-                                      &dst_time_stamp, &dst_end_time_stamp,
-                                      !img, &encode_frame_result);
+        ret = vp9_get_compressed_data(
+            cpi, &lib_flags, &size, cx_data, cx_data_sz, &dst_time_stamp,
+            &dst_end_time_stamp, !img, &encode_frame_result);
         assert(size == 0);  // There is no compressed data in the first pass
         (void)ret;
         assert(ret == 0);
@@ -1479,8 +1479,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
       vp9_init_encode_frame_result(&encode_frame_result);
       while (cx_data_sz >= ctx->cx_data_sz / 2 &&
              -1 != vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
-                                           &dst_time_stamp, &dst_end_time_stamp,
-                                           !img, &encode_frame_result)) {
+                                           cx_data_sz, &dst_time_stamp,
+                                           &dst_end_time_stamp, !img,
+                                           &encode_frame_result)) {
         // Pack psnr pkt
         if (size > 0 && !cpi->use_svc) {
           // TODO(angiebird): Figure out while we don't need psnr pkt when
