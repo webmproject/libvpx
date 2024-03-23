@@ -948,8 +948,7 @@ static int encode_tile_worker(void *arg1, void *arg2) {
   write_modes(cpi, xd, &cpi->tile_data[data->tile_idx].tile_info,
               &data->bit_writer, tile_row, data->tile_idx,
               &data->max_mv_magnitude, data->interp_filter_selected);
-  vpx_stop_encode(&data->bit_writer);
-  return 1;
+  return vpx_stop_encode(&data->bit_writer) == 0;
 }
 
 void vp9_bitstream_encode_tiles_buffer_dealloc(VP9_COMP *const cpi) {
@@ -1123,7 +1122,10 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr, size_t data_size) {
                   tile_row, tile_col, &cpi->max_mv_magnitude,
                   cpi->interp_filter_selected);
 
-      vpx_stop_encode(&residual_bc);
+      if (vpx_stop_encode(&residual_bc)) {
+        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                           "encode_tiles: output buffer full");
+      }
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
         // size of this tile
         mem_put_be32(data_ptr + total_size, residual_bc.pos);
@@ -1377,8 +1379,10 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data,
                         &counts->mv);
   }
 
-  vpx_stop_encode(&header_bc);
-  assert(header_bc.pos <= 0xffff);
+  if (vpx_stop_encode(&header_bc)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                       "write_compressed_header: output buffer full");
+  }
 
   return header_bc.pos;
 }
@@ -1388,7 +1392,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
   VP9_COMMON *const cm = &cpi->common;
   uint8_t *data = dest;
   size_t data_size = dest_size;
-  size_t first_part_size, uncompressed_hdr_size;
+  size_t uncompressed_hdr_size, compressed_hdr_size;
   struct vpx_write_bit_buffer wb = { data, 0 };
   struct vpx_write_bit_buffer saved_wb;
 
@@ -1408,7 +1412,8 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
   }
 
   saved_wb = wb;
-  vpx_wb_write_literal(&wb, 0, 16);  // don't know in advance first part. size
+  // don't know in advance compressed header size
+  vpx_wb_write_literal(&wb, 0, 16);
 
   uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
   data += uncompressed_hdr_size;
@@ -1416,14 +1421,14 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
 
   vpx_clear_system_state();
 
-  first_part_size = write_compressed_header(cpi, data, data_size);
-  data += first_part_size;
-  data_size -= first_part_size;
-  if (first_part_size > UINT16_MAX) {
+  compressed_hdr_size = write_compressed_header(cpi, data, data_size);
+  data += compressed_hdr_size;
+  data_size -= compressed_hdr_size;
+  if (compressed_hdr_size > UINT16_MAX) {
     vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                       "first_part_size > 16 bits");
+                       "compressed_hdr_size > 16 bits");
   }
-  vpx_wb_write_literal(&saved_wb, (int)first_part_size, 16);
+  vpx_wb_write_literal(&saved_wb, (int)compressed_hdr_size, 16);
 
   data += encode_tiles(cpi, data, data_size);
 
