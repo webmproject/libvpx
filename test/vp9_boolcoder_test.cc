@@ -65,7 +65,7 @@ TEST(VP9, TestBitIO) {
           vpx_write(&bw, bit, static_cast<int>(probas[i]));
         }
 
-        vpx_stop_encode(&bw);
+        GTEST_ASSERT_EQ(vpx_stop_encode(&bw), 0);
         // vpx_reader_fill() may read into uninitialized data that
         // isn't used meaningfully, but may trigger an MSan warning.
         memset(bw_buffer + bw.pos, 0, sizeof(BD_VALUE) - 1);
@@ -89,4 +89,25 @@ TEST(VP9, TestBitIO) {
       }
     }
   }
+}
+
+TEST(VP9, TestBitIOBufferSize0) {
+  vpx_writer bw;
+  uint8_t bw_buffer[1];
+  vpx_start_encode(&bw, bw_buffer, 0);
+  GTEST_ASSERT_EQ(vpx_stop_encode(&bw), -1);
+}
+
+TEST(VP9, TestBitIOBufferSize1) {
+  vpx_writer bw;
+  uint8_t bw_buffer[1];
+  vpx_start_encode(&bw, bw_buffer, sizeof(bw_buffer));
+  GTEST_ASSERT_EQ(vpx_stop_encode(&bw), -1);
+}
+
+TEST(VP9, TestBitIOBufferSize2) {
+  vpx_writer bw;
+  uint8_t bw_buffer[2];
+  vpx_start_encode(&bw, bw_buffer, sizeof(bw_buffer));
+  GTEST_ASSERT_EQ(vpx_stop_encode(&bw), 0);
 }
