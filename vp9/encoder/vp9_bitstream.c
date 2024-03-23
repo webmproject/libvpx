@@ -963,18 +963,18 @@ void vp9_bitstream_encode_tiles_buffer_dealloc(VP9_COMP *const cpi) {
   }
 }
 
-static int encode_tiles_buffer_alloc_size(const VP9_COMP *cpi) {
+static size_t encode_tiles_buffer_alloc_size(const VP9_COMP *cpi) {
   const VP9_COMMON *cm = &cpi->common;
   const int image_bps =
       (8 + 2 * (8 >> (cm->subsampling_x + cm->subsampling_y))) *
       (1 + (cm->bit_depth > 8));
   const int64_t size =
       (int64_t)cpi->oxcf.width * cpi->oxcf.height * image_bps / 8;
-  return (int)size;
+  return (size_t)size;
 }
 
 static void encode_tiles_buffer_alloc(VP9_COMP *const cpi,
-                                      int buffer_alloc_size) {
+                                      size_t buffer_alloc_size) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
   const size_t worker_data_size =
@@ -998,7 +998,7 @@ static size_t encode_tiles_mt(VP9_COMP *cpi, uint8_t *data_ptr,
   size_t total_size = 0;
   int tile_col = 0;
 
-  const int buffer_alloc_size = encode_tiles_buffer_alloc_size(cpi);
+  const size_t buffer_alloc_size = encode_tiles_buffer_alloc_size(cpi);
   if (!cpi->vp9_bitstream_worker_data ||
       cpi->vp9_bitstream_worker_data[1].dest_size != buffer_alloc_size) {
     vp9_bitstream_encode_tiles_buffer_dealloc(cpi);

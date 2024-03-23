@@ -19,7 +19,7 @@ extern "C" {
 
 typedef struct VP9BitstreamWorkerData {
   uint8_t *dest;
-  int dest_size;
+  size_t dest_size;
   vpx_writer bit_writer;
   int tile_idx;
   unsigned int max_mv_magnitude;
