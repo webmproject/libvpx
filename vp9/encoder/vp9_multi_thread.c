@@ -136,14 +136,17 @@ void vp9_row_mt_mem_dealloc(VP9_COMP *cpi) {
 #endif
 
   // Deallocate memory for job queue
-  if (multi_thread_ctxt->job_queue) vpx_free(multi_thread_ctxt->job_queue);
+  if (multi_thread_ctxt->job_queue) {
+    vpx_free(multi_thread_ctxt->job_queue);
+    multi_thread_ctxt->job_queue = NULL;
+  }
 
 #if CONFIG_MULTITHREAD
   // Destroy mutex for each tile
   for (tile_col = 0; tile_col < multi_thread_ctxt->allocated_tile_cols;
        tile_col++) {
     RowMTInfo *row_mt_info = &multi_thread_ctxt->row_mt_info[tile_col];
-    if (row_mt_info) pthread_mutex_destroy(&row_mt_info->job_mutex);
+    pthread_mutex_destroy(&row_mt_info->job_mutex);
   }
 #endif
 
@@ -169,6 +172,10 @@ void vp9_row_mt_mem_dealloc(VP9_COMP *cpi) {
     }
   }
 #endif
+
+  multi_thread_ctxt->allocated_tile_cols = 0;
+  multi_thread_ctxt->allocated_tile_rows = 0;
+  multi_thread_ctxt->allocated_vert_unit_rows = 0;
 }
 
 void vp9_multi_thread_tile_init(VP9_COMP *cpi) {

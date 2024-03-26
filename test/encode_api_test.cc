@@ -1359,6 +1359,27 @@ TEST(EncodeAPI, Buganizer329088759RowMT1) {
                     VPX_DL_REALTIME);
 }
 
+TEST(EncodeAPI, Buganizer331086799) {
+  VP9Encoder encoder(6, 1, VPX_BITS_8, VPX_IMG_FMT_I420);
+  encoder.Configure(0, 1385, 1, VPX_CBR, VPX_DL_REALTIME);
+  encoder.Configure(0, 1, 1, VPX_VBR, VPX_DL_REALTIME);
+  encoder.Encode(false);
+  encoder.Configure(16, 1385, 1, VPX_VBR, VPX_DL_GOOD_QUALITY);
+  encoder.Encode(false);
+  encoder.Encode(false);
+  encoder.Configure(0, 1, 1, VPX_CBR, VPX_DL_REALTIME);
+  encoder.Encode(true);
+}
+
+TEST(EncodeAPI, Buganizer331108729) {
+  VP9Encoder encoder(1, 1, VPX_BITS_8, VPX_IMG_FMT_I422);
+  encoder.Configure(0, 1919, 260, VPX_VBR, VPX_DL_REALTIME);
+  encoder.Configure(9, 440, 1, VPX_CBR, VPX_DL_GOOD_QUALITY);
+  encoder.Encode(true);
+  encoder.Configure(8, 1919, 260, VPX_VBR, VPX_DL_REALTIME);
+  encoder.Encode(false);
+}
+
 #if CONFIG_VP9_HIGHBITDEPTH
 TEST(EncodeAPI, Buganizer329674887RowMT0BitDepth12) {
   VP9Encoder encoder(8, 0, VPX_BITS_12, VPX_IMG_FMT_I444);
