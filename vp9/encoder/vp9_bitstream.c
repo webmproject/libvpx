@@ -1393,14 +1393,19 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
   uint8_t *data = dest;
   size_t data_size = dest_size;
   size_t uncompressed_hdr_size, compressed_hdr_size;
-  struct vpx_write_bit_buffer wb = { data, 0 };
+  struct vpx_write_bit_buffer wb;
   struct vpx_write_bit_buffer saved_wb;
 
 #if CONFIG_BITSTREAM_DEBUG
   bitstream_queue_reset_write();
 #endif
 
+  vpx_wb_init(&wb, data, data_size);
   write_uncompressed_header(cpi, &wb);
+  if (vpx_wb_has_error(&wb)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                       "vp9_pack_bitstream: output buffer full");
+  }
 
   // Skip the rest coding process if use show existing frame.
   if (cm->show_existing_frame) {
@@ -1413,6 +1418,10 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
   saved_wb = wb;
   // don't know in advance compressed header size
   vpx_wb_write_literal(&wb, 0, 16);
+  if (vpx_wb_has_error(&wb)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                       "vp9_pack_bitstream: output buffer full");
+  }
 
   uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
   data += uncompressed_hdr_size;
@@ -1428,6 +1437,7 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
                        "compressed_hdr_size > 16 bits");
   }
   vpx_wb_write_literal(&saved_wb, (int)compressed_hdr_size, 16);
+  assert(!vpx_wb_has_error(&saved_wb));
 
   data += encode_tiles(cpi, data, data_size);
 
