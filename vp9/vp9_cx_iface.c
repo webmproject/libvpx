@@ -1450,6 +1450,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
     /* Any pending invisible frames? */
     if (ctx->pending_cx_data) {
+      assert(cx_data_sz >= ctx->pending_cx_data_sz);
       memmove(cx_data, ctx->pending_cx_data, ctx->pending_cx_data_sz);
       ctx->pending_cx_data = cx_data;
       cx_data += ctx->pending_cx_data_sz;
