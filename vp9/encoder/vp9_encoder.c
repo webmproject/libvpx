@@ -3901,7 +3901,7 @@ static void set_frame_size(VP9_COMP *cpi) {
   }
   if (!frame_is_intra_only(cm) && !has_valid_ref_frame) {
     vpx_internal_error(
-        &cm->error, VPX_CODEC_CORRUPT_FRAME,
+        &cm->error, VPX_CODEC_ERROR,
         "Can't find at least one reference frame with valid size");
   }
 
