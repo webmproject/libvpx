@@ -68,6 +68,7 @@ typedef enum vpx_ext_rc_mode {
 /*!\brief This is correspondent to FRAME_UPDATE_TYPE defined in vp9_firstpass.h.
  */
 typedef enum vpx_rc_frame_update_type {
+  VPX_RC_INVALID_UPDATE_TYPE = -1,
   VPX_RC_KF_UPDATE = 0,
   VPX_RC_LF_UPDATE = 1,
   VPX_RC_GF_UPDATE = 2,
@@ -80,6 +81,7 @@ typedef enum vpx_rc_frame_update_type {
 /*!\brief Name for the ref frames returned by the external RC. Correspondent to
  * the ref frames defined in vp9_blockd.h. */
 typedef enum vpx_rc_ref_name {
+  VPX_RC_INVALID_REF_FRAME = -1,
   VPX_RC_INTRA_FRAME = 0,
   VPX_RC_LAST_FRAME = 1,
   VPX_RC_GOLDEN_FRAME = 2,
