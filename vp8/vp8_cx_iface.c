@@ -710,6 +710,7 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
     priv->cx_data = malloc(priv->cx_data_sz);
 
     if (!priv->cx_data) {
+      priv->cx_data_sz = 0;
       return VPX_CODEC_MEM_ERROR;
     }
 
