@@ -14,6 +14,7 @@
 #include "test/util.h"
 #include "test/video_source.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "vpx_config.h"
 
 namespace {
 

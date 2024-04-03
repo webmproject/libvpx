@@ -16,6 +16,7 @@
 #include "test/encode_test_driver.h"
 #include "test/util.h"
 #include "test/yuv_video_source.h"
+#include "vpx_config.h"
 
 namespace {
 #define MAX_EXTREME_MV 1

@@ -17,6 +17,7 @@
 #include "test/util.h"
 #include "test/y4m_video_source.h"
 #include "vp9/encoder/vp9_firstpass.h"
+#include "vpx_config.h"
 
 namespace {
 // FIRSTPASS_STATS struct:
