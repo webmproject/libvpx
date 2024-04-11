@@ -88,10 +88,22 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
     default: ycs = 0; break;
   }
 
-  /* Calculate storage sizes. If the buffer was allocated externally, the width
-   * and height shouldn't be adjusted. */
-  w = d_w;
-  h = d_h;
+  /* Calculate storage sizes. */
+  if (img_data) {
+    /* If the buffer was allocated externally, the width and height shouldn't
+     * be adjusted. */
+    w = d_w;
+    h = d_h;
+  } else {
+    /* Calculate storage sizes given the chroma subsampling */
+    align = (1 << xcs) - 1;
+    w = (d_w + align) & ~align;
+    assert(d_w <= w);
+    align = (1 << ycs) - 1;
+    h = (d_h + align) & ~align;
+    assert(d_h <= h);
+  }
+
   s = (fmt & VPX_IMG_FMT_PLANAR) ? w : (uint64_t)bps * w / 8;
   s = (s + stride_align - 1) & ~((uint64_t)stride_align - 1);
   s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s * 2 : s;
@@ -111,19 +123,6 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
 
   if (!img_data) {
     uint64_t alloc_size;
-    /* Calculate storage sizes given the chroma subsampling */
-    align = (1 << xcs) - 1;
-    w = (d_w + align) & ~align;
-    assert(d_w <= w);
-    align = (1 << ycs) - 1;
-    h = (d_h + align) & ~align;
-    assert(d_h <= h);
-
-    s = (fmt & VPX_IMG_FMT_PLANAR) ? w : (uint64_t)bps * w / 8;
-    s = (s + stride_align - 1) & ~((uint64_t)stride_align - 1);
-    s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s * 2 : s;
-    if (s > INT_MAX) goto fail;
-    stride_in_bytes = (int)s;
     alloc_size = (fmt & VPX_IMG_FMT_PLANAR) ? (uint64_t)h * s * bps / 8
                                             : (uint64_t)h * s;
 
