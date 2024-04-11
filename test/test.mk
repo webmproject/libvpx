@@ -21,6 +21,7 @@ LIBVPX_TEST_SRCS-yes += video_source.h
 ## Black box tests only use the public API.
 ##
 LIBVPX_TEST_SRCS-yes                   += ../md5_utils.h ../md5_utils.c
+LIBVPX_TEST_SRCS-yes                   += vpx_image_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ivf_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += ../y4minput.h ../y4minput.c
 ifneq ($(CONFIG_REALTIME_ONLY),yes)
