@@ -162,8 +162,8 @@ vpx_image_t *vpx_img_alloc(vpx_image_t *img, vpx_img_fmt_t fmt,
  *                             (2^27).
  * \param[in]    d_h           Height of the image. Must not exceed 0x08000000
  *                             (2^27).
- * \param[in]    stride_align  Alignment, in bytes, of each row in the image.
- *                             Must not exceed 65536.
+ * \param[in]    stride_align  Alignment, in bytes, of each row in the image
+ *                             (stride). Must not exceed 65536.
  * \param[in]    img_data      Storage to use for the image
  *
  * \return Returns a pointer to the initialized image descriptor. If the img
