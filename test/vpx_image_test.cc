@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <climits>
+
 #include "vpx/vpx_image.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -81,6 +83,10 @@ TEST(VpxImageTest, VpxImgAllocHugeWidth) {
   image = vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, 0x80000000, 1, 1);
   ASSERT_EQ(image, nullptr);
 
+  // The aligned width (UINT_MAX + 1) would overflow unsigned int.
+  image = vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, UINT_MAX, 1, 1);
+  ASSERT_EQ(image, nullptr);
+
   image = vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, 0x7ffffffe, 1, 1);
   if (image) {
     vpx_img_free(image);
@@ -101,8 +107,21 @@ TEST(VpxImageTest, VpxImgAllocHugeWidth) {
     vpx_img_free(image);
   }
 
+  image = vpx_img_alloc(nullptr, VPX_IMG_FMT_I42016, 65536, 2, 1);
+  if (image) {
+    uint16_t *y_plane =
+        reinterpret_cast<uint16_t *>(image->planes[VPX_PLANE_Y]);
+    y_plane[0] = 0;
+    y_plane[image->d_w - 1] = 0;
+    vpx_img_free(image);
+  }
+
   image = vpx_img_alloc(nullptr, VPX_IMG_FMT_I42016, 285245883, 2, 1);
   if (image) {
+    uint16_t *y_plane =
+        reinterpret_cast<uint16_t *>(image->planes[VPX_PLANE_Y]);
+    y_plane[0] = 0;
+    y_plane[image->d_w - 1] = 0;
     vpx_img_free(image);
   }
 }
