@@ -105,8 +105,8 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
   }
 
   s = (fmt & VPX_IMG_FMT_PLANAR) ? w : (uint64_t)bps * w / 8;
-  s = (s + stride_align - 1) & ~((uint64_t)stride_align - 1);
   s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s * 2 : s;
+  s = (s + stride_align - 1) & ~((uint64_t)stride_align - 1);
   if (s > INT_MAX) goto fail;
   stride_in_bytes = (int)s;
 
