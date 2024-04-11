@@ -21,8 +21,9 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
                                      unsigned int buf_align,
                                      unsigned int stride_align,
                                      unsigned char *img_data) {
-  unsigned int h, w, s, xcs, ycs, bps;
-  unsigned int stride_in_bytes;
+  unsigned int h, w, xcs, ycs, bps;
+  uint64_t s;
+  int stride_in_bytes;
   unsigned int align;
 
   if (img != NULL) memset(img, 0, sizeof(vpx_image_t));
@@ -82,9 +83,11 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
    * and height shouldn't be adjusted. */
   w = d_w;
   h = d_h;
-  s = (fmt & VPX_IMG_FMT_PLANAR) ? w : bps * w / 8;
-  s = (s + stride_align - 1) & ~(stride_align - 1);
-  stride_in_bytes = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s * 2 : s;
+  s = (fmt & VPX_IMG_FMT_PLANAR) ? w : (uint64_t)bps * w / 8;
+  s = (s + stride_align - 1) & ~((uint64_t)stride_align - 1);
+  s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s * 2 : s;
+  if (s > INT_MAX) goto fail;
+  stride_in_bytes = (int)s;
 
   /* Allocate the new image */
   if (!img) {
@@ -105,9 +108,11 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
     align = (1 << ycs) - 1;
     h = (d_h + align) & ~align;
 
-    s = (fmt & VPX_IMG_FMT_PLANAR) ? w : bps * w / 8;
-    s = (s + stride_align - 1) & ~(stride_align - 1);
-    stride_in_bytes = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s * 2 : s;
+    s = (fmt & VPX_IMG_FMT_PLANAR) ? w : (uint64_t)bps * w / 8;
+    s = (s + stride_align - 1) & ~((uint64_t)stride_align - 1);
+    s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s * 2 : s;
+    if (s > INT_MAX) goto fail;
+    stride_in_bytes = (int)s;
     alloc_size = (fmt & VPX_IMG_FMT_PLANAR) ? (uint64_t)h * s * bps / 8
                                             : (uint64_t)h * s;
 
@@ -172,12 +177,12 @@ int vpx_img_set_rect(vpx_image_t *img, unsigned int x, unsigned int y,
       if (img->fmt & VPX_IMG_FMT_HAS_ALPHA) {
         img->planes[VPX_PLANE_ALPHA] =
             data + x * bytes_per_sample + y * img->stride[VPX_PLANE_ALPHA];
-        data += img->h * img->stride[VPX_PLANE_ALPHA];
+        data += (size_t)img->h * img->stride[VPX_PLANE_ALPHA];
       }
 
       img->planes[VPX_PLANE_Y] =
           data + x * bytes_per_sample + y * img->stride[VPX_PLANE_Y];
-      data += img->h * img->stride[VPX_PLANE_Y];
+      data += (size_t)img->h * img->stride[VPX_PLANE_Y];
 
       if (img->fmt == VPX_IMG_FMT_NV12) {
         img->planes[VPX_PLANE_U] =
@@ -188,7 +193,8 @@ int vpx_img_set_rect(vpx_image_t *img, unsigned int x, unsigned int y,
         img->planes[VPX_PLANE_U] =
             data + (x >> img->x_chroma_shift) * bytes_per_sample +
             (y >> img->y_chroma_shift) * img->stride[VPX_PLANE_U];
-        data += (img->h >> img->y_chroma_shift) * img->stride[VPX_PLANE_U];
+        data +=
+            (size_t)(img->h >> img->y_chroma_shift) * img->stride[VPX_PLANE_U];
         img->planes[VPX_PLANE_V] =
             data + (x >> img->x_chroma_shift) * bytes_per_sample +
             (y >> img->y_chroma_shift) * img->stride[VPX_PLANE_V];
@@ -196,7 +202,8 @@ int vpx_img_set_rect(vpx_image_t *img, unsigned int x, unsigned int y,
         img->planes[VPX_PLANE_V] =
             data + (x >> img->x_chroma_shift) * bytes_per_sample +
             (y >> img->y_chroma_shift) * img->stride[VPX_PLANE_V];
-        data += (img->h >> img->y_chroma_shift) * img->stride[VPX_PLANE_V];
+        data +=
+            (size_t)(img->h >> img->y_chroma_shift) * img->stride[VPX_PLANE_V];
         img->planes[VPX_PLANE_U] =
             data + (x >> img->x_chroma_shift) * bytes_per_sample +
             (y >> img->y_chroma_shift) * img->stride[VPX_PLANE_U];
