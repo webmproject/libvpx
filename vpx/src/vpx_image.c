@@ -109,6 +109,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
   s = (s + stride_align - 1) & ~((uint64_t)stride_align - 1);
   if (s > INT_MAX) goto fail;
   stride_in_bytes = (int)s;
+  s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s / 2 : s;
 
   /* Allocate the new image */
   if (!img) {
