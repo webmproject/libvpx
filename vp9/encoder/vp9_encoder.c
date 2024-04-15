@@ -10,6 +10,7 @@
 
 #include <limits.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -4615,12 +4616,12 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest,
       }
     }
 #endif  // CONFIG_RATE_CTRL
+    const GF_GROUP *gf_group = &cpi->twopass.gf_group;
     if (cpi->ext_ratectrl.ready && !ext_rc_recode &&
         !cpi->tpl_with_external_rc &&
         (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0 &&
         cpi->ext_ratectrl.funcs.get_encodeframe_decision != NULL) {
       vpx_codec_err_t codec_status;
-      const GF_GROUP *gf_group = &cpi->twopass.gf_group;
       vpx_rc_encodeframe_decision_t encode_frame_decision;
       codec_status = vp9_extrc_get_encodeframe_decision(
           &cpi->ext_ratectrl, gf_group->index, &encode_frame_decision);
@@ -4633,6 +4634,12 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest,
       if (encode_frame_decision.q_index != VPX_DEFAULT_Q) {
         q = encode_frame_decision.q_index;
       }
+    }
+
+    if (cpi->ext_ratectrl.ready && cpi->ext_ratectrl.log_file) {
+      fprintf(cpi->ext_ratectrl.log_file,
+              "ENCODE_FRAME_INFO gop_index %d update_type %d q %d\n",
+              gf_group->index, gf_group->update_type[gf_group->index], q);
     }
 
     vp9_set_quantizer(cpi, q);
@@ -5401,6 +5408,22 @@ static void set_mb_wiener_variance(VP9_COMP *cpi) {
 }
 
 #if !CONFIG_REALTIME_ONLY
+static PSNR_STATS compute_psnr_stats(const YV12_BUFFER_CONFIG *source_frame,
+                                     const YV12_BUFFER_CONFIG *coded_frame,
+                                     uint32_t bit_depth,
+                                     uint32_t input_bit_depth) {
+  PSNR_STATS psnr;
+#if CONFIG_VP9_HIGHBITDEPTH
+  vpx_calc_highbd_psnr(source_frame, coded_frame, &psnr, bit_depth,
+                       input_bit_depth);
+#else   // CONFIG_VP9_HIGHBITDEPTH
+  (void)bit_depth;
+  (void)input_bit_depth;
+  vpx_calc_psnr(source_frame, coded_frame, &psnr);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  return psnr;
+}
+
 static void update_encode_frame_result_basic(
     FRAME_UPDATE_TYPE update_type, int show_idx, int quantize_index,
     ENCODE_FRAME_RESULT *encode_frame_result) {
@@ -5437,6 +5460,7 @@ static void yv12_buffer_to_image_buffer(const YV12_BUFFER_CONFIG *yv12_buffer,
     }
   }
 }
+
 // This function will update extra information specific for simple_encode APIs
 static void update_encode_frame_result_simple_encode(
     int ref_frame_flags, FRAME_UPDATE_TYPE update_type,
@@ -5450,14 +5474,8 @@ static void update_encode_frame_result_simple_encode(
   PSNR_STATS psnr;
   update_encode_frame_result_basic(update_type, coded_frame_buf->frame_index,
                                    quantize_index, encode_frame_result);
-#if CONFIG_VP9_HIGHBITDEPTH
-  vpx_calc_highbd_psnr(source_frame, &coded_frame_buf->buf, &psnr, bit_depth,
-                       input_bit_depth);
-#else   // CONFIG_VP9_HIGHBITDEPTH
-  (void)bit_depth;
-  (void)input_bit_depth;
-  vpx_calc_psnr(source_frame, &coded_frame_buf->buf, &psnr);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+  compute_psnr_stats(source_frame, &coded_frame_buf->buf, bit_depth,
+                     input_bit_depth);
   encode_frame_result->frame_coding_index = coded_frame_buf->frame_coding_index;
 
   vp9_get_ref_frame_info(update_type, ref_frame_flags, ref_frame_bufs,
@@ -5722,6 +5740,15 @@ static void encode_frame_to_data_rate(
 
     update_encode_frame_result_basic(update_type, coded_frame_buf->frame_index,
                                      quantize_index, encode_frame_result);
+    if (cpi->ext_ratectrl.ready && cpi->ext_ratectrl.log_file) {
+      PSNR_STATS psnr =
+          compute_psnr_stats(cpi->Source, &coded_frame_buf->buf, cm->bit_depth,
+                             cpi->oxcf.input_bit_depth);
+      fprintf(cpi->ext_ratectrl.log_file,
+              "ENCODE_FRAME_RESULT psnr %f bits %ld \n", psnr.psnr[0],
+              (*size) << 3);
+    }
+
 #if CONFIG_RATE_CTRL
     if (cpi->oxcf.use_simple_encode_api) {
       const int ref_frame_flags = get_ref_frame_flags(cpi);

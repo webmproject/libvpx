@@ -514,6 +514,11 @@ typedef struct vpx_rc_funcs {
    * Delete the external rate control model.
    */
   vpx_rc_delete_model_cb_fn_t delete_model;
+
+  /*!
+   * Rate control log path.
+   */
+  char *rate_ctrl_log_path;
   /*!
    * Private data for the external rate control model.
    */
