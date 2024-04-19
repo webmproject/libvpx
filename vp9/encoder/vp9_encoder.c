@@ -5745,8 +5745,8 @@ static void encode_frame_to_data_rate(
           compute_psnr_stats(cpi->Source, &coded_frame_buf->buf, cm->bit_depth,
                              cpi->oxcf.input_bit_depth);
       fprintf(cpi->ext_ratectrl.log_file,
-              "ENCODE_FRAME_RESULT psnr %f bits %zu\n", psnr.psnr[0],
-              (*size) << 3);
+              "ENCODE_FRAME_RESULT gop_index %d psnr %f bits %zu\n",
+              cpi->twopass.gf_group.index, psnr.psnr[0], (*size) << 3);
     }
 
 #if CONFIG_RATE_CTRL
