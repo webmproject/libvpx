@@ -14,6 +14,7 @@
 #include <cstring>
 #include <initializer_list>
 #include <new>
+#include <vector>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/acm_random.h"
@@ -28,6 +29,7 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx/vpx_image.h"
 #include "vpx/vpx_tpl.h"
+#include "vpx_ports/msvc.h"
 
 namespace {
 
@@ -87,6 +89,32 @@ vpx_image_t *CreateImage(vpx_bit_depth_t bit_depth, vpx_img_fmt_t fmt,
   }
 
   return image;
+}
+
+void InitCodec(vpx_codec_iface_t &iface, int width, int height,
+               vpx_codec_ctx_t *enc, vpx_codec_enc_cfg_t *cfg) {
+  cfg->g_w = width;
+  cfg->g_h = height;
+  cfg->g_lag_in_frames = 0;
+  cfg->g_pass = VPX_RC_ONE_PASS;
+  ASSERT_EQ(vpx_codec_enc_init(enc, &iface, cfg, 0), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control_(enc, VP8E_SET_CPUUSED, 2), VPX_CODEC_OK);
+}
+
+// Encodes 1 frame of size |cfg.g_w| x |cfg.g_h| setting |enc|'s configuration
+// to |cfg|.
+void EncodeWithConfig(const vpx_codec_enc_cfg_t &cfg, vpx_codec_ctx_t *enc) {
+  libvpx_test::DummyVideoSource video;
+  video.SetSize(cfg.g_w, cfg.g_h);
+  video.Begin();
+  EXPECT_EQ(vpx_codec_enc_config_set(enc, &cfg), VPX_CODEC_OK)
+      << vpx_codec_error_detail(enc);
+
+  EXPECT_EQ(vpx_codec_encode(enc, video.img(), video.pts(), video.duration(),
+                             /*flags=*/0, VPX_DL_GOOD_QUALITY),
+            VPX_CODEC_OK)
+      << vpx_codec_error_detail(enc);
 }
 
 TEST(EncodeAPI, InvalidParams) {
@@ -431,6 +459,25 @@ TEST(EncodeAPI, Chromium324459561) {
 
   encoder.Configure(0, 1685, 1, VPX_VBR, VPX_DL_REALTIME);
 }
+
+TEST(EncodeAPI, VP8GlobalHeaders) {
+  constexpr int kWidth = 320;
+  constexpr int kHeight = 240;
+
+  vpx_codec_enc_cfg_t cfg = {};
+  struct Encoder {
+    ~Encoder() { EXPECT_EQ(vpx_codec_destroy(&ctx), VPX_CODEC_OK); }
+    vpx_codec_ctx_t ctx = {};
+  } enc;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(vpx_codec_vp8_cx(), &cfg, 0),
+            VPX_CODEC_OK);
+  ASSERT_NO_FATAL_FAILURE(
+      InitCodec(*vpx_codec_vp8_cx(), kWidth, kHeight, &enc.ctx, &cfg));
+  EXPECT_EQ(vpx_codec_get_global_headers(&enc.ctx), nullptr);
+  EXPECT_NO_FATAL_FAILURE(EncodeWithConfig(cfg, &enc.ctx));
+  EXPECT_EQ(vpx_codec_get_global_headers(&enc.ctx), nullptr);
+}
 #endif  // CONFIG_VP8_ENCODER
 
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
@@ -613,32 +660,6 @@ TEST(EncodeAPI, SetRoi) {
 
     EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
   }
-}
-
-void InitCodec(vpx_codec_iface_t &iface, int width, int height,
-               vpx_codec_ctx_t *enc, vpx_codec_enc_cfg_t *cfg) {
-  cfg->g_w = width;
-  cfg->g_h = height;
-  cfg->g_lag_in_frames = 0;
-  cfg->g_pass = VPX_RC_ONE_PASS;
-  ASSERT_EQ(vpx_codec_enc_init(enc, &iface, cfg, 0), VPX_CODEC_OK);
-
-  ASSERT_EQ(vpx_codec_control_(enc, VP8E_SET_CPUUSED, 2), VPX_CODEC_OK);
-}
-
-// Encodes 1 frame of size |cfg.g_w| x |cfg.g_h| setting |enc|'s configuration
-// to |cfg|.
-void EncodeWithConfig(const vpx_codec_enc_cfg_t &cfg, vpx_codec_ctx_t *enc) {
-  libvpx_test::DummyVideoSource video;
-  video.SetSize(cfg.g_w, cfg.g_h);
-  video.Begin();
-  EXPECT_EQ(vpx_codec_enc_config_set(enc, &cfg), VPX_CODEC_OK)
-      << vpx_codec_error_detail(enc);
-
-  EXPECT_EQ(vpx_codec_encode(enc, video.img(), video.pts(), video.duration(),
-                             /*flags=*/0, VPX_DL_GOOD_QUALITY),
-            VPX_CODEC_OK)
-      << vpx_codec_error_detail(enc);
 }
 
 TEST(EncodeAPI, ConfigChangeThreadCount) {
@@ -1459,6 +1480,121 @@ TEST(EncodeAPI, Buganizer331108922BitDepth12) {
   encoder.Encode(/*key_frame=*/false);
 }
 #endif
+
+TEST(EncodeAPI, VP9GlobalHeaders) {
+  constexpr int kWidth = 320;
+  constexpr int kHeight = 240;
+
+  libvpx_test::DummyVideoSource video;
+  video.SetSize(kWidth, kHeight);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  const int profiles[] = { 0, 1, 2, 3 };
+#else
+  const int profiles[] = { 0, 1 };
+#endif
+  char str[80];
+  for (const int profile : profiles) {
+    std::vector<vpx_bit_depth_t> bitdepths;
+    std::vector<vpx_img_fmt_t> formats;
+    switch (profile) {
+      case 0:
+        bitdepths = { VPX_BITS_8 };
+        formats = { VPX_IMG_FMT_I420 };
+        break;
+      case 1:
+        bitdepths = { VPX_BITS_8 };
+        formats = { VPX_IMG_FMT_I422, VPX_IMG_FMT_I444 };
+        break;
+#if CONFIG_VP9_HIGHBITDEPTH
+      case 2:
+        bitdepths = { VPX_BITS_10, VPX_BITS_12 };
+        formats = { VPX_IMG_FMT_I42016 };
+        break;
+      case 3:
+        bitdepths = { VPX_BITS_10, VPX_BITS_12 };
+        formats = { VPX_IMG_FMT_I42216, VPX_IMG_FMT_I44416 };
+        break;
+#endif
+    }
+
+    for (const auto format : formats) {
+      for (const auto bitdepth : bitdepths) {
+        snprintf(str, sizeof(str), "profile: %d bitdepth: %d format: %d",
+                 profile, bitdepth, format);
+        SCOPED_TRACE(str);
+
+        vpx_codec_enc_cfg_t cfg = {};
+        struct Encoder {
+          ~Encoder() { EXPECT_EQ(vpx_codec_destroy(&ctx), VPX_CODEC_OK); }
+          vpx_codec_ctx_t ctx = {};
+        } enc;
+        vpx_codec_ctx_t *const ctx = &enc.ctx;
+
+        ASSERT_EQ(vpx_codec_enc_config_default(vpx_codec_vp9_cx(), &cfg, 0),
+                  VPX_CODEC_OK);
+        cfg.g_w = kWidth;
+        cfg.g_h = kHeight;
+        cfg.g_lag_in_frames = 0;
+        cfg.g_pass = VPX_RC_ONE_PASS;
+        cfg.g_profile = profile;
+        cfg.g_bit_depth = bitdepth;
+        ASSERT_EQ(
+            vpx_codec_enc_init(ctx, vpx_codec_vp9_cx(), &cfg,
+                               bitdepth == 8 ? 0 : VPX_CODEC_USE_HIGHBITDEPTH),
+            VPX_CODEC_OK);
+        ASSERT_EQ(vpx_codec_control_(ctx, VP8E_SET_CPUUSED, 2), VPX_CODEC_OK);
+        ASSERT_EQ(vpx_codec_control_(ctx, VP9E_SET_TARGET_LEVEL, 62),
+                  VPX_CODEC_OK);
+
+        vpx_fixed_buf_t *global_headers = vpx_codec_get_global_headers(ctx);
+        EXPECT_NE(global_headers, nullptr);
+        EXPECT_EQ(global_headers->sz, size_t{ 9 });
+
+        video.SetImageFormat(format);
+        video.Begin();
+        EXPECT_EQ(
+            vpx_codec_encode(ctx, video.img(), video.pts(), video.duration(),
+                             /*flags=*/0, VPX_DL_GOOD_QUALITY),
+            VPX_CODEC_OK)
+            << vpx_codec_error_detail(ctx);
+
+        global_headers = vpx_codec_get_global_headers(ctx);
+        EXPECT_NE(global_headers, nullptr);
+        EXPECT_EQ(global_headers->sz, size_t{ 12 });
+        uint8_t chroma_subsampling;
+        if ((format & VPX_IMG_FMT_I420) == VPX_IMG_FMT_I420) {
+          chroma_subsampling = 1;
+        } else if ((format & VPX_IMG_FMT_I422) == VPX_IMG_FMT_I422) {
+          chroma_subsampling = 2;
+        } else {  // VPX_IMG_FMT_I444
+          chroma_subsampling = 3;
+        }
+        const uint8_t expected_headers[] = { 1,
+                                             1,
+                                             static_cast<uint8_t>(profile),
+                                             2,
+                                             1,
+                                             /*level,*/ 3,
+                                             1,
+                                             static_cast<uint8_t>(bitdepth),
+                                             4,
+                                             1,
+                                             chroma_subsampling };
+        const uint8_t *actual_headers =
+            reinterpret_cast<const uint8_t *>(global_headers->buf);
+        for (int i = 0; i < 5; ++i) {
+          EXPECT_EQ(expected_headers[i], actual_headers[i]) << "index: " << i;
+        }
+        EXPECT_NE(actual_headers[6], 0);  // level
+        for (int i = 5; i < 11; ++i) {
+          EXPECT_EQ(expected_headers[i], actual_headers[i + 1])
+              << "index: " << i + 1;
+        }
+      }
+    }
+  }
+}
 
 #endif  // CONFIG_VP9_ENCODER
 
