@@ -129,6 +129,8 @@ struct vpx_codec_alg_priv {
   vpx_codec_priv_output_cx_pkt_cb_pair_t output_cx_pkt_cb;
   // BufferPool that holds all reference frames.
   BufferPool *buffer_pool;
+  vpx_fixed_buf_t global_headers;
+  int global_header_subsampling;
 };
 
 // Called by encoder_set_config() and encoder_encode() only. Must not be called
@@ -1137,6 +1139,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 
     if (res == VPX_CODEC_OK) {
       priv->pts_offset_initialized = 0;
+      priv->global_header_subsampling = -1;
       // TODO(angiebird): Replace priv->timestamp_ratio by
       // oxcf->g_timebase_in_ts
       priv->timestamp_ratio = get_g_timebase_in_ts(priv->cfg.g_timebase);
@@ -1157,6 +1160,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 
 static vpx_codec_err_t encoder_destroy(vpx_codec_alg_priv_t *ctx) {
   free(ctx->cx_data);
+  free(ctx->global_headers.buf);
   vp9_remove_compressor(ctx->cpi);
   vpx_free(ctx->buffer_pool);
   vpx_free(ctx);
@@ -1340,6 +1344,20 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
         if (ctx->cx_data == NULL) {
           return VPX_CODEC_MEM_ERROR;
         }
+      }
+
+      int chroma_subsampling = -1;
+      if ((img->fmt & VPX_IMG_FMT_I420) == VPX_IMG_FMT_I420 ||
+          (img->fmt & VPX_IMG_FMT_NV12) == VPX_IMG_FMT_NV12 ||
+          (img->fmt & VPX_IMG_FMT_YV12) == VPX_IMG_FMT_YV12) {
+        chroma_subsampling = 1;  // matches default for Codec Parameter String
+      } else if ((img->fmt & VPX_IMG_FMT_I422) == VPX_IMG_FMT_I422) {
+        chroma_subsampling = 2;
+      } else if ((img->fmt & VPX_IMG_FMT_I444) == VPX_IMG_FMT_I444) {
+        chroma_subsampling = 3;
+      }
+      if (chroma_subsampling > ctx->global_header_subsampling) {
+        ctx->global_header_subsampling = chroma_subsampling;
       }
     }
   }
@@ -1630,6 +1648,34 @@ static vpx_codec_err_t ctrl_set_previewpp(vpx_codec_alg_priv_t *ctx,
   (void)args;
   return VPX_CODEC_INCAPABLE;
 #endif
+}
+
+// Returns the contents of CodecPrivate described in:
+// https://www.webmproject.org/docs/container/#vp9-codec-feature-metadata-codecprivate
+// This includes Profile, Level, Bit depth and Chroma subsampling. Each entry
+// is 3 bytes. 1 byte ID, 1 byte length (= 1) and 1 byte value.
+static vpx_fixed_buf_t *encoder_get_global_headers(vpx_codec_alg_priv_t *ctx) {
+  if (!ctx->cpi) return NULL;
+
+  const unsigned int profile = ctx->cfg.g_profile;
+  const VP9_LEVEL level = vp9_get_level(&ctx->cpi->level_info.level_spec);
+  const vpx_bit_depth_t bit_depth = ctx->cfg.g_bit_depth;
+  const int subsampling = ctx->global_header_subsampling;
+  const uint8_t buf[12] = {
+    1, 1, (uint8_t)profile,   2, 1, (uint8_t)level,
+    3, 1, (uint8_t)bit_depth, 4, 1, (uint8_t)subsampling
+  };
+
+  if (ctx->global_headers.buf) free(ctx->global_headers.buf);
+  ctx->global_headers.buf = malloc(sizeof(buf));
+  if (!ctx->global_headers.buf) return NULL;
+
+  ctx->global_headers.sz = sizeof(buf);
+  // No data or I440, which isn't mapped.
+  if (ctx->global_header_subsampling == -1) ctx->global_headers.sz -= 3;
+  memcpy(ctx->global_headers.buf, buf, ctx->global_headers.sz);
+
+  return &ctx->global_headers;
 }
 
 static vpx_image_t *encoder_get_preview(vpx_codec_alg_priv_t *ctx) {
@@ -2175,14 +2221,14 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   },
   {
       // NOLINT
-      1,                      // 1 cfg map
-      encoder_usage_cfg_map,  // vpx_codec_enc_cfg_map_t
-      encoder_encode,         // vpx_codec_encode_fn_t
-      encoder_get_cxdata,     // vpx_codec_get_cx_data_fn_t
-      encoder_set_config,     // vpx_codec_enc_config_set_fn_t
-      NULL,                   // vpx_codec_get_global_headers_fn_t
-      encoder_get_preview,    // vpx_codec_get_preview_frame_fn_t
-      NULL                    // vpx_codec_enc_mr_get_mem_loc_fn_t
+      1,                           // 1 cfg map
+      encoder_usage_cfg_map,       // vpx_codec_enc_cfg_map_t
+      encoder_encode,              // vpx_codec_encode_fn_t
+      encoder_get_cxdata,          // vpx_codec_get_cx_data_fn_t
+      encoder_set_config,          // vpx_codec_enc_config_set_fn_t
+      encoder_get_global_headers,  // vpx_codec_get_global_headers_fn_t
+      encoder_get_preview,         // vpx_codec_get_preview_frame_fn_t
+      NULL                         // vpx_codec_enc_mr_get_mem_loc_fn_t
   }
 };
 
