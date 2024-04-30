@@ -553,7 +553,7 @@ typedef struct vpx_rc_funcs {
   /*!
    * Rate control log path.
    */
-  char *rate_ctrl_log_path;
+  const char *rate_ctrl_log_path;
   /*!
    * Private data for the external rate control model.
    */
