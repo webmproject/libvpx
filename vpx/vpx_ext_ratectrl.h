@@ -8,6 +8,10 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+/*!\file
+ * \brief Defines structs and callbacks needed for external rate control.
+ *
+ */
 #ifndef VPX_VPX_VPX_EXT_RATECTRL_H_
 #define VPX_VPX_VPX_EXT_RATECTRL_H_
 
@@ -356,7 +360,16 @@ typedef struct vpx_rc_config {
 /*!\brief Control what ref frame to use and its index.
  */
 typedef struct vpx_rc_ref_frame {
+  /*!
+   * Ref frame index. Corresponding to |lst_fb_idx|, |gld_fb_idx| or
+   * |alt_fb_idx| in VP9_COMP depending on the ref frame #name.
+   */
   int index[VPX_RC_MAX_REF_FRAMES];
+  /*!
+   * Ref frame name. This decides whether the #index is used as
+   * |lst_fb_idx|, |gld_fb_idx| or |alt_fb_idx| in VP9_COMP.
+   *
+   */
   vpx_rc_ref_name_t name[VPX_RC_MAX_REF_FRAMES];
 } vpx_rc_ref_frame_t;
 
