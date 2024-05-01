@@ -2302,42 +2302,61 @@ static void define_gf_group_structure(VP9_COMP *cpi) {
   gf_group->gf_group_size = frame_index;
 }
 
+static INLINE void gf_group_set_overlay_frame(GF_GROUP *gf_group,
+                                              int frame_index) {
+  gf_group->update_type[frame_index] = OVERLAY_UPDATE;
+  gf_group->arf_src_offset[frame_index] = 0;
+  gf_group->frame_gop_index[frame_index] = frame_index;
+  gf_group->rf_level[frame_index] = INTER_NORMAL;
+  gf_group->layer_depth[frame_index] = MAX_ARF_LAYERS - 1;
+}
+
+static INLINE void gf_group_set_key_frame(GF_GROUP *gf_group, int frame_index) {
+  gf_group->update_type[frame_index] = KF_UPDATE;
+  gf_group->arf_src_offset[frame_index] = 0;
+  gf_group->frame_gop_index[frame_index] = frame_index;
+  gf_group->rf_level[frame_index] = KF_STD;
+  gf_group->layer_depth[frame_index] = 0;
+}
+
+static INLINE void gf_group_set_arf_frame(GF_GROUP *gf_group, int frame_index,
+                                          int show_frame_count) {
+  gf_group->update_type[frame_index] = ARF_UPDATE;
+  gf_group->arf_src_offset[frame_index] = (unsigned char)(show_frame_count - 1);
+  gf_group->frame_gop_index[frame_index] = show_frame_count;
+  gf_group->rf_level[frame_index] = GF_ARF_STD;
+  gf_group->layer_depth[frame_index] = 1;
+}
+
+static INLINE void gf_group_set_inter_normal_frame(GF_GROUP *gf_group,
+                                                   int frame_index) {
+  gf_group->update_type[frame_index] = LF_UPDATE;
+  gf_group->arf_src_offset[frame_index] = 0;
+  gf_group->frame_gop_index[frame_index] = frame_index;
+  gf_group->rf_level[frame_index] = INTER_NORMAL;
+  gf_group->layer_depth[frame_index] = 2;
+}
+
 static void ext_rc_define_gf_group_structure(
-    VP9_COMP *cpi, vpx_rc_gop_decision_t *gop_decision) {
-  RATE_CONTROL *const rc = &cpi->rc;
-  TWO_PASS *const twopass = &cpi->twopass;
-  GF_GROUP *const gf_group = &twopass->gf_group;
-  const int key_frame = cpi->common.frame_type == KEY_FRAME;
+    const vpx_rc_gop_decision_t *gop_decision, GF_GROUP *gf_group) {
+  const int key_frame = gop_decision->use_key_frame;
+  const int show_frame_count = gop_decision->gop_coding_frames - 1;
 
-  if (!key_frame) {
-    set_gf_overlay_frame_type(gf_group, 0, rc->source_alt_ref_active);
+  if (key_frame) {
+    gf_group_set_key_frame(gf_group, 0);
+  } else {
+    gf_group_set_overlay_frame(gf_group, 0);
   }
 
-  for (int frame_index = 1; frame_index < gop_decision->gop_coding_frames;
+  // We assume arf is always used to keep the logic simple for now.
+  gf_group_set_arf_frame(gf_group, 1, show_frame_count);
+
+  for (int frame_index = 2; frame_index < gop_decision->gop_coding_frames;
        frame_index++) {
-    const int ext_frame_index = key_frame ? frame_index : frame_index - 1;
-    const vpx_rc_frame_update_type_t update_type =
-        gop_decision->update_type[ext_frame_index];
-    gf_group->update_type[frame_index] = (FRAME_UPDATE_TYPE)update_type;
-    if (update_type == VPX_RC_ARF_UPDATE) {
-      gf_group->rf_level[frame_index] = GF_ARF_STD;
-      gf_group->layer_depth[frame_index] = 1;
-      gf_group->arf_src_offset[frame_index] =
-          (unsigned char)(rc->baseline_gf_interval - 1);
-      gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
-    } else if (update_type == VPX_RC_LF_UPDATE) {
-      gf_group->frame_gop_index[frame_index] = frame_index;
-      gf_group->arf_src_offset[frame_index] = 0;
-      gf_group->rf_level[frame_index] = INTER_NORMAL;
-      gf_group->layer_depth[frame_index] = 2;
-    } else if (update_type == VPX_RC_OVERLAY_UPDATE) {
-      set_gf_overlay_frame_type(gf_group, frame_index,
-                                rc->source_alt_ref_pending);
-      gf_group->arf_src_offset[frame_index] = 0;
-      gf_group->frame_gop_index[frame_index] = rc->baseline_gf_interval;
-    }
+    gf_group_set_inter_normal_frame(gf_group, frame_index);
   }
-  gf_group->max_layer_depth = 2;
+  gf_group->max_layer_depth = MAX_ARF_LAYERS - 1;
+  gf_group->gf_group_size = gop_decision->gop_coding_frames;
 }
 
 static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
@@ -3641,7 +3660,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
       }
       rc->baseline_gf_interval =
           gop_decision.gop_coding_frames - rc->source_alt_ref_pending;
-      ext_rc_define_gf_group_structure(cpi, &gop_decision);
+      ext_rc_define_gf_group_structure(&gop_decision, &twopass->gf_group);
     }
   } else {
     // Keyframe and section processing.
