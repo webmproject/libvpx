@@ -423,6 +423,7 @@ void VP8Encoder::Configure(unsigned int threads, unsigned int width,
 }
 
 void VP8Encoder::Encode(bool key_frame) {
+  assert(initialized_);
   const vpx_codec_cx_pkt_t *pkt;
   vpx_image_t *image =
       CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg_.g_w, cfg_.g_h);
@@ -977,6 +978,7 @@ void VP9Encoder::Configure(unsigned int threads, unsigned int width,
 }
 
 void VP9Encoder::Encode(bool key_frame) {
+  assert(initialized_);
   const vpx_codec_cx_pkt_t *pkt;
   vpx_image_t *image = CreateImage(bit_depth_, fmt_, cfg_.g_w, cfg_.g_h);
   ASSERT_NE(image, nullptr);
