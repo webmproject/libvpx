@@ -21,7 +21,6 @@
 #include "test/register_state_check.h"
 #include "test/util.h"
 #include "vp9/common/vp9_blockd.h"
-#include "vpx_ports/msvc.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/vpx_timer.h"
 
