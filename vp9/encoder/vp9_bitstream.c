@@ -1402,7 +1402,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t dest_size,
   if (cm->show_existing_frame) {
     uncompressed_hdr_size = vpx_wb_bytes_written(&wb);
     data += uncompressed_hdr_size;
-    data_size -= uncompressed_hdr_size;
     *size = data - dest;
     return;
   }
