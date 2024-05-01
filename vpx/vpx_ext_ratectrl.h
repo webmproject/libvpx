@@ -367,13 +367,15 @@ typedef struct vpx_rc_gop_decision {
   int gop_coding_frames; /**< The number of frames of this GOP */
   int use_alt_ref;       /**< Whether to use alt ref for this GOP */
   int use_key_frame;     /**< Whether to set key frame for this GOP */
-  // Frame type for each frame in this GOP.
-  // This will be populated to |update_type| in GF_GROUP defined in
-  // vp9_firstpass.h
+  /*!
+   * Frame type for each frame in this GOP.
+   * This will be populated to |update_type| in GF_GROUP defined in
+   * vp9_firstpass.h
+   */
   vpx_rc_frame_update_type_t update_type[VPX_RC_MAX_STATIC_GF_GROUP_LENGTH + 2];
-  // Ref frame buffer index to be updated for each frame in this GOP.
+  /*! Ref frame buffer index to be updated for each frame in this GOP. */
   int update_ref_index[VPX_RC_MAX_STATIC_GF_GROUP_LENGTH + 2];
-  // Ref frame list to be used for each frame in this GOP.
+  /*! Ref frame list to be used for each frame in this GOP. */
   vpx_rc_ref_frame_t ref_frame_list[VPX_RC_MAX_STATIC_GF_GROUP_LENGTH + 2];
 } vpx_rc_gop_decision_t;
 
