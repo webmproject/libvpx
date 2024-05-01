@@ -37,30 +37,45 @@ extern "C" {
  */
 #define VPX_RC_MAX_STATIC_GF_GROUP_LENGTH 250
 
-/*!\brief Max number of ref frames returned by the external RC. Correspondent to
- * MAX_REF_FRAMES defined in vp9_blockd.h. */
+/*!\brief Max number of ref frames returned by the external RC.
+ *
+ * Correspondent to MAX_REF_FRAMES defined in vp9_blockd.h.
+ */
 #define VPX_RC_MAX_REF_FRAMES 4
 
-/*!\brief The control type of the inference API.
- * In VPX_RC_NONE mode, the external rate control doesn't determines anything.
- * This mode is used as baseline.
- * In VPX_RC_QP mode, the external rate control model determines the
- * quantization parameter (QP) for each frame.
- * In VPX_RC_GOP mode, the external rate control model determines the
- * group of picture (GOP) of the video sequence.
- * In VPX_RC_RDMULT mode, the external rate control model determines the
- * rate-distortion multiplier (rdmult) for the current frame.
- * In VPX_RC_GOP_QP mode, the external rate control model determines
- * both the QP and the GOP.
- * In VPX_RC_GOP_QP_RDMULT mode, the external rate control model determines
- * the QP, GOP and the rdmult.
+/*!\brief The type of the external rate control.
+ *
+ * This controls what encoder parameters are determined by the external rate
+ * control.
  */
 typedef enum vpx_rc_type {
+  /*!
+   * The external rate control doesn't determine anything.
+   * This mode is used as baseline.
+   */
   VPX_RC_NONE = 0,
+  /*!
+   * The external rate control model determines the quantization parameter (QP)
+   * for each frame.
+   */
   VPX_RC_QP = 1 << 0,
+  /*!
+   * The external rate control model determines the group of picture (GOP) of
+   * the video sequence.
+   */
   VPX_RC_GOP = 1 << 1,
+  /*!
+   * The external rate control model determines the rate-distortion multiplier
+   * (rdmult) for the current frame.
+   */
   VPX_RC_RDMULT = 1 << 2,
+  /*!
+   * The external rate control model determines both QP and GOP.
+   */
   VPX_RC_GOP_QP = VPX_RC_QP | VPX_RC_GOP,
+  /*!
+   * The external rate control model determines the QP, GOP and the rdmult.
+   */
   VPX_RC_GOP_QP_RDMULT = VPX_RC_QP | VPX_RC_GOP | VPX_RC_RDMULT
 } vpx_rc_type_t;
 
@@ -85,8 +100,10 @@ typedef enum vpx_rc_frame_update_type {
   VPX_RC_USE_BUF_FRAME = 6,
 } vpx_rc_frame_update_type_t;
 
-/*!\brief Name for the ref frames returned by the external RC. Correspondent to
- * the ref frames defined in vp9_blockd.h. */
+/*!\brief Name for the ref frames returned by the external RC.
+ *
+ * Correspondent to the ref frames defined in vp9_blockd.h.
+ */
 typedef enum vpx_rc_ref_name {
   VPX_RC_INVALID_REF_FRAME = -1,
   VPX_RC_INTRA_FRAME = 0,
