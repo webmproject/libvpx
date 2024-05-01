@@ -11,16 +11,14 @@
 #include <cassert>
 #include <climits>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <initializer_list>
-#include <new>
 #include <vector>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/acm_random.h"
-#include "test/codec_factory.h"
-#include "test/encode_test_driver.h"
-#include "test/i420_video_source.h"
 #include "test/video_source.h"
 
 #include "./vpx_config.h"
@@ -28,7 +26,6 @@
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx/vpx_image.h"
-#include "vpx/vpx_tpl.h"
 #include "vpx_ports/msvc.h"
 
 namespace {
