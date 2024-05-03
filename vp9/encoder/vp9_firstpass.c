@@ -36,6 +36,7 @@
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_quantize.h"
+#include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
 #include "vpx/vpx_ext_ratectrl.h"
 #include "vpx_dsp/variance.h"
