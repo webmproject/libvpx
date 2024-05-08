@@ -32,14 +32,13 @@ extern "C" {
  */
 #define VPX_EXT_RATECTRL_ABI_VERSION (5 + VPX_TPL_ABI_VERSION)
 
-/*!\brief This is correspondent to MAX_STATIC_GF_GROUP_LENGTH defined in
- * vp9_ratectrl.h
+/*!\brief Corresponds to MAX_STATIC_GF_GROUP_LENGTH defined in vp9_ratectrl.h
  */
 #define VPX_RC_MAX_STATIC_GF_GROUP_LENGTH 250
 
 /*!\brief Max number of ref frames returned by the external RC.
  *
- * Correspondent to MAX_REF_FRAMES defined in vp9_blockd.h.
+ * Corresponds to MAX_REF_FRAMES defined in vp9_blockd.h.
  */
 #define VPX_RC_MAX_REF_FRAMES 4
 
@@ -87,7 +86,7 @@ typedef enum vpx_ext_rc_mode {
   VPX_RC_CQ = 2,
 } vpx_ext_rc_mode_t;
 
-/*!\brief This is correspondent to FRAME_UPDATE_TYPE defined in vp9_firstpass.h.
+/*!\brief Corresponds to FRAME_UPDATE_TYPE defined in vp9_firstpass.h.
  */
 typedef enum vpx_rc_frame_update_type {
   VPX_RC_INVALID_UPDATE_TYPE = -1,
@@ -102,7 +101,7 @@ typedef enum vpx_rc_frame_update_type {
 
 /*!\brief Name for the ref frames returned by the external RC.
  *
- * Correspondent to the ref frames defined in vp9_blockd.h.
+ * Corresponds to the ref frames defined in vp9_blockd.h.
  */
 typedef enum vpx_rc_ref_name {
   VPX_RC_INVALID_REF_FRAME = -1,
@@ -114,8 +113,8 @@ typedef enum vpx_rc_ref_name {
 
 /*!\brief Abstract rate control model handler
  *
- * The encoder will receive the model handler from create_model() defined in
- * vpx_rc_funcs_t.
+ * The encoder will receive the model handler from
+ * vpx_rc_funcs_t::create_model().
  */
 typedef void *vpx_rc_model_t;
 
@@ -136,7 +135,7 @@ typedef void *vpx_rc_model_t;
 /*!\brief Encode frame decision made by the external rate control model
  *
  * The encoder will receive the decision from the external rate control model
- * through get_encodeframe_decision() defined in vpx_rc_funcs_t.
+ * through vpx_rc_funcs_t::get_encodeframe_decision().
  */
 typedef struct vpx_rc_encodeframe_decision {
   int q_index; /**< Quantizer step index [0..255]*/
@@ -146,7 +145,7 @@ typedef struct vpx_rc_encodeframe_decision {
 /*!\brief Information for the frame to be encoded.
  *
  * The encoder will send the information to external rate control model through
- * get_encodeframe_decision() defined in vpx_rc_funcs_t.
+ * vpx_rc_funcs_t::get_encodeframe_decision().
  *
  */
 typedef struct vpx_rc_encodeframe_info {
@@ -184,7 +183,7 @@ typedef struct vpx_rc_encodeframe_info {
 /*!\brief Frame coding result
  *
  * The encoder will send the result to the external rate control model through
- * update_encodeframe_result() defined in vpx_rc_funcs_t.
+ * vpx_rc_funcs_t::update_encodeframe_result().
  */
 typedef struct vpx_rc_encodeframe_result {
   int64_t sse;         /**< sum of squared error of the reconstructed frame */
@@ -510,7 +509,7 @@ typedef vpx_rc_status_t (*vpx_rc_delete_model_cb_fn_t)(
  *
  * The user can enable external rate control by registering
  * a set of callback functions with the codec control flag
- * VP9E_SET_EXTERNAL_RATE_CONTROL.
+ * #VP9E_SET_EXTERNAL_RATE_CONTROL.
  */
 typedef struct vpx_rc_funcs {
   /*!
