@@ -2199,7 +2199,7 @@ int vp9_calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
     if (rc->frames_since_key < framerate / 2) {
       kf_boost = (int)(kf_boost * rc->frames_since_key / (framerate / 2));
     }
-    target = ((16 + kf_boost) * rc->avg_frame_bandwidth) >> 4;
+    target = (int)(((int64_t)(16 + kf_boost) * rc->avg_frame_bandwidth) >> 4);
   }
   return vp9_rc_clamp_iframe_target_size(cpi, target);
 }
