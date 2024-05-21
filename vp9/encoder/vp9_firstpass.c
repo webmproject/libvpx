@@ -2348,12 +2348,15 @@ static void ext_rc_define_gf_group_structure(
   } else {
     gf_group_set_overlay_frame(gf_group, 0);
   }
+  int frame_index = 1;
 
-  // We assume arf is always used to keep the logic simple for now.
-  gf_group_set_arf_frame(gf_group, 1, show_frame_count);
+  if (gop_decision->use_alt_ref) {
+    assert(frame_index < gop_decision->gop_coding_frames);
+    gf_group_set_arf_frame(gf_group, 1, show_frame_count);
+    ++frame_index;
+  }
 
-  for (int frame_index = 2; frame_index < gop_decision->gop_coding_frames;
-       frame_index++) {
+  for (; frame_index < gop_decision->gop_coding_frames; frame_index++) {
     gf_group_set_inter_normal_frame(gf_group, frame_index);
   }
   gf_group->max_layer_depth = MAX_ARF_LAYERS - 1;
