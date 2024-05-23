@@ -2635,11 +2635,12 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
 
   rc->avg_frame_bandwidth =
       (int)VPXMIN(oxcf->target_bandwidth / cpi->framerate, INT_MAX);
-  rc->min_frame_bandwidth =
-      (int)(rc->avg_frame_bandwidth * oxcf->two_pass_vbrmin_section / 100);
 
-  rc->min_frame_bandwidth =
-      VPXMAX(rc->min_frame_bandwidth, FRAME_OVERHEAD_BITS);
+  int64_t vbr_min_bits =
+      (int64_t)rc->avg_frame_bandwidth * oxcf->two_pass_vbrmin_section / 100;
+  vbr_min_bits = VPXMIN(vbr_min_bits, INT_MAX);
+
+  rc->min_frame_bandwidth = VPXMAX((int)vbr_min_bits, FRAME_OVERHEAD_BITS);
 
   // A maximum bitrate for a frame is defined.
   // However this limit is extended if a very high rate is given on the command

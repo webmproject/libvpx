@@ -1594,6 +1594,78 @@ TEST(EncodeAPI, VP9GlobalHeaders) {
   }
 }
 
+TEST(EncodeAPI, AomediaIssue3509VbrMinSection2Percent) {
+  // Initialize libvpx encoder.
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 1920;
+  cfg.g_h = 1080;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_target_bitrate = 1000000;
+  // Set this to more than 1 percent to cause a signed integer overflow in the
+  // multiplication rc->avg_frame_bandwidth * oxcf->rc_cfg.vbrmin_section in
+  // vp9_rc_update_framerate() if the multiplication is done in the `int` type.
+  cfg.rc_2pass_vbr_minsection_pct = 2;
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  // Create input image.
+  vpx_image_t *const image =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+
+  // Encode frame.
+  // `duration` can go as high as 300, but the UBSan error is gone if
+  // `duration` is 301 or higher.
+  ASSERT_EQ(
+      vpx_codec_encode(&enc, image, 0, /*duration=*/300, 0, VPX_DL_REALTIME),
+      VPX_CODEC_OK);
+
+  // Free resources.
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
+TEST(EncodeAPI, AomediaIssue3509VbrMinSection101Percent) {
+  // Initialize libvpx encoder.
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 1920;
+  cfg.g_h = 1080;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_target_bitrate = 1000000;
+  // Set this to more than 100 percent to cause an error when vbr_min_bits is
+  // cast to `int` in vp9_rc_update_framerate() if vbr_min_bits is not clamped
+  // to INT_MAX.
+  cfg.rc_2pass_vbr_minsection_pct = 101;
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  // Create input image.
+  vpx_image_t *const image =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+
+  // Encode frame.
+  // `duration` can go as high as 300, but the UBSan error is gone if
+  // `duration` is 301 or higher.
+  ASSERT_EQ(
+      vpx_codec_encode(&enc, image, 0, /*duration=*/300, 0, VPX_DL_REALTIME),
+      VPX_CODEC_OK);
+
+  // Free resources.
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
