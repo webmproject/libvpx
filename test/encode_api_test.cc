@@ -1477,7 +1477,7 @@ TEST(EncodeAPI, Buganizer331108922BitDepth12) {
                     VPX_DL_REALTIME);
   encoder.Encode(/*key_frame=*/false);
 }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 TEST(EncodeAPI, VP9GlobalHeaders) {
   constexpr int kWidth = 320;
