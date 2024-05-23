@@ -1267,11 +1267,13 @@ void vp8_new_framerate(VP8_COMP *cpi, double framerate) {
 
   cpi->framerate = framerate;
   cpi->output_framerate = framerate;
-  cpi->per_frame_bandwidth =
-      (int)round(cpi->oxcf.target_bandwidth / cpi->output_framerate);
+  const double per_frame_bandwidth =
+      round(cpi->oxcf.target_bandwidth / cpi->output_framerate);
+  cpi->per_frame_bandwidth = (int)VPXMIN(per_frame_bandwidth, INT_MAX);
   cpi->av_per_frame_bandwidth = cpi->per_frame_bandwidth;
-  cpi->min_frame_bandwidth = (int)(cpi->av_per_frame_bandwidth *
-                                   cpi->oxcf.two_pass_vbrmin_section / 100);
+  const int64_t vbr_min_bits = (int64_t)cpi->av_per_frame_bandwidth *
+                               cpi->oxcf.two_pass_vbrmin_section / 100;
+  cpi->min_frame_bandwidth = (int)VPXMIN(vbr_min_bits, INT_MAX);
 
   /* Set Maximum gf/arf interval */
   cpi->max_gf_interval = ((int)(cpi->output_framerate / 2.0) + 2);
@@ -3350,10 +3352,12 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, size_t *size,
       }
       break;
 #endif  // !CONFIG_REALTIME_ONLY
-    default:
-      cpi->per_frame_bandwidth =
-          (int)round(cpi->target_bandwidth / cpi->output_framerate);
+    default: {
+      const double per_frame_bandwidth =
+          round(cpi->target_bandwidth / cpi->output_framerate);
+      cpi->per_frame_bandwidth = (int)VPXMIN(per_frame_bandwidth, INT_MAX);
       break;
+    }
   }
 
   /* Default turn off buffer to buffer copying */
