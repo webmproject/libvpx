@@ -10,7 +10,6 @@
 
   - Bug fixes:
     Added buffer bounds checks to vpx_writer and vpx_write_bit_buffer.
-    Fix to error handling in vp9_pack_bitstream().
     Fix to GetSegmentationData() crash in aq_mode=0 for RTC rate control.
     Fix to alloc for row_base_thresh_freq_fac.
     Free row mt memory before freeing cpi->tile_data.
@@ -20,6 +19,8 @@
     Fix to stack overflow in encode_api_test,RandomPixelsVp8.
     Fix to integer division by zero and overflow in calc_pframe_target_size().
     Fix to integer overflow in vpx_img_alloc() & vpx_img_wrap()(CVE-2024-5197).
+    Fix to UBSan error in vp9_rc_update_framerate().
+    Fix to UBSan errors in vp8_new_framerate().
 
 2024-01-02 v1.14.0 "Venetian Duck"
   This release drops support for old C compilers, such as Visual Studio 2012
