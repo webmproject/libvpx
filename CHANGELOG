@@ -5,7 +5,9 @@
     This release is ABI compatible with the previous release.
 
   - Enhancement:
-    More elaborate test of whether SVE can be compiled.
+    Improved the detection of compiler support for AArch64 extensions,
+    particularly SVE.
+
     Added vpx_codec_get_global_headers() support for VP9.
 
   - Bug fixes:
@@ -16,11 +18,12 @@
     Fix to buffer alloc for vp9_bitstream_worker_data.
     Fix to VP8 race issue for multi-thread with pnsr_calc.
     Fix to uv width/height in vp9_scale_and_extend_frame_ssse3.
-    Fix to stack overflow in encode_api_test,RandomPixelsVp8.
     Fix to integer division by zero and overflow in calc_pframe_target_size().
     Fix to integer overflow in vpx_img_alloc() & vpx_img_wrap()(CVE-2024-5197).
     Fix to UBSan error in vp9_rc_update_framerate().
     Fix to UBSan errors in vp8_new_framerate().
+    Fix to integer overflow in vp8 encodeframe.c.
+    Handle EINTR from sem_wait().
 
 2024-01-02 v1.14.0 "Venetian Duck"
   This release drops support for old C compilers, such as Visual Studio 2012
