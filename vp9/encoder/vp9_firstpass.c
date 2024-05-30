@@ -3656,16 +3656,14 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     }
 
     // A new GF group
-    if (rc->frames_till_gf_update_due == 0) {
-      vp9_zero(twopass->gf_group);
-      ++rc->gop_global_index;
-      if (gop_decision.use_alt_ref) {
-        rc->source_alt_ref_pending = 1;
-      }
-      rc->baseline_gf_interval =
-          gop_decision.gop_coding_frames - rc->source_alt_ref_pending;
-      ext_rc_define_gf_group_structure(&gop_decision, &twopass->gf_group);
+    vp9_zero(twopass->gf_group);
+    ++rc->gop_global_index;
+    if (gop_decision.use_alt_ref) {
+      rc->source_alt_ref_pending = 1;
     }
+    rc->baseline_gf_interval =
+        gop_decision.gop_coding_frames - rc->source_alt_ref_pending;
+    ext_rc_define_gf_group_structure(&gop_decision, &twopass->gf_group);
   } else {
     // Keyframe and section processing.
     if (rc->frames_to_key == 0 || (cpi->frame_flags & FRAMEFLAGS_KEY)) {
