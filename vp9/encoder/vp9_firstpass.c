@@ -2339,16 +2339,20 @@ static INLINE void gf_group_set_inter_normal_frame(GF_GROUP *gf_group,
 }
 
 static void ext_rc_define_gf_group_structure(
-    const vpx_rc_gop_decision_t *gop_decision, GF_GROUP *gf_group) {
+    const vpx_rc_gop_decision_t *gop_decision, GF_GROUP *gf_group,
+    int prev_arf_active) {
   const int key_frame = gop_decision->use_key_frame;
   const int show_frame_count = gop_decision->gop_coding_frames - 1;
 
+  int frame_index = 0;
+
   if (key_frame) {
-    gf_group_set_key_frame(gf_group, 0);
-  } else {
-    gf_group_set_overlay_frame(gf_group, 0);
+    gf_group_set_key_frame(gf_group, frame_index);
+    ++frame_index;
+  } else if (prev_arf_active) {
+    gf_group_set_overlay_frame(gf_group, frame_index);
+    ++frame_index;
   }
-  int frame_index = 1;
 
   if (gop_decision->use_alt_ref) {
     assert(frame_index < gop_decision->gop_coding_frames);
@@ -3645,6 +3649,9 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
       vpx_internal_error(&cm->error, codec_status,
                          "vp9_extrc_get_gop_decision() failed");
     }
+
+    const int prev_arf_active = rc->source_alt_ref_active;
+
     if (gop_decision.use_key_frame) {
       cpi->common.frame_type = KEY_FRAME;
       rc->frames_since_key = 0;
@@ -3663,7 +3670,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     }
     rc->baseline_gf_interval =
         gop_decision.gop_coding_frames - rc->source_alt_ref_pending;
-    ext_rc_define_gf_group_structure(&gop_decision, &twopass->gf_group);
+    ext_rc_define_gf_group_structure(&gop_decision, &twopass->gf_group,
+                                     prev_arf_active);
   } else {
     // Keyframe and section processing.
     if (rc->frames_to_key == 0 || (cpi->frame_flags & FRAMEFLAGS_KEY)) {
