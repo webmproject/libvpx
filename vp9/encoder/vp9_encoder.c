@@ -6704,7 +6704,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   if (oxcf->pass != 1 && !cpi->last_frame_dropped) {
     double samples = 0.0;
-    cpi->bytes += (int)(*size);
+    cpi->bytes += *size;
 
     if (cm->show_frame) {
       uint32_t bit_depth = 8;

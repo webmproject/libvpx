@@ -1593,8 +1593,8 @@ static int get_twopass_worst_quality(VP9_COMP *cpi, const double section_err,
     const int active_mbs = (int)VPXMAX(1, (double)num_mbs * active_pct);
     const double av_err_per_mb = section_err / active_pct;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
-    const int target_norm_bits_per_mb =
-        (int)(((uint64_t)target_rate << BPER_MB_NORMBITS) / active_mbs);
+    const uint64_t target_norm_bits_per_mb =
+        ((uint64_t)target_rate << BPER_MB_NORMBITS) / active_mbs;
     int q;
 
 // TODO(jimbankoski): remove #if here or above when this has been
@@ -1618,7 +1618,7 @@ static int get_twopass_worst_quality(VP9_COMP *cpi, const double section_err,
           INTER_FRAME, q,
           factor * speed_term * cpi->twopass.bpm_factor * noise_factor,
           cpi->common.bit_depth);
-      if (bits_per_mb <= target_norm_bits_per_mb) break;
+      if ((uint64_t)bits_per_mb <= target_norm_bits_per_mb) break;
     }
 
     // Restriction on active max q for constrained quality mode.

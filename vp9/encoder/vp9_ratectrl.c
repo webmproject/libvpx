@@ -2631,7 +2631,6 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
-  int vbr_max_bits;
 
   rc->avg_frame_bandwidth =
       (int)VPXMIN(oxcf->target_bandwidth / cpi->framerate, INT_MAX);
@@ -2649,11 +2648,12 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   //
   // If a level is specified that requires a lower maximum rate then the level
   // value take precedence.
-  vbr_max_bits =
-      (int)(((int64_t)rc->avg_frame_bandwidth * oxcf->two_pass_vbrmax_section) /
-            100);
+  int64_t vbr_max_bits =
+      (int64_t)rc->avg_frame_bandwidth * oxcf->two_pass_vbrmax_section / 100;
+  vbr_max_bits = VPXMIN(vbr_max_bits, INT_MAX);
+
   rc->max_frame_bandwidth =
-      VPXMAX(VPXMAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P), vbr_max_bits);
+      VPXMAX(VPXMAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P), (int)vbr_max_bits);
 
   vp9_rc_set_gf_interval_range(cpi, rc);
 }

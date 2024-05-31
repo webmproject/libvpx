@@ -339,13 +339,14 @@ void vp9_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
   RATE_CONTROL *const lrc = &lc->rc;
 
   lc->framerate = framerate;
-  lrc->avg_frame_bandwidth =
-      (int)VPXMIN(lc->target_bandwidth / lc->framerate, INT_MAX);
-  lrc->min_frame_bandwidth =
-      (int)(lrc->avg_frame_bandwidth * oxcf->two_pass_vbrmin_section / 100);
-  lrc->max_frame_bandwidth = (int)(((int64_t)lrc->avg_frame_bandwidth *
-                                    oxcf->two_pass_vbrmax_section) /
-                                   100);
+  const double avg_frame_bandwidth = lc->target_bandwidth / lc->framerate;
+  lrc->avg_frame_bandwidth = (int)VPXMIN(avg_frame_bandwidth, INT_MAX);
+  const int64_t vbr_min_bits =
+      (int64_t)lrc->avg_frame_bandwidth * oxcf->two_pass_vbrmin_section / 100;
+  lrc->min_frame_bandwidth = (int)VPXMIN(vbr_min_bits, INT_MAX);
+  const int64_t vbr_max_bits =
+      (int64_t)lrc->avg_frame_bandwidth * oxcf->two_pass_vbrmax_section / 100;
+  lrc->max_frame_bandwidth = (int)VPXMIN(vbr_max_bits, INT_MAX);
   vp9_rc_set_gf_interval_range(cpi, lrc);
 }
 
