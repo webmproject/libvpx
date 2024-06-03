@@ -3702,7 +3702,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   if (rc->frames_till_gf_update_due == 0) {
     if (cpi->ext_ratectrl.ready && cpi->ext_ratectrl.log_file) {
-      fprintf(cpi->ext_ratectrl.log_file, "GOP_INFO gop_size %d\n",
+      fprintf(cpi->ext_ratectrl.log_file, "GOP_INFO show_frame_count %d\n",
               rc->baseline_gf_interval);
     }
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
