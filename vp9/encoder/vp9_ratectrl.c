@@ -2631,9 +2631,10 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
+  const double avg_frame_bandwidth =
+      round(oxcf->target_bandwidth / cpi->framerate);
 
-  rc->avg_frame_bandwidth =
-      (int)VPXMIN(oxcf->target_bandwidth / cpi->framerate, INT_MAX);
+  rc->avg_frame_bandwidth = (int)VPXMIN(avg_frame_bandwidth, INT_MAX);
 
   int64_t vbr_min_bits =
       (int64_t)rc->avg_frame_bandwidth * oxcf->two_pass_vbrmin_section / 100;
