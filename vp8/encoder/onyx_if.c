@@ -2190,8 +2190,8 @@ void vp8_remove_compressor(VP8_COMP **comp) {
     {
       extern int count_mb_seg[4];
       FILE *f = fopen("modes.stt", "a");
-      double dr = (double)cpi->framerate * (double)bytes * (double)8 /
-                  (double)count / (double)1000;
+      double dr = cpi->framerate * (double)bytes * (double)8 / (double)count /
+                  (double)1000;
       fprintf(f, "intra_mode in Intra Frames:\n");
       fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1],
               y_modes[2], y_modes[3], y_modes[4]);
