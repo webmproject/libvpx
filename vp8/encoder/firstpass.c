@@ -10,6 +10,7 @@
 
 #include <math.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "./vpx_dsp_rtcd.h"
@@ -17,6 +18,7 @@
 #include "block.h"
 #include "onyx_int.h"
 #include "vpx_dsp/variance.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "encodeintra.h"
 #include "vp8/common/common.h"
 #include "vp8/common/setupintrarecon.h"
@@ -2324,13 +2326,15 @@ void vp8_second_pass(VP8_COMP *cpi) {
   if (cpi->common.current_video_frame == 0) {
     cpi->twopass.est_max_qcorrection_factor = 1.0;
 
+    int64_t section_target_bandwidth = cpi->twopass.bits_left / frames_left;
+    section_target_bandwidth = VPXMIN(section_target_bandwidth, INT_MAX);
+
     /* Set a cq_level in constrained quality mode. */
     if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
       int est_cq;
 
       est_cq = estimate_cq(cpi, &cpi->twopass.total_left_stats,
-                           (int)(cpi->twopass.bits_left / frames_left),
-                           overhead_bits);
+                           (int)section_target_bandwidth, overhead_bits);
 
       cpi->cq_target_quality = cpi->oxcf.cq_level;
       if (est_cq > cpi->cq_target_quality) cpi->cq_target_quality = est_cq;
@@ -2341,8 +2345,7 @@ void vp8_second_pass(VP8_COMP *cpi) {
     cpi->twopass.maxq_min_limit = cpi->best_quality;
 
     tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
-                           (int)(cpi->twopass.bits_left / frames_left),
-                           overhead_bits);
+                           (int)section_target_bandwidth, overhead_bits);
 
     /* Limit the maxq value returned subsequently.
      * This increases the risk of overspend or underspend if the initial
@@ -2370,9 +2373,11 @@ void vp8_second_pass(VP8_COMP *cpi) {
             (unsigned int)cpi->twopass.total_stats.count)) {
     if (frames_left < 1) frames_left = 1;
 
+    int64_t section_target_bandwidth = cpi->twopass.bits_left / frames_left;
+    section_target_bandwidth = VPXMIN(section_target_bandwidth, INT_MAX);
+
     tmp_q = estimate_max_q(cpi, &cpi->twopass.total_left_stats,
-                           (int)(cpi->twopass.bits_left / frames_left),
-                           overhead_bits);
+                           (int)section_target_bandwidth, overhead_bits);
 
     /* Move active_worst_quality but in a damped way */
     if (tmp_q > cpi->active_worst_quality) {
