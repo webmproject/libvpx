@@ -348,13 +348,13 @@ int vp9_rc_get_default_min_gf_interval(int width, int height,
   static const double factor_safe = 3840 * 2160 * 20.0;
   const double factor = width * height * framerate;
   const int default_interval =
-      clamp((int)(framerate * 0.125), MIN_GF_INTERVAL, MAX_GF_INTERVAL);
+      clamp((int)round(framerate * 0.125), MIN_GF_INTERVAL, MAX_GF_INTERVAL);
 
   if (factor <= factor_safe)
     return default_interval;
   else
     return VPXMAX(default_interval,
-                  (int)(MIN_GF_INTERVAL * factor / factor_safe + 0.5));
+                  (int)round(MIN_GF_INTERVAL * factor / factor_safe));
   // Note this logic makes:
   // 4K24: 5
   // 4K30: 6
@@ -362,7 +362,7 @@ int vp9_rc_get_default_min_gf_interval(int width, int height,
 }
 
 int vp9_rc_get_default_max_gf_interval(double framerate, int min_gf_interval) {
-  int interval = VPXMIN(MAX_GF_INTERVAL, (int)(framerate * 0.75));
+  int interval = VPXMIN(MAX_GF_INTERVAL, (int)round(framerate * 0.75));
   interval += (interval & 0x01);  // Round to even value
   return VPXMAX(interval, min_gf_interval);
 }
@@ -2195,9 +2195,9 @@ int vp9_calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
       const LAYER_CONTEXT *lc = &svc->layer_context[layer];
       framerate = lc->framerate;
     }
-    kf_boost = VPXMAX(kf_boost, (int)(2 * framerate - 16));
+    kf_boost = VPXMAX(kf_boost, (int)round(2 * framerate - 16));
     if (rc->frames_since_key < framerate / 2) {
-      kf_boost = (int)(kf_boost * rc->frames_since_key / (framerate / 2));
+      kf_boost = (int)round(kf_boost * rc->frames_since_key / (framerate / 2));
     }
     target = (int)(((int64_t)(16 + kf_boost) * rc->avg_frame_bandwidth) >> 4);
   }
@@ -2778,7 +2778,7 @@ int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
   // Resize based on average buffer underflow and QP over some window.
   // Ignore samples close to key frame, since QP is usually high after key.
   if (!force_downsize_rate && cpi->rc.frames_since_key > cpi->framerate) {
-    const int window = VPXMIN(30, (int)(2 * cpi->framerate));
+    const int window = VPXMIN(30, (int)round(2 * cpi->framerate));
     cpi->resize_avg_qp += rc->last_q[INTER_FRAME];
     if (cpi->rc.buffer_level < (int)(30 * rc->optimal_buffer_level / 100))
       ++cpi->resize_buffer_underflow;
