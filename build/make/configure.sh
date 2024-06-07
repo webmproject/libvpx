@@ -1021,7 +1021,15 @@ EOF
   # Process architecture variants
   case ${toolchain} in
     arm*)
-      soft_enable runtime_cpu_detect
+      case ${toolchain} in
+        armv7*-darwin*)
+          # Runtime cpu detection is not defined for these targets.
+          enabled runtime_cpu_detect && disable_feature runtime_cpu_detect
+          ;;
+        *)
+          soft_enable runtime_cpu_detect
+          ;;
+      esac
 
       if [ ${tgt_isa} = "armv7" ] || [ ${tgt_isa} = "armv7s" ]; then
         soft_enable neon
