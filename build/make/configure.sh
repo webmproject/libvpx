@@ -1171,6 +1171,14 @@ EOF
           echo "See build/make/Android.mk for details."
           check_add_ldflags -static
           soft_enable unit_tests
+          case "$AS" in
+            *clang)
+              # The GNU Assembler was removed in the r24 version of the NDK.
+              # clang's internal assembler works, but `-c` is necessary to
+              # avoid linking.
+              add_asflags -c
+              ;;
+          esac
           ;;
 
         darwin)
