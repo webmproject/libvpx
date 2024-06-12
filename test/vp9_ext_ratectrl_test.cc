@@ -179,7 +179,7 @@ class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
     // pack ARF and the next show frame into one pkt. Therefore, we might
     // receive two frames in one pkt. However, one thing we are sure is that
     // each pkt will have just one show frame. Therefore, we can check if the
-    // recieved show frame count match the actual show frame count.
+    // received show frame count match the actual show frame count.
     if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
       ++received_show_frame_count_;
     }
