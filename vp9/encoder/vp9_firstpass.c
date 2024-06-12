@@ -2370,7 +2370,9 @@ static void ext_rc_define_gf_group_structure(
     ++show_frame_index;
   }
 
-  gf_group->max_layer_depth = MAX_ARF_LAYERS - 1;
+  // max_layer_depth is hardcoded to match the behavior of
+  // define_gf_group_structure()
+  // TODO(angiebird): Check whether max_layer_depth has performance impact.
   gf_group->max_layer_depth = 2;
   gf_group->allowed_max_layer_depth = 1;
   gf_group->gf_group_size = gop_decision->gop_coding_frames;
