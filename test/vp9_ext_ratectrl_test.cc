@@ -136,7 +136,7 @@ class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
                         public ::testing::Test {
  protected:
   ExtRateCtrlTest()
-      : EncoderTest(&::libvpx_test::kVP9), recieved_show_frame_count_(0),
+      : EncoderTest(&::libvpx_test::kVP9), received_show_frame_count_(0),
         current_frame_qp_(0) {}
 
   ~ExtRateCtrlTest() override = default;
@@ -181,12 +181,12 @@ class ExtRateCtrlTest : public ::libvpx_test::EncoderTest,
     // each pkt will have just one show frame. Therefore, we can check if the
     // recieved show frame count match the actual show frame count.
     if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
-      ++recieved_show_frame_count_;
+      ++received_show_frame_count_;
     }
   }
 #endif  // CONFIG_VP9_DECODER
 
-  int recieved_show_frame_count_;
+  int received_show_frame_count_;
   int current_frame_qp_;
 };
 
@@ -201,7 +201,7 @@ TEST_F(ExtRateCtrlTest, EncodeTest) {
 
   ASSERT_NE(video, nullptr);
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
-  EXPECT_EQ(recieved_show_frame_count_, kShowFrameCount);
+  EXPECT_EQ(received_show_frame_count_, kShowFrameCount);
 }
 
 }  // namespace
