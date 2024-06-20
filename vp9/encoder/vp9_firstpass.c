@@ -3369,8 +3369,22 @@ static void find_next_key_frame(VP9_COMP *cpi, int kf_show_idx) {
   kf_mod_err = calc_norm_frame_score(oxcf, frame_info, keyframe_stats,
                                      mean_mod_score, av_err);
 
-  rc->frames_to_key = vp9_get_frames_to_next_key(oxcf, twopass, kf_show_idx,
-                                                 rc->min_gf_interval);
+  if (cpi->ext_ratectrl.ready &&
+      (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_GOP) != 0 &&
+      cpi->ext_ratectrl.funcs.get_key_frame_decision != NULL) {
+    vpx_rc_key_frame_decision_t key_frame_decision;
+    vpx_codec_err_t codec_status = vp9_extrc_get_key_frame_decision(
+        &cpi->ext_ratectrl, &key_frame_decision);
+    if (codec_status == VPX_CODEC_OK) {
+      rc->frames_to_key = key_frame_decision.key_frame_group_size;
+    } else {
+      vpx_internal_error(&cpi->common.error, codec_status,
+                         "vp9_extrc_get_key_frame_decision() failed");
+    }
+  } else {
+    rc->frames_to_key = vp9_get_frames_to_next_key(oxcf, twopass, kf_show_idx,
+                                                   rc->min_gf_interval);
+  }
 
   // If there is a max kf interval set by the user we must obey it.
   // We already breakout of the loop above at 2x max.
