@@ -312,6 +312,12 @@ static double simple_weight(YV12_BUFFER_CONFIG *source) {
   return sum_weights;
 }
 
+// Returns the saturating cast of a double value to int.
+static int saturate_cast_double_to_int(double d) {
+  if (d > INT_MAX) return INT_MAX;
+  return (int)d;
+}
+
 /* This function returns the current per frame maximum bitrate target */
 static int frame_max_bits(VP8_COMP *cpi) {
   /* Max allocation for a single frame based on the max section guidelines
@@ -354,10 +360,11 @@ static int frame_max_bits(VP8_COMP *cpi) {
     /* For VBR base this on the bits and frames left plus the
      * two_pass_vbrmax_section rate passed in by the user
      */
-    max_bits = (int)(((double)cpi->twopass.bits_left /
-                      (cpi->twopass.total_stats.count -
-                       (double)cpi->common.current_video_frame)) *
-                     ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
+    max_bits = saturate_cast_double_to_int(
+        ((double)cpi->twopass.bits_left /
+         (cpi->twopass.total_stats.count -
+          (double)cpi->common.current_video_frame)) *
+        ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
   }
 
   /* Trap case where we are out of bits */
@@ -2006,8 +2013,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     /* Calculate the number of bits to be spent on the gf or arf based on
      * the boost number
      */
-    gf_bits = (int)((double)Boost *
-                    (cpi->twopass.gf_group_bits / (double)allocation_chunks));
+    gf_bits = saturate_cast_double_to_int(
+        (double)Boost *
+        (cpi->twopass.gf_group_bits / (double)allocation_chunks));
 
     /* If the frame that is to be boosted is simpler than the average for
      * the gf/arf group then use an alternative calculation
@@ -2035,9 +2043,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
      */
     else {
       // Avoid division by 0 by clamping cpi->twopass.kf_group_error_left to 1
-      int alt_gf_bits =
-          (int)((double)cpi->twopass.kf_group_bits * mod_frame_err /
-                (double)VPXMAX(cpi->twopass.kf_group_error_left, 1));
+      int alt_gf_bits = saturate_cast_double_to_int(
+          (double)cpi->twopass.kf_group_bits * mod_frame_err /
+          (double)VPXMAX(cpi->twopass.kf_group_error_left, 1));
 
       if (alt_gf_bits > gf_bits) {
         gf_bits = alt_gf_bits;
@@ -2171,7 +2179,8 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 
   /* How many of those bits available for allocation should we give it? */
-  target_frame_size = (int)((double)cpi->twopass.gf_group_bits * err_fraction);
+  target_frame_size = saturate_cast_double_to_int(
+      (double)cpi->twopass.gf_group_bits * err_fraction);
 
   /* Clip to target size to 0 - max_bits (or cpi->twopass.gf_group_bits)
    * at the top end.
