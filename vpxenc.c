@@ -1586,8 +1586,8 @@ static void test_decode(struct stream_state *stream,
   /* Get the internal reference frame */
   if (strcmp(codec->name, "vp8") == 0) {
     struct vpx_ref_frame ref_enc, ref_dec;
-    int aligned_width = (stream->config.cfg.g_w + 15) & ~15;
-    int aligned_height = (stream->config.cfg.g_h + 15) & ~15;
+    unsigned int aligned_width = (stream->config.cfg.g_w + 15u) & ~15u;
+    unsigned int aligned_height = (stream->config.cfg.g_h + 15u) & ~15u;
 
     vpx_img_alloc(&ref_enc.img, VPX_IMG_FMT_I420, aligned_width, aligned_height,
                   1);
