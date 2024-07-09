@@ -2980,11 +2980,27 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
       // fps_get_frame_stats(). Here we mitigate the issue using break whenever
       // frame_stats == NULL. Show we set the upperbound to show frame count?
       if (frame_stats == NULL) {
-        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                           "In define_gf_group(), frame_stats is NULL when "
-                           "calculating gf_group_err.");
+        if (cpi->ext_ratectrl.ready &&
+            (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_GOP) != 0 &&
+            cpi->ext_ratectrl.funcs.get_gop_decision != NULL) {
+          // Since in ext_ratectrl, gop_coding_frames means the count of both
+          // show and no show frames. Using this variable to access
+          // first_pass_info will trigger out-of-range error because
+          // first_pass_info only contains show frames. This part is used for
+          // computing gf_group_err which will be used to compute gf_group_bits
+          // for libvpx internal rate control. Since ext_ratectrl is using
+          // external rate control module, this part becomes non-critical.
+          // Hence, we can safely turn off this error reporting. In the future,
+          // we should refactor the code so that this part is not used by
+          // ext_ratectrl.
+          break;
+        } else {
+          vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                             "In define_gf_group(), frame_stats is NULL when "
+                             "calculating gf_group_err.");
 
-        break;
+          break;
+        }
       }
       // Accumulate error score of frames in this gf group.
       gf_group_err += calc_norm_frame_score(oxcf, frame_info, frame_stats,
