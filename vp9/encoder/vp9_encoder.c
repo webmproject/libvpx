@@ -6981,7 +6981,6 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
     cm->width = width;
     if (cm->width > cpi->initial_width) {
       cm->width = cpi->initial_width;
-      printf("Warning: Desired width too large, changed to %d\n", cm->width);
     }
   }
 
@@ -6989,7 +6988,6 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
     cm->height = height;
     if (cm->height > cpi->initial_height) {
       cm->height = cpi->initial_height;
-      printf("Warning: Desired height too large, changed to %d\n", cm->height);
     }
   }
   assert(cm->width <= cpi->initial_width);
