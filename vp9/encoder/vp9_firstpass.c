@@ -2994,13 +2994,11 @@ static void define_gf_group(VP9_COMP *cpi, int gf_start_show_idx) {
           // we should refactor the code so that this part is not used by
           // ext_ratectrl.
           break;
-        } else {
-          vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                             "In define_gf_group(), frame_stats is NULL when "
-                             "calculating gf_group_err.");
-
-          break;
         }
+        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                           "In define_gf_group(), frame_stats is NULL when "
+                           "calculating gf_group_err.");
+        break;
       }
       // Accumulate error score of frames in this gf group.
       gf_group_err += calc_norm_frame_score(oxcf, frame_info, frame_stats,
