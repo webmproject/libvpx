@@ -1244,7 +1244,6 @@ void vp8_init_second_pass(VP8_COMP *cpi) {
   vp8_new_framerate(cpi, 10000000.0 * cpi->twopass.total_stats.count /
                              cpi->twopass.total_stats.duration);
 
-  cpi->output_framerate = cpi->framerate;
   cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats.duration *
                                      cpi->oxcf.target_bandwidth / 10000000.0);
   cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats.duration *
