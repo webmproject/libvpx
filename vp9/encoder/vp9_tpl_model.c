@@ -82,9 +82,6 @@ static int init_gop_frames_rc(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
       for (i = 0; i < 3; ++i) gf_picture[0].ref_frame[i] = -REFS_PER_FRAME;
       gf_picture[0].update_type = gf_group->update_type[0];
-      for (i = 0; i < 3; ++i) {
-        gf_picture[0].ref_frame[i] = -REFS_PER_FRAME;
-      }
     } else {
       for (i = 0; i < REFS_PER_FRAME; i++) {
         if (cm->ref_frame_map[i] != -1) {
@@ -103,11 +100,8 @@ static int init_gop_frames_rc(VP9_COMP *cpi, GF_PICTURE *gf_picture,
 
     // Initialize base layer ARF frame
     gf_picture[1].frame = cpi->Source;
-    for (i = 0; i < 3; ++i) {
-      gf_picture[1].ref_frame[i] = ref_table[i];
-    }
+    for (i = 0; i < 3; ++i) gf_picture[1].ref_frame[i] = ref_table[i];
     gf_picture[1].update_type = gf_group->update_type[1];
-
     ref_table[gf_group->update_ref_idx[1]] = 1;
 
     ++*tpl_group_frames;
