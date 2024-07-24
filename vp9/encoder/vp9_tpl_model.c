@@ -114,7 +114,8 @@ static int init_gop_frames_rc(VP9_COMP *cpi, GF_PICTURE *gf_picture,
       for (i = 0; i < 3; ++i) gf_picture[0].ref_frame[i] = -REFS_PER_FRAME;
       gf_picture[0].update_type = gf_group->update_type[0];
 
-      for (i = 0; i < 3; ++i) ref_table[i] = 0;
+      for (i = 0; i < 3; ++i) ref_table[i] = -REFS_PER_FRAME;
+      ref_table[gf_group->update_ref_idx[0]] = 0;
     } else {
       // Initialize ref table
       for (i = 0; i < REFS_PER_FRAME; i++) {
