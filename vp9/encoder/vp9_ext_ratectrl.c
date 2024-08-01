@@ -182,8 +182,7 @@ vpx_codec_err_t vp9_extrc_get_encodeframe_decision(
 }
 
 vpx_codec_err_t vp9_extrc_update_encodeframe_result(
-    EXT_RATECTRL *ext_ratectrl, int64_t bit_count,
-    const int actual_encoding_qindex) {
+    EXT_RATECTRL *ext_ratectrl, int64_t bit_count, int actual_encoding_qindex) {
   if (ext_ratectrl == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
