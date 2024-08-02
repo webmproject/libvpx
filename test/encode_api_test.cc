@@ -17,7 +17,7 @@
 #include <initializer_list>
 #include <vector>
 
-#include "third_party/googletest/src/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "test/acm_random.h"
 #include "test/video_source.h"
 #include "test/y4m_video_source.h"
