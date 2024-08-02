@@ -2711,9 +2711,10 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         else if (cpi->twopass.kf_group_bits < av_group_bits) {
           int64_t bits_below_av = av_group_bits - cpi->twopass.kf_group_bits;
 
-          cpi->twopass.kf_group_bits += (int64_t)(
-              (double)bits_below_av * (double)(buffer_lvl - opt_buffer_lvl) /
-              (double)(high_water_mark - opt_buffer_lvl));
+          cpi->twopass.kf_group_bits +=
+              (int64_t)((double)bits_below_av *
+                        (double)(buffer_lvl - opt_buffer_lvl) /
+                        (double)(high_water_mark - opt_buffer_lvl));
         }
       }
     }
