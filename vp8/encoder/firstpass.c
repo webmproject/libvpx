@@ -2698,9 +2698,10 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         else if (cpi->twopass.kf_group_bits < av_group_bits) {
           int64_t bits_below_av = av_group_bits - cpi->twopass.kf_group_bits;
 
-          cpi->twopass.kf_group_bits += (int64_t)(
-              (double)bits_below_av * (double)(buffer_lvl - opt_buffer_lvl) /
-              (double)(high_water_mark - opt_buffer_lvl));
+          cpi->twopass.kf_group_bits +=
+              (int64_t)((double)bits_below_av *
+                        (double)(buffer_lvl - opt_buffer_lvl) /
+                        (double)(high_water_mark - opt_buffer_lvl));
         }
       }
     }
@@ -3032,9 +3033,10 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         resample_trigger = 0;
       }
     } else {
-      int64_t clip_bits = (int64_t)(
-          cpi->twopass.total_stats.count * cpi->oxcf.target_bandwidth /
-          DOUBLE_DIVIDE_CHECK((double)cpi->framerate));
+      int64_t clip_bits =
+          (int64_t)(cpi->twopass.total_stats.count *
+                    cpi->oxcf.target_bandwidth /
+                    DOUBLE_DIVIDE_CHECK((double)cpi->framerate));
       int64_t over_spend = cpi->oxcf.starting_buffer_level - cpi->buffer_level;
 
       /* If triggered last time the threshold for triggering again is
