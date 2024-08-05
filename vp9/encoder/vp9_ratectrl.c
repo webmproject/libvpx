@@ -2182,11 +2182,9 @@ int vp9_calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const RATE_CONTROL *rc = &cpi->rc;
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const SVC *const svc = &cpi->svc;
-  int target;
+  int64_t target;
   if (cpi->common.current_video_frame == 0) {
-    target = ((rc->starting_buffer_level / 2) > INT_MAX)
-                 ? INT_MAX
-                 : (int)(rc->starting_buffer_level / 2);
+    target = rc->starting_buffer_level / 2;
   } else {
     int kf_boost = 32;
     double framerate = cpi->framerate;
@@ -2202,9 +2200,11 @@ int vp9_calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
     if (rc->frames_since_key < framerate / 2) {
       kf_boost = (int)round(kf_boost * rc->frames_since_key / (framerate / 2));
     }
-    target = (int)(((int64_t)(16 + kf_boost) * rc->avg_frame_bandwidth) >> 4);
+
+    target = ((int64_t)(16 + kf_boost) * rc->avg_frame_bandwidth) >> 4;
   }
-  return vp9_rc_clamp_iframe_target_size(cpi, target);
+  target = VPXMIN(INT_MAX, target);
+  return vp9_rc_clamp_iframe_target_size(cpi, (int)target);
 }
 
 static void set_intra_only_frame(VP9_COMP *cpi) {
