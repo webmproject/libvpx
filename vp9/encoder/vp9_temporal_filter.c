@@ -45,13 +45,214 @@ static int64_t highbd_index_mult[14] = { 0U,          0U,          0U,
                                          0U,          991146300U };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+// Prediction function using 12-tap interpolation filter.
+// TODO(yunqingwang@google.com): add SIMD optimization.
+#define MAX_FILTER_TAP 12
+typedef int16_t InterpKernel12[MAX_FILTER_TAP];
+// 12-tap filter (used by the encoder only).
+DECLARE_ALIGNED(256, static const InterpKernel12,
+                sub_pel_filters_12[SUBPEL_SHIFTS]) = {
+  { 0, 0, 0, 0, 0, 128, 0, 0, 0, 0, 0, 0 },
+  { 0, 1, -2, 3, -7, 127, 8, -4, 2, -1, 1, 0 },
+  { -1, 2, -3, 6, -13, 124, 18, -8, 4, -2, 2, -1 },
+  { -1, 3, -4, 8, -18, 120, 28, -12, 7, -4, 2, -1 },
+  { -1, 3, -6, 10, -21, 115, 38, -15, 8, -5, 3, -1 },
+  { -2, 4, -6, 12, -24, 108, 49, -18, 10, -6, 3, -2 },
+  { -2, 4, -7, 13, -25, 100, 60, -21, 11, -7, 4, -2 },
+  { -2, 4, -7, 13, -26, 91, 71, -24, 13, -7, 4, -2 },
+  { -2, 4, -7, 13, -25, 81, 81, -25, 13, -7, 4, -2 },
+  { -2, 4, -7, 13, -24, 71, 91, -26, 13, -7, 4, -2 },
+  { -2, 4, -7, 11, -21, 60, 100, -25, 13, -7, 4, -2 },
+  { -2, 3, -6, 10, -18, 49, 108, -24, 12, -6, 4, -2 },
+  { -1, 3, -5, 8, -15, 38, 115, -21, 10, -6, 3, -1 },
+  { -1, 2, -4, 7, -12, 28, 120, -18, 8, -4, 3, -1 },
+  { -1, 2, -2, 4, -8, 18, 124, -13, 6, -3, 2, -1 },
+  { 0, 1, -1, 2, -4, 8, 127, -7, 3, -2, 1, 0 }
+};
+
+static void convolve_horiz_12(const uint8_t *src, ptrdiff_t src_stride,
+                              uint8_t *dst, ptrdiff_t dst_stride,
+                              const InterpKernel12 *x_filters, int x0_q4,
+                              int x_step_q4, int w, int h) {
+  int x, y;
+  src -= MAX_FILTER_TAP / 2 - 1;
+
+  for (y = 0; y < h; ++y) {
+    int x_q4 = x0_q4;
+    for (x = 0; x < w; ++x) {
+      const uint8_t *const src_x = &src[x_q4 >> SUBPEL_BITS];
+      const int16_t *const x_filter = x_filters[x_q4 & SUBPEL_MASK];
+      int k, sum = 0;
+      for (k = 0; k < MAX_FILTER_TAP; ++k) sum += src_x[k] * x_filter[k];
+      dst[x] = clip_pixel(ROUND_POWER_OF_TWO(sum, FILTER_BITS));
+      x_q4 += x_step_q4;
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+static void convolve_vert_12(const uint8_t *src, ptrdiff_t src_stride,
+                             uint8_t *dst, ptrdiff_t dst_stride,
+                             const InterpKernel12 *y_filters, int y0_q4,
+                             int y_step_q4, int w, int h) {
+  int x, y;
+  src -= src_stride * (MAX_FILTER_TAP / 2 - 1);
+
+  for (x = 0; x < w; ++x) {
+    int y_q4 = y0_q4;
+    for (y = 0; y < h; ++y) {
+      const uint8_t *src_y = &src[(y_q4 >> SUBPEL_BITS) * src_stride];
+      const int16_t *const y_filter = y_filters[y_q4 & SUBPEL_MASK];
+      int k, sum = 0;
+      for (k = 0; k < MAX_FILTER_TAP; ++k)
+        sum += src_y[k * src_stride] * y_filter[k];
+      dst[y * dst_stride] = clip_pixel(ROUND_POWER_OF_TWO(sum, FILTER_BITS));
+      y_q4 += y_step_q4;
+    }
+    ++src;
+    ++dst;
+  }
+}
+
+// Copied from vpx_convolve8_c(). Possible block sizes are 32x32, 16x16, 8x8.
+static void vpx_convolve8_12_c(const uint8_t *src, ptrdiff_t src_stride,
+                               uint8_t *dst, ptrdiff_t dst_stride,
+                               const InterpKernel12 *filter, int x0_q4,
+                               int x_step_q4, int y0_q4, int y_step_q4, int w,
+                               int h) {
+  uint8_t temp[BW * (BH + MAX_FILTER_TAP - 1)];
+  const int temp_stride = BW;
+  const int intermediate_height =
+      (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + MAX_FILTER_TAP;
+
+  convolve_horiz_12(src - src_stride * (MAX_FILTER_TAP / 2 - 1), src_stride,
+                    temp, temp_stride, filter, x0_q4, x_step_q4, w,
+                    intermediate_height);
+  convolve_vert_12(temp + temp_stride * (MAX_FILTER_TAP / 2 - 1), temp_stride,
+                   dst, dst_stride, filter, y0_q4, y_step_q4, w, h);
+}
+
+static void vp9_build_inter_predictor_12(
+    const uint8_t *src, int src_stride, uint8_t *dst, int dst_stride,
+    const MV *src_mv, const struct scale_factors *sf, int w, int h, int ref,
+    const InterpKernel12 *kernel, enum mv_precision precision, int x, int y) {
+  (void)ref;
+  const int is_q4 = precision == MV_PRECISION_Q4;
+  const MV mv_q4 = { is_q4 ? src_mv->row : src_mv->row * 2,
+                     is_q4 ? src_mv->col : src_mv->col * 2 };
+  MV32 mv = vp9_scale_mv(&mv_q4, x, y, sf);
+  const int subpel_x = mv.col & SUBPEL_MASK;
+  const int subpel_y = mv.row & SUBPEL_MASK;
+
+  src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
+
+  vpx_convolve8_12_c(src, src_stride, dst, dst_stride, kernel, subpel_x,
+                     sf->x_step_q4, subpel_y, sf->y_step_q4, w, h);
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static void highbd_convolve_horiz_12(const uint16_t *src, ptrdiff_t src_stride,
+                                     uint16_t *dst, ptrdiff_t dst_stride,
+                                     const InterpKernel12 *x_filters, int x0_q4,
+                                     int x_step_q4, int w, int h, int bd) {
+  int x, y;
+  src -= MAX_FILTER_TAP / 2 - 1;
+
+  for (y = 0; y < h; ++y) {
+    int x_q4 = x0_q4;
+    for (x = 0; x < w; ++x) {
+      const uint16_t *const src_x = &src[x_q4 >> SUBPEL_BITS];
+      const int16_t *const x_filter = x_filters[x_q4 & SUBPEL_MASK];
+      int k, sum = 0;
+      for (k = 0; k < MAX_FILTER_TAP; ++k) sum += src_x[k] * x_filter[k];
+      dst[x] = clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
+      x_q4 += x_step_q4;
+    }
+    src += src_stride;
+    dst += dst_stride;
+  }
+}
+
+static void highbd_convolve_vert_12(const uint16_t *src, ptrdiff_t src_stride,
+                                    uint16_t *dst, ptrdiff_t dst_stride,
+                                    const InterpKernel12 *y_filters, int y0_q4,
+                                    int y_step_q4, int w, int h, int bd) {
+  int x, y;
+  src -= src_stride * (MAX_FILTER_TAP / 2 - 1);
+
+  for (x = 0; x < w; ++x) {
+    int y_q4 = y0_q4;
+    for (y = 0; y < h; ++y) {
+      const uint16_t *src_y = &src[(y_q4 >> SUBPEL_BITS) * src_stride];
+      const int16_t *const y_filter = y_filters[y_q4 & SUBPEL_MASK];
+      int k, sum = 0;
+      for (k = 0; k < MAX_FILTER_TAP; ++k)
+        sum += src_y[k * src_stride] * y_filter[k];
+      dst[y * dst_stride] =
+          clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
+      y_q4 += y_step_q4;
+    }
+    ++src;
+    ++dst;
+  }
+}
+
+static void highbd_convolve_12(const uint16_t *src, ptrdiff_t src_stride,
+                               uint16_t *dst, ptrdiff_t dst_stride,
+                               const InterpKernel12 *filter, int x0_q4,
+                               int x_step_q4, int y0_q4, int y_step_q4, int w,
+                               int h, int bd) {
+  uint16_t temp[BW * (BH + MAX_FILTER_TAP - 1)];
+  const int temp_stride = BW;
+  const int intermediate_height =
+      (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + MAX_FILTER_TAP;
+
+  highbd_convolve_horiz_12(src - src_stride * (MAX_FILTER_TAP / 2 - 1),
+                           src_stride, temp, temp_stride, filter, x0_q4,
+                           x_step_q4, w, intermediate_height, bd);
+  highbd_convolve_vert_12(temp + temp_stride * (MAX_FILTER_TAP / 2 - 1),
+                          temp_stride, dst, dst_stride, filter, y0_q4,
+                          y_step_q4, w, h, bd);
+}
+
+// Copied from vpx_highbd_convolve8_c()
+static void vpx_highbd_convolve8_12_c(const uint16_t *src, ptrdiff_t src_stride,
+                                      uint16_t *dst, ptrdiff_t dst_stride,
+                                      const InterpKernel12 *filter, int x0_q4,
+                                      int x_step_q4, int y0_q4, int y_step_q4,
+                                      int w, int h, int bd) {
+  highbd_convolve_12(src, src_stride, dst, dst_stride, filter, x0_q4, x_step_q4,
+                     y0_q4, y_step_q4, w, h, bd);
+}
+
+static void vp9_highbd_build_inter_predictor_12(
+    const uint16_t *src, int src_stride, uint16_t *dst, int dst_stride,
+    const MV *src_mv, const struct scale_factors *sf, int w, int h, int ref,
+    const InterpKernel12 *kernel, enum mv_precision precision, int x, int y,
+    int bd) {
+  (void)ref;
+  const int is_q4 = precision == MV_PRECISION_Q4;
+  const MV mv_q4 = { is_q4 ? src_mv->row : src_mv->row * 2,
+                     is_q4 ? src_mv->col : src_mv->col * 2 };
+  MV32 mv = vp9_scale_mv(&mv_q4, x, y, sf);
+  const int subpel_x = mv.col & SUBPEL_MASK;
+  const int subpel_y = mv.row & SUBPEL_MASK;
+
+  src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
+
+  vpx_highbd_convolve8_12_c(src, src_stride, dst, dst_stride, kernel, subpel_x,
+                            sf->x_step_q4, subpel_y, sf->y_step_q4, w, h, bd);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 static void temporal_filter_predictors_mb_c(
     MACROBLOCKD *xd, uint8_t *y_mb_ptr, uint8_t *u_mb_ptr, uint8_t *v_mb_ptr,
     int stride, int uv_block_width, int uv_block_height, int mv_row, int mv_col,
     uint8_t *pred, struct scale_factors *scale, int x, int y, MV *blk_mvs,
     int use_32x32) {
   const int which_mv = 0;
-  const InterpKernel *const kernel = vp9_filter_kernels[EIGHTTAP_SHARP];
+  const InterpKernel12 *const kernel = sub_pel_filters_12;
   int i, j, k = 0, ys = (BH >> 1), xs = (BW >> 1);
 
   enum mv_precision mv_precision_uv;
@@ -71,18 +272,18 @@ static void temporal_filter_predictors_mb_c(
     const MV mv = { mv_row, mv_col };
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      vp9_highbd_build_inter_predictor(CONVERT_TO_SHORTPTR(y_mb_ptr), stride,
-                                       CONVERT_TO_SHORTPTR(&pred[0]), BW, &mv,
-                                       scale, BW, BH, which_mv, kernel,
-                                       MV_PRECISION_Q3, x, y, xd->bd);
+      vp9_highbd_build_inter_predictor_12(CONVERT_TO_SHORTPTR(y_mb_ptr), stride,
+                                          CONVERT_TO_SHORTPTR(&pred[0]), BW,
+                                          &mv, scale, BW, BH, which_mv, kernel,
+                                          MV_PRECISION_Q3, x, y, xd->bd);
 
-      vp9_highbd_build_inter_predictor(
+      vp9_highbd_build_inter_predictor_12(
           CONVERT_TO_SHORTPTR(u_mb_ptr), uv_stride,
           CONVERT_TO_SHORTPTR(&pred[BLK_PELS]), uv_block_width, &mv, scale,
           uv_block_width, uv_block_height, which_mv, kernel, mv_precision_uv, x,
           y, xd->bd);
 
-      vp9_highbd_build_inter_predictor(
+      vp9_highbd_build_inter_predictor_12(
           CONVERT_TO_SHORTPTR(v_mb_ptr), uv_stride,
           CONVERT_TO_SHORTPTR(&pred[(BLK_PELS << 1)]), uv_block_width, &mv,
           scale, uv_block_width, uv_block_height, which_mv, kernel,
@@ -90,18 +291,18 @@ static void temporal_filter_predictors_mb_c(
       return;
     }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    vp9_build_inter_predictor(y_mb_ptr, stride, &pred[0], BW, &mv, scale, BW,
-                              BH, which_mv, kernel, MV_PRECISION_Q3, x, y);
+    vp9_build_inter_predictor_12(y_mb_ptr, stride, &pred[0], BW, &mv, scale, BW,
+                                 BH, which_mv, kernel, MV_PRECISION_Q3, x, y);
 
-    vp9_build_inter_predictor(u_mb_ptr, uv_stride, &pred[BLK_PELS],
-                              uv_block_width, &mv, scale, uv_block_width,
-                              uv_block_height, which_mv, kernel,
-                              mv_precision_uv, x, y);
+    vp9_build_inter_predictor_12(u_mb_ptr, uv_stride, &pred[BLK_PELS],
+                                 uv_block_width, &mv, scale, uv_block_width,
+                                 uv_block_height, which_mv, kernel,
+                                 mv_precision_uv, x, y);
 
-    vp9_build_inter_predictor(v_mb_ptr, uv_stride, &pred[(BLK_PELS << 1)],
-                              uv_block_width, &mv, scale, uv_block_width,
-                              uv_block_height, which_mv, kernel,
-                              mv_precision_uv, x, y);
+    vp9_build_inter_predictor_12(v_mb_ptr, uv_stride, &pred[(BLK_PELS << 1)],
+                                 uv_block_width, &mv, scale, uv_block_width,
+                                 uv_block_height, which_mv, kernel,
+                                 mv_precision_uv, x, y);
     return;
   }
 
@@ -116,19 +317,19 @@ static void temporal_filter_predictors_mb_c(
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        vp9_highbd_build_inter_predictor(
+        vp9_highbd_build_inter_predictor_12(
             CONVERT_TO_SHORTPTR(y_mb_ptr + y_offset), stride,
             CONVERT_TO_SHORTPTR(&pred[p_offset]), BW, &mv, scale, xs, ys,
             which_mv, kernel, MV_PRECISION_Q3, x, y, xd->bd);
       } else {
-        vp9_build_inter_predictor(y_mb_ptr + y_offset, stride, &pred[p_offset],
-                                  BW, &mv, scale, xs, ys, which_mv, kernel,
-                                  MV_PRECISION_Q3, x, y);
+        vp9_build_inter_predictor_12(y_mb_ptr + y_offset, stride,
+                                     &pred[p_offset], BW, &mv, scale, xs, ys,
+                                     which_mv, kernel, MV_PRECISION_Q3, x, y);
       }
 #else
-      vp9_build_inter_predictor(y_mb_ptr + y_offset, stride, &pred[p_offset],
-                                BW, &mv, scale, xs, ys, which_mv, kernel,
-                                MV_PRECISION_Q3, x, y);
+      vp9_build_inter_predictor_12(y_mb_ptr + y_offset, stride, &pred[p_offset],
+                                   BW, &mv, scale, xs, ys, which_mv, kernel,
+                                   MV_PRECISION_Q3, x, y);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       k++;
     }
@@ -147,38 +348,38 @@ static void temporal_filter_predictors_mb_c(
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        vp9_highbd_build_inter_predictor(
+        vp9_highbd_build_inter_predictor_12(
             CONVERT_TO_SHORTPTR(u_mb_ptr + uv_offset), uv_stride,
             CONVERT_TO_SHORTPTR(&pred[BLK_PELS + p_offset]), uv_block_width,
             &mv, scale, xs, ys, which_mv, kernel, mv_precision_uv, x, y,
             xd->bd);
 
-        vp9_highbd_build_inter_predictor(
+        vp9_highbd_build_inter_predictor_12(
             CONVERT_TO_SHORTPTR(v_mb_ptr + uv_offset), uv_stride,
             CONVERT_TO_SHORTPTR(&pred[(BLK_PELS << 1) + p_offset]),
             uv_block_width, &mv, scale, xs, ys, which_mv, kernel,
             mv_precision_uv, x, y, xd->bd);
       } else {
-        vp9_build_inter_predictor(u_mb_ptr + uv_offset, uv_stride,
-                                  &pred[BLK_PELS + p_offset], uv_block_width,
-                                  &mv, scale, xs, ys, which_mv, kernel,
-                                  mv_precision_uv, x, y);
+        vp9_build_inter_predictor_12(u_mb_ptr + uv_offset, uv_stride,
+                                     &pred[BLK_PELS + p_offset], uv_block_width,
+                                     &mv, scale, xs, ys, which_mv, kernel,
+                                     mv_precision_uv, x, y);
 
-        vp9_build_inter_predictor(v_mb_ptr + uv_offset, uv_stride,
-                                  &pred[(BLK_PELS << 1) + p_offset],
-                                  uv_block_width, &mv, scale, xs, ys, which_mv,
-                                  kernel, mv_precision_uv, x, y);
+        vp9_build_inter_predictor_12(v_mb_ptr + uv_offset, uv_stride,
+                                     &pred[(BLK_PELS << 1) + p_offset],
+                                     uv_block_width, &mv, scale, xs, ys,
+                                     which_mv, kernel, mv_precision_uv, x, y);
       }
 #else
-      vp9_build_inter_predictor(u_mb_ptr + uv_offset, uv_stride,
-                                &pred[BLK_PELS + p_offset], uv_block_width, &mv,
-                                scale, xs, ys, which_mv, kernel,
-                                mv_precision_uv, x, y);
+      vp9_build_inter_predictor_12(u_mb_ptr + uv_offset, uv_stride,
+                                   &pred[BLK_PELS + p_offset], uv_block_width,
+                                   &mv, scale, xs, ys, which_mv, kernel,
+                                   mv_precision_uv, x, y);
 
-      vp9_build_inter_predictor(v_mb_ptr + uv_offset, uv_stride,
-                                &pred[(BLK_PELS << 1) + p_offset],
-                                uv_block_width, &mv, scale, xs, ys, which_mv,
-                                kernel, mv_precision_uv, x, y);
+      vp9_build_inter_predictor_12(v_mb_ptr + uv_offset, uv_stride,
+                                   &pred[(BLK_PELS << 1) + p_offset],
+                                   uv_block_width, &mv, scale, xs, ys, which_mv,
+                                   kernel, mv_precision_uv, x, y);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       k++;
     }
@@ -1029,14 +1230,15 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi) {
 
 // Apply buffer limits and context specific adjustments to arnr filter.
 static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
-                               int *arnr_frames, int *arnr_strength) {
+                               int *arnr_frames, int *frames_backward,
+                               int *frames_forward, int *arnr_strength) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-  const int frames_after_arf =
-      vp9_lookahead_depth(cpi->lookahead) - distance - 1;
-  int frames_fwd = (cpi->oxcf.arnr_max_frames - 1) >> 1;
-  int frames_bwd;
-  int q, frames, base_strength, strength;
+
+  int max_fwd = vp9_lookahead_depth(cpi->lookahead) - distance - 1;
+  int max_bwd = distance;
+  int frames = VPXMAX(oxcf->arnr_max_frames, 1);
+  int q, base_strength, strength;
 
   // Context dependent two pass adjustment to strength.
   if (oxcf->pass == 2) {
@@ -1046,19 +1248,6 @@ static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
   } else {
     base_strength = oxcf->arnr_strength;
   }
-
-  // Define the forward and backwards filter limits for this arnr group.
-  if (frames_fwd > frames_after_arf) frames_fwd = frames_after_arf;
-  if (frames_fwd > distance) frames_fwd = distance;
-
-  frames_bwd = frames_fwd;
-
-  // For even length filter there is one more frame backward
-  // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
-  if (frames_bwd < distance) frames_bwd += (oxcf->arnr_max_frames + 1) & 0x1;
-
-  // Set the baseline active filter size.
-  frames = frames_bwd + 1 + frames_fwd;
 
   // Adjust the strength based on active max q.
   if (cpi->common.current_video_frame > 1)
@@ -1075,14 +1264,29 @@ static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
   }
 
   // Adjust number of frames in filter and strength based on gf boost level.
-  if (frames > group_boost / 150) {
-    frames = group_boost / 150;
-    frames += !(frames & 1);
-  }
+  frames = VPXMIN(frames, group_boost / 150);
+  frames += !(frames & 1);  // Make the number odd.
 
   if (strength > group_boost / 300) {
     strength = group_boost / 300;
   }
+
+  if (VPXMIN(max_fwd, max_bwd) >= frames / 2) {
+    // just use half half
+    *frames_backward = frames / 2;
+    *frames_forward = frames / 2;
+  } else {
+    if (max_fwd < frames / 2) {
+      *frames_forward = max_fwd;
+      *frames_backward = VPXMIN(frames - 1 - *frames_forward, max_bwd);
+    } else {
+      *frames_backward = max_bwd;
+      *frames_forward = VPXMIN(frames - 1 - *frames_backward, max_fwd);
+    }
+  }
+
+  // Set the baseline active filter size.
+  frames = *frames_backward + 1 + *frames_forward;
 
   // Adjustments for second level arf in multi arf case.
   // Leave commented out place holder for possible filtering adjustment with
@@ -1094,8 +1298,11 @@ static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
   // be used as show_existing_frame. Need to further explore the possibility to
   // apply certain filter.
   if (gf_group->arf_src_offset[gf_group->index] <
-      cpi->rc.baseline_gf_interval - 1)
+      cpi->rc.baseline_gf_interval - 1) {
     frames = 1;
+    *frames_backward = 0;
+    *frames_forward = 0;
+  }
 
   *arnr_frames = frames;
   *arnr_strength = strength;
@@ -1117,9 +1324,9 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   int rdmult;
 
   // Apply context specific adjustments to the arnr filter parameters.
-  adjust_arnr_filter(cpi, distance, rc->gfu_boost, &frames_to_blur, &strength);
-  frames_to_blur_backward = (frames_to_blur / 2);
-  frames_to_blur_forward = ((frames_to_blur - 1) / 2);
+  adjust_arnr_filter(cpi, distance, rc->gfu_boost, &frames_to_blur,
+                     &frames_to_blur_backward, &frames_to_blur_forward,
+                     &strength);
   start_frame = distance + frames_to_blur_forward;
 
   arnr_filter_data->strength = strength;
