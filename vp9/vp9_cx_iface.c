@@ -2055,6 +2055,8 @@ static vpx_codec_err_t ctrl_set_external_rate_control(vpx_codec_alg_priv_t *ctx,
     ratectrl_config.frame_rate_den = oxcf->g_timebase.num;
     ratectrl_config.overshoot_percent = oxcf->over_shoot_pct;
     ratectrl_config.undershoot_percent = oxcf->under_shoot_pct;
+    ratectrl_config.min_base_q_index = oxcf->best_allowed_q;
+    ratectrl_config.max_base_q_index = oxcf->worst_allowed_q;
     ratectrl_config.base_qp = oxcf->cq_level;
 
     if (oxcf->rc_mode == VPX_VBR) {
