@@ -1067,8 +1067,6 @@ typedef struct VP9_COMP {
    */
   uint64_t frame_component_time[kTimingComponents];
 #endif
-  // Flag to indicate if QP and GOP for TPL are controlled by external RC.
-  int tpl_with_external_rc;
 } VP9_COMP;
 
 #if CONFIG_RATE_CTRL
