@@ -263,6 +263,8 @@ typedef struct VP9EncoderConfig {
 
   int enable_tpl_model;
 
+  int enable_keyframe_filtering;
+
   int max_threads;
 
   unsigned int target_level;
@@ -503,6 +505,7 @@ typedef struct ARNRFilterData {
   int frame_count;
   int alt_ref_index;
   struct scale_factors sf;
+  YV12_BUFFER_CONFIG *dst;
 } ARNRFilterData;
 
 typedef struct EncFrameBuf {
@@ -872,7 +875,7 @@ typedef struct VP9_COMP {
   // Force recalculation of segment_ids for each mode info
   uint8_t force_update_segmentation;
 
-  YV12_BUFFER_CONFIG alt_ref_buffer;
+  YV12_BUFFER_CONFIG tf_buffer;
 
   // class responsible for adaptive
   // quantization of altref frames

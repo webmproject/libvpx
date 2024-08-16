@@ -44,6 +44,7 @@ typedef struct vp9_extracfg {
   unsigned int tile_columns;
   unsigned int tile_rows;
   unsigned int enable_tpl_model;
+  unsigned int enable_keyframe_filtering;
   unsigned int arnr_max_frames;
   unsigned int arnr_strength;
   unsigned int min_gf_interval;
@@ -83,6 +84,7 @@ static struct vp9_extracfg default_extra_cfg = {
   6,                     // tile_columns
   0,                     // tile_rows
   1,                     // enable_tpl_model
+  0,                     // enable_keyframe_filtering
   7,                     // arnr_max_frames
   5,                     // arnr_strength
   0,                     // min_gf_interval; 0 -> default decision
@@ -614,6 +616,8 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->enable_tpl_model = extra_cfg->enable_tpl_model;
 
+  oxcf->enable_keyframe_filtering = extra_cfg->enable_keyframe_filtering;
+
   // TODO(yunqing): The dependencies between row tiles cause error in multi-
   // threaded encoding. For now, tile_rows is forced to be 0 in this case.
   // The further fix can be done by adding synchronizations after a tile row
@@ -962,6 +966,14 @@ static vpx_codec_err_t ctrl_set_tpl_model(vpx_codec_alg_priv_t *ctx,
                                           va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.enable_tpl_model = CAST(VP9E_SET_TPL, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_set_keyframe_filtering(vpx_codec_alg_priv_t *ctx,
+                                                   va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.enable_keyframe_filtering =
+      CAST(VP9E_SET_KEY_FRAME_FILTERING, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -2108,6 +2120,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_TILE_COLUMNS, ctrl_set_tile_columns },
   { VP9E_SET_TILE_ROWS, ctrl_set_tile_rows },
   { VP9E_SET_TPL, ctrl_set_tpl_model },
+  { VP9E_SET_KEY_FRAME_FILTERING, ctrl_set_keyframe_filtering },
   { VP8E_SET_ARNR_MAXFRAMES, ctrl_set_arnr_max_frames },
   { VP8E_SET_ARNR_STRENGTH, ctrl_set_arnr_strength },
   { VP8E_SET_ARNR_TYPE, ctrl_set_arnr_type },
@@ -2455,6 +2468,8 @@ void vp9_dump_encoder_config(const VP9EncoderConfig *oxcf, FILE *fp) {
   DUMP_STRUCT_VALUE(fp, oxcf, tile_rows);
 
   DUMP_STRUCT_VALUE(fp, oxcf, enable_tpl_model);
+
+  DUMP_STRUCT_VALUE(fp, oxcf, enable_keyframe_filtering);
 
   DUMP_STRUCT_VALUE(fp, oxcf, max_threads);
 

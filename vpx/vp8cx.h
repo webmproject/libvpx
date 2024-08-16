@@ -673,6 +673,14 @@ enum vp8e_enc_control_id {
    */
   VP9E_SET_TPL,
 
+  /*!\brief Codec control function to enable key frame temporal filtering.
+   *
+   * Vp9 allows the encoder to run key frame temporal filtering and use it to
+   * improve the compression performance. To enable, set this parameter to be
+   * 1. The default value is set to be 0.
+   */
+  VP9E_SET_KEY_FRAME_FILTERING,
+
   /*!\brief Codec control function to enable postencode frame drop.
    *
    * This will allow encoder to drop frame after it's encoded.
@@ -1078,6 +1086,8 @@ VPX_CTRL_USE_TYPE(VP9E_SET_SVC_SPATIAL_LAYER_SYNC,
 #define VPX_CTRL_VP9E_SET_SVC_SPATIAL_LAYER_SYNC
 VPX_CTRL_USE_TYPE(VP9E_SET_TPL, int)
 #define VPX_CTRL_VP9E_SET_TPL
+VPX_CTRL_USE_TYPE(VP9E_SET_KEY_FRAME_FILTERING, int)
+#define VPX_CTRL_VP9E_SET_KEY_FRAME_FILTERING
 VPX_CTRL_USE_TYPE(VP9E_SET_POSTENCODE_DROP, unsigned int)
 #define VPX_CTRL_VP9E_SET_POSTENCODE_DROP
 VPX_CTRL_USE_TYPE(VP9E_SET_DELTA_Q_UV, int)

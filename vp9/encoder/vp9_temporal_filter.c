@@ -48,6 +48,7 @@ static int64_t highbd_index_mult[14] = { 0U,          0U,          0U,
 // Prediction function using 12-tap interpolation filter.
 // TODO(yunqingwang@google.com): add SIMD optimization.
 #define MAX_FILTER_TAP 12
+#define TF_INTERP_EXTEND 6
 typedef int16_t InterpKernel12[MAX_FILTER_TAP];
 // 12-tap filter (used by the encoder only).
 DECLARE_ALIGNED(256, static const InterpKernel12,
@@ -861,6 +862,7 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
   DECLARE_ALIGNED(16, uint16_t, count[BLK_PELS * 3]);
   MACROBLOCKD *mbd = &td->mb.e_mbd;
   YV12_BUFFER_CONFIG *f = frames[alt_ref_index];
+  YV12_BUFFER_CONFIG *dst = arnr_filter_data->dst;
   uint8_t *dst1, *dst2;
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED(16, uint16_t, predictor16[BLK_PELS * 3]);
@@ -886,18 +888,17 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
 
   // Source frames are extended to 16 pixels. This is different than
   //  L/A/G reference frames that have a border of 32 (VP9ENCBORDERINPIXELS)
-  // A 6/8 tap filter is used for motion search.  This requires 2 pixels
-  //  before and 3 pixels after.  So the largest Y mv on a border would
-  //  then be 16 - VP9_INTERP_EXTEND. The UV blocks are half the size of the
-  //  Y and therefore only extended by 8.  The largest mv that a UV block
-  //  can support is 8 - VP9_INTERP_EXTEND.  A UV mv is half of a Y mv.
-  //  (16 - VP9_INTERP_EXTEND) >> 1 which is greater than
-  //  8 - VP9_INTERP_EXTEND.
-  // To keep the mv in play for both Y and UV planes the max that it
-  //  can be on a border is therefore 16 - (2*VP9_INTERP_EXTEND+1).
-  td->mb.mv_limits.row_min = -((mb_row * BH) + (17 - 2 * VP9_INTERP_EXTEND));
+  // A 6/8/12 tap filter is used for motion search and prediction. So the
+  // largest Y mv on a border would then be 16 - TF_INTERP_EXTEND. The UV
+  // blocks are half the size of the Y and therefore only extended by 8.
+  // The largest mv that a UV block can support is 8 - TF_INTERP_EXTEND.
+  // A UV mv is half of a Y mv. (16 - TF_INTERP_EXTEND) >> 1 is greater than
+  // 8 - TF_INTERP_EXTEND. To keep the mv in play for both Y and UV planes,
+  // the max that it can be on a border is therefore 16 - (2 * TF_INTERP_EXTEND
+  // + 1).
+  td->mb.mv_limits.row_min = -((mb_row * BH) + (17 - 2 * TF_INTERP_EXTEND));
   td->mb.mv_limits.row_max =
-      ((mb_rows - 1 - mb_row) * BH) + (17 - 2 * VP9_INTERP_EXTEND);
+      ((mb_rows - 1 - mb_row) * BH) + (17 - 2 * TF_INTERP_EXTEND);
 
   for (mb_col = mb_col_start; mb_col < mb_col_end; mb_col++) {
     int i, j, k;
@@ -907,9 +908,9 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
     vp9_zero_array(accumulator, BLK_PELS * 3);
     vp9_zero_array(count, BLK_PELS * 3);
 
-    td->mb.mv_limits.col_min = -((mb_col * BW) + (17 - 2 * VP9_INTERP_EXTEND));
+    td->mb.mv_limits.col_min = -((mb_col * BW) + (17 - 2 * TF_INTERP_EXTEND));
     td->mb.mv_limits.col_max =
-        ((mb_cols - 1 - mb_col) * BW) + (17 - 2 * VP9_INTERP_EXTEND);
+        ((mb_cols - 1 - mb_col) * BW) + (17 - 2 * TF_INTERP_EXTEND);
 
     if (cpi->oxcf.content == VP9E_CONTENT_FILM) {
       unsigned int src_variance;
@@ -1054,9 +1055,9 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
       uint16_t *dst1_16;
       uint16_t *dst2_16;
       // Normalize filter output to produce AltRef frame
-      dst1 = cpi->alt_ref_buffer.y_buffer;
+      dst1 = dst->y_buffer;
       dst1_16 = CONVERT_TO_SHORTPTR(dst1);
-      stride = cpi->alt_ref_buffer.y_stride;
+      stride = dst->y_stride;
       byte = mb_y_offset;
       for (i = 0, k = 0; i < BH; i++) {
         for (j = 0; j < BW; j++, k++) {
@@ -1073,11 +1074,11 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         byte += stride - BW;
       }
 
-      dst1 = cpi->alt_ref_buffer.u_buffer;
-      dst2 = cpi->alt_ref_buffer.v_buffer;
+      dst1 = dst->u_buffer;
+      dst2 = dst->v_buffer;
       dst1_16 = CONVERT_TO_SHORTPTR(dst1);
       dst2_16 = CONVERT_TO_SHORTPTR(dst2);
-      stride = cpi->alt_ref_buffer.uv_stride;
+      stride = dst->uv_stride;
       byte = mb_uv_offset;
       for (i = 0, k = BLK_PELS; i < mb_uv_height; i++) {
         for (j = 0; j < mb_uv_width; j++, k++) {
@@ -1103,8 +1104,8 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
       }
     } else {
       // Normalize filter output to produce AltRef frame
-      dst1 = cpi->alt_ref_buffer.y_buffer;
-      stride = cpi->alt_ref_buffer.y_stride;
+      dst1 = dst->y_buffer;
+      stride = dst->y_stride;
       byte = mb_y_offset;
       for (i = 0, k = 0; i < BH; i++) {
         for (j = 0; j < BW; j++, k++) {
@@ -1120,9 +1121,9 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
         byte += stride - BW;
       }
 
-      dst1 = cpi->alt_ref_buffer.u_buffer;
-      dst2 = cpi->alt_ref_buffer.v_buffer;
-      stride = cpi->alt_ref_buffer.uv_stride;
+      dst1 = dst->u_buffer;
+      dst2 = dst->v_buffer;
+      stride = dst->uv_stride;
       byte = mb_uv_offset;
       for (i = 0, k = BLK_PELS; i < mb_uv_height; i++) {
         for (j = 0; j < mb_uv_width; j++, k++) {
@@ -1148,8 +1149,8 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
     }
 #else
     // Normalize filter output to produce AltRef frame
-    dst1 = cpi->alt_ref_buffer.y_buffer;
-    stride = cpi->alt_ref_buffer.y_stride;
+    dst1 = dst->y_buffer;
+    stride = dst->y_stride;
     byte = mb_y_offset;
     for (i = 0, k = 0; i < BH; i++) {
       for (j = 0; j < BW; j++, k++) {
@@ -1165,9 +1166,9 @@ void vp9_temporal_filter_iterate_row_c(VP9_COMP *cpi, ThreadData *td,
       byte += stride - BW;
     }
 
-    dst1 = cpi->alt_ref_buffer.u_buffer;
-    dst2 = cpi->alt_ref_buffer.v_buffer;
-    stride = cpi->alt_ref_buffer.uv_stride;
+    dst1 = dst->u_buffer;
+    dst2 = dst->v_buffer;
+    stride = dst->uv_stride;
     byte = mb_uv_offset;
     for (i = 0, k = BLK_PELS; i < mb_uv_height; i++) {
       for (j = 0; j < mb_uv_width; j++, k++) {
@@ -1233,10 +1234,10 @@ static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
                                int *arnr_frames, int *frames_backward,
                                int *frames_forward, int *arnr_strength) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
 
-  int max_fwd = vp9_lookahead_depth(cpi->lookahead) - distance - 1;
-  int max_bwd = distance;
+  int max_fwd =
+      VPXMAX((int)vp9_lookahead_depth(cpi->lookahead) - distance - 1, 0);
+  int max_bwd = VPXMAX(distance, 0);
   int frames = VPXMAX(oxcf->arnr_max_frames, 1);
   int q, base_strength, strength;
 
@@ -1265,16 +1266,15 @@ static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
 
   // Adjust number of frames in filter and strength based on gf boost level.
   frames = VPXMIN(frames, group_boost / 150);
-  frames += !(frames & 1);  // Make the number odd.
 
   if (strength > group_boost / 300) {
     strength = group_boost / 300;
   }
 
   if (VPXMIN(max_fwd, max_bwd) >= frames / 2) {
-    // just use half half
+    // Handle the even/odd case.
     *frames_backward = frames / 2;
-    *frames_forward = frames / 2;
+    *frames_forward = (frames - 1) / 2;
   } else {
     if (max_fwd < frames / 2) {
       *frames_forward = max_fwd;
@@ -1297,8 +1297,7 @@ static void adjust_arnr_filter(VP9_COMP *cpi, int distance, int group_boost,
   // TODO(jingning): Skip temporal filtering for intermediate frames that will
   // be used as show_existing_frame. Need to further explore the possibility to
   // apply certain filter.
-  if (gf_group->arf_src_offset[gf_group->index] <
-      cpi->rc.baseline_gf_interval - 1) {
+  if (frames <= 1) {
     frames = 1;
     *frames_backward = 0;
     *frames_forward = 0;
@@ -1332,6 +1331,7 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   arnr_filter_data->strength = strength;
   arnr_filter_data->frame_count = frames_to_blur;
   arnr_filter_data->alt_ref_index = frames_to_blur_backward;
+  arnr_filter_data->dst = &cpi->tf_buffer;
 
   // Setup frame pointers, NULL indicates frame not included in filter.
   for (frame = 0; frame < frames_to_blur; ++frame) {
@@ -1340,6 +1340,11 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
         vp9_lookahead_peek(cpi->lookahead, which_buffer);
     frames[frames_to_blur - 1 - frame] = &buf->img;
   }
+
+  YV12_BUFFER_CONFIG *f = frames[arnr_filter_data->alt_ref_index];
+  xd->cur_buf = f;
+  xd->plane[1].subsampling_y = f->subsampling_y;
+  xd->plane[1].subsampling_x = f->subsampling_x;
 
   if (frames_to_blur > 0) {
     // Setup scaling factors. Scaling on each of the arnr frames is not
