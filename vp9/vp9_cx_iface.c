@@ -1294,6 +1294,13 @@ static INLINE vpx_codec_cx_pkt_t get_psnr_pkt(const PSNR_STATS *psnr) {
   return pkt;
 }
 
+static INLINE vpx_codec_cx_pkt_t get_ssim_pkt(const SSIM_STATS *ssim) {
+  vpx_codec_cx_pkt_t pkt;
+  pkt.kind = VPX_CODEC_SSIM_PKT;
+  pkt.data.ssim = *ssim;
+  return pkt;
+}
+
 #if !CONFIG_REALTIME_ONLY
 static INLINE vpx_codec_cx_pkt_t
 get_first_pass_stats_pkt(FIRSTPASS_STATS *stats) {
@@ -1409,6 +1416,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
     // Set up internal flags
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR) cpi->b_calculate_psnr = 1;
+    if (ctx->base.init_flags & VPX_CODEC_USE_SSIM) cpi->b_calculate_fastssim = 1;
 
     if (img != NULL) {
       const int64_t dst_end_time_stamp =
@@ -1490,6 +1498,11 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
           if (vp9_get_psnr(cpi, &psnr)) {
             vpx_codec_cx_pkt_t psnr_pkt = get_psnr_pkt(&psnr);
             vpx_codec_pkt_list_add(&ctx->pkt_list.head, &psnr_pkt);
+          }
+          SSIM_STATS ssim;
+          if (vp9_get_ssim(cpi, &ssim)) {
+            vpx_codec_cx_pkt_t ssim_pkt = get_ssim_pkt(&ssim);
+            vpx_codec_pkt_list_add(&ctx->pkt_list.head, &ssim_pkt);
           }
         }
 
@@ -2207,6 +2220,9 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   VPX_CODEC_INTERNAL_ABI_VERSION,
 #if CONFIG_VP9_HIGHBITDEPTH
   VPX_CODEC_CAP_HIGHBITDEPTH |
+#endif
+#if CONFIG_INTERNAL_STATS
+  VPX_CODEC_CAP_SSIM |
 #endif
       VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,  // vpx_codec_caps_t
   encoder_init,                                    // vpx_codec_init_fn_t

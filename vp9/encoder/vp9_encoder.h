@@ -904,6 +904,7 @@ typedef struct VP9_COMP {
   ImageStat fastssim;
   ImageStat psnrhvs;
 
+  int b_calculate_fastssim;
   int b_calculate_ssimg;
   int b_calculate_blockiness;
 
@@ -1491,6 +1492,7 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 void vp9_set_row_mt(VP9_COMP *cpi);
 
 int vp9_get_psnr(const VP9_COMP *cpi, PSNR_STATS *psnr);
+int vp9_get_ssim(const VP9_COMP *cpi, SSIM_STATS *ssim);
 
 #define LAYER_IDS_TO_IDX(sl, tl, num_tl) ((sl) * (num_tl) + (tl))
 

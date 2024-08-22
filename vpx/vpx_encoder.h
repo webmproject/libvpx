@@ -79,6 +79,7 @@ extern "C" {
  *  returned partition by partition.
  */
 #define VPX_CODEC_CAP_OUTPUT_PARTITION 0x20000
+#define VPX_CODEC_CAP_SSIM 0x40000 /**< Can issue SSIM packets */
 
 /*! \brief Initialization-time Feature Enabling
  *
@@ -91,6 +92,7 @@ extern "C" {
 /*!\brief Make the encoder output one  partition at a time. */
 #define VPX_CODEC_USE_OUTPUT_PARTITION 0x20000
 #define VPX_CODEC_USE_HIGHBITDEPTH 0x40000 /**< Use high bitdepth */
+#define VPX_CODEC_USE_SSIM 0x80000 /**< Calculate SSIM on each frame */
 
 /*!\brief Generic fixed size buffer structure
  *
@@ -152,6 +154,7 @@ enum vpx_codec_cx_pkt_kind {
   VPX_CODEC_STATS_PKT,       /**< Two-pass statistics for this frame */
   VPX_CODEC_FPMB_STATS_PKT,  /**< first pass mb statistics for this frame */
   VPX_CODEC_PSNR_PKT,        /**< PSNR statistics for this frame */
+  VPX_CODEC_SSIM_PKT,        /**< SSIM statistics for this frame */
   VPX_CODEC_CUSTOM_PKT = 256 /**< Algorithm extensions  */
 };
 
@@ -190,6 +193,9 @@ typedef struct vpx_codec_cx_pkt {
       uint64_t sse[4];         /**< sum squared error, total/y/u/v */
       double psnr[4];          /**< PSNR, total/y/u/v */
     } psnr;                    /**< data for PSNR packet */
+    struct vpx_ssim_pkt {
+      double ssim[4];          /**< SSIM, total/y/u/v */
+    } ssim;                    /**< data for SSIM packet */
     vpx_fixed_buf_t raw;       /**< data for arbitrary packets */
 
     /* This packet size is fixed to allow codecs to extend this

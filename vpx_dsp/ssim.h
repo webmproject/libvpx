@@ -19,6 +19,9 @@ extern "C" {
 
 #include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
+#include "vpx/vpx_encoder.h"
+
+typedef struct vpx_ssim_pkt SSIM_STATS;
 
 // metrics used for calculating ssim, ssim2, dssim, and ssimc
 typedef struct {

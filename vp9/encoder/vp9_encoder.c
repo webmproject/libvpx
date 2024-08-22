@@ -463,6 +463,14 @@ static int is_psnr_calc_enabled(const VP9_COMP *cpi) {
   return cpi->b_calculate_psnr && (oxcf->pass != 1) && cm->show_frame;
 }
 
+// Test for whether to calculate metrics for the frame.
+static int is_ssim_calc_enabled(const VP9_COMP *cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+
+  return cpi->b_calculate_fastssim && (oxcf->pass != 1) && cm->show_frame;
+}
+
 /* clang-format off */
 const Vp9LevelSpec vp9_level_defs[VP9_LEVELS] = {
   //         sample rate    size   breadth  bitrate  cpb
@@ -2464,14 +2472,13 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
   }
 
   cpi->refresh_alt_ref_frame = 0;
-  cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 
   init_level_info(&cpi->level_info);
   init_level_constraint(&cpi->level_constraint);
 
 #if CONFIG_INTERNAL_STATS
-  cpi->b_calculate_blockiness = 1;
-  cpi->b_calculate_consistency = 1;
+  cpi->b_calculate_blockiness = 0;
+  cpi->b_calculate_consistency = 0;
   cpi->total_inconsistency = 0;
   cpi->psnr.worst = 100.0;
   cpi->worst_ssim = 100.0;
@@ -2781,7 +2788,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
   cm = &cpi->common;
   if (cm->current_video_frame > 0) {
-#if CONFIG_INTERNAL_STATS
+#if 0 && CONFIG_INTERNAL_STATS
     vpx_clear_system_state();
 
     if (cpi->oxcf.pass != 1) {
@@ -2955,6 +2962,18 @@ int vp9_get_psnr(const VP9_COMP *cpi, PSNR_STATS *psnr) {
     return 1;
   } else {
     vp9_zero(*psnr);
+    return 0;
+  }
+}
+
+int vp9_get_ssim(const VP9_COMP *cpi, SSIM_STATS *ssim) {
+  if (is_ssim_calc_enabled(cpi)) {
+    ssim->ssim[0] = vpx_calc_fastssim(cpi->raw_source_frame, cpi->common.frame_to_show,
+                                    &ssim->ssim[1], &ssim->ssim[2], &ssim->ssim[3],
+                                    cpi->td.mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
+    return 1;
+  } else {
+    vp9_zero(*ssim);
     return 0;
   }
 }
@@ -3942,6 +3961,7 @@ static void save_encode_params(VP9_COMP *cpi) {
 }
 
 static INLINE void set_raw_source_frame(VP9_COMP *cpi) {
+  printf("set_raw_source_frame\n");
 #ifdef ENABLE_KF_DENOISE
   if (is_spatial_denoise_enabled(cpi)) {
     cpi->raw_source_frame = vp9_scale_if_required(
@@ -3972,7 +3992,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   if (cm->show_existing_frame) {
     cpi->rc.this_frame_target = 0;
-    if (is_psnr_calc_enabled(cpi)) set_raw_source_frame(cpi);
+    if (is_psnr_calc_enabled(cpi) || is_ssim_calc_enabled(cpi)) set_raw_source_frame(cpi);
     return 1;
   }
 
@@ -4022,7 +4042,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 #endif
   // Unfiltered raw source used in metrics calculation if the source
   // has been filtered.
-  if (is_psnr_calc_enabled(cpi)) {
+  if (is_psnr_calc_enabled(cpi) || is_ssim_calc_enabled(cpi)) {
 #ifdef ENABLE_KF_DENOISE
     if (is_spatial_denoise_enabled(cpi)) {
       cpi->raw_source_frame = vp9_scale_if_required(
@@ -4514,7 +4534,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest,
 
   if (cm->show_existing_frame) {
     rc->this_frame_target = 0;
-    if (is_psnr_calc_enabled(cpi)) set_raw_source_frame(cpi);
+    if (is_psnr_calc_enabled(cpi) || is_ssim_calc_enabled(cpi)) set_raw_source_frame(cpi);
     return;
   }
 
