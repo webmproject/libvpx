@@ -1764,6 +1764,7 @@ void vp9_setup_tpl_stats(VP9_COMP *cpi) {
   int extended_frame_count;
   cpi->tpl_bsize = BLOCK_32X32;
 
+  memset(gf_picture_buf, 0, sizeof(gf_picture_buf));
   extended_frame_count =
       init_gop_frames(cpi, gf_picture, gf_group, &tpl_group_frames);
 
