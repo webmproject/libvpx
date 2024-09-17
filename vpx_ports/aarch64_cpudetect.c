@@ -90,6 +90,23 @@ static int arm_get_cpu_caps(void) {
   }
 #endif  // defined(PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE)
 #endif  // HAVE_NEON_I8MM
+#if HAVE_SVE
+// Support for PF_ARM_SVE_INSTRUCTIONS_AVAILABLE was added in Windows SDK 26100.
+#if defined(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE)
+  if (IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE)) {
+    flags |= HAS_SVE;
+  }
+#endif  // defined(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE)
+#endif  // HAVE_SVE
+#if HAVE_SVE2
+// Support for PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE was added in Windows SDK
+// 26100.
+#if defined(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE)
+  if (IsProcessorFeaturePresent(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE)) {
+    flags |= HAS_SVE2;
+  }
+#endif  // defined(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE)
+#endif  // HAVE_SVE2
   return flags;
 }
 
