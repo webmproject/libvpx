@@ -331,10 +331,10 @@ int main(int argc, char *argv[]) {
 
   memset(in, 0, sizeof(in));
 
-  if (argc < 2) {
+  if (argc < 3) {
     fprintf(stderr,
             "Usage: %s file1.{yuv|y4m} file2.{yuv|y4m}"
-            "[WxH tl_skip={0,1,3} frame_stats_file bits]\n",
+            " [WxH tl_skip={0,1,3} frame_stats_file bits]\n",
             argv[0]);
     return 1;
   }
