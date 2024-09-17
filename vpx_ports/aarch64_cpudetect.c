@@ -78,7 +78,18 @@ static int arm_get_cpu_caps(void) {
   }
 #endif  // defined(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE)
 #endif  // HAVE_NEON_DOTPROD
-  // No I8MM or SVE feature detection available on Windows at time of writing.
+#if HAVE_NEON_I8MM
+// Support for PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE was added in Windows SDK
+// 26100.
+#if defined(PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE)
+  // There's no PF_* flag that indicates whether plain I8MM is available
+  // or not. But if SVE_I8MM is available, that also implies that
+  // regular I8MM is available.
+  if (IsProcessorFeaturePresent(PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE)) {
+    flags |= HAS_NEON_I8MM;
+  }
+#endif  // defined(PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE)
+#endif  // HAVE_NEON_I8MM
   return flags;
 }
 
