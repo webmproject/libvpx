@@ -1058,7 +1058,7 @@ void vp9_svc_check_reset_layer_rc_flag(VP9_COMP *const cpi) {
         sl, svc->number_temporal_layers - 1, svc->number_temporal_layers);
     LAYER_CONTEXT *lc = &svc->layer_context[spatial_layer_idx];
     RATE_CONTROL *lrc = &lc->rc;
-    if (lrc->avg_frame_bandwidth > (3 * lrc->last_avg_frame_bandwidth >> 1) ||
+    if (lrc->avg_frame_bandwidth / 3 > (lrc->last_avg_frame_bandwidth >> 1) ||
         lrc->avg_frame_bandwidth < (lrc->last_avg_frame_bandwidth >> 1)) {
       // Reset for all temporal layers with spatial layer sl.
       for (tl = 0; tl < svc->number_temporal_layers; ++tl) {
