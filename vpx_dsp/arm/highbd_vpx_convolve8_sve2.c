@@ -759,8 +759,8 @@ void vpx_highbd_convolve8_avg_sve2(const uint16_t *src, ptrdiff_t src_stride,
                                    int x_step_q4, int y0_q4, int y_step_q4,
                                    int w, int h, int bd) {
   if (x_step_q4 != 16 || y_step_q4 != 16) {
-    vpx_highbd_convolve8_c(src, src_stride, dst, dst_stride, filter, x0_q4,
-                           x_step_q4, y0_q4, y_step_q4, w, h, bd);
+    vpx_highbd_convolve8_avg_c(src, src_stride, dst, dst_stride, filter, x0_q4,
+                               x_step_q4, y0_q4, y_step_q4, w, h, bd);
     return;
   }
 
