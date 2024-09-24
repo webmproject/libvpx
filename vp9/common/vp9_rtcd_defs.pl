@@ -96,6 +96,18 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vp9_highbd_post_proc_down_and_across/, "const uint16_t *src_ptr, uint16_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit";
   }
 
+  add_proto qw/void vpx_highbd_convolve_copy_12/, "const uint16_t *src, ptrdiff_t src_stride, uint16_t *dst, ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h, int bd";
+  specialize qw/vpx_highbd_convolve_copy_12 avx2/;
+
+  add_proto qw/void vpx_highbd_convolve_vert_12/, "const uint16_t *src, ptrdiff_t src_stride, uint16_t *dst, ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h, int bd";
+  specialize qw/vpx_highbd_convolve_vert_12 avx2/;
+
+  add_proto qw/void vpx_highbd_convolve_horiz_12/, "const uint16_t *src, ptrdiff_t src_stride, uint16_t *dst, ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h, int bd";
+  specialize qw/vpx_highbd_convolve_horiz_12 avx2/;
+
+  add_proto qw/void vpx_highbd_convolve_12/, "const uint16_t *src, ptrdiff_t src_stride, uint16_t *dst, ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h, int bd";
+  specialize qw/vpx_highbd_convolve_12 avx2/;
+
   #
   # dct
   #
