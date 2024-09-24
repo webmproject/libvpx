@@ -736,7 +736,6 @@ static void set_rt_speed_feature_framesize_independent(
     // only for 3 spatial layers and when config/top resolution is above VGA.
     // Enable only for non-base temporal layer frames.
     if (cpi->use_svc && svc->use_partition_reuse &&
-        cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
         svc->number_spatial_layers == 3 && svc->temporal_layer_id > 0 &&
         cpi->oxcf.width * cpi->oxcf.height > 640 * 480)
       sf->svc_use_lowres_part = 1;
@@ -865,6 +864,10 @@ static void set_rt_speed_feature_framesize_independent(
   // avoid entering rd pickmode. This causes issues, such as: b/310663186.
   if (cpi->oxcf.mode != cpi->deadline_mode_previous_frame)
     sf->nonrd_keyframe = 1;
+
+  // TODO(marpan): Force this feature off always, for the issue: 366146260
+  // Remove this disabling when underlying issue is resolved.
+  sf->svc_use_lowres_part = 0;
 }
 
 void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi, int speed) {
