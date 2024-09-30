@@ -1917,6 +1917,18 @@ const ConvolveFunctions convolve8_ssse3(
 const ConvolveParam kArrayConvolve8_ssse3[] = { ALL_SIZES(convolve8_ssse3) };
 INSTANTIATE_TEST_SUITE_P(SSSE3, ConvolveTest,
                          ::testing::ValuesIn(kArrayConvolve8_ssse3));
+
+#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
+const ConvolveFunctions12Tap convolve12_ssse3(vpx_convolve_copy_12_ssse3,
+                                              vpx_convolve_horiz_12_ssse3,
+                                              vpx_convolve_vert_12_ssse3,
+                                              vpx_convolve8_12_ssse3, 0);
+const Convolve12TapParam kArrayConvolve12_ssse3[] = { ALL_SIZES_12TAP(
+    convolve12_ssse3) };
+
+INSTANTIATE_TEST_SUITE_P(SSSE3, ConvolveTest12Tap,
+                         ::testing::ValuesIn(kArrayConvolve12_ssse3));
+#endif  // !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 #endif
 
 #if HAVE_AVX2
