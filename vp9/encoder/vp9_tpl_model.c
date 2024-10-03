@@ -1728,17 +1728,18 @@ void vp9_estimate_tpl_qp_gop(VP9_COMP *cpi) {
   const int is_src_frame_alt_ref = cpi->rc.is_src_frame_alt_ref;
   const int refresh_frame_context = cpi->common.refresh_frame_context;
 
-  int sb_size = num_8x8_blocks_wide_lookup[BLOCK_64X64] * MI_SIZE;
-  int frame_height_sb = (cm->height + sb_size - 1) / sb_size;
-  int frame_width_sb = (cm->width + sb_size - 1) / sb_size;
+  const int sb_size = num_8x8_blocks_wide_lookup[BLOCK_64X64] * MI_SIZE;
+  const int frame_height_sb = (cm->height + sb_size - 1) / sb_size;
+  const int frame_width_sb = (cm->width + sb_size - 1) / sb_size;
 
   vpx_codec_err_t codec_status;
   const GF_GROUP *gf_group = &cpi->twopass.gf_group;
   vpx_rc_encodeframe_decision_t encode_frame_decision;
 
-  CHECK_MEM_ERROR(&cm->error, encode_frame_decision.sb_params_list,
-                  vpx_calloc(frame_height_sb * frame_width_sb,
-                             sizeof(*encode_frame_decision.sb_params_list)));
+  CHECK_MEM_ERROR(
+      &cm->error, encode_frame_decision.sb_params_list,
+      (sb_params *)vpx_malloc(frame_height_sb * frame_width_sb *
+                              sizeof(*encode_frame_decision.sb_params_list)));
 
   for (idx = gf_index; idx <= gop_length; ++idx) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[idx];

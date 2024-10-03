@@ -146,9 +146,14 @@ typedef struct sb_parameters {
  * through vpx_rc_funcs_t::get_encodeframe_decision().
  */
 typedef struct vpx_rc_encodeframe_decision {
-  int q_index;               /**< Quantizer step index [0..255]*/
-  int rdmult;                /**< Frame level Lagrangian multiplier*/
-  sb_params *sb_params_list; /**< Superblock quantization parameters*/
+  int q_index; /**< Required: Quantizer step index [0..255]*/
+  int rdmult;  /**< Required: Frame level Lagrangian multiplier*/
+  /*!
+   * Optional: Superblock quantization parameters
+   * It is zero initialized by default. It will be set for key and ARF frames
+   * but not leaf frames.
+   */
+  sb_params *sb_params_list;
 } vpx_rc_encodeframe_decision_t;
 
 /*!\brief Information for the frame to be encoded.
