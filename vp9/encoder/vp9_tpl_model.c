@@ -1762,8 +1762,8 @@ void vp9_estimate_tpl_qp_gop(VP9_COMP *cpi) {
       }
       for (int i = 0; i < frame_height_sb * frame_width_sb; ++i) {
         cpi->sb_mul_scale[i] =
-            (int64_t)((encode_frame_decision.sb_params_list[i].rdmult * 256) /
-                      (encode_frame_decision.rdmult + 1));
+            (((int64_t)encode_frame_decision.sb_params_list[i].rdmult * 256) /
+             (encode_frame_decision.rdmult + 1));
       }
       tpl_frame->base_qindex = encode_frame_decision.q_index;
     } else {
