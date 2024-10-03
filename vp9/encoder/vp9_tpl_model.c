@@ -1750,23 +1750,19 @@ void vp9_estimate_tpl_qp_gop(VP9_COMP *cpi) {
         (cpi->ext_ratectrl.funcs.rc_type & VPX_RC_QP) != 0 &&
         cpi->ext_ratectrl.funcs.get_encodeframe_decision != NULL) {
       if (idx == gop_length) break;
-
       memset(encode_frame_decision.sb_params_list, 0,
              sizeof(*encode_frame_decision.sb_params_list) * frame_height_sb *
                  frame_width_sb);
-
       codec_status = vp9_extrc_get_encodeframe_decision(
           &cpi->ext_ratectrl, gf_group->index, &encode_frame_decision);
-
+      if (codec_status != VPX_CODEC_OK) {
+        vpx_internal_error(&cm->error, codec_status,
+                           "vp9_extrc_get_encodeframe_decision() failed");
+      }
       for (int i = 0; i < frame_height_sb * frame_width_sb; ++i) {
         cpi->sb_mul_scale[i] =
             (int64_t)((encode_frame_decision.sb_params_list[i].rdmult * 256) /
                       (encode_frame_decision.rdmult + 1));
-      }
-
-      if (codec_status != VPX_CODEC_OK) {
-        vpx_internal_error(&cm->error, codec_status,
-                           "vp9_extrc_get_encodeframe_decision() failed");
       }
       tpl_frame->base_qindex = encode_frame_decision.q_index;
     } else {
