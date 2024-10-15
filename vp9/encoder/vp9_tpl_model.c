@@ -1809,7 +1809,7 @@ void vp9_setup_tpl_stats(VP9_COMP *cpi) {
   if (cpi->ext_ratectrl.ready &&
       cpi->ext_ratectrl.funcs.send_tpl_gop_stats != NULL) {
     // Intra search on key frame
-    if (gf_picture[0].update_type != OVERLAY_UPDATE) {
+    if (gf_group->update_type[0] != OVERLAY_UPDATE) {
       mc_flow_dispenser(cpi, gf_picture, 0, cpi->tpl_bsize);
     }
     // TPL stats has extra frames from next GOP. Trim those extra frames for
