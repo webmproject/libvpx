@@ -13,6 +13,9 @@
 
   - Enhancement:
     Neon optimization speed up
+      1-3% speed up across speed 5 to 10 for RTC
+      3% speed up for speed 0 and 1 for VoD in standard bitdepth
+      3% and 7% speed up for speed 0 and 1 respectively for VoD in high bitdepth
     Scene detection is allowed for all RTC speeds (>=5)
     Support profile guided optimizations
 
