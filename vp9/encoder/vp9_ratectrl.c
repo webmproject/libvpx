@@ -1309,14 +1309,16 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     // and encoding bitrate. The additional avg_frame_bandwidth term is to
     // compensate for the pre-encoded buffer update (in
     // vp9_rc_get_one_pass_vbr_params).
+    const int qp_thresh = 32;
     const int bitrate_err =
         (int)(cpi->framerate *
               (rc->buffer_level - rc->starting_buffer_level -
                rc->avg_frame_bandwidth) /
               (cm->current_video_frame + 1));
     // Threshold may be tuned, but for now condition this on low QP.
-    if (cpi->oxcf.lag_in_frames == 0 && bitrate_err / 1000 < -10 && q < 24) {
-      q = 24;
+    if (cpi->oxcf.lag_in_frames == 0 && bitrate_err / 1000 < -10 &&
+        (q < qp_thresh || *top_index < qp_thresh)) {
+      q = qp_thresh;
       *top_index = VPXMAX(*top_index, q);
     }
 
