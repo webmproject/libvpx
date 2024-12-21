@@ -1317,6 +1317,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
                   (cm->current_video_frame + 1));
     // Threshold may be tuned, but for now condition this on low QP.
     if (cpi->oxcf.lag_in_frames == 0 && bitrate_err / 1000 < -10 &&
+        qp_thresh < active_worst_quality &&
         (q < qp_thresh || *top_index < qp_thresh)) {
       q = qp_thresh;
       *top_index = VPXMAX(*top_index, q);
