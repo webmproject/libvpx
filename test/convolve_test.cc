@@ -2045,7 +2045,7 @@ INSTANTIATE_TEST_SUITE_P(NEON, ConvolveTest,
                          ::testing::ValuesIn(kArrayConvolve_neon));
 
 #if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
-const ConvolveFunctions12Tap convolve12Tap_neon(vpx_convolve12_horiz_c,
+const ConvolveFunctions12Tap convolve12Tap_neon(vpx_convolve12_horiz_neon,
                                                 vpx_convolve12_vert_neon,
                                                 vpx_convolve12_c, 0);
 const Convolve12TapParam kArrayConvolve12Tap_neon[] = { ALL_SIZES_12TAP(

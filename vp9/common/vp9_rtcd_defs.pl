@@ -199,7 +199,7 @@ if (vpx_config("CONFIG_REALTIME_ONLY") ne "yes") {
   specialize qw/vpx_convolve12_vert ssse3 avx2 neon/;
 
   add_proto qw/void vpx_convolve12_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
-  specialize qw/vpx_convolve12_horiz ssse3 avx2/;
+  specialize qw/vpx_convolve12_horiz ssse3 avx2 neon/;
 
   add_proto qw/void vpx_convolve12/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
   specialize qw/vpx_convolve12 ssse3 avx2/;
