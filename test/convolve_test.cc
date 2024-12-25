@@ -2068,6 +2068,16 @@ const ConvolveParam kArrayConvolve_neon_dotprod[] = { ALL_SIZES(
     convolve8_neon_dotprod) };
 INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, ConvolveTest,
                          ::testing::ValuesIn(kArrayConvolve_neon_dotprod));
+
+#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
+const ConvolveFunctions12Tap convolve12Tap_neon_dotprod(
+    vpx_convolve12_horiz_neon_dotprod, vpx_convolve12_vert_neon,
+    vpx_convolve12_neon, 0);
+const Convolve12TapParam kArrayConvolve12Tap_neon_dotprod[] = { ALL_SIZES_12TAP(
+    convolve12Tap_neon_dotprod) };
+INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, ConvolveTest12Tap,
+                         ::testing::ValuesIn(kArrayConvolve12Tap_neon_dotprod));
+#endif
 #endif  // HAVE_NEON_DOTPROD
 
 #if HAVE_SVE
