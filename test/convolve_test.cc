@@ -2161,6 +2161,16 @@ const ConvolveParam kArrayConvolve_neon_i8mm[] = { ALL_SIZES(
     convolve8_neon_i8mm) };
 INSTANTIATE_TEST_SUITE_P(NEON_I8MM, ConvolveTest,
                          ::testing::ValuesIn(kArrayConvolve_neon_i8mm));
+
+#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
+const ConvolveFunctions12Tap convolve12Tap_neon_i8mm(
+    vpx_convolve12_horiz_neon_i8mm, vpx_convolve12_vert_neon,
+    vpx_convolve12_neon, 0);
+const Convolve12TapParam kArrayConvolve12Tap_neon_i8mm[] = { ALL_SIZES_12TAP(
+    convolve12Tap_neon_i8mm) };
+INSTANTIATE_TEST_SUITE_P(NEON_I8MM, ConvolveTest12Tap,
+                         ::testing::ValuesIn(kArrayConvolve12Tap_neon_i8mm));
+#endif
 #endif  // HAVE_NEON_I8MM
 
 #if HAVE_DSPR2
