@@ -2072,7 +2072,7 @@ INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, ConvolveTest,
 #if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 const ConvolveFunctions12Tap convolve12Tap_neon_dotprod(
     vpx_convolve12_horiz_neon_dotprod, vpx_convolve12_vert_neon_dotprod,
-    vpx_convolve12_neon, 0);
+    vpx_convolve12_neon_dotprod, 0);
 const Convolve12TapParam kArrayConvolve12Tap_neon_dotprod[] = { ALL_SIZES_12TAP(
     convolve12Tap_neon_dotprod) };
 INSTANTIATE_TEST_SUITE_P(NEON_DOTPROD, ConvolveTest12Tap,

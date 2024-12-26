@@ -297,3 +297,96 @@ void vpx_convolve12_vert_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
     w -= 8;
   } while (w != 0);
 }
+
+static INLINE void vpx_convolve12_2d_horiz_neon_dotprod(
+    const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst,
+    ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int w,
+    int h) {
+  assert(w == 32 || w == 16 || w == 8);
+  assert(h % 4 == 3);
+
+  const int16x8_t x_filter_0_7 = vld1q_s16(filter[x0_q4]);
+  const int16x4_t x_filter_8_11 = vld1_s16(filter[x0_q4] + 8);
+  const int16x8_t x_filter_8_15 = vcombine_s16(x_filter_8_11, vdup_n_s16(0));
+  const int8x16_t x_filter =
+      vcombine_s8(vmovn_s16(x_filter_0_7), vmovn_s16(x_filter_8_15));
+
+  const uint8x16x3_t permute_tbl = vld1q_u8_x3(kDotProdPermuteTbl);
+
+  src -= MAX_FILTER_TAP / 2 - 1;
+
+  do {
+    const uint8_t *s = src;
+    uint8_t *d = dst;
+    int width = w;
+
+    do {
+      uint8x16_t s0[2], s1[2], s2[2], s3[2];
+      load_u8_16x4(s, src_stride, &s0[0], &s1[0], &s2[0], &s3[0]);
+      load_u8_16x4(s + 4, src_stride, &s0[1], &s1[1], &s2[1], &s3[1]);
+
+      uint8x8_t d0 = convolve12_8_h(s0, x_filter, permute_tbl);
+      uint8x8_t d1 = convolve12_8_h(s1, x_filter, permute_tbl);
+      uint8x8_t d2 = convolve12_8_h(s2, x_filter, permute_tbl);
+      uint8x8_t d3 = convolve12_8_h(s3, x_filter, permute_tbl);
+
+      store_u8_8x4(d, dst_stride, d0, d1, d2, d3);
+
+      s += 8;
+      d += 8;
+      width -= 8;
+    } while (width != 0);
+    src += 4 * src_stride;
+    dst += 4 * dst_stride;
+    h -= 4;
+  } while (h != 3);
+
+  do {
+    uint8x16_t s0[2], s1[2], s2[2];
+    load_u8_16x3(src, src_stride, &s0[0], &s1[0], &s2[0]);
+    load_u8_16x3(src + 4, src_stride, &s0[1], &s1[1], &s2[1]);
+
+    uint8x8_t d0 = convolve12_8_h(s0, x_filter, permute_tbl);
+    uint8x8_t d1 = convolve12_8_h(s1, x_filter, permute_tbl);
+    uint8x8_t d2 = convolve12_8_h(s2, x_filter, permute_tbl);
+
+    store_u8_8x3(dst, dst_stride, d0, d1, d2);
+
+    src += 8;
+    dst += 8;
+    w -= 8;
+  } while (w != 0);
+}
+
+void vpx_convolve12_neon_dotprod(const uint8_t *src, ptrdiff_t src_stride,
+                                 uint8_t *dst, ptrdiff_t dst_stride,
+                                 const InterpKernel12 *filter, int x0_q4,
+                                 int x_step_q4, int y0_q4, int y_step_q4, int w,
+                                 int h) {
+  // Scaling not supported by Neon implementation.
+  if (x_step_q4 != 16 || y_step_q4 != 16) {
+    vpx_convolve12_c(src, src_stride, dst, dst_stride, filter, x0_q4, x_step_q4,
+                     y0_q4, y_step_q4, w, h);
+    return;
+  }
+
+  assert(w == 32 || w == 16 || w == 8);
+  assert(h == 32 || h == 16 || h == 8);
+
+  DECLARE_ALIGNED(32, uint8_t, im_block[BW * (BH + MAX_FILTER_TAP)]);
+
+  const int im_stride = BW;
+  // Account for the vertical pass needing MAX_FILTER_TAP / 2 - 1 lines prior
+  // and MAX_FILTER_TAP / 2 lines post.
+  const int im_height = h + MAX_FILTER_TAP - 1;
+  const ptrdiff_t border_offset = MAX_FILTER_TAP / 2 - 1;
+
+  // Filter starting border_offset rows up.
+  vpx_convolve12_2d_horiz_neon_dotprod(src - src_stride * border_offset,
+                                       src_stride, im_block, im_stride, filter,
+                                       x0_q4, w, im_height);
+
+  vpx_convolve12_vert_neon_dotprod(im_block + im_stride * border_offset,
+                                   im_stride, dst, dst_stride, filter, x0_q4,
+                                   x_step_q4, y0_q4, y_step_q4, w, h);
+}
