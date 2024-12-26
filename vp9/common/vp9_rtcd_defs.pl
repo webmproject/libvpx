@@ -202,7 +202,7 @@ if (vpx_config("CONFIG_REALTIME_ONLY") ne "yes") {
   specialize qw/vpx_convolve12_horiz ssse3 avx2 neon neon_dotprod neon_i8mm/;
 
   add_proto qw/void vpx_convolve12/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h";
-  specialize qw/vpx_convolve12 ssse3 avx2 neon neon_dotprod/;
+  specialize qw/vpx_convolve12 ssse3 avx2 neon neon_dotprod neon_i8mm/;
 
   if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vpx_highbd_convolve12_vert/, "const uint16_t *src, ptrdiff_t src_stride, uint16_t *dst, ptrdiff_t dst_stride, const InterpKernel12 *filter, int x0_q4, int x_step_q4, int y0_q4, int y_step_q4, int w, int h, int bd";
