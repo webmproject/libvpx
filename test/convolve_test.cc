@@ -802,17 +802,17 @@ TEST_P(ConvolveTest12Tap, MatchesReferenceSubpixelFilter) {
     for (int filter_y = 0; filter_y < 16; ++filter_y) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (UUT_->use_highbd_ == 0) {
-        vpx_convolve8_12_c(in, kInputStride, ref, kOutputStride, filters,
-                           filter_x, 16, filter_y, 16, Width(), Height());
+        vpx_convolve12_c(in, kInputStride, ref, kOutputStride, filters,
+                         filter_x, 16, filter_y, 16, Width(), Height());
       } else {
-        vpx_highbd_convolve_12_c(CAST_TO_SHORTPTR(in), kInputStride,
-                                 CAST_TO_SHORTPTR(ref), kOutputStride, filters,
-                                 filter_x, 16, filter_y, 16, Width(), Height(),
-                                 UUT_->use_highbd_);
+        vpx_highbd_convolve12_c(CAST_TO_SHORTPTR(in), kInputStride,
+                                CAST_TO_SHORTPTR(ref), kOutputStride, filters,
+                                filter_x, 16, filter_y, 16, Width(), Height(),
+                                UUT_->use_highbd_);
       }
 #else
-      vpx_convolve8_12_c(in, kInputStride, ref, kOutputStride, filters,
-                         filter_x, 16, filter_y, 16, Width(), Height());
+      vpx_convolve12_c(in, kInputStride, ref, kOutputStride, filters, filter_x,
+                       16, filter_y, 16, Width(), Height());
 #endif
       if (filter_x && filter_y)
         ASM_REGISTER_STATE_CHECK(
@@ -907,17 +907,17 @@ TEST_P(ConvolveTest12Tap, FilterExtremes) {
         for (int filter_y = 0; filter_y < 16; ++filter_y) {
 #if CONFIG_VP9_HIGHBITDEPTH
           if (UUT_->use_highbd_ == 0) {
-            vpx_convolve8_12_c(in, kInputStride, ref, kOutputStride, filters,
-                               filter_x, 16, filter_y, 16, Width(), Height());
+            vpx_convolve12_c(in, kInputStride, ref, kOutputStride, filters,
+                             filter_x, 16, filter_y, 16, Width(), Height());
           } else {
-            vpx_highbd_convolve_12_c(CAST_TO_SHORTPTR(in), kInputStride,
-                                     CAST_TO_SHORTPTR(ref), kOutputStride,
-                                     filters, filter_x, 16, filter_y, 16,
-                                     Width(), Height(), UUT_->use_highbd_);
+            vpx_highbd_convolve12_c(CAST_TO_SHORTPTR(in), kInputStride,
+                                    CAST_TO_SHORTPTR(ref), kOutputStride,
+                                    filters, filter_x, 16, filter_y, 16,
+                                    Width(), Height(), UUT_->use_highbd_);
           }
 #else
-          vpx_convolve8_12_c(in, kInputStride, ref, kOutputStride, filters,
-                             filter_x, 16, filter_y, 16, Width(), Height());
+          vpx_convolve12_c(in, kInputStride, ref, kOutputStride, filters,
+                           filter_x, 16, filter_y, 16, Width(), Height());
 #endif
           if (filter_x && filter_y)
             ASM_REGISTER_STATE_CHECK(
@@ -1807,73 +1807,73 @@ INSTANTIATE_TEST_SUITE_P(C, ConvolveTest,
   }
 
 #if HAVE_AVX2
-WRAP12TAP(convolve_copy_12_avx2, 8)
-WRAP12TAP(convolve_horiz_12_avx2, 8)
-WRAP12TAP(convolve_vert_12_avx2, 8)
-WRAP12TAP(convolve_12_avx2, 8)
-WRAP12TAP(convolve_copy_12_avx2, 10)
-WRAP12TAP(convolve_horiz_12_avx2, 10)
-WRAP12TAP(convolve_vert_12_avx2, 10)
-WRAP12TAP(convolve_12_avx2, 10)
-WRAP12TAP(convolve_copy_12_avx2, 12)
-WRAP12TAP(convolve_horiz_12_avx2, 12)
-WRAP12TAP(convolve_vert_12_avx2, 12)
-WRAP12TAP(convolve_12_avx2, 12)
+WRAP12TAP(convolve12_copy_avx2, 8)
+WRAP12TAP(convolve12_horiz_avx2, 8)
+WRAP12TAP(convolve12_vert_avx2, 8)
+WRAP12TAP(convolve12_avx2, 8)
+WRAP12TAP(convolve12_copy_avx2, 10)
+WRAP12TAP(convolve12_horiz_avx2, 10)
+WRAP12TAP(convolve12_vert_avx2, 10)
+WRAP12TAP(convolve12_avx2, 10)
+WRAP12TAP(convolve12_copy_avx2, 12)
+WRAP12TAP(convolve12_horiz_avx2, 12)
+WRAP12TAP(convolve12_vert_avx2, 12)
+WRAP12TAP(convolve12_avx2, 12)
 #endif  // HAVE_AVX2
 
 #if HAVE_SSSE3
-WRAP12TAP(convolve_copy_12_ssse3, 8)
-WRAP12TAP(convolve_horiz_12_ssse3, 8)
-WRAP12TAP(convolve_vert_12_ssse3, 8)
-WRAP12TAP(convolve_12_ssse3, 8)
-WRAP12TAP(convolve_copy_12_ssse3, 10)
-WRAP12TAP(convolve_horiz_12_ssse3, 10)
-WRAP12TAP(convolve_vert_12_ssse3, 10)
-WRAP12TAP(convolve_12_ssse3, 10)
-WRAP12TAP(convolve_copy_12_ssse3, 12)
-WRAP12TAP(convolve_horiz_12_ssse3, 12)
-WRAP12TAP(convolve_vert_12_ssse3, 12)
-WRAP12TAP(convolve_12_ssse3, 12)
+WRAP12TAP(convolve12_copy_ssse3, 8)
+WRAP12TAP(convolve12_horiz_ssse3, 8)
+WRAP12TAP(convolve12_vert_ssse3, 8)
+WRAP12TAP(convolve12_ssse3, 8)
+WRAP12TAP(convolve12_copy_ssse3, 10)
+WRAP12TAP(convolve12_horiz_ssse3, 10)
+WRAP12TAP(convolve12_vert_ssse3, 10)
+WRAP12TAP(convolve12_ssse3, 10)
+WRAP12TAP(convolve12_copy_ssse3, 12)
+WRAP12TAP(convolve12_horiz_ssse3, 12)
+WRAP12TAP(convolve12_vert_ssse3, 12)
+WRAP12TAP(convolve12_ssse3, 12)
 #endif  // HAVE_SSSE3
 
-WRAP12TAP(convolve_copy_12_c, 8)
-WRAP12TAP(convolve_horiz_12_c, 8)
-WRAP12TAP(convolve_vert_12_c, 8)
-WRAP12TAP(convolve_12_c, 8)
-WRAP12TAP(convolve_copy_12_c, 10)
-WRAP12TAP(convolve_horiz_12_c, 10)
-WRAP12TAP(convolve_vert_12_c, 10)
-WRAP12TAP(convolve_12_c, 10)
-WRAP12TAP(convolve_copy_12_c, 12)
-WRAP12TAP(convolve_horiz_12_c, 12)
-WRAP12TAP(convolve_vert_12_c, 12)
-WRAP12TAP(convolve_12_c, 12)
+WRAP12TAP(convolve12_copy_c, 8)
+WRAP12TAP(convolve12_horiz_c, 8)
+WRAP12TAP(convolve12_vert_c, 8)
+WRAP12TAP(convolve12_c, 8)
+WRAP12TAP(convolve12_copy_c, 10)
+WRAP12TAP(convolve12_horiz_c, 10)
+WRAP12TAP(convolve12_vert_c, 10)
+WRAP12TAP(convolve12_c, 10)
+WRAP12TAP(convolve12_copy_c, 12)
+WRAP12TAP(convolve12_horiz_c, 12)
+WRAP12TAP(convolve12_vert_c, 12)
+WRAP12TAP(convolve12_c, 12)
 #undef WRAP12TAP
 
-const ConvolveFunctions12Tap convolve12tap_8bit_c(wrap_convolve_copy_12_c_8,
-                                                  wrap_convolve_horiz_12_c_8,
-                                                  wrap_convolve_vert_12_c_8,
-                                                  wrap_convolve_12_c_8, 8);
+const ConvolveFunctions12Tap convolve12tap_8bit_c(wrap_convolve12_copy_c_8,
+                                                  wrap_convolve12_horiz_c_8,
+                                                  wrap_convolve12_vert_c_8,
+                                                  wrap_convolve12_c_8, 8);
 
-const ConvolveFunctions12Tap convolve12tap_10bit_c(wrap_convolve_copy_12_c_10,
-                                                   wrap_convolve_horiz_12_c_10,
-                                                   wrap_convolve_vert_12_c_10,
-                                                   wrap_convolve_12_c_10, 10);
+const ConvolveFunctions12Tap convolve12tap_10bit_c(wrap_convolve12_copy_c_10,
+                                                   wrap_convolve12_horiz_c_10,
+                                                   wrap_convolve12_vert_c_10,
+                                                   wrap_convolve12_c_10, 10);
 
-const ConvolveFunctions12Tap convolve12tap_12bit_c(wrap_convolve_copy_12_c_12,
-                                                   wrap_convolve_horiz_12_c_12,
-                                                   wrap_convolve_vert_12_c_12,
-                                                   wrap_convolve_12_c_12, 12);
+const ConvolveFunctions12Tap convolve12tap_12bit_c(wrap_convolve12_copy_c_12,
+                                                   wrap_convolve12_horiz_c_12,
+                                                   wrap_convolve12_vert_c_12,
+                                                   wrap_convolve12_c_12, 12);
 
 const Convolve12TapParam kArrayConvolve12Tap_c[] = {
   ALL_SIZES_12TAP(convolve12tap_8bit_c), ALL_SIZES_12TAP(convolve12tap_10bit_c),
   ALL_SIZES_12TAP(convolve12tap_12bit_c)
 };
 #else
-const ConvolveFunctions12Tap convolve12Tap_c(vpx_convolve_copy_12_c,
-                                             vpx_convolve_horiz_12_c,
-                                             vpx_convolve_vert_12_c,
-                                             vpx_convolve8_12_c, 0);
+const ConvolveFunctions12Tap convolve12Tap_c(vpx_convolve12_copy_c,
+                                             vpx_convolve12_horiz_c,
+                                             vpx_convolve12_vert_c,
+                                             vpx_convolve12_c, 0);
 const Convolve12TapParam kArrayConvolve12Tap_c[] = { ALL_SIZES_12TAP(
     convolve12Tap_c) };
 #endif
@@ -1939,16 +1939,16 @@ INSTANTIATE_TEST_SUITE_P(SSSE3, ConvolveTest,
 #if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 #if CONFIG_VP9_HIGHBITDEPTH
 const ConvolveFunctions12Tap convolve12tap_8bit_ssse3(
-    wrap_convolve_copy_12_ssse3_8, wrap_convolve_horiz_12_ssse3_8,
-    wrap_convolve_vert_12_ssse3_8, wrap_convolve_12_ssse3_8, 8);
+    wrap_convolve12_copy_ssse3_8, wrap_convolve12_horiz_ssse3_8,
+    wrap_convolve12_vert_ssse3_8, wrap_convolve12_ssse3_8, 8);
 
 const ConvolveFunctions12Tap convolve12tap_10bit_ssse3(
-    wrap_convolve_copy_12_ssse3_10, wrap_convolve_horiz_12_ssse3_10,
-    wrap_convolve_vert_12_ssse3_10, wrap_convolve_12_ssse3_10, 10);
+    wrap_convolve12_copy_ssse3_10, wrap_convolve12_horiz_ssse3_10,
+    wrap_convolve12_vert_ssse3_10, wrap_convolve12_ssse3_10, 10);
 
 const ConvolveFunctions12Tap convolve12tap_12bit_ssse3(
-    wrap_convolve_copy_12_ssse3_12, wrap_convolve_horiz_12_ssse3_12,
-    wrap_convolve_vert_12_ssse3_12, wrap_convolve_12_ssse3_12, 12);
+    wrap_convolve12_copy_ssse3_12, wrap_convolve12_horiz_ssse3_12,
+    wrap_convolve12_vert_ssse3_12, wrap_convolve12_ssse3_12, 12);
 
 const Convolve12TapParam kArrayConvolve12Tap_ssse3[] = {
   ALL_SIZES_12TAP(convolve12tap_8bit_ssse3),
@@ -1956,10 +1956,10 @@ const Convolve12TapParam kArrayConvolve12Tap_ssse3[] = {
   ALL_SIZES_12TAP(convolve12tap_12bit_ssse3)
 };
 #else
-const ConvolveFunctions12Tap convolve12_ssse3(vpx_convolve_copy_12_ssse3,
-                                              vpx_convolve_horiz_12_ssse3,
-                                              vpx_convolve_vert_12_ssse3,
-                                              vpx_convolve8_12_ssse3, 0);
+const ConvolveFunctions12Tap convolve12_ssse3(vpx_convolve12_copy_ssse3,
+                                              vpx_convolve12_horiz_ssse3,
+                                              vpx_convolve12_vert_ssse3,
+                                              vpx_convolve12_ssse3, 0);
 const Convolve12TapParam kArrayConvolve12Tap_ssse3[] = { ALL_SIZES_12TAP(
     convolve12_ssse3) };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -2014,16 +2014,16 @@ INSTANTIATE_TEST_SUITE_P(AVX2, ConvolveTest,
 #if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 #if CONFIG_VP9_HIGHBITDEPTH
 const ConvolveFunctions12Tap convolve12Tap_8bit_avx2(
-    wrap_convolve_copy_12_avx2_8, wrap_convolve_horiz_12_avx2_8,
-    wrap_convolve_vert_12_avx2_8, wrap_convolve_12_avx2_8, 8);
+    wrap_convolve12_copy_avx2_8, wrap_convolve12_horiz_avx2_8,
+    wrap_convolve12_vert_avx2_8, wrap_convolve12_avx2_8, 8);
 
 const ConvolveFunctions12Tap convolve12Tap_10bit_avx2(
-    wrap_convolve_copy_12_avx2_10, wrap_convolve_horiz_12_avx2_10,
-    wrap_convolve_vert_12_avx2_10, wrap_convolve_12_avx2_10, 10);
+    wrap_convolve12_copy_avx2_10, wrap_convolve12_horiz_avx2_10,
+    wrap_convolve12_vert_avx2_10, wrap_convolve12_avx2_10, 10);
 
 const ConvolveFunctions12Tap convolve12Tap_12bit_avx2(
-    wrap_convolve_copy_12_avx2_12, wrap_convolve_horiz_12_avx2_12,
-    wrap_convolve_vert_12_avx2_12, wrap_convolve_12_avx2_12, 12);
+    wrap_convolve12_copy_avx2_12, wrap_convolve12_horiz_avx2_12,
+    wrap_convolve12_vert_avx2_12, wrap_convolve12_avx2_12, 12);
 
 const Convolve12TapParam kArrayConvolve12Tap_avx2[] = {
   ALL_SIZES_12TAP(convolve12Tap_8bit_avx2),
@@ -2031,10 +2031,10 @@ const Convolve12TapParam kArrayConvolve12Tap_avx2[] = {
   ALL_SIZES_12TAP(convolve12Tap_12bit_avx2)
 };
 #else
-const ConvolveFunctions12Tap convolve12Tap_avx2(vpx_convolve_copy_12_avx2,
-                                                vpx_convolve_horiz_12_avx2,
-                                                vpx_convolve_vert_12_avx2,
-                                                vpx_convolve8_12_avx2, 0);
+const ConvolveFunctions12Tap convolve12Tap_avx2(vpx_convolve12_copy_avx2,
+                                                vpx_convolve12_horiz_avx2,
+                                                vpx_convolve12_vert_avx2,
+                                                vpx_convolve12_avx2, 0);
 const Convolve12TapParam kArrayConvolve12Tap_avx2[] = { ALL_SIZES_12TAP(
     convolve12Tap_avx2) };
 #endif
