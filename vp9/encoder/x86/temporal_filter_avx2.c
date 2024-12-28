@@ -108,60 +108,6 @@ static INLINE __m256i convolve12_16_avx2(const __m256i *s, const __m256i *f) {
   return res;
 }
 
-void vpx_convolve12_copy_avx2(const uint8_t *src, ptrdiff_t src_stride,
-                              uint8_t *dst, ptrdiff_t dst_stride,
-                              const InterpKernel12 *filter, int x0_q4,
-                              int x_step_q4, int y0_q4, int y_step_q4, int w,
-                              int h) {
-  assert(h == 32 || h == 16 || h == 8);
-  assert(h % 2 == 0);
-  (void)filter;
-  (void)x0_q4;
-  (void)x_step_q4;
-  (void)y0_q4;
-  (void)y_step_q4;
-  if (w == 8) {
-    do {
-      __m128i s[2];
-      s[0] = _mm_loadl_epi64((const __m128i *)src);
-      src += src_stride;
-      s[1] = _mm_loadl_epi64((const __m128i *)src);
-      src += src_stride;
-      _mm_storel_epi64((__m128i *)dst, s[0]);
-      dst += dst_stride;
-      _mm_storel_epi64((__m128i *)dst, s[1]);
-      dst += dst_stride;
-      h -= 2;
-    } while (h);
-  } else if (w == 16) {
-    do {
-      __m128i s[2];
-      s[0] = _mm_loadu_si128((const __m128i *)src);
-      src += src_stride;
-      s[1] = _mm_loadu_si128((const __m128i *)src);
-      src += src_stride;
-      _mm_storeu_si128((__m128i *)dst, s[0]);
-      dst += dst_stride;
-      _mm_storeu_si128((__m128i *)dst, s[1]);
-      dst += dst_stride;
-      h -= 2;
-    } while (h);
-  } else if (w == 32) {
-    do {
-      __m256i s[2];
-      s[0] = _mm256_loadu_si256((const __m256i *)src);
-      src += src_stride;
-      s[1] = _mm256_loadu_si256((const __m256i *)src);
-      src += src_stride;
-      _mm256_storeu_si256((__m256i *)dst, s[0]);
-      dst += dst_stride;
-      _mm256_storeu_si256((__m256i *)dst, s[1]);
-      dst += dst_stride;
-      h -= 2;
-    } while (h);
-  }
-}
-
 void vpx_convolve12_horiz_avx2(const uint8_t *src, ptrdiff_t src_stride,
                                uint8_t *dst, ptrdiff_t dst_stride,
                                const InterpKernel12 *filter, int x0_q4,

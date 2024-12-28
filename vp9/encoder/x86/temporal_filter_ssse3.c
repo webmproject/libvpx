@@ -106,16 +106,6 @@ static INLINE __m128i convolve12_16_ssse3(const __m128i *const s,
   return res;
 }
 
-void vpx_convolve12_copy_ssse3(const uint8_t *src, ptrdiff_t src_stride,
-                               uint8_t *dst, ptrdiff_t dst_stride,
-                               const InterpKernel12 *filter, int x0_q4,
-                               int x_step_q4, int y0_q4, int y_step_q4, int w,
-                               int h) {
-  (void)filter;
-  vpx_convolve_copy_sse2(src, src_stride, dst, dst_stride, NULL, x0_q4,
-                         x_step_q4, y0_q4, y_step_q4, w, h);
-}
-
 void vpx_convolve12_horiz_ssse3(const uint8_t *src, ptrdiff_t src_stride,
                                 uint8_t *dst, ptrdiff_t dst_stride,
                                 const InterpKernel12 *filter, int x0_q4,

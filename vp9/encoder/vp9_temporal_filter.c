@@ -49,16 +49,6 @@ static const MV kZeroMv = { 0, 0 };
 #define TF_INTERP_EXTEND 6
 
 // Prediction function using 12-tap interpolation filter.
-void vpx_convolve12_copy_c(const uint8_t *src, ptrdiff_t src_stride,
-                           uint8_t *dst, ptrdiff_t dst_stride,
-                           const InterpKernel12 *filter, int x0_q4,
-                           int x_step_q4, int y0_q4, int y_step_q4, int w,
-                           int h) {
-  (void)filter;
-  vpx_convolve_copy_c(src, src_stride, dst, dst_stride, NULL, x0_q4, x_step_q4,
-                      y0_q4, y_step_q4, w, h);
-}
-
 void vpx_convolve12_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
                             uint8_t *dst, ptrdiff_t dst_stride,
                             const InterpKernel12 *filter, int x0_q4,
@@ -143,8 +133,8 @@ static void vp9_build_inter_predictor_12(
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
   if (subpel_x == 0 && subpel_y == 0) {
-    vpx_convolve12_copy(src, src_stride, dst, dst_stride, kernel, subpel_x,
-                        sf->x_step_q4, subpel_y, sf->y_step_q4, w, h);
+    vpx_convolve_copy(src, src_stride, dst, dst_stride, NULL, subpel_x,
+                      sf->x_step_q4, subpel_y, sf->y_step_q4, w, h);
   } else if (subpel_x == 0 && subpel_y != 0) {
     vpx_convolve12_vert(src, src_stride, dst, dst_stride, kernel, subpel_x,
                         sf->x_step_q4, subpel_y, sf->y_step_q4, w, h);
@@ -158,16 +148,6 @@ static void vp9_build_inter_predictor_12(
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vpx_highbd_convolve12_copy_c(const uint16_t *src, ptrdiff_t src_stride,
-                                  uint16_t *dst, ptrdiff_t dst_stride,
-                                  const InterpKernel12 *filter, int x0_q4,
-                                  int x_step_q4, int y0_q4, int y_step_q4,
-                                  int w, int h, int bd) {
-  (void)filter;
-  vpx_highbd_convolve_copy_c(src, src_stride, dst, dst_stride, NULL, x0_q4,
-                             x_step_q4, y0_q4, y_step_q4, w, h, bd);
-}
-
 void vpx_highbd_convolve12_horiz_c(const uint16_t *src, ptrdiff_t src_stride,
                                    uint16_t *dst, ptrdiff_t dst_stride,
                                    const InterpKernel12 *filter, int x0_q4,
@@ -265,9 +245,8 @@ static void vp9_highbd_build_inter_predictor_12(
   src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
 
   if (subpel_x == 0 && subpel_y == 0) {
-    vpx_highbd_convolve12_copy(src, src_stride, dst, dst_stride, kernel,
-                               subpel_x, sf->x_step_q4, subpel_y, sf->y_step_q4,
-                               w, h, bd);
+    vpx_highbd_convolve_copy(src, src_stride, dst, dst_stride, NULL, subpel_x,
+                             sf->x_step_q4, subpel_y, sf->y_step_q4, w, h, bd);
   } else if (subpel_x == 0 && subpel_y != 0) {
     vpx_highbd_convolve12_vert(src, src_stride, dst, dst_stride, kernel,
                                subpel_x, sf->x_step_q4, subpel_y, sf->y_step_q4,

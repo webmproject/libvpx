@@ -54,16 +54,6 @@ static INLINE void reuse_src_data_avx2(const __m256i *src, __m256i *des) {
   des[4] = src[4];
 }
 
-void vpx_highbd_convolve12_copy_avx2(const uint16_t *src, ptrdiff_t src_stride,
-                                     uint16_t *dst, ptrdiff_t dst_stride,
-                                     const InterpKernel12 *filter, int x0_q4,
-                                     int x_step_q4, int y0_q4, int y_step_q4,
-                                     int w, int h, int bd) {
-  (void)filter;
-  vpx_highbd_convolve_copy_avx2(src, src_stride, dst, dst_stride, NULL, x0_q4,
-                                x_step_q4, y0_q4, y_step_q4, w, h, bd);
-}
-
 void vpx_highbd_convolve12_horiz_avx2(const uint16_t *src, ptrdiff_t src_stride,
                                       uint16_t *dst, ptrdiff_t dst_stride,
                                       const InterpKernel12 *filter, int x0_q4,
