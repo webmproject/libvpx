@@ -446,9 +446,63 @@ TEST_P(DatarateTestRealTime, NV12) {
       << " The datarate for the file missed the target!";
 }
 
+class DatarateTestPsnr : public DatarateTestLarge {
+ public:
+  DatarateTestPsnr() : DatarateTestLarge() {}
+  ~DatarateTestPsnr() override = default;
+
+ protected:
+  void SetUp() override {
+    InitializeConfig();
+    SetMode(libvpx_test::kRealTime);
+    set_cpu_used_ = 10;
+    ResetModel();
+    frame_flags_ = VPX_EFLAG_CALCULATE_PSNR;
+  }
+  void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                          ::libvpx_test::Encoder *encoder) override {
+    DatarateTestLarge::PreEncodeFrameHook(video, encoder);
+    frame_flags_ ^= VPX_EFLAG_CALCULATE_PSNR;
+#if CONFIG_INTERNAL_STATS
+    // CONFIG_INTERNAL_STATS unconditionally generates PSNR.
+    expect_psnr_ = true;
+#else
+    expect_psnr_ = (frame_flags_ & VPX_EFLAG_CALCULATE_PSNR) != 0;
+#endif  // CONFIG_INTERNAL_STATS
+    if (video->img() == nullptr) {
+      expect_psnr_ = false;
+    }
+  }
+  void PostEncodeFrameHook(::libvpx_test::Encoder *encoder) override {
+    libvpx_test::CxDataIterator iter = encoder->GetCxData();
+
+    bool had_psnr = false;
+    while (const vpx_codec_cx_pkt_t *pkt = iter.Next()) {
+      if (pkt->kind == VPX_CODEC_PSNR_PKT) had_psnr = true;
+    }
+
+    EXPECT_EQ(had_psnr, expect_psnr_);
+  }
+
+ private:
+  bool expect_psnr_;
+};
+
+TEST_P(DatarateTestPsnr, PerFramePsnr) {
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 100);
+
+  ResetModel();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+}
+
 VP8_INSTANTIATE_TEST_SUITE(DatarateTestLarge, ALL_TEST_MODES,
                            ::testing::Values(0));
 VP8_INSTANTIATE_TEST_SUITE(DatarateTestRealTime,
                            ::testing::Values(::libvpx_test::kRealTime),
                            ::testing::Values(-6, -12));
+VP8_INSTANTIATE_TEST_SUITE(DatarateTestPsnr,
+                           ::testing::Values(::libvpx_test::kRealTime),
+                           ::testing::Values(0));
+
 }  // namespace

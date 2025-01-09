@@ -1091,6 +1091,62 @@ TEST(EncodeAPI, PtsOrDurationTooBig) {
   }
 }
 
+TEST(EncodeAPI, PerFramePsnr) {
+  for (const auto *iface : kCodecIfaces) {
+    SCOPED_TRACE(vpx_codec_iface_name(iface));
+    vpx_codec_enc_cfg_t cfg;
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+    cfg.g_lag_in_frames = 0;
+
+    vpx_codec_ctx_t enc;
+    ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+    vpx_image_t *const image =
+        CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+    ASSERT_NE(image, nullptr);
+
+    vpx_enc_frame_flags_t psnr_flags = VPX_EFLAG_CALCULATE_PSNR;
+    ASSERT_EQ(vpx_codec_encode(&enc, image, /*pts=*/0, /*duration=*/1,
+                               psnr_flags, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+
+    const vpx_codec_cx_pkt_t *pkt;
+    vpx_codec_iter_t iter = nullptr;
+    bool had_psnr = false;
+    while ((pkt = vpx_codec_get_cx_data(&enc, &iter)) != nullptr) {
+      if (pkt->kind != VPX_CODEC_CX_FRAME_PKT) {
+        ASSERT_EQ(pkt->kind, VPX_CODEC_PSNR_PKT);
+        had_psnr = true;
+      }
+    }
+    EXPECT_TRUE(had_psnr);
+
+    vpx_enc_frame_flags_t no_psnr_flags = 0;
+    ASSERT_EQ(vpx_codec_encode(&enc, image, /*pts=*/1, /*duration=*/1,
+                               no_psnr_flags, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+
+    iter = nullptr;
+    had_psnr = false;
+    while ((pkt = vpx_codec_get_cx_data(&enc, &iter)) != nullptr) {
+      if (pkt->kind != VPX_CODEC_CX_FRAME_PKT) {
+        ASSERT_EQ(pkt->kind, VPX_CODEC_PSNR_PKT);
+        had_psnr = true;
+      }
+    }
+#if CONFIG_INTERNAL_STATS
+    // CONFIG_INTERNAL_STATS unconditionally generates PSNR.
+    EXPECT_TRUE(had_psnr);
+#else
+    EXPECT_FALSE(had_psnr);
+#endif  // CONFIG_INTERNAL_STATS
+
+    // Free resources.
+    vpx_img_free(image);
+    ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  }
+}
+
 #if CONFIG_VP9_ENCODER
 // Frame size needed to trigger the overflow exceeds the max buffer allowed on
 // 32-bit systems defined by VPX_MAX_ALLOCABLE_MEMORY
@@ -1977,6 +2033,28 @@ TEST(EncodeAPI, Chromium352414650) {
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 
+TEST(EncodeAPI, PerFramePsnrNotSupportedWithLagInFrames) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_NE(cfg.g_lag_in_frames, 0u);
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  vpx_image_t *const image =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+
+  vpx_enc_frame_flags_t psnr_flags = VPX_EFLAG_CALCULATE_PSNR;
+  ASSERT_EQ(vpx_codec_encode(&enc, image, /*pts=*/0, /*duration=*/1, psnr_flags,
+                             VPX_DL_REALTIME),
+            VPX_CODEC_INCAPABLE);
+
+  // Free resources.
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace

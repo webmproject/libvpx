@@ -1421,8 +1421,19 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     size_t size, cx_data_sz;
     unsigned char *cx_data;
 
+    // Per-frame PSNR is not supported when g_lag_in_frames is greater than 0.
+    if ((flags & VPX_EFLAG_CALCULATE_PSNR) && ctx->cfg.g_lag_in_frames != 0) {
+      vpx_internal_error(
+          &ctx->cpi->common.error, VPX_CODEC_INCAPABLE,
+          "Cannot calculate per-frame PSNR when g_lag_in_frames is nonzero");
+    }
     // Set up internal flags
-    if (ctx->base.init_flags & VPX_CODEC_USE_PSNR) cpi->b_calculate_psnr = 1;
+#if CONFIG_INTERNAL_STATS
+    assert(cpi->b_calculate_psnr == 1);
+#else
+    cpi->b_calculate_psnr = (ctx->base.init_flags & VPX_CODEC_USE_PSNR) ||
+                            (flags & VPX_EFLAG_CALCULATE_PSNR);
+#endif
 
     if (img != NULL) {
       YV12_BUFFER_CONFIG sd;
