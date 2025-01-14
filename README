@@ -24,9 +24,9 @@ COMPILING THE APPLICATIONS/LIBRARIES:
          PATH for Visual Studio. For VS2017 it is sufficient to rename
          yasm-<version>-<arch>.exe to yasm.exe and place it in:
          Program Files (x86)/Microsoft Visual Studio/2017/<level>/Common7/Tools/
-         The MSYS2 version of the binaries can also be used and may avoid
-         issues with VS2022 and GitHub actions when using the yasm.torball.net
-         1.3.0 binaries.
+         The MSYS2 version of the yasm binary can also be used and avoids an
+         issue caused by a missing Visual C++ Redistributable install (Visual
+         Studio 2010, MSVCR100.dll).
     [3]: http://www.cygwin.com
     [4]: http://www.msys2.org/
     [5]: http://www.doxygen.org
