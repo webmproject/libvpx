@@ -813,6 +813,7 @@ class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
     limit_ = 300;
   }
   int external_resize_pattern_ = 1;
+  int force_zero_source_ = 0;
   ~ResizingVideoSource() override = default;
 
  protected:
@@ -828,6 +829,7 @@ class ResizingVideoSource : public ::libvpx_test::DummyVideoSource {
     unsigned char *image = img_->planes[0];
     for (size_t i = 0; i < raw_sz_; ++i) {
       image[i] = rnd.Rand8();
+      if (force_zero_source_ && frame_ % 20 == 0) image[i] = 0;
     }
   }
 };
@@ -1328,7 +1330,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR, OnePassCbrSvc2SL1TL5x5MultipleRuns) {
 // layers. Resizing starts on first frame and the pattern is:
 //  1/4 -> 1/2 -> 1 -> 1/4 -> 1/2.
 TEST_P(DatarateOnePassCbrSvcSingleBR,
-       OnePassCbrSvc3SL1TL_DenoiseExternalResizePattern1) {
+       OnePassCbrSvc3SL3TL_DenoiseExternalResizePattern1) {
   SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -1350,6 +1352,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR,
   top_sl_height_ = 720;
   ResizingVideoSource video;
   video.external_resize_pattern_ = 1;
+  video.force_zero_source_ = 0;
   cfg_.rc_target_bitrate = 1000;
   ResetModel();
   dynamic_drop_layer_ = false;
@@ -1368,7 +1371,7 @@ TEST_P(DatarateOnePassCbrSvcSingleBR,
 // layers. Resizing starts on first frame and the pattern is:
 //  1/2 -> 1/4 -> 1 -> 1/2 -> 1/4.
 TEST_P(DatarateOnePassCbrSvcSingleBR,
-       OnePassCbrSvc3SL1TL_DenoiseExternalResizePattern2) {
+       OnePassCbrSvc3SL3TL_DenoiseExternalResizePattern2) {
   SetSvcConfig(3, 3);
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
@@ -1390,6 +1393,49 @@ TEST_P(DatarateOnePassCbrSvcSingleBR,
   top_sl_height_ = 720;
   ResizingVideoSource video;
   video.external_resize_pattern_ = 2;
+  video.force_zero_source_ = 0;
+  cfg_.rc_target_bitrate = 1000;
+  ResetModel();
+  dynamic_drop_layer_ = false;
+  single_layer_resize_ = false;
+  denoiser_on_ = 1;
+  base_speed_setting_ = speed_setting_;
+  external_resize_dynamic_drop_layer_ = true;
+  external_resize_pattern_ = video.external_resize_pattern_;
+  AssignLayerBitrates();
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+}
+
+// For 1 pass CBR SVC with 3 spatial and 3 temporal layers with external resize
+// and denoiser enabled. The external resizer will resize down and back up,
+// setting 0/nonzero bitrate on spatial enhancement layers to disable/enable
+// layers. Resizing starts on first frame and the pattern is:
+//  1/4 -> 1/2 -> 1 -> 1/4 -> 1/2. The source will be set to 0 every x frames,
+// otherwise random values, to trigger scene detection in the encoder.
+TEST_P(DatarateOnePassCbrSvcSingleBR,
+       OnePassCbrSvc3SL3TL_DenoiseExternalResizePattern1SceneChange) {
+  SetSvcConfig(3, 3);
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_buf_optimal_sz = 500;
+  cfg_.rc_buf_sz = 1000;
+  cfg_.rc_min_quantizer = 40;
+  cfg_.rc_max_quantizer = 63;
+  cfg_.g_threads = 1;
+  cfg_.temporal_layering_mode = 3;
+  cfg_.ts_rate_decimator[0] = 4;
+  cfg_.ts_rate_decimator[1] = 2;
+  cfg_.ts_rate_decimator[2] = 1;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.kf_max_dist = 10000;
+  cfg_.kf_min_dist = 10000;
+  cfg_.rc_resize_allowed = 0;
+  cfg_.g_w = 1280;
+  cfg_.g_h = 720;
+  top_sl_width_ = 1280;
+  top_sl_height_ = 720;
+  ResizingVideoSource video;
+  video.external_resize_pattern_ = 1;
+  video.force_zero_source_ = 1;
   cfg_.rc_target_bitrate = 1000;
   ResetModel();
   dynamic_drop_layer_ = false;
