@@ -87,6 +87,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     ksvc_flex_noupd_tlenh_ = false;
     external_resize_dynamic_drop_layer_ = false;
     external_resize_pattern_ = 0;
+    superframe_cnt_ = 0;
   }
   void BeginPassHook(unsigned int /*pass*/) override {}
 
@@ -361,8 +362,6 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
         }
         encoder->Config(&cfg_);
         encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);
-        // Force key frame on external resize.
-        frame_flags_ = VPX_EFLAG_FORCE_KF;
       } else if (video->frame() == 50 || video->frame() == 200) {
         top_sl_width_ = video->img()->d_w;
         top_sl_height_ = video->img()->d_h;
@@ -394,7 +393,6 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
         }
         encoder->Config(&cfg_);
         encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);
-        frame_flags_ = VPX_EFLAG_FORCE_KF;
       } else if (video->frame() == 100 || video->frame() == 250) {
         top_sl_width_ = video->img()->d_w;
         top_sl_height_ = video->img()->d_h;
@@ -413,7 +411,6 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
         svc_params_.scaling_factor_den[2] = 1;
         encoder->Config(&cfg_);
         encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);
-        frame_flags_ = VPX_EFLAG_FORCE_KF;
       }
     } else if (dynamic_drop_layer_ && !single_layer_resize_) {
       if (video->frame() == 0) {
@@ -531,6 +528,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     const vpx_rational_t tb = video->timebase();
     timebase_ = static_cast<double>(tb.num) / tb.den;
     duration_ = 0;
+    superframe_cnt_++;
   }
 
   vpx_codec_err_t parse_superframe_index(const uint8_t *data, size_t data_sz,
@@ -575,6 +573,9 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
     last_pts_ = pkt->data.frame.pts;
     const bool key_frame =
         (pkt->data.frame.flags & VPX_FRAME_IS_KEY) ? true : false;
+    if (external_resize_dynamic_drop_layer_) {
+      ASSERT_FALSE(key_frame && superframe_cnt_ > 1);
+    }
     if (key_frame) {
       // For test that inserts layer sync frames: requesting a layer_sync on
       // the base layer must force key frame. So if any key frame occurs after
@@ -739,6 +740,7 @@ class DatarateOnePassCbrSvc : public OnePassCbrSvc {
   bool external_resize_dynamic_drop_layer_;
   int bitrate_layer_[9];
   int external_resize_pattern_;
+  int superframe_cnt_;
 
  private:
   void SetConfig(const int num_temporal_layer) override {
