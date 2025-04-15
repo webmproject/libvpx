@@ -213,7 +213,7 @@ static INLINE int x86_simd_caps(void) {
         if (reg_ebx & BIT(5)) flags |= HAS_AVX2;
 
         // bits 16 (AVX-512F) & 17 (AVX-512DQ) & 28 (AVX-512CD) &
-        // 30 (AVX-512BW) & 32 (AVX-512VL)
+        // 30 (AVX-512BW) & 31 (AVX-512VL)
         if ((reg_ebx & (BIT(16) | BIT(17) | BIT(28) | BIT(30) | BIT(31))) ==
             (BIT(16) | BIT(17) | BIT(28) | BIT(30) | BIT(31))) {
           // Check for OS-support of ZMM and YMM state. Necessary for AVX-512.
