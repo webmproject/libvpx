@@ -4834,7 +4834,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
                             unsigned char *dest_end, int64_t *time_stamp,
                             int64_t *time_end, int flush) {
   VP8_COMMON *cm;
-  struct vpx_usec_timer tsctimer;
   struct vpx_usec_timer ticktimer;
 #if CONFIG_INTERNAL_STATS
   struct vpx_usec_timer cmptimer;
@@ -5021,7 +5020,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (cpi->compressor_speed == 2) {
-    vpx_usec_timer_start(&tsctimer);
     vpx_usec_timer_start(&ticktimer);
   }
 
@@ -5096,7 +5094,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
 
   if (cpi->compressor_speed == 2) {
     unsigned int duration, duration2;
-    vpx_usec_timer_mark(&tsctimer);
     vpx_usec_timer_mark(&ticktimer);
 
     duration = (int)(vpx_usec_timer_elapsed(&ticktimer));
