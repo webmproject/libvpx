@@ -2371,57 +2371,6 @@ static void update_initial_width(VP9_COMP *cpi, int use_highbitdepth,
   }
 }
 
-// TODO(angiebird): Check whether we can move this function to vpx_image.c
-static INLINE void vpx_img_chroma_subsampling(vpx_img_fmt_t fmt,
-                                              unsigned int *subsampling_x,
-                                              unsigned int *subsampling_y) {
-  switch (fmt) {
-    case VPX_IMG_FMT_I420:
-    case VPX_IMG_FMT_YV12:
-    case VPX_IMG_FMT_NV12:
-    case VPX_IMG_FMT_I422:
-    case VPX_IMG_FMT_I42016:
-    case VPX_IMG_FMT_I42216: *subsampling_x = 1; break;
-    default: *subsampling_x = 0; break;
-  }
-
-  switch (fmt) {
-    case VPX_IMG_FMT_I420:
-    case VPX_IMG_FMT_I440:
-    case VPX_IMG_FMT_YV12:
-    case VPX_IMG_FMT_NV12:
-    case VPX_IMG_FMT_I42016:
-    case VPX_IMG_FMT_I44016: *subsampling_y = 1; break;
-    default: *subsampling_y = 0; break;
-  }
-}
-
-// TODO(angiebird): Check whether we can move this function to vpx_image.c
-static INLINE int vpx_img_use_highbitdepth(vpx_img_fmt_t fmt) {
-  return fmt & VPX_IMG_FMT_HIGHBITDEPTH;
-}
-
-void vp9_update_compressor_with_img_fmt(VP9_COMP *cpi, vpx_img_fmt_t img_fmt) {
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
-  unsigned int subsampling_x, subsampling_y;
-  const int use_highbitdepth = vpx_img_use_highbitdepth(img_fmt);
-  vpx_img_chroma_subsampling(img_fmt, &subsampling_x, &subsampling_y);
-
-  update_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  setup_denoiser_buffer(cpi);
-#endif
-
-  assert(cpi->lookahead == NULL);
-  cpi->lookahead = vp9_lookahead_init(oxcf->width, oxcf->height, subsampling_x,
-                                      subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                                      use_highbitdepth,
-#endif
-                                      oxcf->lag_in_frames);
-  alloc_raw_frame_buffers(cpi);
-}
-
 VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
                                 BufferPool *const pool) {
   unsigned int i;
