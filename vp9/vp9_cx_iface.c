@@ -17,6 +17,7 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx/vpx_ext_ratectrl.h"
 #include "vpx_dsp/psnr.h"
+#include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/static_assert.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_util/vpx_timestamp.h"
@@ -912,8 +913,7 @@ static vpx_codec_err_t ctrl_set_cpuused(vpx_codec_alg_priv_t *ctx,
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   // Use fastest speed setting (speed 9 or -9) if it's set beyond the range.
   extra_cfg.cpu_used = CAST(VP8E_SET_CPUUSED, args);
-  extra_cfg.cpu_used = VPXMIN(9, extra_cfg.cpu_used);
-  extra_cfg.cpu_used = VPXMAX(-9, extra_cfg.cpu_used);
+  extra_cfg.cpu_used = clamp(extra_cfg.cpu_used, -9, 9);
 #if CONFIG_REALTIME_ONLY
   if (extra_cfg.cpu_used > -5 && extra_cfg.cpu_used < 5)
     extra_cfg.cpu_used = (extra_cfg.cpu_used > 0) ? 5 : -5;
@@ -1980,7 +1980,7 @@ static vpx_codec_err_t ctrl_set_delta_q_uv(vpx_codec_alg_priv_t *ctx,
                                            va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   int data = va_arg(args, int);
-  data = VPXMIN(VPXMAX(data, -15), 15);
+  data = clamp(data, -15, 15);
   extra_cfg.delta_q_uv = data;
   return update_extra_cfg(ctx, &extra_cfg);
 }
