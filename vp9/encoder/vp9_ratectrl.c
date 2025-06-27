@@ -3274,7 +3274,6 @@ int vp9_encodedframe_overshoot(VP9_COMP *cpi, int frame_size, int *q) {
     int enumerator;
     // Set a larger QP.
     if (cpi->oxcf.content != VP9E_CONTENT_SCREEN &&
-        cm->width * cm->height >= 1280 * 720 &&
         (rc->buffer_level > (3 * rc->optimal_buffer_level) >> 2) &&
         (cpi->rc.avg_source_sad[0] < sad_thr)) {
       *q = (*q + cpi->rc.worst_quality) >> 1;
