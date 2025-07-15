@@ -1262,9 +1262,16 @@ int vp8_reverse_trans(int x) {
 
   return 63;
 }
-void vp8_new_framerate(VP8_COMP *cpi, double framerate) {
-  if (framerate < .1) framerate = 30;
 
+static double clamp_framerate(double framerate) {
+  if (framerate < .1)
+    return 30.0;
+  else
+    return framerate;
+}
+
+void vp8_new_framerate(VP8_COMP *cpi, double framerate) {
+  framerate = clamp_framerate(framerate);
   cpi->framerate = framerate;
   cpi->output_framerate = framerate;
   const double per_frame_bandwidth =
@@ -4983,6 +4990,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags,
         }
       }
 #endif
+      cpi->ref_framerate = clamp_framerate(cpi->ref_framerate);
       if (cpi->oxcf.number_of_layers > 1) {
         unsigned int i;
 

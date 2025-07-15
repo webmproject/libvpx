@@ -477,6 +477,61 @@ TEST(EncodeAPI, VP8GlobalHeaders) {
   EXPECT_EQ(vpx_codec_get_global_headers(&enc.ctx), nullptr);
 }
 
+// Encode a few frames for 2 temporal layers realtime mode.
+// Set duration to be very large on first frame, much smaller
+// on second frames, with the timestamp (pts) parameter very
+// inconsistent with the duration (i.e, pts != prev_pts + duration).
+// This reproduces the issue found in the bug: 431520320.
+TEST(EncodeAPI, Vp8ChromiumIssue431520320) {
+  // Initialize libvpx encoder.
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 320;
+  cfg.g_h = 240;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_target_bitrate = 500;
+
+  // 2-layers, 2-frame period.
+  int ids[2] = { 0, 1 };
+  cfg.ts_periodicity = 2;
+  cfg.ts_number_layers = 2;
+  cfg.ts_rate_decimator[0] = 2;
+  cfg.ts_rate_decimator[1] = 1;
+  cfg.ts_target_bitrate[0] = 300;
+  cfg.ts_target_bitrate[1] = 500;
+  memcpy(cfg.ts_layer_id, ids, sizeof(ids));
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  // Create input image.
+  vpx_image_t *const image =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+
+  // Encode first frame.
+  ASSERT_EQ(
+      vpx_codec_encode(&enc, image, 0, /*duration=*/800000, 0, VPX_DL_REALTIME),
+      VPX_CODEC_OK);
+
+  // Encode second frame.
+  ASSERT_EQ(vpx_codec_encode(&enc, image, 40000, /*duration=*/40000, 0,
+                             VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  // Encode third frame.
+  ASSERT_EQ(vpx_codec_encode(&enc, image, 80000, /*duration=*/40000, 0,
+                             VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  // Free resources.
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
 TEST(EncodeAPI, AomediaIssue3509VbrMinSection2PercentVP8) {
   // Initialize libvpx encoder.
   vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
