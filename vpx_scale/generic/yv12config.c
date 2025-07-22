@@ -27,7 +27,7 @@
  *
  ****************************************************************************/
 #define yv12_align_addr(addr, align) \
-  (void *)(((size_t)(addr) + ((align)-1)) & (size_t) - (align))
+  (void *)(((size_t)(addr) + ((align) - 1)) & (size_t)-(align))
 
 int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
   if (ybf) {

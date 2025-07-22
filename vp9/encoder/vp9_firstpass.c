@@ -84,7 +84,7 @@
 #define HIGH_UNDERSHOOT_RATIO 2
 #define AV_WQ_FACTOR 4.0
 
-#define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x)-0.000001 : (x) + 0.000001)
+#define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
 #if ARF_STATS_OUTPUT
 unsigned int arf_count = 0;

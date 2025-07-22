@@ -54,7 +54,7 @@ extern const int vp8_gf_boost_qadjustment[QINDEX_RANGE];
 #define KF_MB_INTRA_MIN 300
 #define GF_MB_INTRA_MIN 200
 
-#define DOUBLE_DIVIDE_CHECK(X) ((X) < 0 ? (X)-.000001 : (X) + .000001)
+#define DOUBLE_DIVIDE_CHECK(X) ((X) < 0 ? (X) - .000001 : (X) + .000001)
 
 #define POW1 (double)cpi->oxcf.two_pass_vbrbias / 100.0
 #define POW2 (double)cpi->oxcf.two_pass_vbrbias / 100.0
