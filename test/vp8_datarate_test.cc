@@ -34,13 +34,15 @@ class DatarateTestLarge
     ResetModel();
   }
 
-  virtual void ResetModel() {
+  void ResetModel() {
     last_pts_ = 0;
     bits_in_buffer_model_ = cfg_.rc_target_bitrate * cfg_.rc_buf_initial_sz;
     frame_number_ = 0;
     first_drop_ = 0;
     bits_total_ = 0;
     duration_ = 0.0;
+    // Denoiser is off by default.
+    denoiser_on_ = 0;
     denoiser_offon_test_ = 0;
     denoiser_offon_period_ = -1;
     gf_boost_ = 0;
@@ -147,9 +149,9 @@ class DatarateTestLarge
       // For the temporal denoiser (#if CONFIG_TEMPORAL_DENOISING) the level j
       // refers to the 4 denoiser modes: denoiserYonly, denoiserOnYUV,
       // denoiserOnAggressive, and denoiserOnAdaptive.
-      denoiser_on_ = j;
       cfg_.rc_target_bitrate = 300;
       ResetModel();
+      denoiser_on_ = j;
       ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
       ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
           << " The datarate for the file exceeds the target!";
@@ -168,8 +170,6 @@ class DatarateTestLarge
                                          288, 30, 1, 0, 299);
     cfg_.rc_target_bitrate = 300;
     ResetModel();
-    // The denoiser is off by default.
-    denoiser_on_ = 0;
     // Set the offon test flag.
     denoiser_offon_test_ = 1;
     denoiser_offon_period_ = 100;
@@ -181,7 +181,6 @@ class DatarateTestLarge
   }
 
   virtual void BasicBufferModelTest() {
-    denoiser_on_ = 0;
     cfg_.rc_buf_initial_sz = 500;
     cfg_.rc_dropframe_thresh = 1;
     cfg_.rc_max_quantizer = 56;
@@ -212,7 +211,6 @@ class DatarateTestLarge
   }
 
   virtual void ChangingDropFrameThreshTest() {
-    denoiser_on_ = 0;
     cfg_.rc_buf_initial_sz = 500;
     cfg_.rc_max_quantizer = 36;
     cfg_.rc_end_usage = VPX_CBR;
@@ -241,7 +239,6 @@ class DatarateTestLarge
   }
 
   virtual void DropFramesMultiThreadsTest() {
-    denoiser_on_ = 0;
     cfg_.rc_buf_initial_sz = 500;
     cfg_.rc_dropframe_thresh = 30;
     cfg_.rc_max_quantizer = 56;
@@ -261,7 +258,6 @@ class DatarateTestLarge
   }
 
   virtual void MultiThreadsPSNRTest() {
-    denoiser_on_ = 0;
     cfg_.rc_buf_initial_sz = 500;
     cfg_.rc_dropframe_thresh = 0;
     cfg_.rc_max_quantizer = 56;
@@ -348,7 +344,6 @@ TEST_P(DatarateTestRealTime, DropFramesMultiThreads) {
 TEST_P(DatarateTestRealTime, MultiThreadsPSNR) { MultiThreadsPSNRTest(); }
 
 TEST_P(DatarateTestRealTime, RegionOfInterest) {
-  denoiser_on_ = 0;
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.rc_max_quantizer = 56;
@@ -409,7 +404,6 @@ TEST_P(DatarateTestRealTime, RegionOfInterest) {
 }
 
 TEST_P(DatarateTestRealTime, GFBoost) {
-  denoiser_on_ = 0;
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.rc_max_quantizer = 56;
@@ -432,7 +426,6 @@ TEST_P(DatarateTestRealTime, GFBoost) {
 }
 
 TEST_P(DatarateTestRealTime, NV12) {
-  denoiser_on_ = 0;
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_dropframe_thresh = 0;
   cfg_.rc_max_quantizer = 56;
