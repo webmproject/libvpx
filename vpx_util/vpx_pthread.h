@@ -94,10 +94,6 @@ static INLINE int pthread_mutex_init(pthread_mutex_t *const mutex,
   return 0;
 }
 
-static INLINE int pthread_mutex_trylock(pthread_mutex_t *const mutex) {
-  return TryEnterCriticalSection(mutex) ? 0 : EBUSY;
-}
-
 static INLINE int pthread_mutex_lock(pthread_mutex_t *const mutex) {
   EnterCriticalSection(mutex);
   return 0;
