@@ -2386,120 +2386,6 @@ static void set_fixed_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-static const struct {
-  int row;
-  int col;
-} coord_lookup[16] = {
-  // 32x32 index = 0
-  { 0, 0 },
-  { 0, 2 },
-  { 2, 0 },
-  { 2, 2 },
-  // 32x32 index = 1
-  { 0, 4 },
-  { 0, 6 },
-  { 2, 4 },
-  { 2, 6 },
-  // 32x32 index = 2
-  { 4, 0 },
-  { 4, 2 },
-  { 6, 0 },
-  { 6, 2 },
-  // 32x32 index = 3
-  { 4, 4 },
-  { 4, 6 },
-  { 6, 4 },
-  { 6, 6 },
-};
-
-static void set_source_var_based_partition(VP9_COMP *cpi,
-                                           const TileInfo *const tile,
-                                           MACROBLOCK *const x,
-                                           MODE_INFO **mi_8x8, int mi_row,
-                                           int mi_col) {
-  VP9_COMMON *const cm = &cpi->common;
-  const int mis = cm->mi_stride;
-  const int row8x8_remaining = tile->mi_row_end - mi_row;
-  const int col8x8_remaining = tile->mi_col_end - mi_col;
-  MODE_INFO *mi_upper_left = cm->mi + mi_row * mis + mi_col;
-
-  vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
-
-  assert((row8x8_remaining > 0) && (col8x8_remaining > 0));
-
-  // In-image SB64
-  if ((col8x8_remaining >= MI_BLOCK_SIZE) &&
-      (row8x8_remaining >= MI_BLOCK_SIZE)) {
-    int i, j;
-    int index;
-    Diff d32[4];
-    const int offset = (mi_row >> 1) * cm->mb_cols + (mi_col >> 1);
-    int is_larger_better = 0;
-    int use32x32 = 0;
-    unsigned int thr = cpi->source_var_thresh;
-
-    memset(d32, 0, sizeof(d32));
-
-    for (i = 0; i < 4; i++) {
-      Diff *d16[4];
-
-      for (j = 0; j < 4; j++) {
-        int b_mi_row = coord_lookup[i * 4 + j].row;
-        int b_mi_col = coord_lookup[i * 4 + j].col;
-        int boffset = b_mi_row / 2 * cm->mb_cols + b_mi_col / 2;
-
-        d16[j] = cpi->source_diff_var + offset + boffset;
-
-        index = b_mi_row * mis + b_mi_col;
-        mi_8x8[index] = mi_upper_left + index;
-        mi_8x8[index]->sb_type = BLOCK_16X16;
-
-        // TODO(yunqingwang): If d16[j].var is very large, use 8x8 partition
-        // size to further improve quality.
-      }
-
-      is_larger_better = (d16[0]->var < thr) && (d16[1]->var < thr) &&
-                         (d16[2]->var < thr) && (d16[3]->var < thr);
-
-      // Use 32x32 partition
-      if (is_larger_better) {
-        use32x32 += 1;
-
-        for (j = 0; j < 4; j++) {
-          d32[i].sse += d16[j]->sse;
-          d32[i].sum += d16[j]->sum;
-        }
-
-        d32[i].var =
-            (unsigned int)(d32[i].sse -
-                           (unsigned int)(((int64_t)d32[i].sum * d32[i].sum) >>
-                                          10));
-
-        index = coord_lookup[i * 4].row * mis + coord_lookup[i * 4].col;
-        mi_8x8[index] = mi_upper_left + index;
-        mi_8x8[index]->sb_type = BLOCK_32X32;
-      }
-    }
-
-    if (use32x32 == 4) {
-      thr <<= 1;
-      is_larger_better = (d32[0].var < thr) && (d32[1].var < thr) &&
-                         (d32[2].var < thr) && (d32[3].var < thr);
-
-      // Use 64x64 partition
-      if (is_larger_better) {
-        mi_8x8[0] = mi_upper_left;
-        mi_8x8[0]->sb_type = BLOCK_64X64;
-      }
-    }
-  } else {  // partial in-image SB64
-    int bh = num_8x8_blocks_high_lookup[BLOCK_16X16];
-    int bw = num_8x8_blocks_wide_lookup[BLOCK_16X16];
-    set_partial_b64x64_partition(mi_upper_left, mis, bh, bw, row8x8_remaining,
-                                 col8x8_remaining, BLOCK_16X16, mi_8x8);
-  }
-}
-
 static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
                             PICK_MODE_CONTEXT *ctx, int mi_row, int mi_col,
                             int bsize) {
@@ -5420,11 +5306,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
                              BLOCK_64X64, &dummy_rdc, 1, INT64_MAX,
                              td->pc_root);
         break;
-      case SOURCE_VAR_BASED_PARTITION:
-        set_source_var_based_partition(cpi, tile_info, x, mi, mi_row, mi_col);
-        nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
-                            BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
-        break;
       case FIXED_PARTITION:
         if (!seg_skip) bsize = sf->always_this_block_size;
         set_fixed_partitioning(cpi, tile_info, mi, mi_row, mi_col, bsize);
@@ -5482,128 +5363,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, ThreadData *td,
   }
 }
 // end RTC play code
-
-static INLINE uint32_t variance(const Diff *const d) {
-  return d->sse - (uint32_t)(((int64_t)d->sum * d->sum) >> 8);
-}
-
-#if CONFIG_VP9_HIGHBITDEPTH
-static INLINE uint32_t variance_highbd(Diff *const d) {
-  const int64_t var = (int64_t)d->sse - (((int64_t)d->sum * d->sum) >> 8);
-  return (var >= 0) ? (uint32_t)var : 0;
-}
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
-  const SPEED_FEATURES *const sf = &cpi->sf;
-  const VP9_COMMON *const cm = &cpi->common;
-
-  const uint8_t *src = cpi->Source->y_buffer;
-  const uint8_t *last_src = cpi->Last_Source->y_buffer;
-  const int src_stride = cpi->Source->y_stride;
-  const int last_stride = cpi->Last_Source->y_stride;
-
-  // Pick cutoff threshold
-  const int cutoff = (VPXMIN(cm->width, cm->height) >= 720)
-                         ? (cm->MBs * VAR_HIST_LARGE_CUT_OFF / 100)
-                         : (cm->MBs * VAR_HIST_SMALL_CUT_OFF / 100);
-  DECLARE_ALIGNED(16, int, hist[VAR_HIST_BINS]);
-  Diff *var16 = cpi->source_diff_var;
-
-  int sum = 0;
-  int i, j;
-
-  memset(hist, 0, VAR_HIST_BINS * sizeof(hist[0]));
-
-  for (i = 0; i < cm->mb_rows; i++) {
-    for (j = 0; j < cm->mb_cols; j++) {
-#if CONFIG_VP9_HIGHBITDEPTH
-      if (cm->use_highbitdepth) {
-        switch (cm->bit_depth) {
-          case VPX_BITS_8:
-            vpx_highbd_8_get16x16var(src, src_stride, last_src, last_stride,
-                                     &var16->sse, &var16->sum);
-            var16->var = variance(var16);
-            break;
-          case VPX_BITS_10:
-            vpx_highbd_10_get16x16var(src, src_stride, last_src, last_stride,
-                                      &var16->sse, &var16->sum);
-            var16->var = variance_highbd(var16);
-            break;
-          default:
-            assert(cm->bit_depth == VPX_BITS_12);
-            vpx_highbd_12_get16x16var(src, src_stride, last_src, last_stride,
-                                      &var16->sse, &var16->sum);
-            var16->var = variance_highbd(var16);
-            break;
-        }
-      } else {
-        vpx_get16x16var(src, src_stride, last_src, last_stride, &var16->sse,
-                        &var16->sum);
-        var16->var = variance(var16);
-      }
-#else
-      vpx_get16x16var(src, src_stride, last_src, last_stride, &var16->sse,
-                      &var16->sum);
-      var16->var = variance(var16);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-      if (var16->var >= VAR_HIST_MAX_BG_VAR)
-        hist[VAR_HIST_BINS - 1]++;
-      else
-        hist[var16->var / VAR_HIST_FACTOR]++;
-
-      src += 16;
-      last_src += 16;
-      var16++;
-    }
-
-    src = src - cm->mb_cols * 16 + 16 * src_stride;
-    last_src = last_src - cm->mb_cols * 16 + 16 * last_stride;
-  }
-
-  cpi->source_var_thresh = 0;
-
-  if (hist[VAR_HIST_BINS - 1] < cutoff) {
-    for (i = 0; i < VAR_HIST_BINS - 1; i++) {
-      sum += hist[i];
-
-      if (sum > cutoff) {
-        cpi->source_var_thresh = (i + 1) * VAR_HIST_FACTOR;
-        return 0;
-      }
-    }
-  }
-
-  return sf->search_type_check_frequency;
-}
-
-static void source_var_based_partition_search_method(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  SPEED_FEATURES *const sf = &cpi->sf;
-
-  if (cm->frame_type == KEY_FRAME) {
-    // For key frame, use SEARCH_PARTITION.
-    sf->partition_search_type = SEARCH_PARTITION;
-  } else if (cm->intra_only) {
-    sf->partition_search_type = FIXED_PARTITION;
-  } else {
-    if (cm->last_width != cm->width || cm->last_height != cm->height) {
-      if (cpi->source_diff_var) vpx_free(cpi->source_diff_var);
-
-      CHECK_MEM_ERROR(&cm->error, cpi->source_diff_var,
-                      vpx_calloc(cm->MBs, sizeof(cpi->source_diff_var)));
-    }
-
-    if (!cpi->frames_till_next_var_check)
-      cpi->frames_till_next_var_check = set_var_thresh_from_histogram(cpi);
-
-    if (cpi->frames_till_next_var_check > 0) {
-      sf->partition_search_type = FIXED_PARTITION;
-      cpi->frames_till_next_var_check--;
-    }
-  }
-}
 
 static int get_skip_encode_frame(const VP9_COMMON *cm, ThreadData *const td) {
   unsigned int intra_count = 0, inter_count = 0;
@@ -5912,9 +5671,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
         !(cpi->oxcf.lag_in_frames > 0 && cpi->oxcf.rc_mode == VPX_VBR) &&
         !cpi->use_svc)
       cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
-
-    if (sf->partition_search_type == SOURCE_VAR_BASED_PARTITION)
-      source_var_based_partition_search_method(cpi);
   } else if (gf_group_index && gf_group_index < MAX_ARF_GOP_SIZE &&
              cpi->sf.enable_tpl_model) {
     TplDepFrame *tpl_frame = &cpi->tpl_stats[cpi->twopass.gf_group.index];

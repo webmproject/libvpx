@@ -802,12 +802,6 @@ typedef struct VP9_COMP {
 
   SVC svc;
 
-  // Store frame variance info in SOURCE_VAR_BASED_PARTITION search type.
-  Diff *source_diff_var;
-  // The threshold used in SOURCE_VAR_BASED_PARTITION search type.
-  unsigned int source_var_thresh;
-  int frames_till_next_var_check;
-
   int frame_flags;
 
   search_site_config ss_cfg;
