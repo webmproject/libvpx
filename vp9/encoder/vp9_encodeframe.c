@@ -3787,6 +3787,14 @@ static int rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
     if (do_rd_ml_partition_var_pruning) {
       ml_predict_var_rd_partitioning(cpi, x, pc_tree, bsize, mi_row, mi_col,
                                      &partition_none_allowed, &do_split);
+      // ml_predict_var_rd_partitioning() may pruune out either
+      // partition_none_allowed or do_split, but we should keep the
+      // partition_none_allowed for 8x8 blocks unless disable_split_mask is
+      // off (0).
+      if (bsize == BLOCK_8X8 && cpi->sf.disable_split_mask &&
+          partition_none_allowed == 0) {
+        partition_none_allowed = 1;
+      }
     } else {
       vp9_zero(pc_tree->mv);
     }
