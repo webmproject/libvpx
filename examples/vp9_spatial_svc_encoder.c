@@ -90,6 +90,8 @@ static const arg_def_t bitrates_arg =
     ARG_DEF("bl", "bitrates", 1, "bitrates[sl * num_tl + tl]");
 static const arg_def_t dropframe_thresh_arg =
     ARG_DEF(NULL, "drop-frame", 1, "Temporal resampling threshold (buf %)");
+static const arg_def_t psnr_arg =
+    ARG_DEF(NULL, "psnr", 1, "Enable PSNR computation and statistics");
 static const struct arg_enum_list tune_content_enum[] = {
   { "default", VP9E_CONTENT_DEFAULT },
   { "screen", VP9E_CONTENT_SCREEN },
@@ -143,6 +145,7 @@ static const arg_def_t *svc_args[] = { &frames_arg,
                                        &dropframe_thresh_arg,
                                        &tune_content_arg,
                                        &inter_layer_pred_arg,
+                                       &psnr_arg,
                                        NULL };
 
 static const uint32_t default_frames_to_skip = 0;
@@ -202,6 +205,7 @@ static void parse_command_line(int argc, const char **argv_,
 #endif
   svc_ctx->speed = default_speed;
   svc_ctx->threads = default_threads;
+  svc_ctx->use_psnr = 0;
 
   // start with default encoder configuration
   res = vpx_codec_enc_config_default(vpx_codec_vp9_cx(), enc_cfg, 0);
@@ -325,6 +329,8 @@ static void parse_command_line(int argc, const char **argv_,
       app_input->tune_content = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &inter_layer_pred_arg, argi)) {
       app_input->inter_layer_pred = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &psnr_arg, argi)) {
+      svc_ctx->use_psnr = arg_parse_uint(&arg);
     } else {
       ++argj;
     }

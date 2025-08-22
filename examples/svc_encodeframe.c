@@ -516,7 +516,11 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     enc_cfg->g_error_resilient = 1;
 
   // Initialize codec
-  res = vpx_codec_enc_init(codec_ctx, iface, enc_cfg, VPX_CODEC_USE_PSNR);
+  vpx_codec_flags_t flags = 0;
+  if (svc_ctx->use_psnr) {
+    flags |= VPX_CODEC_USE_PSNR;
+  }
+  res = vpx_codec_enc_init(codec_ctx, iface, enc_cfg, flags);
   if (res != VPX_CODEC_OK) {
     svc_log(svc_ctx, SVC_LOG_ERROR, "svc_enc_init error\n");
     return res;
