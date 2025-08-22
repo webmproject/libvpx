@@ -1547,10 +1547,10 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
                                            cx_data_sz, &dst_time_stamp,
                                            &dst_end_time_stamp, !img,
                                            &encode_frame_result)) {
-        // Pack psnr pkt
-        if (size > 0 && !cpi->use_svc) {
-          // TODO(angiebird): Figure out while we don't need psnr pkt when
-          // use_svc is on
+        // Pack psnr pkt. For SVC allow for top resolution for now.
+        // TODO: webrtc:388070060 - allow for lower spatial layers.
+        if (size > 0 &&
+            cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1) {
           PSNR_STATS psnr;
           if (vp9_get_psnr(cpi, &psnr)) {
             vpx_codec_cx_pkt_t psnr_pkt = get_psnr_pkt(&psnr);

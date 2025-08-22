@@ -1135,13 +1135,48 @@ int main(int argc, const char **argv) {
                  (int)cx_pkt->data.frame.sz, (int)cx_pkt->data.frame.pts);
           ++frames_received;
 #endif
-          if (enc_cfg.ss_number_layers == 1 && enc_cfg.ts_number_layers == 1)
+          if (enc_cfg.ss_number_layers > 1) {
+            uint64_t sizes[8] = { 0 };
+            int count = 0;
+            int num_layers_encoded = 0;
+            parse_superframe_index(cx_pkt->data.frame.buf,
+                                   cx_pkt->data.frame.sz, sizes, &count);
+            for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+              if (cx_pkt->data.frame.spatial_layer_encoded[sl]) {
+                si->bytes_sum[sl] += (int)sizes[num_layers_encoded];
+                num_layers_encoded++;
+              }
+            }
+          } else {
             si->bytes_sum[0] += (int)cx_pkt->data.frame.sz;
+          }
 #if CONFIG_VP9_DECODER && !SIMULCAST_MODE
           if (vpx_codec_decode(&decoder, cx_pkt->data.frame.buf,
                                (unsigned int)cx_pkt->data.frame.sz, NULL, 0))
             die_codec(&decoder, "Failed to decode frame.");
+          vpx_codec_control(&encoder, VP9E_GET_SVC_LAYER_ID, &layer_id);
+          // Don't look for mismatch on top spatial and top temporal layers as
+          // they are non reference frames. Don't look at frames whose top
+          // spatial layer is dropped.
+          if ((enc_cfg.ss_number_layers > 1 || enc_cfg.ts_number_layers > 1) &&
+              cx_pkt->data.frame
+                  .spatial_layer_encoded[enc_cfg.ss_number_layers - 1] &&
+              !(layer_id.temporal_layer_id > 0 &&
+                layer_id.temporal_layer_id ==
+                    (int)enc_cfg.ts_number_layers - 1)) {
+            test_decode(&encoder, &decoder, frame_cnt, &mismatch_seen);
+          }
 #endif
+          break;
+        }
+        case VPX_CODEC_PSNR_PKT: {
+          SvcInternal_t *const si = (SvcInternal_t *)svc_ctx.internal;
+          ++si->psnr_pkt_received;
+          int top_sl = enc_cfg.ss_number_layers - 1;
+          for (int j = 0; j < 4; ++j) {
+            si->psnr_sum[top_sl][j] += cx_pkt->data.psnr.psnr[j];
+            si->sse_sum[top_sl][j] += cx_pkt->data.psnr.sse[j];
+          }
           break;
         }
         case VPX_CODEC_STATS_PKT: {
@@ -1153,20 +1188,6 @@ int main(int argc, const char **argv) {
           break;
         }
       }
-
-#if CONFIG_VP9_DECODER && !SIMULCAST_MODE
-      vpx_codec_control(&encoder, VP9E_GET_SVC_LAYER_ID, &layer_id);
-      // Don't look for mismatch on top spatial and top temporal layers as they
-      // are non reference frames. Don't look at frames whose top spatial layer
-      // is dropped.
-      if ((enc_cfg.ss_number_layers > 1 || enc_cfg.ts_number_layers > 1) &&
-          cx_pkt->data.frame
-              .spatial_layer_encoded[enc_cfg.ss_number_layers - 1] &&
-          !(layer_id.temporal_layer_id > 0 &&
-            layer_id.temporal_layer_id == (int)enc_cfg.ts_number_layers - 1)) {
-        test_decode(&encoder, &decoder, frame_cnt, &mismatch_seen);
-      }
-#endif
     }
 
     if (!end_of_stream) {
