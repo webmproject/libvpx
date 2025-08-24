@@ -1547,13 +1547,12 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
                                            cx_data_sz, &dst_time_stamp,
                                            &dst_end_time_stamp, !img,
                                            &encode_frame_result)) {
-        // Pack psnr pkt. For SVC allow for top resolution for now.
-        // TODO: webrtc:388070060 - allow for lower spatial layers.
-        if (size > 0 &&
-            cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1) {
+        // Pack psnr pkt.
+        if (size > 0) {
           PSNR_STATS psnr;
           if (vp9_get_psnr(cpi, &psnr)) {
             vpx_codec_cx_pkt_t psnr_pkt = get_psnr_pkt(&psnr);
+            psnr_pkt.data.psnr.spatial_layer_id = cpi->svc.spatial_layer_id;
             vpx_codec_pkt_list_add(&ctx->pkt_list.head, &psnr_pkt);
           }
         }

@@ -561,7 +561,6 @@ static double calc_psnr(double d) {
 
 // dump accumulated statistics and reset accumulated values
 void vpx_svc_dump_statistics(SvcContext *svc_ctx) {
-  int number_of_frames;
   int i, j;
   uint32_t bytes_total = 0;
   double scale[COMPONENTS];
@@ -572,19 +571,18 @@ void vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   SvcInternal_t *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || si == NULL) return;
 
-  number_of_frames = si->psnr_pkt_received;
-  if (number_of_frames <= 0) return;
-
   svc_log(svc_ctx, SVC_LOG_INFO, "\n");
   for (i = 0; i < svc_ctx->spatial_layers; ++i) {
     svc_log(svc_ctx, SVC_LOG_INFO,
-            "Layer %d Average PSNR=[%2.3f, %2.3f, %2.3f, %2.3f], Bytes=[%u]\n",
-            i, si->psnr_sum[i][0] / number_of_frames,
-            si->psnr_sum[i][1] / number_of_frames,
-            si->psnr_sum[i][2] / number_of_frames,
-            si->psnr_sum[i][3] / number_of_frames, si->bytes_sum[i]);
+            "Layer %d Average PSNR=[%2.3f, %2.3f, %2.3f, %2.3f], Bytes=[%u], "
+            "Number_of_frames %d \n",
+            i, si->psnr_sum[i][0] / si->number_of_frames[i],
+            si->psnr_sum[i][1] / si->number_of_frames[i],
+            si->psnr_sum[i][2] / si->number_of_frames[i],
+            si->psnr_sum[i][3] / si->number_of_frames[i], si->bytes_sum[i],
+            si->number_of_frames[i]);
     // the following psnr calculation is deduced from ffmpeg.c#print_report
-    y_scale = si->width * si->height * 255.0 * 255.0 * number_of_frames;
+    y_scale = si->width * si->height * 255.0 * 255.0 * si->number_of_frames[i];
     scale[1] = y_scale;
     scale[2] = scale[3] = y_scale / 4;  // U or V
     scale[0] = y_scale * 1.5;           // total
@@ -605,14 +603,12 @@ void vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   // Clear sums for next time.
   for (i = 0; i < svc_ctx->spatial_layers; ++i) {
     si->bytes_sum[i] = 0;
+    si->number_of_frames[i] = 0;
     for (j = 0; j < COMPONENTS; ++j) {
       si->psnr_sum[i][j] = 0;
       si->sse_sum[i][j] = 0;
     }
   }
-
-  // only display statistics once
-  si->psnr_pkt_received = 0;
 
   svc_log(svc_ctx, SVC_LOG_INFO, "Total Bytes=[%u]\n", bytes_total);
 }

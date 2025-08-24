@@ -1177,11 +1177,11 @@ int main(int argc, const char **argv) {
         }
         case VPX_CODEC_PSNR_PKT: {
           SvcInternal_t *const si = (SvcInternal_t *)svc_ctx.internal;
-          ++si->psnr_pkt_received;
-          int top_sl = enc_cfg.ss_number_layers - 1;
+          sl = cx_pkt->data.psnr.spatial_layer_id;
+          si->number_of_frames[sl]++;
           for (int j = 0; j < 4; ++j) {
-            si->psnr_sum[top_sl][j] += cx_pkt->data.psnr.psnr[j];
-            si->sse_sum[top_sl][j] += cx_pkt->data.psnr.sse[j];
+            si->psnr_sum[sl][j] += cx_pkt->data.psnr.psnr[j];
+            si->sse_sum[sl][j] += cx_pkt->data.psnr.sse[j];
           }
           break;
         }

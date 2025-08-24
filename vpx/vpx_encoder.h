@@ -63,7 +63,7 @@ extern "C" {
  * vpx_rc_funcs_t.
  */
 #define VPX_ENCODER_ABI_VERSION \
-  (18 + VPX_CODEC_ABI_VERSION + \
+  (19 + VPX_CODEC_ABI_VERSION + \
    VPX_EXT_RATECTRL_ABI_VERSION) /**<\hideinitializer*/
 
 /*! \brief Encoder capabilities bitfield
@@ -193,6 +193,7 @@ typedef struct vpx_codec_cx_pkt {
       unsigned int samples[4]; /**< Number of samples, total/y/u/v */
       uint64_t sse[4];         /**< sum squared error, total/y/u/v */
       double psnr[4];          /**< PSNR, total/y/u/v */
+      int spatial_layer_id;    /**< Spatial layer id */
     } psnr;                    /**< data for PSNR packet */
     vpx_fixed_buf_t raw;       /**< data for arbitrary packets */
 
