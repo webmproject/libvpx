@@ -63,7 +63,7 @@ extern "C" {
  * vpx_rc_funcs_t.
  */
 #define VPX_ENCODER_ABI_VERSION \
-  (19 + VPX_CODEC_ABI_VERSION + \
+  (18 + VPX_CODEC_ABI_VERSION + \
    VPX_EXT_RATECTRL_ABI_VERSION) /**<\hideinitializer*/
 
 /*! \brief Encoder capabilities bitfield
