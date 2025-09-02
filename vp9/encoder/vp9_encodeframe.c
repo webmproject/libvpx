@@ -1301,8 +1301,13 @@ static int choose_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
       is_key_frame = 1;
   }
 
-  // Always use 4x4 partition for key frame.
-  const int use_4x4_partition = frame_is_intra_only(cm);
+  // Allow for sub8x8 (4x4) partition on key frames, but only for hybrid mode
+  // (i.e., sf->nonrd_keyframe = 0), where for small blocks rd intra pickmode
+  // (vp9_rd_pick_intra_mode_sb) is used. The nonrd intra pickmode
+  // (vp9_pick_intra_mode) does not currently support sub8x8 blocks. This causes
+  // the issue: 44166813. Assert is added in vp9_pick_intra_mode to check this.
+  const int use_4x4_partition =
+      frame_is_intra_only(cm) && !cpi->sf.nonrd_keyframe;
   const int low_res = (cm->width <= 352 && cm->height <= 288);
   int variance4x4downsample[16];
   int segment_id;

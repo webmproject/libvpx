@@ -1179,6 +1179,7 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
   const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
   bmode_costs = cpi->y_mode_costs[A][L];
+  assert(bsize >= BLOCK_8X8);
 
   (void)ctx;
   vp9_rd_cost_reset(&best_rdc);
