@@ -130,7 +130,7 @@ typedef struct vpx_image_rect {
 /*!\brief Open a descriptor, allocating storage for the underlying image
  *
  * Returns a descriptor for storing an image of the given format. The
- * storage for the descriptor is allocated on the heap.
+ * storage for the image is allocated on the heap.
  *
  * \param[in]    img       Pointer to storage for descriptor. If this parameter
  *                         is NULL, the storage for the descriptor will be
@@ -155,7 +155,7 @@ vpx_image_t *vpx_img_alloc(vpx_image_t *img, vpx_img_fmt_t fmt,
 /*!\brief Open a descriptor, using existing storage for the underlying image
  *
  * Returns a descriptor for storing an image of the given format. The
- * storage for descriptor has been allocated elsewhere, and a descriptor is
+ * storage for the image has been allocated elsewhere, and a descriptor is
  * desired to "wrap" that storage.
  *
  * \param[in]    img           Pointer to storage for descriptor. If this
