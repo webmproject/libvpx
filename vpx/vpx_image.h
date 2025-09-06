@@ -201,7 +201,7 @@ vpx_image_t *vpx_img_alloc(vpx_image_t *img, vpx_img_fmt_t fmt,
  * example:
  * \code
  * vpx_img_wrap(img, fmt, d_w, d_h, stride_align, (unsigned char *)1);
- * ... calculate buffer size and allocate buffer as desribed earlier
+ * ... calculate buffer size and allocate buffer as described earlier
  * vpx_img_wrap(img, fmt, d_w, d_h, stride_align, img_data);
  * \endcode
  */
