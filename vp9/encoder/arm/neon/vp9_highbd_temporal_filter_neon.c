@@ -969,3 +969,75 @@ void vpx_highbd_convolve12_horiz_neon(const uint16_t *src, ptrdiff_t src_stride,
     h -= 2;
   } while (h != 0);
 }
+
+void vpx_highbd_convolve12_vert_neon(const uint16_t *src, ptrdiff_t src_stride,
+                                     uint16_t *dst, ptrdiff_t dst_stride,
+                                     const InterpKernel12 *filter, int x0_q4,
+                                     int x_step_q4, int y0_q4, int y_step_q4,
+                                     int w, int h, int bd) {
+  // Scaling not supported by Neon implementation.
+  if (y_step_q4 != 16) {
+    vpx_highbd_convolve12_vert_c(src, src_stride, dst, dst_stride, filter,
+                                 x0_q4, x_step_q4, y0_q4, y_step_q4, w, h, bd);
+    return;
+  }
+
+  assert(w == 32 || w == 16 || w == 8);
+  assert(h == 32 || h == 16 || h == 8);
+
+  const int16x8_t filter_0_7 = vld1q_s16(filter[y0_q4]);
+  const int16x4_t filter_8_11 = vld1_s16(filter[y0_q4] + 8);
+  const uint16x8_t max = vdupq_n_u16((1 << bd) - 1);
+
+  src -= src_stride * (MAX_FILTER_TAP / 2 - 1);
+
+  do {
+    const int16_t *s = (const int16_t *)src;
+    uint16_t *d = dst;
+    int height = h;
+
+    int16x8_t s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, sA;
+    load_s16_8x11(s, src_stride, &s0, &s1, &s2, &s3, &s4, &s5, &s6, &s7, &s8,
+                  &s9, &sA);
+    s += 11 * src_stride;
+
+    do {
+      int16x8_t sB, sC, sD, sE;
+      load_s16_8x4(s, src_stride, &sB, &sC, &sD, &sE);
+
+      uint16x8_t d0 =
+          highbd_convolve12_8(s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, sA, sB,
+                              filter_0_7, filter_8_11, max);
+      uint16x8_t d1 =
+          highbd_convolve12_8(s1, s2, s3, s4, s5, s6, s7, s8, s9, sA, sB, sC,
+                              filter_0_7, filter_8_11, max);
+      uint16x8_t d2 =
+          highbd_convolve12_8(s2, s3, s4, s5, s6, s7, s8, s9, sA, sB, sC, sD,
+                              filter_0_7, filter_8_11, max);
+      uint16x8_t d3 =
+          highbd_convolve12_8(s3, s4, s5, s6, s7, s8, s9, sA, sB, sC, sD, sE,
+                              filter_0_7, filter_8_11, max);
+
+      store_u16_8x4(d, dst_stride, d0, d1, d2, d3);
+
+      s0 = s4;
+      s1 = s5;
+      s2 = s6;
+      s3 = s7;
+      s4 = s8;
+      s5 = s9;
+      s6 = sA;
+      s7 = sB;
+      s8 = sC;
+      s9 = sD;
+      sA = sE;
+
+      s += 4 * src_stride;
+      d += 4 * dst_stride;
+      height -= 4;
+    } while (height != 0);
+    src += 8;
+    dst += 8;
+    w -= 8;
+  } while (w != 0);
+}
