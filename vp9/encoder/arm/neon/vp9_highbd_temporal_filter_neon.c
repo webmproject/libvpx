@@ -928,7 +928,7 @@ void vpx_highbd_convolve12_horiz_neon(const uint16_t *src, ptrdiff_t src_stride,
   }
 
   assert(w == 32 || w == 16 || w == 8);
-  assert(h == 32 || h == 16 || h == 8);
+  assert(h % 4 == 0);
 
   const int16x8_t filter_0_7 = vld1q_s16(filter[x0_q4]);
   const int16x4_t filter_8_11 = vld1_s16(filter[x0_q4] + 8);
@@ -1040,4 +1040,37 @@ void vpx_highbd_convolve12_vert_neon(const uint16_t *src, ptrdiff_t src_stride,
     dst += 8;
     w -= 8;
   } while (w != 0);
+}
+
+void vpx_highbd_convolve12_neon(const uint16_t *src, ptrdiff_t src_stride,
+                                uint16_t *dst, ptrdiff_t dst_stride,
+                                const InterpKernel12 *filter, int x0_q4,
+                                int x_step_q4, int y0_q4, int y_step_q4, int w,
+                                int h, int bd) {
+  // Scaling not supported by Neon implementation.
+  if (x_step_q4 != 16 || y_step_q4 != 16) {
+    vpx_highbd_convolve12_c(src, src_stride, dst, dst_stride, filter, x0_q4,
+                            x_step_q4, y0_q4, y_step_q4, w, h, bd);
+    return;
+  }
+
+  assert(w == 32 || w == 16 || w == 8);
+  assert(h == 32 || h == 16 || h == 8);
+
+  DECLARE_ALIGNED(32, uint16_t, im_block[BW * (BH + MAX_FILTER_TAP)]);
+
+  const int im_stride = BW;
+  // Account for the vertical pass needing MAX_FILTER_TAP / 2 - 1 lines prior
+  // and MAX_FILTER_TAP / 2 lines post. (+1 to make total divisible by 2.)
+  const int im_height = h + MAX_FILTER_TAP;
+  const ptrdiff_t border_offset = MAX_FILTER_TAP / 2 - 1;
+
+  // Filter starting border_offset rows up.
+  vpx_highbd_convolve12_horiz_neon(
+      src - src_stride * border_offset, src_stride, im_block, im_stride, filter,
+      x0_q4, x_step_q4, y0_q4, y_step_q4, w, im_height, bd);
+
+  vpx_highbd_convolve12_vert_neon(im_block + im_stride * border_offset,
+                                  im_stride, dst, dst_stride, filter, x0_q4,
+                                  x_step_q4, y0_q4, y_step_q4, w, h, bd);
 }
