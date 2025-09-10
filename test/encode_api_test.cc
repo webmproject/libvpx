@@ -1745,9 +1745,7 @@ TEST(EncodeAPI, Buganizer331108922BitDepth8) {
 
 // Encode some frames, flip from BEST_QUALITY to REALTIME after 2 frames.
 // This test is taken from the code snippet in issue:441668134.
-// TODO: bug 441668134 - Remove this after the valgrind warnings are
-// fixed.
-TEST(EncodeAPI, DISABLED_Buganizer441668134) {
+TEST(EncodeAPI, Buganizer441668134) {
   // Get VP9 encoder interface.
   vpx_codec_iface_t *iface = vpx_codec_vp9_cx();
   // Initialize encoder configuration with default values.
@@ -1767,6 +1765,10 @@ TEST(EncodeAPI, DISABLED_Buganizer441668134) {
     for (unsigned int x = 0; x < img->d_w; x++) {
       img->planes[0][y * img->stride[0] + x] = ((x ^ y) * 127) & 0xFF;
     }
+  }
+  const unsigned int uv_height = (img->d_h + 1) >> 1;
+  for (int i : { VPX_PLANE_U, VPX_PLANE_V }) {
+    memset(img->planes[i], 0, img->stride[i] * uv_height);
   }
   // Encode some frames.
   int num_frames = 6;
