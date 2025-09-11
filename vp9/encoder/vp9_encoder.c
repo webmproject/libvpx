@@ -5687,6 +5687,31 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
   const int use_highbitdepth = 0;
 #endif
 
+  if ((cm->profile == PROFILE_0 || cm->profile == PROFILE_2) &&
+      (subsampling_x != 1 || subsampling_y != 1)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
+                       "Non-4:2:0 color format requires profile 1 or 3");
+    return -1;
+  }
+  if ((cm->profile == PROFILE_1 || cm->profile == PROFILE_3) &&
+      (subsampling_x == 1 && subsampling_y == 1)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
+                       "4:2:0 color format requires profile 0 or 2");
+    return -1;
+  }
+  if (cm->color_space == VPX_CS_SRGB) {
+    if (cm->profile == PROFILE_0 || cm->profile == PROFILE_2) {
+      vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
+                         "SRGB color space requires profile 1 or 3");
+      return -1;
+    }
+    if (subsampling_x != 0 || subsampling_y != 0) {
+      vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
+                         "SRGB color space requires 4:4:4");
+      return -1;
+    }
+  }
+
   update_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);
 #if CONFIG_VP9_TEMPORAL_DENOISING
   setup_denoiser_buffer(cpi);
@@ -5706,30 +5731,6 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, vpx_enc_frame_flags_t frame_flags,
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 #endif
 
-  if ((cm->profile == PROFILE_0 || cm->profile == PROFILE_2) &&
-      (subsampling_x != 1 || subsampling_y != 1)) {
-    vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
-                       "Non-4:2:0 color format requires profile 1 or 3");
-    res = -1;
-  }
-  if ((cm->profile == PROFILE_1 || cm->profile == PROFILE_3) &&
-      (subsampling_x == 1 && subsampling_y == 1)) {
-    vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
-                       "4:2:0 color format requires profile 0 or 2");
-    res = -1;
-  }
-  if (cm->color_space == VPX_CS_SRGB) {
-    if (cm->profile == PROFILE_0 || cm->profile == PROFILE_2) {
-      vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
-                         "SRGB color space requires profile 1 or 3");
-      res = -1;
-    }
-    if (subsampling_x != 0 || subsampling_y != 0) {
-      vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
-                         "SRGB color space requires 4:4:4");
-      res = -1;
-    }
-  }
   return res;
 }
 
