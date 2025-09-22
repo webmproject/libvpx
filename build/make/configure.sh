@@ -1229,8 +1229,8 @@ EOF
                 ;;
             esac
 
-            if [ "$(show_darwin_sdk_major_version iphoneos)" -gt 8 \
-               && [ "$(show_xcode_version)" -lt 16 ]; then
+            if [ "$(show_darwin_sdk_major_version iphoneos)" -gt 8 ] \
+               && [ "$(show_xcode_version | cut -d. -f1)" -lt 16 ]; then
               check_add_cflags -fembed-bitcode
               check_add_asflags -fembed-bitcode
               check_add_ldflags -fembed-bitcode
