@@ -36,20 +36,6 @@ DECLARE_ALIGNED(16, static const uint16_t, kDotProdMergeBlockTbl[24]) = {
 DECLARE_ALIGNED(16, static const uint16_t, kTblConv4_8[8]) = { 0, 2, 4, 6,
                                                                1, 3, 5, 7 };
 
-static INLINE void vpx_tbl2x4_s16(int16x8_t s0[4], int16x8_t s1[4],
-                                  int16x8_t res[4], uint16x8_t idx) {
-  res[0] = vpx_tbl2_s16(s0[0], s1[0], idx);
-  res[1] = vpx_tbl2_s16(s0[1], s1[1], idx);
-  res[2] = vpx_tbl2_s16(s0[2], s1[2], idx);
-  res[3] = vpx_tbl2_s16(s0[3], s1[3], idx);
-}
-
-static INLINE void vpx_tbl2x2_s16(int16x8_t s0[2], int16x8_t s1[2],
-                                  int16x8_t res[2], uint16x8_t idx) {
-  res[0] = vpx_tbl2_s16(s0[0], s1[0], idx);
-  res[1] = vpx_tbl2_s16(s0[1], s1[1], idx);
-}
-
 static INLINE uint16x4_t highbd_convolve8_4_v(int16x8_t s_lo[2],
                                               int16x8_t s_hi[2],
                                               int16x8_t filter,
