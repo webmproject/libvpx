@@ -1818,8 +1818,11 @@ WRAP12TAP(convolve12_neon, 12)
 
 #if HAVE_SVE2
 WRAP12TAP(convolve12_horiz_sve2, 8)
+WRAP12TAP(convolve12_vert_sve2, 8)
 WRAP12TAP(convolve12_horiz_sve2, 10)
+WRAP12TAP(convolve12_vert_sve2, 10)
 WRAP12TAP(convolve12_horiz_sve2, 12)
+WRAP12TAP(convolve12_vert_sve2, 12)
 #endif  // HAVE_SVE2
 
 WRAP12TAP(convolve12_horiz_c, 8)
@@ -2189,15 +2192,15 @@ INSTANTIATE_TEST_SUITE_P(SVE2, ConvolveTest,
 
 #if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 const ConvolveFunctions12Tap convolve12tap_8bit_sve2(
-    wrap_convolve12_horiz_sve2_8, wrap_convolve12_vert_c_8, wrap_convolve12_c_8,
-    8);
+    wrap_convolve12_horiz_sve2_8, wrap_convolve12_vert_sve2_8,
+    wrap_convolve12_c_8, 8);
 
 const ConvolveFunctions12Tap convolve12tap_10bit_sve2(
-    wrap_convolve12_horiz_sve2_10, wrap_convolve12_vert_c_10,
+    wrap_convolve12_horiz_sve2_10, wrap_convolve12_vert_sve2_10,
     wrap_convolve12_c_10, 10);
 
 const ConvolveFunctions12Tap convolve12tap_12bit_sve2(
-    wrap_convolve12_horiz_sve2_12, wrap_convolve12_vert_c_12,
+    wrap_convolve12_horiz_sve2_12, wrap_convolve12_vert_sve2_12,
     wrap_convolve12_c_12, 12);
 
 const Convolve12TapParam kArrayConvolve12Tap_sve2[] = {
