@@ -69,6 +69,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "third_party/nalloc/nalloc.h"
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx_ports/mem_ops.h"
@@ -85,6 +86,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   if (size <= IVF_FILE_HDR_SZ) {
     return 0;
   }
+  nalloc_init(nullptr);
 
   vpx_codec_ctx_t codec;
   // Set thread count in the range [1, 64].
@@ -93,6 +95,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   if (vpx_codec_dec_init(&codec, VPXD_INTERFACE(DECODER), &cfg, 0)) {
     return 0;
   }
+  nalloc_start(data, size);
 
   if (threads > 1) {
     const int enable = (data[IVF_FILE_HDR_SZ] & 0xa0) != 0;
@@ -126,5 +129,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     size -= frame_size;
   }
   vpx_codec_destroy(&codec);
+  nalloc_end();
   return 0;
 }
