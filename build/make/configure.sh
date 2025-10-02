@@ -1381,6 +1381,10 @@ EOF
           AS=${AS:-nasm}
           add_ldflags -Zhigh-mem
           ;;
+        darwin*)
+          enabled x86 && darwin_arch="-arch i386" || darwin_arch="-arch x86_64"
+          add_cflags  ${darwin_arch}
+          add_ldflags ${darwin_arch}
       esac
 
       AS="${alt_as:-${AS:-auto}}"
@@ -1503,9 +1507,6 @@ EOF
           ;;
         darwin*)
           add_asflags -f macho${bits}
-          enabled x86 && darwin_arch="-arch i386" || darwin_arch="-arch x86_64"
-          add_cflags  ${darwin_arch}
-          add_ldflags ${darwin_arch}
           # -mdynamic-no-pic is still a bit of voodoo -- it was required at
           # one time, but does not seem to be now, and it breaks some of the
           # code that still relies on inline assembly.
