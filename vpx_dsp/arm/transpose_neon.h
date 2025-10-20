@@ -1574,8 +1574,8 @@ static INLINE void transpose_concat_s16_4x4(const int16x4_t a0,
 
   int16x8x2_t a0123 = vzipq_s16(a02, a13);
 
-  b0[0] = a0123.val[0];
-  b1[1] = a0123.val[1];
+  *b0 = a0123.val[0];
+  *b1 = a0123.val[1];
 }
 
 static INLINE void transpose_concat_s16_8x4(const int16x8_t a0,
