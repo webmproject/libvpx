@@ -1420,7 +1420,14 @@ static void set_tile_limits(VP9_COMP *cpi) {
 
   cm->log2_tile_cols =
       clamp(cpi->oxcf.tile_columns, min_log2_tile_cols, max_log2_tile_cols);
-  cm->log2_tile_rows = cpi->oxcf.tile_rows;
+
+  // Max allowed number of tile_rows is 4 (so log2_tile_rows = 2), and each
+  // tile_row contains a multiple of superblocks.
+  const int sb64_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> 3;
+  const int max_log2_tile_rows = (sb64_rows >= 4)   ? 2
+                                 : (sb64_rows >= 2) ? 1
+                                                    : 0;
+  cm->log2_tile_rows = VPXMIN(cpi->oxcf.tile_rows, max_log2_tile_rows);
 
   if (cpi->oxcf.target_level == LEVEL_AUTO) {
     const int level_tile_cols =
