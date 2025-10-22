@@ -180,6 +180,7 @@ VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/arm/neon/vp9_temporal_filt
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/arm/neon/vp9_temporal_filter_neon_dotprod.c
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/arm/neon/vp9_temporal_filter_neon_i8mm.c
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/arm/neon/vp9_highbd_temporal_filter_neon.c
+VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/arm/neon/vp9_highbd_temporal_filter_sve2.c
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_alt_ref_aq.h
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_alt_ref_aq.c
 VP9_CX_SRCS_REMOVE-$(CONFIG_REALTIME_ONLY) += encoder/vp9_aq_variance.c

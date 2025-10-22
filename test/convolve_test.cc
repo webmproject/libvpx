@@ -2205,9 +2205,11 @@ const Convolve12TapParam kArrayConvolve12Tap_sve2[] = {
   ALL_SIZES_12TAP(convolve12tap_10bit_sve2),
   ALL_SIZES_12TAP(convolve12tap_12bit_sve2)
 };
+#endif  // !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 
-#else
+#else  // !CONFIG_VP9_HIGHBITDEPTH
 
+#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 const ConvolveFunctions12Tap convolve12Tap_sve2(vpx_convolve12_horiz_sve2,
                                                 vpx_convolve12_vert_c,
                                                 vpx_convolve12_c, 0);
@@ -2215,9 +2217,13 @@ const Convolve12TapParam kArrayConvolve12Tap_sve2[] = { ALL_SIZES_12TAP(
     convolve12Tap_sve2) };
 #endif  // !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#if !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
 INSTANTIATE_TEST_SUITE_P(SVE2, ConvolveTest12Tap,
                          ::testing::ValuesIn(kArrayConvolve12Tap_sve2));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // !CONFIG_REALTIME_ONLY && CONFIG_VP9_ENCODER
+
 #endif  // HAVE_SVE2
 
 #if HAVE_NEON_I8MM
