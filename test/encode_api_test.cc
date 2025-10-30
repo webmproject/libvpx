@@ -1821,6 +1821,15 @@ TEST(EncodeAPI, Buganizer442105459_2RowTiles) {
   vpx_img_fmt_t img_fmt = VPX_IMG_FMT_I420;
   // Allocate image with varied alignment
   vpx_image_t *img = vpx_img_alloc(nullptr, img_fmt, cfg.g_w, cfg.g_h, 1);
+  for (unsigned int y = 0; y < img->d_h; y++) {
+    for (unsigned int x = 0; x < img->d_w; x++) {
+      img->planes[0][y * img->stride[0] + x] = ((x ^ y) * 127) & 0xFF;
+    }
+  }
+  const unsigned int uv_height = (img->d_h + 1) >> 1;
+  for (int i : { VPX_PLANE_U, VPX_PLANE_V }) {
+    memset(img->planes[i], 0, img->stride[i] * uv_height);
+  }
   // Encode with dynamic configuration changes
   int num_frames = 2;
   // Per-frame constants captured from the original run (indices consumed per
@@ -1854,8 +1863,7 @@ TEST(EncodeAPI, Buganizer442105459_2RowTiles) {
 // on very first encoded frame since lag_in_frames = 0. Issue is due to enabling
 // TILE_ROWS, with number of tile_rows more than the number of superblocks.
 // This test sets 4 tile_rows with height corresponding to 3 superblocks.
-// TODO: b:442105459 - Re-enable after fix msan
-TEST(EncodeAPI, DISABLED_Buganizer442105459_4RowTiles) {
+TEST(EncodeAPI, Buganizer442105459_4RowTiles) {
   // Initialize VP9 encoder interface
   vpx_codec_iface_t *iface = vpx_codec_vp9_cx();
   // Get default encoder configuration
@@ -1886,6 +1894,15 @@ TEST(EncodeAPI, DISABLED_Buganizer442105459_4RowTiles) {
   vpx_img_fmt_t img_fmt = VPX_IMG_FMT_I420;
   // Allocate image with varied alignment
   vpx_image_t *img = vpx_img_alloc(nullptr, img_fmt, cfg.g_w, cfg.g_h, 1);
+  for (unsigned int y = 0; y < img->d_h; y++) {
+    for (unsigned int x = 0; x < img->d_w; x++) {
+      img->planes[0][y * img->stride[0] + x] = ((x ^ y) * 127) & 0xFF;
+    }
+  }
+  const unsigned int uv_height = (img->d_h + 1) >> 1;
+  for (int i : { VPX_PLANE_U, VPX_PLANE_V }) {
+    memset(img->planes[i], 0, img->stride[i] * uv_height);
+  }
   // Encode with dynamic configuration changes
   int num_frames = 2;
   // Per-frame constants captured from the original run (indices consumed per
