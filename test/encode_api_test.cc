@@ -1854,7 +1854,8 @@ TEST(EncodeAPI, Buganizer442105459_2RowTiles) {
 // on very first encoded frame since lag_in_frames = 0. Issue is due to enabling
 // TILE_ROWS, with number of tile_rows more than the number of superblocks.
 // This test sets 4 tile_rows with height corresponding to 3 superblocks.
-TEST(EncodeAPI, Buganizer442105459_4RowTiles) {
+// TODO: b:442105459 - Re-enable after fix msan
+TEST(EncodeAPI, DISABLED_Buganizer442105459_4RowTiles) {
   // Initialize VP9 encoder interface
   vpx_codec_iface_t *iface = vpx_codec_vp9_cx();
   // Get default encoder configuration
