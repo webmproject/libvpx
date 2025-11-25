@@ -62,6 +62,7 @@
  * https://github.com/google/oss-fuzz
  */
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
