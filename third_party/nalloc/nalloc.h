@@ -29,7 +29,17 @@
 #if __has_feature(address_sanitizer)
 #define NALLOC_ASAN 1
 #endif
+#if __has_feature(memory_sanitizer)
+#define FUZZER_DISABLE_NALLOC 1
 #endif
+#endif
+
+#if defined(FUZZER_DISABLE_NALLOC)
+#define nalloc_init(x)
+#define nalloc_restrict_file_prefix(x)
+#define nalloc_start(x, y)
+#define nalloc_end()
+#else
 
 #include <errno.h>
 #include <stdbool.h>
@@ -326,5 +336,7 @@ void *reallocarray(void *ptr, size_t nmemb, size_t size) {
 #ifdef __cplusplus
 }  // extern "C" {
 #endif
+
+#endif // FUZZER_DISABLE_NALLOC
 
 #endif  // NALLOC_H_
