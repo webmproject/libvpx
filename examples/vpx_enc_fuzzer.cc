@@ -67,6 +67,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
