@@ -119,8 +119,8 @@ void vp9_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch, int rows,
   uint16_t d[16];
 
   for (r = 0; r < rows; r++) {
-    int sumsq = 0;
-    int sum = 0;
+    int64_t sumsq = 0;
+    int64_t sum = 0;
 
     for (i = -8; i <= 6; i++) {
       sumsq += s[i] * s[i];
@@ -157,8 +157,8 @@ void vp9_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch, int rows, int cols,
 
   for (c = 0; c < cols; c++) {
     uint16_t *s = &dst[c];
-    int sumsq = 0;
-    int sum = 0;
+    int64_t sumsq = 0;
+    int64_t sum = 0;
     uint16_t d[16];
     const int16_t *rv2 = rv3 + ((c * 17) & 127);
 
