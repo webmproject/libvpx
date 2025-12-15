@@ -254,8 +254,7 @@ void vp9_deblock(struct VP9Common *cm, const YV12_BUFFER_CONFIG *src,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     int mbr;
     const int mb_rows = cm->mb_rows;
-    const int mb_cols = cm->mb_cols;
-    memset(limits, (unsigned char)ppl, 16 * mb_cols);
+    memset(limits, (unsigned char)ppl, cm->postproc_state.limits_size);
 
     for (mbr = 0; mbr < mb_rows; mbr++) {
       vpx_post_proc_down_and_across_mb_row(
@@ -298,6 +297,7 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
   const int flags = ppflags->post_proc_flag;
   YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
   struct postproc_state *const ppstate = &cm->postproc_state;
+  ppstate->limits_size = unscaled_width;
 
   if (!cm->frame_to_show) return -1;
 
@@ -359,7 +359,7 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
   if (flags & (VP9D_DEMACROBLOCK | VP9D_DEBLOCK)) {
     if (!cm->postproc_state.limits) {
       cm->postproc_state.limits =
-          vpx_calloc(unscaled_width, sizeof(*cm->postproc_state.limits));
+          vpx_calloc(ppstate->limits_size, sizeof(*cm->postproc_state.limits));
       if (!cm->postproc_state.limits) return 1;
     }
   }
