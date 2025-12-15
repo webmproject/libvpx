@@ -342,7 +342,7 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
       // Ensure that postproc is set to all 0s so that post proc
       // doesn't pull random data in from edge.
       memset(cm->post_proc_buffer_int.buffer_alloc, 128,
-             cm->post_proc_buffer.frame_size);
+             cm->post_proc_buffer_int.frame_size);
     }
   }
 
