@@ -339,7 +339,7 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
                            "Failed to allocate MFQE framebuffer");
       }
 
-      // Ensure that postproc is set to all 0s so that post proc
+      // Ensure that postproc is set to flat image so that post proc
       // doesn't pull random data in from edge.
       memset(cm->post_proc_buffer_int.buffer_alloc, 128,
              cm->post_proc_buffer_int.frame_size);
@@ -352,9 +352,12 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
                                cm->use_highbitdepth,
 #endif
                                VP9_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
-                               NULL, NULL, NULL) < 0)
+                               NULL, NULL, NULL) < 0) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate post-processing buffer");
+  }
+  memset(cm->post_proc_buffer.buffer_alloc, 128,
+         cm->post_proc_buffer.frame_size);
 
   if (flags & (VP9D_DEMACROBLOCK | VP9D_DEBLOCK)) {
     if (!cm->postproc_state.limits) {
