@@ -64,6 +64,10 @@ const TestVideoParam kTestVectorsNv12[] = {
   { "hantro_collage_w352h288_nv12.yuv", 8, VPX_IMG_FMT_NV12, VPX_BITS_8, 0 },
 };
 
+const TestVideoParam k4x2VideoTestVectors[] = {
+  { "4x2.y4m", 8, VPX_IMG_FMT_I420, VPX_BITS_8, 0 },
+};
+
 // Encoding modes tested
 const libvpx_test::TestMode kEncodingModeVectors[] = {
 #if !CONFIG_REALTIME_ONLY
@@ -265,6 +269,24 @@ TEST_P(EndToEndNV12, EndtoEndNV12Test) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
 
+class EndToEnd4x2Video : public EndToEndTestLarge {};
+
+TEST_P(EndToEnd4x2Video, EndtoEnd4x2VideoTest) {
+  cfg_.rc_target_bitrate = kBitrate;
+  cfg_.g_error_resilient = 0;
+  cfg_.g_profile = test_video_param_.profile;
+  cfg_.g_input_bit_depth = test_video_param_.input_bit_depth;
+  cfg_.g_bit_depth = test_video_param_.bit_depth;
+
+  std::unique_ptr<libvpx_test::VideoSource> video;
+
+  video.reset(
+      new libvpx_test::Y4mVideoSource(test_video_param_.filename, 0, 200));
+  ASSERT_NE(video.get(), nullptr);
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
+}
+
 TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
   cfg_.rc_target_bitrate = kBitrate;
   cfg_.g_error_resilient = 0;
@@ -346,6 +368,11 @@ VP9_INSTANTIATE_TEST_SUITE(EndToEndNV12,
                            ::testing::Values(::libvpx_test::kRealTime),
                            ::testing::ValuesIn(kTestVectorsNv12),
                            ::testing::Values(6, 7, 8));
+
+VP9_INSTANTIATE_TEST_SUITE(EndToEnd4x2Video,
+                           ::testing::Values(::libvpx_test::kTwoPassGood),
+                           ::testing::ValuesIn(k4x2VideoTestVectors),
+                           ::testing::Values(0, 1));
 
 VP9_INSTANTIATE_TEST_SUITE(EndToEndTestAdaptiveRDThresh,
                            ::testing::Values(5, 6, 7), ::testing::Values(8, 9));
