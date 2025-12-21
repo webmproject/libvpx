@@ -538,6 +538,36 @@ TEST_P(VP9HighbdIntraPredTest, HighbdIntraPredTests) {
 }
 #endif
 
+#if HAVE_AVX512
+INSTANTIATE_TEST_SUITE_P(AVX512_TO_C_8, VP9HighbdIntraPredTest,
+                         ::testing::Values(HighbdIntraPredParam(
+                             &vpx_highbd_d63_predictor_32x32_avx512,
+                             &vpx_highbd_d63_predictor_32x32_c, 32, 8)));
+INSTANTIATE_TEST_SUITE_P(AVX512_TO_C_10, VP9HighbdIntraPredTest,
+                         ::testing::Values(HighbdIntraPredParam(
+                             &vpx_highbd_d63_predictor_32x32_avx512,
+                             &vpx_highbd_d63_predictor_32x32_c, 32, 10)));
+INSTANTIATE_TEST_SUITE_P(AVX512_TO_C_12, VP9HighbdIntraPredTest,
+                         ::testing::Values(HighbdIntraPredParam(
+                             &vpx_highbd_d63_predictor_32x32_avx512,
+                             &vpx_highbd_d63_predictor_32x32_c, 32, 12)));
+#endif  // HAVE_AVX512
+
+#if HAVE_AVX2
+INSTANTIATE_TEST_SUITE_P(AVX2_TO_C_8, VP9HighbdIntraPredTest,
+                         ::testing::Values(HighbdIntraPredParam(
+                             &vpx_highbd_d63_predictor_32x32_avx2,
+                             &vpx_highbd_d63_predictor_32x32_c, 32, 8)));
+INSTANTIATE_TEST_SUITE_P(AVX2_TO_C_10, VP9HighbdIntraPredTest,
+                         ::testing::Values(HighbdIntraPredParam(
+                             &vpx_highbd_d63_predictor_32x32_avx2,
+                             &vpx_highbd_d63_predictor_32x32_c, 32, 10)));
+INSTANTIATE_TEST_SUITE_P(AVX2_TO_C_12, VP9HighbdIntraPredTest,
+                         ::testing::Values(HighbdIntraPredParam(
+                             &vpx_highbd_d63_predictor_32x32_avx2,
+                             &vpx_highbd_d63_predictor_32x32_c, 32, 12)));
+#endif  // HAVE_AVX2
+
 #if HAVE_SSSE3
 INSTANTIATE_TEST_SUITE_P(
     SSSE3_TO_C_8, VP9HighbdIntraPredTest,
