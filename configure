@@ -304,6 +304,7 @@ HAVE_LIST="
     ${ARCH_EXT_LIST}
     vpx_ports
     pthread_h
+    pthread_setname_np
     unistd_h
 "
 EXPERIMENT_LIST="

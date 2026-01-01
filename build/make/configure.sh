@@ -1628,12 +1628,22 @@ EOF
         ;;
       *-android-gcc)
         # bionic includes basic pthread functionality, obviating -lpthread.
+        soft_enable pthread_setname_np
         ;;
       *)
         check_header pthread.h && check_lib -lpthread <<EOF && add_extralibs -lpthread || disable_feature pthread_h
 #include <pthread.h>
 #include <stddef.h>
 int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }
+EOF
+
+        enabled pthread_h && check_lib -lpthread <<EOF && enable_feature pthread_setname_np
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
+#include <pthread.h>
+int main(void) { return &pthread_setname_np != 0; }
 EOF
         ;;
     esac
