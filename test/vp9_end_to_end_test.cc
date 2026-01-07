@@ -269,6 +269,7 @@ TEST_P(EndToEndNV12, EndtoEndNV12Test) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
 
+#if !CONFIG_REALTIME_ONLY
 class EndToEnd4x2Video : public EndToEndTestLarge {};
 
 TEST_P(EndToEnd4x2Video, EndtoEnd4x2VideoTest) {
@@ -286,6 +287,7 @@ TEST_P(EndToEnd4x2Video, EndtoEnd4x2VideoTest) {
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(video.get()));
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
   cfg_.rc_target_bitrate = kBitrate;
@@ -369,10 +371,12 @@ VP9_INSTANTIATE_TEST_SUITE(EndToEndNV12,
                            ::testing::ValuesIn(kTestVectorsNv12),
                            ::testing::Values(6, 7, 8));
 
+#if !CONFIG_REALTIME_ONLY
 VP9_INSTANTIATE_TEST_SUITE(EndToEnd4x2Video,
                            ::testing::Values(::libvpx_test::kTwoPassGood),
                            ::testing::ValuesIn(k4x2VideoTestVectors),
                            ::testing::Values(0, 1));
+#endif
 
 VP9_INSTANTIATE_TEST_SUITE(EndToEndTestAdaptiveRDThresh,
                            ::testing::Values(5, 6, 7), ::testing::Values(8, 9));

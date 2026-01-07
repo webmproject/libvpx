@@ -164,8 +164,10 @@ ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_DECODER),yesyes)
 # IDCT test currently depends on FDCT function
 LIBVPX_TEST_SRCS-yes                   += idct8x8_test.cc
 LIBVPX_TEST_SRCS-yes                   += partial_idct_test.cc
+ifneq ($(CONFIG_REALTIME_ONLY),yes)
 LIBVPX_TEST_SRCS-yes                   += superframe_test.cc
 LIBVPX_TEST_SRCS-yes                   += tile_independence_test.cc
+endif
 LIBVPX_TEST_SRCS-yes                   += vp9_boolcoder_test.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_encoder_parms_get_to_decoder.cc
 LIBVPX_TEST_SRCS-yes                   += vp9_roi_test.cc

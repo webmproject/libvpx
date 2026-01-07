@@ -605,6 +605,8 @@ TEST(EncodeAPI, AomediaIssue3509VbrMinSection101PercentVP8) {
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 
+// VP8 realtime mode does not support lag in frames.
+#if !CONFIG_REALTIME_ONLY
 TEST(EncodeAPI, OssFuzz69100) {
   // Initialize libvpx encoder.
   vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
@@ -649,6 +651,7 @@ TEST(EncodeAPI, OssFuzz69100) {
 
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+#endif  // !CONFIG_REALTIME_ONLY
 
 void EncodeOssFuzz69906(int cpu_used, vpx_enc_deadline_t deadline) {
   char str[80];
