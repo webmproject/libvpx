@@ -1180,7 +1180,7 @@ INSTANTIATE_TEST_SUITE_P(
                                 12)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if HAVE_SSE2
+#if HAVE_SSE2 && HAVE_X86_ASM
 INSTANTIATE_TEST_SUITE_P(SSE2, SumOfSquaresTest,
                          ::testing::Values(vpx_get_mb_ss_sse2));
 
@@ -1476,9 +1476,9 @@ INSTANTIATE_TEST_SUITE_P(
                                 &vpx_highbd_8_sub_pixel_avg_variance8x4_sse2,
                                 8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-#endif  // HAVE_SSE2
+#endif  // HAVE_SSE2 && HAVE_X86_ASM
 
-#if HAVE_SSSE3
+#if HAVE_SSSE3 && HAVE_X86_ASM
 INSTANTIATE_TEST_SUITE_P(
     SSSE3, VpxSubpelVarianceTest,
     ::testing::Values(
@@ -1520,7 +1520,7 @@ INSTANTIATE_TEST_SUITE_P(
         SubpelAvgVarianceParams(2, 3, &vpx_sub_pixel_avg_variance4x8_ssse3, 0),
         SubpelAvgVarianceParams(2, 2, &vpx_sub_pixel_avg_variance4x4_ssse3,
                                 0)));
-#endif  // HAVE_SSSE3
+#endif  // HAVE_SSSE3 && HAVE_X86_ASM
 
 #if HAVE_AVX2
 INSTANTIATE_TEST_SUITE_P(AVX2, VpxMseTest,

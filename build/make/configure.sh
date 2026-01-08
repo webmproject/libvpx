@@ -1363,6 +1363,7 @@ EOF
       fi
       ;;
     x86*)
+      soft_enable x86_asm
       case  ${tgt_os} in
         android)
           soft_enable realtime_only

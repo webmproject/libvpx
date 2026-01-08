@@ -294,6 +294,7 @@ ARCH_EXT_LIST="
     msa
     mips64
 
+    x86_asm
     ${ARCH_EXT_LIST_X86}
 
     vsx
