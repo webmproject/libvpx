@@ -77,7 +77,11 @@ const libvpx_test::TestMode kEncodingModeVectors[] = {
 };
 
 // Speed settings tested
+#if CONFIG_REALTIME_ONLY
+const int kCpuUsedVectors[] = { 5, 6, 7 };
+#else
 const int kCpuUsedVectors[] = { 1, 2, 3, 5, 6, 7 };
+#endif
 
 int is_extension_y4m(const char *filename) {
   const char *dot = strrchr(filename, '.');

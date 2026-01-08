@@ -1220,6 +1220,7 @@ static vpx_codec_err_t pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
   if (deadline == VPX_DL_REALTIME) {
     ctx->oxcf.pass = 0;
     new_mode = REALTIME;
+    ctx->oxcf.speed = VPXMAX(ctx->oxcf.speed, 5);
   }
 
   if (ctx->oxcf.mode != new_mode) {
