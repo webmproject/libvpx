@@ -1,3 +1,46 @@
+2026-01-06 v1.16.0 "Xenonetta Duck"
+  This release includes Arm SVE2 and Neon optimizations for 12-tap filters,
+  AVX512 implementations for SAD, support for per-frame and per-spatial-layer
+  PSNR calculation, and numerous bug fixes.
+
+  - Upgrading:
+    This release is ABI incompatible with the previous release.
+
+    Unit tests require C++17 to build.
+
+    Support for 32-bit iOS targets (armv7, armv7s, and i386) has been removed.
+
+  - Enhancement:
+    Optimized Arm SVE2 and Neon implementations for 12-tap convolution filters.
+    Optimized Neon High Bitdepth (HBD) SAD and sad_avg functions.
+    Added Arm Neon DotProd and I8MM implementations for vpx_convolve12.
+    Added AVX512 implementations for SAD64 and sad_skip functions.
+    Added SSSE3 and AVX2 implementations for 12-tap temporal filter prediction.
+    Added support for per-frame and per-spatial-layer PSNR calculation.
+
+    Adjusted temporal filter strength to improve visual quality and reduce block
+    artifacts.
+
+    Added support for darwin24 (macOS 15) and darwin25 (macOS 26).
+    libwebm is upgraded to commit b4f01ea.
+
+  - Bug fixes:
+    Fix to heap buffer overflow in vp9_deblock, vp9_post_proc_frame, and
+    vp9_pack_bitstream.
+
+    Fix to integer overflow in vp9_highbd_post_proc, vp9_rc_regulate_q,
+    tiny_ssim, and vp9_calc_pframe_target_size_one_pass_cbr.
+
+    Fix to use-of-uninitialized-value in vp9_highbd_post_proc, mfqe, and
+    vp8_datarate_test.
+
+    Fix to out-of-bounds in log_tile_cols_from_picsize_level.
+    Fix to double free on initialization failure in vpx_codec_enc_init_multi.
+    Fix to division-by-zero crash in vpxenc with 0 FPS numerator input.
+
+    Fix to various build failures for Arm/SVE2, macOS cross-compilation, and
+    Xcode 16.
+
 2025-05-28 v1.15.2 "Wigeon Duck"
   This release fixes CVE-2025-5283 (bug webm:413411335), and is ABI compatible
   with the previous release.
