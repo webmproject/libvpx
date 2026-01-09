@@ -12,12 +12,53 @@
  */
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "vpx/vpx_integer.h"
+#include "vpx_mem/vpx_mem.h"
 #include "y4minput.h"
+
+static int checked_add_size(size_t a, size_t b, size_t *out) {
+  if (a > SIZE_MAX - b) return 0;
+  *out = a + b;
+  return 1;
+}
+
+static int checked_mul_size(size_t a, size_t b, size_t *out) {
+  if (a != 0 && b > SIZE_MAX / a) return 0;
+  *out = a * b;
+  return 1;
+}
+
+static int checked_muladd_size(size_t a, size_t b, size_t c, size_t *out) {
+  size_t prod;
+  if (!checked_mul_size(a, b, &prod)) return 0;
+  return checked_add_size(prod, c, out);
+}
+
+static int checked_ceil_div_size(size_t n, size_t d, size_t *out) {
+  size_t tmp;
+  if (d == 0) return 0;
+  if (!checked_add_size(n, d - 1, &tmp)) return 0;
+  *out = tmp / d;
+  return 1;
+}
+
+static int parse_positive_int_tag(const char *s, int *out) {
+  char *end = NULL;
+  unsigned long value;
+  if (s == NULL || out == NULL) return 0;
+  if (*s == '\0' || *s == '-') return 0;
+  errno = 0;
+  value = strtoul(s, &end, 10);
+  if (errno != 0 || end == s || *end != '\0') return 0;
+  if (value == 0 || value > (unsigned long)INT_MAX) return 0;
+  *out = (int)value;
+  return 1;
+}
 
 // Reads 'size' bytes from 'file' into 'buf' with some fault tolerance.
 // Returns true on success.
@@ -67,11 +108,11 @@ static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
     /*Process the tag.*/
     switch (p[0]) {
       case 'W': {
-        if (sscanf(p + 1, "%d", &_y4m->pic_w) != 1) return -1;
+        if (!parse_positive_int_tag(p + 1, &_y4m->pic_w)) return -1;
         break;
       }
       case 'H': {
-        if (sscanf(p + 1, "%d", &_y4m->pic_h) != 1) return -1;
+        if (!parse_positive_int_tag(p + 1, &_y4m->pic_h)) return -1;
         break;
       }
       case 'F': {
@@ -855,6 +896,14 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
   if (!parse_tags(y4m_ctx, file)) {
     fprintf(stderr, "Error parsing %s header.\n", TAG);
   }
+
+  // Reject non-positive or unreasonably large dimensions early.
+  // Note: y4m_input stores dimensions as int but vpx_image uses unsigned int.
+  if (y4m_ctx->pic_w <= 0 || y4m_ctx->pic_h <= 0) return -1;
+  if ((unsigned long)y4m_ctx->pic_w > UINT_MAX ||
+      (unsigned long)y4m_ctx->pic_h > UINT_MAX) {
+    return -1;
+  }
   if (y4m_ctx->interlace == '?') {
     fprintf(stderr,
             "Warning: Input video interlacing format unknown; "
@@ -875,9 +924,18 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
       strcmp(y4m_ctx->chroma_type, "420mpeg2") == 0) {
     y4m_ctx->src_c_dec_h = y4m_ctx->dst_c_dec_h = y4m_ctx->src_c_dec_v =
         y4m_ctx->dst_c_dec_v = 2;
-    y4m_ctx->dst_buf_read_sz =
-        y4m_ctx->pic_w * y4m_ctx->pic_h +
-        2 * ((y4m_ctx->pic_w + 1) / 2) * ((y4m_ctx->pic_h + 1) / 2);
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t luma, cw, ch, chroma, chroma2, total;
+      if (!checked_mul_size(w, h, &luma)) return -1;
+      if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+      if (!checked_ceil_div_size(h, 2u, &ch)) return -1;
+      if (!checked_mul_size(cw, ch, &chroma)) return -1;
+      if (!checked_mul_size(2u, chroma, &chroma2)) return -1;
+      if (!checked_add_size(luma, chroma2, &total)) return -1;
+      y4m_ctx->dst_buf_read_sz = total;
+    }
     /* Natively supported: no conversion required. */
     y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz = 0;
     y4m_ctx->convert = y4m_convert_null;
@@ -886,9 +944,19 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
     y4m_ctx->dst_c_dec_h = 2;
     y4m_ctx->src_c_dec_v = 2;
     y4m_ctx->dst_c_dec_v = 2;
-    y4m_ctx->dst_buf_read_sz =
-        2 * (y4m_ctx->pic_w * y4m_ctx->pic_h +
-             2 * ((y4m_ctx->pic_w + 1) / 2) * ((y4m_ctx->pic_h + 1) / 2));
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t luma, cw, ch, chroma, chroma2, samples, bytes;
+      if (!checked_mul_size(w, h, &luma)) return -1;
+      if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+      if (!checked_ceil_div_size(h, 2u, &ch)) return -1;
+      if (!checked_mul_size(cw, ch, &chroma)) return -1;
+      if (!checked_mul_size(2u, chroma, &chroma2)) return -1;
+      if (!checked_add_size(luma, chroma2, &samples)) return -1;
+      if (!checked_mul_size(2u, samples, &bytes)) return -1;
+      y4m_ctx->dst_buf_read_sz = bytes;
+    }
     /* Natively supported: no conversion required. */
     y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz = 0;
     y4m_ctx->convert = y4m_convert_null;
@@ -904,9 +972,19 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
     y4m_ctx->dst_c_dec_h = 2;
     y4m_ctx->src_c_dec_v = 2;
     y4m_ctx->dst_c_dec_v = 2;
-    y4m_ctx->dst_buf_read_sz =
-        2 * (y4m_ctx->pic_w * y4m_ctx->pic_h +
-             2 * ((y4m_ctx->pic_w + 1) / 2) * ((y4m_ctx->pic_h + 1) / 2));
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t luma, cw, ch, chroma, chroma2, samples, bytes;
+      if (!checked_mul_size(w, h, &luma)) return -1;
+      if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+      if (!checked_ceil_div_size(h, 2u, &ch)) return -1;
+      if (!checked_mul_size(cw, ch, &chroma)) return -1;
+      if (!checked_mul_size(2u, chroma, &chroma2)) return -1;
+      if (!checked_add_size(luma, chroma2, &samples)) return -1;
+      if (!checked_mul_size(2u, samples, &bytes)) return -1;
+      y4m_ctx->dst_buf_read_sz = bytes;
+    }
     /* Natively supported: no conversion required. */
     y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz = 0;
     y4m_ctx->convert = y4m_convert_null;
@@ -920,23 +998,50 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
   } else if (strcmp(y4m_ctx->chroma_type, "420paldv") == 0) {
     y4m_ctx->src_c_dec_h = y4m_ctx->dst_c_dec_h = y4m_ctx->src_c_dec_v =
         y4m_ctx->dst_c_dec_v = 2;
-    y4m_ctx->dst_buf_read_sz = y4m_ctx->pic_w * y4m_ctx->pic_h;
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t luma;
+      if (!checked_mul_size(w, h, &luma)) return -1;
+      y4m_ctx->dst_buf_read_sz = luma;
+    }
     /*Chroma filter required: read into the aux buf first.
       We need to make two filter passes, so we need some extra space in the
        aux buffer.*/
-    y4m_ctx->aux_buf_sz =
-        3 * ((y4m_ctx->pic_w + 1) / 2) * ((y4m_ctx->pic_h + 1) / 2);
-    y4m_ctx->aux_buf_read_sz =
-        2 * ((y4m_ctx->pic_w + 1) / 2) * ((y4m_ctx->pic_h + 1) / 2);
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t cw, ch, chroma, tmp;
+      if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+      if (!checked_ceil_div_size(h, 2u, &ch)) return -1;
+      if (!checked_mul_size(cw, ch, &chroma)) return -1;
+      if (!checked_mul_size(2u, chroma, &tmp)) return -1;
+      y4m_ctx->aux_buf_read_sz = tmp;
+      if (!checked_mul_size(3u, chroma, &tmp)) return -1;
+      y4m_ctx->aux_buf_sz = tmp;
+    }
     y4m_ctx->convert = y4m_convert_42xpaldv_42xjpeg;
   } else if (strcmp(y4m_ctx->chroma_type, "422jpeg") == 0) {
     y4m_ctx->src_c_dec_h = y4m_ctx->dst_c_dec_h = 2;
     y4m_ctx->src_c_dec_v = 1;
     y4m_ctx->dst_c_dec_v = 2;
-    y4m_ctx->dst_buf_read_sz = y4m_ctx->pic_w * y4m_ctx->pic_h;
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t luma;
+      if (!checked_mul_size(w, h, &luma)) return -1;
+      y4m_ctx->dst_buf_read_sz = luma;
+    }
     /*Chroma filter required: read into the aux buf first.*/
-    y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz =
-        2 * ((y4m_ctx->pic_w + 1) / 2) * y4m_ctx->pic_h;
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t cw, tmp;
+      if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+      if (!checked_mul_size(cw, h, &tmp)) return -1;
+      if (!checked_mul_size(2u, tmp, &tmp)) return -1;
+      y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz = tmp;
+    }
     y4m_ctx->convert = y4m_convert_422jpeg_420jpeg;
   } else if (strcmp(y4m_ctx->chroma_type, "422") == 0) {
     y4m_ctx->src_c_dec_h = 2;
@@ -944,23 +1049,44 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
     if (only_420) {
       y4m_ctx->dst_c_dec_h = 2;
       y4m_ctx->dst_c_dec_v = 2;
-      y4m_ctx->dst_buf_read_sz = y4m_ctx->pic_w * y4m_ctx->pic_h;
+      {
+        size_t w = (size_t)y4m_ctx->pic_w;
+        size_t h = (size_t)y4m_ctx->pic_h;
+        size_t luma;
+        if (!checked_mul_size(w, h, &luma)) return -1;
+        y4m_ctx->dst_buf_read_sz = luma;
+      }
       /*Chroma filter required: read into the aux buf first.
         We need to make two filter passes, so we need some extra space in the
          aux buffer.*/
-      y4m_ctx->aux_buf_read_sz =
-          2 * ((y4m_ctx->pic_w + 1) / 2) * y4m_ctx->pic_h;
-      y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz +
-                            ((y4m_ctx->pic_w + 1) / 2) * y4m_ctx->pic_h;
+      {
+        size_t w = (size_t)y4m_ctx->pic_w;
+        size_t h = (size_t)y4m_ctx->pic_h;
+        size_t cw, tmp, tmp2;
+        if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+        if (!checked_mul_size(cw, h, &tmp)) return -1;
+        if (!checked_mul_size(2u, tmp, &tmp2)) return -1;
+        y4m_ctx->aux_buf_read_sz = tmp2;
+        if (!checked_add_size(tmp2, tmp, &tmp)) return -1;
+        y4m_ctx->aux_buf_sz = tmp;
+      }
       y4m_ctx->convert = y4m_convert_422_420jpeg;
     } else {
       y4m_ctx->vpx_fmt = VPX_IMG_FMT_I422;
       y4m_ctx->bps = 16;
       y4m_ctx->dst_c_dec_h = y4m_ctx->src_c_dec_h;
       y4m_ctx->dst_c_dec_v = y4m_ctx->src_c_dec_v;
-      y4m_ctx->dst_buf_read_sz =
-          y4m_ctx->pic_w * y4m_ctx->pic_h +
-          2 * ((y4m_ctx->pic_w + 1) / 2) * y4m_ctx->pic_h;
+      {
+        size_t w = (size_t)y4m_ctx->pic_w;
+        size_t h = (size_t)y4m_ctx->pic_h;
+        size_t luma, cw, chroma, chroma2, total;
+        if (!checked_mul_size(w, h, &luma)) return -1;
+        if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+        if (!checked_mul_size(cw, h, &chroma)) return -1;
+        if (!checked_mul_size(2u, chroma, &chroma2)) return -1;
+        if (!checked_add_size(luma, chroma2, &total)) return -1;
+        y4m_ctx->dst_buf_read_sz = total;
+      }
       /*Natively supported: no conversion required.*/
       y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz = 0;
       y4m_ctx->convert = y4m_convert_null;
@@ -973,9 +1099,18 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
     y4m_ctx->bit_depth = 10;
     y4m_ctx->dst_c_dec_h = y4m_ctx->src_c_dec_h;
     y4m_ctx->dst_c_dec_v = y4m_ctx->src_c_dec_v;
-    y4m_ctx->dst_buf_read_sz =
-        2 * (y4m_ctx->pic_w * y4m_ctx->pic_h +
-             2 * ((y4m_ctx->pic_w + 1) / 2) * y4m_ctx->pic_h);
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t luma, cw, chroma, chroma2, samples, bytes;
+      if (!checked_mul_size(w, h, &luma)) return -1;
+      if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+      if (!checked_mul_size(cw, h, &chroma)) return -1;
+      if (!checked_mul_size(2u, chroma, &chroma2)) return -1;
+      if (!checked_add_size(luma, chroma2, &samples)) return -1;
+      if (!checked_mul_size(2u, samples, &bytes)) return -1;
+      y4m_ctx->dst_buf_read_sz = bytes;
+    }
     y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz = 0;
     y4m_ctx->convert = y4m_convert_null;
     if (only_420) {
@@ -990,9 +1125,18 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
     y4m_ctx->bit_depth = 12;
     y4m_ctx->dst_c_dec_h = y4m_ctx->src_c_dec_h;
     y4m_ctx->dst_c_dec_v = y4m_ctx->src_c_dec_v;
-    y4m_ctx->dst_buf_read_sz =
-        2 * (y4m_ctx->pic_w * y4m_ctx->pic_h +
-             2 * ((y4m_ctx->pic_w + 1) / 2) * y4m_ctx->pic_h);
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t luma, cw, chroma, chroma2, samples, bytes;
+      if (!checked_mul_size(w, h, &luma)) return -1;
+      if (!checked_ceil_div_size(w, 2u, &cw)) return -1;
+      if (!checked_mul_size(cw, h, &chroma)) return -1;
+      if (!checked_mul_size(2u, chroma, &chroma2)) return -1;
+      if (!checked_add_size(luma, chroma2, &samples)) return -1;
+      if (!checked_mul_size(2u, samples, &bytes)) return -1;
+      y4m_ctx->dst_buf_read_sz = bytes;
+    }
     y4m_ctx->aux_buf_sz = y4m_ctx->aux_buf_read_sz = 0;
     y4m_ctx->convert = y4m_convert_null;
     if (only_420) {
@@ -1004,13 +1148,29 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
     y4m_ctx->dst_c_dec_h = 2;
     y4m_ctx->src_c_dec_v = 1;
     y4m_ctx->dst_c_dec_v = 2;
-    y4m_ctx->dst_buf_read_sz = y4m_ctx->pic_w * y4m_ctx->pic_h;
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t luma;
+      if (!checked_mul_size(w, h, &luma)) return -1;
+      y4m_ctx->dst_buf_read_sz = luma;
+    }
     /*Chroma filter required: read into the aux buf first.
       We need to make two filter passes, so we need some extra space in the
        aux buffer.*/
-    y4m_ctx->aux_buf_read_sz = 2 * ((y4m_ctx->pic_w + 3) / 4) * y4m_ctx->pic_h;
-    y4m_ctx->aux_buf_sz =
-        y4m_ctx->aux_buf_read_sz + ((y4m_ctx->pic_w + 1) / 2) * y4m_ctx->pic_h;
+    {
+      size_t w = (size_t)y4m_ctx->pic_w;
+      size_t h = (size_t)y4m_ctx->pic_h;
+      size_t cw4, cw2, tmp, tmp2;
+      if (!checked_ceil_div_size(w, 4u, &cw4)) return -1;
+      if (!checked_mul_size(cw4, h, &tmp)) return -1;
+      if (!checked_mul_size(2u, tmp, &tmp2)) return -1;
+      y4m_ctx->aux_buf_read_sz = tmp2;
+      if (!checked_ceil_div_size(w, 2u, &cw2)) return -1;
+      if (!checked_mul_size(cw2, h, &tmp)) return -1;
+      if (!checked_add_size(tmp2, tmp, &tmp)) return -1;
+      y4m_ctx->aux_buf_sz = tmp;
+    }
     y4m_ctx->convert = y4m_convert_411_420jpeg;
     fprintf(stderr, "Unsupported conversion from yuv 411\n");
     return -1;
@@ -1081,20 +1241,42 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
   }
   /*The size of the final frame buffers is always computed from the
      destination chroma decimation type.*/
-  y4m_ctx->dst_buf_sz =
-      y4m_ctx->pic_w * y4m_ctx->pic_h +
-      2 * ((y4m_ctx->pic_w + y4m_ctx->dst_c_dec_h - 1) / y4m_ctx->dst_c_dec_h) *
-          ((y4m_ctx->pic_h + y4m_ctx->dst_c_dec_v - 1) / y4m_ctx->dst_c_dec_v);
-  if (y4m_ctx->bit_depth == 8)
-    y4m_ctx->dst_buf = (unsigned char *)malloc(y4m_ctx->dst_buf_sz);
-  else
-    y4m_ctx->dst_buf = (unsigned char *)malloc(2 * y4m_ctx->dst_buf_sz);
-  if (!y4m_ctx->dst_buf) return -1;
+  {
+    const size_t w = (size_t)y4m_ctx->pic_w;
+    const size_t h = (size_t)y4m_ctx->pic_h;
+    const size_t dec_h = (size_t)y4m_ctx->dst_c_dec_h;
+    const size_t dec_v = (size_t)y4m_ctx->dst_c_dec_v;
+    const size_t bytes_per_sample = (y4m_ctx->bit_depth > 8) ? 2u : 1u;
+    size_t luma, cw, ch, chroma, chroma2, samples, dst_bytes;
+
+    if (!checked_mul_size(w, h, &luma)) return -1;
+    if (!checked_ceil_div_size(w, dec_h, &cw)) return -1;
+    if (!checked_ceil_div_size(h, dec_v, &ch)) return -1;
+    if (!checked_mul_size(cw, ch, &chroma)) return -1;
+    if (!checked_mul_size(2u, chroma, &chroma2)) return -1;
+    if (!checked_add_size(luma, chroma2, &samples)) return -1;
+    y4m_ctx->dst_buf_sz = samples;
+
+    if (!checked_mul_size(bytes_per_sample, y4m_ctx->dst_buf_sz, &dst_bytes)) {
+      return -1;
+    }
+    if (y4m_ctx->dst_buf_read_sz > dst_bytes) {
+      return -1;
+    }
+
+    y4m_ctx->dst_buf = (unsigned char *)vpx_malloc(dst_bytes);
+    if (!y4m_ctx->dst_buf) return -1;
+  }
 
   if (y4m_ctx->aux_buf_sz > 0) {
-    y4m_ctx->aux_buf = (unsigned char *)malloc(y4m_ctx->aux_buf_sz);
+    if (y4m_ctx->aux_buf_read_sz > y4m_ctx->aux_buf_sz) {
+      vpx_free(y4m_ctx->dst_buf);
+      y4m_ctx->dst_buf = NULL;
+      return -1;
+    }
+    y4m_ctx->aux_buf = (unsigned char *)vpx_malloc(y4m_ctx->aux_buf_sz);
     if (!y4m_ctx->aux_buf) {
-      free(y4m_ctx->dst_buf);
+      vpx_free(y4m_ctx->dst_buf);
       return -1;
     }
   }
@@ -1102,17 +1284,17 @@ int y4m_input_open(y4m_input *y4m_ctx, FILE *file, char *skip_buffer,
 }
 
 void y4m_input_close(y4m_input *_y4m) {
-  free(_y4m->dst_buf);
-  free(_y4m->aux_buf);
+  vpx_free(_y4m->dst_buf);
+  vpx_free(_y4m->aux_buf);
 }
 
 int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *_img) {
   char frame[6];
-  int pic_sz;
-  int c_w;
-  int c_h;
-  int c_sz;
-  int bytes_per_sample = _y4m->bit_depth > 8 ? 2 : 1;
+  size_t pic_sz;
+  size_t c_w;
+  size_t c_h;
+  size_t c_sz;
+  size_t bytes_per_sample = _y4m->bit_depth > 8 ? 2u : 1u;
   /*Read and skip the frame header.*/
   if (!file_read(frame, 6, _fin)) return 0;
   if (memcmp(frame, "FRAME", 5)) {
@@ -1147,22 +1329,32 @@ int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *_img) {
   memset(_img, 0, sizeof(*_img));
   /*Y4M has the planes in Y'CbCr order, which libvpx calls Y, U, and V.*/
   _img->fmt = _y4m->vpx_fmt;
-  _img->w = _img->d_w = _y4m->pic_w;
-  _img->h = _img->d_h = _y4m->pic_h;
+  _img->w = _img->d_w = (unsigned int)_y4m->pic_w;
+  _img->h = _img->d_h = (unsigned int)_y4m->pic_h;
   _img->bit_depth = _y4m->bit_depth;
   _img->x_chroma_shift = _y4m->dst_c_dec_h >> 1;
   _img->y_chroma_shift = _y4m->dst_c_dec_v >> 1;
   _img->bps = _y4m->bps;
 
   /*Set up the buffer pointers.*/
-  pic_sz = _y4m->pic_w * _y4m->pic_h * bytes_per_sample;
-  c_w = (_y4m->pic_w + _y4m->dst_c_dec_h - 1) / _y4m->dst_c_dec_h;
-  c_w *= bytes_per_sample;
-  c_h = (_y4m->pic_h + _y4m->dst_c_dec_v - 1) / _y4m->dst_c_dec_v;
-  c_sz = c_w * c_h;
-  _img->stride[VPX_PLANE_Y] = _img->stride[VPX_PLANE_ALPHA] =
-      _y4m->pic_w * bytes_per_sample;
-  _img->stride[VPX_PLANE_U] = _img->stride[VPX_PLANE_V] = c_w;
+  {
+    const size_t w = (size_t)_y4m->pic_w;
+    const size_t h = (size_t)_y4m->pic_h;
+    size_t cw, ch;
+    size_t luma_samples;
+    if (!checked_mul_size(w, h, &luma_samples)) return -1;
+    if (!checked_mul_size(luma_samples, bytes_per_sample, &pic_sz)) return -1;
+    if (!checked_ceil_div_size(w, (size_t)_y4m->dst_c_dec_h, &cw)) return -1;
+    if (!checked_ceil_div_size(h, (size_t)_y4m->dst_c_dec_v, &ch)) return -1;
+    if (!checked_mul_size(cw, bytes_per_sample, &c_w)) return -1;
+    c_h = ch;
+    if (!checked_mul_size(c_w, c_h, &c_sz)) return -1;
+    if (w > (size_t)INT_MAX / bytes_per_sample) return -1;
+    _img->stride[VPX_PLANE_Y] = _img->stride[VPX_PLANE_ALPHA] =
+        (int)(w * bytes_per_sample);
+    if (c_w > (size_t)INT_MAX) return -1;
+    _img->stride[VPX_PLANE_U] = _img->stride[VPX_PLANE_V] = (int)c_w;
+  }
   _img->planes[VPX_PLANE_Y] = _y4m->dst_buf;
   _img->planes[VPX_PLANE_U] = _y4m->dst_buf + pic_sz;
   _img->planes[VPX_PLANE_V] = _y4m->dst_buf + pic_sz + c_sz;
