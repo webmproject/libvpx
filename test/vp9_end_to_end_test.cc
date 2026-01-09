@@ -64,9 +64,11 @@ const TestVideoParam kTestVectorsNv12[] = {
   { "hantro_collage_w352h288_nv12.yuv", 8, VPX_IMG_FMT_NV12, VPX_BITS_8, 0 },
 };
 
+#if !CONFIG_REALTIME_ONLY
 const TestVideoParam k4x2VideoTestVectors[] = {
   { "4x2.y4m", 8, VPX_IMG_FMT_I420, VPX_BITS_8, 0 },
 };
+#endif
 
 // Encoding modes tested
 const libvpx_test::TestMode kEncodingModeVectors[] = {
