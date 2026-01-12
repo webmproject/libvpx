@@ -143,6 +143,12 @@ class EndToEndTestLarge
   ~EndToEndTestLarge() override = default;
 
   void SetUp() override {
+    if (encoding_mode_ == ::libvpx_test::kRealTime && cpu_used_ < 5) {
+      // For realtime mode the speed setting < 5 gets
+      // clamped to 5, so skip it as 5 is already checked,
+      // see kCpuUsedVectors[].
+      GTEST_SKIP() << "For realtime skip speeds < 5.";
+    }
     InitializeConfig();
     SetMode(encoding_mode_);
     if (encoding_mode_ != ::libvpx_test::kRealTime) {
