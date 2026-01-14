@@ -297,7 +297,6 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
   const int flags = ppflags->post_proc_flag;
   YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
   struct postproc_state *const ppstate = &cm->postproc_state;
-  ppstate->limits_size = unscaled_width;
 
   if (!cm->frame_to_show) return -1;
 
@@ -360,10 +359,13 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
          cm->post_proc_buffer.frame_size);
 
   if (flags & (VP9D_DEMACROBLOCK | VP9D_DEBLOCK)) {
-    if (!cm->postproc_state.limits) {
+    if (!cm->postproc_state.limits ||
+        cm->postproc_state.limits_size < unscaled_width) {
+      if (cm->postproc_state.limits) vpx_free(cm->postproc_state.limits);
       cm->postproc_state.limits =
           vpx_calloc(ppstate->limits_size, sizeof(*cm->postproc_state.limits));
       if (!cm->postproc_state.limits) return 1;
+      cm->postproc_state.limits_size = unscaled_width;
     }
   }
 

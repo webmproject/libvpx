@@ -3800,10 +3800,15 @@ static void set_size_dependent_vars(VP9_COMP *cpi, int *q, int *bottom_index,
       case 5: l = 100; break;
       case 6: l = 150; break;
     }
-    if (!cpi->common.postproc_state.limits) {
+    if (!cpi->common.postproc_state.limits ||
+        cpi->common.postproc_state.limits_size <
+            cpi->un_scaled_source->y_width) {
+      if (cpi->common.postproc_state.limits)
+        vpx_free(cpi->common.postproc_state.limits);
       CHECK_MEM_ERROR(&cm->error, cpi->common.postproc_state.limits,
                       vpx_calloc(cpi->un_scaled_source->y_width,
                                  sizeof(*cpi->common.postproc_state.limits)));
+      cpi->common.postproc_state.limits_size = cpi->un_scaled_source->y_width;
     }
     vp9_denoise(&cpi->common, cpi->Source, cpi->Source, l,
                 cpi->common.postproc_state.limits);
