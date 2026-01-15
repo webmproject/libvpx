@@ -97,6 +97,7 @@ EOF
 
 # all_platforms is a list of all supported target platforms. Maintain
 # alphabetically by architecture, generic-gnu last.
+all_platforms="${all_platforms} aarch64-linux"
 all_platforms="${all_platforms} arm64-android-gcc"
 all_platforms="${all_platforms} arm64-darwin-gcc"
 all_platforms="${all_platforms} arm64-darwin20-gcc"
@@ -112,6 +113,7 @@ all_platforms="${all_platforms} arm64-win64-vs16"
 all_platforms="${all_platforms} arm64-win64-vs16-clangcl"
 all_platforms="${all_platforms} arm64-win64-vs17"
 all_platforms="${all_platforms} arm64-win64-vs17-clangcl"
+all_platforms="${all_platforms} arm-linux"
 all_platforms="${all_platforms} armv7-android-gcc"   #neon Cortex-A8
 all_platforms="${all_platforms} armv7-darwin-gcc"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-rvct"    #neon Cortex-A8
