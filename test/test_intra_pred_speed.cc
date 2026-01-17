@@ -573,15 +573,15 @@ HIGHBD_INTRA_PRED_TEST(SSSE3, TestHighbdIntraPred32, nullptr, nullptr, nullptr,
 #if HAVE_AVX2
 HIGHBD_INTRA_PRED_TEST(AVX2, TestHighbdIntraPred32, nullptr, nullptr, nullptr,
                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, vpx_highbd_d63_predictor_32x32_avx2,
-                       nullptr)
+                       nullptr, vpx_highbd_d207_predictor_32x32_avx2,
+                       vpx_highbd_d63_predictor_32x32_avx2, nullptr)
 #endif  // HAVE_AVX2
 
 #if HAVE_AVX512
 HIGHBD_INTRA_PRED_TEST(AVX512, TestHighbdIntraPred32, nullptr, nullptr, nullptr,
                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                       nullptr, nullptr, vpx_highbd_d63_predictor_32x32_avx512,
-                       nullptr)
+                       nullptr, vpx_highbd_d207_predictor_32x32_avx512,
+                       vpx_highbd_d63_predictor_32x32_avx512, nullptr)
 #endif  // HAVE_AVX512
 
 #if HAVE_NEON
