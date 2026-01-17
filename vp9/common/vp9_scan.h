@@ -22,6 +22,7 @@ extern "C" {
 #endif
 
 #define MAX_NEIGHBORS 2
+#define MAX_SCAN_VALUE 1024
 
 typedef struct ScanOrder {
   const int16_t *scan;
