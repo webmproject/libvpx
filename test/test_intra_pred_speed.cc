@@ -571,6 +571,10 @@ HIGHBD_INTRA_PRED_TEST(SSSE3, TestHighbdIntraPred32, nullptr, nullptr, nullptr,
 #endif  // HAVE_SSSE3
 
 #if HAVE_AVX2
+HIGHBD_INTRA_PRED_TEST(AVX2, TestHighbdIntraPred16, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, vpx_highbd_d207_predictor_16x16_avx2,
+                       vpx_highbd_d63_predictor_16x16_avx2, nullptr)
 HIGHBD_INTRA_PRED_TEST(AVX2, TestHighbdIntraPred32, nullptr, nullptr, nullptr,
                        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
                        nullptr, vpx_highbd_d207_predictor_32x32_avx2,
