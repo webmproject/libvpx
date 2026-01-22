@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <array>
 #include <cassert>
 #include <climits>
 #include <cstdint>
@@ -1642,6 +1643,64 @@ TEST(EncodeAPI, AssertIssueGoodQualitySpeed1Lossless) {
               VPX_CODEC_OK);
     video.Next();
   } while (video.img() != nullptr);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
+void FillPlane(uint8_t *plane, int stride, int width, int height,
+               uint8_t value) {
+  for (int y = 0; y < height; ++y) {
+    memset(plane + y * stride, value, width);
+  }
+}
+
+// Test case to capture ioc in vp9_caq_select_segment()
+// in b/475394382
+TEST(EncodeAPI, Buganizer475394382) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 41;
+  cfg.g_h = 43;
+  cfg.g_timebase.num = 1;
+  cfg.g_timebase.den = 30;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 2;
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_AQ_MODE, 2), VPX_CODEC_OK);
+
+  cfg.rc_target_bitrate = 141452;
+  cfg.g_lag_in_frames = 0;
+  vpx_codec_enc_config_set(&enc, &cfg);
+
+  vpx_image_t *img =
+      vpx_img_alloc(NULL, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h, 16);
+  ASSERT_NE(img, nullptr);
+
+  FillPlane(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y], cfg.g_w,
+            cfg.g_h, 0x80);
+  FillPlane(img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U], cfg.g_w / 2 + 1,
+            cfg.g_h / 2 + 1, 0x40);
+  FillPlane(img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V], cfg.g_w / 2 + 1,
+            cfg.g_h / 2 + 1, 0xC0);
+
+  static constexpr std::array<vpx_enc_frame_flags_t, 3> frame_flags = {
+    VPX_EFLAG_FORCE_KF, VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_GF, 0
+  };
+
+  int frame_idx = 0;
+  for (const auto flags : frame_flags) {
+    vpx_codec_encode(&enc, img, frame_idx, 1, flags, VPX_DL_GOOD_QUALITY);
+    vpx_codec_iter_t iter = nullptr;
+    while (vpx_codec_get_cx_data(&enc, &iter)) {
+    }
+    ++frame_idx;
+  }
+
+  vpx_img_free(img);
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 
