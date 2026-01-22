@@ -5866,7 +5866,7 @@ static void level_rc_framerate(VP9_COMP *cpi, int arf_src_index) {
   }
 }
 
-static void update_level_info(VP9_COMP *cpi, size_t *size, int arf_src_index) {
+static void update_level_info(VP9_COMP *cpi, size_t size, int arf_src_index) {
   VP9_COMMON *const cm = &cpi->common;
   Vp9LevelInfo *const level_info = &cpi->level_info;
   Vp9LevelSpec *const level_spec = &level_info->level_spec;
@@ -5882,7 +5882,7 @@ static void update_level_info(VP9_COMP *cpi, size_t *size, int arf_src_index) {
   vpx_clear_system_state();
 
   // update level_stats
-  level_stats->total_compressed_size += *size;
+  level_stats->total_compressed_size += size;
   if (cm->show_frame) {
     level_stats->total_uncompressed_size +=
         luma_pic_size +
@@ -5913,7 +5913,7 @@ static void update_level_info(VP9_COMP *cpi, size_t *size, int arf_src_index) {
     level_stats->frame_window_buffer.start = (idx + 1) % FRAME_WINDOW_SIZE;
   }
   level_stats->frame_window_buffer.buf[idx].ts = cpi->last_time_stamp_seen;
-  level_stats->frame_window_buffer.buf[idx].size = (uint32_t)(*size);
+  level_stats->frame_window_buffer.buf[idx].size = (uint32_t)size;
   level_stats->frame_window_buffer.buf[idx].luma_samples = luma_pic_size;
 
   if (cm->frame_type == KEY_FRAME) {
@@ -6497,7 +6497,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
 
   if (cpi->keep_level_stats && oxcf->pass != 1)
-    update_level_info(cpi, size, arf_src_index);
+    update_level_info(cpi, *size, arf_src_index);
 
 #if !CONFIG_REALTIME_ONLY
   if (is_key_temporal_filter_enabled && cpi->b_calculate_psnr) {
