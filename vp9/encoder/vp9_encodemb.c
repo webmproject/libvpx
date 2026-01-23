@@ -30,6 +30,26 @@
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_tokenize.h"
 
+#if defined(NDEBUG)
+#if defined(__clang__) && defined(__has_builtin)
+#if __has_builtin(__builtin_assume)
+// This is verified by test/vp9_scan_test.cc
+#define ASSUME_VALID_SCAN_VALUE(i) \
+  __builtin_assume(0 <= i && i <= MAX_SCAN_VALUE)
+#else
+#define ASSUME_VALID_SCAN_VALUE(i) \
+  do {                             \
+  } while (0)
+#endif
+#else
+#define ASSUME_VALID_SCAN_VALUE(i) \
+  do {                             \
+  } while (0)
+#endif
+#else
+#define ASSUME_VALID_SCAN_VALUE(i) assert(0 <= i && i <= MAX_SCAN_VALUE)
+#endif
+
 struct optimize_ctx {
   ENTROPY_CONTEXT ta[MAX_MB_PLANE][16];
   ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
@@ -119,6 +139,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
 
   for (i = 0; i < eob; i++) {
     const int rc = scan[i];
+    ASSUME_VALID_SCAN_VALUE(rc);
     token_cache[rc] = vp9_pt_energy_class[vp9_get_token(qcoeff[rc])];
   }
   final_eob = 0;
@@ -133,6 +154,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   // (ii) Second candidate: Reduce quantized value by 1.
   for (i = 0; i < eob; i++) {
     const int rc = scan[i];
+    ASSUME_VALID_SCAN_VALUE(rc);
     const int x = qcoeff[rc];
     const int band_cur = band_translate[i];
     const int ctx_cur = (i == 0) ? ctx : get_coef_context(nb, token_cache, i);
@@ -301,6 +323,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
     final_eob = eob - 1;
     for (; final_eob >= 0; final_eob--) {
       const int rc = scan[final_eob];
+      ASSUME_VALID_SCAN_VALUE(rc);
       const int x = qcoeff[rc];
       if (x) {
         break;
@@ -314,11 +337,13 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
       assert(before_best_eob_qc != 0);
       i = final_eob - 1;
       rc = scan[i];
+      ASSUME_VALID_SCAN_VALUE(rc);
       qcoeff[rc] = before_best_eob_qc;
       dqcoeff[rc] = before_best_eob_dqc;
     }
     for (i = final_eob; i < eob; i++) {
       int rc = scan[i];
+      ASSUME_VALID_SCAN_VALUE(rc);
       qcoeff[rc] = 0;
       dqcoeff[rc] = 0;
     }
