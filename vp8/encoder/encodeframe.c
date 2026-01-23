@@ -96,8 +96,7 @@ static unsigned int mb_activity_measure(MACROBLOCK *x, int mb_row, int mb_col) {
   unsigned int mb_activity;
 
   if (ALT_ACT_MEASURE) {
-    int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
-
+    int use_dc_pred = (mb_col > 1 && mb_row > 1);
     /* Or use an alternative. */
     mb_activity = vp8_encode_intra(x, use_dc_pred);
   } else {
