@@ -56,6 +56,7 @@ ifeq ($(HAVE_X86_ASM),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/intrapred_sse2.asm
 DSP_SRCS-$(HAVE_SSSE3) += x86/intrapred_ssse3.asm
 endif
+DSP_SRCS-$(HAVE_AVX2) += x86/intrapred_intrin_avx2.c
 DSP_SRCS-$(HAVE_VSX) += ppc/intrapred_vsx.c
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)

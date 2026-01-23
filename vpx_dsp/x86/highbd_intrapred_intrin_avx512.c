@@ -162,3 +162,35 @@ void vpx_highbd_d207_predictor_32x32_avx512(uint16_t *dst, ptrdiff_t stride,
   d207_store_16x32_avx512(&dst, stride, &out_abcd, &out_efgh);
   d207_store_16x32_avx512(&dst, stride, &out_efgh, &AR);
 }
+
+void vpx_highbd_tm_predictor_32x32_avx512(uint16_t *dst, ptrdiff_t stride,
+                                          const uint16_t *above,
+                                          const uint16_t *left, int bd) {
+  __m512i top_left = _mm512_set1_epi16(above[-1]);
+  __m512i A = _mm512_sub_epi16(*(const __m512i *)above, top_left);
+
+  __m512i bd_max = _mm512_set1_epi16((1 << bd) - 1);
+  __m512i bd_min = _mm512_setzero_si512();
+
+  for (int i = 0; i < 16; i++) {
+    __m512i L0 = _mm512_set1_epi16(left[0]);
+    __m512i L1 = _mm512_set1_epi16(left[1]);
+
+    __m512i D = _mm512_add_epi16(A, L0);
+
+    D = _mm512_min_epi16(D, bd_max);
+    D = _mm512_max_epi16(D, bd_min);
+
+    _mm512_store_si512((__m512i *)dst, D);
+
+    D = _mm512_add_epi16(A, L1);
+
+    D = _mm512_min_epi16(D, bd_max);
+    D = _mm512_max_epi16(D, bd_min);
+
+    _mm512_store_si512((__m512i *)(dst + stride), D);
+
+    dst += 2 * stride;
+    left += 2;
+  }
+}

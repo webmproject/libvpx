@@ -247,6 +247,17 @@ INSTANTIATE_TEST_SUITE_P(
                                      &vpx_d207_predictor_32x32_c, 32, 8)));
 #endif  // HAVE_SSSE3 && HAVE_X86_ASM
 
+#if HAVE_AVX2
+INSTANTIATE_TEST_SUITE_P(
+    AVX2, VP9IntraPredTest,
+    ::testing::Values(IntraPredParam(&vpx_tm_predictor_8x8_avx2,
+                                     &vpx_tm_predictor_8x8_c, 8, 8),
+                      IntraPredParam(&vpx_tm_predictor_16x16_avx2,
+                                     &vpx_tm_predictor_16x16_c, 16, 8),
+                      IntraPredParam(&vpx_tm_predictor_32x32_avx2,
+                                     &vpx_tm_predictor_32x32_c, 32, 8)));
+#endif  // HAVE_AVX2
+
 #if HAVE_NEON
 INSTANTIATE_TEST_SUITE_P(
     NEON, VP9IntraPredTest,
@@ -545,21 +556,27 @@ INSTANTIATE_TEST_SUITE_P(
         HighbdIntraPredParam(&vpx_highbd_d63_predictor_32x32_avx512,
                              &vpx_highbd_d63_predictor_32x32_c, 32, 8),
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_avx512,
-                             &vpx_highbd_d207_predictor_32x32_c, 32, 8)));
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 8),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_32x32_avx512,
+                             &vpx_highbd_tm_predictor_32x32_c, 32, 8)));
 INSTANTIATE_TEST_SUITE_P(
     AVX512_TO_C_10, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_d63_predictor_32x32_avx512,
                              &vpx_highbd_d63_predictor_32x32_c, 32, 10),
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_avx512,
-                             &vpx_highbd_d207_predictor_32x32_c, 32, 10)));
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 10),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_32x32_avx512,
+                             &vpx_highbd_tm_predictor_32x32_c, 32, 10)));
 INSTANTIATE_TEST_SUITE_P(
     AVX512_TO_C_12, VP9HighbdIntraPredTest,
     ::testing::Values(
         HighbdIntraPredParam(&vpx_highbd_d63_predictor_32x32_avx512,
                              &vpx_highbd_d63_predictor_32x32_c, 32, 12),
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_avx512,
-                             &vpx_highbd_d207_predictor_32x32_c, 32, 12)));
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 12),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_32x32_avx512,
+                             &vpx_highbd_tm_predictor_32x32_c, 32, 12)));
 #endif  // HAVE_AVX512
 
 #if HAVE_AVX2
@@ -573,7 +590,13 @@ INSTANTIATE_TEST_SUITE_P(
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_16x16_avx2,
                              &vpx_highbd_d207_predictor_16x16_c, 16, 8),
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_avx2,
-                             &vpx_highbd_d207_predictor_32x32_c, 32, 8)));
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 8),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_8x8_avx2,
+                             &vpx_highbd_tm_predictor_8x8_c, 8, 8),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_16x16_avx2,
+                             &vpx_highbd_tm_predictor_16x16_c, 16, 8),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_32x32_avx2,
+                             &vpx_highbd_tm_predictor_32x32_c, 32, 8)));
 INSTANTIATE_TEST_SUITE_P(
     AVX2_TO_C_10, VP9HighbdIntraPredTest,
     ::testing::Values(
@@ -584,7 +607,13 @@ INSTANTIATE_TEST_SUITE_P(
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_16x16_avx2,
                              &vpx_highbd_d207_predictor_16x16_c, 16, 10),
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_avx2,
-                             &vpx_highbd_d207_predictor_32x32_c, 32, 10)));
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 10),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_8x8_avx2,
+                             &vpx_highbd_tm_predictor_8x8_c, 8, 10),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_16x16_avx2,
+                             &vpx_highbd_tm_predictor_16x16_c, 16, 10),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_32x32_avx2,
+                             &vpx_highbd_tm_predictor_32x32_c, 32, 10)));
 INSTANTIATE_TEST_SUITE_P(
     AVX2_TO_C_12, VP9HighbdIntraPredTest,
     ::testing::Values(
@@ -595,7 +624,13 @@ INSTANTIATE_TEST_SUITE_P(
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_16x16_avx2,
                              &vpx_highbd_d207_predictor_16x16_c, 16, 12),
         HighbdIntraPredParam(&vpx_highbd_d207_predictor_32x32_avx2,
-                             &vpx_highbd_d207_predictor_32x32_c, 32, 12)));
+                             &vpx_highbd_d207_predictor_32x32_c, 32, 12),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_8x8_avx2,
+                             &vpx_highbd_tm_predictor_8x8_c, 8, 12),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_16x16_avx2,
+                             &vpx_highbd_tm_predictor_16x16_c, 16, 12),
+        HighbdIntraPredParam(&vpx_highbd_tm_predictor_32x32_avx2,
+                             &vpx_highbd_tm_predictor_32x32_c, 32, 12)));
 #endif  // HAVE_AVX2
 
 #if HAVE_SSSE3
