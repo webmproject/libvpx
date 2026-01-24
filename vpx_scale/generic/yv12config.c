@@ -155,7 +155,7 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
 #if CONFIG_VP9_HIGHBITDEPTH
                              int use_highbitdepth,
 #endif
-                             int border, int byte_alignment,
+                             int border_in_pixel, int byte_alignment,
                              vpx_codec_frame_buffer_t *fb,
                              vpx_get_frame_buffer_cb_fn_t cb, void *cb_priv) {
 #if CONFIG_SIZE_LIMIT
@@ -163,17 +163,35 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
 #endif
 
   /* Only support allocating buffers that have a border that's a multiple
-   * of 32. The border restriction is required to get 16-byte alignment of
-   * the start of the chroma rows without introducing an arbitrary gap
-   * between planes, which would break the semantics of things like
-   * vpx_img_set_rect(). */
-  if (border & 0x1f) return -3;
+   * of 64 on x86/x64 (32 otherwise). The border restriction is required to
+   * get 32-byte or 16-byte alignment of the start of the chroma rows without
+   * introducing an arbitrary gap between planes, which would break the
+   * semantics of things like vpx_img_set_rect(). */
+#if VPX_ARCH_X86 || VPX_ARCH_X86_64
+  int row_alignment = 64;
+  const int alloc_alignment = 64;
+#else
+  int row_alignment = 32;
+  const int alloc_alignment = 32;
+#endif
+  if (border_in_pixel & (row_alignment - 1)) return -3;
+  int border = border_in_pixel;
+#if (VPX_ARCH_X86 || VPX_ARCH_X86_64) && CONFIG_VP9_HIGHBITDEPTH
+  if (use_highbitdepth) {
+    // two bytes per pixel, align chroma rows to 64 byte boundaries
+    // so that AVX512 can access 32 pixels at a time with aligned
+    // loads/stores.
+    border <<= 1;
+    row_alignment <<= 1;
+  }
+#endif
 
   if (ybf) {
     const int vp9_byte_align = (byte_alignment == 0) ? 1 : byte_alignment;
     const int aligned_width = (width + 7) & ~7;
     const int aligned_height = (height + 7) & ~7;
-    const int y_stride = ((aligned_width + 2 * border) + 31) & ~31;
+    const int y_stride = ((aligned_width + 2 * border) + (row_alignment - 1)) &
+                         ~(row_alignment - 1);
     const uint64_t yplane_size =
         (aligned_height + 2 * border) * (uint64_t)y_stride + byte_alignment;
     const int uv_width = aligned_width >> ss_x;
@@ -209,7 +227,7 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
 #endif
 
     if (cb != NULL) {
-      const int align_addr_extra_size = 31;
+      const int align_addr_extra_size = alloc_alignment - 1;
       const uint64_t external_frame_size = frame_size + align_addr_extra_size;
 
       assert(fb != NULL);
@@ -221,7 +239,7 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
 
       if (fb->data == NULL || fb->size < external_frame_size) return -1;
 
-      ybf->buffer_alloc = (uint8_t *)yv12_align_addr(fb->data, 32);
+      ybf->buffer_alloc = (uint8_t *)yv12_align_addr(fb->data, alloc_alignment);
 
 #if defined(__has_feature)
 #if __has_feature(memory_sanitizer)
@@ -237,7 +255,8 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
       ybf->buffer_alloc = NULL;
       ybf->buffer_alloc_sz = 0;
 
-      ybf->buffer_alloc = (uint8_t *)vpx_memalign(32, (size_t)frame_size);
+      ybf->buffer_alloc =
+          (uint8_t *)vpx_memalign(alloc_alignment, (size_t)frame_size);
       if (!ybf->buffer_alloc) return -1;
 
       ybf->buffer_alloc_sz = (size_t)frame_size;

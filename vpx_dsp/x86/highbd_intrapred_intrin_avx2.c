@@ -44,7 +44,7 @@ static INLINE __m256i avg3_epu16_avx2(const __m256i *x, const __m256i *y,
 void vpx_highbd_d63_predictor_16x16_avx2(uint16_t *dst, ptrdiff_t stride,
                                          const uint16_t *above,
                                          const uint16_t *left, int bd) {
-  const __m256i A = _mm256_loadu_si256((const __m256i *)above);
+  const __m256i A = _mm256_load_si256((const __m256i *)above);
   // Replicate above[15] for right-edge extension
   const __m256i AR =
       _mm256_permute4x64_epi64(_mm256_shufflehi_epi16(A, 0xff), 0xff);
@@ -61,19 +61,19 @@ void vpx_highbd_d63_predictor_16x16_avx2(uint16_t *dst, ptrdiff_t stride,
   (void)left;
   (void)bd;
   for (i = 0; i < 14; i += 2) {
-    _mm256_storeu_si256((__m256i *)dst, avg2);
+    _mm256_store_si256((__m256i *)dst, avg2);
     dst += stride;
 
-    _mm256_storeu_si256((__m256i *)dst, avg3);
+    _mm256_store_si256((__m256i *)dst, avg3);
     dst += stride;
 
     ALIGNR_256(avg2, AR, avg2, 2);
     ALIGNR_256(avg3, AR, avg3, 2);
   }
-  _mm256_storeu_si256((__m256i *)dst, avg2);
+  _mm256_store_si256((__m256i *)dst, avg2);
   dst += stride;
 
-  _mm256_storeu_si256((__m256i *)dst, avg3);
+  _mm256_store_si256((__m256i *)dst, avg3);
 }
 
 void vpx_highbd_d63_predictor_32x32_avx2(uint16_t *dst, ptrdiff_t stride,
@@ -82,9 +82,9 @@ void vpx_highbd_d63_predictor_32x32_avx2(uint16_t *dst, ptrdiff_t stride,
   (void)left;
   (void)bd;
 
-  const __m256i A0 = _mm256_loadu_si256((const __m256i *)(above));  // 0..15
+  const __m256i A0 = _mm256_load_si256((const __m256i *)(above));  // 0..15
   const __m256i A1 =
-      _mm256_loadu_si256((const __m256i *)(above + 16));  // 16..31
+      _mm256_load_si256((const __m256i *)(above + 16));  // 16..31
 
   // Replicate above[31] for right-edge extension
   const __m256i AR =
@@ -106,12 +106,12 @@ void vpx_highbd_d63_predictor_32x32_avx2(uint16_t *dst, ptrdiff_t stride,
   __m256i avg3_1 = avg3_epu16_avx2(&A1, &B1, &C1);
 
   for (int i = 0; i < 30; i += 2) {
-    _mm256_storeu_si256((__m256i *)dst, avg2_0);
-    _mm256_storeu_si256((__m256i *)(dst + 16), avg2_1);
+    _mm256_store_si256((__m256i *)dst, avg2_0);
+    _mm256_store_si256((__m256i *)(dst + 16), avg2_1);
     dst += stride;
 
-    _mm256_storeu_si256((__m256i *)dst, avg3_0);
-    _mm256_storeu_si256((__m256i *)(dst + 16), avg3_1);
+    _mm256_store_si256((__m256i *)dst, avg3_0);
+    _mm256_store_si256((__m256i *)(dst + 16), avg3_1);
     dst += stride;
 
     ALIGNR_256(avg2_0, avg2_1, avg2_0, 2);
@@ -120,53 +120,53 @@ void vpx_highbd_d63_predictor_32x32_avx2(uint16_t *dst, ptrdiff_t stride,
     ALIGNR_256(avg3_1, AR, avg3_1, 2);
   }
 
-  _mm256_storeu_si256((__m256i *)dst, avg2_0);
-  _mm256_storeu_si256((__m256i *)(dst + 16), avg2_1);
+  _mm256_store_si256((__m256i *)dst, avg2_0);
+  _mm256_store_si256((__m256i *)(dst + 16), avg2_1);
   dst += stride;
 
-  _mm256_storeu_si256((__m256i *)dst, avg3_0);
-  _mm256_storeu_si256((__m256i *)(dst + 16), avg3_1);
+  _mm256_store_si256((__m256i *)dst, avg3_0);
+  _mm256_store_si256((__m256i *)(dst + 16), avg3_1);
 }
 
 static INLINE void d207_store_8x16_avx2(uint16_t **dst, const ptrdiff_t stride,
                                         const __m256i *ab, const __m256i *cd) {
-  _mm256_storeu_si256((__m256i *)*dst, *ab);
+  _mm256_store_si256((__m256i *)*dst, *ab);
   *dst += stride;
 
   __m256i shift;
   ALIGNR_256(shift, *cd, *ab, 4);
-  _mm256_storeu_si256((__m256i *)*dst, shift);
+  _mm256_store_si256((__m256i *)*dst, shift);
   *dst += stride;
 
   ALIGNR_256(shift, *cd, *ab, 8);
-  _mm256_storeu_si256((__m256i *)*dst, shift);
+  _mm256_store_si256((__m256i *)*dst, shift);
   *dst += stride;
 
   ALIGNR_256(shift, *cd, *ab, 12);
-  _mm256_storeu_si256((__m256i *)*dst, shift);
+  _mm256_store_si256((__m256i *)*dst, shift);
   *dst += stride;
 
   shift = _mm256_permute2x128_si256(*cd, *ab, 3);
-  _mm256_storeu_si256((__m256i *)*dst, shift);
+  _mm256_store_si256((__m256i *)*dst, shift);
   *dst += stride;
 
   ALIGNR_256_HI(shift, *cd, *ab, 4);
-  _mm256_storeu_si256((__m256i *)*dst, shift);
+  _mm256_store_si256((__m256i *)*dst, shift);
   *dst += stride;
 
   ALIGNR_256_HI(shift, *cd, *ab, 8);
-  _mm256_storeu_si256((__m256i *)*dst, shift);
+  _mm256_store_si256((__m256i *)*dst, shift);
   *dst += stride;
 
   ALIGNR_256_HI(shift, *cd, *ab, 12);
-  _mm256_storeu_si256((__m256i *)*dst, shift);
+  _mm256_store_si256((__m256i *)*dst, shift);
   *dst += stride;
 }
 
 void vpx_highbd_d207_predictor_16x16_avx2(uint16_t *dst, ptrdiff_t stride,
                                           const uint16_t *above,
                                           const uint16_t *left, int bd) {
-  const __m256i A = _mm256_loadu_si256((const __m256i *)left);
+  const __m256i A = _mm256_load_si256((const __m256i *)left);
   const __m256i LR =
       _mm256_permute4x64_epi64(_mm256_shufflehi_epi16(A, 0xff), 0xff);
 
@@ -194,8 +194,8 @@ void vpx_highbd_d207_predictor_16x16_avx2(uint16_t *dst, ptrdiff_t stride,
 static INLINE void d207_store_8x32_avx2(uint16_t **dst, const ptrdiff_t stride,
                                         const __m256i *ab, const __m256i *cd,
                                         const __m256i *ef) {
-  _mm256_storeu_si256((__m256i *)*dst, *ab);
-  _mm256_storeu_si256((__m256i *)(*dst + 16), *cd);
+  _mm256_store_si256((__m256i *)*dst, *ab);
+  _mm256_store_si256((__m256i *)(*dst + 16), *cd);
   *dst += stride;
 
   __m256i ab_shift;
@@ -203,44 +203,44 @@ static INLINE void d207_store_8x32_avx2(uint16_t **dst, const ptrdiff_t stride,
 
   ALIGNR_256(ab_shift, *cd, *ab, 4);
   ALIGNR_256(cd_shift, *ef, *cd, 4);
-  _mm256_storeu_si256((__m256i *)*dst, ab_shift);
-  _mm256_storeu_si256((__m256i *)(*dst + 16), cd_shift);
+  _mm256_store_si256((__m256i *)*dst, ab_shift);
+  _mm256_store_si256((__m256i *)(*dst + 16), cd_shift);
   *dst += stride;
 
   ALIGNR_256(ab_shift, *cd, *ab, 8);
   ALIGNR_256(cd_shift, *ef, *cd, 8);
-  _mm256_storeu_si256((__m256i *)*dst, ab_shift);
-  _mm256_storeu_si256((__m256i *)(*dst + 16), cd_shift);
+  _mm256_store_si256((__m256i *)*dst, ab_shift);
+  _mm256_store_si256((__m256i *)(*dst + 16), cd_shift);
   *dst += stride;
 
   ALIGNR_256(ab_shift, *cd, *ab, 12);
   ALIGNR_256(cd_shift, *ef, *cd, 12);
-  _mm256_storeu_si256((__m256i *)*dst, ab_shift);
-  _mm256_storeu_si256((__m256i *)(*dst + 16), cd_shift);
+  _mm256_store_si256((__m256i *)*dst, ab_shift);
+  _mm256_store_si256((__m256i *)(*dst + 16), cd_shift);
   *dst += stride;
 
   ab_shift = _mm256_permute2x128_si256(*cd, *ab, 3);
   cd_shift = _mm256_permute2x128_si256(*ef, *cd, 3);
-  _mm256_storeu_si256((__m256i *)*dst, ab_shift);
-  _mm256_storeu_si256((__m256i *)(*dst + 16), cd_shift);
+  _mm256_store_si256((__m256i *)*dst, ab_shift);
+  _mm256_store_si256((__m256i *)(*dst + 16), cd_shift);
   *dst += stride;
 
   ALIGNR_256_HI(ab_shift, *cd, *ab, 4);
   ALIGNR_256_HI(cd_shift, *ef, *cd, 4);
-  _mm256_storeu_si256((__m256i *)*dst, ab_shift);
-  _mm256_storeu_si256((__m256i *)(*dst + 16), cd_shift);
+  _mm256_store_si256((__m256i *)*dst, ab_shift);
+  _mm256_store_si256((__m256i *)(*dst + 16), cd_shift);
   *dst += stride;
 
   ALIGNR_256_HI(ab_shift, *cd, *ab, 8);
   ALIGNR_256_HI(cd_shift, *ef, *cd, 8);
-  _mm256_storeu_si256((__m256i *)*dst, ab_shift);
-  _mm256_storeu_si256((__m256i *)(*dst + 16), cd_shift);
+  _mm256_store_si256((__m256i *)*dst, ab_shift);
+  _mm256_store_si256((__m256i *)(*dst + 16), cd_shift);
   *dst += stride;
 
   ALIGNR_256_HI(ab_shift, *cd, *ab, 12);
   ALIGNR_256_HI(cd_shift, *ef, *cd, 12);
-  _mm256_storeu_si256((__m256i *)*dst, ab_shift);
-  _mm256_storeu_si256((__m256i *)(*dst + 16), cd_shift);
+  _mm256_store_si256((__m256i *)*dst, ab_shift);
+  _mm256_store_si256((__m256i *)(*dst + 16), cd_shift);
   *dst += stride;
 }
 
@@ -250,9 +250,8 @@ void vpx_highbd_d207_predictor_32x32_avx2(uint16_t *dst, ptrdiff_t stride,
   (void)above;
   (void)bd;
 
-  const __m256i A0 = _mm256_loadu_si256((const __m256i *)left);  // 0..15
-  const __m256i A1 =
-      _mm256_loadu_si256((const __m256i *)(left + 16));  // 16..31
+  const __m256i A0 = _mm256_load_si256((const __m256i *)left);         // 0..15
+  const __m256i A1 = _mm256_load_si256((const __m256i *)(left + 16));  // 16..31
 
   const __m256i AR =
       _mm256_permute4x64_epi64(_mm256_shufflehi_epi16(A1, 0xff), 0xff);

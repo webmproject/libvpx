@@ -49,7 +49,7 @@ class IntraPredTest : public ::testing::TestWithParam<PredParam> {
   void RunTest(Pixel *left_col, Pixel *above_data, Pixel *dst, Pixel *ref_dst) {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int block_size = params_.block_size;
-    above_row_ = above_data + 16;
+    above_row_ = above_data + 32;
     left_col_ = left_col;
     dst_ = dst;
     ref_dst_ = ref_dst;
@@ -139,10 +139,10 @@ using VP9IntraPredTest = IntraPredTest<uint8_t, IntraPredParam>;
 
 TEST_P(VP9IntraPredTest, IntraPredTests) {
   // max block size is 32
-  DECLARE_ALIGNED(16, uint8_t, left_col[2 * 32]);
-  DECLARE_ALIGNED(16, uint8_t, above_data[2 * 32 + 32]);
-  DECLARE_ALIGNED(16, uint8_t, dst[3 * 32 * 32]);
-  DECLARE_ALIGNED(16, uint8_t, ref_dst[3 * 32 * 32]);
+  DECLARE_ALIGNED(32, uint8_t, left_col[2 * 32]);
+  DECLARE_ALIGNED(32, uint8_t, above_data[2 * 32 + 32]);
+  DECLARE_ALIGNED(32, uint8_t, dst[3 * 32 * 32]);
+  DECLARE_ALIGNED(32, uint8_t, ref_dst[3 * 32 * 32]);
   RunTest(left_col, above_data, dst, ref_dst);
 }
 
@@ -530,10 +530,10 @@ GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(VP9HighbdIntraPredTest);
 
 TEST_P(VP9HighbdIntraPredTest, HighbdIntraPredTests) {
   // max block size is 32
-  DECLARE_ALIGNED(16, uint16_t, left_col[2 * 32]);
-  DECLARE_ALIGNED(16, uint16_t, above_data[2 * 32 + 32]);
-  DECLARE_ALIGNED(16, uint16_t, dst[3 * 32 * 32]);
-  DECLARE_ALIGNED(16, uint16_t, ref_dst[3 * 32 * 32]);
+  DECLARE_ALIGNED(64, uint16_t, left_col[2 * 32]);
+  DECLARE_ALIGNED(64, uint16_t, above_data[2 * 32 + 32]);
+  DECLARE_ALIGNED(64, uint16_t, dst[3 * 32 * 32]);
+  DECLARE_ALIGNED(64, uint16_t, ref_dst[3 * 32 * 32]);
   RunTest(left_col, above_data, dst, ref_dst);
 }
 #endif

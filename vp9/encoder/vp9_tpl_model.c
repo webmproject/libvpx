@@ -1381,11 +1381,11 @@ static void mc_flow_dispenser(VP9_COMP *cpi, GF_PICTURE *gf_picture,
   int mi_row, mi_col;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED(16, uint16_t, predictor16[32 * 32 * 3]);
-  DECLARE_ALIGNED(16, uint8_t, predictor8[32 * 32 * 3]);
+  DECLARE_ALIGNED(MAX_PRED_ALIGNMENT_HBD, uint16_t, predictor16[32 * 32 * 3]);
+  DECLARE_ALIGNED(MAX_PRED_ALIGNMENT_HBD, uint8_t, predictor8[32 * 32 * 3]);
   uint8_t *predictor;
 #else
-  DECLARE_ALIGNED(16, uint8_t, predictor[32 * 32 * 3]);
+  DECLARE_ALIGNED(MAX_PRED_ALIGNMENT, uint8_t, predictor[32 * 32 * 3]);
 #endif
   DECLARE_ALIGNED(16, int16_t, src_diff[32 * 32]);
   DECLARE_ALIGNED(16, tran_low_t, coeff[32 * 32]);

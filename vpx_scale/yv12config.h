@@ -23,8 +23,13 @@ extern "C" {
 #define VP8BORDERINPIXELS 32
 #define VP9INNERBORDERINPIXELS 96
 #define VP9_INTERP_EXTEND 4
+#if VPX_ARCH_X86 || VPX_ARCH_X86_64
+#define VP9_ENC_BORDER_IN_PIXELS 192
+#define VP9_DEC_BORDER_IN_PIXELS 64
+#else
 #define VP9_ENC_BORDER_IN_PIXELS 160
 #define VP9_DEC_BORDER_IN_PIXELS 32
+#endif
 
 typedef struct yv12_buffer_config {
   int y_width;
@@ -91,7 +96,7 @@ int vpx_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height,
 #if CONFIG_VP9_HIGHBITDEPTH
                              int use_highbitdepth,
 #endif
-                             int border, int byte_alignment,
+                             int border_in_pixel, int byte_alignment,
                              vpx_codec_frame_buffer_t *fb,
                              vpx_get_frame_buffer_cb_fn_t cb, void *cb_priv);
 int vpx_free_frame_buffer(YV12_BUFFER_CONFIG *ybf);
