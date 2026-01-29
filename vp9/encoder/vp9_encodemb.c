@@ -41,12 +41,16 @@
 // This is verified by test/vp9_entropy_test.cc
 #define ASSUME_VALID_ENERGY_CLASS(i) \
   __builtin_assume(0 <= i && i <= MAX_ENERGY_CLASS)
+#define ASSUME_VALID_TOKEN(i) __builtin_assume(0 <= i && i <= MAX_TOKEN)
 #else
 #define ASSUME_VALID_SCAN_VALUE(i) \
   do {                             \
   } while (0)
 #define ASSUME_VALID_ENERGY_CLASS(i) \
   do {                               \
+  } while (0)
+#define ASSUME_VALID_TOKEN(i) \
+  do {                        \
   } while (0)
 #endif
 #else
@@ -55,11 +59,15 @@
   } while (0)
 #define ASSUME_VALID_ENERGY_CLASS(i) \
   do {                               \
+  } while (0)
+#define ASSUME_VALID_TOKEN(i) \
+  do {                        \
   } while (0)
 #endif
 #else
 #define ASSUME_VALID_SCAN_VALUE(i) assert(0 <= i && i <= MAX_SCAN_VALUE)
 #define ASSUME_VALID_ENERGY_CLASS(i) assert(0 <= i && i <= MAX_ENERGY_CLASS)
+#define ASSUME_VALID_TOKEN(i) assert(0 <= i && i <= MAX_TOKEN)
 #endif
 
 struct optimize_ctx {
@@ -151,7 +159,9 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   for (i = 0; i < eob; i++) {
     const int rc = scan[i];
     ASSUME_VALID_SCAN_VALUE(rc);
-    token_cache[rc] = vp9_pt_energy_class[vp9_get_token(qcoeff[rc])];
+    int16_t token = vp9_get_token(qcoeff[rc]);
+    ASSUME_VALID_TOKEN(token);
+    token_cache[rc] = vp9_pt_energy_class[token];
   }
   final_eob = 0;
 
@@ -185,6 +195,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
     token_costs_cur = token_costs + band_cur;
     if (x == 0) {  // No need to search
       const int token = vp9_get_token(x);
+      ASSUME_VALID_TOKEN(token);
       rate0 = (*token_costs_cur)[token_tree_sel_cur][ctx_cur][token];
       accu_rate += rate0;
       x_prev = 0;
@@ -257,6 +268,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
           const int band_next = band_translate[i + 1];
           const int token_next =
               (i + 1 != eob) ? vp9_get_token(qcoeff[scan[i + 1]]) : EOB_TOKEN;
+          ASSUME_VALID_TOKEN(token_next);
           unsigned int(*const token_costs_next)[2][COEFF_CONTEXTS]
                                                [ENTROPY_TOKENS] =
                                                    token_costs + band_next;
