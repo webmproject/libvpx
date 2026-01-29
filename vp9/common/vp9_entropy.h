@@ -41,6 +41,7 @@ extern "C" {
 
 #define ENTROPY_NODES 11
 
+#define MAX_ENERGY_CLASS 5
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]);
 
 #define CAT1_MIN_VAL 5
