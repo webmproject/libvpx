@@ -36,18 +36,28 @@
 // This is verified by test/vp9_scan_test.cc
 #define ASSUME_VALID_SCAN_VALUE(i) \
   __builtin_assume(0 <= i && i <= MAX_SCAN_VALUE)
+// This is verified by test/vp9_entropy_test.cc
+#define ASSUME_VALID_ENERGY_CLASS(i) \
+  __builtin_assume(0 <= i && i <= MAX_ENERGY_CLASS)
 #else
 #define ASSUME_VALID_SCAN_VALUE(i) \
   do {                             \
+  } while (0)
+#define ASSUME_VALID_ENERGY_CLASS(i) \
+  do {                               \
   } while (0)
 #endif
 #else
 #define ASSUME_VALID_SCAN_VALUE(i) \
   do {                             \
+  } while (0)
+#define ASSUME_VALID_ENERGY_CLASS(i) \
+  do {                               \
   } while (0)
 #endif
 #else
 #define ASSUME_VALID_SCAN_VALUE(i) assert(0 <= i && i <= MAX_SCAN_VALUE)
+#define ASSUME_VALID_ENERGY_CLASS(i) assert(0 <= i && i <= MAX_ENERGY_CLASS)
 #endif
 
 struct optimize_ctx {
@@ -239,6 +249,10 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
                                                    token_costs + band_next;
           token_cache[rc] = vp9_pt_energy_class[t0];
           ctx_next = get_coef_context(nb, token_cache, i + 1);
+          // token_cache is initialized with valid energy classes.
+          // get_coef_context returns at most the maximum value of
+          // token_cache.
+          ASSUME_VALID_ENERGY_CLASS(ctx_next);
           token_tree_sel_next = (x == 0);
           next_bits0 =
               (*token_costs_next)[token_tree_sel_next][ctx_next][token_next];
@@ -246,6 +260,10 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
               (*token_costs_next)[token_tree_sel_next][ctx_next][EOB_TOKEN];
           token_cache[rc] = vp9_pt_energy_class[t1];
           ctx_next = get_coef_context(nb, token_cache, i + 1);
+          // token_cache is initialized with valid energy classes.
+          // get_coef_context returns at most the maximum value of
+          // token_cache.
+          ASSUME_VALID_ENERGY_CLASS(ctx_next);
           token_tree_sel_next = (x1 == 0);
           next_bits1 =
               (*token_costs_next)[token_tree_sel_next][ctx_next][token_next];
