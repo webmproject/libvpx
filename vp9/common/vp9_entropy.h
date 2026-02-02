@@ -36,6 +36,7 @@ extern "C" {
 #define CATEGORY5_TOKEN 9   // 35-66 Extra Bits 5+1
 #define CATEGORY6_TOKEN 10  // 67+   Extra Bits 14+1
 #define EOB_TOKEN 11        // EOB   Extra Bits 0+0
+#define MAX_TOKEN EOB_TOKEN
 
 #define ENTROPY_TOKENS 12
 
