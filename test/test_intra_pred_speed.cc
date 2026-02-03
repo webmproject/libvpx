@@ -522,7 +522,7 @@ HIGHBD_INTRA_PRED_TEST(
     vpx_highbd_h_predictor_4x4_sse2, nullptr,
     vpx_highbd_d135_predictor_4x4_sse2, vpx_highbd_d117_predictor_4x4_sse2,
     vpx_highbd_d153_predictor_4x4_sse2, vpx_highbd_d207_predictor_4x4_sse2,
-    vpx_highbd_d63_predictor_4x4_sse2, vpx_highbd_tm_predictor_4x4_c)
+    vpx_highbd_d63_predictor_4x4_sse2, vpx_highbd_tm_predictor_4x4_sse2)
 
 HIGHBD_INTRA_PRED_TEST(
     SSE2, TestHighbdIntraPred8, vpx_highbd_dc_predictor_8x8_sse2,
