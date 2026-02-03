@@ -134,7 +134,6 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
       mb->token_costs[tx_size][plane_type][ref];
   unsigned int(*token_costs_cur)[2][COEFF_CONTEXTS][ENTROPY_TOKENS];
   int64_t eob_cost0, eob_cost1;
-  const int ctx0 = ctx;
   int64_t accu_rate = 0;
   // Initialized to the worst possible error for the largest transform size.
   // This ensures that it never goes negative.
@@ -156,7 +155,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
 
   // Initial RD cost.
   token_costs_cur = token_costs + band_translate[0];
-  rate0 = (*token_costs_cur)[0][ctx0][EOB_TOKEN];
+  rate0 = (*token_costs_cur)[0][ctx][EOB_TOKEN];
   best_block_rd_cost = RDCOST(rdmult, rddiv, rate0, accu_error);
 
   // For each token, pick one of two choices greedily:
