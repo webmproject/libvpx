@@ -1682,10 +1682,10 @@ TEST(EncodeAPI, Buganizer475394382) {
 
   FillPlane(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y], cfg.g_w,
             cfg.g_h, 0x80);
-  FillPlane(img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U], cfg.g_w / 2 + 1,
-            cfg.g_h / 2 + 1, 0x40);
-  FillPlane(img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V], cfg.g_w / 2 + 1,
-            cfg.g_h / 2 + 1, 0xC0);
+  FillPlane(img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U],
+            (cfg.g_w + 1) / 2, (cfg.g_h + 1) / 2, 0x40);
+  FillPlane(img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V],
+            (cfg.g_w + 1) / 2, (cfg.g_h + 1) / 2, 0xC0);
 
   static constexpr std::array<vpx_enc_frame_flags_t, 3> frame_flags = {
     VPX_EFLAG_FORCE_KF, VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_GF, 0
