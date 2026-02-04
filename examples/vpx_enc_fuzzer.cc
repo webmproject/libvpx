@@ -41,8 +41,8 @@
    $make -j32
 
  * Build vp9 fuzzer
-   $ $CXX $CXXFLAGS -std=gnu++17 -DENCODER=vp9 \
-   -fsanitize=fuzzer -I../libvpx -I. -Wl,--start-group \
+   $ $CXX $CXXFLAGS -std=gnu++17 -Wall -Wextra -Wimplicit-fallthrough \
+   -DENCODER=vp9 -fsanitize=fuzzer -I../libvpx -I. -Wl,--start-group \
    ../libvpx/examples/vpx_enc_fuzzer.cc -o ./vpx_enc_fuzzer_vp9 \
    ./libvpx.a -Wl,--end-group
 
@@ -183,12 +183,30 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   FILE *out = fopen("/dev/null", "wb");
 
   switch (data[0] & 0x1F) {
-    case 0: cfg.g_w = 64; cfg.g_h = 1;
-    case 1: cfg.g_w = 1; cfg.g_h = 48;
-    case 2: cfg.g_w = 1; cfg.g_h = 1;
-    case 3: cfg.g_w = 4; cfg.g_h = 4;
-    case 4: cfg.g_w = 16; cfg.g_h = 16;
-    default: cfg.g_w = 64; cfg.g_h = 48;
+    case 0:
+      cfg.g_w = 64;
+      cfg.g_h = 1;
+      break;
+    case 1:
+      cfg.g_w = 1;
+      cfg.g_h = 48;
+      break;
+    case 2:
+      cfg.g_w = 1;
+      cfg.g_h = 1;
+      break;
+    case 3:
+      cfg.g_w = 4;
+      cfg.g_h = 4;
+      break;
+    case 4:
+      cfg.g_w = 16;
+      cfg.g_h = 16;
+      break;
+    default:
+      cfg.g_w = 64;
+      cfg.g_h = 48;
+      break;
   }
   cfg.g_timebase.num = 1;
   cfg.g_timebase.den = 30;  // fps
