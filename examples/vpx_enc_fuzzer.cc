@@ -80,6 +80,8 @@
 #define VPXC_INTERFACE(name) VPXC_INTERFACE_(name)
 #define VPXC_INTERFACE_(name) vpx_codec_##name##_cx()
 
+static constexpr int kMaxFrames = 300;
+
 extern "C" void usage_exit(void) { exit(EXIT_FAILURE); }
 
 static int vpx_img_plane_width(const vpx_image_t *img, int plane) {
@@ -230,7 +232,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   size -= FUZZ_HDR_SZ;
 
   // Encode frames.
-  while (1) {
+  for (int i = 0; i < kMaxFrames; ++i) {
     int flags = 0;
     size_t size_read = fuzz_vpx_img_read(&raw, data, size);
     if (size_read == 0) break;
