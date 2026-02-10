@@ -38,7 +38,7 @@ void vpx_highbd_d63_predictor_32x32_avx512(uint16_t *dst, ptrdiff_t stride,
   (void)left;
   (void)bd;
 
-  const __m512i A = _mm512_load_si512((const __m512i *)above);
+  const __m512i A = _mm512_loadu_si512((const __m512i *)above);
 
   // B = shift by 1 (2 bytes)
   const __m512i B = _mm512_permutexvar_epi16(*(const __m512i *)rshift_1w, A);
@@ -50,87 +50,87 @@ void vpx_highbd_d63_predictor_32x32_avx512(uint16_t *dst, ptrdiff_t stride,
   __m512i avg3 = avg3_epu16_avx512(&A, &B, &C);
 
   for (int i = 0; i < 30; i += 2) {
-    _mm512_store_si512((__m512i *)dst, avg2);
+    _mm512_storeu_si512((__m512i *)dst, avg2);
     dst += stride;
 
-    _mm512_store_si512((__m512i *)dst, avg3);
+    _mm512_storeu_si512((__m512i *)dst, avg3);
     dst += stride;
 
     avg2 = _mm512_permutexvar_epi16(*(const __m512i *)rshift_1w, avg2);
     avg3 = _mm512_permutexvar_epi16(*(const __m512i *)rshift_1w, avg3);
   }
 
-  _mm512_store_si512((__m512i *)dst, avg2);
+  _mm512_storeu_si512((__m512i *)dst, avg2);
   dst += stride;
 
-  _mm512_store_si512((__m512i *)dst, avg3);
+  _mm512_storeu_si512((__m512i *)dst, avg3);
 }
 
 static INLINE void d207_store_16x32_avx512(uint16_t **dst,
                                            const ptrdiff_t stride,
                                            const __m512i *abcd,
                                            const __m512i *efgh) {
-  _mm512_store_si512((__m512i *)*dst, *abcd);
+  _mm512_storeu_si512((__m512i *)*dst, *abcd);
   *dst += stride;
 
   __m512i shift = _mm512_alignr_epi32(*efgh, *abcd, 1);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 2);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 3);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 4);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 5);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 6);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 7);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 8);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 9);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 10);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 11);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 12);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 13);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 14);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 
   shift = _mm512_alignr_epi32(*efgh, *abcd, 15);
-  _mm512_store_si512((__m512i *)*dst, shift);
+  _mm512_storeu_si512((__m512i *)*dst, shift);
   *dst += stride;
 }
 
@@ -140,7 +140,7 @@ void vpx_highbd_d207_predictor_32x32_avx512(uint16_t *dst, ptrdiff_t stride,
   (void)above;
   (void)bd;
 
-  const __m512i A = _mm512_load_si512((const __m512i *)left);
+  const __m512i A = _mm512_loadu_si512((const __m512i *)left);
   const __m512i AR = _mm512_set1_epi16(left[31]);
 
   // B = shift by 1 (2 bytes)

@@ -44,7 +44,7 @@ template <typename Pixel>
 struct IntraPredTestMem {
   void Init(int block_size, int bd) {
     libvpx_test::ACMRandom rnd(libvpx_test::ACMRandom::DeterministicSeed());
-    Pixel *const above = above_mem + 32;
+    Pixel *const above = above_mem + 16;
     const int mask = (1 << bd) - 1;
     for (int i = 0; i < kTotalPixels; ++i) ref_src[i] = rnd.Rand16() & mask;
     for (int i = 0; i < kBPS; ++i) left[i] = rnd.Rand16() & mask;
@@ -57,10 +57,10 @@ struct IntraPredTestMem {
     }
   }
 
-  DECLARE_ALIGNED(64, Pixel, src[kTotalPixels]);
-  DECLARE_ALIGNED(64, Pixel, ref_src[kTotalPixels]);
-  DECLARE_ALIGNED(64, Pixel, left[kBPS]);
-  DECLARE_ALIGNED(64, Pixel, above_mem[2 * kBPS + 32]);
+  DECLARE_ALIGNED(16, Pixel, src[kTotalPixels]);
+  DECLARE_ALIGNED(16, Pixel, ref_src[kTotalPixels]);
+  DECLARE_ALIGNED(16, Pixel, left[kBPS]);
+  DECLARE_ALIGNED(16, Pixel, above_mem[2 * kBPS + 16]);
 };
 
 using Vp9IntraPredTestMem = IntraPredTestMem<uint8_t>;
@@ -80,7 +80,7 @@ void TestIntraPred(const char name[], VpxPredFunc const *pred_funcs,
   const int kNumTests = static_cast<int>(
       2.e10 / (block_size * block_size * kNumVp9IntraPredFuncs));
   Vp9IntraPredTestMem intra_pred_test_mem;
-  const uint8_t *const above = intra_pred_test_mem.above_mem + 32;
+  const uint8_t *const above = intra_pred_test_mem.above_mem + 16;
 
   intra_pred_test_mem.Init(block_size, 8);
 
@@ -375,7 +375,7 @@ void TestHighbdIntraPred(const char name[], VpxHighbdPredFunc const *pred_funcs,
   const int kNumTests = static_cast<int>(
       2.e10 / (block_size * block_size * kNumVp9IntraPredFuncs));
   Vp9HighbdIntraPredTestMem intra_pred_test_mem;
-  const uint16_t *const above = intra_pred_test_mem.above_mem + 32;
+  const uint16_t *const above = intra_pred_test_mem.above_mem + 16;
 
   intra_pred_test_mem.Init(block_size, 12);
 

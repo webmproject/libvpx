@@ -18,18 +18,6 @@
 extern "C" {
 #endif
 
-#if VPX_ARCH_X86 || VPX_ARCH_X86_64
-// max block 32x32 pixels, 64 bytes alignment for AVX512
-#define MAX_PRED_ALIGNMENT_HBD 64
-// 32 bytes alignment for AVX2
-#define MAX_PRED_ALIGNMENT 32
-#define EXTRA_ABOVE_DATA 32
-#else
-#define MAX_PRED_ALIGNMENT_HBD 16
-#define MAX_PRED_ALIGNMENT 16
-#define EXTRA_ABOVE_DATA 16
-#endif
-
 void vp9_init_intra_predictors(void);
 
 void vp9_predict_intra_block(const MACROBLOCKD *xd, int bwl_in, TX_SIZE tx_size,
