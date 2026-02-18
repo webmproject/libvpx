@@ -22,6 +22,7 @@
 #include "test/acm_random.h"
 #include "test/video_source.h"
 #include "test/y4m_video_source.h"
+#include "test/yuv_video_source.h"
 
 #include "./vpx_config.h"
 #include "vpx/vp8cx.h"
@@ -709,6 +710,53 @@ TEST(EncodeAPI, OssFuzz69906) {
   for (int cpu_used = -16; cpu_used <= -5; ++cpu_used) {
     EncodeOssFuzz69906(cpu_used, VPX_DL_REALTIME);
   }
+}
+
+TEST(EncodeAPI, OssFuzz471723682) {
+  // Initialize libvpx encoder.
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 253;
+  cfg.g_h = 252;
+  cfg.rc_target_bitrate = 2611345883;
+  cfg.kf_max_dist = 16515082;
+  cfg.g_timebase.num = 89;
+  cfg.g_timebase.den = 655613;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.rc_dropframe_thresh = 0;
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 1), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_ARNR_MAXFRAMES, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_ARNR_STRENGTH, 3), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control_(&enc, VP8E_SET_ARNR_TYPE, 3),
+            VPX_CODEC_OK);  // deprecated
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_NOISE_SENSITIVITY, 0),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_TOKEN_PARTITIONS, 0),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_STATIC_THRESHOLD, 0),
+            VPX_CODEC_OK);
+
+  libvpx_test::YUVVideoSource video(
+      "repro-oss-fuzz-471723682.yuv", VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h,
+      /*rate_numerator=*/786684, /*rate_denominator=*/4980772,
+      /*start=*/0,
+      /*limit=*/8);
+  video.Begin();
+  do {
+    ASSERT_EQ(vpx_codec_encode(&enc, video.img(), /*pts=*/0, /*duration=*/46640,
+                               /*flags=*/0, VPX_DL_GOOD_QUALITY),
+              VPX_CODEC_OK);
+    video.Next();
+  } while (video.img() != nullptr);
+
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 #endif  // CONFIG_VP8_ENCODER
 
