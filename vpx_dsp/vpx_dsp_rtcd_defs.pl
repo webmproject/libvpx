@@ -1309,7 +1309,7 @@ add_proto qw/unsigned int vpx_variance4x8/, "const uint8_t *src_ptr, int src_str
   specialize qw/vpx_variance4x8 sse2 neon neon_dotprod msa mmi vsx/;
 
 add_proto qw/unsigned int vpx_variance4x4/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-  specialize qw/vpx_variance4x4 sse2 neon neon_dotprod msa mmi vsx/;
+  specialize qw/vpx_variance4x4 sse2 neon msa mmi vsx/;
 
 #
 # Specialty Variance

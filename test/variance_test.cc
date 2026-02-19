@@ -1616,8 +1616,7 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(3, 4, &vpx_variance8x16_neon_dotprod),
                       VarianceParams(3, 3, &vpx_variance8x8_neon_dotprod),
                       VarianceParams(3, 2, &vpx_variance8x4_neon_dotprod),
-                      VarianceParams(2, 3, &vpx_variance4x8_neon_dotprod),
-                      VarianceParams(2, 2, &vpx_variance4x4_neon_dotprod)));
+                      VarianceParams(2, 3, &vpx_variance4x8_neon_dotprod)));
 
 INSTANTIATE_TEST_SUITE_P(
     NEON_DOTPROD, VpxGetVarianceTest,
