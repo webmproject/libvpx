@@ -80,8 +80,6 @@
 #define VPXC_INTERFACE(name) VPXC_INTERFACE_(name)
 #define VPXC_INTERFACE_(name) vpx_codec_##name##_cx()
 
-static constexpr int kMaxFrames = 300;
-
 extern "C" void usage_exit(void) { exit(EXIT_FAILURE); }
 
 static int vpx_img_plane_width(const vpx_image_t *img, int plane) {
@@ -180,6 +178,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   } else if ((data[0] & 0x20) != 0) {
     quality = VPX_DL_BEST_QUALITY;
   }
+  const int max_frames = (quality == VPX_DL_BEST_QUALITY) ? 150 : 300;
 
   if (vpx_codec_enc_config_default(VPXC_INTERFACE(ENCODER), &cfg, 0)) abort();
   FILE *out = fopen("/dev/null", "wb");
@@ -232,7 +231,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   size -= FUZZ_HDR_SZ;
 
   // Encode frames.
-  for (int i = 0; i < kMaxFrames; ++i) {
+  for (int i = 0; i < max_frames; ++i) {
     int flags = 0;
     size_t size_read = fuzz_vpx_img_read(&raw, data, size);
     if (size_read == 0) break;
