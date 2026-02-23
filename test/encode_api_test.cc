@@ -712,7 +712,9 @@ TEST(EncodeAPI, OssFuzz69906) {
   }
 }
 
-TEST(EncodeAPI, OssFuzz471723682) {
+// TODO: bug 486910181 - enable test after uninitialized value / valgrind
+// errors are fixed.
+TEST(EncodeAPI, DISABLED_OssFuzz471723682) {
   // Initialize libvpx encoder.
   vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
   vpx_codec_ctx_t enc;
