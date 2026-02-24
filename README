@@ -63,6 +63,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   --help output of the configure script. As of this writing, the list of
   available targets is:
 
+    aarch64-linux
     arm64-android-gcc
     arm64-darwin-gcc
     arm64-darwin20-gcc
@@ -78,6 +79,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     arm64-win64-vs16-clangcl
     arm64-win64-vs17
     arm64-win64-vs17-clangcl
+    arm-linux
     armv7-android-gcc
     armv7-darwin-gcc
     armv7-linux-rvct
