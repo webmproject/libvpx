@@ -106,18 +106,20 @@ class YUVVideoSource : public VideoSource {
     // If vpx_img_alloc() pads the row -- for example, to a power of 2 when
     // width is odd -- the YUV data needs to be read row-wise to ensure the
     // planes refer to the correct data.
-    if (img_->stride[VPX_PLANE_Y] != static_cast<int>(width_)) {
+    const int width_in_bytes =
+        static_cast<int>(width_ * (img_->bit_depth >> 3));
+    if (img_->stride[VPX_PLANE_Y] != width_in_bytes) {
       uint8_t *row = img_->planes[VPX_PLANE_Y];
       const int y_stride = img_->stride[VPX_PLANE_Y];
       for (unsigned int y = 0; y < height_; ++y) {
-        if (fread(row, width_, 1, input_file_) == 0) {
+        if (fread(row, width_in_bytes, 1, input_file_) == 0) {
           limit_ = frame_;
           return;
         }
         row += y_stride;
       }
       const int uv_width =
-          (width_ + img_->x_chroma_shift) >> img_->x_chroma_shift;
+          (width_in_bytes + img_->x_chroma_shift) >> img_->x_chroma_shift;
       const int uv_height =
           (height_ + img_->y_chroma_shift) >> img_->y_chroma_shift;
       const int last_uv_plane =
