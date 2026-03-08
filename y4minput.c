@@ -12,6 +12,7 @@
  */
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -68,10 +69,12 @@ static int y4m_parse_tags(y4m_input *_y4m, char *_tags) {
     switch (p[0]) {
       case 'W': {
         if (sscanf(p + 1, "%d", &_y4m->pic_w) != 1) return -1;
+        if (_y4m->pic_w <= 0) return -1;
         break;
       }
       case 'H': {
         if (sscanf(p + 1, "%d", &_y4m->pic_h) != 1) return -1;
+        if (_y4m->pic_h <= 0) return -1;
         break;
       }
       case 'F': {
@@ -176,6 +179,14 @@ static int parse_tags(y4m_input *y4m_ctx, FILE *file) {
   }
   if (y4m_ctx->fps_n == -1) {
     fprintf(stderr, "FPS field missing\n");
+    return 0;
+  }
+  /* Validate dimensions to prevent integer overflow in buffer size
+     calculations. The factor of 6 accounts for the most demanding buffer
+     formula: 2 * 3 * pic_w * pic_h (444 format at high bit-depth). */
+  if ((int64_t)y4m_ctx->pic_w * y4m_ctx->pic_h > INT_MAX / 6) {
+    fprintf(stderr, "Y4M dimensions %dx%d are too large.\n", y4m_ctx->pic_w,
+            y4m_ctx->pic_h);
     return 0;
   }
   return 1;
