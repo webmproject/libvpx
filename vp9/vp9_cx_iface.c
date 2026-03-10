@@ -1855,7 +1855,11 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
   SVC *const svc = &cpi->svc;
   int sl;
-
+  // Checks on valid spatial_layer_id input.
+  if (data->spatial_layer_id < 0 ||
+      data->spatial_layer_id >= (int)ctx->cfg.ss_number_layers) {
+    return VPX_CODEC_INVALID_PARAM;
+  }
   svc->spatial_layer_to_encode = data->spatial_layer_id;
   svc->first_spatial_layer_to_encode = data->spatial_layer_id;
   // TODO(jianj): Deprecated to be removed.
@@ -1865,7 +1869,7 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
     svc->temporal_layer_id_per_spatial[sl] =
         data->temporal_layer_id_per_spatial[sl];
   }
-  // Checks on valid layer_id input.
+  // Checks on valid temporal_layer_id input.
   if (svc->temporal_layer_id < 0 ||
       svc->temporal_layer_id >= (int)ctx->cfg.ts_number_layers) {
     return VPX_CODEC_INVALID_PARAM;
