@@ -2422,6 +2422,39 @@ TEST(EncodeAPI, Buganizer487259772ScaledRefs) {
   encoder.Encode(/*key_frame=*/false, &rng);
 }
 
+TEST(EncodeAPI, DISABLED_Buganizer488585490CostTableOverflow) {
+  // Initialize libvpx encoder.
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
+            VPX_CODEC_OK);
+
+  cfg.g_w = 149;
+  cfg.g_h = 48;
+  cfg.g_profile = 3;
+  cfg.g_bit_depth = VPX_BITS_10;
+  cfg.g_input_bit_depth = 10;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, VPX_CODEC_USE_HIGHBITDEPTH),
+            VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 7), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_LOSSLESS, 1), VPX_CODEC_OK);
+
+  libvpx_test::YUVVideoSource video(
+      "repro-b488585490.yuv", VPX_IMG_FMT_I44416, cfg.g_w, cfg.g_h,
+      /*rate_numerator=*/1, /*rate_denominator=*/30, /*start=*/0, /*limit=*/1);
+  video.Begin();
+  ASSERT_EQ(vpx_codec_encode(&enc, video.img(), video.pts(), /*duration=*/66666,
+                             /*flags=*/0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
