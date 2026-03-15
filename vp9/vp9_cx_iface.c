@@ -1347,7 +1347,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
                                       unsigned long duration,
                                       vpx_enc_frame_flags_t enc_flags,
                                       vpx_enc_deadline_t deadline) {
-  volatile vpx_codec_err_t res = VPX_CODEC_OK;
+  volatile vpx_codec_err_t res;
   volatile vpx_enc_frame_flags_t flags = enc_flags;
   volatile vpx_codec_pts_t pts = pts_val;
   VP9_COMP *const cpi = ctx->cpi;
@@ -1363,34 +1363,35 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
   if (img != NULL) {
     res = validate_img(ctx, img);
-    if (res == VPX_CODEC_OK) {
-      // There's no codec control for multiple alt-refs so check the encoder
-      // instance for its status to determine the compressed data size.
-      data_sz = ctx->cfg.g_w * ctx->cfg.g_h * get_image_bps(img) / 8 *
-                (cpi->multi_layer_arf ? 8 : 2);
-      if (data_sz < kMinCompressedSize) data_sz = kMinCompressedSize;
-      if (ctx->cx_data == NULL || ctx->cx_data_sz < data_sz) {
-        ctx->cx_data_sz = data_sz;
-        free(ctx->cx_data);
-        ctx->cx_data = (unsigned char *)malloc(ctx->cx_data_sz);
-        if (ctx->cx_data == NULL) {
-          return VPX_CODEC_MEM_ERROR;
-        }
+    if (res != VPX_CODEC_OK) {
+      return res;
+    }
+    // There's no codec control for multiple alt-refs so check the encoder
+    // instance for its status to determine the compressed data size.
+    data_sz = ctx->cfg.g_w * ctx->cfg.g_h * get_image_bps(img) / 8 *
+              (cpi->multi_layer_arf ? 8 : 2);
+    if (data_sz < kMinCompressedSize) data_sz = kMinCompressedSize;
+    if (ctx->cx_data == NULL || ctx->cx_data_sz < data_sz) {
+      ctx->cx_data_sz = data_sz;
+      free(ctx->cx_data);
+      ctx->cx_data = (unsigned char *)malloc(ctx->cx_data_sz);
+      if (ctx->cx_data == NULL) {
+        return VPX_CODEC_MEM_ERROR;
       }
+    }
 
-      int chroma_subsampling = -1;
-      if ((img->fmt & VPX_IMG_FMT_I420) == VPX_IMG_FMT_I420 ||
-          (img->fmt & VPX_IMG_FMT_NV12) == VPX_IMG_FMT_NV12 ||
-          (img->fmt & VPX_IMG_FMT_YV12) == VPX_IMG_FMT_YV12) {
-        chroma_subsampling = 1;  // matches default for Codec Parameter String
-      } else if ((img->fmt & VPX_IMG_FMT_I422) == VPX_IMG_FMT_I422) {
-        chroma_subsampling = 2;
-      } else if ((img->fmt & VPX_IMG_FMT_I444) == VPX_IMG_FMT_I444) {
-        chroma_subsampling = 3;
-      }
-      if (chroma_subsampling > ctx->global_header_subsampling) {
-        ctx->global_header_subsampling = chroma_subsampling;
-      }
+    int chroma_subsampling = -1;
+    if ((img->fmt & VPX_IMG_FMT_I420) == VPX_IMG_FMT_I420 ||
+        (img->fmt & VPX_IMG_FMT_NV12) == VPX_IMG_FMT_NV12 ||
+        (img->fmt & VPX_IMG_FMT_YV12) == VPX_IMG_FMT_YV12) {
+      chroma_subsampling = 1;  // matches default for Codec Parameter String
+    } else if ((img->fmt & VPX_IMG_FMT_I422) == VPX_IMG_FMT_I422) {
+      chroma_subsampling = 2;
+    } else if ((img->fmt & VPX_IMG_FMT_I444) == VPX_IMG_FMT_I444) {
+      chroma_subsampling = 3;
+    }
+    if (chroma_subsampling > ctx->global_header_subsampling) {
+      ctx->global_header_subsampling = chroma_subsampling;
     }
   }
 
