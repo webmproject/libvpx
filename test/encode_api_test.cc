@@ -262,6 +262,24 @@ TEST(EncodeAPI, InvalidUVStrides) {
   }
 }
 
+TEST(EncodeAPI, InvalidImageFormats) {
+  EXPECT_EQ(vpx_img_alloc(/*img=*/nullptr, VPX_IMG_FMT_NONE, /*d_w=*/32,
+                          /*d_h=*/32, /*align=*/1),
+            nullptr);
+  EXPECT_EQ(vpx_img_alloc(/*img=*/nullptr,
+                          static_cast<vpx_img_fmt_t>(VPX_IMG_FMT_NONE - 1),
+                          /*d_w=*/32, /*d_h=*/32, /*align=*/1),
+            nullptr);
+  EXPECT_EQ(vpx_img_alloc(/*img=*/nullptr,
+                          static_cast<vpx_img_fmt_t>(VPX_IMG_FMT_NV12 + 1),
+                          /*d_w=*/32, /*d_h=*/32, /*align=*/1),
+            nullptr);
+  EXPECT_EQ(vpx_img_alloc(/*img=*/nullptr,
+                          static_cast<vpx_img_fmt_t>(VPX_IMG_FMT_I44016 + 1),
+                          /*d_w=*/32, /*d_h=*/32, /*align=*/1),
+            nullptr);
+}
+
 TEST(EncodeAPI, HighBitDepthCapability) {
 // VP8 should not claim VP9 HBD as a capability.
 #if CONFIG_VP8_ENCODER
