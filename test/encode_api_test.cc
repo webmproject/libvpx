@@ -187,8 +187,8 @@ TEST(EncodeAPI, InvalidUVStrides) {
   constexpr int kWidth = 64;
   constexpr int kHeight = 64;
   static constexpr std::array<UVStride, 4> kUVStrides = {
-    UVStride{ kWidth, kHeight - 1 }, UVStride{ kWidth, kHeight + 1 },
-    UVStride{ kWidth - 1, kHeight }, UVStride{ kWidth + 1, kHeight }
+    UVStride{ kWidth, kWidth - 1 }, UVStride{ kWidth, kWidth + 1 },
+    UVStride{ kWidth - 1, kWidth }, UVStride{ kWidth + 1, kWidth }
   };
   vpx_image_t img;
   vpx_codec_ctx_t enc;
