@@ -235,6 +235,6 @@ SUPPORT
   email webm-discuss@webmproject.org for help.
 
 BUG REPORTS
-  Bug reports can be filed in the libvpx issue tracker:
-  https://issues.webmproject.org/.
+  Bug reports can be filed in the libvpx component of the issue tracker:
+  https://issues.webmproject.org/issues/new?component=1618984&template=2023833.
   For security reports, select 'Security report' from the Template dropdown.
