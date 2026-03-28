@@ -1427,7 +1427,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
   }
   cpi->common.error.setjmp = 1;
 
-  if (res == VPX_CODEC_OK) vp9_apply_encoding_flags(cpi, flags);
+  vp9_apply_encoding_flags(cpi, flags);
 
   // Handle fixed keyframe intervals
   if (ctx->cfg.kf_mode == VPX_KF_AUTO &&
@@ -1438,263 +1438,253 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     }
   }
 
-  if (res == VPX_CODEC_OK) {
-    unsigned int lib_flags = 0;
-    size_t size, cx_data_sz;
-    unsigned char *cx_data;
+  unsigned int lib_flags = 0;
+  size_t size, cx_data_sz;
+  unsigned char *cx_data;
 
-    // Per-frame PSNR is not supported when g_lag_in_frames is greater than 0.
-    if ((flags & VPX_EFLAG_CALCULATE_PSNR) && ctx->cfg.g_lag_in_frames != 0) {
-      vpx_internal_error(
-          &ctx->cpi->common.error, VPX_CODEC_INCAPABLE,
-          "Cannot calculate per-frame PSNR when g_lag_in_frames is nonzero");
-    }
-    // Set up internal flags
+  // Per-frame PSNR is not supported when g_lag_in_frames is greater than 0.
+  if ((flags & VPX_EFLAG_CALCULATE_PSNR) && ctx->cfg.g_lag_in_frames != 0) {
+    vpx_internal_error(
+        &ctx->cpi->common.error, VPX_CODEC_INCAPABLE,
+        "Cannot calculate per-frame PSNR when g_lag_in_frames is nonzero");
+  }
+  // Set up internal flags
 #if CONFIG_INTERNAL_STATS
-    assert(cpi->b_calculate_psnr == 1);
+  assert(cpi->b_calculate_psnr == 1);
 #else
-    cpi->b_calculate_psnr = (ctx->base.init_flags & VPX_CODEC_USE_PSNR) ||
-                            (flags & VPX_EFLAG_CALCULATE_PSNR);
+  cpi->b_calculate_psnr = (ctx->base.init_flags & VPX_CODEC_USE_PSNR) ||
+                          (flags & VPX_EFLAG_CALCULATE_PSNR);
 #endif
 
-    if (img != NULL) {
-      YV12_BUFFER_CONFIG sd;
+  if (img != NULL) {
+    YV12_BUFFER_CONFIG sd;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-      if (ctx->extra_cfg.validate_input_hbd &&
-          (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) &&
-          ctx->oxcf.input_bit_depth > 8) {
-        const unsigned int h = img->d_h;
-        const unsigned int w = img->d_w;
-        const unsigned int bit_depth = ctx->oxcf.input_bit_depth;
-        const int max_val = 1 << bit_depth;
-        for (int plane = 0; plane < 3; ++plane) {
-          const unsigned short *src =
-              (const unsigned short *)img->planes[plane];
-          const unsigned int stride = img->stride[plane] / 2;
-          const unsigned int ph =
-              (plane == 0) ? h
-                           : (h + img->y_chroma_shift) >> img->y_chroma_shift;
-          const unsigned int pw =
-              (plane == 0) ? w
-                           : (w + img->x_chroma_shift) >> img->x_chroma_shift;
-          for (unsigned int i = 0; i < ph; ++i) {
-            for (unsigned int j = 0; j < pw; ++j) {
-              if (src[j] >= max_val) {
-                return VPX_CODEC_INVALID_PARAM;
-              }
+    if (ctx->extra_cfg.validate_input_hbd &&
+        (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) &&
+        ctx->oxcf.input_bit_depth > 8) {
+      const unsigned int h = img->d_h;
+      const unsigned int w = img->d_w;
+      const unsigned int bit_depth = ctx->oxcf.input_bit_depth;
+      const int max_val = 1 << bit_depth;
+      for (int plane = 0; plane < 3; ++plane) {
+        const unsigned short *src = (const unsigned short *)img->planes[plane];
+        const unsigned int stride = img->stride[plane] / 2;
+        const unsigned int ph =
+            (plane == 0) ? h : (h + img->y_chroma_shift) >> img->y_chroma_shift;
+        const unsigned int pw =
+            (plane == 0) ? w : (w + img->x_chroma_shift) >> img->x_chroma_shift;
+        for (unsigned int i = 0; i < ph; ++i) {
+          for (unsigned int j = 0; j < pw; ++j) {
+            if (src[j] >= max_val) {
+              return VPX_CODEC_INVALID_PARAM;
             }
-            src += stride;
           }
+          src += stride;
         }
       }
+    }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-      if (!ctx->pts_offset_initialized) {
-        ctx->pts_offset = pts;
-        ctx->pts_offset_initialized = 1;
-      }
-      if (pts < ctx->pts_offset) {
-        vpx_internal_error(&cpi->common.error, VPX_CODEC_INVALID_PARAM,
-                           "pts is smaller than initial pts");
-      }
-      pts -= ctx->pts_offset;
-      if (pts > INT64_MAX / timebase_in_ts->num) {
-        vpx_internal_error(
-            &cpi->common.error, VPX_CODEC_INVALID_PARAM,
-            "conversion of relative pts to ticks would overflow");
-      }
-      const int64_t dst_time_stamp =
-          timebase_units_to_ticks(timebase_in_ts, pts);
+    if (!ctx->pts_offset_initialized) {
+      ctx->pts_offset = pts;
+      ctx->pts_offset_initialized = 1;
+    }
+    if (pts < ctx->pts_offset) {
+      vpx_internal_error(&cpi->common.error, VPX_CODEC_INVALID_PARAM,
+                         "pts is smaller than initial pts");
+    }
+    pts -= ctx->pts_offset;
+    if (pts > INT64_MAX / timebase_in_ts->num) {
+      vpx_internal_error(&cpi->common.error, VPX_CODEC_INVALID_PARAM,
+                         "conversion of relative pts to ticks would overflow");
+    }
+    const int64_t dst_time_stamp = timebase_units_to_ticks(timebase_in_ts, pts);
 
-      cpi->svc.timebase_fac = timebase_units_to_ticks(timebase_in_ts, 1);
-      cpi->svc.time_stamp_superframe = dst_time_stamp;
+    cpi->svc.timebase_fac = timebase_units_to_ticks(timebase_in_ts, 1);
+    cpi->svc.time_stamp_superframe = dst_time_stamp;
 
 #if ULONG_MAX > INT64_MAX
-      if (duration > INT64_MAX) {
-        vpx_internal_error(&cpi->common.error, VPX_CODEC_INVALID_PARAM,
-                           "duration is too big");
-      }
+    if (duration > INT64_MAX) {
+      vpx_internal_error(&cpi->common.error, VPX_CODEC_INVALID_PARAM,
+                         "duration is too big");
+    }
 #endif
-      if (pts > INT64_MAX - (int64_t)duration) {
-        vpx_internal_error(&cpi->common.error, VPX_CODEC_INVALID_PARAM,
-                           "relative pts + duration is too big");
-      }
-      vpx_codec_pts_t pts_end = pts + (int64_t)duration;
-      if (pts_end > INT64_MAX / timebase_in_ts->num) {
-        vpx_internal_error(
-            &cpi->common.error, VPX_CODEC_INVALID_PARAM,
-            "conversion of relative pts + duration to ticks would overflow");
-      }
-      const int64_t dst_end_time_stamp =
-          timebase_units_to_ticks(timebase_in_ts, pts_end);
-      res = image2yuvconfig(img, &sd);
-
-      // Store the original flags in to the frame buffer. Will extract the
-      // key frame flag when we actually encode this frame.
-      if (vp9_receive_raw_frame(cpi, flags | ctx->next_frame_flags, &sd,
-                                dst_time_stamp, dst_end_time_stamp)) {
-        res = update_error_state(ctx, &cpi->common.error);
-      }
-      ctx->next_frame_flags = 0;
+    if (pts > INT64_MAX - (int64_t)duration) {
+      vpx_internal_error(&cpi->common.error, VPX_CODEC_INVALID_PARAM,
+                         "relative pts + duration is too big");
     }
-
-    cx_data = ctx->cx_data;
-    cx_data_sz = ctx->cx_data_sz;
-
-    /* Any pending invisible frames? */
-    if (ctx->pending_cx_data) {
-      assert(cx_data_sz >= ctx->pending_cx_data_sz);
-      memmove(cx_data, ctx->pending_cx_data, ctx->pending_cx_data_sz);
-      ctx->pending_cx_data = cx_data;
-      cx_data += ctx->pending_cx_data_sz;
-      cx_data_sz -= ctx->pending_cx_data_sz;
-
-      /* TODO(webm:1844): this is a minimal check, the underlying codec doesn't
-       * respect the buffer size anyway.
-       */
-      if (cx_data_sz < ctx->cx_data_sz / 2) {
-        vpx_internal_error(&cpi->common.error, VPX_CODEC_ERROR,
-                           "Compressed data buffer too small");
-      }
+    vpx_codec_pts_t pts_end = pts + (int64_t)duration;
+    if (pts_end > INT64_MAX / timebase_in_ts->num) {
+      vpx_internal_error(
+          &cpi->common.error, VPX_CODEC_INVALID_PARAM,
+          "conversion of relative pts + duration to ticks would overflow");
     }
+    const int64_t dst_end_time_stamp =
+        timebase_units_to_ticks(timebase_in_ts, pts_end);
+    res = image2yuvconfig(img, &sd);
 
-    if (cpi->oxcf.pass == 1 && !cpi->use_svc) {
+    // Store the original flags in to the frame buffer. Will extract the
+    // key frame flag when we actually encode this frame.
+    if (vp9_receive_raw_frame(cpi, flags | ctx->next_frame_flags, &sd,
+                              dst_time_stamp, dst_end_time_stamp)) {
+      res = update_error_state(ctx, &cpi->common.error);
+    }
+    ctx->next_frame_flags = 0;
+  }
+
+  cx_data = ctx->cx_data;
+  cx_data_sz = ctx->cx_data_sz;
+
+  /* Any pending invisible frames? */
+  if (ctx->pending_cx_data) {
+    assert(cx_data_sz >= ctx->pending_cx_data_sz);
+    memmove(cx_data, ctx->pending_cx_data, ctx->pending_cx_data_sz);
+    ctx->pending_cx_data = cx_data;
+    cx_data += ctx->pending_cx_data_sz;
+    cx_data_sz -= ctx->pending_cx_data_sz;
+
+    /* TODO(webm:1844): this is a minimal check, the underlying codec doesn't
+     * respect the buffer size anyway.
+     */
+    if (cx_data_sz < ctx->cx_data_sz / 2) {
+      vpx_internal_error(&cpi->common.error, VPX_CODEC_ERROR,
+                         "Compressed data buffer too small");
+    }
+  }
+
+  if (cpi->oxcf.pass == 1 && !cpi->use_svc) {
 #if !CONFIG_REALTIME_ONLY
-      // compute first pass stats
-      if (img) {
-        int ret;
-        int64_t dst_time_stamp;
-        int64_t dst_end_time_stamp;
-        vpx_codec_cx_pkt_t fps_pkt;
-        ENCODE_FRAME_RESULT encode_frame_result;
-        vp9_init_encode_frame_result(&encode_frame_result);
-        // TODO(angiebird): Call vp9_first_pass directly
-        ret = vp9_get_compressed_data(
-            cpi, &lib_flags, &size, cx_data, cx_data_sz, &dst_time_stamp,
-            &dst_end_time_stamp, !img, &encode_frame_result);
-        assert(size == 0);  // There is no compressed data in the first pass
-        (void)ret;
-        assert(ret == 0);
-        fps_pkt = get_first_pass_stats_pkt(&cpi->twopass.this_frame_stats);
-        vpx_codec_pkt_list_add(&ctx->pkt_list.head, &fps_pkt);
-      } else {
-        if (!cpi->twopass.first_pass_done) {
-          vpx_codec_cx_pkt_t fps_pkt;
-          vp9_end_first_pass(cpi);
-          fps_pkt = get_first_pass_stats_pkt(&cpi->twopass.total_stats);
-          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &fps_pkt);
-        }
-      }
-#else   // !CONFIG_REALTIME_ONLY
-      assert(0);
-#endif  // !CONFIG_REALTIME_ONLY
-    } else {
-      ENCODE_FRAME_RESULT encode_frame_result;
+    // compute first pass stats
+    if (img) {
+      int ret;
       int64_t dst_time_stamp;
       int64_t dst_end_time_stamp;
+      vpx_codec_cx_pkt_t fps_pkt;
+      ENCODE_FRAME_RESULT encode_frame_result;
       vp9_init_encode_frame_result(&encode_frame_result);
-      while (cx_data_sz >= ctx->cx_data_sz / 2 &&
-             -1 != vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
-                                           cx_data_sz, &dst_time_stamp,
-                                           &dst_end_time_stamp, !img,
-                                           &encode_frame_result)) {
-        // Pack psnr pkt.
-        if (size > 0) {
-          PSNR_STATS psnr;
-          if (vp9_get_psnr(cpi, &psnr)) {
-            vpx_codec_cx_pkt_t psnr_pkt = get_psnr_pkt(&psnr);
-            vpx_codec_pkt_list_add(&ctx->pkt_list.head, &psnr_pkt);
-          }
+      // TODO(angiebird): Call vp9_first_pass directly
+      ret = vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data, cx_data_sz,
+                                    &dst_time_stamp, &dst_end_time_stamp, !img,
+                                    &encode_frame_result);
+      assert(size == 0);  // There is no compressed data in the first pass
+      (void)ret;
+      assert(ret == 0);
+      fps_pkt = get_first_pass_stats_pkt(&cpi->twopass.this_frame_stats);
+      vpx_codec_pkt_list_add(&ctx->pkt_list.head, &fps_pkt);
+    } else {
+      if (!cpi->twopass.first_pass_done) {
+        vpx_codec_cx_pkt_t fps_pkt;
+        vp9_end_first_pass(cpi);
+        fps_pkt = get_first_pass_stats_pkt(&cpi->twopass.total_stats);
+        vpx_codec_pkt_list_add(&ctx->pkt_list.head, &fps_pkt);
+      }
+    }
+#else   // !CONFIG_REALTIME_ONLY
+    assert(0);
+#endif  // !CONFIG_REALTIME_ONLY
+  } else {
+    ENCODE_FRAME_RESULT encode_frame_result;
+    int64_t dst_time_stamp;
+    int64_t dst_end_time_stamp;
+    vp9_init_encode_frame_result(&encode_frame_result);
+    while (cx_data_sz >= ctx->cx_data_sz / 2 &&
+           -1 != vp9_get_compressed_data(cpi, &lib_flags, &size, cx_data,
+                                         cx_data_sz, &dst_time_stamp,
+                                         &dst_end_time_stamp, !img,
+                                         &encode_frame_result)) {
+      // Pack psnr pkt.
+      if (size > 0) {
+        PSNR_STATS psnr;
+        if (vp9_get_psnr(cpi, &psnr)) {
+          vpx_codec_cx_pkt_t psnr_pkt = get_psnr_pkt(&psnr);
+          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &psnr_pkt);
         }
+      }
 
-        if (size || (cpi->use_svc && cpi->svc.skip_enhancement_layer)) {
-          // Pack invisible frames with the next visible frame
-          if (!cpi->common.show_frame ||
-              (cpi->use_svc && cpi->svc.spatial_layer_id <
-                                   cpi->svc.number_spatial_layers - 1)) {
-            if (ctx->pending_cx_data == NULL) ctx->pending_cx_data = cx_data;
-            ctx->pending_cx_data_sz += size;
-            if (size)
-              ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
-            ctx->pending_frame_magnitude |= size;
-            cx_data += size;
-            cx_data_sz -= size;
-            pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
-            pkt.data.frame.height[cpi->svc.spatial_layer_id] =
-                cpi->common.height;
-            pkt.data.frame.spatial_layer_encoded[cpi->svc.spatial_layer_id] =
-                1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
-
-            if (ctx->output_cx_pkt_cb.output_cx_pkt) {
-              pkt.kind = VPX_CODEC_CX_FRAME_PKT;
-              pkt.data.frame.pts =
-                  ticks_to_timebase_units(timebase_in_ts, dst_time_stamp) +
-                  ctx->pts_offset;
-              pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
-                  timebase_in_ts, dst_end_time_stamp - dst_time_stamp);
-              pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
-              pkt.data.frame.buf = ctx->pending_cx_data;
-              pkt.data.frame.sz = size;
-              ctx->pending_cx_data = NULL;
-              ctx->pending_cx_data_sz = 0;
-              ctx->pending_frame_count = 0;
-              ctx->pending_frame_magnitude = 0;
-              ctx->output_cx_pkt_cb.output_cx_pkt(
-                  &pkt, ctx->output_cx_pkt_cb.user_priv);
-            }
-            continue;
-          }
-
-          // Add the frame packet to the list of returned packets.
-          pkt.kind = VPX_CODEC_CX_FRAME_PKT;
-          pkt.data.frame.pts =
-              ticks_to_timebase_units(timebase_in_ts, dst_time_stamp) +
-              ctx->pts_offset;
-          pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
-              timebase_in_ts, dst_end_time_stamp - dst_time_stamp);
-          pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
+      if (size || (cpi->use_svc && cpi->svc.skip_enhancement_layer)) {
+        // Pack invisible frames with the next visible frame
+        if (!cpi->common.show_frame ||
+            (cpi->use_svc &&
+             cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)) {
+          if (ctx->pending_cx_data == NULL) ctx->pending_cx_data = cx_data;
+          ctx->pending_cx_data_sz += size;
+          if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+          ctx->pending_frame_magnitude |= size;
+          cx_data += size;
+          cx_data_sz -= size;
           pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
           pkt.data.frame.height[cpi->svc.spatial_layer_id] = cpi->common.height;
           pkt.data.frame.spatial_layer_encoded[cpi->svc.spatial_layer_id] =
               1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
 
-          if (ctx->pending_cx_data) {
-            if (size)
-              ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
-            ctx->pending_frame_magnitude |= size;
-            ctx->pending_cx_data_sz += size;
-            // write the superframe only for the case when the callback function
-            // for getting per-layer packets is not registered.
-            if (!ctx->output_cx_pkt_cb.output_cx_pkt) {
-              size += write_superframe_index(ctx);
-              assert(size <= cx_data_sz);
-            }
+          if (ctx->output_cx_pkt_cb.output_cx_pkt) {
+            pkt.kind = VPX_CODEC_CX_FRAME_PKT;
+            pkt.data.frame.pts =
+                ticks_to_timebase_units(timebase_in_ts, dst_time_stamp) +
+                ctx->pts_offset;
+            pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
+                timebase_in_ts, dst_end_time_stamp - dst_time_stamp);
+            pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
             pkt.data.frame.buf = ctx->pending_cx_data;
-            pkt.data.frame.sz = ctx->pending_cx_data_sz;
+            pkt.data.frame.sz = size;
             ctx->pending_cx_data = NULL;
             ctx->pending_cx_data_sz = 0;
             ctx->pending_frame_count = 0;
             ctx->pending_frame_magnitude = 0;
-          } else {
-            pkt.data.frame.buf = cx_data;
-            pkt.data.frame.sz = size;
-          }
-          pkt.data.frame.partition_id = -1;
-
-          if (ctx->output_cx_pkt_cb.output_cx_pkt)
             ctx->output_cx_pkt_cb.output_cx_pkt(
                 &pkt, ctx->output_cx_pkt_cb.user_priv);
-          else
-            vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
-
-          cx_data += size;
-          cx_data_sz -= size;
-          if (is_one_pass_svc(cpi) && (cpi->svc.spatial_layer_id ==
-                                       cpi->svc.number_spatial_layers - 1)) {
-            // Encoded all spatial layers; exit loop.
-            break;
           }
+          continue;
+        }
+
+        // Add the frame packet to the list of returned packets.
+        pkt.kind = VPX_CODEC_CX_FRAME_PKT;
+        pkt.data.frame.pts =
+            ticks_to_timebase_units(timebase_in_ts, dst_time_stamp) +
+            ctx->pts_offset;
+        pkt.data.frame.duration = (unsigned long)ticks_to_timebase_units(
+            timebase_in_ts, dst_end_time_stamp - dst_time_stamp);
+        pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
+        pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
+        pkt.data.frame.height[cpi->svc.spatial_layer_id] = cpi->common.height;
+        pkt.data.frame.spatial_layer_encoded[cpi->svc.spatial_layer_id] =
+            1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
+
+        if (ctx->pending_cx_data) {
+          if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+          ctx->pending_frame_magnitude |= size;
+          ctx->pending_cx_data_sz += size;
+          // write the superframe only for the case when the callback function
+          // for getting per-layer packets is not registered.
+          if (!ctx->output_cx_pkt_cb.output_cx_pkt) {
+            size += write_superframe_index(ctx);
+            assert(size <= cx_data_sz);
+          }
+          pkt.data.frame.buf = ctx->pending_cx_data;
+          pkt.data.frame.sz = ctx->pending_cx_data_sz;
+          ctx->pending_cx_data = NULL;
+          ctx->pending_cx_data_sz = 0;
+          ctx->pending_frame_count = 0;
+          ctx->pending_frame_magnitude = 0;
+        } else {
+          pkt.data.frame.buf = cx_data;
+          pkt.data.frame.sz = size;
+        }
+        pkt.data.frame.partition_id = -1;
+
+        if (ctx->output_cx_pkt_cb.output_cx_pkt)
+          ctx->output_cx_pkt_cb.output_cx_pkt(&pkt,
+                                              ctx->output_cx_pkt_cb.user_priv);
+        else
+          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+
+        cx_data += size;
+        cx_data_sz -= size;
+        if (is_one_pass_svc(cpi) &&
+            (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
+          // Encoded all spatial layers; exit loop.
+          break;
         }
       }
     }
