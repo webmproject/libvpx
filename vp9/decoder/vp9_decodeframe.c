@@ -1804,7 +1804,8 @@ static void recon_tile_row(TileWorkerData *tile_data, VP9Decoder *pbi,
   for (mi_col = mi_col_start; mi_col < mi_col_end; mi_col += MI_BLOCK_SIZE) {
     const int c = mi_col >> MI_BLOCK_SIZE_LOG2;
     int plane;
-    const int sb_num = (cur_sb_row * (aligned_cols >> MI_BLOCK_SIZE_LOG2) + c);
+    const size_t sb_num =
+        (cur_sb_row * (aligned_cols >> MI_BLOCK_SIZE_LOG2) + c);
 
     // Top Dependency
     if (cur_sb_row) {
@@ -1879,7 +1880,7 @@ static void parse_tile_row(TileWorkerData *tile_data, VP9Decoder *pbi,
     const int r = mi_row >> MI_BLOCK_SIZE_LOG2;
     const int c = mi_col >> MI_BLOCK_SIZE_LOG2;
     int plane;
-    const int sb_num = (r * (aligned_cols >> MI_BLOCK_SIZE_LOG2) + c);
+    const size_t sb_num = (r * (aligned_cols >> MI_BLOCK_SIZE_LOG2) + c);
     for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
       tile_data->xd.plane[plane].eob =
           row_mt_worker_data->eob[plane] + (sb_num << EOBS_PER_SB_LOG2);
