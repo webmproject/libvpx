@@ -16,6 +16,8 @@
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 
+#include "vpx/internal/vpx_codec_internal.h"
+#include "vpx/vpx_codec.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/system_state.h"
 #include "vpx_ports/vpx_once.h"

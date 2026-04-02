@@ -17,11 +17,13 @@
 
 #include "./vpx_config.h"
 #include "vpx/vpx_encoder.h"
+#include "vpx/vpx_image.h"
 #include "vpx/vpx_ext_ratectrl.h"
 #include "vpx_dsp/psnr.h"
 #include "vpx_dsp/vpx_dsp_common.h"
 #include "vpx_ports/static_assert.h"
 #include "vpx_ports/system_state.h"
+#include "vpx_scale/yv12config.h"
 #include "vpx_util/vpx_timestamp.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "./vpx_version.h"
