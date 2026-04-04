@@ -436,6 +436,7 @@ generate_vcxproj() {
             tag_content Optimization $opt
             tag_content AdditionalIncludeDirectories "$incs;%(AdditionalIncludeDirectories)"
             tag_content PreprocessorDefinitions "WIN32;$debug;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE$extradefines;%(PreprocessorDefinitions)"
+            tag_content LanguageStandard_C stdc11
             tag_content LanguageStandard stdcpp17
             tag_content RuntimeLibrary $runtime
             tag_content WarningLevel Level3

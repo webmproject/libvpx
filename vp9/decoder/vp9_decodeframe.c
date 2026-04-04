@@ -3013,7 +3013,7 @@ void vp9_decode_frame(VP9Decoder *pbi, const uint8_t *data,
     const size_t twd_size = num_tile_workers * sizeof(*pbi->tile_worker_data);
     // Ensure tile data offsets will be properly aligned. This may fail on
     // platforms without DECLARE_ALIGNED().
-    assert((sizeof(*pbi->tile_worker_data) % 16) == 0);
+    static_assert((sizeof(*pbi->tile_worker_data) % 16) == 0, "");
     vpx_free(pbi->tile_worker_data);
     CHECK_MEM_ERROR(&cm->error, pbi->tile_worker_data,
                     vpx_memalign(32, twd_size));
