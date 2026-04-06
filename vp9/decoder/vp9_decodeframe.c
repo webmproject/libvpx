@@ -1560,16 +1560,13 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   BufferPool *const pool = cm->buffer_pool;
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     if (vpx_rb_read_bit(rb)) {
-      if (cm->frame_refs[i].idx != INVALID_IDX) {
-        YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
-        width = buf->y_crop_width;
-        height = buf->y_crop_height;
-        found = 1;
-        break;
-      } else {
-        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Failed to decode frame size");
-      }
+      assert(cm->frame_refs[i].idx >= 0 &&
+             cm->frame_refs[i].idx < FRAME_BUFFERS);
+      YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
+      width = buf->y_crop_width;
+      height = buf->y_crop_height;
+      found = 1;
+      break;
     }
   }
 
@@ -1583,18 +1580,18 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   // has valid dimensions.
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
+    assert(ref_frame->idx >= 0 && ref_frame->idx < FRAME_BUFFERS);
     has_valid_ref_frame |=
-        (ref_frame->idx != INVALID_IDX &&
-         valid_ref_frame_size(ref_frame->buf->y_crop_width,
-                              ref_frame->buf->y_crop_height, width, height));
+        valid_ref_frame_size(ref_frame->buf->y_crop_width,
+                             ref_frame->buf->y_crop_height, width, height);
   }
   if (!has_valid_ref_frame)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame has invalid size");
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
-    if (ref_frame->idx == INVALID_IDX ||
-        !valid_ref_frame_img_fmt(ref_frame->buf->bit_depth,
+    assert(ref_frame->idx >= 0 && ref_frame->idx < FRAME_BUFFERS);
+    if (!valid_ref_frame_img_fmt(ref_frame->buf->bit_depth,
                                  ref_frame->buf->subsampling_x,
                                  ref_frame->buf->subsampling_y, cm->bit_depth,
                                  cm->subsampling_x, cm->subsampling_y))
@@ -2742,6 +2739,11 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         const int ref = vpx_rb_read_literal(rb, REF_FRAMES_LOG2);
         const int idx = cm->ref_frame_map[ref];
+        if (idx == INVALID_IDX) {
+          vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                             "Invalid reference frame index");
+        }
+        assert(idx >= 0 && idx < FRAME_BUFFERS);
         RefBuffer *const ref_frame = &cm->frame_refs[i];
         ref_frame->idx = idx;
         ref_frame->buf = &frame_bufs[idx].buf;
