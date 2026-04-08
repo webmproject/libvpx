@@ -213,7 +213,8 @@ TEST(DecodeAPI, Buganizer499206650) {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   };
-  EXPECT_EQ(vpx_codec_decode(&dec, frame1.data(), frame1.size(),
+  EXPECT_EQ(vpx_codec_decode(&dec, frame1.data(),
+                             static_cast<unsigned int>(frame1.size()),
                              /*user_priv=*/nullptr, /*deadline=*/0),
             VPX_CODEC_OK)
       << vpx_codec_error_detail(&dec);
@@ -230,7 +231,8 @@ TEST(DecodeAPI, Buganizer499206650) {
   };
   // Ensure there is no out of bounds read using the invalid index and that the
   // decoder reports an error.
-  EXPECT_EQ(vpx_codec_decode(&dec, frame2.data(), frame2.size(),
+  EXPECT_EQ(vpx_codec_decode(&dec, frame2.data(),
+                             static_cast<unsigned int>(frame2.size()),
                              /*user_priv=*/nullptr, /*deadline=*/0),
             VPX_CODEC_CORRUPT_FRAME);
 
