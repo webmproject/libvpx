@@ -762,7 +762,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
       if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) && (xd->bd > 8))
         sse = ROUND64_POWER_OF_TWO(sse, (xd->bd - 8) * 2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-      sse = sse * 16;
+      sse = (sse > (INT64_MAX >> (RDDIV_BITS + 4))) ? (INT64_MAX >> RDDIV_BITS) : sse * 16;
       tmp = pixel_sse(args->cpi, xd, pd, src, src_stride, dst, dst_stride,
                       blk_row, blk_col, plane_bsize, tx_bsize);
       dist = (int64_t)tmp * 16;
