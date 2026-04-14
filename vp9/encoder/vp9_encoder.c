@@ -2177,15 +2177,23 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     update_frame_size(cpi);
 
   if (last_w != cpi->oxcf.width || last_h != cpi->oxcf.height) {
+    int svc_alloc_mi_area = cm->mi_rows * cm->mi_cols;
+    if (cpi->svc.number_spatial_layers > 1 && cpi->initial_width &&
+        cpi->initial_height) {
+      int init_mi_rows, init_mi_cols, init_mi_stride;
+      vp9_set_mi_size(&init_mi_rows, &init_mi_cols, &init_mi_stride,
+                      cpi->initial_width, cpi->initial_height);
+      svc_alloc_mi_area =
+          VPXMAX(svc_alloc_mi_area, init_mi_rows * init_mi_cols);
+    }
     vpx_free(cpi->consec_zero_mv);
     CHECK_MEM_ERROR(
         &cm->error, cpi->consec_zero_mv,
-        vpx_calloc(cm->mi_rows * cm->mi_cols, sizeof(*cpi->consec_zero_mv)));
+        vpx_calloc(svc_alloc_mi_area, sizeof(*cpi->consec_zero_mv)));
 
     vpx_free(cpi->skin_map);
-    CHECK_MEM_ERROR(
-        &cm->error, cpi->skin_map,
-        vpx_calloc(cm->mi_rows * cm->mi_cols, sizeof(*cpi->skin_map)));
+    CHECK_MEM_ERROR(&cm->error, cpi->skin_map,
+                    vpx_calloc(svc_alloc_mi_area, sizeof(*cpi->skin_map)));
 
     if (cpi->svc.number_spatial_layers > 1) {
 #if CONFIG_VP9_TEMPORAL_DENOISING
@@ -2205,18 +2213,17 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
           lc->actual_num_seg2_blocks = 0;
           lc->counter_encode_maxq_scene_change = 0;
           vpx_free(lc->map);
-          CHECK_MEM_ERROR(
-              &cm->error, lc->map,
-              vpx_calloc(cm->mi_rows * cm->mi_cols, sizeof(*lc->map)));
+          CHECK_MEM_ERROR(&cm->error, lc->map,
+                          vpx_calloc(svc_alloc_mi_area, sizeof(*lc->map)));
           vpx_free(lc->last_coded_q_map);
-          CHECK_MEM_ERROR(&cm->error, lc->last_coded_q_map,
-                          vpx_malloc(cm->mi_rows * cm->mi_cols *
-                                     sizeof(*lc->last_coded_q_map)));
-          memset(lc->last_coded_q_map, MAXQ, cm->mi_rows * cm->mi_cols);
+          CHECK_MEM_ERROR(
+              &cm->error, lc->last_coded_q_map,
+              vpx_malloc(svc_alloc_mi_area * sizeof(*lc->last_coded_q_map)));
+          memset(lc->last_coded_q_map, MAXQ, svc_alloc_mi_area);
           vpx_free(lc->consec_zero_mv);
-          CHECK_MEM_ERROR(&cm->error, lc->consec_zero_mv,
-                          vpx_calloc(cm->mi_rows * cm->mi_cols,
-                                     sizeof(*lc->consec_zero_mv)));
+          CHECK_MEM_ERROR(
+              &cm->error, lc->consec_zero_mv,
+              vpx_calloc(svc_alloc_mi_area, sizeof(*lc->consec_zero_mv)));
         }
         cpi->refresh_golden_frame = 1;
         cpi->refresh_alt_ref_frame = 1;
