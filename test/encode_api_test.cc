@@ -2572,6 +2572,61 @@ TEST(EncodeAPI, Buganizer488585490CostTableOverflow) {
 }
 #endif
 
+TEST(EncodeAPI, SvcTestInvalidQuantizerInputs) {
+  // Initialize libvpx encoder.
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_w = 1280;
+  cfg.g_h = 720;
+  cfg.g_profile = 0;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_max_quantizer = 58;
+  cfg.rc_min_quantizer = 2;
+  cfg.ss_number_layers = 2;
+  cfg.ts_number_layers = 2;
+  cfg.ts_periodicity = 2;
+  cfg.ts_layer_id[0] = 0;
+  cfg.ts_layer_id[1] = 1;
+  cfg.ts_rate_decimator[0] = 2;
+  cfg.ts_rate_decimator[1] = 1;
+  cfg.layer_target_bitrate[0] = 100;
+  cfg.layer_target_bitrate[1] = 200;
+  cfg.layer_target_bitrate[2] = 300;
+  cfg.layer_target_bitrate[3] = 400;
+  cfg.rc_target_bitrate = 700;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  vpx_svc_extra_cfg_t svc_cfg = {};
+  svc_cfg.scaling_factor_num[0] = 1;
+  svc_cfg.scaling_factor_den[0] = 2;
+  svc_cfg.scaling_factor_num[1] = 1;
+  svc_cfg.scaling_factor_den[1] = 1;
+  for (unsigned int i = 0; i < cfg.ss_number_layers * cfg.ss_number_layers;
+       i++) {
+    svc_cfg.max_quantizers[i] = 56;
+    svc_cfg.min_quantizers[i] = 2;
+  }
+  svc_cfg.min_quantizers[1] = 2;
+  svc_cfg.max_quantizers[1] = 65;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+            VPX_CODEC_INVALID_PARAM);
+  svc_cfg.min_quantizers[1] = 2;
+  svc_cfg.max_quantizers[1] = -1;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+            VPX_CODEC_INVALID_PARAM);
+  svc_cfg.min_quantizers[1] = 64;
+  svc_cfg.max_quantizers[1] = 56;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+            VPX_CODEC_INVALID_PARAM);
+  svc_cfg.min_quantizers[1] = -1;
+  svc_cfg.max_quantizers[1] = 56;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+            VPX_CODEC_INVALID_PARAM);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace

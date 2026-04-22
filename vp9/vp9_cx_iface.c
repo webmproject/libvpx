@@ -1936,6 +1936,12 @@ static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
       const int layer =
           LAYER_IDS_TO_IDX(sl, tl, cpi->svc.number_temporal_layers);
       LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
+      if (params->max_quantizers[layer] < 0 ||
+          params->max_quantizers[layer] > 63 ||
+          params->min_quantizers[layer] < 0 ||
+          params->min_quantizers[layer] > params->max_quantizers[layer]) {
+        return VPX_CODEC_INVALID_PARAM;
+      }
       lc->max_q = params->max_quantizers[layer];
       lc->min_q = params->min_quantizers[layer];
       // Checks on valid scale factors.
