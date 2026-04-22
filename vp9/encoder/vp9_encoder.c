@@ -1510,10 +1510,8 @@ static void init_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   // Temporal scalability.
   cpi->svc.number_temporal_layers = oxcf->ts_number_layers;
 
-  if ((cpi->svc.number_temporal_layers > 1) ||
-      ((cpi->svc.number_temporal_layers > 1 ||
-        cpi->svc.number_spatial_layers > 1) &&
-       cpi->oxcf.pass != 1)) {
+  if (cpi->svc.number_temporal_layers > 1 ||
+      cpi->svc.number_spatial_layers > 1) {
     vp9_init_layer_context(cpi);
   }
 
