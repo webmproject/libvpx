@@ -363,7 +363,11 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   // Check if it is one_pass_cbr_svc mode and lc->speed > 0 (real-time mode
   // does not use speed = 0).
   if (is_one_pass_svc(cpi) && lc->speed > 0) {
+#if CONFIG_REALTIME_ONLY
+    cpi->oxcf.speed = VPXMAX(lc->speed, 5);
+#else
     cpi->oxcf.speed = lc->speed;
+#endif
   }
   cpi->loopfilter_ctrl = lc->loopfilter_ctrl;
   // Reset the frames_since_key and frames_to_key counters to their values
