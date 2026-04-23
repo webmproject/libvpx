@@ -2572,7 +2572,7 @@ TEST(EncodeAPI, Buganizer488585490CostTableOverflow) {
 }
 #endif
 
-TEST(EncodeAPI, SvcTestInvalidQuantizerInputs) {
+TEST(EncodeAPI, SvcTestInvalidInputs) {
   // Initialize libvpx encoder.
   vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
   vpx_codec_ctx_t enc;
@@ -2582,6 +2582,8 @@ TEST(EncodeAPI, SvcTestInvalidQuantizerInputs) {
   cfg.g_h = 720;
   cfg.g_profile = 0;
   cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_timebase.num = 1;
+  cfg.g_timebase.den = 1000;
   cfg.g_lag_in_frames = 0;
   cfg.rc_max_quantizer = 58;
   cfg.rc_min_quantizer = 2;
@@ -2608,6 +2610,8 @@ TEST(EncodeAPI, SvcTestInvalidQuantizerInputs) {
     svc_cfg.max_quantizers[i] = 56;
     svc_cfg.min_quantizers[i] = 2;
   }
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC, 1), VPX_CODEC_OK);
+  // Check for invalid quantizer inputs.
   svc_cfg.min_quantizers[1] = 2;
   svc_cfg.max_quantizers[1] = 65;
   ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
@@ -2624,6 +2628,26 @@ TEST(EncodeAPI, SvcTestInvalidQuantizerInputs) {
   svc_cfg.max_quantizers[1] = 56;
   ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
             VPX_CODEC_INVALID_PARAM);
+
+  // Check for invalid duration input.
+  vpx_svc_ref_frame_config_t ref_frame_config = {};
+  for (unsigned int i = 0; i < cfg.ss_number_layers; i++) {
+    ref_frame_config.lst_fb_idx[i] = 0;
+    ref_frame_config.reference_last[i] = 1;
+    ref_frame_config.update_last[i] = 1;
+    ref_frame_config.duration[i] = 1000;
+  }
+  ref_frame_config.duration[0] = INT64_MAX;
+  ASSERT_EQ(
+      vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_frame_config),
+      VPX_CODEC_OK);
+  // Create input image.
+  vpx_image_t *const image =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+  ASSERT_EQ(vpx_codec_encode(&enc, image, 0, 300, 0, VPX_DL_REALTIME),
+            VPX_CODEC_INVALID_PARAM);
+  vpx_img_free(image);
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 
