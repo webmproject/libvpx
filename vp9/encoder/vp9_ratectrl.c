@@ -2161,7 +2161,7 @@ int vp9_calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
       VPXMAX(rc->avg_frame_bandwidth >> 4, FRAME_OVERHEAD_BITS);
   int64_t target;
 
-  if (oxcf->gf_cbr_boost_pct) {
+  if (oxcf->gf_cbr_boost_pct && rc->baseline_gf_interval != INT_MAX) {
     const int af_ratio_pct = oxcf->gf_cbr_boost_pct + 100;
     target = cpi->refresh_golden_frame
                  ? ((int64_t)rc->avg_frame_bandwidth *
