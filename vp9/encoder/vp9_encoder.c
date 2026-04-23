@@ -4169,14 +4169,16 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
     if (vp9_rc_drop_frame(cpi)) return 0;
   }
 
-  // For 1 pass SVC, only ZEROMV is allowed for spatial reference frame
-  // when svc->force_zero_mode_spatial_ref = 1. Under those conditions we can
-  // avoid this frame-level upsampling (for non intra_only frames).
+  // For 1 pass SVC wth use_nonrd_pick_mode, only ZEROMV is allowed for
+  // spatial reference frame when svc->force_zero_mode_spatial_ref = 1.
+  // Under those conditions we can avoid this frame-level upsampling
+  // (for non intra_only frames).
   // For SVC single_layer mode, dynamic resize is allowed and we need to
   // scale references for this case.
   if (frame_is_intra_only(cm) == 0 &&
       ((svc->single_layer_svc && cpi->oxcf.resize_mode == RESIZE_DYNAMIC) ||
-       !(is_one_pass_svc(cpi) && svc->force_zero_mode_spatial_ref))) {
+       !(is_one_pass_svc(cpi) && svc->force_zero_mode_spatial_ref &&
+         cpi->sf.use_nonrd_pick_mode))) {
     vp9_scale_references(cpi);
   }
 
