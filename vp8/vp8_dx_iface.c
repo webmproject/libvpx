@@ -586,6 +586,8 @@ static vpx_codec_err_t vp8_set_reference(vpx_codec_alg_priv_t *ctx,
 
     image2yuvconfig(&frame->img, &sd);
 
+    if (ctx->yv12_frame_buffers.pbi[0] == NULL) return VPX_CODEC_CORRUPT_FRAME;
+
     return vp8dx_set_reference(ctx->yv12_frame_buffers.pbi[0],
                                frame->frame_type, &sd);
   } else {
@@ -602,6 +604,8 @@ static vpx_codec_err_t vp8_get_reference(vpx_codec_alg_priv_t *ctx,
     YV12_BUFFER_CONFIG sd;
 
     image2yuvconfig(&frame->img, &sd);
+
+    if (ctx->yv12_frame_buffers.pbi[0] == NULL) return VPX_CODEC_CORRUPT_FRAME;
 
     return vp8dx_get_reference(ctx->yv12_frame_buffers.pbi[0],
                                frame->frame_type, &sd);
