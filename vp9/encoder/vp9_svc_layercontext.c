@@ -469,8 +469,8 @@ void get_layer_resolution(const int width_org, const int height_org,
     return;
   }
 
-  w = width_org * num / den;
-  h = height_org * num / den;
+  w = (int)((int64_t)width_org * num / den);
+  h = (int)((int64_t)height_org * num / den);
 
   // make height and width even to make chrome player happy
   w += w % 2;
@@ -938,7 +938,7 @@ int vp9_one_pass_svc_start_layer(VP9_COMP *const cpi) {
     svc->downsample_filter_type[svc->spatial_layer_id] = EIGHTTAP_SMOOTH;
   // For scale factors > 0.75, set the phase to 0 (aligns decimated pixel
   // to source pixel).
-  if (scaling_factor_num > (3 * scaling_factor_den) >> 2)
+  if (scaling_factor_num > ((int64_t)3 * scaling_factor_den) >> 2)
     svc->downsample_filter_phase[svc->spatial_layer_id] = 0;
 
   // The usage of use_base_mv or partition_reuse assumes down-scale of 2x2.
