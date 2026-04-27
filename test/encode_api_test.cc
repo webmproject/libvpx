@@ -406,6 +406,42 @@ TEST(EncodeAPI, RandomPixelsVp8) {
   vpx_codec_destroy(&enc);
 }
 
+// Large static_threshold: issue: 505902433.
+TEST(EncodeAPI, LargeStaticThresholdVp8) {
+  // Initialize libvpx encoder
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.rc_target_bitrate = 2000;
+  cfg.g_w = 1280;
+  cfg.g_h = 720;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, -8), VPX_CODEC_OK);
+
+  // 131071 = 1024 << 7 - 1: max value for static_threshold.
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_STATIC_THRESHOLD, 131072),
+            VPX_CODEC_INVALID_PARAM);
+
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_STATIC_THRESHOLD, 131071),
+            VPX_CODEC_OK);
+
+  // Generate random frame data and encode
+  libvpx_test::RandomVideoSource video;
+  video.SetSize(cfg.g_w, cfg.g_h);
+  video.SetImageFormat(VPX_IMG_FMT_I420);
+  video.Begin();
+  ASSERT_EQ(vpx_codec_encode(&enc, video.img(), video.pts(), video.duration(),
+                             /*flags=*/0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  // Destroy libvpx encoder
+  vpx_codec_destroy(&enc);
+}
+
 TEST(EncodeAPI, ChangeToL1T3AndSetBitrateVp8) {
   // Initialize libvpx encoder
   vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();

@@ -199,6 +199,9 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_BOOL(vp8_cfg, enable_auto_alt_ref);
   RANGE_CHECK(vp8_cfg, cpu_used, -16, 16);
 
+  /* Prevent (static_thresh >> 7) from exceeding MAX_ERROR_BINS (1024) */
+  RANGE_CHECK_HI(vp8_cfg, static_thresh, (MAX_ERROR_BINS << 7) - 1);
+
 #if CONFIG_REALTIME_ONLY && !CONFIG_TEMPORAL_DENOISING
   RANGE_CHECK(vp8_cfg, noise_sensitivity, 0, 0);
 #else

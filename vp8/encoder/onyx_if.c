@@ -965,6 +965,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
         if (cpi->oxcf.encode_breakout > 2000) min = cpi->oxcf.encode_breakout;
 
         min >>= 7;
+        if (min >= MAX_ERROR_BINS) min = MAX_ERROR_BINS - 1;
 
         for (i = 0; i < min; ++i) {
           sum += cpi->mb.error_bins[i];
