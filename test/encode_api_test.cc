@@ -918,6 +918,32 @@ TEST(EncodeAPI, OssFuzz471723682) {
 
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+
+TEST(EncodeAPI, Vp8TotalrateOverflow) {
+  vpx_codec_enc_cfg_t cfg;
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 1156;
+  cfg.g_h = 700;
+  cfg.g_threads = 8;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+
+  vpx_codec_ctx_t codec;
+  ASSERT_EQ(vpx_codec_enc_init(&codec, iface, &cfg, 0), VPX_CODEC_OK);
+
+  libvpx_test::ACMRandom rng;
+  vpx_image_t *const image =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h, &rng);
+  ASSERT_NE(image, nullptr);
+
+  EXPECT_EQ(vpx_codec_encode(&codec, image, 0, 1, 0, VPX_DL_GOOD_QUALITY),
+            VPX_CODEC_OK);
+
+  vpx_img_free(image);
+  EXPECT_EQ(vpx_codec_destroy(&codec), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP8_ENCODER
 
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
