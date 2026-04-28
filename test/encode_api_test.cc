@@ -2763,6 +2763,23 @@ TEST(EncodeAPI, SvcIssue505665613) {
   vpx_codec_destroy(&codec);
 }
 
+TEST(EncodeAPI, Vp9TargetLevelTinyResolution) {
+  vpx_codec_enc_cfg_t cfg;
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_w = 1;
+  cfg.g_h = 1;
+
+  vpx_codec_ctx_t codec;
+  ASSERT_EQ(vpx_codec_enc_init(&codec, iface, &cfg, 0), VPX_CODEC_OK);
+
+  EXPECT_EQ(vpx_codec_control_(&codec, VP9E_SET_TARGET_LEVEL, 40),
+            VPX_CODEC_OK);
+
+  EXPECT_EQ(vpx_codec_destroy(&codec), VPX_CODEC_OK);
+}
+
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace

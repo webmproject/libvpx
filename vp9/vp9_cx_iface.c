@@ -496,12 +496,14 @@ static void config_target_level(VP9EncoderConfig *oxcf) {
   if (oxcf->ss_number_layers == 1 && oxcf->pass != 0)
     oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
 
-  // Adjust max over-shoot percentage.
-  max_over_shoot_pct =
-      (int)((max_average_bitrate * 1.10 - (double)oxcf->target_bandwidth) *
-            100 / (double)(oxcf->target_bandwidth));
-  if (oxcf->over_shoot_pct > max_over_shoot_pct)
-    oxcf->over_shoot_pct = max_over_shoot_pct;
+  // Adjust max over-shoot percentage (only when target_bandwidth > 0).
+  if (oxcf->target_bandwidth > 0) {
+    max_over_shoot_pct =
+        (int)((max_average_bitrate * 1.10 - (double)oxcf->target_bandwidth) *
+              100 / (double)(oxcf->target_bandwidth));
+    if (oxcf->over_shoot_pct > max_over_shoot_pct)
+      oxcf->over_shoot_pct = max_over_shoot_pct;
+  }
 
   // Adjust worst allowed quantizer.
   oxcf->worst_allowed_q = vp9_quantizer_to_qindex(63);
