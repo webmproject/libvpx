@@ -699,6 +699,12 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->ts_number_layers = cfg->ts_number_layers;
   oxcf->temporal_layering_mode =
       (enum vp9e_temporal_layering_mode)cfg->temporal_layering_mode;
+  if (oxcf->temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING) {
+    if (oxcf->ts_number_layers == 2)
+      oxcf->temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_0101;
+    else if (oxcf->ts_number_layers == 3)
+      oxcf->temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_0212;
+  }
 
   oxcf->target_level = extra_cfg->target_level;
 
@@ -2010,6 +2016,7 @@ static vpx_codec_err_t ctrl_set_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
     cpi->svc.alt_fb_idx[sl] = data->alt_fb_idx[sl];
     cpi->svc.duration[sl] = data->duration[sl];
   }
+  cpi->svc.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
   return VPX_CODEC_OK;
 }
 

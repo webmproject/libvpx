@@ -240,14 +240,8 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
       }
     }
   } else {
-    int layer_end;
-
-    if (svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) {
-      layer_end = svc->number_temporal_layers;
-    } else {
-      layer_end = svc->number_spatial_layers;
-    }
-
+    assert(svc->number_temporal_layers == 1);
+    int layer_end = svc->number_spatial_layers;
     for (layer = 0; layer < layer_end; ++layer) {
       LAYER_CONTEXT *const lc = &svc->layer_context[layer];
       RATE_CONTROL *const lrc = &lc->rc;
@@ -267,12 +261,7 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
       lrc->bits_off_target =
           VPXMIN(lrc->bits_off_target, lrc->maximum_buffer_size);
       lrc->buffer_level = VPXMIN(lrc->buffer_level, lrc->maximum_buffer_size);
-      // Update framerate-related quantities.
-      if (svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) {
-        lc->framerate = cpi->framerate / oxcf->ts_rate_decimator[layer];
-      } else {
-        lc->framerate = cpi->framerate;
-      }
+      lc->framerate = cpi->framerate;
       lrc->avg_frame_bandwidth = saturate_cast_double_to_int(
           round(lc->target_bandwidth / lc->framerate));
       lrc->max_frame_bandwidth = rc->max_frame_bandwidth;

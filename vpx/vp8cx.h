@@ -812,8 +812,7 @@ typedef enum vp9e_temporal_layering_mode {
   VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING = 0,
 
   /*!\brief Bypass mode.
-   * Used when application needs to control temporal layering.
-   * This will only work when the number of spatial layers equals 1.
+   * Used when application needs to control spatial and temporal layering.
    */
   VP9E_TEMPORAL_LAYERING_MODE_BYPASS = 1,
 
