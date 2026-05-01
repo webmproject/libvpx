@@ -75,7 +75,7 @@ typedef struct vp9_extracfg {
   unsigned int row_mt;
   unsigned int motion_vector_unit_test;
   int delta_q_uv;
-  unsigned int validate_input_hbd;
+  unsigned int validate_hbd_input;
 } vp9_extracfg;
 
 static struct vp9_extracfg default_extra_cfg = {
@@ -116,7 +116,7 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                     // row_mt
   0,                     // motion_vector_unit_test
   0,                     // delta_q_uv
-  1,                     // validate_input_hbd
+  1,                     // validate_hbd_input
 };
 
 struct vpx_codec_alg_priv {
@@ -454,7 +454,7 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
         "format");
   }
 
-  if (ctx->extra_cfg.validate_input_hbd &&
+  if (ctx->extra_cfg.validate_hbd_input &&
       (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
     const unsigned int h = img->d_h;
     const unsigned int w = img->d_w;
@@ -1037,10 +1037,10 @@ static vpx_codec_err_t ctrl_set_keyframe_filtering(vpx_codec_alg_priv_t *ctx,
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
-static vpx_codec_err_t ctrl_set_validate_input_hbd(vpx_codec_alg_priv_t *ctx,
+static vpx_codec_err_t ctrl_set_validate_hbd_input(vpx_codec_alg_priv_t *ctx,
                                                    va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
-  extra_cfg.validate_input_hbd = CAST(VP9E_SET_VALIDATE_INPUT_HBD, args);
+  extra_cfg.validate_hbd_input = CAST(VP9E_SET_VALIDATE_HBD_INPUT, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 static vpx_codec_err_t ctrl_set_arnr_max_frames(vpx_codec_alg_priv_t *ctx,
@@ -2206,7 +2206,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   { VP9E_SET_TILE_ROWS, ctrl_set_tile_rows },
   { VP9E_SET_TPL, ctrl_set_tpl_model },
   { VP9E_SET_KEY_FRAME_FILTERING, ctrl_set_keyframe_filtering },
-  { VP9E_SET_VALIDATE_INPUT_HBD, ctrl_set_validate_input_hbd },
+  { VP9E_SET_VALIDATE_HBD_INPUT, ctrl_set_validate_hbd_input },
   { VP8E_SET_ARNR_MAXFRAMES, ctrl_set_arnr_max_frames },
   { VP8E_SET_ARNR_STRENGTH, ctrl_set_arnr_strength },
   { VP8E_SET_ARNR_TYPE, ctrl_set_arnr_type },
