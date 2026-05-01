@@ -31,6 +31,7 @@
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx/vpx_image.h"
+#include "vpx_mem/vpx_mem.h"
 
 #if CONFIG_VP9_ENCODER
 #include "vp9/encoder/vp9_encoder.h"
@@ -2290,6 +2291,68 @@ TEST(EncodeAPI, Buganizer331108922BitDepth12) {
   encoder.Configure(/*threads=*/16, /*width=*/1, /*height=*/798, VPX_CBR,
                     VPX_DL_REALTIME);
   encoder.Encode(/*key_frame=*/false);
+}
+
+TEST(EncodeAPI, InvalidInputRange) {
+  constexpr int kWidth = 64;
+  constexpr int kHeight = 64;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(vpx_codec_vp9_cx(), &cfg,
+                                         /*usage=*/0),
+            VPX_CODEC_OK);
+  cfg.g_w = kWidth;
+  cfg.g_h = kHeight;
+
+  std::unique_ptr<vpx_image_t, decltype(&vpx_img_free)> image(
+      vpx_img_alloc(nullptr, VPX_IMG_FMT_I42016, cfg.g_w, cfg.g_h, 0),
+      &vpx_img_free);
+  vpx_image_t *img = image.get();
+  ASSERT_NE(img, nullptr);
+
+  for (const auto bitdepth : { VPX_BITS_8, VPX_BITS_10, VPX_BITS_12 }) {
+    cfg.g_profile = (bitdepth == VPX_BITS_8) ? 0 : 2;
+    cfg.g_bit_depth = bitdepth;
+
+    // A value that's slightly over the max is used to ensure when the range is
+    // not checked an encode won't produce any integer overflows. Values
+    // outside of the valid range are not supported, so overflows will be
+    // ignored in that case.
+    const int val = 1 << bitdepth;
+    for (const int plane : { VPX_PLANE_Y, VPX_PLANE_U, VPX_PLANE_V }) {
+      const int width = (plane == VPX_PLANE_Y) ? img->d_w : (img->d_w + 1) / 2;
+      const int height = (plane == VPX_PLANE_Y) ? img->d_h : (img->d_h + 1) / 2;
+      uint8_t *p = img->planes[plane];
+      for (int y = 0; y < height; ++y) {
+        vpx_memset16(p, val, width);
+        p += img->stride[plane];
+      }
+    }
+
+    vpx_codec_ctx_t enc;
+    ASSERT_EQ(vpx_codec_enc_init(&enc, vpx_codec_vp9_cx(), &cfg,
+                                 VPX_CODEC_USE_HIGHBITDEPTH),
+              VPX_CODEC_OK);
+
+    for (int check_input_range = 0; check_input_range <= 1;
+         ++check_input_range) {
+      EXPECT_EQ(vpx_codec_control(&enc, VP9E_SET_VALIDATE_HBD_INPUT,
+                                  check_input_range),
+                VPX_CODEC_OK);
+
+      EXPECT_EQ(vpx_codec_encode(&enc, img, /*pts=*/0, /*duration=*/1,
+                                 /*flags=*/0, VPX_DL_REALTIME),
+                check_input_range ? VPX_CODEC_INVALID_PARAM : VPX_CODEC_OK)
+          << "Error: " << vpx_codec_error_detail(&enc)
+          << ", bitdepth: " << bitdepth
+          << ", check_input_range: " << check_input_range;
+    }
+
+    EXPECT_EQ(vpx_codec_encode(&enc, /*img=*/nullptr, /*pts=*/0, /*duration=*/0,
+                               /*flags=*/0, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
