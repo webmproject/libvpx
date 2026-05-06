@@ -29,6 +29,7 @@
 #include "vp8/encoder/ethreading.h"
 #endif
 #include "vp8/encoder/onyx_int.h"
+#include "vp8/encoder/block.h"
 #include "vpx/vp8cx.h"
 #include "vp8/encoder/firstpass.h"
 #include "vp8/common/onyx.h"

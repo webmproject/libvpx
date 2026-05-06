@@ -2714,7 +2714,7 @@ void TestEncoderImageMismatch(bool use_highbitdepth) {
   cfg.g_lag_in_frames = 0;
 
   vpx_img_fmt_t img_fmt;
-  long flags = 0;
+  vpx_codec_flags_t flags = 0;
 
   if (use_highbitdepth) {
     cfg.g_profile = 2;
@@ -2729,7 +2729,7 @@ void TestEncoderImageMismatch(bool use_highbitdepth) {
 
   ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, flags), VPX_CODEC_OK);
 
-  vpx_image_t *img = vpx_img_alloc(NULL, img_fmt, cfg.g_w, cfg.g_h, 1);
+  vpx_image_t *img = vpx_img_alloc(nullptr, img_fmt, cfg.g_w, cfg.g_h, 1);
   ASSERT_NE(img, nullptr);
 
   ASSERT_EQ(vpx_codec_encode(&enc, img, 0, 1, 0, VPX_DL_REALTIME),
