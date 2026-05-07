@@ -1920,7 +1920,7 @@ TEST(EncodeAPI, Buganizer475394382) {
   vpx_codec_enc_config_set(&enc, &cfg);
 
   vpx_image_t *img =
-      vpx_img_alloc(NULL, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h, 16);
+      vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h, 16);
   ASSERT_NE(img, nullptr);
 
   FillPlane(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y], cfg.g_w,
@@ -2065,7 +2065,7 @@ TEST(EncodeAPI, Buganizer441668134) {
   ASSERT_EQ(vpx_codec_control_(&ctx, VP9E_SET_DELTA_Q_UV, -15), 0);
   // Image allocation.
   vpx_img_fmt_t img_fmt = VPX_IMG_FMT_I420;
-  vpx_image_t *img = vpx_img_alloc(NULL, img_fmt, cfg.g_w, cfg.g_h, 32);
+  vpx_image_t *img = vpx_img_alloc(nullptr, img_fmt, cfg.g_w, cfg.g_h, 32);
   for (unsigned int y = 0; y < img->d_h; y++) {
     for (unsigned int x = 0; x < img->d_w; x++) {
       img->planes[0][y * img->stride[0] + x] = ((x ^ y) * 127) & 0xFF;

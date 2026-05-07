@@ -138,13 +138,13 @@ static int encode_frame(vpx_codec_ctx_t *codec, vpx_image_t *img,
                         int frame_index, int flags, FILE *out,
                         vpx_enc_deadline_t quality) {
   int got_pkts = 0;
-  vpx_codec_iter_t iter = NULL;
-  const vpx_codec_cx_pkt_t *pkt = NULL;
+  vpx_codec_iter_t iter = nullptr;
+  const vpx_codec_cx_pkt_t *pkt = nullptr;
   const vpx_codec_err_t res =
       vpx_codec_encode(codec, img, frame_index, 1, flags, quality);
   if (res != VPX_CODEC_OK) return 0;
 
-  while ((pkt = vpx_codec_get_cx_data(codec, &iter)) != NULL) {
+  while ((pkt = vpx_codec_get_cx_data(codec, &iter)) != nullptr) {
     got_pkts = 1;
 
     if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
@@ -243,7 +243,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   }
 
   // Flush encoder.
-  while (encode_frame(&codec, NULL, -1, 0, out, quality)) {
+  while (encode_frame(&codec, nullptr, -1, 0, out, quality)) {
   }
 
 fail:
