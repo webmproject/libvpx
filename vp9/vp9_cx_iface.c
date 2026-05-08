@@ -298,6 +298,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, cq_level, 0, 63);
   RANGE_CHECK(cfg, g_bit_depth, VPX_BITS_8, VPX_BITS_12);
   RANGE_CHECK(cfg, g_input_bit_depth, 8, 12);
+  if (cfg->g_input_bit_depth > cfg->g_bit_depth)
+    ERROR("Input bit-depth must not exceed codec bit-depth");
   RANGE_CHECK(extra_cfg, content, VP9E_CONTENT_DEFAULT,
               VP9E_CONTENT_INVALID - 1);
 
@@ -368,9 +370,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
       cfg->g_bit_depth > VPX_BITS_8) {
     ERROR("Codec high bit-depth not supported in profile < 2");
-  }
-  if (cfg->g_profile <= (unsigned int)PROFILE_1 && cfg->g_input_bit_depth > 8) {
-    ERROR("Source high bit-depth not supported in profile < 2");
   }
   if (cfg->g_profile > (unsigned int)PROFILE_1 &&
       cfg->g_bit_depth == VPX_BITS_8) {
@@ -458,7 +457,7 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
       (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
     const unsigned int h = img->d_h;
     const unsigned int w = img->d_w;
-    const unsigned int bit_depth = ctx->oxcf.input_bit_depth;
+    const unsigned int bit_depth = ctx->cfg.g_bit_depth;
     const int max_val = 1 << bit_depth;
     for (int plane = 0; plane < 3; ++plane) {
       const unsigned short *src = (const unsigned short *)img->planes[plane];

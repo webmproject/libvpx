@@ -497,7 +497,7 @@ static const arg_def_t bitdeptharg = ARG_DEF_ENUM(
     "Bit depth for codec (8 for version <=1, 10 or 12 for version 2)",
     bitdepth_enum);
 static const arg_def_t inbitdeptharg =
-    ARG_DEF(NULL, "input-bit-depth", 1, "Bit depth of input");
+    ARG_DEF(NULL, "input-bit-depth", 1, "Actual bit depth of input source");
 #endif
 
 static const struct arg_enum_list tune_content_enum[] = {

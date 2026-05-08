@@ -156,7 +156,7 @@ typedef struct VP9EncoderConfig {
   vpx_bit_depth_t bit_depth;     // Codec bit-depth.
   int width;                     // width of data passed to the compressor
   int height;                    // height of data passed to the compressor
-  unsigned int input_bit_depth;  // Input bit depth.
+  unsigned int input_bit_depth;  // Actual bit-depth of the input source
   double init_framerate;         // set to passed in framerate
   vpx_rational_t g_timebase;  // equivalent to g_timebase in vpx_codec_enc_cfg_t
   vpx_rational64_t g_timebase_in_ts;  // g_timebase * TICKS_PER_SEC
