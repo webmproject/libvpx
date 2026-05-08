@@ -121,6 +121,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86-win32-vs15
     x86-win32-vs16
     x86-win32-vs17
+    x86-win32-vs18
     x86_64-android-gcc
     x86_64-darwin9-gcc
     x86_64-darwin10-gcc
