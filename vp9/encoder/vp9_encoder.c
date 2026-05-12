@@ -2636,20 +2636,12 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
   cpi->mb_wiener_var_cols = 0;
   cpi->mb_wiener_var_rows = 0;
   cpi->mb_wiener_variance = NULL;
+  cpi->mi_ssim_rdmult_scaling_factors = NULL;
+  cpi->mi_ssim_rdmult_scaling_factors_rows = 0;
+  cpi->mi_ssim_rdmult_scaling_factors_cols = 0;
 
   vp9_set_speed_features_framesize_independent(cpi, oxcf->speed);
   vp9_set_speed_features_framesize_dependent(cpi, oxcf->speed);
-
-  {
-    const int bsize = BLOCK_16X16;
-    const int w = num_8x8_blocks_wide_lookup[bsize];
-    const int h = num_8x8_blocks_high_lookup[bsize];
-    const int num_cols = (cm->mi_cols + w - 1) / w;
-    const int num_rows = (cm->mi_rows + h - 1) / h;
-    CHECK_MEM_ERROR(&cm->error, cpi->mi_ssim_rdmult_scaling_factors,
-                    vpx_calloc(num_rows * num_cols,
-                               sizeof(*cpi->mi_ssim_rdmult_scaling_factors)));
-  }
 
   cpi->kmeans_data_arr_alloc = 0;
 #if CONFIG_NON_GREEDY_MV
@@ -5053,6 +5045,24 @@ static void set_frame_index(VP9_COMP *cpi, VP9_COMMON *cm) {
   }
 }
 
+static void init_mb_ssim_rdmult_scaling_buffer(VP9_COMP *cpi) {
+  VP9_COMMON *cm = &cpi->common;
+
+  if (cpi->mi_ssim_rdmult_scaling_factors &&
+      cpi->mi_ssim_rdmult_scaling_factors_rows >= cm->mb_rows &&
+      cpi->mi_ssim_rdmult_scaling_factors_cols >= cm->mb_cols)
+    return;
+
+  vpx_free(cpi->mi_ssim_rdmult_scaling_factors);
+  cpi->mi_ssim_rdmult_scaling_factors = NULL;
+
+  CHECK_MEM_ERROR(&cm->error, cpi->mi_ssim_rdmult_scaling_factors,
+                  vpx_calloc(cm->mb_rows * cm->mb_cols,
+                             sizeof(*cpi->mi_ssim_rdmult_scaling_factors)));
+  cpi->mi_ssim_rdmult_scaling_factors_rows = cm->mb_rows;
+  cpi->mi_ssim_rdmult_scaling_factors_cols = cm->mb_cols;
+}
+
 static void set_mb_ssim_rdmult_scaling(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   ThreadData *td = &cpi->td;
@@ -5352,7 +5362,10 @@ static void encode_frame_to_data_rate(
     }
   }
 
-  if (oxcf->tuning == VP8_TUNE_SSIM) set_mb_ssim_rdmult_scaling(cpi);
+  if (oxcf->tuning == VP8_TUNE_SSIM) {
+    init_mb_ssim_rdmult_scaling_buffer(cpi);
+    set_mb_ssim_rdmult_scaling(cpi);
+  }
 
   if (oxcf->aq_mode == PERCEPTUAL_AQ) {
     init_mb_wiener_var_buffer(cpi);

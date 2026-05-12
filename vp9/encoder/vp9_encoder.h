@@ -664,6 +664,8 @@ typedef struct VP9_COMP {
   int mb_wiener_var_rows;
   int mb_wiener_var_cols;
   double *mi_ssim_rdmult_scaling_factors;
+  int mi_ssim_rdmult_scaling_factors_rows;
+  int mi_ssim_rdmult_scaling_factors_cols;
 
   int64_t *sb_mul_scale;
 

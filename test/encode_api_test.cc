@@ -3121,6 +3121,48 @@ TEST(EncodeAPI, Vp9SvcLayeringModeNotSet) {
   vpx_img_free(image);
   ASSERT_EQ(vpx_codec_destroy(&codec), VPX_CODEC_OK);
 }
+
+// Test for SSIM tuning with resolution change: bug: 512508456.
+TEST(EncodeAPI, BuganizerSSIMHeapOverflow) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_w = 16;
+  cfg.g_h = 16;
+  cfg.g_threads = 1;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  // Set VP8_TUNE_SSIM.
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_TUNING, VP8_TUNE_SSIM),
+            VPX_CODEC_OK);
+
+  vpx_image_t *img =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(img, nullptr);
+
+  // Encode first frame
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  // Change resolution to larger size.
+  cfg.g_w = 4096;
+  cfg.g_h = 4096;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+
+  vpx_img_free(img);
+  img = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(img, nullptr);
+
+  // Encode second frame.
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 1, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  vpx_img_free(img);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
