@@ -298,7 +298,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, cq_level, 0, 63);
   RANGE_CHECK(cfg, g_bit_depth, VPX_BITS_8, VPX_BITS_12);
   RANGE_CHECK(cfg, g_input_bit_depth, 8, 12);
-  if (cfg->g_input_bit_depth > cfg->g_bit_depth)
+  if (cfg->g_input_bit_depth > (unsigned int)cfg->g_bit_depth)
     ERROR("Input bit-depth must not exceed codec bit-depth");
   RANGE_CHECK(extra_cfg, content, VP9E_CONTENT_DEFAULT,
               VP9E_CONTENT_INVALID - 1);
