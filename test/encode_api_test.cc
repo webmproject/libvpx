@@ -3163,6 +3163,57 @@ TEST(EncodeAPI, BuganizerSSIMHeapOverflow) {
   vpx_img_free(img);
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+
+// Configure spatial layers and encode first superframe with 0 layer bitrates
+// for enhancement layers, and start with SL1 (don't call encoder for SL0).
+// This causes an empty superframe. Bug: 508317885.
+TEST(EncodeAPI, Vp9SvcEmptySuperframe) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 640;
+  cfg.g_h = 360;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_end_usage = VPX_CBR;
+  cfg.ss_number_layers = 3;
+  cfg.ts_number_layers = 1;
+  cfg.rc_dropframe_thresh = 30;
+  cfg.rc_target_bitrate = 30;
+  cfg.ss_target_bitrate[0] = 30;
+  cfg.ss_target_bitrate[1] = 0;
+  cfg.ss_target_bitrate[2] = 0;
+  cfg.layer_target_bitrate[0] = 30;
+  cfg.layer_target_bitrate[1] = 0;
+  cfg.layer_target_bitrate[2] = 0;
+
+  vpx_codec_ctx_t codec;
+  ASSERT_EQ(vpx_codec_enc_init(&codec, iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&codec, VP9E_SET_SVC, 1), VPX_CODEC_OK);
+
+  vpx_image_t *const image =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+
+  vpx_svc_layer_id_t layer_id = {};
+  layer_id.spatial_layer_id = 1;
+  layer_id.temporal_layer_id = 0;
+  ASSERT_EQ(vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_encode(&codec, image, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  layer_id.spatial_layer_id = 2;
+  layer_id.temporal_layer_id = 0;
+  ASSERT_EQ(vpx_codec_control(&codec, VP9E_SET_SVC_LAYER_ID, &layer_id),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_encode(&codec, image, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&codec), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace

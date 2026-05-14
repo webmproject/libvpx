@@ -1307,7 +1307,6 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   unsigned int mask;
   int mag, index_sz;
 
-  assert(ctx->pending_frame_count);
   assert(ctx->pending_frame_count <= 8);
 
   // Add the number of frames to the marker byte
@@ -1686,7 +1685,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
           ctx->pending_cx_data_sz += size;
           // write the superframe only for the case when the callback function
           // for getting per-layer packets is not registered.
-          if (!ctx->output_cx_pkt_cb.output_cx_pkt) {
+          if (!ctx->output_cx_pkt_cb.output_cx_pkt &&
+              ctx->pending_frame_count > 0) {
             size += write_superframe_index(ctx);
             assert(size <= cx_data_sz);
           }
