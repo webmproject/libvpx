@@ -517,16 +517,27 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   pbi->ready_for_new_data = 1;
 
 #if CONFIG_VP9_POSTPROC
+  if (setjmp(cm->error.jmp)) {
+    cm->error.setjmp = 0;
+    vpx_clear_system_state();
+    return -1;
+  }
+
+  cm->error.setjmp = 1;
+
   if (!cm->show_existing_frame) {
     ret = vp9_post_proc_frame(cm, sd, flags, cm->width);
   } else {
     *sd = *cm->frame_to_show;
     ret = 0;
   }
+
+  cm->error.setjmp = 0;
 #else
   *sd = *cm->frame_to_show;
   ret = 0;
 #endif /*!CONFIG_POSTPROC*/
+
   vpx_clear_system_state();
   return ret;
 }

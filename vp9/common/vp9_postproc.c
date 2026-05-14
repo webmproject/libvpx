@@ -313,10 +313,13 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
     ppstate->last_frame_valid = 1;
   }
 
-  if ((flags & VP9D_MFQE) && ppstate->prev_mip == NULL) {
-    ppstate->prev_mip = vpx_calloc(cm->mi_alloc_size, sizeof(*cm->mip));
-    if (!ppstate->prev_mip) {
-      return 1;
+  if ((flags & VP9D_MFQE)) {
+    if (ppstate->prev_mip == NULL ||
+        cm->mi_alloc_size > ppstate->prev_mip_size) {
+      vpx_free(ppstate->prev_mip);
+      CHECK_MEM_ERROR(&cm->error, ppstate->prev_mip,
+                      vpx_calloc(cm->mi_alloc_size, sizeof(*cm->mip)));
+      ppstate->prev_mip_size = cm->mi_alloc_size;
     }
     ppstate->prev_mi = ppstate->prev_mip + cm->mi_stride + 1;
   }

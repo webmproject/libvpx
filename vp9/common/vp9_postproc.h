@@ -31,6 +31,7 @@ struct postproc_state {
   int clamp;
   uint8_t *limits;
   int limits_size;
+  int prev_mip_size;
   int8_t *generated_noise;
 };
 
