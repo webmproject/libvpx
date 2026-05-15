@@ -260,9 +260,11 @@ void vpx_img_flip(vpx_image_t *img) {
                               img->stride[VPX_PLANE_V];
   img->stride[VPX_PLANE_V] = -img->stride[VPX_PLANE_V];
 
-  img->planes[VPX_PLANE_ALPHA] +=
-      (signed)(img->d_h - 1) * img->stride[VPX_PLANE_ALPHA];
-  img->stride[VPX_PLANE_ALPHA] = -img->stride[VPX_PLANE_ALPHA];
+  if (img->fmt & VPX_IMG_FMT_HAS_ALPHA) {
+    img->planes[VPX_PLANE_ALPHA] +=
+        (signed)(img->d_h - 1) * img->stride[VPX_PLANE_ALPHA];
+    img->stride[VPX_PLANE_ALPHA] = -img->stride[VPX_PLANE_ALPHA];
+  }
 }
 
 void vpx_img_free(vpx_image_t *img) {
