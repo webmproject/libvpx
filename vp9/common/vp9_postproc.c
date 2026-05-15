@@ -297,6 +297,7 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
   const int flags = ppflags->post_proc_flag;
   YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
   struct postproc_state *const ppstate = &cm->postproc_state;
+  const int generated_noise_size = unscaled_width + 256;
 
   if (!cm->frame_to_show) return -1;
 
@@ -373,10 +374,13 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
   }
 
   if (flags & VP9D_ADDNOISE) {
-    if (!cm->postproc_state.generated_noise) {
+    if (!cm->postproc_state.generated_noise ||
+        cm->postproc_state.generated_noise_size < generated_noise_size) {
+      vpx_free(cm->postproc_state.generated_noise);
       cm->postproc_state.generated_noise = vpx_calloc(
-          cm->width + 256, sizeof(*cm->postproc_state.generated_noise));
+          generated_noise_size, sizeof(*cm->postproc_state.generated_noise));
       if (!cm->postproc_state.generated_noise) return 1;
+      cm->postproc_state.generated_noise_size = generated_noise_size;
     }
   }
 
@@ -419,8 +423,8 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
       double sigma;
       vpx_clear_system_state();
       sigma = noise_level + .5 + .6 * q / 63.0;
-      ppstate->clamp =
-          vpx_setup_noise(sigma, ppstate->generated_noise, cm->width + 256);
+      ppstate->clamp = vpx_setup_noise(sigma, ppstate->generated_noise,
+                                       generated_noise_size);
       ppstate->last_q = q;
       ppstate->last_noise = noise_level;
     }
