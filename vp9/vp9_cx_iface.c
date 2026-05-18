@@ -461,6 +461,7 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
     const int max_val = 1 << bit_depth;
     for (int plane = 0; plane < 3; ++plane) {
       const unsigned short *src = (const unsigned short *)img->planes[plane];
+      if (!src) return VPX_CODEC_INVALID_PARAM;
       const unsigned int stride = img->stride[plane] / 2;
       const unsigned int ph =
           (plane == 0) ? h : (h + img->y_chroma_shift) >> img->y_chroma_shift;
