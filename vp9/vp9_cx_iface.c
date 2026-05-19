@@ -470,7 +470,7 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
       for (unsigned int i = 0; i < ph; ++i) {
         for (unsigned int j = 0; j < pw; ++j) {
           if (src[j] >= max_val) {
-            return VPX_CODEC_INVALID_PARAM;
+            ERROR("Input pixel value out of range for encoder bit depth");
           }
         }
         src += stride;
