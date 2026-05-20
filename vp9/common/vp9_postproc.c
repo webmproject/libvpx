@@ -294,13 +294,19 @@ static void swap_mi_and_prev_mi(VP9_COMMON *cm) {
 int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
                         vp9_ppflags_t *ppflags, int unscaled_width) {
   const int q = VPXMIN(105, cm->lf.filter_level * 2);
-  const int flags = ppflags->post_proc_flag;
   YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
   struct postproc_state *const ppstate = &cm->postproc_state;
   const int generated_noise_size = unscaled_width + 256;
 
   if (!cm->frame_to_show) return -1;
 
+  int flags = ppflags->post_proc_flag;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    // VP9D_ADDNOISE is an 8-bit only implementation. See issue 499602810.
+    flags &= ~VP9D_ADDNOISE;
+  }
+#endif
   if (!flags) {
     *dest = *cm->frame_to_show;
     return 0;
