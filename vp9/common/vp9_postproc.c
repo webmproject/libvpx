@@ -277,6 +277,12 @@ void vp9_deblock(struct VP9Common *cm, const YV12_BUFFER_CONFIG *src,
 
 void vp9_denoise(struct VP9Common *cm, const YV12_BUFFER_CONFIG *src,
                  YV12_BUFFER_CONFIG *dst, int q, uint8_t *limits) {
+  if (src->uv_width < 8) {
+    // This function is only called by the encoder to perform an in place
+    // modification of 'src'.
+    assert(src == dst);
+    return;
+  }
   vp9_deblock(cm, src, dst, q, limits);
 }
 
@@ -307,6 +313,10 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
     flags &= ~VP9D_ADDNOISE;
   }
 #endif
+  if (cm->frame_to_show->uv_width < 8) {
+    // vp9_deblock() has a minimum width of 8.
+    flags &= ~VP9D_DEBLOCK;
+  }
   if (!flags) {
     *dest = *cm->frame_to_show;
     return 0;
