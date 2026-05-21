@@ -302,7 +302,9 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
   const int q = VPXMIN(105, cm->lf.filter_level * 2);
   YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
   struct postproc_state *const ppstate = &cm->postproc_state;
-  const int generated_noise_size = unscaled_width + 256;
+  int generated_noise_size = unscaled_width + 256;
+  int pp_width = cm->width;
+  int pp_height = cm->height;
 
   if (!cm->frame_to_show) return -1;
 
@@ -342,31 +344,33 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
     ppstate->prev_mi = ppstate->prev_mip + cm->mi_stride + 1;
   }
 
-  // Allocate post_proc_buffer_int if needed.
-  if ((flags & VP9D_MFQE) && !cm->post_proc_buffer_int.buffer_alloc) {
-    if ((flags & VP9D_DEMACROBLOCK) || (flags & VP9D_DEBLOCK)) {
-      const int width = ALIGN_POWER_OF_TWO(cm->width, 4);
-      const int height = ALIGN_POWER_OF_TWO(cm->height, 4);
+  // Allocate/resize post_proc_buffer_int if needed.
+  if ((flags & VP9D_MFQE) &&
+      ((flags & VP9D_DEMACROBLOCK) || (flags & VP9D_DEBLOCK))) {
+    // Keep postproc and noise buffer sizes in sync as the dimensions from the
+    // buffers are used interchangeably.
+    pp_width = ALIGN_POWER_OF_TWO(cm->width, 4);
+    pp_height = ALIGN_POWER_OF_TWO(cm->height, 4);
+    generated_noise_size = pp_width + 256;
 
-      if (vpx_alloc_frame_buffer(&cm->post_proc_buffer_int, width, height,
-                                 cm->subsampling_x, cm->subsampling_y,
+    if (vpx_alloc_frame_buffer(&cm->post_proc_buffer_int, pp_width, pp_height,
+                               cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-                                 cm->use_highbitdepth,
+                               cm->use_highbitdepth,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-                                 VP9_ENC_BORDER_IN_PIXELS,
-                                 cm->byte_alignment) < 0) {
-        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                           "Failed to allocate MFQE framebuffer");
-      }
-
-      // Ensure that postproc is set to flat image so that post proc
-      // doesn't pull random data in from edge.
-      memset(cm->post_proc_buffer_int.buffer_alloc, 128,
-             cm->post_proc_buffer_int.frame_size);
+                               VP9_ENC_BORDER_IN_PIXELS,
+                               cm->byte_alignment) < 0) {
+      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                         "Failed to allocate MFQE framebuffer");
     }
+
+    // Ensure that postproc is set to flat image so that post proc
+    // doesn't pull random data in from edge.
+    memset(cm->post_proc_buffer_int.buffer_alloc, 128,
+           cm->post_proc_buffer_int.frame_size);
   }
 
-  if (vpx_realloc_frame_buffer(&cm->post_proc_buffer, cm->width, cm->height,
+  if (vpx_realloc_frame_buffer(&cm->post_proc_buffer, pp_width, pp_height,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
