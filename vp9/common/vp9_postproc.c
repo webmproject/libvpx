@@ -316,6 +316,7 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
   if (cm->frame_to_show->uv_width < 8) {
     // vp9_deblock() has a minimum width of 8.
     flags &= ~VP9D_DEBLOCK;
+    flags &= ~VP9D_DEMACROBLOCK;
   }
   if (!flags) {
     *dest = *cm->frame_to_show;
