@@ -1800,7 +1800,9 @@ static void update_altref_usage(VP9_COMP *const cpi) {
   int arf_frame_usage = 0;
   int mi_row, mi_col;
   if (cpi->rc.alt_ref_gf_group && !cpi->rc.is_src_frame_alt_ref &&
-      !cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame)
+      !cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame &&
+      cpi->count_arf_frame_usage != NULL &&
+      cpi->count_lastgolden_frame_usage != NULL)
     for (mi_row = 0; mi_row < cm->mi_rows; mi_row += 8) {
       for (mi_col = 0; mi_col < cm->mi_cols; mi_col += 8) {
         int sboffset = ((cm->mi_cols + 7) >> 3) * (mi_row >> 3) + (mi_col >> 3);

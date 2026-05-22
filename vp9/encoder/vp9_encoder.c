@@ -2233,6 +2233,10 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
         cpi->svc.number_spatial_layers == 1)
       vp9_cyclic_refresh_reset_resize(cpi);
+    vpx_free(cpi->count_arf_frame_usage);
+    cpi->count_arf_frame_usage = NULL;
+    vpx_free(cpi->count_lastgolden_frame_usage);
+    cpi->count_lastgolden_frame_usage = NULL;
     rc->rc_1_frame = 0;
     rc->rc_2_frame = 0;
   }
