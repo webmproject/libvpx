@@ -1412,6 +1412,15 @@ static void alloc_compressor_data(VP9_COMP *cpi) {
       vpx_calloc(sb_rows * 4 * (1 << 6), sizeof(*cpi->tplist[0][0])));
 
   vp9_setup_pc_tree(&cpi->common, &cpi->td);
+
+  if (cpi->kmeans_data_arr_alloc) {
+#if CONFIG_MULTITHREAD
+    pthread_mutex_destroy(&cpi->kmeans_mutex);
+#endif
+    vpx_free(cpi->kmeans_data_arr);
+    cpi->kmeans_data_arr = NULL;
+    cpi->kmeans_data_arr_alloc = 0;
+  }
 }
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
@@ -6414,8 +6423,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (cpi->kmeans_data_arr_alloc == 0) {
-    const int mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-    const int mi_rows = mi_cols_aligned_to_sb(cm->mi_rows);
+    int init_mi_rows, init_mi_cols, init_mi_stride;
+    vp9_set_mi_size(&init_mi_rows, &init_mi_cols, &init_mi_stride,
+                    cpi->initial_width, cpi->initial_height);
+    const int mi_cols = mi_cols_aligned_to_sb(init_mi_cols);
+    const int mi_rows = mi_cols_aligned_to_sb(init_mi_rows);
 #if CONFIG_MULTITHREAD
     pthread_mutex_init(&cpi->kmeans_mutex, NULL);
 #endif
