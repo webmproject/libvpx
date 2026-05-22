@@ -383,7 +383,6 @@ DSP_SRCS-yes            += skin_detection.h
 DSP_SRCS-yes            += skin_detection.c
 
 ifeq ($(CONFIG_ENCODERS),yes)
-DSP_SRCS-yes            += sad.c
 DSP_SRCS-yes            += subtract.c
 DSP_SRCS-yes            += sum_squares.c
 DSP_SRCS-$(HAVE_NEON)   += arm/sum_squares_neon.c
@@ -393,23 +392,17 @@ DSP_SRCS-$(HAVE_MSA)    += mips/sum_squares_msa.c
 
 DSP_SRCS-$(HAVE_NEON)   += arm/sad4d_neon.c
 DSP_SRCS-$(HAVE_NEON_DOTPROD) += arm/sad4d_neon_dotprod.c
-DSP_SRCS-$(HAVE_NEON)   += arm/sad_neon.c
-DSP_SRCS-$(HAVE_NEON_DOTPROD) += arm/sad_neon_dotprod.c
 DSP_SRCS-$(HAVE_NEON)   += arm/subtract_neon.c
 
-DSP_SRCS-$(HAVE_MSA)    += mips/sad_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/subtract_msa.c
 
 DSP_SRCS-$(HAVE_LSX)    += loongarch/sad_lsx.c
 
-DSP_SRCS-$(HAVE_MMI)    += mips/sad_mmi.c
 DSP_SRCS-$(HAVE_MMI)    += mips/subtract_mmi.c
 
 DSP_SRCS-$(HAVE_AVX2)   += x86/sad4d_avx2.c
-DSP_SRCS-$(HAVE_AVX2)   += x86/sad_avx2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/subtract_avx2.c
 DSP_SRCS-$(HAVE_AVX512) += x86/sad4d_avx512.c
-DSP_SRCS-$(HAVE_AVX512) += x86/sad_avx512.c
 
 ifeq ($(HAVE_X86_ASM),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/sad4d_sse2.asm
@@ -436,15 +429,19 @@ endif  # CONFIG_VP9_HIGHBITDEPTH
 endif  # CONFIG_ENCODERS
 
 ifneq ($(filter yes,$(CONFIG_ENCODERS) $(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)),)
+DSP_SRCS-yes            += sad.c
 DSP_SRCS-yes            += variance.c
 DSP_SRCS-yes            += variance.h
 
 DSP_SRCS-$(HAVE_NEON)   += arm/avg_pred_neon.c
+DSP_SRCS-$(HAVE_NEON)   += arm/sad_neon.c
+DSP_SRCS-$(HAVE_NEON_DOTPROD) += arm/sad_neon_dotprod.c
 DSP_SRCS-$(HAVE_NEON)   += arm/subpel_variance_neon.c
 DSP_SRCS-$(HAVE_NEON_DOTPROD) += arm/subpel_variance_neon_dotprod.c
 DSP_SRCS-$(HAVE_NEON)   += arm/variance_neon.c
 DSP_SRCS-$(HAVE_NEON_DOTPROD)   += arm/variance_neon_dotprod.c
 
+DSP_SRCS-$(HAVE_MSA)    += mips/sad_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/variance_msa.c
 DSP_SRCS-$(HAVE_MSA)    += mips/sub_pixel_variance_msa.c
 
@@ -453,10 +450,13 @@ DSP_SRCS-$(HAVE_LSX)    += loongarch/variance_lsx.c
 DSP_SRCS-$(HAVE_LSX)    += loongarch/sub_pixel_variance_lsx.c
 DSP_SRCS-$(HAVE_LSX)    += loongarch/avg_pred_lsx.c
 
+DSP_SRCS-$(HAVE_MMI)    += mips/sad_mmi.c
 DSP_SRCS-$(HAVE_MMI)    += mips/variance_mmi.c
 
 DSP_SRCS-$(HAVE_SSE2)   += x86/avg_pred_sse2.c
 DSP_SRCS-$(HAVE_AVX2)   += x86/avg_pred_avx2.c
+DSP_SRCS-$(HAVE_AVX2)   += x86/sad_avx2.c
+DSP_SRCS-$(HAVE_AVX512) += x86/sad_avx512.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_avx2.c
 DSP_SRCS-$(HAVE_VSX)    += ppc/variance_vsx.c
@@ -466,6 +466,7 @@ DSP_SRCS-$(HAVE_SSE2)   += x86/ssim_opt_x86_64.asm
 endif  # VPX_ARCH_X86_64
 
 ifeq ($(HAVE_X86_ASM),yes)
+DSP_SRCS-$(HAVE_SSE2)   += x86/sad_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/subpel_variance_sse2.asm  # Contains SSE2 and SSSE3
 endif
 
