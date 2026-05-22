@@ -477,7 +477,9 @@ DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_variance_impl_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_subpel_variance_impl_sse2.asm
 endif
 DSP_SRCS-$(HAVE_NEON)   += arm/highbd_avg_pred_neon.c
+ifeq ($(CONFIG_ENCODERS),yes)
 DSP_SRCS-$(HAVE_NEON)   += arm/highbd_sse_neon.c
+endif
 DSP_SRCS-$(HAVE_NEON)   += arm/highbd_variance_neon.c
 DSP_SRCS-$(HAVE_NEON_DOTPROD)   += arm/highbd_variance_neon_dotprod.c
 DSP_SRCS-$(HAVE_SVE)    += arm/highbd_variance_sve.c
