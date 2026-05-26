@@ -2211,8 +2211,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           if (!force_skip_low_temp_var && usable_ref_frame > LAST_FRAME) {
             i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
             if ((cpi->ref_frame_flags & ref_frame_to_flag(i)))
-              if (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[i] << 1))
-                ref_frame_skip_mask |= (1 << ref_frame);
+              if (x->pred_mv_sad[i] < INT_MAX)
+                if (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[i] << 1))
+                  ref_frame_skip_mask |= (1 << ref_frame);
           }
         } else if (!cpi->rc.is_src_frame_alt_ref &&
                    !(frame_mv[this_mode][ref_frame].as_int == 0 &&
@@ -2220,8 +2221,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x, TileDataEnc *tile_data,
           int ref1 = (ref_frame == GOLDEN_FRAME) ? LAST_FRAME : GOLDEN_FRAME;
           int ref2 = (ref_frame == ALTREF_FRAME) ? LAST_FRAME : ALTREF_FRAME;
           if (((cpi->ref_frame_flags & ref_frame_to_flag(ref1)) &&
+               x->pred_mv_sad[ref1] < INT_MAX &&
                (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[ref1] << 1))) ||
               ((cpi->ref_frame_flags & ref_frame_to_flag(ref2)) &&
+               x->pred_mv_sad[ref2] < INT_MAX &&
                (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[ref2] << 1))))
             ref_frame_skip_mask |= (1 << ref_frame);
         }
