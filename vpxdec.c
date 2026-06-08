@@ -746,7 +746,7 @@ static int main_loop(int argc, const char **argv_) {
       fprintf(stderr,
               "YUV4MPEG2 not supported with output patterns,"
               " try --i420 or --yv12 or --rawvideo.\n");
-      return EXIT_FAILURE;
+      goto fail2;
     }
 
 #if CONFIG_WEBM_IO
@@ -755,7 +755,7 @@ static int main_loop(int argc, const char **argv_) {
         fprintf(stderr,
                 "Failed to guess framerate -- error parsing "
                 "webm file?\n");
-        return EXIT_FAILURE;
+        goto fail2;
       }
     }
 #endif
