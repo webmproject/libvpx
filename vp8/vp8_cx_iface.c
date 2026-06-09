@@ -100,9 +100,10 @@ struct vpx_codec_alg_priv {
   vpx_enc_frame_flags_t control_frame_flags;
 };
 
-// Called by vp8e_set_config() and vp8e_encode() only. Must not be called
-// by vp8e_init() because the `error` paramerer (cpi->common.error) will be
-// destroyed by vpx_codec_enc_init_ver() after vp8e_init() returns an error.
+// Called by update_extracfg(), vp8e_set_config() and vp8e_encode() only. Must
+// not be called by vp8e_init() because the `error` paramerer
+// (cpi->common.error) will be destroyed by vpx_codec_enc_init_ver() after
+// vp8e_init() returns an error.
 // See the "IMPORTANT" comment in vpx_codec_enc_init_ver().
 static vpx_codec_err_t update_error_state(
     vpx_codec_alg_priv_t *ctx, const struct vpx_internal_error_info *error) {
@@ -532,12 +533,22 @@ static vpx_codec_err_t get_quantizer64(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t update_extracfg(vpx_codec_alg_priv_t *ctx,
                                        const struct vp8_extracfg *extra_cfg) {
   const vpx_codec_err_t res = validate_config(ctx, &ctx->cfg, extra_cfg, 0);
-  if (res == VPX_CODEC_OK) {
-    ctx->vp8_cfg = *extra_cfg;
-    set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg, NULL);
-    vp8_change_config(ctx->cpi, &ctx->oxcf);
+  if (res != VPX_CODEC_OK) return res;
+
+  if (setjmp(ctx->cpi->common.error.jmp)) {
+    const vpx_codec_err_t codec_err =
+        update_error_state(ctx, &ctx->cpi->common.error);
+    ctx->cpi->common.error.setjmp = 0;
+    vpx_clear_system_state();
+    assert(codec_err != VPX_CODEC_OK);
+    return codec_err;
   }
-  return res;
+  ctx->cpi->common.error.setjmp = 1;
+  ctx->vp8_cfg = *extra_cfg;
+  set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg, NULL);
+  vp8_change_config(ctx->cpi, &ctx->oxcf);
+  ctx->cpi->common.error.setjmp = 0;
+  return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t set_cpu_used(vpx_codec_alg_priv_t *ctx, va_list args) {
