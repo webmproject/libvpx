@@ -220,9 +220,7 @@ TEST(EncodeAPI, InvalidUVStrides) {
                              buf.get()),
                 &img)
           << "Unable to wrap vpx_image for format: " << img_fmt;
-      const bool is_420 =
-          (img.x_chroma_shift == 1 && img.y_chroma_shift == 1) ||
-          img_fmt == VPX_IMG_FMT_NV12;
+      const bool is_420 = img.x_chroma_shift == 1 && img.y_chroma_shift == 1;
       // In profiles 0 and 2, only 4:2:0 format is allowed. In profiles 1 and 3,
       // all other subsampling formats are allowed. In profiles 0 and 1, only
       // bit depth 8 is allowed. In profiles 2 and 3, only bit depths 10 and 12
