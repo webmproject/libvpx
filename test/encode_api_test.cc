@@ -532,6 +532,44 @@ TEST(EncodeAPI, ChangeToL1T3AndSetBitrateVp8) {
   vpx_codec_destroy(&enc);
 }
 
+// Bug: 526737981.
+TEST(EncodeAPI, SetReferenceSizeValidationVp8) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_enc_cfg_t cfg;
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 128;
+  cfg.g_h = 128;
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  vpx_image_t raw;
+  ASSERT_NE(vpx_img_alloc(&raw, VPX_IMG_FMT_I420, 128, 128, 1), nullptr);
+  ASSERT_EQ(vpx_codec_encode(&enc, &raw, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  // Create a larger reference frame.
+  vpx_image_t ref_img;
+  ASSERT_NE(vpx_img_alloc(&ref_img, VPX_IMG_FMT_I420, 256, 256, 1), nullptr);
+
+  vpx_ref_frame_t ref_frame;
+  ref_frame.frame_type = VP8_LAST_FRAME;
+  ref_frame.img = ref_img;
+
+  // Setting the reference frame with incorrect size must fail.
+  EXPECT_EQ(vpx_codec_control(&enc, VP8_SET_REFERENCE, &ref_frame),
+            VPX_CODEC_INVALID_PARAM);
+
+  // Copying reference frame with incorrect size must also fail.
+  EXPECT_EQ(vpx_codec_control(&enc, VP8_COPY_REFERENCE, &ref_frame),
+            VPX_CODEC_INVALID_PARAM);
+
+  vpx_img_free(&raw);
+  vpx_img_free(&ref_img);
+  EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
 // Emulates the WebCodecs VideoEncoder interface.
 class VP8Encoder {
  public:
