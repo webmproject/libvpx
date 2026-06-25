@@ -949,6 +949,47 @@ TEST(EncodeAPI, Vp8TotalrateOverflow) {
   vpx_img_free(image);
   EXPECT_EQ(vpx_codec_destroy(&codec), VPX_CODEC_OK);
 }
+
+// Bug: 526739171.
+TEST(EncodeAPI, Vp8InvalidTemporalLayerId) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 64;
+  cfg.g_h = 64;
+
+  cfg.ts_number_layers = 2;
+  cfg.ts_periodicity = 2;
+  cfg.ts_target_bitrate[0] = 500;
+  cfg.ts_target_bitrate[1] = 1000;
+  cfg.ts_rate_decimator[0] = 2;
+  cfg.ts_rate_decimator[1] = 1;
+
+  cfg.ts_layer_id[0] = 0;
+  cfg.ts_layer_id[1] = 2;  // Invalid, must be < ts_number_layers (2)
+
+  EXPECT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_INVALID_PARAM);
+}
+
+// Bug: 526739171.
+TEST(EncodeAPI, Vp8InvalidTemporalLayerPeriodicity) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 64;
+  cfg.g_h = 64;
+
+  cfg.ts_number_layers = 2;
+  cfg.ts_periodicity = 0;  // Invalid, must be >= 1
+
+  EXPECT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_INVALID_PARAM);
+}
 #endif  // CONFIG_VP8_ENCODER
 
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
