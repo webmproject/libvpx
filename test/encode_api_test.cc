@@ -546,6 +546,7 @@ TEST(EncodeAPI, SetReferenceSizeValidationVp8) {
 
   vpx_image_t raw;
   ASSERT_NE(vpx_img_alloc(&raw, VPX_IMG_FMT_I420, 128, 128, 1), nullptr);
+  memset(raw.img_data, 128, raw.stride[0] * raw.d_h * 3 / 2);
   ASSERT_EQ(vpx_codec_encode(&enc, &raw, 0, 1, 0, VPX_DL_REALTIME),
             VPX_CODEC_OK);
 
