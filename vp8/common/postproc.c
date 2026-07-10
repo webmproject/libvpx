@@ -25,23 +25,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/* clang-format off */
-#define RGB_TO_YUV(t)                                     \
-  (unsigned char)((0.257 * (float)(t >> 16)) +            \
-                  (0.504 * (float)(t >> 8 & 0xff)) +      \
-                  (0.098 * (float)(t & 0xff)) + 16),      \
-  (unsigned char)(-(0.148 * (float)(t >> 16)) -           \
-                  (0.291 * (float)(t >> 8 & 0xff)) +      \
-                  (0.439 * (float)(t & 0xff)) + 128),     \
-  (unsigned char)((0.439 * (float)(t >> 16)) -            \
-                  (0.368 * (float)(t >> 8 & 0xff)) -      \
-                  (0.071 * (float)(t & 0xff)) + 128)
-/* clang-format on */
-
-extern void vp8_blit_text(const char *msg, unsigned char *address,
-                          const int pitch);
-extern void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image,
-                          const int pitch);
 /***********************************************************************************************************
  */
 #if CONFIG_POSTPROC
