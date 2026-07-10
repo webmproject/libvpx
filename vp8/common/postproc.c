@@ -44,6 +44,7 @@ static void vp8_de_mblock(YV12_BUFFER_CONFIG *post, int q) {
 
 void vp8_deblock(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
                  YV12_BUFFER_CONFIG *post, int q) {
+  vpx_clear_system_state();
   double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
   int ppl = (int)(level + .5);
 
@@ -99,6 +100,7 @@ void vp8_deblock(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source,
 void vp8_de_noise(VP8_COMMON *cm, YV12_BUFFER_CONFIG *source, int q,
                   int uvfilter) {
   int mbr;
+  vpx_clear_system_state();
   double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
   int ppl = (int)(level + .5);
   int mb_rows = cm->mb_rows;
