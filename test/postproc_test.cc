@@ -139,12 +139,12 @@ std::vector<int> GeneratePostProcFlags() {
   return flags;
 }
 
+template <typename Iterator>
 std::vector<TestParam> GenerateTestParams(const std::vector<int> &flags,
-                                          const char *const *begin,
-                                          const char *const *end) {
+                                          Iterator begin, Iterator end) {
   std::vector<TestParam> params;
   for (const int flag : flags) {
-    for (const char *const *it = begin; it != end; ++it) {
+    for (Iterator it = begin; it != end; ++it) {
       params.push_back({ flag, *it });
     }
   }
