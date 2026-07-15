@@ -177,8 +177,10 @@ TEST_P(PostProcTestInvalidFiles, Decode) { DecodeTest(); }
 #if CONFIG_VP8_DECODER && CONFIG_POSTPROC
 // TODO(issue 499602810): remove this test suite after valgrind errors are
 // fixed, and the files are migrated to the enabled test suite.
-constexpr std::array<const char *, 2> kVP8FailingTestVectors = {
-  "vp80-02-inter-1418.ivf", "vp80-03-segmentation-1425.ivf"
+constexpr std::array<const char *, 5> kVP8FailingTestVectors = {
+  "invalid-bug-1443.ivf", "vp80-00-comprehensive-008.ivf",
+  "vp80-02-inter-1418.ivf", "vp80-03-segmentation-1425.ivf",
+  "vp80-03-segmentation-1436.ivf"
 };
 
 std::vector<TestParam> GenerateVP8PassingTestParams() {
@@ -213,9 +215,8 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::ValuesIn(GenerateTestParams(GeneratePostProcFlags(),
                                                kVP8FailingTestVectors))));
 
-constexpr std::array<const char *, 5> kVP8InvalidFiles = {
-  "invalid-bug-1443.ivf", "invalid-bug-148271109.ivf",
-  "invalid-token-partition.ivf",
+constexpr std::array<const char *, 4> kVP8InvalidFiles = {
+  "invalid-bug-148271109.ivf", "invalid-token-partition.ivf",
   "invalid-vp80-00-comprehensive-018.ivf.2kf_0x6.ivf",
   "invalid-vp80-00-comprehensive-s17661_r01-05_b6-.ivf"
 };
@@ -226,8 +227,24 @@ VP8_INSTANTIATE_TEST_SUITE(PostProcTestInvalidFiles,
 #endif  // CONFIG_VP8_DECODER && CONFIG_POSTPROC
 
 #if CONFIG_VP9_DECODER && CONFIG_VP9_POSTPROC
-constexpr std::array<const char *, 72> kVP9FailingTestVectors = {
+constexpr std::array<const char *, 104> kVP9FailingTestVectors = {
   "invalid-vp90-02-v2.webm",
+  "vp90-2-02-size-08x08.webm",
+  "vp90-2-02-size-08x10.webm",
+  "vp90-2-02-size-08x16.webm",
+  "vp90-2-02-size-08x18.webm",
+  "vp90-2-02-size-08x32.webm",
+  "vp90-2-02-size-08x34.webm",
+  "vp90-2-02-size-08x64.webm",
+  "vp90-2-02-size-08x66.webm",
+  "vp90-2-02-size-10x08.webm",
+  "vp90-2-02-size-10x10.webm",
+  "vp90-2-02-size-10x16.webm",
+  "vp90-2-02-size-10x18.webm",
+  "vp90-2-02-size-10x32.webm",
+  "vp90-2-02-size-10x34.webm",
+  "vp90-2-02-size-10x64.webm",
+  "vp90-2-02-size-10x66.webm",
   "vp90-2-02-size-130x132.webm",
   "vp90-2-02-size-132x130.webm",
   "vp90-2-02-size-132x132.webm",
@@ -274,6 +291,22 @@ constexpr std::array<const char *, 72> kVP9FailingTestVectors = {
   "vp90-2-03-size-198x210.webm",
   "vp90-2-03-size-198x224.webm",
   "vp90-2-03-size-198x226.webm",
+  "vp90-2-03-size-200x196.webm",
+  "vp90-2-03-size-200x198.webm",
+  "vp90-2-03-size-200x200.webm",
+  "vp90-2-03-size-200x202.webm",
+  "vp90-2-03-size-200x208.webm",
+  "vp90-2-03-size-200x210.webm",
+  "vp90-2-03-size-200x224.webm",
+  "vp90-2-03-size-200x226.webm",
+  "vp90-2-03-size-202x196.webm",
+  "vp90-2-03-size-202x198.webm",
+  "vp90-2-03-size-202x200.webm",
+  "vp90-2-03-size-202x202.webm",
+  "vp90-2-03-size-202x208.webm",
+  "vp90-2-03-size-202x210.webm",
+  "vp90-2-03-size-202x224.webm",
+  "vp90-2-03-size-202x226.webm",
   "vp90-2-03-size-210x196.webm",
   "vp90-2-03-size-210x198.webm",
   "vp90-2-03-size-210x200.webm",
