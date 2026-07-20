@@ -451,8 +451,8 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
       ppstate->last_noise = noise_level;
     }
     vpx_plane_add_noise(ppbuf->y_buffer, ppstate->generated_noise,
-                        ppstate->clamp, ppstate->clamp, ppbuf->y_width,
-                        ppbuf->y_height, ppbuf->y_stride);
+                        ppstate->clamp, ppstate->clamp, ppbuf->y_crop_width,
+                        ppbuf->y_crop_height, ppbuf->y_stride);
   }
 
   *dest = *ppbuf;
