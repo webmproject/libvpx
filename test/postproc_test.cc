@@ -175,48 +175,15 @@ class PostProcTestInvalidFiles : public PostProcTest {
 TEST_P(PostProcTestInvalidFiles, Decode) { DecodeTest(); }
 
 #if CONFIG_VP8_DECODER && CONFIG_POSTPROC
-// TODO(issue 499602810): remove this test suite after valgrind errors are
-// fixed, and the files are migrated to the enabled test suite.
-constexpr std::array<const char *, 5> kVP8FailingTestVectors = {
-  "invalid-bug-1443.ivf", "vp80-00-comprehensive-008.ivf",
-  "vp80-02-inter-1418.ivf", "vp80-03-segmentation-1425.ivf",
-  "vp80-03-segmentation-1436.ivf"
-};
+VP8_INSTANTIATE_TEST_SUITE(
+    PostProcTest,
+    ::testing::ValuesIn(GenerateTestParams(
+        GeneratePostProcFlags(), libvpx_test::kVP8TestVectors,
+        libvpx_test::kVP8TestVectors + libvpx_test::kNumVP8TestVectors)));
 
-std::vector<TestParam> GenerateVP8PassingTestParams() {
-  std::vector<TestParam> params;
-  const std::vector<int> flags = GeneratePostProcFlags();
-  for (const int flag : flags) {
-    for (const char *const *it = libvpx_test::kVP8TestVectors;
-         it != libvpx_test::kVP8TestVectors + libvpx_test::kNumVP8TestVectors;
-         ++it) {
-      if (std::find_if(kVP8FailingTestVectors.cbegin(),
-                       kVP8FailingTestVectors.cend(), [it](const char *f) {
-                         return std::string(f) == *it;
-                       }) == kVP8FailingTestVectors.cend()) {
-        params.push_back({ flag, *it });
-      }
-    }
-  }
-  return params;
-}
-
-VP8_INSTANTIATE_TEST_SUITE(PostProcTest,
-                           ::testing::ValuesIn(GenerateVP8PassingTestParams()));
-
-// TODO(issue 499602810): remove this test suite after asserts, out of
-// bounds accesses, and valgrind errors are fixed, and the files are migrated
-// to the enabled test suite.
-INSTANTIATE_TEST_SUITE_P(
-    DISABLED_VP8, PostProcTest,
-    ::testing::Combine(
-        ::testing::Values(
-            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP8)),
-        ::testing::ValuesIn(GenerateTestParams(GeneratePostProcFlags(),
-                                               kVP8FailingTestVectors))));
-
-constexpr std::array<const char *, 4> kVP8InvalidFiles = {
-  "invalid-bug-148271109.ivf", "invalid-token-partition.ivf",
+constexpr std::array<const char *, 5> kVP8InvalidFiles = {
+  "invalid-bug-1443.ivf", "invalid-bug-148271109.ivf",
+  "invalid-token-partition.ivf",
   "invalid-vp80-00-comprehensive-018.ivf.2kf_0x6.ivf",
   "invalid-vp80-00-comprehensive-s17661_r01-05_b6-.ivf"
 };

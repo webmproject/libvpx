@@ -136,7 +136,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest,
   int flags = ppflags->post_proc_flag;
   int deblock_level = ppflags->deblocking_level;
   int noise_level = ppflags->noise_level;
-  const int generated_noise_size = oci->Width + 256;
+  const int generated_noise_size = ALIGN_POWER_OF_TWO(oci->Width, 4) + 256;
 
   if (!oci->frame_to_show) return -1;
 
