@@ -194,90 +194,17 @@ VP8_INSTANTIATE_TEST_SUITE(PostProcTestInvalidFiles,
 #endif  // CONFIG_VP8_DECODER && CONFIG_POSTPROC
 
 #if CONFIG_VP9_DECODER && CONFIG_VP9_POSTPROC
-constexpr std::array<const char *, 89> kVP9FailingTestVectors = {
-  "invalid-vp90-02-v2.webm",     "vp90-2-02-size-10x08.webm",
-  "vp90-2-02-size-10x10.webm",   "vp90-2-02-size-10x16.webm",
-  "vp90-2-02-size-10x18.webm",   "vp90-2-02-size-10x32.webm",
-  "vp90-2-02-size-10x34.webm",   "vp90-2-02-size-10x64.webm",
-  "vp90-2-02-size-10x66.webm",   "vp90-2-02-size-130x132.webm",
-  "vp90-2-02-size-132x130.webm", "vp90-2-02-size-132x132.webm",
-  "vp90-2-02-size-178x180.webm", "vp90-2-02-size-180x178.webm",
-  "vp90-2-02-size-180x180.webm", "vp90-2-02-size-18x08.webm",
-  "vp90-2-02-size-18x10.webm",   "vp90-2-02-size-18x16.webm",
-  "vp90-2-02-size-18x18.webm",   "vp90-2-02-size-18x32.webm",
-  "vp90-2-02-size-18x34.webm",   "vp90-2-02-size-18x64.webm",
-  "vp90-2-02-size-18x66.webm",   "vp90-2-02-size-34x08.webm",
-  "vp90-2-02-size-34x10.webm",   "vp90-2-02-size-34x16.webm",
-  "vp90-2-02-size-34x18.webm",   "vp90-2-02-size-34x32.webm",
-  "vp90-2-02-size-34x34.webm",   "vp90-2-02-size-34x64.webm",
-  "vp90-2-02-size-34x66.webm",   "vp90-2-02-size-66x08.webm",
-  "vp90-2-02-size-66x10.webm",   "vp90-2-02-size-66x16.webm",
-  "vp90-2-02-size-66x18.webm",   "vp90-2-02-size-66x32.webm",
-  "vp90-2-02-size-66x34.webm",   "vp90-2-02-size-66x64.webm",
-  "vp90-2-02-size-66x66.webm",   "vp90-2-03-size-196x196.webm",
-  "vp90-2-03-size-196x198.webm", "vp90-2-03-size-196x200.webm",
-  "vp90-2-03-size-196x202.webm", "vp90-2-03-size-196x208.webm",
-  "vp90-2-03-size-196x210.webm", "vp90-2-03-size-196x224.webm",
-  "vp90-2-03-size-196x226.webm", "vp90-2-03-size-198x196.webm",
-  "vp90-2-03-size-198x198.webm", "vp90-2-03-size-198x200.webm",
-  "vp90-2-03-size-198x202.webm", "vp90-2-03-size-198x208.webm",
-  "vp90-2-03-size-198x210.webm", "vp90-2-03-size-198x224.webm",
-  "vp90-2-03-size-198x226.webm", "vp90-2-03-size-200x196.webm",
-  "vp90-2-03-size-200x198.webm", "vp90-2-03-size-200x200.webm",
-  "vp90-2-03-size-200x202.webm", "vp90-2-03-size-200x208.webm",
-  "vp90-2-03-size-200x210.webm", "vp90-2-03-size-200x224.webm",
-  "vp90-2-03-size-200x226.webm", "vp90-2-03-size-202x196.webm",
-  "vp90-2-03-size-202x198.webm", "vp90-2-03-size-202x200.webm",
-  "vp90-2-03-size-202x202.webm", "vp90-2-03-size-202x208.webm",
-  "vp90-2-03-size-202x210.webm", "vp90-2-03-size-202x224.webm",
-  "vp90-2-03-size-202x226.webm", "vp90-2-03-size-210x196.webm",
-  "vp90-2-03-size-210x198.webm", "vp90-2-03-size-210x200.webm",
-  "vp90-2-03-size-210x202.webm", "vp90-2-03-size-210x208.webm",
-  "vp90-2-03-size-210x210.webm", "vp90-2-03-size-210x224.webm",
-  "vp90-2-03-size-210x226.webm", "vp90-2-03-size-226x196.webm",
-  "vp90-2-03-size-226x198.webm", "vp90-2-03-size-226x200.webm",
-  "vp90-2-03-size-226x202.webm", "vp90-2-03-size-226x208.webm",
-  "vp90-2-03-size-226x210.webm", "vp90-2-03-size-226x224.webm",
-  "vp90-2-03-size-226x226.webm", "vp90-2-15-segkey_adpq.webm",
-  "vp90-2-18-resize.ivf"
-};
+VP9_INSTANTIATE_TEST_SUITE(
+    PostProcTest,
+    ::testing::ValuesIn(GenerateTestParams(
+        GeneratePostProcFlags(), libvpx_test::kVP9TestVectors,
+        libvpx_test::kVP9TestVectors + libvpx_test::kNumVP9TestVectors)));
 
-std::vector<TestParam> GenerateVP9PassingTestParams() {
-  std::vector<TestParam> params;
-  const std::vector<int> flags = GeneratePostProcFlags();
-  for (const int flag : flags) {
-    for (const char *const *it = libvpx_test::kVP9TestVectors;
-         it != libvpx_test::kVP9TestVectors + libvpx_test::kNumVP9TestVectors;
-         ++it) {
-      if (std::find_if(kVP9FailingTestVectors.cbegin(),
-                       kVP9FailingTestVectors.cend(), [it](const char *f) {
-                         return std::string(f) == *it;
-                       }) == kVP9FailingTestVectors.cend()) {
-        params.push_back({ flag, *it });
-      }
-    }
-  }
-  return params;
-}
-
-VP9_INSTANTIATE_TEST_SUITE(PostProcTest,
-                           ::testing::ValuesIn(GenerateVP9PassingTestParams()));
-
-// TODO(issue 499602810): remove this test suite after asserts and out of
-// bounds accesses are fixed, and the files are migrated to the enabled test
-// suite.
-INSTANTIATE_TEST_SUITE_P(
-    DISABLED_VP9, PostProcTest,
-    ::testing::Combine(
-        ::testing::Values(
-            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
-        ::testing::ValuesIn(GenerateTestParams(GeneratePostProcFlags(),
-                                               kVP9FailingTestVectors))));
-
-constexpr std::array<const char *, 26> kVP9InvalidFiles = {
+constexpr std::array<const char *, 27> kVP9InvalidFiles = {
   "invalid-crbug-1558.ivf", "invalid-crbug-1562.ivf",
   "invalid-crbug-629481.webm", "invalid-crbug-667044.webm",
-  "invalid-vp90-01-v3.webm", "invalid-vp90-03-v3.webm",
+  "invalid-vp90-01-v3.webm", "invalid-vp90-02-v2.webm",
+  "invalid-vp90-03-v3.webm",
   "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.v2.ivf",
   "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf",
   "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-z.ivf",
