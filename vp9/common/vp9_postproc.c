@@ -138,7 +138,7 @@ void vp9_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch, int rows,
       d[c & 15] = s[c];
 
       if (sumsq * 15 - sum * sum < flimit) {
-        d[c & 15] = (8 + sum + s[c]) >> 4;
+        d[c & 15] = (uint16_t)((8 + sum + s[c]) >> 4);
       }
 
       s[c - 8] = d[(c - 8) & 15];
@@ -173,7 +173,7 @@ void vp9_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch, int rows, int cols,
       d[r & 15] = s[0];
 
       if (sumsq * 15 - sum * sum < flimit) {
-        d[r & 15] = (rv2[r & 127] + sum + s[0]) >> 4;
+        d[r & 15] = (uint16_t)((rv2[r & 127] + sum + s[0]) >> 4);
       }
 
       s[-8 * pitch] = d[(r - 8) & 15];
