@@ -78,7 +78,6 @@ DSP_SRCS-$(HAVE_MSA) += mips/deblock_msa.c
 DSP_SRCS-$(HAVE_NEON) += arm/deblock_neon.c
 ifeq ($(HAVE_X86_ASM),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/add_noise_sse2.asm
-DSP_SRCS-$(HAVE_SSE2) += x86/deblock_sse2.asm
 endif
 DSP_SRCS-$(HAVE_SSE2) += x86/post_proc_sse2.c
 DSP_SRCS-$(HAVE_VSX) += ppc/deblock_vsx.c
