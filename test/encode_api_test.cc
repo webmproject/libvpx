@@ -3582,6 +3582,51 @@ TEST(EncodeAPI, SvcResolutionChangeAq3Cbr) {
 
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+// Bug: 540943267.
+TEST(EncodeAPI, ResizeRealtimeSourceSadOverflow) {
+  vpx_codec_ctx_t codec;
+  vpx_codec_enc_cfg_t cfg;
+  vpx_image_t *image;
+
+  constexpr int kInitialWidth = 16;
+  constexpr int kInitialHeight = 16;
+  constexpr int kNewWidth = 4096;
+  constexpr int kNewHeight = 4096;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(vpx_codec_vp9_cx(), &cfg, 0),
+            VPX_CODEC_OK);
+
+  cfg.g_w = kInitialWidth;
+  cfg.g_h = kInitialHeight;
+  cfg.g_threads = 1;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  ASSERT_EQ(vpx_codec_enc_init(&codec, vpx_codec_vp9_cx(), &cfg, 0),
+            VPX_CODEC_OK);
+  // Set speed 6 to enable use_source_sad allocation
+  ASSERT_EQ(vpx_codec_control(&codec, VP8E_SET_CPUUSED, 6), VPX_CODEC_OK);
+
+  image = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+  ASSERT_EQ(vpx_codec_encode(&codec, image, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  cfg.g_w = kNewWidth;
+  cfg.g_h = kNewHeight;
+  ASSERT_EQ(vpx_codec_enc_config_set(&codec, &cfg), VPX_CODEC_OK);
+
+  vpx_img_free(image);
+  image = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(image, nullptr);
+
+  // Encode second frame. Without the fix, this will cause heap corruption
+  // which will trigger a crash during encode or on codec destroy.
+  ASSERT_EQ(vpx_codec_encode(&codec, image, 1, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&codec), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace

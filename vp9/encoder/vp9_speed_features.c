@@ -676,9 +676,12 @@ static void set_rt_speed_feature_framesize_independent(
       if (cpi->content_state_sb_fd == NULL &&
           (!cpi->use_svc ||
            svc->spatial_layer_id == svc->number_spatial_layers - 1)) {
+        int init_mi_rows, init_mi_cols, init_mi_stride;
+        vp9_set_mi_size(&init_mi_rows, &init_mi_cols, &init_mi_stride,
+                        cpi->initial_width, cpi->initial_height);
         CHECK_MEM_ERROR(&cm->error, cpi->content_state_sb_fd,
                         (uint8_t *)vpx_calloc(
-                            (cm->mi_stride >> 3) * ((cm->mi_rows >> 3) + 1),
+                            (init_mi_stride >> 3) * ((init_mi_rows >> 3) + 1),
                             sizeof(uint8_t)));
       }
     }

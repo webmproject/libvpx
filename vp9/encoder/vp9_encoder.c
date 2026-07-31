@@ -2172,6 +2172,8 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     vp9_free_context_buffers(cm);
     vp9_free_pc_tree(&cpi->td);
     vpx_free(cpi->mbmi_ext_base);
+    vpx_free(cpi->content_state_sb_fd);
+    cpi->content_state_sb_fd = NULL;
     alloc_compressor_data(cpi);
     realloc_segmentation_maps(cpi);
     cpi->initial_width = cm->width;
