@@ -1122,6 +1122,9 @@ static void dealloc_raw_frame_buffers(VP8_COMP *cpi) {
   vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer);
 #endif
   vp8_lookahead_destroy(cpi->lookahead);
+#if CONFIG_TEMPORAL_DENOISING
+  vp8_denoiser_free(&cpi->denoiser);
+#endif
 }
 
 static int vp8_alloc_partition_data(VP8_COMP *cpi) {
