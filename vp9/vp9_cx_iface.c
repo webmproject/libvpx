@@ -687,7 +687,8 @@ static vpx_codec_err_t set_encoder_config(
   else
     oxcf->tile_rows = extra_cfg->tile_rows;
 
-  oxcf->error_resilient_mode = cfg->g_error_resilient;
+  oxcf->error_resilient_mode =
+      cfg->g_error_resilient & VPX_ERROR_RESILIENT_DEFAULT;
   oxcf->frame_parallel_decoding_mode = extra_cfg->frame_parallel_decoding_mode;
 
   oxcf->aq_mode = extra_cfg->aq_mode;
