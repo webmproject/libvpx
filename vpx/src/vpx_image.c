@@ -193,10 +193,25 @@ vpx_image_t *vpx_img_wrap(vpx_image_t *img, vpx_img_fmt_t fmt, unsigned int d_w,
   return img_alloc_helper(img, fmt, d_w, d_h, 1, stride_align, img_data);
 }
 
+static void negate_strides(vpx_image_t *img) {
+  img->stride[VPX_PLANE_Y] = -img->stride[VPX_PLANE_Y];
+  if (img->fmt & VPX_IMG_FMT_PLANAR) {
+    img->stride[VPX_PLANE_U] = -img->stride[VPX_PLANE_U];
+    img->stride[VPX_PLANE_V] = -img->stride[VPX_PLANE_V];
+    if (img->fmt & VPX_IMG_FMT_HAS_ALPHA) {
+      img->stride[VPX_PLANE_ALPHA] = -img->stride[VPX_PLANE_ALPHA];
+    }
+  }
+}
+
 int vpx_img_set_rect(vpx_image_t *img, unsigned int x, unsigned int y,
                      unsigned int w, unsigned int h) {
   if (x <= UINT_MAX - w && x + w <= img->w && y <= UINT_MAX - h &&
       y + h <= img->h) {
+    const int flipped = img->stride[VPX_PLANE_Y] < 0;
+    /* Plane offsets are calculated from the unflipped allocation base. */
+    if (flipped) negate_strides(img);
+
     img->d_w = w;
     img->d_h = h;
 
@@ -239,6 +254,14 @@ int vpx_img_set_rect(vpx_image_t *img, unsigned int x, unsigned int y,
             (size_t)(img->h >> img->y_chroma_shift) * img->stride[VPX_PLANE_V];
         img->planes[VPX_PLANE_U] =
             data + uv_x * bytes_per_sample + uv_y * img->stride[VPX_PLANE_U];
+      }
+    }
+    if (flipped) {
+      if (h == 0) {
+        /* An empty image has no last row for vpx_img_flip() to select. */
+        negate_strides(img);
+      } else {
+        vpx_img_flip(img);
       }
     }
     return 0;
