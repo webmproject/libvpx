@@ -1603,10 +1603,6 @@ EOF
   # shared objects
   enabled gcc && enabled pic && check_add_cflags -fPIC
 
-  # Work around longjmp interception on glibc >= 2.11, to improve binary
-  # compatibility. See http://code.google.com/p/webm/issues/detail?id=166
-  enabled linux && check_add_cflags -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
-
   # Check for strip utility variant
   ${STRIP} -V 2>/dev/null | grep GNU >/dev/null && enable_feature gnu_strip
 
