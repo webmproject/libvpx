@@ -1,4 +1,4 @@
-2026-06-09 v1.17.0 "Yellowbilled Duck"
+2026-08-07 v1.17.0 "Yellowbilled Duck"
   This release includes a new encoder control to validate high bitdepth input,
   additional Neon and AVX2/AVX512 optimizations, support for the C11 standard,
   and numerous bug fixes.
@@ -30,7 +30,8 @@
   - Enhancement:
     Added Arm Neon DotProd subpel variance paths.
     Optimized Neon HBD sadx4d and sad_skipx4d functions.
-    Added AVX2/AVX512 implementations for various vpx_highbd predictor functions.
+    Added AVX2/AVX512 implementations for various vpx_highbd predictor
+    functions.
     Added support for MSVC v145 (Visual Studio 2026).
     Added configure option --disable-x86-asm.
 
@@ -50,6 +51,26 @@
     Fix to VP9 highbitdepth encoder format mismatch.
     Fix to VP9 float-to-int overflow in validate_config (EOS count) and with
     zero bitrate.
+
+    Fix to VP8 decoder multithreading corruption flag reset at start of
+    frame.
+    Fix to VP8 decoder accepting inter frames on resolution change before
+    keyframe.
+    Fix to VP8 encoder reference frame dimension validation.
+    Fix to VP8 encoder temporal layer ID validation.
+    Fix to VP8 encoder missing setjmp in VP8E_SET_SCALEMODE.
+
+    Fix to VP9 SVC encoder crash with dynamic resize and cyclic refresh
+    (aq_mode=3).
+    Fix to VP9 1-pass rate control last_boosted_qindex clamping and
+    VP9E_SET_QUANTIZER_ONE_PASS validation.
+
+    Fix to NV12 x_chroma_shift calculation in vpx_image and image2yuvconfig.
+    Fix to AVX-512 CPU feature detection on older x86 CPUs.
+    Fix to x86_abi_support.asm placing read-only data tables in .rdata for
+    Windows.
+    Fix to file leaks on error paths in vpxdec and video reader/writer
+    utilities.
 
     Fix to crash/undefined behavior in vpx_img_flip with formats without alpha.
 
