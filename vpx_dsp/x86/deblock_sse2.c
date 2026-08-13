@@ -49,6 +49,19 @@ static INLINE __m128i filter_16_sse2(__m128i v, __m128i p_above2,
                       _mm_andnot_si128(fail_mask, filtered));
 }
 
+static INLINE unsigned char filter_scalar(
+    unsigned char v, unsigned char p_above2, unsigned char p_above1,
+    unsigned char p_below1, unsigned char p_below2, unsigned char flimit) {
+  if ((abs(v - p_above2) < flimit) && (abs(v - p_above1) < flimit) &&
+      (abs(v - p_below1) < flimit) && (abs(v - p_below2) < flimit)) {
+    const unsigned char k1 = (p_above2 + p_above1 + 1) >> 1;
+    const unsigned char k2 = (p_below2 + p_below1 + 1) >> 1;
+    const unsigned char k3 = (k1 + k2 + 1) >> 1;
+    return (k3 + v + 1) >> 1;
+  }
+  return v;
+}
+
 void vpx_post_proc_down_and_across_mb_row_sse2(unsigned char *src,
                                                unsigned char *dst,
                                                int src_pitch, int dst_pitch,
@@ -57,14 +70,9 @@ void vpx_post_proc_down_and_across_mb_row_sse2(unsigned char *src,
   int row, col;
   const __m128i zero = _mm_setzero_si128();
 
-  if (cols & 15) {
-    vpx_post_proc_down_and_across_mb_row_c(src, dst, src_pitch, dst_pitch, cols,
-                                           flimits, size);
-    return;
-  }
-
   for (row = 0; row < size; row++) {
-    for (col = 0; col < cols; col += 16) {
+    const int aligned_cols = cols & ~15;
+    for (col = 0; col < aligned_cols; col += 16) {
       const __m128i v = _mm_loadu_si128((const __m128i *)(src + col));
       const __m128i p_below1 =
           _mm_loadu_si128((const __m128i *)(src + src_pitch + col));
@@ -81,11 +89,22 @@ void vpx_post_proc_down_and_across_mb_row_sse2(unsigned char *src,
       _mm_storeu_si128((__m128i *)(dst + col), out);
     }
 
+    for (; col < cols; col++) {
+      const unsigned char p_above2 = src[col - 2 * src_pitch];
+      const unsigned char p_above1 = src[col - src_pitch];
+      const unsigned char p_below1 = src[col + src_pitch];
+      const unsigned char p_below2 = src[col + 2 * src_pitch];
+      const unsigned char v = src[col];
+
+      dst[col] = filter_scalar(v, p_above2, p_above1, p_below1, p_below2,
+                               flimits[col]);
+    }
+
     dst[-2] = dst[-1] = dst[0];
     dst[cols] = dst[cols + 1] = dst[cols - 1];
 
     __m128i prev_out = _mm_setzero_si128();
-    for (col = 0; col < cols; col += 16) {
+    for (col = 0; col < aligned_cols; col += 16) {
       const __m128i v = _mm_loadu_si128((const __m128i *)(dst + col));
       const __m128i p_left2 = _mm_loadu_si128((const __m128i *)(dst + col - 2));
       const __m128i p_left1 = _mm_loadu_si128((const __m128i *)(dst + col - 1));
@@ -101,7 +120,39 @@ void vpx_post_proc_down_and_across_mb_row_sse2(unsigned char *src,
       prev_out =
           filter_16_sse2(v, p_left2, p_left1, p_right1, p_right2, f, zero);
     }
-    _mm_storeu_si128((__m128i *)(dst + cols - 16), prev_out);
+
+    const int last_sse_col = col;
+    const unsigned char prev_p2 = dst[col - 2];
+    const unsigned char prev_p1 = dst[col - 1];
+    unsigned char d[4] = { 0 };
+
+    if (col > 0) {
+      _mm_storeu_si128((__m128i *)(dst + col - 16), prev_out);
+    }
+
+    for (; col < cols; col++) {
+      const unsigned char p_left2 =
+          (col == last_sse_col)
+              ? prev_p2
+              : ((col == last_sse_col + 1) ? prev_p1 : dst[col - 2]);
+      const unsigned char p_left1 =
+          (col == last_sse_col) ? prev_p1 : dst[col - 1];
+      const unsigned char p_right1 = dst[col + 1];
+      const unsigned char p_right2 = dst[col + 2];
+      const unsigned char v = dst[col];
+
+      d[col & 3] =
+          filter_scalar(v, p_left2, p_left1, p_right1, p_right2, flimits[col]);
+
+      if (col >= last_sse_col + 2) dst[col - 2] = d[(col - 2) & 3];
+    }
+
+    if (cols - last_sse_col >= 2) {
+      dst[cols - 2] = d[(cols - 2) & 3];
+      dst[cols - 1] = d[(cols - 1) & 3];
+    } else if (cols - last_sse_col == 1) {
+      dst[cols - 1] = d[(cols - 1) & 3];
+    }
 
     src += src_pitch;
     dst += dst_pitch;

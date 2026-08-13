@@ -66,9 +66,10 @@ class VpxPostProcDownAndAcrossMbRowTest
 };
 
 void VpxPostProcDownAndAcrossMbRowTest::Run() {
-  mb_post_proc_down_and_across_(
-      src_image_->TopLeftPixel(), dst_image_->TopLeftPixel(),
-      src_image_->stride(), dst_image_->stride(), block_width_, flimits_, 16);
+  mb_post_proc_down_and_across_(src_image_->TopLeftPixel(),
+                                dst_image_->TopLeftPixel(),
+                                src_image_->stride(), dst_image_->stride(),
+                                block_width_, flimits_, block_height_);
 }
 
 // Test routine for the VPx post-processing function
@@ -125,99 +126,126 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
   // Size of the underlying data block that will be filtered.
   // Y blocks are always a multiple of 16 wide and exactly 16 high. U and V
   // blocks are always a multiple of 8 wide and exactly 8 high.
-  block_width_ = 136;
-  block_height_ = 16;
-
-  // 5-tap filter needs 2 padding rows above and below the block in the input.
-  // SSE2 reads in blocks of 16. Pad an extra 8 in case the width is not %16.
-  Buffer<uint8_t> src_image =
-      Buffer<uint8_t>(block_width_, block_height_, 2, 2, 10, 2);
-  ASSERT_TRUE(src_image.Init());
-
-  // Filter extends output block by 8 samples at left and right edges.
-  // Though the left padding is only 8 bytes, there is 'above' padding as well
-  // so when the assembly code tries to read 16 bytes before the pointer it is
-  // not a problem.
-  // SSE2 reads in blocks of 16. Pad an extra 8 in case the width is not %16.
-  Buffer<uint8_t> dst_image =
-      Buffer<uint8_t>(block_width_, block_height_, 8, 8, 16, 8);
-  ASSERT_TRUE(dst_image.Init());
-  Buffer<uint8_t> dst_image_ref =
-      Buffer<uint8_t>(block_width_, block_height_, 8);
-  ASSERT_TRUE(dst_image_ref.Init());
-
-  // Filter values are set in blocks of 16 for Y and 8 for U/V. Each macroblock
-  // can have a different filter. SSE2 assembly reads flimits in blocks of 16 so
-  // it must be padded out.
-  const int flimits_width = block_width_ % 16 ? block_width_ + 8 : block_width_;
-  flimits_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, flimits_width));
+  static constexpr int kWidths[] = { 8, 16, 24, 32, 136 };
+  static constexpr int kHeights[] = { 8, 16 };
 
   ACMRandom rnd;
   rnd.Reset(ACMRandom::DeterministicSeed());
-  // Initialize pixels in the input:
-  //   block pixels to random values.
-  //   border pixels to value 10.
-  src_image.SetPadding(10);
-  src_image.Set(&rnd, &ACMRandom::Rand8);
 
-  for (int blocks = 0; blocks < block_width_; blocks += 8) {
-    (void)memset(flimits_, 0, sizeof(*flimits_) * flimits_width);
+  for (int width : kWidths) {
+    for (int height : kHeights) {
+      block_width_ = width;
+      block_height_ = height;
 
-    for (int f = 0; f < 255; f++) {
-      (void)memset(flimits_ + blocks, f, sizeof(*flimits_) * 8);
-      dst_image.Set(0);
-      dst_image_ref.Set(0);
+      // 5-tap filter needs 2 padding rows above and below the block in the
+      // input. SSE2 reads in blocks of 16. Pad an extra 8 in case the width is
+      // not %16.
+      Buffer<uint8_t> src_image =
+          Buffer<uint8_t>(block_width_, block_height_, 2, 2, 10, 2);
+      ASSERT_TRUE(src_image.Init());
 
-      vpx_post_proc_down_and_across_mb_row_c(
-          src_image.TopLeftPixel(), dst_image_ref.TopLeftPixel(),
-          src_image.stride(), dst_image_ref.stride(), block_width_, flimits_,
-          block_height_);
-      ASM_REGISTER_STATE_CHECK(mb_post_proc_down_and_across_(
-          src_image.TopLeftPixel(), dst_image.TopLeftPixel(),
-          src_image.stride(), dst_image.stride(), block_width_, flimits_,
-          block_height_));
+      // Filter extends output block by 8 samples at left and right edges.
+      // Though the left padding is only 8 bytes, there is 'above' padding as
+      // well so when the assembly code tries to read 16 bytes before the
+      // pointer it is not a problem. SSE2 reads in blocks of 16. Pad an extra 8
+      // in case the width is not %16.
+      Buffer<uint8_t> dst_image =
+          Buffer<uint8_t>(block_width_, block_height_, 8, 8, 16, 8);
+      ASSERT_TRUE(dst_image.Init());
+      Buffer<uint8_t> dst_image_ref =
+          Buffer<uint8_t>(block_width_, block_height_, 8);
+      ASSERT_TRUE(dst_image_ref.Init());
 
-      ASSERT_TRUE(dst_image.CheckValues(dst_image_ref));
+      // Filter values are set in blocks of 16 for Y and 8 for U/V. Each
+      // macroblock can have a different filter. SSE2 assembly reads flimits in
+      // blocks of 16 so it must be padded out.
+      const int flimits_width =
+          block_width_ % 16 ? block_width_ + 8 : block_width_;
+      flimits_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, flimits_width));
+
+      // Initialize pixels in the input:
+      //   block pixels to random values.
+      //   border pixels to value 10.
+      src_image.SetPadding(10);
+      src_image.Set(&rnd, &ACMRandom::Rand8);
+
+      for (int blocks = 0; blocks < block_width_; blocks += 8) {
+        (void)memset(flimits_, 0, sizeof(*flimits_) * flimits_width);
+
+        for (int f = 0; f < 255; f++) {
+          (void)memset(flimits_ + blocks, f, sizeof(*flimits_) * 8);
+          dst_image.Set(0);
+          dst_image_ref.Set(0);
+
+          vpx_post_proc_down_and_across_mb_row_c(
+              src_image.TopLeftPixel(), dst_image_ref.TopLeftPixel(),
+              src_image.stride(), dst_image_ref.stride(), block_width_,
+              flimits_, block_height_);
+          ASM_REGISTER_STATE_CHECK(mb_post_proc_down_and_across_(
+              src_image.TopLeftPixel(), dst_image.TopLeftPixel(),
+              src_image.stride(), dst_image.stride(), block_width_, flimits_,
+              block_height_));
+
+          ASSERT_TRUE(dst_image.CheckValues(dst_image_ref));
+        }
+      }
+
+      vpx_free(flimits_);
     }
   }
-
-  vpx_free(flimits_);
 }
 
 TEST_P(VpxPostProcDownAndAcrossMbRowTest, DISABLED_Speed) {
-  // Size of the underlying data block that will be filtered.
-  block_width_ = 16;
-  block_height_ = 16;
+  static constexpr struct {
+    int width;
+    int height;
+  } kSizes[] = {
+    { 16, 16 },
+    { 136, 16 },
+    { 24, 8 },
+    { 8, 8 },
+  };
 
-  // 5-tap filter needs 2 padding rows above and below the block in the input.
-  Buffer<uint8_t> src_image = Buffer<uint8_t>(block_width_, block_height_, 2);
-  ASSERT_TRUE(src_image.Init());
-  this->src_image_ = &src_image;
+  for (const auto &size : kSizes) {
+    block_width_ = size.width;
+    block_height_ = size.height;
 
-  // Filter extends output block by 8 samples at left and right edges.
-  // Though the left padding is only 8 bytes, the assembly code tries to
-  // read 16 bytes before the pointer.
-  Buffer<uint8_t> dst_image =
-      Buffer<uint8_t>(block_width_, block_height_, 8, 16, 8, 8);
-  ASSERT_TRUE(dst_image.Init());
-  this->dst_image_ = &dst_image;
+    // 5-tap filter needs 2 padding rows above and below the block in the input.
+    Buffer<uint8_t> src_image =
+        Buffer<uint8_t>(block_width_, block_height_, 2, 2, 10, 2);
+    ASSERT_TRUE(src_image.Init());
+    this->src_image_ = &src_image;
 
-  flimits_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width_));
-  (void)memset(flimits_, 255, block_width_);
+    // Filter extends output block by 8 samples at left and right edges.
+    // Though the left padding is only 8 bytes, the assembly code tries to
+    // read 16 bytes before the pointer. Pad an extra 8 in case the width is
+    // not %16.
+    Buffer<uint8_t> dst_image =
+        Buffer<uint8_t>(block_width_, block_height_, 8, 8, 16, 8);
+    ASSERT_TRUE(dst_image.Init());
+    this->dst_image_ = &dst_image;
 
-  // Initialize pixels in the input:
-  //   block pixels to value 1,
-  //   border pixels to value 10.
-  src_image.SetPadding(10);
-  src_image.Set(1);
+    const int flimits_width =
+        block_width_ % 16 ? block_width_ + 8 : block_width_;
+    flimits_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, flimits_width));
+    (void)memset(flimits_, 255, flimits_width);
 
-  // Initialize pixels in the output to 99.
-  dst_image.Set(99);
+    // Initialize pixels in the input:
+    //   block pixels to value 1,
+    //   border pixels to value 10.
+    src_image.SetPadding(10);
+    src_image.Set(1);
 
-  RunNTimes(INT16_MAX);
-  PrintMedian("16x16");
+    // Initialize pixels in the output to 99.
+    dst_image.Set(99);
 
-  vpx_free(flimits_);
+    char title[32];
+    snprintf(title, sizeof(title), "%dx%d", block_width_, block_height_);
+    RunNTimes(INT16_MAX);
+    PrintMedian(title);
+
+    vpx_free(flimits_);
+  }
 }
 
 class VpxMbPostProcAcrossIpTest
