@@ -125,7 +125,14 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
   s = (s + stride_align - 1) & ~((uint64_t)stride_align - 1);
   if (s > INT_MAX) goto fail;
   stride_in_bytes = (int)s;
-  s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s / 2 : s;
+  uint64_t uv_s = s;
+  // Convert to number of samples.
+  uv_s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? uv_s / 2 : uv_s;
+  // Apply chroma subsampling.
+  uv_s = (uv_s + xcs) >> xcs;
+  // Convert back to number of bytes.
+  uv_s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? uv_s * 2 : uv_s;
+  const int uv_stride_in_bytes = (int)uv_s;
 
   /* Allocate the new image */
   if (!img) {
@@ -140,6 +147,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
 
   if (!img_data) {
     uint64_t alloc_size;
+    s = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s / 2 : s;
     alloc_size = (fmt & VPX_IMG_FMT_PLANAR) ? (uint64_t)h * s * bps / 8
                                             : (uint64_t)h * s;
 
@@ -161,7 +169,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
 
   /* Calculate strides */
   img->stride[VPX_PLANE_Y] = img->stride[VPX_PLANE_ALPHA] = stride_in_bytes;
-  img->stride[VPX_PLANE_U] = img->stride[VPX_PLANE_V] = stride_in_bytes >> xcs;
+  img->stride[VPX_PLANE_U] = img->stride[VPX_PLANE_V] = uv_stride_in_bytes;
 
   if (fmt == VPX_IMG_FMT_NV12) {
     img->stride[VPX_PLANE_U] = img->stride[VPX_PLANE_V] = stride_in_bytes;

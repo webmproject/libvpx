@@ -10,6 +10,8 @@
 
 #include <climits>
 #include <cstdint>
+#include <cstdio>
+#include <initializer_list>
 
 #include "vpx/vpx_image.h"
 #include "gtest/gtest.h"
@@ -31,6 +33,29 @@ TEST(VpxImageTest, VpxImgWrapInvalidAlign) {
   // call to fail. The test verifies we do not read the junk values in 'img'.
   unsigned int align = 31;
   EXPECT_EQ(vpx_img_wrap(&img, format, kWidth, kHeight, align, buf), nullptr);
+}
+
+TEST(VpxImageTest, VpxImgWrapI42xOddWidth) {
+  vpx_image_t img;
+  unsigned char buf[1];  // Should not be read
+  char str[32];
+  for (const auto format : { VPX_IMG_FMT_I420, VPX_IMG_FMT_I422,
+                             VPX_IMG_FMT_I42016, VPX_IMG_FMT_I42216 }) {
+    for (const int width : { 1, 711, 4913 }) {
+      snprintf(str, sizeof(str), "format: %d width: %d", format, width);
+      SCOPED_TRACE(str);
+      const int stride_in_bytes =
+          (format & VPX_IMG_FMT_HIGHBITDEPTH) ? width * 2 : width;
+      const int uv_width = (width + 1) / 2;
+      const int uv_stride_in_bytes =
+          (format & VPX_IMG_FMT_HIGHBITDEPTH) ? uv_width * 2 : uv_width;
+      EXPECT_EQ(vpx_img_wrap(&img, format, width, 32, /*stride_align=*/1, buf),
+                &img);
+      EXPECT_EQ(img.stride[VPX_PLANE_Y], stride_in_bytes);
+      EXPECT_EQ(img.stride[VPX_PLANE_U], uv_stride_in_bytes);
+      EXPECT_EQ(img.stride[VPX_PLANE_V], uv_stride_in_bytes);
+    }
+  }
 }
 
 TEST(VpxImageTest, VpxImgSetRectOverflow) {
