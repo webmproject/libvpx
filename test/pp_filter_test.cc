@@ -9,6 +9,7 @@
  */
 
 #include <limits.h>
+#include <stdio.h>
 
 #include <memory>
 
@@ -134,6 +135,9 @@ TEST_P(VpxPostProcDownAndAcrossMbRowTest, CheckCvsAssembly) {
 
   for (int width : kWidths) {
     for (int height : kHeights) {
+      char str[8];
+      snprintf(str, sizeof(str), "%dx%d", width, height);
+      SCOPED_TRACE(str);
       block_width_ = width;
       block_height_ = height;
 
