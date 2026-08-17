@@ -10,8 +10,7 @@
 
 #include <assert.h>
 #include <emmintrin.h>
-
-#include <stdio.h>
+#include <stdlib.h>
 
 #include "./vpx_dsp_rtcd.h"
 #include "vpx/vpx_integer.h"
