@@ -69,6 +69,7 @@
     Fix to AVX-512 CPU feature detection on older x86 CPUs.
     Fix to x86_abi_support.asm placing read-only data tables in .rdata for
     Windows.
+    Fix to configure disabling _FORTIFY_SOURCE on Linux.
     Fix to file leaks on error paths in vpxdec and video reader/writer
     utilities.
 
