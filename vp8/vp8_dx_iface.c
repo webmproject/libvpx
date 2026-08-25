@@ -312,6 +312,17 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
     res = VPX_CODEC_OK;
   }
 
+#if CONFIG_SIZE_LIMIT
+  // Reject oversized keyframes before decoder initialization allocates frame
+  // buffers.
+  if (!res && ctx->si.is_kf &&
+      (ctx->si.w > DECODE_WIDTH_LIMIT || ctx->si.h > DECODE_HEIGHT_LIMIT)) {
+    ctx->si.w = 0;
+    ctx->si.h = 0;
+    res = VPX_CODEC_CORRUPT_FRAME;
+  }
+#endif
+
   if (!ctx->decoder_init && !ctx->si.is_kf) res = VPX_CODEC_UNSUP_BITSTREAM;
   if (!res && ctx->decoder_init && w == 0 && h == 0 && ctx->si.h == 0 &&
       ctx->si.w == 0) {
