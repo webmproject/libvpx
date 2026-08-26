@@ -613,6 +613,7 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi) {
 
   x->mvc = cm->fc.mvc;
 
+  xd->above_context = cm->above_context;
   memset(cm->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
   /* Special case treatment when GF and ARF are not sensible options

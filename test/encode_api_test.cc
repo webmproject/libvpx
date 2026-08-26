@@ -1082,6 +1082,33 @@ TEST(EncodeAPI, Vp8DenoiserResolutionChange) {
 
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+
+// Test VP8 SSIM tuning with multiple frames.
+TEST(EncodeAPI, Vp8SSIMMultipleFrames) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  // Set VP8_TUNE_SSIM.
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_TUNING, VP8_TUNE_SSIM),
+            VPX_CODEC_OK);
+
+  vpx_image_t *const img =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(img, nullptr);
+
+  // Encode multiple frames with GOOD_QUALITY to enable coefficient
+  // optimization.
+  for (int frame = 0; frame < 2; ++frame) {
+    ASSERT_EQ(vpx_codec_encode(&enc, img, frame, 1, 0, VPX_DL_GOOD_QUALITY),
+              VPX_CODEC_OK);
+  }
+
+  vpx_img_free(img);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP8_ENCODER
 
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
