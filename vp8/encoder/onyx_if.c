@@ -2990,8 +2990,15 @@ static void update_reference_frames(VP8_COMP *cpi) {
                             &cpi->denoiser.yv12_running_avg[GOLDEN_FRAME]);
       }
       if (cm->refresh_last_frame) {
-        vp8_yv12_copy_frame(&cpi->denoiser.yv12_running_avg[INTRA_FRAME],
-                            &cpi->denoiser.yv12_running_avg[LAST_FRAME]);
+        if (cpi->denoiser.denoiser_mode == kDenoiserOnYOnly) {
+          vp8_yv12_copy_frame(&cpi->denoiser.yv12_running_avg[INTRA_FRAME],
+                              &cpi->denoiser.yv12_running_avg[LAST_FRAME]);
+        } else {
+          YV12_BUFFER_CONFIG tmp = cpi->denoiser.yv12_running_avg[INTRA_FRAME];
+          cpi->denoiser.yv12_running_avg[INTRA_FRAME] =
+              cpi->denoiser.yv12_running_avg[LAST_FRAME];
+          cpi->denoiser.yv12_running_avg[LAST_FRAME] = tmp;
+        }
       }
     }
     if (cpi->oxcf.noise_sensitivity == 4)
