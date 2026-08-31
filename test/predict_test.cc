@@ -22,6 +22,8 @@
 #include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
+#include "vp8/common/blockd.h"
+#include "vp8/common/reconinter.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 
@@ -411,4 +413,110 @@ INSTANTIATE_TEST_SUITE_P(
                       make_tuple(8, 4, &vp8_bilinear_predict8x4_msa),
                       make_tuple(4, 4, &vp8_bilinear_predict4x4_msa)));
 #endif
+class BuildInterPredictorTest : public ::testing::Test {
+ protected:
+  enum {
+    kYStride = 64,
+    kYSize = kYStride * kYStride,
+    kUVStride = kYStride >> 1,
+    kUVSize = kUVStride * kUVStride,
+    kRef = 0x80,
+    kFill = 0xcd
+  };
+
+  void SetUp() override {
+    xd_ =
+        reinterpret_cast<MACROBLOCKD *>(vpx_memalign(32, sizeof(MACROBLOCKD)));
+    ASSERT_NE(xd_, nullptr);
+    memset(xd_, 0, sizeof(*xd_));
+
+    pre_y_ = reinterpret_cast<uint8_t *>(vpx_memalign(32, kYSize));
+    pre_u_ = reinterpret_cast<uint8_t *>(vpx_memalign(32, kUVSize));
+    pre_v_ = reinterpret_cast<uint8_t *>(vpx_memalign(32, kUVSize));
+    dst_y_ = reinterpret_cast<uint8_t *>(vpx_memalign(32, kYSize));
+    dst_u_ = reinterpret_cast<uint8_t *>(vpx_memalign(32, kUVSize));
+    dst_v_ = reinterpret_cast<uint8_t *>(vpx_memalign(32, kUVSize));
+    ASSERT_NE(pre_y_, nullptr);
+    ASSERT_NE(pre_u_, nullptr);
+    ASSERT_NE(pre_v_, nullptr);
+    ASSERT_NE(dst_y_, nullptr);
+    ASSERT_NE(dst_u_, nullptr);
+    ASSERT_NE(dst_v_, nullptr);
+    memset(pre_y_, kRef, kYSize);
+    memset(pre_u_, kRef, kUVSize);
+    memset(pre_v_, kRef, kUVSize);
+
+    memset(&mi_, 0, sizeof(mi_));
+    xd_->mode_info_context = &mi_;
+    xd_->pre.y_buffer = pre_y_ + (kYStride >> 1) * kYStride + (kYStride >> 1);
+    xd_->pre.u_buffer =
+        pre_u_ + (kUVStride >> 1) * kUVStride + (kUVStride >> 1);
+    xd_->pre.v_buffer =
+        pre_v_ + (kUVStride >> 1) * kUVStride + (kUVStride >> 1);
+    xd_->pre.y_stride = kYStride;
+  }
+
+  void TearDown() override {
+    vpx_free(xd_);
+    vpx_free(pre_y_);
+    vpx_free(pre_u_);
+    vpx_free(pre_v_);
+    vpx_free(dst_y_);
+    vpx_free(dst_u_);
+    vpx_free(dst_v_);
+    libvpx_test::ClearSystemState();
+  }
+
+  void RunAndCheck(int row, int col) {
+    memset(dst_y_, kFill, kYSize);
+    memset(dst_u_, kFill, kUVSize);
+    memset(dst_v_, kFill, kUVSize);
+
+    mi_.mbmi.mv.as_mv.row = static_cast<short>(row);
+    mi_.mbmi.mv.as_mv.col = static_cast<short>(col);
+    mi_.mbmi.need_to_clamp_mvs = 1;
+
+    uint8_t *const dst_y =
+        dst_y_ + (kYStride >> 1) * kYStride + (kYStride >> 1);
+    uint8_t *const dst_u =
+        dst_u_ + (kUVStride >> 1) * kUVStride + (kUVStride >> 1);
+    uint8_t *const dst_v =
+        dst_v_ + (kUVStride >> 1) * kUVStride + (kUVStride >> 1);
+
+    vp8_build_inter16x16_predictors_mb(xd_, dst_y, dst_u, dst_v, kYStride,
+                                       kUVStride);
+
+    for (int r = 0; r < 8; ++r) {
+      for (int c = 0; c < 8; ++c) {
+        ASSERT_EQ(kRef, dst_u[r * kUVStride + c])
+            << "U[" << r << "][" << c << "] mv=(" << row << "," << col << ")";
+        ASSERT_EQ(kRef, dst_v[r * kUVStride + c])
+            << "V[" << r << "][" << c << "] mv=(" << row << "," << col << ")";
+      }
+    }
+  }
+
+  MACROBLOCKD *xd_;
+  MODE_INFO mi_;
+  uint8_t *pre_y_;
+  uint8_t *pre_u_;
+  uint8_t *pre_v_;
+  uint8_t *dst_y_;
+  uint8_t *dst_u_;
+  uint8_t *dst_v_;
+};
+
+// With full-pixel-only chroma motion (fullpixel_mask == ~7), rounding the
+// derived chroma MV down can move it just past the border tap window. The
+// chroma destination must still be written from a clamped reference position.
+TEST_F(BuildInterPredictorTest, FullPixelChromaMVAlwaysWritesUV) {
+  xd_->mb_to_left_edge = 0;
+  xd_->mb_to_right_edge = 0;
+  xd_->mb_to_top_edge = 0;
+  xd_->mb_to_bottom_edge = 0;
+  xd_->fullpixel_mask = ~7;
+
+  RunAndCheck(0, -152);
+  RunAndCheck(-152, 0);
+}
 }  // namespace
