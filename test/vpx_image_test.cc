@@ -58,6 +58,33 @@ TEST(VpxImageTest, VpxImgWrapI42xOddWidth) {
   }
 }
 
+TEST(VpxImageTest, VpxImgWrapOddHeightSeparatesChromaPlanes) {
+  static constexpr vpx_img_fmt_t kFormats[] = {
+    VPX_IMG_FMT_YV12,   VPX_IMG_FMT_I420,   VPX_IMG_FMT_I440,
+    VPX_IMG_FMT_I42016, VPX_IMG_FMT_I44016,
+  };
+  static constexpr int kWidth = 16;
+  static constexpr int kHeight = 3;
+  unsigned char buf[256];
+
+  for (const vpx_img_fmt_t format : kFormats) {
+    vpx_image_t img;
+    ASSERT_EQ(vpx_img_wrap(&img, format, kWidth, kHeight,
+                           /*stride_align=*/1, buf),
+              &img);
+
+    const ptrdiff_t chroma_plane_size =
+        ((kHeight + 1) / 2) * img.stride[VPX_PLANE_U];
+    if (format & VPX_IMG_FMT_UV_FLIP) {
+      EXPECT_EQ(img.planes[VPX_PLANE_U] - img.planes[VPX_PLANE_V],
+                chroma_plane_size);
+    } else {
+      EXPECT_EQ(img.planes[VPX_PLANE_V] - img.planes[VPX_PLANE_U],
+                chroma_plane_size);
+    }
+  }
+}
+
 TEST(VpxImageTest, VpxImgSetRectOverflow) {
   const int kWidth = 128;
   const int kHeight = 128;
