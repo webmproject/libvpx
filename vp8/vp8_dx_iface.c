@@ -345,6 +345,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
       pbi->common.error.setjmp = 0;
       vp8_decoder_remove_threads(pbi);
       vpx_clear_system_state();
+      ctx->fragments.count = 0;
       return VPX_CODEC_ERROR;
     }
     pbi->common.error.setjmp = 1;
@@ -418,6 +419,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
           ctx->si.h = 0;
           vpx_clear_system_state();
           /* same return value as used in vp8dx_receive_compressed_data */
+          ctx->fragments.count = 0;
           return -1;
         }
 
@@ -517,6 +519,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
       }
 #endif
       res = update_error_state(ctx, &pbi->common.error);
+      ctx->fragments.count = 0;
       return res;
     }
 
@@ -532,11 +535,11 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
       res = update_error_state(ctx, &pbi->common.error);
     }
 
-    /* get ready for the next series of fragments */
-    ctx->fragments.count = 0;
     pbi->common.error.setjmp = 0;
   }
 
+  /* A complete fragment sequence is consumed even when decoding fails. */
+  ctx->fragments.count = 0;
   return res;
 }
 

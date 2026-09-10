@@ -86,6 +86,22 @@ TEST(DecodeAPI, OptionalParams) {
 #endif  // CONFIG_ERROR_CONCEALMENT
 }
 
+TEST(DecodeAPI, Vp8FlushAfterFragmentError) {
+  static constexpr uint8_t kInvalidKeyframe[10] = { 0 };
+  vpx_codec_ctx_t dec;
+
+  ASSERT_EQ(VPX_CODEC_OK,
+            vpx_codec_dec_init(&dec, &vpx_codec_vp8_dx_algo, nullptr,
+                               VPX_CODEC_USE_INPUT_FRAGMENTS));
+  EXPECT_EQ(VPX_CODEC_OK,
+            vpx_codec_decode(&dec, kInvalidKeyframe, sizeof(kInvalidKeyframe),
+                             nullptr, 0));
+  EXPECT_EQ(VPX_CODEC_UNSUP_BITSTREAM,
+            vpx_codec_decode(&dec, nullptr, 0, nullptr, 0));
+  EXPECT_EQ(VPX_CODEC_OK, vpx_codec_decode(&dec, nullptr, 0, nullptr, 0));
+  EXPECT_EQ(VPX_CODEC_OK, vpx_codec_destroy(&dec));
+}
+
 #if CONFIG_SIZE_LIMIT && \
     (DECODE_WIDTH_LIMIT < 16383 || DECODE_HEIGHT_LIMIT < 16383)
 TEST(DecodeAPI, Vp8RejectsOversizedKeyframeBeforeInitialization) {
