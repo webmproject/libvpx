@@ -75,7 +75,7 @@ TEST(VpxImageTest, VpxImgSetRectOverflow) {
             0);
 }
 
-TEST(VpxImageTest, VpxImgSetRectPreservesFlip) {
+TEST(VpxImageTest, VpxImgSetRectRejectsFlipped) {
   static constexpr vpx_img_fmt_t kFormats[] = {
     VPX_IMG_FMT_YV12,   VPX_IMG_FMT_I420,   VPX_IMG_FMT_I422,
     VPX_IMG_FMT_I444,   VPX_IMG_FMT_I440,   VPX_IMG_FMT_NV12,
@@ -84,38 +84,35 @@ TEST(VpxImageTest, VpxImgSetRectPreservesFlip) {
   };
 
   for (const vpx_img_fmt_t format : kFormats) {
-    vpx_image_t *img = vpx_img_alloc(nullptr, format, 16, 5, 1);
-    vpx_image_t *expected = vpx_img_alloc(nullptr, format, 16, 5, 1);
+    SCOPED_TRACE(format);
+    vpx_image_t *img = vpx_img_alloc(nullptr, format, 4, 4, 1);
     ASSERT_NE(img, nullptr);
-    ASSERT_NE(expected, nullptr);
 
-    ASSERT_EQ(vpx_img_set_rect(expected, 2, 1, 8, 3), 0);
-    vpx_img_flip(expected);
+    // An ordinary crop is valid before flipping.
+    ASSERT_EQ(vpx_img_set_rect(img, 2, 2, 2, 2), 0);
+    EXPECT_EQ(img->d_w, 2u);
+    EXPECT_EQ(img->d_h, 2u);
+    ASSERT_EQ(vpx_img_set_rect(img, 0, 0, 4, 4), 0);
 
     vpx_img_flip(img);
-    ASSERT_EQ(vpx_img_set_rect(img, 2, 1, 8, 3), 0);
-
+    const unsigned char *const flipped_planes[] = { img->planes[VPX_PLANE_Y],
+                                                    img->planes[VPX_PLANE_U],
+                                                    img->planes[VPX_PLANE_V] };
+    EXPECT_EQ(vpx_img_set_rect(img, 2, 2, 2, 2), -1);
+    EXPECT_EQ(img->d_w, 4u);
+    EXPECT_EQ(img->d_h, 4u);
     for (int plane = VPX_PLANE_Y; plane <= VPX_PLANE_V; ++plane) {
-      EXPECT_EQ(img->planes[plane] - img->img_data,
-                expected->planes[plane] - expected->img_data);
-      EXPECT_EQ(img->stride[plane], expected->stride[plane]);
+      EXPECT_EQ(img->planes[plane], flipped_planes[plane]);
     }
 
-    ASSERT_EQ(vpx_img_set_rect(img, 0, 0, 16, 0), 0);
-    EXPECT_LT(img->stride[VPX_PLANE_Y], 0);
-    ASSERT_EQ(vpx_img_set_rect(img, 0, 0, 16, 5), 0);
-
-    vpx_img_flip(expected);
-    ASSERT_EQ(vpx_img_set_rect(expected, 0, 0, 16, 5), 0);
-    vpx_img_flip(expected);
-
-    for (int plane = VPX_PLANE_Y; plane <= VPX_PLANE_V; ++plane) {
-      EXPECT_EQ(img->planes[plane] - img->img_data,
-                expected->planes[plane] - expected->img_data);
-      EXPECT_EQ(img->stride[plane], expected->stride[plane]);
-    }
-
-    vpx_img_free(expected);
+    // Flipping back permits changing the viewport again.
+    vpx_img_flip(img);
+    EXPECT_GT(img->stride[VPX_PLANE_Y], 0);
+    const unsigned char *const unflipped_y_plane = img->planes[VPX_PLANE_Y];
+    EXPECT_EQ(vpx_img_set_rect(img, 2, 2, 2, 2), 0);
+    EXPECT_NE(img->planes[VPX_PLANE_Y], unflipped_y_plane);
+    EXPECT_EQ(img->d_w, 2u);
+    EXPECT_EQ(img->d_h, 2u);
     vpx_img_free(img);
   }
 }
