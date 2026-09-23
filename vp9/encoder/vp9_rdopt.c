@@ -1072,7 +1072,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int row,
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
   const uint8_t *src_init = &p->src.buf[row * 4 * src_stride + col * 4];
-  uint8_t *dst_init = &pd->dst.buf[row * 4 * src_stride + col * 4];
+  uint8_t *dst_init = &pd->dst.buf[row * 4 * dst_stride + col * 4];
   ENTROPY_CONTEXT ta[2], tempa[2];
   ENTROPY_CONTEXT tl[2], templ[2];
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
