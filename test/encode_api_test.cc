@@ -572,6 +572,54 @@ TEST(EncodeAPI, SetReferenceSizeValidationVp8) {
   EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 
+// Bug: 564326761.
+TEST(EncodeAPI, ValidateConfigVp8) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_enc_cfg_t default_cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &default_cfg, 0), VPX_CODEC_OK);
+
+  const vpx_rational_t dsf = { 1, 1 };
+  vpx_codec_ctx_t enc = {};
+
+  // Invalid ss_number_layers (0 and > VPX_SS_MAX_LAYERS).
+  for (const unsigned int layers : { 0U, VPX_SS_MAX_LAYERS + 1U }) {
+    vpx_codec_enc_cfg_t cfg = default_cfg;
+    cfg.ss_number_layers = layers;
+    EXPECT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0),
+              VPX_CODEC_INVALID_PARAM);
+    EXPECT_EQ(vpx_codec_enc_init_multi(&enc, iface, &cfg, 1, 0, &dsf),
+              VPX_CODEC_INVALID_PARAM);
+  }
+
+  // Invalid boost factor denominators (0).
+  {
+    vpx_codec_enc_cfg_t cfg = default_cfg;
+    cfg.kf_frame_max_boost_first_factor.den = 0;
+    EXPECT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0),
+              VPX_CODEC_INVALID_PARAM);
+  }
+  {
+    vpx_codec_enc_cfg_t cfg = default_cfg;
+    cfg.kf_max_total_boost_factor.den = 0;
+    EXPECT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0),
+              VPX_CODEC_INVALID_PARAM);
+  }
+
+  // Ensure scalar range checks run before dereferencing rc_twopass_stats_in.buf
+  // when g_pass == VPX_RC_LAST_PASS.
+  {
+    uint8_t dummy_buf[1] = { 0 };
+    constexpr size_t kDummyStatsSize = 52992;
+    vpx_codec_enc_cfg_t cfg = default_cfg;
+    cfg.g_pass = VPX_RC_LAST_PASS;
+    cfg.ss_number_layers = VPX_SS_MAX_LAYERS + 1;
+    cfg.rc_twopass_stats_in.buf = dummy_buf;
+    cfg.rc_twopass_stats_in.sz = kDummyStatsSize;
+    EXPECT_EQ(vpx_codec_enc_init_multi(&enc, iface, &cfg, 1, 0, &dsf),
+              VPX_CODEC_INVALID_PARAM);
+  }
+}
+
 // Emulates the WebCodecs VideoEncoder interface.
 class VP8Encoder {
  public:
