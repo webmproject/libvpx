@@ -260,6 +260,23 @@ TEST(VpxImageTest, VpxImgFlipOneRow) {
   vpx_img_free(img);
 }
 
+TEST(VpxImageTest, VpxImgFlipEmpty) {
+  vpx_image_t *img = vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, 16, 16, 1);
+  ASSERT_NE(img, nullptr);
+  ASSERT_EQ(vpx_img_set_rect(img, 0, 0, 16, 0), 0);
+  const unsigned char *const planes[] = { img->planes[VPX_PLANE_Y],
+                                          img->planes[VPX_PLANE_U],
+                                          img->planes[VPX_PLANE_V] };
+
+  vpx_img_flip(img);
+
+  for (int plane = VPX_PLANE_Y; plane <= VPX_PLANE_V; ++plane) {
+    EXPECT_EQ(img->planes[plane], planes[plane]);
+    EXPECT_GT(img->stride[plane], 0);
+  }
+  vpx_img_free(img);
+}
+
 TEST(VpxImageTest, VpxImgFlipOddHeight) {
   static constexpr vpx_img_fmt_t kFormats[] = {
     VPX_IMG_FMT_YV12, VPX_IMG_FMT_I420,   VPX_IMG_FMT_I440,

@@ -264,6 +264,8 @@ void vpx_img_flip(vpx_image_t *img) {
   const unsigned int chroma_height =
       (img->d_h + img->y_chroma_shift) >> img->y_chroma_shift;
 
+  if (img->d_h == 0) return;
+
   img->planes[VPX_PLANE_Y] +=
       (ptrdiff_t)(img->d_h - 1) * img->stride[VPX_PLANE_Y];
   img->stride[VPX_PLANE_Y] = -img->stride[VPX_PLANE_Y];
