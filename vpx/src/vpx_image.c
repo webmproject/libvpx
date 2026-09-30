@@ -50,9 +50,12 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img, vpx_img_fmt_t fmt,
 
   /* Impose maximum values on input parameters so that this function can
    * perform arithmetic operations without worrying about overflows.
+   * Zero dimensions are rejected: vpx_img_flip() computes
+   * (d_h - 1) * stride, which underflows for d_h == 0 and produces
+   * a wild plane pointer.
    */
-  if (d_w > 0x08000000 || d_h > 0x08000000 || buf_align > 65536 ||
-      stride_align > 65536) {
+  if (d_w == 0 || d_h == 0 || d_w > 0x08000000 || d_h > 0x08000000 ||
+      buf_align > 65536 || stride_align > 65536) {
     goto fail;
   }
 
@@ -208,6 +211,12 @@ vpx_image_t *vpx_img_wrap(vpx_image_t *img, vpx_img_fmt_t fmt, unsigned int d_w,
 int vpx_img_set_rect(vpx_image_t *img, unsigned int x, unsigned int y,
                      unsigned int w, unsigned int h) {
   if (img->stride[VPX_PLANE_Y] < 0) return -1;
+
+  /* A zero-area viewport is invalid: it would leave d_w or d_h at 0, and
+   * vpx_img_flip() computes (d_h - 1) * stride, which underflows for
+   * d_h == 0 and produces a wild plane pointer.
+   */
+  if (w == 0 || h == 0) return -1;
 
   if (x <= UINT_MAX - w && x + w <= img->w && y <= UINT_MAX - h &&
       y + h <= img->h) {
