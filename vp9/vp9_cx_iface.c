@@ -303,6 +303,40 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, content, VP9E_CONTENT_DEFAULT,
               VP9E_CONTENT_INVALID - 1);
 
+#if !CONFIG_VP9_HIGHBITDEPTH
+  if (cfg->g_profile > (unsigned int)PROFILE_1) {
+    ERROR("Profile > 1 not supported in this build configuration");
+  }
+#endif
+  if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
+      cfg->g_bit_depth > VPX_BITS_8) {
+    ERROR("Codec high bit-depth not supported in profile < 2");
+  }
+  if (cfg->g_profile > (unsigned int)PROFILE_1 &&
+      cfg->g_bit_depth == VPX_BITS_8) {
+    ERROR("Codec bit-depth 8 not supported in profile > 1");
+  }
+  RANGE_CHECK(extra_cfg, color_space, VPX_CS_UNKNOWN, VPX_CS_SRGB);
+  RANGE_CHECK(extra_cfg, color_range, VPX_CR_STUDIO_RANGE, VPX_CR_FULL_RANGE);
+
+  // The range below shall be further tuned.
+  RANGE_CHECK(cfg, use_vizier_rc_params, 0, 1);
+  RANGE_CHECK(cfg, active_wq_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, err_per_mb_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, sr_default_decay_limit.den, 1, 1000);
+  RANGE_CHECK(cfg, sr_diff_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_err_per_mb_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_min_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_max_boost_first_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_frame_max_boost_subs_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, kf_max_total_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_max_total_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, gf_frame_max_boost_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, zm_factor.den, 1, 1000);
+  RANGE_CHECK(cfg, rd_mult_inter_qp_fac.den, 1, 1000);
+  RANGE_CHECK(cfg, rd_mult_arf_qp_fac.den, 1, 1000);
+  RANGE_CHECK(cfg, rd_mult_key_qp_fac.den, 1, 1000);
+
 #if !CONFIG_REALTIME_ONLY
   if (cfg->g_pass == VPX_RC_LAST_PASS) {
     const size_t packet_sz = sizeof(FIRSTPASS_STATS);
@@ -361,39 +395,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     }
   }
 #endif  // !CONFIG_REALTIME_ONLY
-
-#if !CONFIG_VP9_HIGHBITDEPTH
-  if (cfg->g_profile > (unsigned int)PROFILE_1) {
-    ERROR("Profile > 1 not supported in this build configuration");
-  }
-#endif
-  if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
-      cfg->g_bit_depth > VPX_BITS_8) {
-    ERROR("Codec high bit-depth not supported in profile < 2");
-  }
-  if (cfg->g_profile > (unsigned int)PROFILE_1 &&
-      cfg->g_bit_depth == VPX_BITS_8) {
-    ERROR("Codec bit-depth 8 not supported in profile > 1");
-  }
-  RANGE_CHECK(extra_cfg, color_space, VPX_CS_UNKNOWN, VPX_CS_SRGB);
-  RANGE_CHECK(extra_cfg, color_range, VPX_CR_STUDIO_RANGE, VPX_CR_FULL_RANGE);
-
-  // The range below shall be further tuned.
-  RANGE_CHECK(cfg, use_vizier_rc_params, 0, 1);
-  RANGE_CHECK(cfg, active_wq_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, err_per_mb_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, sr_default_decay_limit.den, 1, 1000);
-  RANGE_CHECK(cfg, sr_diff_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_err_per_mb_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_frame_min_boost_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_frame_max_boost_subs_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, kf_max_total_boost_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, gf_max_total_boost_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, gf_frame_max_boost_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, zm_factor.den, 1, 1000);
-  RANGE_CHECK(cfg, rd_mult_inter_qp_fac.den, 1, 1000);
-  RANGE_CHECK(cfg, rd_mult_arf_qp_fac.den, 1, 1000);
-  RANGE_CHECK(cfg, rd_mult_key_qp_fac.den, 1, 1000);
 
   return VPX_CODEC_OK;
 }

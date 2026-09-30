@@ -1159,6 +1159,27 @@ TEST(EncodeAPI, Vp8SSIMMultipleFrames) {
 }
 #endif  // CONFIG_VP8_ENCODER
 
+#if CONFIG_VP9_ENCODER
+// Ports the VP8 fix for Bug 564326761 to VP9: validate
+// kf_frame_max_boost_first_factor.den before use as a divisor.
+TEST(EncodeAPI, ValidateConfigVp9) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t default_cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &default_cfg, 0), VPX_CODEC_OK);
+
+  vpx_codec_ctx_t enc = {};
+
+  // Invalid boost factor denominator (0).
+  {
+    vpx_codec_enc_cfg_t cfg = default_cfg;
+    cfg.kf_frame_max_boost_first_factor.den = 0;
+    EXPECT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0),
+              VPX_CODEC_INVALID_PARAM);
+  }
+}
+
+#endif  // CONFIG_VP9_ENCODER
+
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
 // invalid configuration by setting the temporal layer rate allocation
 // (ts_target_bitrate[]) to 0 for both layers. This should fail independent of
