@@ -365,7 +365,7 @@ static int cost_coeffs(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
   const int16_t *band_count = &band_counts[tx_size][1];
   const int eob = p->eobs[block];
   const tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
-  unsigned int(*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
+  unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
       x->token_costs[tx_size][type][is_inter_block(mi)];
   uint8_t token_cache[32 * 32];
   int cost;
@@ -422,7 +422,7 @@ static int cost_coeffs(MACROBLOCK *x, int plane, int block, TX_SIZE tx_size,
       // dc token
       int v = qcoeff[0];
       int16_t tok;
-      unsigned int(*tok_cost_ptr)[COEFF_CONTEXTS][ENTROPY_TOKENS];
+      unsigned int (*tok_cost_ptr)[COEFF_CONTEXTS][ENTROPY_TOKENS];
       cost = vp9_get_token_cost(v, &tok, cat6_high_cost);
       cost += (*token_costs)[0][pt][tok];
 
