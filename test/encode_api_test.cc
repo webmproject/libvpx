@@ -1186,6 +1186,34 @@ TEST(EncodeAPI, Vp8SSIMMultipleFrames) {
 }
 #endif  // CONFIG_VP8_ENCODER
 
+#if CONFIG_VP9_ENCODER
+TEST(EncodeAPI, SetReferenceValidationVp9) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+
+  vpx_image_t *const ref_img =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(ref_img, nullptr);
+
+  for (const int plane : { VPX_PLANE_Y, VPX_PLANE_U, VPX_PLANE_V }) {
+    vpx_ref_frame_t ref_frame;
+    ref_frame.frame_type = VP8_LAST_FRAME;
+    ref_frame.img = *ref_img;
+    ref_frame.img.planes[plane] = nullptr;
+    EXPECT_EQ(vpx_codec_control(&enc, VP8_SET_REFERENCE, &ref_frame),
+              VPX_CODEC_INVALID_PARAM);
+    EXPECT_EQ(vpx_codec_control(&enc, VP8_COPY_REFERENCE, &ref_frame),
+              VPX_CODEC_INVALID_PARAM);
+  }
+
+  vpx_img_free(ref_img);
+  EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+#endif  // CONFIG_VP9_ENCODER
+
 // Set up 2 spatial streams with 2 temporal layers per stream, and generate
 // invalid configuration by setting the temporal layer rate allocation
 // (ts_target_bitrate[]) to 0 for both layers. This should fail independent of

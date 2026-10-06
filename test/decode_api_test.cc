@@ -629,4 +629,54 @@ TEST(DecodeAPI, HighBitDepthCapability) {
 #endif
 }
 
+#if CONFIG_VP8_DECODER
+TEST(DecodeAPI, SetReferenceValidationVp8) {
+  vpx_codec_ctx_t dec;
+  ASSERT_EQ(vpx_codec_dec_init(&dec, vpx_codec_vp8_dx(), nullptr, 0),
+            VPX_CODEC_OK);
+
+  vpx_image_t ref_img;
+  ASSERT_NE(vpx_img_alloc(&ref_img, VPX_IMG_FMT_I420, 64, 64, 1), nullptr);
+
+  for (const int plane : { VPX_PLANE_Y, VPX_PLANE_U, VPX_PLANE_V }) {
+    vpx_ref_frame_t ref_frame;
+    ref_frame.frame_type = VP8_LAST_FRAME;
+    ref_frame.img = ref_img;
+    ref_frame.img.planes[plane] = nullptr;
+    EXPECT_EQ(vpx_codec_control(&dec, VP8_SET_REFERENCE, &ref_frame),
+              VPX_CODEC_INVALID_PARAM);
+    EXPECT_EQ(vpx_codec_control(&dec, VP8_COPY_REFERENCE, &ref_frame),
+              VPX_CODEC_INVALID_PARAM);
+  }
+
+  vpx_img_free(&ref_img);
+  EXPECT_EQ(vpx_codec_destroy(&dec), VPX_CODEC_OK);
+}
+#endif  // CONFIG_VP8_DECODER
+
+#if CONFIG_VP9_DECODER
+TEST(DecodeAPI, SetReferenceValidationVp9) {
+  vpx_codec_ctx_t dec;
+  ASSERT_EQ(vpx_codec_dec_init(&dec, vpx_codec_vp9_dx(), nullptr, 0),
+            VPX_CODEC_OK);
+
+  vpx_image_t ref_img;
+  ASSERT_NE(vpx_img_alloc(&ref_img, VPX_IMG_FMT_I420, 64, 64, 1), nullptr);
+
+  for (const int plane : { VPX_PLANE_Y, VPX_PLANE_U, VPX_PLANE_V }) {
+    vpx_ref_frame_t ref_frame;
+    ref_frame.frame_type = VP8_LAST_FRAME;
+    ref_frame.img = ref_img;
+    ref_frame.img.planes[plane] = nullptr;
+    EXPECT_EQ(vpx_codec_control(&dec, VP8_SET_REFERENCE, &ref_frame),
+              VPX_CODEC_INVALID_PARAM);
+    EXPECT_EQ(vpx_codec_control(&dec, VP8_COPY_REFERENCE, &ref_frame),
+              VPX_CODEC_INVALID_PARAM);
+  }
+
+  vpx_img_free(&ref_img);
+  EXPECT_EQ(vpx_codec_destroy(&dec), VPX_CODEC_OK);
+}
+#endif  // CONFIG_VP9_DECODER
+
 }  // namespace
