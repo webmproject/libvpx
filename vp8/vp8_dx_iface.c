@@ -343,6 +343,10 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t *ctx,
     VP8_COMMON *const pc = &pbi->common;
     if (setjmp(pbi->common.error.jmp)) {
       pbi->common.error.setjmp = 0;
+      /* on failure clear the cached resolution to ensure a full
+       * reallocation is attempted on resync. */
+      ctx->si.w = 0;
+      ctx->si.h = 0;
       vp8_decoder_remove_threads(pbi);
       vpx_clear_system_state();
       ctx->fragments.count = 0;
