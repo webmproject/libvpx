@@ -1772,171 +1772,195 @@ void vpx_h_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
 
 // -----------------------------------------------------------------------------
 
-static INLINE int16x8_t convert_u8_to_s16(uint8x8_t v) {
-  return vreinterpretq_s16_u16(vmovl_u8(v));
+// Expand the first four bytes to [a a a a b b b b c c c c d d d d].
+static INLINE uint8x16_t tm_pack_4x4_neon(const uint8x8_t pixels) {
+  const uint8x16_t a = vcombine_u8(pixels, vdup_n_u8(0));
+  const uint8x16_t aa = vzipq_u8(a, a).val[0];
+  return vzipq_u8(aa, aa).val[0];
 }
 
 void vpx_tm_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
-  const uint8x8_t top_left = vld1_dup_u8(above - 1);
-  const uint8x8_t left_u8 = vld1_u8(left);
-  const uint8x8_t above_u8 = vld1_u8(above);
-  const int16x4_t left_s16 = vget_low_s16(convert_u8_to_s16(left_u8));
-  int16x8_t sub, sum;
-  uint32x2_t d;
+  const uint8x16_t top_left_u8 = vld1q_dup_u8(above - 1);
+  const uint8x8_t above_u8 = load_unaligned_u8_4x1(above);
+  const uint8x8_t left_u8 = load_unaligned_u8_4x1(left);
 
-  sub = vreinterpretq_s16_u16(vsubl_u8(above_u8, top_left));
-  // Avoid vcombine_s16() which generates lots of redundant code with clang-3.8.
-  sub = vreinterpretq_s16_s64(
-      vdupq_lane_s64(vreinterpret_s64_s16(vget_low_s16(sub)), 0));
+  // Pack all four rows, repeating the above row and each left pixel four times.
+  const uint8x16_t above_dup =
+      vreinterpretq_u8_u32(vdupq_lane_u32(vreinterpret_u32_u8(above_u8), 0));
+  const uint8x16_t left_dup = tm_pack_4x4_neon(left_u8);
 
-  sum = vcombine_s16(vdup_lane_s16(left_s16, 0), vdup_lane_s16(left_s16, 1));
-  sum = vaddq_s16(sum, sub);
-  d = vreinterpret_u32_u8(vqmovun_s16(sum));
-  vst1_lane_u32((uint32_t *)dst, d, 0);
-  dst += stride;
-  vst1_lane_u32((uint32_t *)dst, d, 1);
-  dst += stride;
+  const uint8x16_t positive = vqsubq_u8(above_dup, top_left_u8);
+  const uint8x16_t negative = vqsubq_u8(top_left_u8, above_dup);
+  const uint8x16_t result = vqsubq_u8(vqaddq_u8(left_dup, positive), negative);
 
-  sum = vcombine_s16(vdup_lane_s16(left_s16, 2), vdup_lane_s16(left_s16, 3));
-  sum = vaddq_s16(sum, sub);
-  d = vreinterpret_u32_u8(vqmovun_s16(sum));
-  vst1_lane_u32((uint32_t *)dst, d, 0);
-  dst += stride;
-  vst1_lane_u32((uint32_t *)dst, d, 1);
+  store_unaligned_u8q(dst, stride, result);
 }
 
 static INLINE void tm_8_kernel(uint8_t **dst, const ptrdiff_t stride,
-                               const int16x8_t left_dup, const int16x8_t sub) {
-  const int16x8_t sum = vaddq_s16(left_dup, sub);
-  const uint8x8_t d = vqmovun_s16(sum);
-  vst1_u8(*dst, d);
+                               const uint8x8_t left_dup, const uint8x8_t above,
+                               const uint8x8_t top_left) {
+  const uint8x8_t positive = vqsub_u8(above, top_left);
+  const uint8x8_t negative = vqsub_u8(top_left, above);
+  const uint8x8_t result = vqsub_u8(vqadd_u8(left_dup, positive), negative);
+  vst1_u8(*dst, result);
   *dst += stride;
 }
 
 void vpx_tm_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
                                const uint8_t *above, const uint8_t *left) {
-  const uint8x8_t top_left = vld1_dup_u8(above - 1);
+  const uint8x8_t top_left_u8 = vld1_dup_u8(above - 1);
   const uint8x8_t above_u8 = vld1_u8(above);
   const uint8x8_t left_u8 = vld1_u8(left);
-  const int16x8_t left_s16q = convert_u8_to_s16(left_u8);
-  const int16x8_t sub = vreinterpretq_s16_u16(vsubl_u8(above_u8, top_left));
-  int16x4_t left_s16d = vget_low_s16(left_s16q);
-  int i;
+  uint8x8_t left_dup;
 
-  for (i = 0; i < 2; i++, left_s16d = vget_high_s16(left_s16q)) {
-    int16x8_t left_dup;
-
-    left_dup = vdupq_lane_s16(left_s16d, 0);
-    tm_8_kernel(&dst, stride, left_dup, sub);
-    left_dup = vdupq_lane_s16(left_s16d, 1);
-    tm_8_kernel(&dst, stride, left_dup, sub);
-    left_dup = vdupq_lane_s16(left_s16d, 2);
-    tm_8_kernel(&dst, stride, left_dup, sub);
-    left_dup = vdupq_lane_s16(left_s16d, 3);
-    tm_8_kernel(&dst, stride, left_dup, sub);
-  }
+  left_dup = vdup_lane_u8(left_u8, 0);
+  tm_8_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = vdup_lane_u8(left_u8, 1);
+  tm_8_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = vdup_lane_u8(left_u8, 2);
+  tm_8_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = vdup_lane_u8(left_u8, 3);
+  tm_8_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = vdup_lane_u8(left_u8, 4);
+  tm_8_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = vdup_lane_u8(left_u8, 5);
+  tm_8_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = vdup_lane_u8(left_u8, 6);
+  tm_8_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = vdup_lane_u8(left_u8, 7);
+  tm_8_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
 }
 
+// The lane must be a compile-time constant in [0, 15].
+#if VPX_ARCH_AARCH64
+#define DUPQ_LANEQ_U8(v, lane) vdupq_laneq_u8((v), (lane))
+#else
+#define DUPQ_LANEQ_U8(v, lane) \
+  vdupq_lane_u8((lane) < 8 ? vget_low_u8((v)) : vget_high_u8((v)), (lane) & 7)
+#endif
+
 static INLINE void tm_16_kernel(uint8_t **dst, const ptrdiff_t stride,
-                                const int16x8_t left_dup, const int16x8_t sub0,
-                                const int16x8_t sub1) {
-  const int16x8_t sum0 = vaddq_s16(left_dup, sub0);
-  const int16x8_t sum1 = vaddq_s16(left_dup, sub1);
-  const uint8x8_t d0 = vqmovun_s16(sum0);
-  const uint8x8_t d1 = vqmovun_s16(sum1);
-  vst1_u8(*dst, d0);
-  *dst += 8;
-  vst1_u8(*dst, d1);
-  *dst += stride - 8;
+                                const uint8x16_t left_dup,
+                                const uint8x16_t above,
+                                const uint8x16_t top_left) {
+  const uint8x16_t positive = vqsubq_u8(above, top_left);
+  const uint8x16_t negative = vqsubq_u8(top_left, above);
+  const uint8x16_t result = vqsubq_u8(vqaddq_u8(left_dup, positive), negative);
+  vst1q_u8(*dst, result);
+  *dst += stride;
 }
 
 void vpx_tm_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
-  const uint8x16_t top_left = vld1q_dup_u8(above - 1);
+  const uint8x16_t top_left_u8 = vld1q_dup_u8(above - 1);
   const uint8x16_t above_u8 = vld1q_u8(above);
-  const int16x8_t sub0 = vreinterpretq_s16_u16(
-      vsubl_u8(vget_low_u8(above_u8), vget_low_u8(top_left)));
-  const int16x8_t sub1 = vreinterpretq_s16_u16(
-      vsubl_u8(vget_high_u8(above_u8), vget_high_u8(top_left)));
-  int16x8_t left_dup;
-  int i;
+  const uint8x16_t left_u8 = vld1q_u8(left);
+  uint8x16_t left_dup;
 
-  for (i = 0; i < 2; i++, left += 8) {
-    const uint8x8_t left_u8 = vld1_u8(left);
-    const int16x8_t left_s16q = convert_u8_to_s16(left_u8);
-    const int16x4_t left_low = vget_low_s16(left_s16q);
-    const int16x4_t left_high = vget_high_s16(left_s16q);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 0);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 1);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 2);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 3);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 4);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 5);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 6);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 7);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
 
-    left_dup = vdupq_lane_s16(left_low, 0);
-    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
-    left_dup = vdupq_lane_s16(left_low, 1);
-    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
-    left_dup = vdupq_lane_s16(left_low, 2);
-    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
-    left_dup = vdupq_lane_s16(left_low, 3);
-    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
-
-    left_dup = vdupq_lane_s16(left_high, 0);
-    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
-    left_dup = vdupq_lane_s16(left_high, 1);
-    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
-    left_dup = vdupq_lane_s16(left_high, 2);
-    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
-    left_dup = vdupq_lane_s16(left_high, 3);
-    tm_16_kernel(&dst, stride, left_dup, sub0, sub1);
-  }
+  left_dup = DUPQ_LANEQ_U8(left_u8, 8);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 9);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 10);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 11);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 12);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 13);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 14);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
+  left_dup = DUPQ_LANEQ_U8(left_u8, 15);
+  tm_16_kernel(&dst, stride, left_dup, above_u8, top_left_u8);
 }
 
 static INLINE void tm_32_kernel(uint8_t **dst, const ptrdiff_t stride,
-                                const int16x8_t left_dup, const int16x8_t sub0,
-                                const int16x8_t sub1, const int16x8_t sub2,
-                                const int16x8_t sub3) {
-  const int16x8_t sum0 = vaddq_s16(left_dup, sub0);
-  const int16x8_t sum1 = vaddq_s16(left_dup, sub1);
-  const int16x8_t sum2 = vaddq_s16(left_dup, sub2);
-  const int16x8_t sum3 = vaddq_s16(left_dup, sub3);
-  const uint8x8_t d0 = vqmovun_s16(sum0);
-  const uint8x8_t d1 = vqmovun_s16(sum1);
-  const uint8x8_t d2 = vqmovun_s16(sum2);
-  const uint8x8_t d3 = vqmovun_s16(sum3);
+                                const uint8x16_t left_dup,
+                                const uint8x16_t above_lo,
+                                const uint8x16_t above_hi,
+                                const uint8x16_t top_left) {
+  const uint8x16_t positive_lo = vqsubq_u8(above_lo, top_left);
+  const uint8x16_t negative_lo = vqsubq_u8(top_left, above_lo);
+  const uint8x16_t result_lo =
+      vqsubq_u8(vqaddq_u8(left_dup, positive_lo), negative_lo);
 
-  vst1q_u8(*dst, vcombine_u8(d0, d1));
+  const uint8x16_t positive_hi = vqsubq_u8(above_hi, top_left);
+  const uint8x16_t negative_hi = vqsubq_u8(top_left, above_hi);
+  const uint8x16_t result_hi =
+      vqsubq_u8(vqaddq_u8(left_dup, positive_hi), negative_hi);
+
+  vst1q_u8(*dst, result_lo);
   *dst += 16;
-  vst1q_u8(*dst, vcombine_u8(d2, d3));
+
+  vst1q_u8(*dst, result_hi);
   *dst += stride - 16;
 }
 
 void vpx_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
                                  const uint8_t *above, const uint8_t *left) {
   const uint8x16_t top_left = vld1q_dup_u8(above - 1);
-  const uint8x16_t above_low = vld1q_u8(above);
-  const uint8x16_t above_high = vld1q_u8(above + 16);
-  const int16x8_t sub0 = vreinterpretq_s16_u16(
-      vsubl_u8(vget_low_u8(above_low), vget_low_u8(top_left)));
-  const int16x8_t sub1 = vreinterpretq_s16_u16(
-      vsubl_u8(vget_high_u8(above_low), vget_high_u8(top_left)));
-  const int16x8_t sub2 = vreinterpretq_s16_u16(
-      vsubl_u8(vget_low_u8(above_high), vget_low_u8(top_left)));
-  const int16x8_t sub3 = vreinterpretq_s16_u16(
-      vsubl_u8(vget_high_u8(above_high), vget_high_u8(top_left)));
-  int16x8_t left_dup;
-  int i, j;
+  const uint8x16_t above_lo = vld1q_u8(above);
+  const uint8x16_t above_hi = vld1q_u8(above + 16);
+  int i;
 
-  for (j = 0; j < 4; j++, left += 8) {
-    const uint8x8_t left_u8 = vld1_u8(left);
-    const int16x8_t left_s16q = convert_u8_to_s16(left_u8);
-    int16x4_t left_s16d = vget_low_s16(left_s16q);
-    for (i = 0; i < 2; i++, left_s16d = vget_high_s16(left_s16q)) {
-      left_dup = vdupq_lane_s16(left_s16d, 0);
-      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3);
-      left_dup = vdupq_lane_s16(left_s16d, 1);
-      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3);
-      left_dup = vdupq_lane_s16(left_s16d, 2);
-      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3);
-      left_dup = vdupq_lane_s16(left_s16d, 3);
-      tm_32_kernel(&dst, stride, left_dup, sub0, sub1, sub2, sub3);
-    }
+  for (i = 0; i < 2; i++, left += 16) {
+    const uint8x16_t left_u8 = vld1q_u8(left);
+    uint8x16_t left_dup;
+
+    left_dup = DUPQ_LANEQ_U8(left_u8, 0);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 1);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 2);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 3);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 4);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 5);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 6);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 7);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+
+    left_dup = DUPQ_LANEQ_U8(left_u8, 8);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 9);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 10);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 11);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 12);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 13);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 14);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
+    left_dup = DUPQ_LANEQ_U8(left_u8, 15);
+    tm_32_kernel(&dst, stride, left_dup, above_lo, above_hi, top_left);
   }
 }
+#undef DUPQ_LANEQ_U8
+
 #endif  // !HAVE_NEON_ASM
