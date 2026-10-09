@@ -34,6 +34,107 @@ void vpx_fdct32x32_rd_neon(const int16_t *input, tran_low_t *output,
 
 #else
 
+// Combine the load/cross and scale stages for the 8-bit transforms.
+static INLINE void load_cross_scale(const int16_t *a, int stride,
+                                    int16x8_t *b) {
+  {
+    const int16x8_t lo = vld1q_s16(a + 0 * stride);
+    const int16x8_t hi = vld1q_s16(a + 31 * stride);
+    b[0] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[31] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 1 * stride);
+    const int16x8_t hi = vld1q_s16(a + 30 * stride);
+    b[1] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[30] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 2 * stride);
+    const int16x8_t hi = vld1q_s16(a + 29 * stride);
+    b[2] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[29] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 3 * stride);
+    const int16x8_t hi = vld1q_s16(a + 28 * stride);
+    b[3] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[28] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 4 * stride);
+    const int16x8_t hi = vld1q_s16(a + 27 * stride);
+    b[4] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[27] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 5 * stride);
+    const int16x8_t hi = vld1q_s16(a + 26 * stride);
+    b[5] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[26] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 6 * stride);
+    const int16x8_t hi = vld1q_s16(a + 25 * stride);
+    b[6] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[25] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 7 * stride);
+    const int16x8_t hi = vld1q_s16(a + 24 * stride);
+    b[7] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[24] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 8 * stride);
+    const int16x8_t hi = vld1q_s16(a + 23 * stride);
+    b[8] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[23] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 9 * stride);
+    const int16x8_t hi = vld1q_s16(a + 22 * stride);
+    b[9] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[22] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 10 * stride);
+    const int16x8_t hi = vld1q_s16(a + 21 * stride);
+    b[10] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[21] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 11 * stride);
+    const int16x8_t hi = vld1q_s16(a + 20 * stride);
+    b[11] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[20] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 12 * stride);
+    const int16x8_t hi = vld1q_s16(a + 19 * stride);
+    b[12] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[19] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 13 * stride);
+    const int16x8_t hi = vld1q_s16(a + 18 * stride);
+    b[13] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[18] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 14 * stride);
+    const int16x8_t hi = vld1q_s16(a + 17 * stride);
+    b[14] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[17] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+  {
+    const int16x8_t lo = vld1q_s16(a + 15 * stride);
+    const int16x8_t hi = vld1q_s16(a + 16 * stride);
+    b[15] = vshlq_n_s16(vaddq_s16(lo, hi), 2);
+    b[16] = vshlq_n_s16(vsubq_s16(lo, hi), 2);
+  }
+}
+
 void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   int16x8_t temp0[32];
   int16x8_t temp1[32];
@@ -43,20 +144,16 @@ void vpx_fdct32x32_neon(const int16_t *input, tran_low_t *output, int stride) {
   int16x8_t temp5[32];
 
   // Process in 8x32 columns.
-  load_cross(input, stride, temp0);
-  scale_input(temp0, temp5);
+  load_cross_scale(input, stride, temp5);
   dct_body_first_pass(temp5, temp1);
 
-  load_cross(input + 8, stride, temp0);
-  scale_input(temp0, temp5);
+  load_cross_scale(input + 8, stride, temp5);
   dct_body_first_pass(temp5, temp2);
 
-  load_cross(input + 16, stride, temp0);
-  scale_input(temp0, temp5);
+  load_cross_scale(input + 16, stride, temp5);
   dct_body_first_pass(temp5, temp3);
 
-  load_cross(input + 24, stride, temp0);
-  scale_input(temp0, temp5);
+  load_cross_scale(input + 24, stride, temp5);
   dct_body_first_pass(temp5, temp4);
 
   // Generate the top row by munging the first set of 8 from each one together.
@@ -142,20 +239,16 @@ void vpx_fdct32x32_rd_neon(const int16_t *input, tran_low_t *output,
   int16x8_t temp5[32];
 
   // Process in 8x32 columns.
-  load_cross(input, stride, temp0);
-  scale_input(temp0, temp5);
+  load_cross_scale(input, stride, temp5);
   dct_body_first_pass(temp5, temp1);
 
-  load_cross(input + 8, stride, temp0);
-  scale_input(temp0, temp5);
+  load_cross_scale(input + 8, stride, temp5);
   dct_body_first_pass(temp5, temp2);
 
-  load_cross(input + 16, stride, temp0);
-  scale_input(temp0, temp5);
+  load_cross_scale(input + 16, stride, temp5);
   dct_body_first_pass(temp5, temp3);
 
-  load_cross(input + 24, stride, temp0);
-  scale_input(temp0, temp5);
+  load_cross_scale(input + 24, stride, temp5);
   dct_body_first_pass(temp5, temp4);
 
   // Generate the top row by munging the first set of 8 from each one together.
