@@ -1417,7 +1417,7 @@ const SadSkipMxNx4Param skip_x4d_neon_tests[] = {
 INSTANTIATE_TEST_SUITE_P(NEON, SADSkipx4Test,
                          ::testing::ValuesIn(skip_x4d_neon_tests));
 
-#if HAVE_NEONE_DOTPROD
+#if HAVE_NEON_DOTPROD
 const SadSkipMxNx4Param skip_x4d_neon_dotprod_tests[] = {
   SadSkipMxNx4Param(64, 64, &vpx_sad_skip_64x64x4d_neon_dotprod),
   SadSkipMxNx4Param(64, 32, &vpx_sad_skip_64x32x4d_neon_dotprod),
