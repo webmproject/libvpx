@@ -16,6 +16,13 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_dsp/arm/mem_neon.h"
 
+// Prefer the explicit high-half operation to preserve full-width loads in GCC.
+#if VPX_ARCH_AARCH64
+#define VSUBL_HIGH_U8(a, b) vsubl_high_u8((a), (b))
+#else
+#define VSUBL_HIGH_U8(a, b) vsubl_u8(vget_high_u8((a)), vget_high_u8((b)))
+#endif
+
 void vpx_subtract_block_neon(int rows, int cols, int16_t *diff,
                              ptrdiff_t diff_stride, const uint8_t *src,
                              ptrdiff_t src_stride, const uint8_t *pred,
@@ -30,9 +37,9 @@ void vpx_subtract_block_neon(int rows, int cols, int16_t *diff,
         const uint8x16_t p0 = vld1q_u8(&pred[c + 0]);
         const uint8x16_t p1 = vld1q_u8(&pred[c + 16]);
         const uint16x8_t d0 = vsubl_u8(vget_low_u8(s0), vget_low_u8(p0));
-        const uint16x8_t d1 = vsubl_u8(vget_high_u8(s0), vget_high_u8(p0));
+        const uint16x8_t d1 = VSUBL_HIGH_U8(s0, p0);
         const uint16x8_t d2 = vsubl_u8(vget_low_u8(s1), vget_low_u8(p1));
-        const uint16x8_t d3 = vsubl_u8(vget_high_u8(s1), vget_high_u8(p1));
+        const uint16x8_t d3 = VSUBL_HIGH_U8(s1, p1);
         vst1q_s16(&diff[c + 0], vreinterpretq_s16_u16(d0));
         vst1q_s16(&diff[c + 8], vreinterpretq_s16_u16(d1));
         vst1q_s16(&diff[c + 16], vreinterpretq_s16_u16(d2));
@@ -47,7 +54,7 @@ void vpx_subtract_block_neon(int rows, int cols, int16_t *diff,
       const uint8x16_t s = vld1q_u8(&src[0]);
       const uint8x16_t p = vld1q_u8(&pred[0]);
       const uint16x8_t d0 = vsubl_u8(vget_low_u8(s), vget_low_u8(p));
-      const uint16x8_t d1 = vsubl_u8(vget_high_u8(s), vget_high_u8(p));
+      const uint16x8_t d1 = VSUBL_HIGH_U8(s, p);
       vst1q_s16(&diff[0], vreinterpretq_s16_u16(d0));
       vst1q_s16(&diff[8], vreinterpretq_s16_u16(d1));
       diff += diff_stride;
@@ -79,6 +86,8 @@ void vpx_subtract_block_neon(int rows, int cols, int16_t *diff,
     } while (r);
   }
 }
+
+#undef VSUBL_HIGH_U8
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void vpx_highbd_subtract_block_neon(int rows, int cols, int16_t *diff_ptr,
