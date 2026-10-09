@@ -115,6 +115,11 @@ static INLINE void sad16xhx4d_neon_dotprod(const uint8_t *src, int src_stride,
                         vdupq_n_u32(0) };
 
   int i = 0;
+  // Balance loop overhead and register pressure in the short SAD kernels.
+#if VPX_ARCH_AARCH64 && defined(__GNUC__) && !defined(__clang__) && \
+    __GNUC__ >= 8
+#pragma GCC unroll 2
+#endif
   do {
     const uint8x16_t s = vld1q_u8(src + i * src_stride);
     sad16_neon(s, vld1q_u8(ref[0] + i * ref_stride), &sum[0]);
