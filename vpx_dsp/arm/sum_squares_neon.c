@@ -36,7 +36,12 @@ uint64_t vpx_sum_squares_2d_i16_neon(const int16_t *src, int stride, int size) {
 
     do {
       const int16_t *src_ptr = src;
+#if VPX_ARCH_AARCH64
+      int32x4_t sum_s32[4] = { vdupq_n_s32(0), vdupq_n_s32(0), vdupq_n_s32(0),
+                               vdupq_n_s32(0) };
+#else
       int32x4_t sum_s32[2] = { vdupq_n_s32(0), vdupq_n_s32(0) };
+#endif
       int cols = size;
 
       do {
@@ -51,6 +56,36 @@ uint64_t vpx_sum_squares_2d_i16_neon(const int16_t *src, int stride, int size) {
         s[6] = vld1q_s16(src_ptr + 6 * stride);
         s[7] = vld1q_s16(src_ptr + 7 * stride);
 
+#if VPX_ARCH_AARCH64
+        // Group each accumulator chain, low halves before high halves.
+        sum_s32[0] =
+            vmlal_s16(sum_s32[0], vget_low_s16(s[0]), vget_low_s16(s[0]));
+        sum_s32[0] =
+            vmlal_s16(sum_s32[0], vget_low_s16(s[2]), vget_low_s16(s[2]));
+        sum_s32[0] =
+            vmlal_s16(sum_s32[0], vget_low_s16(s[4]), vget_low_s16(s[4]));
+        sum_s32[0] =
+            vmlal_s16(sum_s32[0], vget_low_s16(s[6]), vget_low_s16(s[6]));
+
+        sum_s32[2] =
+            vmlal_s16(sum_s32[2], vget_low_s16(s[1]), vget_low_s16(s[1]));
+        sum_s32[2] =
+            vmlal_s16(sum_s32[2], vget_low_s16(s[3]), vget_low_s16(s[3]));
+        sum_s32[2] =
+            vmlal_s16(sum_s32[2], vget_low_s16(s[5]), vget_low_s16(s[5]));
+        sum_s32[2] =
+            vmlal_s16(sum_s32[2], vget_low_s16(s[7]), vget_low_s16(s[7]));
+
+        sum_s32[1] = vmlal_high_s16(sum_s32[1], s[0], s[0]);
+        sum_s32[1] = vmlal_high_s16(sum_s32[1], s[2], s[2]);
+        sum_s32[1] = vmlal_high_s16(sum_s32[1], s[4], s[4]);
+        sum_s32[1] = vmlal_high_s16(sum_s32[1], s[6], s[6]);
+
+        sum_s32[3] = vmlal_high_s16(sum_s32[3], s[1], s[1]);
+        sum_s32[3] = vmlal_high_s16(sum_s32[3], s[3], s[3]);
+        sum_s32[3] = vmlal_high_s16(sum_s32[3], s[5], s[5]);
+        sum_s32[3] = vmlal_high_s16(sum_s32[3], s[7], s[7]);
+#else
         sum_s32[0] =
             vmlal_s16(sum_s32[0], vget_low_s16(s[0]), vget_low_s16(s[0]));
         sum_s32[0] =
@@ -84,11 +119,16 @@ uint64_t vpx_sum_squares_2d_i16_neon(const int16_t *src, int stride, int size) {
             vmlal_s16(sum_s32[1], vget_high_s16(s[6]), vget_high_s16(s[6]));
         sum_s32[1] =
             vmlal_s16(sum_s32[1], vget_high_s16(s[7]), vget_high_s16(s[7]));
+#endif
 
         src_ptr += 8;
         cols -= 8;
       } while (cols);
 
+#if VPX_ARCH_AARCH64
+      sum_s32[0] = vaddq_s32(sum_s32[0], sum_s32[2]);
+      sum_s32[1] = vaddq_s32(sum_s32[1], sum_s32[3]);
+#endif
       sum_u64 = vpadalq_u32(sum_u64, vreinterpretq_u32_s32(sum_s32[0]));
       sum_u64 = vpadalq_u32(sum_u64, vreinterpretq_u32_s32(sum_s32[1]));
       src += 8 * stride;
