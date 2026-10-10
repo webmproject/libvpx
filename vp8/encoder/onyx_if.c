@@ -2629,6 +2629,7 @@ static void update_golden_frame_stats(VP8_COMP *cpi) {
          */
         cpi->gf_overspend_bits +=
             (cpi->projected_frame_size - cpi->inter_frame_target);
+        cpi->gf_overspend_bits = VPXMAX(0, cpi->gf_overspend_bits);
       }
 
       cpi->non_gf_bitrate_adjustment =

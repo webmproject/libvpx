@@ -1184,6 +1184,50 @@ TEST(EncodeAPI, Vp8SSIMMultipleFrames) {
   vpx_img_free(img);
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+
+// Bug: 454794528, 567288636.
+TEST(EncodeAPI, Vp8GfOverspendBitsUnderflow) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 320;
+  cfg.g_h = 240;
+  cfg.g_threads = 0;
+  cfg.g_error_resilient = 0;
+  cfg.g_timebase.num = 1;
+  cfg.g_timebase.den = 1000000;
+  cfg.rc_target_bitrate = 40000;
+  cfg.rc_end_usage = VPX_VBR;
+  cfg.rc_dropframe_thresh = 0;
+  cfg.g_lag_in_frames = 0;
+  cfg.kf_max_dist = 3000;
+  cfg.kf_min_dist = 3000;
+  cfg.kf_mode = VPX_KF_AUTO;
+  cfg.g_profile = 0;
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_STATIC_THRESHOLD, 1),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, -8), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_TOKEN_PARTITIONS, 0),
+            VPX_CODEC_OK);
+
+  vpx_image_t *const img =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(img, nullptr);
+
+  constexpr unsigned long kDuration = 5000000;
+  for (int frame = 0; frame < 120; ++frame) {
+    ASSERT_EQ(vpx_codec_encode(&enc, img, frame * kDuration, kDuration,
+                               /*flags=*/0, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+  }
+
+  vpx_img_free(img);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP8_ENCODER
 
 #if CONFIG_VP9_ENCODER
