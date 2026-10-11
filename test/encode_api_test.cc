@@ -3782,6 +3782,92 @@ TEST(EncodeAPI, ResizeRealtimeSourceSadOverflow) {
   vpx_img_free(image);
   ASSERT_EQ(vpx_codec_destroy(&codec), VPX_CODEC_OK);
 }
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+uint64_t CalcPlaneSse(const uint8_t *a, int stride_a, const uint8_t *b,
+                      int stride_b, int width, int height) {
+  uint64_t sse = 0;
+  for (int y = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x) {
+      const int diff = static_cast<int>(a[y * stride_a + x]) -
+                       static_cast<int>(b[y * stride_b + x]);
+      sse += static_cast<uint64_t>(diff * diff);
+    }
+  }
+  return sse;
+}
+
+TEST(EncodeAPI, VP9DenoiserPsnr) {
+  constexpr int kWidth = 64;
+  constexpr int kHeight = 64;
+
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_w = kWidth;
+  cfg.g_h = kHeight;
+  cfg.g_lag_in_frames = 0;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.rc_end_usage = VPX_CBR;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, VPX_CODEC_USE_PSNR),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 6), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_NOISE_SENSITIVITY, 1),
+            VPX_CODEC_OK);
+
+  // Frame 0 (keyframe, Y=128) initializes the temporal denoiser reference.
+  vpx_image_t *const img =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, kWidth, kHeight);
+  ASSERT_NE(img, nullptr);
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  // Frame 1 (inter frame, Y=130): small luma perturbation is filtered back
+  // toward 128 in-place in cpi->Source by the temporal denoiser.
+  for (int y = 0; y < kHeight; ++y) {
+    memset(img->planes[VPX_PLANE_Y] + y * img->stride[VPX_PLANE_Y], 130,
+           kWidth);
+  }
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 1, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  const vpx_image_t *const recon = vpx_codec_get_preview_frame(&enc);
+  ASSERT_NE(recon, nullptr);
+
+  const uint64_t expected_sse_y = CalcPlaneSse(
+      img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y],
+      recon->planes[VPX_PLANE_Y], recon->stride[VPX_PLANE_Y], kWidth, kHeight);
+  const uint64_t expected_sse_u =
+      CalcPlaneSse(img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U],
+                   recon->planes[VPX_PLANE_U], recon->stride[VPX_PLANE_U],
+                   kWidth / 2, kHeight / 2);
+  const uint64_t expected_sse_v =
+      CalcPlaneSse(img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V],
+                   recon->planes[VPX_PLANE_V], recon->stride[VPX_PLANE_V],
+                   kWidth / 2, kHeight / 2);
+  EXPECT_GT(expected_sse_y, 0u);
+
+  const vpx_codec_cx_pkt_t *pkt;
+  vpx_codec_iter_t iter = nullptr;
+  bool had_psnr_pkt = false;
+  while ((pkt = vpx_codec_get_cx_data(&enc, &iter)) != nullptr) {
+    if (pkt->kind == VPX_CODEC_PSNR_PKT) {
+      had_psnr_pkt = true;
+      EXPECT_EQ(pkt->data.psnr.sse[0],
+                expected_sse_y + expected_sse_u + expected_sse_v);
+      EXPECT_EQ(pkt->data.psnr.sse[1], expected_sse_y);
+      EXPECT_EQ(pkt->data.psnr.sse[2], expected_sse_u);
+      EXPECT_EQ(pkt->data.psnr.sse[3], expected_sse_v);
+    }
+  }
+  EXPECT_TRUE(had_psnr_pkt);
+
+  vpx_img_free(img);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+#endif  // CONFIG_VP9_TEMPORAL_DENOISING
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace

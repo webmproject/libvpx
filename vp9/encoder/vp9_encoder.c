@@ -1038,7 +1038,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free_frame_buffer(&cpi->scaled_source);
   vpx_free_frame_buffer(&cpi->scaled_last_source);
   vpx_free_frame_buffer(&cpi->tf_buffer);
-#ifdef ENABLE_KF_DENOISE
+#if defined(ENABLE_KF_DENOISE) || CONFIG_VP9_TEMPORAL_DENOISING
   vpx_free_frame_buffer(&cpi->raw_unscaled_source);
   vpx_free_frame_buffer(&cpi->raw_scaled_source);
 #endif
@@ -3967,11 +3967,32 @@ static void save_encode_params(VP9_COMP *cpi) {
 }
 
 static INLINE void set_raw_source_frame(VP9_COMP *cpi) {
+#if defined(ENABLE_KF_DENOISE) || CONFIG_VP9_TEMPORAL_DENOISING
+  VP9_COMMON *const cm = &cpi->common;
+  int use_raw_source = 0;
 #ifdef ENABLE_KF_DENOISE
-  if (is_spatial_denoise_enabled(cpi)) {
-    cpi->raw_source_frame = vp9_scale_if_required(
-        cm, &cpi->raw_unscaled_source, &cpi->raw_scaled_source,
-        (oxcf->pass == 0), EIGHTTAP, 0);
+  use_raw_source |= is_spatial_denoise_enabled(cpi);
+#endif
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  use_raw_source |= (cpi->oxcf.noise_sensitivity > 0);
+#endif
+  if (use_raw_source) {
+    if (cpi->Source == cpi->un_scaled_source) {
+      cpi->raw_source_frame = &cpi->raw_unscaled_source;
+    } else {
+      if (vpx_realloc_frame_buffer(
+              &cpi->raw_scaled_source, cpi->Source->y_crop_width,
+              cpi->Source->y_crop_height, cpi->Source->subsampling_x,
+              cpi->Source->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+              cm->use_highbitdepth,
+#endif
+              VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment, NULL, NULL, NULL))
+        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate scaled raw source frame buffer");
+      vp9_copy_and_extend_frame(cpi->Source, &cpi->raw_scaled_source);
+      cpi->raw_source_frame = &cpi->raw_scaled_source;
+    }
   } else {
     cpi->raw_source_frame = cpi->Source;
   }
@@ -4077,17 +4098,7 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
   // Unfiltered raw source used in metrics calculation if the source
   // has been filtered.
   if (is_psnr_calc_enabled(cpi)) {
-#ifdef ENABLE_KF_DENOISE
-    if (is_spatial_denoise_enabled(cpi)) {
-      cpi->raw_source_frame = vp9_scale_if_required(
-          cm, &cpi->raw_unscaled_source, &cpi->raw_scaled_source,
-          (cpi->oxcf.pass == 0), EIGHTTAP, phase_scaler);
-    } else {
-      cpi->raw_source_frame = cpi->Source;
-    }
-#else
-    cpi->raw_source_frame = cpi->Source;
-#endif
+    set_raw_source_frame(cpi);
   }
 
   if ((cpi->use_svc &&
@@ -4454,17 +4465,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi, size_t *size, uint8_t *dest,
     // Unfiltered raw source used in metrics calculation if the source
     // has been filtered.
     if (is_psnr_calc_enabled(cpi)) {
-#ifdef ENABLE_KF_DENOISE
-      if (is_spatial_denoise_enabled(cpi)) {
-        cpi->raw_source_frame = vp9_scale_if_required(
-            cm, &cpi->raw_unscaled_source, &cpi->raw_scaled_source,
-            (oxcf->pass == 0), EIGHTTAP, 0);
-      } else {
-        cpi->raw_source_frame = cpi->Source;
-      }
-#else
-      cpi->raw_source_frame = cpi->Source;
-#endif
+      set_raw_source_frame(cpi);
     }
 
     if (cpi->unscaled_last_source != NULL)
@@ -6317,10 +6318,33 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->un_scaled_source = cpi->Source =
         force_src_buffer ? force_src_buffer : &source->img;
 
-#ifdef ENABLE_KF_DENOISE
+#if defined(ENABLE_KF_DENOISE) || CONFIG_VP9_TEMPORAL_DENOISING
     // Copy of raw source for metrics calculation.
-    if (is_psnr_calc_enabled(cpi))
-      vp9_copy_and_extend_frame(cpi->Source, &cpi->raw_unscaled_source);
+    if (is_psnr_calc_enabled(cpi) &&
+        (!cpi->use_svc ||
+         cpi->svc.spatial_layer_id == cpi->svc.first_spatial_layer_to_encode)) {
+      int copy_raw_source = 0;
+#ifdef ENABLE_KF_DENOISE
+      copy_raw_source |= is_spatial_denoise_enabled(cpi);
+#endif
+#if CONFIG_VP9_TEMPORAL_DENOISING
+      copy_raw_source |= (cpi->oxcf.noise_sensitivity > 0);
+#endif
+      if (copy_raw_source) {
+        if (vpx_realloc_frame_buffer(
+                &cpi->raw_unscaled_source, cpi->Source->y_crop_width,
+                cpi->Source->y_crop_height, cpi->Source->subsampling_x,
+                cpi->Source->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                cm->use_highbitdepth,
+#endif
+                VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment, NULL, NULL, NULL))
+          vpx_internal_error(
+              &cm->error, VPX_CODEC_MEM_ERROR,
+              "Failed to allocate unscaled raw source frame buffer");
+        vp9_copy_and_extend_frame(cpi->Source, &cpi->raw_unscaled_source);
+      }
+    }
 #endif
 
     cpi->unscaled_last_source = last_source != NULL ? &last_source->img : NULL;
