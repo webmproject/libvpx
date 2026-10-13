@@ -267,6 +267,82 @@ TEST(EncodeAPI, InvalidUVStrides) {
   }
 }
 
+#if CONFIG_VP9_ENCODER
+// Encodes one 64x64 I420 frame. With high_bit_depth the image is I42016
+// (10-bit, profile 2) and the encoder is initialized with
+// VPX_CODEC_USE_HIGHBITDEPTH. With flip the image is flipped with
+// vpx_img_flip() before being passed to the encoder.
+static void EncodeImageVp9(bool high_bit_depth, bool flip) {
+  constexpr int kWidth = 64;
+  constexpr int kHeight = 64;
+
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(vpx_codec_vp9_cx(), &cfg, /*usage=*/0),
+            VPX_CODEC_OK);
+  cfg.g_profile = high_bit_depth ? 2 : 0;
+  cfg.g_w = kWidth;
+  cfg.g_h = kHeight;
+  cfg.g_lag_in_frames = 0;
+  if (high_bit_depth) cfg.g_bit_depth = VPX_BITS_10;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, vpx_codec_vp9_cx(), &cfg,
+                               high_bit_depth ? VPX_CODEC_USE_HIGHBITDEPTH : 0),
+            VPX_CODEC_OK);
+
+  vpx_image_t *const img = vpx_img_alloc(
+      nullptr, high_bit_depth ? VPX_IMG_FMT_I42016 : VPX_IMG_FMT_I420, kWidth,
+      kHeight, 32);
+  ASSERT_NE(img, nullptr);
+  for (int plane = 0; plane < 3; ++plane) {
+    const int w = plane ? kWidth >> 1 : kWidth;
+    const int h = plane ? kHeight >> 1 : kHeight;
+    uint8_t *row = img->planes[plane];
+    for (int y = 0; y < h; ++y) {
+      for (int x = 0; x < w; ++x) {
+        if (high_bit_depth) {
+          reinterpret_cast<uint16_t *>(row)[x] =
+              static_cast<uint16_t>((x * 7 + y * 13) & 1023);
+        } else {
+          row[x] = static_cast<uint8_t>((x * 7 + y * 13) & 255);
+        }
+      }
+      row += img->stride[plane];
+    }
+  }
+  if (flip) vpx_img_flip(img);
+
+  ASSERT_EQ(vpx_codec_encode(&enc, img, /*pts=*/0, /*duration=*/1, /*flags=*/0,
+                             VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+  vpx_codec_iter_t iter = nullptr;
+  while (vpx_codec_get_cx_data(&enc, &iter) != nullptr) {
+  }
+
+  vpx_img_free(img);
+  EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
+#if CONFIG_VP9_HIGHBITDEPTH
+// vpx_img_flip() negates the image strides. The high bit-depth input
+// validation used an unsigned stride, so with a flipped image the source
+// pointer stepped far out of the allocation on the first row. Encoding a
+// flipped image must succeed.
+TEST(EncodeAPI, HighBitDepthFlippedImageVp9) {
+  EncodeImageVp9(/*high_bit_depth=*/true, /*flip=*/true);
+}
+
+// Non-flipped high bit-depth images must keep working.
+TEST(EncodeAPI, HighBitDepthImageVp9) {
+  EncodeImageVp9(/*high_bit_depth=*/true, /*flip=*/false);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+// Flipped 8-bit images must keep working.
+TEST(EncodeAPI, FlippedImageVp9) {
+  EncodeImageVp9(/*high_bit_depth=*/false, /*flip=*/true);
+}
+#endif  // CONFIG_VP9_ENCODER
+
 TEST(EncodeAPI, InvalidImageFormats) {
   EXPECT_EQ(vpx_img_alloc(/*img=*/nullptr, VPX_IMG_FMT_NONE, /*d_w=*/32,
                           /*d_h=*/32, /*align=*/1),

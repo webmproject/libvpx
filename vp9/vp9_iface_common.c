@@ -124,10 +124,8 @@ vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   } else {
     yv12->flags = 0;
   }
-  yv12->border = (yv12->y_stride - img->w) / 2;
-#else
-  yv12->border = (img->stride[VPX_PLANE_Y] - img->w) / 2;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  yv12->border = 0;
   yv12->subsampling_x = img->x_chroma_shift;
   yv12->subsampling_y = img->y_chroma_shift;
   return VPX_CODEC_OK;
