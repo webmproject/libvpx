@@ -1464,6 +1464,82 @@ TEST(EncodeAPI, SetRoi) {
   }
 }
 
+#if CONFIG_VP9_ENCODER
+// Segment ids in the ROI map must be in [0, MAX_SEGMENTS). vp9_set_roi_map()
+// did not validate the map contents, so out-of-range ids were used to index
+// segment count arrays on the stack while encoding inter frames.
+TEST(EncodeAPI, SetRoiInvalidSegmentIdVp9) {
+  constexpr int kWidth = 64;
+  constexpr int kHeight = 64;
+  constexpr int kRows = (kHeight + 7) >> 3;
+  constexpr int kCols = (kWidth + 7) >> 3;
+  constexpr uint8_t kMaxSegments = 8;  // MAX_SEGMENTS
+
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(vpx_codec_vp9_cx(), &cfg, /*usage=*/0),
+            VPX_CODEC_OK);
+  cfg.g_w = kWidth;
+  cfg.g_h = kHeight;
+  cfg.g_lag_in_frames = 0;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, vpx_codec_vp9_cx(), &cfg, 0),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 5), VPX_CODEC_OK);
+
+  vpx_image_t *const img =
+      vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, kWidth, kHeight, 32);
+  ASSERT_NE(img, nullptr);
+  for (int plane = 0; plane < 3; ++plane) {
+    const int w = plane ? kWidth >> 1 : kWidth;
+    const int h = plane ? kHeight >> 1 : kHeight;
+    uint8_t *row = img->planes[plane];
+    for (int y = 0; y < h; ++y) {
+      for (int x = 0; x < w; ++x) {
+        row[x] = static_cast<uint8_t>((x * 7 + y * 13) & 255);
+      }
+      row += img->stride[plane];
+    }
+  }
+
+  vpx_roi_map_t roi = {};
+  uint8_t roi_map[kRows * kCols];
+  roi.roi_map = roi_map;
+  roi.rows = kRows;
+  roi.cols = kCols;
+  roi.delta_q[0] = -10;  // Enable segmentation.
+  // -1 disables the ref frame feature: with 0 the ROI would force intra
+  // prediction and the second frame would not exercise an inter frame.
+  for (int i = 0; i < 8; ++i) {
+    roi.ref_frame[i] = -1;
+  }
+
+  // Segment ids out of range must be rejected.
+  memset(roi_map, kMaxSegments, sizeof(roi_map));
+  EXPECT_EQ(vpx_codec_control(&enc, VP9E_SET_ROI_MAP, &roi),
+            VPX_CODEC_INVALID_PARAM);
+
+  // Valid segment ids must be accepted...
+  for (size_t i = 0; i < sizeof(roi_map); ++i) {
+    roi_map[i] = static_cast<uint8_t>(i % kMaxSegments);
+  }
+  EXPECT_EQ(vpx_codec_control(&enc, VP9E_SET_ROI_MAP, &roi), VPX_CODEC_OK);
+
+  // ...and encoding a key frame followed by an inter frame with the ROI map
+  // enabled must succeed.
+  for (int frame = 0; frame < 2; ++frame) {
+    ASSERT_EQ(vpx_codec_encode(&enc, img, /*pts=*/frame, /*duration=*/1,
+                               /*flags=*/0, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    vpx_codec_iter_t iter = nullptr;
+    while (vpx_codec_get_cx_data(&enc, &iter) != nullptr) {
+    }
+  }
+
+  vpx_img_free(img);
+  EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+#endif  // CONFIG_VP9_ENCODER
+
 TEST(EncodeAPI, ConfigChangeThreadCount) {
   constexpr int kWidth = 1920;
   constexpr int kHeight = 1080;

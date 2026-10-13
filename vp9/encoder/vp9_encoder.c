@@ -727,6 +727,11 @@ vpx_codec_err_t vp9_set_roi_map(VP9_COMP *cpi, unsigned char *map,
     return VPX_CODEC_OK;
   }
 
+  // Each byte of the map is used as a segment id and must be in range.
+  for (unsigned int i = 0; i < rows * cols; ++i) {
+    if (map[i] >= MAX_SEGMENTS) return VPX_CODEC_INVALID_PARAM;
+  }
+
   if (roi->roi_map) {
     vpx_free(roi->roi_map);
     roi->roi_map = NULL;
