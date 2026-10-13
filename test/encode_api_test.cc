@@ -3901,6 +3901,36 @@ TEST(EncodeAPI, Vp9SvcEmptySuperframe) {
   ASSERT_EQ(vpx_codec_destroy(&codec), VPX_CODEC_OK);
 }
 
+// Increase the resolution with vpx_codec_enc_config_set() to a size whose
+// context buffers exceed VPX_MAX_ALLOCABLE_MEMORY, then destroy the encoder.
+// The failed reallocation must not leave freed buffers referenced by the
+// encoder. The allocation limit is only low enough to fail deterministically
+// when size_t is 32 bits.
+#if SIZE_MAX <= UINT32_MAX
+TEST(EncodeAPI, ConfigResizeAllocFailureVp9) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  vpx_codec_ctx_t enc;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  EXPECT_NO_FATAL_FAILURE(InitCodec(*iface, 64, 64, &enc, &cfg));
+
+  vpx_image_t *img = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, 64, 64);
+  ASSERT_NE(img, nullptr);
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+  vpx_img_free(img);
+
+  // 46340 is the largest size whose square fits in an int, as frame size
+  // computations in the encoder require.
+  cfg.g_w = 46340;
+  cfg.g_h = 46340;
+  EXPECT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_MEM_ERROR);
+
+  EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+#endif  // SIZE_MAX <= UINT32_MAX
+
 // Encode one pass VBR with nonzero-lookahead, with resize and realtime mode.
 // Test for the re-allocation of count_arf_frame_usage and
 // count_lastgolden_frame_usage. Bug: 515433297.
