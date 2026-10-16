@@ -4075,6 +4075,62 @@ TEST(EncodeAPI, VP9DenoiserPsnr) {
   vpx_img_free(img);
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+
+TEST(EncodeAPI, VP9DenoiserResolutionChange) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_w = 320;
+  cfg.g_h = 240;
+  cfg.g_lag_in_frames = 0;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.rc_end_usage = VPX_CBR;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 6), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_NOISE_SENSITIVITY, 1),
+            VPX_CODEC_OK);
+
+  vpx_image_t *img =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(img, nullptr);
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+  vpx_img_free(img);
+
+  // Increase frame height while temporal denoiser is enabled.
+  cfg.g_h = 720;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+
+  img = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(img, nullptr);
+  ASSERT_EQ(
+      vpx_codec_encode(&enc, img, 1, 1, VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+      VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 2, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+  vpx_img_free(img);
+
+  // Disable noise sensitivity, increase width, and re-enable noise sensitivity.
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_NOISE_SENSITIVITY, 0),
+            VPX_CODEC_OK);
+  cfg.g_w = 640;
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_NOISE_SENSITIVITY, 1),
+            VPX_CODEC_OK);
+
+  img = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+  ASSERT_NE(img, nullptr);
+  ASSERT_EQ(
+      vpx_codec_encode(&enc, img, 3, 1, VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+      VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 4, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+  vpx_img_free(img);
+
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
 #endif  // CONFIG_VP9_ENCODER
 
