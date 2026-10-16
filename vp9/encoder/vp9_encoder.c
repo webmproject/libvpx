@@ -1053,13 +1053,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_free_pc_tree(&cpi->td);
 
-  for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
-    LAYER_CONTEXT *const lc = &cpi->svc.layer_context[i];
-    vpx_free(lc->rc_twopass_stats_in.buf);
-    lc->rc_twopass_stats_in.buf = NULL;
-    lc->rc_twopass_stats_in.sz = 0;
-  }
-
   for (i = 0; i < MAX_LAG_BUFFERS; ++i) {
     vpx_free_frame_buffer(&cpi->svc.scaled_frames[i]);
   }
@@ -2587,64 +2580,18 @@ VP9_COMP *vp9_create_compressor(const VP9EncoderConfig *oxcf,
   } else if (oxcf->pass == 2) {
     const size_t packet_sz = sizeof(FIRSTPASS_STATS);
     const int packets = (int)(oxcf->two_pass_stats_in.sz / packet_sz);
+    int num_frames;
 
-    if (cpi->svc.number_spatial_layers > 1 ||
-        cpi->svc.number_temporal_layers > 1) {
-      FIRSTPASS_STATS *const stats = oxcf->two_pass_stats_in.buf;
-      FIRSTPASS_STATS *stats_copy[VPX_SS_MAX_LAYERS] = { 0 };
-      int n;
+    cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
+    cpi->twopass.stats_in = cpi->twopass.stats_in_start;
+    cpi->twopass.stats_in_end = &cpi->twopass.stats_in[packets - 1];
+    // Note the last packet is cumulative first pass stats.
+    // So the number of frames is packet number minus one
+    num_frames = packets - 1;
+    fps_init_first_pass_info(&cpi->twopass.first_pass_info,
+                             oxcf->two_pass_stats_in.buf, num_frames);
 
-      for (n = 0; n < oxcf->ss_number_layers; ++n) {
-        FIRSTPASS_STATS *const last_packet_for_layer =
-            &stats[packets - oxcf->ss_number_layers + n];
-        const int layer_id = (int)last_packet_for_layer->spatial_layer_id;
-        const int packets_in_layer = (int)last_packet_for_layer->count + 1;
-        if (layer_id >= 0 && layer_id < oxcf->ss_number_layers) {
-          int num_frames;
-          LAYER_CONTEXT *const lc = &cpi->svc.layer_context[layer_id];
-
-          vpx_free(lc->rc_twopass_stats_in.buf);
-
-          lc->rc_twopass_stats_in.sz = packets_in_layer * packet_sz;
-          CHECK_MEM_ERROR(&cm->error, lc->rc_twopass_stats_in.buf,
-                          vpx_malloc(lc->rc_twopass_stats_in.sz));
-          lc->twopass.stats_in_start = lc->rc_twopass_stats_in.buf;
-          lc->twopass.stats_in = lc->twopass.stats_in_start;
-          lc->twopass.stats_in_end =
-              lc->twopass.stats_in_start + packets_in_layer - 1;
-          // Note the last packet is cumulative first pass stats.
-          // So the number of frames is packet number minus one
-          num_frames = packets_in_layer - 1;
-          fps_init_first_pass_info(&lc->twopass.first_pass_info,
-                                   lc->rc_twopass_stats_in.buf, num_frames);
-          stats_copy[layer_id] = lc->rc_twopass_stats_in.buf;
-        }
-      }
-
-      for (n = 0; n < packets; ++n) {
-        const int layer_id = (int)stats[n].spatial_layer_id;
-        if (layer_id >= 0 && layer_id < oxcf->ss_number_layers &&
-            stats_copy[layer_id] != NULL) {
-          *stats_copy[layer_id] = stats[n];
-          ++stats_copy[layer_id];
-        }
-      }
-
-      vp9_init_second_pass_spatial_svc(cpi);
-    } else {
-      int num_frames;
-
-      cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
-      cpi->twopass.stats_in = cpi->twopass.stats_in_start;
-      cpi->twopass.stats_in_end = &cpi->twopass.stats_in[packets - 1];
-      // Note the last packet is cumulative first pass stats.
-      // So the number of frames is packet number minus one
-      num_frames = packets - 1;
-      fps_init_first_pass_info(&cpi->twopass.first_pass_info,
-                               oxcf->two_pass_stats_in.buf, num_frames);
-
-      vp9_init_second_pass(cpi);
-    }
+    vp9_init_second_pass(cpi);
   }
 #endif  // !CONFIG_REALTIME_ONLY
 

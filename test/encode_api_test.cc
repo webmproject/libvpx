@@ -3202,6 +3202,12 @@ TEST(EncodeAPI, SvcTestInvalidInputs) {
   cfg.layer_target_bitrate[2] = 300;
   cfg.layer_target_bitrate[3] = 400;
   cfg.rc_target_bitrate = 700;
+  // Multi-layer encoding is only supported for one-pass.
+  cfg.g_pass = VPX_RC_FIRST_PASS;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_INVALID_PARAM);
+  cfg.g_pass = VPX_RC_LAST_PASS;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_INVALID_PARAM);
+  cfg.g_pass = VPX_RC_ONE_PASS;
   ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
   vpx_svc_extra_cfg_t svc_cfg = {};
   svc_cfg.scaling_factor_num[0] = 1;

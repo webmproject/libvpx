@@ -260,6 +260,9 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
 
   if (cfg->ss_number_layers * cfg->ts_number_layers > VPX_MAX_LAYERS)
     ERROR("ss_number_layers * ts_number_layers is out of range");
+  if ((cfg->ss_number_layers > 1 || cfg->ts_number_layers > 1) &&
+      cfg->g_pass != VPX_RC_ONE_PASS)
+    ERROR("SVC is only supported for one-pass encoding.");
   if (cfg->ts_number_layers > 1) {
     unsigned int sl, tl;
     for (sl = 1; sl < cfg->ss_number_layers; ++sl) {
@@ -315,50 +318,16 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     if (cfg->rc_twopass_stats_in.sz % packet_sz)
       ERROR("rc_twopass_stats_in.sz indicates truncated packet.");
 
-    if (cfg->ss_number_layers > 1 || cfg->ts_number_layers > 1) {
-      int i;
-      int n_packets_per_layer[VPX_SS_MAX_LAYERS] = { 0 };
+    if (cfg->rc_twopass_stats_in.sz < 2 * packet_sz)
+      ERROR("rc_twopass_stats_in requires at least two packets.");
 
-      stats = cfg->rc_twopass_stats_in.buf;
-      for (i = 0; i < n_packets; ++i) {
-        const int layer_id = (int)stats[i].spatial_layer_id;
-        if (layer_id >= 0 && layer_id < (int)cfg->ss_number_layers) {
-          ++n_packets_per_layer[layer_id];
-        }
-      }
+    stats =
+        (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf + n_packets - 1;
 
-      for (i = 0; i < (int)cfg->ss_number_layers; ++i) {
-        unsigned int layer_id;
-        if (n_packets_per_layer[i] < 2) {
-          ERROR(
-              "rc_twopass_stats_in requires at least two packets for each "
-              "layer.");
-        }
-
-        stats = (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf +
-                n_packets - cfg->ss_number_layers + i;
-        layer_id = (int)stats->spatial_layer_id;
-
-        const double count_rounded = stats->count + 0.5;
-        if (layer_id >= cfg->ss_number_layers ||
-            !isfinite((float)stats->count) || stats->count < 0.0 ||
-            count_rounded > (double)INT_MAX ||
-            (int)count_rounded != n_packets_per_layer[layer_id] - 1)
-          ERROR("rc_twopass_stats_in missing EOS stats packet");
-      }
-    } else {
-      if (cfg->rc_twopass_stats_in.sz < 2 * packet_sz)
-        ERROR("rc_twopass_stats_in requires at least two packets.");
-
-      stats =
-          (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf + n_packets - 1;
-
-      const double count_rounded = stats->count + 0.5;
-      if (!isfinite((float)stats->count) || stats->count < 0.0 ||
-          count_rounded > (double)INT_MAX ||
-          (int)count_rounded != n_packets - 1)
-        ERROR("rc_twopass_stats_in missing EOS stats packet");
-    }
+    const double count_rounded = stats->count + 0.5;
+    if (!isfinite((float)stats->count) || stats->count < 0.0 ||
+        count_rounded > (double)INT_MAX || (int)count_rounded != n_packets - 1)
+      ERROR("rc_twopass_stats_in missing EOS stats packet");
   }
 #endif  // !CONFIG_REALTIME_ONLY
 
