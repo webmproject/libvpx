@@ -1898,6 +1898,24 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
       data->spatial_layer_id >= (int)ctx->cfg.ss_number_layers) {
     return VPX_CODEC_INVALID_PARAM;
   }
+  // Validate temporal_layer_id and every temporal_layer_id_per_spatial[]
+  // entry before storing any of them. Both are later used to index
+  // svc.layer_context[] (VPX_MAX_LAYERS entries) in
+  // vp9_one_pass_svc_start_layer(); an out-of-range value causes an
+  // out-of-bounds access during encoding. Validating up front also leaves
+  // svc unchanged when the input is rejected.
+  if (data->temporal_layer_id < 0 ||
+      data->temporal_layer_id >= (int)ctx->cfg.ts_number_layers) {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+  for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
+    if (data->temporal_layer_id_per_spatial[sl] < 0 ||
+        data->temporal_layer_id_per_spatial[sl] >=
+            (int)ctx->cfg.ts_number_layers) {
+      return VPX_CODEC_INVALID_PARAM;
+    }
+  }
+
   svc->spatial_layer_to_encode = data->spatial_layer_id;
   svc->first_spatial_layer_to_encode = data->spatial_layer_id;
   // TODO(jianj): Deprecated to be removed.
@@ -1906,11 +1924,6 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
   for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
     svc->temporal_layer_id_per_spatial[sl] =
         data->temporal_layer_id_per_spatial[sl];
-  }
-  // Checks on valid temporal_layer_id input.
-  if (svc->temporal_layer_id < 0 ||
-      svc->temporal_layer_id >= (int)ctx->cfg.ts_number_layers) {
-    return VPX_CODEC_INVALID_PARAM;
   }
 
   return VPX_CODEC_OK;

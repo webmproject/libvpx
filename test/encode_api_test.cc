@@ -3314,6 +3314,33 @@ TEST(EncodeAPI, SvcTestInvalidInputs) {
   ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
             VPX_CODEC_INVALID_PARAM);
 
+  // Check for invalid layer id input.
+  vpx_svc_layer_id_t layer_id = {};
+  layer_id.spatial_layer_id = 0;
+  layer_id.temporal_layer_id = 0;
+  for (unsigned int i = 0; i < cfg.ss_number_layers; i++) {
+    layer_id.temporal_layer_id_per_spatial[i] = 0;
+  }
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+            VPX_CODEC_OK);
+
+  layer_id.temporal_layer_id_per_spatial[0] = cfg.ts_number_layers;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+            VPX_CODEC_INVALID_PARAM);
+
+  layer_id.temporal_layer_id_per_spatial[0] = -1;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+            VPX_CODEC_INVALID_PARAM);
+  layer_id.temporal_layer_id_per_spatial[0] = 0;
+
+  layer_id.temporal_layer_id = cfg.ts_number_layers;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+            VPX_CODEC_INVALID_PARAM);
+
+  layer_id.temporal_layer_id = -1;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+            VPX_CODEC_INVALID_PARAM);
+
   // Check for invalid duration input.
   vpx_svc_ref_frame_config_t ref_frame_config = {};
   for (unsigned int i = 0; i < cfg.ss_number_layers; i++) {
