@@ -3341,6 +3341,36 @@ TEST(EncodeAPI, SvcTestInvalidInputs) {
   ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
             VPX_CODEC_INVALID_PARAM);
 
+  // Check for invalid frame buffer index input. Valid indices are in
+  // [0, REF_FRAMES) (REF_FRAMES is 8); -1 is used internally for "no
+  // reference" but is not a valid input here.
+  vpx_svc_ref_frame_config_t fb_config = {};
+  for (unsigned int i = 0; i < cfg.ss_number_layers; i++) {
+    fb_config.lst_fb_idx[i] = 0;
+    fb_config.gld_fb_idx[i] = 0;
+    fb_config.alt_fb_idx[i] = 0;
+    fb_config.reference_last[i] = 1;
+    fb_config.update_last[i] = 1;
+    fb_config.duration[i] = 1000;
+  }
+  fb_config.lst_fb_idx[0] = 7;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &fb_config),
+            VPX_CODEC_OK);
+  fb_config.lst_fb_idx[0] = 8;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &fb_config),
+            VPX_CODEC_INVALID_PARAM);
+  fb_config.lst_fb_idx[0] = -1;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &fb_config),
+            VPX_CODEC_INVALID_PARAM);
+  fb_config.lst_fb_idx[0] = 0;
+  fb_config.gld_fb_idx[0] = -2000000;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &fb_config),
+            VPX_CODEC_INVALID_PARAM);
+  fb_config.gld_fb_idx[0] = 0;
+  fb_config.alt_fb_idx[1] = 8;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &fb_config),
+            VPX_CODEC_INVALID_PARAM);
+
   // Check for invalid duration input.
   vpx_svc_ref_frame_config_t ref_frame_config = {};
   for (unsigned int i = 0; i < cfg.ss_number_layers; i++) {

@@ -2004,6 +2004,13 @@ static vpx_codec_err_t ctrl_set_svc_ref_frame_config(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *const cpi = ctx->cpi;
   vpx_svc_ref_frame_config_t *data = va_arg(args, vpx_svc_ref_frame_config_t *);
   int sl;
+  for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
+    if (data->lst_fb_idx[sl] < 0 || data->lst_fb_idx[sl] >= REF_FRAMES ||
+        data->gld_fb_idx[sl] < 0 || data->gld_fb_idx[sl] >= REF_FRAMES ||
+        data->alt_fb_idx[sl] < 0 || data->alt_fb_idx[sl] >= REF_FRAMES) {
+      return VPX_CODEC_INVALID_PARAM;
+    }
+  }
   cpi->svc.use_set_ref_frame_config = 1;
   for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
     cpi->svc.update_buffer_slot[sl] = data->update_buffer_slot[sl];
