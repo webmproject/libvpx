@@ -4189,6 +4189,106 @@ TEST(EncodeAPI, VP9DenoiserResolutionChange) {
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
+
+// Bug: 575939911.
+// Test external resolution changes via vpx_codec_enc_config_set() in 1-pass
+// CBR SVC mode (1 spatial layer, 3 temporal layers, RESIZE_NONE):
+// 1. Initialize and encode 1 frame at 1280x720.
+// 2. Downscale via vpx_codec_enc_config_set() to 80x46 (> 2x downscale, which
+//    exceeds the valid reference scaling ratio and forces a keyframe) and
+//    encode 5 frames so reference buffer slots hold 80x46 frames.
+// 3. Upscale via vpx_codec_enc_config_set() back to 1280x720. Since 1280x720
+//    is within the 16x maximum upscale ratio of 80x46 (1280 <= 16 * 80 and
+//    720 <= 16 * 46), no keyframe is forced and the 1280x720 inter frames
+//    reference the unscaled 80x46 buffers while vp9_scale_references() is
+//    skipped in SVC mode.
+TEST(EncodeAPI, SvcResizeUnscaledReferenceMotionSearch) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  // Configure 1-pass CBR with 1 spatial layer and 3 temporal layers (L1T3).
+  cfg.g_w = 1280;
+  cfg.g_h = 720;
+  cfg.g_lag_in_frames = 0;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.rc_end_usage = VPX_CBR;
+  cfg.rc_target_bitrate = 1000;
+  cfg.ss_number_layers = 1;
+  cfg.ts_number_layers = 3;
+  cfg.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_0212;
+  cfg.ts_target_bitrate[0] = 400;
+  cfg.ts_target_bitrate[1] = 600;
+  cfg.ts_target_bitrate[2] = 1000;
+  cfg.layer_target_bitrate[0] = 400;
+  cfg.layer_target_bitrate[1] = 600;
+  cfg.layer_target_bitrate[2] = 1000;
+  cfg.ts_rate_decimator[0] = 4;
+  cfg.ts_rate_decimator[1] = 2;
+  cfg.ts_rate_decimator[2] = 1;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  // Use speed >= 5 (non-RD pickmode) and screen content mode.
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 7), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_TUNE_CONTENT, VP9E_CONTENT_SCREEN),
+            VPX_CODEC_OK);
+
+  // Enable SVC with 1:1 layer scaling factors.
+  vpx_svc_extra_cfg_t svc_cfg = {};
+  for (int i = 0; i < VPX_MAX_LAYERS; ++i) {
+    svc_cfg.max_quantizers[i] = 56;
+    svc_cfg.min_quantizers[i] = 2;
+    svc_cfg.scaling_factor_num[i] = 1;
+    svc_cfg.scaling_factor_den[i] = 1;
+  }
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC, 1), VPX_CODEC_OK);
+
+  // Reconfigure across three resolution batches:
+  // 1280x720 (1 frame) -> 80x46 (5 frames) -> 1280x720 (4 frames).
+  struct Batch {
+    unsigned int w;
+    unsigned int h;
+    int count;
+  };
+  const Batch kBatches[] = { { 1280, 720, 1 },
+                             { 80, 46, 5 },
+                             { 1280, 720, 4 } };
+
+  libvpx_test::ACMRandom rng(libvpx_test::ACMRandom::DeterministicSeed());
+  vpx_codec_pts_t pts = 0;
+  for (const auto &batch : kBatches) {
+    cfg.g_w = batch.w;
+    cfg.g_h = batch.h;
+    ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+
+    vpx_image_t *const img =
+        vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, batch.w, batch.h, 1);
+    ASSERT_NE(img, nullptr);
+
+    // Fill each frame with pseudo-random noise so ZEROMV does not early-exit
+    // before NEWMV is evaluated in vp9_pick_inter_mode().
+    for (int i = 0; i < batch.count; ++i) {
+      for (int plane = 0; plane < 3; ++plane) {
+        const unsigned int plane_w = plane ? (batch.w + 1) >> 1 : batch.w;
+        const unsigned int plane_h = plane ? (batch.h + 1) >> 1 : batch.h;
+        for (unsigned int y = 0; y < plane_h; ++y) {
+          uint8_t *const row = img->planes[plane] + y * img->stride[plane];
+          for (unsigned int x = 0; x < plane_w; ++x) {
+            row[x] = rng.Rand8();
+          }
+        }
+      }
+      ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+                VPX_CODEC_OK);
+    }
+    vpx_img_free(img);
+  }
+
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
