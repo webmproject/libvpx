@@ -4409,6 +4409,124 @@ TEST(EncodeAPI, SvcResizeUnscaledReferenceMotionSearch) {
 
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+
+// Bug: 575903327.
+// Test that dynamically enabling a higher spatial layer (with SL0 disabled)
+// in 1-pass CBR flexible SVC mode at speed 8 does not use a stale/freed
+// reference buffer pointer in get_estimated_pred() when the new spatial
+// layer's LAST_FRAME buffer slot is unallocated (NULL).
+TEST(EncodeAPI, SvcGetEstimatedPredStaleReference) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 64;
+  cfg.g_h = 36;
+  cfg.g_lag_in_frames = 0;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.rc_end_usage = VPX_CBR;
+  cfg.rc_target_bitrate = 60;
+  cfg.g_threads = 2;
+  cfg.ss_number_layers = 3;
+  cfg.ts_number_layers = 1;
+  cfg.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
+  cfg.ss_target_bitrate[0] = 60;
+  cfg.layer_target_bitrate[0] = 60;
+  cfg.ss_target_bitrate[1] = 0;
+  cfg.layer_target_bitrate[1] = 0;
+  cfg.ss_target_bitrate[2] = 0;
+  cfg.layer_target_bitrate[2] = 0;
+  cfg.ts_rate_decimator[0] = 1;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 8), VPX_CODEC_OK);
+
+  vpx_svc_extra_cfg_t svc_cfg = {};
+  for (int i = 0; i < VPX_MAX_LAYERS; ++i) {
+    svc_cfg.max_quantizers[i] = 56;
+    svc_cfg.min_quantizers[i] = 2;
+    svc_cfg.scaling_factor_num[i] = 1;
+    svc_cfg.scaling_factor_den[i] = 1;
+    svc_cfg.speed_per_layer[i] = 8;
+  }
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC, 1), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_INTER_LAYER_PRED,
+                              INTER_LAYER_PRED_OFF),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_ROW_MT, 1), VPX_CODEC_OK);
+
+  // Encode 2 frames on SL0 (64x36) using buffer slot 0.
+  vpx_image_t *img = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, 64, 36);
+  ASSERT_NE(img, nullptr);
+  vpx_codec_pts_t pts = 0;
+  for (int i = 0; i < 2; ++i) {
+    vpx_svc_layer_id_t layer_id = {};
+    layer_id.spatial_layer_id = 0;
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+              VPX_CODEC_OK);
+
+    vpx_svc_ref_frame_config_t ref_cfg = {};
+    ref_cfg.lst_fb_idx[0] = 0;
+    ref_cfg.reference_last[0] = (i > 0) ? 1 : 0;
+    ref_cfg.update_buffer_slot[0] = (1 << 0);
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+              VPX_CODEC_OK);
+
+    ASSERT_EQ(
+        vpx_codec_encode(&enc, img, pts++, 1, (i == 0) ? VPX_EFLAG_FORCE_KF : 0,
+                         VPX_DL_REALTIME),
+        VPX_CODEC_OK);
+  }
+  vpx_img_free(img);
+
+  // Disable SL0 (64x36) and enable SL1 (128x72) and SL2 (256x144) on
+  // previously unused buffer slots 1 and 2 without forcing a keyframe.
+  cfg.g_w = 256;
+  cfg.g_h = 144;
+  cfg.rc_target_bitrate = 670;
+  cfg.ss_target_bitrate[0] = 0;
+  cfg.layer_target_bitrate[0] = 0;
+  cfg.ss_target_bitrate[1] = 170;
+  cfg.layer_target_bitrate[1] = 170;
+  cfg.ss_target_bitrate[2] = 500;
+  cfg.layer_target_bitrate[2] = 500;
+
+  svc_cfg.scaling_factor_num[0] = 1;
+  svc_cfg.scaling_factor_den[0] = 4;
+  svc_cfg.scaling_factor_num[1] = 1;
+  svc_cfg.scaling_factor_den[1] = 2;
+  svc_cfg.scaling_factor_num[2] = 1;
+  svc_cfg.scaling_factor_den[2] = 1;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+
+  vpx_svc_layer_id_t layer_id = {};
+  layer_id.spatial_layer_id = 1;
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+            VPX_CODEC_OK);
+
+  vpx_svc_ref_frame_config_t ref_cfg = {};
+  ref_cfg.lst_fb_idx[1] = 1;
+  ref_cfg.reference_last[1] = 0;
+  ref_cfg.update_buffer_slot[1] = (1 << 1);
+  ref_cfg.lst_fb_idx[2] = 2;
+  ref_cfg.reference_last[2] = 0;
+  ref_cfg.update_buffer_slot[2] = (1 << 2);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+            VPX_CODEC_OK);
+
+  img = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, 256, 144);
+  ASSERT_NE(img, nullptr);
+  ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+  vpx_img_free(img);
+
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
