@@ -3369,6 +3369,127 @@ TEST(EncodeAPI, HighbdEncoderI420ImageMismatch) {
 TEST(EncodeAPI, NonHighbdEncoderI42016ImageMismatch) {
   TestEncoderImageMismatch(false);
 }
+
+// Verifies that validate_img() rejects high bit-depth images whose plane
+// pointers or byte strides are not 2-byte aligned.
+// Bug: 578678096
+TEST(EncodeAPI, HighbdMisalignedPlanesAndStrides) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_ctx_t enc;
+  vpx_codec_enc_cfg_t cfg;
+
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
+            VPX_CODEC_OK);
+
+  const unsigned int kWidth = 72;
+  const unsigned int kHeight = 72;
+  const int kStride = 256;
+  cfg.g_w = kWidth;
+  cfg.g_h = kHeight;
+  cfg.g_profile = 2;
+  cfg.g_bit_depth = VPX_BITS_10;
+  cfg.g_input_bit_depth = 10;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.g_lag_in_frames = 0;
+  cfg.rc_end_usage = VPX_Q;
+  cfg.rc_min_quantizer = 0;
+  cfg.rc_max_quantizer = 0;
+
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, VPX_CODEC_USE_HIGHBITDEPTH),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 6), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CQ_LEVEL, 0), VPX_CODEC_OK);
+
+  std::vector<uint8_t> buf(kStride * kHeight * 3 + 16, 0);
+  // Ensure base is 2-byte aligned so base + 1 is guaranteed to be odd and
+  // base + 2 is guaranteed to be even.
+  uint8_t *base = buf.data();
+  if (reinterpret_cast<uintptr_t>(base) & 1) {
+    ++base;
+  }
+
+  // Populate a 4x4 checkerboard pattern of [0x00, 0x7F] / [0x00, 0x80] in the
+  // right-most 8x8 column. At base + 1 (odd), these 16-bit little-endian words
+  // are 0x007F / 0x0080 (< 1024); at base + 0 (even), they are 0x7F00 / 0x8000.
+  for (unsigned int y = 0; y < kHeight; ++y) {
+    for (unsigned int x = 64; x < kWidth; ++x) {
+      const size_t idx = y * kStride + x * 2;
+      const bool sx = (x & 3) < 2;
+      const bool sy = (y & 3) < 2;
+      base[idx] = 0x00;
+      base[idx + 1] = (sx ^ sy) ? 0x80 : 0x7F;
+    }
+  }
+
+  vpx_image_t img;
+  memset(&img, 0, sizeof(img));
+  ASSERT_EQ(vpx_img_wrap(&img, VPX_IMG_FMT_I42016, kWidth, kHeight, 1, base),
+            &img);
+  uint8_t *const aligned_y = base + 2;
+  uint8_t *const aligned_u = base + kStride * kHeight + 2;
+  uint8_t *const aligned_v = base + kStride * kHeight * 2 + 2;
+  auto reset_valid_img = [&]() {
+    img.planes[VPX_PLANE_Y] = aligned_y;
+    img.planes[VPX_PLANE_U] = aligned_u;
+    img.planes[VPX_PLANE_V] = aligned_v;
+    img.stride[VPX_PLANE_Y] = kStride;
+    img.stride[VPX_PLANE_U] = kStride;
+    img.stride[VPX_PLANE_V] = kStride;
+  };
+
+  // 1. Odd plane pointers on Y, U, or V must be rejected.
+  for (int plane = 0; plane < 3; ++plane) {
+    reset_valid_img();
+    img.planes[plane] -= 1;  // Odd byte address.
+    EXPECT_EQ(vpx_codec_encode(&enc, &img, /*pts=*/0, /*duration=*/1,
+                               /*flags=*/VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+              VPX_CODEC_INVALID_PARAM);
+  }
+
+  // 2. Odd byte strides on Y or U/V must be rejected.
+  reset_valid_img();
+  img.stride[VPX_PLANE_Y] = kStride + 1;
+  EXPECT_EQ(vpx_codec_encode(&enc, &img, /*pts=*/0, /*duration=*/1,
+                             /*flags=*/VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+            VPX_CODEC_INVALID_PARAM);
+
+  reset_valid_img();
+  img.stride[VPX_PLANE_U] = kStride + 1;
+  img.stride[VPX_PLANE_V] = kStride + 1;
+  EXPECT_EQ(vpx_codec_encode(&enc, &img, /*pts=*/0, /*duration=*/1,
+                             /*flags=*/VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+            VPX_CODEC_INVALID_PARAM);
+
+  // 3. Even with VP9E_SET_VALIDATE_HBD_INPUT disabled, odd plane pointers and
+  // strides must still be rejected because CONVERT_TO_BYTEPTR and stride >>= 1
+  // require 2-byte alignment.
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_VALIDATE_HBD_INPUT, 0),
+            VPX_CODEC_OK);
+  reset_valid_img();
+  img.planes[VPX_PLANE_Y] -= 1;
+  EXPECT_EQ(vpx_codec_encode(&enc, &img, /*pts=*/0, /*duration=*/1,
+                             /*flags=*/VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+            VPX_CODEC_INVALID_PARAM);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_VALIDATE_HBD_INPUT, 1),
+            VPX_CODEC_OK);
+
+  // 4. At the 2-byte aligned address (base + 2), the crafted bytes read as
+  // 0x7F00 / 0x8000 (>= 1024) and are rejected by validate_hbd_input.
+  // Moving the valid 10-bit samples (0x007F / 0x0080) to the 2-byte aligned
+  // plane address allows the frame to encode cleanly.
+  reset_valid_img();
+  EXPECT_EQ(vpx_codec_encode(&enc, &img, /*pts=*/0, /*duration=*/1,
+                             /*flags=*/VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+            VPX_CODEC_INVALID_PARAM);
+
+  memmove(base, base + 1, kStride * kHeight * 3);
+  reset_valid_img();
+  EXPECT_EQ(vpx_codec_encode(&enc, &img, /*pts=*/0, /*duration=*/1,
+                             /*flags=*/VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
 #endif
 
 TEST(EncodeAPI, SvcTestInvalidInputs) {

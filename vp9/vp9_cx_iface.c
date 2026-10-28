@@ -422,6 +422,15 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
         "format");
   }
 
+  if (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    // Validate that it is safe to cast each row pointer to `unsigned short *`.
+    for (int plane = 0; plane < 3; ++plane) {
+      if ((((uintptr_t)img->planes[plane]) & 1) || (img->stride[plane] & 1)) {
+        ERROR("High bit-depth image planes and strides must be 2-byte aligned");
+      }
+    }
+  }
+
   if (ctx->extra_cfg.validate_hbd_input &&
       (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
     const unsigned int h = img->d_h;
