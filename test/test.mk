@@ -143,7 +143,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += add_noise_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_DECODER) += vp8_decrypt_test.cc
 ifneq (, $(filter yes, $(HAVE_SSE2) $(HAVE_SSSE3) $(HAVE_SSE4_1) $(HAVE_NEON) \
-                       $(HAVE_MSA) $(HAVE_MMI)))
+                       $(HAVE_MSA) $(HAVE_MMI) $(HAVE_LSX)))
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += quantize_test.cc
 endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += set_roi.cc
