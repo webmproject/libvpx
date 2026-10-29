@@ -149,6 +149,9 @@ endif
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += set_roi.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += vp8_fdct4x4_test.cc
+ifneq (, $(filter yes, $(CONFIG_VP8_ENCODER) $(CONFIG_VP8_DECODER)))
+LIBVPX_TEST_SRCS-$(HAVE_LSX) += vp8_loopfilter_simple_test.cc
+endif
 
 LIBVPX_TEST_SRCS-yes                   += idct_test.cc
 LIBVPX_TEST_SRCS-yes                   += predict_test.cc
