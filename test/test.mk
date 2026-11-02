@@ -227,6 +227,7 @@ endif # VP9
 
 ## Multi-codec / unconditional whitebox tests.
 
+LIBVPX_TEST_SRCS-yes += yv12config_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sad_test.cc
 ifneq (, $(filter yes, $(HAVE_NEON) $(HAVE_SSE2) $(HAVE_MSA)))
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) += sum_squares_test.cc
