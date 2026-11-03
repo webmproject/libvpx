@@ -27,14 +27,24 @@ struct encode_b_args {
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
   int8_t *skip;
+  // Optional output for the token rate of the trellis-optimized block as
+  // computed by cost_coeffs() (vp9_rdopt.c) with precise, i.e. non-fast,
+  // coefficient costing, or -1 when the rate is unavailable. May be NULL if the
+  // caller does not need the rate. See vp9_optimize_b().
+  int *rate;
 #if CONFIG_MISMATCH_DEBUG
   int mi_row;
   int mi_col;
   int output_enabled;
 #endif
 };
+// Optimizes the quantized coefficients of `block` using trellis RDO and returns
+// the final EOB position. If `rate` is non-NULL, `*rate` receives the token
+// rate of the optimized block, equal to cost_coeffs() (vp9_rdopt.c) with
+// precise, i.e. non-fast, coefficient costing, or -1 when the rate is
+// unavailable because the post-EOB sharpness adjustment moved the final EOB.
 int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
-                   int ctx);
+                   int ctx, int *rate);
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize, int mi_row, int mi_col,
                    int output_enabled);
 void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize);

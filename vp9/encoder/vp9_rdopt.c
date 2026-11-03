@@ -704,6 +704,7 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   MODE_INFO *const mi = xd->mi[0];
   int64_t rd1, rd2, rd;
   int rate;
+  int trellis_rate = -1;
   int64_t dist = INT64_MAX;
   int64_t sse = INT64_MAX;
   const int coeff_ctx =
@@ -718,17 +719,29 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
   int sse_calc_done = 0;
 #if CONFIG_MISMATCH_DEBUG
   struct encode_b_args encode_b_arg = {
-    x,    enable_trellis_opt, trellis_opt_thresh, &sse_calc_done,
-    &sse, args->t_above,      args->t_left,       &mi->skip,
+    x,
+    enable_trellis_opt,
+    trellis_opt_thresh,
+    &sse_calc_done,
+    &sse,
+    args->t_above,
+    args->t_left,
+    &mi->skip,
+    &trellis_rate,
     0,  // mi_row
     0,  // mi_col
     0   // output_enabled
   };
 #else
-  struct encode_b_args encode_b_arg = {
-    x,    enable_trellis_opt, trellis_opt_thresh, &sse_calc_done,
-    &sse, args->t_above,      args->t_left,       &mi->skip
-  };
+  struct encode_b_args encode_b_arg = { x,
+                                        enable_trellis_opt,
+                                        trellis_opt_thresh,
+                                        &sse_calc_done,
+                                        &sse,
+                                        args->t_above,
+                                        args->t_left,
+                                        &mi->skip,
+                                        &trellis_rate };
 #endif
 
   if (args->exit_early) return;
@@ -790,7 +803,8 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
                          tx_size, &encode_b_arg);
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, blk_row, blk_col, plane_bsize, tx_size);
-      if (use_trellis_opt) vp9_optimize_b(x, plane, block, tx_size, coeff_ctx);
+      if (use_trellis_opt)
+        vp9_optimize_b(x, plane, block, tx_size, coeff_ctx, &trellis_rate);
       dist_block(args->cpi, x, plane, plane_bsize, block, blk_row, blk_col,
                  tx_size, &dist, &sse, recon, sse_calc_done);
     } else if (skip_txfm_flag == SKIP_TXFM_AC_ONLY) {
@@ -823,7 +837,14 @@ static void block_rd_txfm(int plane, int block, int blk_row, int blk_col,
     return;
   }
 
-  rate = rate_block(plane, block, tx_size, coeff_ctx, args);
+#ifndef NDEBUG
+  if (trellis_rate >= 0 && !args->use_fast_coef_costing) {
+    assert(trellis_rate == rate_block(plane, block, tx_size, coeff_ctx, args));
+  }
+#endif
+  rate = (trellis_rate >= 0 && !args->use_fast_coef_costing)
+             ? trellis_rate
+             : rate_block(plane, block, tx_size, coeff_ctx, args);
   args->t_above[blk_col] = (x->plane[plane].eobs[block] > 0) ? 1 : 0;
   args->t_left[blk_row] = (x->plane[plane].eobs[block] > 0) ? 1 : 0;
   rd1 = RDCOST(x->rdmult, x->rddiv, rate, dist);
