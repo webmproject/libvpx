@@ -16,6 +16,7 @@
 
 #include "vpx_dsp/quantize.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/compiler_attributes.h"
 #include "vpx_ports/mem.h"
 
 #if CONFIG_MISMATCH_DEBUG
@@ -103,8 +104,12 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
 #define RIGHT_SHIFT_POSSIBLY_NEGATIVE(num, shift) \
   (((num) >= 0) ? (num) >> (shift) : -((-(num)) >> (shift)))
 
-int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
-                   int ctx, int *rate) {
+// Kept out-of-line so ThinLTO/FDO does not inline the 1 KiB token_cache frame
+// and trellis loop into block_rd_txfm() and all switch arms of
+// vp9_encode_block_intra(), where most blocks have eob == 0 or skip trellis
+// RDO.
+VPX_NOINLINE int vp9_optimize_b_nonzero(MACROBLOCK *mb, int plane, int block,
+                                        TX_SIZE tx_size, int ctx, int *rate) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblock_plane *const p = &mb->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -142,7 +147,6 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
 #endif
   unsigned int (*const token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
       mb->token_costs[tx_size][plane_type][ref];
-  unsigned int (*token_costs_cur)[2][COEFF_CONTEXTS][ENTROPY_TOKENS];
   int64_t eob_cost0, eob_cost1;
   int64_t accu_rate = 0;
   // Initialized to the worst possible error for the largest transform size.
@@ -155,6 +159,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
   tran_low_t before_best_eob_dqc = 0;
 
   assert((!plane_type && !plane) || (plane_type && plane));
+  assert(eob > 0);
   assert(eob <= default_eob);
 
   // Seed index 0 so compilers (e.g. GCC -Wmaybe-uninitialized) see token_cache
@@ -175,8 +180,7 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
 #endif
 
   // Initial RD cost.
-  token_costs_cur = token_costs + band_translate[0];
-  rate0 = (*token_costs_cur)[0][ctx][EOB_TOKEN];
+  rate0 = vp9_empty_block_rate(mb, plane, tx_size, ctx);
   best_block_rd_cost = RDCOST(rdmult, rddiv, rate0, accu_error);
   best_rate = rate0;
 
@@ -198,7 +202,8 @@ int vp9_optimize_b(MACROBLOCK *mb, int plane, int block, TX_SIZE tx_size,
     const int ctx_cur = (i == 0) ? ctx : get_coef_context(nb, token_cache, i);
     ASSUME_VALID_ENERGY_CLASS(ctx_cur);
     const int token_tree_sel_cur = (x_prev == 0);
-    token_costs_cur = token_costs + band_cur;
+    unsigned int (*const token_costs_cur)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
+        token_costs + band_cur;
     if (x == 0) {  // No need to search
       const int token = vp9_get_token(x);
       ASSUME_VALID_TOKEN(token);
