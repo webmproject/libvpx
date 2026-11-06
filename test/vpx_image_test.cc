@@ -144,6 +144,27 @@ TEST(VpxImageTest, VpxImgSetRectRejectsFlipped) {
   }
 }
 
+TEST(VpxImageTest, VpxImgZeroDimensionsRejected) {
+  // Zero dimensions must be rejected: vpx_img_flip() computes
+  // (d_h - 1) * stride, which underflows for d_h == 0 and produces
+  // a wild plane pointer.
+  vpx_image_t img;
+  unsigned char buf[64];
+
+  EXPECT_EQ(vpx_img_wrap(&img, VPX_IMG_FMT_I420, 16, 0, 1, buf), nullptr);
+  EXPECT_EQ(vpx_img_wrap(&img, VPX_IMG_FMT_I420, 0, 16, 1, buf), nullptr);
+  EXPECT_EQ(vpx_img_alloc(&img, VPX_IMG_FMT_I420, 16, 0, 1), nullptr);
+  EXPECT_EQ(vpx_img_alloc(&img, VPX_IMG_FMT_I420, 0, 16, 1), nullptr);
+
+  // A zero-area viewport must also be rejected on a valid image.
+  ASSERT_NE(vpx_img_wrap(&img, VPX_IMG_FMT_I420, 16, 16, 1, buf), nullptr);
+  EXPECT_EQ(vpx_img_set_rect(&img, 0, 0, 16, 0), -1);
+  EXPECT_EQ(vpx_img_set_rect(&img, 0, 0, 0, 16), -1);
+  EXPECT_EQ(img.d_w, 16u);
+  EXPECT_EQ(img.d_h, 16u);
+  vpx_img_free(&img);
+}
+
 TEST(VpxImageTest, VpxImgAllocNone) {
   const int kWidth = 128;
   const int kHeight = 128;
