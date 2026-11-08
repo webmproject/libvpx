@@ -1400,8 +1400,19 @@ static void alloc_compressor_data(VP9_COMP *cpi) {
           "Size of cpi->tile_tok[0][0] can't be represented in size_t");
     }
 #endif
-    CHECK_MEM_ERROR(&cm->error, cpi->tile_tok[0][0],
-                    vpx_calloc((size_t)tokens, sizeof(*cpi->tile_tok[0][0])));
+    // The token buffer is sized for the worst case, but only the
+    // [start, start + count) range of each superblock row that was written
+    // during tokenization is ever read back by the bitstream packer. Allocate
+    // it without zeroing so that the pages a frame does not use are never
+    // touched, which keeps them out of the resident set.
+    {
+      const size_t tok_size = (size_t)tokens * sizeof(*cpi->tile_tok[0][0]);
+      if (tok_size / sizeof(*cpi->tile_tok[0][0]) != (size_t)tokens) {
+        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                           "Size of cpi->tile_tok[0][0] overflows size_t");
+      }
+      CHECK_MEM_ERROR(&cm->error, cpi->tile_tok[0][0], vpx_malloc(tok_size));
+    }
   }
 
   sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
