@@ -1441,38 +1441,35 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
 static int super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                             int64_t *distortion, int *skippable, int64_t *sse,
                             BLOCK_SIZE bsize, int64_t ref_best_rd) {
-  MACROBLOCKD *const xd = &x->e_mbd;
-  MODE_INFO *const mi = xd->mi[0];
-  const TX_SIZE uv_tx_size = get_uv_tx_size(mi, &xd->plane[1]);
-  int plane;
-  int pnrate = 0, pnskip = 1;
-  int64_t pndist = 0, pnsse = 0;
-  int is_cost_valid = 1;
+  int is_cost_valid = ref_best_rd >= 0;
 
-  if (ref_best_rd < 0) is_cost_valid = 0;
+  if (is_cost_valid) {
+    MACROBLOCKD *const xd = &x->e_mbd;
+    MODE_INFO *const mi = xd->mi[0];
+    const TX_SIZE uv_tx_size = get_uv_tx_size(mi, &xd->plane[1]);
+    int plane;
+    int pnrate = 0, pnskip = 1;
+    int64_t pndist = 0, pnsse = 0;
 
-  if (is_inter_block(mi) && is_cost_valid) {
-    for (plane = 1; plane < MAX_MB_PLANE; ++plane)
-      vp9_subtract_plane(x, bsize, plane);
-  }
+    *rate = 0;
+    *distortion = 0;
+    *sse = 0;
+    *skippable = 1;
 
-  *rate = 0;
-  *distortion = 0;
-  *sse = 0;
-  *skippable = 1;
-
-  for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
-    txfm_rd_in_plane(cpi, x, &pnrate, &pndist, &pnskip, &pnsse, ref_best_rd,
-                     plane, bsize, uv_tx_size, cpi->sf.use_fast_coef_costing,
-                     /*recon=*/NULL);
-    if (pnrate == INT_MAX) {
-      is_cost_valid = 0;
-      break;
+    for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
+      if (is_inter_block(mi)) vp9_subtract_plane(x, bsize, plane);
+      txfm_rd_in_plane(cpi, x, &pnrate, &pndist, &pnskip, &pnsse, ref_best_rd,
+                       plane, bsize, uv_tx_size, cpi->sf.use_fast_coef_costing,
+                       /*recon=*/NULL);
+      if (pnrate == INT_MAX) {
+        is_cost_valid = 0;
+        break;
+      }
+      *rate += pnrate;
+      *distortion += pndist;
+      *sse += pnsse;
+      *skippable &= pnskip;
     }
-    *rate += pnrate;
-    *distortion += pndist;
-    *sse += pnsse;
-    *skippable &= pnskip;
   }
 
   if (!is_cost_valid) {
