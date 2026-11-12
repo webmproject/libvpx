@@ -378,6 +378,43 @@ TEST(EncodeAPI, HighBitDepthCapability) {
 #endif
 }
 
+#if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
+TEST(EncodeAPI, ImageSizeSettingNV12) {
+  const unsigned int width = 711;
+  const unsigned int height = 32;
+  vpx_image_t img;
+  ASSERT_EQ(vpx_img_wrap(&img, VPX_IMG_FMT_NV12, width, height,
+                         /*stride_align=*/1, reinterpret_cast<uint8_t *>(1)),
+            &img);
+  const size_t y_size = static_cast<size_t>(img.stride[VPX_PLANE_Y]) * height;
+  const size_t uv_size =
+      static_cast<size_t>(img.stride[VPX_PLANE_U]) * ((height + 1) / 2);
+  auto img_buf = std::make_unique<uint8_t[]>(y_size + uv_size);
+  memset(img_buf.get(), 128, y_size + uv_size);
+  ASSERT_EQ(vpx_img_wrap(&img, VPX_IMG_FMT_NV12, width, height,
+                         /*stride_align=*/1, img_buf.get()),
+            &img);
+
+  for (const auto *iface : kCodecIfaces) {
+    SCOPED_TRACE(vpx_codec_iface_name(iface));
+    vpx_codec_enc_cfg_t cfg;
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, /*usage=*/0),
+              VPX_CODEC_OK);
+    cfg.g_w = width;
+    cfg.g_h = height;
+    cfg.g_lag_in_frames = 0;
+
+    vpx_codec_ctx_t enc;
+    ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+    EXPECT_EQ(vpx_codec_encode(&enc, &img, 0, 1, 0, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    EXPECT_EQ(vpx_codec_encode(&enc, nullptr, -1, 0, 0, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    EXPECT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  }
+}
+#endif  // CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
+
 #if CONFIG_VP8_ENCODER
 TEST(EncodeAPI, ImageSizeSetting) {
   const int width = 711;
