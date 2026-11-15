@@ -4977,6 +4977,77 @@ TEST(EncodeAPI, SvcSimulcastForceKeyFrameBaseLayerDisabled) {
   vpx_img_free(img);
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+
+#if !CONFIG_REALTIME_ONLY
+// Bug: 586165753.
+// Verify that downsizing via vpx_codec_enc_config_set() to non-superblock
+// multiples with multithreading (both tile-MT and row-MT) clears stale
+// MODE_INFO pointers from the border/padding of both mi_grid_base and
+// prev_mi_grid_base.
+TEST(EncodeAPI, Vp9ResizeDownMultithreadStaleMiGrid) {
+  struct Step {
+    unsigned int w;
+    unsigned int h;
+    int frames;
+  };
+  // 1. 1280x128 (1 frame) populates one MI grid and swaps it into
+  //    prev_mi_grid_base; downsizing to 1024x1 (4 tiles, mi_rows = 1) and
+  //    encoding 2 frames swaps that grid back into mi_grid_base on the second
+  //    frame.
+  // 2. 1280x128 (2 frames) populates both ping-pong MI grids; downsizing to
+  //    1027x67 (4 tiles, mi_cols = 129, mi_rows = 9) exercises both bottom and
+  //    right MI_BLOCK_SIZE padding rows/columns across consecutive frames.
+  const Step kSteps[] = {
+    { 1280, 128, 1 },
+    { 1024, 1, 2 },
+    { 1280, 128, 2 },
+    { 1027, 67, 2 },
+  };
+
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  for (int row_mt : { 0, 1 }) {
+    SCOPED_TRACE(row_mt ? "row_mt=1" : "row_mt=0");
+    vpx_codec_enc_cfg_t cfg;
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+    cfg.g_threads = 8;
+    cfg.g_w = kSteps[0].w;
+    cfg.g_h = kSteps[0].h;
+    cfg.g_pass = VPX_RC_ONE_PASS;
+    cfg.g_lag_in_frames = 0;
+    cfg.rc_end_usage = VPX_VBR;
+
+    vpx_codec_ctx_t enc;
+    ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 3), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_TILE_COLUMNS, 2), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_ROW_MT, row_mt), VPX_CODEC_OK);
+
+    vpx_codec_pts_t pts = 0;
+    for (const auto &step : kSteps) {
+      cfg.g_w = step.w;
+      cfg.g_h = step.h;
+      ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK)
+          << vpx_codec_error_detail(&enc);
+
+      vpx_image_t *const img =
+          CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, step.w, step.h);
+      ASSERT_NE(img, nullptr);
+      for (int i = 0; i < step.frames; ++i) {
+        const vpx_enc_frame_flags_t flags = (i == 0) ? VPX_EFLAG_FORCE_KF : 0;
+        ASSERT_EQ(
+            vpx_codec_encode(&enc, img, pts++, 1, flags, VPX_DL_GOOD_QUALITY),
+            VPX_CODEC_OK)
+            << vpx_codec_error_detail(&enc);
+      }
+      vpx_img_free(img);
+    }
+
+    ASSERT_EQ(vpx_codec_encode(&enc, nullptr, 0, 1, 0, VPX_DL_GOOD_QUALITY),
+              VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  }
+}
+#endif  // !CONFIG_REALTIME_ONLY
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace

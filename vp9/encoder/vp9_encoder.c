@@ -870,6 +870,7 @@ static void setup_frame(VP9_COMP *cpi) {
 
 static void vp9_enc_setup_mi(VP9_COMMON *cm) {
   int i;
+  const int mi_grid_size = cm->mi_stride * calc_mi_size(cm->mi_rows);
   cm->mi = cm->mip + cm->mi_stride + 1;
   memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
   cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
@@ -882,8 +883,9 @@ static void vp9_enc_setup_mi(VP9_COMMON *cm) {
   cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
   cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 
-  memset(cm->mi_grid_base, 0,
-         cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
+  memset(cm->mi_grid_base, 0, mi_grid_size * sizeof(*cm->mi_grid_base));
+  memset(cm->prev_mi_grid_base, 0,
+         mi_grid_size * sizeof(*cm->prev_mi_grid_base));
 }
 
 static int vp9_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
