@@ -37,6 +37,10 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_firstpass_stats.h"
 #endif
+#if CONFIG_VP9_DECODER
+#include "vpx/vp8dx.h"
+#include "vpx/vpx_decoder.h"
+#endif
 
 namespace {
 
@@ -4713,6 +4717,264 @@ TEST(EncodeAPI, SvcGetEstimatedPredStaleReference) {
             VPX_CODEC_OK);
   vpx_img_free(img);
 
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+
+struct SvcLayerPkt {
+  vpx_codec_frame_flags_t flags;
+  std::vector<uint8_t> data;
+};
+
+void CollectSvcLayerPktCallback(vpx_codec_cx_pkt *pkt, void *user_data) {
+  if (pkt->kind != VPX_CODEC_CX_FRAME_PKT) return;
+  auto *pkts = static_cast<std::vector<SvcLayerPkt> *>(user_data);
+  SvcLayerPkt out;
+  out.flags = pkt->data.frame.flags;
+  const uint8_t *buf = static_cast<const uint8_t *>(pkt->data.frame.buf);
+  out.data.assign(buf, buf + pkt->data.frame.sz);
+  pkts->push_back(std::move(out));
+}
+
+// Bug: 585027365.
+// Verify that in 3-layer VP9 simulcast mode (INTER_LAYER_PRED_OFF) with SL0
+// disabled (first_spatial_layer_to_encode = 1) and {SL1, SL2} active, forcing
+// a keyframe via VPX_EFLAG_FORCE_KF produces keyframes on both SL1 and SL2,
+// and resets is_key_frame on the subsequent delta frame.
+TEST(EncodeAPI, SvcSimulcastForceKeyFrameBaseLayerDisabled) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = 256;
+  cfg.g_h = 144;
+  cfg.g_lag_in_frames = 0;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.rc_end_usage = VPX_CBR;
+  cfg.kf_mode = VPX_KF_DISABLED;
+  cfg.rc_target_bitrate = 730;
+  cfg.ss_number_layers = 3;
+  cfg.ts_number_layers = 3;
+  cfg.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
+  cfg.ts_rate_decimator[0] = 4;
+  cfg.ts_rate_decimator[1] = 2;
+  cfg.ts_rate_decimator[2] = 1;
+
+  const unsigned int sl_bitrates[3] = { 60, 170, 500 };
+  for (int sl = 0; sl < 3; ++sl) {
+    cfg.ss_target_bitrate[sl] = sl_bitrates[sl];
+    cfg.layer_target_bitrate[3 * sl + 0] = sl_bitrates[sl] * 50 / 100;
+    cfg.layer_target_bitrate[3 * sl + 1] = sl_bitrates[sl] * 70 / 100;
+    cfg.layer_target_bitrate[3 * sl + 2] = sl_bitrates[sl];
+  }
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 7), VPX_CODEC_OK);
+
+  vpx_svc_extra_cfg_t svc_cfg = {};
+  for (int i = 0; i < VPX_MAX_LAYERS; ++i) {
+    svc_cfg.max_quantizers[i] = 56;
+    svc_cfg.min_quantizers[i] = 2;
+  }
+  const int scale_den[3] = { 4, 2, 1 };
+  for (int sl = 0; sl < 3; ++sl) {
+    svc_cfg.scaling_factor_num[sl] = 1;
+    svc_cfg.scaling_factor_den[sl] = scale_den[sl];
+    svc_cfg.speed_per_layer[sl] = 7;
+  }
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+            VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC, 1), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_INTER_LAYER_PRED,
+                              INTER_LAYER_PRED_OFF),
+            VPX_CODEC_OK);
+
+  std::vector<SvcLayerPkt> pkts;
+  vpx_codec_priv_output_cx_pkt_cb_pair_t cbp = { CollectSvcLayerPktCallback,
+                                                 &pkts };
+  ASSERT_EQ(vpx_codec_control(&enc, VP9E_REGISTER_CX_CALLBACK,
+                              reinterpret_cast<void *>(&cbp)),
+            VPX_CODEC_OK);
+
+  vpx_image_t *img = CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, 256, 144);
+  ASSERT_NE(img, nullptr);
+  vpx_codec_pts_t pts = 0;
+
+  // Frame 0: All 3 layers {SL0, SL1, SL2} active, initial keyframe.
+  {
+    vpx_svc_layer_id_t layer_id = {};
+    layer_id.spatial_layer_id = 0;
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+              VPX_CODEC_OK);
+    vpx_svc_ref_frame_config_t ref_cfg = {};
+    for (int sl = 0; sl < 3; ++sl) {
+      ref_cfg.lst_fb_idx[sl] = sl;
+      ref_cfg.reference_last[sl] = 0;
+      ref_cfg.update_buffer_slot[sl] = (1 << sl);
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+              VPX_CODEC_OK);
+    pkts.clear();
+    ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, VPX_EFLAG_FORCE_KF,
+                               VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    ASSERT_EQ(pkts.size(), 3u);
+    for (size_t i = 0; i < 3; ++i) {
+      EXPECT_NE(pkts[i].flags & VPX_FRAME_IS_KEY, 0u);
+    }
+  }
+
+  // Disable SL0, leaving {SL1, SL2} active (first_spatial_layer_to_encode = 1).
+  cfg.rc_target_bitrate = 670;
+  cfg.ss_target_bitrate[0] = 0;
+  for (int tl = 0; tl < 3; ++tl) {
+    cfg.layer_target_bitrate[tl] = 0;
+  }
+  ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+
+  // Frame 1: Delta frame on {SL1, SL2} (TL2).
+  {
+    vpx_svc_layer_id_t layer_id = {};
+    layer_id.spatial_layer_id = 1;
+    layer_id.temporal_layer_id = 2;
+    for (int sl = 0; sl < 3; ++sl) {
+      layer_id.temporal_layer_id_per_spatial[sl] = 2;
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+              VPX_CODEC_OK);
+    vpx_svc_ref_frame_config_t ref_cfg = {};
+    for (int sl = 1; sl < 3; ++sl) {
+      ref_cfg.lst_fb_idx[sl] = sl;
+      ref_cfg.reference_last[sl] = 1;
+      ref_cfg.update_buffer_slot[sl] = 0;
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+              VPX_CODEC_OK);
+    pkts.clear();
+    ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    ASSERT_EQ(pkts.size(), 2u);
+    EXPECT_EQ(pkts[0].flags & VPX_FRAME_IS_KEY, 0u);
+    EXPECT_EQ(pkts[1].flags & VPX_FRAME_IS_KEY, 0u);
+  }
+
+  // Frame 2: Forced keyframe (VPX_EFLAG_FORCE_KF) with SL0 disabled and
+  // {SL1, SL2} active. Both SL1 and SL2 must emit keyframes.
+  std::vector<SvcLayerPkt> kf_pkts;
+  {
+    vpx_svc_layer_id_t layer_id = {};
+    layer_id.spatial_layer_id = 1;
+    layer_id.temporal_layer_id = 0;
+    for (int sl = 0; sl < 3; ++sl) {
+      layer_id.temporal_layer_id_per_spatial[sl] = 0;
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+              VPX_CODEC_OK);
+    vpx_svc_ref_frame_config_t ref_cfg = {};
+    for (int sl = 1; sl < 3; ++sl) {
+      ref_cfg.lst_fb_idx[sl] = sl;
+      ref_cfg.reference_last[sl] = 0;
+      ref_cfg.update_buffer_slot[sl] = (1 << sl);
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+              VPX_CODEC_OK);
+    pkts.clear();
+    ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, VPX_EFLAG_FORCE_KF,
+                               VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    ASSERT_EQ(pkts.size(), 2u);
+    for (size_t i = 0; i < 2; ++i) {
+      EXPECT_NE(pkts[i].flags & VPX_FRAME_IS_KEY, 0u) << "layer index " << i;
+      ASSERT_GE(pkts[i].data.size(), 4u);
+      // Profile 0 keyframe uncompressed header: frame_type bit (bit 2) == 0,
+      // followed by VP9 sync code 0x49, 0x83, 0x42.
+      EXPECT_EQ(pkts[i].data[0] & 0x04, 0) << "layer index " << i;
+      EXPECT_EQ(pkts[i].data[1], 0x49) << "layer index " << i;
+      EXPECT_EQ(pkts[i].data[2], 0x83) << "layer index " << i;
+      EXPECT_EQ(pkts[i].data[3], 0x42) << "layer index " << i;
+    }
+    kf_pkts = pkts;
+  }
+
+  // Frame 3: Subsequent delta frame on {SL1, SL2} must not be marked key.
+  std::vector<SvcLayerPkt> delta_pkts;
+  {
+    vpx_svc_layer_id_t layer_id = {};
+    layer_id.spatial_layer_id = 1;
+    layer_id.temporal_layer_id = 2;
+    for (int sl = 0; sl < 3; ++sl) {
+      layer_id.temporal_layer_id_per_spatial[sl] = 2;
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+              VPX_CODEC_OK);
+    vpx_svc_ref_frame_config_t ref_cfg = {};
+    for (int sl = 1; sl < 3; ++sl) {
+      ref_cfg.lst_fb_idx[sl] = sl;
+      ref_cfg.reference_last[sl] = 1;
+      ref_cfg.update_buffer_slot[sl] = 0;
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+              VPX_CODEC_OK);
+    pkts.clear();
+    ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    ASSERT_EQ(pkts.size(), 2u);
+    EXPECT_EQ(pkts[0].flags & VPX_FRAME_IS_KEY, 0u);
+    EXPECT_EQ(pkts[1].flags & VPX_FRAME_IS_KEY, 0u);
+    delta_pkts = pkts;
+  }
+
+  // Frame 4: Skip both SL0 and SL1 (first_spatial_layer_to_encode = 2) on a
+  // TL0 delta frame; SL1's prior TL0 keyframe state must be cleared and SL2
+  // must emit a delta frame.
+  {
+    vpx_svc_layer_id_t layer_id = {};
+    layer_id.spatial_layer_id = 2;
+    layer_id.temporal_layer_id = 0;
+    for (int sl = 0; sl < 3; ++sl) {
+      layer_id.temporal_layer_id_per_spatial[sl] = 0;
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+              VPX_CODEC_OK);
+    vpx_svc_ref_frame_config_t ref_cfg = {};
+    ref_cfg.lst_fb_idx[2] = 2;
+    ref_cfg.reference_last[2] = 1;
+    ref_cfg.update_buffer_slot[2] = (1 << 2);
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+              VPX_CODEC_OK);
+    pkts.clear();
+    ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+              VPX_CODEC_OK);
+    ASSERT_EQ(pkts.size(), 1u);
+    EXPECT_EQ(pkts[0].flags & VPX_FRAME_IS_KEY, 0u);
+    ASSERT_GE(pkts[0].data.size(), 1u);
+    EXPECT_NE(pkts[0].data[0] & 0x04, 0);
+  }
+
+#if CONFIG_VP9_DECODER
+  // Verify both SL1 and SL2 are independently decodable starting from the
+  // forced keyframe on Frame 2.
+  for (size_t i = 0; i < 2; ++i) {
+    vpx_codec_ctx_t dec;
+    ASSERT_EQ(vpx_codec_dec_init(&dec, vpx_codec_vp9_dx(), nullptr, 0),
+              VPX_CODEC_OK);
+    EXPECT_EQ(
+        vpx_codec_decode(&dec, kf_pkts[i].data.data(),
+                         static_cast<unsigned int>(kf_pkts[i].data.size()),
+                         nullptr, 0),
+        VPX_CODEC_OK)
+        << "layer index " << i;
+    EXPECT_EQ(
+        vpx_codec_decode(&dec, delta_pkts[i].data.data(),
+                         static_cast<unsigned int>(delta_pkts[i].data.size()),
+                         nullptr, 0),
+        VPX_CODEC_OK)
+        << "layer index " << i;
+    ASSERT_EQ(vpx_codec_destroy(&dec), VPX_CODEC_OK);
+  }
+#endif  // CONFIG_VP9_DECODER
+
+  vpx_img_free(img);
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
 #endif  // CONFIG_VP9_ENCODER
