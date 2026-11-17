@@ -94,7 +94,8 @@ typedef struct SVC {
   // Temp buffer used for 2-stage down-sampling, for real-time mode.
   YV12_BUFFER_CONFIG scaled_temp;
   int scaled_one_half;
-  int scaled_temp_is_alloc;
+  INTERP_FILTER scaled_one_half_filter;
+  int scaled_one_half_phase;
 
   // Layer context used for rate control in one pass temporal CBR mode or
   // two pass spatial mode.

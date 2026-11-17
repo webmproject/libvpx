@@ -1329,23 +1329,6 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
 
-  // For 1 pass cbr: allocate scaled_frame that may be used as an intermediate
-  // buffer for a 2 stage down-sampling: two stages of 1:2 down-sampling for a
-  // target of 1/4x1/4. number_spatial_layers must be greater than 2.
-  if (is_one_pass_svc(cpi) && !cpi->svc.scaled_temp_is_alloc &&
-      cpi->svc.number_spatial_layers > 2) {
-    cpi->svc.scaled_temp_is_alloc = 1;
-    if (vpx_realloc_frame_buffer(
-            &cpi->svc.scaled_temp, cm->width >> 1, cm->height >> 1,
-            cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-            cm->use_highbitdepth,
-#endif
-            VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment, NULL, NULL, NULL))
-      vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
-                         "Failed to allocate scaled_frame for svc ");
-  }
-
   if (vpx_realloc_frame_buffer(&cpi->scaled_last_source, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -3984,29 +3967,51 @@ static YV12_BUFFER_CONFIG *svc_twostage_scale(
     VP9_COMMON *cm, YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled,
     YV12_BUFFER_CONFIG *scaled_temp, INTERP_FILTER filter_type,
     int phase_scaler, INTERP_FILTER filter_type2, int phase_scaler2) {
-  if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
-      cm->mi_rows * MI_SIZE != unscaled->y_height) {
+  if (vpx_realloc_frame_buffer(scaled_temp, cm->width << 1, cm->height << 1,
+                               cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-    if (cm->bit_depth == VPX_BITS_8) {
-      vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
-                                 phase_scaler2);
-      vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type,
-                                 phase_scaler);
-    } else {
-      scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth,
-                             filter_type2, phase_scaler2);
-      scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth,
-                             filter_type, phase_scaler);
-    }
-#else
+                               cm->use_highbitdepth,
+#endif
+                               VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                               NULL, NULL, NULL))
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate two-stage scaling buffer");
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->bit_depth == VPX_BITS_8) {
     vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
                                phase_scaler2);
     vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type, phase_scaler);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    return scaled;
   } else {
-    return unscaled;
+    scale_and_extend_frame(unscaled, scaled_temp, (int)cm->bit_depth,
+                           filter_type2, phase_scaler2);
+    scale_and_extend_frame(scaled_temp, scaled, (int)cm->bit_depth, filter_type,
+                           phase_scaler);
   }
+#else
+  vp9_scale_and_extend_frame(unscaled, scaled_temp, filter_type2,
+                             phase_scaler2);
+  vp9_scale_and_extend_frame(scaled_temp, scaled, filter_type, phase_scaler);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  return scaled;
+}
+
+static int is_quarter_scale(const VP9_COMP *cpi,
+                            const YV12_BUFFER_CONFIG *unscaled) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const SVC *const svc = &cpi->svc;
+  const LAYER_CONTEXT *lc;
+  int w = 0, h = 0;
+  if (!is_one_pass_svc(cpi) ||
+      svc->spatial_layer_id + 1 >= svc->number_spatial_layers ||
+      unscaled->y_crop_width != cm->width << 2 ||
+      unscaled->y_crop_height != cm->height << 2)
+    return 0;
+  lc = &svc->layer_context[(svc->spatial_layer_id + 1) *
+                               svc->number_temporal_layers +
+                           svc->temporal_layer_id];
+  get_layer_resolution(cpi->oxcf.width, cpi->oxcf.height,
+                       lc->scaling_factor_num, lc->scaling_factor_den, &w, &h);
+  return w == cm->width << 1 && h == cm->height << 1;
 }
 
 static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
@@ -4041,24 +4046,28 @@ static int encode_without_recode_loop(VP9_COMP *cpi, size_t *size,
 
   set_frame_size(cpi);
 
-  if (is_one_pass_svc(cpi) &&
-      cpi->un_scaled_source->y_width == cm->width << 2 &&
-      cpi->un_scaled_source->y_height == cm->height << 2 &&
-      svc->scaled_temp.y_width == cm->width << 1 &&
-      svc->scaled_temp.y_height == cm->height << 1) {
+  if (is_quarter_scale(cpi, cpi->un_scaled_source)) {
     // For svc, if it is a 1/4x1/4 downscaling, do a two-stage scaling to take
     // advantage of the 1:2 optimized scaler. In the process, the 1/2x1/2
     // result will be saved in scaled_temp and might be used later.
-    const INTERP_FILTER filter_scaler2 = svc->downsample_filter_type[1];
-    const int phase_scaler2 = svc->downsample_filter_phase[1];
+    const INTERP_FILTER filter_scaler2 =
+        svc->downsample_filter_type[svc->spatial_layer_id + 1];
+    const int phase_scaler2 =
+        svc->downsample_filter_phase[svc->spatial_layer_id + 1];
     cpi->Source = svc_twostage_scale(
         cm, cpi->un_scaled_source, &cpi->scaled_source, &svc->scaled_temp,
         filter_scaler, phase_scaler, filter_scaler2, phase_scaler2);
     svc->scaled_one_half = 1;
+    svc->scaled_one_half_filter = filter_scaler2;
+    svc->scaled_one_half_phase = phase_scaler2;
   } else if (is_one_pass_svc(cpi) &&
-             cpi->un_scaled_source->y_width == cm->width << 1 &&
-             cpi->un_scaled_source->y_height == cm->height << 1 &&
-             svc->scaled_one_half) {
+             cpi->un_scaled_source->y_crop_width == cm->width << 1 &&
+             cpi->un_scaled_source->y_crop_height == cm->height << 1 &&
+             svc->scaled_one_half &&
+             svc->scaled_temp.y_crop_width == cm->width &&
+             svc->scaled_temp.y_crop_height == cm->height &&
+             svc->scaled_one_half_filter == filter_scaler &&
+             svc->scaled_one_half_phase == phase_scaler) {
     // If the spatial layer is 1/2x1/2 and the scaling is already done in the
     // two-stage scaling, use the result directly.
     cpi->Source = &svc->scaled_temp;

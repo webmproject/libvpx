@@ -42,7 +42,6 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->use_partition_reuse = 0;
   svc->use_gf_temporal_ref = 1;
   svc->use_gf_temporal_ref_current_layer = 0;
-  svc->scaled_temp_is_alloc = 0;
   svc->scaled_one_half = 0;
   svc->current_superframe = 0;
   svc->non_reference_frame = 0;
@@ -852,6 +851,8 @@ int vp9_one_pass_svc_start_layer(VP9_COMP *const cpi) {
   // first_spatial_layer_to_encode.
   if (svc->spatial_layer_id == svc->first_spatial_layer_to_encode) {
     vp9_zero(svc->drop_spatial_layer);
+    // current_superframe is not incremented on a full superframe drop.
+    svc->scaled_one_half = 0;
     // TODO(jianj/marpan): Investigate why setting svc->lst/gld/alt_fb_idx
     // causes an issue with frame dropping and temporal layers, when the frame
     // flags are passed via the encode call (bypass mode). Issue is that we're
@@ -904,12 +905,23 @@ int vp9_one_pass_svc_start_layer(VP9_COMP *const cpi) {
                        scaling_factor_den, &width, &height);
 
   // Use Eightap_smooth for low resolutions.
-  if (width * height <= 320 * 240)
-    svc->downsample_filter_type[svc->spatial_layer_id] = EIGHTTAP_SMOOTH;
-  // For scale factors > 0.75, set the phase to 0 (aligns decimated pixel
-  // to source pixel).
-  if (scaling_factor_num > ((int64_t)3 * scaling_factor_den) >> 2)
-    svc->downsample_filter_phase[svc->spatial_layer_id] = 0;
+  for (int sl = 0; sl < svc->number_spatial_layers; ++sl) {
+    const LAYER_CONTEXT *const lc_sl =
+        &svc->layer_context[sl * svc->number_temporal_layers +
+                            svc->temporal_layer_id];
+    int num = scaling_factor_num, den = scaling_factor_den;
+    int w = width, h = height;
+    if (sl != svc->spatial_layer_id) {
+      num = lc_sl->scaling_factor_num;
+      den = lc_sl->scaling_factor_den;
+      get_layer_resolution(cpi->oxcf.width, cpi->oxcf.height, num, den, &w, &h);
+    }
+    svc->downsample_filter_type[sl] =
+        ((int64_t)w * h <= 320 * 240) ? EIGHTTAP_SMOOTH : BILINEAR;
+    // For scale factors > 0.75, set the phase to 0 (aligns decimated pixel
+    // to source pixel).
+    svc->downsample_filter_phase[sl] = (num > ((int64_t)3 * den) >> 2) ? 0 : 8;
+  }
 
   // The usage of use_base_mv or partition_reuse assumes down-scale of 2x2.
   // For now, turn off use of base motion vectors and partition reuse if the
