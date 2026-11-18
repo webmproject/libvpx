@@ -37,6 +37,10 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_firstpass_stats.h"
 #endif
+#if CONFIG_VP9_DECODER
+#include "vpx/vp8dx.h"
+#include "vpx/vpx_decoder.h"
+#endif
 
 namespace {
 
@@ -4527,6 +4531,279 @@ TEST(EncodeAPI, SvcGetEstimatedPredStaleReference) {
 
   ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
 }
+
+struct SvcLayerPkt {
+  vpx_codec_frame_flags_t flags;
+  std::vector<uint8_t> data;
+};
+
+void CollectSvcLayerPktCallback(vpx_codec_cx_pkt *pkt, void *user_data) {
+  if (pkt->kind != VPX_CODEC_CX_FRAME_PKT) return;
+  auto *pkts = static_cast<std::vector<SvcLayerPkt> *>(user_data);
+  SvcLayerPkt out;
+  out.flags = pkt->data.frame.flags;
+  const uint8_t *buf = static_cast<const uint8_t *>(pkt->data.frame.buf);
+  out.data.assign(buf, buf + pkt->data.frame.sz);
+  pkts->push_back(std::move(out));
+}
+
+// Bug: 586941063.
+// Verify that deactivating lower spatial layers in-place
+// (first_spatial_layer_to_encode > 0) does not read stale base_mv or
+// partitions from skipped lower spatial layers.
+TEST(EncodeAPI, SvcDeactivateLowerLayersBaseMv) {
+  constexpr unsigned int kWidth = 1280;
+  constexpr unsigned int kHeight = 720;
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+
+  for (int row_mt : { 0, 1 }) {
+    SCOPED_TRACE(row_mt ? "row_mt=1" : "row_mt=0");
+    vpx_codec_enc_cfg_t cfg;
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+    cfg.g_w = kWidth;
+    cfg.g_h = kHeight;
+    cfg.g_threads = 4;
+    cfg.g_error_resilient = VPX_ERROR_RESILIENT_DEFAULT;
+    cfg.g_lag_in_frames = 0;
+    cfg.g_pass = VPX_RC_ONE_PASS;
+    cfg.rc_end_usage = VPX_CBR;
+    cfg.kf_mode = VPX_KF_DISABLED;
+    cfg.rc_dropframe_thresh = 0;
+    cfg.ss_number_layers = 3;
+    cfg.ts_number_layers = 3;
+    cfg.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
+    cfg.ts_rate_decimator[0] = 4;
+    cfg.ts_rate_decimator[1] = 2;
+    cfg.ts_rate_decimator[2] = 1;
+
+    auto set_active_bitrates = [&](unsigned int br0, unsigned int br1,
+                                   unsigned int br2) {
+      const unsigned int sl_br[3] = { br0, br1, br2 };
+      cfg.rc_target_bitrate = br0 + br1 + br2;
+      for (int sl = 0; sl < 3; ++sl) {
+        cfg.ss_target_bitrate[sl] = sl_br[sl];
+        cfg.layer_target_bitrate[3 * sl + 0] = sl_br[sl] * 50 / 100;
+        cfg.layer_target_bitrate[3 * sl + 1] = sl_br[sl] * 70 / 100;
+        cfg.layer_target_bitrate[3 * sl + 2] = sl_br[sl];
+      }
+    };
+    set_active_bitrates(150, 400, 1200);
+
+    vpx_codec_ctx_t enc;
+    ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 7), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_ROW_MT, row_mt), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_TILE_COLUMNS, 2), VPX_CODEC_OK);
+
+    vpx_svc_extra_cfg_t svc_cfg = {};
+    for (int i = 0; i < VPX_MAX_LAYERS; ++i) {
+      svc_cfg.max_quantizers[i] = 56;
+      svc_cfg.min_quantizers[i] = 2;
+    }
+    const int scale_den[3] = { 4, 2, 1 };
+    for (int sl = 0; sl < 3; ++sl) {
+      svc_cfg.scaling_factor_num[sl] = 1;
+      svc_cfg.scaling_factor_den[sl] = scale_den[sl];
+      svc_cfg.speed_per_layer[sl] = 7;
+    }
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_PARAMETERS, &svc_cfg),
+              VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC, 1), VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_INTER_LAYER_PRED,
+                                INTER_LAYER_PRED_OFF),
+              VPX_CODEC_OK);
+
+    std::vector<SvcLayerPkt> pkts;
+    vpx_codec_priv_output_cx_pkt_cb_pair_t cbp = { CollectSvcLayerPktCallback,
+                                                   &pkts };
+    ASSERT_EQ(vpx_codec_control(&enc, VP9E_REGISTER_CX_CALLBACK,
+                                reinterpret_cast<void *>(&cbp)),
+              VPX_CODEC_OK);
+
+    vpx_image_t *img =
+        vpx_img_alloc(nullptr, VPX_IMG_FMT_I420, kWidth, kHeight, 16);
+    ASSERT_NE(img, nullptr);
+    auto fill_pattern = [&](int frame_idx) {
+      for (unsigned int y = 0; y < kHeight; ++y) {
+        for (unsigned int x = 0; x < kWidth; ++x) {
+          img->planes[VPX_PLANE_Y][y * img->stride[VPX_PLANE_Y] + x] =
+              static_cast<uint8_t>((x * 7 + y * 13 + frame_idx * 29) & 0xff);
+        }
+      }
+      for (int p : { VPX_PLANE_U, VPX_PLANE_V }) {
+        for (unsigned int y = 0; y < kHeight / 2; ++y) {
+          for (unsigned int x = 0; x < kWidth / 2; ++x) {
+            img->planes[p][y * img->stride[p] + x] =
+                static_cast<uint8_t>((x * 3 + y * 5 + frame_idx * 11) & 0xff);
+          }
+        }
+      }
+    };
+
+    vpx_codec_pts_t pts = 0;
+    std::vector<std::vector<uint8_t>> sl1_stream;
+    std::vector<std::vector<uint8_t>> sl2_stream;
+
+    // Frame 0: Encode all 3 spatial layers to cache SL1 geometry (640x360).
+    {
+      fill_pattern(0);
+      vpx_svc_layer_id_t layer_id = {};
+      layer_id.spatial_layer_id = 0;
+      ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+                VPX_CODEC_OK);
+      vpx_svc_ref_frame_config_t ref_cfg = {};
+      for (int sl = 0; sl < 3; ++sl) {
+        ref_cfg.lst_fb_idx[sl] = sl;
+        ref_cfg.reference_last[sl] = 0;
+        ref_cfg.update_buffer_slot[sl] = (1 << sl);
+      }
+      ASSERT_EQ(
+          vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+          VPX_CODEC_OK);
+      pkts.clear();
+      ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, VPX_EFLAG_FORCE_KF,
+                                 VPX_DL_REALTIME),
+                VPX_CODEC_OK);
+      ASSERT_EQ(pkts.size(), 3u);
+      sl1_stream.push_back(pkts[1].data);
+      sl2_stream.push_back(pkts[2].data);
+    }
+
+    // Frame 1: Encode SL0 (320x180) only so cm->prev_frame holds a 320x180
+    // MV buffer while SL1 and SL2 are skipped.
+    {
+      fill_pattern(1);
+      set_active_bitrates(150, 0, 0);
+      ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+      vpx_svc_layer_id_t layer_id = {};
+      layer_id.spatial_layer_id = 0;
+      layer_id.temporal_layer_id = 2;
+      for (int sl = 0; sl < 3; ++sl) {
+        layer_id.temporal_layer_id_per_spatial[sl] = 2;
+      }
+      ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+                VPX_CODEC_OK);
+      vpx_svc_ref_frame_config_t ref_cfg = {};
+      ref_cfg.lst_fb_idx[0] = 0;
+      ref_cfg.reference_last[0] = 1;
+      ref_cfg.update_buffer_slot[0] = (1 << 3);
+      ASSERT_EQ(
+          vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+          VPX_CODEC_OK);
+      pkts.clear();
+      ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+                VPX_CODEC_OK);
+      ASSERT_EQ(pkts.size(), 3u);
+      EXPECT_GT(pkts[0].data.size(), 0u);
+      EXPECT_TRUE(pkts[1].data.empty());
+      EXPECT_TRUE(pkts[2].data.empty());
+    }
+
+    // Frames 2-3: Deactivate SL0 and SL1 (first_spatial_layer_to_encode = 2);
+    // SL2 must not read stale SL1 base_mv or partitions.
+    set_active_bitrates(0, 0, 1200);
+    ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+    for (int tl : { 2, 0 }) {
+      fill_pattern(static_cast<int>(pts));
+      vpx_svc_layer_id_t layer_id = {};
+      layer_id.spatial_layer_id = 2;
+      layer_id.temporal_layer_id = tl;
+      for (int sl = 0; sl < 3; ++sl) {
+        layer_id.temporal_layer_id_per_spatial[sl] = tl;
+      }
+      ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+                VPX_CODEC_OK);
+      vpx_svc_ref_frame_config_t ref_cfg = {};
+      ref_cfg.lst_fb_idx[2] = 2;
+      ref_cfg.reference_last[2] = 1;
+      ref_cfg.update_buffer_slot[2] = (tl == 0) ? (1 << 2) : 0;
+      ASSERT_EQ(
+          vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+          VPX_CODEC_OK);
+      pkts.clear();
+      ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+                VPX_CODEC_OK);
+      ASSERT_EQ(pkts.size(), 1u);
+      sl2_stream.push_back(pkts[0].data);
+    }
+
+    // Frames 4-5: Encode SL0-only, then {SL1, SL2} with SL0 deactivated
+    // (first_spatial_layer_to_encode = 1); SL1 skips base_mv while populating
+    // MVs and partitions for SL2.
+    {
+      fill_pattern(static_cast<int>(pts));
+      set_active_bitrates(150, 0, 0);
+      ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+      vpx_svc_layer_id_t layer_id = {};
+      layer_id.spatial_layer_id = 0;
+      ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+                VPX_CODEC_OK);
+      vpx_svc_ref_frame_config_t ref_cfg = {};
+      ref_cfg.lst_fb_idx[0] = 0;
+      ref_cfg.reference_last[0] = 1;
+      ref_cfg.update_buffer_slot[0] = (1 << 4);
+      ASSERT_EQ(
+          vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+          VPX_CODEC_OK);
+      pkts.clear();
+      ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+                VPX_CODEC_OK);
+      ASSERT_EQ(pkts.size(), 3u);
+      EXPECT_GT(pkts[0].data.size(), 0u);
+      EXPECT_TRUE(pkts[1].data.empty());
+      EXPECT_TRUE(pkts[2].data.empty());
+    }
+    {
+      fill_pattern(static_cast<int>(pts));
+      set_active_bitrates(0, 400, 1200);
+      ASSERT_EQ(vpx_codec_enc_config_set(&enc, &cfg), VPX_CODEC_OK);
+      vpx_svc_layer_id_t layer_id = {};
+      layer_id.spatial_layer_id = 1;
+      layer_id.temporal_layer_id = 1;
+      for (int sl = 0; sl < 3; ++sl) {
+        layer_id.temporal_layer_id_per_spatial[sl] = 1;
+      }
+      ASSERT_EQ(vpx_codec_control(&enc, VP9E_SET_SVC_LAYER_ID, &layer_id),
+                VPX_CODEC_OK);
+      vpx_svc_ref_frame_config_t ref_cfg = {};
+      for (int sl = 1; sl < 3; ++sl) {
+        ref_cfg.lst_fb_idx[sl] = sl;
+        ref_cfg.reference_last[sl] = 1;
+        ref_cfg.update_buffer_slot[sl] = (1 << sl);
+      }
+      ASSERT_EQ(
+          vpx_codec_control(&enc, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+          VPX_CODEC_OK);
+      pkts.clear();
+      ASSERT_EQ(vpx_codec_encode(&enc, img, pts++, 1, 0, VPX_DL_REALTIME),
+                VPX_CODEC_OK);
+      ASSERT_EQ(pkts.size(), 2u);
+      sl1_stream.push_back(pkts[0].data);
+      sl2_stream.push_back(pkts[1].data);
+    }
+
+#if CONFIG_VP9_DECODER
+    // Verify both SL1 and SL2 streams decode cleanly.
+    for (const auto *stream : { &sl1_stream, &sl2_stream }) {
+      vpx_codec_ctx_t dec;
+      ASSERT_EQ(vpx_codec_dec_init(&dec, vpx_codec_vp9_dx(), nullptr, 0),
+                VPX_CODEC_OK);
+      for (const auto &frame : *stream) {
+        EXPECT_EQ(vpx_codec_decode(&dec, frame.data(),
+                                   static_cast<unsigned int>(frame.size()),
+                                   nullptr, 0),
+                  VPX_CODEC_OK);
+      }
+      ASSERT_EQ(vpx_codec_destroy(&dec), VPX_CODEC_OK);
+    }
+#endif  // CONFIG_VP9_DECODER
+
+    vpx_img_free(img);
+    ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+  }
+}
+
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
