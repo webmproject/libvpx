@@ -681,6 +681,7 @@ WRAP_HIGHBD_FUNC(vp9_highbd_apply_temporal_filter_c, 12)
 INSTANTIATE_TEST_SUITE_P(
     C, YUVTemporalFilterTest,
     ::testing::Values(
+        TemporalFilterWithBd(&vp9_apply_temporal_filter_c, 8),
         TemporalFilterWithBd(&wrap_vp9_highbd_apply_temporal_filter_c_10, 10),
         TemporalFilterWithBd(&wrap_vp9_highbd_apply_temporal_filter_c_12, 12)));
 #if HAVE_SSE4_1
@@ -690,11 +691,25 @@ WRAP_HIGHBD_FUNC(vp9_highbd_apply_temporal_filter_sse4_1, 12)
 INSTANTIATE_TEST_SUITE_P(
     SSE4_1, YUVTemporalFilterTest,
     ::testing::Values(
+        TemporalFilterWithBd(&vp9_apply_temporal_filter_sse4_1, 8),
         TemporalFilterWithBd(&wrap_vp9_highbd_apply_temporal_filter_sse4_1_10,
                              10),
         TemporalFilterWithBd(&wrap_vp9_highbd_apply_temporal_filter_sse4_1_12,
                              12)));
 #endif  // HAVE_SSE4_1
+#if HAVE_AVX2
+WRAP_HIGHBD_FUNC(vp9_highbd_apply_temporal_filter_avx2, 10)
+WRAP_HIGHBD_FUNC(vp9_highbd_apply_temporal_filter_avx2, 12)
+
+INSTANTIATE_TEST_SUITE_P(
+    AVX2, YUVTemporalFilterTest,
+    ::testing::Values(
+        TemporalFilterWithBd(&vp9_apply_temporal_filter_avx2, 8),
+        TemporalFilterWithBd(&wrap_vp9_highbd_apply_temporal_filter_avx2_10,
+                             10),
+        TemporalFilterWithBd(&wrap_vp9_highbd_apply_temporal_filter_avx2_12,
+                             12)));
+#endif  // HAVE_AVX2
 #if HAVE_NEON
 WRAP_HIGHBD_FUNC(vp9_highbd_apply_temporal_filter_neon, 10)
 WRAP_HIGHBD_FUNC(vp9_highbd_apply_temporal_filter_neon, 12)
@@ -717,6 +732,11 @@ INSTANTIATE_TEST_SUITE_P(SSE4_1, YUVTemporalFilterTest,
                          ::testing::Values(TemporalFilterWithBd(
                              &vp9_apply_temporal_filter_sse4_1, 8)));
 #endif  // HAVE_SSE4_1
+#if HAVE_AVX2
+INSTANTIATE_TEST_SUITE_P(AVX2, YUVTemporalFilterTest,
+                         ::testing::Values(TemporalFilterWithBd(
+                             &vp9_apply_temporal_filter_avx2, 8)));
+#endif  // HAVE_AVX2
 #if HAVE_NEON
 INSTANTIATE_TEST_SUITE_P(NEON, YUVTemporalFilterTest,
                          ::testing::Values(TemporalFilterWithBd(
