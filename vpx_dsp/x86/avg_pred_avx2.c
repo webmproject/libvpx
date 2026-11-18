@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <immintrin.h>
 
+#include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 
 void vpx_comp_avg_pred_avx2(uint8_t *comp_pred, const uint8_t *pred, int width,
@@ -109,3 +110,95 @@ void vpx_comp_avg_pred_avx2(uint8_t *comp_pred, const uint8_t *pred, int width,
     vpx_comp_avg_pred_sse2(comp_pred, pred, width, height, ref, ref_stride);
   }
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void vpx_highbd_comp_avg_pred_avx2(uint16_t *comp_pred, const uint16_t *pred,
+                                   int width, int height, const uint16_t *ref,
+                                   int ref_stride) {
+  int row = 0;
+  // Use unaligned 256-bit loads/stores to avoid requiring 32-byte alignment
+  // from callers (matching vpx_highbd_comp_avg_pred_sse2).
+  assert(height > 0);
+
+  if (width == 8 && (height & 1) == 0) {
+    do {
+      const __m256i p = _mm256_loadu_si256((const __m256i *)pred);
+      const __m128i r0 = _mm_loadu_si128((const __m128i *)ref);
+      const __m128i r1 = _mm_loadu_si128((const __m128i *)(ref + ref_stride));
+      const __m256i r =
+          _mm256_inserti128_si256(_mm256_castsi128_si256(r0), r1, 1);
+      _mm256_storeu_si256((__m256i *)comp_pred, _mm256_avg_epu16(p, r));
+
+      row += 2;
+      comp_pred += 16;
+      pred += 16;
+      ref += 2 * ref_stride;
+    } while (row < height);
+  } else if (width == 16 && (height & 1) == 0) {
+    do {
+      const __m256i p0 = _mm256_loadu_si256((const __m256i *)pred);
+      const __m256i p1 = _mm256_loadu_si256((const __m256i *)(pred + 16));
+      const __m256i r0 = _mm256_loadu_si256((const __m256i *)ref);
+      const __m256i r1 =
+          _mm256_loadu_si256((const __m256i *)(ref + ref_stride));
+      const __m256i avg0 = _mm256_avg_epu16(p0, r0);
+      const __m256i avg1 = _mm256_avg_epu16(p1, r1);
+      _mm256_storeu_si256((__m256i *)comp_pred, avg0);
+      _mm256_storeu_si256((__m256i *)(comp_pred + 16), avg1);
+
+      row += 2;
+      comp_pred += 32;
+      pred += 32;
+      ref += 2 * ref_stride;
+    } while (row < height);
+  } else if (width == 32) {
+    do {
+      const __m256i p0 = _mm256_loadu_si256((const __m256i *)pred);
+      const __m256i p1 = _mm256_loadu_si256((const __m256i *)(pred + 16));
+      const __m256i r0 = _mm256_loadu_si256((const __m256i *)ref);
+      const __m256i r1 = _mm256_loadu_si256((const __m256i *)(ref + 16));
+      const __m256i avg0 = _mm256_avg_epu16(p0, r0);
+      const __m256i avg1 = _mm256_avg_epu16(p1, r1);
+      _mm256_storeu_si256((__m256i *)comp_pred, avg0);
+      _mm256_storeu_si256((__m256i *)(comp_pred + 16), avg1);
+
+      ++row;
+      comp_pred += 32;
+      pred += 32;
+      ref += ref_stride;
+    } while (row < height);
+  } else if (width >= 64 && (width & 63) == 0) {
+    do {
+      int j = 0;
+      do {
+        const __m256i p0 = _mm256_loadu_si256((const __m256i *)(pred + j));
+        const __m256i p1 = _mm256_loadu_si256((const __m256i *)(pred + j + 16));
+        const __m256i p2 = _mm256_loadu_si256((const __m256i *)(pred + j + 32));
+        const __m256i p3 = _mm256_loadu_si256((const __m256i *)(pred + j + 48));
+        const __m256i r0 = _mm256_loadu_si256((const __m256i *)(ref + j));
+        const __m256i r1 = _mm256_loadu_si256((const __m256i *)(ref + j + 16));
+        const __m256i r2 = _mm256_loadu_si256((const __m256i *)(ref + j + 32));
+        const __m256i r3 = _mm256_loadu_si256((const __m256i *)(ref + j + 48));
+        const __m256i avg0 = _mm256_avg_epu16(p0, r0);
+        const __m256i avg1 = _mm256_avg_epu16(p1, r1);
+        const __m256i avg2 = _mm256_avg_epu16(p2, r2);
+        const __m256i avg3 = _mm256_avg_epu16(p3, r3);
+        _mm256_storeu_si256((__m256i *)(comp_pred + j), avg0);
+        _mm256_storeu_si256((__m256i *)(comp_pred + j + 16), avg1);
+        _mm256_storeu_si256((__m256i *)(comp_pred + j + 32), avg2);
+        _mm256_storeu_si256((__m256i *)(comp_pred + j + 48), avg3);
+        j += 64;
+      } while (j < width);
+      ++row;
+      comp_pred += width;
+      pred += width;
+      ref += ref_stride;
+    } while (row < height);
+  } else if (width == 4 && (height & 1) == 0) {
+    vpx_highbd_comp_avg_pred_sse2(comp_pred, pred, width, height, ref,
+                                  ref_stride);
+  } else {
+    vpx_highbd_comp_avg_pred_c(comp_pred, pred, width, height, ref, ref_stride);
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH

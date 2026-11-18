@@ -1586,7 +1586,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vpx_highbd_12_mse8x8 neon sve/, "$sse2_asm";
 
   add_proto qw/void vpx_highbd_comp_avg_pred/, "uint16_t *comp_pred, const uint16_t *pred, int width, int height, const uint16_t *ref, int ref_stride";
-  specialize qw/vpx_highbd_comp_avg_pred neon sse2/;
+  specialize qw/vpx_highbd_comp_avg_pred neon sse2 avx2/;
 
   #
   # Subpixel Variance

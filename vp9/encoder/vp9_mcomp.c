@@ -291,7 +291,7 @@ static unsigned int setup_center_error(
   uint64_t besterr;
   if (second_pred != NULL) {
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      DECLARE_ALIGNED(16, uint16_t, comp_pred16[64 * 64]);
+      DECLARE_ALIGNED(32, uint16_t, comp_pred16[64 * 64]);
       vpx_highbd_comp_avg_pred(comp_pred16, CONVERT_TO_SHORTPTR(second_pred), w,
                                h, CONVERT_TO_SHORTPTR(y + offset), y_stride);
       besterr =
@@ -616,12 +616,12 @@ static int accurate_sub_pel_search(
   assert(sf->x_step_q4 == 16 && sf->y_step_q4 == 16);
   assert(w != 0 && h != 0);
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    DECLARE_ALIGNED(16, uint16_t, pred16[64 * 64]);
+    DECLARE_ALIGNED(32, uint16_t, pred16[64 * 64]);
     vp9_highbd_build_inter_predictor(CONVERT_TO_SHORTPTR(pre_address), y_stride,
                                      pred16, w, this_mv, sf, w, h, 0, kernel,
                                      MV_PRECISION_Q3, 0, 0, xd->bd);
     if (second_pred != NULL) {
-      DECLARE_ALIGNED(16, uint16_t, comp_pred16[64 * 64]);
+      DECLARE_ALIGNED(32, uint16_t, comp_pred16[64 * 64]);
       vpx_highbd_comp_avg_pred(comp_pred16, CONVERT_TO_SHORTPTR(second_pred), w,
                                h, pred16, w);
       besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, src_address,

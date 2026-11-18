@@ -266,6 +266,12 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(&highbd_wrapper<vpx_highbd_comp_avg_pred_sse2>));
 #endif  // HAVE_SSE2
 
+#if HAVE_AVX2
+INSTANTIATE_TEST_SUITE_P(
+    AVX2, AvgPredTestHBD,
+    ::testing::Values(&highbd_wrapper<vpx_highbd_comp_avg_pred_avx2>));
+#endif  // HAVE_AVX2
+
 #if HAVE_NEON
 INSTANTIATE_TEST_SUITE_P(
     NEON, AvgPredTestHBD,
