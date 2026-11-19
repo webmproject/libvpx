@@ -119,6 +119,8 @@ static struct vp9_extracfg default_extra_cfg = {
   1,                     // validate_hbd_input
 };
 
+#define MAX_SUPERFRAME_FRAMES 8
+
 struct vpx_codec_alg_priv {
   vpx_codec_priv_t base;
   vpx_codec_enc_cfg_t cfg;
@@ -133,7 +135,7 @@ struct vpx_codec_alg_priv {
   unsigned char *pending_cx_data;
   size_t pending_cx_data_sz;
   int pending_frame_count;
-  size_t pending_frame_sizes[8];
+  size_t pending_frame_sizes[MAX_SUPERFRAME_FRAMES];
   size_t pending_frame_magnitude;
   vpx_image_t preview_img;
   vpx_enc_frame_flags_t next_frame_flags;
@@ -246,6 +248,9 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
 
   RANGE_CHECK(cfg, ss_number_layers, 1, VPX_SS_MAX_LAYERS);
   RANGE_CHECK(cfg, ts_number_layers, 1, VPX_TS_MAX_LAYERS);
+  RANGE_CHECK(cfg, temporal_layering_mode,
+              VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING,
+              VP9E_TEMPORAL_LAYERING_MODE_0212);
 
   {
     unsigned int level = extra_cfg->target_level;
@@ -1280,6 +1285,21 @@ static vpx_codec_err_t pick_quickcompress_mode(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static void add_pending_frame_size(vpx_codec_alg_priv_t *ctx, size_t size) {
+  if (size == 0) return;
+  if (ctx->pending_frame_count >= MAX_SUPERFRAME_FRAMES) {
+    ctx->pending_cx_data = NULL;
+    ctx->pending_cx_data_sz = 0;
+    ctx->pending_frame_count = 0;
+    ctx->pending_frame_magnitude = 0;
+    vpx_internal_error(
+        &ctx->cpi->common.error, VPX_CODEC_ERROR,
+        "Number of pending frames exceeds maximum superframe count");
+  }
+  ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
+  ctx->pending_frame_magnitude |= size;
+}
+
 // Turn on to test if supplemental superframe data breaks decoding
 // #define TEST_SUPPLEMENTAL_SUPERFRAME_DATA
 static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
@@ -1287,7 +1307,7 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   unsigned int mask;
   int mag, index_sz;
 
-  assert(ctx->pending_frame_count <= 8);
+  assert(ctx->pending_frame_count <= MAX_SUPERFRAME_FRAMES);
 
   // Add the number of frames to the marker byte
   marker |= ctx->pending_frame_count - 1;
@@ -1456,6 +1476,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
 
   if (setjmp(cpi->common.error.jmp)) {
     cpi->common.error.setjmp = 0;
+    vpx_codec_pkt_list_init(&ctx->pkt_list);
     res = update_error_state(ctx, &cpi->common.error);
     vpx_clear_system_state();
     return res;
@@ -1482,6 +1503,19 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
     vpx_internal_error(
         &ctx->cpi->common.error, VPX_CODEC_INCAPABLE,
         "Cannot calculate per-frame PSNR when g_lag_in_frames is nonzero");
+  }
+  // Passing reference flags via vpx_codec_encode() in SVC bypass mode is only
+  // supported for temporal-only SVC (number_spatial_layers == 1); multiple
+  // spatial layers require per-layer reference slots via
+  // VP9E_SET_SVC_REF_FRAME_CONFIG.
+  if (is_one_pass_svc(cpi) &&
+      cpi->svc.temporal_layering_mode == VP9E_TEMPORAL_LAYERING_MODE_BYPASS &&
+      cpi->svc.number_spatial_layers > 1 &&
+      !cpi->svc.use_set_ref_frame_config &&
+      (img != NULL || (cpi->lookahead != NULL && cpi->lookahead->sz > 0))) {
+    vpx_internal_error(&cpi->common.error, VPX_CODEC_INVALID_PARAM,
+                       "SVC bypass mode with multiple spatial layers requires "
+                       "VP9E_SET_SVC_REF_FRAME_CONFIG");
   }
   // Set up internal flags
 #if CONFIG_INTERNAL_STATS
@@ -1616,9 +1650,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
             (cpi->use_svc &&
              cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)) {
           if (ctx->pending_cx_data == NULL) ctx->pending_cx_data = cx_data;
+          add_pending_frame_size(ctx, size);
           ctx->pending_cx_data_sz += size;
-          if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
-          ctx->pending_frame_magnitude |= size;
           cx_data += size;
           cx_data_sz -= size;
           pkt.data.frame.width[cpi->svc.spatial_layer_id] = cpi->common.width;
@@ -1660,8 +1693,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t *ctx,
             1 - cpi->svc.drop_spatial_layer[cpi->svc.spatial_layer_id];
 
         if (ctx->pending_cx_data) {
-          if (size) ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
-          ctx->pending_frame_magnitude |= size;
+          add_pending_frame_size(ctx, size);
           ctx->pending_cx_data_sz += size;
           // write the superframe only for the case when the callback function
           // for getting per-layer packets is not registered.

@@ -5235,6 +5235,115 @@ TEST(EncodeAPI, SvcDeactivateLowerLayersBaseMv) {
   }
 }
 
+// Bug: 587634710.
+// Verify multi-spatial-layer SVC in BYPASS mode rejects encoding without
+// VP9E_SET_SVC_REF_FRAME_CONFIG (instead of leaving spatial_layer_id at 0 and
+// overflowing pending_frame_sizes), and rejects invalid temporal_layering_mode.
+TEST(EncodeAPI, SvcBypassMultiSpatialWithoutRefFrameConfig) {
+  constexpr unsigned int kWidth = 254;
+  constexpr unsigned int kHeight = 254;
+  constexpr int kBitrate = 174;
+  constexpr int kMinQ = 31;
+  constexpr int kMaxQ = 55;
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+
+  cfg.g_w = kWidth;
+  cfg.g_h = kHeight;
+  cfg.g_lag_in_frames = 0;
+  cfg.g_pass = VPX_RC_ONE_PASS;
+  cfg.rc_end_usage = VPX_CBR;
+  cfg.rc_target_bitrate = kBitrate * 4;
+  cfg.rc_min_quantizer = kMinQ;
+  cfg.rc_max_quantizer = kMaxQ;
+  cfg.ss_number_layers = 2;
+  cfg.ts_number_layers = 2;
+  cfg.ts_rate_decimator[0] = 2;
+  cfg.ts_rate_decimator[1] = 1;
+  cfg.ts_periodicity = 2;
+  cfg.ts_layer_id[0] = 0;
+  cfg.ts_layer_id[1] = 1;
+  for (unsigned int sl = 0; sl < 2; ++sl) {
+    cfg.ss_target_bitrate[sl] = kBitrate * 2 * (sl + 1);
+    for (unsigned int tl = 0; tl < 2; ++tl) {
+      cfg.layer_target_bitrate[sl * 2 + tl] = kBitrate * (sl * 2 + tl + 1);
+    }
+  }
+
+  // Out-of-range temporal_layering_mode must fail init.
+  vpx_codec_ctx_t ctx = {};
+  cfg.temporal_layering_mode = -1;
+  EXPECT_EQ(vpx_codec_enc_init(&ctx, iface, &cfg, 0), VPX_CODEC_INVALID_PARAM);
+  cfg.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_0212 + 1;
+  EXPECT_EQ(vpx_codec_enc_init(&ctx, iface, &cfg, 0), VPX_CODEC_INVALID_PARAM);
+
+  cfg.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
+  ASSERT_EQ(vpx_codec_enc_init(&ctx, iface, &cfg, 0), VPX_CODEC_OK);
+
+  vpx_svc_extra_cfg_t svc = {};
+  for (unsigned int sl = 0; sl < 2; ++sl) {
+    svc.scaling_factor_num[sl] = 1;
+    svc.scaling_factor_den[sl] = (sl == 0) ? 2 : 1;
+    svc.speed_per_layer[sl] = 5;
+    for (unsigned int tl = 0; tl < 2; ++tl) {
+      svc.min_quantizers[sl * 2 + tl] = kMinQ;
+      svc.max_quantizers[sl * 2 + tl] = kMaxQ;
+    }
+  }
+  ASSERT_EQ(vpx_codec_control(&ctx, VP9E_SET_SVC, 1), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&ctx, VP9E_SET_SVC_PARAMETERS, &svc),
+            VPX_CODEC_OK);
+
+  vpx_image_t *const image =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, kWidth, kHeight);
+  ASSERT_NE(image, nullptr);
+
+  // Without VP9E_SET_SVC_REF_FRAME_CONFIG, multi-spatial BYPASS encode must
+  // return VPX_CODEC_INVALID_PARAM with no output packets.
+  for (unsigned int frame = 0; frame < 2; ++frame) {
+    vpx_svc_layer_id_t id = {};
+    id.spatial_layer_id = frame & 1;
+    id.temporal_layer_id = frame & 1;
+    for (int sl = 0; sl < 2; ++sl) {
+      id.temporal_layer_id_per_spatial[sl] = (frame + sl) & 1;
+    }
+    ASSERT_EQ(vpx_codec_control(&ctx, VP9E_SET_SVC_LAYER_ID, &id),
+              VPX_CODEC_OK);
+    EXPECT_EQ(vpx_codec_encode(&ctx, image, frame, 1, 0, VPX_DL_REALTIME),
+              VPX_CODEC_INVALID_PARAM);
+    vpx_codec_iter_t iter = nullptr;
+    EXPECT_EQ(vpx_codec_get_cx_data(&ctx, &iter), nullptr);
+  }
+
+  // Setting VP9E_SET_SVC_REF_FRAME_CONFIG allows encoding to proceed cleanly.
+  vpx_svc_layer_id_t id = {};
+  id.spatial_layer_id = 0;
+  id.temporal_layer_id = 0;
+  ASSERT_EQ(vpx_codec_control(&ctx, VP9E_SET_SVC_LAYER_ID, &id), VPX_CODEC_OK);
+  vpx_svc_ref_frame_config_t ref_cfg = {};
+  for (int sl = 0; sl < 2; ++sl) {
+    ref_cfg.lst_fb_idx[sl] = sl;
+    ref_cfg.gld_fb_idx[sl] = (sl > 0) ? sl - 1 : 0;
+    ref_cfg.alt_fb_idx[sl] = 2 + sl;
+    ref_cfg.reference_last[sl] = 0;
+    ref_cfg.update_buffer_slot[sl] = (1 << sl);
+  }
+  ASSERT_EQ(vpx_codec_control(&ctx, VP9E_SET_SVC_REF_FRAME_CONFIG, &ref_cfg),
+            VPX_CODEC_OK);
+  ASSERT_EQ(
+      vpx_codec_encode(&ctx, image, 2, 1, VPX_EFLAG_FORCE_KF, VPX_DL_REALTIME),
+      VPX_CODEC_OK);
+  vpx_codec_iter_t iter = nullptr;
+  const vpx_codec_cx_pkt_t *const pkt = vpx_codec_get_cx_data(&ctx, &iter);
+  ASSERT_NE(pkt, nullptr);
+  EXPECT_EQ(pkt->kind, VPX_CODEC_CX_FRAME_PKT);
+  EXPECT_GT(pkt->data.frame.sz, 0u);
+
+  vpx_img_free(image);
+  ASSERT_EQ(vpx_codec_destroy(&ctx), VPX_CODEC_OK);
+}
+
 #if !CONFIG_REALTIME_ONLY
 // Bug: 586165753.
 // Verify that downsizing via vpx_codec_enc_config_set() to non-superblock
