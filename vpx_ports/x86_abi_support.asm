@@ -410,6 +410,20 @@ section .note.GNU-stack noalloc noexec nowrite progbits
 section .text
 %elifidn __OUTPUT_FORMAT__,elf64
 section .note.GNU-stack noalloc noexec nowrite progbits
+%ifdef __NASM_VERSION_ID__
+%if __NASM_VERSION_ID__ >= 0x020e0300 ; 2.14.03
+; Control-flow Enforcement Technology (CET) properties.
+section .note.gnu.property alloc noexec nowrite note align=8
+    dd 0x00000004  ; n_namesz
+    dd 0x00000010  ; n_descsz
+    dd 0x00000005  ; n_type = NT_GNU_PROPERTY_TYPE_0
+    db "GNU",0     ; n_name
+    dd 0xc0000002  ; pr_type = GNU_PROPERTY_X86_FEATURE_1_AND
+    dd 0x00000004  ; pr_datasz
+    dd 0x00000002  ; pr_data = GNU_PROPERTY_X86_FEATURE_1_SHSTK
+    dd 0x00000000  ; pr_padding
+%endif
+%endif
 section .text
 %elifidn __OUTPUT_FORMAT__,elfx32
 section .note.GNU-stack noalloc noexec nowrite progbits
