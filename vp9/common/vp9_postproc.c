@@ -337,8 +337,12 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
     if (ppstate->prev_mip == NULL ||
         cm->mi_alloc_size > ppstate->prev_mip_size) {
       vpx_free(ppstate->prev_mip);
-      CHECK_MEM_ERROR(&cm->error, ppstate->prev_mip,
-                      vpx_calloc(cm->mi_alloc_size, sizeof(*cm->mip)));
+      ppstate->prev_mip_size = 0;
+      ppstate->prev_mi = NULL;
+      ppstate->prev_mip = vpx_calloc(cm->mi_alloc_size, sizeof(*cm->mip));
+      if (!ppstate->prev_mip) {
+        return -1;
+      }
       ppstate->prev_mip_size = cm->mi_alloc_size;
     }
     ppstate->prev_mi = ppstate->prev_mip + cm->mi_stride + 1;
@@ -360,8 +364,7 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
                                VP9_ENC_BORDER_IN_PIXELS,
                                cm->byte_alignment) < 0) {
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                         "Failed to allocate MFQE framebuffer");
+      return -1;
     }
 
     // Ensure that postproc is set to flat image so that post proc
@@ -377,8 +380,7 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
 #endif
                                VP9_DEC_BORDER_IN_PIXELS, cm->byte_alignment,
                                NULL, NULL, NULL) < 0) {
-    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                       "Failed to allocate post-processing buffer");
+    return -1;
   }
   memset(cm->post_proc_buffer.buffer_alloc, 128,
          cm->post_proc_buffer.frame_size);
@@ -387,10 +389,13 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
     const int limits_size = ALIGN_POWER_OF_TWO(unscaled_width, 4);
     if (!cm->postproc_state.limits ||
         cm->postproc_state.limits_size < limits_size) {
-      if (cm->postproc_state.limits) vpx_free(cm->postproc_state.limits);
+      vpx_free(cm->postproc_state.limits);
       cm->postproc_state.limits =
           vpx_calloc(limits_size, sizeof(*cm->postproc_state.limits));
-      if (!cm->postproc_state.limits) return 1;
+      if (!cm->postproc_state.limits) {
+        cm->postproc_state.limits_size = 0;
+        return -1;
+      }
       cm->postproc_state.limits_size = limits_size;
     }
   }
@@ -401,7 +406,10 @@ int vp9_post_proc_frame(struct VP9Common *cm, YV12_BUFFER_CONFIG *dest,
       vpx_free(cm->postproc_state.generated_noise);
       cm->postproc_state.generated_noise = vpx_calloc(
           generated_noise_size, sizeof(*cm->postproc_state.generated_noise));
-      if (!cm->postproc_state.generated_noise) return 1;
+      if (!cm->postproc_state.generated_noise) {
+        cm->postproc_state.generated_noise_size = 0;
+        return -1;
+      }
       cm->postproc_state.generated_noise_size = generated_noise_size;
     }
   }

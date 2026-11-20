@@ -9,6 +9,7 @@
  */
 
 #include <array>
+#include <cstdint>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -18,6 +19,7 @@
 #include <sys/resource.h>
 #endif
 #include "test/ivf_video_source.h"
+#include "test/util.h"
 #include "test/video_source.h"
 #if CONFIG_VP8_ENCODER || CONFIG_VP9_ENCODER
 #include "vpx/vp8cx.h"
@@ -678,5 +680,100 @@ TEST(DecodeAPI, SetReferenceValidationVp9) {
   EXPECT_EQ(vpx_codec_destroy(&dec), VPX_CODEC_OK);
 }
 #endif  // CONFIG_VP9_DECODER
+
+#if VPX_TEST_CAN_EXHAUST_ADDRESS_SPACE
+#if (CONFIG_VP8_DECODER && CONFIG_POSTPROC) || \
+    (CONFIG_VP9_DECODER && CONFIG_VP9_POSTPROC)
+// Helper that pre-allocates regular postproc buffers on frame 0 (VP8_DEBLOCK),
+// then enables VP8_MFQE and exhausts memory around vpx_codec_get_frame() on
+// frame 1, checks error/reference state preservation immediately afterward, and
+// verifies recovery on frame 2 after restoring memory limits.
+void RunPostProcAllocFailTest(vpx_codec_iface_t *iface, const uint8_t *frame,
+                              unsigned int frame_size, bool is_vp9) {
+  vpx_codec_ctx_t dec;
+  ASSERT_EQ(vpx_codec_dec_init(&dec, iface, nullptr, VPX_CODEC_USE_POSTPROC),
+            VPX_CODEC_OK);
+
+  vp8_postproc_cfg_t pp = { VP8_DEBLOCK, 4, 0 };
+  ASSERT_EQ(vpx_codec_control(&dec, VP8_SET_POSTPROC, &pp), VPX_CODEC_OK);
+
+  ASSERT_EQ(vpx_codec_decode(&dec, frame, frame_size, nullptr, 0),
+            VPX_CODEC_OK);
+  vpx_codec_iter_t iter = nullptr;
+  const vpx_image_t *const first_img = vpx_codec_get_frame(&dec, &iter);
+  ASSERT_NE(first_img, nullptr);
+
+  vpx_image_t ref_img;
+  ASSERT_NE(vpx_img_alloc(&ref_img, VPX_IMG_FMT_I420, first_img->d_w,
+                          first_img->d_h, 1),
+            nullptr);
+
+  pp.post_proc_flag = VP8_DEBLOCK | VP8_MFQE;
+  ASSERT_EQ(vpx_codec_control(&dec, VP8_SET_POSTPROC, &pp), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_decode(&dec, frame, frame_size, nullptr, 0),
+            VPX_CODEC_OK);
+
+  const vpx_image_t *oom_img = nullptr;
+  bool armed = false;
+  bool restored = false;
+  {
+    libvpx_test::ScopedAddressSpaceExhaustion exhaustion;
+    armed = exhaustion.IsArmed();
+    if (armed) {
+      iter = nullptr;
+      oom_img = vpx_codec_get_frame(&dec, &iter);
+    }
+    restored = exhaustion.Restore();
+  }
+  EXPECT_TRUE(armed);
+  EXPECT_TRUE(restored);
+  EXPECT_EQ(oom_img, nullptr);
+
+  vpx_ref_frame_t ref_frame = { VP8_LAST_FRAME, ref_img };
+  EXPECT_EQ(vpx_codec_control(&dec, VP8_COPY_REFERENCE, &ref_frame),
+            VPX_CODEC_OK);
+  if (is_vp9) {
+    vp9_ref_frame_t vp9_ref = {};
+    EXPECT_EQ(vpx_codec_control(&dec, VP9_GET_REFERENCE, &vp9_ref),
+              VPX_CODEC_OK);
+    EXPECT_NE(vp9_ref.img.planes[VPX_PLANE_Y], nullptr);
+  }
+  vpx_img_free(&ref_img);
+
+  // Verify the decoder remains usable after the failed postproc allocation.
+  ASSERT_EQ(vpx_codec_decode(&dec, frame, frame_size, nullptr, 0),
+            VPX_CODEC_OK);
+  iter = nullptr;
+  EXPECT_NE(vpx_codec_get_frame(&dec, &iter), nullptr);
+
+  EXPECT_EQ(vpx_codec_destroy(&dec), VPX_CODEC_OK);
+}
+#endif
+
+#if CONFIG_VP8_DECODER && CONFIG_POSTPROC
+TEST(DecodeAPI, Vp8PostProcAllocFail) {
+  static constexpr std::array<uint8_t, 28> kVp8Keyframe = {
+    0x30, 0x02, 0x00, 0x9d, 0x01, 0x2a, 0x20, 0x00, 0x20, 0x00,
+    0x00, 0x47, 0x08, 0x85, 0x85, 0x88, 0x99, 0x84, 0x88, 0x02,
+    0x02, 0x00, 0x06, 0x19, 0xc1, 0x22, 0x00, 0x00,
+  };
+  RunPostProcAllocFailTest(vpx_codec_vp8_dx(), kVp8Keyframe.data(),
+                           static_cast<unsigned int>(kVp8Keyframe.size()),
+                           false);
+}
+#endif  // CONFIG_VP8_DECODER && CONFIG_POSTPROC
+
+#if CONFIG_VP9_DECODER && CONFIG_VP9_POSTPROC
+TEST(DecodeAPI, Vp9PostProcAllocFail) {
+  static constexpr std::array<uint8_t, 22> kVp9Keyframe = {
+    0x82, 0x49, 0x83, 0x42, 0x00, 0x01, 0xf0, 0x01, 0xf6, 0x06, 0x38,
+    0x24, 0x1c, 0x18, 0x42, 0x00, 0x00, 0x20, 0x40, 0x00, 0x38, 0x00,
+  };
+  RunPostProcAllocFailTest(vpx_codec_vp9_dx(), kVp9Keyframe.data(),
+                           static_cast<unsigned int>(kVp9Keyframe.size()),
+                           true);
+}
+#endif  // CONFIG_VP9_DECODER && CONFIG_VP9_POSTPROC
+#endif  // VPX_TEST_CAN_EXHAUST_ADDRESS_SPACE
 
 }  // namespace

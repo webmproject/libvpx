@@ -32,6 +32,7 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx/vpx_image.h"
 #include "vpx_mem/vpx_mem.h"
+#include "test/util.h"
 
 #if CONFIG_VP9_ENCODER
 #include "vp9/encoder/vp9_encoder.h"
@@ -5585,5 +5586,96 @@ TEST(EncodeAPI, Vp9ResizeDownMultithreadStaleMiGrid) {
 }
 #endif  // !CONFIG_REALTIME_ONLY
 #endif  // CONFIG_VP9_ENCODER
+
+#if VPX_TEST_CAN_EXHAUST_ADDRESS_SPACE
+#if (CONFIG_VP8_ENCODER && CONFIG_POSTPROC) || \
+    (CONFIG_VP9_ENCODER && CONFIG_VP9_POSTPROC)
+void RunPreviewPostProcAllocFailTest(vpx_codec_iface_t *iface) {
+  constexpr unsigned int kWidth = 32;
+  constexpr unsigned int kHeight = 32;
+
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_w = kWidth;
+  cfg.g_h = kHeight;
+  cfg.g_lag_in_frames = 0;
+
+  vpx_codec_ctx_t enc;
+  ASSERT_EQ(vpx_codec_enc_init(&enc, iface, &cfg, 0), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_control(&enc, VP8E_SET_CPUUSED, 8), VPX_CODEC_OK);
+
+  vp8_postproc_cfg_t pp = { VP8_DEBLOCK, 4, 0 };
+  ASSERT_EQ(vpx_codec_control(&enc, VP8_SET_POSTPROC, &pp), VPX_CODEC_OK);
+
+  vpx_image_t *const img =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, kWidth, kHeight);
+  ASSERT_NE(img, nullptr);
+  vpx_image_t *const ref_img =
+      CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, kWidth, kHeight);
+  ASSERT_NE(ref_img, nullptr);
+
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 0, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+  EXPECT_NE(vpx_codec_get_preview_frame(&enc), nullptr);
+
+  pp.post_proc_flag = VP8_DEBLOCK | VP8_MFQE;
+  ASSERT_EQ(vpx_codec_control(&enc, VP8_SET_POSTPROC, &pp), VPX_CODEC_OK);
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 1, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+
+  const vpx_image_t *oom_img = nullptr;
+  bool armed = false;
+  bool restored = false;
+  {
+    libvpx_test::ScopedAddressSpaceExhaustion exhaustion;
+    armed = exhaustion.IsArmed();
+    if (armed) {
+      oom_img = vpx_codec_get_preview_frame(&enc);
+    }
+    restored = exhaustion.Restore();
+  }
+  EXPECT_TRUE(armed);
+  EXPECT_TRUE(restored);
+  EXPECT_EQ(oom_img, nullptr);
+
+  vpx_ref_frame_t ref_frame = { VP8_LAST_FRAME, *ref_img };
+  EXPECT_EQ(vpx_codec_control(&enc, VP8_COPY_REFERENCE, &ref_frame),
+            VPX_CODEC_OK);
+  if (IsVP9(iface)) {
+    vp9_ref_frame_t vp9_ref = {};
+    EXPECT_EQ(vpx_codec_control(&enc, VP9_GET_REFERENCE, &vp9_ref),
+              VPX_CODEC_OK);
+    EXPECT_NE(vp9_ref.img.planes[VPX_PLANE_Y], nullptr);
+  }
+  vpx_img_free(ref_img);
+
+  // Verify the encoder preview remains usable after restoring memory limits.
+  ASSERT_EQ(vpx_codec_encode(&enc, img, 2, 1, 0, VPX_DL_REALTIME),
+            VPX_CODEC_OK);
+  EXPECT_NE(vpx_codec_get_preview_frame(&enc), nullptr);
+  if (IsVP9(iface)) {
+    vp9_ref_frame_t vp9_ref = {};
+    EXPECT_EQ(vpx_codec_control(&enc, VP9_GET_REFERENCE, &vp9_ref),
+              VPX_CODEC_OK);
+    EXPECT_NE(vp9_ref.img.planes[VPX_PLANE_Y], nullptr);
+  }
+
+  vpx_img_free(img);
+  ASSERT_EQ(vpx_codec_destroy(&enc), VPX_CODEC_OK);
+}
+#endif
+
+#if CONFIG_VP8_ENCODER && CONFIG_POSTPROC
+TEST(EncodeAPI, Vp8PreviewPostProcAllocFail) {
+  RunPreviewPostProcAllocFailTest(vpx_codec_vp8_cx());
+}
+#endif  // CONFIG_VP8_ENCODER && CONFIG_POSTPROC
+
+#if CONFIG_VP9_ENCODER && CONFIG_VP9_POSTPROC
+TEST(EncodeAPI, Vp9PreviewPostProcAllocFail) {
+  RunPreviewPostProcAllocFailTest(vpx_codec_vp9_cx());
+}
+#endif  // CONFIG_VP9_ENCODER && CONFIG_VP9_POSTPROC
+#endif  // VPX_TEST_CAN_EXHAUST_ADDRESS_SPACE
 
 }  // namespace

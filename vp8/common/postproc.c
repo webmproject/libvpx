@@ -159,7 +159,10 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest,
       vpx_free(oci->postproc_state.generated_noise);
       oci->postproc_state.generated_noise = vpx_calloc(
           generated_noise_size, sizeof(*oci->postproc_state.generated_noise));
-      if (!oci->postproc_state.generated_noise) return 1;
+      if (!oci->postproc_state.generated_noise) {
+        oci->postproc_state.generated_noise_size = 0;
+        return -1;
+      }
       oci->postproc_state.generated_noise_size = generated_noise_size;
     }
   }
@@ -172,8 +175,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest,
 
       if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer_int, width, height,
                                       VP8BORDERINPIXELS)) {
-        vpx_internal_error(&oci->error, VPX_CODEC_MEM_ERROR,
-                           "Failed to allocate MFQE framebuffer");
+        return -1;
       }
 
       oci->post_proc_buffer_int_used = 1;
@@ -181,8 +183,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest,
       /* insure that postproc is set to all 0's so that post proc
        * doesn't pull random data in from edge
        */
-      memset((&oci->post_proc_buffer_int)->buffer_alloc, 128,
-             (&oci->post_proc_buffer)->frame_size);
+      memset(oci->post_proc_buffer_int.buffer_alloc, 128,
+             oci->post_proc_buffer_int.frame_size);
     }
   }
 

@@ -17,6 +17,79 @@
 
 #include "gtest/gtest.h"
 #include "vpx/vpx_image.h"
+#include "vpx_ports/compiler_attributes.h"
+
+#if defined(__linux__) && !VPX_WITH_ASAN &&                                 \
+    !__has_feature(memory_sanitizer) && !__has_feature(thread_sanitizer) && \
+    !__has_feature(hwaddress_sanitizer) && !defined(__SANITIZE_THREAD__)
+#define VPX_TEST_CAN_EXHAUST_ADDRESS_SPACE 1
+#else
+#define VPX_TEST_CAN_EXHAUST_ADDRESS_SPACE 0
+#endif
+
+#if VPX_TEST_CAN_EXHAUST_ADDRESS_SPACE
+#include <cstdint>
+#include <cstdlib>
+#include <vector>
+#include <sys/resource.h>
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
+
+namespace libvpx_test {
+
+// RAII helper that sets RLIMIT_AS to 0 and drains residual allocator free
+// lists so subsequent heap allocations return nullptr. Restore() (or
+// destruction) restores the original limit and frees drained blocks. Must call
+// Restore() before any EXPECT_*/ASSERT_* macros.
+class ScopedAddressSpaceExhaustion {
+ public:
+  ScopedAddressSpaceExhaustion() {
+    filler_.reserve(65536);
+#ifdef __GLIBC__
+    malloc_trim(0);
+#endif
+    if (getrlimit(RLIMIT_AS, &old_lim_) != 0) return;
+    const struct rlimit zero_lim = { 0, old_lim_.rlim_max };
+    if (setrlimit(RLIMIT_AS, &zero_lim) != 0) return;
+    armed_ = true;
+
+    for (size_t sz : { size_t{ 1 } << 24, size_t{ 1 } << 20, size_t{ 1 } << 16,
+                       size_t{ 1 } << 12, size_t{ 256 } }) {
+      while (filler_.size() < filler_.capacity()) {
+        void *p = malloc(sz);
+        if (p == nullptr) break;
+        *static_cast<volatile uint8_t *>(p) = 0;
+        filler_.push_back(p);
+      }
+    }
+  }
+
+  ScopedAddressSpaceExhaustion(const ScopedAddressSpaceExhaustion &) = delete;
+  ScopedAddressSpaceExhaustion &operator=(
+      const ScopedAddressSpaceExhaustion &) = delete;
+
+  ~ScopedAddressSpaceExhaustion() { Restore(); }
+
+  bool IsArmed() const { return armed_; }
+
+  bool Restore() {
+    if (!armed_) return true;
+    const int restore_res = setrlimit(RLIMIT_AS, &old_lim_);
+    for (void *p : filler_) free(p);
+    filler_.clear();
+    armed_ = false;
+    return restore_res == 0;
+  }
+
+ private:
+  struct rlimit old_lim_ = {};
+  std::vector<void *> filler_;
+  bool armed_ = false;
+};
+
+}  // namespace libvpx_test
+#endif  // VPX_TEST_CAN_EXHAUST_ADDRESS_SPACE
 
 // Macros
 #define GET_PARAM(k) std::get<k>(GetParam())

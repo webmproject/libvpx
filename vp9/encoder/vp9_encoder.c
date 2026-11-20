@@ -906,6 +906,13 @@ static int vp9_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
 }
 
 static void vp9_enc_free_mi(VP9_COMMON *cm) {
+#if CONFIG_VP9_POSTPROC
+  // MFQE allocates an additional mip and swaps it with cm->mip.
+  vpx_free(cm->postproc_state.prev_mip);
+  cm->postproc_state.prev_mip = NULL;
+  cm->postproc_state.prev_mip_size = 0;
+  cm->postproc_state.prev_mi = NULL;
+#endif
   vpx_free(cm->mip);
   cm->mip = NULL;
   vpx_free(cm->prev_mip);
@@ -6615,8 +6622,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
             ppflags.post_proc_flag = VP9D_DEBLOCK;
             ppflags.deblocking_level = 0;  // not used in vp9_post_proc_frame()
             ppflags.noise_level = 0;       // not used in vp9_post_proc_frame()
-            vp9_post_proc_frame(cm, pp, &ppflags,
-                                cpi->un_scaled_source->y_width);
+            if (vp9_post_proc_frame(cm, pp, &ppflags,
+                                    cpi->un_scaled_source->y_width) != 0) {
+              vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                                 "Failed to post-process frame");
+            }
           }
 #endif
           vpx_clear_system_state();
