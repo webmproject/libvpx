@@ -354,11 +354,13 @@ static int frame_max_bits(VP8_COMP *cpi) {
     /* For VBR base this on the bits and frames left plus the
      * two_pass_vbrmax_section rate passed in by the user
      */
-    max_bits = saturate_cast_double_to_int(
-        ((double)cpi->twopass.bits_left /
-         (cpi->twopass.total_stats.count -
-          (double)cpi->common.current_video_frame)) *
-        ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
+    const double frames_left = cpi->twopass.total_stats.count -
+                               (double)cpi->common.current_video_frame;
+    const double max_bits_d =
+        ((double)cpi->twopass.bits_left / VPXMAX(frames_left, 1.0)) *
+        ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0);
+    max_bits =
+        !(max_bits_d > 0.0) ? 0 : saturate_cast_double_to_int(max_bits_d);
   }
 
   /* Trap case where we are out of bits */
@@ -2209,8 +2211,12 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
 void vp8_second_pass(VP8_COMP *cpi) {
   int tmp_q;
-  int frames_left =
-      (int)(cpi->twopass.total_stats.count - cpi->common.current_video_frame);
+  const double frames_left_d =
+      cpi->twopass.total_stats.count - cpi->common.current_video_frame;
+  const int frames_left =
+      !(frames_left_d >= 1.0)
+          ? 1
+          : (frames_left_d > (double)INT_MAX ? INT_MAX : (int)frames_left_d);
 
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS this_frame_copy;
@@ -2373,8 +2379,6 @@ void vp8_second_pass(VP8_COMP *cpi) {
             (((unsigned int)cpi->twopass.total_stats.count * 255) >> 8)) &&
            ((cpi->common.current_video_frame + cpi->baseline_gf_interval) <
             (unsigned int)cpi->twopass.total_stats.count)) {
-    if (frames_left < 1) frames_left = 1;
-
     int64_t section_target_bandwidth = cpi->twopass.bits_left / frames_left;
     section_target_bandwidth = VPXMIN(section_target_bandwidth, INT_MAX);
 

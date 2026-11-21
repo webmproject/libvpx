@@ -3644,8 +3644,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   if (cpi->oxcf.rc_mode == VPX_Q) {
     twopass->active_worst_quality = cpi->oxcf.cq_level;
   } else if (cm->current_video_frame == 0) {
+    const double frames_left_d = twopass->total_stats.count;
     const int frames_left =
-        (int)(twopass->total_stats.count - cm->current_video_frame);
+        !(frames_left_d >= 1.0)
+            ? 1
+            : (frames_left_d > (double)INT_MAX ? INT_MAX : (int)frames_left_d);
     // Special case code for first frame.
     int64_t section_target_bandwidth = twopass->bits_left / frames_left;
     section_target_bandwidth = VPXMIN(section_target_bandwidth, INT_MAX);

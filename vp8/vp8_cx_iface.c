@@ -272,8 +272,9 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
 #if !(CONFIG_REALTIME_ONLY)
   if (cfg->g_pass == VPX_RC_LAST_PASS) {
     const size_t packet_sz = sizeof(FIRSTPASS_STATS);
-    const int n_packets = (int)(cfg->rc_twopass_stats_in.sz / packet_sz);
+    int n_packets;
     const FIRSTPASS_STATS *stats;
+    double count_rounded;
 
     if (!cfg->rc_twopass_stats_in.buf) {
       ERROR("rc_twopass_stats_in.buf not set.");
@@ -287,10 +288,17 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
       ERROR("rc_twopass_stats_in requires at least two packets.");
     }
 
+    if (cfg->rc_twopass_stats_in.sz / packet_sz > INT_MAX) {
+      ERROR("rc_twopass_stats_in.sz out of range.");
+    }
+
+    n_packets = (int)(cfg->rc_twopass_stats_in.sz / packet_sz);
     stats =
         (const FIRSTPASS_STATS *)cfg->rc_twopass_stats_in.buf + n_packets - 1;
 
-    if ((int)(stats->count + 0.5) != n_packets - 1) {
+    count_rounded = stats->count + 0.5;
+    if (!(stats->count >= 1.0 && count_rounded <= (double)INT_MAX) ||
+        (int)count_rounded != n_packets - 1) {
       ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
   }

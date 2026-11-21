@@ -3868,7 +3868,142 @@ TEST(EncodeAPI, Vp9EncoderMidstreamReconfig4) {
 }
 #endif  // CONFIG_VP9_ENCODER
 
+#if CONFIG_VP8_ENCODER
+// Verify VP8 two-pass validation rejects non-finite, out-of-range, and sub-1.0
+// EOS packet counts without float-to-int cast UB. Bug: 528828878.
+void VerifyVp8UnsafeCastEosCount(double count_value) {
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_pass = VPX_RC_LAST_PASS;
+
+  // VP8 FIRSTPASS_STATS consists of 18 doubles with `count` as the last field.
+  // Two packets required: one frame packet + one EOS packet.
+  constexpr size_t kVp8FirstpassStatsNumDoubles = 18;
+  double packets[2][kVp8FirstpassStatsNumDoubles] = {};
+  packets[1][kVp8FirstpassStatsNumDoubles - 1] = count_value;
+
+  cfg.rc_twopass_stats_in.buf = packets;
+  cfg.rc_twopass_stats_in.sz = sizeof(packets);
+
+  vpx_codec_ctx_t codec;
+  EXPECT_EQ(vpx_codec_enc_init(&codec, iface, &cfg, 0),
+            VPX_CODEC_INVALID_PARAM);
+}
+
+TEST(EncodeAPI, Vp8UnsafeCastEosCount) {
+  VerifyVp8UnsafeCastEosCount(1e300);
+  VerifyVp8UnsafeCastEosCount(static_cast<double>(INT_MAX));
+}
+
+TEST(EncodeAPI, Vp8UnsafeCastEosCountInf) {
+  VerifyVp8UnsafeCastEosCount(INFINITY);
+  VerifyVp8UnsafeCastEosCount(-INFINITY);
+}
+
+TEST(EncodeAPI, Vp8UnsafeCastEosCountNaN) { VerifyVp8UnsafeCastEosCount(NAN); }
+
+// Values in [0.5, 1.0) round to 1 with +0.5 when n_packets == 2, which
+// previously bypassed validate_config and yielded frames_left == 0 on frame 0.
+TEST(EncodeAPI, Vp8UnsafeCastEosCountZeroAndSubOne) {
+  VerifyVp8UnsafeCastEosCount(-1.0);
+  VerifyVp8UnsafeCastEosCount(0.0);
+  VerifyVp8UnsafeCastEosCount(0.5);
+  VerifyVp8UnsafeCastEosCount(0.6);
+  VerifyVp8UnsafeCastEosCount(0.999999);
+}
+
+// Verify oversized rc_twopass_stats_in.sz (> INT_MAX packets) is rejected
+// before int truncation or dereferencing buf.
+TEST(EncodeAPI, Vp8TwoPassStatsSizeOverflow) {
+  if (sizeof(size_t) <= sizeof(int)) GTEST_SKIP();
+  vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_pass = VPX_RC_LAST_PASS;
+
+  constexpr size_t kVp8FirstpassStatsSz = 18 * sizeof(double);
+  uint8_t dummy_buf[1] = { 0 };
+  cfg.rc_twopass_stats_in.buf = dummy_buf;
+  cfg.rc_twopass_stats_in.sz =
+      (static_cast<size_t>(INT_MAX) + 1) * kVp8FirstpassStatsSz;
+
+  vpx_codec_ctx_t codec;
+  EXPECT_EQ(vpx_codec_enc_init(&codec, iface, &cfg, 0),
+            VPX_CODEC_INVALID_PARAM);
+}
+#endif  // CONFIG_VP8_ENCODER
+
+#if !CONFIG_REALTIME_ONLY
+// Encode 1 frame in first pass (EOS count == 1.0), then encode 3 frames in
+// second pass so frames_left exercises 1, 0, and negative differences cleanly.
+// Bug: 528828878.
+TEST(EncodeAPI, TwoPassSecondPassFramesLeftBoundary) {
+  for (auto *iface : kCodecIfaces) {
+    vpx_codec_enc_cfg_t cfg;
+    ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+    cfg.g_w = 32;
+    cfg.g_h = 32;
+    cfg.g_timebase.num = 1;
+    cfg.g_timebase.den = 30;
+    cfg.g_lag_in_frames = 0;
+
+    vpx_image_t *img =
+        CreateImage(VPX_BITS_8, VPX_IMG_FMT_I420, cfg.g_w, cfg.g_h);
+    ASSERT_NE(img, nullptr);
+
+    // First pass: encode 1 frame + flush to obtain valid 2-packet stats.
+    cfg.g_pass = VPX_RC_FIRST_PASS;
+    vpx_codec_ctx_t pass1;
+    ASSERT_EQ(vpx_codec_enc_init(&pass1, iface, &cfg, 0), VPX_CODEC_OK);
+    std::vector<uint8_t> stats_buf;
+    ASSERT_EQ(vpx_codec_encode(&pass1, img, 0, 1, 0, VPX_DL_GOOD_QUALITY),
+              VPX_CODEC_OK);
+    vpx_codec_iter_t iter = nullptr;
+    const vpx_codec_cx_pkt_t *pkt = nullptr;
+    while ((pkt = vpx_codec_get_cx_data(&pass1, &iter)) != nullptr) {
+      if (pkt->kind == VPX_CODEC_STATS_PKT) {
+        const auto *src =
+            static_cast<const uint8_t *>(pkt->data.twopass_stats.buf);
+        stats_buf.insert(stats_buf.end(), src,
+                         src + pkt->data.twopass_stats.sz);
+      }
+    }
+    ASSERT_EQ(vpx_codec_encode(&pass1, nullptr, 0, 1, 0, VPX_DL_GOOD_QUALITY),
+              VPX_CODEC_OK);
+    iter = nullptr;
+    while ((pkt = vpx_codec_get_cx_data(&pass1, &iter)) != nullptr) {
+      if (pkt->kind == VPX_CODEC_STATS_PKT) {
+        const auto *src =
+            static_cast<const uint8_t *>(pkt->data.twopass_stats.buf);
+        stats_buf.insert(stats_buf.end(), src,
+                         src + pkt->data.twopass_stats.sz);
+      }
+    }
+    ASSERT_EQ(vpx_codec_destroy(&pass1), VPX_CODEC_OK);
+    ASSERT_FALSE(stats_buf.empty());
+
+    // Second pass: encode 3 frames (exceeding EOS count == 1.0) and flush.
+    cfg.g_pass = VPX_RC_LAST_PASS;
+    cfg.rc_twopass_stats_in.buf = stats_buf.data();
+    cfg.rc_twopass_stats_in.sz = stats_buf.size();
+    vpx_codec_ctx_t pass2;
+    ASSERT_EQ(vpx_codec_enc_init(&pass2, iface, &cfg, 0), VPX_CODEC_OK);
+    for (int f = 0; f < 3; ++f) {
+      ASSERT_EQ(vpx_codec_encode(&pass2, img, f, 1, 0, VPX_DL_GOOD_QUALITY),
+                VPX_CODEC_OK);
+    }
+    ASSERT_EQ(vpx_codec_encode(&pass2, nullptr, 0, 1, 0, VPX_DL_GOOD_QUALITY),
+              VPX_CODEC_OK);
+    ASSERT_EQ(vpx_codec_destroy(&pass2), VPX_CODEC_OK);
+    vpx_img_free(img);
+  }
+}
+#endif  // !CONFIG_REALTIME_ONLY
+
 #if CONFIG_VP9_ENCODER
+// Verify VP9 two-pass validation rejects non-finite, out-of-range, and sub-1.0
+// EOS packet counts without float-to-int cast UB. Bug: 505902439, 528828878.
 void VerifyVp9UnsafeCastEosCount(double count_value) {
   vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
   vpx_codec_enc_cfg_t cfg;
@@ -3888,11 +4023,46 @@ void VerifyVp9UnsafeCastEosCount(double count_value) {
             VPX_CODEC_INVALID_PARAM);
 }
 
-TEST(EncodeAPI, Vp9UnsafeCastEosCount) { VerifyVp9UnsafeCastEosCount(1e300); }
+TEST(EncodeAPI, Vp9UnsafeCastEosCount) {
+  VerifyVp9UnsafeCastEosCount(1e300);
+  VerifyVp9UnsafeCastEosCount(static_cast<double>(INT_MAX));
+}
+
+TEST(EncodeAPI, Vp9UnsafeCastEosCountInf) {
+  VerifyVp9UnsafeCastEosCount(INFINITY);
+  VerifyVp9UnsafeCastEosCount(-INFINITY);
+}
 
 TEST(EncodeAPI, Vp9UnsafeCastEosCountNaN) { VerifyVp9UnsafeCastEosCount(NAN); }
 
-TEST(EncodeAPI, Vp9UnsafeCastEosCountZero) { VerifyVp9UnsafeCastEosCount(0.0); }
+// Values in [0.5, 1.0) round to 1 with +0.5 when n_packets == 2, which
+// previously bypassed validate_config and yielded frames_left == 0 on frame 0.
+TEST(EncodeAPI, Vp9UnsafeCastEosCountZero) {
+  VerifyVp9UnsafeCastEosCount(-1.0);
+  VerifyVp9UnsafeCastEosCount(0.0);
+  VerifyVp9UnsafeCastEosCount(0.5);
+  VerifyVp9UnsafeCastEosCount(0.6);
+  VerifyVp9UnsafeCastEosCount(0.999999);
+}
+
+// Verify oversized rc_twopass_stats_in.sz (> INT_MAX packets) is rejected
+// before int truncation or dereferencing buf.
+TEST(EncodeAPI, Vp9TwoPassStatsSizeOverflow) {
+  if (sizeof(size_t) <= sizeof(int)) GTEST_SKIP();
+  vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
+  vpx_codec_enc_cfg_t cfg;
+  ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
+  cfg.g_pass = VPX_RC_LAST_PASS;
+
+  uint8_t dummy_buf[1] = { 0 };
+  cfg.rc_twopass_stats_in.buf = dummy_buf;
+  cfg.rc_twopass_stats_in.sz =
+      (static_cast<size_t>(INT_MAX) + 1) * sizeof(FIRSTPASS_STATS);
+
+  vpx_codec_ctx_t codec;
+  EXPECT_EQ(vpx_codec_enc_init(&codec, iface, &cfg, 0),
+            VPX_CODEC_INVALID_PARAM);
+}
 
 TEST(EncodeAPI, Vp9SvcLayeringModeNotSet) {
   const unsigned int kSpatialLayers = 4;
