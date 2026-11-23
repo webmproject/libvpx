@@ -1542,6 +1542,11 @@ INSTANTIATE_TEST_SUITE_P(
                       VarianceParams(3, 2, &vpx_variance8x4_avx2)));
 
 INSTANTIATE_TEST_SUITE_P(
+    AVX2, VpxGetVarianceTest,
+    ::testing::Values(GetVarianceParams(4, 4, &vpx_get16x16var_avx2),
+                      GetVarianceParams(3, 3, &vpx_get8x8var_avx2)));
+
+INSTANTIATE_TEST_SUITE_P(
     AVX2, VpxSubpelVarianceTest,
     ::testing::Values(
         SubpelVarianceParams(6, 6, &vpx_sub_pixel_variance64x64_avx2, 0),
@@ -1551,7 +1556,10 @@ INSTANTIATE_TEST_SUITE_P(
         SubpelVarianceParams(5, 4, &vpx_sub_pixel_variance32x16_avx2, 0),
         SubpelVarianceParams(4, 5, &vpx_sub_pixel_variance16x32_avx2, 0),
         SubpelVarianceParams(4, 4, &vpx_sub_pixel_variance16x16_avx2, 0),
-        SubpelVarianceParams(4, 3, &vpx_sub_pixel_variance16x8_avx2, 0)));
+        SubpelVarianceParams(4, 3, &vpx_sub_pixel_variance16x8_avx2, 0),
+        SubpelVarianceParams(3, 4, &vpx_sub_pixel_variance8x16_avx2, 0),
+        SubpelVarianceParams(3, 3, &vpx_sub_pixel_variance8x8_avx2, 0),
+        SubpelVarianceParams(3, 2, &vpx_sub_pixel_variance8x4_avx2, 0)));
 
 INSTANTIATE_TEST_SUITE_P(
     AVX2, VpxSubpelAvgVarianceTest,
@@ -1563,8 +1571,10 @@ INSTANTIATE_TEST_SUITE_P(
         SubpelAvgVarianceParams(5, 4, &vpx_sub_pixel_avg_variance32x16_avx2, 0),
         SubpelAvgVarianceParams(4, 5, &vpx_sub_pixel_avg_variance16x32_avx2, 0),
         SubpelAvgVarianceParams(4, 4, &vpx_sub_pixel_avg_variance16x16_avx2, 0),
-        SubpelAvgVarianceParams(4, 3, &vpx_sub_pixel_avg_variance16x8_avx2,
-                                0)));
+        SubpelAvgVarianceParams(4, 3, &vpx_sub_pixel_avg_variance16x8_avx2, 0),
+        SubpelAvgVarianceParams(3, 4, &vpx_sub_pixel_avg_variance8x16_avx2, 0),
+        SubpelAvgVarianceParams(3, 3, &vpx_sub_pixel_avg_variance8x8_avx2, 0),
+        SubpelAvgVarianceParams(3, 2, &vpx_sub_pixel_avg_variance8x4_avx2, 0)));
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON

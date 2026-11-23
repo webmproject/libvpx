@@ -459,6 +459,7 @@ DSP_SRCS-$(HAVE_AVX2)   += x86/sad_avx2.c
 DSP_SRCS-$(HAVE_AVX512) += x86/sad_avx512.c
 DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c  # Contains SSE2 and SSSE3
 DSP_SRCS-$(HAVE_AVX2)   += x86/variance_avx2.c
+DSP_SRCS-$(HAVE_AVX2)   += x86/variance_common_x86.h
 DSP_SRCS-$(HAVE_VSX)    += ppc/variance_vsx.c
 
 ifeq ($(VPX_ARCH_X86_64)$(HAVE_X86_ASM),yesyes)
