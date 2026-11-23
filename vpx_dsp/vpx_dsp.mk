@@ -473,6 +473,7 @@ endif
 
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_variance_sse2.c
+DSP_SRCS-$(HAVE_AVX2)   += x86/highbd_variance_avx2.c
 ifeq ($(HAVE_X86_ASM),yes)
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_variance_impl_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_subpel_variance_impl_sse2.asm
