@@ -3914,10 +3914,10 @@ TEST(EncodeAPI, Vp8UnsafeCastEosCountZeroAndSubOne) {
   VerifyVp8UnsafeCastEosCount(0.999999);
 }
 
+#if SIZE_MAX > UINT_MAX
 // Verify oversized rc_twopass_stats_in.sz (> INT_MAX packets) is rejected
 // before int truncation or dereferencing buf.
 TEST(EncodeAPI, Vp8TwoPassStatsSizeOverflow) {
-  if (sizeof(size_t) <= sizeof(int)) GTEST_SKIP();
   vpx_codec_iface_t *const iface = vpx_codec_vp8_cx();
   vpx_codec_enc_cfg_t cfg;
   ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
@@ -3933,6 +3933,7 @@ TEST(EncodeAPI, Vp8TwoPassStatsSizeOverflow) {
   EXPECT_EQ(vpx_codec_enc_init(&codec, iface, &cfg, 0),
             VPX_CODEC_INVALID_PARAM);
 }
+#endif  // SIZE_MAX > UINT_MAX
 #endif  // CONFIG_VP8_ENCODER
 
 #if !CONFIG_REALTIME_ONLY
@@ -4046,10 +4047,10 @@ TEST(EncodeAPI, Vp9UnsafeCastEosCountZero) {
   VerifyVp9UnsafeCastEosCount(0.999999);
 }
 
+#if SIZE_MAX > UINT_MAX
 // Verify oversized rc_twopass_stats_in.sz (> INT_MAX packets) is rejected
 // before int truncation or dereferencing buf.
 TEST(EncodeAPI, Vp9TwoPassStatsSizeOverflow) {
-  if (sizeof(size_t) <= sizeof(int)) GTEST_SKIP();
   vpx_codec_iface_t *const iface = vpx_codec_vp9_cx();
   vpx_codec_enc_cfg_t cfg;
   ASSERT_EQ(vpx_codec_enc_config_default(iface, &cfg, 0), VPX_CODEC_OK);
@@ -4064,6 +4065,7 @@ TEST(EncodeAPI, Vp9TwoPassStatsSizeOverflow) {
   EXPECT_EQ(vpx_codec_enc_init(&codec, iface, &cfg, 0),
             VPX_CODEC_INVALID_PARAM);
 }
+#endif  // SIZE_MAX > UINT_MAX
 
 TEST(EncodeAPI, Vp9SvcLayeringModeNotSet) {
   const unsigned int kSpatialLayers = 4;
