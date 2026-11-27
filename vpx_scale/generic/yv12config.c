@@ -50,21 +50,57 @@ int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
 
 int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width,
                                   int height, int border) {
+#if CONFIG_SIZE_LIMIT
+  if (width > DECODE_WIDTH_LIMIT || height > DECODE_HEIGHT_LIMIT) return -1;
+#endif
+
+  /* Bound the dimensions and the border so the stride arithmetic below
+   * cannot overflow a signed int: with width, height, border <= INT_MAX / 4
+   * the largest int intermediate, aligned_width + 2 * border + 31, is
+   * bounded by 3 * (INT_MAX / 4) + 46 < INT_MAX (the plane sizes themselves
+   * are computed in 64-bit). */
+  if (width < 0 || height < 0 || width > INT_MAX / 4 || height > INT_MAX / 4)
+    return -1;
+
+  /* Only support allocating buffers that have a border that's a multiple
+   * of 32. The border restriction is required to get 16-byte alignment of
+   * the start of the chroma rows without introducing an arbitrary gap
+   * between planes, which would break the semantics of things like
+   * vpx_img_set_rect(). Negative borders are rejected here as well: they
+   * would place the plane pointers outside the buffer. */
+  if (border < 0 || (border & 0x1f) || border > INT_MAX / 4) return -3;
+
   if (ybf) {
     int aligned_width = (width + 15) & ~15;
     int aligned_height = (height + 15) & ~15;
     int y_stride = ((aligned_width + 2 * border) + 31) & ~31;
-    int yplane_size = (aligned_height + 2 * border) * y_stride;
+    const uint64_t yplane_size =
+        (aligned_height + 2 * border) * (uint64_t)y_stride;
     int uv_width = aligned_width >> 1;
     int uv_height = aligned_height >> 1;
     /** There is currently a bunch of code which assumes
      *  uv_stride == y_stride/2, so enforce this here. */
     int uv_stride = y_stride >> 1;
-    int uvplane_size = (uv_height + border) * uv_stride;
-    const size_t frame_size = yplane_size + 2 * uvplane_size;
+    const uint64_t uvplane_size = (uv_height + border) * (uint64_t)uv_stride;
+    const uint64_t frame_size = yplane_size + 2 * uvplane_size;
+
+#if defined(VPX_MAX_ALLOCABLE_MEMORY)
+    // The decoder may allocate REF_FRAMES frame buffers in the frame buffer
+    // pool. Bound the total amount of allocated memory as if these REF_FRAMES
+    // frame buffers were allocated in a single allocation.
+    if (frame_size > VPX_MAX_ALLOCABLE_MEMORY / REF_FRAMES) return -1;
+#endif  // VPX_MAX_ALLOCABLE_MEMORY
+
+#if UINT64_MAX > SIZE_MAX
+    // frame_size is stored in buffer_alloc_sz, which is a size_t. If it won't
+    // fit, fail early.
+    if (frame_size > SIZE_MAX) {
+      return -1;
+    }
+#endif
 
     if (!ybf->buffer_alloc) {
-      ybf->buffer_alloc = (uint8_t *)vpx_memalign(32, frame_size);
+      ybf->buffer_alloc = (uint8_t *)vpx_memalign(32, (size_t)frame_size);
       if (!ybf->buffer_alloc) {
         ybf->buffer_alloc_sz = 0;
         return -1;
@@ -74,20 +110,13 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width,
       // This memset is needed for fixing the issue of using uninitialized
       // value in msan test. It will cause a perf loss, so only do this for
       // msan test.
-      memset(ybf->buffer_alloc, 0, frame_size);
+      memset(ybf->buffer_alloc, 0, (size_t)frame_size);
 #endif
 #endif
-      ybf->buffer_alloc_sz = frame_size;
+      ybf->buffer_alloc_sz = (size_t)frame_size;
     }
 
     if (ybf->buffer_alloc_sz < frame_size) return -1;
-
-    /* Only support allocating buffers that have a border that's a multiple
-     * of 32. The border restriction is required to get 16-byte alignment of
-     * the start of the chroma rows without introducing an arbitrary gap
-     * between planes, which would break the semantics of things like
-     * vpx_img_set_rect(). */
-    if (border & 0x1f) return -3;
 
     ybf->y_crop_width = width;
     ybf->y_crop_height = height;
@@ -106,13 +135,17 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width,
     ybf->alpha_stride = 0;
 
     ybf->border = border;
-    ybf->frame_size = frame_size;
+    ybf->frame_size = (size_t)frame_size;
 
-    ybf->y_buffer = ybf->buffer_alloc + (border * y_stride) + border;
+    ybf->y_buffer =
+        ybf->buffer_alloc + (size_t)((uint64_t)border * y_stride + border);
     ybf->u_buffer =
-        ybf->buffer_alloc + yplane_size + (border / 2 * uv_stride) + border / 2;
-    ybf->v_buffer = ybf->buffer_alloc + yplane_size + uvplane_size +
-                    (border / 2 * uv_stride) + border / 2;
+        ybf->buffer_alloc +
+        (size_t)(yplane_size + (uint64_t)(border / 2) * uv_stride + border / 2);
+    ybf->v_buffer =
+        ybf->buffer_alloc +
+        (size_t)(yplane_size + uvplane_size + (uint64_t)(border / 2) * uv_stride +
+                 border / 2);
     ybf->alpha_buffer = NULL;
 
     ybf->corrupted = 0; /* assume not currupted by errors */
